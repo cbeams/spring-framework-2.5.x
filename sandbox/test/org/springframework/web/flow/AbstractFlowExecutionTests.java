@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.flow;
 
 import java.util.Collection;
@@ -266,61 +265,61 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 		return flowExecution.getLastEventId();
 	}
 
-	protected void assertModelAttributePresent(Map attributeMap, String attributeName) {
-		assertTrue("The model attribute '" + attributeName + "' is not present in model", attributeMap
+	protected void assertModelAttributePresent(Map model, String attributeName) {
+		assertTrue("The model attribute '" + attributeName + "' is not present in model", model
 				.containsKey(attributeName));
 	}
 
 	/**
 	 * Assert that an attribute exists in the model map of the specified type.
-	 * @param attributeMap the model map
+	 * @param model the model map
 	 * @param attributeName the attribute name
 	 * @param clazz the required type
 	 */
-	protected void assertModelAttributeInstanceOf(Map attributeMap, String attributeName, Class clazz) {
-		assertModelAttributePresent(attributeMap, attributeName);
-		Assert.isInstanceOf(clazz, attributeMap.get(attributeName));
+	protected void assertModelAttributeInstanceOf(Map model, String attributeName, Class clazz) {
+		assertModelAttributePresent(model, attributeName);
+		Assert.isInstanceOf(clazz, model.get(attributeName));
 	}
 
 	/**
 	 * Assert that an attribute exists in the model map of the specified value.
-	 * @param attributeMap the model map
+	 * @param model the model map
 	 * @param attributeName the attribute name
-	 * @param attributeValue the attributeValue
+	 * @param attributeValue the attribute value
 	 */
-	protected void assertModelAttributeEquals(Map attributeMap, String attributeName, Object attributeValue) {
+	protected void assertModelAttributeEquals(Map model, String attributeName, Object attributeValue) {
 		if (attributeValue != null) {
-			assertModelAttributeInstanceOf(attributeMap, attributeName, attributeValue.getClass());
+			assertModelAttributeInstanceOf(model, attributeName, attributeValue.getClass());
 		}
 		assertEquals("The model attribute '" + attributeName + "' must equal '" + attributeValue + "'", attributeValue,
-				attributeMap.get(attributeName));
+				model.get(attributeName));
 	}
 
 	/**
 	 * Assert that a collection exists in the model map under the provided
 	 * attribute name, with the specified size.
-	 * @param attributeMap the model map
+	 * @param model the model map
 	 * @param attributeName the attribute name
 	 * @param size the expected collection size
 	 */
-	protected void assertModelCollectionAttributeSize(Map attributeMap, String attributeName, int size) {
-		assertModelAttributeInstanceOf(attributeMap, attributeName, Collection.class);
+	protected void assertModelCollectionAttributeSize(Map model, String attributeName, int size) {
+		assertModelAttributeInstanceOf(model, attributeName, Collection.class);
 		assertEquals("The model collection attribute '" + attributeName + "' must have " + size + " elements", size,
-				((Collection)attributeMap.get(attributeName)).size());
+				((Collection)model.get(attributeName)).size());
 	}
 
 	/**
 	 * Assert that a bean property attribute in the model map has a property
 	 * with the provided property value.
-	 * @param attributeMap the model map
+	 * @param model the model map
 	 * @param attributeName the attribute name (of a javabean)
 	 * @param propertyName the bean property name
 	 * @param propertyValue the expected property value
 	 */
-	protected void assertModelAttributePropertyEquals(Map attributeMap, String attributeName, String propertyName,
+	protected void assertModelAttributePropertyEquals(Map model, String attributeName, String propertyName,
 			Object propertyValue) {
-		assertModelAttributePresent(attributeMap, attributeName);
-		Object value = attributeMap.get(attributeName);
+		assertModelAttributePresent(model, attributeName);
+		Object value = model.get(attributeName);
 		Assert.isTrue(!BeanUtils.isSimpleProperty(value.getClass()), "Attribute value must be a bean");
 		BeanWrapper wrapper = new BeanWrapperImpl(value);
 		assertEquals(propertyValue, wrapper.getPropertyValue(propertyName));

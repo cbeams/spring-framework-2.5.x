@@ -24,7 +24,7 @@
 		<transition event="event3" to="endState3"/>
 	</view-state>
 	
-	<sub-flow-state id="subFlowState1" flow="subFlow1" attributes-mapper="attribMapper1">
+	<sub-flow-state id="subFlowState1" flow="subFlow1" model-mapper="modelMapper1">
 		<transition event="event1" to="endState1"/>
 	</sub-flow-state>
 	

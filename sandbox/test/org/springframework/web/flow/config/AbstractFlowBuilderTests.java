@@ -65,7 +65,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 			}
 
 			public FlowModelMapper getFlowModelMapper(String id) throws ServiceLookupException {
-				if (id.equals("personId.attributesMapper")) {
+				if (id.equals("personId.modelMapper")) {
 					return new PersonIdMapper();
 				}
 				else {
@@ -119,7 +119,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 			addGetState(PERSONS_LIST, executeAction(NoOpAction.class));
 			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
 			addSubFlowState(PERSON_DETAILS, TestDetailFlowBuilderLookupByType.class,
-					useAttributesMapper(PersonIdMapper.class), get(PERSONS_LIST));
+					useModelMapper(PersonIdMapper.class), get(PERSONS_LIST));
 			addFinishEndState();
 		}
 	}
@@ -218,7 +218,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	 */
 	public static final class NoOpAction implements Action {
 		public String execute(HttpServletRequest request, HttpServletResponse response,
-				MutableFlowModel attributes) throws Exception {
+				MutableFlowModel model) throws Exception {
 			return "success";
 		}
 	}
