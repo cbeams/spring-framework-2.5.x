@@ -465,13 +465,13 @@ public class Flow implements FlowEventProcessor, Serializable {
     }
 
     public ViewState createViewState(String stateIdSuffix) {
-        return createViewState(stateIdSuffix, new Transition[] { onSubmitBindAndValidate(stateIdSuffix), onCancelEnd(),
-                onBackEnd() });
+        return createViewState(stateIdSuffix, new Transition[] { onBackEnd(), onCancelEnd(),
+                onSubmitBindAndValidate(stateIdSuffix) });
     }
 
     public ViewState createViewState(String stateIdSuffix, String viewName) {
-        return createViewState(stateIdSuffix, viewName, new Transition[] { onSubmitBindAndValidate(stateIdSuffix),
-                onCancelEnd(), onBackEnd() });
+        return createViewState(stateIdSuffix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
+                onSubmitBindAndValidate(stateIdSuffix) });
     }
 
     public ViewState createViewState(String stateIdSuffix, Transition transition) {
