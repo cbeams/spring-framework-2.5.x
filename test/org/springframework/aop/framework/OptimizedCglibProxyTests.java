@@ -16,11 +16,11 @@
 
 package org.springframework.aop.framework;
 
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.support.AopUtils;
+
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -30,17 +30,10 @@ import org.springframework.beans.TestBean;
  * TargetSources or do other things that this proxy can't do.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: OptimizedCglibProxyTests.java,v 1.5 2004-04-01 15:36:03 jhoeller Exp $
+ * @version $Id: OptimizedCglibProxyTests.java,v 1.6 2004-06-24 14:23:06 jhoeller Exp $
  */
 public class OptimizedCglibProxyTests extends CglibProxyTests {
 	
-	public OptimizedCglibProxyTests(String arg0) {
-		super(arg0);
-	}
-	
-	/**
-	 * @see org.springframework.aop.framework.AbstractAopProxyTests#setInMode(org.springframework.aop.framework.AdvisedSupport)
-	 */
 	protected Object createProxy(AdvisedSupport as) {
 		as.setProxyTargetClass(true);
 		as.setOptimize(true);
@@ -58,8 +51,7 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 	protected boolean requiresTarget() {
 		return true;
 	}
-	
-	
+
 	/**
 	 * Inherited version checks identity with original object. We change that,
 	 * after the ////////////////// line

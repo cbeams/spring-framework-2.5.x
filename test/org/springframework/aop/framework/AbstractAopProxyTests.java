@@ -25,10 +25,10 @@ import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
@@ -48,16 +48,12 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.30 2004-06-11 08:20:19 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.31 2004-06-24 14:23:06 jhoeller Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
 	protected MockTargetSource mockTargetSource = new MockTargetSource();
 
-	public AbstractAopProxyTests(String arg0) {
-		super(arg0);
-	}
-	
 	/**
 	 * Make a clean target source available if code wants to use it.
 	 * The target must be set. Verification will be automatic in tearDown
@@ -73,8 +69,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 	
 	/**
-	 * Set in CGLIB or JDK mode
-	 * @param as
+	 * Set in CGLIB or JDK mode.
 	 */
 	protected abstract Object createProxy(AdvisedSupport as);
 	
@@ -82,7 +77,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	
 	/**
 	 * Is a target always required?
-	 * @return
 	 */
 	protected boolean requiresTarget() {
 		return false;
