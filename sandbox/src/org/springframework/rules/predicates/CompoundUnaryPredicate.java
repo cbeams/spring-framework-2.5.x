@@ -15,6 +15,7 @@
  */
 package org.springframework.rules.predicates;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -30,7 +31,7 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public abstract class CompoundUnaryPredicate implements UnaryPredicate {
+public abstract class CompoundUnaryPredicate implements UnaryPredicate, Serializable {
     private List predicates = new ArrayList();
 
     /**
