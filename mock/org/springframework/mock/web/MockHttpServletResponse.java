@@ -37,6 +37,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the HttpServletResponse interface.
@@ -56,7 +57,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	// ServletResponse properties
 	//---------------------------------------------------------------------
 
-	private String characterEncoding;
+	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 	private final ByteArrayOutputStream content = new ByteArrayOutputStream();
 
