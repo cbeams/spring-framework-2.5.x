@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
@@ -36,7 +37,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.18 2003-12-11 09:18:57 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.19 2003-12-11 18:13:09 jhoeller Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -413,9 +414,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 		boolean useCglib = getEnableCglibSubclassOptimizations() || getProxyTargetClass() || this.interfaces.isEmpty();
 		if (useCglib) {
-			return getEnableCglibSubclassOptimizations() ? (AopProxy)
-					new OptimizedCglib1AopProxy(this) : 
-					new Cglib1AopProxy(this);
+			return CglibProxyFactory.createCglibProxy(this, getEnableCglibSubclassOptimizations());
 		}
 		else {
 			return new JdkDynamicAopProxy(this);
@@ -444,6 +443,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		sb.append("advisorChainFactory=" + advisorChainFactory);
 		sb.append(super.toString());
 		return sb.toString();
+	}
+
+
+	/**
+	 * Inner class to just introduce a CGLIB dependency
+	 * when actually creating a CGLIB proxy.
+	 */
+	private static class CglibProxyFactory {
+
+		private static AopProxy createCglibProxy(AdvisedSupport advisedSupport, boolean subclassOptimizations) {
+			return subclassOptimizations ?
+			    new OptimizedCglib1AopProxy(advisedSupport) :
+					new Cglib1AopProxy(advisedSupport);
+		}
 	}
 
 }
