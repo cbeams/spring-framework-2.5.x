@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="bean:name=testBean1">
+					<value>testBean</value>
+				</entry>
+				<entry key="bean:name=testBean2">
+					<value>testBean2</value>
+				</entry>
+			</map>
+		</property>
+		<property name="server">
+			<ref local="server"/>
+		</property>
+	</bean>
+
+	<bean id="testBean" class="org.springframework.jmx.export.ExceptionOnInitBean" lazy-init="true">
+		<property name="exceptOnInit">
+			<value>true</value>
+		</property>
+		<property name="name">
+			<value>foo</value>
+		</property>
+	</bean>
+
+	<bean id="testBean2" class="org.springframework.jmx.export.ExceptionOnInitBean" lazy-init="true">
+		<property name="exceptOnInit">
+			<value>false</value>
+		</property>
+		<property name="name">
+			<value>foo</value>
+		</property>
+	</bean>
+
+	<bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+
+</beans>

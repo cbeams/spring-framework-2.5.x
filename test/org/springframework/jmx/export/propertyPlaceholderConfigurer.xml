@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="testBean.name">Rob Harrop</prop>
+				<prop key="testBean.age">100</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="bean:name=proxyTestBean1">
+					<ref local="testBean"/>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+		<property name="name">
+			<value>${testBean.name}</value>
+		</property>
+		<property name="age">
+			<value>${testBean.age}</value>
+		</property>
+	</bean>
+
+</beans>
