@@ -1,8 +1,3 @@
-/**
- * User: Clinton Begin
- * Date: Jul 13, 2003
- * Time: 8:18:30 PM
- */
 package org.springframework.samples.jpetstore.dao;
 
 import java.util.List;

@@ -1,8 +1,3 @@
-/**
- * User: Clinton Begin
- * Date: Jul 13, 2003
- * Time: 7:20:47 PM
- */
 package org.springframework.samples.jpetstore.dao.ibatis;
 
 import java.util.List;
@@ -28,7 +23,9 @@ public class SqlMapOrderDao extends SqlMapDaoSupport implements OrderDao {
   public Order getOrder(int orderId) throws DataAccessException {
     Object parameterObject = new Integer(orderId);
     Order order = (Order) getSqlMapTemplate().executeQueryForObject("getOrder", parameterObject);
-    order.setLineItems(getSqlMapTemplate().executeQueryForList("getLineItemsByOrderId", new Integer(order.getOrderId())));
+		if (order != null) {
+    	order.setLineItems(getSqlMapTemplate().executeQueryForList("getLineItemsByOrderId", new Integer(order.getOrderId())));
+		}
     return order;
   }
 

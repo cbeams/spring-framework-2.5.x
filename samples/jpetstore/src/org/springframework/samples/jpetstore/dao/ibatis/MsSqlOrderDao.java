@@ -1,8 +1,3 @@
-/**
- * User: Clinton Begin
- * Date: Jul 13, 2003
- * Time: 8:25:37 PM
- */
 package org.springframework.samples.jpetstore.dao.ibatis;
 
 import org.springframework.dao.DataAccessException;

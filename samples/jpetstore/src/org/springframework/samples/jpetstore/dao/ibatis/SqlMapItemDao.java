@@ -1,8 +1,3 @@
-/**
- * User: Clinton Begin
- * Date: Jul 13, 2003
- * Time: 7:21:08 PM
- */
 package org.springframework.samples.jpetstore.dao.ibatis;
 
 import java.util.HashMap;
@@ -40,9 +35,11 @@ public class SqlMapItemDao extends SqlMapDaoSupport implements ItemDao {
   }
 
   public Item getItem(String itemId) throws DataAccessException {
-    Integer i = (Integer) getSqlMapTemplate().executeQueryForObject("getInventoryQuantity", itemId);
     Item item = (Item) getSqlMapTemplate().executeQueryForObject("getItem", itemId);
-    item.setQuantity(i.intValue());
+		if (item != null) {
+			Integer qty = (Integer) getSqlMapTemplate().executeQueryForObject("getInventoryQuantity", itemId);
+			item.setQuantity(qty.intValue());
+		}
     return item;
   }
 

@@ -1,8 +1,3 @@
-/**
- * User: Clinton Begin
- * Date: Apr 1, 2003
- * Time: 9:03:33 PM
- */
 package org.springframework.samples.jpetstore.web.struts;
 
 import javax.servlet.http.HttpServletRequest;
