@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC1 (21.3.2005)
+Changes in version 1.2 RC1 (23.3.2005)
 --------------------------------------
 
 Overall
@@ -24,20 +24,35 @@ Package org.springframework.beans
 * added InstantiationAwareBeanPostProcessor extension of BeanPostProcessor interface, intercepting before instantiation
 * PropertyOverrideConfigurer does not log invalid keys at WARN level in case of "ignoreInvalidKeys" (only at DEBUG)
 * added BeanReferenceFactoryBean, allowing for exposure of a target bean under a different name (effectively an alias)
+* refined AbstractBeanFactory's "getType" to only suppress specific exceptions like BeanCurrentlyInCreationException
+* refined AbstractAutowireCapableBeanFactory's "autowireConstructor" to only suppress UnsatisfiedDependencyException
 * XmlBeanDefinitionReader offers an "errorHandler" property and uses the factored-out SimpleSaxErrorHandler as default
+
+Package org.springframework.context
+* fixed DelegatingMessageSource to return default message for MessageSourceResolvable, if no parent MessageSource found
 
 Package org.springframework.core
 * PathMatchingResourcePatternResolver collects resource entries in a Set and normalizes paths (to avoid double entries)
 
 Package org.springframework.jdbc
+* added "getTargetConnection" method to DataSourceUtils, returning the innermost target Connection of a given proxy
+* refined DataSourceUtils' "closeConnectionIfNecessary" to detect given target Connection handles as transactional too
 * LazyConnectionDataSourceProxy handles "toString", "equals" and "hashCode" itself (avoiding to fetch target Connection)
 * added debug logging to LazyConnectionDataSourceProxy, logging whether an operation is handled locally or in target
+* added "1213" as SQL error code for CannotAcquireLockException on MySQL (in the default "sql-error-codes.xml" file)
+* added LOB accessor methods that take column names to LobHandler interface, pre-implemented in AbstractLobHandler class
+* added "support.rowset" package, with SqlRowSet abstraction for disconnected result sets with Spring exceptions
+* added "queryForRowSet" methods to JdbcTemplate, returning a SqlRowSet as generic representation of the result rows
+* added "queryForObject" convenience methods to JdbcTemplate, taking a RowMapper argument and expecting a single row
 * factored out protected "createJdbcTemplate" in JdbcDaoSupport, allowing to override JdbcTemplate creation
 
 Package org.springframework.jmx
 * added JMX support, for registration of Spring-managed beans as JMX MBeans as well as for access to remote JMX MBeans
 * added Commons Attributes annotations for MBean export, plus corresponding AttributesJmxAttributeSource
 * added JDK 1.5+ annotations for MBean export, plus corresponding AnnotationJmxAttributeSource
+
+Package org.springframework.mail
+* JavaMailSenderImpl uses the current date as "sentDate" if none specified, to make sure the mail contains a date header
 
 Package org.springframework.orm
 * added "orm.hibernate3" support package for Hibernate3, mirroring the Hibernate 2.1 support in "orm.hibernate"
@@ -54,6 +69,7 @@ Package org.springframework.transaction
 * TransactionInterceptor exposes fully qualified class name + "." + method name as transaction name (by default)
 * added thread-bound "currentTransactionReadOnly" flag to TransactionSynchronizationManager
 * JtaTransactionManager autodetects JTA TransactionManager at "java:/TransactionManager" too (JBoss, JRun4)
+* JtaTransactionManager properly initializes with "transactionManagerName" only too (creating a UserTransactionAdapter)
 * WebLogicJtaTransactionManager autodetects WebLogic 7.0 or 8.1+, adapting accordingly (TransactionManager lookup etc)
 * WebLogicJtaTransactionManager invokes WebLogic's special "begin(name)" method, for visibility in WebLogic's tx monitor
 * WebLogicJtaTransactionManager applies per-transaction isolation level as WebLogic's "ISOLATION LEVEL" tx property
@@ -65,15 +81,21 @@ Package org.springframework.util
 Package org.springframework.validation
 * added "addAllErrors(Errors)" method to Errors interface and BindException, for merging Errors objects
 * factored out BindingErrorProcessor strategy from DataBinder, with DefaultBindErrorProcessor implementation
+* DataBinder does not generate any further field errors for "requiredField" that has already caused missing field error
 
 Package org.springframework.web
-* removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)
-* AbstractXlstView offers an "errorListener" property and registers a default ErrorListener with the XSLT transformer
-* AbstractXsltView.createDomNode() is deprecated in favor of AbstractXsltView.createXsltSource()
+* CommonsMultipartResolver exposes query parameters in multipart requests too, not just multipart POST parameters
 * ParameterMethodNameResolver can optionally resolve methods based purely based on existence of specified parameters
 * AbstractFormController/AbstractWizardFormController perform debug logging for session attributes being added/removed
 * changed MultiActionController's log level from INFO to DEBUG
+* added "prefix" and "suffix" properties to InternalPathMethodNameResolver, for common method name prefixes/suffixes
+* added "methodParamNames" property to ParameterMethodNameResolver, for params where the very existence chooses a method
+* added "logicalMappings" property to ParameterMethodNameResolver, for logical mappings between params and method names
 * added "createBinder" and "initBinder" methods to MultiActionController, which may be overridden by subclasses
+* removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)
+* JSP BindTag saves previous "status" value and re-exposes it at the end of the tag (to support BindTag nesting)
+* AbstractXlstView offers an "errorListener" property and registers a default ErrorListener with the XSLT transformer
+* deprecated AbstractXsltView's "createDomNode" method in favor of new "createXsltSource" method
 
 
 Changes in version 1.1.5 (28.2.2005)
