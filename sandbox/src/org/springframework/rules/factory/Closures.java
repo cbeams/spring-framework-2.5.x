@@ -17,7 +17,7 @@ package org.springframework.rules.factory;
 
 import org.springframework.rules.Closure;
 import org.springframework.rules.Constraint;
-import org.springframework.rules.Generator;
+import org.springframework.rules.ProcessTemplate;
 import org.springframework.rules.closure.ClosureChain;
 import org.springframework.rules.closure.ConstrainedBlock;
 
@@ -49,9 +49,9 @@ public class Closures {
         return new ConstrainedBlock(closure, predicate);
     }
 
-    public Generator createFilteredGenerator(final Generator generator,
+    public ProcessTemplate createFilteredGenerator(final ProcessTemplate generator,
             final Constraint constraint) {
-        return new Generator() {
+        return new ProcessTemplate() {
             public void run(Closure block) {
                 generator.run(constrain(block, constraint));
             }

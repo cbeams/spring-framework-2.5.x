@@ -19,9 +19,9 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.springframework.rules.Closure;
-import org.springframework.rules.Generator;
+import org.springframework.rules.ProcessTemplate;
 
-public class IteratorElementGenerator implements Generator {
+public class IteratorElementGenerator implements ProcessTemplate {
     private Iterator it;
 
     public IteratorElementGenerator(Collection collection) {

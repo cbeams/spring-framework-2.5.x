@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.enums.CodedEnum;
 import org.springframework.rules.Closure;
-import org.springframework.rules.Generator;
+import org.springframework.rules.ProcessTemplate;
 import org.springframework.rules.closure.Block;
 import org.springframework.util.Assert;
 
@@ -67,7 +67,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
      * 
      * @author Keith Donald
      */
-    private static class CodedEnumFieldValueGenerator implements Generator {
+    private static class CodedEnumFieldValueGenerator implements ProcessTemplate {
         private static final Log logger = LogFactory
                 .getLog(CodedEnumFieldValueGenerator.class);
 

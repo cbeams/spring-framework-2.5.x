@@ -21,7 +21,7 @@ import java.util.Iterator;
 
 import org.springframework.rules.Closure;
 import org.springframework.rules.Constraint;
-import org.springframework.rules.Generator;
+import org.springframework.rules.ProcessTemplate;
 import org.springframework.rules.closure.Block;
 import org.springframework.rules.factory.Closures;
 
@@ -113,7 +113,7 @@ public class Algorithms {
 
     public Collection findAll(Iterator it, final Constraint constraint) {
         final Collection results = new ArrayList();
-        Generator generator = closures.createFilteredGenerator(
+        ProcessTemplate generator = closures.createFilteredGenerator(
                 new IteratorElementGenerator(it), constraint);
         generator.run(new Block() {
             protected void handle(Object element) {
