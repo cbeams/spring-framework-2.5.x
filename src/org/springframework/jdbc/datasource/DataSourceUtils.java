@@ -263,7 +263,7 @@ public abstract class DataSourceUtils {
 		}
 
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
-		if (conHolder != null && con == conHolder.getConnection()) {
+		if (conHolder != null && connectionEquals(conHolder.getConnection(), con)) {
 			// It's the transactional Connection: Don't close it.
 			conHolder.released();
 			return;
@@ -275,6 +275,35 @@ public abstract class DataSourceUtils {
 			logger.debug("Closing JDBC connection");
 			con.close();
 		}
+	}
+
+	/**
+	 * Return whether the given two Connections are equal, asking the target
+	 * Connection in case of a proxy. Used to detect equality even if the
+	 * user passed in a raw target Connection while the held one is a proxy.
+	 * @param heldCon the held Connection (potentially a proxy)
+	 * @param passedInCon the Connection passed-in by the user
+	 * (potentially a target Connection without proxy)
+	 * @see #getTargetConnection
+	 */
+	private static boolean connectionEquals(Connection heldCon, Connection passedInCon) {
+		return (heldCon.equals(passedInCon) || getTargetConnection(heldCon).equals(passedInCon));
+	}
+
+	/**
+	 * Return the innermost target Connection of the given Connection. If the given
+	 * Connection is a proxy, it will be unwrapped until a non-proxy Connection is
+	 * found. Else, the passed-in Connection will be returned as-is.
+	 * @param con the Connection proxy to unwrap
+	 * @return the innermost target Connection, or the passed-in one if no proxy
+	 * @see ConnectionProxy#getTargetConnection
+	 */
+	public static Connection getTargetConnection(Connection con) {
+		Connection conToUse = con;
+		while (conToUse instanceof ConnectionProxy) {
+			conToUse = ((ConnectionProxy) conToUse).getTargetConnection();
+		}
+		return conToUse;
 	}
 
 
