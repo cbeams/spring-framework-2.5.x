@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.47 2004-04-03 14:40:34 aarendsen Exp $
+    $Id: build.xml,v 1.48 2004-04-05 11:18:42 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -397,6 +397,7 @@
 		<copy todir="${target.testclasses.dir}" preservelastmodified="true">
 			<fileset dir="${test.dir}">
 				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
 			</fileset>
 		</copy>
 
@@ -714,7 +715,7 @@
 	</target>
 
 	<target name="refdoc" depends="dochtml,dochtmlsingle,docpdf" description="Generate and copy reference documentation"/>
-	
+
 	<!-- sandbox build -->
 	<target name="build-sandbox"
 		description="Compile sandbox source tree java files into class files (no-jarring)">
@@ -736,7 +737,7 @@
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<target name="buildtests-sandbox" depends="buildtests"
 		description="Compile test source tree Java files into class files">
 
@@ -785,7 +786,7 @@
 
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
-			
+
 			<formatter type="plain" usefile="false"/>
 			<formatter type="xml"/>
 
@@ -796,7 +797,7 @@
 		</junit>
 
 	</target>
-	
+
 	<target name="sandboxjar" depends="build,build-sandbox,initdist" description="Creates spring.jar including the sandbox">
 
 		<delete file="${dist.dir}/spring.jar"/>
