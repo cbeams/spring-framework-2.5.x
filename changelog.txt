@@ -1,6 +1,39 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.118 2004-03-24 22:08:32 jhoeller Exp $
+$Id: changelog.txt,v 1.119 2004-03-30 06:31:40 jhoeller Exp $
+
+
+Changes in version 1.0.1 (7.4.2003)
+-----------------------------------
+
+Package org.springframework.beans
+* added "getPropertyType" method to BeanWrapper/BeanWrapperImpl, capable of checking indexed/mapped elements
+* BeanWrapperImpl allows registration of custom editors for array/List/Map properties
+* BeanWrapperImpl allows registration of custom editors for specific elements of array/List/Map properties
+* AbstractBeanFactory overrides parent bean if child name equals parent name (rather than causing a stack overflow)
+
+Package org.springframework.core
+* added check whether cause is "this" to NestedRuntime/CheckedException, to avoid stack overflow in obscure scenarios
+
+Package org.springframework.context
+* AbstractXml/StaticApplicationContext use internal bean factory of parent context as parent for their bean factory
+* AbstractXml/StaticApplicationContext properly check parent context for referenced parent beans (bean parent="...")
+* removed unused default constructor and protected setters from DefaultMessageSourceResolvable
+
+Package org.springframework.orm
+* fixed Hibernate Session unbinding in case of JtaTransactionManager and flush failure im beforeCommit synchronization
+
+Package org.springframework.transaction
+* fixed AbstractPlatformTransactionManager's handling of beforeCompletion callbacks in case of beforeCommit failures
+
+Package org.springframework.validation
+* factored out message code resolution into MessageCodesResolver strategy, with DefaultMessageCodesResolver impl
+* DefaultMessageCodesResolver generates codes for specific elements and the whole collection in case of array/List/Map
+* DefaultMessageCodesResolver generates code for the type of a field, e.g. "typeMismatch.java.lang.String"
+* DefaultMessageCodesResolver generates code for the object name in case of an ObjectError, e.g. "myError.myForm"
+
+Package org.springframework.web
+* added "messageCodesResolver" property to BaseCommandController, available to all command and form controllers
 
 
 Changes in version 1.0 final (24.3.2003)
