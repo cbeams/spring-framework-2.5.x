@@ -1,16 +1,23 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.119 2004-03-30 06:31:40 jhoeller Exp $
+$Id: changelog.txt,v 1.120 2004-04-01 15:39:36 jhoeller Exp $
 
 
 Changes in version 1.0.1 (7.4.2003)
 -----------------------------------
 
+Package org.springframework.aop
+* refined usage of AopConfigException, to avoid cyclic dependencies between org.springframework.aop subpackages
+* moved internal class AopUtils from package aop.framework.support to aop.support, to avoid cyclic package dependencies
+
 Package org.springframework.beans
 * added "getPropertyType" method to BeanWrapper/BeanWrapperImpl, capable of checking indexed/mapped elements
 * BeanWrapperImpl allows registration of custom editors for array/List/Map properties
 * BeanWrapperImpl allows registration of custom editors for specific elements of array/List/Map properties
+* added InputStreamEditor to standard PropertyEditors, for creating java.io.InputStream instances from String locations
 * AbstractBeanFactory overrides parent bean if child name equals parent name (rather than causing a stack overflow)
+* AbstractAutowireCapableBeanFactory throws more expressive exceptions if a custom init-method failed
+* AbstractAutowireCapableBeanFactory throws an exception if a BeanPostProcessor returns null as bean instance 
 
 Package org.springframework.core
 * added check whether cause is "this" to NestedRuntime/CheckedException, to avoid stack overflow in obscure scenarios
@@ -19,12 +26,20 @@ Package org.springframework.context
 * AbstractXml/StaticApplicationContext use internal bean factory of parent context as parent for their bean factory
 * AbstractXml/StaticApplicationContext properly check parent context for referenced parent beans (bean parent="...")
 * removed unused default constructor and protected setters from DefaultMessageSourceResolvable
+* AbstractMessageSource returns default message if passed-in message code is null
+* AbstractMessageSource just falls back to message code as message if no default message given
+* AbstractMessageSource's "getMessageInternal" method returns null instead of throwing NoSuchMessageException
+* EventPublicationInterceptor implements ApplicationContextAware rather than extending ApplicationObjectSupport
 
 Package org.springframework.orm
 * fixed Hibernate Session unbinding in case of JtaTransactionManager and flush failure im beforeCommit synchronization
 
+Package org.springframework.remoting
+* refined exceptions thrown by RmiClientInterceptor's "createRmiProxy" and RmiProxyFactoryBean's "afterPropertiesSet"
+
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager's handling of beforeCompletion callbacks in case of beforeCommit failures
+* added WebSphere 5.1 check to WebSphereTransactionManagerFactoryBean (covering versions 5.1, 5.0 and 4 now)
 
 Package org.springframework.validation
 * factored out message code resolution into MessageCodesResolver strategy, with DefaultMessageCodesResolver impl
@@ -33,7 +48,11 @@ Package org.springframework.validation
 * DefaultMessageCodesResolver generates code for the object name in case of an ObjectError, e.g. "myError.myForm"
 
 Package org.springframework.web
+* added MaxUploadSizeExceededException to multipart package, as a specific subclass of MultipartException
+* CommonsMultipartResolver and CosMultipartResolver throw MaxUploadSizeExceededException when appropriate
+* apply HandlerExceptionResolvers also if multipart resolution of handler mapping failed (passing in null as handler)
 * added "messageCodesResolver" property to BaseCommandController, available to all command and form controllers
+* added overloaded "onBind" method with an additional BindException parameter to BaseCommandController
 
 
 Changes in version 1.0 final (24.3.2003)
