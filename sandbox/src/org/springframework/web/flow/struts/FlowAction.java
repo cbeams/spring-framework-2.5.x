@@ -251,9 +251,7 @@ public class FlowAction extends TemplateAction {
 	}
 
 	protected FlowExecution createFlowExecution(Flow flow) {
-		FlowExecutionStack flowExecution = new FlowExecutionStack(flow);
-		flowExecution.getListenerList().add(flow.getFlowExecutionListenerList());
-		return flowExecution;
+		return flow.createFlowExecution();
 	}
 
 	protected Map getFlowExecutionInput(HttpServletRequest request) {

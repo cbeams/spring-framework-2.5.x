@@ -384,6 +384,17 @@ public class Flow implements Serializable {
 		return (String[])stateIds.toArray(new String[0]);
 	}
 
+	/**
+	 * Factory method that produces a new flow execution instance for this flow
+	 * on each invocation.
+	 * @return A new flow execution, not yet started.
+	 */
+	public FlowExecution createFlowExecution() {
+		FlowExecutionStack flowExecution = new FlowExecutionStack(this);
+		flowExecution.getListenerList().add(getFlowExecutionListenerList());
+		return flowExecution;
+	}
+
 	public String toString() {
 		return new ToStringCreator(this).append("id", id).append("startState", startState)
 				.append("states", this.states).toString();

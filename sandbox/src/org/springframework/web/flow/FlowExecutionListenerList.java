@@ -60,7 +60,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * 
+	 *  
 	 */
 	public void clear() {
 		this.flowExecutionListeners.clear();
@@ -113,5 +113,13 @@ public class FlowExecutionListenerList {
 	 */
 	public int size() {
 		return flowExecutionListeners.getListenerCount();
+	}
+
+	/**
+	 * Is this listener list empty?
+	 * @return
+	 */
+	public boolean isEmpty() {
+		return flowExecutionListeners.isEmpty();
 	}
 }

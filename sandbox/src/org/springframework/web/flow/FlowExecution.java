@@ -3,7 +3,6 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +29,7 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	 * @return The flow execution listener list
 	 */
 	public FlowExecutionListenerList getListenerList();
-	
+
 	/**
 	 * Returns this flow execution's active flow definition.
 	 * @return The active flow definition

@@ -13,7 +13,6 @@ import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionListener;
-import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
 import org.springframework.web.flow.config.FlowConstants;
 import org.springframework.web.flow.config.FlowServiceLocator;
@@ -173,8 +172,7 @@ public class FlowController extends AbstractController {
 	}
 
 	protected FlowExecution createFlowExecution(Flow flow) {
-		FlowExecution flowExecution = new FlowExecutionStack(flow);
-		flowExecution.getListenerList().add(flow.getFlowExecutionListenerList());
+		FlowExecution flowExecution = flow.createFlowExecution();
 		if (!flowExecutionListeners.isEmpty()) {
 			flowExecution.getListenerList().add(
 					(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));

@@ -123,6 +123,13 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 	public boolean hasListeners() {
 		return listeners.length > 0;
 	}
+	
+	/**
+	 * Returns true if there are no listeners registered with this list.
+	 */
+	public boolean isEmpty() {
+		return !hasListeners();
+	}
 
 	/**
 	 * Returns the total number of listeners registered with this list.
@@ -439,5 +446,4 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 		return new ToStringCreator(this).append("listenerClass", listenerClass).append("listeners", listeners)
 				.toString();
 	}
-
 }
