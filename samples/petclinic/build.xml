@@ -59,12 +59,14 @@
 		<fileset dir="${spring.root}/lib/dom4j">
 			<include name="dom4j.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/hsqldb">
-			<include name="hsqldb.jar"/>
+		<fileset dir="${spring.root}/lib/ehcache">
+			<include name="ehcache*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/hibernate">
-			<include name="ehcache.jar"/>
 			<include name="odmg.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/hsqldb">
+			<include name="hsqldb.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="jdbc2_0-stdext.jar"/>
@@ -72,9 +74,9 @@
 			<include name="servlet.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
-			<include name="commons-lang.jar"/>
 			<include name="commons-dbcp.jar"/>
 			<include name="commons-collections.jar"/>
+			<include name="commons-lang.jar"/>
 			<include name="commons-pool.jar"/>
 		</fileset>
 
@@ -157,13 +159,15 @@
 			<fileset dir="${spring.root}/lib/dom4j">
 				<include name="dom4j.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/hsqldb">
-				<include name="hsqldb.jar"/>
+			<fileset dir="${spring.root}/lib/ehcache">
+				<include name="ehcache*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/hibernate">
-				<include name="ehcache.jar"/>
 				<include name="hibernate2.jar"/>
 				<include name="odmg.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/hsqldb">
+				<include name="hsqldb.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jstl.jar"/>
