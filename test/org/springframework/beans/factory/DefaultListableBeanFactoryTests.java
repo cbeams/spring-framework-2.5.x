@@ -154,7 +154,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		p.setProperty(PREFIX + "kerry.name", "Kerry");
 		p.setProperty(PREFIX + "kerry.age", "35");
 		p.setProperty(PREFIX + "kerry.spouse(ref)", "rod");
-		//p.setProperty("
+
 		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p, PREFIX);
 		assertTrue("2 beans registered, not " + count, count == 2);
 
@@ -163,6 +163,21 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		ITestBean spouse = kerry.getSpouse();
 		assertTrue("Kerry spouse is non null", spouse != null);
 		assertTrue("Kerry spouse name is Rod", "Rod".equals(spouse.getName()));
+	}
+
+	public void testPropertiesWithDotsInKey() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+
+		p.setProperty("tb.class", "org.springframework.beans.TestBean");
+		p.setProperty("tb.someMap[my.key]", "my.value");
+
+		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		assertTrue("1 beans registered, not " + count, count == 1);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+
+		TestBean tb = (TestBean) lbf.getBean("tb", TestBean.class);
+		assertEquals("my.value", tb.getSomeMap().get("my.key"));
 	}
 
 	public void testUnresolvedReference() throws Exception {

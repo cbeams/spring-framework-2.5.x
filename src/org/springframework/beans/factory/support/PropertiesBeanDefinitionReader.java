@@ -27,6 +27,7 @@ import java.util.ResourceBundle;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -273,9 +274,17 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			}
 			String keyString = (String) key;
 			if (keyString.startsWith(prefix)) {
-				// key is of form prefix<name>.property
+				// Key is of form: prefix<name>.property
 				String nameAndProperty = keyString.substring(prefix.length());
-				int sepIdx = nameAndProperty.lastIndexOf(SEPARATOR);
+				// Find dot before property name, ignoring dots in property keys.
+				int sepIdx = -1;
+				int propKeyIdx = nameAndProperty.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX);
+				if (propKeyIdx != -1) {
+					sepIdx = nameAndProperty.lastIndexOf(SEPARATOR, propKeyIdx);
+				}
+				else {
+					sepIdx = nameAndProperty.lastIndexOf(SEPARATOR);
+				}
 				if (sepIdx != -1) {
 					String beanName = nameAndProperty.substring(0, sepIdx);
 					if (logger.isDebugEnabled()) {
