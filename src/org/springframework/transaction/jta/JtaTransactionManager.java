@@ -16,6 +16,9 @@
 
 package org.springframework.transaction.jta;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
 import javax.naming.NamingException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -28,6 +31,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
+import org.aopalliance.aop.AspectException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
@@ -136,6 +140,9 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * implementations. Note that some resource-specific transaction managers like
  * DataSourceTransactionManager and HibernateTransactionManager do support timeouts,
  * custom isolation levels, and transaction suspension without JTA's restrictions.
+ * 
+ * <p>This class is serializable. Synchronizations do not
+ * survive serialization.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
@@ -150,19 +157,20 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+ * @version $Id: JtaTransactionManager.java,v 1.19 2004-07-27 09:18:43 johnsonr Exp $
  */
 public class JtaTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
 	public static final String DEFAULT_USER_TRANSACTION_NAME = "java:comp/UserTransaction";
 
 
-	private JndiTemplate jndiTemplate = new JndiTemplate();
+	private transient JndiTemplate jndiTemplate = new JndiTemplate();
 
-	private UserTransaction userTransaction;
+	private transient UserTransaction userTransaction;
 
 	private String userTransactionName = DEFAULT_USER_TRANSACTION_NAME;
 
-	private TransactionManager transactionManager;
+	private transient TransactionManager transactionManager;
 
 	private String transactionManagerName;
 
@@ -523,6 +531,25 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on setRollbackOnly", ex);
 		}
+	}
+	
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+	private void readObject(ObjectInputStream ois) throws IOException {
+		// Rely on default serialization, just initialize state after deserialization
+		try {
+			ois.defaultReadObject();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new AspectException("Failed to deserialize JtaTransactionManager:" +
+					"Check that JTA and Spring transaction libraries are available on the client side", ex);
+		}
+		
+		// Do client-side JNDI lookup
+		this.jndiTemplate = new JndiTemplate();
+		// Run lookup code
+		this.userTransaction = lookupUserTransaction(this.userTransactionName);
 	}
 
 }

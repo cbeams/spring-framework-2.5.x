@@ -16,12 +16,15 @@
 
 package org.springframework.transaction.support;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.Constants;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -56,16 +59,21 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * for closing at transaction completion time, allowing e.g. for reuse of
  * the same Hibernate Session within the transaction. The same mechanism
  * can also be used for custom synchronization efforts.
+ * 
+ * <p>The state of this class is serializable. It's up to subclasses if
+ * they wish to make their state to be serializable.
+ * They should implement readObject() methods if they need
+ * to restore any transient state.
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.30 2004-07-02 09:20:51 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.31 2004-07-27 09:18:42 johnsonr Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  */
-public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
+public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager, Serializable {
 
 	/**
 	 * Always activate transaction synchronization, even for "empty" transactions
@@ -85,8 +93,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public static final int SYNCHRONIZATION_NEVER = 2;
 
-
-	protected final Log logger = LogFactory.getLog(getClass());
+	/** Transient to optimize serialization */
+	protected transient Log logger = LogFactory.getLog(getClass());
 
 	/** Constants instance for AbstractPlatformTransactionManager */
 	private static final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
@@ -720,6 +728,23 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		private Object getSuspendedResources() {
 			return suspendedResources;
 		}
+	}
+	
+	// ---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+	private void readObject(ObjectInputStream ois) throws IOException {
+		// Rely on default serialization, just initialize state after deserialization
+		try {
+			ois.defaultReadObject();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new AspectException("Failed to deserialize " + getClass() + 
+					"Check that Spring transaction libraries are available on the client side", ex);
+		}
+		
+		// Initialize transient fields
+		this.logger = LogFactory.getLog(getClass());
 	}
 
 }
