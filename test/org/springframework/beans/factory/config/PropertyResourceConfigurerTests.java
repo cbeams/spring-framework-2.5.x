@@ -248,6 +248,49 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	public void testPropertyPlaceholderConfigurerWithSystemPropertiesInLocation() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("location", "${user.dir}/test/${user.dir}");
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		try {
+			ac.refresh();
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanInitializationException ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof FileNotFoundException);
+			// slight hack for Linux/Unix systems
+			String userDir = System.getProperty("user.dir");
+			if (userDir.startsWith("/")) {
+				userDir = userDir.substring(1);
+			}
+			assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1);
+		}
+	}
+
+	public void testPropertyPlaceholderConfigurerWithUnresolvableSystemPropertiesInLocation() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("location", "${myprop}/test/${myprop}");
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		try {
+			ac.refresh();
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanInitializationException ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof FileNotFoundException);
+			assertTrue(ex.getMessage().indexOf("myprop") != -1);
+		}
+	}
+
 	public void testPropertyPlaceholderConfigurerWithCircularReference() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();

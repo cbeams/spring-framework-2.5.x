@@ -79,22 +79,28 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @see #PLACEHOLDER_SUFFIX
 	 */
 	protected String resolvePath(String path) {
-		int startIndex = path.indexOf(PLACEHOLDER_PREFIX);
-		if (startIndex != -1) {
-			int endIndex = path.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
+		StringBuffer buf = new StringBuffer(path);
+		int startIndex = buf.indexOf(PLACEHOLDER_PREFIX);
+		while (startIndex != -1) {
+			int endIndex = buf.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
 			if (endIndex != -1) {
-				String placeholder = path.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
+				String placeholder = buf.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
 				String propVal = System.getProperty(placeholder);
 				if (propVal != null) {
-					return path.substring(0, startIndex) + propVal + path.substring(endIndex+1);
+					buf.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
+					startIndex = buf.indexOf(PLACEHOLDER_PREFIX, startIndex + propVal.length());
 				}
 				else {
 					logger.warn("Could not resolve placeholder '" + placeholder +
 					    "' in resource path [" + path + "] as system property");
+					startIndex = buf.indexOf(PLACEHOLDER_PREFIX, endIndex + PLACEHOLDER_SUFFIX.length());
 				}
 			}
+			else {
+				startIndex = -1;
+			}
 		}
-		return path;
+		return buf.toString();
 	}
 
 }
