@@ -18,6 +18,7 @@ package org.springframework.functor.predicates;
 import java.util.Comparator;
 
 import org.springframework.functor.BinaryPredicate;
+import org.springframework.util.comparators.NullSafeComparator;
 
 /**
  * Abstract helper superclass for binary predicates involved in comparison
@@ -48,17 +49,13 @@ public abstract class ComparingBinaryPredicate implements BinaryPredicate {
     }
 
     public boolean test(Object value1, Object value2) {
-        /*
-        int result;
         Comparator c;
         if (comparator != null) {
-            c = new NullSafeComparator(c);
+            c = new NullSafeComparator(comparator);
         } else {
-            c = new NullSafeComparator(ComparableComparator.instance());
+            c = NullSafeComparator.instance();
         }
         return testCompareResult(c.compare(value1, value2));
-        */
-        return true;
     }
 
     /**
