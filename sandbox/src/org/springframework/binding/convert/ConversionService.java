@@ -7,6 +7,6 @@ package org.springframework.binding.convert;
  * A service locator that provides access to a registry of type converters.
  * @author Keith Donald
  */
-public interface ConverterLocator {
-	public Converter getConverter(Class sourceClass, Class targetClass);
+public interface ConversionService {
+	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) throws ConversionException;
 }

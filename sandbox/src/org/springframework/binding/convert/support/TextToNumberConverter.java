@@ -3,22 +3,15 @@
  */
 package org.springframework.binding.convert.support;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import org.springframework.binding.format.FormatterLocator;
 
 public class TextToNumberConverter extends AbstractFormattingConverter {
-	private Class numberClass;
 
-	public TextToNumberConverter() {
-		this.numberClass = Integer.class;
-	}
-
-	public TextToNumberConverter(Class numberClass) {
-		this.numberClass = numberClass;
-	}
-
-	public TextToNumberConverter(Class numberClass, FormatterLocator locator) {
+	public TextToNumberConverter(FormatterLocator locator) {
 		super(locator);
-		this.numberClass = numberClass;
 	}
 
 	public Class[] getSourceClasses() {
@@ -26,10 +19,11 @@ public class TextToNumberConverter extends AbstractFormattingConverter {
 	}
 
 	public Class[] getTargetClasses() {
-		return new Class[] { numberClass };
+		return new Class[] { Short.class, Integer.class, Long.class, Float.class, Double.class, BigInteger.class,
+				BigDecimal.class };
 	}
 
-	protected Object doConvert(Object o) throws Exception {
-		return getFormatterLocator().getNumberFormatter(numberClass).parseValue((String)o);
+	protected Object doConvert(Object o, Class targetClass) throws Exception {
+		return getFormatterLocator().getNumberFormatter(targetClass).parseValue((String)o);
 	}
 }

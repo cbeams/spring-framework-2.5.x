@@ -17,19 +17,14 @@ package org.springframework.binding.convert.support;
 
 import java.util.Locale;
 
+import org.springframework.enums.CodedEnum;
 import org.springframework.enums.CodedEnumResolver;
 import org.springframework.enums.support.StaticCodedEnumResolver;
 import org.springframework.util.StringUtils;
 
-public class TextToCodedEnumConverter extends AbstractFormattingConverter {
+public class TextToCodedEnumConverter extends AbstractConverter {
 
 	private CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
-
-	private Class codedEnumClass;
-
-	public TextToCodedEnumConverter(Class codedEnumClass) {
-		this.codedEnumClass = codedEnumClass;
-	}
 
 	public void setEnumResolver(CodedEnumResolver enumResolver) {
 		this.enumResolver = enumResolver;
@@ -40,21 +35,17 @@ public class TextToCodedEnumConverter extends AbstractFormattingConverter {
 	}
 
 	public Class[] getTargetClasses() {
-		return new Class[] { codedEnumClass };
+		return new Class[] { CodedEnum.class };
 	}
 
-	protected String getCodedEnumType() {
-		return codedEnumClass.getName();
-	}
-	
 	protected Locale getLocale() {
 		return null;
 	}
-	
-	protected Object doConvert(Object o) throws Exception {
-		String text = (String)o;
+
+	protected Object doConvert(Object source, Class targetClass) throws Exception {
+		String text = (String)source;
 		if (StringUtils.hasText(text)) {
-			return this.enumResolver.getEnum(getCodedEnumType(), (Comparable)o, getLocale());
+			return this.enumResolver.getEnum(targetClass.getName(), (Comparable)source, getLocale());
 		}
 		else {
 			return null;

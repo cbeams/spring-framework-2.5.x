@@ -17,9 +17,7 @@ package org.springframework.binding.convert;
 
 /**
  * A type converter converts objects of one type to that of another. They may
- * also support conversion for multiple different types. For example, a
- * "DateToString" type converter would convert Date objects to String (convert
- * to), as well as properly-formatted Strings back to Dates (convert from).
+ * also support conversion for multiple different types.
  * @author Keith Donald
  */
 public interface Converter {
@@ -35,11 +33,14 @@ public interface Converter {
 	public Class[] getTargetClasses();
 
 	/**
-	 * Convert the provided object argument to another type.
-	 * <p>
-	 * A typical type converter implementation is capable of converting from one
-	 * type to another and back.
+	 * Convert the provided source object argument to an instance of the
+	 * specified target class.
+	 * 
+	 * @param source the source object to convert
+	 * @param the target class to convert the source to
+	 * @return The converted object, an instance of the default target type
 	 * @throws ConversionException An exception occured during the conversion.
 	 */
-	public Object convert(Object o) throws ConversionException;
+	public Object convert(Object source, Class targetClass) throws ConversionException;
+
 }

@@ -23,7 +23,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeSetter;
-import org.springframework.binding.convert.Converter;
+import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.util.Assert;
 
 /**
@@ -38,7 +38,7 @@ public class Mapping implements Serializable {
 
 	private String targetAttributeName;
 
-	private Converter valueTypeConverter;
+	private ConversionExecutor valueConversionExecutor;
 
 	/**
 	 * Creates a mapping definition that will map the specified attribute name
@@ -58,10 +58,10 @@ public class Mapping implements Serializable {
 	 * @param sourceAttributeName The source attribute name
 	 * @param valueTypeConverter the type converter
 	 */
-	public Mapping(String sourceAttributeName, Converter valueTypeConverter) {
+	public Mapping(String sourceAttributeName, ConversionExecutor valueTypeConverter) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = sourceAttributeName;
-		this.valueTypeConverter = valueTypeConverter;
+		this.valueConversionExecutor = valueTypeConverter;
 	}
 
 	/**
@@ -85,10 +85,10 @@ public class Mapping implements Serializable {
 	 * @param targetAttributeName The target attribute name
 	 * @param valueTypeConverter the type converter
 	 */
-	public Mapping(String sourceAttributeName, String targetAttributeName, Converter valueTypeConverter) {
+	public Mapping(String sourceAttributeName, String targetAttributeName, ConversionExecutor valueTypeConverter) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = targetAttributeName;
-		this.valueTypeConverter = valueTypeConverter;
+		this.valueConversionExecutor = valueTypeConverter;
 	}
 
 	private void setSourceAttributeName(String sourceAttributeName) {
@@ -120,8 +120,8 @@ public class Mapping implements Serializable {
 			value = source.getAttribute(sourceAttributeName);
 		}
 		// convert value to a expected target type if neccessary
-		if (valueTypeConverter != null) {
-			value = valueTypeConverter.convert(value);
+		if (valueConversionExecutor != null) {
+			value = valueConversionExecutor.call(value);
 		}
 		// set target value
 		propertyDelimiterIndex = targetAttributeName.indexOf('.');

@@ -15,8 +15,8 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
-import org.springframework.binding.convert.Converter;
-import org.springframework.binding.convert.ConverterLocator;
+import org.springframework.binding.convert.ConversionExecutor;
+import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.QueryAction;
 import org.springframework.web.flow.Action;
@@ -44,14 +44,14 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
 	private static final String ID = "id";
 
-	private ConverterLocator converterLocator;
+	private ConversionService conversionService;
 	
-	public void setConverterLocator(ConverterLocator converterLocator) {
-		this.converterLocator = converterLocator;
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
 	}
 	
-	protected Converter getConverter(Class targetClass) {
-		return converterLocator.getConverter(String.class, targetClass);
+	protected ConversionExecutor getConversionExecutor(Class targetClass) {
+		return conversionService.getConversionExecutor(String.class, targetClass);
 	}
 
 	protected String flowId() {
@@ -74,7 +74,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setId) });
 
 		// set a user id in the model (selected from result list)
-		Action setAction = new SetAction(new Mapping(ID, getConverter(Long.class)));
+		Action setAction = new SetAction(new Mapping(ID, getConversionExecutor(Long.class)));
 		addActionState(setId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
 
 		// view details for selected user id

@@ -1,11 +1,21 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.binding.convert.support;
 
 import java.beans.PropertyEditor;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,22 +25,22 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.binding.convert.Converter;
-import org.springframework.binding.convert.ConverterLocator;
+import org.springframework.binding.convert.ConversionExecutor;
+import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.format.FormatterLocator;
-import org.springframework.binding.format.Style;
 import org.springframework.binding.support.TextToMappingConverter;
 
 /**
  * Specialized registry for type converters.
  * @author Keith Donald
  */
-public class DefaultConverterLocator implements ConverterLocator, BeanFactoryPostProcessor, InitializingBean {
+public class DefaultConversionService implements ConversionService, BeanFactoryPostProcessor, InitializingBean {
 
 	private Map sourceClassConverters = new HashMap();
 
 	private FormatterLocator formatterLocator;
 
-	public DefaultConverterLocator() {
+	public DefaultConversionService() {
 
 	}
 
@@ -72,34 +82,34 @@ public class DefaultConverterLocator implements ConverterLocator, BeanFactoryPos
 
 	protected void addDefaultConverters() {
 		addConverter(new TextToClassConverter());
-		addConverter(new TextToCodedEnumConverter(Style.class));
-		addConverter(new TextToNumberConverter(Short.class, formatterLocator));
-		addConverter(new TextToNumberConverter(Integer.class, formatterLocator));
-		addConverter(new TextToNumberConverter(Long.class, formatterLocator));
-		addConverter(new TextToNumberConverter(Float.class, formatterLocator));
-		addConverter(new TextToNumberConverter(Double.class, formatterLocator));
-		addConverter(new TextToNumberConverter(BigInteger.class, formatterLocator));
-		addConverter(new TextToNumberConverter(BigDecimal.class, formatterLocator));
+		addConverter(new TextToNumberConverter(formatterLocator));
+		addConverter(new TextToCodedEnumConverter());
 		addConverter(new TextToMappingConverter(this));
 	}
 
-	public Converter getConverter(Class sourceClass, Class targetClass) {
+	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) {
 		if (sourceClassConverters == null) {
 			return null;
 		}
 		Map sourceTargetConverters = (Map)sourceClassConverters.get(sourceClass);
-		return (Converter)sourceTargetConverters.get(targetClass);
+		Converter converter = (Converter)sourceTargetConverters.get(targetClass);
+		if (converter != null) {
+			return new ConversionExecutor(converter, targetClass);
+		}
+		return null;
 	}
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.sourceClassConverters != null) {
-			Map fromStringConverters = (Map)sourceClassConverters.get(String.class);
-			if (fromStringConverters != null) {
-				Iterator it = fromStringConverters.entrySet().iterator();
+			Map sourceStringConverters = (Map)sourceClassConverters.get(String.class);
+			if (sourceStringConverters != null) {
+				Iterator it = sourceStringConverters.entrySet().iterator();
 				while (it.hasNext()) {
 					Map.Entry entry = (Map.Entry)it.next();
-					PropertyEditor editor = new ConverterPropertyEditorAdapter((Converter)entry.getValue());
-					beanFactory.registerCustomEditor((Class)entry.getKey(), editor);
+					Class targetClass = (Class)entry.getKey();
+					PropertyEditor editor = new ConverterPropertyEditorAdapter(new ConversionExecutor((Converter)entry
+							.getValue(), targetClass));
+					beanFactory.registerCustomEditor(targetClass, editor);
 				}
 			}
 		}

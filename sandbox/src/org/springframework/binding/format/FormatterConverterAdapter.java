@@ -34,21 +34,21 @@ public class FormatterConverterAdapter implements Converter, Closure {
 		return new Class[] { String.class, formatter.getValueClass() };
 	}
 
-	public Object convert(Object o) throws ConversionException {
-		if (String.class.isInstance(o)) {
+	public Object convert(Object source, Class targetClass) throws ConversionException {
+		if (String.class.isInstance(source)) {
 			try {
-				return formatter.parseValue((String)o);
+				return formatter.parseValue((String)source);
 			}
 			catch (InvalidFormatException e) {
-				throw new ConversionException(o, null, e);
+				throw new ConversionException(source, null, e);
 			}
 		}
 		else {
-			return formatter.formatValue(o);
+			return formatter.formatValue(source);
 		}
 	}
 
-	public Object call(Object o) {
-		return convert(o);
+	public Object call(Object source) {
+		return convert(source, null);
 	}
 }

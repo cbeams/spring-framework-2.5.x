@@ -18,7 +18,7 @@ package org.springframework.binding.convert.support;
 import java.beans.PropertyEditorSupport;
 
 import org.springframework.binding.convert.ConversionException;
-import org.springframework.binding.convert.Converter;
+import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.util.Assert;
 
 /**
@@ -27,26 +27,26 @@ import org.springframework.util.Assert;
  */
 public class ConverterPropertyEditorAdapter extends PropertyEditorSupport {
 
-    private Converter converter;
+	private ConversionExecutor converterExecutor;
 
-    public ConverterPropertyEditorAdapter(Converter converter) {
-        Assert.notNull(converter, "Converter is required");
-        this.converter = converter;
-    }
+	public ConverterPropertyEditorAdapter(ConversionExecutor converter) {
+		Assert.notNull(converter, "Converter is required");
+		this.converterExecutor = converter;
+	}
 
-    public void setAsText(String text) throws IllegalArgumentException {
-        try {
-            setValue(converter.convert(text));
-        }
-        catch (ConversionException e) {
-            IllegalArgumentException iae = new IllegalArgumentException("Could not convert from string: "
-                    + e.getMessage());
-            iae.initCause(e);
-            throw iae;
-        }
-    }
+	public void setAsText(String text) throws IllegalArgumentException {
+		try {
+			setValue(converterExecutor.call(text));
+		}
+		catch (ConversionException e) {
+			IllegalArgumentException iae = new IllegalArgumentException("Could not convert from string: "
+					+ e.getMessage());
+			iae.initCause(e);
+			throw iae;
+		}
+	}
 
-    public String getAsText() {
-		return (String)converter.convert(getValue());
-    }
+	public String getAsText() {
+		throw new UnsupportedOperationException();
+	}
 }

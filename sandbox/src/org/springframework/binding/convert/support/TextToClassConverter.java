@@ -7,7 +7,7 @@ import org.springframework.binding.convert.ConversionException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-public class TextToClassConverter extends AbstractFormattingConverter {
+public class TextToClassConverter extends AbstractConverter {
 
 	public Class[] getSourceClasses() {
 		return new Class[] { String.class };
@@ -17,16 +17,17 @@ public class TextToClassConverter extends AbstractFormattingConverter {
 		return new Class[] { Class.class };
 	}
 
-	protected Object doConvert(Object o) throws Exception {
-		String text = (String)o;
+	protected Object doConvert(Object source, Class targetClass) throws Exception {
+		String text = (String)source;
 		if (StringUtils.hasText(text)) {
 			try {
 				return ClassUtils.forName(text.trim());
 			}
 			catch (ClassNotFoundException ex) {
-				throw new ConversionException(o, Class.class, ex);
+				throw new ConversionException(source, Class.class, ex);
 			}
-		} else {
+		}
+		else {
 			return null;
 		}
 	}

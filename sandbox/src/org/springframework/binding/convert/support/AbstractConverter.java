@@ -5,26 +5,21 @@ package org.springframework.binding.convert.support;
 
 import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.Converter;
-import org.springframework.util.closure.Closure;
 
-public abstract class AbstractConverter implements Converter, Closure {
+public abstract class AbstractConverter implements Converter {
 
-	public Object convert(Object o) throws ConversionException {
+	public Object convert(Object source, Class targetClass) throws ConversionException {
 		try {
-			return doConvert(o);
+			return doConvert(source, targetClass);
 		}
 		catch (ConversionException e) {
 			throw e;
 		}
 		catch (Exception e) {
-			throw new ConversionException(o, null, e);
+			throw new ConversionException(source, null, e);
 		}
 	}
 
-	protected abstract Object doConvert(Object o) throws Exception;
-
-	public Object call(Object o) {
-		return call(o);
-	}
+	protected abstract Object doConvert(Object source, Class targetClass) throws Exception;
 	
 }
