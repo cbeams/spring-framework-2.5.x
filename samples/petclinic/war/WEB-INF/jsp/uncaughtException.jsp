@@ -7,7 +7,7 @@
 <% 
 try {
 	// The Servlet spec guarantees this attribute will be available
-	Exception exception = (Exception) request.getAttribute("javax.servlet.error.exception"); 
+	Throwable exception = (Throwable) request.getAttribute("javax.servlet.error.exception"); 
 
 	if (exception != null) {
 		if (exception instanceof ServletException) {
