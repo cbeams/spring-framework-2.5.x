@@ -5,8 +5,8 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.Connection;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,15 +34,15 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Create a new factory. Will need to add parameters
-	 * via the addParameter() method or have no parameters
+	 * via the addParameter() method or have no parameters.
 	 */
 	public CallableStatementCreatorFactory(String callString) {
 		this(callString, new LinkedList());
 	}
 
 	/**
-	 * Create a new factory with sql and the given parameters
-	 * @param sql SQL
+	 * Create a new factory with sql and the given parameters.
+	 * @param callString SQL string
 	 * @param declaredParameters list of SqlParameter objects
 	 */
 	public CallableStatementCreatorFactory(String callString, List declaredParameters) {
@@ -51,8 +51,8 @@ public class CallableStatementCreatorFactory {
 	}
 
 	/**
-	 * Add a new declared parameter
-	 * Order of parameter addition is significant
+	 * Add a new declared parameter.
+	 * Order of parameter addition is significant.
 	 */
 	public void addParameter(SqlParameter p) {
 		declaredParameters.add(p);
@@ -60,7 +60,7 @@ public class CallableStatementCreatorFactory {
 		
 	/**
 	 * Return a new CallableStatementCreator instance given this parameters.
-	 * @param params List of parameters. May be null.
+	 * @param inParams List of parameters. May be null.
 	 */
 	public CallableStatementCreator newCallableStatementCreator(Map inParams) {
 		return new CallableStatementCreatorImpl(inParams != null ? inParams : new HashMap());
@@ -75,7 +75,7 @@ public class CallableStatementCreatorFactory {
 		private Map inParameters;
 		
 		/**
-		 * @param params list of SqlParameter objects. May not be null
+		 * @param inParams list of SqlParameter objects. May not be null
 		 */
 		private CallableStatementCreatorImpl(final Map inParams) {
 			this.inParameters = inParams;
