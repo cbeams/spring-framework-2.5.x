@@ -29,9 +29,9 @@ import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.InternalEvent;
-import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.SimpleEvent;
+import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.StubRequestContext;
 import org.springframework.web.flow.SubFlowState;
@@ -48,18 +48,18 @@ import org.springframework.web.flow.ViewState;
 public class XmlFlowBuilderTests extends TestCase {
 
 	private Flow flow;
-
 	private StubRequestContext context;
 
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
 		builder.setFlowServiceLocator(new TestFlowServiceLocator());
 		flow = new FlowFactoryBean(builder).getFlow();
-		context = new StubRequestContext();
+		
+		context=new StubRequestContext();
 	}
-
+	
 	private Event createEvent(String id) {
-		return new InternalEvent(this, id);
+		return new SimpleEvent(this, id);
 	}
 
 	public void testBuildResult() {
@@ -155,7 +155,7 @@ public class XmlFlowBuilderTests extends TestCase {
 			if ("action1".equals(actionId) || "action2".equals(actionId)) {
 				return new Action() {
 					public Event execute(RequestContext context) throws Exception {
-						return new InternalEvent(this, "event1");
+						return new SimpleEvent(this, "event1");
 					}
 				};
 			}
@@ -187,7 +187,7 @@ public class XmlFlowBuilderTests extends TestCase {
 
 	public static class TestAction implements Action {
 		public Event execute(RequestContext context) throws Exception {
-			return new InternalEvent(this, "success");
+			return new SimpleEvent(this, "success");
 		}
 	}
 }

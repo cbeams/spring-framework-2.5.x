@@ -24,7 +24,7 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.InternalEvent;
+import org.springframework.web.flow.SimpleEvent;
 
 /**
  * Base action implementation that provides a number of helper methods generally
@@ -58,14 +58,14 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * Returns the default error event.
 	 */
 	protected Event error() {
-		return new InternalEvent(this, FlowConstants.ERROR);
+		return new SimpleEvent(this, FlowConstants.ERROR);
 	}
 
 	/**
 	 * Returns the default success event.
 	 */
 	protected Event success() {
-		return new InternalEvent(this, FlowConstants.SUCCESS);
+		return new SimpleEvent(this, FlowConstants.SUCCESS);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return the action result event
 	 */
 	protected Event result(String resultId) {
-		return new InternalEvent(this, resultId);
+		return new SimpleEvent(this, resultId);
 	}
 
 	/**
@@ -115,7 +115,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return the action result event
 	 */
 	protected Event result(String resultId, Map parameters) {
-		return new InternalEvent(this, resultId, parameters);
+		return new SimpleEvent(this, resultId, parameters);
 	}
 
 	// action pre and post execution logic

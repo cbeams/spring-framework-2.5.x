@@ -108,7 +108,7 @@ public class FlowExecutionStackTests extends TestCase {
 		Map inputData = new HashMap(1);
 		inputData.put("name", "value");
 		// start the flow execution
-		flowExecution.start(new InternalEvent(this, "start", inputData));
+		flowExecution.start(new SimpleEvent(this, "start", inputData));
 		runFlowExecutionRehydrationTest();
 	}
 

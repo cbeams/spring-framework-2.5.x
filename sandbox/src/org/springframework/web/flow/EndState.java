@@ -162,6 +162,6 @@ public class EndState extends State {
 	 * parameters. Subclasses may override.
 	 */
 	protected Event createEndingSubFlowResultEvent() {
-		return new InternalEvent(this, getId());
+		return new SimpleEvent(this, getId());
 	}
 }

@@ -23,15 +23,18 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * An implementation of the <code>Event</code> base class for signaling
- * events from an internal source within a flow artifact such as an
- * <code>Action</code> or <code>State</code> definition. This is the
- * simplest <code>Event</code> implementation.
+ * A simple implementation of the <code>Event</code> base class. Mostly
+ * used for signaling events from an internal source within the web flow
+ * system, such as an <code>Action</code> or <code>State</code> definition.
+ * This is the simplest possible <code>Event</code> implementation.
+ * 
+ * @see org.springframework.web.flow.Action
+ * @see org.springframework.web.flow.State
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class InternalEvent extends Event {
+public class SimpleEvent extends Event {
 
 	/**
 	 * The event identifier.
@@ -54,43 +57,43 @@ public class InternalEvent extends Event {
 	private Map parameters;
 
 	/**
-	 * Create an internal event with the specified <code>id</code>.
+	 * Create a simple event with the specified <code>id</code>.
 	 * @param source the source of the event
 	 * @param id the event identifier
 	 */
-	public InternalEvent(Object source, String id) {
+	public SimpleEvent(Object source, String id) {
 		super(source);
 		setId(id);
 	}
 
 	/**
-	 * Create an internal event with the specified <code>id</code> occuring in the
+	 * Create a simple event with the specified <code>id</code> occuring in the
 	 * state with the specified <code>stateId</code>.
 	 * @param source the source of the event
 	 * @param id the event identifier
 	 * @param stateId the state in which this event occured
 	 */
-	public InternalEvent(Object source, String id, String stateId) {
+	public SimpleEvent(Object source, String id, String stateId) {
 		super(source);
 		setId(id);
 		this.stateId = stateId;
 	}
 
 	/**
-	 * Create an internal event with the specified <code>id</code> and the
+	 * Create a simple event with the specified <code>id</code> and the
 	 * provided contextual parameters.
 	 * @param source the source of the event
 	 * @param id the event identifier
 	 * @param parameters the event parameters
 	 */
-	public InternalEvent(Object source, String id, Map parameters) {
+	public SimpleEvent(Object source, String id, Map parameters) {
 		super(source);
 		setId(id);
 		setParameters(parameters);
 	}
 
 	/**
-	 * Create an internal event with the specified <code>id</code> occuring in the
+	 * Create a simple event with the specified <code>id</code> occuring in the
 	 * state with the specified <code>stateId</code> and the provided
 	 * contextual parameters.
 	 * @param source the source of the event
@@ -98,7 +101,7 @@ public class InternalEvent extends Event {
 	 * @param stateId the state in which this event occured
 	 * @param parameters contextual parameters
 	 */
-	public InternalEvent(Object source, String id, String stateId, Map parameters) {
+	public SimpleEvent(Object source, String id, String stateId, Map parameters) {
 		super(source);
 		setId(id);
 		this.stateId = stateId;

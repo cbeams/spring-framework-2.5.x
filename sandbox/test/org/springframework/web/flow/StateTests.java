@@ -38,7 +38,7 @@ public class StateTests extends TestCase {
 				"success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		ViewDescriptor view = flowExecution.start(new InternalEvent(this, "start"));
+		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("success", flowExecution.getLastEventId());
 		assertEquals(1, ((ExecutionCounterAction)state.getAction()).getExecutionCount());
@@ -53,7 +53,7 @@ public class StateTests extends TestCase {
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		ViewDescriptor view = flowExecution.start(new InternalEvent(this, "start"));
+		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("success", flowExecution.getLastEventId());
 		Action[] actions = state.getActions();
@@ -71,7 +71,7 @@ public class StateTests extends TestCase {
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
 		try {
-			ViewDescriptor view = flowExecution.start(new InternalEvent(this, "start"));
+			ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 			fail("Should not have matched to another state transition");
 		}
 		catch (CannotExecuteStateTransitionException e) {
@@ -87,7 +87,7 @@ public class StateTests extends TestCase {
 						"action4.success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		ViewDescriptor view = flowExecution.start(new InternalEvent(this, "start"));
+		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("action4.success", flowExecution.getLastEventId());
 		Action[] actions = state.getActions();
@@ -103,7 +103,7 @@ public class StateTests extends TestCase {
 		assertTrue(!state.isMarker());
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		ViewDescriptor view = flowExecution.start(new InternalEvent(this, "start"));
+		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertEquals("viewState", flowExecution.getCurrentStateId());
 		assertNotNull(view);
 		assertEquals("myViewName", view.getViewName());
@@ -116,7 +116,7 @@ public class StateTests extends TestCase {
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		ViewDescriptor view = flowExecution.start(new InternalEvent(this, "start"));
+		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertEquals("viewState", flowExecution.getCurrentStateId());
 		assertNull(view);
 	}
@@ -130,11 +130,11 @@ public class StateTests extends TestCase {
 		SubFlowState state = new SubFlowState(flow, "subFlowState", subFlow, new Transition("finish", "finish"));
 		new EndState(flow, "finish", "myParentFlowEndingViewName");
 		FlowExecution flowExecution = flow.createExecution();
-		ViewDescriptor view = flowExecution.start(new InternalEvent(this, "start"));
+		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
 		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
 		assertEquals("mySubFlowViewName", view.getViewName());
-		view = flowExecution.signalEvent(new InternalEvent(this, "submit"));
+		view = flowExecution.signalEvent(new SimpleEvent(this, "submit"));
 		assertEquals("myParentFlowEndingViewName", view.getViewName());
 		assertTrue(!flowExecution.isActive());
 	}
@@ -151,12 +151,12 @@ public class StateTests extends TestCase {
 		FlowExecutionStack flowExecution = (FlowExecutionStack)flow.createExecution();
 		Map input = new HashMap();
 		input.put("parentInputAttribute", "attributeValue");
-		ViewDescriptor view = flowExecution.start(new InternalEvent(this, "start", input));
+		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start", input));
 		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
 		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
 		assertEquals("mySubFlowViewName", view.getViewName());
 		assertEquals("attributeValue", flowExecution.getActiveFlowSession().getFlowScope().getAttribute("childInputAttribute"));
-		view = flowExecution.signalEvent(new InternalEvent(this, "submit"));
+		view = flowExecution.signalEvent(new SimpleEvent(this, "submit"));
 		assertEquals("myParentFlowEndingViewName", view.getViewName());
 		assertTrue(!flowExecution.isActive());
 		assertEquals("attributeValue", view.getModel().get("parentOutputAttribute"));
@@ -175,7 +175,7 @@ public class StateTests extends TestCase {
 	}
 
 	public static class ExecutionCounterAction implements Action {
-		private Event result = new InternalEvent(this, "success");
+		private Event result = new SimpleEvent(this, "success");
 
 		private int executionCount;
 
@@ -185,7 +185,7 @@ public class StateTests extends TestCase {
 
 		public ExecutionCounterAction(String result) {
 			if (StringUtils.hasText(result)) {
-				this.result = new InternalEvent(this, result);
+				this.result = new SimpleEvent(this, result);
 			}
 			else {
 				this.result = null;

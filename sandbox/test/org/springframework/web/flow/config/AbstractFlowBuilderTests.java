@@ -31,7 +31,7 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.InternalEvent;
+import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
@@ -222,7 +222,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	 */
 	public static final class NoOpAction implements Action {
 		public Event execute(RequestContext context) throws Exception {
-			return new InternalEvent(this, FlowConstants.SUCCESS);
+			return new SimpleEvent(this, FlowConstants.SUCCESS);
 		}
 	}
 }
