@@ -72,21 +72,9 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 		super.initialize(loadHelper, signaler);
 	}
 
-	protected Connection getConnection() throws JobPersistenceException {
-		Connection con = DataSourceUtils.getConnection(this.dataSource);
-		// following block copied from base class implementation
-		try {
-			if (!isDontSetAutoCommitFalse()) {
-				con.setAutoCommit(false);
-			}
-			if (isTxIsolationLevelSerializable()) {
-				con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-			}
-		}
-		catch (SQLException ex) {
-			throw new JobPersistenceException("Failed to prepare JDBC connection", ex);
-		}
-		return con;
+	protected Connection getConnection() {
+		// not preparing connection, as this is driven by the transaction
+		return DataSourceUtils.getConnection(this.dataSource);
 	}
 
 	protected Connection getNonManagedTXConnection() throws JobPersistenceException {
