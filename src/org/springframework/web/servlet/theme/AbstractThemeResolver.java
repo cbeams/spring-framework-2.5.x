@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.theme;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.web.servlet.ThemeResolver;
 
 /**
@@ -36,7 +33,6 @@ public abstract class AbstractThemeResolver implements ThemeResolver {
 
 	/**
 	 * Set the name of the default theme.
-	 * @param defaultThemeName new default theme name
 	 */
 	public void setDefaultThemeName(String defaultThemeName) {
 		this.defaultThemeName = defaultThemeName;
@@ -44,17 +40,9 @@ public abstract class AbstractThemeResolver implements ThemeResolver {
 
 	/**
 	 * Return the name of the default theme.
-	 * @return the default theme name
 	 */
 	public String getDefaultThemeName() {
 		return defaultThemeName;
-	}
-
-	/**
-	 * Make the theme name available for the view.
-	 */
-	public void makeThemeNameAvailable(HttpServletRequest request, HttpServletResponse response) {
-		setThemeName(request, response, resolveThemeName(request));
 	}
 
 }
