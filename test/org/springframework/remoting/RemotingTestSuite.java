@@ -154,7 +154,7 @@ public class RemotingTestSuite extends TestCase {
 	}
 
 
-	public static class RemoteBean implements JaxRpcTestSuite.IRemoteBean, Stub {
+	public static class RemoteBean implements IRemoteBean, Stub {
 
 		private static RemoteBean singleton;
 		private static String name;
