@@ -61,7 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.53 2004-05-24 09:49:49 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.54 2004-05-27 08:53:31 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  */
@@ -337,6 +337,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
 		this.singletonCache.put(beanName, singletonObject);
+	}
+
+	/**
+	 * Remove the bean with the given name from the singleton cache of this factory.
+	 * <p>To be able to clean up eager registration of a singleton if creation failed.
+	 * @param beanName the name of the bean
+	 */
+	protected void removeSingleton(String beanName) {
+		this.singletonCache.remove(beanName);
 	}
 
 	public void destroySingletons() {

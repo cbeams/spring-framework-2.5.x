@@ -196,25 +196,36 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		BeanWrapper instanceWrapper = null;
-		if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
-				mergedBeanDefinition.hasConstructorArgumentValues()) {
-			instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
-		}
-		else {
-			instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
-			initBeanWrapper(instanceWrapper);
-		}
-		Object bean = instanceWrapper.getWrappedInstance();
-
-		// Eagerly cache singletons to be able to resolve circular references
-		// even when triggered by lifecycle interfaces like BeanFactoryAware.
-		if (allowEagerCaching && mergedBeanDefinition.isSingleton()) {
-			addSingleton(beanName, bean);
-		}
-
-		populateBean(beanName, mergedBeanDefinition, instanceWrapper);
+		Object bean = null;
+		String errorMessage = null;
+		boolean eagerlyCached = false;
 
 		try {
+			// instantiate bean
+			errorMessage = "Instantiation of bean failed";
+
+			if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
+					mergedBeanDefinition.hasConstructorArgumentValues()) {
+				instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
+			}
+			else {
+				instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
+				initBeanWrapper(instanceWrapper);
+			}
+			bean = instanceWrapper.getWrappedInstance();
+
+			// Eagerly cache singletons to be able to resolve circular references
+			// even when triggered by lifecycle interfaces like BeanFactoryAware.
+			if (allowEagerCaching && mergedBeanDefinition.isSingleton()) {
+				addSingleton(beanName, bean);
+				eagerlyCached = true;
+			}
+
+			// initialize bean
+			errorMessage = "Initialization of bean failed";
+
+			populateBean(beanName, mergedBeanDefinition, instanceWrapper);
+
 			if (bean instanceof BeanNameAware) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Invoking setBeanName() on BeanNameAware bean '" + beanName + "'");
@@ -234,12 +245,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 		}
 		catch (BeanCreationException ex) {
+			if (eagerlyCached) {
+				removeSingleton(beanName);
+			}
 			throw ex;
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
+			if (eagerlyCached) {
+				removeSingleton(beanName);
+			}
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-																			"Initialization of bean failed", ex);
+																			errorMessage, ex);
 		}
+
 		return bean;
 	}
 
@@ -326,14 +344,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					}
 					else {
 						if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
-							throw new UnsatisfiedDependencyException(beanName, j, argTypes[j],
-						 			"Did you specify the correct bean references as generic constructor arguments?");
+							throw new UnsatisfiedDependencyException(
+									mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
+									"Did you specify the correct bean references as generic constructor arguments?");
 						}
 						Map matchingBeans = findMatchingBeans(argTypes[j]);
 						if (matchingBeans == null || matchingBeans.size() != 1) {
-							throw new UnsatisfiedDependencyException(beanName, j, argTypes[j],
-									"There are " + matchingBeans.size() + " beans of type [" + argTypes[j] + "] for autowiring constructor. " +
-									"There should have been 1 to be able to autowire constructor of bean '" + beanName + "'.");
+							throw new UnsatisfiedDependencyException(
+									mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
+									"There are " + matchingBeans.size() + " beans of type [" + argTypes[j] +
+									"] for autowiring constructor. There should have been 1 to be able to " +
+									"autowire constructor of bean '" + beanName + "'.");
 						}
 						args[j] = matchingBeans.values().iterator().next();
 						logger.info("Autowiring by type from bean name '" + beanName +
@@ -367,7 +388,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			                                "Could not resolve matching constructor");
 		}
 		bw.setWrappedInstance(BeanUtils.instantiateClass(constructorToUse, argsToUse));
-		logger.info("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
+		}
 		return bw;
 	}
 
@@ -498,9 +521,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			else if (matchingBeans != null && matchingBeans.size() > 1) {
-				throw new UnsatisfiedDependencyException(beanName, propertyName,
+				throw new UnsatisfiedDependencyException(
+						mergedBeanDefinition.getResourceDescription(), beanName, propertyName,
 						"There are " + matchingBeans.size() + " beans of type [" + requiredType + "] for autowire by type. " +
-						"There should have been 1 to be able to autowire property '" + propertyName + "' of bean '" + beanName + "'.");
+						"There should have been 1 to be able to autowire property '" + propertyName + "' of bean '" +
+						beanName + "'.");
 			}
 			else {
 				if (logger.isDebugEnabled()) {
@@ -516,11 +541,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * if desired. Dependency checks can be objects (collaborating beans),
 	 * simple (primitives and String), or all (both).
 	 * @param beanName name of the bean
-	 * @throws org.springframework.beans.factory.UnsatisfiedDependencyException
 	 */
 	protected void dependencyCheck(String beanName, RootBeanDefinition mergedBeanDefinition,
-																 BeanWrapper bw, PropertyValues pvs)
-			throws UnsatisfiedDependencyException {
+																 BeanWrapper bw, PropertyValues pvs) throws UnsatisfiedDependencyException {
 		int dependencyCheck = mergedBeanDefinition.getDependencyCheck();
 		if (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_NONE)
 			return;
@@ -536,7 +559,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					(isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE) ||
 					(!isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 				if (unsatisfied) {
-					throw new UnsatisfiedDependencyException(beanName, pds[i].getName(), null);
+					throw new UnsatisfiedDependencyException(
+							mergedBeanDefinition.getResourceDescription(), beanName, pds[i].getName(),
+							"Set this property value or disable dependency checking for this bean.");
 				}
 			}
 		}
