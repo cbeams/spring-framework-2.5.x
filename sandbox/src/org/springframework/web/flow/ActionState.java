@@ -32,7 +32,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class ActionState extends TransitionableState {
 
-	private Set actionBeans;
+	private Set actionBeans = new LinkedHashSet(1);
 
 	public ActionState(String id) {
 		super(id);
@@ -211,11 +211,23 @@ public class ActionState extends TransitionableState {
 	}
 
 	protected ActionBean getActionBean() {
-		return ((ActionBeanHolder)actionBeans.iterator().next()).actionBean;
+		Iterator it = actionBeanIterator();
+		if (it.hasNext()) {
+			return (ActionBean)it.next();
+		}
+		else {
+			return null;
+		}
 	}
 
 	protected String getActionBeanName() {
-		return ((ActionBeanHolder)actionBeans.iterator().next()).actionBeanName;
+		Iterator it = actionBeans.iterator();
+		if (it.hasNext()) {
+			return ((ActionBeanHolder)it.next()).actionBeanName;
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -255,8 +267,9 @@ public class ActionState extends TransitionableState {
 		}
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
-					"No action beans executed, thus I cannot execute any state transition "
-							+ "-- programmer configuration error"));
+					"No action beans were executed, thus I cannot execute any state transition "
+							+ "-- programmer configuration error; "
+							+ "make sure you add at least one action bean to this state"));
 		}
 	}
 
