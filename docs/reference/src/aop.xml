@@ -1093,7 +1093,7 @@
     &lt;property name="someProperty"&gt;&lt;value&gt;Custom string property value&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.NopInterceptor"&gt;
+&lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"&gt;
 &lt;/bean&gt;
 
 &lt;bean id="person" 
@@ -1151,7 +1151,7 @@
     &lt;property name="someProperty"&gt;&lt;value&gt;Custom string property value&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.NopInterceptor"&gt;
+&lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"&gt;
 &lt;/bean&gt;
 
 &lt;bean id="person" 
