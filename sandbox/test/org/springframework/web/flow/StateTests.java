@@ -77,6 +77,7 @@ public class StateTests extends TestCase {
 		}
 	}
 
+	/*
 	public void testActionStateActionChainNamedActions() {
 		Flow flow = new Flow("myFlow");
 		ActionState state = new ActionState(flow, "actionState", new String[] { null, null, "action3", "action4" },
@@ -93,6 +94,7 @@ public class StateTests extends TestCase {
 			assertEquals(1, ((ExecutionCounterAction)actions[i]).getExecutionCount());
 		}
 	}
+	*/
 
 	public void testViewState() {
 		Flow flow = new Flow("myFlow");

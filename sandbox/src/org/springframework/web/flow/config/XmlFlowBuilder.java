@@ -33,6 +33,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -343,7 +344,11 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String[] actionNames = parseActionNames(element);
 		Action[] actions = parseActions(element);
 		Transition[] transitions = parseTransitions(element);
-		new ActionState(flow, id, actionNames, actions, transitions);
+		ActionStateAction[] stateActions = new ActionStateAction[actions.length];
+		for (int i = 0; i < stateActions.length; i++) {
+			stateActions[i] = new ActionStateAction(actions[i], actionNames[i]);
+		}
+		new ActionState(flow, id, stateActions, transitions);
 	}
 
 	/**

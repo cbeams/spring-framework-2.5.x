@@ -19,6 +19,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -40,31 +41,39 @@ import org.springframework.web.flow.action.MultiAction;
  * 
  * <pre>
  * 
- *  public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
  *  
- *  	protected String flowId() {
- *  		return &quot;customer.Detail&quot;;
- *  	}
- *  
- *   public void buildStates() {
- *      // get customer information
- *    	addActionState(&quot;getDetails&quot;,
- *                      action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *                      on(success(), &quot;viewDetails&quot;));
- *      // view customer information               
- *    	addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *                    on(submit(), &quot;bindAndValidate&quot;);
- *      // bind and validate customer information updates 
- *    	addActionState(&quot;bindAndValidate&quot;,
- *                      action(&quot;customer.Detail.bindAndValidate&quot;),
- *                      new Transition[] {
- *                          on(error(), &quot;viewDetails&quot;),
- *                          on(success(), &quot;finish&quot;)
- *                      }
- *      // finish
- *    	addEndState(&quot;finish&quot;);
- *   }
- *  
+ *   
+ *    
+ *     
+ *      public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
+ *      
+ *      	protected String flowId() {
+ *      		return &quot;customer.Detail&quot;;
+ *      	}
+ *      
+ *       public void buildStates() {
+ *          // get customer information
+ *        	addActionState(&quot;getDetails&quot;,
+ *                          action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *                          on(success(), &quot;viewDetails&quot;));
+ *          // view customer information               
+ *        	addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *                        on(submit(), &quot;bindAndValidate&quot;);
+ *          // bind and validate customer information updates 
+ *        	addActionState(&quot;bindAndValidate&quot;,
+ *                          action(&quot;customer.Detail.bindAndValidate&quot;),
+ *                          new Transition[] {
+ *                              on(error(), &quot;viewDetails&quot;),
+ *                              on(success(), &quot;finish&quot;)
+ *                          }
+ *          // finish
+ *        	addEndState(&quot;finish&quot;);
+ *       }
+ *      
+ *      
+ *     
+ *    
+ *   
  *  
  * </pre>
  * 
@@ -313,9 +322,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, String actionName, Action action, Transition transition)
+	protected ActionState addActionState(String stateId, ActionStateAction action, Transition transition)
 			throws IllegalArgumentException {
-		return new ActionState(getFlow(), stateId, actionName, action, transition);
+		return new ActionState(getFlow(), stateId, action, transition);
 	}
 
 	/**
@@ -335,9 +344,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, String actionName, Action action, Transition[] transitions)
+	protected ActionState addActionState(String stateId, ActionStateAction action, Transition[] transitions)
 			throws IllegalArgumentException {
-		return new ActionState(getFlow(), stateId, actionName, action, transitions);
+		return new ActionState(getFlow(), stateId, action, transitions);
 	}
 
 	/**
@@ -377,9 +386,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, String[] actionNames, Action[] actions,
-			Transition[] transitions) throws IllegalArgumentException {
-		return new ActionState(getFlow(), stateId, actionNames, actions, transitions);
+	protected ActionState addActionState(String stateId, ActionStateAction[] actions, Transition[] transitions)
+			throws IllegalArgumentException {
+		return new ActionState(getFlow(), stateId, actions, transitions);
 	}
 
 	/**
