@@ -53,7 +53,7 @@
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
-	<!-- an EJB proxy with the cached home flag off, to test home lookup every time -->  
+	<!-- a proxy to remote EJB, with the cached home flag oon, to test home caching -->
 	<bean id="cachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
 		<property name="jndiName">
 			<value>Simple</value>
@@ -62,7 +62,7 @@
 			<value>true</value>
 		</property>
 		<property name="businessInterface">
-			<value>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleService</value>
+			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
 		</property>
 	</bean>
 
@@ -75,11 +75,25 @@
 			<value>false</value>
 		</property>
 		<property name="businessInterface">
-			<value>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleService</value>
+			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
+		</property>
+	</bean>
+  
+	<!-- now a local EJB (with cache on, although that is not the purpose of the test which uses this -->
+	<bean id="simpleEjbLocalProxy" lazy-init="true" class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+		<property name="jndiName">
+			<value>local/Simple</value>
+		</property>
+		<property name="cacheHome">
+			<value>false</value>
+		</property>
+		<property name="businessInterface">
+			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
 		</property>
 	</bean>
 
-	<!-- stateless session bean proxy -->  
+	<!-- stateless session bean proxy for test of proper Hibernate Session binding and unbinding, when
+       no spring TX is used at the same time, but only CMT transaction (accessed via JTA)  -->
 	<bean id="cmtJtaNoSpringTx" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
 		<property name="jndiName">
 			<value>CmtJtaNoSpringTx</value>

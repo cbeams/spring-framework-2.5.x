@@ -17,7 +17,6 @@
 package org.springframework.autobuilds.ejbtest.simple.ejb;
 
 import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import net.sf.hibernate.SessionFactory;
@@ -25,6 +24,7 @@ import net.sf.hibernate.SessionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.autobuilds.ejbtest.Constants;
+import org.springframework.autobuilds.ejbtest.simple.SimpleService;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.ejb.support.AbstractStatelessSessionBean;
 
@@ -43,7 +43,7 @@ import org.springframework.ejb.support.AbstractStatelessSessionBean;
  * and then XDoclet will not generate its own.</p>
  * 
  * @author colin sampaleanu
- * @version $Id: SimpleEJB.java,v 1.1 2004-07-14 22:55:08 colins Exp $
+ * @version $Id: SimpleEJB.java,v 1.2 2004-07-14 23:44:09 colins Exp $
  */
 public class SimpleEJB extends AbstractStatelessSessionBean
 		implements SimpleService {

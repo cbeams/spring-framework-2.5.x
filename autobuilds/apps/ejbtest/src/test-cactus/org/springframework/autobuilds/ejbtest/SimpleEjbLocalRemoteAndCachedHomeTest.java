@@ -21,22 +21,23 @@ import junit.framework.TestCase;
 
 import org.apache.cactus.ServletTestSuite;
 import org.springframework.autobuilds.ejbtest.Constants;
-import org.springframework.autobuilds.ejbtest.simple.ejb.SimpleService;
+import org.springframework.autobuilds.ejbtest.simple.SimpleService;
 import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 
 /**
- * Test usage of EJB Proxy with and without a cached home. We actually just reuse the
- * EJB used for the test of Hibernate session binding...
+ * Test usage of EJB Remote proxy with and without a cached home. Also test EJB Local proxy (home
+ * cache is not changed for this, since there is no difference in behaviour from remote).
  * 
  * @author colin sampaleanu
- * @version $Id: CachedHomeTest.java,v 1.1 2004-07-14 22:55:28 colins Exp $
+ * @version $Id: SimpleEjbLocalRemoteAndCachedHomeTest.java,v 1.1 2004-07-14 23:44:07 colins Exp $
  */
-public class CachedHomeTest extends TestCase {
+public class SimpleEjbLocalRemoteAndCachedHomeTest extends TestCase {
 
 	// --- statics
 	public static final String SERVICE_ID_CACHE_ON = "cachedHomeProxy";
 	public static final String SERVICE_ID_CACHE_OFF = "noCachedHomeProxy";
+	public static final String SERVICE_ID_LOCAL_PROXY = "simpleEjbLocalProxy";
 
 	// --- attributes
 
@@ -46,7 +47,7 @@ public class CachedHomeTest extends TestCase {
 
 	public static Test suite() {
 		ServletTestSuite suite = new ServletTestSuite();
-		suite.addTestSuite(CachedHomeTest.class);
+		suite.addTestSuite(SimpleEjbLocalRemoteAndCachedHomeTest.class);
 		return suite;
 	}
 
@@ -59,16 +60,22 @@ public class CachedHomeTest extends TestCase {
 		bfr.release();
 	}
 
-	public void testInvocationsWithCache() {
+	public void testRemoteInvocationsWithCache() {
 		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_CACHE_ON);
 		ejb.echo("hello");
 		ejb.echo("hello");
 		ejb.echo("hello");
 	}
 
-	
-	public void testInvocationsWithNoCache() {
+	public void testRemoteInvocationsWithNoCache() {
 		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_CACHE_OFF);
+		ejb.echo("hello");
+		ejb.echo("hello");
+		ejb.echo("hello");
+	}
+	
+	public void testLocalInvocations() {
+		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
 		ejb.echo("hello");
 		ejb.echo("hello");
 		ejb.echo("hello");
