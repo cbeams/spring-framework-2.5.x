@@ -24,7 +24,7 @@ public class ListOrdersController implements Controller {
 	}
 
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		UserSession userSession = (UserSession) WebUtils.getSessionAttribute(request, "userSession");
+		UserSession userSession = (UserSession) WebUtils.getRequiredSessionAttribute(request, "userSession");
 		String username = userSession.getAccount().getUsername();
 		Map model = new HashMap();
 		model.put("orderList", this.petStore.getOrdersByUsername(username));

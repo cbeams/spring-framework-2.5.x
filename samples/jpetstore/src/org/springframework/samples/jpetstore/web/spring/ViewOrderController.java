@@ -22,9 +22,9 @@ public class ViewOrderController implements Controller {
 	}
 
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		UserSession userSession = (UserSession) WebUtils.getRequiredSessionAttribute(request, "userSession");
 		int orderId = Integer.parseInt(request.getParameter("orderId"));
 		Order order = this.petStore.getOrder(orderId);
-		UserSession userSession = (UserSession) WebUtils.getSessionAttribute(request, "userSession");
 		if (userSession.getAccount().getUsername().equals(order.getUsername())) {
 			return new ModelAndView("ViewOrder", "order", order);
 		}

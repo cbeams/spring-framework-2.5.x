@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -94,9 +93,27 @@ public abstract class WebUtils {
 	}
 
 	/**
+	 * Check the given request for a session attribute of the given name.
+	 * Throws an exception if there is no session or if the session has no such
+	 * attribute. Does not create a new session if none has existed before!
+	 * @param request current HTTP request
+	 * @param name the name of the session attribute
+	 * @return the value of the session attribute, or null if not found
+	 * @throws IllegalStateException if the session attribute could not be found
+	 */
+	public static Object getRequiredSessionAttribute(HttpServletRequest request, String name)
+	    throws IllegalStateException {
+		Object attr = getSessionAttribute(request, name);
+		if (attr == null) {
+			throw new IllegalStateException("No session attribute '" + name + "' found");
+		}
+		return attr;
+	}
+
+	/**
 	 * Set the session attribute with the given name to the given value.
 	 * Removes the session attribute if value is null, if a session existed at all.
-	 * Does not create a new session on remove if none has existed before!
+	 * Does not create a new session if not necessary!
 	 * @param request current HTTP request
 	 * @param name the name of the session attribute
 	 */
@@ -116,28 +133,28 @@ public abstract class WebUtils {
 	 * Get the specified session attribute, creating and setting a new attribute if
 	 * no existing found. The given class needs to have a public no-arg constructor.
 	 * Useful for on-demand state objects in a web tier, like shopping carts.
-	 * @param request current HTTP request
+	 * @param session current HTTP session
 	 * @param name the name of the session attribute
 	 * @param clazz the class to instantiate for a new attribute
 	 * @return the value of the session attribute, newly created if not found
-	 * @throws ServletException if the session attribute could not be instantiated
+	 * @throws IllegalArgumentException if the session attribute could not be instantiated
 	 */
-	public static Object getOrCreateSessionAttribute(HttpServletRequest request, String name, Class clazz)
-			throws ServletException {
-		Object sessionObject = getSessionAttribute(request, name);
+	public static Object getOrCreateSessionAttribute(HttpSession session, String name, Class clazz)
+			throws IllegalArgumentException {
+		Object sessionObject = session.getAttribute(name);
 		if (sessionObject == null) {
 			try {
 				sessionObject = clazz.newInstance();
 			}
 			catch (InstantiationException ex) {
-				throw new ServletException("Could not instantiate class [" + clazz.getName() +
-																	 "] for session attribute '" + name + "'", ex);
+				throw new IllegalArgumentException("Could not instantiate class [" + clazz.getName() +
+				                                   "] for session attribute '" + name + "': " + ex.getMessage());
 			}
 			catch (IllegalAccessException ex) {
-				throw new ServletException("Could not access default constructor of class [" + clazz.getName() +
-																	 "] for session attribute '" + name + "'", ex);
+				throw new IllegalArgumentException("Could not access default constructor of class [" + clazz.getName() +
+				                                   "] for session attribute '" + name + "': " + ex.getMessage());
 			}
-			request.getSession(true).setAttribute(name, sessionObject);
+			session.setAttribute(name, sessionObject);
 		}
 		return sessionObject;
 	}
