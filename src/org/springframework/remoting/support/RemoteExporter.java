@@ -98,7 +98,8 @@ public abstract class RemoteExporter {
 		if (!this.serviceInterface.isInstance(this.service)) {
 			throw new IllegalArgumentException(
 					"serviceInterface [" + this.serviceInterface.getName() +
-					"] needs to be implemented by service [" + this.service + "]");
+					"] needs to be implemented by service [" + this.service +
+					"] of class [" + this.service.getClass().getName() + "]");
 		}
 	}
 
