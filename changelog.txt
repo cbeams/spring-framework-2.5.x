@@ -73,6 +73,7 @@ Package org.springframework.aop
 * added "customizeProxyFactory" hook method in AbstractAutoProxyCreator
 * renamed AbstractAutoProxyCreator's "getInterceptorsAndAdvisorsForBean" method to "getAdvicesAndAdvisorsForBean"
 * AbstractAutoProxyCreator's "getAdvicesAndAdvisorsForBean" method takes a TargetSource as third argument now
+* added Jdk14RegexpMethodPointcut
 
 Package org.springframework.beans
 * set getter/setter methods accessible if the declaring class is not public (e.g. in case of a non-public base class)
