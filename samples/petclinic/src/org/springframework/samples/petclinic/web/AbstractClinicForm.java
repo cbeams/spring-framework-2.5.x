@@ -55,7 +55,7 @@ abstract public class AbstractClinicForm extends SimpleFormController {
 	 */
 	protected ModelAndView disallowDuplicateFormSubmission(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		BindException errors = new BindException(formBackingObject(request), getBeanName());
+		BindException errors = new BindException(formBackingObject(request), getCommandName());
 		errors.reject("duplicateFormSubmission", null, "Duplicate form submission");
 		return showForm(request, response, errors);
 	}
