@@ -47,7 +47,7 @@ public class MetadataCompilerAdapter implements CompilerAdapter {
         originalAdapter.setJavac(_javac);
         boolean javacOK = originalAdapter.execute();
 
-        if (javacOK = false) {
+        if (javacOK == false) {
             return false;
         } else {
 
