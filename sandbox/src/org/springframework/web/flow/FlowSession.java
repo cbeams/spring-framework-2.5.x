@@ -67,7 +67,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	/**
 	 * The session data model ("flow scope");
 	 */
-	private Map attributes = new HashMap();
+	private Map attributes = Collections.synchronizedMap(new HashMap());
 
 	/**
 	 * Create a new flow session.

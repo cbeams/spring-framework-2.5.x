@@ -32,9 +32,9 @@ import javax.servlet.http.HttpServletResponse;
  * stubs, as they are simple POJOs.
  * <p>
  * Note: because Actions are singletons, take care not to store and/or modify
- * caller-specific state. The Action execute method always runs in an
- * independently executing thread on each invocation, so make
- * sure you deal only with local data or internal, thread-safe services.
+ * caller-specific state in a unsafe manner. The Action execute method runs in
+ * an independently executing thread on each invocation, so make sure you deal
+ * only with local data or internal, thread-safe services.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -57,7 +57,7 @@ public interface Action {
 	 * <p>
 	 * Note: The flow model should not be used as a general purpose cache; but
 	 * rather as a context for data needed locally by the flows this action
-	 * partcipates in. For example, it would be inappropriate to stuff large
+	 * participates in. For example, it would be inappropriate to stuff large
 	 * collections of objects (like those returned to support a search results
 	 * view) into the flow model. Instead, put such result collections in the
 	 * request, and ensure you execute the action again each time you wish to
@@ -67,9 +67,10 @@ public interface Action {
 	 *        parameters and/or attributes if neccessary
 	 * @param response The http response, enabling direct response writing by
 	 *        the action if neccessary
-	 * @param model The data model for the current flow session ("flow scope")
+	 * @param model The data model for the current flow session, for accessing
+	 *        and setting data in "flow scope"
 	 * @return A logical result outcome, used as grounds for a transition in the
-	 *         current state
+	 *         current, calling action state
 	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked; note: any recoverable exceptions should be
 	 *         caught and an appropriate result outcome returned.
