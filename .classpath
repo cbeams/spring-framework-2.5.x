@@ -69,5 +69,6 @@
     <classpathentry kind="lib" path="lib/itext-pdf/itext-1.02.jar"/>
     <classpathentry kind="lib" path="lib/cglib/cglib-2.0.jar"/>
     <classpathentry kind="lib" path="lib/cglib/asm.jar"/>
+    <classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
     <classpathentry kind="output" path="target/other-classes"/>
 </classpath>
