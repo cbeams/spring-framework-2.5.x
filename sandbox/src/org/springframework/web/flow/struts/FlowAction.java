@@ -40,40 +40,17 @@ import org.springframework.web.util.WebUtils;
  * flow executions by parameterization with the appropriate <code>flowId</code>
  * in views that start new flow executions.
  * 
+ * <p>
+ * Requests are managed using an {@link HttpFlowExecutionManager}. Consult
+ * the JavaDoc of that class for more information on how requests are processed.
+ * 
+ * @see org.springframework.web.flow.support.HttpFlowExecutionManager
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class FlowAction extends TemplateAction {
 
-	public static String ACTION_FORM_ATTRIBUTE = "_bindingActionForm";
-
-	public static final String ACTION_PATH_ATTRIBUTE = "actionPath";
-
-	protected String getActionPathAttributeName() {
-		return ACTION_PATH_ATTRIBUTE;
-	}
-
-	protected String getActionFormAttributeName() {
-		return ACTION_FORM_ATTRIBUTE;
-	}
-
-	private String getFlowId(ActionMapping mapping) {
-		Assert.isInstanceOf(FlowActionMapping.class, mapping);
-		return ((FlowActionMapping)mapping).getFlowId();
-	}
-
-	/**
-	 * The main entry point for this action. Looks for a flow execution ID in
-	 * the request. If none exists, it creates one. If one exists, it looks in
-	 * the user's session to find the current FlowExecution. The request should
-	 * also contain the current state ID and event ID. These String values can
-	 * be passed to the FlowExecution to execute the action. Execution will
-	 * typically result in a state transition.
-	 * @see org.springframework.web.struts.TemplateAction#doExecuteAction(org.apache.struts.action.ActionMapping,
-	 *      org.apache.struts.action.ActionForm,
-	 *      javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
-	 */
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
@@ -90,6 +67,15 @@ public class FlowAction extends TemplateAction {
 			}
 		}
 		return createForwardFromModelAndView(modelAndView, mapping, request);
+	}
+
+	/**
+	 * Get the flow id from given action mapping, which should be of
+	 * type <code>FlowActionMapping</code>.
+	 */
+	private String getFlowId(ActionMapping mapping) {
+		Assert.isInstanceOf(FlowActionMapping.class, mapping);
+		return ((FlowActionMapping)mapping).getFlowId();
 	}
 
 	/**
