@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.core;
 
@@ -78,7 +78,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.36 2004-03-23 22:19:51 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.37 2004-03-23 22:48:38 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.datasource
@@ -236,19 +236,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public long queryForLong(String sql) throws DataAccessException {
-		Number value = (Number) queryForObject(sql, Number.class);
-		if (value != null)
-			return value.longValue();
-		else
-			return 0;
+		Number number = (Number) queryForObject(sql, Number.class);
+		return (number != null ? number.longValue() : 0);
 	}
 
 	public int queryForInt(String sql) throws DataAccessException {
-		Number value = (Number) queryForObject(sql, Number.class);
-		if (value != null)
-			return value.intValue();
-		else
-			return 0;
+		Number number = (Number) queryForObject(sql, Number.class);
+		return (number != null ? number.intValue() : 0);
 	}
 
 	public int update(final String sql) throws DataAccessException {
@@ -426,19 +420,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public long queryForLong(String sql, final Object[] args) throws DataAccessException {
-		Number value =(Number) queryForObject(sql, args, Number.class);
-		if (value != null)
-			return value.longValue();
-		else
-			return 0;
+		Number number = (Number) queryForObject(sql, args, Number.class);
+		return (number != null ? number.longValue() : 0);
 	}
 
 	public int queryForInt(String sql, final Object[] args) throws DataAccessException {
-		Number value = (Number) queryForObject(sql, args, Number.class);
-		if (value != null)
-			return value.intValue();
-		else
-			return 0;
+		Number number = (Number) queryForObject(sql, args, Number.class);
+		return (number != null ? number.intValue() : 0);
 	}
 
 	protected int update(PreparedStatementCreator psc, final PreparedStatementSetter pss) throws DataAccessException {
@@ -838,7 +826,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				throw new InvalidDataAccessApiUsageException("Expected single row, not more than one");
 			}
 			if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
-			//if (this.requiredType != null && !this.requiredType.isInstance(result)) {
 				throw new InvalidDataAccessApiUsageException("Result object (db-type=\"" + rsmd.getColumnTypeName(1) +
 																										 "\" value=\"" + result + "\") is of type [" +
 																										 rsmd.getColumnClassName(1) + "] and not of required type [" +
