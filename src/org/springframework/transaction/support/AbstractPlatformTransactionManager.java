@@ -15,6 +15,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.util.Constants;
 
 /**
  * Abstract base class that allows for easy implementation of concrete platform
@@ -39,7 +40,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.14 2003-12-22 16:01:18 johnsonr Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.15 2003-12-30 00:23:27 jhoeller Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -64,6 +65,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public static final int SYNCHRONIZATION_NEVER = 2;
 
+	/** Constants instance for AbstractPlatformTransactionManager */
+	private static final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -71,6 +75,16 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	private boolean rollbackOnCommitFailure = false;
 
+
+	/**
+	 * Set the transaction synchronization by the name of the corresponding constant
+	 * in this class, e.g. "SYNCHRONIZATION_ALWAYS".
+	 * @param constantName name of the constant
+	 * @see #SYNCHRONIZATION_ALWAYS
+	 */
+	public void setTransactionSynchronizationName(String constantName) {
+		setTransactionSynchronization(constants.asNumber(constantName).intValue());
+	}
 
 	/**
 	 * Set when this transaction manager should activate the thread-bound

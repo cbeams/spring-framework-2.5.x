@@ -246,7 +246,7 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.replay();
 
 		TransactionTemplate tt = getTransactionTemplateForJta("test", ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
+		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronizationName("SYNCHRONIZATION_NEVER");
 		tt.setTimeout(10);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
