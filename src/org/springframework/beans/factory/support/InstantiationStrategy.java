@@ -22,12 +22,10 @@ import java.lang.reflect.Method;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * Interface responsible for creating instances corresponding to a
- * root bean definition.
+ * Interface responsible for creating instances corresponding to a root bean definition.
  *
  * <p>This is pulled out into a strategy as various approaches are possible,
- * including using CGLIB to create subclasses on the fly to support
- * Method Injection.
+ * including using CGLIB to create subclasses on the fly to support Method Injection.
  *
  * @author Rod Johnson
  * @since 1.1
@@ -36,10 +34,9 @@ public interface InstantiationStrategy {
 	
 	/**
 	 * Return an instance of the bean with the given name in this factory.
-	 * @param beanDefinition bean definition
+	 * @param beanDefinition the bean definition
 	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be null if we're autowiring a bean that doesn't
-	 * belong to the factory.
+	 * The name can be null if we're autowiring a bean that doesn't belong to the factory.
 	 * @param owner owning BeanFactory
 	 * @return a bean instance for this bean definition
 	 */
@@ -48,10 +45,9 @@ public interface InstantiationStrategy {
 	/**
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given constructor.
-	 * @param beanDefinition bean definition
+	 * @param beanDefinition the bean definition
 	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be null if we're autowiring a bean that doesn't
-	 * belong to the factory.
+	 * The name can be null if we're autowiring a bean that doesn't belong to the factory.
 	 * @param owner owning BeanFactory
 	 * @param ctor the constructor to use
 	 * @param args the constructor arguments to apply
@@ -65,8 +61,7 @@ public interface InstantiationStrategy {
 	 * creating it via the given factory method.
 	 * @param beanDefinition bean definition
 	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be null if we're autowiring a bean that doesn't
-	 * belong to the factory.
+	 * The name can be null if we're autowiring a bean that doesn't belong to the factory.
 	 * @param owner owning BeanFactory
 	 * @param factoryMethod the factory method to use
 	 * @param args the factory method arguments to apply

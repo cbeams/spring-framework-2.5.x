@@ -32,10 +32,20 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.StringUtils;
 
 /**
- * Static factory that allows to register existing singleton instances programmatically.
+ * Static factory that allows to register existing singleton instances
+ * programmatically. Does not have support for prototype beans and aliases.
+ *
+ * <p>Serves as example for a simple implementation of the ListableBeanFactory
+ * interface, managing existing bean instances rather than creating new ones
+ * based on bean definitions.
+ *
+ * <p>For a full-fledged bean factory based on bean definitions, have a look
+ * at DefaultListableBeanFactory.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 06-Jan-03
+ * @see DefaultListableBeanFactory
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
@@ -53,8 +63,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			}
 		}
 		if (bean == null)
-			throw new NoSuchBeanDefinitionException(name, "defined beans are [" +
-																										StringUtils.collectionToCommaDelimitedString(this.beans.keySet()) + "]");
+			throw new NoSuchBeanDefinitionException(name,
+					"defined beans are [" + StringUtils.collectionToCommaDelimitedString(this.beans.keySet()) + "]");
 		return bean;
 	}
 	
@@ -72,7 +82,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		Object bean = getBean(name);
-		// in case of FactoryBean, return singleton status of created object
+		// In case of FactoryBean, return singleton status of created object.
 		if (bean instanceof FactoryBean) {
 			return ((FactoryBean) bean).isSingleton();
 		}
@@ -82,7 +92,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	public String[] getAliases(String name) {
-		return null;
+		return new String[0];
 	}
 
 	public int getBeanDefinitionCount() {
@@ -90,7 +100,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	public String[] getBeanDefinitionNames() {
-		return (String[]) this.beans.keySet().toArray(new String[this.beans.keySet().size()]);
+		Set keySet = this.beans.keySet();
+		return (String[]) keySet.toArray(new String[keySet.size()]);
 	}
 
 	public String[] getBeanDefinitionNames(Class type) {
@@ -113,11 +124,11 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
 		Map matches = new HashMap();
-		Set keys = this.beans.keySet();
-		Iterator it = keys.iterator();
+		Iterator it = this.beans.entrySet().iterator();
 		while (it.hasNext()) {
-			String name = (String) it.next();
-			Object bean = this.beans.get(name);
+			Map.Entry entry = (Map.Entry) it.next();
+			String name = (String) entry.getKey();
+			Object bean = entry.getValue();
 			if (bean instanceof FactoryBean && includeFactoryBeans) {
 				FactoryBean factory = (FactoryBean) bean;
 				Class objectType = factory.getObjectType();
@@ -139,6 +150,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	/**
 	 * Add a new singleton bean.
+	 * @param name the name of the bean
+	 * @param bean the bean instance
 	 */
 	public void addBean(String name, Object bean) {
 		this.beans.put(name, bean);

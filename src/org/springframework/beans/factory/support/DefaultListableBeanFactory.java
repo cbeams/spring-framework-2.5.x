@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -38,17 +37,33 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * Concrete implementation of ListableBeanFactory.
- * Can be used as a standalone bean factory,
- * or as a superclass for custom bean factories.
+ * Default implementation of the ListableBeanFactory and BeanDefinitionRegistry
+ * interfaces: a full-fledged bean factory based on bean definitions.
+ *
+ * <p>Typical usage is registering all bean definitions first (possibly read
+ * from a bean definition file), before accessing beans. Bean definition lookup
+ * is therefore an inexpensive operation in a local bean definition table.
+ *
+ * <p>Can be used as a standalone bean factory, or as a superclass for custom
+ * bean factories. Note that readers for specific bean definition formats are
+ * typically implemented separately rather than as bean factory subclasses.
+ *
+ * <p>For an alternative implementation of the ListableBeanFactory interface,
+ * have a look at StaticListableBeanFactory, which manages existing bean
+ * instances rather than creating new ones based on bean definitions.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
+ * @see org.springframework.beans.factory.ListableBeanFactory
+ * @see StaticListableBeanFactory
+ * @see PropertiesBeanDefinitionReader
+ * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
 
-	/* Whether to allow re-registration of a different definition with the same name */
+	/** Whether to allow re-registration of a different definition with the same name */
 	private boolean allowBeanDefinitionOverriding = true;
 
 	/** Map of bean definition objects, keyed by bean name */
@@ -83,7 +98,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ListableBeanFactory
+	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
 	public int getBeanDefinitionCount() {
@@ -213,7 +228,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ConfigurableListableBeanFactory
+	// Implementation of ConfigurableListableBeanFactory interface
 	//---------------------------------------------------------------------
 
 	public void preInstantiateSingletons() throws BeansException {
@@ -253,7 +268,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	//---------------------------------------------------------------------
-	// Implementation of BeanDefinitionRegistry
+	// Implementation of BeanDefinitionRegistry interface
 	//---------------------------------------------------------------------
 
 	public void registerBeanDefinition(String name, BeanDefinition beanDefinition)
@@ -306,12 +321,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName());
-		sb.append(" defining beans [" + StringUtils.arrayToDelimitedString(getBeanDefinitionNames(), ",") + "]");
+		sb.append(" defining beans [");
+		sb.append(StringUtils.arrayToDelimitedString(getBeanDefinitionNames(), ","));
+		sb.append("]; ");
 		if (getParentBeanFactory() == null) {
-			sb.append("; Root of BeanFactory hierarchy");
+			sb.append("root of BeanFactory hierarchy");
 		}
 		else {
-			sb.append("; parent=<" + getParentBeanFactory() + ">");
+			sb.append("parent: " + getParentBeanFactory());
 		}
 		return sb.toString();
 	}

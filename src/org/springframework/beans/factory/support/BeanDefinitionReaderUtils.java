@@ -20,7 +20,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /**
- * Common utility methods that are useful fo bean definition readers.
+ * Utility methods that are useful for bean definition readers implementations.
  * @author Juergen Hoeller
  * @since 09.07.2004
  * @see PropertiesBeanDefinitionReader
