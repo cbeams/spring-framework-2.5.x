@@ -1,6 +1,116 @@
 <chapter id="metadata">
 
-    <title>Sourcelevel Metadata Support</title>
+    <title>Source Level Metadata Support</title>
+    
+    <sect1 id="metadata-concepts">
+    	<title>Source-level metadata</title>
+    	
+    	<para>
+    		What metadata is. C# etc.
+    	</para>
+    	
+    	<para>
+    		JSR-175. But we need a solution now and may always want a facade
+    	</para>
+    </sect1>
+    
+    <sect1 id="metadata-spring">
+    	<title>Spring's metadata support</title>
+    	
+    	<para>
+    		In keeping with its provision of abstractions over important concepts,
+    		Spring provides a facade to other metadata implementations.
+    	</para>
+    	
+    	<para>
+    		Such a facade adds value because
+    		LI- 
+    		LI- hierarchical
+    	</para>
+    	
+    	<para>
+    		Even when JSR-175 comes, still tied to class
+    	</para>
+    </sect1>
+    
+    
+    <sect1 id="metadata-commons">
+    	<title>Integration with Jakarta Commons Attributes</title>
+    	
+    	<para>
+    		Presently Spring supports only Jakarta Commons Attributes out of the box, although it
+    		is easy to provide implementations of the <literal>org.springframework.metadata.Attributes</literal>
+    		interface for other metadata providers.
+    	</para>
+    	
+    </sect1>
+    
+    <sect1 id="metadata-uses">
+    	<title>Common uses of metadata attributes</title>
+    	
+    	<para>
+    		All these uses build on AOP
+    	</para>
+    	
+    	<sect2 id="metadata-tx">
+    		<title>Declarative transaction management</title>
+    		
+    		<para>
+    			as in .NET; commonest use
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="metadata-pool">
+    		<title>Pooling</title>
+    		
+    		<para>
+    			Discuss how this works out of the box. Again like .NET
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="metadata-arbitrary">
+    		<title>Custom metadata</title>
+    		
+    		<para>
+    			How easy it is to define custom attribute
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="aop-introduction-defn">
+    		<title>AOP concepts</title>
+    		
+    		<para>
+    			Define pointcuts, advice, aspect, introduction, etc.
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="aop-introduction-spring-defn">
+    		<title>Spring terminology</title>
+    		
+    		<para>
+    			Classes for pointcuts, Advisor etc.
+    		</para>
+    		
+    		<para>
+    			Note AOP Alliance ocmpliance
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="metadata-handlers">
+    		<title>Using attributes to minimize MVC web tier configuration</title>
+    		
+    		<para>
+    			Annotating handlers with PathMap attributes
+    		</para>
+
+    	</sect2>
+    	
+    </sect1>
 
 </chapter>
 
