@@ -40,8 +40,8 @@
     <title>Binding data using the <literal>DataBinder</literal></title>
 
     <para>The DataBinder builds on top of the BeanWrapper<footnote>
-        <para>See <link linkend="beans">the beans chapter</link> for
-        more information</para>
+        <para>See <link linkend="beans">the beans chapter</link> for more
+        information</para>
       </footnote>.</para>
   </sect1>
 
@@ -125,20 +125,20 @@
               <row>
                 <entry><literal>account[2]</literal></entry>
 
-                <entry>Indicates the <emphasis>third</emphasis> element of
-                the indexed property <literal>account</literal>. Indexed
+                <entry>Indicates the <emphasis>third</emphasis> element of the
+                indexed property <literal>account</literal>. Indexed
                 properties can be of type <literal>array</literal>,
                 <literal>list</literal> or other <emphasis>naturally
                 ordered</emphasis> collection</entry>
               </row>
 
-							<row>
-							  <entry><literal>account[COMPANYNAME]</literal></entry>
+              <row>
+                <entry><literal>account[COMPANYNAME]</literal></entry>
 
-							  <entry>Indicates the value of the map entry indexed by the
-							  key <emphasis>COMPANYNAME</emphasis> of the Map property
-							  <literal>account</literal></entry>
-							</row>
+                <entry>Indicates the value of the map entry indexed by the key
+                <emphasis>COMPANYNAME</emphasis> of the Map property
+                <literal>account</literal></entry>
+              </row>
             </tbody>
           </tgroup>
         </table></para>
@@ -149,8 +149,8 @@
       <para><emphasis>Note: this part is not important to you if you're not
       planning to work with the BeanWrapper directly. If you're just using the
       <literal>DataBinder</literal> and the <literal>BeanFactory</literal> and
-      their out-of-the-box implementation, you should skip ahead to the section
-      about <literal>PropertyEditors</literal>.</emphasis></para>
+      their out-of-the-box implementation, you should skip ahead to the
+      section about <literal>PropertyEditors</literal>.</emphasis></para>
 
       <para>Consider the following two classes: <programlisting>public class Company {
     private String name;
@@ -201,7 +201,8 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
     </sect2>
 
     <sect2 id="beans-beans-conversion">
-      <title>Built-in <literal>PropertyEditors</literal>, converting types</title>
+      <title>Built-in <literal>PropertyEditors</literal>, converting
+      types</title>
 
       <para>Spring heavily uses the concept of
       <literal>PropertyEditors</literal>. Sometimes it might be handy to be
@@ -212,9 +213,11 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
       back to Date objects). This behavior can be achieved by
       <emphasis>registering custom editors</emphasis>, of type
       <literal>java.beans.PropertyEditor</literal>. Registering custom editors
-      on a BeanWrapper gives it the knowledge of how to convert properties to
-      the desired type. Read more about PropertyEditors in the JavaDoc of the
-      <literal>java.beans</literal> package provided by Sun.</para>
+      on a BeanWrapper or alternately in a specific Application Context as
+      mentioned in the previous chapter, gives it the knowledge of how to
+      convert properties to the desired type. Read more about PropertyEditors
+      in the JavaDoc of the <literal>java.beans</literal> package provided by
+      Sun.</para>
 
       <para>A couple of examples where property editing is used in Spring
       <itemizedlist spacing="compact">
@@ -238,8 +241,11 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
 
       <para>Spring has a number of built-in PropertyEditors to make life easy.
       Each of those is listed below and they are all located in the
-      <literal>org.springframework.beans.propertyeditors</literal> package:
-      <table frame="all">
+      <literal>org.springframework.beans.propertyeditors</literal> package.
+      Most, but not all (as indicated below), are registered by default by
+      BeanWrapperImpl. Where the property editor is configurable in some
+      fashion, you can of course still register your own variant to override
+      the default one: <table frame="all">
           <title>Built-in PropertyEditors</title>
 
           <tgroup cols="2">
@@ -257,18 +263,66 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
 
             <tbody>
               <row>
+                <entry><literal>ByteArrayPropertyEditor</literal></entry>
+
+                <entry>Editor for byte arrays. Strings will simply be
+                converted to their corresponding byte representations.
+                Registered by default by BeanWrapperImpl.</entry>
+              </row>
+
+              <row>
                 <entry><literal>ClassEditor</literal></entry>
 
                 <entry>Parses Strings representing classes to actual classes
                 and the other way around. When a class is not found, an
-                IllegalArgumentException is thrown</entry>
+                IllegalArgumentException is thrown. Registered by default by
+                BeanWrapperImpl.</entry>
+              </row>
+
+              <row>
+                <entry><literal>CustomBooleanEditor</literal></entry>
+
+                <entry>Customizable property editor for Boolean properties.
+                Registered by default by BeanWrapperImpl, but, can be
+                overridden by registering custom instance of it as custom
+                editor.</entry>
+              </row>
+
+              <row>
+                <entry><literal>CustomDateEditor</literal></entry>
+
+                <entry>Customizable property editor for java.util.Date,
+                supporting a custom DateFormat. NOT registerd by default. Must
+                be user registered as needed with appropriate format.</entry>
+              </row>
+
+              <row>
+                <entry><literal>CustomNumberEditor</literal></entry>
+
+                <entry>Customizable property editor for any Number subclass
+                like Integer, Long, Float, Double. Registered by default by
+                BeanWrapperImpl, but, can be overridden by registering custom
+                instance of it as custom editor.</entry>
               </row>
 
               <row>
                 <entry><literal>FileEditor</literal></entry>
 
                 <entry>Capable of resolving Strings to
-                <literal>File</literal>-objects</entry>
+                <literal>File</literal>-objects. Registered by default by
+                BeanWrapperImpl. </entry>
+              </row>
+
+              <row>
+                <entry><literal>InputStreamEditor</literal></entry>
+
+                <entry>One-way property editor, capable of taking a text
+                string and producing (via an intermediate ResourceEditor and
+                Resource) an InputStream, so InputStream properties may be
+                directly setCapable of resolving Strings to
+                <literal>File</literal>-objects. Note that the default usage
+                will not close the InputStream for you!. Registered by default
+                by BeanWrapperImpl.</entry>
               </row>
 
               <row>
@@ -277,7 +331,8 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 <entry>Capable of resolving Strings to
                 <literal>Locale</literal>-objects and vice versa (the String
                 format is [language]_[country]_[variant], which is the same
-                thing the toString() method of Locale provides</entry>
+                thing the toString() method of Locale provides. Registered by
+                default by BeanWrapperImpl.</entry>
               </row>
 
               <row>
@@ -285,21 +340,32 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
 
                 <entry>Capable of converting Strings (formatted using the
                 format as defined in the Javadoc for the java.lang.Properties
-                class) to <literal>Properties</literal>-objects</entry>
+                class) to <literal>Properties</literal>-objects. Registered by
+                default by BeanWrapperImpl.</entry>
               </row>
 
               <row>
                 <entry><literal>StringArrayPropertyEditor</literal></entry>
 
                 <entry>Capable of resolving a comma-delimited list of String
-                to a String-array and vice versa</entry>
+                to a String-array and vice versa. Registered by default by
+                BeanWrapperImpl.</entry>
+              </row>
+
+              <row>
+                <entry><literal>StringTrimmedEditor</literal></entry>
+
+                <entry>Property editor that trims Strings. Optionally allows
+                transforming an empty string into a null value. NOT registerd
+                by default. Must be user registered as needed.</entry>
               </row>
 
               <row>
                 <entry><literal>URLEditor</literal></entry>
 
                 <entry>Capable of resolving a String representation of a URL
-                to an actual <literal>URL</literal>-object</entry>
+                to an actual <literal>URL</literal>-object. Registered by
+                default by BeanWrapperImpl.</entry>
               </row>
             </tbody>
           </tgroup>
@@ -309,7 +375,11 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
       <literal>java.beans.PropertyEditorManager</literal> to set the
       search-path for property editors that might be needed. The search-path
       also includes <literal>sun.bean.editors</literal>, which includes
-      PropertyEditors for Font, Color and all the primitive types.</para>
+      PropertyEditors for Font, Color and all the primitive types. Note also
+      that the Java PropertyEditors code will automatically discover
+      PropertyEditors (without you having to register them) if they are in the
+      same package as the class they handle, and have the same name as that
+      class, with 'Editor' appended.</para>
     </sect2>
 
     <sect2 id="beans-beans-other">
