@@ -74,7 +74,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.8 2004-04-01 15:36:01 jhoeller Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.9 2004-05-04 06:09:00 jhoeller Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		implements BeanPostProcessor, BeanFactoryAware, Ordered {
@@ -175,7 +175,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 
-	public Object postProcessBeforeInitialization(Object bean, String name) {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
@@ -184,17 +184,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * identified as one to proxy by the subclass.
 	 * @see #getInterceptorsAndAdvisorsForBean
 	 */
-	public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
+	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		// Check for special cases. We don't want to try to autoproxy a part of the autoproxying
 		// infrastructure, lest we get a stack overflow.
-		if (isInfrastructureClass(bean, name) || shouldSkip(bean, name)) {
+		if (isInfrastructureClass(bean, beanName) || shouldSkip(bean, beanName)) {
 			logger.debug("Did not attempt to autoproxy infrastructure class [" + bean.getClass().getName() + "]");
 			return bean;
 		}
 		
-		TargetSource targetSource = getTargetSource(bean, name);
+		TargetSource targetSource = getTargetSource(bean, beanName);
 		
-		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, name);
+		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, beanName);
 		
 		// proxy if we have advice or if a TargetSourceCreator wants to do some
 		// fancy stuff such as pooling
@@ -218,7 +218,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			if (logger.isInfoEnabled()) {
 				int nrOfCommonInterceptors = commonInterceptors != null ? commonInterceptors.length : 0;
 				int nrOfSpecificInterceptors = specificInterceptors != null ? specificInterceptors.length : 0;
-				logger.info("Creating implicit proxy for bean '" +  name + "' with " + nrOfCommonInterceptors +
+				logger.info("Creating implicit proxy for bean '" +  beanName + "' with " + nrOfCommonInterceptors +
 										" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 			}
 
@@ -239,7 +239,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 				Advisor advisor = GlobalAdvisorAdapterRegistry.getInstance().wrap(it.next());
 				proxyFactory.addAdvisor(advisor);
 			}
-			proxyFactory.setTargetSource(getTargetSource(bean, name));
+			proxyFactory.setTargetSource(getTargetSource(bean, beanName));
 			
 			return proxyFactory.getProxy();
 		}
@@ -257,7 +257,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		return advisors;
 	}
 
-	protected boolean isInfrastructureClass(Object bean, String name) {
+	protected boolean isInfrastructureClass(Object bean, String beanName) {
 		return Advisor.class.isAssignableFrom(bean.getClass()) ||
 				MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
 				AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass());
@@ -268,29 +268,36 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * bean should not be considered for autoproxying by this post processor. 
 	 * Sometimes we need to be able to avoid this happening if it will lead to
 	 * a circular reference. This implementation returns true.
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
 	 */
-	protected boolean shouldSkip(Object bean, String name) {
+	protected boolean shouldSkip(Object bean, String beanName) {
 		return false;
 	}
 
 	/**
-	 * Create a target source to source instances.
-	 * Uses any TargetSourceCreators if set.
-	 * @param bean bean to intercept
-	 * @param beanName name of the bean
-	 * @return an invoker interceptor wrapping this bean.
-	 * This implementation returns a straight reflection InvokerInterceptor
+	 * Create a target source for bean instances. Uses any
+	 * TargetSourceCreators if set; default is a SingletonTargetSource.
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
+	 * @return a TargetSource for this bean
+	 * @see #setCustomTargetSourceCreators
+	 * @see org.springframework.aop.target.SingletonTargetSource
 	 */
 	private TargetSource getTargetSource(Object bean, String beanName) {
 		// we can't create fancy target sources for singletons
-		if (this.owningBeanFactory != null && !this.owningBeanFactory.isSingleton(beanName)) {
-			logger.info("Checking for custom TargetSource for bean with name '" + beanName + "'");
+		if (this.owningBeanFactory != null && this.owningBeanFactory.containsBean(beanName) &&
+				!this.owningBeanFactory.isSingleton(beanName)) {
+			logger.info("Checking for custom TargetSource for bean with beanName '" + beanName + "'");
 			for (int i = 0; i < this.customTargetSourceCreators.size(); i++) {
 				TargetSourceCreator tsc = (TargetSourceCreator) this.customTargetSourceCreators.get(i);
 				TargetSource ts = tsc.getTargetSource(bean, beanName, this.owningBeanFactory);
 				if (ts != null) {
 					// found a match
-					logger.info("TargetSourceCreator [" + tsc + " found custom TargetSource for bean with name '" + beanName + "'");
+					if (logger.isInfoEnabled()) {
+						logger.info("TargetSourceCreator [" + tsc + " found custom TargetSource for bean with beanName '" +
+												beanName + "'");
+					}
 					return ts;
 				}
 			}
@@ -303,7 +310,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * Return whether the given bean is to be proxied,
 	 * and what additional interceptors and pointcuts to apply.
 	 * @param bean the new bean instance
-	 * @param beanName the beanName of the bean
+	 * @param beanName the name of the bean
 	 * @return an array of additional interceptors for the particular bean;
 	 * or an empty array if no additional interceptors but just the common ones;
 	 * or null if no proxy at all, not even with the common interceptors.
