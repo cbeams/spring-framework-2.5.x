@@ -1,6 +1,17 @@
 /*
- * The Spring Framework is published under the terms of the Apache Software
- * License.
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  */
 package org.springframework.rules;
 
@@ -15,6 +26,7 @@ import org.springframework.rules.predicates.CompoundUnaryPredicate;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
+import org.springframework.util.ToStringBuilder;
 
 /**
  * @author Keith Donald
@@ -66,7 +78,7 @@ public class ValidationResultsBuilder implements ValidationResults {
         UnaryNot not = new UnaryNot();
         add(not);
     }
-    
+
     public UnaryPredicate peek() {
         return (UnaryPredicate)levels.peek();
     }
@@ -111,7 +123,13 @@ public class ValidationResultsBuilder implements ValidationResults {
         UnaryPredicate p = (UnaryPredicate)levels.pop();
         if (logger.isDebugEnabled()) {
             logger.debug(
-                "Top [" + p + "] popped; result was " + result + "; stack now has " + levels.size() + " elements");
+                "Top ["
+                    + p
+                    + "] popped; result was "
+                    + result
+                    + "; stack now has "
+                    + levels.size()
+                    + " elements");
         }
         if (levels.isEmpty()) {
             if (!result) {
@@ -131,11 +149,21 @@ public class ValidationResultsBuilder implements ValidationResults {
             if (result) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(
-                            "Removing compound predicate [" + p + "]; tested true.");
+                        "Removing compound predicate ["
+                            + p
+                            + "]; tested true.");
                 }
                 ((CompoundUnaryPredicate)this.top).remove(p);
             }
         }
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this)
+            .append("propertyValidationResults", propertyResults)
+            .append("topOfStack", top)
+            .append("levelsStack", levels)
+            .toString();
     }
 
 }

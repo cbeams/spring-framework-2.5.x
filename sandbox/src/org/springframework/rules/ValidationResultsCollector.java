@@ -26,7 +26,13 @@ import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
-import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
+import org
+    .springframework
+    .rules
+    .predicates
+    .beans
+    .ParameterizedBeanPropertyExpression;
+import org.springframework.util.ToStringBuilder;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
 
@@ -47,7 +53,7 @@ public class ValidationResultsCollector implements Visitor {
         this.bean = bean;
         this.getProperty = new GetProperty(bean);
     }
-    
+
     public void setCollectAllErrors(boolean collectAllErrors) {
         this.collectAllErrors = collectAllErrors;
     }
@@ -223,6 +229,14 @@ public class ValidationResultsCollector implements Visitor {
             }
         }
         return negated ? !result : result;
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this)
+            .append("bean", bean)
+            .append("collectAllErrors", collectAllErrors)
+            .append("validationResultsBuilder", results)
+            .toString();
     }
 
 }
