@@ -23,6 +23,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.transaction.Status;
+import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
@@ -30,6 +32,7 @@ import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.Transaction;
+import net.sf.hibernate.engine.SessionFactoryImplementor;
 import org.easymock.MockControl;
 
 import org.springframework.mock.web.MockFilterConfig;
@@ -37,12 +40,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.orm.hibernate.HibernateAccessor;
-import org.springframework.orm.hibernate.SessionFactoryUtils;
 import org.springframework.orm.hibernate.HibernateTransactionManager;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
+import org.springframework.orm.hibernate.SessionFactoryUtils;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
@@ -67,7 +70,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 2);
 		session.setFlushMode(FlushMode.NEVER);
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
@@ -77,6 +80,83 @@ public class OpenSessionInViewTests extends TestCase {
 
 		// check that further invocations simply participate
 		interceptor.preHandle(request, response, "handler");
+
+		assertEquals(session, SessionFactoryUtils.getSession(sf, false));
+
+		interceptor.preHandle(request, response, "handler");
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
+
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
+
+		interceptor.preHandle(request, response, "handler");
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
+
+		sfControl.verify();
+		sessionControl.verify();
+
+		sfControl.reset();
+		sessionControl.reset();
+		sfControl.replay();
+		sessionControl.replay();
+		interceptor.postHandle(request, response, "handler", null);
+		assertTrue(TransactionSynchronizationManager.hasResource(sf));
+		sfControl.verify();
+		sessionControl.verify();
+
+		sfControl.reset();
+		sessionControl.reset();
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		interceptor.afterCompletion(request, response, "handler", null);
+		assertFalse(TransactionSynchronizationManager.hasResource(sf));
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testOpenSessionInViewInterceptorWithSingleSessionAndJtaTm() throws Exception {
+		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
+		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 2);
+		tm.getTransaction();
+		tmControl.setReturnValue(null, 1);
+
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
+		MockServletContext sc = new MockServletContext();
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		sf.getConnectionProvider();
+		sfControl.setReturnValue(null, 1);
+		sf.getTransactionManager();
+		sfControl.setReturnValue(tm, 2);
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
+
+		tmControl.replay();
+		sfControl.replay();
+		sessionControl.replay();
+
+		interceptor.preHandle(request, response, "handler");
+		assertTrue(TransactionSynchronizationManager.hasResource(sf));
+
+		// check that further invocations simply participate
+		interceptor.preHandle(request, response, "handler");
+
+		assertEquals(session, SessionFactoryUtils.getSession(sf, false));
 
 		interceptor.preHandle(request, response, "handler");
 		interceptor.postHandle(request, response, "handler", null);

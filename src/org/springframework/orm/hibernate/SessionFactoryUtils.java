@@ -294,10 +294,15 @@ public abstract class SessionFactoryUtils {
 					try {
 						int jtaStatus = jtaTm.getStatus();
 						if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
+							// look for transaction-specific Session
 							Session session = sessionHolder.getSession(jtaTm.getTransaction());
 							if (session != null) {
 								return session;
 							}
+						}
+						else {
+							// no transaction active -> simply return default thread-bound Session
+							return sessionHolder.getSession();
 						}
 					}
 					catch (SystemException ex) {
@@ -305,7 +310,7 @@ public abstract class SessionFactoryUtils {
 					}
 				}
 				else {
-					// simply return default pre-bound Session
+					// no JTA TransactionManager -> simply return default thread-bound Session
 					return sessionHolder.getSession();
 				}
 			}
