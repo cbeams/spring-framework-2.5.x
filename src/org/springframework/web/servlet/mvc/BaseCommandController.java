@@ -380,7 +380,9 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress validation for the given request.
-	 * Default implementations always returns false.
+	 * <p>Default implementation always returns false. Can be overridden
+	 * in subclasses to suppress validation, for example, if a special
+	 * request parameter is set.
 	 * @param request current HTTP request
 	 * @return whether to suppress validation for the given request
 	 */
