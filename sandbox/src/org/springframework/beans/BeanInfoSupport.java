@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.springframework.beans.BeanUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.Cache;
 import org.springframework.util.ClassUtils;
@@ -26,6 +27,7 @@ import org.springframework.util.ClassUtils;
  * @author Keith Donald
  */
 public class BeanInfoSupport {
+    private static final Log logger = LogFactory.getLog(BeanInfoSupport.class);
     private BeanInfo rootBeanInfo;
     private Class rootBeanType;
 
@@ -70,6 +72,9 @@ public class BeanInfoSupport {
         this.rootBeanType = beanType;
         beanInfoProperties.clear();
         this.rootBeanInfo = getBeanInfo(this.rootBeanType);
+        Assert.notNull(
+            rootBeanInfo,
+            "Unable to retrive root bean type " + beanType + " BeanInfo.");
     }
 
     /**
@@ -83,15 +88,17 @@ public class BeanInfoSupport {
 
     /**
      * Returns the parent bean info of the specified nested property name path.
-     * For example, if you have the property "name.lastName", asking for
-     * "name" will return the root BeanInfo, while asking for "name.lastName",
-     * will return Name's BeanInfo.
+     * As an example, asking for property "name" will return the root BeanInfo,
+     * while asking for "name.lastName", will return Name's BeanInfo.
      * 
      * @param propertyNamePath
      *            The property name path, separated by dots.
      * @return The parent BeanInfo.
+     * @throws IllegalArgumentException
+     *             if the property is null or does not exist.
      */
     public BeanInfo getParentBeanInfo(String propertyNamePath) {
+        Assert.notNull(propertyNamePath);
         int lastDot = propertyNamePath.lastIndexOf('.');
         if (lastDot == -1) {
             PropertyDescriptor property =
@@ -103,6 +110,7 @@ public class BeanInfoSupport {
         }
         return getNestedBeanInfo(propertyNamePath.substring(0, lastDot));
     }
+
     /**
      * Returns the BeanInfo of a nested bean property, which is also another
      * bean.
@@ -161,7 +169,8 @@ public class BeanInfoSupport {
         try {
             return Introspector.getBeanInfo(type);
         } catch (IntrospectionException e) {
-            throw new RuntimeException(e);
+            logger.error("Unable to introspect bean type " + type, e);
+            return null;
         }
     }
 
@@ -207,10 +216,14 @@ public class BeanInfoSupport {
      * @param propertyName
      *            The property name of this beanInfo.
      * @return The PropertyDescriptor, or null if it does not exist.
+     * @throws IllegalArgumentException,
+     *             if either parameters are null.
      */
     public PropertyDescriptor getPropertyDescriptor(
         BeanInfo beanInfo,
         String propertyName) {
+        Assert.notNull(beanInfo);
+        Assert.notNull(propertyName);
         Map beanProperties = (Map)beanInfoProperties.get(beanInfo);
         return (PropertyDescriptor)beanProperties.get(propertyName);
     }
