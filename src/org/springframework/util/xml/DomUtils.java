@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
+import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -60,9 +61,10 @@ public abstract class DomUtils {
 	/**
 	 * Extract the text value from the given DOM element,
 	 * ignoring XML comments.
-	 * <p>Appends all CharacterData nodes into a single String value,
-	 * excluding Comment nodes.
+	 * <p>Appends all CharacterData nodes and EntityReference nodes
+	 * into a single String value, excluding Comment nodes.
 	 * @see org.w3c.dom.CharacterData
+	 * @see org.w3c.dom.EntityReference
 	 * @see org.w3c.dom.Comment
 	 */
 	public static String getTextValue(Element valueEle) {
@@ -70,10 +72,9 @@ public abstract class DomUtils {
 		NodeList nl = valueEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node item = nl.item(i);
-			if (item instanceof org.w3c.dom.CharacterData) {
-				if (!(item instanceof Comment)) {
-					value.append(item.getNodeValue());
-				}
+			if ((item instanceof org.w3c.dom.CharacterData && !(item instanceof Comment)) ||
+					item instanceof EntityReference) {
+				value.append(item.getNodeValue());
 			}
 		}
 		return value.toString();
