@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.61 2003-12-10 09:15:26 jhoeller Exp $
+$Id: changelog.txt,v 1.62 2003-12-11 15:05:39 johnsonr Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -8,8 +8,11 @@ Changes in version 1.0 M4 (XX.12.2003)
 
 Package org.springframework.aop
 * introduced ProxyConfig base class for ProxyFactoryBean etc, specifying common AOP proxy settings
-* introduced before advice, in addition to interception around advice
+* introduced Before and Throws advice, in addition to interception Around advice
 * replaced InvokerInterceptor and ProxyInterceptor interface by TargetSource interface
+* removed exposeInvocation option in proxy factories
+* added org.springframework.aop.framework.adapter package allowing new Advisor and advice types to be supported without changing the basic AOP framework
+* significant reduction in overhead of AOP framework
 
 Package org.springframework.beans
 * removed event propagation support in BeanWrapper
@@ -56,7 +59,10 @@ Package org.springframework.samples
 * introduced JPetStore sample application, an adapted version of Clinton Begin's JPetStore
 
 Package org.springframework.transaction
-* dissolved TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
+* removed TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
+* TransactionInterceptor now keeps TransactionStatus in its own ThreadLocal, not MethodInvocation
+* introduced PropertiesTransactionAttributeSource, making properties parsing previously available in TransactionFactoryProxyBean available standalone
+* added TransactionAttributeSourceTransactionAroundAdvisor to allow pointcut to be used by default to target transaction interception
 
 Package org.springframework.validation
 * removed event propagation support in DataBinder
