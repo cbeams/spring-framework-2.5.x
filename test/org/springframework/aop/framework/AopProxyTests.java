@@ -31,7 +31,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.13 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.14 2003-11-17 20:35:46 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 
@@ -62,6 +62,18 @@ public class AopProxyTests extends TestCase {
 		}
 	}
 	
+	private static class CheckMethodInvocationIsSameInAndOutInterceptor implements MethodInterceptor {
+		/**
+		 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
+		 */
+		public Object invoke(MethodInvocation mi) throws Throwable {
+			Method m = mi.getMethod();
+			Object retval = mi.proceed();
+			assertEquals("Method invocation has same method on way back", m, mi.getMethod());
+			return retval;
+		}
+	}
+	
 	/**
 	 * Check that the two MethodInvocations necessary are independent and
 	 * don't conflict
@@ -74,6 +86,7 @@ public class AopProxyTests extends TestCase {
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		DebugInterceptor di1 = new DebugInterceptor();
 		pf1.addInterceptor(0, di1);
+		pf1.addInterceptor(1, new CheckMethodInvocationIsSameInAndOutInterceptor());
 		ITestBean advised1 = (ITestBean) pf1.getProxy();
 		advised1.setAge(age1); // = 1 invocation
 		
@@ -81,6 +94,7 @@ public class AopProxyTests extends TestCase {
 		ProxyFactory pf2 = new ProxyFactory(target2);
 		DebugInterceptor di2 = new DebugInterceptor();
 		pf2.addInterceptor(0, di2);
+		pf2.addInterceptor(1, new CheckMethodInvocationIsSameInAndOutInterceptor());
 		ITestBean advised2 = (ITestBean) pf2.getProxy();
 		advised2.setAge(age2);
 		advised1.setSpouse(advised2); // = 2 invocations
