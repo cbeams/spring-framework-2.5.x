@@ -1,5 +1,6 @@
 package org.springframework.orm.hibernate;
 
+import net.sf.hibernate.Criteria;
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
@@ -161,8 +162,8 @@ public abstract class SessionFactoryUtils {
 	}
 
 	/**
-	 * Apply the current transaction timeout, if any,
-	 * to the given Hibernate Query object.
+	 * Apply the current transaction timeout, if any, to the given
+	 * Hibernate Query object.
 	 * @param query the Hibernate Query object
 	 * @param sessionFactory Hibernate SessionFactory that the Query was created for
 	 */
@@ -170,6 +171,19 @@ public abstract class SessionFactoryUtils {
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && sessionHolder.getDeadline() != null) {
 			query.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+		}
+	}
+
+	/**
+	 * Apply the current transaction timeout, if any, to the given
+	 * Hibernate Criteria object.
+	 * @param criteria the Hibernate Criteria object
+	 * @param sessionFactory Hibernate SessionFactory that the Criteria was created for
+	 */
+	public static void applyTransactionTimeout(Criteria criteria, SessionFactory sessionFactory) {
+		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		if (sessionHolder != null && sessionHolder.getDeadline() != null) {
+			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
 	}
 
