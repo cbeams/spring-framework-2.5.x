@@ -55,7 +55,6 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		Properties mappings = new Properties();
 		mappings.put("csv", headerValue);
 
-
 		((JasperReportsMultiFormatView) view).setContentDispositionMappings(mappings);
 
 		view.render(model, request, response);
@@ -90,8 +89,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	}
 
 	protected AbstractJasperReportsView getViewImplementation() {
-		JasperReportsMultiFormatView view = new JasperReportsMultiFormatView();
-		return view;
+		return new JasperReportsMultiFormatView();
 	}
 
 	protected String getDesiredContentType() {
@@ -104,15 +102,13 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		model.put("dataSource", getData());
 		return model;
 	}
-	
+
 
 	public static class ExporterParameterTestView extends AbstractJasperReportsView {
 
 		public static final String TEST_PARAM = "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI";
 
-		protected void renderReport(JasperPrint filledReport, Map parameters, HttpServletResponse response)
-				throws Exception {
-
+		protected void renderReport(JasperPrint filledReport, Map parameters, HttpServletResponse response) {
 			assertNotNull("Exporter parameters are null", getExporterParameters());
 			assertEquals("Incorrect number of exporter parameters", 1, getExporterParameters().size());
 		}
