@@ -275,7 +275,7 @@
     <sect2 id="beans-factory-modes">
       <title>To singleton or not to singleton</title>
 
-      <para>Beans exist in two types, singletons and prototypes. When a bean
+      <para>Beans exist in two modes, singletons or prototypes. When a bean
       is a singleton, only one <emphasis>shared</emphasis> instance of the
       bean will be managed and all requests for instances of that specific
       instances of bean will result in that one specific bean instance being
