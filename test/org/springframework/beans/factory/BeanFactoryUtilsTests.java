@@ -63,12 +63,13 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertTrue(this.listableBeanFactory.getBeanDefinitionCount() == 1);
 		// Count minus duplicate
 		assertTrue("Should count 7 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory),
-			BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 7);
+				BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 7);
 	}
 
 	public void testHierarchicalNamesWithOverride() throws Exception {
 		List names = Arrays.asList(
 				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableBeanFactory, ITestBean.class));
+		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
 		assertEquals(2, names.size());
 		assertTrue(names.contains("test"));
 		assertTrue(names.contains("test3"));
@@ -87,6 +88,17 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertTrue(names.contains("indexedBean"));
 		// Distinguish from default ListableBeanFactory behavior
 		assertTrue(listableBeanFactory.getBeanDefinitionNames(IndexedTestBean.class).length == 0);
+	}
+
+	public void testGetBeanNamesForTypeWithOverride() throws Exception {
+		List names = Arrays.asList(
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class));
+		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
+		assertEquals(4, names.size());
+		assertTrue(names.contains("test"));
+		assertTrue(names.contains("test3"));
+		assertTrue(names.contains("testFactory1"));
+		assertTrue(names.contains("testFactory2"));
 	}
 
 	public void testNoBeansOfType() {

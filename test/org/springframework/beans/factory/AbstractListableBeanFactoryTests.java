@@ -27,7 +27,7 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	protected ListableBeanFactory getListableBeanFactory() {
 		BeanFactory bf = getBeanFactory();
 		if (!(bf instanceof ListableBeanFactory)) {
-			throw new RuntimeException("ListableBeanFactory required");
+			throw new IllegalStateException("ListableBeanFactory required");
 		}
 		return (ListableBeanFactory) bf;
 	}
@@ -49,9 +49,15 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	}
 
 	public void assertTestBeanCount(int count) {
-		String[] defnames = getListableBeanFactory().getBeanDefinitionNames(TestBean.class);
+		String[] defNames = getListableBeanFactory().getBeanDefinitionNames(TestBean.class);
 		assertTrue("We should have " + count + " beans for class org.springframework.beans.TestBean, not " +
-		           defnames.length, defnames.length == count);
+				defNames.length, defNames.length == count);
+
+		int countIncludingFactoryBeans = count + 2;
+		String[] names = getListableBeanFactory().getBeanNamesForType(TestBean.class);
+		assertTrue("We should have " + countIncludingFactoryBeans +
+				" beans for class org.springframework.beans.TestBean, not " + names.length,
+				names.length == countIncludingFactoryBeans);
 	}
 
 	public void testGetDefinitionsForNoSuchClass() {
@@ -65,8 +71,12 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	 */
 	public void testGetCountForFactoryClass() {
 		assertTrue("Should have 2 factories, not " +
-							 getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length,
-							 getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length == 2);
+				getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length,
+				getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length == 2);
+
+		assertTrue("Should have 2 factories, not " +
+				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length,
+				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length == 2);
 	}
 
 	public void testContainsBeanDefinition() {

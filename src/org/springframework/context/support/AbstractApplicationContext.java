@@ -529,6 +529,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	// Implementation of ListableBeanFactory
 	//---------------------------------------------------------------------
 
+	public boolean containsBeanDefinition(String name) {
+		return getBeanFactory().containsBeanDefinition(name);
+	}
+
 	public int getBeanDefinitionCount() {
 		return getBeanFactory().getBeanDefinitionCount();
 	}
@@ -541,8 +545,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBeanDefinitionNames(type);
 	}
 
-	public boolean containsBeanDefinition(String name) {
-		return getBeanFactory().containsBeanDefinition(name);
+	public String[] getBeanNamesForType(Class type) {
+		return getBeanFactory().getBeanNamesForType(type);
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {

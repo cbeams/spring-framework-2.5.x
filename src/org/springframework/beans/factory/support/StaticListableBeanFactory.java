@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 06-Jan-03
+ * @since 06.01.2003
  * @see DefaultListableBeanFactory
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
@@ -143,6 +143,10 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	public boolean containsBeanDefinition(String name) {
+		return this.beans.containsKey(name);
+	}
+
 	public int getBeanDefinitionCount() {
 		return this.beans.size();
 	}
@@ -158,25 +162,46 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		Iterator it = keys.iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
-			Class clazz = this.beans.get(name).getClass();
-			if (type.isAssignableFrom(clazz)) {
+			Object beanInstance = this.beans.get(name);
+			if (type.isInstance(beanInstance)) {
 				matches.add(name);
 			}
 		}
 		return (String[]) matches.toArray(new String[matches.size()]);
 	}
 
-	public boolean containsBeanDefinition(String name) {
-		return this.beans.containsKey(name);
+	public String[] getBeanNamesForType(Class type) {
+		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
+		List matches = new ArrayList();
+		Set keys = this.beans.keySet();
+		Iterator it = keys.iterator();
+		while (it.hasNext()) {
+			String name = (String) it.next();
+			Object beanInstance = this.beans.get(name);
+			if (beanInstance instanceof FactoryBean && !isFactoryType) {
+				Class objectType = ((FactoryBean) beanInstance).getObjectType();
+				if (objectType != null && type.isAssignableFrom(objectType)) {
+					matches.add(name);
+				}
+			}
+			else {
+				if (type.isInstance(beanInstance)) {
+					matches.add(name);
+				}
+			}
+		}
+		return (String[]) matches.toArray(new String[matches.size()]);
 	}
 
-	public Map getBeansOfType(Class type) {
+	public Map getBeansOfType(Class type) throws BeansException {
 		return getBeansOfType(type, true, true);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
-		Map matches = new HashMap();
+	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+			throws BeansException {
+
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
+		Map matches = new HashMap();
 
 		Iterator it = this.beans.entrySet().iterator();
 		while (it.hasNext()) {
@@ -190,13 +215,9 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					// Match object created by FactoryBean.
 					FactoryBean factory = (FactoryBean) beanInstance;
 					Class objectType = factory.getObjectType();
-					if ((objectType == null && factory.isSingleton()) ||
-							((includePrototypes || factory.isSingleton()) &&
-							objectType != null && type.isAssignableFrom(objectType))) {
-						Object createdObject = getBean(beanName);
-						if (type.isInstance(createdObject)) {
-							matches.put(beanName, createdObject);
-						}
+					if ((includePrototypes || factory.isSingleton()) &&
+							objectType != null && type.isAssignableFrom(objectType)) {
+						matches.put(beanName, getBean(beanName));
 					}
 				}
 			}

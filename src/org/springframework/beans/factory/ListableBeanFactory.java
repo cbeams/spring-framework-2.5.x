@@ -54,6 +54,18 @@ import org.springframework.beans.BeansException;
 public interface ListableBeanFactory extends BeanFactory {
 
 	/**
+	 * Check if this bean factory contains a bean definition with the given name.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use <code>containsBean</code> to check ancestor factories too.
+	 * <p>Note: Ignores any singleton beans that have been registered by
+	 * other means than bean definitions.
+	 * @param beanName the name of the bean to look for
+	 * @return if this bean factory contains a bean definition with the given name
+	 * @see #containsBean
+	 */
+	boolean containsBeanDefinition(String beanName);
+
+	/**
 	 * Return the number of beans defined in the factory.
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>countBeansIncludingAncestors</code>
@@ -82,9 +94,9 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from the bean definitions. Merges child bean definition with
 	 * their parent before checking the type.
-	 * <p>Does <i>not</i> consider objects created by FactoryBeans but rather
-	 * the FactoryBean instances themselves. Use <code>getBeansOfType</code>
-	 * to match objects created by FactoryBeans.)
+	 * <p>Does <i>not</i> consider objects created by FactoryBeans but rather the
+	 * FactoryBean classes themselves, avoiding instantiation of any beans. Use
+	 * <code>getBeanNamesForType</code> to match objects created by FactoryBeans.
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beanNamesIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
@@ -93,30 +105,36 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @param type the class or interface to match, or null for all bean names
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
-	 * @see #getBeansOfType
+	 * @see #getBeanNamesForType
 	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory, Class)
 	 */
 	String[] getBeanDefinitionNames(Class type);
 
 	/**
-	 * Check if this bean factory contains a bean definition with the given name.
+	 * Return the names of beans matching the given type (including subclasses),
+	 * judging from either bean definitions or the value of <code>getObjectType</code>
+	 * in the case of FactoryBeans.
+	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
+	 * classes themselves, which means that FactoryBeans will get instantiated.
 	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * Use <code>containsBean</code> to check ancestor factories too.
-	 * <p>Note: Ignores any singleton beans that have been registered by
-	 * other means than bean definitions.
-	 * @param beanName the name of the bean to look for
-	 * @return if this bean factory contains a bean definition with the given name
-	 * @see #containsBean
+	 * Use BeanFactoryUtils' <code>beanNamesForTypeIncludingAncestors</code>
+	 * to include beans in ancestor factories too.
+	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
+	 * by other means than bean definitions.
+	 * @param type the class or interface to match, or null for all bean names
+	 * @return the names of beans (or objects created by FactoryBeans) matching
+	 * the given object type (including subclasses), or an empty array if none
+	 * @see FactoryBean#getObjectType
+	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, Class)
 	 */
-	boolean containsBeanDefinition(String beanName);
+	String[] getBeanNamesForType(Class type);
 
 	/**
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
-	 * <p>If FactoryBean's <code>getObjectType</code> returns null and the bean is
-	 * a singleton, the type of the actually created objects should be evaluated.
-	 * Prototypes without explicit object type specification should be ignored.
+	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
+	 * classes themselves, which means that FactoryBeans will get instantiated.
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beansOfTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
@@ -128,7 +146,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @param type the class or interface to match, or null for all concrete beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
-	 * @throws BeansException if the beans could not be created
+	 * @throws BeansException if a bean could not be created
 	 * @since 1.1.2
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class)
@@ -139,9 +157,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
-	 * <p>If FactoryBean's <code>getObjectType</code> returns null and the bean is
-	 * a singleton, the type of the actually created objects should be evaluated.
-	 * Prototypes without explicit object type specification should be ignored.
+	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
+	 * classes themselves, which means that FactoryBeans will get instantiated.
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beansOfTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
@@ -154,7 +171,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * or just conventional beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
-	 * @throws BeansException if the beans could not be created
+	 * @throws BeansException if a bean could not be created
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */

@@ -19,7 +19,6 @@ package org.springframework.beans.factory.support;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +70,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private final Map beanDefinitionMap = new HashMap();
 
 	/** List of bean definition names, in registration order */
-	private final List beanDefinitionNames = new LinkedList();
+	private final List beanDefinitionNames = new ArrayList();
 
 
 	/**
@@ -102,12 +101,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	public boolean containsBeanDefinition(String beanName) {
+		return this.beanDefinitionMap.containsKey(beanName);
+	}
+
 	public int getBeanDefinitionCount() {
 		return this.beanDefinitionMap.size();
 	}
 
 	public String[] getBeanDefinitionNames() {
-		return getBeanDefinitionNames(null);
+		return (String[]) this.beanDefinitionNames.toArray(new String[this.beanDefinitionNames.size()]);
 	}
 
 	public String[] getBeanDefinitionNames(Class type) {
@@ -122,25 +125,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (String[]) matches.toArray(new String[matches.size()]);
 	}
 
-	/**
-	 * Determine whether the bean definition with the given name matches
-	 * the given type.
-	 * @param beanName the name of the bean to check
-	 * @param type class or interface to match, or null for all bean names
-	 * @return whether the type matches
-	 * @see RootBeanDefinition#hasBeanClass
-	 * @see RootBeanDefinition#getBeanClass
-	 */
-	private boolean isBeanDefinitionTypeMatch(String beanName, Class type) {
-		if (type == null) {
-			return true;
-		}
-		RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
-		return (rbd.hasBeanClass() && type.isAssignableFrom(rbd.getBeanClass()));
-	}
-
-	public boolean containsBeanDefinition(String beanName) {
-		return this.beanDefinitionMap.containsKey(beanName);
+	public String[] getBeanNamesForType(Class type) {
+		List beanNames = doGetBeanNamesForType(type, true, true);
+		return (String[]) beanNames.toArray(new String[beanNames.size()]);
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {
@@ -150,36 +137,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
 			throws BeansException {
 
-		Map result = CollectionFactory.createLinkedMapIfPossible(16);
-		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
-
-		// Check all bean definitions.
-		Iterator it = this.beanDefinitionNames.iterator();
-		while (it.hasNext()) {
+		List beanNames = doGetBeanNamesForType(type, includePrototypes, includeFactoryBeans);
+		Map result = CollectionFactory.createLinkedMapIfPossible(beanNames.size());
+		for (Iterator it = beanNames.iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
-			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
 			try {
-				// Only check bean definition if it is complete.
-				if (!rbd.isAbstract() && rbd.hasBeanClass()) {
-					// In case of FactoryBean, match object created by FactoryBean.
-					if (FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) {
-						if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
-								isBeanTypeMatch(beanName, type)) {
-							result.put(beanName, getBean(beanName));
-						}
-					}
-					else {
-						// If type to match is FactoryBean, match FactoryBean itself.
-						// Else, match bean instance.
-						if (isFactoryType) {
-							beanName = FACTORY_BEAN_PREFIX + beanName;
-						}
-						if ((includePrototypes || rbd.isSingleton()) &&
-								(type == null || type.isAssignableFrom(rbd.getBeanClass()))) {
-							result.put(beanName, getBean(beanName));
-						}
-					}
-				}
+				result.put(beanName, getBean(beanName));
 			}
 			catch (BeanCreationException ex) {
 				if (ex.contains(BeanCurrentlyInCreationException.class)) {
@@ -194,6 +157,53 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 		}
+		return result;
+	}
+
+
+	/**
+	 * Get a List of all bean names that match the given type (including subclasses),
+	 * judging from either bean definitions or the value of <code>getObjectType</code>
+	 * in the case of FactoryBeans.
+	 * @param type the class or interface to match, or null for all concrete beans
+	 * @param includePrototypes whether to include prototype beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @param includeFactoryBeans whether to include FactoryBeans too
+	 * or just conventional beans
+	 * @return the names of beans (or objects created by FactoryBeans) matching
+	 * the given object type (including subclasses), or an empty List if none
+	 */
+	protected List doGetBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
+		List result = new ArrayList();
+
+		// Check all bean definitions.
+		Iterator it = this.beanDefinitionNames.iterator();
+		while (it.hasNext()) {
+			String beanName = (String) it.next();
+			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
+			// Only check bean definition if it is complete.
+			if (!rbd.isAbstract() && rbd.hasBeanClass()) {
+				// In case of FactoryBean, match object created by FactoryBean.
+				if (FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) {
+					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
+							isBeanTypeMatch(beanName, type)) {
+						result.add(beanName);
+					}
+				}
+				else {
+					// If type to match is FactoryBean, match FactoryBean itself.
+					// Else, match bean instance.
+					if (isFactoryType) {
+						beanName = FACTORY_BEAN_PREFIX + beanName;
+					}
+					if ((includePrototypes || rbd.isSingleton()) &&
+							(type == null || type.isAssignableFrom(rbd.getBeanClass()))) {
+						result.add(beanName);
+					}
+				}
+			}
+		}
 
 		// Check singletons too, to catch manually registered singletons.
 		String[] singletonNames = getSingletonNames();
@@ -205,7 +215,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (isFactoryBean(beanName) && !isFactoryType) {
 					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
 							isBeanTypeMatch(beanName, type)) {
-						result.put(beanName, getBean(beanName));
+						result.add(beanName);
 					}
 				}
 				else {
@@ -215,7 +225,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						beanName = FACTORY_BEAN_PREFIX + beanName;
 					}
 					if (isBeanTypeMatch(beanName, type)) {
-						result.put(beanName, getBean(beanName));
+						result.add(beanName);
 					}
 				}
 			}
@@ -235,26 +245,25 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (type == null) {
 			return true;
 		}
+		Class beanType = getType(beanName);
+		return (beanType != null && type.isAssignableFrom(beanType));
+	}
 
-		try {
-			Class beanType = getType(beanName);
-			return (beanType != null && type.isAssignableFrom(beanType));
+	/**
+	 * Determine whether the bean definition with the given name matches
+	 * the given type.
+	 * @param beanName the name of the bean to check
+	 * @param type class or interface to match, or null for all bean names
+	 * @return whether the type matches
+	 * @see RootBeanDefinition#hasBeanClass
+	 * @see RootBeanDefinition#getBeanClass
+	 */
+	private boolean isBeanDefinitionTypeMatch(String beanName, Class type) {
+		if (type == null) {
+			return true;
 		}
-		
-		catch (BeanCreationException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Looking for match to type [" + type.getName() +
-						"]: ignoring bean '" + beanName + "' that couldn't be created properly", ex);
-			}
-
-			// Ignore: probably indicates a circular reference when autowiring constructors.
-			// We want to find matches that do not cause circular references with FactoryBean.
-
-			// Could also be caused by a "lazy-init" bean that cannot be instantiated.
-			// Use "abstract" for such beans that are not meant to be instantiated at all.
-
-			return false;
-		}
+		RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
+		return (rbd.hasBeanClass() && type.isAssignableFrom(rbd.getBeanClass()));
 	}
 
 
