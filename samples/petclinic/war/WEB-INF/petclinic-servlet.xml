@@ -60,8 +60,8 @@
 	  - It uses the "clinicControllerMethodNameResolver" bean.
 	  -->
 	<bean id="clinicController" class="org.springframework.samples.petclinic.web.ClinicController">
-		<property name="methodNameResolver"><ref bean="clinicControllerMethodNameResolver"/></property>
-		<property name="clinic"><ref external="clinic"/></property>
+		<property name="methodNameResolver"><ref local="clinicControllerMethodNameResolver"/></property>
+		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
 	<!--
@@ -72,7 +72,7 @@
 		<property name="formView"><value>findOwnersForm</value></property>
 		<property name="selectView"><value>selectOwnerView</value></property>
 		<property name="successView"><value>ownerRedirect</value></property>
-		<property name="clinic"><ref external="clinic"/></property>
+		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
 	<!--
@@ -87,8 +87,8 @@
   	<bean id="addOwnerForm" class="org.springframework.samples.petclinic.web.AddOwnerForm">
 		<property name="formView"><value>ownerForm</value></property>
 		<property name="successView"><value>ownerRedirect</value></property>
-		<property name="validator"><ref bean="ownerValidator"/></property>
-		<property name="clinic"><ref external="clinic"/></property>
+		<property name="validator"><ref local="ownerValidator"/></property>
+		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
 	<!--
@@ -98,8 +98,8 @@
 	<bean id="editOwnerForm" class="org.springframework.samples.petclinic.web.EditOwnerForm">
 		<property name="formView"><value>ownerForm</value></property>
 		<property name="successView"><value>ownerRedirect</value></property>
-		<property name="validator"><ref bean="ownerValidator"/></property>
-		<property name="clinic"><ref external="clinic"/></property>
+		<property name="validator"><ref local="ownerValidator"/></property>
+		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
 	<!-- Validator for petForm, implementing Spring's Validator interface. -->
@@ -112,8 +112,8 @@
 	<bean id="addPetForm" class="org.springframework.samples.petclinic.web.AddPetForm">
 		<property name="formView"><value>petForm</value></property>
 		<property name="successView"><value>ownerRedirect</value></property>
-		<property name="validator"><ref bean="petValidator"/></property>
-		<property name="clinic"><ref external="clinic"/></property>
+		<property name="validator"><ref local="petValidator"/></property>
+		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
 	<!--
@@ -123,8 +123,8 @@
 	<bean id="editPetForm" class="org.springframework.samples.petclinic.web.EditPetForm">
 		<property name="formView"><value>petForm</value></property>
 		<property name="successView"><value>ownerRedirect</value></property>
-		<property name="validator"><ref bean="petValidator"/></property>
-		<property name="clinic"><ref external="clinic"/></property>
+		<property name="validator"><ref local="petValidator"/></property>
+		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
 	<!-- Validator for visitForm, implementing Spring's Validator interface. -->
@@ -137,8 +137,8 @@
 	<bean id="addVisitForm" class="org.springframework.samples.petclinic.web.AddVisitForm">
 		<property name="formView"><value>visitForm</value></property>
 		<property name="successView"><value>ownerRedirect</value></property>
-		<property name="validator"><ref bean="visitValidator"/></property>
-		<property name="clinic"><ref external="clinic"/></property>
+		<property name="validator"><ref local="visitValidator"/></property>
+		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
 </beans>

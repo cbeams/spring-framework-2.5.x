@@ -53,8 +53,8 @@
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"> 
 		<property name="interceptors">
 			<list>
-				<ref bean="localeChangeInterceptor"/>
-				<ref bean="themeChangeInterceptor"/>
+				<ref local="localeChangeInterceptor"/>
+				<ref local="themeChangeInterceptor"/>
 			</list>
 		</property>
 		<property name="mappings">
@@ -87,7 +87,7 @@
 	</bean>
 
 	<bean id="errorsController" class="org.springframework.samples.lightcountries.web.ErrorsController">
-		<property name="methodNameResolver"><ref bean="errorsMethodNameResolver"/></property>
+		<property name="methodNameResolver"><ref local="errorsMethodNameResolver"/></property>
 	</bean>
 
 	<!-- ===========================================================-->
@@ -107,8 +107,8 @@
 	</bean>
 
 	<bean id="lcountriesController" class="org.springframework.samples.lightcountries.web.CountriesController">
-		<property name="methodNameResolver"><ref bean="lcountriesMethodNameResolver"/></property>
-		<property name="daoCountry"><ref external="daoCountry"/></property>
+		<property name="methodNameResolver"><ref local="lcountriesMethodNameResolver"/></property>
+		<property name="daoCountry"><ref bean="daoCountry"/></property>
 		<!--
 		<property name="homeView"><value>homeView</value></property>
 		<property name="configView"><value>configView</value></property>

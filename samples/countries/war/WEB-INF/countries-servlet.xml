@@ -54,9 +54,9 @@
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"> 
 		<property name="interceptors">
 			<list>
-				<ref bean="localeChangeInterceptor"/>
-				<ref bean="themeChangeInterceptor"/>
-				<ref bean="copyInterceptor"/>
+				<ref local="localeChangeInterceptor"/>
+				<ref local="themeChangeInterceptor"/>
+				<ref local="copyInterceptor"/>
 			</list>
 		</property>
 		<property name="mappings">
@@ -90,7 +90,7 @@
 	</bean>
 
 	<bean id="errorsController" class="org.springframework.samples.countries.web.ErrorsController">
-		<property name="methodNameResolver"><ref bean="errorsMethodNameResolver"/></property>
+		<property name="methodNameResolver"><ref local="errorsMethodNameResolver"/></property>
 	</bean>
 
 	<!-- ===========================================================-->
@@ -119,10 +119,10 @@
 	-->
 
 	<bean id="countriesController" class="org.springframework.samples.countries.web.CountriesController">
-		<property name="methodNameResolver"><ref bean="countriesMethodNameResolver"/></property>
-		<property name="daoCountry"><ref external="daoCountry"/></property>
+		<property name="methodNameResolver"><ref local="countriesMethodNameResolver"/></property>
+		<property name="daoCountry"><ref bean="daoCountry"/></property>
 		<!-- Uncomment for MEMORY+DATABASE IMPLEMENTATION scenario 2 -->
-		<!-- <property name="secondDaoCountry"><ref external="secondDaoCountry"/></property> -->
+		<!-- <property name="secondDaoCountry"><ref bean="secondDaoCountry"/></property> -->
 		<!-- Possibility to redefine the view names without changing java code
 		<property name="homeView"><value>homeView</value></property>
 		<property name="configView"><value>configView</value></property>

@@ -73,7 +73,7 @@
 	</bean>
 	<bean id="daoCountry" class="org.springframework.samples.countries.dao.DaoCountryMem" singleton="true"/>
 	<bean id="secondDaoCountry" class="org.springframework.samples.countries.dao.DaoCountryJdbc" singleton="true">
-		<property name="dataSource"><ref bean="dataSource"/></property>
+		<property name="dataSource"><ref local="dataSource"/></property>
 		<property name="dropSql"><value>DROP TABLE countries</value></property>
 		<property name="createSql"><value>CREATE TABLE countries (lang CHAR(2), code CHAR(2), name VARCHAR(50))</value></property>
 	</bean>
@@ -86,7 +86,7 @@
 		<property name="jndiName"><value>jdbc/countries-ds</value></property>
 	</bean>
 	<bean id="daoCountry" class="org.springframework.samples.countries.dao.DaoCountryJdbc" singleton="true">
-		<property name="dataSource"><ref bean="dataSource"/></property>
+		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 	-->
 

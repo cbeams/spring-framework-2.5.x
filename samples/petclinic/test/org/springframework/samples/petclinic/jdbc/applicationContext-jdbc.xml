@@ -24,13 +24,13 @@
 
 	<!-- Transaction manager for a single JDBC DataSource (alternative to JTA) -->
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource"><ref bean="dataSource"/></property>
+		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 
 	<!-- Transactional proxy for the Petclinic primary business object -->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref bean="transactionManager"/></property>
-		<property name="target"><ref bean="clinicTarget"/></property>
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="clinicTarget"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="*">PROPAGATION_REQUIRED</prop>
@@ -41,7 +41,7 @@
 	<!-- Petclinic primary business object: HSQL JDBC implementation -->
 	<!-- Uncomment this to switch to JDBC, commenting out the Hibernate implementation below. -->
 	<bean id="clinicTarget" class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic">
-		<property name="dataSource"><ref bean="dataSource"/></property>
+		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 
 	<!-- ========================= End of PERSISTENCE DEFINITIONS ========================= -->
