@@ -29,7 +29,7 @@ public class ContextLoaderListener implements ServletContextListener {
 	 */
 	public void contextInitialized(ServletContextEvent event) {
 		this.contextLoader = createContextLoader();
-		this.contextLoader.initContext(event.getServletContext());
+		this.contextLoader.initWebApplicationContext(event.getServletContext());
 	}
 
 	/**

@@ -61,7 +61,7 @@ public class ContextLoaderServlet extends HttpServlet {
 	 */
 	public void init() throws ServletException {
 		this.contextLoader = createContextLoader();
-		this.contextLoader.initContext(getServletContext());
+		this.contextLoader.initWebApplicationContext(getServletContext());
 	}
 
 	/**

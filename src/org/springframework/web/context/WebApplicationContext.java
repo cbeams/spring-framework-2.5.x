@@ -20,15 +20,21 @@ import org.springframework.ui.context.ThemeSource;
  *
  * <p>Like generic application contexts, web application contexts are hierarchical.
  * There is a single root context per application, while each servlet in the application
- * (including controller servlets in the MVC framework) has its own child context.
+ * (including a dispatcher servlet in the MVC framework) has its own child context.
  *
  * @author Rod Johnson
  * @since January 19, 2001
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public interface WebApplicationContext extends ApplicationContext, ThemeSource {
 
-	/** 
+	/**
+	 * Context attribute to bind root WebApplicationContext to on successful startup.
+	 */
+	String ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE = WebApplicationContext.class + ".ROOT";
+
+
+	/**
 	 * Return the standard Servlet API ServletContext for this application.
 	 */
 	ServletContext getServletContext();

@@ -12,9 +12,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.config.ConfigurableApplicationContext;
-import org.springframework.web.context.NestedWebApplicationContext;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -28,8 +30,7 @@ import org.springframework.web.util.WebUtils;
  * <p>This class offers the following functionality:
  * <ul>
  * <li>Uses a WebApplicationContext to access a BeanFactory. The servlet's
- * configuration is determined by the beans in the namespace 'servlet-name'-servlet,
- * if not overridden via the namespace property.
+ * configuration is determined by beans in the servlet's namespace.
  * <li>Publishes events on request processing, whether or not a request is
  * successfully handled.
  * </ul>
@@ -37,11 +38,30 @@ import org.springframework.web.util.WebUtils;
  * <p>Subclasses must implement doService() to handle requests. Because this extends
  * HttpServletBean rather than HttpServlet directly, bean properties are mapped
  * onto it. Subclasses can override initFrameworkServlet() for custom initialization.
-  *
+ *
+ * <p>Regards a "contextClass" parameter at the servlet init-param level,
+ * falling back to the default context class (XmlWebApplicationContext) if not found.
+ * With the default FrameworkServlet, a context class needs to implement
+ * ConfigurableWebApplicationContext.
+ *
+ * <p>Passes a "contextConfigLocation" servlet init-param to the context instance,
+ * parsing it into potentially multiple file paths which can be separated by any
+ * number of commas and spaces, like "test-servlet.xml, myServlet.xml".
+ * If not explicitly specified, the context implementation is supposed to build a
+ * default location from the namespace of the servlet.
+ *
+ * <p>The default namespace is "'servlet-name'-servlet", e.g. "test-servlet" for a
+ * servlet-name "test" (leading to a "/WEB-INF/test-servlet.xml" default location
+ * with XmlWebApplicationContext). The namespace can also be explicitly set via
+ * the "namespace" servlet init-param.
+ *
  * @author Rod Johnson
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see #doService
  * @see #initFrameworkServlet
+ * @see #setContextClass
+ * @see #setContextConfigLocation
+ * @see #setNamespace
  */
 public abstract class FrameworkServlet extends HttpServletBean {
 
@@ -65,11 +85,14 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	public static final String SERVLET_CONTEXT_PREFIX = FrameworkServlet.class.getName() + ".CONTEXT.";
 
 
+	/** Custom context class */
+	private Class contextClass = DEFAULT_CONTEXT_CLASS;
+
 	/** Namespace for this servlet */
 	private String namespace;
 
-	/** Custom context class */
-	private Class contextClass = DEFAULT_CONTEXT_CLASS;
+	/** Explicit context config location */
+	private String contextConfigLocation;
 
 	/** Should we publish the context as a ServletContext attribute? */
 	private boolean publishContext = true;
@@ -79,7 +102,24 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 
 	/**
-	 * Set a custom namespace for this servlet.
+	 * Set a custom context class. This class must be of type WebApplicationContext,
+	 * with the default FrameworkServlet implementing ConfigurableWebApplicationContext.
+	 * @see #createWebApplicationContext
+	 */
+	public final void setContextClass(Class contextClass) {
+		this.contextClass = contextClass;
+	}
+
+	/**
+	 * Return the custom context class.
+	 */
+	public Class getContextClass() {
+		return contextClass;
+	}
+
+	/**
+	 * Set a custom namespace for this servlet,
+	 * to be used for building a default context config location.
 	 */
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
@@ -94,20 +134,19 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Set a custom context class. This class must be of type WebApplicationContext,
-	 * and must implement a constructor taking two arguments:
-	 * a parent WebApplicationContext (the root), and the current namespace as String.
-	 * @param contextClass custom context class to use
+	 * Set the context config location explicitly, instead of relying on the default
+	 * location built from the namespace. This location string can consist of
+	 * multiple locations separated by any number of commas and spaces.
 	 */
-	public final void setContextClass(Class contextClass) {
-		this.contextClass = contextClass;
+	public void setContextConfigLocation(String contextConfigLocation) {
+		this.contextConfigLocation = contextConfigLocation;
 	}
 
 	/**
-	 * Return the custom context class name, or null if none set.
+	 * Return the explicit context config location, if any.
 	 */
-	public Class getContextClass() {
-		return contextClass;
+	public String getContextConfigLocation() {
+		return contextConfigLocation;
 	}
 
 	/**
@@ -150,7 +189,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Overridden method of HttpServletBean, invoked after any bean properties
 	 * have been set. Creates this servlet's WebApplicationContext.
 	 */
-	protected final void initServletBean() throws ServletException {
+	protected final void initServletBean() throws ServletException, BeansException {
 		long startTime = System.currentTimeMillis();
 		logger.info("Framework servlet '" + getServletName() + "' init");
 		this.webApplicationContext = initWebApplicationContext();
@@ -163,10 +202,10 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Initialize and publish the WebApplicationContext for this servlet.
 	 * Delegates to createWebApplicationContext for actual creation.
 	 * Can be overridden in subclasses.
-	 * @throws ServletException if the context couldn't be initialized
+	 * @throws BeansException if the context couldn't be initialized
 	 * @see #createWebApplicationContext
 	 */
-	protected WebApplicationContext initWebApplicationContext() throws ServletException {
+	protected WebApplicationContext initWebApplicationContext() throws BeansException {
 		getServletContext().log("Initializing WebApplicationContext for servlet '" + getServletName() + "'");
 		ServletContext servletContext = getServletConfig().getServletContext();
 		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(servletContext);
@@ -185,53 +224,31 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Instantiate the WebApplicationContext for this servlet, either a default
-	 * XmlWebApplicationContext or a custom context class if set.
-	 * This implementation expects custom contexts to implement NestedWebApplicationContext.
+	 * XmlWebApplicationContext or a custom context class if set. This implementation
+	 * expects custom contexts to implement ConfigurableWebApplicationContext.
 	 * Can be overridden in subclasses.
-	 * @throws ServletException if the context couldn't be initialized
+	 * @throws BeansException if the context couldn't be initialized
 	 * @see #setContextClass
-	 * @see org.springframework.web.context.NestedWebApplicationContext
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
-	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) throws ServletException {
-		NestedWebApplicationContext wac = null;
-		try {
-			logger.info("Servlet with name '" + getServletName() +
-									"' will try to create custom WebApplicationContext context of class '" + getContextClass().getName() + "'");
-			if (!NestedWebApplicationContext.class.isAssignableFrom(getContextClass())) {
-				throw new ServletException("Fatal initialization error in servlet with name '" + getServletName() +
-																	 "': custom WebApplicationContext class '" + getContextClass().getName() +
-																	 "' must implement NestedWebApplicationContext");
-			}
-			wac = (NestedWebApplicationContext) getContextClass().newInstance();
-			wac.initNestedContext(getServletContext(), getNamespace(), parent, this);
+	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) throws BeansException {
+		ConfigurableWebApplicationContext wac = null;
+		logger.info("Servlet with name '" + getServletName() +
+								"' will try to create custom WebApplicationContext context of class '" + getContextClass().getName() + "'");
+		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(getContextClass())) {
+			throw new ApplicationContextException("Fatal initialization error in servlet with name '" + getServletName() +
+																						"': custom WebApplicationContext class '" + getContextClass().getName() +
+																						"' is not of type ConfigurableWebApplicationContext");
 		}
-		catch (BeansException ex) {
-			handleException("Failed to initialize application context", ex);
+		wac = (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(getContextClass());
+		wac.setParent(parent);
+		wac.setServletContext(getServletContext());
+		wac.setNamespace(getNamespace());
+		if (this.contextConfigLocation != null) {
+			wac.setConfigLocations(WebApplicationContextUtils.parseContextConfigLocation(this.contextConfigLocation));
 		}
-		catch (InstantiationException ex) {
-			handleException("Failed to instantiate custom context", ex);
-		}
-		catch (IllegalAccessException ex) {
-			handleException("Failed to access constructor for custom context", ex);
-		}
+		wac.refresh();
 		return wac;
-	}
-
-	/**
-	 * Log and throw an appropriate exception.
-	 */
-	private void handleException(String msg, Exception ex) throws ServletException {
-		logger.error(msg + " for servlet '" + getServletName() + "'", ex);
-		if (ex instanceof ServletException) {
-			throw (ServletException) ex;
-		}
-		else if (ex instanceof RuntimeException) {
-			throw (RuntimeException) ex;
-		}
-		else {
-			throw new ServletException(msg, ex);
-		}
 	}
 
 	public void destroy() {
@@ -314,8 +331,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * The implementation may be empty. This method will be invoked after any bean properties
 	 * have been set and WebApplicationContext and BeanFactory have been loaded.
 	 * @throws ServletException in case of an initialization exception
+	 * @throws BeansException if thrown by application context methods
 	 */
-	protected abstract void initFrameworkServlet() throws ServletException;
+	protected abstract void initFrameworkServlet() throws ServletException, BeansException;
 
 	/**
 	 * Subclasses must implement this method to do the work of request handling.

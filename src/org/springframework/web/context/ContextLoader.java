@@ -4,6 +4,8 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
@@ -15,15 +17,24 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * Performs the actual initialization work for the root application context.
  * Called by ContextLoaderListener and ContextLoaderServlet.
  *
- * <p>Regards a "contextClass" parameter at the servlet context resp. web.xml root level,
+ * <p>Regards a "contextClass" parameter at the web.xml context-param level,
  * falling back to the default context class (XmlWebApplicationContext) if not found.
+ * With the default ContextLoader, a context class needs to implement
+ * ConfigurableWebApplicationContext.
+ *
+ * <p>Passes a "contextConfigLocation" context-param to the context instance,
+ * parsing it into potentially multiple file paths which can be separated by any
+ * number of commas and spaces, like "applicationContext1.xml, applicationContext2.xml".
+ * If not explicitly specified, the context implementation is supposed to use a
+ * default location (with XmlWebApplicationContext: "/WEB-INF/applicationContext.xml").
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
  * @since 17.02.2003
  * @see ContextLoaderListener
  * @see ContextLoaderServlet
- * @see XmlWebApplicationContext
+ * @see ConfigurableWebApplicationContext
+ * @see org.springframework.web.context.support.XmlWebApplicationContext
  */
 public class ContextLoader {
 
@@ -39,23 +50,28 @@ public class ContextLoader {
 	 */
 	public static final Class DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
 
+	/**
+	 * Name of servlet context parameter that can specify the config location
+	 * for the root context, falling back to DEFAULT_CONFIG_LOCATION.
+	 */
+	public static final String CONFIG_LOCATION_PARAM = "contextConfigLocation";
+
+
 	private final Log logger = LogFactory.getLog(ContextLoader.class);
 
 	/**
-	 * Parent context to web application context, which may optionally be
-	 * loaded/initialized by the loadParentContext() template method 
-	 */
-	protected ApplicationContext parentContext;
-	
-	/**
 	 * Initialize Spring's web application context for the given servlet context,
-	 * regarding the "contextClass" servlet context init parameter.
+	 * regarding the "contextClass" and "contextConfigLocation" context-params.
 	 * @param servletContext current servlet context
 	 * @return the new WebApplicationContext
+	 * @throws BeansException if the context couldn't be initialized
+	 * @see #CONTEXT_CLASS_PARAM
+	 * @see #CONFIG_LOCATION_PARAM
 	 */
-	public WebApplicationContext initContext(ServletContext servletContext) throws BeansException {
+	public WebApplicationContext initWebApplicationContext(ServletContext servletContext) throws BeansException {
 		servletContext.log("Loading root WebApplicationContext");
-		WebApplicationContext wac = createContext(servletContext);
+		ApplicationContext parent = loadParentContext(servletContext);
+		WebApplicationContext wac = createWebApplicationContext(servletContext, parent);
 		logger.info("Using context class [" + wac.getClass().getName() + "] for root WebApplicationContext");
 		WebApplicationContextUtils.publishWebApplicationContext(wac);
 		return wac;
@@ -64,44 +80,51 @@ public class ContextLoader {
 	/**
 	 * Instantiate the root WebApplicationContext for this loader, either a default
 	 * XmlWebApplicationContext or a custom context class if specified.
-	 * This implementation expects custom contexts to implement NestedWebApplicationContext.
+	 * This implementation expects custom contexts to implement ConfigurableWebApplicationContext.
 	 * Can be overridden in subclasses.
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #CONTEXT_CLASS_PARAM
 	 * @see #DEFAULT_CONTEXT_CLASS
-	 * @see RootWebApplicationContext
+	 * @see ConfigurableWebApplicationContext
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
-	protected WebApplicationContext createContext(ServletContext servletContext) throws BeansException {
-
-		String contextClass = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
-		RootWebApplicationContext wac = null;
-		try {
-			loadParentContext(servletContext);
-			
-			ClassLoader cl = Thread.currentThread().getContextClassLoader();
-			Class clazz = (contextClass != null ? Class.forName(contextClass, true, cl) : DEFAULT_CONTEXT_CLASS);
-			if (!RootWebApplicationContext.class.isAssignableFrom(clazz)) {
-				throw new ApplicationContextException("Context class [" + contextClass + "] is not RootWebApplicationContext");
+	protected WebApplicationContext createWebApplicationContext(ServletContext servletContext,
+																															ApplicationContext parent) throws BeansException {
+		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
+		Class contextClass = DEFAULT_CONTEXT_CLASS;
+		if (contextClassName != null) {
+			try {
+				contextClass = Class.forName(contextClassName, true, Thread.currentThread().getContextClassLoader());
 			}
-			wac = (RootWebApplicationContext) clazz.newInstance();
-			wac.initRootContext(servletContext, this.parentContext);
+			catch (ClassNotFoundException ex) {
+				throw new ApplicationContextException("Failed to load context class [" + contextClassName + "]", ex);
+			}
+			if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
+				throw new ApplicationContextException("Custom context class [" + contextClassName +
+																							"] is not of type ConfigurableWebApplicationContext");
+			}
 		}
-		catch (BeansException ex) {
-			handleException("Failed to initialize application context", ex);
+		ConfigurableWebApplicationContext wac = (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
+		wac.setParent(parent);
+		wac.setServletContext(servletContext);
+		String configLocation = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
+		if (configLocation != null) {
+			wac.setConfigLocations(WebApplicationContextUtils.parseContextConfigLocation(configLocation));
 		}
-		catch (ClassNotFoundException ex) {
-			handleException("Failed to load config class [" + contextClass + "]", ex);
-		}
-		catch (InstantiationException ex) {
-			handleException("Failed to instantiate config class [" + contextClass +
-			                "]: does it have a public no arg constructor?", ex);
-		}
-		catch (IllegalAccessException ex) {
-			handleException("Illegal access while finding or instantiating config class [" +
-			                contextClass + "]: does it have a public no arg constructor?", ex);
-		}
+		wac.refresh();
 		return wac;
+	}
+
+	/**
+	 * Template method which may be overridden by a subclass to load or obtain
+	 * an ApplicationContext instance which will be used as the parent context
+	 * of the root WebApplicationContext if it is not null.
+	 * @param servletContext
+	 * @return the parent application context, or null if none
+	 * @throws BeansException if the context couldn't be initialized
+	 */
+	protected ApplicationContext loadParentContext(ServletContext servletContext) throws BeansException {
+		return null;
 	}
 
 	/**
@@ -113,32 +136,6 @@ public class ContextLoader {
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 		if (wac instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) wac).close();
-		}
-	}
-	
-	/**
-	 * Template method which may be overriden by a subclass to load or obtain
-	 * an ApplicationContext instance which will be used as the parent context
-	 * of the WebApplicationContext if it is not null. This method should set
-	 * the parentContext field.
-	 * 
-	 * @param servletContext
-	 * @throws BeansException if the context couldn't be initialized
-	 */
-	protected void loadParentContext(ServletContext servletContext) throws BeansException {
-		// empty default impl.
-	}
-	
-	/**
-	 * Log and throw an appropriate exception.
-	 */
-	protected void handleException(String msg, Throwable ex) throws BeansException {
-		logger.error(msg, ex);
-		if (ex instanceof BeansException) {
-			throw (BeansException) ex;
-		}
-		else {
-			throw new ApplicationContextException(msg, ex);
 		}
 	}
 
