@@ -284,7 +284,7 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Specialization of AbstractState's <code>doEnterState</code> template
+	 * Specialization of State's <code>doEnterState</code> template
 	 * method that executes behaivior specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
@@ -331,7 +331,7 @@ public class ActionState extends TransitionableState {
 					+ "'; transitions must be defined to handle action result outcomes -- "
 					+ "possible flow configuration error?  Note: the eventIds signaled were: '" + Styler.call(eventIds)
 					+ "', while the supported set of eventId criteria for this action state is '"
-					+ Styler.call(getEventIdCriteria()) + "'");
+					+ Styler.call(getTransitionalCriteria()) + "'");
 		}
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(

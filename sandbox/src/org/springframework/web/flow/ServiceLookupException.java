@@ -19,7 +19,6 @@ import org.springframework.util.StringUtils;
 
 /**
  * Abstract superclass of all flow service lookup exceptions.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */

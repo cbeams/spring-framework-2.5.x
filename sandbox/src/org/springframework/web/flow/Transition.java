@@ -27,11 +27,10 @@ import org.springframework.util.closure.support.AbstractConstraint;
  * A transition is associated with exactly one source
  * <code>TransitionableState</code> managed by exactly one <code>Flow</code>
  * definition.
- * 
- * @see org.springframework.web.flow.TransitionableState
- * @see org.springframework.web.flow.Flow
  * @author Keith Donald
  * @author Erwin Vervaet
+ * @see org.springframework.web.flow.TransitionableState
+ * @see org.springframework.web.flow.Flow
  */
 public class Transition {
 
@@ -44,8 +43,8 @@ public class Transition {
 	public static final String WILDCARD_EVENT_ID = "*";
 
 	/**
-	 * The criteria that determines whether or not this criteria handles a given
-	 * event. The event is identified by a String identifier.
+	 * The criteria that determines whether or not this transition handles a
+	 * given <code>Event</code>.
 	 */
 	private Constraint condition;
 
@@ -75,7 +74,7 @@ public class Transition {
 	public Transition(String eventId, String targetStateId) {
 		Assert.notNull(eventId, "The event id property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.condition = createDefaultEventIdCriteria(eventId);
+		this.condition = createDefaultCondition(eventId);
 		this.targetStateId = targetStateId;
 	}
 
@@ -95,6 +94,7 @@ public class Transition {
 
 	/**
 	 * Returns the owning source (<i>from</i>) state of this transition.
+	 * @return the source state
 	 * @throws IllegalStateException, if the source state has not been set.
 	 */
 	protected TransitionableState getSourceState() {
@@ -113,6 +113,7 @@ public class Transition {
 
 	/**
 	 * Returns the id of the target (<i>to</i>) state of this transition.
+	 * @return the target state id
 	 */
 	public String getTargetStateId() {
 		return targetStateId;
@@ -120,6 +121,7 @@ public class Transition {
 
 	/**
 	 * Returns the target (<i>to</i>) state of this transition.
+	 * @return the target state
 	 * @throws NoSuchFlowStateException When the target state cannot be found
 	 */
 	protected State getTargetState() throws NoSuchFlowStateException {
@@ -136,14 +138,15 @@ public class Transition {
 	}
 
 	/**
-	 * Create a constraint object used to match event ids with this transition
-	 * based on given event id.
+	 * Create a default constraint implementation that will match true on events
+	 * with the provided event id.
 	 * <p>
 	 * If the given event id is "*", a wildcard event criteria object will be
 	 * returned that matches any event. Otherwise you get a criteria object that
 	 * matches given event id exactly.
+	 * @param the default event condition
 	 */
-	protected Constraint createDefaultEventIdCriteria(final String eventId) {
+	protected Constraint createDefaultCondition(final String eventId) {
 		if (WILDCARD_EVENT_ID.equals(eventId)) {
 			return WILDCARD_EVENT_CRITERIA;
 		}
@@ -163,16 +166,19 @@ public class Transition {
 	}
 
 	/**
-	 * Returns the strategy used to match event ids with this transition
+	 * Returns the strategy used to determine if this transition should execute
+	 * given a execution context.
+	 * @return the constraint
 	 */
 	public Constraint getCondition() {
 		return this.condition;
 	}
 
 	/**
-	 * Checks if this transition is executed (triggered by) given event id.
-	 * @param eventId The event id
-	 * @return true or false
+	 * Checks if this transition should be executed given the state of the
+	 * provided flow execution context.
+	 * @param context the flow execution context
+	 * @return true if this transition should execute, false otherwise
 	 */
 	public boolean executesOn(FlowExecutionContext context) {
 		return condition.test(context);
@@ -180,10 +186,7 @@ public class Transition {
 
 	/**
 	 * Execute this transition.
-	 * @param context A flow execution stack, tracking any suspended
-	 *        parent flows that spawned this flow (as a subflow)
-	 * @param request the client http request
-	 * @param response the server http response
+	 * @param context The flow execution context
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the transition execution.
 	 * @throws CannotExecuteStateTransitionException thrown when this transition
@@ -194,9 +197,10 @@ public class Transition {
 			ViewDescriptor viewDescriptor = getTargetState().enter(context);
 			if (logger.isDebugEnabled()) {
 				if (context.isFlowExecutionActive()) {
-					logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
-							+ context.getCurrentState().getId() + "' in flow '"
-							+ context.getActiveFlow().getId() + "'");
+					logger
+							.debug("Transition '" + this + "' executed; as a result, the new state is '"
+									+ context.getCurrentState().getId() + "' in flow '"
+									+ context.getActiveFlow().getId() + "'");
 				}
 				else {
 					logger.debug("Transition '" + this + "' executed; as a result, the flow '"

@@ -25,19 +25,25 @@ import org.springframework.util.Assert;
 /**
  * State that spawns a subflow when executed.
  * <p>
- * A sub flow state has the ability to map data between the parent and sub flow
- * models. See the {@link FlowAttributeMapper} interface definition for info on how
- * to do this.
- * 
- * @see org.springframework.web.flow.FlowAttributeMapper
+ * A sub flow state has the ability to map data between the parent and sub flow.
+ * See the {@link FlowAttributeMapper} interface definition for info on how to
+ * do this.
  * @author Keith Donald
  * @author Erwin Vervaet
+ * @see org.springframework.web.flow.FlowAttributeMapper
  */
 public class SubFlowState extends TransitionableState implements FlowAttributeMapper {
 
+	/**
+	 * The subflow that should be spawned when this subflow state is entered.
+	 */
 	private Flow subFlow;
 
-	private FlowAttributeMapper flowModelMapper;
+	/**
+	 * The attribute mapper that should map attributes from the parent flow down
+	 * to the spawned subflow.
+	 */
+	private FlowAttributeMapper flowAttributeMapper;
 
 	/**
 	 * Create a new sub flow state.
@@ -70,14 +76,14 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param subFlow The sub flow to spawn
-	 * @param modelMapper The model mapper to use
+	 * @param attributeMapper The attribute mapper to use
 	 * @param transition The sole transition of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
-	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper modelMapper, Transition transition)
+	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper attributeMapper, Transition transition)
 			throws IllegalArgumentException {
-		this(flow, id, subFlow, modelMapper, new Transition[] { transition });
+		this(flow, id, subFlow, attributeMapper, new Transition[] { transition });
 	}
 
 	/**
@@ -85,16 +91,16 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param subFlow The sub flow to spawn
-	 * @param modelMapper The model mapper to use
+	 * @param attributeMapper The attribute mapper to use
 	 * @param transitions The transitions of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
-	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper modelMapper, Transition[] transitions)
-			throws IllegalArgumentException {
+	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper attributeMapper,
+			Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
 		setSubFlow(subFlow);
-		setFlowModelMapper(modelMapper);
+		setFlowAttributeMapper(attributeMapper);
 	}
 
 	/**
@@ -114,22 +120,26 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 	}
 
 	/**
-	 * Set the model mapper to use to map model data between parent and sub flow
-	 * model. Can be null if no mapping is needed.
+	 * Set the attribute mapper to use to map model data between parent and sub
+	 * flow model. Can be null if no mapping is needed.
 	 */
-	protected void setFlowModelMapper(FlowAttributeMapper modelMapper) {
-		this.flowModelMapper = modelMapper;
+	protected void setFlowAttributeMapper(FlowAttributeMapper attributeMapper) {
+		this.flowAttributeMapper = attributeMapper;
 	}
 
 	/**
-	 * Returns the model mapper used to map data between parent and sub flow
+	 * Returns the attribute mapper used to map data between parent and sub flow
 	 * model, or null if no mapping is needed.
 	 */
-	public FlowAttributeMapper getFlowModelMapper() {
-		return this.flowModelMapper;
+	public FlowAttributeMapper getFlowAttributeMapper() {
+		return this.flowAttributeMapper;
 	}
 
 	/**
+	 * Specialization of State's <code>doEnterState</code> template
+	 * method that executes behaivior specific to this state type in polymorphic
+	 * fashion.
+	 * <p>
 	 * Enter this state, creating the sub flow input map and spawning the sub
 	 * flow in the current flow execution.
 	 */
@@ -141,18 +151,18 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 		return context.spawn(getSubFlow(), createSubFlowInputAttributes(context.flowScope()));
 	}
 
-	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {
-		if (getFlowModelMapper() != null) {
+	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowAttributes) {
+		if (getFlowAttributeMapper() != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Messaging the configured model mapper to map parent-flow attributes "
+				logger.debug("Messaging the configured attribute mapper to map parent-flow attributes "
 						+ "down to the spawned sub flow for access within the sub flow");
 			}
-			return this.flowModelMapper.createSubFlowInputAttributes(parentFlowModel);
+			return this.flowAttributeMapper.createSubFlowInputAttributes(parentFlowAttributes);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger
-						.debug("No model mapper configured for this sub flow state '"
+						.debug("No attribute mapper configured for this sub flow state '"
 								+ getId()
 								+ "'; as a result, no attributes in the parent flow scope will be passed to the spawned sub flow '"
 								+ subFlow.getId() + "'");
@@ -161,19 +171,19 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 		}
 	}
 
-	public void mapSubFlowOutputAttributes(AttributeAccessor subFlowModel, AttributeSetter parentFlowModel) {
-		if (getFlowModelMapper() != null) {
+	public void mapSubFlowOutputAttributes(AttributeAccessor subFlowAttributes, AttributeSetter parentFlowAttributes) {
+		if (getFlowAttributeMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger
-						.debug("Messaging the configured model mapper to map sub flow attributes back up to the resuming parent flow - "
+						.debug("Messaging the configured attribute mapper to map sub flow attributes back up to the resuming parent flow - "
 								+ "the resuming parent flow will now have access to attributes passed up by the completed sub flow");
 			}
-			this.flowModelMapper.mapSubFlowOutputAttributes(subFlowModel, parentFlowModel);
+			this.flowAttributeMapper.mapSubFlowOutputAttributes(subFlowAttributes, parentFlowAttributes);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger
-						.debug("No model mapper is configured for the resuming state '"
+						.debug("No attribute mapper is configured for the resuming state '"
 								+ getId()
 								+ "' - note: as a result, no attributes in the ending sub flow scope will be passed to the resuming parent flow");
 			}

@@ -23,10 +23,10 @@ import org.springframework.util.ToStringCreator;
  * to the user, for example, for solicting form input.
  * <p>
  * To accomplish this, a <code>ViewState</code> returns a
- * <code>ViewDescriptor</code>, which contains the name of the view template
- * to render and all supporting model data needed to render it correctly. It is
- * expected that some sort of view resolver will map this view name to a
- * physical resource template (like a jsp file.)
+ * <code>ViewDescriptor</code>, which contains the logical name of a view
+ * template to render and all supporting model data needed to render it
+ * correctly. It is expected that some sort of view resolver will map this view
+ * name to a physical resource template (like a jsp file.)
  * <p>
  * A view state can also be a <i>marker</i> state with no associated view. In
  * this case it just returns control back to the HTTP client. Marker states are
@@ -115,15 +115,15 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
-	 * Return a view descriptor pointing requesting front controllers to a
+	 * Specialization of State's <code>doEnterState</code> template
+	 * method that executes behaivior specific to this state type in polymorphic
+	 * fashion.
+	 * <p>
+	 * Returns a view descriptor pointing requesting front controllers to a
 	 * logical view resource to be displayed. The descriptor also contains a
 	 * model map needed when the view is rendered, for populating dynamic
 	 * content.
-	 * 
-	 * @param context The flow execution stack, tracking the current active flow
-	 *        session
-	 * @param request The client http request
-	 * @param response The server http response
+	 * @param context The state execution context
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */

@@ -97,7 +97,7 @@ public class EndState extends State {
 	}
 
 	/**
-	 * Specialization of AbstractState's <code>doEnterState</code> template
+	 * Specialization of State's <code>doEnterState</code> template
 	 * method that executes behaivior specific to this state type in polymorphic
 	 * fashion.
 	 * <p>

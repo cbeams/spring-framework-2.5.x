@@ -16,7 +16,7 @@
 package org.springframework.web.flow;
 
 /**
- * Thrown when a flow definition cannot be found.
+ * Thrown when a flow definition cannot be found in a registry.
  * @author Keith Donald
  * @author Erwin Vervaet
  */

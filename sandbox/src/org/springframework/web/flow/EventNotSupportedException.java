@@ -62,6 +62,6 @@ public class EventNotSupportedException extends FlowNavigationException {
 	public String getMessage() {
 		return "No transition found for event '" + event.getId() + "' in state '" + state.getId() + "' of flow '"
 				+ getFlow().getId() + "' -- valid transitional event criteria are "
-				+ Styler.call(state.getEventIdCriteria()) + " -- programmer error?";
+				+ Styler.call(state.getTransitionalCriteria()) + " -- programmer error?";
 	}
 }

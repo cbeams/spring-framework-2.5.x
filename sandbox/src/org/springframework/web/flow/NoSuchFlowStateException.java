@@ -18,7 +18,7 @@ package org.springframework.web.flow;
 import org.springframework.util.Styler;
 
 /**
- * Thrown when a state could not be found in a flow, on lookup by
+ * Thrown when a state could not be found in a flow on lookup by
  * <code>stateId</code>.
  * @author Keith Donald
  * @author Erwin Vervaet

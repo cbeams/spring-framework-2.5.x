@@ -21,12 +21,16 @@ import java.util.Map;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * Holder for both Model and View in the web MVC framework. Note that these are
- * entirely distinct. This class merely holds both to make it possible for a
- * controller to return both model and view in a single return value.
+ * Holder for a logical view name and the dynamic model data neccessary to
+ * render it. It is expected that a client map this logical view descriptor to a
+ * physical view template for rendering.
+ * <p>
+ * For readers familiar with Spring MVC, this class is very similiar to its
+ * <code>ModelAndView</code> construct. This class is provided to prevent a
+ * web.flow dependency on Spring MVC.
+ * @author Keith Donald
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @author Keith Donald
  */
 public class ViewDescriptor {
 

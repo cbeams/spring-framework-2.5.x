@@ -27,12 +27,16 @@ import org.springframework.util.ToStringCreator;
  * Abstract superclass for states that have one or more transitions. State
  * transitions are triggered by events, specifically, when an occurence of a
  * supported event in this state is signaled.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
+ * @see org.springframework.web.flow.Transition
+ * @see org.springframework.web.flow.Flow
  */
 public abstract class TransitionableState extends State {
 
+	/**
+	 * The set of possible transitions out of this state.
+	 */
 	private Set transitions = new LinkedHashSet();
 
 	/**
@@ -81,14 +85,11 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Signal an occurence of the event identified by <code>eventId</code> in
-	 * this state.
-	 * @param eventId The id of the event to execute (e.g 'submit', 'next',
+	 * Signal an occurence of the specified event in this state, triggering the
+	 * execution of an appropriate state transition.
+	 * @param event The event that occured in this state (e.g 'submit', 'next',
 	 *        'back')
-	 * @param flowExecution A flow execution stack, tracking any suspended
-	 *        parent flows that spawned this flow (as a subflow)
-	 * @param request the client http request
-	 * @param response the server http response
+	 * @param context A flow execution context
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 * @throws EventNotSupportedException if the eventId does not map to a valid
@@ -118,10 +119,11 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Returns a collection of all the criteria (Constraint objects) used to
-	 * match events with transitions in this state.
+	 * Returns a collection of the supported transitional criteria (Constraint
+	 * objects) used to match events with transitions in this state.
+	 * @return the collection of transitional conditions
 	 */
-	public Collection getEventIdCriteria() {
+	public Collection getTransitionalCriteria() {
 		if (transitions.isEmpty()) {
 			return Collections.EMPTY_SET;
 		}
