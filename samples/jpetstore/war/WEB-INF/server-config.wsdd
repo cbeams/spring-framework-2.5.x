@@ -28,10 +28,10 @@
  <service name="OrderService" provider="java:RPC">
   <parameter name="allowedMethods" value="*"/>
   <parameter name="className" value="org.springframework.samples.jpetstore.service.server.JaxRpcOrderService"/>
-	<beanMapping qname="jpetstore:Order" xmlns:jpetstore="urn:BeanService" languageSpecificType="java:org.springframework.samples.jpetstore.domain.Order"/>
-	<beanMapping qname="jpetstore:LineItem" xmlns:jpetstore="urn:BeanService" languageSpecificType="java:org.springframework.samples.jpetstore.domain.LineItem"/>
-	<beanMapping qname="jpetstore:Item" xmlns:jpetstore="urn:BeanService" languageSpecificType="java:org.springframework.samples.jpetstore.domain.Item"/>
-	<beanMapping qname="jpetstore:Product" xmlns:jpetstore="urn:BeanService" languageSpecificType="java:org.springframework.samples.jpetstore.domain.Product"/>
+	<beanMapping qname="jpetstore:Order" xmlns:jpetstore="urn:JPetStore" languageSpecificType="java:org.springframework.samples.jpetstore.domain.Order"/>
+	<beanMapping qname="jpetstore:LineItem" xmlns:jpetstore="urn:JPetStore" languageSpecificType="java:org.springframework.samples.jpetstore.domain.LineItem"/>
+	<beanMapping qname="jpetstore:Item" xmlns:jpetstore="urn:JPetStore" languageSpecificType="java:org.springframework.samples.jpetstore.domain.Item"/>
+	<beanMapping qname="jpetstore:Product" xmlns:jpetstore="urn:JPetStore" languageSpecificType="java:org.springframework.samples.jpetstore.domain.Product"/>
  </service>
  <service name="Version" provider="java:RPC">
   <parameter name="allowedMethods" value="getVersion"/>

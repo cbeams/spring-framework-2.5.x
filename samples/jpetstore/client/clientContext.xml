@@ -57,6 +57,9 @@
 		<property name="portName">
 			<value>OrderService</value>
 		</property>
+		<property name="namespace">
+			<value>urn:JPetStore</value>
+		</property>
 	</bean>
 
 	<!-- Proxy for the RMI-exported OrderService -->

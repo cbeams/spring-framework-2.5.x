@@ -29,6 +29,12 @@ import org.springframework.samples.jpetstore.domain.Product;
  */
 public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
 
+	private String namespace;
+
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
+
 	protected void postProcessJaxRpcService(Service service) {
 		TypeMappingRegistry registry = service.getTypeMappingRegistry();
 		TypeMapping mapping = registry.createTypeMapping();
@@ -40,7 +46,7 @@ public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
 	}
 
 	protected void registerBeanMapping(TypeMapping mapping, Class type, String name) {
-		QName qName = new QName("urn:BeanService", name);
+		QName qName = new QName(this.namespace, name);
 		mapping.register(type, qName,
 										 new BeanSerializerFactory(type, qName),
 										 new BeanDeserializerFactory(type, qName));
