@@ -218,14 +218,17 @@
       <literal>yetAnotherExample</literal> is only created once; a reference
       to the exact same instance is returned on each request for this bean.<programlisting>&#60;bean id=&#34;exampleBean&#34; class=&#34;examples.ExampleBean&#34; singleton=&#34;false&#34;/&#62;
 &#60;bean name=&#34;yetAnotherExample&#34; class=&#34;examples.ExampleBeanTwo&#34; singleton=&#34;true&#34;/&#62;</programlisting></para>
-		<para>
-			<emphasis>Note: when deploying a bean in the prototype mode, the lifecycle of the bean changes slightly.
-			By definition, Spring can not manage the complete lifecycle of a non-singleton/prototype bean, since 
-			after it is created, it is given to the client and the container does not keep track of it 
-			at all any longer. You can think of Spring's role when talking about a non-singleton/prototype bean 
-			as a replacement for the 'new' operator. Any lifecycle aspects past that point have to be handled by the client.
-			The lifecycle of a bean in the BeanFactory is further described in <xref linkend="beans-factory-lifecycle" /></emphasis>
-		</para>
+
+      <para><emphasis>Note: when deploying a bean in the prototype mode, the
+      lifecycle of the bean changes slightly. By definition, Spring can not
+      manage the complete lifecycle of a non-singleton/prototype bean, since
+      after it is created, it is given to the client and the container does
+      not keep track of it at all any longer. You can think of Spring&#39;s
+      role when talking about a non-singleton/prototype bean as a replacement
+      for the &#39;new&#39; operator. Any lifecycle aspects past that point
+      have to be handled by the client. The lifecycle of a bean in the
+      BeanFactory is further described in <xref
+      linkend="beans-factory-lifecycle" /></emphasis></para>
     </sect2>
   </sect1>
 
@@ -588,14 +591,17 @@ public class AnotherExampleBean implements DisposableBean {
         // do some destruction work
     }
 }</programlisting></para>
-		<para>
-			<emphasis>Note: when deploying a bean in the prototype mode, the lifecycle of the bean changes slightly.
-			By definition, Spring can not manage the complete lifecycle of a non-singleton/prototype bean, since 
-			after it is created, it is given to the client and the container does not keep track of it 
-			at all any longer. You can think of Spring's role when talking about a non-singleton/prototype bean 
-			as a replacement for the 'new' operator. Any lifecycle aspects past that point have to be handled by the client.
-			The lifecycle of a bean in the BeanFactory is further described in <xref linkend="beans-factory-lifecycle" /></emphasis>
-		</para>
+
+        <para><emphasis>Note: when deploying a bean in the prototype mode, the
+        lifecycle of the bean changes slightly. By definition, Spring can not
+        manage the complete lifecycle of a non-singleton/prototype bean, since
+        after it is created, it is given to the client and the container does
+        not keep track of it at all any longer. You can think of Spring&#39;s
+        role when talking about a non-singleton/prototype bean as a
+        replacement for the &#39;new&#39; operator. Any lifecycle aspects past
+        that point have to be handled by the client. The lifecycle of a bean
+        in the BeanFactory is further described in <xref
+        linkend="beans-factory-lifecycle" /></emphasis></para>
       </sect3>
     </sect2>
 
@@ -1206,8 +1212,9 @@ public class DependsOnExoticType {
 
     private String format;
 
-    public void setWhatever(String format) {
-        this.format = format
+    public void setFormat(String format) {
+        this.format = format;
+    }
     
     public void setAsText(String text) {
         if (format != null &#38;&#38; format.equals(&#34;upperCase&#34;)) {
@@ -1286,13 +1293,14 @@ public class DependsOnExoticType {
     method each time it is asked for an object.</para>
 
     <para>A static target method may be specified by setting the
-    <literal>targetMethod</literal> property to a String representing the static
-    method name, with <literal>targetClass</literal> specifying the Class that
-    the static method is defined on. Alternatively, a target instance method
-    may be specified, by setting the <literal>targetObject</literal> property as
-    the target object, and the <literal>targetMethod</literal> property as the
-    name of the method to call on that target object. Arguments for the method
-    invocation may be specified by setting the <literal>args</literal> property.</para>
+    <literal>targetMethod</literal> property to a String representing the
+    static method name, with <literal>targetClass</literal> specifying the
+    Class that the static method is defined on. Alternatively, a target
+    instance method may be specified, by setting the <literal>targetObject</literal>
+    property as the target object, and the <literal>targetMethod</literal>
+    property as the name of the method to call on that target object.
+    Arguments for the method invocation may be specified by setting the
+    <literal>args</literal> property.</para>
   </sect1>
 
   <sect1 id="context-create">
