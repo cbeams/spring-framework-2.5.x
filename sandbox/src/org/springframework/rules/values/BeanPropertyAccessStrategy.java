@@ -47,7 +47,8 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     private MetaAspectAccessStrategy metaAspectAccessor;
 
     public BeanPropertyAccessStrategy(Object bean) {
-        this(new ValueHolder(bean));
+        this((bean instanceof ValueModel ? (ValueModel)bean : new ValueHolder(
+                bean)));
     }
 
     public BeanPropertyAccessStrategy(final ValueModel beanHolder) {
@@ -93,13 +94,13 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
             }
         }
     }
-    
+
     protected Map getListeners() {
         if (this.listeners == null) {
             this.listeners = new WeakHashMap();
         }
         return listeners;
-    } 
+    }
 
     private Set createListenerKey(ValueListener l, String aspect) {
         LinkedHashSet key = new LinkedHashSet(2);
@@ -115,6 +116,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
 
     public void registerCustomEditor(Class aspectType, String aspect,
             PropertyEditor propertyEditor) {
+        System.out.println("Registering");
         beanWrapper.registerCustomEditor(aspectType, aspect, propertyEditor);
     }
 

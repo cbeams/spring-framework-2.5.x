@@ -61,6 +61,10 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     public void setRulesSource(RulesSource rulesSource) {
         this.rulesSource = rulesSource;
     }
+    
+    public void setBufferChanges(boolean bufferChanges) {
+        this.bufferChanges = bufferChanges;
+    }
 
     public MutableFormModel createChild(String childFormModelName) {
         Assert.isTrue(getChildFormModel(childFormModelName) == null,
@@ -73,7 +77,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         formModels.put(childFormModelName, childModel);
         return childModel;
     }
-
+    
     public void addValidationListener(final ValidationListener listener) {
         Algorithms.instance().forEachIn(formModels.values(),
                 new UnaryProcedure() {

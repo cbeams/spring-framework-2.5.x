@@ -57,7 +57,7 @@ public class DefaultFormModel implements MutableFormModel {
             boolean bufferChanges) {
         this.domainObjectAccessStrategy = domainObjectAccessStrategy;
         this.commitTrigger = new ValueHolder(null);
-        this.bufferChanges = bufferChanges;
+        setBufferChanges(bufferChanges);
     }
 
     public void setFormProperties(String[] domainObjectProperties) {
@@ -69,6 +69,10 @@ public class DefaultFormModel implements MutableFormModel {
 
     public void setParent(NestingFormModel parent) {
         this.parent = parent;
+    }
+    
+    public void setBufferChanges(boolean bufferChanges) {
+        this.bufferChanges = bufferChanges;
     }
 
     public void addValidationListener(ValidationListener listener) {
