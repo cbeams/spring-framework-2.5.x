@@ -149,6 +149,8 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
         }
         
         // is the datasource still null
+        // if so look for a Collection keyed as REPORT_DATA_KEY
+        // and wrap.
         if(dataSource == null) {
             Object data = model.get(REPORT_DATA_KEY);
             

@@ -20,12 +20,10 @@ import java.util.Map;
 
 import javax.management.DynamicMBean;
 import javax.management.JMException;
-import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBean;
-import javax.management.modelmbean.RequiredModelMBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,12 +34,14 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.jmx.assemblers.AutodetectCapableModelMBeanInfoAssembler;
+import org.springframework.jmx.assemblers.ModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.reflection.ReflectiveModelMBeanInfoAssembler;
 import org.springframework.jmx.exceptions.MBeanAssemblyException;
-import org.springframework.jmx.invokers.reflection.ReflectiveMBeanInvoker;
 import org.springframework.jmx.naming.KeyNamingStrategy;
 import org.springframework.jmx.naming.ObjectNamingStrategy;
 import org.springframework.jmx.proxy.JmxProxyFactoryBean;
+import org.springframework.jmx.util.JmxUtils;
 
 /**
  * A bean that allows for any Spring managed to be exposed to an MBeanServer
@@ -73,16 +73,17 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
     private Map beans;
 
     /**
+     * Stores the <code>ModelMBeanProvider</code> used by this class to obatin
+     * <code>ModelMBean</code> instances.
+     */
+    private ModelMBeanProvider mbeanProvider = new RequiredModelMBeanProvider();
+    
+    /**
      * Stores the <code>ModelMBeanInfoAssembler</code> to use for this
      * adaptor.
      */
     private ModelMBeanInfoAssembler assembler = new ReflectiveModelMBeanInfoAssembler();
 
-    /**
-     * The <code>MBeanInvoker</code> to use for invoking methods against
-     * MBeans created by this adaptor.
-     */
-    private MBeanInvoker invoker = new ReflectiveMBeanInvoker();
 
     /**
      * The strategy to use for creating ObjectNames for an object
@@ -98,13 +99,6 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
      * The beans that have been registered.
      */
     private ObjectName[] registeredBeans = null;
-
-    /**
-     * Flag indicating whether the platform specific RequiredModelMBean class
-     * should be used or whether the Spring implementation of ModelMBean should
-     * be used.
-     */
-    private boolean useRequiredModelMBean = false;
 
     /**
      * Stores the BeanFactory for use in autodetection process
@@ -138,9 +132,6 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         this.assembler = assembler;
     }
 
-    public void setInvoker(MBeanInvoker invoker) {
-        this.invoker = invoker;
-    }
 
     public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
         this.namingStrategy = namingStrategy;
@@ -150,20 +141,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         this.server = server;
     }
 
-    /**
-     * Setting this to <code>true</code> will use the <code>ModelMBean</code>
-     * implementation provided by your JMX implementation rather than the Spring
-     * implementation when creating MBeans for your Spring beans. Using your
-     * providers implementation may be desirable in some cases. Note that when
-     * using an implementation other than that provided by Spring the choice of
-     * <code>MBeanInvoker</code> is irrelevant since the invocation semantics
-     * are specific to the <code>ModelMBean</code> implementation used.
-     * 
-     * @param useRequiredModelMBean
-     */
-    public void setUseRequiredModelMBean(boolean useRequiredModelMBean) {
-        this.useRequiredModelMBean = useRequiredModelMBean;
-    }
+
 
     /**
      * Register the defined beans with the MBeanServer
@@ -199,10 +177,10 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 
                     server.registerMBean(bean, objectName);
                 } else {
-                    ModelMBean mbean = getModelMBean(objectName);
-                    mbean.setManagedResource(bean, "ObjectReference");
+                    ModelMBean mbean = mbeanProvider.getModelMBean();
                     mbean.setModelMBeanInfo(assembler.getMBeanInfo(bean));
-
+                    mbean.setManagedResource(bean, "ObjectReference");
+                    
                     log.info("Registering and Assembling MBean: "
                             + objectName.toString());
 
@@ -266,26 +244,6 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
                 }
             }
         }
-    }
-
-    /**
-     * Gets an instance of the appropriate ModelMBean implementation.
-     * 
-     * @return
-     */
-    private ModelMBean getModelMBean(ObjectName objectName)
-            throws MBeanException {
-        if (useRequiredModelMBean) {
-            return new RequiredModelMBean();
-        } else {
-            try {
-                return new ModelMBeanImpl(invoker, objectName);
-            } catch (Exception ex) {
-                throw new MBeanException(ex,
-                        "Unable to create ModelMBeanImpl class - check supplied invokerClass is valid");
-            }
-        }
-
     }
 
     /**

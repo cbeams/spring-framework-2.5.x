@@ -8,8 +8,8 @@ import javax.management.ObjectName;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.ObjectNameManager;
+import org.springframework.jmx.util.JmxUtils;
 
 /**
  * @author robh

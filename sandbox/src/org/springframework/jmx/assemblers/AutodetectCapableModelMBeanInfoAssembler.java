@@ -1,7 +1,8 @@
 /*
  * Created on 11-Aug-2004
  */
-package org.springframework.jmx;
+package org.springframework.jmx.assemblers;
+
 
 /**
  * @author robh

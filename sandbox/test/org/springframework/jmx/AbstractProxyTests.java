@@ -6,6 +6,7 @@ package org.springframework.jmx;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
+import org.springframework.jmx.proxy.InvalidInvocationException;
 import org.springframework.jmx.proxy.JmxObjectProxyFactory;
 
 /**

@@ -13,9 +13,9 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
+import org.springframework.jmx.util.JmxUtils;
 
 /**
  * @author Rob Harrop

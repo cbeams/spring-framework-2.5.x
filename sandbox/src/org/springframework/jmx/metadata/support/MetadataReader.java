@@ -6,7 +6,7 @@ package org.springframework.jmx.metadata.support;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import org.springframework.jmx.JmxUtils;
+import org.springframework.jmx.util.JmxUtils;
 import org.springframework.metadata.Attributes;
 
 /**

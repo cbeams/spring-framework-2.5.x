@@ -34,9 +34,8 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
-import org.springframework.jmx.InvalidInvocationException;
-import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.exceptions.ProxyCreationException;
+import org.springframework.jmx.util.JmxUtils;
 
 /**
  * Proxy to a JMX managed resource. Uses CGLIB to capture invocations and

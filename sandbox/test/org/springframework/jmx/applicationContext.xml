@@ -19,9 +19,7 @@
 				</entry>
 			</map>
 		</property>    
-		<property name="invoker">
-	        <ref local="cglibInvoker"/>
-	    </property>    
+
 	</bean>
 	
 	<bean id="jmxAdapter3" class="org.springframework.jmx.JmxMBeanAdapter">
@@ -93,8 +91,6 @@
 	
 	<bean id="identityNamingStrategy" class="org.springframework.jmx.naming.IdentityNamingStrategy">
 	</bean>
-	
-	<bean id="cglibInvoker" class="org.springframework.jmx.invokers.cglib.CglibMBeanInvoker"></bean>
 	
 	<bean id="metadataNamingStrategy" class="org.springframework.jmx.naming.MetadataNamingStrategy">
 	</bean>

@@ -7,6 +7,7 @@ import javax.management.MBeanInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
+import org.springframework.jmx.assemblers.ModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.metadata.MetadataModelMBeanInfoAssembler;
 
 /**
@@ -100,7 +101,7 @@ public class MetadataAssemblerTests extends AbstractJmxAssemblerTests {
     }
 
     protected int getExpectedOperationCount() {
-        return 2;
+        return 7;
     }
 
     protected ModelMBeanInfoAssembler getAssembler() {

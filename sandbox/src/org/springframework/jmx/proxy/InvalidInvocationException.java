@@ -1,7 +1,7 @@
 /*
  * Created on Jul 22, 2004
  */
-package org.springframework.jmx;
+package org.springframework.jmx.proxy;
 
 import org.springframework.core.NestedRuntimeException;
 

@@ -18,22 +18,13 @@ package org.springframework.jmx.assemblers.metadata;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
-import javax.management.IntrospectionException;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import javax.management.modelmbean.ModelMBeanConstructorInfo;
-import javax.management.modelmbean.ModelMBeanNotificationInfo;
-import javax.management.modelmbean.ModelMBeanOperationInfo;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.jmx.AbstractModelMBeanInfoAssembler;
-import org.springframework.jmx.AutodetectCapableModelMBeanInfoAssembler;
-import org.springframework.jmx.JmxUtils;
-import org.springframework.jmx.exceptions.MBeanAssemblyException;
+import org.springframework.jmx.assemblers.AbstractReflectionBasedModelMBeanInfoAssembler;
+import org.springframework.jmx.assemblers.AutodetectCapableModelMBeanInfoAssembler;
 import org.springframework.jmx.metadata.support.ManagedAttribute;
 import org.springframework.jmx.metadata.support.ManagedOperation;
 import org.springframework.jmx.metadata.support.ManagedResource;
 import org.springframework.jmx.metadata.support.MetadataReader;
+import org.springframework.jmx.util.JmxUtils;
 import org.springframework.metadata.Attributes;
 import org.springframework.metadata.commons.CommonsAttributes;
 
@@ -46,7 +37,8 @@ import org.springframework.metadata.commons.CommonsAttributes;
  * @author Rob Harrop
  */
 public class MetadataModelMBeanInfoAssembler extends
-        AbstractModelMBeanInfoAssembler implements AutodetectCapableModelMBeanInfoAssembler{
+        AbstractReflectionBasedModelMBeanInfoAssembler implements
+        AutodetectCapableModelMBeanInfoAssembler {
 
     /**
      * Attributes implementation. Default is Commons Attributes
@@ -63,98 +55,84 @@ public class MetadataModelMBeanInfoAssembler extends
         this.attributes = attributes;
     }
 
-    protected ModelMBeanAttributeInfo[] getAttributeInfo(Object bean) {
-        Class beanClass = bean.getClass();
-        BeanWrapper bw = new BeanWrapperImpl(bean);
+    protected boolean includeReadAttribute(Method method) {
+        return hasManagedAttribute(method);
+    }
 
-        PropertyDescriptor[] props = bw.getPropertyDescriptors();
-        ModelMBeanAttributeInfo[] info = new ModelMBeanAttributeInfo[props.length];
-        int attrCount = 0;
+    protected boolean includeWriteAttribute(Method method) {
+        return hasManagedAttribute(method);
+    }
 
-        try {
-            for (int x = 0; x < props.length; x++) {
-
-                Method getter = checkForManagedAttribute(props[x].getReadMethod());
-                Method setter = checkForManagedAttribute(props[x].getWriteMethod());
-
-                if ((getter != null) || (setter != null)) {
-                    // if both getter and setter are null
-                    // then this does not need exposing
-                    ModelMBeanAttributeInfo inf = new ModelMBeanAttributeInfo(
-                            props[x].getName(), 
-                            getDescription(props[x]),
-                            getter, setter);
-
-                    info[attrCount++] = inf;
-                }
-
-            }
-        } catch (IntrospectionException ex) {
-            throw new MBeanAssemblyException(
-                    "Unable to attribute info. Check that you have specified valid metadata",
-                    ex);
+    protected boolean includeOperation(Method method) {
+        if (JmxUtils.isProperty(method)) {
+            return hasManagedAttribute(method);
+        } else {
+            return hasManagedOperation(method);
         }
+    }
 
-        // create a final array to hold the attributes
-        ModelMBeanAttributeInfo[] result = JmxUtils.shrink(info, attrCount);
+    protected String getOperationDescription(Method method) {
 
-        // release the temp array
-        info = null;
+        if (JmxUtils.isProperty(method)) {
+            ManagedAttribute ma = MetadataReader.getManagedAttribute(
+                    attributes, method);
 
-        return result;
+            if (ma == null) {
+                return method.getName();
+            } else {
+                return ma.getDescription();
+            }
+        } else {
+            ManagedOperation mo = MetadataReader.getManagedOperation(
+                    attributes, method);
+
+            if (mo == null) {
+                return method.getName();
+            } else {
+                return mo.getDescription();
+            }
+        }
     }
 
     /**
-     * Creates a description for the attribute corresponding
-     * to this property descriptor. Attempts to 
-     * create the description using metadata from either the getter
-     * or setter attributes, otherwise uses the property name.
-     * @param pd
+     * Creates a description for the attribute corresponding to this property
+     * descriptor. Attempts to create the description using metadata from either
+     * the getter or setter attributes, otherwise uses the property name.
+     * 
+     * @param propertyDescriptor
      * @return
      */
-    private String getDescription(PropertyDescriptor pd) {
-        
-        Method readMethod = pd.getReadMethod();
-        Method writeMethod = pd.getWriteMethod();
-        
-        ManagedAttribute getter = (readMethod != null) ? MetadataReader.getManagedAttribute(attributes, readMethod) : null;
-        ManagedAttribute setter = (writeMethod != null) ? MetadataReader.getManagedAttribute(attributes, writeMethod) : null;
-        
+    protected String getAttributeDescription(
+            PropertyDescriptor propertyDescriptor) {
+
+        Method readMethod = propertyDescriptor.getReadMethod();
+        Method writeMethod = propertyDescriptor.getWriteMethod();
+
+        ManagedAttribute getter = (readMethod != null) ? MetadataReader.getManagedAttribute(
+                attributes, readMethod)
+                : null;
+        ManagedAttribute setter = (writeMethod != null) ? MetadataReader.getManagedAttribute(
+                attributes, writeMethod)
+                : null;
+
         StringBuffer sb = new StringBuffer();
-        
-        if((getter != null) && (getter.getDescription() != null) && (getter.getDescription().length() > 0)) {
+
+        if ((getter != null) && (getter.getDescription() != null)
+                && (getter.getDescription().length() > 0)) {
             return getter.getDescription();
-        } else if((setter != null) && (setter.getDescription() != null) && (setter.getDescription().length() > 0)) {
+        } else if ((setter != null) && (setter.getDescription() != null)
+                && (setter.getDescription().length() > 0)) {
             return setter.getDescription();
         } else {
-            return pd.getDisplayName();
+            return propertyDescriptor.getDisplayName();
         }
     }
-    
+
     /**
-     * Checks to see if a method has a ManagedAttribute defined. If so then
-     * the method is returned back to the caller, otherwise null is returned.
-     * 
-     * @param method
-     * @return
+     * Attempts to read managed resource description from the source level
+     * metdata. Returns an empty <code>String</code> if no description can be
+     * found.
      */
-    private Method checkForManagedAttribute(Method method) {
-        if (method == null)
-            return null;
-
-        ManagedAttribute ma = MetadataReader.getManagedAttribute(attributes, method);
-        
-        if(ma == null) {
-            return null;
-        } else {
-            return method;
-        }
-    }
-
-    protected ModelMBeanConstructorInfo[] getConstructorInfo(Object bean) {
-        return new ModelMBeanConstructorInfo[] {};
-    }
-
     protected String getDescription(Object bean) {
         ManagedResource mr = MetadataReader.getManagedResource(attributes,
                 bean.getClass());
@@ -166,39 +144,26 @@ public class MetadataModelMBeanInfoAssembler extends
         }
     }
 
-    protected ModelMBeanNotificationInfo[] getNotificationInfo(Object bean) {
-        return new ModelMBeanNotificationInfo[] {};
+    private boolean hasManagedAttribute(Method method) {
+        ManagedAttribute ma = MetadataReader.getManagedAttribute(attributes,
+                method);
+
+        return (ma != null) ? true : false;
     }
 
-    protected ModelMBeanOperationInfo[] getOperationInfo(Object bean) {
+    private boolean hasManagedOperation(Method method) {
+        ManagedOperation mo = MetadataReader.getManagedOperation(attributes,
+                method);
 
-        Method[] methods = bean.getClass().getDeclaredMethods();
-        ModelMBeanOperationInfo[] info = new ModelMBeanOperationInfo[methods.length];
-        int attrCount = 0;
-
-        for (int x = 0; x < methods.length; x++) {
-            if (!JmxUtils.isProperty(methods[x])) {
-                ManagedOperation mo = MetadataReader.getManagedOperation(
-                        attributes, methods[x]);
-
-                if (mo != null) {
-                    info[attrCount++] = new ModelMBeanOperationInfo(
-                            mo.getDescription(), methods[x]);
-                }
-            }
-        }
-
-        ModelMBeanOperationInfo[] result = JmxUtils.shrink(info, attrCount);
-        return result;
+        return (mo != null) ? true : false;
     }
 
     /**
-     * Used for auto detection of beans. Checks to see if
-     * the bean's class has a ManagedResource attribute. If so
-     * it will add it list of included beans
+     * Used for auto detection of beans. Checks to see if the bean's class has a
+     * ManagedResource attribute. If so it will add it list of included beans
      */
     public boolean includeBean(String beanName, Object bean) {
-        if(MetadataReader.getManagedResource(attributes, bean.getClass()) != null) {
+        if (MetadataReader.getManagedResource(attributes, bean.getClass()) != null) {
             return true;
         } else {
             return false;

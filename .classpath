@@ -75,7 +75,7 @@
 	<classpathentry kind="lib" path="lib/cglib/cglib-full-2.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
-	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
+	<classpathentry sourcepath="D:/opt/src/jmx-1_2_1-src/src/jmxri" kind="lib" path="lib/jmx/jmxri.jar"/>
 	<classpathentry kind="lib" path="lib/groovy/groovy-1.0-beta-6.jar"/>
 	<classpathentry kind="lib" path="lib/jsf/jsf-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-httpclient.jar"/>

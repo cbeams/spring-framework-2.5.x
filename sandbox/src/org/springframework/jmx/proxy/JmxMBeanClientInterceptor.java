@@ -23,9 +23,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jmx.InvalidInvocationException;
-import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.exceptions.ProxyCreationException;
+import org.springframework.jmx.util.JmxUtils;
 
 /**
  * @author robh

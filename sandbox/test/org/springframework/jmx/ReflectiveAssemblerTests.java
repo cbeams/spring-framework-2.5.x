@@ -3,6 +3,7 @@
  */
 package org.springframework.jmx;
 
+import org.springframework.jmx.assemblers.ModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.reflection.ReflectiveModelMBeanInfoAssembler;
 
 
@@ -22,7 +23,7 @@ public class ReflectiveAssemblerTests extends AbstractJmxAssemblerTests {
 	}
 	
 	protected int getExpectedOperationCount() {
-	    return 3;
+	    return 9;
 	}
 	
 	protected int getExpectedAttributeCount() {
