@@ -20,6 +20,7 @@ import java.io.Serializable;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.util.enums.LabeledEnum;
+import org.springframework.util.enums.LabeledEnumResolver;
 
 /**
  * Abstract base superclass for LabeledEnum implementations.
@@ -58,12 +59,12 @@ public abstract class AbstractLabeledEnum implements LabeledEnum, MessageSourceR
 		if (!(o instanceof AbstractLabeledEnum)) {
 			return false;
 		}
-		AbstractLabeledEnum e = (AbstractLabeledEnum)o;
+		AbstractLabeledEnum e = (AbstractLabeledEnum) o;
 		return this.getCode().equals(e.getCode()) && this.getType().equals(e.getType());
 	}
 
 	public int compareTo(Object o) {
-		AbstractLabeledEnum e = (AbstractLabeledEnum)o;
+		AbstractLabeledEnum e = (AbstractLabeledEnum) o;
 		Assert.isTrue(getType().equals(e.getType()), "You may only compare enumerations of the same type.");
 		return getCode().compareTo(e.getCode());
 	}
@@ -94,8 +95,25 @@ public abstract class AbstractLabeledEnum implements LabeledEnum, MessageSourceR
 		}
 	}
 
-	protected StaticLabeledEnumResolver getStaticEnumResolver() {
+	protected final StaticLabeledEnumResolver getStaticEnumResolver() {
 		return StaticLabeledEnumResolver.instance();
+	}
+
+	protected LabeledEnumResolver getEnumResolver() {
+		return getStaticEnumResolver();
+	}
+
+	/*
+	 * Handle the deserialization of the class to ensure that multiple
+	 * copies are not wastefully created if this enum is static.</p>
+	 * @return the resolved object
+	 */
+	protected Object readResolve() {
+		try {
+			return getEnumResolver().getLabeledEnum(getClass(), getCode());
+		} catch (Exception e) {
+			return this;
+		}
 	}
 
 	public String toString() {

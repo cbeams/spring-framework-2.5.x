@@ -37,7 +37,7 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 
 	private CachingMapTemplate labeledEnumCache = new CachingMapTemplate() {
 		protected Object create(Object key) {
-			Map typeEnums = findLabeledEnums((String)key);
+			Map typeEnums = findLabeledEnums((Class)key);
 			if (typeEnums != null && !typeEnums.isEmpty()) {
 				return typeEnums;
 			}
@@ -52,17 +52,17 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 	protected AbstractLabeledEnumResolver() {
 	}
 
-	public Collection getLabeledEnumCollection(String type) throws IllegalArgumentException {
+	public Collection getLabeledEnumCollection(Class type) throws IllegalArgumentException {
 		return Collections.unmodifiableSet(new TreeSet(getLabeledEnumMap(type).values()));
 	}
 
-	public Map getLabeledEnumMap(String type) throws IllegalArgumentException {
+	public Map getLabeledEnumMap(Class type) throws IllegalArgumentException {
 		Assert.notNull(type, "No type specified");
 		Map typeEnums = (Map)labeledEnumCache.get(type);
 		return Collections.unmodifiableMap(typeEnums);
 	}
 
-	public LabeledEnum getLabeledEnum(String type, Comparable code) throws IllegalArgumentException {
+	public LabeledEnum getLabeledEnum(Class type, Comparable code) throws IllegalArgumentException {
 		Assert.notNull(code, "No enum code specified");
 		Map typeEnums = getLabeledEnumMap(type);
 		LabeledEnum codedEnum = (LabeledEnum)typeEnums.get(code);
@@ -74,7 +74,7 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 		return codedEnum;
 	}
 
-	public LabeledEnum getLabeledEnum(String type, String label) throws IllegalArgumentException {
+	public LabeledEnum getLabeledEnum(Class type, String label) throws IllegalArgumentException {
 		Map typeEnums = getLabeledEnumMap(type);
 		Iterator it = typeEnums.entrySet().iterator();
 		while (it.hasNext()) {
@@ -89,7 +89,7 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 				+ " make sure the label string matches a valid instance's label property");
 	}
 
-	protected Map findLabeledEnums(String type) {
+	protected Map findLabeledEnums(Class type) {
 		logger.info("Assuming no enums exist for type " + type + "'");
 		return null;
 	}

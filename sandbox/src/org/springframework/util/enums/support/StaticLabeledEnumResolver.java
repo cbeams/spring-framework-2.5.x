@@ -17,21 +17,20 @@ package org.springframework.util.enums.support;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.Closure;
 import org.springframework.util.closure.support.AbstractProcessTemplate;
 import org.springframework.util.closure.support.Block;
 import org.springframework.util.enums.LabeledEnum;
 
 /**
- * Resolves statically (in Java code) defined enumerations.
+ * Resolves statically defined enumerations.  Static implies all enum instances were defined within
+ * Java code, implementing the type-safe enum pattern.
  * @author Keith Donald
  */
 public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
@@ -42,21 +41,14 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 		return INSTANCE;
 	}
 
-	protected Map findLabeledEnums(String type) {
+	protected Map findLabeledEnums(Class type) {
 		final Map enums = new TreeMap();
-		try {
-			new LabeledEnumFieldValueGenerator(ClassUtils.forName(type)).run(new Block() {
-				protected void handle(Object value) {
-					LabeledEnum e = (LabeledEnum)value;
-					enums.put(e.getCode(), e);
-				}
-			});
-		}
-		catch (ClassNotFoundException e) {
-			IllegalArgumentException iae = new IllegalArgumentException("Type does not map to a valid enum class");
-			iae.initCause(e);
-			throw iae;
-		}
+		new LabeledEnumFieldValueGenerator(type).run(new Block() {
+			protected void handle(Object value) {
+				LabeledEnum e = (LabeledEnum) value;
+				enums.put(e.getCode(), e);
+			}
+		});
 		return enums;
 	}
 
@@ -86,25 +78,12 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 							Assert.isTrue(LabeledEnum.class.isInstance(value),
 									"Field value must be a LabeledEnum instance.");
 							fieldValueCallback.call(value);
-						}
-						catch (IllegalAccessException e) {
+						} catch (IllegalAccessException e) {
 							logger.warn("Unable to access field value " + field, e);
 						}
 					}
 				}
 			}
 		}
-	}
-
-	public LabeledEnum getLabeledEnum(Class type, Comparable code) throws IllegalArgumentException {
-		return getLabeledEnum(type.getName(), code);
-	}
-
-	public Collection getLabeledEnumCollection(Class type) throws IllegalArgumentException {
-		return getLabeledEnumCollection(type.getName());
-	}
-
-	public Map getLabeledEnumMap(Class type) throws IllegalArgumentException {
-		return getLabeledEnumMap(type.getName());
 	}
 }

@@ -19,6 +19,7 @@ import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.util.Locale;
 
+import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.enums.LabeledEnum;
@@ -101,17 +102,19 @@ public class LabeledEnumEditor extends PropertyEditorSupport {
 			return;
 		}
 
-		String type;
+		Class type;
 		Comparable code;
 
 		if (this.enumClass == null) {
 			String[] keyParts = StringUtils.delimitedListToStringArray(encodedCode, ".");
 			Assert.isTrue(keyParts.length == 2, "Enum string key must in the format '<type>.<code>'");
-			type = keyParts[0];
+			ClassEditor converter = new ClassEditor();
+			converter.setAsText(keyParts[0]);
+			type = (Class)converter.getValue();
 			code = decodeFromString(keyParts[1]);
 		}
 		else {
-			type = this.enumClass.getName();
+			type = this.enumClass;
 			if (ShortCodedLabeledEnum.class.isAssignableFrom(this.enumClass)) {
 				code = doShortConversion(encodedCode);
 			}
