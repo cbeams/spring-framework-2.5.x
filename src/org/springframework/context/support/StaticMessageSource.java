@@ -1,5 +1,6 @@
 package org.springframework.context.support;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -22,8 +23,8 @@ public class StaticMessageSource extends AbstractNestingMessageSource {
 
 	private Map messages = new HashMap();
 
-	protected String resolve(String code, Locale locale) {
-		return (String) this.messages.get(messageKey(locale, code));
+	protected MessageFormat resolve(String code, Locale locale) {
+		return (MessageFormat) this.messages.get(code + "_" + locale.toString());
 	}
 
 	/**
@@ -33,7 +34,7 @@ public class StaticMessageSource extends AbstractNestingMessageSource {
 	 * @param message message associated with this lookup code
 	 */
 	public void addMessage(String code, Locale locale, String message) {
-		this.messages.put(messageKey(locale, code), message);
+		this.messages.put(code + "_" + locale.toString(), new MessageFormat(message));
 		logger.info("Added message [" + message + "] for code [" + code + "] and Locale [" + locale + "]");
 	}
 

@@ -1,28 +1,39 @@
 package org.springframework.context.support;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.springframework.util.StringUtils;
 
 /**
- * MessageSource that accesses the ResourceBundle with the specified basename.
- * This class relies on the caching of the underlying JDK's ResourceBundle
- * implementation.
+ * MessageSource that accesses the ResourceBundles with the specified basenames.
+ * This class relies on the underlying JDK's java.util.ResourceBundle implementation.
  *
  * <p>Unfortunately, java.util.ResourceBundle caches loaded bundles indefinitely.
  * Reloading a bundle during VM execution is <i>not</i> possible by any means.
  * As this MessageSource relies on ResourceBundle, it faces the same limitation.
+ * Consider ReloadableResourceBundleMessageSource for an alternative.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setBasenames
+ * @see ReloadableResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
 public class ResourceBundleMessageSource extends AbstractNestingMessageSource {
 
 	private String[] basenames;
+
+	/**
+	 * Cache to hold already generated MessageFormats per message code.
+	 * Note that this Map contains the actual code Map, keyed with the Locale.
+	 * @see #getMessageFormat
+	 */
+	private final Map cachedMessageFormats = new HashMap();
 
 	/**
 	 * Set a single basename, following ResourceBundle conventions:
@@ -53,32 +64,75 @@ public class ResourceBundleMessageSource extends AbstractNestingMessageSource {
 		this.basenames = basenames;
 	}
 
-	protected String resolve(String code, Locale locale) {
-		String msg = null;
-		for (int i = 0; msg == null && i < this.basenames.length; i++) {
-			String basename = this.basenames[i];
+	protected final MessageFormat resolve(String code, Locale locale) {
+		MessageFormat messageFormat = null;
+		for (int i = 0; messageFormat == null && i < this.basenames.length; i++) {
+			messageFormat = resolve(this.basenames[i], code, locale);
+		}
+		return messageFormat;
+	}
+
+	/**
+	 * Return a MessageFormat for the given bundle basename, message code,
+	 * and Locale.
+	 * @param basename the basename of the bundle
+	 * @param code the message code to retrieve
+	 * @param locale the Locale to resolve for
+	 * @return the resulting MessageFormat
+	 */
+	protected MessageFormat resolve(String basename, String code, Locale locale) {
+		try {
+			ResourceBundle bundle = ResourceBundle.getBundle(basename, locale,
+			                                                 Thread.currentThread().getContextClassLoader());
 			try {
-				ResourceBundle bundle = ResourceBundle.getBundle(basename, locale,
-				                                                 Thread.currentThread().getContextClassLoader());
-				try {
-					msg = bundle.getString(code);
-				}
-				catch (MissingResourceException ex) {
-					// assume key not found
-					// -> do NOT throw the exception to allow for checking parent message source
-					msg = null;
-				}
+				return getMessageFormat(bundle, code);
 			}
 			catch (MissingResourceException ex) {
-				logger.warn("No ResourceBundle found for MessageSource: " + ex.getMessage());
-				// assume bundle not found
+				// assume key not found
 				// -> do NOT throw the exception to allow for checking parent message source
-				msg = null;
+				return null;
 			}
 		}
-		return msg;
+		catch (MissingResourceException ex) {
+			logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
+			// assume bundle not found
+			// -> do NOT throw the exception to allow for checking parent message source
+			return null;
+		}
 	}
-	
+
+	/**
+	 * Return a MessageFormat for the given bundle and code,
+	 * fetching already generated MessageFormats from the cache.
+	 * @param bundle the ResourceBundle to work on
+	 * @param code the message code to retrieve
+	 * @return the resulting MessageFormat
+	 */
+	protected synchronized MessageFormat getMessageFormat(ResourceBundle bundle, String code)
+	    throws MissingResourceException {
+		Map codeMap = (Map) this.cachedMessageFormats.get(bundle);
+		if (codeMap != null) {
+			MessageFormat result = (MessageFormat) codeMap.get(code);
+			if (result != null) {
+				return result;
+			}
+		}
+		String msg = bundle.getString(code);
+		if (msg != null) {
+			MessageFormat result = new MessageFormat(msg);
+			if (codeMap != null) {
+				codeMap.put(code, result);
+			}
+			else {
+				codeMap = new HashMap();
+				codeMap.put(code, result);
+				this.cachedMessageFormats.put(bundle, codeMap);
+			}
+			return result;
+		}
+		return null;
+	}
+
 	/**
 	 * Show the configuration of this MessageSource.
 	 */
