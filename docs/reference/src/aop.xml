@@ -356,10 +356,42 @@
           is a generic regular expression pointcut, using Perl 5 regular
           expression syntax.</para>
 
-          <para>**TODO EXAMPLE OF USING IT</para>
+          <para>Using this class, you can provide a list of pattern Strings.
+          If any of these is a match, the pointcut will evaluate to true. (So
+          the result is effectively the union of these pointcuts.)</para>
 
-          <remark>This class requires the Jakarta ORO regular expression
-          package.</remark>
+          <para>The usage is shown below:</para>
+
+          <para><programlisting>&#60;bean id=&#34;settersAndAbsquatulatePointcut&#34; 
+    class=&#34;org.springframework.aop.support.RegexpMethodPointcut&#34;&#62;
+    &#60;property name=&#34;patterns&#34;&#62;
+        &#60;list&#62;
+            &#60;value&#62;.*get.*&#60;/value&#62;
+            &#60;value&#62;.*absquatulate&#60;/value&#62;
+        &#60;/list&#62;
+    &#60;/property&#62;
+&#60;/bean&#62;</programlisting></para>
+
+          <para>A convenience subclass of RegexpMethodPointcut,
+          RegexoMethodPointcutAroundAdvisor, allows us to reference an
+          interceptor also. This simplifies wiring, as the one bean serves as
+          both pointcut and advisor, as shown below:</para>
+
+          <para><programlisting>&#60;bean id=&#34;settersAndAbsquatulateAdvisor&#34; 
+    class=&#34;org.springframework.aop.support.RegexpMethodPointcutAroundAdvisor&#34;&#62;
+    &#60;property name=&#34;interceptor&#34;&#62;&#60;ref local=&#34;beanNameOfAopAllianceInterceptor&#34;/&#62;&#60;/property&#62;
+    &#60;property name=&#34;patterns&#34;&#62;
+        &#60;list&#62;
+            &#60;value&#62;.*get.*&#60;/value&#62;
+            &#60;value&#62;.*absquatulate&#60;/value&#62;
+        &#60;/list&#62;
+    &#60;/property&#62;
+&#60;/bean&#62;</programlisting></para>
+
+          <para>This creates ****</para>
+
+          <remark>The RegExpMethodPointcut class requires the Jakarta ORO
+          regular expression package.</remark>
         </sect4>
 
         <sect4>
@@ -915,12 +947,51 @@
       <para>The JPetStore sample application shipped with Spring shows the use
       of the TransactionProxyFactoryBean.</para>
 
-      <para>The TransactionProxyFactoryBean also extends ProxyConfig, so the</para>
-
-      <para>More discussion in next chapter</para>
-
-      <para>The TransactionProxyFactoryBean is a subclass of ProxyConfig, so
+      <para>TThe TransactionProxyFactoryBean is a subclass of ProxyConfig, so
       basic configuration is shared with ProxyFactoryBean.</para>
+
+      <para>The following example from the JPetStore sample application
+      illustrates how this work. As with a ProxyFactoryBean, there is a target
+      bean definition. Dependencies should be expressed on the proxied factory
+      bean definition (&#34;petStore&#34; here), rather than the target POJO
+      (&#34;petStoreTarget&#34;).</para>
+
+      <para>The TransactionProxyFactoryBean requires a target, and information
+      about &#34;transaction attributes,&#34; specifying which methods should
+      be transactional and the required propagation and other settings:</para>
+
+      <para><programlisting>&#60;bean id=&#34;petStoreTarget&#34; class=&#34;org.springframework.samples.jpetstore.domain.logic.PetStoreImpl&#34;&#62;
+    &#60;property name=&#34;accountDao&#34;&#62;&#60;ref bean=&#34;accountDao&#34;/&#62;&#60;/property&#62;
+    &#60;!-- Other dependencies omitted --&#62;
+&#60;/bean&#62;
+
+&#60;bean id=&#34;petStore&#34; 
+    class=&#34;org.springframework.transaction.interceptor.TransactionProxyFactoryBean&#34;&#62;
+    &#60;property name=&#34;transactionManager&#34;&#62;&#60;ref bean=&#34;transactionManager&#34;/&#62;&#60;/property&#62;
+    &#60;property name=&#34;target&#34;&#62;&#60;ref local=&#34;petStoreTarget&#34;/&#62;&#60;/property&#62;
+    &#60;property name=&#34;transactionAttributes&#34;&#62;
+        &#60;props&#62;
+            &#60;prop key=&#34;insert*&#34;&#62;PROPAGATION_REQUIRED&#60;/prop&#62;
+            &#60;prop key=&#34;update*&#34;&#62;PROPAGATION_REQUIRED&#60;/prop&#62;
+            &#60;prop key=&#34;*&#34;&#62;PROPAGATION_REQUIRED,readOnly&#60;/prop&#62;
+        &#60;/props&#62;
+    &#60;/property&#62;
+&#60;/bean&#62;</programlisting></para>
+
+      <para>The TransactionProxyFactoryBean automatically creates a
+      transaction advisor, including a pointcut based on the transaction
+      attributes, so only transactional methods are advised. </para>
+
+      <para>The TransactionProxyFactoryBean depends on a
+      PlatformTransactionManager implementation via its transactionManager
+      JavaBean property. This allows for pluggable transaction implementation,
+      based on JTA, JDBC or other strategies. This relates to the Spring
+      transaction abstraction, rather than AOP. We&#39;ll discuss the
+      transaction infrastructure in the next chapter.</para>
+
+      <remark>If you&#39;re interested only in declarative transaction
+      management, the TransactionProxyFactoryBean is a good solution, and
+      simpler than using a ProxyFactoryBean.</remark>
     </sect2>
 
     <sect2>
@@ -1076,16 +1147,90 @@ boolean getProxyTargetClass();</programlisting>
       <sect3>
         <title>AdvisorAutoProxyCreator</title>
 
-        <para>A more general</para>
+        <para>A more general auto proxy creator is AdvisorAutoProxyCreator.
+        This will automagically apply eligible advisors in the current
+        context, without the need to include specific bean names in the
+        autoproxy advisor&#39;s bean definition.</para>
+
+        <para>Using this mechanism involves:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Specifying an AdvisorAutoProxyCreator bean definition</para>
+          </listitem>
+
+          <listitem>
+            <para>Specifying any number of Advisors in the same or related
+            contexts. </para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The AdvisorAutoProxyCreator will automatically evaluate the
+        pointcut contained in each advisor, to see what (if any) advice it
+        should apply to each business object (such as
+        &#34;businessObject1&#34; and &#34;businessObject2&#34; in the
+        example).</para>
+
+        <para>This means that any number of advices can be applied
+        automatically to each business object. If no pointcut in any of the
+        advisors matches any method in a business object, the object will not
+        be proxied.</para>
+
+        <para>This has the advantage of making it impossible for callers or
+        dependencies to obtain an un-advised object. Calling
+        getBean(&#34;businessObject1&#34;) on this ApplicationContext will
+        return an AOP proxy, not the target business object.</para>
+
+        <para><programlisting>&#60;bean id=&#34;autoProxyCreator&#34;
+    class=&#34;org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator&#34;&#62;
+&#60;/bean&#62;
+
+&#60;bean id=&#34;txAdvisor&#34;
+    autowire=&#34;constructor&#34;
+    class=&#34;org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor&#34;&#62;
+&#60;/bean&#62;
+
+&#60;bean id=&#34;customAdvisor&#34;
+    class=&#34;com.mycompany.MyAdvisor&#34;&#62;
+&#60;/bean&#62;
+
+
+&#60;bean id=&#34;businessObject1&#34;
+    class=&#34;com.mycompany.BusinessObject1&#34;&#62;
+    &#60;!-- Properties omitted --&#62;
+&#60;/bean&#62;
+
+&#60;bean id=&#34;businessObject2&#34;
+    class=&#34;com.mycompany.BusinessObject2&#34;&#62;
+&#60;/bean&#62;</programlisting></para>
+
+        <para>The AdvisorAutoProxyCreator is very useful if you want to apply
+        the same advice consistently to many business objects. Once the
+        infrastructure definitions are in place, you can simply add new
+        business objects without including specific proxy configuration. You
+        can also drop in additional aspects very easily--for example, tracing
+        or performance monitoring aspects--with minimal change to
+        configuration.</para>
+
+        <para>The AdvisorAutoProxyCreator offers support for filtering (using
+        a naming convention so that only certain advisors are evaluated,
+        allowing use of multiple, differently configured,
+        AdvisorAutoProxyCreators in the same factory) and ordering. Advisors
+        can implement the org.springframework.core.Ordered interface to ensure
+        correct ordering if this is an issue. The
+        TransactionAttributeSourceTransactionAroundAdvisor used in the above
+        example has a high order value, as most other advice will normally
+        want to be run in a transaction context.</para>
       </sect3>
 
       <sect3>
         <title>AbstractAdvisorAutoProxyCreator</title>
 
         <para>This is the superclass of AdvisorAutoProxyCreator. You can
-        create your own autoproxy creators by subclassing this class. </para>
-
-        <para>WHAT DO YOU NEED TO DO?</para>
+        create your own autoproxy creators by subclassing this class, in the
+        unlikely event that your advisor definitions offer insufficient
+        customization to the behaviour of the framework
+        AdvisorAutoProxyCreator. </para>
       </sect3>
     </sect2>
 
@@ -1102,6 +1247,10 @@ boolean getProxyTargetClass();</programlisting>
       with Advisors that understand metadata attributes. The metadata
       specifics are held in the pointcut part of the candidate advisors,
       rather than in the autoproxy creation class itself.</para>
+
+      <para>This is really a special case of the AdvisorAutoProxyCreator, but
+      deserves consideration on its own. (The metadata-aware code is in the
+      pointcuts contained in the advisors, not the AOP framework itself.)</para>
 
       <para>The <literal>/attributes</literal> directory of the JPetStore
       sample application shows the use of attribute-driven autoproxying. In
