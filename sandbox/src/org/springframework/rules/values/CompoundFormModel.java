@@ -36,7 +36,7 @@ public class CompoundFormModel extends AbstractFormModel implements
 
     private List childFormObjectBuffers = new ArrayList(9);
 
-    private Map formModels = new LinkedHashMap(9);
+    private Map childFormModels = new LinkedHashMap(9);
 
     public CompoundFormModel() {
     }
@@ -58,7 +58,7 @@ public class CompoundFormModel extends AbstractFormModel implements
             MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
         super(domainObjectAccessStrategy);
-        setBufferChangesDefault(bufferChanges);        
+        setBufferChangesDefault(bufferChanges);
     }
 
     public MutableFormModel createChild(String childFormModelName) {
@@ -70,28 +70,28 @@ public class CompoundFormModel extends AbstractFormModel implements
     }
 
     public MutableFormModel createChild(String childFormModelName,
-            String parentPropertyFormObjectPath) {
+            String childFormObjectPath) {
         return (MutableFormModel)createChildInternal(new ValidatingFormModel(),
-                childFormModelName, parentPropertyFormObjectPath);
+                childFormModelName, childFormObjectPath);
     }
 
     public NestingFormModel createCompoundChild(String childFormModelName,
-            String parentPropertyFormObjectPath) {
+            String childFormObjectPath) {
         return (NestingFormModel)createChildInternal(new CompoundFormModel(),
-                childFormModelName, parentPropertyFormObjectPath);
+                childFormModelName, childFormObjectPath);
     }
 
     private FormModel createChildInternal(AbstractFormModel childFormModel,
-            String childFormModelName, String parentPropertyFormObjectPath) {
+            String childFormModelName, String childFormObjectPath) {
         ValueModel valueHolder = new PropertyAdapter(
-                getPropertyAccessStrategy(), parentPropertyFormObjectPath);
+                getPropertyAccessStrategy(), childFormObjectPath);
         if (getBufferChangesDefault()) {
             valueHolder = new BufferedValueModel(valueHolder);
             childFormObjectBuffers.add(valueHolder);
         }
         boolean enabledDefault = valueHolder.get() != null;
         Class valueClass = getMetadataAccessStrategy().getPropertyType(
-                parentPropertyFormObjectPath);
+                childFormObjectPath);
         new ChildFormObjectSetter(valueHolder, valueClass);
         return createChildInternal(childFormModel, childFormModelName,
                 valueHolder, enabledDefault);
@@ -168,12 +168,12 @@ public class CompoundFormModel extends AbstractFormModel implements
             logger.debug("Adding new nested form model '" + childFormModelName
                     + "', value=" + childModel);
         }
-        formModels.put(childFormModelName, childModel);
+        childFormModels.put(childFormModelName, childModel);
         return childModel;
     }
 
     public void addValidationListener(final ValidationListener listener) {
-        Algorithms.instance().forEachIn(formModels.values(),
+        Algorithms.instance().forEachIn(childFormModels.values(),
                 new UnaryProcedure() {
                     public void run(Object formModel) {
                         ((FormModel)formModel).addValidationListener(listener);
@@ -182,30 +182,30 @@ public class CompoundFormModel extends AbstractFormModel implements
     }
 
     public void addValidationListener(ValidationListener listener,
-            String childModelName) {
-        FormModel model = getChildFormModel(childModelName);
-        Assert.notNull(model, "No child model by name " + childModelName
+            String childFormModelName) {
+        FormModel model = getChildFormModel(childFormModelName);
+        Assert.notNull(model, "No child model by name " + childFormModelName
                 + "exists; unable to add listener");
         model.addValidationListener(listener);
     }
 
     public void removeValidationListener(ValidationListener listener,
-            String childModelName) {
-        FormModel model = getChildFormModel(childModelName);
-        Assert.notNull(model, "No child model by name " + childModelName
+            String childFormModelName) {
+        FormModel model = getChildFormModel(childFormModelName);
+        Assert.notNull(model, "No child model by name " + childFormModelName
                 + "exists; unable to remove listener");
         model.removeValidationListener(listener);
     }
 
-    public FormModel getChildFormModel(String childModelName) {
-        return (FormModel)formModels.get(childModelName);
+    public FormModel getChildFormModel(String childFormModelName) {
+        return (FormModel)childFormModels.get(childFormModelName);
     }
 
     public void removeValidationListener(final ValidationListener listener) {
-        Algorithms.instance().forEachIn(formModels.values(),
+        Algorithms.instance().forEachIn(childFormModels.values(),
                 new UnaryProcedure() {
-                    public void run(Object formModel) {
-                        ((FormModel)formModel)
+                    public void run(Object childFormModel) {
+                        ((FormModel)childFormModel)
                                 .removeValidationListener(listener);
                     }
                 });
@@ -216,24 +216,24 @@ public class CompoundFormModel extends AbstractFormModel implements
         return null;
     }
 
-    public ValueModel getValueModel(String formProperty) {
-        return getValueModel(formProperty, true);
+    public ValueModel getValueModel(String formPropertyPath) {
+        return getValueModel(formPropertyPath, true);
     }
 
     public ValueModel findValueModelFor(FormModel delegatingChild,
-            String domainObjectProperty) {
-        Iterator it = formModels.values().iterator();
+            String formPropertyPath) {
+        Iterator it = childFormModels.values().iterator();
         while (it.hasNext()) {
             NestableFormModel formModel = (NestableFormModel)it.next();
             if (delegatingChild != null && formModel == delegatingChild) {
                 continue;
             }
             ValueModel valueModel = formModel.getValueModel(
-                    domainObjectProperty, false);
+                    formPropertyPath, false);
             if (valueModel != null) { return valueModel; }
         }
         if (logger.isInfoEnabled()) {
-            logger.info("No value model by name '" + domainObjectProperty
+            logger.info("No value model by name '" + formPropertyPath
                     + "' found on any nested form models... returning [null]");
         }
         return null;
@@ -251,39 +251,39 @@ public class CompoundFormModel extends AbstractFormModel implements
     }
 
     protected void handleEnabledChange() {
-        Algorithms.instance().forEachIn(formModels.values(),
+        Algorithms.instance().forEachIn(childFormModels.values(),
                 new UnaryProcedure() {
-                    public void run(Object formModel) {
-                        ((FormModel)formModel).setEnabled(isEnabled());
+                    public void run(Object childFormModel) {
+                        ((FormModel)childFormModel).setEnabled(isEnabled());
                     }
                 });
     }
 
     public boolean getHasErrors() {
-        return Algorithms.instance().areAnyTrue(formModels.values(),
+        return Algorithms.instance().areAnyTrue(childFormModels.values(),
                 new UnaryPredicate() {
-                    public boolean test(Object formModel) {
-                        return ((FormModel)formModel).getHasErrors();
+                    public boolean test(Object childFormModel) {
+                        return ((FormModel)childFormModel).getHasErrors();
                     }
                 });
     }
 
     public Map getErrors() {
         final Map allErrors = new HashMap();
-        Algorithms.instance().forEachIn(formModels.values(),
+        Algorithms.instance().forEachIn(childFormModels.values(),
                 new UnaryProcedure() {
-                    public void run(Object formModel) {
-                        allErrors.putAll(((FormModel)formModel).getErrors());
+                    public void run(Object childFormModel) {
+                        allErrors.putAll(((FormModel)childFormModel).getErrors());
                     }
                 });
         return allErrors;
     }
 
     public boolean isDirty() {
-        return Algorithms.instance().areAnyTrue(formModels.values(),
+        return Algorithms.instance().areAnyTrue(childFormModels.values(),
                 new UnaryPredicate() {
-                    public boolean test(Object formModel) {
-                        return ((FormModel)formModel).isDirty();
+                    public boolean test(Object childFormModel) {
+                        return ((FormModel)childFormModel).isDirty();
                     }
                 });
     }
@@ -297,10 +297,10 @@ public class CompoundFormModel extends AbstractFormModel implements
 
     public void commit() {
         if (preEditCommit()) {
-            Algorithms.instance().forEachIn(formModels.values(),
+            Algorithms.instance().forEachIn(childFormModels.values(),
                     new UnaryProcedure() {
-                        public void run(Object formModel) {
-                            ((FormModel)formModel).commit();
+                        public void run(Object childFormModel) {
+                            ((FormModel)childFormModel).commit();
                         }
                     });
             if (getBufferChangesDefault()) {
@@ -317,10 +317,10 @@ public class CompoundFormModel extends AbstractFormModel implements
     }
 
     public void revert() {
-        Algorithms.instance().forEachIn(formModels.values(),
+        Algorithms.instance().forEachIn(childFormModels.values(),
                 new UnaryProcedure() {
-                    public void run(Object formModel) {
-                        ((FormModel)formModel).revert();
+                    public void run(Object childFormModel) {
+                        ((FormModel)childFormModel).revert();
                     }
                 });
     }
