@@ -4,6 +4,7 @@ SPRING FRAMEWORK CHANGELOG
 Changes in version 1.0 M2 (XX.XX.2003)
 -------------------------------------
 * removed "shared object" support in ApplicationContext as part of API simplification
+* added tiles-example showing how to use Tiles in conjunction with Spring
 
 
 Changes in version 1.0 M1 (30.8.2003)
