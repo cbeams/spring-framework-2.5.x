@@ -445,6 +445,10 @@ public class ActionState extends TransitionableState {
 				return actionName + "." + event.getId();
 			}
 
+			public long getTimestamp() {
+				return event.getTimestamp();
+			}
+			
 			public Object getParameter(String parameterName) {
 				return event.getParameter(parameterName);
 			}
