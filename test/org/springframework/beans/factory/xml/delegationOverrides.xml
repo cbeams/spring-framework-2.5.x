@@ -50,6 +50,16 @@
 		class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$DoSomethingReplacer" />
 	
 	
+	<bean id="serializableReplacer" 
+		class="org.springframework.beans.factory.xml.SerializableMethodReplacerCandidate">
+		
+		<!-- Arbitrary method replacer -->
+		<replaced-method name="replaceMe" replacer="reverseReplacer">
+			<arg-type>String</arg-type>
+		</replaced-method>
+		
+	</bean>
+	
 	<bean id="jenny" class="org.springframework.beans.TestBean"
 		singleton="false">	
 		<property name="name"><value>Jenny</value></property>
