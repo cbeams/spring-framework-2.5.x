@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.load.AbstractTest;
 
@@ -24,9 +25,10 @@ public abstract class AbstractBeansTest extends AbstractTest {
 	// Logging should be off
 	
 	public AbstractBeansTest() throws BeansException {
-			InputStream is = getClass().getResourceAsStream("/org/springframework/benchmark/beans.xml");
+		String location = "/org/springframework/benchmark/beans.xml";
+		InputStream is = getClass().getResourceAsStream(location);
 
-			this.bf = new XmlBeanFactory(is);
-		}
+		this.bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation(location));
+	}
 
 }

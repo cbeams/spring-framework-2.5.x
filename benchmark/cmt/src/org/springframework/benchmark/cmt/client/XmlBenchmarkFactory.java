@@ -8,6 +8,7 @@ package org.springframework.benchmark.cmt.client;
 import java.io.InputStream;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 import org.springframework.benchmark.cmt.server.Benchmark;
@@ -15,7 +16,7 @@ import org.springframework.benchmark.cmt.server.Benchmark;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: XmlBenchmarkFactory.java,v 1.1 2003-12-02 18:31:08 johnsonr Exp $
+ * @version $Id: XmlBenchmarkFactory.java,v 1.2 2003-12-22 17:43:44 johnsonr Exp $
  */
 public class XmlBenchmarkFactory implements BenchmarkFactory {
 	
@@ -26,7 +27,7 @@ public class XmlBenchmarkFactory implements BenchmarkFactory {
 	public void setFile(String file) {
 		this.file = file;
 		InputStream is = getClass().getResourceAsStream(file);
-		BeanFactory bf = new XmlBeanFactory(is);
+		BeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation(file));
 		this.benchmark = (Benchmark) bf.getBean("benchmark");
 	} 
 
