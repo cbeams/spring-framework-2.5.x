@@ -158,7 +158,7 @@ public abstract class AbstractState implements Serializable {
 	}
 
 	public int hashCode() {
-		return flow.hashCode() + id.hashCode();
+		return (flow != null ? flow.hashCode() : 0) + id.hashCode();
 	}
 
 	public String toString() {
