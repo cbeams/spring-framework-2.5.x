@@ -7,6 +7,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.samples.countries.appli.ICountry;
+import org.springframework.samples.countries.dao.IDaoCountry;
 import org.springframework.util.PagedListSourceProvider;
 import org.springframework.util.RefreshablePagedListHolder;
 import org.springframework.validation.BindException;
@@ -14,9 +16,6 @@ import org.springframework.web.bind.BindUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 import org.springframework.web.servlet.support.RequestContextUtils;
-
-import org.springframework.samples.countries.appli.ICountry;
-import org.springframework.samples.countries.dao.IDaoCountry;
 
 /**
  * @author Jean-Pierre Pawlak
@@ -132,23 +131,21 @@ public class CountriesController extends MultiActionController {
 	 */
 	public ModelAndView handleCopy(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		boolean copyMade = false;
-		try {
-			if (null != secondDaoCountry) {
-				logger.info("A secondDao is configured");
-				secondDaoCountry.initBase();
-				logger.info("The database is initiallised");
-				Locale locs[] = {Locale.US, Locale.FRANCE, Locale.GERMANY};
-				for (int i = 0; i < locs.length; i++ ) {
-					secondDaoCountry.saveCountries(daoCountry.getAllCountries(locs[i]), locs[i]);
-				}
-				copyMade = true;
-				logger.info("The data is copied");
-			} else {
-				logger.error("No secondDao is configured. You cannot copy in a database.");
+		if (null != secondDaoCountry) {
+			logger.info("A secondDao is configured");
+			secondDaoCountry.initBase();
+			logger.info("The database is initiallised");
+			Locale locs[] = {Locale.US, Locale.FRANCE, Locale.GERMANY};
+			for (int i = 0; i < locs.length; i++ ) {
+				secondDaoCountry.saveCountries(daoCountry.getAllCountries(locs[i]), locs[i]);
 			}
-		} finally {
-			return new ModelAndView("copyView", "copyMade", new Boolean(copyMade));
+			copyMade = true;
+			logger.info("The data is copied");
 		}
+		else {
+			logger.error("No secondDao is configured. You cannot copy in a database.");
+		}
+		return new ModelAndView("copyView", "copyMade", new Boolean(copyMade));
 	}
 
 	// Accessors
