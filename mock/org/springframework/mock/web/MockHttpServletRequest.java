@@ -23,13 +23,17 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.security.Principal;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +46,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -405,11 +410,11 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	 * the value will be used as-is. In case of an existing entry,
 	 * a String array will be created, adding the given value (more
 	 * specifically, its toString representation) as further element.
-	 * <p>Multiple values can only be stored as String array,
+	 * <p>Multiple values can only be stored as list of Strings,
 	 * following the Servlet spec (see <code>getHeaders</code> accessor).
 	 * As alternative to repeated <code>addHeader</code> calls for
-	 * individual elements, you can use a single call with the entire
-	 * String array as parameter.
+	 * individual elements, you can use a single call with an entire
+	 * array or Collection of values as parameter.
 	 * @see #getHeaderNames
 	 * @see #getHeader
 	 * @see #getHeaders
@@ -417,26 +422,53 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	 * @see #getIntHeader
 	 */
 	public void addHeader(String name, Object value) {
+		Assert.notNull(name, "name must not be null");
+		Assert.notNull(value, "value must not be null");
 		Object oldValue = this.headers.get(name);
-		if (oldValue instanceof String[]) {
-			String[] oldArray = (String[]) oldValue;
-			String[] newArray = new String[oldArray.length + 1];
-			System.arraycopy(oldArray, 0, newArray, 0, oldArray.length);
-			newArray[oldArray.length] = value.toString();
-			this.headers.put(name, newArray);
+		if (oldValue instanceof List) {
+			List list = (List) oldValue;
+			addHeaderValue(list, value);
 		}
 		else if (oldValue != null) {
-			String[] newArray = new String[2];
-			newArray[0] = oldValue.toString();
-			newArray[1] = value.toString();
-			this.headers.put(name, newArray);
+			List list = new LinkedList();
+			list.add(oldValue);
+			addHeaderValue(list, value);
+			this.headers.put(name, list);
+		}
+		else if (value instanceof Collection || value.getClass().isArray()) {
+			List list = new LinkedList();
+			addHeaderValue(list, value);
+			this.headers.put(name, list);
 		}
 		else {
 			this.headers.put(name, value);
 		}
 	}
 
+	private void addHeaderValue(List list, Object value) {
+		if (value instanceof Collection) {
+			Collection valueColl = (Collection) value;
+			for (Iterator it = valueColl.iterator(); it.hasNext();) {
+				Object element = it.next();
+				Assert.notNull("Value collection must not contain null elements");
+				list.add(element.toString());
+			}
+		}
+		else if (value.getClass().isArray()) {
+			int length = Array.getLength(value);
+			for (int i = 0; i < length; i++) {
+				Object element = Array.get(value, i);
+				Assert.notNull("Value collection must not contain null elements");
+				list.add(element.toString());
+			}
+		}
+		else {
+			list.add(value);
+		}
+	}
+
 	public long getDateHeader(String name) {
+		Assert.notNull(name, "name must not be null");
 		Object value = this.headers.get(name);
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
@@ -454,9 +486,10 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	}
 
 	public String getHeader(String name) {
+		Assert.notNull(name, "name must not be null");
 		Object value = this.headers.get(name);
-		if (value instanceof String[]) {
-			return StringUtils.arrayToCommaDelimitedString((String[]) value);
+		if (value instanceof List) {
+			return StringUtils.collectionToCommaDelimitedString((List) value);
 		}
 		else if (value != null) {
 			return value.toString();
@@ -467,9 +500,10 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	}
 
 	public Enumeration getHeaders(String name) {
+		Assert.notNull(name, "name must not be null");
 		Object value = this.headers.get(name);
-		if (value instanceof String[]) {
-			return Collections.enumeration(Arrays.asList((String[]) value));
+		if (value instanceof List) {
+			return Collections.enumeration((List) value);
 		}
 		else if (value != null) {
 			Vector vector = new Vector(1);
@@ -486,6 +520,7 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	}
 
 	public int getIntHeader(String name) {
+		Assert.notNull(name, "name must not be null");
 		Object value = this.headers.get(name);
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
