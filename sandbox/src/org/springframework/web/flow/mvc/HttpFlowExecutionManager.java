@@ -120,9 +120,9 @@ public class HttpFlowExecutionManager {
 		ModelAndView modelAndView;
 		if (isNewFlowExecutionRequest(request)) {
 			// start a new flow execution
-			if (flow == null) {
+			if (this.flow == null) {
 				// try to extract flow definition to use from request
-				flow = createFlow(request);
+				this.flow = getFlow(request);
 			}
 			flowExecution = createFlowExecution(flow);
 			modelAndView = flowExecution.start(inputData, request, response);
@@ -194,7 +194,7 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Obtain a flow to use from given request.
 	 */
-	public Flow createFlow(HttpServletRequest request) {
+	public Flow getFlow(HttpServletRequest request) {
 		return (Flow)beanFactory.getBean(getRequestParameter(request, getFlowIdParameterName(),
 				getParameterValueDelimiter()));
 	}

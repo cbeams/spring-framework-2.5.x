@@ -266,7 +266,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return this.rootFlow.getStartState().enter(this, request, response);
 	}
 
-	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
+	public synchronized ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
 			HttpServletResponse response) {
 		assertActive();
 		if (stateId == null) {
