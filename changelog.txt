@@ -9,6 +9,8 @@ Changes in version 1.1.5 (6.3.2005)
 Package org.springframework.context
 * AbstractApplicationContext uses new DelegatingMessageSource as placeholder, to avoid StaticMessageSource side effects
 
+Documentation
+* Moved Tapestry integration content to a separate chapter (Integrating with other web frameworks)
 
 Changes in version 1.1.4 (31.1.2005)
 ------------------------------------

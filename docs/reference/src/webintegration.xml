@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="webintegration">
+  <title>Integrating with other web frameworks</title>
+  <sect1 id="view-tapestry">
+    <title>Tapestry</title>
+
+    <para>Tapestry is a powerful, component-oriented web application framework
+    from Apache's Jakarta project (<ulink
+    url="http://jakarta.apache.org/tapestry"></ulink>). While Spring has its
+    own powerful web ui layer, there are a number of unique advantages to
+    building a J2EE application using a combination of Tapestry for the web
+    ui, and the Spring container for the lower layers. This document attempts
+    to detail a few best practices for combining these two frameworks. It is
+    expected that you are relatively familiar with both Tapestry and Spring
+    Framework basics, so they will not be explained here. General introductory
+    documentation for both Tapestry and Spring Framework are available on
+    their respective web sites.</para>
+
+    <sect2 id="view-tapestry-architecture">
+      <title>Architecture</title>
+
+      <para>A typical layered J2EE application built with Tapestry and Spring
+      will consist of a top UI layer built with Tapestry, and a number of
+      lower layers, hosted out of one or more Spring Application
+      Contexts.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><emphasis>User Interface Layer:</emphasis></para>
+
+          <para>- concerned with the user interface</para>
+
+          <para>- contains some application logic</para>
+
+          <para>- provided by Tapestry</para>
+
+          <para>- aside from providing UI via Tapestry, code in this layer
+          does its work via objects which implement interfaces from the
+          Service Layer. The actual objects which implement these service
+          layer interfaces are obtained from a Spring Application
+          Context.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Service Layer:</emphasis></para>
+
+          <para>- application specific 'service' code</para>
+
+          <para>- works with domain objects, and uses the Mapper API to get
+          those domain objects into and out of some sort of repository
+          (database)</para>
+
+          <para>- hosted in one or more Spring contexts</para>
+
+          <para>- code in this layer manipulates objects in the domain model,
+          in an application specific fashion. It does its work via other code
+          in this layer, and via the Mapper API. An object in this layer is
+          given the specific mapper implementations it needs to work with, via
+          the Spring context.</para>
+
+          <para>- since code in this layer is hosted in the Spring context, it
+          may be transactionally wrapped by the Spring context, as opposed to
+          managing its own transactions</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Domain Model:</emphasis></para>
+
+          <para>- domain specific object hierarchy, which deals with data and
+          logic specific to this domain</para>
+
+          <para>- although the domain object hierarchy is built with the idea
+          that it is persisted somehow and makes some general concessions to
+          this (for example, bidirectional relationships), it generally has no
+          knowledge of other layers. As such, it may be tested in isolation,
+          and used with different mapping implementations for production vs.
+          testing.</para>
+
+          <para>- these objects may be standalone, or used in conjunction with
+          a Spring application context to take advantage of some of the
+          benefits of the context, e.g., isolation, inversion of control,
+          different strategy implementations, etc.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Data Source Layer:</emphasis></para>
+
+          <para>- Mapper API (also called Data Access Objects): an API used to
+          persist the domain model to a repository of some sort (generally a
+          DB, but could be the filesystem, memory, etc.)</para>
+
+          <para>- Mapper API implementations: one or more specific
+          implementations of the Mapper API, for example, a Hibernate-specific
+          mapper, a JDO-specific mapper, JDBC-specific mapper, or a memory
+          mapper.</para>
+
+          <para>- mapper implementations live in one or more Spring
+          Application Contexts. A service layer object is given the mapper
+          objects it needs to work with via the context.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Database, filesystem, or other
+          repositories:</emphasis></para>
+
+          <para>- objects in the domain model are stored into one or more
+          repositories via one or more mapper implementations</para>
+
+          <para>- a repository may be very simple (e.g. filesystem), or may
+          have its own representation of the data from the domain model (i.e.
+          a schema in a db). It does not know about other layers
+          howerver.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+
+    <sect2 id="view-tapestry-implementation">
+      <title>Implementation</title>
+
+      <para>The only real question (which needs to be addressed by this
+      document), is how Tapestry pages get access to service implementations,
+      which are simply beans defined in an instance of the Spring Application
+      Context.</para>
+
+      <sect3 id="view-tapestry-context">
+        <title>Sample application context</title>
+
+        <para>Assume we have the following simple Application Context
+        definition, in xml form: <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+        "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
+ 
+&lt;beans&gt;
+ 
+    &lt;!-- ========================= GENERAL DEFINITIONS ========================= --&gt;
+ 
+    &lt;!-- ========================= PERSISTENCE DEFINITIONS ========================= --&gt;
+ 
+    &lt;!-- the DataSource --&gt;
+    &lt;bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+        &lt;property name="jndiName"&gt;&lt;value&gt;java:DefaultDS&lt;/value&gt;&lt;/property&gt;
+        &lt;property name="resourceRef"&gt;&lt;value&gt;false&lt;/value&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+ 
+    &lt;!-- define a Hibernate Session factory via a Spring LocalSessionFactoryBean --&gt;
+    &lt;bean id="hibSessionFactory" 
+        class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+        &lt;property name="dataSource"&gt;&lt;ref bean="dataSource"/&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+ 
+    &lt;!--
+     - Defines a transaction manager for usage in business or data access objects.
+     - No special treatment by the context, just a bean instance available as reference
+     - for business objects that want to handle transactions, e.g. via TransactionTemplate.
+     --&gt;
+    &lt;bean id="transactionManager" 
+        class="org.springframework.transaction.jta.JtaTransactionManager"&gt;
+    &lt;/bean&gt;
+ 
+    &lt;bean id="mapper" 
+        class="com.whatever.dataaccess.mapper.hibernate.MapperImpl"&gt;
+        &lt;property name="sessionFactory"&gt;&lt;ref bean="hibSessionFactory"/&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+   
+    &lt;!-- ========================= BUSINESS DEFINITIONS ========================= --&gt;
+ 
+    &lt;!-- AuthenticationService, including tx interceptor --&gt;
+    &lt;bean id="authenticationServiceTarget"
+        class="com.whatever.services.service.user.AuthenticationServiceImpl"&gt;
+        &lt;property name="mapper"&gt;&lt;ref bean="mapper"/&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+    &lt;bean id="authenticationService" 
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+        &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
+        &lt;property name="target"&gt;&lt;ref bean="authenticationServiceTarget"/&gt;&lt;/property&gt;
+        &lt;property name="proxyInterfacesOnly"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+        &lt;property name="transactionAttributes"&gt;
+            &lt;props&gt;
+                &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;  
+ 
+    &lt;!-- UserService, including tx interceptor --&gt;
+    &lt;bean id="userServiceTarget"
+        class="com.whatever.services.service.user.UserServiceImpl"&gt;
+        &lt;property name="mapper"&gt;&lt;ref bean="mapper"/&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+    &lt;bean id="userService" 
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+        &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
+        &lt;property name="target"&gt;&lt;ref bean="userServiceTarget"/&gt;&lt;/property&gt;
+        &lt;property name="proxyInterfacesOnly"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+        &lt;property name="transactionAttributes"&gt;
+            &lt;props&gt;
+                &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;  
+ 
+ &lt;/beans&gt;</programlisting> Inside the Tapestry application, we need to
+        load this application context, and allow Tapestry pages to get the
+        authenticationService and userService beans, which implement the
+        AuthenticationService and UserService interfaces, respectively.</para>
+      </sect3>
+
+      <sect3 id="view-tapestry-appctx">
+        <title>Obtaining beans in Tapestry pages</title>
+
+        <para>At this point, the application context is available to a web
+        application by calling Spring's static utility function
+        <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>,
+        where servletContext is the standard <literal>ServletContext</literal>
+        from the J2EE Servlet specification. As such, one simple mechanism for
+        a page to get an instance of the UserService, for example, would be
+        with code such as: <programlisting>    WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
+        getRequestCycle().getRequestContext().getServlet().getServletContext());
+    UserService userService = (UserService) appContext.getBean("userService");
+    ... some code which uses UserService</programlisting> This mechanism does
+        work. It can be made a lot less verbose by encapsulating most of the
+        functionality in a method in the base class for the page or component.
+        However, in some respects it goes against the Inversion of Control
+        approach which Spring encourages, which is being used in other layers
+        of this app, in that ideally you would like the page to not have to
+        ask the context for a specific bean by name, and in fact, the page
+        would ideally not know about the context at all.</para>
+
+        <para>Luckily, there is a mechanism to allow this. We rely upon the
+        fact that Tapestry already has a mechanism to declaratively add
+        properties to a page, and it is in fact the preferred approach to
+        manage all properties on a page in this declarative fashion, so that
+        Tapestry can properly manage their lifecycle as part of the page and
+        component lifecycle.</para>
+      </sect3>
+
+      <sect3 id="view-tapestry-exposeappctx">
+        <title>Exposing the application context to Tapestry</title>
+
+        <para>First we need to make the <literal>ApplicationContext</literal>
+        available to the Tapestry page or Component without having to have the
+        <literal>ServletContext</literal>; this is because at the stage in the
+        page's/component's lifecycle when we need to access the
+        <literal>ApplicationContext</literal>, the
+        <literal>ServletContext</literal> won't be easily available to the
+        page, so we can't use
+        <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>
+        directly. One way is by defining a custom version of the Tapestry
+        IEngine which exposes this for us: <programlisting>package com.whatever.web.xportal;
+...
+import ...
+...
+public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
+ 
+    public static final String APPLICATION_CONTEXT_KEY = "appContext";
+ 
+    /**
+     * @see org.apache.tapestry.engine.AbstractEngine#setupForRequest(org.apache.tapestry.request.RequestContext)
+     */
+    protected void setupForRequest(RequestContext context) {
+        super.setupForRequest(context);
+     
+        // insert ApplicationContext in global, if not there
+        Map global = (Map) getGlobal();
+        ApplicationContext ac = (ApplicationContext) global.get(APPLICATION_CONTEXT_KEY);
+        if (ac == null) {
+            ac = WebApplicationContextUtils.getWebApplicationContext(
+                context.getServlet().getServletContext()
+            );
+            global.put(APPLICATION_CONTEXT_KEY, ac);
+        }
+    }
+}</programlisting>This engine class places the Spring Application Context as
+        an attribute called "appContext" in this Tapestry app's 'Global'
+        object. Make sure to register the fact that this special IEngine
+        instance should be used for this Tapestry application, with an entry
+        in the Tapestry application definition file. For example:
+        <programlisting>file: xportal.application:
+ 
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE application PUBLIC 
+    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+&lt;application
+    name="Whatever xPortal"
+    engine-class="com.whatever.web.xportal.MyEngine"&gt;
+&lt;/application&gt;</programlisting></para>
+      </sect3>
+
+      <sect3 id="view-tapestry-componentdefs">
+        <title>Component definition files</title>
+
+        <para>Now in our page or component definition file (*.page or *.jwc),
+        we simply add property-specification elements to grab the beans we
+        need out of the ApplicationContext, and create page or component
+        properties for them. For example: <programlisting>    &lt;property-specification name="userService"
+                            type="com.whatever.services.service.user.UserService"&gt;
+        global.appContext.getBean("userService")
+    &lt;/property-specification&gt;
+    &lt;property-specification name="authenticationService"
+                            type="com.whatever.services.service.user.AuthenticationService"&gt;
+        global.appContext.getBean("authenticationService")
+    &lt;/property-specification&gt;</programlisting> The OGNL expression
+        inside the property-specification specifies the initial value for the
+        property, as a bean obtained from the context. The entire page
+        definition might look like this: <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE page-specification PUBLIC 
+    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+     
+&lt;page-specification class="com.whatever.web.xportal.pages.Login"&gt;
+ 
+    &lt;property-specification name="username" type="java.lang.String"/&gt;
+    &lt;property-specification name="password" type="java.lang.String"/&gt;
+    &lt;property-specification name="error" type="java.lang.String"/&gt;
+    &lt;property-specification name="callback" type="org.apache.tapestry.callback.ICallback" persistent="yes"/&gt;
+    &lt;property-specification name="userService"
+                            type="com.whatever.services.service.user.UserService"&gt;
+        global.appContext.getBean("userService")
+    &lt;/property-specification&gt;
+    &lt;property-specification name="authenticationService"
+                            type="com.whatever.services.service.user.AuthenticationService"&gt;
+        global.appContext.getBean("authenticationService")
+    &lt;/property-specification&gt;
+   
+    &lt;bean name="delegate" class="com.whatever.web.xportal.PortalValidationDelegate"/&gt;
+ 
+    &lt;bean name="validator" class="org.apache.tapestry.valid.StringValidator" lifecycle="page"&gt;
+        &lt;set-property name="required" expression="true"/&gt;
+        &lt;set-property name="clientScriptingEnabled" expression="true"/&gt;
+    &lt;/bean&gt;
+ 
+    &lt;component id="inputUsername" type="ValidField"&gt;
+        &lt;static-binding name="displayName" value="Username"/&gt;
+        &lt;binding name="value" expression="username"/&gt;
+        &lt;binding name="validator" expression="beans.validator"/&gt;
+    &lt;/component&gt;
+   
+    &lt;component id="inputPassword" type="ValidField"&gt;
+        &lt;binding name="value" expression="password"/&gt;
+       &lt;binding name="validator" expression="beans.validator"/&gt;
+       &lt;static-binding name="displayName" value="Password"/&gt;
+       &lt;binding name="hidden" expression="true"/&gt;
+    &lt;/component&gt;
+ 
+&lt;/page-specification&gt;</programlisting></para>
+      </sect3>
+
+      <sect3 id="view-tapestry-getters">
+        <title>Adding abstract accessors</title>
+
+        <para>Now in the Java class definition for the page or component
+        itself, all we need to do is add an abstract getter method for the
+        properties we have defined, to access them. When the page or component
+        is actually loaded by Tapestry, it performs runtime code
+        instrumentation on the classfile to add the properties which have been
+        defined, and hook up the abstract getter methods to the newly created
+        fields. For example: <programlisting>    // our UserService implementation; will come from page definition
+    public abstract UserService getUserService();
+    // our AuthenticationService implementation; will come from page definition
+    public abstract AuthenticationService getAuthenticationService();</programlisting>
+        For completeness, the entire Java class, for a login page in this
+        example, might look like this: <programlisting>package com.whatever.web.xportal.pages;
+ 
+/**
+ *  Allows the user to login, by providing username and password.
+ *  After successfully logging in, a cookie is placed on the client browser
+ *  that provides the default username for future logins (the cookie
+ *  persists for a week).
+ */
+public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
+ 
+    /** the key under which the authenticated user object is stored in the visit as */
+    public static final String USER_KEY = "user";
+   
+    /**
+     * The name of a cookie to store on the user's machine that will identify
+     * them next time they log in.
+     **/
+    private static final String COOKIE_NAME = Login.class.getName() + ".username";  
+    private final static int ONE_WEEK = 7 * 24 * 60 * 60;
+ 
+    // --- attributes
+ 
+    public abstract String getUsername();
+    public abstract void setUsername(String username);
+ 
+    public abstract String getPassword();
+    public abstract void setPassword(String password);
+ 
+    public abstract ICallback getCallback();
+    public abstract void setCallback(ICallback value);
+    
+    public abstract UserService getUserService();
+ 
+    public abstract AuthenticationService getAuthenticationService();
+ 
+    // --- methods
+ 
+    protected IValidationDelegate getValidationDelegate() {
+        return (IValidationDelegate) getBeans().getBean("delegate");
+    }
+ 
+    protected void setErrorField(String componentId, String message) {
+        IFormComponent field = (IFormComponent) getComponent(componentId);
+        IValidationDelegate delegate = getValidationDelegate();
+        delegate.setFormComponent(field);
+        delegate.record(new ValidatorException(message));
+    }
+ 
+    /**
+     *  Attempts to login. 
+     *
+     *  &lt;p&gt;If the user name is not known, or the password is invalid, then an error
+     *  message is displayed.
+     *
+     **/
+    public void attemptLogin(IRequestCycle cycle) {
+     
+        String password = getPassword();
+ 
+        // Do a little extra work to clear out the password.
+ 
+        setPassword(null);
+        IValidationDelegate delegate = getValidationDelegate();
+ 
+        delegate.setFormComponent((IFormComponent) getComponent("inputPassword"));
+        delegate.recordFieldInputValue(null);
+ 
+        // An error, from a validation field, may already have occurred.
+ 
+        if (delegate.getHasErrors())
+            return;
+ 
+        try {
+            User user = getAuthenticationService().login(getUsername(), getPassword());
+           loginUser(user, cycle);
+        }
+        catch (FailedLoginException ex) {
+            this.setError("Login failed: " + ex.getMessage());
+            return;
+        }
+    }
+ 
+    /**
+     *  Sets up the {@link User} as the logged in user, creates
+     *  a cookie for their username (for subsequent logins),
+     *  and redirects to the appropriate page, or
+     *  a specified page).
+     *
+     **/
+    public void loginUser(User user, IRequestCycle cycle) {
+     
+        String username = user.getUsername();
+ 
+        // Get the visit object; this will likely force the
+        // creation of the visit object and an HttpSession.
+ 
+        Map visit = (Map) getVisit();
+        visit.put(USER_KEY, user);
+ 
+        // After logging in, go to the MyLibrary page, unless otherwise
+        // specified.
+ 
+        ICallback callback = getCallback();
+ 
+        if (callback == null)
+            cycle.activate("Home");
+        else
+            callback.performCallback(cycle);
+ 
+        // I've found that failing to set a maximum age and a path means that
+        // the browser (IE 5.0 anyway) quietly drops the cookie.
+ 
+        IEngine engine = getEngine();
+        Cookie cookie = new Cookie(COOKIE_NAME, username);
+        cookie.setPath(engine.getServletPath());
+        cookie.setMaxAge(ONE_WEEK);
+ 
+        // Record the user's username in a cookie
+ 
+        cycle.getRequestContext().addCookie(cookie);
+ 
+        engine.forgetPage(getPageName());
+    }
+   
+    public void pageBeginRender(PageEvent event) {
+        if (getUsername() == null)
+            setUsername(getRequestCycle().getRequestContext().getCookieValue(COOKIE_NAME));
+    }
+}</programlisting></para>
+      </sect3>
+    </sect2>
+
+    <sect2 id="view-tapestry-summary">
+      <title>Summary</title>
+
+      <para>In this example, we've managed to allow service beans defined in
+      the Spring <literal>ApplicationContext</literal> to be provided to the
+      page in a declarative fashion. The page class does not know where the
+      service implementations are coming from, and in fact it is easy to slip
+      in another implementation, for example, during testing. This inversion
+      of control is one of the prime goals and benefits of the Spring
+      Framework, and we have managed to extend it all the way up the J2EE
+      stack in this Tapestry application.</para>
+    </sect2>
+  </sect1>
+</chapter>
