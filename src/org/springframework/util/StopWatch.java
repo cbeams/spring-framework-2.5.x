@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.util;
 
@@ -249,9 +249,10 @@ public class StopWatch {
 		if (this.keepTaskList) {
 			TaskInfo[] tasks = getTaskInfo();
 			for (int i = 0; i < tasks.length; i++) {
-				if (i > 0)
+				if (i > 0) {
 					sb.append("; ");
-				sb.append("[" + tasks[i].getTaskName() + "] took " + tasks[i].getTimeSeconds());
+				}
+				sb.append("[" + tasks[i].getTaskName() + "] took " + tasks[i].getTimeMillis());
 				long percent = Math.round((100.0 * tasks[i].getTimeSeconds()) / getTotalTimeSeconds());
 				sb.append("=" + percent + "%");
 			}

@@ -1069,15 +1069,15 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testJtaTransactionCommitWithJtaSynchronizationAndPreBound() throws Exception {
-		doTestJtaTransactionCommitWithJtaSynchronizationAndPreBound(false);
+	public void testJtaSessionSynchronizationWithPreBound() throws Exception {
+		doTestJtaSessionSynchronizationWithPreBound(false);
 	}
 
-	public void testJtaTransactionCommitWithJtaSynchronizationAndPreBoundAndFlushNever() throws Exception {
-		doTestJtaTransactionCommitWithJtaSynchronizationAndPreBound(true);
+	public void testJtaJtaSessionSynchronizationWithPreBoundAndFlushNever() throws Exception {
+		doTestJtaSessionSynchronizationWithPreBound(true);
 	}
 
-	private void doTestJtaTransactionCommitWithJtaSynchronizationAndPreBound(boolean flushNever) throws Exception {
+	private void doTestJtaSessionSynchronizationWithPreBound(boolean flushNever) throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
