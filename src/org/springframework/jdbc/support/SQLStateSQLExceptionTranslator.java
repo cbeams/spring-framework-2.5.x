@@ -22,7 +22,7 @@ import org.springframework.jdbc.UncategorizedSQLException;
  * code in the SQL exception. Can't diagnose all problems, but is
  * portable between databases.
  * @author Rod Johnson
- * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.1 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.2 2004-02-25 19:57:14 trisberg Exp $
  */
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	
@@ -55,6 +55,12 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 						"' and message [" + sqlex.getMessage() + "]; SQL was [" + sql + "] for task [" + task + "]");
 
 		String sqlState = sqlex.getSQLState();
+		// Some JDBC drivers nest the actual exception from a batched update - need to get the nested one
+		if (sqlState == null) {
+			SQLException nestedEx = sqlex.getNextException();
+			if (nestedEx != null)
+				sqlState = nestedEx.getSQLState();
+		}
 		if (sqlState != null && sqlState.length() >= 2) {
 			String classCode = sqlState.substring(0, 2);
 			if (BAD_SQL_CODES.contains(classCode)) {
