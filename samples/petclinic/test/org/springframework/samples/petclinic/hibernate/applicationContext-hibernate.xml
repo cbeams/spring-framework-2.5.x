@@ -3,18 +3,6 @@
 
 <beans>
 
-	<!-- ========================= GENERAL DEFINITIONS ========================= -->
-
-	<!-- Message source for this context, loaded from localized "messages_xx" files -->
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-		<property name="basename"><value>messages</value></property>										
-	</bean>
-
-	<!-- ========================= Start of PERSISTENCE DEFINITIONS ========================= -->
-  
-	<!-- NOTE: Choose exactly 1 "dataSource" bean and 1 "clinicTarget" bean -->
-
-	<!-- Local HSQL DataSource that works in any environment -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName"><value>org.hsqldb.jdbcDriver</value></property>
 		<property name="url"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
@@ -22,11 +10,10 @@
 		<property name="password"><value></value></property>
 	</bean>
 
-	<!-- Hibernate SessionFactory for HSQL -->
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
 		<property name="dataSource"><ref local="dataSource"/></property>
 		<property name="mappingResources">
-			<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
+			<value>petclinic.hbm.xml</value>
 		</property>
 		<property name="hibernateProperties">
 			<props>
@@ -35,12 +22,14 @@
 		</property>
 	</bean>
 
-	<!-- Transaction manager for a single Hibernate SessionFactory (alternative to JTA) -->
 	<bean id="transactionManager" class="org.springframework.orm.hibernate.HibernateTransactionManager">
 		<property name="sessionFactory"><ref local="sessionFactory"/></property>
 	</bean>
 
-	<!-- Transactional proxy for the Petclinic primary business object -->
+	<bean id="clinicTarget" class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
+		<property name="sessionFactory"><ref local="sessionFactory"/></property>
+	</bean>
+
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
 		<property name="target"><ref local="clinicTarget"/></property>
@@ -51,11 +40,4 @@
 		</property>
 	</bean>
 
-	<!-- Petclinic primary business object: Hibernate implementation -->
-	<bean id="clinicTarget" class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
-	</bean>
-
-	<!-- ========================= End of PERSISTENCE DEFINITIONS ========================= -->
-	
 </beans>

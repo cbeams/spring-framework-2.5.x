@@ -1,6 +1,6 @@
 package org.springframework.samples.petclinic.hibernate;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate.support.HibernateDaoSupport;
@@ -11,31 +11,33 @@ import org.springframework.samples.petclinic.Visit;
 
 /**
  * Hibernate implementation of the Clinic interface.
- * The mappings are defined in "petclinic.hbm.xml", located in this package.
+ *
+ * <p>The mappings are defined in "petclinic.hbm.xml",
+ * located in the root of the classpath.
  *
  * @author Juergen Hoeller
  * @since 19.10.2003
  */
 public class HibernateClinic extends HibernateDaoSupport implements Clinic {
 
-	public List getVets() throws DataAccessException {
+	public Collection getVets() throws DataAccessException {
 		return getHibernateTemplate().find("from Vet vet order by vet.lastName, vet.firstName");
 	}
 
-	public List getPetTypes() throws DataAccessException {
+	public Collection getPetTypes() throws DataAccessException {
 		return getHibernateTemplate().find("from PetType type order by type.name");
 	}
 
-	public List findOwners(String lastName) throws DataAccessException {
+	public Collection findOwners(String lastName) throws DataAccessException {
 		return getHibernateTemplate().find("from Owner owner where owner.lastName like ?", lastName + "%");
 	}
 
-	public Owner loadOwner(long id)  throws DataAccessException {
-		return (Owner) getHibernateTemplate().load(Owner.class, new Long(id));
+	public Owner loadOwner(int id) throws DataAccessException {
+		return (Owner) getHibernateTemplate().load(Owner.class, new Integer(id));
 	}
 
-	public Pet loadPet(long id) throws DataAccessException {
-		return (Pet) getHibernateTemplate().load(Pet.class, new Long(id));
+	public Pet loadPet(int id) throws DataAccessException {
+		return (Pet) getHibernateTemplate().load(Pet.class, new Integer(id));
 	}
 
 	public void storeOwner(Owner owner) throws DataAccessException {

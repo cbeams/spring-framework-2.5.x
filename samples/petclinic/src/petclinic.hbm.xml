@@ -12,7 +12,7 @@
 <hibernate-mapping auto-import="true">
 
 	<class name="org.springframework.samples.petclinic.Vet" table="vets">
-		<id name="id" column="id" type="long" unsaved-value="-1">
+		<id name="id" column="id" unsaved-value="-1">
 			<generator class="identity"/>
 		</id>
 		<property name="firstName" column="first_name"/>
@@ -24,14 +24,14 @@
 	</class>
 
 	<class name="org.springframework.samples.petclinic.Specialty" table="specialties">
-		<id name="id" column="id" type="long" unsaved-value="-1">
+		<id name="id" column="id" unsaved-value="-1">
 			<generator class="identity"/>
 		</id>
 		<property name="name" column="name"/>
 	</class>
 
 	<class name="org.springframework.samples.petclinic.Owner" table="owners">
-		<id name="id" column="id" type="long" unsaved-value="-1">
+		<id name="id" column="id" unsaved-value="-1">
 			<generator class="identity"/>
 		</id>
 		<property name="firstName" column="first_name"/>
@@ -46,7 +46,7 @@
 	</class>
 
 	<class name="org.springframework.samples.petclinic.Pet" table="pets">
-		<id name="id" column="id" type="long" unsaved-value="-1">
+		<id name="id" column="id" unsaved-value="-1">
 			<generator class="identity"/>
 		</id>
 		<property name="name" column="name"/>
@@ -60,14 +60,14 @@
 	</class>
 
 	<class name="org.springframework.samples.petclinic.PetType" table="types">
-		<id name="id" column="id" type="long" unsaved-value="-1">
+		<id name="id" column="id" unsaved-value="-1">
 			<generator class="identity"/>
 		</id>
 		<property name="name" column="name"/>
 	</class>
 
 	<class name="org.springframework.samples.petclinic.Visit" table="visits">
-		<id name="id" column="id" type="long" unsaved-value="-1">
+		<id name="id" column="id" unsaved-value="-1">
 			<generator class="identity"/>
 		</id>
 		<property name="date" column="visit_date" type="date"/>

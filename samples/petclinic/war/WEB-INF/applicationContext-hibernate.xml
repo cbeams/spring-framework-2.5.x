@@ -41,7 +41,7 @@
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
 		<property name="dataSource"><ref local="dataSource"/></property>
 		<property name="mappingResources">
-			<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
+			<value>petclinic.hbm.xml</value>
 		</property>
 		<property name="hibernateProperties">
 			<props>
