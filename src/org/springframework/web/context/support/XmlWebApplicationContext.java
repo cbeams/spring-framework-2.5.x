@@ -36,11 +36,10 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * for the root context, and "/WEB-INF/test-servlet.xml" for a context with the namespace
  * "test-servlet" (like for a DispatcherServlet instance with the servlet-name "test").
  *
- * <p>The config location defaults can be overridden via setConfigLocations,
- * respectively via the "contextConfigLocation" parameters of ContextLoader and
- * FrameworkServlet. Config locations can either denote concrete files like
- * "/WEB-INF/context.xml" or Ant-style patterns like "/WEB-INF/*-context.xml"
- * (see PathMatcher javadoc for pattern details).
+ * <p>The config location defaults can be overridden via the contextConfigLocation
+ * context param of ContextLoader and servlet param of FrameworkServlet. Config locations
+ * can either denote concrete files like "/WEB-INF/context.xml" or Ant-style patterns
+ * like "/WEB-INF/*-context.xml" (see PathMatcher javadoc for pattern details).
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files. This can be leveraged to
