@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.162 2004-06-11 23:59:06 jhoeller Exp $
+$Id: changelog.txt,v 1.163 2004-06-14 11:19:12 jhoeller Exp $
 
 
 Changes in version 1.0.3 (27.6.2004)
@@ -25,7 +25,9 @@ Package org.springframework.dao
 Package org.springframework.jdbc
 * adapted CommonsDbcpNativeJdbcExtractor for Commons DBCP 1.2, to support both DBCP 1.1 and 1.2
 * added WebSphereNativeJdbcExtractor, using WSJdbcUtil's "getNativeConnection" method (tested with WLS 5.1.0)
+* DataSourceTransactionManager closes JDBC Connection if "doBegin" fails
 * refactored Prepared/CallableStatement.setXxx method invocations into JdbcUtils.setParameters utility method
+* JdbcTemplate always passes SQL string to SQLExceptionTranslator, even for static queries and updates
 * added support for BLOB/CLOB parameters to SqlUpdate and StoredProcedure
 * added BatchSqlUpdate class to jdbc.object package, for convenient execution of batch updates
 
@@ -34,7 +36,16 @@ Package org.springframework.mail
 * added "setReplyTo" and "setSentDate" methods to MimeMessageHelper, analogous to SimpleMailMessage
 
 Package org.springframework.orm
-* added "delete" methods to HibernateOperations/HibernateTemplate, analogous to "delete" in the Session interface
+* added "delete" and "iterate" methods to HibernateOperations/HibernateTemplate, analogous to the Session interface
+* HibernateTransactionManager and JdoTransactionManager close Session resp. PersistenceManager if "doBegin" fails
+* JdoTransactionManager supports isolation levels and timeouts via JdoDialect's "beginTransaction" method
+* JdoTransactionManager passes readOnly flag to JdoDialect's "getJdbcConnection" and invokes "releaseJdbcConnection"
+* added JdoObjectRetrievalFailureException and JdoOptimisticLockingFailureException
+* refined PersistenceManagerFactoryUtils' "convertJdoAccessException" implementation to become more fine-granular
+* added "dataSource2" property to LocalPersistenceManagerFactoryBean
+* introduced JdoOperations interface, with convenience methods for load, save, delete and find
+* JdoTemplate implements JdoOperations' convenience methods to allow for one-line data access operations
+* added OpenPersistenceManagerInViewInterceptor and OpenPersistenceManagerInViewFilter
 
 Package org.springframework.scheduling
 * added "jobSchedulingDataLocation" property to SchedulerFactoryBean, supporting Quartz 1.3's job definition XML files
