@@ -284,11 +284,11 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * session attribute is not usually accessed directly. Can be overridden to use
 	 * an application-specific attribute name, which allows other code to access
 	 * the session attribute directly.
-	 * @return the name of the form session attribute, or null if not in session form mode
+	 * @return the name of the form session attribute
 	 * @see javax.servlet.http.HttpSession#getAttribute
 	 */
 	protected String getFormSessionAttributeName() {
-		return isSessionForm() ? getClass().getName() + ".FORM." + getCommandName() : null;
+		return getClass().getName() + ".FORM." + getCommandName();
 	}
 
 	/**
