@@ -227,7 +227,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	 */
 	public static final class NoOpAction implements Action {
 		public Event execute(RequestContext context) throws Exception {
-			return new SimpleEvent(this, FlowConstants.SUCCESS);
+			return new SimpleEvent(this, "success");
 		}
 	}
 }

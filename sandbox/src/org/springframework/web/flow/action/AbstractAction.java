@@ -58,14 +58,14 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * Returns the default error event.
 	 */
 	protected Event error() {
-		return new SimpleEvent(this, FlowConstants.ERROR);
+		return new SimpleEvent(this, "error");
 	}
 
 	/**
 	 * Returns the default success event.
 	 */
 	protected Event success() {
-		return new SimpleEvent(this, FlowConstants.SUCCESS);
+		return new SimpleEvent(this, "success");
 	}
 
 	/**

@@ -50,7 +50,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 	}
 
 	protected String flowId() {
-		return SEARCH;
+		return "person.Search";
 	}
 
 	public void buildStates() throws FlowBuilderException {
