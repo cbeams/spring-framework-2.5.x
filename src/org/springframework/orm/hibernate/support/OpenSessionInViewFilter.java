@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate.support;
 
@@ -82,6 +82,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * @since 06.12.2003
  * @see #setSingleSession
  * @see #closeSession
+ * @see #lookupSessionFactory
  * @see OpenSessionInViewInterceptor
  * @see org.springframework.orm.hibernate.HibernateInterceptor
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
@@ -140,7 +141,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		SessionFactory sessionFactory = lookupSessionFactory();
+		SessionFactory sessionFactory = lookupSessionFactory(request);
 		Session session = null;
 		boolean participate = false;
 
@@ -188,8 +189,20 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
+	 * Look up the SessionFactory that this filter should use,
+	 * taking the current HTTP request as argument.
+	 * <p>Default implementation delegates to the <code>lookupSessionFactory</code>
+	 * without arguments.
+	 * @return the SessionFactory to use
+	 * @see #lookupSessionFactory()
+	 */
+	protected SessionFactory lookupSessionFactory(HttpServletRequest request) {
+		return lookupSessionFactory();
+	}
+
+	/**
 	 * Look up the SessionFactory that this filter should use.
-	 * <p>The default implementation looks for a bean with the specified name
+	 * <p>Default implementation looks for a bean with the specified name
 	 * in Spring's root application context.
 	 * @return the SessionFactory to use
 	 * @see #getSessionFactoryBeanName
