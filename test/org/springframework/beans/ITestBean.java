@@ -42,4 +42,6 @@ public interface ITestBean {
 	
 	INestedTestBean getLawyer();
 
+	IndexedTestBean getNestedIndexedBean();
+
 }
