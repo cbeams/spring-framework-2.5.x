@@ -17,6 +17,7 @@ package org.springframework.util;
 
 import java.beans.PropertyDescriptor;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
@@ -62,9 +63,18 @@ public class ToStringCreator {
      *            the styler encapsulating pretty-print instructions
      */
     public ToStringCreator(Object o, ToStringStyler styler) {
-        this.object = o;
-        this.styler = styler;
+        setObject(o);
+        setToStringStyler(styler);
         this.styler.styleStart(buffer, object);
+    }
+
+    private void setObject(Object object) {
+        Assert.notNull(object, "The object to be styled is required");
+        this.object = object;
+    }
+
+    private void setToStringStyler(ToStringStyler styler) {
+        this.styler = (styler != null ? styler : DEFAULT_STYLER);
     }
 
     /**
@@ -176,6 +186,10 @@ public class ToStringCreator {
     /**
      * Append styled property=value pairs for each of the target object's java
      * bean properties.
+     * <p>
+     * Note: special handling is taken for parent/child relationships between
+     * objects-- this method assumes each calls appendProperties(), to prevent
+     * possible infinite recursion.
      * 
      * @return this, to support call-chaining.
      */
@@ -184,12 +198,43 @@ public class ToStringCreator {
         PropertyDescriptor[] properties = wrapper.getPropertyDescriptors();
         for (int i = 0; i < properties.length; i++) {
             PropertyDescriptor property = properties[i];
-            if (property.getReadMethod() != null) {
-                append(property.getDisplayName(), wrapper
-                        .getPropertyValue(property.getName()));
+            if (property.getReadMethod() != null
+                    && !"class".equals(property.getName())) {
+                Object propertyValue = wrapper.getPropertyValue(property
+                        .getName());
+                if (propertyValue != null
+                        && !BeanUtils
+                                .isSimpleProperty(propertyValue.getClass())) {
+                    wrapper.setWrappedInstance(propertyValue);
+                    if (isBidirectionalRelationship(wrapper
+                            .getPropertyDescriptors(), object.getClass())) {
+                        if (wrapper.getPropertyDescriptor("name") != null) {
+                            propertyValue = wrapper.getPropertyValue("name");
+                        }
+                        else if (wrapper.getPropertyDescriptor("displayName") != null) {
+                            propertyValue = wrapper
+                                    .getPropertyValue("displayName");
+                        }
+                        else {
+                            wrapper.setWrappedInstance(object);
+                            continue;
+                        }
+                    }
+                    wrapper.setWrappedInstance(object);
+                }
+                append(property.getDisplayName(), propertyValue);
             }
         }
         return this;
+    }
+
+    private boolean isBidirectionalRelationship(
+            PropertyDescriptor[] properties, Class propertyType) {
+        for (int i = 0; i < properties.length; i++) {
+            PropertyDescriptor property = properties[i];
+            if (property.getPropertyType().equals(propertyType)) { return true; }
+        }
+        return false;
     }
 
     private void printFieldSeparatorIfNeccessary() {
