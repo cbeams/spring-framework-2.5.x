@@ -1243,8 +1243,8 @@ public class ReplacementComputeValue implements MethodReplacer {
       process any marker interfaces it can find and call the appropriate
       methods. If you need custom features or other lifecycle behavior Spring
       doesn't offer out-of-the-box, you can implement a
-      <literal>BeanPostProcessor</literal> yourself. More information
-      about this can be found in <xref
+      <literal>BeanPostProcessor</literal> yourself. More information about
+      this can be found in <xref
       linkend="beans-factory-customizing" />.</para>
 
       <para>All the different lifecycle marker interfaces are described below.
@@ -1423,6 +1423,74 @@ public class AnotherExampleBean implements DisposableBean {
           </listitem>
         </itemizedlist></para>
     </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Child bean definitions</title>
+
+    <para>A bean definition potentially contains a large amount of
+    configuration information, including container specific information (i.e.
+    initialization method, static factory method name, etc.) and constructor
+    arguments and property values. A child bean definition is a bean
+    definition which inherits configuration data from a parent definition. It
+    is then able to override some values, or add others, as needed. Using
+    parent and child bean definitions can potentially save a lot of typing.
+    Effectively, this is a form of templating.</para>
+
+    <para>When working with a BeanFactory programmatically, child bean
+    definitions are represented by the <literal>ChildBeanDefinition</literal>
+    class. Most users will never work with them on this level, instead
+    configuring bean definitions declaratively in something like the
+    XmlBeanFactory. In an XmlBeanFactory bean definition, a child bean
+    definition is indicated simply by using the <literal>parent</literal>
+    attribute, specifying the parent bean as the value of this
+    attribute.<programlisting>&lt;bean id="inheritedTestBean" class="org.springframework.beans.TestBean"&gt;
+    &lt;property name="name"&gt;&lt;value&gt;parent&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="age"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id="inheritsWithDifferentClass" class="org.springframework.beans.DerivedTestBean"
+      parent="inheritedTestBean" init-method="initialize"&gt;
+    &lt;property name="name"&gt;&lt;value&gt;override&lt;/value&gt;&lt;/property&gt;
+    &lt;!-- age should inherit value of 1 from parent --&gt;
+  &lt;/bean&gt;</programlisting></para>
+
+    <para>A child bean definition will use the bean class from the parent
+    definition if none is specified, but can also override it. In the latter
+    case, the child bean class must be compatible with the parent, i.e. it
+    must accept the parent's property values.</para>
+
+    <para>A child bean definition will inherit constructor argument values,
+    property values and method overrides from the parent, with the option to
+    add new values. If init method, destroy method and/or static factory
+    method are specified, they will override the corresponding parent
+    settings.</para>
+
+    <para>The remaining settings will <emphasis>always</emphasis> be taken
+    from the child definition: <emphasis>depends on</emphasis>,
+    <emphasis>autowire mode</emphasis>, <emphasis>dependency check</emphasis>,
+    <emphasis>singleton</emphasis>, <emphasis>lazy init</emphasis>.</para>
+
+    <para>In the case that the parent definition does not specify a
+    class:<programlisting>&lt;bean id="inheritedTestBeanWithoutClass"&gt;
+    &lt;property name="name"&gt;&lt;value&gt;parent&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="age"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
+      parent="inheritedTestBeanWithoutClass" init-method="initialize"&gt;
+    &lt;property name="name"&gt;&lt;value&gt;override&lt;/value&gt;&lt;/property&gt;
+    &lt;!-- age should inherit value of 1 from parent --&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para>The parent bean can not get instantiated on its own; it's just a
+    pure template that serves as parent definition for children. Trying to use
+    such parent beans on it's own (by referring to it as a ref property of
+    another bean, or doing an explicit getBean() call with the parent bean id,
+    will result in an error. Similarly, the container's internal
+    <emphasis>preInstantiateSingletons</emphasis> method will completely
+    ignore bean definitions which don't have either a parent or class
+    attribute set, since they are not complete.</para>
   </sect1>
 
   <sect1 id="beans-factory-client">
@@ -2118,28 +2186,29 @@ public class BlackListNotifier implement ApplicationListener {
     values expressed as strings to the actual complex type of the property.
     <literal>CustomEditorConfigurer</literal>, a bean factory post-processor,
     may be used to conveniently add support for additional PropertyEditors to
-    an ApplicationContext. <programlisting>public class ExoticType {
+    an ApplicationContext.</para>
 
+    <para>Consier a user class <emphasis>ExoticType</emphasis>, and another
+    class <emphasis>DependsOnExoticType</emphasis> which needs ExoticType set
+    as a property:<programlisting>public class ExoticType {
     private String name;
-    
     public ExoticType(String name) {
         this.name = name;
     }
 }
 
-public class DependsOnExoticType {
-    
+public class DependsOnExoticType {    
     private ExoticType type;
-
     public void setType(ExoticType type) {
         this.type = type;
     }
-}</programlisting>Wiring this up should be done in a fashion similar to this:
-    <programlisting>&lt;bean id="sample" class="example.DependsOnExoticType"&gt;
-    &lt;property name="type"&gt;&lt;value&gt;exoticTypeTwo&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting>When you want to do this, you would need to
-    create a JavaBeans PropertyEditor and wire it up using the
-    <literal>CustomEditorConfigurer</literal>: <programlisting>public class ExoticTypeEditor extends PropertyEditorSupport {
+}</programlisting>When things are properly set up, we want to be able to
+    assign the type property as a string, which a PropertyEditor will behind
+    the scenes convert into a real ExoticType object.: <programlisting>&lt;bean id="sample" class="example.DependsOnExoticType"&gt;
+    &lt;property name="type"&gt;&lt;value&gt;aNameForExoticType&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting>The PropertyEditor could look similar to this:
+    <programlisting>// converts string representation to ExoticType object
+public class ExoticTypeEditor extends PropertyEditorSupport {
 
     private String format;
 
@@ -2154,7 +2223,9 @@ public class DependsOnExoticType {
         ExoticType type = new ExoticType(text);
         setValue(type);
     }
-}</programlisting>To actually register it, do the following: <programlisting>&lt;bean id="customEditorConfigurer" 
+}</programlisting>Finally, we use <literal>CustomEditorConfigurer</literal> to
+    register the new PropertyEditor with the ApplicationContext, which will
+    then be able to use it as needed.: <programlisting>&lt;bean id="customEditorConfigurer" 
     class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
     &lt;property name="customEditors"&gt;
         &lt;map&gt;
@@ -2168,13 +2239,6 @@ public class DependsOnExoticType {
         &lt;/map&gt;
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
-
-    <para>Besides using the <literal>CustomEditorConfigurer</literal>, you can
-    also register custom editors programmatically if you need to. This might
-    come in handy when for instance using the BeanFactory (which does not
-    automatically detect BeanFactoryPostProcessors). Use the
-    <literal>ConfigurableBeanFactory.registerCustomEditor()</literal> method
-    to do this.</para>
   </sect1>
 
   <sect1>
