@@ -16,6 +16,8 @@
 
 package org.springframework.aop.interceptor;
 
+import java.io.Serializable;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -24,11 +26,11 @@ import org.springframework.util.ClassLoaderUtils;
 
 /**
  * Trivial classloader analyzer interceptor.
- * @version $Id: ClassLoaderAnalyzerInterceptor.java,v 1.3 2004-07-24 19:13:32 johnsonr Exp $
+ * @version $Id: ClassLoaderAnalyzerInterceptor.java,v 1.4 2004-07-24 19:14:08 johnsonr Exp $
  * @author Rod Johnson
  * @author Dmitriy Kopylenko
  */
-public class ClassLoaderAnalyzerInterceptor implements MethodInterceptor {
+public class ClassLoaderAnalyzerInterceptor implements MethodInterceptor, Serializable {
 
 	/**
 	 * Static to avoid serializing the logger
