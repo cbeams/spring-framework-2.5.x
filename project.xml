@@ -217,6 +217,10 @@
       </dependency>
 
       <dependency>
+         <id>ant</id>
+         <version>1.5.3-1</version>
+      </dependency>
+      <dependency>
          <id>bcel</id>
          <version>5.1</version>
       </dependency>
@@ -339,6 +343,11 @@
       <dependency>
          <groupId>velocity-tools</groupId>
          <artifactId>velocity-tools-generic</artifactId>
+         <version>1.0</version>
+      </dependency>
+      <dependency>
+         <groupId>xdoclet</groupId>
+         <artifactId>xdoclet-xjavadoc</artifactId>
          <version>1.0</version>
       </dependency>
       
