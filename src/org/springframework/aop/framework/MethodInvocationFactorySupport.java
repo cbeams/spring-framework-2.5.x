@@ -7,13 +7,13 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.InterceptionAdvice;
-import org.springframework.aop.IntroductionAdvice;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.InterceptionAroundAdvisor;
+import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.MethodMatcher;
 
 /**
@@ -21,7 +21,7 @@ import org.springframework.aop.MethodMatcher;
  * Convenient superclass for smarter implmentations.
  * Exposes a useful static method for subclasses or other implementations.
  * @author Rod Johnson
- * @version $Id: MethodInvocationFactorySupport.java,v 1.1 2003-11-12 20:17:58 johnsonr Exp $
+ * @version $Id: MethodInvocationFactorySupport.java,v 1.2 2003-11-15 15:30:14 johnsonr Exp $
  */
 public class MethodInvocationFactorySupport implements MethodInvocationFactory {
 
@@ -29,7 +29,7 @@ public class MethodInvocationFactorySupport implements MethodInvocationFactory {
 	/**
 	 * @see org.springframework.aop.framework.MethodInvocationFactory#getMethodInvocation(org.springframework.aop.framework.ProxyConfig, java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
 	 */
-	public MethodInvocation getMethodInvocation(ProxyConfig config, Object proxy, Method method, Object[] args) {
+	public MethodInvocation getMethodInvocation(Advised config, Object proxy, Method method, Object[] args) {
 		Class targetClass = config.getTarget() != null ? config.getTarget().getClass() : method.getDeclaringClass();
 		return new MethodInvocationImpl(
 			proxy,
@@ -46,7 +46,7 @@ public class MethodInvocationFactorySupport implements MethodInvocationFactory {
 	 * Caching subclasses must override this. This implementation does nothing.
 	 * @see org.springframework.aop.framework.MethodInvocationFactory#refresh(org.springframework.aop.framework.ProxyConfig)
 	 */
-	public void refresh(ProxyConfig config) {
+	public void refresh(Advised config) {
 	}
 	
 	/**
@@ -59,12 +59,12 @@ public class MethodInvocationFactorySupport implements MethodInvocationFactory {
 	 * @return list of MethodInterceptor and InterceptionAdvice (if there's a dynamic
 	 * method matcher that needs evaluation at runtime)
 	 */
-	protected static List GetInterceptorsAndDynamicInterceptionAdvice(ProxyConfig config, Object proxy, Method method, Class targetClass) {
-		List interceptors = new ArrayList(config.getAdvices().size());
-		for (Iterator iter = config.getAdvices().iterator(); iter.hasNext();) {
-			Object advice = iter.next();
-			if (advice instanceof InterceptionAdvice) {
-				InterceptionAdvice ia = (InterceptionAdvice) advice;
+	protected static List GetInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
+		List interceptors = new ArrayList(config.getAdvisors().length);
+		for (int i = 0; i < config.getAdvisors().length; i++) {
+			Advisor advisor = config.getAdvisors()[i];
+			if (advisor instanceof InterceptionAroundAdvisor) {
+				InterceptionAroundAdvisor ia = (InterceptionAroundAdvisor) advisor;
 				if (ia.getPointcut().getClassFilter().matches(targetClass)) {
 					MethodMatcher mm = ia.getPointcut().getMethodMatcher();
 					if (mm.matches(method, targetClass)) {
@@ -77,13 +77,13 @@ public class MethodInvocationFactorySupport implements MethodInvocationFactory {
 					}
 				}
 			}
-			else if (advice instanceof IntroductionAdvice) {
-				IntroductionAdvice ia = (IntroductionAdvice) advice;
+			else if (advisor instanceof InterceptionIntroductionAdvisor) {
+				InterceptionIntroductionAdvisor ia = (InterceptionIntroductionAdvisor) advisor;
 				if (ia.getClassFilter().matches(targetClass)) {
 					interceptors.add(ia.getIntroductionInterceptor());
 				}
 			}
-		}
+		}	// for
 		return interceptors;
 	}
 	
@@ -96,7 +96,7 @@ public class MethodInvocationFactorySupport implements MethodInvocationFactory {
 	 * @param targetClass
 	 * @return
 	 */
-	protected List getInterceptorsAndDynamicInterceptionAdvice(ProxyConfig config, Object proxy, Method method, Class targetClass) {
+	protected List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
 		return GetInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
 	}
 

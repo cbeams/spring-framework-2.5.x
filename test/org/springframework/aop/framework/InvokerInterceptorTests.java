@@ -18,7 +18,7 @@ import org.springframework.beans.IOther;
  * 
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class InvokerInterceptorTests extends TestCase {
 
@@ -40,7 +40,7 @@ public class InvokerInterceptorTests extends TestCase {
 		Test t = new Test();
 		InvokerInterceptor ii = new InvokerInterceptor(t);
 		LinkedList l = new LinkedList();
-		l.add(new DefaultInterceptionAdvice(ii));
+		l.add(new DefaultInterceptionAroundAdvisor(ii));
 
 		Method m = IOther.class.getMethod("absquatulate", null);
 			MethodInvocationImpl invocation = new MethodInvocationImpl(null, t, m.getDeclaringClass(), //?
@@ -68,7 +68,7 @@ public class InvokerInterceptorTests extends TestCase {
 		Test test = new Test();
 		InvokerInterceptor ii = new InvokerInterceptor(test);
 		LinkedList l = new LinkedList();
-		l.add(new DefaultInterceptionAdvice(ii));
+		l.add(new DefaultInterceptionAroundAdvisor(ii));
 
 		Method m = Demo.class.getMethod("doSomething", null);
 			MethodInvocationImpl invocation = new MethodInvocationImpl(null, t, m.getDeclaringClass(), //?

@@ -9,7 +9,7 @@ import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.Advice;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.InvokerInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
@@ -37,7 +37,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.14 2003-11-11 21:11:49 dkopylenko Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.15 2003-11-15 15:30:14 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
 
@@ -114,7 +114,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 			return bean;
 		}
 		
-		Object[] specificInterceptors = getInterceptorsAndAdvicesForBean(bean, name);
+		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, name);
 		if (specificInterceptors != null) {
 			List allInterceptors = new ArrayList();
 			allInterceptors.addAll(Arrays.asList(specificInterceptors));
@@ -135,9 +135,9 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 			
 			for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
 				Object interceptorOrAdvice = it.next();
-				if (interceptorOrAdvice instanceof Advice) {
+				if (interceptorOrAdvice instanceof Advisor) {
 					//System.err.println("Found advice " + interceptorOrAdvice);
-					proxyFactory.addAdvice((Advice) interceptorOrAdvice);
+					proxyFactory.addAdvisor((Advisor) interceptorOrAdvice);
 				}
 				else if (interceptorOrAdvice instanceof Interceptor) {
 					//System.err.println("Found interceptor " + interceptorOrAdvice);
@@ -170,7 +170,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * @return
 	 */
 	private boolean isInfrastructureClass(Object bean, String name) {
-		return Advice.class.isAssignableFrom(bean.getClass()) ||
+		return Advisor.class.isAssignableFrom(bean.getClass()) ||
 			MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
 			AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass());
 	}
@@ -206,7 +206,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
-	protected abstract Object[] getInterceptorsAndAdvicesForBean(Object bean, String beanName)
+	protected abstract Object[] getInterceptorsAndAdvisorsForBean(Object bean, String beanName)
 	    throws BeansException;
 
 }

@@ -6,7 +6,7 @@
 	<!--
 		Just included for the count: not to mean anything in particular
 	-->
-	<bean id="something" class="org.springframework.aop.framework.DefaultInterceptionAdvice">
+	<bean id="something" class="org.springframework.aop.framework.DefaultInterceptionAroundAdvisor">
 
 	</bean>
 

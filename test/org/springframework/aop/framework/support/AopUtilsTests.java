@@ -8,7 +8,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.framework.DefaultInterceptionAdvice;
+import org.springframework.aop.framework.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IOther;
@@ -75,8 +75,8 @@ public class AopUtilsTests extends TestCase {
 	}
 
 	public void testPointcutAlwaysApplies() {
-		assertTrue(AopUtils.canApply(new DefaultInterceptionAdvice(new DebugInterceptor()), Object.class, null));
-		assertTrue(AopUtils.canApply(new DefaultInterceptionAdvice(new DebugInterceptor()), TestBean.class, new Class[] { ITestBean.class }));
+		assertTrue(AopUtils.canApply(new DefaultInterceptionAroundAdvisor(new DebugInterceptor()), Object.class, null));
+		assertTrue(AopUtils.canApply(new DefaultInterceptionAroundAdvisor(new DebugInterceptor()), TestBean.class, new Class[] { ITestBean.class }));
 	}
 
 	public void testPointcutAppliesToOneMethodOnObject() {

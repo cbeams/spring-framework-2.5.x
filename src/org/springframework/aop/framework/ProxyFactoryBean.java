@@ -16,7 +16,7 @@ import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 
-import org.springframework.aop.Advice;
+import org.springframework.aop.Advisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -57,11 +57,11 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.9 2003-11-13 11:51:25 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.10 2003-11-15 15:30:14 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  */
-public class ProxyFactoryBean extends ProxyConfigSupport implements FactoryBean, BeanFactoryAware {
+public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, BeanFactoryAware {
 
 	/**
 	 * This suffix in a value in an interceptor list indicates to expand globals.
@@ -156,7 +156,7 @@ public class ProxyFactoryBean extends ProxyConfigSupport implements FactoryBean,
 				// Add a named interceptor
 				Object advice = this.beanFactory.getBean(this.interceptorNames[i]);
 				//logger.debug("Adding pointcut or interceptor [" + pointcutOrInterceptor + "] from bean name '" + this.interceptorNames[i] + "'");
-				addAdvice(advice, this.interceptorNames[i]);
+				addAdvisor(advice, this.interceptorNames[i]);
 			}
 		}
 	}
@@ -168,25 +168,25 @@ public class ProxyFactoryBean extends ProxyConfigSupport implements FactoryBean,
 	 * and pointcuts.
 	 */
 	private void refreshInterceptorChain() {
-		List advices = getAdvices();
-		for (Iterator iter = advices.iterator(); iter.hasNext();) {
-			Advice advice = (Advice) iter.next();
-			String beanName = (String) this.sourceMap.get(advice);
+		Advisor[] advisors = getAdvisors();
+		for (int i = 0; i < advisors.length; i++) {
+			String beanName = (String) this.sourceMap.get(advisors[i]);
 			if (beanName != null) {
 				logger.info("Refreshing bean named '" + beanName + "'");
 
 				Object bean = this.beanFactory.getBean(beanName);
 
-				Advice refreshedAdvice = objectToAdvice(bean);
+				Advisor refreshedAdvice = objectToAdvice(bean);
 				// What about aspect interfaces!? we're only updating
-				replaceAdvice(advice, refreshedAdvice);
+				replaceAdvice(advisors[i], refreshedAdvice);
 				// Keep name mapping up to date
 				sourceMap.put(refreshedAdvice, beanName);
 			}
 			else {
 				// We can't throw an exception here, as the user may have added additional
 				// pointcuts programmatically we don't know about
-				logger.info("Cannot find bean name for MethodPointcut [" + advice + "] when refreshing interceptor chain");
+				logger.info("Cannot find bean name for MethodPointcut [" + advisors[i] + 
+					"] when refreshing interceptor chain");
 			}
 		}
 	}
@@ -195,7 +195,7 @@ public class ProxyFactoryBean extends ProxyConfigSupport implements FactoryBean,
 	 * Add all global interceptors and pointcuts.
 	 */
 	private void addGlobalAdvice(ListableBeanFactory beanFactory, String prefix) {
-		String[] globalPointcutNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Advice.class);
+		String[] globalPointcutNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Advisor.class);
 		String[] globalInterceptorNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Interceptor.class);
 		List beans = new ArrayList(globalPointcutNames.length + globalInterceptorNames.length);
 		Map names = new HashMap();
@@ -216,7 +216,7 @@ public class ProxyFactoryBean extends ProxyConfigSupport implements FactoryBean,
 			Object bean = it.next();
 			String name = (String) names.get(bean);
 			if (name.startsWith(prefix)) {
-				addAdvice(bean, name);
+				addAdvisor(bean, name);
 			}
 		}
 	}
@@ -229,14 +229,14 @@ public class ProxyFactoryBean extends ProxyConfigSupport implements FactoryBean,
 	 * @param name bean name from which we obtained this object in our owning
 	 * bean factory.
 	 */
-	private void addAdvice(Object next, String name) {
+	private void addAdvisor(Object next, String name) {
 		logger.debug("Adding pointcut or interceptor [" + next + "] with name [" + name + "]");
 		// We need to add a method pointcut so that our source reference matches
 		// what we find from superclass interceptors
-		Advice advice = null;
+		Advisor advice = null;
 		advice = objectToAdvice(next);
 
-		addAdvice(advice);
+		addAdvisor(advice);
 		// Record the pointcut as descended from the given bean name.
 		// This allows us to refresh the interceptor list, which we'll need to
 		// do if we have to create a new prototype instance. Otherwise the new
@@ -245,20 +245,20 @@ public class ProxyFactoryBean extends ProxyConfigSupport implements FactoryBean,
 		this.sourceMap.put(advice, name);
 	}
 
-	private Advice objectToAdvice(Object next) {
-		Advice advice;
-		if (next instanceof Advice) {
-			advice = (Advice) next;
+	private Advisor objectToAdvice(Object next) {
+		Advisor advice;
+		if (next instanceof Advisor) {
+			advice = (Advisor) next;
 		}
 		else if (next instanceof MethodInterceptor) {
-			advice = new DefaultInterceptionAdvice((MethodInterceptor) next);
+			advice = new DefaultInterceptionAroundAdvisor((MethodInterceptor) next);
 		}
 		else {
 			// It's not a pointcut or interceptor.
 			// It's a bean that needs an invoker around it.
 			// TODO how do these get refreshed
 			InvokerInterceptor ii = new InvokerInterceptor(next);
-			advice = new DefaultInterceptionAdvice(ii);
+			advice = new DefaultInterceptionAroundAdvisor(ii);
 			//throw new AopConfigException("Illegal type: bean '" + name + "' must be of type MethodPointcut or Interceptor");
 		}
 		return advice;
@@ -293,7 +293,7 @@ public class ProxyFactoryBean extends ProxyConfigSupport implements FactoryBean,
 			// an independent instance of the configuration
 			if (logger.isDebugEnabled())
 				logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
-			ProxyConfigSupport copy = new ProxyConfigSupport();
+			AdvisedSupport copy = new AdvisedSupport();
 			copy.copyConfigurationFrom(this);
 			proxy = copy.createAopProxy();
 		}

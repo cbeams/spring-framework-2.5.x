@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.7 2003-11-14 09:23:20 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.8 2003-11-15 15:30:14 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -57,7 +57,7 @@ public class AopProxy implements InvocationHandler {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Config used to configure this proxy */
-	private ProxyConfig config;
+	private Advised config;
 	
 	/** Factory for method invocation objects, to allow optimization */
 	private MethodInvocationFactory methodInvocationFactory;
@@ -68,10 +68,10 @@ public class AopProxy implements InvocationHandler {
 	 * to throw an informative exception in this case, rather than let
 	 * a mysterious failure happen later.
 	 */
-	public AopProxy(ProxyConfig config, MethodInvocationFactory methodInvocationFactory) throws AopConfigException {
+	public AopProxy(Advised config, MethodInvocationFactory methodInvocationFactory) throws AopConfigException {
 		if (config == null)
 			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
-		if (config.getAdvices() == null || config.getAdvices().size() == 0)
+		if (config.getAdvisors().length == 0)
 			throw new AopConfigException("Cannot create AopProxy with null interceptors");
 		this.config = config;
 		this.methodInvocationFactory = methodInvocationFactory;
@@ -95,7 +95,7 @@ public class AopProxy implements InvocationHandler {
 				// This class implements the equals() method itself
 				return method.invoke(this, args);
 			}
-			else if (ProxyConfig.class.equals(method.getDeclaringClass())) {
+			else if (Advised.class.equals(method.getDeclaringClass())) {
 				// Service invocations on ProxyConfig with the proxy config
 				return method.invoke(this.config, args);
 			}
@@ -177,13 +177,13 @@ public class AopProxy implements InvocationHandler {
 		Class[] proxiedInterfaces = this.config.getProxiedInterfaces();
 		if (proxiedInterfaces == null ||proxiedInterfaces.length == 0) {
 			proxiedInterfaces = new Class[1];
-			proxiedInterfaces[0] = ProxyConfig.class;
+			proxiedInterfaces[0] = Advised.class;
 		}
 		else {
 			// Don't add the interface twice if it's already there
-			if (!this.config.isInterfaceProxied(ProxyConfig.class)) {
+			if (!this.config.isInterfaceProxied(Advised.class)) {
 				proxiedInterfaces = new Class[this.config.getProxiedInterfaces().length + 1];
-				proxiedInterfaces[0] = ProxyConfig.class;
+				proxiedInterfaces[0] = Advised.class;
 				System.arraycopy(this.config.getProxiedInterfaces(), 0, proxiedInterfaces, 1, this.config.getProxiedInterfaces().length);
 			}
 		}
@@ -226,8 +226,7 @@ public class AopProxy implements InvocationHandler {
 		if (!Arrays.equals(aopr2.config.getProxiedInterfaces(), this.config.getProxiedInterfaces()))
 			return false;
 		
-		// List equality is cool
-		if (!aopr2.config.getAdvices().equals(this.config.getAdvices()))
+		if (!Arrays.equals(aopr2.config.getAdvisors(), this.config.getAdvisors()))
 			return false;
 			
 		return true;

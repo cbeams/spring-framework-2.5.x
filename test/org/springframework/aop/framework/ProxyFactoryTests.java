@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
  * Also tests DefaultProxyConfig superclass
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -84,7 +84,7 @@ public class ProxyFactoryTests extends TestCase {
 		
 		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
 		
-		factory.addAdvice(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
+		factory.addAdvisor(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
 		
 		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
 		

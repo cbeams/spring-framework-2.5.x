@@ -29,7 +29,7 @@ import org.springframework.context.config.ConfigurableApplicationContext;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.13 2003-11-14 11:35:00 jhoeller Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.14 2003-11-15 15:30:14 johnsonr Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -123,7 +123,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 			setOrder(0);
 		}
 
-		protected Object[] getInterceptorsAndAdvicesForBean(Object bean, String name) {
+		protected Object[] getInterceptorsAndAdvisorsForBean(Object bean, String name) {
 			if (bean instanceof StaticMessageSource)
 				return DO_NOT_PROXY;
 			else if (name.startsWith("aca"))

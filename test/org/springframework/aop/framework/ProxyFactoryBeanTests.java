@@ -16,9 +16,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.IntroductionAdvice;
+import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
-import org.springframework.aop.framework.support.DynamicMethodMatcherPointcutAdvice;
+import org.springframework.aop.framework.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.framework.support.SimpleIntroductionAdvice;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
@@ -36,7 +36,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.8 2003-11-13 11:51:27 jhoeller Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.9 2003-11-15 15:30:14 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -79,14 +79,14 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(test1.getAge(), test1_1.getAge());
 		test1.setAge(250);
 		assertEquals(test1.getAge(), test1_1.getAge());
-		ProxyConfig pc1 = (ProxyConfig) test1;
-		ProxyConfig pc2 = (ProxyConfig) test1_1;
-		assertEquals(pc1.getAdvices(), pc2.getAdvices());
-		int oldLength = pc1.getAdvices().size();
+		Advised pc1 = (Advised) test1;
+		Advised pc2 = (Advised) test1_1;
+		assertEquals(pc1.getAdvisors(), pc2.getAdvisors());
+		int oldLength = pc1.getAdvisors().length;
 		DebugInterceptor di = new DebugInterceptor();
 		pc1.addInterceptor(1, di);
-		assertEquals(pc1.getAdvices(), pc2.getAdvices());
-		assertEquals(oldLength + 1, pc2.getAdvices().size());
+		assertEquals(pc1.getAdvisors(), pc2.getAdvisors());
+		assertEquals("Now have one more advisor", oldLength + 1, pc2.getAdvisors().length);
 		assertEquals(di.getCount(), 0);
 		test1.setAge(5);
 		assertEquals(test1_1.getAge(), test1.getAge());
@@ -108,6 +108,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	 * be a prototype
 	 */
 	private void testPrototypeInstancesAreIndependent(String beanName) {
+		try {
 		// Initial count value set in bean factory XML 
 		int INITIAL_COUNT = 10;
 		
@@ -131,6 +132,11 @@ public class ProxyFactoryBeanTests extends TestCase {
 		SideEffectBean prototype2SecondInstance = (SideEffectBean) bf.getBean(beanName);
 		assertEquals(INITIAL_COUNT, prototype2SecondInstance.getCount() );
 		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount() );
+		}
+		catch (Throwable t) {
+			System.err.println("---------------- t");
+			t.printStackTrace();
+		}
 
 	}
 	
@@ -156,7 +162,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	public void testCanGetFactoryReferenceAndManipulate() {
 		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test1");
 		assertTrue(config.getExposeInvocation() == false);
-		assertTrue(config.getAdvices().size() == 2);
+		assertEquals("Have two advisors", 2, config.getAdvisors().length);
 		
 		ITestBean tb = (ITestBean) factory.getBean("test1");
 		// no exception 
@@ -169,7 +175,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 				throw ex;
 			}
 		});
-		assertTrue(config.getAdvices().size() == 3);
+		assertEquals("Have 3 advisors", 3, config.getAdvisors().length);
 		
 		tb = (ITestBean) factory.getBean("test1"); 
 		try {
@@ -199,10 +205,10 @@ public class ProxyFactoryBeanTests extends TestCase {
 		ti.setTime(time);
 		
 		// add to front of interceptor chain
-		int oldCount = config.getAdvices().size();
-		config.addAdvice(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
+		int oldCount = config.getAdvisors().length;
+		config.addAdvisor(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
 		
-		assertTrue(config.getAdvices().size() == oldCount + 1);
+		assertTrue(config.getAdvisors().length == oldCount + 1);
 	
 		TimeStamped ts = (TimeStamped) factory.getBean("test1");
 		assertTrue(ts.getTimeStamp() == time);
@@ -210,7 +216,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		// Can remove
 		config.removeInterceptor(ti);
 
-		assertTrue(config.getAdvices().size() == oldCount);
+		assertTrue(config.getAdvisors().length == oldCount);
 	
 		try {
 			// Existing reference will fail
@@ -231,7 +237,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		// Now check non-effect of removing interceptor that isn't there
 		config.removeInterceptor(new DebugInterceptor());
 	
-		assertTrue(config.getAdvices().size() == oldCount);
+		assertTrue(config.getAdvisors().length == oldCount);
 	
 		ITestBean it = (ITestBean) ts;
 		DebugInterceptor debugInterceptor = new DebugInterceptor();
@@ -263,16 +269,16 @@ public class ProxyFactoryBeanTests extends TestCase {
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor();
 		ti.setTime(time);
 		// Add to head of interceptor chain
-		int oldCount = config.getAdvices().size();
-		config.addAdvice(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
-		assertTrue(config.getAdvices().size() == oldCount + 1);
+		int oldCount = config.getAdvisors().length;
+		config.addAdvisor(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
+		assertTrue(config.getAdvisors().length == oldCount + 1);
 		
 		TimeStamped ts = (TimeStamped) factory.getBean("test2");
 		assertEquals(time, ts.getTimeStamp());
 		
 		// Can remove
 		config.removeInterceptor(ti);
-		assertTrue(config.getAdvices().size() == oldCount);
+		assertTrue(config.getAdvisors().length == oldCount);
 		
 		// Check no change on existing object reference
 		assertTrue(ts.getTimeStamp() == time);
@@ -286,7 +292,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		// Now check non-effect of removing interceptor that isn't there
 		config.removeInterceptor(new DebugInterceptor());
-		assertTrue(config.getAdvices().size() == oldCount);
+		assertTrue(config.getAdvisors().length == oldCount);
 		
 		ITestBean it = (ITestBean) ts;
 		DebugInterceptor debugInterceptor = new DebugInterceptor();
@@ -322,7 +328,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	 */
 	public void testCanAddAndRemoveAspectInterfacesOnSingletonByCasting() {
 		ITestBean it = (ITestBean) factory.getBean("test1");
-		ProxyConfig pc = (ProxyConfig) it;
+		Advised pc = (Advised) it;
 		it.getAge();
 		DebugInterceptor di = new DebugInterceptor();
 		pc.addInterceptor(0, di);
@@ -395,7 +401,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		ProxyFactoryBean pfb = (ProxyFactoryBean) factory.getBean("&validGlobals");
 		// 2 globals + 2 explicit
-		assertTrue(pfb.getAdvices().size() == 4);
+		assertEquals("Have 2 globals and 2 explicit advisors", 4, pfb.getAdvisors().length);
 		
 		ApplicationListener l = (ApplicationListener) factory.getBean("validGlobals");
 		agi = (AddedGlobalInterface) l;
@@ -414,7 +420,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
 	 */
-	public static class PointcutForVoid extends DynamicMethodMatcherPointcutAdvice {
+	public static class PointcutForVoid extends DynamicMethodMatcherPointcutAroundAdvisor {
 		
 		public static List methodNames = new LinkedList();
 		
@@ -463,7 +469,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		}
 	}
 	
-	public static class GlobalIntroductionAdvice implements IntroductionAdvice {
+	public static class GlobalIntroductionAdvice implements InterceptionIntroductionAdvisor {
 		
 		private IntroductionInterceptor gi = new GlobalAspectInterfaceInterceptor();
 

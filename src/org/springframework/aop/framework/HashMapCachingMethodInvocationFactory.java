@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: HashMapCachingMethodInvocationFactory.java,v 1.1 2003-11-12 20:17:58 johnsonr Exp $
+ * @version $Id: HashMapCachingMethodInvocationFactory.java,v 1.2 2003-11-15 15:30:14 johnsonr Exp $
  */
 public class HashMapCachingMethodInvocationFactory extends MethodInvocationFactorySupport {
 	
@@ -25,12 +25,12 @@ public class HashMapCachingMethodInvocationFactory extends MethodInvocationFacto
 	/**
 	 * @see org.springframework.aop.framework.MethodInvocationFactory#refresh(org.springframework.aop.framework.ProxyConfig)
 	 */
-	public void refresh(ProxyConfig pc) {
+	public void refresh(Advised pc) {
 		super.refresh(pc);
 		methodCache.clear();
 	}
 	
-	protected List getInterceptorsAndDynamicInterceptionAdvice(ProxyConfig config, Object proxy, Method method, Class targetClass) {
+	protected List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
 		
 		List cached = (List) methodCache.get(method);
 		if (cached == null) {

@@ -14,7 +14,7 @@ package org.springframework.aop;
  * 
  * @author Rod Johnson
  * @since 04-Apr-2003
- * @version $Id: Aspect.java,v 1.1 2003-11-11 18:31:51 johnsonr Exp $
+ * @version $Id: Aspect.java,v 1.2 2003-11-15 15:29:55 johnsonr Exp $
  */
 public interface Aspect {
 	
@@ -22,6 +22,6 @@ public interface Aspect {
 	 * Must not return the empty array or null
 	 * @return
 	 */
-	Advice[] geAdvice();
+	Advisor[] getAdvisors();
 
 }
