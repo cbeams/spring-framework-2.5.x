@@ -155,7 +155,7 @@ public class FlowAction extends TemplateAction {
 				getFlow(getRequiredStringParameter(request, getFlowIdParameterName()));
 			}
 			flowExecution = createFlowExecution(flow);
-			modelAndView = flowExecution.start(null, request, response);
+			modelAndView = flowExecution.start(getFlowInput(request), request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -282,6 +282,10 @@ public class FlowAction extends TemplateAction {
 		}
 	}
 
+	protected Map getFlowInput(HttpServletRequest request) {
+		return null;
+	}
+	
 	protected FlowExecution getRequiredFlowExecution(String flowExecutionId, HttpServletRequest request)
 			throws NoSuchFlowExecutionException {
 		try {

@@ -1,5 +1,10 @@
 package org.springframework.web.flow.mvc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -7,7 +12,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.FlowExecutionListenerList;
+import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
 import org.springframework.web.flow.config.FlowConstants;
@@ -18,25 +23,32 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * @author Erwin Vervaet
+ * @author Keith Donald
  */
 public class FlowController extends AbstractController {
 
 	private Flow flow;
 
-	private FlowExecutionListenerList flowExecutionListenerList;
-
 	private FlowServiceLocator flowServiceLocator;
+
+	private Collection flowExecutionListeners = new ArrayList(3);
 
 	public void setFlow(Flow flow) {
 		this.flow = flow;
 	}
 
-	public void setFlowExecutionListenerList(FlowExecutionListenerList flowExecutionListenerList) {
-		this.flowExecutionListenerList = flowExecutionListenerList;
-	}
-
 	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
 		this.flowServiceLocator = flowServiceLocator;
+	}
+
+	public void setFlowExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners.clear();
+		this.flowExecutionListeners.add(listener);
+	}
+
+	public void setFlowExecutionListeners(FlowExecutionListener[] listeners) {
+		this.flowExecutionListeners.clear();
+		this.flowExecutionListeners.addAll(Arrays.asList(listeners));
 	}
 
 	protected String getFlowIdParameterName() {
@@ -88,7 +100,7 @@ public class FlowController extends AbstractController {
 						getFlowIdParameterName()));
 			}
 			flowExecution = createFlowExecution(flow);
-			modelAndView = flowExecution.start(null, request, response);
+			modelAndView = flowExecution.start(getFlowInput(request), request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -163,8 +175,15 @@ public class FlowController extends AbstractController {
 	protected FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = new FlowExecutionStack(flow);
 		flowExecution.getListenerList().add(flow.getFlowExecutionListenerList());
-		flowExecution.getListenerList().add(flowExecutionListenerList);
+		if (!flowExecutionListeners.isEmpty()) {
+			flowExecution.getListenerList().add(
+					(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));
+		}
 		return flowExecution;
+	}
+
+	protected Map getFlowInput(HttpServletRequest request) {
+		return null;
 	}
 
 	protected FlowExecution getRequiredFlowExecution(String flowExecutionId, HttpServletRequest request)

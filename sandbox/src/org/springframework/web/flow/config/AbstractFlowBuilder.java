@@ -515,7 +515,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param transitions
 	 * @return
 	 */
-	protected ActionState addActionState(String stateId, String[] actionNames, Action[] actions, Transition[] transitions) {
+	protected ActionState addActionState(String stateId, String[] actionNames, Action[] actions,
+			Transition[] transitions) {
 		return new ActionState(getFlow(), stateId, actionNames, actions, transitions);
 	}
 
@@ -536,7 +537,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param transitions
 	 * @return
 	 */
-	protected ActionState addActionState(String stateId, String[] actionNames, String[] actionIds, Transition[] transitions) {
+	protected ActionState addActionState(String stateId, String[] actionNames, String[] actionIds,
+			Transition[] transitions) {
 		return new ActionState(getFlow(), stateId, actionNames, executeActions(actionIds), transitions);
 	}
 
@@ -1177,7 +1179,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	protected Transition onEvent(String eventId, String stateId) {
 		return new Transition(eventId, stateId);
 	}
-	
+
 	/**
 	 * @param actionName
 	 * @param eventId
@@ -1669,7 +1671,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 			return join(stateIdPrefix, stateIdSuffix);
 		}
 	}
-	
+
 	/**
 	 * @param prefix
 	 * @param suffix
