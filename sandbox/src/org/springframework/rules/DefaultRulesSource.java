@@ -42,6 +42,9 @@ public class DefaultRulesSource implements RulesSource {
      *            The rules.
      */
     public void addRules(Rules rules) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding rules -> " + rules);
+        }
         this.rules.put(rules.getBeanClass(), rules);
     }
 
@@ -53,8 +56,11 @@ public class DefaultRulesSource implements RulesSource {
      * @param rules
      *            The list of rules.
      */
-    public void setBeanRules(List rules) {
-        rules.clear();
+    public void setRules(List rules) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Configuring rules in source...");
+        }
+        this.rules.clear();
         for (Iterator i = rules.iterator(); i.hasNext();) {
             addRules((Rules)i.next());
         }
