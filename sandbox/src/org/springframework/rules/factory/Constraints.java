@@ -34,6 +34,7 @@ import org.springframework.rules.predicates.Like;
 import org.springframework.rules.predicates.MethodInvokingConstraint;
 import org.springframework.rules.predicates.ParameterizedBinaryPredicate;
 import org.springframework.rules.predicates.Range;
+import org.springframework.rules.predicates.RegexpConstraint;
 import org.springframework.rules.predicates.Required;
 import org.springframework.rules.predicates.StringLengthConstraint;
 import org.springframework.rules.predicates.UnaryAnd;
@@ -315,6 +316,29 @@ public class Constraints {
     }
 
     /**
+     * Returns a minlength predicate.
+     * 
+     * @param minLength
+     *            The minimum length in characters.
+     * @return The configured minlength predicate.
+     */
+    public UnaryPredicate minLength(int minLength) {
+        return new StringLengthConstraint(
+                RelationalOperator.GREATER_THAN_EQUAL_TO, minLength);
+    }
+
+    /**
+     * Creates a constraint backed by a regular expression.
+     * 
+     * @param regexp
+     *            The regular expression string.
+     * @return The constraint.
+     */
+    public UnaryPredicate regexp(String regexp) {
+        return new RegexpConstraint(regexp);
+    }
+
+    /**
      * Returns a constraint whose test is determined by a boolean method on a
      * target object.
      * 
@@ -327,18 +351,6 @@ public class Constraints {
     public UnaryPredicate method(Object target, String methodName,
             String constraintType) {
         return new MethodInvokingConstraint(target, methodName, constraintType);
-    }
-
-    /**
-     * Returns a minlength predicate.
-     * 
-     * @param minLength
-     *            The minimum length in characters.
-     * @return The configured minlength predicate.
-     */
-    public UnaryPredicate minLength(int minLength) {
-        return new StringLengthConstraint(
-                RelationalOperator.GREATER_THAN_EQUAL_TO, minLength);
     }
 
     /**

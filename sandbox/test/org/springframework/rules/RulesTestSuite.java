@@ -126,6 +126,19 @@ public class RulesTestSuite extends TestCase {
         assertFalse(p.test(keith));
 
     }
+    
+    public void testMethodInvokingRule() {
+        TestBean b = new TestBean();
+        UnaryPredicate p = constraints.method(b, "isTooMuch", "max");
+        assertTrue(p.test(new Integer(26)));
+        assertFalse(p.test(new Integer(25)));
+    }
+    
+    public void testRegExpConstraint() {
+        UnaryPredicate p = constraints.regexp("a*b");
+        assertTrue(p.test("aaaaab"));
+        assertFalse(p.test("bbbbbba"));
+    }
 
     public void testRequired() {
         UnaryPredicate req = Required.instance();
@@ -223,6 +236,10 @@ public class RulesTestSuite extends TestCase {
 
         public int getMin() {
             return min;
+        }
+        
+        public boolean isTooMuch(int number) {
+            return number > max;
         }
     }
 
