@@ -30,10 +30,41 @@ import org.springframework.beans.BeansException;
  * Implementations are encouraged to support references amongst beans, to either
  * Singletons or Prototypes.
  *
+ * <p>In contrast to the methods in ListableBeanFactory, all of the methods in this
+ * interface will also check parent factories if this is a HierarchicalBeanFactory.
+ * If a bean is not found in this factory instance, the immediate parent is asked.
+ * Beans in this factory instance are supposed to override beans of the same name
+ * in any parent factory.
+ *
+ * <p>Bean factories are supposed to support the standard bean lifecycle interfaces
+ * as far as possible. The maximum set of initialization methods and their standard
+ * order is:<br>
+ * 1. BeanNameAware's setBeanName<br>
+ * 2. BeanFactoryAware's setBeanFactory<br>
+ * 3. ApplicationContextAware's setApplicationContext (only applicable if running
+ * in an application context)<br>
+ * 4. postProcessBeforeInitialization methods of BeanPostProcessors<br>
+ * 5. InitializingBean's afterPropertiesSet<br>
+ * 6. a custom init-method definition<br>
+ * 7. postProcessAfterInitialization methods of BeanPostProcessors
+ *
+ * <p>On shutdown of a bean factory, the following lifecycle methods apply:<br>
+ * 1. DisposableBean's destroy<br>
+ * 2. a custom destroy-method definition
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13 April 2001
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
+ * @see BeanNameAware#setBeanName
+ * @see BeanFactoryAware#setBeanFactory
+ * @see InitializingBean#afterPropertiesSet
+ * @see DisposableBean#destroy
+ * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization
+ * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization
+ * @see org.springframework.beans.factory.support.RootBeanDefinition#getInitMethodName
+ * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
+ * @see org.springframework.context.ApplicationContextAware#setApplicationContext
  */
 public interface BeanFactory {
 
@@ -44,6 +75,7 @@ public interface BeanFactory {
 	 * <p>Note that callers should retain references to returned objects. There is
 	 * no guarantee that this method will be implemented to be efficient. For example,
 	 * it may be synchronized, or may need to run an RDBMS query.
+	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name name of the bean to return
 	 * @return the instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
@@ -58,6 +90,7 @@ public interface BeanFactory {
 	 * <p>Note that callers should retain references to returned objects. There is
 	 * no guarantee that this method will be implemented to be efficient. For example,
 	 * it may be synchronized, or may need to run an RDBMS query.
+	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name name of the bean to return
 	 * @param requiredType type the bean may match. Can be an interface or superclass
 	 * of the actual class. For example, if the value is Object.class, this method will
@@ -71,14 +104,15 @@ public interface BeanFactory {
 
 	/**
 	 * Does this bean factory contain a bean with the given name?
+	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name name of the bean to query
 	 * @return whether a bean with the given name is defined
-	 * @throws BeansException if there were retrieval errors
 	 */
-	boolean containsBean(String name) throws BeansException;
+	boolean containsBean(String name);
 
 	/**
 	 * Is this bean a singleton? That is, will getBean() always return the same object?
+	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name name of the bean to query
 	 * @return is this bean a singleton
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
@@ -87,6 +121,7 @@ public interface BeanFactory {
 
 	/**
 	 * Return the aliases for the given bean name, if defined.
+	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition

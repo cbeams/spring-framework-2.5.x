@@ -13,20 +13,23 @@ import org.springframework.beans.BeansException;
  *
  * <p>Note that most beans will choose to receive references to collaborating
  * beans via respective bean properties.
- * 
- * <strong>Note, </strong>If the bean also implements InitializingBean, this
- * method will be invoked after InitializingBean's <code>afterPropertiesSet</code>. 
+ *
+ * <p>For a list of all bean lifecycle methods, see the BeanFactory javadocs.
  *
  * @author Rod Johnson
  * @since 11-Mar-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
+ * @see BeanNameAware
+ * @see InitializingBean
+ * @see BeanFactory
+ * @see org.springframework.context.ApplicationContextAware
  */
 public interface BeanFactoryAware {
 	
 	/**
 	 * Callback that supplies the owning factory to a bean instance.
-	 * <p>If the bean also implements InitializingBean, this method will
-	 * be invoked after InitializingBean's <code>afterPropertiesSet</code>.
+	 * <p>Invoked after population of normal bean properties but before an init
+	 * callback like InitializingBean's afterPropertiesSet or a custom init-method.
 	 * @param beanFactory owning BeanFactory (may not be null).
 	 * The bean can immediately call methods on the factory.
 	 * @throws BeansException in case of initialization errors
