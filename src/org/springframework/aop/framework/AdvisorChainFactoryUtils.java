@@ -18,7 +18,7 @@ import org.springframework.aop.MethodMatcher;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AdvisorChainFactoryUtils.java,v 1.1 2003-11-28 11:17:17 johnsonr Exp $
+ * @version $Id: AdvisorChainFactoryUtils.java,v 1.2 2003-12-01 10:02:25 johnsonr Exp $
  */
 public abstract class AdvisorChainFactoryUtils {
 
@@ -63,11 +63,15 @@ public abstract class AdvisorChainFactoryUtils {
 	
 	
 	public static AdvisorChainFactory SIMPLE_ADVISOR_CHAIN_FACTORY = new AdvisorChainFactory() {
-		public void refresh(Advised config) {
-		}
 
 		public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
 			return AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
+		}
+
+		public void activated(AdvisedSupport advisedSupport) {
+		}
+
+		public void adviceChanged(AdvisedSupport advisedSupport) {
 		}
 	};
 	

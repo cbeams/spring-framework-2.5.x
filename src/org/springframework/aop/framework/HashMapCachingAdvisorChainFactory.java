@@ -12,15 +12,12 @@ import java.util.List;
 /**
  * AdvisorChainFactory implementation that caches by method.
  * @author Rod Johnson
- * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.1 2003-11-28 11:17:17 johnsonr Exp $
+ * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.2 2003-12-01 10:02:25 johnsonr Exp $
  */
 public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFactory {
 	
 	private HashMap methodCache = new HashMap();
 	
-	public void refresh(Advised pc) {
-		this.methodCache.clear();
-	}
 	
 	public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
 		List cached = (List) this.methodCache.get(method);
@@ -30,6 +27,21 @@ public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFact
 			this.methodCache.put(method, cached);
 		}
 		return cached;
+	}
+
+
+	/**
+	 * @see org.springframework.aop.framework.AdvisedSupportListener#activated(org.springframework.aop.framework.AdvisedSupport)
+	 */
+	public void activated(AdvisedSupport advisedSupport) {
+	}
+
+
+	/**
+	 * @see org.springframework.aop.framework.AdvisedSupportListener#adviceChanged(org.springframework.aop.framework.AdvisedSupport)
+	 */
+	public void adviceChanged(AdvisedSupport advisedSupport) {
+		methodCache.clear();
 	}
 
 }

@@ -11,9 +11,9 @@ import java.util.List;
 /**
  * Factory for advisor chains.
  * @author Rod Johnson
- * @version $Id: AdvisorChainFactory.java,v 1.1 2003-11-28 11:17:17 johnsonr Exp $
+ * @version $Id: AdvisorChainFactory.java,v 1.2 2003-12-01 10:02:25 johnsonr Exp $
  */
-public interface AdvisorChainFactory {
+public interface AdvisorChainFactory extends AdvisedSupportListener {
 	
 	/**
 	 * Return a list of Interceptor and InterceptorAndDynamicMethodMatcher
@@ -23,12 +23,6 @@ public interface AdvisorChainFactory {
 	 * @return
 	 */
 	List getInterceptorsAndDynamicInterceptionAdvice(Advised pc, Object proxy, Method method, Class targetClass);
-	
-	/**
-	 * Cache state based on this Advised instance.
-	 * Clear any existing state.
-	 */
-	void refresh(Advised pc);
 	
 
 }

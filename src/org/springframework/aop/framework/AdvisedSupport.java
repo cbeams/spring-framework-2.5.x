@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.7 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.8 2003-12-01 10:02:25 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport implements Advised {
@@ -83,6 +83,10 @@ public class AdvisedSupport implements Advised {
 	 * track advice changes via onAdviceChange() callback.
 	 */
 	private boolean isActive;
+	
+	/** List of AdvisedSupportListener */
+	private LinkedList listeners = new LinkedList();
+	
 
 	/**
 	 * No arg constructor to allow use as a Java bean.
@@ -106,9 +110,18 @@ public class AdvisedSupport implements Advised {
 		this();
 		setInterfaces(interfaces);
 	}
+	
+	public void addListener(AdvisedSupportListener l) {
+		listeners.add(l);
+	}
+	
+	public void removeListener(AdvisedSupportListener l) {
+		listeners.remove(l);
+	}
 
-	public void setAdvisorChainFactory(AdvisorChainFactory methodInvocationFactory) {
-		this.advisorChainFactory = methodInvocationFactory;
+	public void setAdvisorChainFactory(AdvisorChainFactory advisorChainFactory) {
+		this.advisorChainFactory = advisorChainFactory;
+		addListener(advisorChainFactory);
 	}
 	
 	public void setTargetSource(TargetSource ts) {
@@ -413,14 +426,17 @@ public class AdvisedSupport implements Advised {
 	 */
 	private synchronized void adviceChanged() {
 		if (this.isActive) {
-			this.advisorChainFactory.refresh(this);
-			onAdviceChanged();
+			for (int i = 0; i < listeners.size(); i++) {
+				((AdvisedSupportListener) listeners.get(i)).adviceChanged(this);
+			}
 		}
 	}
 	
 	private void activate() {
 		this.isActive = true;
-		this.advisorChainFactory.refresh(this);
+		for (int i = 0; i < listeners.size(); i++) {
+			((AdvisedSupportListener) listeners.get(i)).activated(this);
+		}
 	}
 
 	/**
@@ -432,13 +448,6 @@ public class AdvisedSupport implements Advised {
 			activate();
 		}
 		return new AopProxy(this);
-	}
-	
-	/**
-	 * Subclasses can override this method to receive notification when advice changes. 
-	 * This implementation does nothing.
-	 */
-	protected void onAdviceChanged() {
 	}
 	
 	/**

@@ -19,6 +19,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
@@ -31,7 +32,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.21 2003-11-30 18:00:35 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.22 2003-12-01 10:04:16 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 	
@@ -789,53 +790,79 @@ public class AopProxyTests extends TestCase {
 		assertEquals(target.getAge(), proxied.getAge());
 	}
 	
-	public void testAdviceChangeCallbacks() throws Throwable {
+	public void testAdviceSupportListeners() throws Throwable {
 		TestBean target = new TestBean();
 		target.setAge(21);
 		
-		AdviceChangeCountingProxyFactory pc = new AdviceChangeCountingProxyFactory(target);
-		RefreshCountingAdvisorChainFactory mif = new RefreshCountingAdvisorChainFactory();
-		pc.setAdvisorChainFactory(mif);
+		ProxyFactory pc = new ProxyFactory(target);
+		CountingAdvisorListener l = new CountingAdvisorListener(pc);
+		pc.addListener(l);
+		RefreshCountingAdvisorChainFactory acf = new RefreshCountingAdvisorChainFactory();
+		// Should be automatically added as a listener
+		pc.setAdvisorChainFactory(acf);
 		assertFalse(pc.isActive());
-		assertEquals(0, mif.refreshes);
+		assertEquals(0, l.activates);
+		assertEquals(0, acf.refreshes);
 		ITestBean proxied = (ITestBean) pc.getProxy();
-		assertEquals(1, mif.refreshes);
+		assertEquals(1, acf.refreshes);
+		assertEquals(1, l.activates);
 		assertTrue(pc.isActive());
 		assertEquals(target.getAge(), proxied.getAge());
-		assertEquals(0, pc.adviceChanges);
+		assertEquals(0, l.adviceChanges);
 		NopInterceptor di = new NopInterceptor();
 		pc.addInterceptor(0, di);
-		assertEquals(1, pc.adviceChanges);
-		assertEquals(2, mif.refreshes);
+		assertEquals(1, l.adviceChanges);
+		assertEquals(2, acf.refreshes);
 		assertEquals(target.getAge(), proxied.getAge());
 		pc.removeInterceptor(di);
-		assertEquals(2, pc.adviceChanges);
-		assertEquals(3, mif.refreshes);
+		assertEquals(2, l.adviceChanges);
+		assertEquals(3, acf.refreshes);
 		assertEquals(target.getAge(), proxied.getAge());
+		pc.getProxy();
+		assertEquals(1, l.activates);
+		
+		pc.removeListener(l);
+		assertEquals(2, l.adviceChanges);
+		pc.addAdvisor(new DefaultInterceptionAroundAdvisor(new NopInterceptor()));
+		// No longer counting
+		assertEquals(2, l.adviceChanges);
 	}
 	
 	
-	public static class AdviceChangeCountingProxyFactory extends ProxyFactory {
+	public static class CountingAdvisorListener implements AdvisedSupportListener {
 		public int adviceChanges;
-		public AdviceChangeCountingProxyFactory(Object target) {
-			super(target);
+		public int activates;
+		private AdvisedSupport expectedSource;
+		
+		public CountingAdvisorListener(AdvisedSupport expectedSource) {
+			this.expectedSource = expectedSource;
 		}
-		protected void onAdviceChanged() {
+		
+		public void adviceChanged(AdvisedSupport as) {
+			assertEquals(expectedSource, as);
 			++adviceChanges;
+		}
+
+		public void activated(AdvisedSupport as) {
+			assertEquals(expectedSource, as);
+			++activates;
 		}
 	}
 	
 	public class RefreshCountingAdvisorChainFactory implements AdvisorChainFactory {
 		public int refreshes;
 		
-		public void refresh(Advised pc) {
+		public void adviceChanged(AdvisedSupport pc) {
 			++refreshes;
 		}
 
 		public List getInterceptorsAndDynamicInterceptionAdvice(Advised pc, Object proxy, Method method, Class targetClass) {
 			return AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(pc, proxy, method, targetClass);
 		}
-
+		
+		public void activated(AdvisedSupport as) {
+			++refreshes;
+		}
 	}
 	
 	/**
