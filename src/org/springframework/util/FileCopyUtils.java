@@ -10,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * Utility methods for file and stream copying.
@@ -19,6 +21,36 @@ import java.io.OutputStream;
 public abstract class FileCopyUtils {
 
 	public static final int BLOCK_SIZE = 1024;
+
+	/**
+	 * Copy the contents of the given InputStream to the given OutputStream.
+	 * Closes both streams when done.
+	 * @param in the stream to copy from
+	 * @param out the stream to copy to
+	 * @throws IOException in case of I/O errors
+	 */
+	public static void copy(Reader in, Writer out) throws IOException {
+		try {
+			char[] buffer = new char[BLOCK_SIZE];
+			int nrOfBytes = -1;
+			while ((nrOfBytes = in.read(buffer)) != -1) {
+				out.write(buffer, 0, nrOfBytes);
+			}
+			out.flush();
+		}
+		finally {
+			try {
+				in.close();
+			}
+			catch (IOException ignore) {
+			}
+			try {
+				out.close();
+			}
+			catch (IOException ignore) {
+			}
+		}
+	}
 
 	/**
 	 * Copy the contents of the given InputStream to the given OutputStream.
@@ -40,14 +72,12 @@ public abstract class FileCopyUtils {
 			try {
 				in.close();
 			}
-			catch (IOException ex) {
-				// ignore
+			catch (IOException ignore) {
 			}
 			try {
 				out.close();
 			}
-			catch (IOException ex) {
-				// ignore
+			catch (IOException ignore) {
 			}
 		}
 	}
