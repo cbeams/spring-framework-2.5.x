@@ -5,7 +5,6 @@
  
 package org.springframework.benchmark.cmt.server;
 
-import java.io.InputStream;
 import java.rmi.RemoteException;
 
 import javax.sql.DataSource;
@@ -13,18 +12,18 @@ import javax.sql.DataSource;
 import junit.framework.TestCase;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.benchmark.cmt.data.Item;
 import org.springframework.benchmark.cmt.data.Order;
 import org.springframework.benchmark.cmt.data.User;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcHelper;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: LiveBenchmarkTests.java,v 1.2 2003-12-22 17:43:21 johnsonr Exp $
+ * @version $Id: LiveBenchmarkTests.java,v 1.3 2003-12-30 13:52:39 jhoeller Exp $
  */
 public class LiveBenchmarkTests extends TestCase {
 	
@@ -62,8 +61,7 @@ public class LiveBenchmarkTests extends TestCase {
 	}
 	
 	protected void setUp() {
-		InputStream is = getClass().getResourceAsStream("test.xml");
-		BeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("test.xml"));
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("test.xml", getClass()));
 		benchmark = (Benchmark) bf.getBean("benchmark");
 	}
 	

@@ -5,12 +5,10 @@
  
 package org.springframework.benchmark.invokers;
 
-import java.io.InputStream;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.load.AbortTestException;
 import org.springframework.load.AbstractTest;
 import org.springframework.load.TestFailedException;
@@ -18,7 +16,7 @@ import org.springframework.load.TestFailedException;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: RandomWaitTest.java,v 1.3 2003-12-22 17:43:44 johnsonr Exp $
+ * @version $Id: RandomWaitTest.java,v 1.4 2003-12-30 13:52:39 jhoeller Exp $
  */
 public class RandomWaitTest extends AbstractTest implements InitializingBean {
 	
@@ -26,8 +24,7 @@ public class RandomWaitTest extends AbstractTest implements InitializingBean {
 	protected static BeanFactory bf;
 	
 	static {
-		InputStream is = RandomWaitTest.class.getResourceAsStream("beans.xml");
-		bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("beans.xml"));
+		bf = new XmlBeanFactory(new ClassPathResource("beans.xml", RandomWaitTest.class));
 		Object a = bf.getBean("singleton");
 		Object b = bf.getBean("singleton");
 		if (a != b) throw new RuntimeException("Singletons not ==");

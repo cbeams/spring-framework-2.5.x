@@ -5,18 +5,14 @@
  
 package org.springframework.benchmark.cmt.client;
 
-import java.io.InputStream;
-
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-
 import org.springframework.benchmark.cmt.server.Benchmark;
+import org.springframework.core.io.ClassPathResource;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: XmlBenchmarkFactory.java,v 1.2 2003-12-22 17:43:44 johnsonr Exp $
+ * @version $Id: XmlBenchmarkFactory.java,v 1.3 2003-12-30 13:52:39 jhoeller Exp $
  */
 public class XmlBenchmarkFactory implements BenchmarkFactory {
 	
@@ -26,14 +22,10 @@ public class XmlBenchmarkFactory implements BenchmarkFactory {
 
 	public void setFile(String file) {
 		this.file = file;
-		InputStream is = getClass().getResourceAsStream(file);
-		BeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation(file));
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource(file, getClass()));
 		this.benchmark = (Benchmark) bf.getBean("benchmark");
 	} 
 
-	/**
-	 * @see org.springframework.benchmark.cmt.client.BenchmarkCreator#getBenchmark()
-	 */
 	public Benchmark getBenchmark() {
 		return benchmark;
 	}
