@@ -19,17 +19,19 @@ package org.springframework.beans;
 
 /**
  * Interface used for test beans.
+ * Two methods are the same as on Person, but if this
+ * extends person it breaks quite a few tests
  * 
  * @author Rod Johnson
- * @version $Id: ITestBean.java,v 1.6 2004-07-24 10:26:10 johnsonr Exp $
+ * @version $Id: ITestBean.java,v 1.7 2004-07-24 10:52:37 johnsonr Exp $
  */
-public interface ITestBean extends Person {
+public interface ITestBean {
 	
-	//int getAge(); -- inherited
+	int getAge();
 	
 	void setAge(int age);
 	
-	//String getName(); -- inherited
+	String getName(); 
 	
 	void setName(String name);
 	

@@ -23,14 +23,13 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.Person;
 import org.springframework.beans.TestBean;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: JdkDynamicProxyTests.java,v 1.7 2004-07-24 10:26:07 johnsonr Exp $
+ * @version $Id: JdkDynamicProxyTests.java,v 1.8 2004-07-24 10:52:35 johnsonr Exp $
  */
 public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
@@ -98,8 +97,8 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		final ContextTestBean expectedTarget = new ContextTestBean() {
 			protected void assertions(MethodInvocation invocation) {
 				assertTrue(invocation.getThis() == this);
-				assertTrue("Invocation should be on Person: " + invocation.getMethod(), 
-					invocation.getMethod().getDeclaringClass() == Person.class);
+				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
+					invocation.getMethod().getDeclaringClass() == ITestBean.class);
 			}
 		};
 	

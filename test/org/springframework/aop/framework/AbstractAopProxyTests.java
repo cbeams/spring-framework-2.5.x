@@ -57,7 +57,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.37 2004-07-24 10:26:07 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.38 2004-07-24 10:52:35 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -611,8 +611,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	static class ContextTestBean2 extends ContextTestBean {
 		protected void assertions(MethodInvocation invocation) {
 			assertTrue(invocation.getThis() == this);
-			assertTrue("Invocation should be on Person: " + invocation.getMethod(), 
-					Person.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
+			assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
+					ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
 		}
 	}
 
