@@ -47,7 +47,7 @@ import org.springframework.beans.factory.InitializingBean;
  * this class (i.e. lazy load it instead).<p> 
  *
  * @author Rod Johnson
- * @version $Id: AbstractJndiLocator.java,v 1.9 2004-03-18 02:46:17 trisberg Exp $
+ * @version $Id: AbstractJndiLocator.java,v 1.10 2004-05-18 07:52:20 jhoeller Exp $
  * @see #setJndiTemplate
  * @see #setJndiEnvironment
  * @see #setResourceRef
@@ -153,6 +153,13 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 	}
 
 
+	/**
+	 * Check the jndiName property and initiate a lookup.
+	 * <p>The JNDI object will thus be fetched eagerly on initialization.
+	 * For refreshing the JNDI object, subclasses can invoke <code>lookup</code>
+	 * at any later time.
+	 * @see #lookup
+	 */
 	public final void afterPropertiesSet() throws NamingException, IllegalArgumentException {
 		if (this.jndiName == null || this.jndiName.equals("")) {
 			throw new IllegalArgumentException("Property 'jndiName' must be set on " + getClass().getName());
@@ -161,14 +168,19 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 		if (this.resourceRef && !this.jndiName.startsWith(CONTAINER_PREFIX) && this.jndiName.indexOf(':') == -1) {
 			this.jndiName = CONTAINER_PREFIX + this.jndiName;
 		}
-		Object o = lookup(this.jndiName);
-		located(o);
+		lookup();
 	}
 
-	private Object lookup(String jndiName) throws NamingException {
-		Object o = this.jndiTemplate.lookup(jndiName);
-		logger.debug("Successfully looked up object with jndiName '" + jndiName + "': value=[" + o + "]");
-		return o;
+	/**
+	 * Perform the actual JNDI lookup via the JndiTemplate.
+	 * Invokes the <code>located</code> method after successful lookup.
+	 * @throws NamingException if the JNDI lookup failed
+	 * @see #located
+	 */
+	protected final void lookup() throws NamingException {
+		Object jndiObject = this.jndiTemplate.lookup(this.jndiName);
+		logger.debug("Successfully looked up object with jndiName '" + this.jndiName + "': value=[" + jndiObject + "]");
+		located(jndiObject);
 	}
 
 	/**
