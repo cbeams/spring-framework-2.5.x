@@ -4,7 +4,7 @@ of these libraries is subject to the respective license; check the respective pr
 distribution/website before using any of them in your own applications.
 
 * ant/ant.jar
-- Ant 1.6.1 (http://ant.apache.org)
+- Ant 1.6.2 (http://ant.apache.org)
 - used to build the framework and the sample apps
 
 * aopalliance/aopalliance.jar
@@ -68,7 +68,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0.2 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.0.3 (http://www.ibatis.com)
 - ibatis-sqlmap-2.jar is required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
