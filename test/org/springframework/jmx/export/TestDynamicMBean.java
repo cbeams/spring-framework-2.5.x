@@ -34,6 +34,12 @@ import javax.management.ReflectionException;
  */
 public class TestDynamicMBean implements DynamicMBean {
 
+	public void setFailOnInit(boolean failOnInit) {
+		if (failOnInit) {
+			throw new IllegalArgumentException("Failing on initialization");
+		}
+	}
+
 	public Object getAttribute(String attribute)
 			throws AttributeNotFoundException, MBeanException, ReflectionException {
 

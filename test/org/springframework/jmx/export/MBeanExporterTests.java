@@ -93,14 +93,26 @@ public class MBeanExporterTests extends TestCase {
 		}
 	}
 
-	public void testAutodetectSkipsConnectorServerFactoryBean() throws Exception {
+	public void testAutodetectMBeans() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
-			assertTrue("ConnectorServerFactoryBean was skipped", true);
+			MBeanServer server = (MBeanServer) bf.getBean("server");
+			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
+			assertNotNull(instance);
 		}
-		catch (Exception ex) {
-			fail("ConnectorServerFactoryBean was not skipped: " + ex);
+		finally {
+			bf.destroySingletons();
+		}
+	}
+
+	public void testAutodetectLazyMBeans() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectLazyMBeans.xml", getClass()));
+		try {
+			bf.getBean("exporter");
+			MBeanServer server = (MBeanServer) bf.getBean("server");
+			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
+			assertNotNull(instance);
 		}
 		finally {
 			bf.destroySingletons();

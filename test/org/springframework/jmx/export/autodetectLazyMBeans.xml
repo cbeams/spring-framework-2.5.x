@@ -14,7 +14,11 @@
 		</property>
 	</bean>
 
-	<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean"/>
+	<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean" lazy-init="true">
+		<property name="failOnInit">
+			<value>true</value>
+		</property>
+	</bean>
 
 	<bean id="connector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
 		<property name="server">
