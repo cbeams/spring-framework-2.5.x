@@ -304,7 +304,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
 				<programlisting><![CDATA[
 public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 	void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-	    beanFactory.registerCustomEditor(Date.class, CustomDateEditor.class);
+	    beanFactory.registerCustomEditor(Date.class, new CustomDateEditor());
 	}
 }
 				]]></programlisting>
