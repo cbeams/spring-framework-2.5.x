@@ -56,11 +56,18 @@ public interface FlowExecutionContext {
 	public State getCurrentState() throws IllegalStateException;
 
 	/**
+	 * Returns the event that triggered the currently executing request for this
+	 * flow execution.
+	 * @return The first event, that triggered the current execution request
+	 */
+	public Event getRequestEvent();
+
+	/**
 	 * Returns the last event signaled within this flow execution context. The
 	 * event may or may not have caused a state transition to happen.
 	 * @return The last signaled event
 	 */
-	public Event getEvent();
+	public Event getLastEvent();
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in

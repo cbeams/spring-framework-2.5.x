@@ -77,12 +77,12 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * Valid means the event indeed maps to a state transition (it is
 	 * supported).
 	 */
-	private String eventId;
+	private String lastEventId;
 
 	/**
 	 * The timestamp when the last valid event was signaled.
 	 */
-	private long eventTimestamp;
+	private long lastEventTimestamp;
 
 	/**
 	 * The stack of active, currently executing flow sessions. As subflows are
@@ -201,12 +201,12 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		return getActiveFlowSession().getCurrentState().getId();
 	}
 
-	public String getEventId() {
-		return this.eventId;
+	public String getLastEventId() {
+		return this.lastEventId;
 	}
 
-	public long getEventTimestamp() {
-		return this.eventTimestamp;
+	public long getLastEventTimestamp() {
+		return this.lastEventTimestamp;
 	}
 
 	/**
@@ -215,16 +215,16 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * monitor the activity of this execution to detect idle status.
 	 * @param eventId The last event id to set
 	 */
-	public void setEvent(Event event) {
-		Assert.notNull(event, "The event is required");
-		this.eventId = event.getId();
-		this.eventTimestamp = event.getTimestamp();
+	public void setLastEvent(Event lastEvent) {
+		Assert.notNull(lastEvent, "The event is required");
+		this.lastEventId = lastEvent.getId();
+		this.lastEventTimestamp = lastEvent.getTimestamp();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Event '" + event + "' within state '" + getCurrentStateId() + "' for flow '"
+			logger.debug("Event '" + lastEvent + "' within state '" + getCurrentStateId() + "' for flow '"
 					+ getActiveFlowId() + "' signaled");
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Set last event id to '" + this.eventId + "' and updated timestamp to " + this.eventTimestamp);
+			logger.debug("Set last event id to '" + this.lastEventId + "' and updated timestamp to " + this.lastEventTimestamp);
 		}
 	}
 
@@ -277,7 +277,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 
 	public ViewDescriptor start(Event event) {
 		Assert.state(!isActive(), "This flow execution is already started");
-		this.eventTimestamp = event.getTimestamp();
+		this.lastEventTimestamp = event.getTimestamp();
 		activateFlowSession(this.rootFlow, event.getParameters());
 		LocalFlowExecutionContext context = new LocalFlowExecutionContext(event, this);
 		context.fireRequestSubmitted(event);
@@ -433,16 +433,16 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.id);
 		out.writeObject(this.getRootFlow().getId());
-		out.writeObject(this.eventId);
-		out.writeLong(this.eventTimestamp);
+		out.writeObject(this.lastEventId);
+		out.writeLong(this.lastEventTimestamp);
 		out.writeObject(this.executingFlowSessions);
 	}
 
 	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
 		this.id = (String)in.readObject();
 		this.rootFlowId = (String)in.readObject();
-		this.eventId = (String)in.readObject();
-		this.eventTimestamp = in.readLong();
+		this.lastEventId = (String)in.readObject();
+		this.lastEventTimestamp = in.readLong();
 		this.executingFlowSessions = (Stack)in.readObject();
 	}
 

@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.web.flow;
 
@@ -27,7 +27,9 @@ import org.springframework.util.closure.support.Block;
 public class LocalFlowExecutionContext implements StateContext {
 	protected static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
-	private Event event;
+	private Event requestEvent;
+
+	private Event lastEvent;
 
 	private FlowExecutionStack flowExecutionStack;
 
@@ -35,8 +37,9 @@ public class LocalFlowExecutionContext implements StateContext {
 
 	private TransactionSynchronizer transactionSynchronizer = new LocalTransactionSynchronizer();
 
-	public LocalFlowExecutionContext(Event event, FlowExecutionStack executionStack) {
-		this.event = event;
+	public LocalFlowExecutionContext(Event requestEvent, FlowExecutionStack executionStack) {
+		this.requestEvent = requestEvent;
+		this.lastEvent = requestEvent;
 		this.flowExecutionStack = executionStack;
 	}
 
@@ -60,8 +63,12 @@ public class LocalFlowExecutionContext implements StateContext {
 		return this.flowExecutionStack.isActive();
 	}
 
-	public Event getEvent() {
-		return event;
+	public Event getRequestEvent() {
+		return this.requestEvent;
+	}
+
+	public Event getLastEvent() {
+		return lastEvent;
 	}
 
 	public void setCurrentState(State state) {
@@ -70,9 +77,9 @@ public class LocalFlowExecutionContext implements StateContext {
 		fireStateTransitioned(previousState);
 	}
 
-	public void setEvent(Event event) {
-		this.event = event;
-		this.flowExecutionStack.setEvent(event);
+	public void setLastEvent(Event event) {
+		this.lastEvent = event;
+		this.flowExecutionStack.setLastEvent(event);
 		fireEventSignaled(event);
 	}
 
@@ -114,10 +121,11 @@ public class LocalFlowExecutionContext implements StateContext {
 	public TransactionSynchronizer getTransactionSynchronizer() {
 		return this.transactionSynchronizer;
 	}
-	
+
 	public Map getModel() {
 		Map model = this.flowExecutionStack.getModel();
 		model.putAll(requestAttributes.getAttributeMap());
+		model.put("flowExecutionContext", this);
 		return model;
 	}
 
@@ -312,7 +320,8 @@ public class LocalFlowExecutionContext implements StateContext {
 		 * it. Returns <code>false</code> when
 		 * <ul>
 		 * <li>there is no transaction token saved in the model</li>
-		 * <li>there is no transaction token included as a request parameter</li>
+		 * <li>there is no transaction token included as a request parameter
+		 * </li>
 		 * <li>the included transaction token value does not match the
 		 * transaction token in the model</li>
 		 * </ul>
@@ -326,7 +335,7 @@ public class LocalFlowExecutionContext implements StateContext {
 		 * @return true when the token is valid, false otherwise
 		 */
 		public boolean isEventTokenValid(String tokenName, String tokenParameterName, boolean clear) {
-			String tokenValue = (String)getEvent().getParameter(tokenParameterName);
+			String tokenValue = (String)getLastEvent().getParameter(tokenParameterName);
 			return isTokenValid(tokenName, tokenValue, clear);
 		}
 

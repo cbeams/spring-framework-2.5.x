@@ -100,13 +100,13 @@ public interface FlowExecutionMBean {
 	 * flow execution.
 	 * @return The identifier of the last event
 	 */
-	public String getEventId();
+	public String getLastEventId();
 
 	/**
 	 * Returns the timestamp noting when the last event was signaled.
 	 * @return The timestamp of the last event occurance
 	 */
-	public long getEventTimestamp();
+	public long getLastEventTimestamp();
 
 	/**
 	 * Returns the time in milliseconds this flow execution has been active, or
