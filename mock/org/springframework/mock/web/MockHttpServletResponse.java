@@ -77,6 +77,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private int status = HttpServletResponse.SC_OK;
 
+	private String errorMessage;
+
 	private String redirectedUrl;
 
 	private String forwardedUrl;
@@ -217,8 +219,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return url;
 	}
 
-	public void sendError(int param, String message) {
-		this.status = param;
+	public void sendError(int status, String errorMessage) {
+		this.status = status;
+		this.errorMessage = errorMessage;
 	}
 
 	public void sendError(int status) {
@@ -257,16 +260,21 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.headers.put(name, new Integer(value));
 	}
 
-	public void setStatus(int status, String message) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 
-	public void setStatus(int param) {
-		this.status = param;
+	public void setStatus(int status, String errorMessage) {
+		this.status = status;
+		this.errorMessage = errorMessage;
 	}
 
 	public int getStatus() {
 		return status;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 
 
