@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support.nativejdbc;
 
@@ -34,11 +34,11 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * with a WebLogic DataSource: If a given object is not a WebLogic
  * Connection wrapper, it will be returned as-is.
  *
- * <p>Currently just tested with BEA WebLogic 8.1 SP2.
+ * <p>Currently only tested with BEA WebLogic 8.1 SP2.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @since 31.05.2004
+ * @since 1.0.2
  * @see #getNativeConnection
  * @see weblogic.jdbc.extensions.WLConnection#getVendorConnection
  */
