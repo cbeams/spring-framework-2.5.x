@@ -92,7 +92,7 @@ Package org.springframework.validation
 * DataBinder does not accept an empty String (without text content) as value for a required field
 * DataBinder logs a warning when suppressing a non-allowed field (i.e. a field not specified in "allowedFields")
 
-Package org.springframework.webC
+Package org.springframework.web
 * added ServletContextResourcePatternResolver, to find matching resources within a web app even in an unexpanded WAR
 * fixed UrlPathHelper to check for request URIs that do not start with the application's context path (rather unusual)
 * fixed FrameworkServlet to use "doGet"/"doPost"/"doHead" etc, to reenable proper LastModified support in controllers
@@ -102,6 +102,8 @@ Package org.springframework.webC
 * added "createVelocityContext" hook to VelocityView, for using a different impl of Velocity's Context interface
 * added "springMessage"/"springMessageText" macros for Velocity and "message"/"messageText" macros for FreeMarker
 * fixed AbstractExcelView to not hold the HSSFWorkbook instance in an instance variable (avoiding concurrency issues)
+* added convenience methods to RequestUtils for extracting and converting request parameters that are arrays
+* ModelAndView now allows model objects to be added in bulk, via the introduced "addAllObjects" method
 
 
 Changes in version 1.1.1 (30.9.2004)
