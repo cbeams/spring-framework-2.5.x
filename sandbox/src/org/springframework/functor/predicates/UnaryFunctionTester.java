@@ -21,18 +21,18 @@ import org.springframework.functor.UnaryPredicate;
 /**
  * @author Keith Donald
  */
-public class UnaryFunctionEvaluator implements UnaryPredicate {
+public class UnaryFunctionTester implements UnaryPredicate {
     private UnaryPredicate evaluator;
     private UnaryFunction function;
 
-    public UnaryFunctionEvaluator(UnaryPredicate evaluator,
+    public UnaryFunctionTester(UnaryPredicate evaluator,
             UnaryFunction function) {
         this.evaluator = evaluator;
         this.function = function;
     }
 
-    public boolean evaluate(Object value) {
-        return this.evaluator.evaluate(function.execute(value));
+    public boolean test(Object value) {
+        return this.evaluator.test(function.evaluate(value));
     }
 
 }

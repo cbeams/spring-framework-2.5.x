@@ -16,11 +16,22 @@
 package org.springframework.functor;
 
 /**
+ * Type-safe enums for various logical operators.
+ * 
  * @author Keith Donald
  */
 public class LogicalOperator {
+    
+    /**
+     * The <code>AND</code> operator
+     */
     public static final LogicalOperator AND = new LogicalOperator("and");
+    
+    /**
+     * The <code>OR</code> operator
+     */
     public static final LogicalOperator OR = new LogicalOperator("or");
+    
     private String name;
 
     private LogicalOperator(String name) {

@@ -53,10 +53,10 @@ public class RequiredIfTrue implements UnaryPredicate {
         this.propertyName = propertyName;
     }
 
-    public boolean evaluate(Object bean) {
+    public boolean test(Object bean) {
         Assert.notNull(propertyName);
-        if (predicate.evaluate(bean)) {
-            return Required.instance().evaluate(
+        if (predicate.test(bean)) {
+            return Required.instance().test(
                     new BeanWrapperImpl(bean).getPropertyValue(propertyName));
         } else {
             return true;

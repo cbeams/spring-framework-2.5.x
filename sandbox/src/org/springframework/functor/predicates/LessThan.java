@@ -20,6 +20,8 @@ import java.util.Comparator;
 import org.springframework.functor.BinaryPredicate;
 
 /**
+ * Predicate that tests if one comparable object is less than another.
+ * 
  * @author Keith Donald
  */
 public class LessThan extends ComparingBinaryPredicate implements
@@ -34,7 +36,7 @@ public class LessThan extends ComparingBinaryPredicate implements
         super(comparator);
     }
 
-    protected boolean evaluateCompareResult(int result) {
+    protected boolean testCompareResult(int result) {
         return result < 0;
     }
 

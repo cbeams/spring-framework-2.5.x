@@ -39,7 +39,7 @@ public class StringLengthConstraint implements UnaryPredicate {
         BinaryPredicate comparer = operator.getPredicate();
         UnaryPredicate lengthConstraint = PredicateFactory.bind(
                 comparer, new Integer(length));
-        this.predicate = PredicateFactory.attachResultEvaluator(
+        this.predicate = PredicateFactory.attachResultTester(
                 lengthConstraint, StringLengthFunction.instance());
     }
 
@@ -52,12 +52,12 @@ public class StringLengthConstraint implements UnaryPredicate {
     public StringLengthConstraint(int min, int max) {
         UnaryPredicate rangeConstraint = new Range(new Integer(min),
                 new Integer(max));
-        this.predicate = PredicateFactory.attachResultEvaluator(
+        this.predicate = PredicateFactory.attachResultTester(
                 rangeConstraint, StringLengthFunction.instance());
     }
 
-    public boolean evaluate(Object value) {
-        return this.predicate.evaluate(value);
+    public boolean test(Object value) {
+        return this.predicate.test(value);
     }
 
 }

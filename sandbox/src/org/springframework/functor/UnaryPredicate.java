@@ -18,8 +18,23 @@ package org.springframework.functor;
 import java.io.Serializable;
 
 /**
+ * A predicate is a boolean expression that takes one argument and returns
+ * a boolean result.
+ * <p><p>
+ * A unary predicate is a function object that tests a single argument
+ * against some conditional expression.  For example, a "required" unary
+ * predicate may return true if the provided argument is non-null, and
+ * false otherwise.
+ * 
  * @author  Keith Donald
  */
 public interface UnaryPredicate extends Serializable {
-    public boolean evaluate(Object value);
+    
+    /**
+     * Test the provided argument against this predicate's condition.
+     * 
+     * @param argument the argument value
+     * @return true if the condition was satisfied, false otherwise
+     */
+    public boolean test(Object argument);
 }
