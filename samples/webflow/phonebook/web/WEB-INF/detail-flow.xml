@@ -22,7 +22,7 @@
 		<transition event="error" to="error"/>
 	</action-state>
 	
-	<sub-flow-state id="collegue.Detail" flow="person.Detail" attributes-mapper="collegueId.modelMapper">
+	<sub-flow-state id="collegue.Detail" flow="person.Detail" model-mapper="collegueId.modelMapper">
 		<transition event="finish" to="detail.get"/>
 		<transition event="error" to="error"/>
 	</sub-flow-state>

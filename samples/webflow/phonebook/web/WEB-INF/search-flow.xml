@@ -31,7 +31,7 @@
 		<transition event="error" to="error"/>
 	</action-state>
 	
-	<sub-flow-state id="person.Detail" flow="person.Detail" attributes-mapper="id.modelMapper">
+	<sub-flow-state id="person.Detail" flow="person.Detail" model-mapper="id.modelMapper">
 		<transition event="finish" to="results"/>
 		<transition event="error" to="error"/>
 	</sub-flow-state>

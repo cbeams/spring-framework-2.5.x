@@ -461,7 +461,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return model;
 	}
 
-	//methods implementing AttributesAccessor
+	//methods implementing FlowModel
 
 	public Object getAttribute(String attributeName) {
 		if (attributeName.equals(getFlowExecutionAttributeName())) {
@@ -541,7 +541,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return getActiveFlowSession().findAttributes(criteria);
 	}
 
-	//methods implementing MutableAttributesAccessor
+	//methods implementing MutableFlowModel
 
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (getFlowExecutionAttributeName().equals(attributeName)) {

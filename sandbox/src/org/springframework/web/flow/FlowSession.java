@@ -35,7 +35,7 @@ import org.springframework.web.flow.support.FlowUtils;
 
 /**
  * A single client session instance for a <code>Flow</code> participating in a
- * <code>FlowExecution</code>. Also a <code>MutableAttributesAccessor</code>,
+ * <code>FlowExecution</code>. Also a <code>MutableFlowModel</code>,
  * as the flow session acts as a "flow-scope" data model.
  * <p>
  * The stack of executing flow sessions (managed within
@@ -169,7 +169,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
 	}
 
-	//methods implementing AttributesAccessor
+	//methods implementing FlowModel
 
 	/**
 	 * Returns all the attributes stored in this flow session as a model map.
@@ -266,7 +266,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		return filteredEntries;
 	}
 
-	//methods implementing MutableAttributesAccessor
+	//methods implementing MutableFlowModel
 
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (logger.isDebugEnabled()) {
