@@ -30,6 +30,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ClassUtils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Jasper Reports view class that allows for the actual rendering format to be
  * specified at runtime using a parameter contained in the model.
@@ -70,6 +73,14 @@ import org.springframework.util.ClassUtils;
  */
 public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 
+	/**
+	 * <code>Log</code> for this class.
+	 */
+	private static final Log log = LogFactory.getLog(JasperReportsMultiFormatView.class);
+
+	/**
+	 * Default value used for format key
+	 */
 	public static final String DEFAULT_FORMAT_KEY = "format";
 
 	/**
@@ -82,6 +93,12 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * as key and the corresponding view class as value.
 	 */
 	private Map formatMappings = new HashMap();
+
+	/**
+	 * Stores the mappings of mapping keys to Content-Disposition header
+	 * values.
+	 */
+	private Properties contentDispositionMappings = new Properties();
 
   /**
 	 * Creates a new <code>JasperReportsMultiFormatView</code> instance
@@ -117,6 +134,9 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 			String discriminator = (String) discriminators.nextElement();
 			String className = mappingsWithClassNames.getProperty(discriminator);
 			try {
+				if(log.isDebugEnabled()) {
+					log.debug("Mapped view class [" + className + "] to mapping key [" + discriminator + "]");
+				}
 				this.formatMappings.put(discriminator, ClassUtils.forName(className));
 			}
 			catch (ClassNotFoundException ex) {
@@ -124,6 +144,16 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 						"Class [" + className + "] mapped to format [" + discriminator + "] cannot be found", ex);
 			}
 		}
+	}
+
+	/**
+	 * Sets the mappings of <code>Content-Disposition</code> header values to
+	 * mapping keys. If specified Spring will look at these mappings to determine
+	 * the value of the <code>Content-Disposition</code> header for a given
+	 * format mapping.
+	 */
+	public void setContentDispositionMappings(Properties mappings) {
+		this.contentDispositionMappings = mappings;
 	}
 
 
@@ -141,15 +171,45 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 			throw new IllegalArgumentException("No format format found in model.");
 		}
 
+		if(log.isDebugEnabled()) {
+			log.debug("Rendering report using format mapping key [" + format + "]");
+		}
+
 		Class viewClass = (Class) this.formatMappings.get(format);
 		if (viewClass == null) {
 			throw new IllegalArgumentException("Format discriminator [" + format + "] is not a configured mapping");
 		}
 
+		if(log.isDebugEnabled()) {
+			log.debug("Rendering report using view class [" + viewClass.getName() + "]");
+		}
+
 		AbstractJasperReportsView view = (AbstractJasperReportsView) BeanUtils.instantiateClass(viewClass);
 
 		response.setContentType(view.getContentType());
+
+		populateContentDispositionIfNecessary(format, response);
+
 		view.renderReport(report, model, dataSource, response);
+	}
+
+	/**
+	 * Adds/overwrites the <code>Content-Disposition</code> header value with the format-specific
+	 * value if the mappings have been specified and a valid one exists for the given format.
+	 * @param format  the format key of the mapping.
+	 * @param response  the <code>HttpServletResponse</code> to set the header in.
+	 * @see #setContentDispositionMappings(java.util.Properties)
+	 */
+	private void populateContentDispositionIfNecessary(String format, HttpServletResponse response) {
+		if(contentDispositionMappings != null && contentDispositionMappings.size() > 0) {
+			String header = contentDispositionMappings.getProperty(format);
+			if(header != null) {
+				if(log.isDebugEnabled()) {
+					log.debug("Setting Content-Disposition header to: [" + header + "]");
+				}
+				response.setHeader(HEADER_CONTENT_DISPOSITION, header);
+			}
+		}
 	}
 
 }

@@ -103,7 +103,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Constant that defines "Content-Disposition" header.
 	 */
-	private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+	protected static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 
 	/**
 	 * Stores the default Content-Disposition header. Used to make IE play nice.
