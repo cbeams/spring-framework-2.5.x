@@ -36,7 +36,7 @@ import org.springframework.web.portlet.context.PortletApplicationContext;
  * available for internal resource dispatching.
  * 
  * @author William G. Thompson, Jr.
- * @version $Revision: 1.1 $
+ * @version $Id: ViewRendererServlet.java,v 1.2 2004-05-08 01:38:38 dkopylenko Exp $
  */
 public class ViewRendererServlet extends HttpServletBean {
     

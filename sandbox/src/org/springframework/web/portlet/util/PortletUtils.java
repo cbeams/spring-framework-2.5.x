@@ -31,7 +31,7 @@ import javax.portlet.PortletSession;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Revision: 1.2 $
+ * @version $Id: PortletUtils.java,v 1.3 2004-05-08 01:36:04 dkopylenko Exp $
  */
 public abstract class PortletUtils {
 
