@@ -15,7 +15,7 @@
  */
 package org.springframework.util.thread;
 
-public interface ThreadLocalStorage {
+public interface ThreadLocalContext {
 
 	public Object get(Object key);
 

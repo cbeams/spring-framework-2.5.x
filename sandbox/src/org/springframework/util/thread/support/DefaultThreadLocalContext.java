@@ -18,12 +18,16 @@ package org.springframework.util.thread.support;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.binding.AttributeAccessor;
+import org.springframework.binding.AttributeSetter;
 import org.springframework.util.thread.ThreadCleanupBroadcaster;
 import org.springframework.util.thread.ThreadCleanupListener;
-import org.springframework.util.thread.ThreadLocalStorage;
+import org.springframework.util.thread.ThreadLocalContext;
 
-public class DefaultThreadLocalStorage implements ThreadLocalStorage, ThreadCleanupListener {
-	private static final String CREATED_KEY = DefaultThreadLocalStorage.class + ".created";
+public class DefaultThreadLocalContext implements ThreadLocalContext, ThreadCleanupListener, AttributeAccessor,
+		AttributeSetter {
+
+	private static final String CREATED_KEY = DefaultThreadLocalContext.class + ".created";
 
 	private MapThreadLocal threadLocal = new MapThreadLocal();
 
@@ -40,6 +44,18 @@ public class DefaultThreadLocalStorage implements ThreadLocalStorage, ThreadClea
 			map.remove(CREATED_KEY);
 		}
 		return map;
+	}
+
+	public boolean containsAttribute(String attributeName) {
+		return getThreadLocalStorageMap().containsKey(attributeName);
+	}
+
+	public Object getAttribute(String attributeName) {
+		return get(attributeName);
+	}
+
+	public void setAttribute(String attributeName, Object value) {
+		put(attributeName, value);
 	}
 
 	public Object get(Object key) {
