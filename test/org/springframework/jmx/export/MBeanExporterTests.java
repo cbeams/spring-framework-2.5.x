@@ -23,6 +23,7 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 import junit.framework.TestCase;
@@ -30,6 +31,10 @@ import junit.framework.TestCase;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.jmx.support.ConnectorServerFactoryBean;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
@@ -89,6 +94,18 @@ public class MBeanExporterTests extends TestCase {
 		finally {
 			MBeanServerFactory.releaseMBeanServer(server);
 		}
+	}
+
+	public void testAutodetectSkipsConnectorServerFactoryBean() throws Exception {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectMBeans.xml", getClass()));
+
+		try {
+			bf.getBean("exporter");
+			assertTrue("ConnectorServerFactoryBean was skipped", true);
+		} catch(Exception ex) {
+			fail("ConnectorServerFactoryBean was not skipped: " + ex);
+		}
+
 	}
 
 	private Map getBeanMap() {
