@@ -49,7 +49,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
  * @see org.springframework.mock.jndi.SimpleNamingContextBuilder
  * @see org.apache.commons.dbcp.BasicDataSource
  */
-public class DriverManagerDataSource extends AbstractDataSource implements SmartDataSource {
+public class DriverManagerDataSource extends AbstractDataSource {
 
 	private String driverClassName = "";
 
@@ -119,14 +119,6 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 		return password;
 	}
 
-
-	/**
-	 * This DataSource returns a new connection every time:
-	 * Close it when returning one to the "pool".
-	 */
-	public boolean shouldClose(Connection con) {
-		return true;
-	}
 
 	public Connection getConnection() throws SQLException {
 		return getConnectionFromDriverManager();

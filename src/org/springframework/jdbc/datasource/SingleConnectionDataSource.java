@@ -49,7 +49,8 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @see DataSourceUtils#closeConnectionIfNecessary
  */
-public class SingleConnectionDataSource extends DriverManagerDataSource implements DisposableBean {
+public class SingleConnectionDataSource extends DriverManagerDataSource
+		implements SmartDataSource, DisposableBean {
 
 	private boolean suppressClose;
 
@@ -115,7 +116,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * This is a single connection: Do not close it when returning to the "pool".
 	 */
 	public boolean shouldClose(Connection con) {
-		return false;
+		return (con != this.connection && con != this.target);
 	}
 
 	/**

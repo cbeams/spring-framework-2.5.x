@@ -22,8 +22,8 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 /**
- * Subinterface of javax.sql.DataSource, to be implemented by special
- * DataSources that return pooled JDBC Connection in an unwrapped fashion.
+ * Subinterface of <code>javax.sql.DataSource</code>, to be implemented by
+ * special DataSources that return JDBC Connections in an unwrapped fashion.
  *
  * <p>Classes using this interface can query whether or not the connection
  * should be closed after an operation. Spring's DataSourceUtils and
@@ -34,7 +34,7 @@ import javax.sql.DataSource;
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
-public interface SmartDataSource extends DataSource {
+interface SmartDataSource extends DataSource {
 		
 	/** 
 	 * Should we close this connection, obtained from this DataSource?
