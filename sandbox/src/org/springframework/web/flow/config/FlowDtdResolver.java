@@ -32,15 +32,15 @@ import org.xml.sax.SAXException;
  */
 public class FlowDtdResolver implements EntityResolver {
 
-	private static final String WEB_FLOW_ELEMENT = "web-flow";
+	private static final String WEBFLOW_ELEMENT = "spring-webflow";
 
-	private static final String WEB_FLOW_CONFIG_PACKAGE = "/org/springframework/web/flow/config/";
+	private static final String WEBFLOW_CONFIG_PACKAGE = "/org/springframework/web/flow/config/";
 
 	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-		if (systemId != null && systemId.indexOf(WEB_FLOW_ELEMENT) > systemId.lastIndexOf("/")) {
-			String dtdFile = systemId.substring(systemId.indexOf(WEB_FLOW_ELEMENT));
+		if (systemId != null && systemId.indexOf(WEBFLOW_ELEMENT) > systemId.lastIndexOf("/")) {
+			String dtdFile = systemId.substring(systemId.indexOf(WEBFLOW_ELEMENT));
 			try {
-				Resource resource = new ClassPathResource(WEB_FLOW_CONFIG_PACKAGE + dtdFile, getClass());
+				Resource resource = new ClassPathResource(WEBFLOW_CONFIG_PACKAGE + dtdFile, getClass());
 				InputSource source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);

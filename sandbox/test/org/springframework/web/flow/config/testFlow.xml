@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
-	"http://www.springframework.org/dtd/web-flow.dtd">
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
 
-<web-flow id="testFlow" start-state="actionState1">
+<webflow id="testFlow" start-state="actionState1">
 
 	<action-state id="actionState1">
 		<action bean="action1">
@@ -39,4 +39,4 @@
 	
 	<end-state id="endState2"/>
 
-</web-flow>
+</webflow>
