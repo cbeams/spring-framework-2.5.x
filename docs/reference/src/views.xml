@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.22 2004-08-16 00:09:32 davison Exp $-->
+<!--$Id: views.xml,v 1.23 2004-08-16 06:01:28 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -293,11 +293,12 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       <title>Creating templates</title>
 
       <para>Your templates need to be stored in the directory specified by the
-      <literal>ViewResolver</literal> bean shown above in <xref
-      linkend="???" /> This document does not cover details of creating
-      templates for the two languages - please see their relevant websites for
-      information. If you use the view resolvers highlighted, then the logical
-      view names relate to the template file names in similar fashion to
+      <literal>*Configurer</literal> bean shown above in <xref
+      linkend="view-velocity-contextconfig" /> This document does not cover
+      details of creating templates for the two languages - please see their
+      relevant websites for information. If you use the view resolvers
+      highlighted, then the logical view names relate to the template file
+      names in similar fashion to
       <literal>InternalResourceViewResolver</literal> for JSP's. So if your
       controller returns a ModelAndView object containing a view name of
       "welcome" then the resolvers will look for the
@@ -609,7 +610,7 @@ recommend sticking to 'spring' --&gt;
                 <entry><emphasis role="bold">showErrors</emphasis> (simplify
                 display of validation errors for the bound field)</entry>
 
-                <entry><literal>#showErrors($separator
+                <entry><literal>#springShowErrors($separator
                 $classOrStyle)</literal></entry>
 
                 <entry><literal>&lt;@spring.showErrors separator
@@ -777,7 +778,7 @@ recommend sticking to 'spring' --&gt;
         <programlisting>&lt;#-- until this point, default HTML escaping is used --&gt;
 
 &lt;#assign htmlEscape = true in spring&gt;
-&lt;#-- next field will use default HTML escaping --&gt;
+&lt;#-- next field will use HTML escaping --&gt;
 &lt;@spring.formInput "command.name" /&gt;
 
 &lt;#assign htmlEscape = false in spring&gt;
