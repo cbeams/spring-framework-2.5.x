@@ -26,6 +26,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
@@ -34,7 +35,7 @@ import org.springframework.web.util.TagUtils;
  * support internationalization.
  *
  * <p>Regards a HTML escaping setting, either on this tag instance,
- * the page level, or the web.xml level.
+ * the page level, or the web.xml level. Can also apply JavaScript escaping.
  *
  * <p>If "code" isn't set or cannot be resolved, "text" will be used as default
  * message. Thus, this tag can also be used for HTML escaping of any texts.
@@ -44,6 +45,7 @@ import org.springframework.web.util.TagUtils;
  * @see #setCode
  * @see #setText
  * @see #setHtmlEscape
+ * @see #setJavaScriptEscape
  * @see HtmlEscapeTag#setDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  */
@@ -58,6 +60,8 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	private String var;
 	
 	private String scope = TagUtils.SCOPE_PAGE;
+
+	private boolean javaScriptEscape = false;
 
 
 	/**
@@ -103,15 +107,26 @@ public class MessageTag extends HtmlEscapingAwareTag {
 		this.scope = scope;
 	}
 
+	/**
+	 * Set JavaScript escaping for this tag, as boolean value.
+	 * Default is false.
+	 */
+	public void setJavaScriptEscape(String javaScriptEscape) throws JspException {
+		this.javaScriptEscape =
+				ExpressionEvaluationUtils.evaluateBoolean("javaScriptEscape", javaScriptEscape, pageContext);
+	}
+
 
 	protected final int doStartTagInternal() throws JspException, IOException {
 		MessageSource messageSource = getMessageSource();
 		if (messageSource == null) {
 			throw new JspTagException("No corresponding MessageSource found");
 		}
+
 		String resolvedCode = ExpressionEvaluationUtils.evaluateString("code", this.code, pageContext);
 		String resolvedText = ExpressionEvaluationUtils.evaluateString("text", this.text, pageContext);
 		String resolvedVar = ExpressionEvaluationUtils.evaluateString("var", this.var, pageContext);
+
 		try {
 			String msg = null;
 			if (resolvedCode != null) {
@@ -130,7 +145,12 @@ public class MessageTag extends HtmlEscapingAwareTag {
 			else {
 				msg = resolvedText;
 			}
+
+			// HTML and/or JavaScript escape, if demanded
 			msg = isHtmlEscape() ? HtmlUtils.htmlEscape(msg) : msg;
+			msg = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(msg) : msg;
+
+			// expose as variable, if demanded
 			if (resolvedVar != null) {
 				String resolvedScope = ExpressionEvaluationUtils.evaluateString("scope", this.scope, pageContext);
 				pageContext.setAttribute(resolvedVar, msg, TagUtils.getScope(resolvedScope));
@@ -138,11 +158,11 @@ public class MessageTag extends HtmlEscapingAwareTag {
 			else {
 				writeMessage(msg);
 			}
+			return EVAL_BODY_INCLUDE;
 		}
 		catch (NoSuchMessageException ex) {
 			throw new JspTagException(getNoSuchMessageExceptionDescription(ex));
 		}
-		return EVAL_BODY_INCLUDE;
 	}
 
 	/**

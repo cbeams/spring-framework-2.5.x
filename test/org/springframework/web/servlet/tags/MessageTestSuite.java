@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.io.IOException;
 import java.util.Locale;
 
 import javax.servlet.jsp.JspException;
@@ -44,7 +43,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setPageContext(pc);
 		tag.setCode("test");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "test message".equals(message.toString()));
+		assertEquals("Correct message", "test message", message.toString());
 	}
 
 	public void testMessageTagWithCode2() throws JspException {
@@ -62,7 +61,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setCode("${myattr}");
 		tag.setHtmlEscape("true");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "Canadian &#38; test message".equals(message.toString()));
+		assertEquals("Correct message", "Canadian &#38; test message", message.toString());
 	}
 
 	public void testMessageTagWithNullCode() throws JspException {
@@ -76,7 +75,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setPageContext(pc);
 		tag.setCode(null);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "null".equals(message.toString()));
+		assertEquals("Correct message", "null", message.toString());
 	}
 
 	public void testMessageTagWithCodeAndArguments() throws JspException {
@@ -91,7 +90,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setCode("testAttr");
 		tag.setArguments("arg1,arg2");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "test arg1 message arg2".equals(message.toString()));
+		assertEquals("Correct message", "test arg1 message arg2", message.toString());
 	}
 
 	public void testMessageTagWithCodeAndText1() throws JspException {
@@ -106,7 +105,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setCode("test");
 		tag.setText("testtext");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "test message".equals(message.toString()));
+		assertEquals("Correct message", "test message", (message.toString()));
 	}
 
 	public void testMessageTagWithCodeAndText2() throws JspException {
@@ -122,7 +121,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setCode("test2");
 		tag.setText("${myattr}");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "test & text".equals(message.toString()));
+		assertEquals("Correct message", "test & text", message.toString());
 	}
 
 	public void testMessageTagWithText() throws JspException {
@@ -137,9 +136,25 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setText("test & text");
 		tag.setHtmlEscape("true");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "test &#38; text".equals(message.toString()));
+		assertEquals("Correct message", "test &#38; text", message.toString());
 	}
 	
+	public void testMessageTagWithTextAndJavaScriptEscape() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setText("' test & text \\");
+		tag.setHtmlEscape("true");
+		tag.setJavaScriptEscape("true");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct message", "\\' test &#38; text \\\\", message.toString());
+	}
+
 	public void testMessageWithVarAndScope() throws JspException {
 		PageContext pc = createPageContext();
 		MessageTag tag = new MessageTag();
@@ -148,8 +163,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setVar("testvar");		
 		tag.setScope("page");
 		tag.doStartTag();
-		assertNotNull(pc.getAttribute("testvar"));
-		assertEquals(pc.getAttribute("testvar"), "text & text");
+		assertEquals("text & text", pc.getAttribute("testvar"));
 		tag.release();
 		
 		tag = new MessageTag();
@@ -157,8 +171,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setCode("test");
 		tag.setVar("testvar2");
 		tag.doStartTag();
-		assertNotNull(pc.getAttribute("testvar2"));
-		assertEquals(pc.getAttribute("testvar2"), "test message");
+		assertEquals("test message", pc.getAttribute("testvar2"));
 		tag.release();
 	}
 
@@ -169,8 +182,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setText("text & text");
 		tag.setVar("testvar");		
 		tag.doStartTag();
-		assertNotNull(pc.getAttribute("testvar"));
-		assertEquals(pc.getAttribute("testvar"), "text & text");
+		assertEquals("text & text", pc.getAttribute("testvar"));
 		tag.release();
 
 		// try to reuse
@@ -179,15 +191,14 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setVar("testvar");
 			
 		tag.doStartTag();
-		assertNotNull(pc.getAttribute("testvar"));
-		assertEquals(pc.getAttribute("testvar"), "test message");
+		assertEquals("test message", pc.getAttribute("testvar"));
 
 	}
 	
 	public void testNullMessageSource() throws JspException {
 		PageContext pc = createPageContext();
 		ConfigurableApplicationContext ctx = (ConfigurableApplicationContext)pc.getRequest().getAttribute(
-			DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		    DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		ctx.close();
 		
 		MessageTag tag = new MessageTag();
@@ -195,8 +206,6 @@ public class MessageTestSuite extends AbstractTagTests {
 		tag.setCode("test");
 		tag.setVar("testvar2");
 		tag.doStartTag();
-		
-		
 	}
 
 }
