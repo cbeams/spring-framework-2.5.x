@@ -1,8 +1,13 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
+$Id: changelog.txt,v 1.21 2003-09-14 08:30:57 johnsonr Exp $
+
 Changes in version 1.0 M2 (XX.XX.2003)
 -------------------------------------
+* added support for sending email in the org.springframework.mail package. 
+Provided JavaMail implementation, but underlying API is a pluggable strategy
+to allow for other mail APIs and easy testability without JavaMail configured.
 * added PropertyValuesProviderFactoryBean so that FactoryBean interface no longer
 needs to implement getPropertyValues() method. Significant API
 and conceptual simplification for typical FactoryBean usage
