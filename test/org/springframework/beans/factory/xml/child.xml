@@ -32,7 +32,12 @@
 		<!-- age should inherit value of 2 from parent -->
 	</bean>
 	
-	<bean id="bogusParent" 
+	<bean id="inheritedTestBean" parent="inheritedTestBean">
+		<property name="name"><value>overrideParentBean</value></property>
+		<!-- age should inherit value of 1 from parent -->
+	</bean>
+
+	<bean id="bogusParent"
 		parent="bogus"
 		singleton="false"
 	>

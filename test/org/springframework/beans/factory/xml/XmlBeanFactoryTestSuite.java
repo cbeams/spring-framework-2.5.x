@@ -57,7 +57,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.40 2004-03-18 03:01:16 trisberg Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.41 2004-03-29 20:45:31 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -148,7 +148,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("prototypeInheritsFromParentFactoryPrototype");
-		// Name property value is overriden
+		// Name property value is overridden
 		assertTrue(inherits.getName().equals("prototype-override"));
 		// Age property is inherited from bean in parent factory
 		assertTrue(inherits.getAge() == 2);
@@ -164,7 +164,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("protoypeInheritsFromParentFactorySingleton");
-		// Name property value is overriden
+		// Name property value is overridden
 		assertTrue(inherits.getName().equals("prototypeOverridesInheritedSingleton"));
 		// Age property is inherited from bean in parent factory
 		assertTrue(inherits.getAge() == 1);
@@ -185,10 +185,21 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(bos.dao, bop.dao);
 	}
 
+	public void testChildOverridesParentBean() throws Exception {
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		TestBean inherits = (TestBean) child.getBean("inheritedTestBean");
+		// Name property value is overridden
+		assertTrue(inherits.getName().equals("overrideParentBean"));
+		// Age property is inherited from bean in parent factory
+		assertTrue(inherits.getAge() == 1);
+		TestBean inherits2 = (TestBean) child.getBean("inheritedTestBean");
+		assertTrue(inherits2 == inherits);
+	}
+
 	/**
 	 * Check that a prototype can't inherit from a bogus parent.
 	 * If a singleton does this the factory will fail to load.
-	 * @throws Exception
 	 */
 	public void testBogusParentageFromParentFactory() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));

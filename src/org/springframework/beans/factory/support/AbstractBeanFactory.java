@@ -61,7 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.51 2004-03-23 20:16:59 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.52 2004-03-29 20:41:40 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  */
@@ -488,8 +488,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 			return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			if (includingAncestors && getParentBeanFactory() instanceof AbstractAutowireCapableBeanFactory) {
-				return ((AbstractAutowireCapableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
+			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {
+				return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
 			}
 			else {
 				throw ex;
@@ -507,8 +507,23 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 		}
 		else if (bd instanceof ChildBeanDefinition) {
 			ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
+			RootBeanDefinition pbd = null;
+			if (!beanName.equals(cbd.getParentName())) {
+				pbd = getMergedBeanDefinition(cbd.getParentName(), true);
+			}
+			else {
+				if (getParentBeanFactory() instanceof AbstractBeanFactory) {
+					pbd = ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(cbd.getParentName(), true);
+				}
+				else {
+					throw new NoSuchBeanDefinitionException(cbd.getParentName(),
+																									"Parent name '" + cbd.getParentName() +
+																									"' is equal to bean name '" + beanName +
+																									"' - cannot be resolved without an AbstractBeanFactory parent");
+				}
+			}
 			// deep copy
-			RootBeanDefinition rbd = new RootBeanDefinition(getMergedBeanDefinition(cbd.getParentName(), true));
+			RootBeanDefinition rbd = new RootBeanDefinition(pbd);
 			// override properties
 			for (int i = 0; i < cbd.getPropertyValues().getPropertyValues().length; i++) {
 				rbd.getPropertyValues().addPropertyValue(cbd.getPropertyValues().getPropertyValues()[i]);
