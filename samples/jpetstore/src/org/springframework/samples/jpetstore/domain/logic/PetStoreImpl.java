@@ -14,16 +14,21 @@ import org.springframework.samples.jpetstore.domain.Order;
 import org.springframework.samples.jpetstore.domain.Product;
 
 /**
- * Default transaction attribute for all methods.
- * Note that this attribute definition is only necessary if using
- * Commons Attributes autoproxying (see the attributes directory
- * under the root of the JPetStore). No attributes are required
- * with a TransactionFactoryProxyBean, as in the default applicationContext.xml
- * in the WEB-INF/war directory.
- * The following attribute definition uses Commons Attributes attribute syntax.
+ * JPetStore primary business object.
+ *
+ * <p>Defines a default transaction attribute for all methods.
+ * Note that this attribute definition is only necessary if using Commons
+ * Attributes autoproxying (see the attributes directory under the root of
+ * JPetStore). No attributes are required with a TransactionFactoryProxyBean,
+ * as in the default applicationContext.xml in the war/WEB-INF directory.
+ *
+ * <p>The following attribute definition uses Commons Attributes attribute syntax.
  * @org.springframework.transaction.interceptor.DefaultTransactionAttribute()
+ *
+ * @author Juergen Hoeller
+ * @since 30.11.2003
  */
-public class PetStoreImpl implements PetStoreFacade {
+public class PetStoreImpl implements PetStoreFacade, OrderService {
 
   private AccountDao accountDao;
 
