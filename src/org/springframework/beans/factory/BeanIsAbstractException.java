@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory;
 
-import org.springframework.beans.BeansException;
-
 /**
  * Exception thrown when a bean instance has been requested for a bean
  * which has been defined as abstract
@@ -25,14 +23,14 @@ import org.springframework.beans.BeansException;
  * @since 1.1
  * @see org.springframework.beans.factory.support.AbstractBeanDefinition#setAbstract
  */
-public class BeanIsAbstractException extends BeansException {
+public class BeanIsAbstractException extends BeanCreationException {
 
 	/**
 	 * Create a new <code>BeanIsAbstractException</code>.
-	 * @param name the name of the bean requested
+	 * @param beanName the name of the bean requested
 	 */
-	public BeanIsAbstractException(String name) {
-		super("Tried to instantiate abstract bean definition '" + name + "'");
+	public BeanIsAbstractException(String beanName) {
+		super(beanName, "Bean definition is abstract");
 	}
 
 }
