@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.176 2004-06-29 06:54:20 jhoeller Exp $
+$Id: changelog.txt,v 1.177 2004-06-29 15:22:37 jhoeller Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -124,6 +124,8 @@ Package org.springframework.web
 * added "isFormChangeRequest" callback to SimpleFormController, to enforce suppressing validation and showing form
 * deprecated SimpleFormController's "onSubmit(command)", in favor of "onSubmit(command,errors)" resp. "doSubmitAction"
 * added "getAttributesMap" method to AbstractView, to allow for "attributesMap[key]" overrides in child view definitions
+* added overloaded "getParameters(request)" method to AbstractXsltView, delegating to "getParameters()" by default
+* reworked AbstractXsltView's "doTransform" method into 2 methods to allow for specifying a custom transform result
 
 
 Changes in version 1.0.2 (3.6.2004)
