@@ -16,6 +16,7 @@
 
 package org.springframework.jms.support.converter;
 
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,12 +26,13 @@ import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
 /**
  * A simple message converter that can handle TextMessages, BytesMessages,
- * and MapMessages.
+ * MapMessages, and ObjectMessages.
  *
  * <p>Converts a String to a JMS TextMessage, a byte array to a JMS BytesMessage,
  * and a Map to a JMS MapMessage (and vice versa).
@@ -40,12 +42,14 @@ import javax.jms.TextMessage;
  * @see javax.jms.TextMessage
  * @see javax.jms.BytesMessage
  * @see javax.jms.MapMessage
+ * @see javax.jms.ObjectMessage
  */
 public class SimpleMessageConverter implements MessageConverter {
 
 	/**
 	 * This implementation creates a TextMessage for a String, a
-	 * BytesMessage for a byte array, and a MapMessage for a Map.
+	 * BytesMessage for a byte array, a MapMessage for a Map,
+	 * and an ObjectMessage for a Serializable object.
 	 * @see javax.jms.Session#createBytesMessage
 	 * @see javax.jms.Session#createTextMessage
 	 * @see javax.jms.Session#createObjectMessage
@@ -74,6 +78,9 @@ public class SimpleMessageConverter implements MessageConverter {
 			}
 			return message;
 		}
+		else if (object instanceof Serializable) {
+			return session.createObjectMessage(((Serializable) object));
+		}
 		else {
 			throw new MessageConversionException("Cannot convert object [" + object + "] to JMS message");
 		}
@@ -81,7 +88,8 @@ public class SimpleMessageConverter implements MessageConverter {
 
 	/**
 	 * This implementation converts a TextMessage back to a String, a
-	 * ByteMessage back to a byte array, and a MapMessage back to a Map.
+	 * ByteMessage back to a byte array, a MapMessage back to a Map,
+	 * and an ObjectMessage back to a Serializable object.
 	 */
 	public Object fromMessage(Message message) throws JMSException, MessageConversionException {
 		if (message instanceof TextMessage) {
@@ -102,6 +110,9 @@ public class SimpleMessageConverter implements MessageConverter {
 				map.put(key, mapMessage.getObject(key));
 			}
 			return map;
+		}
+		else if (message instanceof ObjectMessage) {
+			return ((ObjectMessage) message).getObject();
 		}
 		else {
 			throw new MessageConversionException("Cannot convert JMS message [" + message + "] to object");
