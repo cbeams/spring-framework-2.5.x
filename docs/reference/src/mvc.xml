@@ -865,7 +865,7 @@ public class SampleDelegate {
     <sect2 id="mvc-handlermapping-beanname">
       <title><literal>BeanNameUrlHandlerMapping</literal></title>
 
-      <para>A very simple, but very powerful handlermapping is the
+      <para>A very simple, but very powerful handler mapping is the
       <literal>BeanNameUrlHandlerMapping</literal>, which maps incoming HTTP
       requests to names of beans, defined in the webapplicationcontext. Let's
       say we want to enable a user to insert an account and we've already
@@ -916,9 +916,9 @@ public class SampleDelegate {
     <sect2 id="mvc-handlermapping-urlhandlermapping">
       <title><literal>SimpleUrlHandlerMapping</literal></title>
 
-      <para>Another - and much more powerful handlermapping - is the
+      <para>A further - and much more powerful handler mapping - is the
       <literal>SimpleUrlHandlerMapping</literal>. This mapping is configurable
-      in the applicationcontext and has Ant-style pathmatching capabilities
+      in the application context and has Ant-style path matching capabilities
       (see <xref linkend="mvc-utilities-pathmatching" />). A couple of example
       will probably makes thing clear enough: <programlisting>&lt;web-app&gt;
     ...
@@ -939,7 +939,7 @@ public class SampleDelegate {
     &lt;/servlet-mapping&gt;
     ...
 &lt;/web-app&gt;</programlisting> Allows all requests ending with .html and
-      .form to be handled by the sample dispatcherservlet. <programlisting>&lt;beans&gt;
+      .form to be handled by the sample dispatcher servlet. <programlisting>&lt;beans&gt;
     &lt;bean id="handlerMapping" 
           class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;            
         &lt;property name="mappings"&gt;
@@ -962,7 +962,7 @@ public class SampleDelegate {
         &lt;property name="commandName"&gt;&lt;value&gt;Account&lt;/value&gt;&lt;/property&gt;
         &lt;property name="commandClass"&gt;&lt;value&gt;samples.Account&lt;/value&gt;&lt;/property&gt;
     &lt;/bean&gt;
-&lt;beans&gt;</programlisting> This handlermapping first of all reroutes all
+&lt;beans&gt;</programlisting> This handler mapping first of all reroutes all
       requests in all directories for a file named
       <literal>help.html</literal> to the
       <literal>someViewController</literal>, which is a
@@ -1216,7 +1216,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     retrieve the locale that was resolved by the locale resolver.</para>
 
     <para>Besides the automatic locale resolution, you can also attach an
-    interceptor to the handlermapping (see <xref
+    interceptor to the handler mapping (see <xref
     linkend="mvc-handlermapping-interceptor" /> for more info on that), to
     change the locale under specific circumstances, based on a parameter
     occurring in the request for example.</para>
