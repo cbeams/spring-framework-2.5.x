@@ -16,12 +16,15 @@
 
 package org.springframework.autobuilds.ejbtest.dbutil.mapper.hibernate;
 
+import net.sf.hibernate.SessionFactory;
+
+import org.springframework.orm.hibernate.HibernateTemplate;
 import org.springframework.orm.hibernate.support.HibernateDaoSupport;
 
 /**
  * Subclass of Spring's HibernateDaoSupport which defaults the defaultAllowCreate flag to 
  * false. It also has a constructor variant which allows an instance to be created based
- * on a passed in Mapper instance. InitializingBean's afterPropertiesSet must still be
+ * on a passed in Mapper instance. InitializingBean's afterPropertiesSet should still be
  * called when using this constructor! 
  * 
  * @author colin sampaleanu
@@ -29,14 +32,21 @@ import org.springframework.orm.hibernate.support.HibernateDaoSupport;
 
 public abstract class MapperHibernateDaoSupport extends HibernateDaoSupport {
 
+	/* (non-Javadoc)
+	 * @see org.springframework.orm.hibernate.support.HibernateDaoSupport#createHibernateTemplate(net.sf.hibernate.SessionFactory)
+	 */
+	protected HibernateTemplate createHibernateTemplate(
+			SessionFactory sessionFactory) {
+		return new HibernateTemplate(sessionFactory, false);
+	}
+	
+	
   // constructor for bean style creation
   public MapperHibernateDaoSupport() {
-    defaultTemplateAllowCreateValue = false;  
   }
 
   // construction off an existing mapper instance
   protected MapperHibernateDaoSupport(MapperImpl mapper) {
     setSessionFactory(mapper.getSessionFactory());
   }
-
 }
