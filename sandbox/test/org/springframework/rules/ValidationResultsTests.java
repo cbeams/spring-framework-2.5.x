@@ -40,6 +40,7 @@ public class ValidationResultsTests extends TestCase {
         c.setCollectAllErrors(true);
         ValidationResults r = c.collectResults(rulesSource.getRules(Person.class));
         System.out.println(r.getResults().size());
+        System.out.println(r.getViolatedCount());
     }
   
     public void testNestedValidationResultsPropertyConstraint() {
@@ -59,5 +60,6 @@ public class ValidationResultsTests extends TestCase {
         c.setCollectAllErrors(true);
         ValidationResults r = c.collectResults(rules);
         System.out.println(r.getResults().size());
+        System.out.println(r.getViolatedCount());
     }
 }

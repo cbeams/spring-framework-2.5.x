@@ -17,8 +17,6 @@ package org.springframework.rules.reporting;
 
 import java.util.Map;
 
-import org.springframework.rules.UnaryPredicate;
-
 /**
  * @TODO field error type stuff, errors interface adaption
  * @TODO number of errors per field...
@@ -26,5 +24,6 @@ import org.springframework.rules.UnaryPredicate;
  */
 public interface ValidationResults {
     public Map getResults();
-    public UnaryPredicate getResults(String propertyName);
+    public int getViolatedCount();
+    public PropertyResults getResults(String propertyName);
 }

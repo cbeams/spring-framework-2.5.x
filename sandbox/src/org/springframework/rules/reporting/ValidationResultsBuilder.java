@@ -17,12 +17,14 @@ package org.springframework.rules.reporting;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.CompoundUnaryPredicate;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryNot;
@@ -36,16 +38,30 @@ public class ValidationResultsBuilder implements ValidationResults {
     private static final Log logger =
         LogFactory.getLog(ValidationResultsBuilder.class);
     private String currentProperty;
-    private Map propertyResults = new HashMap();
+    private Map beanResults = new HashMap();
     private UnaryPredicate top;
     private Stack levels = new Stack();
+    private GetProperty getProperty;
 
     public Map getResults() {
-        return Collections.unmodifiableMap(propertyResults);
+        return Collections.unmodifiableMap(beanResults);
+    }
+    
+    public ValidationResultsBuilder(Object bean) {
+        getProperty = new GetProperty(bean);
     }
 
-    public UnaryPredicate getResults(String propertyName) {
-        return (UnaryPredicate)propertyResults.get(propertyName);
+    public PropertyResults getResults(String propertyName) {
+        return (PropertyResults)beanResults.get(propertyName);
+    }
+    
+    public int getViolatedCount() {
+        int count = 0;
+        Iterator it = beanResults.values().iterator();
+        while (it.hasNext()) {
+            count += ((PropertyResults)it.next()).getViolatedCount();
+        }
+        return count;
     }
 
     /**
@@ -138,11 +154,20 @@ public class ValidationResultsBuilder implements ValidationResults {
                     logger.debug(
                         "[Done] collecting results for property '"
                             + getPropertyName()
-                            + "'.  Results are ["
+                            + "'.  Constraints violated: ["
                             + top
                             + "]");
                 }
-                propertyResults.put(getPropertyName(), top);
+                PropertyResults results = new PropertyResults(getPropertyName(),
+                        getProperty.evaluate(getPropertyName()), top);
+                beanResults.put(getPropertyName(), results);
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                        "[Done] collecting results for property '"
+                            + getPropertyName()
+                            + "'.  All constraints met.");
+                }
             }
             top = null;
         } else {
@@ -161,7 +186,7 @@ public class ValidationResultsBuilder implements ValidationResults {
 
     public String toString() {
         return new ToStringBuilder(this)
-            .append("propertyValidationResults", propertyResults)
+            .append("propertyValidationResults", beanResults)
             .append("topOfStack", top)
             .append("levelsStack", levels)
             .toString();
