@@ -7,17 +7,22 @@ Changes in version 1.0 M1 (xx.8.2003)
 * revised distribution jar files (spring-beans, -aop, -jdbc, -orm, -context, -full)
 * introduced DisposableBean interface
 * introduced "destroy-method" attribute for XML bean definitions
-* SingleConnectionDataSource implements DisposableBean
-* LocalSessionFactoryBean implements DisposableBean
 * fixed typeMismatch reporting for nested bean properties
 * added PropertiesFactoryBean as alternative to properties file loading
 * added getValues and toCode methods to Constants utility class
 * DynamicMethodPointcut now takes method, args and AttributeRegistry arguments instead of MethodInvocation
 * JndiObjectFactoryBean does not prepend container prefix if scheme is given
-* dissolved ReadOnlyResultSet to make JdbcTemplate return the underlying ResultSet
 * fixed Statement and ResultSet handling to work for all kinds of JDBC drivers
+* dissolved ReadOnlyResultSet to make JdbcTemplate return the underlying ResultSet
+* removed getSql method from PreparedStatementCreator interface
+* introduced QueryExecutor interface for retrieval of underlying driver ResultSets
+* added CommonsDbcpQueryExecutor implementation for Jakarta Commons DBCP
+* revised RdbmsOperation hierarchy to allow for all of JdbcTemplate's options
+* SingleConnectionDataSource implements DisposableBean
+* SingleConnectionDataSource does not override auto-commit on an existing connection
 * renamed XxxExtracter to XxxExtractor and XxxTranslater to XxxTranslator  
 * support for returning Types.ARRAY from stored procedure
+* LocalSessionFactoryBean implements DisposableBean
 * added HibernateTemplate.deleteAll for batch deletes
 * support for overlapping method name patterns in transaction attribute source definitions
 * support for specifying timeouts via TransactionAttributeEditor
@@ -30,6 +35,7 @@ Changes in version 1.0 M1 (xx.8.2003)
 * revised initHandler method in AbstractUrlHandlerMapping 
 * added "urlMap" property to SimpleUrlHandlerMapping
 * revised exception behavior of RequestContext and BindErrorsTag
+* added "useCacheControlHeader" property to WebContentGenerator
 * re-added deprecated ContextLoaderServlet for Servlet 2.2 containers
 * refactored Log4jConfigListener into Log4jWebConfigurer and listener
 * introduced deprecated Log4jConfigServlet for Servlet 2.2 containers
