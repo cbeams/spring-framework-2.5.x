@@ -48,9 +48,9 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
- * Subclasses must <b>either</b> provide the XML W3C Document or Node to 
+ * Subclasses must <b>either</b> provide the XML W3C Document or Node to
  * transform by overriding <code>createDomNode()</code>, <b>or</b> provide
- * the <code>Source</code> to transform by overriding 
+ * the <code>Source</code> to transform by overriding
  * <code>createXsltSource()</code>.
  * <p>
  * Note that <code>createXsltSource()</code> is the preferred method which all
@@ -62,19 +62,18 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * <p>Properties:
  * <ul>
- * <li>stylesheetLocation: a Spring <code>Resource</code> pointing to the 
- *      XSLT stylesheet
+ * <li>stylesheetLocation: a Spring <code>Resource</code> pointing to the
+ * XSLT stylesheet
  * <li>root: name of the root element, defaults to "DocRoot"
  * <li>uriResolver: URIResolver used in the transform
  * <li>cache (optional, default=true): debug setting only
  * <li>errorListener (optional): ErrorListener implementation for custom
- *      handling of warnings and errors during TransformerFactory operations.
+ * handling of warnings and errors during TransformerFactory operations.
  * </ul>
  *
  * <p>Setting cache to false will cause the templates object to be reloaded
  * for each rendering. This is useful during development, but will seriously
  * affect performance in production and isn't threadsafe.
- *
  * @author Rod Johnson
  * @author Darren Davison
  */
@@ -102,7 +101,9 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	private TransformerFactory transformerFactory;
 
-	/** XSLT Template */
+	/**
+	 * XSLT Template
+	 */
 	private Templates templates;
 
 	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
@@ -274,40 +275,37 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-     * Return the XML <code>Source</code> to transform. Subclasses must implement 
-     * <b>either</b> this method <b>or</b> <code>createDomNode</code>, which is 
-     * retained only for backward compatibility.
-     * 
-     * @param model the model Map
-     * @param root name for root element. This can be supplied as a bean property
-     * to concrete subclasses within the view definition file, but will be overridden
-     * in the case of a single object in the model map to be the key for that object.
-     * If no root property is specified and multiple model objects exist, a default
-     * root tag name will be supplied. 
-     * @param request HTTP request. Subclasses won't normally use this, as
-     * request processing should have been complete. However, we might to
-     * create a RequestContext to expose as part of the model.
-     * @param response HTTP response. Subclasses won't normally use this,
-     * however there may sometimes be a need to set cookies.
-     * @return the xslt Source to transform
-     * @throws Exception we let this method throw any exception; the
-     * AbstractXlstView superclass will catch exceptions
-     */
-    protected Source createXsltSource(
-        Map model, String string, HttpServletRequest request, HttpServletResponse response) 
-        throws Exception {
-        return null;
-    }
+	 * Return the XML <code>Source</code> to transform. Subclasses must implement
+	 * <b>either</b> this method <b>or</b> <code>createDomNode</code>, which is
+	 * retained only for backward compatibility.
+	 * @param model the model Map
+	 * @param root name for root element. This can be supplied as a bean property
+	 * to concrete subclasses within the view definition file, but will be overridden
+	 * in the case of a single object in the model map to be the key for that object.
+	 * If no root property is specified and multiple model objects exist, a default
+	 * root tag name will be supplied.
+	 * @param request HTTP request. Subclasses won't normally use this, as
+	 * request processing should have been complete. However, we might to
+	 * create a RequestContext to expose as part of the model.
+	 * @param response HTTP response. Subclasses won't normally use this,
+	 * however there may sometimes be a need to set cookies.
+	 * @return the xslt Source to transform
+	 * @throws Exception we let this method throw any exception; the
+	 * AbstractXlstView superclass will catch exceptions
+	 */
+	protected Source createXsltSource(
+			Map model, String root, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		return null;
+	}
 
-    /**
+	/**
 	 * Return the XML <code>Node</code> to transform.
-     * <p>
+	 * <p>
 	 * This method is deprecated from version 1.2 with the preferred extension point
-     * being <code>createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)</code>
-     * instead.  Code that previously implemented this method can now override the preferred
-     * method, returning <code>new DOMSource(node)</code> in place of returning <code>node</code>
-     *  
-     * @deprecated in favour of createXsltSource(Map, String, HttpServletRequest, HttpServletResponse) 
+	 * being <code>createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)</code>
+	 * instead.  Code that previously implemented this method can now override the preferred
+	 * method, returning <code>new DOMSource(node)</code> in place of returning <code>node</code>
 	 * @param model the model Map
 	 * @param root name for root element. This can be supplied as a bean property
 	 * to concrete subclasses within the view definition file, but will be overridden
@@ -344,7 +342,8 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @see javax.xml.transform.stream.StreamResult
 	 * @see javax.servlet.ServletResponse#getOutputStream
 	 * @see #doTransform(Map, Source, HttpServletRequest, HttpServletResponse)
-	 * @deprecated the preferred method is doTransform(Map model, Source source, HttpServletRequest request, HttpServletResponse response)
+	 * @deprecated the preferred method is doTransform with a Source argument
+	 * @see #doTransform(java.util.Map, javax.xml.transform.Source, HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doTransform(Map model, Node dom, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
