@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.config;
 
@@ -80,6 +80,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	/**
 	 * Register the given existing object as singleton in the bean factory,
 	 * under the given bean name.
+	 * <p>The given instance is supposed to be fully initialized; the factory
+	 * will not perform any initialization callbacks (in particular, it won't
+	 * call InitializingBean's <code>afterPropertiesSet</code> method).
 	 * <p>Typically invoked during factory configuration, but can also be
 	 * used for runtime registration of singletons. Therefore, a factory
 	 * implementation should synchronize singleton access; it will have
@@ -87,6 +90,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * @param beanName name of the bean
 	 * @param singletonObject the existing object
 	 * @throws BeansException if the singleton could not be registered
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 */
 	void registerSingleton(String beanName, Object singletonObject) throws BeansException;
 
