@@ -41,13 +41,13 @@ public class ConstructorArgumentValues {
 	/**
 	 * Get argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
-	 * @return the argument value, or null if none set
+	 * @return the ValueHolder for the argument, or null if none set
 	 */
-	public Object getIndexedArgumentValue(int index, Class requiredType) {
+	public ValueHolder getIndexedArgumentValue(int index, Class requiredType) {
 		ValueHolder valueHolder = (ValueHolder) this.indexedArgumentValues.get(new Integer(index));
 		if (valueHolder != null) {
 			if (valueHolder.getType() == null || requiredType.getName().equals(valueHolder.getType())) {
-				return valueHolder.getValue();
+				return valueHolder;
 			}
 		}
 		return null;
@@ -81,18 +81,19 @@ public class ConstructorArgumentValues {
 	/**
 	 * Look for a generic argument value that matches the given type.
 	 * @param requiredType the type to match
+	 * @return the ValueHolder for the argument, or null if none set
 	 */
-	public Object getGenericArgumentValue(Class requiredType) {
+	public ValueHolder getGenericArgumentValue(Class requiredType) {
 		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
 			ValueHolder valueHolder = (ValueHolder) it.next();
 			Object value = valueHolder.getValue();
 			if (valueHolder.getType() != null) {
 				if (valueHolder.getType().equals(requiredType.getName())) {
-					return valueHolder.getValue();
+					return valueHolder;
 				}
 			}
 			else if (requiredType.isInstance(value) || (requiredType.isArray() && List.class.isInstance(value))) {
-				return valueHolder.getValue();
+				return valueHolder;
 			}
 		}
 		return null;
@@ -112,14 +113,14 @@ public class ConstructorArgumentValues {
 	 * in the constructor argument list or generically matches by type.
 	 * @param index the index in the constructor argument list
 	 * @param requiredType the type to match
-	 * @return the argument value, or null if none found
+	 * @return the ValueHolder for the argument, or null if none set
 	 */
-	public Object getArgumentValue(int index, Class requiredType) {
-		Object value = getIndexedArgumentValue(index, requiredType);
-		if (value == null) {
-			value = getGenericArgumentValue(requiredType);
+	public ValueHolder getArgumentValue(int index, Class requiredType) {
+		ValueHolder valueHolder = getIndexedArgumentValue(index, requiredType);
+		if (valueHolder == null) {
+			valueHolder = getGenericArgumentValue(requiredType);
 		}
-		return value;
+		return valueHolder;
 	}
 
 	/**

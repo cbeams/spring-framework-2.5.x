@@ -45,7 +45,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.36 2004-02-22 21:07:59 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.37 2004-02-24 17:43:02 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -377,7 +377,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertFalse(beanNames.contains("aliasWithoutId3"));
 
 		TestBean tb4 = (TestBean) xbf.getBean(TestBean.class.getName());
-		assertEquals("noname", tb4.getName());
+		assertEquals(null, tb4.getName());
 	}
 
 	public void testEmptyMap() throws Exception {
@@ -391,9 +391,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		HasMap hasMap = (HasMap) xbf.getBean("literalMap");
-		assertTrue(hasMap.getMap().size() == 2);
+		assertTrue(hasMap.getMap().size() == 3);
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
 		assertTrue(hasMap.getMap().get("fi").equals("fum"));
+		assertTrue(hasMap.getMap().get("fa") == null);
 	}
 
 	public void testMapWithLiteralsAndReferences() throws Exception {
@@ -437,8 +438,9 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		// Check list
 		List l = (List) hasMap.getMap().get("list");
 		assertNotNull(l);
-		assertTrue(l.size() == 3);
+		assertTrue(l.size() == 4);
 		assertTrue(l.get(0).equals("zero"));
+		assertTrue(l.get(3) == null);
 
 		// Check nested map in list
 		Map m = (Map) l.get(1);
@@ -475,10 +477,11 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		HasMap hasMap = (HasMap) xbf.getBean("set");
-		assertTrue(hasMap.getSet().size() == 2);
+		assertTrue(hasMap.getSet().size() == 3);
 		assertTrue(hasMap.getSet().contains("bar"));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertTrue(hasMap.getSet().contains(jenny));
+		assertTrue(hasMap.getSet().contains(null));
 	}
 
 	public void testEmptyProps() throws Exception {
@@ -823,7 +826,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(99, rod9.getAge());
 
 		ConstructorDependenciesBean rod10 = (ConstructorDependenciesBean) xbf.getBean("rod10");
-		assertEquals("rod10", rod10.getName());
+		assertEquals(null, rod10.getName());
 	}
 
 	public void testThrowsExceptionOnTooManyArguments() throws Exception {

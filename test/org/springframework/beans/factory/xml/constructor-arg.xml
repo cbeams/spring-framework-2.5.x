@@ -66,7 +66,7 @@
 	</bean>
 
 	<bean id="rod10" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" singleton="false">
-		<constructor-arg index="0" type="java.lang.String"><value>rod10</value></constructor-arg>
+		<constructor-arg index="0" type="java.lang.String"><null/></constructor-arg>
 	</bean>
 
 	<bean id="kerry1" class="org.springframework.beans.TestBean">

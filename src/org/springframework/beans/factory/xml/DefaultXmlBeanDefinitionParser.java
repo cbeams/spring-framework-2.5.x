@@ -70,14 +70,15 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String PROPERTY_ELEMENT = "property";
 	public static final String REF_ELEMENT = "ref";
 	public static final String IDREF_ELEMENT = "idref";
+	public static final String BEAN_REF_ATTRIBUTE = "bean";
+	public static final String LOCAL_REF_ATTRIBUTE = "local";
 	public static final String LIST_ELEMENT = "list";
 	public static final String SET_ELEMENT = "set";
 	public static final String MAP_ELEMENT = "map";
 	public static final String KEY_ATTRIBUTE = "key";
 	public static final String ENTRY_ELEMENT = "entry";
-	public static final String BEAN_REF_ATTRIBUTE = "bean";
-	public static final String LOCAL_REF_ATTRIBUTE = "local";
 	public static final String VALUE_ELEMENT = "value";
+	public static final String NULL_ELEMENT = "null";
 	public static final String PROPS_ELEMENT = "props";
 	public static final String PROP_ELEMENT = "prop";
 
@@ -423,10 +424,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 			return beanRef;
 		}
-		else if (ele.getTagName().equals(VALUE_ELEMENT)) {
-			// it's a literal value
-			return getTextValue(ele, beanName);
-		}
 		else if (ele.getTagName().equals(LIST_ELEMENT)) {
 			return getList(ele, beanName);
 		}
@@ -438,6 +435,14 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		else if (ele.getTagName().equals(PROPS_ELEMENT)) {
 			return getProps(ele, beanName);
+		}
+		else if (ele.getTagName().equals(VALUE_ELEMENT)) {
+			// it's a literal value
+			return getTextValue(ele, beanName);
+		}
+		else if (ele.getTagName().equals(NULL_ELEMENT)) {
+			// it's a distinguished null value
+			return null;
 		}
 		throw new BeanDefinitionStoreException(this.resource, beanName,
 																					 "Unknown subelement of <property>: <" + ele.getTagName() + ">");

@@ -124,7 +124,7 @@
 	</bean>
 
 	<bean class="org.springframework.beans.TestBean">
-		<property name="name"><value>noname</value></property>
+		<property name="name"><null/></property>
 	</bean>
 
 	<bean id="emptyMap" class="org.springframework.beans.factory.HasMap">
@@ -139,6 +139,7 @@
 			<map>
 				<entry key="foo"><value>bar</value></entry>
 				<entry key="fi"><value>fum</value></entry>
+				<entry key="fa"><null/></entry>
 			</map>
 		</property>
 	</bean>
@@ -178,6 +179,7 @@
 							<ref local="jenny"/>
 							<value>ba</value>
 						</list>
+						<null/>
 					</list>
 				</entry>
 				<entry key="map">
@@ -203,6 +205,7 @@
 			<set>
 				<value>bar</value>
 				<ref local="jenny"/>
+				<null/>
 			</set>
 		</property>
 	</bean>

@@ -249,9 +249,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				Class[] argTypes = constructor.getParameterTypes();
 				Object[] args = new Object[argTypes.length];
 				for (int j = 0; j < argTypes.length; j++) {
-					args[j] = resolvedValues.getArgumentValue(j, argTypes[j]);
-					if (args[j] != null) {
-						args[j] = bw.doTypeConversionIfNecessary(args[j], argTypes[j]);
+					ConstructorArgumentValues.ValueHolder valueHolder = resolvedValues.getArgumentValue(j, argTypes[j]);
+					if (valueHolder != null) {
+						args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
 					}
 					else {
 						if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
