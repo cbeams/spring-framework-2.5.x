@@ -214,6 +214,9 @@ public class MethodInvoker {
 	 * @see #VOID
 	 */
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
+		if (this.methodObject == null) {
+			throw new IllegalStateException( "prepare() must be called prior to invoke() on MethodInvoker");
+		}
 		// in the static case, target will just be null
 		Object result = this.methodObject.invoke(this.targetObject, this.arguments);
 		return (result == null ? VOID : result);
