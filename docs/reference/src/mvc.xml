@@ -784,10 +784,42 @@ public class SampleDelegate {
           </listitem>
 
           <listitem>
-            <para><literal>WizardFormController</literal> - last but not
-            least, a WizardFormController allows you to model wizard-style
-            manipulation of dataobjects, which is extremely handy when large
-            dataobjects come in</para>
+			<para><literal>AbstractWizardFormController</literal> - as the class name suggests,
+				this is an abstract class--your WizardController should extend it. This means you have to
+				implement both the <literal>validatePage()</literal>, <literal>processFinish</literal> as well
+				as <literal>processCancel</literal> methods.
+			</para>
+			<para>Probably you also want to write a contractor, which should at the very least call 
+				<literal>setPages()</literal> and <literal>setCommandName()</literal>. 
+				The former takes as its argument an array of type String. This array is the list of views 
+				which comprise your wizard. 
+				The latter takes as its argument a String, which will be used to refer to your 
+				Command object from within your views.
+			</para>
+			<para>
+				As with any instance of AbstractFormController, you are required to use a Command 
+				object - a JavaBean which will be populated with the data from your forms. You can 
+				do this in one of two ways: either call <literal>setCommandClass()</literal> from the constructor with the 
+				class of your command object, or implement the <literal>formBackingObject()</literal> method.
+			</para>
+			<para>
+				AbstractWizardFormController has a number of concrete methods that you may wish to 
+				override. Of these, the ones you are likely to find most useful are: <literal>referenceData</literal>
+				which you can use to pass model data to your view in the form of a Map; 
+				<literal>getTargetPage</literal> if your wizard needs to change page order or omit pages dynamically; 
+				and <literal>onBindAndValidate</literal> if you want to override the built-in binding and validation workflow.
+			</para>
+			<para>
+				Finally, it is worth pointing out the <literal>setAllowDirtyBack</literal> 
+				and <literal>setAllowDirtyForward</literal>, which you can call 
+				from <literal>getTargetPage</literal> to allow users to move backwards and forwards in the wizard 
+				even if validation fails for the current page.
+			</para>
+			<para>
+				For a full list of methods, see the JavaDoc for AbstractWizardFormController. 
+				There is an implemented example of this wizard in the jPetStore included in the 
+				Spring distribution: org.springframework.samples.jpetstore.web.spring.OrderFormController.java
+			</para>			
           </listitem>
         </itemizedlist></para>
     </sect2>
