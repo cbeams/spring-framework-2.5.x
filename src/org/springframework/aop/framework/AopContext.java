@@ -14,6 +14,11 @@ import org.aopalliance.intercept.MethodInvocation;
  * method in this class--is usable only if the AOP framework is configured
  * to expose invocations. The framework does not expose invocation contexts
  * by default, as there is a performance cost in doing so.
+ * <br>
+ * The currentProxy() methods works in the same way to return the AOP proxy in 
+ * use. Target objects or advice can use this to make advised calls, in the same way 
+ * as getEJBObject() can be used in EJBs. They can also use it to find advice
+ * configuration.
  *
  * <p>The functionality in this class might be used by a target object
  * that needed access to resources on the invocation. However, this
@@ -23,7 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: AopContext.java,v 1.1.1.1 2003-08-14 16:20:12 trisberg Exp $
+ * @version $Id: AopContext.java,v 1.2 2003-11-15 16:20:15 johnsonr Exp $
  */
 public abstract class AopContext {
 	
@@ -33,6 +38,8 @@ public abstract class AopContext {
 	 * The default value for this property is false, for performance reasons.
 	 */
 	private static ThreadLocal currentInvocation = new ThreadLocal();
+	
+	private static ThreadLocal currentProxy = new ThreadLocal();
 
 	/**
 	 * Internal method that the AOP framework uses to set the current
@@ -57,8 +64,18 @@ public abstract class AopContext {
 	 */
 	public static MethodInvocation currentInvocation() throws AspectException {
 		if (currentInvocation == null || currentInvocation.get() == null)
-			throw new AspectException("Cannot find invocation: set 'exposeInvocation' property on AopProxy to make it available");
+			throw new AspectException("Cannot find invocation: set 'exposeInvocation' property on Advised to make it available");
 		return (MethodInvocation) currentInvocation.get();
+	}
+	
+	public static Object currentProxy() throws AspectException {
+		if (currentProxy == null || currentProxy.get() == null)
+			throw new AspectException("Cannot find proxy: set 'exposeProxy' property on Advised to make it available");
+		return currentProxy.get();
+	}
+	
+	static void setCurrentProxy(Object proxy) {
+		currentProxy.set(proxy);
 	}
 
 }

@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.aop.framework.ProxyConfig
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.1 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.2 2003-11-15 16:20:16 johnsonr Exp $
  */
 public class AdvisedSupport implements Advised {
 
@@ -67,6 +67,8 @@ public class AdvisedSupport implements Advised {
 	 * impair performance.
 	 */
 	private boolean exposeInvocation;
+	
+	private boolean exposeProxy;
 	
 	/**
 	 * Should we proxy the target class as well as any interfaces?
@@ -146,6 +148,14 @@ public class AdvisedSupport implements Advised {
 	 */
 	public boolean getExposeInvocation() {
 		return exposeInvocation;
+	}
+	
+	public boolean getExposeProxy() {
+		return this.exposeProxy;
+	}
+	
+	public void setExposeProxy(boolean exposeProxy) {
+		this.exposeProxy = exposeProxy;
 	}
 	
 	/**
