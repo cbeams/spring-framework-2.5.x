@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.core;
 
@@ -20,10 +20,12 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * Handy class for wrapping runtime Exceptions with a root cause. This time-honoured
- * technique is no longer necessary in Java 1.4, which provides built-in support for
- * exception nesting. Thus exceptions in applications written to use Java 1.4 need
- * not extend this class.
+ * Handy class for wrapping runtime Exceptions with a root cause.
+ *
+ * <p>This time-honoured technique is no longer necessary in Java 1.4, which
+ * finally provides built-in support for exception nesting. Thus exceptions in
+ * applications written to use Java 1.4 need not extend this class. To ease
+ * migration, this class mirrors Java 1.4's nested exceptions as closely as possible.
  *
  * <p>Abstract to force the programmer to extend the class. getMessage will include
  * nested exception information; printStackTrace etc will delegate to the wrapped
@@ -41,7 +43,7 @@ import java.io.PrintWriter;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: NestedRuntimeException.java,v 1.7 2004-03-26 16:31:32 jhoeller Exp $
+ * @version $Id: NestedRuntimeException.java,v 1.8 2004-03-29 20:51:27 jhoeller Exp $
  * @see #getMessage
  * @see #printStackTrace
  */
@@ -73,7 +75,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * Return the nested cause, or null if none.
 	 */
 	public Throwable getCause() {
-		return cause;
+		return (cause == this ? null : cause);
 	}
 
 	/**
