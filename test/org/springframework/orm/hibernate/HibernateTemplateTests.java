@@ -66,16 +66,6 @@ public class HibernateTemplateTests extends TestCase {
 		session = (Session) sessionControl.getMock();
 	}
 
-	protected void tearDown() {
-		try {
-			sfControl.verify();
-			sessionControl.verify();
-		}
-		catch (IllegalStateException ex) {
-			// ignore: test method didn't call replay
-		}
-	}
-
 	public void testExecuteWithNewSession() throws HibernateException {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1545,7 +1535,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testIterateWithParameterAndType() throws HibernateException {
+	public void testIterateWithParameter() throws HibernateException {
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1556,7 +1546,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
-		query.setParameter(0, "myvalue", Hibernate.STRING);
+		query.setParameter(0, "myvalue");
 		queryControl.setReturnValue(query, 1);
 		query.iterate();
 		queryControl.setReturnValue(it, 1);
@@ -1569,7 +1559,68 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		Iterator result = ht.iterate("some query string", "myvalue", Hibernate.STRING);
+		Iterator result = ht.iterate("some query string", "myvalue");
+		assertTrue("Correct list", result == it);
+		queryControl.verify();
+	}
+
+	public void testIterateWithParameters() throws HibernateException {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		Iterator it = Collections.EMPTY_LIST.iterator();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue1");
+		queryControl.setReturnValue(query, 1);
+		query.setParameter(1, new Integer(2));
+		queryControl.setReturnValue(query, 1);
+		query.iterate();
+		queryControl.setReturnValue(it, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Iterator result = ht.iterate("some query string",
+				new Object[] {"myvalue1", new Integer(2)});
+		assertTrue("Correct list", result == it);
+		sfControl.verify();
+	}
+
+	public void testIterateWithParameterAndType() throws HibernateException {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		Iterator it = Collections.EMPTY_LIST.iterator();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue");
+		queryControl.setReturnValue(query, 1);
+		query.iterate();
+		queryControl.setReturnValue(it, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Iterator result = ht.iterate("some query string", "myvalue");
 		assertTrue("Correct list", result == it);
 		queryControl.verify();
 	}
@@ -1795,6 +1846,16 @@ public class HibernateTemplateTests extends TestCase {
 		sfControl.replay();
 		sessionControl.replay();
 		return new HibernateTemplate(sf);
+	}
+
+	protected void tearDown() {
+		try {
+			sfControl.verify();
+			sessionControl.verify();
+		}
+		catch (IllegalStateException ex) {
+			// ignore: test method didn't call replay
+		}
 	}
 
 }

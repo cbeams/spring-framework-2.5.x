@@ -793,7 +793,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Iterator iterate(final String queryString, final Object[] values, final Type[] types)
 			throws DataAccessException {
-		if (values.length != types.length) {
+		if (types != null && values.length != types.length) {
 			throw new IllegalArgumentException("Length of values array must match length of types array");
 		}
 		return (Iterator) execute(new HibernateCallback() {
