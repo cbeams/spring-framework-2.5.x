@@ -126,14 +126,14 @@ public class RulesTestSuite extends TestCase {
         assertFalse(p.test(keith));
 
     }
-    
+
     public void testMethodInvokingRule() {
         TestBean b = new TestBean();
         UnaryPredicate p = constraints.method(b, "isTooMuch", "max");
         assertTrue(p.test(new Integer(26)));
         assertFalse(p.test(new Integer(25)));
     }
-    
+
     public void testRegExpConstraint() {
         UnaryPredicate p = constraints.regexp("a*b");
         assertTrue(p.test("aaaaab"));
@@ -208,10 +208,15 @@ public class RulesTestSuite extends TestCase {
 
     public class TestBean {
         private String test = "testValue";
+
         private String confirmTest = "testValue";
+
         private String test2 = "test2Value";
+
         private int number = 15;
+
         private int min = 10;
+
         private int max = 25;
 
         public String getTest() {
@@ -237,7 +242,7 @@ public class RulesTestSuite extends TestCase {
         public int getMin() {
             return min;
         }
-        
+
         public boolean isTooMuch(int number) {
             return number > max;
         }
@@ -306,9 +311,8 @@ public class RulesTestSuite extends TestCase {
         // or test must just equal confirmTest
         UnaryPredicate rules = constraints.or(constraints.all("test",
                 new UnaryPredicate[] { constraints.required(),
-                        constraints.maxLength(25),
-                        constraints.minLength(3) }), constraints.eqProperty(
-                "test", "confirmTest"));
+                        constraints.maxLength(25), constraints.minLength(3) }),
+                constraints.eqProperty("test", "confirmTest"));
         r.add(rules);
         assertTrue(r.test(new TestBean()));
         TestBean b = new TestBean();
