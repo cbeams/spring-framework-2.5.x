@@ -44,13 +44,13 @@ import java.util.TreeSet;
  */
 public abstract class StringUtils {
 
-	private static final String CHANGE_PATH = "/";		// folder sep.
+	private static final String FOLDER_SEPARATOR = "/"; // folder separator
 
-	private static final String WIN_CHANGE_PATH = "\\";	// Windows folder sep.
+	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";	// Windows folder separator
 
-	private static final String TOP_PATH = "..";			// Top folder
+	private static final String TOP_PATH = ".."; // top folder
 
-	private static final String CURRENT_PATH = ".";		// Current folder
+	private static final String CURRENT_PATH = "."; // current folder
 
 
 	/**
@@ -186,8 +186,8 @@ public abstract class StringUtils {
 	 * @see java.util.StringTokenizer
 	 * @see java.lang.String#trim
 	 */
-	public static String[] tokenizeToStringArray(String s, String delimiters,
-																							 boolean trimTokens, boolean ignoreEmptyTokens) {
+	public static String[] tokenizeToStringArray(
+			String s, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
 		StringTokenizer st = new StringTokenizer(s, delimiters);
 		List tokens = new ArrayList();
 		while (st.hasMoreTokens()) {
@@ -285,7 +285,8 @@ public abstract class StringUtils {
 	 * @param prefix string to start each element with
 	 * @param suffix string to end each element with
 	 */
-	public static String collectionToDelimitedString(Collection c, String delim, String prefix, String suffix) {
+	public static String collectionToDelimitedString(
+			Collection c, String delim, String prefix, String suffix) {
 		if (c == null) {
 			return "null";
 		}
@@ -403,16 +404,49 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Extract the filename from the given path,
+	 * e.g. "mypath/myfile.txt" -> "myfile.txt".
+	 * @param path the file path
+	 * @return the extracted filename
+	 */
+	public static String getFilename(String path) {
+		int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
+		return (separatorIndex != -1 ? path.substring(separatorIndex + 1) : path);
+	}
+
+	/**
+	 * Apply the given relative path to the given path,
+	 * assuming standard Java folder separation (i.e. "/" separators);
+	 * @param path the path to start from (usually a full file path)
+	 * @param relativePath the relative path to apply
+	 * (relative to the full file path above)
+	 * @return the full file path that results from applying the relative path
+	 */
+	public static String applyRelativePath(String path, String relativePath) {
+		int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
+		if (separatorIndex != -1) {
+			String newPath = path.substring(0, separatorIndex);
+			if (!relativePath.startsWith("/")) {
+				newPath += "/";
+			}
+			return newPath + relativePath;
+		}
+		else {
+			return relativePath;
+		}
+	}
+
+	/**
 	 * Normalize the path by suppressing sequences like "path/.." and
 	 * inner simple dots folders.
 	 * <p>The result is convenient for path comparison. For other uses,
 	 * notice that Windows separators ("\") are replaced by simple dashes.
-	 * @param path The original path
-	 * @return The normalized path
+	 * @param path the original path
+	 * @return the normalized path
 	 */
 	public static String cleanPath(String path) {
-		String p = replace(path, WIN_CHANGE_PATH, CHANGE_PATH);
-		String[] pArray = delimitedListToStringArray(p, CHANGE_PATH);
+		String p = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
+		String[] pArray = delimitedListToStringArray(p, FOLDER_SEPARATOR);
 		List pList = new LinkedList();
 		int tops = 0;
 		for (int i = pArray.length - 1; i >= 0; i--) {
@@ -431,7 +465,7 @@ public abstract class StringUtils {
 				}
 			}
 		}
-		return collectionToDelimitedString(pList, CHANGE_PATH);
+		return collectionToDelimitedString(pList, FOLDER_SEPARATOR);
 	}
 
 	/**
