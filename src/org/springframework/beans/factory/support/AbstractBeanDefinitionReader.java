@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -20,7 +20,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * Abstract base class for bean definition readers which implement
@@ -41,6 +43,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	private ClassLoader beanClassLoader = Thread.currentThread().getContextClassLoader();
 
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+
 
 	/**
 	 * Create a new AbstractBeanDefinitionReader for the given factory.
@@ -55,7 +59,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	}
 
 	/**
-	 * Set the class loader to use for bean classes.
+	 * Set the ClassLoader to use for bean classes.
 	 * Default is the thread context class loader.
 	 * <p>Setting this to null suggests to not load bean classes but just register
 	 * bean definitions with class names, for example when just registering beans
@@ -70,13 +74,25 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		return beanClassLoader;
 	}
 
-
 	/**
-	 * Load bean definitions from the specified files.
-	 * @param resources the resource descriptors for the files
-	 * @return the number of bean definitions found
-	 * @throws BeansException in case of loading or parsing errors
+	 * Set the ResourceLoader to use for resource locations.
+	 * Default is DefaultResourceLoader.
+	 * <p>Can also be a ResourcePatternResolver, additionally capable
+	 * of resolving resource patterns to Resource arrays.
+	 * <p>Setting this to null suggests that absolute resource loading
+	 * is not available for this bean definition reader.
+	 * @see org.springframework.core.io.DefaultResourceLoader
+	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 */
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+
+	public ResourceLoader getResourceLoader() {
+		return resourceLoader;
+	}
+
+
 	public int loadBeanDefinitions(Resource[] resources) throws BeansException {
 		int counter = 0;
 		for (int i = 0; i < resources.length; i++) {
