@@ -26,7 +26,7 @@ import org.springframework.util.StopWatch;
  * 
  * @author  Rod Johnson
  * @since February 9, 2001
- * @version $Id: AbstractTest.java,v 1.6 2003-12-05 17:50:55 johnsonr Exp $
+ * @version $Id: AbstractTest.java,v 1.7 2003-12-07 18:57:46 johnsonr Exp $
  */
 public abstract class AbstractTest implements Test, BeanNameAware {
 
@@ -460,7 +460,7 @@ public abstract class AbstractTest implements Test, BeanNameAware {
 	
 	protected void assertEquals(String s, int a, int b) throws TestFailedException {
 		if (a != b)
-			throw new TestFailedException(s);
+			throw new TestFailedException(s + ": expected " + a + " but found " + b);
 	}
 	
 	protected void assertEquals(String s, long a, long b) throws TestFailedException {

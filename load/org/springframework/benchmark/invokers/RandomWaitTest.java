@@ -17,7 +17,7 @@ import org.springframework.load.TestFailedException;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: RandomWaitTest.java,v 1.1 2003-12-02 22:31:06 johnsonr Exp $
+ * @version $Id: RandomWaitTest.java,v 1.2 2003-12-07 18:57:17 johnsonr Exp $
  */
 public class RandomWaitTest extends AbstractTest implements InitializingBean {
 	
@@ -34,11 +34,11 @@ public class RandomWaitTest extends AbstractTest implements InitializingBean {
 	
 	protected String bean;
 	
-	private int maxMillis = 0;
+	protected int maxMillis = 0;
 	
-	private int notAdvised = 10;
+	protected int notAdvised = 10;
 	
-	private Service service;
+	protected Service service;
 	
 	public void setBean(String name) {
 		this.bean = name;
