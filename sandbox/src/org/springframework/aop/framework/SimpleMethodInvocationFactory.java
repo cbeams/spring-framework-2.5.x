@@ -14,7 +14,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * Simple MethodInvocationFactory implementation that 
  * constructs a new MethodInvocationImpl on every call.
  * @author Rod Johnson
- * @version $Id: SimpleMethodInvocationFactory.java,v 1.3 2003-12-01 18:28:24 johnsonr Exp $
+ * @version $Id: SimpleMethodInvocationFactory.java,v 1.1 2003-12-10 10:39:40 johnsonr Exp $
  */
 public class SimpleMethodInvocationFactory implements MethodInvocationFactory {
 
