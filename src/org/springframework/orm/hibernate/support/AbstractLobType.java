@@ -35,6 +35,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.orm.hibernate.LocalSessionFactoryBean;
+import org.springframework.orm.hibernate.SessionFactoryUtils;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -55,6 +56,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
  */
 public abstract class AbstractLobType implements UserType {
+
+	/**
+	 * Order value for TransactionSynchronization objects that clean up LobCreators.
+	 * Return SessionFactoryUtils.SESSION_SYNCHRONIZATION_ORDER - 100 to execute
+	 * LobCreator cleanup before Hibernate Session and JDBC Connection cleanup, if any.
+	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#SESSION_SYNCHRONIZATION_ORDER
+	 */
+	public static final int LOB_CREATOR_SYNCHRONIZATION_ORDER =
+			SessionFactoryUtils.SESSION_SYNCHRONIZATION_ORDER - 100;
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -212,6 +222,14 @@ public abstract class AbstractLobType implements UserType {
 
 		private SpringLobCreatorSynchronization(LobCreator lobCreator) {
 			this.lobCreator = lobCreator;
+		}
+
+		/**
+		 * Returns 0, to enforce early execution of this synchronization
+		 * (before any JDBC Connection or Hibernate Session cleanup).
+		 */
+		public int getOrder() {
+			return LOB_CREATOR_SYNCHRONIZATION_ORDER;
 		}
 
 		public void beforeCompletion() {
