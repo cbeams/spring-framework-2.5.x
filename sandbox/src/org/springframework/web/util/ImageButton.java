@@ -16,6 +16,9 @@
 package org.springframework.web.util;
 
 import java.io.Serializable;
+import java.util.Enumeration;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.ToStringCreator;
 
@@ -60,6 +63,17 @@ public class ImageButton implements Serializable {
 	 */
 	public void setY(int y) {
 		this.y = y;
+	}
+
+	public static String getImageButtonCommand(HttpServletRequest request) {
+		Enumeration it = request.getParameterNames();
+		while (it.hasMoreElements()) {
+			String parameterName = (String)it.nextElement();
+			if (parameterName.endsWith(".x")) {
+				return parameterName.substring(0, parameterName.indexOf('.'));
+			}
+		}
+		return null;
 	}
 
 	public String toString() {

@@ -89,6 +89,8 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 
 	private Map fromMappings = Collections.EMPTY_MAP;
 
+	private boolean mapMissingAttributesToNull = false;
+
 	/**
 	 * Set the mappings that will be executed when mapping model data <i>to </i>
 	 * a sub flow. All keys in given list will be mapped.
@@ -153,6 +155,14 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 		}
 	}
 
+	public void setMapMapMissingAttributesToNull(boolean toNull) {
+		this.mapMissingAttributesToNull = toNull;
+	}
+
+	public boolean isMapMissingAttributesToNull() {
+		return this.mapMissingAttributesToNull;
+	}
+
 	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowAttributes) {
 		Map subFlowAttributes = new HashMap();
 		map(parentFlowAttributes, new MapAttributesAccessorAdapter(subFlowAttributes), toMappings);
@@ -186,11 +196,18 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 				else {
 					fromValue = from.getAttribute(fromName);
 					if (fromValue == null) {
-						if (logger.isInfoEnabled()) {
-							logger
-									.info("No value exists for attribute '"
-											+ fromName
-											+ "' in the from model map - thus, I will map a null value - this may not be an error, but it could be a typo?");
+						if (isMapMissingAttributesToNull()) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("No value exists for attribute '" + fromName
+										+ "' in the from model map - thus, I will map a null value");
+							}
+						}
+						else {
+							if (logger.isDebugEnabled()) {
+								logger.debug("No value exists for attribute '" + fromName
+										+ "' in the from model map - thus, I will NOT map a value");
+							}
+							return;
 						}
 					}
 				}
@@ -289,9 +306,9 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 		public void setAttributes(Map attributes) {
 			throw new UnsupportedOperationException();
 		}
-        
-        public void removeAttribute(String attributeName) {
-            map.remove(attributeName);
-        }
+
+		public void removeAttribute(String attributeName) {
+			map.remove(attributeName);
+		}
 	}
 }
