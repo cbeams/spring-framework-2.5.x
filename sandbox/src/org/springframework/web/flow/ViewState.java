@@ -25,12 +25,16 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * A view state is a state in which a physical view resource should be rendered
  * to the user, for example, for solicting form input.
- * 
  * <p>
- * A view state can also be a <i>marker</i> state with no associated view.
- * In this case it just return controll back to the client. Marker states
- * are usefull for situations where an action has already generated the
- * response.
+ * To accomplish this, a <code>ViewState</code> returns a
+ * <code>ModelAndView</code>, which contains the name of the view template to
+ * render and all supporting model data needed to render it correctly. It is
+ * expected that some sort of view resolver will map this view name to a
+ * physical resource template (like a jsp file.)
+ * <p>
+ * A view state can also be a <i>marker</i> state with no associated view. In
+ * this case it just return control back to the HTTP client. Marker states are
+ * useful for situations where an action has already generated the response.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -47,7 +51,8 @@ public class ViewState extends TransitionableState {
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public ViewState(Flow flow, String id, Transition transition) throws IllegalArgumentException {
 		super(flow, id, transition);
@@ -58,7 +63,8 @@ public class ViewState extends TransitionableState {
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public ViewState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
@@ -70,7 +76,8 @@ public class ViewState extends TransitionableState {
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param viewName The logical name of the view to render
 	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public ViewState(Flow flow, String id, String viewName, Transition transition) throws IllegalArgumentException {
 		super(flow, id, transition);
@@ -83,7 +90,8 @@ public class ViewState extends TransitionableState {
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param viewName The logical name of the view to render
 	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
@@ -98,7 +106,8 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
-	 * @param viewName The logical name of the view to render in this view state.
+	 * @param viewName The logical name of the view to render in this view
+	 *        state.
 	 */
 	protected void setViewName(String viewName) {
 		this.viewName = viewName;
@@ -117,8 +126,8 @@ public class ViewState extends TransitionableState {
 	 * model map needed when the view is rendered, for populating dynamic
 	 * content.
 	 * 
-	 * @param flowExecution The session execution stack, tracking the
-	 *        current active flow session
+	 * @param flowExecution The session execution stack, tracking the current
+	 *        active flow session
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
