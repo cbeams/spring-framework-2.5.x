@@ -41,7 +41,6 @@
 	<classpathentry kind="lib" path="lib/httpclient/httpclient.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j/dom4j.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit/httpunit.jar"/>
-	<classpathentry kind="lib" path="lib/jdom/jdom.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit/Tidy.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jaxrpc.jar"/>
 	<classpathentry kind="lib" path="lib/axis/axis.jar"/>
@@ -49,7 +48,6 @@
 	<classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
 	<classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap.jar"/>
-	<classpathentry kind="lib" path="lib/ibatis/ibatis-common.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
 	<classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
@@ -96,5 +94,7 @@
 	<classpathentry kind="lib" path="lib/cayenne/cayenne-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/itext/itext-1.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.3.jar"/>
+	<classpathentry kind="lib" path="lib/ibatis/ibatis-common-2.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-codec.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
