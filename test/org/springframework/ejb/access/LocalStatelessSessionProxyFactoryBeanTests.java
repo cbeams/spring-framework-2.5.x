@@ -24,16 +24,16 @@ import javax.ejb.EJBLocalObject;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
+import org.aopalliance.intercept.AspectException;
 import org.easymock.MockControl;
 
-import org.springframework.beans.MethodInvocationException;
 import org.springframework.jndi.JndiTemplate;
 
 /**
  * Tests Business Methods pattern
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.7 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.8 2004-03-19 07:41:44 jhoeller Exp $
  */
 public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 
@@ -121,8 +121,8 @@ public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 			mbm.getValue();
 			fail("Should have failed to create EJB");
 		}
-		catch (MethodInvocationException ex) {
-			assertTrue(ex.getCause() == cex);
+		catch (AspectException ex) {
+			assertTrue(ex.getRootCause() == cex);
 		}
 		
 		mc.verify();	

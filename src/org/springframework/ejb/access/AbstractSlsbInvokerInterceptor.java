@@ -19,21 +19,21 @@ package org.springframework.ejb.access;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
+
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.AbstractJndiLocator;
 
 /**
- * <p>Superclass for AOP interceptors invoking remote or local Stateless Session Beans.
+ * Superclass for AOP interceptors invoking remote or local Stateless Session Beans.
  * Such an interceptor must be the last interceptor in the advice chain. In this case,
- * there is no target object.</p>
- * 
+ * there is no target object.
  * @author Rod Johnson
- * @version $Id: AbstractSlsbInvokerInterceptor.java,v 1.8 2004-03-18 02:46:14 trisberg Exp $
+ * @version $Id: AbstractSlsbInvokerInterceptor.java,v 1.9 2004-03-19 07:41:45 jhoeller Exp $
  */
 public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
-		implements MethodInterceptor, InitializingBean {
+		implements MethodInterceptor {
 
 	/** 
 	 * The no-arg create() method required on EJB homes,
@@ -60,17 +60,17 @@ public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 	 * @see #afterLocated
 	 */
 	protected void located(Object jndiObject) {
-		// Cache the home object
+		// cache the home object
 		this.cachedHome = jndiObject;
 		try {
-			// Cache the EJB create() method that must be declared on the home interface
-			createMethod = cachedHome.getClass().getMethod("create", null);
+			// cache the EJB create() method that must be declared on the home interface
+			this.createMethod = this.cachedHome.getClass().getMethod("create", null);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new FatalBeanException("Cannot create EJB proxy: EJB home [" + cachedHome + "] has no no-arg create() method");
 		}
 		
-		// Invoke any subclass initialization behaviour
+		// invoke any subclass initialization behaviour
 		afterLocated();
 	}
 
@@ -91,11 +91,12 @@ public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 			return this.createMethod.invoke(this.cachedHome, null);
 		}
 		catch (IllegalArgumentException ex) {
-			// Can't happen
-			throw new FatalBeanException("Inconsistent state: could not call ejbCreate() method without arguments", ex);
+			// can't happen
+			throw new AspectException("Inconsistent state: could not call ejbCreate() method without arguments", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not access ejbCreate() method", ex);
+			throw new AspectException("Could not access ejbCreate() method", ex);
 		}
 	}
+
 }

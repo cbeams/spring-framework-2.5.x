@@ -24,8 +24,6 @@ import javax.ejb.EJBLocalObject;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.beans.MethodInvocationException;
-
 /**
  * <p>Invoker for a local Stateless Session Bean.
  * Caches the home object. A local EJB home can never go stale.
@@ -43,7 +41,7 @@ import org.springframework.beans.MethodInvocationException;
  * the "lazy-init" attribute.
  *
  * @author Rod Johnson
- * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.8 2004-03-18 02:46:14 trisberg Exp $
+ * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.9 2004-03-19 07:41:45 jhoeller Exp $
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
@@ -73,7 +71,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 			Throwable targetException = ex.getTargetException();
 			logger.info("Method of local EJB [" + getJndiName() + "] threw exception", targetException);
 			if (targetException instanceof CreateException) {
-				throw new MethodInvocationException(targetException, "create");
+				throw new AspectException("Could not create local EJB [" + getJndiName() + "]", targetException);
 			}
 			else {
 				throw targetException;
