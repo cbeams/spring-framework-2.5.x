@@ -81,5 +81,6 @@
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
 	<classpathentry kind="lib" path="lib/rowset/rowset.jar"/>
+	<classpathentry kind="lib" path="lib/jboss/jboss.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>

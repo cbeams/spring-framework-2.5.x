@@ -19,19 +19,23 @@ package org.springframework.jdbc.support.nativejdbc;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.jboss.resource.adapter.jdbc.WrappedCallableStatement;
 import org.jboss.resource.adapter.jdbc.WrappedConnection;
 import org.jboss.resource.adapter.jdbc.WrappedPreparedStatement;
+import org.jboss.resource.adapter.jdbc.WrappedResultSet;
 import org.jboss.resource.adapter.jdbc.WrappedStatement;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for the JBoss 3.2
  * connection pool. Returns the underlying native Connection, Statement,
- * etc to application code instead of JBoss' wrapper implementations.
- * The returned JDBC classes can then safely be cast, e.g. to OracleConnection.
+ * etc to application code instead of JBoss' wrapper implementations. (Note
+ * that JBoss started wrapping ResultSets as of v3.2.4, which is supported
+ * by this implementation.) The returned JDBC classes can then safely be
+ * cast, e.g. to OracleConnection.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
  * a JBoss connection pool: If a given object is not a JBoss wrapper,
@@ -69,5 +73,11 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		}
 		return cs;
 	}
-
+	
+	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
+		if (rs instanceof WrappedResultSet) {
+			return ((WrappedResultSet)rs).getUnderlyingResultSet();
+		}
+		return rs;
+	}
 }
