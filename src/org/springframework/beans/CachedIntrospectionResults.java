@@ -22,6 +22,8 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 05 May 2001
- *  @version $Id: CachedIntrospectionResults.java,v 1.12 2004-06-02 00:29:32 jhoeller Exp $
+ * @version $Id: CachedIntrospectionResults.java,v 1.13 2004-07-29 17:14:43 jhoeller Exp $
  */
 final class CachedIntrospectionResults {
 
@@ -159,6 +161,18 @@ final class CachedIntrospectionResults {
 					logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() +
 											 "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
 				}
+
+				// Set methods accessible if declaring class is not public, for example
+				// in case of package-protected base classes that define bean properties.
+				Method readMethod = pds[i].getReadMethod();
+				if (readMethod != null && !Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+					readMethod.setAccessible(true);
+				}
+				Method writeMethod = pds[i].getWriteMethod();
+				if (writeMethod != null && !Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+					writeMethod.setAccessible(true);
+				}
+
 				this.propertyDescriptorCache.put(pds[i].getName(), pds[i]);
 			}
 		}

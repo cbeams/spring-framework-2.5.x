@@ -30,10 +30,12 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanWrapperTestSuite.java,v 1.25 2004-07-01 19:54:17 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.26 2004-07-29 17:15:12 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -1225,6 +1227,14 @@ public class BeanWrapperTestSuite extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("array", "myvalue");
 		assertEquals("myvalue", new String(bean.getArray()));
+	}
+
+	public void testPropertiesInProtectedBaseBean() {
+		DerivedFromProtectedBaseBean bean = new DerivedFromProtectedBaseBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.setPropertyValue("someProperty", "someValue");
+		assertEquals("someValue", bw.getPropertyValue("someProperty"));
+		assertEquals("someValue", bean.getSomeProperty());
 	}
 
 
