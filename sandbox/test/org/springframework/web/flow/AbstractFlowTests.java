@@ -30,7 +30,6 @@ import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.flow.config.NoSuchFlowDefinitionException;
-import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -103,9 +102,6 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 	protected void setFlow(Flow flow) {
 		Assert.notNull(flow, "The flow definition whose execution to test is required");
 		this.flow = flow;
-		if (!this.flow.getFlowExecutionListenerList().isAdded(FlusherFlowExecutionListener.class)) {
-			this.flow.getFlowExecutionListenerList().add(createFlusherLifecycleListener());
-		}
 	}
 
 	/**
@@ -121,22 +117,6 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		return flowServiceLocator;
 	}
 
-	protected FlowExecutionListener createFlusherLifecycleListener() {
-		return new FlusherFlowExecutionListener();
-	}
-
-	/**
-	 * Simulates end-of-transaction flushing on entering a view state.
-	 * @author Keith Donald
-	 */
-	private class FlusherFlowExecutionListener extends FlowExecutionListenerAdapter {
-		public void stateTransitioned(FlowExecution sessionExecution, AbstractState oldState, AbstractState newState) {
-			if (newState.isViewState()) {
-				hibernateTemplate.flush();
-			}
-		}
-	}
-
 	/**
 	 * Start a new flow execution for the flow definition that is being tested.
 	 * @param request the http request, typically a mock http request
@@ -147,6 +127,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 	 */
 	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
 		this.flowExecution = createFlowExecution(getFlow());
+		setupFlowExecution(flowExecution);
 		return this.flowExecution.start(input, request, response);
 	}
 
@@ -157,6 +138,15 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
 		return new FlowExecutionStack(flow);
+	}
+
+	/**
+	 * Hook method where you can do additional setup a flow execution before it
+	 * is started, like register a execution listener.
+	 * @param flowExecution the flow execution.
+	 */
+	protected void setupFlowExecution(FlowExecution flowExecution) {
+
 	}
 
 	/**
