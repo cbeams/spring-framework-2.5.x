@@ -34,9 +34,9 @@ import org.springframework.web.servlet.View;
 public class XmlViewResolver extends AbstractCachingViewResolver {
 
 	/** Default if no other location is supplied */
-	public final static String DEFAULT_LOCATION = "WEB-INF/views.xml";
+	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
 
-	private String location = DEFAULT_LOCATION;
+	private Resource location;
 
 	private BeanFactory cachedFactory;
 
@@ -45,7 +45,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 	 * <p>The default is "/WEB-INF/views.xml".
 	 * @param location the location of the XML file.
 	 */
-	public void setLocation(String location) {
+	public void setLocation(Resource location) {
 		this.location = location;
 	}
 
@@ -80,8 +80,11 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 		if (this.cachedFactory != null) {
 			return this.cachedFactory;
 		}
-		XmlBeanFactory xbf = new XmlBeanFactory(getApplicationContext().getResource(this.location),
-																						getApplicationContext());
+		Resource actualLocation = this.location;
+		if (actualLocation == null) {
+			actualLocation = getApplicationContext().getResource(DEFAULT_LOCATION);
+		}
+		XmlBeanFactory xbf = new XmlBeanFactory(actualLocation, getApplicationContext());
 		xbf.registerCustomEditor(Resource.class, new ContextResourceEditor(getApplicationContext()));
 		xbf.preInstantiateSingletons();
 		if (isCache()) {
