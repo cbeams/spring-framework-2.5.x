@@ -18,6 +18,7 @@ package org.springframework.jmx.naming;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
 
 /**
@@ -29,7 +30,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy {
 
     public ObjectName getObjectName(Object managedResource, String key) {
         try {
-            return ObjectName.getInstance(key);
+            return ObjectNameManager.getInstance(key);
         } catch (MalformedObjectNameException ex) {
             throw new ObjectNamingException("The supplied key: " + key
                     + " is not a valid ObjectName.", ex);

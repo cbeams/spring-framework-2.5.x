@@ -8,6 +8,7 @@ import javax.management.ObjectName;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jmx.ObjectNameManager;
 
 /**
  * @author robh
@@ -59,7 +60,7 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
     }
 
 public void afterPropertiesSet() throws Exception {
-        name = ObjectName.getInstance(objectName);
+        name = ObjectNameManager.getInstance(objectName);
 
         if(implementationClass == null) {
             implementationClass = Class.forName(DEFAULT_IMPLEMENTATION);

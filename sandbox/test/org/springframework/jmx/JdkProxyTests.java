@@ -20,7 +20,7 @@ public class JdkProxyTests extends AbstractProxyTests {
     }
 
     protected ObjectName getObjectNameForProxy() throws Exception {
-        return ObjectName.getInstance("bean:name=testBean3");
+        return ObjectNameManager.getInstance("bean:name=testBean3");
     }
 
 

@@ -27,7 +27,7 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 	protected abstract MBeanInvoker getInvoker();
 	
 	public void testGetAttribute() throws Exception {
-		Object value = server.getAttribute(ObjectName.getInstance(getObjectName()),
+		Object value = server.getAttribute(ObjectNameManager.getInstance(getObjectName()),
 				"name");
 		assertNotNull("Result should not be null", value);
 		assertEquals("The name should be TEST", value, "TEST");
@@ -52,7 +52,7 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 
 		String newVal = "Updated";
 
-		server.setAttribute(ObjectName.getInstance(getObjectName()), new Attribute(
+		server.setAttribute(ObjectNameManager.getInstance(getObjectName()), new Attribute(
 				"name", newVal));
 
 		assertEquals("The name property should have been updated", newVal, bean
@@ -70,7 +70,7 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 		al.add(new Attribute("age", new Integer(newAge)));
 		al.add(new Attribute("name", newName));
 
-		server.setAttributes(ObjectName.getInstance(getObjectName()), al);
+		server.setAttributes(ObjectNameManager.getInstance(getObjectName()), al);
 
 		assertEquals("The name property should have been updated", bean
 				.getName(), newName);
@@ -96,7 +96,7 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 	public void testMultiInvoke() throws Exception {
 		JmxTestBean bean = (JmxTestBean) getContext().getBean("testBean");
 		
-		ObjectName objectName = ObjectName.getInstance(getObjectName());
+		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		
 		StopWatch sw = new StopWatch();
 		
@@ -112,7 +112,7 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 	
 	public void testInvalidAttributeInvoke() throws Exception {
 		try {
-			server.invoke(ObjectName.getInstance(getObjectName()), "getAge", null, null);
+			server.invoke(ObjectNameManager.getInstance(getObjectName()), "getAge", null, null);
 			fail("Accessing an attribute using invoke is not allowed");
 		} catch(MBeanException ex) {
 			
@@ -136,10 +136,10 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 		adaptor.registerBeans();
 		
 		// test the attribute values
-		Object name1 = server.getAttribute(ObjectName.getInstance("spring:name=mb1"), "name");
+		Object name1 = server.getAttribute(ObjectNameManager.getInstance("spring:name=mb1"), "name");
 		assertEquals("Name is not correct", "Rob Harrop", name1);
 		
-		Object name2 = server.getAttribute(ObjectName.getInstance("spring:name=mb2"), "name");
+		Object name2 = server.getAttribute(ObjectNameManager.getInstance("spring:name=mb2"), "name");
 		assertEquals("Name is not correct", "Harry Potter", name2);
 	}
 }

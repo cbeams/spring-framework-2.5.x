@@ -20,7 +20,7 @@ public class MetadataAssemblerAutodetectTests extends AbstractAutodetectTest {
     }
     
     protected ObjectName getExpectedObjectName() throws Exception{
-        return ObjectName.getInstance("spring:bean=test");
+        return ObjectNameManager.getInstance("spring:bean=test");
     }
 
 }

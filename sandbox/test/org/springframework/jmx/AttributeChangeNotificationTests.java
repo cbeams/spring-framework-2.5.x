@@ -239,7 +239,7 @@ public class AttributeChangeNotificationTests extends AbstractJmxTests {
     }
 
     private ObjectName getObjectName() throws Exception {
-        return ObjectName.getInstance(OBJECT_NAME);
+        return ObjectNameManager.getInstance(OBJECT_NAME);
     }
 
     private class TestListener implements NotificationListener {

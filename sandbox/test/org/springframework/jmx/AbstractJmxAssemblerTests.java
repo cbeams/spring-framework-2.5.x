@@ -7,7 +7,6 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.ObjectInstance;
-import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 /**
@@ -100,11 +99,11 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
     }
 
     protected MBeanInfo getMBeanInfo() throws Exception {
-        return server.getMBeanInfo(ObjectName.getInstance(getObjectName()));
+        return server.getMBeanInfo(ObjectNameManager.getInstance(getObjectName()));
     }
     
     protected ObjectInstance getObjectInstance() throws Exception {
-        return server.getObjectInstance(ObjectName.getInstance(getObjectName()));
+        return server.getObjectInstance(ObjectNameManager.getInstance(getObjectName()));
     }
     
     protected abstract int getExpectedOperationCount();

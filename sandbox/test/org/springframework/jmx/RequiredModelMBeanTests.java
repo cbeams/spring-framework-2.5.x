@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.ObjectInstance;
-import javax.management.ObjectName;
 
 /**
  * @author robh
@@ -31,7 +30,7 @@ public class RequiredModelMBeanTests extends AbstractJmxTests {
         adapter.afterPropertiesSet();
         adapter.registerBeans();
         
-        ObjectInstance oi = server.getObjectInstance(ObjectName.getInstance(name));
+        ObjectInstance oi = server.getObjectInstance(ObjectNameManager.getInstance(name));
         
         assertNotNull("Object instance should not be null", oi);
         

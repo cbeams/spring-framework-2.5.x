@@ -4,7 +4,6 @@
 package org.springframework.jmx;
 
 import javax.management.ObjectInstance;
-import javax.management.ObjectName;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -25,7 +24,7 @@ public class IdentityNamingStrategyTests extends AbstractJmxTests {
         desiredName += ",hashCode="
                 + ObjectUtils.getIdentityHexString(testBean);
 
-        ObjectInstance instance = server.getObjectInstance(ObjectName.getInstance(desiredName));
+        ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance(desiredName));
         
         assertNotNull("ObjectInstance should not be null", instance);
     }

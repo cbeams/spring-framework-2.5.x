@@ -4,7 +4,6 @@
 package org.springframework.jmx;
 
 import javax.management.ObjectInstance;
-import javax.management.ObjectName;
 
 /**
  * @author robh
@@ -18,7 +17,7 @@ public class MetadataNamingStrategyTests extends AbstractJmxTests {
     }
     
     public void testNaming() throws Exception{
-        ObjectInstance instance = server.getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
+        ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance(OBJECT_NAME));
         assertNotNull("The instance should not be null", instance);
     }
 }

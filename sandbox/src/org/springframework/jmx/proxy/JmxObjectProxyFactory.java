@@ -19,6 +19,8 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 /**
+ * Interface for proxy factory which allows for
+ * JMX proxies to be created. Requires JMX 1.2.
  * @author Rob Harrop
  *  
  */
@@ -26,7 +28,7 @@ public interface JmxObjectProxyFactory {
 
     public Object createProxy(MBeanServerConnection server, ObjectName objectName);
     
-    public void setIgnoreInvalidInvocations(boolean ignoreInvalidInvocatios);
+    public void setIgnoreInvalidInvocations(boolean ignoreInvalidInvocations);
     public boolean getIgnoreInvalidInvocations();
     
     public void setProxyInterfaces(Class[] interfaces);

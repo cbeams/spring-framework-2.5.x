@@ -6,6 +6,7 @@ package org.springframework.jmx.naming;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
 import org.springframework.jmx.metadata.support.ManagedResource;
 import org.springframework.jmx.metadata.support.MetadataReader;
@@ -52,7 +53,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 
         // now try to parse the name
         try {
-            return ObjectName.getInstance(objectName);
+            return ObjectNameManager.getInstance(objectName);
         } catch (MalformedObjectNameException ex) {
             throw new ObjectNamingException("The specified object name:"
                     + objectName + " is malformed", ex);

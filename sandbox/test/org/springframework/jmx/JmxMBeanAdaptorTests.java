@@ -26,7 +26,7 @@ public class JmxMBeanAdaptorTests extends TestCase {
         adaptor.setBeans(getBeanMap());
         adaptor.setServer(server);
         adaptor.registerBeans();
-        assertTrue("The bean was not registered with the MBeanServer", beanExists(server, ObjectName.getInstance(OBJECT_NAME)));
+        assertTrue("The bean was not registered with the MBeanServer", beanExists(server, ObjectNameManager.getInstance(OBJECT_NAME)));
     }
     
     public void testWithLocatedMBeanServer() throws Exception {
@@ -35,7 +35,22 @@ public class JmxMBeanAdaptorTests extends TestCase {
         adaptor.setBeans(getBeanMap());
         adaptor.afterPropertiesSet();
         adaptor.registerBeans();
-        assertTrue("The bean was not registered with the MBeanServer", beanExists(server, ObjectName.getInstance(OBJECT_NAME)));
+        assertTrue("The bean was not registered with the MBeanServer", beanExists(server, ObjectNameManager.getInstance(OBJECT_NAME)));
+    }
+    
+    public void testUserCreatedMBeanRegWithDynamicMBean() throws Exception {
+    		Map map = new HashMap();
+    		map.put("spring:name=dynBean", new DynamicMBeanTest());
+    		
+    		MBeanServer server = MBeanServerFactory.createMBeanServer();
+    		
+    		JmxMBeanAdapter adaptor = new JmxMBeanAdapter();
+    		adaptor.setServer(server);
+    		adaptor.setBeans(map);
+    		adaptor.registerBeans();
+    		
+    		Object name = server.getAttribute(ObjectNameManager.getInstance("spring:name=dynBean"), "name");
+    		assertEquals("The name attribute is incorrect", "Rob Harrop", name);
     }
 
     private Map getBeanMap() {

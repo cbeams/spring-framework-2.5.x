@@ -1,19 +1,21 @@
 package org.springframework.jmx.remote;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jmx.JmxUtils;
-import org.springframework.jmx.exceptions.ObjectNamingException;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-import javax.management.JMException;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
-import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
+
+import javax.management.JMException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
+import javax.management.remote.JMXServiceURL;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jmx.JmxUtils;
+import org.springframework.jmx.ObjectNameManager;
+import org.springframework.jmx.exceptions.ObjectNamingException;
 
 /**
  * @author Rob Harrop
@@ -75,7 +77,7 @@ public class ConnectorServiceBean implements InitializingBean {
 								+ "when registerConnectorAsBean is true.");
 			} else {
 				try {
-					oname = ObjectName.getInstance(objectName);
+					oname = ObjectNameManager.getInstance(objectName);
 				} catch (MalformedObjectNameException ex) {
 					throw new ObjectNamingException("ObjectName: " + objectName
 							+ " is malformed.", ex);

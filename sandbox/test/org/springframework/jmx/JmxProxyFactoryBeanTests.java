@@ -20,7 +20,7 @@ public class JmxProxyFactoryBeanTests extends AbstractJmxTests {
     }
     
     protected ObjectName getObjectName() throws Exception{
-        return ObjectName.getInstance(OBJECT_NAME);
+        return ObjectNameManager.getInstance(OBJECT_NAME);
     }
     
     public void testWithJdkProxyFactory() throws Exception {

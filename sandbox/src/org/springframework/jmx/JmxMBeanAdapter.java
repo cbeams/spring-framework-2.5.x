@@ -18,6 +18,7 @@ package org.springframework.jmx;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.DynamicMBean;
 import javax.management.JMException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
@@ -183,13 +184,19 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 				Object bean = beans.get(key);
 				ObjectName objectName = namingStrategy.getObjectName(bean, key);
 
-				ModelMBean mbean = getModelMBean();
-				mbean.setManagedResource(bean, "ObjectReference");
-				mbean.setModelMBeanInfo(assembler.getMBeanInfo(bean));
+				if (bean instanceof DynamicMBean) {
+					log.info("Registering User Created MBean: " + objectName.toString());
 
-				log.info("Registering MBean: " + objectName.toString());
+					server.registerMBean(bean, objectName);
+				} else {
+					ModelMBean mbean = getModelMBean();
+					mbean.setManagedResource(bean, "ObjectReference");
+					mbean.setModelMBeanInfo(assembler.getMBeanInfo(bean));
 
-				server.registerMBean(mbean, objectName);
+					log.info("Registering and Assembling MBean: " + objectName.toString());
+
+					server.registerMBean(mbean, objectName);
+				}
 				registeredBeans[x] = objectName;
 
 				log.info("Registered MBean: " + objectName.toString());
@@ -248,9 +255,11 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 			return new RequiredModelMBean();
 		} else {
 			try {
-			return new ModelMBeanImpl((MBeanInvoker)invokerClass.newInstance());
-			} catch(Exception ex) {
-				throw new MBeanException(ex, "Unable to create ModelMBeanImpl class - check supplied invokerClass is valid");
+				return new ModelMBeanImpl((MBeanInvoker) invokerClass
+						.newInstance());
+			} catch (Exception ex) {
+				throw new MBeanException(ex,
+						"Unable to create ModelMBeanImpl class - check supplied invokerClass is valid");
 			}
 		}
 

@@ -7,6 +7,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
 
 /**
@@ -34,7 +35,7 @@ public abstract class AbstractConfigurableAdaptorHost implements AdaptorHost, In
 
     public void setObjectName(String objectName) {
         try {
-            this.objectName = ObjectName.getInstance(objectName);
+            this.objectName = ObjectNameManager.getInstance(objectName);
         } catch (MalformedObjectNameException ex) {
             throw new ObjectNamingException(
                     "You supplied an invalid ObjectName for AdaptorHost of type: "

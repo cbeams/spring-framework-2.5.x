@@ -23,6 +23,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
 
 /**
@@ -72,7 +73,7 @@ public class PropertiesNamingStrategy implements ObjectNamingStrategy,
         
         try {
             objectName = properties.getProperty(key);
-            return ObjectName.getInstance(objectName);
+            return ObjectNameManager.getInstance(objectName);
         } catch(MalformedObjectNameException ex) {
             throw new ObjectNamingException("The name associated with key: " + key + " [" + objectName + "] is malformed.", ex);
         }
