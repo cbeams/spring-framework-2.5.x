@@ -65,4 +65,13 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 			throw new IllegalArgumentException("Invalid Boolean value [" + text + "]");
 	}
 
+	public String getAsText() {
+		if (getValue() != null) {
+			return getValue().toString();
+		}
+		else {
+			return (this.allowEmpty ? "" : "null");
+		}
+	}
+
 }

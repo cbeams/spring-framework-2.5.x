@@ -112,7 +112,12 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	}
 
 	public String getAsText() {
-		return this.numberFormat.format(getValue());
+		if (getValue() != null) {
+			return this.numberFormat.format(getValue());
+		}
+		else {
+			return (this.allowEmpty ? "" : "null");
+		}
 	}
 
 }
