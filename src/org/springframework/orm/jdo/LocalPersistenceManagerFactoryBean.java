@@ -53,7 +53,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 * <p>Note: Can be omitted when all necessary properties are
 	 * specified locally via this bean.
 	 */
-	public final void setConfigLocation(String configLocation) {
+	public void setConfigLocation(String configLocation) {
 		this.configLocation = configLocation;
 	}
 
@@ -62,7 +62,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 * <p>Can be used to override values in a JDO properties config file,
 	 * or to specify all necessary properties locally.
 	 */
-	public final void setJdoProperties(Properties jdoProperties) {
+	public void setJdoProperties(Properties jdoProperties) {
 		this.jdoProperties = jdoProperties;
 	}
 
@@ -72,7 +72,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 * @throws IOException if the properties could not be loaded from the given location
 	 * @throws JDOException in case of JDO initialization errors
 	 */
-	public final void afterPropertiesSet() throws IllegalArgumentException, IOException, JDOException {
+	public void afterPropertiesSet() throws IllegalArgumentException, IOException, JDOException {
 		if (this.configLocation == null && this.jdoProperties == null) {
 			throw new IllegalArgumentException("Either configLocation (e.g. '/kodo.properties') or jdoProperties must be set");
 		}
@@ -120,7 +120,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	/**
 	 * Return the singleton PersistenceManagerFactory.
 	 */
-	public final Object getObject() {
+	public Object getObject() {
 		return this.persistenceManagerFactory;
 	}
 
@@ -129,7 +129,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 		    this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class;
 	}
 
-	public final boolean isSingleton() {
+	public boolean isSingleton() {
 		return true;
 	}
 

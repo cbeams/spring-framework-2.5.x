@@ -4,7 +4,6 @@ import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 
 /**
@@ -54,9 +53,7 @@ import org.springframework.dao.DataAccessException;
  * @see JdoCallback
  * @see JdoTransactionManager
  */
-public class JdoTemplate implements InitializingBean {
-
-	private PersistenceManagerFactory persistenceManagerFactory;
+public class JdoTemplate extends JdoAccessor {
 
 	private boolean allowCreate = true;
 
@@ -71,24 +68,8 @@ public class JdoTemplate implements InitializingBean {
 	 * @param pmf PersistenceManagerFactory to create PersistenceManagers
 	 */
 	public JdoTemplate(PersistenceManagerFactory pmf) {
-		this.persistenceManagerFactory = pmf;
+		setPersistenceManagerFactory(pmf);
 		afterPropertiesSet();
-	}
-
-	/**
-	 * Set the JDO PersistenceManagerFactory that should be used to create
-	 * PersistenceManagers.
-	 */
-	public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
-		this.persistenceManagerFactory = pmf;
-	}
-
-	/**
-	 * Return the JDO PersistenceManagerFactory that should be used to create
-	 * PersistenceManagers.
-	 */
-	public PersistenceManagerFactory getPersistenceManagerFactory() {
-		return persistenceManagerFactory;
 	}
 
 	/**
@@ -110,12 +91,6 @@ public class JdoTemplate implements InitializingBean {
 		return allowCreate;
 	}
 
-	public void afterPropertiesSet() {
-		if (this.persistenceManagerFactory == null) {
-			throw new IllegalArgumentException("persistenceManagerFactory is required");
-		}
-	}
-
 	/**
 	 * Execute the action specified by the given action object within a
 	 * PersistenceManager. Application exceptions thrown by the action object
@@ -132,9 +107,12 @@ public class JdoTemplate implements InitializingBean {
 	 * @see org.springframework.transaction
 	 */
 	public Object execute(JdoCallback action) throws DataAccessException {
-		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory, this.allowCreate);
+		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), this.allowCreate);
+		boolean existingTransaction = PersistenceManagerFactoryUtils.isPersistenceManagerBoundToThread(pm, getPersistenceManagerFactory());
 		try {
-			return action.doInJdo(pm);
+			Object result = action.doInJdo(pm);
+			flushIfNecessary(pm, existingTransaction);
+			return result;
 		}
 		catch (JDOException ex) {
 			throw convertJdoAccessException(ex);
@@ -144,7 +122,7 @@ public class JdoTemplate implements InitializingBean {
 			throw ex;
 		}
 		finally {
-			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, this.persistenceManagerFactory);
+			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
 		}
 	}
 

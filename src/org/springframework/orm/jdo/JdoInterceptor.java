@@ -1,14 +1,9 @@
 package org.springframework.orm.jdo;
 
 import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * This interceptor binds a new JDO PersistenceManager to the thread before a method
@@ -52,7 +47,8 @@ import org.springframework.beans.factory.InitializingBean;
  * <li>no anonymous classes necessary for callback implementations;
  * <li>the possibility to throw any application exceptions from within data access code.
  * </ul>
- * The drawbacks are:
+ *
+ * <p>The drawbacks are:
  * <ul>
  * <li>the dependency on interceptor configuration;
  * <li>the delegating try/catch blocks.
@@ -61,44 +57,32 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 13.06.2003
  */
-public class JdoInterceptor implements MethodInterceptor, InitializingBean {
-
-	private final Log logger = LogFactory.getLog(getClass());
-
-	private PersistenceManagerFactory persistenceManagerFactory;
-
-	public void setPersistenceManagerFactory(PersistenceManagerFactory persistenceManagerFactory) {
-		this.persistenceManagerFactory = persistenceManagerFactory;
-	}
-
-	public void afterPropertiesSet() {
-		if (this.persistenceManagerFactory == null) {
-			throw new IllegalArgumentException("persistenceManagerFactory is required");
-		}
-	}
+public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		boolean existingTransaction = false;
-		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory, true);
-		if (PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(this.persistenceManagerFactory)) {
+		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true);
+		if (PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(getPersistenceManagerFactory())) {
 			logger.debug("Found thread-bound PersistenceManager for JDO interceptor");
 			existingTransaction = true;
 		}
 		else {
 			logger.debug("Using new PersistenceManager for JDO interceptor");
-			PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(this.persistenceManagerFactory,
+			PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(getPersistenceManagerFactory(),
 			                                                                         new PersistenceManagerHolder(pm));
 		}
 		try {
-			return methodInvocation.proceed();
+			Object retVal = methodInvocation.proceed();
+			flushIfNecessary(pm, existingTransaction);
+			return retVal;
 		}
 		finally {
 			if (existingTransaction) {
 				logger.debug("Not closing pre-bound JDO PersistenceManager after interceptor");
 			}
 			else {
-				PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(this.persistenceManagerFactory);
-				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, this.persistenceManagerFactory);
+				PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(getPersistenceManagerFactory());
+				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
 			}
 		}
 	}

@@ -1,15 +1,17 @@
 package org.springframework.orm.jdo;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
+import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.transaction.InvalidIsolationException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -19,6 +21,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
  * @author Juergen Hoeller
@@ -482,6 +485,79 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.verify();
 		pmControl.verify();
 		txControl.verify();
+	}
+
+	public void testTransactionCommitWithDataSource() {
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
+		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl dialectControl = MockControl.createControl(JdoDialect.class);
+		JdoDialect dialect = (JdoDialect) dialectControl.getMock();
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
+		final PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm, 1);
+		pm.currentTransaction();
+		pmControl.setReturnValue(tx, 3);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		tx.isActive();
+		txControl.setReturnValue(false, 1);
+		tx.begin();
+		txControl.setVoidCallable(1);
+		dialect.getJdbcConnection(pm);
+		dialectControl.setReturnValue(con);
+		tx.commit();
+		txControl.setVoidCallable(1);
+		pmfControl.replay();
+		dsControl.replay();
+		dialectControl.replay();
+		pmControl.replay();
+		txControl.replay();
+		conControl.replay();
+
+		JdoTransactionManager tm = new JdoTransactionManager(pmf);
+		tm.setDataSource(ds);
+		tm.setJdoDialect(dialect);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		final List l = new ArrayList();
+		l.add("test");
+		assertTrue("Hasn't thread pm", !PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(pmf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isActive());
+
+		try {
+			Object result = tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					assertTrue("Has thread pm", PersistenceManagerFactoryUtils.isPersistenceManagerBoundToThread(pm, pmf));
+					assertTrue("Has thread con", DataSourceUtils.isConnectionBoundToThread(con, ds));
+					JdoTemplate jt = new JdoTemplate(pmf);
+					return jt.execute(new JdoCallback() {
+						public Object doInJdo(PersistenceManager pm) {
+							return l;
+						}
+					});
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		catch (RuntimeException ex) {
+			fail("Should not have thrown RuntimeException");
+		}
+
+		assertTrue("Hasn't thread pm", !PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(pmf));
+		assertTrue("Hasn't thread con", !DataSourceUtils.getThreadObjectManager().hasThreadObject(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isActive());
+		pmfControl.verify();
+		dsControl.verify();
+		dialectControl.verify();
+		pmControl.verify();
+		txControl.verify();
+		conControl.verify();
 	}
 
 }

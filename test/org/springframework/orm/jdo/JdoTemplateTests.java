@@ -22,7 +22,7 @@ import org.easymock.MockControl;
 /**
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @version $Id: JdoTemplateTests.java,v 1.2 2003-09-19 10:56:23 johnsonr Exp $
+ * @version $Id: JdoTemplateTests.java,v 1.3 2003-11-04 22:59:17 jhoeller Exp $
  */
 public class JdoTemplateTests extends TestCase {
 
@@ -91,18 +91,65 @@ public class JdoTemplateTests extends TestCase {
 		pmControl.verify();
 	}
 
+	public void testTemplateExecuteWithThreadBoundAndFlushEager() {
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
+		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
+		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		MockControl dialectControl = MockControl.createControl(JdoDialect.class);
+		JdoDialect dialect = (JdoDialect) dialectControl.getMock();
+		pm.currentTransaction();
+		pmControl.setReturnValue(tx, 1);
+		dialect.flush(tx);
+		dialectControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
+		dialectControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		jt.setJdoDialect(dialect);
+		jt.setFlushEager(true);
+		jt.setAllowCreate(false);
+		PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(pmf, new PersistenceManagerHolder(pm));
+		final List l = new ArrayList();
+		l.add("test");
+		List result = (List) jt.execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) {
+				return l;
+			}
+		});
+		assertTrue("Correct result list", result == l);
+		PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(pmf);
+		pmfControl.verify();
+		pmControl.verify();
+		txControl.verify();
+		dialectControl.verify();
+	}
+
 	public void testTemplateExceptions() {
+		try {
+			JdoTemplate template = createTemplate();
+			template.setFlushEager(true);
+			template.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+
 		try {
 			createTemplate().execute(new JdoCallback() {
 				public Object doInJdo(PersistenceManager pm) {
 					throw new JDOUserException();
 				}
 			});
+			fail("Should have thrown JdoUsageException");
 		}
 		catch (JdoUsageException ex) {
-		}
-		catch (Exception ex) {
-			fail("Should have thrown JdoUsageException");
+			// expected
 		}
 
 		try {
@@ -111,11 +158,10 @@ public class JdoTemplateTests extends TestCase {
 					throw new JDOFatalUserException();
 				}
 			});
+			fail("Should have thrown JdoUsageException");
 		}
 		catch (JdoUsageException ex) {
-		}
-		catch (Exception ex) {
-			fail("Should have thrown JdoUsageException");
+			// expected
 		}
 
 		try {
@@ -124,11 +170,10 @@ public class JdoTemplateTests extends TestCase {
 					throw new JDOException();
 				}
 			});
+			fail("Should have thrown JdoSystemException");
 		}
 		catch (JdoSystemException ex) {
-		}
-		catch (Exception ex) {
-			fail("Should have thrown JdoSystemException");
+			// expected
 		}
 	}
 
