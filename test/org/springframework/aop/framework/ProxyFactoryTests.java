@@ -212,12 +212,12 @@ public class ProxyFactoryTests extends TestCase {
 		long t = 555555L;
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor(t);
 		
-		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
+		Class[] oldProxiedInterfaces = factory.getProxiedInterfaces();
 		
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
 		
-		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
-		
+		Class[] newProxiedInterfaces = factory.getProxiedInterfaces();
+		assertEquals("Advisor proxies one more interface after introduction", oldProxiedInterfaces.length + 1, newProxiedInterfaces.length);
 
 		TimeStamped ts = (TimeStamped) factory.getProxy();
 		assertTrue(ts.getTimeStamp() == t);
@@ -247,14 +247,14 @@ public class ProxyFactoryTests extends TestCase {
 		ProxyFactory factory = new ProxyFactory(new TestBean());
 		factory.addAdvice(0, di);
 		ITestBean tb = (ITestBean) factory.getProxy();
-		assertTrue(factory.interceptorIncluded(di));
+		assertTrue(factory.adviceIncluded(di));
 		assertTrue(!factory.interceptorIncluded(diUnused));
 		assertTrue(factory.countInterceptorsOfType(NopInterceptor.class) == 1);
-		assertTrue(factory.countInterceptorsOfType(TransactionInterceptor.class) == 0);
+		assertTrue(factory.countAdvicesOfType(TransactionInterceptor.class) == 0);
 	
 		factory.addAdvice(0, diUnused);
 		assertTrue(factory.interceptorIncluded(diUnused));
-		assertTrue(factory.countInterceptorsOfType(NopInterceptor.class) == 2);
+		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 2);
 	}
 
 }
