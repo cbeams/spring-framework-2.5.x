@@ -2,6 +2,8 @@ package org.springframework.web.context.support;
 
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.ui.context.support.StaticUiApplicationContext;
 import org.springframework.web.context.NestedWebApplicationContext;
 import org.springframework.web.context.RootWebApplicationContext;
@@ -19,9 +21,16 @@ public class StaticWebApplicationContext extends StaticUiApplicationContext
 	private String namespace;
 
 	public void initRootContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
+		initRootContext(servletContext, null);
 	}
 
+	public void initRootContext(ServletContext servletContext, ApplicationContext parent) throws BeansException {
+		this.servletContext = servletContext;
+		if (parent != null)
+			setParent(parent);
+	}
+	
+	
 	public void initNestedContext(ServletContext servletContext, String namespace,
 																WebApplicationContext parent, Object owner) {
 		this.servletContext = servletContext;
@@ -36,5 +45,6 @@ public class StaticWebApplicationContext extends StaticUiApplicationContext
 	public String getNamespace() {
 		return namespace;
 	}
+
 
 }

@@ -12,6 +12,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.xml.AbstractXmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.NestedWebApplicationContext;
@@ -97,7 +98,20 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 
 
 	public void initRootContext(ServletContext servletContext) throws BeansException {
+		initRootContext(servletContext, null);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.springframework.web.context.RootWebApplicationContext#initRootContext(javax.servlet.ServletContext, org.springframework.context.ApplicationContext)
+	 */
+	public void initRootContext(ServletContext servletContext, ApplicationContext parent)
+				throws BeansException {
+		
 		this.servletContext = servletContext;
+		if (parent != null)
+			setParent(parent);
+		
 		setDisplayName("Root WebApplicationContext");
 
 		String configLocation = this.servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
@@ -110,8 +124,10 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 		logger.info("Using config locations [" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "]");
 
 		refresh();
+		
 	}
-
+	
+	
 	public void initNestedContext(ServletContext servletContext, String namespace,
 															 WebApplicationContext parent, Object owner) throws BeansException {
 		this.servletContext = servletContext;

@@ -3,6 +3,7 @@ package org.springframework.web.context;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.config.ConfigurableApplicationContext;
 
 /**
@@ -26,4 +27,14 @@ public interface RootWebApplicationContext extends WebApplicationContext, Config
 	 */
 	void initRootContext(ServletContext servletContext) throws BeansException;
 
+	/**
+	 * Initialize this root web application context, also specifying
+	 * a parent context for it.
+	 * @param servletContext the current ServletContext
+	 * @param parent the parent ApplicationContext. A null value signifies
+	 * no parent context
+	 * @throws BeansException in case of initialization errors
+	 */
+	void initRootContext(ServletContext servletContext, ApplicationContext parent) throws BeansException;
+	
 }
