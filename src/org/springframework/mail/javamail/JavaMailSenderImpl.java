@@ -199,37 +199,9 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new MIME message using the following mail properties: " + simpleMessage);
 			}
-			try {
-				MimeMessageHelper message = new MimeMessageHelper(createMimeMessage());
-				if (simpleMessage.getFrom() != null) {
-					message.setFrom(simpleMessage.getFrom());
-				}
-				if (simpleMessage.getReplyTo() != null) {
-					message.setReplyTo(simpleMessage.getReplyTo());
-				}
-				if (simpleMessage.getTo() != null) {
-					message.setTo(simpleMessage.getTo());
-				}
-				if (simpleMessage.getCc() != null) {
-					message.setCc(simpleMessage.getCc());
-				}
-				if (simpleMessage.getBcc() != null) {
-					message.setBcc(simpleMessage.getBcc());
-				}
-				if (simpleMessage.getSentDate() != null) {
-					message.setSentDate(simpleMessage.getSentDate());
-				}
-				if (simpleMessage.getSubject() != null) {
-					message.setSubject(simpleMessage.getSubject());
-				}
-				if (simpleMessage.getText() != null) {
-					message.setText(simpleMessage.getText());
-				}
-				mimeMessages.add(message.getMimeMessage());
-			}
-			catch (MessagingException ex) {
-				throw new MailParseException("Could not parse SimpleMailMessage: " + simpleMessage, ex);
-			}
+			MimeMailMessage message = new MimeMailMessage(createMimeMessage());
+			simpleMessage.copyTo(message);
+			mimeMessages.add(message.getMimeMessage());
 		}
 		send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
 	}
@@ -306,6 +278,9 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				mimeMessages.add(mimeMessage);
 			}
 			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+		}
+		catch (MailException ex) {
+			throw ex;
 		}
 		catch (MessagingException ex) {
 			throw new MailParseException(ex);

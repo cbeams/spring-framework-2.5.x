@@ -30,6 +30,10 @@ import org.springframework.util.StringUtils;
  * more sophisticated messages, for example with attachments, special
  * character encodings, or personal names that accompany mail addresses.
  *
+ * <p>This simple message class implements the MailMessage interface,
+ * to let message population code interact with a simple message or a
+ * MIME message through a common interface.
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 10.09.2003
@@ -37,8 +41,9 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.mail.javamail.JavaMailSender
  * @see org.springframework.mail.javamail.MimeMessagePreparator
  * @see org.springframework.mail.javamail.MimeMessageHelper
+ * @see org.springframework.mail.javamail.MimeMailMessage
  */
-public class SimpleMailMessage implements Serializable {
+public class SimpleMailMessage implements MailMessage, Serializable {
 
 	private String from;
 
@@ -58,7 +63,7 @@ public class SimpleMailMessage implements Serializable {
 
 
 	/**
-	 * Create new SimpleMailMessage.
+	 * Create a new SimpleMailMessage.
 	 */
 	public SimpleMailMessage() {
 	}
@@ -104,7 +109,7 @@ public class SimpleMailMessage implements Serializable {
 	}
 
 	public void setTo(String to) {
-		this.to = new String[]{to};
+		this.to = new String[] {to};
 	}
 
 	public void setTo(String[] to) {
@@ -116,7 +121,7 @@ public class SimpleMailMessage implements Serializable {
 	}
 
 	public void setCc(String cc) {
-		this.cc = new String[]{cc};
+		this.cc = new String[] {cc};
 	}
 
 	public void setCc(String[] cc) {
@@ -128,7 +133,7 @@ public class SimpleMailMessage implements Serializable {
 	}
 
 	public void setBcc(String bcc) {
-		this.bcc = new String[]{bcc};
+		this.bcc = new String[] {bcc};
 	}
 
 	public void setBcc(String[] bcc) {
@@ -161,6 +166,38 @@ public class SimpleMailMessage implements Serializable {
 
 	public String getText() {
 		return this.text;
+	}
+
+
+	/**
+	 * Copy the contents of this message to the given target message.
+	 * @param target the MailMessage to copy to
+	 */
+	public void copyTo(MailMessage target) {
+		if (getFrom() != null) {
+			target.setFrom(getFrom());
+		}
+		if (getReplyTo() != null) {
+			target.setReplyTo(getReplyTo());
+		}
+		if (getTo() != null) {
+			target.setTo(getTo());
+		}
+		if (getCc() != null) {
+			target.setCc(getCc());
+		}
+		if (getBcc() != null) {
+			target.setBcc(getBcc());
+		}
+		if (getSentDate() != null) {
+			target.setSentDate(getSentDate());
+		}
+		if (getSubject() != null) {
+			target.setSubject(getSubject());
+		}
+		if (getText() != null) {
+			target.setText(getText());
+		}
 	}
 
 

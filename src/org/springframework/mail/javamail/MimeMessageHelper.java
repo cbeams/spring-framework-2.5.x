@@ -73,6 +73,11 @@ import org.springframework.util.Assert;
  *   }
  * });</pre>
  *
+ * Consider using MimeMailMessage (which implements the common MailMessage
+ * interface, just like SimpleMailMessage) on top of a MimeMessageHelper,
+ * to let message population code interact with a simple message or a MIME
+ * message through a common interface.
+ *
  * @author Juergen Hoeller
  * @since 19.01.2004
  * @see #getMimeMessage
@@ -81,6 +86,7 @@ import org.springframework.util.Assert;
  * @see JavaMailSenderImpl
  * @see javax.mail.internet.MimeMessage
  * @see org.springframework.mail.SimpleMailMessage
+ * @see MimeMailMessage
  */
 public class MimeMessageHelper {
 
