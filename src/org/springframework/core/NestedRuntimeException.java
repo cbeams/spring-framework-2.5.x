@@ -28,12 +28,12 @@ import java.io.PrintWriter;
  * should preserve their stack trace, if caused by a lower-level exception.
  *
  * @author Rod Johnson
- * @version $Id: NestedRuntimeException.java,v 1.4 2003-11-13 11:51:26 jhoeller Exp $
+ * @version $Id: NestedRuntimeException.java,v 1.5 2004-02-02 11:38:33 jhoeller Exp $
  */
-public abstract class NestedRuntimeException extends RuntimeException implements HasRootCause {
+public abstract class NestedRuntimeException extends RuntimeException {
 
 	/** Root cause of this nested exception */
-	private Throwable rootCause;
+	private Throwable cause;
 
 	/**
 	 * Construct a <code>ExceptionWrapperException</code> with the specified detail message.
@@ -51,14 +51,14 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 	 */
 	public NestedRuntimeException(String msg, Throwable ex) {
 		super(msg);
-		rootCause = ex;
+		this.cause = ex;
 	}
 
 	/**
 	 * Return the nested cause, or null if none.
 	 */
-	public Throwable getRootCause() {
-		return rootCause;
+	public Throwable getCause() {
+		return cause;
 	}
 
 	/**
@@ -66,10 +66,13 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 	 * if there is one.
 	 */
 	public String getMessage() {
-		if (this.rootCause == null)
+		if (this.cause == null) {
 			return super.getMessage();
-		else
-			return super.getMessage() + "; nested exception is: \n\t" + rootCause.toString();
+		}
+		else {
+			return super.getMessage() + "; nested exception is " + this.cause.getClass().getName() +
+					": " + this.cause.getMessage();
+		}
 	}
 
 	/**
@@ -77,12 +80,12 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 	 * @param ps the print stream
 	 */
 	public void printStackTrace(PrintStream ps) {
-		if (this.rootCause == null) {
+		if (this.cause == null) {
 			super.printStackTrace(ps);
 		}
 		else {
 			ps.println(this);
-			this.rootCause.printStackTrace(ps);
+			this.cause.printStackTrace(ps);
 		}
 	}
 
@@ -91,12 +94,12 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 	 * @param pw the print writer
 	 */
 	public void printStackTrace(PrintWriter pw) {
-		if (this.rootCause == null) {
+		if (this.cause == null) {
 			super.printStackTrace(pw);
 		}
 		else {
 			pw.println(this);
-			this.rootCause.printStackTrace(pw);
+			this.cause.printStackTrace(pw);
 		}
 	}
 

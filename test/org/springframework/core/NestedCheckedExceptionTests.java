@@ -15,22 +15,15 @@ import junit.framework.TestCase;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: NestedCheckedExceptionTests.java,v 1.1 2003-09-21 08:42:51 johnsonr Exp $
+ * @version $Id: NestedCheckedExceptionTests.java,v 1.2 2004-02-02 11:38:54 jhoeller Exp $
  */
 public class NestedCheckedExceptionTests extends TestCase {
 
-	/**
-	 * @param arg0
-	 */
-	public NestedCheckedExceptionTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testNoRootCause() {
 		String mesg = "mesg of mine";
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedCheckedException nce = new NestedCheckedException(mesg) {};
-		assertNull(nce.getRootCause());
+		assertNull(nce.getCause());
 		assertEquals(nce.getMessage(), mesg);
 		
 		// Check PrintStackTrace
@@ -48,7 +41,7 @@ public class NestedCheckedExceptionTests extends TestCase {
 		ServletException rootCause = new ServletException(rootCauseMesg);
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedCheckedException nce = new NestedCheckedException(myMessage, rootCause) {};
-		assertEquals(nce.getRootCause(), rootCause);
+		assertEquals(nce.getCause(), rootCause);
 		assertTrue(nce.getMessage().indexOf(myMessage) != -1);
 		assertTrue(nce.getMessage().indexOf(rootCauseMesg) != -1);
 		
