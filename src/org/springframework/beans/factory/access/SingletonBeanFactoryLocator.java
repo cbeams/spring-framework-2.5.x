@@ -105,7 +105,7 @@ import org.springframework.core.io.UrlResource;
  * The client code is as simple as:
  * <pre>
  * BeanFactoryLocator bfl = KeyedSingletonBeanFactoryLocator.getInstance();
- * BeanFactoryRef bf = bfl.useFactory("com.mycompany.myapp");
+ * BeanFactoryReference bf = bfl.useFactory("com.mycompany.myapp");
  * // now use some bean from factory 
  * MyClass zed = bf.getFactory().getBean("mybean");
  * </pre>
@@ -238,7 +238,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  *   
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @author colin sampaleanu
  * 
  * @see org.springframework.context.access.LocatorFactory
@@ -329,7 +329,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * (non-Javadoc)
 	 * @see org.springframework.beans.factory.access.BeanFactoryLocator#useFactory(java.lang.String)
 	 */
-	public BeanFactoryRef useFactory(String factoryKey) throws FatalBeanException {
+	public BeanFactoryReference useFactory(String factoryKey) throws FatalBeanException {
 
 		synchronized (_bfgInstancesByKey) {
 			BeanFactoryGroup bfg = (BeanFactoryGroup) _bfgInstancesByKey
@@ -418,7 +418,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 								+ ". Returned cbject class is: " + bean.getClass());
 
 			final BeanFactory retval = (BeanFactory) bean;
-			return new BeanFactoryRef() {
+			return new BeanFactoryReference() {
 
 				public BeanFactory getFactory() {
 					return (BeanFactory) retval;

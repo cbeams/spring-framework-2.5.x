@@ -15,7 +15,6 @@ import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;

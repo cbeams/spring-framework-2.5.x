@@ -57,7 +57,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		}
 		String beanName = key.substring(0, dotIndex);
 		String beanProperty = key.substring(dotIndex+1);
-		factory.overridePropertyValue(beanName, new PropertyValue(beanProperty, value));
+		factory.getPropertyValues(beanName).addPropertyValue(beanProperty, value);
 		logger.debug("Property '" + key + "' set to [" + value + "]");
 	}
 

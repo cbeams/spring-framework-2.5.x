@@ -17,6 +17,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
 
 /**
@@ -313,15 +314,16 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					pvs.addPropertyValue(new PropertyValue(property, val));
 				}
 				else{
-					// Normal bean property
+					// normal bean property
 					Object val = m.get(key);
 					if (val instanceof String) {
-						String sval = (String) val;
-						// If it starts with unescaped prefix...
-						if (sval.startsWith(REF_PREFIX)) {
-							// Expand reference
-							String targetName = ((String) val).substring(1);
-							if (sval.startsWith("**")) {
+						String strVal = (String) val;
+						// if it starts with a reference prefix...
+						if (strVal.startsWith(REF_PREFIX)) {
+							// expand reference
+							String targetName = strVal.substring(1);
+							if (targetName.startsWith(REF_PREFIX)) {
+								// escaped prefix -> use plain value
 								val = targetName;
 							}
 							else {
@@ -329,7 +331,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 							}
 						}
 					}
-
 					pvs.addPropertyValue(new PropertyValue(property, val));
 				}
 			}

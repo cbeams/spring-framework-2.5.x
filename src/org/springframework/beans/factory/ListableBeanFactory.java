@@ -31,8 +31,8 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: ListableBeanFactory.java,v 1.7 2004-01-13 18:12:47 jhoeller Exp $
- * @see org.springframework.beans.factory.support.BeanFactoryUtils
+ * @version $Id: ListableBeanFactory.java,v 1.8 2004-02-04 17:23:23 jhoeller Exp $
+ * @see BeanFactoryUtils
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#registerSingleton
  */
 public interface ListableBeanFactory extends BeanFactory {

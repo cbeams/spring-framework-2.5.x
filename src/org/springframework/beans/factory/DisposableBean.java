@@ -18,7 +18,7 @@ package org.springframework.beans.factory;
  * @author Juergen Hoeller
  * @since 12.08.2003
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
- * @see org.springframework.context.config.ConfigurableApplicationContext#close
+ * @see org.springframework.context.ConfigurableApplicationContext#close
  */
 public interface DisposableBean {
 

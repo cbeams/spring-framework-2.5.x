@@ -1,4 +1,4 @@
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.access;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
-
 /**
  * 
  * @author Rod Johnson
@@ -19,17 +18,8 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  */
 public class BeanFactoryBootstrapTests extends TestCase {
 	
-	Properties _savedProps;
-	
-	
-	/**
-	 * Constructor for BeanFactoryBootstrapTests.
-	 * @param arg0
-	 */
-	public BeanFactoryBootstrapTests(String arg0) {
-		super(arg0);
-	}
-	
+	private Properties _savedProps;
+
 	/** How to test many singletons? */
 	public void testGetInstanceWithNullPropertiesFails() throws BeansException {
 		System.setProperties(null);
@@ -46,7 +36,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 	public void testGetInstanceWithUnknownBeanFactoryClassFails() throws BeansException {
 		System.setProperties(null);
 		Properties p = new Properties();
-		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class", 
+		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
 		"org.springframework.beans.factory.support.xxxxXmlBeanFactory");
 		
 		System.setProperties(p);
@@ -63,7 +53,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 	public void testGetInstanceWithMistypedBeanFactoryClassFails() throws BeansException {
 		System.setProperties(null);
 		Properties p = new Properties();
-		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class", 
+		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
 		"java.awt.Point");
 		
 		System.setProperties(p);
@@ -117,8 +107,8 @@ public class BeanFactoryBootstrapTests extends TestCase {
 	
 	public void testDummyBeanFactory() throws Exception {
 		Properties p = new Properties();
-		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class", 
-		"org.springframework.beans.factory.support.BeanFactoryBootstrapTests$DummyBeanFactory");
+		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
+		"org.springframework.beans.factory.access.BeanFactoryBootstrapTests$DummyBeanFactory");
 		
 		
 		System.setProperties(p);
@@ -180,7 +170,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		// save and restore System properties, which get destroyed for the tests
-		_savedProps = System.getProperties();		
+		_savedProps = System.getProperties();
 	}
 
 	/* (non-Javadoc)

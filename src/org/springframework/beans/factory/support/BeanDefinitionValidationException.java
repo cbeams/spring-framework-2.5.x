@@ -14,8 +14,8 @@ public class BeanDefinitionValidationException extends BeansException {
 		super(msg);
 	}
 
-	public BeanDefinitionValidationException(String msg, Throwable t) {
-		super(msg, t);
+	public BeanDefinitionValidationException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 }

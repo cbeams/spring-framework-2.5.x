@@ -13,20 +13,16 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class PropertiesFactoryBeanTests extends TestCase {
 
-	protected PropertiesFactoryBean getPropertiesFactoryBean() {
-		return new PropertiesFactoryBean();
-	}
-
 	public void testWithPropertiesFile() throws IOException {
-		PropertiesFactoryBean pfb = getPropertiesFactoryBean();
-		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/support/test.properties"));
+		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
+		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
 		pfb.afterPropertiesSet();
 		Properties props = (Properties) pfb.getObject();
 		assertEquals("value1", props.getProperty("key1"));
 	}
 
 	public void testWithLocalProperties() throws IOException {
-		PropertiesFactoryBean pfb = getPropertiesFactoryBean();
+		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
 		pfb.setProperties(localProps);
@@ -36,8 +32,8 @@ public class PropertiesFactoryBeanTests extends TestCase {
 	}
 
 	public void testWithPropertiesFileAndLocalProperties() throws IOException {
-		PropertiesFactoryBean pfb = getPropertiesFactoryBean();
-		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/support/test.properties"));
+		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
+		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
 		pfb.setProperties(localProps);
@@ -48,9 +44,9 @@ public class PropertiesFactoryBeanTests extends TestCase {
 	}
 
 	public void testWithPrototype() throws IOException {
-		PropertiesFactoryBean pfb = getPropertiesFactoryBean();
+		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setSingleton(false);
-		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/support/test.properties"));
+		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
 		pfb.setProperties(localProps);

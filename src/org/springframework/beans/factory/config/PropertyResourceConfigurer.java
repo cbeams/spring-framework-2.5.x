@@ -36,11 +36,12 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
-	private Resource location;
-
 	private Properties properties;
 
+	private Resource[] locations;
+
 	private boolean ignoreResourceNotFound = false;
+
 
 	public void setOrder(int order) {
 	  this.order = order;
@@ -51,20 +52,26 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 	}
 
 	/**
-	 * Set the location of the properties file. Allows for both a URL
-	 * and a (file) path, according to the respective ApplicationContext.
-	 * @see org.springframework.context.ApplicationContext#getResource
-	 */
-	public void setLocation(Resource location) {
-		this.location = location;
-	}
-
-	/**
-	 * Set the properties directly as java.util.Properties instance.
-	 * Mainly useful for testing.
+	 * Set local properties, e.g. via the "props" tag in XML bean definitions.
+	 * These can be considered defaults, to be overridden by properties
+	 * loaded from files.
 	 */
 	public void setProperties(Properties properties) {
 		this.properties = properties;
+	}
+
+	/**
+	 * Set a location of a properties file to be loaded.
+	 */
+	public void setLocation(Resource location) {
+		this.locations = new Resource[] {location};
+	}
+
+	/**
+	 * Set locations of properties files to be loaded.
+	 */
+	public void setLocations(Resource[] locations) {
+		this.locations = locations;
 	}
 
 	/**
@@ -76,30 +83,9 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 		this.ignoreResourceNotFound = ignoreResourceNotFound;
 	}
 
+
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		Properties props = new Properties();
-
-		if (this.location != null) {
-			logger.info("Loading properties file from " + this.location + "");
-			try {
-				InputStream is = this.location.getInputStream();
-				try {
-					props.load(is);
-				}
-				finally {
-					is.close();
-				}
-			}
-			catch (IOException ex) {
-				String msg = "Could not load properties file from " + this.location;
-				if (this.ignoreResourceNotFound) {
-					logger.warn(msg + ": " + ex.getMessage());
-				}
-				else {
-					throw new BeanInitializationException(msg, ex);
-				}
-			}
-		}
 
 		if (this.properties != null) {
 			if (logger.isDebugEnabled()) {
@@ -108,12 +94,32 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 			props.putAll(this.properties);
 		}
 
-		if (this.location != null || this.properties != null) {
-			processProperties(beanFactory, props);
+		if (this.locations != null) {
+			for (int i = 0; i < this.locations.length; i++) {
+				Resource location = this.locations[i];
+				logger.info("Loading properties from " + location + "");
+				try {
+					InputStream is = location.getInputStream();
+					try {
+						props.load(is);
+					}
+					finally {
+						is.close();
+					}
+				}
+				catch (IOException ex) {
+					String msg = "Could not load properties from " + location;
+					if (this.ignoreResourceNotFound) {
+						logger.warn(msg + ": " + ex.getMessage());
+					}
+					else {
+						throw new BeanInitializationException(msg, ex);
+					}
+				}
+			}
 		}
-		else {
-			logger.warn("No property resource location specified");
-		}
+
+		processProperties(beanFactory, props);
 	}
 
 	/**

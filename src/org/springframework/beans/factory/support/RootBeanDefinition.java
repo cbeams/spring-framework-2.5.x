@@ -8,9 +8,9 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /** 
  * Root bean definitions have a class plus optionally constructor argument
@@ -21,7 +21,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RootBeanDefinition.java,v 1.15 2004-01-26 08:58:50 jhoeller Exp $
+ * @version $Id: RootBeanDefinition.java,v 1.16 2004-02-04 17:23:46 jhoeller Exp $
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -96,7 +96,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param beanClass the class of the bean to instantiate
 	 * @param pvs the property values to apply
 	 */
-	public RootBeanDefinition(Class beanClass, PropertyValues pvs) {
+	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs) {
 		super(pvs);
 		this.beanClass = beanClass;
 	}
@@ -108,7 +108,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param pvs the property values to apply
 	 * @param singleton the singleton status of the bean
 	 */
-	public RootBeanDefinition(Class beanClass, PropertyValues pvs, boolean singleton) {
+	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs, boolean singleton) {
 		super(pvs);
 		this.beanClass = beanClass;
 		setSingleton(singleton);
@@ -121,7 +121,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param cargs the constructor argument values to apply
 	 * @param pvs the property values to apply
 	 */
-	public RootBeanDefinition(Class beanClass, ConstructorArgumentValues cargs, PropertyValues pvs) {
+	public RootBeanDefinition(Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		super(pvs);
 		this.beanClass = beanClass;
 		this.constructorArgumentValues = cargs;
@@ -135,7 +135,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param cargs the constructor argument values to apply
 	 * @param pvs the property values to apply
 	 */
-	public RootBeanDefinition(String beanClassName, ConstructorArgumentValues cargs, PropertyValues pvs) {
+	public RootBeanDefinition(String beanClassName, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		super(pvs);
 		this.beanClass = beanClassName;
 		this.constructorArgumentValues = cargs;

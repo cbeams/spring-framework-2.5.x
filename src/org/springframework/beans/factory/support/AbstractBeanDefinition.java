@@ -6,8 +6,6 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
 
 /**
  * Common base class for bean definitions. Use a FactoryBean to
@@ -21,11 +19,11 @@ import org.springframework.beans.PropertyValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractBeanDefinition.java,v 1.9 2004-01-20 11:26:43 jhoeller Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.10 2004-02-04 17:23:45 jhoeller Exp $
  */
 public abstract class AbstractBeanDefinition {
 
-	private PropertyValues propertyValues;
+	private MutablePropertyValues propertyValues;
 
 	private boolean singleton = true;
 
@@ -37,29 +35,17 @@ public abstract class AbstractBeanDefinition {
 	/**
 	 * Set the PropertyValues to be applied to a new instance of this bean.
 	 */
-	protected AbstractBeanDefinition(PropertyValues pvs) {
+	protected AbstractBeanDefinition(MutablePropertyValues pvs) {
 		this.propertyValues = (pvs != null) ? pvs : new MutablePropertyValues();
 	}
 
 	/**
 	 * Return the PropertyValues to be applied to a new instance of this bean.
 	 */
-	public PropertyValues getPropertyValues() {
+	public MutablePropertyValues getPropertyValues() {
 		return propertyValues;
 	}
 	
-	/**
-	 * Convenience method to add an additional property value
-	 * @param pv new property value to add
-	 */
-	public void addPropertyValue(PropertyValue pv) {
-		if (!(this.propertyValues instanceof MutablePropertyValues)) {
-			// Adding an additional propertyValue requires replacing our member variable.
-			this.propertyValues = new MutablePropertyValues(getPropertyValues());
-		}
-		((MutablePropertyValues) this.propertyValues).addPropertyValue(pv);
-	}
-
 	/**
 	 * Set if this a <b>Singleton</b>, with a single, shared instance returned
 	 * on all calls. If false, the BeanFactory will apply the <b>Prototype</b>

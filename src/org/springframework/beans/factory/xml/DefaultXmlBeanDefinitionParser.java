@@ -19,17 +19,16 @@ import org.w3c.dom.Text;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
-import org.springframework.beans.factory.support.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -215,7 +214,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 
 			AbstractBeanDefinition bd = null;
-			PropertyValues pvs = getPropertyValueSubElements(beanName, ele);
+			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
 
 			if (className != null) {
 				ConstructorArgumentValues cargs = getConstructorArgSubElements(beanName, ele);
@@ -299,7 +298,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse property value subelements of the given bean element.
 	 */
-	protected PropertyValues getPropertyValueSubElements(String beanName, Element beanEle) {
+	protected MutablePropertyValues getPropertyValueSubElements(String beanName, Element beanEle) {
 		NodeList nl = beanEle.getChildNodes();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -391,7 +390,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				// a reference to the id of another bean in the same XML file
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if ("".equals(beanRef)) {
-					throw new BeanDefinitionStoreException(this.resource, beanRef,
+					throw new BeanDefinitionStoreException(this.resource, beanName,
 																								 "Either 'bean' or 'local' is required for a reference");
 				}
 			}
@@ -404,7 +403,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				// a reference to the id of another bean in the same XML file
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if ("".equals(beanRef)) {
-					throw new BeanDefinitionStoreException(this.resource, beanRef,
+					throw new BeanDefinitionStoreException(this.resource, beanName,
 																								 "Either 'bean' or 'local' is required for an idref");
 				}
 			}

@@ -1,4 +1,4 @@
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.config;
 
 import java.util.HashMap;
 import java.util.HashSet;

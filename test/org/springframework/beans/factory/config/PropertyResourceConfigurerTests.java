@@ -2,15 +2,17 @@ package org.springframework.beans.factory.config;
 
 import java.util.List;
 import java.util.Map;
+import java.io.FileNotFoundException;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.support.RuntimeBeanReference;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 
 /**
@@ -43,27 +45,26 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("age", "${age}");
 		pvs.addPropertyValue("name", "name${var}${");
+		pvs.addPropertyValue("touchy", "${user.dir}");
 		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb1", TestBean.class, pvs);
-		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "${var}name${age}");
+		ConstructorArgumentValues cas = new ConstructorArgumentValues();
+		cas.addIndexedArgumentValue(1, "${age}");
+		cas.addGenericArgumentValue("${var}name${age}");
 		List friends = new ManagedList();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
+		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("friends", friends);
 		Map someMap = new ManagedMap();
 		someMap.put("key1", new RuntimeBeanReference("${ref}"));
 		someMap.put("key2", "${age}name");
 		pvs.addPropertyValue("someMap", someMap);
-		ac.registerSingleton("tb2", TestBean.class, pvs);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, cas, pvs);
+		ac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=99\nvar=${m}var\nref=tb2\nm=my");
-		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
-		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98");
-		pvs.addPropertyValue("order", "0");
-		ac.registerSingleton("configurer2", PropertyPlaceholderConfigurer.class, pvs);
+		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my");
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		ac.refresh();
 		TestBean tb1 = (TestBean) ac.getBean("tb1");
 		TestBean tb2 = (TestBean) ac.getBean("tb2");
@@ -78,6 +79,72 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(2, tb2.getSomeMap().size());
 		assertEquals(tb2, tb2.getSomeMap().get("key1"));
 		assertEquals("98name", tb2.getSomeMap().get("key2"));
+		assertEquals(System.getProperty("user.dir"), tb1.getTouchy());
+	}
+
+	public void testPropertyPlaceholderConfigurerWithSystemPropertyOnly() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("touchy", "${user.dir}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals(System.getProperty("user.dir"), tb.getTouchy());
+	}
+
+	public void testPropertyPlaceholderConfigurerWithUnresolvableSystemProperty() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("touchy", "${user.dir}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("checkSystemProperties", "false");
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		try {
+			ac.refresh();
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// expected
+			assertTrue(ex.getMessage().indexOf("user.dir") != -1);
+		}
+	}
+
+	public void testPropertyPlaceholderConfigurerWithUnresolvablePlaceholder() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, null);
+		try {
+			ac.refresh();
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// expected
+			assertTrue(ex.getMessage().indexOf("ref") != -1);
+		}
+	}
+
+	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("location", "${user.dir}/test");
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		try {
+			ac.refresh();
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanInitializationException ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof FileNotFoundException);
+			assertTrue(ex.getMessage().indexOf(System.getProperty("user.dir")) != -1);
+		}
 	}
 
 	public void testPropertyPlaceholderConfigurerWithCircularReference() {

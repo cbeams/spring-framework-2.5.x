@@ -1,4 +1,4 @@
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.access;
 
 import org.springframework.beans.FatalBeanException;
 
@@ -13,8 +13,8 @@ public class BootstrapException extends FatalBeanException {
 		super(msg);
 	}
 
-	public BootstrapException(String msg, Throwable t) {
-		super(msg, t);
+	public BootstrapException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 }

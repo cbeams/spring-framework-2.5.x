@@ -15,7 +15,7 @@ import org.springframework.beans.factory.BeanFactory;
  * @version $Revision: 1.1 $
  * @author colin sampaleanu
  */
-public interface BeanFactoryRef {
+public interface BeanFactoryReference {
   
   /**
    * Returns the BeanFactory instance held by this reference

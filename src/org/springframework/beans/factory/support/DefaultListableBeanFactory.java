@@ -17,6 +17,7 @@ import java.util.Set;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -30,7 +31,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.14 2004-01-20 11:26:43 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.15 2004-02-04 17:23:46 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {

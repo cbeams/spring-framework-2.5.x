@@ -21,24 +21,24 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 		super(msg);
 	}
 
-	public BeanDefinitionStoreException(String msg, Throwable t) {
-		super(msg, t);
+	public BeanDefinitionStoreException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg) {
 		this(documentLocation.getDescription(), beanName, msg, null);
 	}
 
-	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg, Throwable t) {
-		this(documentLocation.getDescription(), beanName, msg, t);
+	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg, Throwable ex) {
+		this(documentLocation.getDescription(), beanName, msg, ex);
 	}
 
 	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg) {
 		this(resourceDescription, beanName, msg, null);
 	}
 
-	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg, Throwable t) {
-		super("Error registering bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, t);
+	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg, Throwable ex) {
+		super("Error registering bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, ex);
 	}
 
 }

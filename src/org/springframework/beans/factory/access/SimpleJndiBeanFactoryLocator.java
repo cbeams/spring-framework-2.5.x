@@ -9,10 +9,10 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.BootstrapException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -20,13 +20,11 @@ import org.springframework.jndi.JndiTemplate;
 import org.springframework.util.StringUtils;
 
 /**
- * @version $Revision: 1.1 $
  * @author Rod Johnson
  * @author colin sampaleanu
+ * @version $Revision: 1.2 $
  */
 public class SimpleJndiBeanFactoryLocator implements BeanFactoryLocator {
-
-	// --- statics
 
 	/**
 	 * Any number of these characters are considered delimiters
@@ -34,30 +32,25 @@ public class SimpleJndiBeanFactoryLocator implements BeanFactoryLocator {
 	 */
 	public static final String BEAN_FACTORY_PATH_DELIMITERS = ",; ";
 
-	protected static final Log _log = LogFactory
-			.getLog(SimpleJndiBeanFactoryLocator.class);
+	protected static final Log logger = LogFactory.getLog(SimpleJndiBeanFactoryLocator.class);
 
-	// --- methods
-
-	/* Load/use a bean factory, as specified by a factoryKey which is a JNDI address, of
-	 * the form, <code>java:comp/env/ejb/BeanFactoryPath</code>
-	 * 
-	 * @see org.springframework.beans.factory.access.BeanFactoryLocator#useFactory(java.lang.String)
+	/**
+	 * Load/use a bean factory, as specified by a factoryKey which is a JNDI address,
+	 * of the form <code>java:comp/env/ejb/BeanFactoryPath</code>.
 	 */
-	public BeanFactoryRef useFactory(String factoryKey) throws BootstrapException {
-
+	public BeanFactoryReference useFactory(String factoryKey) throws BootstrapException {
 		String beanFactoryPath = null;
 		try {
 			beanFactoryPath = (String) (new JndiTemplate()).lookup(factoryKey);
-			_log.info("BeanFactoryPath from JNDI is [" + beanFactoryPath + "]");
+			logger.info("BeanFactoryPath from JNDI is [" + beanFactoryPath + "]");
 
 			String[] paths = StringUtils.tokenizeToStringArray(beanFactoryPath,
 					BEAN_FACTORY_PATH_DELIMITERS, true, true);
 
 			final BeanFactory beanFactory = createFactory(paths);
-			_log.info("Loaded BeanFactory [" + beanFactory + "]");
+			logger.info("Loaded BeanFactory [" + beanFactory + "]");
 
-			return new BeanFactoryRef() {
+			return new BeanFactoryReference() {
 				public BeanFactory getFactory() {
 					return beanFactory;
 				}
@@ -88,13 +81,12 @@ public class SimpleJndiBeanFactoryLocator implements BeanFactoryLocator {
 	 * @return the created BeanFactory
 	 */
 	protected BeanFactory createFactory(String[] resources) throws FatalBeanException {
-		
 		DefaultListableBeanFactory fac = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(fac);
-		for (int i = 0; i < resources.length; ++i)
+		for (int i = 0; i < resources.length; ++i) {
 			reader.loadBeanDefinitions(new ClassPathResource(resources[i]));
+		}
 		fac.preInstantiateSingletons();
-		
 		return fac;
 	}
 		

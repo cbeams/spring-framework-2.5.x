@@ -21,8 +21,8 @@ public class BeanInitializationException extends FatalBeanException {
 		super(msg);
 	}
 
-	public BeanInitializationException(String msg, Throwable t) {
-		super(msg, t);
+	public BeanInitializationException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 }

@@ -9,7 +9,8 @@ import org.springframework.beans.FatalBeanException;
 
 /**
  * <p>An interface for a class used to lookup/use, and optionally allow the
- * release of a BeanFactory, or BeanFactory subclass such as ApplicationContext.</p>
+ * release of a BeanFactory, or BeanFactory subclass such as ApplicationContext.
+ *
  * <p>Where this interface is implemented as a singleton class such as
  * KeyedSingletonBeanFactoryLocator, the Spring team <strong>strongly</strong>
  * suggests that it be used sparingly and with caution. By far the vast majority
@@ -28,11 +29,10 @@ import org.springframework.beans.FatalBeanException;
  * ApplicationContext definition (in a hierarchy), a class like
  * KeyedSingletonBeanFactoryLocator may be used to demand load these contexts.  
  * 
- * @version $Revision: 1.1 $
- * @author  colin sampaleanu
- * 
- * @see org.springframework.context.access.LocatorFactory
+ * @author colin sampaleanu
+ * @version $Revision: 1.2 $
  * @see org.springframework.beans.factory.BeanFactory
+ * @see org.springframework.context.access.LocatorFactory
  * @see org.springframework.context.ApplicationContext
  */
 public interface BeanFactoryLocator {
@@ -40,15 +40,12 @@ public interface BeanFactoryLocator {
   /**
    * Use the BeanFactory (or derived class such as ApplicationContext) specified
    * by the factoryKey parameter. The definition is possibly loaded/created as needed.
-   * 
-   * @param group the definition group from which the definition should come
    * @param factoryKey a resourceName specifying which BeanFactory the BeanFactoryLocator
-   * should return for usage. The actual meaning of the resourceName is specific to the actual
-   * implementation of BeanFactoryLocator.
-   * @return the BeanFactory instance, wrapped as a {@link BeanFactoryRef} object
-   * @throws ApplicationContextException if there is an error loading or accessing
-   * the BeanFactory
+   * should return for usage. The actual meaning of the resourceName is specific to the
+   * actual implementation of BeanFactoryLocator.
+   * @return the BeanFactory instance, wrapped as a {@link BeanFactoryReference} object
+   * @throws FatalBeanException if there is an error loading or accessing the BeanFactory
    */
-  BeanFactoryRef useFactory(String factoryKey) throws FatalBeanException;
+  BeanFactoryReference useFactory(String factoryKey) throws FatalBeanException;
 
 }

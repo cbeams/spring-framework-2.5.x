@@ -8,14 +8,12 @@ package org.springframework.beans.factory.access;
 import junit.framework.TestCase;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.access.SimpleJndiBeanFactoryLocator;
-import org.springframework.beans.factory.support.BootstrapException;
 import org.springframework.jndi.support.SimpleNamingContextBuilder;
 
 /**
  * @author Rod Johnson
  * @author colin sampaleanu
- * @version $Id: SimpleJndiBeanFactoryLocatorTests.java,v 1.1 2004-01-27 00:03:45 colins Exp $
+ * @version $Id: SimpleJndiBeanFactoryLocatorTests.java,v 1.2 2004-02-04 17:26:18 jhoeller Exp $
  */
 public class SimpleJndiBeanFactoryLocatorTests extends TestCase {
 	

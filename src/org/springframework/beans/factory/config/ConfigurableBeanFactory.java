@@ -3,11 +3,9 @@ package org.springframework.beans.factory.config;
 import java.beans.PropertyEditor;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  * SPI interface to be implemented by most if not all bean factories.
@@ -20,7 +18,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see ConfigurableListableBeanFactory
- * @version $Id: ConfigurableBeanFactory.java,v 1.7 2003-12-24 14:48:11 johnsonr Exp $
+ * @version $Id: ConfigurableBeanFactory.java,v 1.8 2004-02-04 17:23:45 jhoeller Exp $
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 
@@ -60,29 +58,29 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * Return the registered PropertyValues for the given bean.
 	 * @param beanName name of the bean
 	 * @return the registered PropertyValues
-	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * if there is no bean with the given name
+	 * @throws BeansException in case of errors
 	 */
-	PropertyValues getPropertyValues(String beanName) throws NoSuchBeanDefinitionException;
+	MutablePropertyValues getPropertyValues(String beanName) throws BeansException;
 
 	/**
-	 * Register property value for a specific bean, overriding an existing value.
-	 * If no previous value exists, a new one will be added.
-	 * <p>This is intended for bean factory post processing, i.e. overriding
-	 * certain property values after parsing the original bean definitions.
+	 * Return the registered ConstructorArgumentValues for the given bean.
 	 * @param beanName name of the bean
-	 * @param pv property name and value
-	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
-	 * @throws BeansException if the property values of the specified bean are immutable
-	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
+	 * @return the registered ConstructorArgumentValues
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * if there is no bean with the given name
+	 * @throws BeansException in case of errors
 	 */
-	void overridePropertyValue(String beanName, PropertyValue pv) throws BeansException;
+	ConstructorArgumentValues getConstructorArgumentValues(String beanName) throws BeansException;
 
 	/**
 	 * Given a bean name, create an alias. We typically use this method to
 	 * support names that are illegal within XML ids (used for bean names).
 	 * @param beanName name of the bean
 	 * @param alias alias that will behave the same as the bean name
-	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * if there is no bean with the given name
 	 * @throws BeansException if the alias is already in use
 	 */
 	void registerAlias(String beanName, String alias) throws BeansException;

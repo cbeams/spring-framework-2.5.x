@@ -18,16 +18,16 @@ public class BeanCreationException extends FatalBeanException {
 		super(msg);
 	}
 
-	public BeanCreationException(String msg, Throwable t) {
-		super(msg, t);
+	public BeanCreationException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 	public BeanCreationException(String resourceDescription, String beanName, String msg) {
 		this(resourceDescription, beanName, msg, null);
 	}
 
-	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable t) {
-		super("Error creating bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, t);
+	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable ex) {
+		super("Error creating bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, ex);
 	}
 
 }

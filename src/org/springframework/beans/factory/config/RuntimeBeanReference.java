@@ -1,4 +1,4 @@
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.config;
 
 /** 
  * Immutable placeholder class used for the value of a PropertyValue
@@ -20,10 +20,13 @@ public class RuntimeBeanReference {
 
 	/**
 	 * Return the target bean name.
-	 * @return the target bean name
 	 */
 	public String getBeanName() {
 		return beanName;
+	}
+
+	public String toString() {
+	   return '<' + getBeanName() + '>';
 	}
 
 }
