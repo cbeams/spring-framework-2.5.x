@@ -30,7 +30,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailTestSuite.java,v 1.13 2004-02-09 19:00:21 jhoeller Exp $
+ * @version $Id: MailTestSuite.java,v 1.14 2004-03-01 09:22:57 jhoeller Exp $
  */
 public class MailTestSuite extends TestCase {
 
@@ -72,7 +72,7 @@ public class MailTestSuite extends TestCase {
 		assertEquals("my text", messageCopy.getText());
 	}
 
-	public void testJavaMailSenderWithSimpleMessage() throws MailException, MessagingException, IOException {
+	public void testJavaMailSenderWithSimpleMessage() throws MessagingException, IOException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setPort(30);
@@ -114,7 +114,7 @@ public class MailTestSuite extends TestCase {
 		assertEquals("my text", sentMessage.getContent());
 	}
 
-	public void testJavaMailSenderWithSimpleMessages() throws MailException, MessagingException, IOException {
+	public void testJavaMailSenderWithSimpleMessages() throws MessagingException, IOException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -142,7 +142,7 @@ public class MailTestSuite extends TestCase {
 		assertEquals("she@mail.org", ((InternetAddress) tos2.get(0)).getAddress());
 	}
 
-	public void testJavaMailSenderWithMimeMessage() throws MailException, MessagingException {
+	public void testJavaMailSenderWithMimeMessage() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -160,7 +160,7 @@ public class MailTestSuite extends TestCase {
 		assertEquals(mimeMessage, sender.transport.getSentMessage(0));
 	}
 
-	public void testJavaMailSenderWithMimeMessages() throws MailException, MessagingException {
+	public void testJavaMailSenderWithMimeMessages() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -181,7 +181,7 @@ public class MailTestSuite extends TestCase {
 		assertEquals(mimeMessage2, sender.transport.getSentMessage(1));
 	}
 
-	public void testJavaMailSenderWithMimeMessagePreparator() throws MailException {
+	public void testJavaMailSenderWithMimeMessagePreparator() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -205,7 +205,7 @@ public class MailTestSuite extends TestCase {
 		assertEquals(messages.get(0), sender.transport.getSentMessage(0));
 	}
 
-	public void testJavaMailSenderWithMimeMessagePreparators() throws MailException {
+	public void testJavaMailSenderWithMimeMessagePreparators() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -236,7 +236,7 @@ public class MailTestSuite extends TestCase {
 		assertEquals(messages.get(1), sender.transport.getSentMessage(1));
 	}
 
-	public void testJavaMailSenderWithParseExceptionOnSimpleMessage() throws MailException {
+	public void testJavaMailSenderWithParseExceptionOnSimpleMessage() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		SimpleMailMessage simpleMessage = new SimpleMailMessage();
 		simpleMessage.setFrom("");
@@ -249,7 +249,7 @@ public class MailTestSuite extends TestCase {
 		}
 	}
 
-	public void testJavaMailSenderWithParseExceptionOnMimeMessagePreparator() throws MailException {
+	public void testJavaMailSenderWithParseExceptionOnMimeMessagePreparator() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		MimeMessagePreparator preparator = new MimeMessagePreparator() {
 			public void prepare(MimeMessage mimeMessage) throws MessagingException {
@@ -265,15 +265,41 @@ public class MailTestSuite extends TestCase {
 		}
 	}
 
-	public void testJavaMailSenderWithCustomSession() throws MailException, MessagingException {
+	public void testJavaMailSenderWithCustomSession() throws MessagingException {
 		final Session session = Session.getInstance(new Properties());
 		MockJavaMailSender sender = new MockJavaMailSender() {
 			protected Transport getTransport(Session sess) throws NoSuchProviderException {
 				assertEquals(session, sess);
-				return super.getTransport(session);
+				return super.getTransport(sess);
 			}
 		};
 		sender.setSession(session);
+		sender.setHost("host");
+		sender.setUsername("username");
+		sender.setPassword("password");
+
+		MimeMessage mimeMessage = sender.createMimeMessage();
+		mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("you@mail.org"));
+		sender.send(mimeMessage);
+
+		assertEquals(sender.transport.getConnectedHost(), "host");
+		assertEquals(sender.transport.getConnectedUsername(), "username");
+		assertEquals(sender.transport.getConnectedPassword(), "password");
+		assertTrue(sender.transport.isCloseCalled());
+		assertEquals(1, sender.transport.getSentMessages().size());
+		assertEquals(mimeMessage, sender.transport.getSentMessage(0));
+	}
+
+	public void testJavaMailProperties() throws MessagingException {
+		Properties props = new Properties();
+		props.setProperty("bogusKey", "bogusValue");
+		MockJavaMailSender sender = new MockJavaMailSender() {
+			protected Transport getTransport(Session sess) throws NoSuchProviderException {
+				assertEquals("bogusValue", sess.getProperty("bogusKey"));
+				return super.getTransport(sess);
+			}
+		};
+		sender.setJavaMailProperties(props);
 		sender.setHost("host");
 		sender.setUsername("username");
 		sender.setPassword("password");

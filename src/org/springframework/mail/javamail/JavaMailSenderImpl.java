@@ -43,7 +43,7 @@ import org.springframework.mail.SimpleMailMessage;
  * @author Juergen Hoeller
  * @see JavaMailSender
  * @see org.springframework.mail.MailSender
- * @version $Id: JavaMailSenderImpl.java,v 1.8 2004-01-26 17:05:00 jhoeller Exp $
+ * @version $Id: JavaMailSenderImpl.java,v 1.9 2004-03-01 09:22:57 jhoeller Exp $
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
@@ -65,17 +65,30 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	private String password;
 
+
 	/**
-	 * Set the JavaMail Session, possibly pulled from JNDI. Default is an new Session
+	 * Set the JavaMail Session, possibly pulled from JNDI. Default is a new Session
 	 * without defaults, i.e. completely configured via this object's properties.
-	 * <p>If using a pre-configured Session, non-default properties in this object
-	 * will override the settings in the Session.
+	 * <p>If using a pre-configured Session, non-default properties in this
+	 * MailSender will override the settings in the Session.
+	 * @see #setJavaMailProperties
 	 */
 	public void setSession(Session session) {
 		if (session == null) {
 			throw new IllegalArgumentException("Cannot work with a null Session");
 		}
 		this.session = session;
+	}
+
+	/**
+	 * Set JavaMail properties for the Session. A new Session will be created
+	 * with those properties. Use either this or setSession, not both.
+	 * <p>Non-default properties in this MailSender will override given
+	 * JavaMail properties.
+	 * @see #setSession
+	 */
+	public void setJavaMailProperties(Properties javaMailProperties) {
+		this.session = Session.getInstance(javaMailProperties);
 	}
 
 	/**
@@ -112,6 +125,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
 
 	public void send(SimpleMailMessage simpleMessage) throws MailException {
 		send(new SimpleMailMessage[] { simpleMessage });
