@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.access;
 
@@ -28,13 +28,21 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
- * 
  * @author Rod Johnson
- * @since 02-Dec-02
+ * @since 02.12.2002
  */
 public class BeanFactoryBootstrapTests extends TestCase {
 	
-	private Properties _savedProps;
+	private Properties savedProps;
+
+	protected void setUp() {
+		// Save and restore System properties, which get destroyed for the tests.
+		this.savedProps = System.getProperties();
+	}
+
+	protected void tearDown() {
+		System.setProperties(this.savedProps);
+	}
 
 	/** How to test many singletons? */
 	public void testGetInstanceWithNullPropertiesFails() throws BeansException {
@@ -86,7 +94,6 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		}
 	}
 	
-	
 //	public void testXmlBeanFactory() throws Exception {
 //		Properties p = new Properties();
 //		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class", 
@@ -119,17 +126,14 @@ public class BeanFactoryBootstrapTests extends TestCase {
 //			throw ex;
 //		}
 //	}
-	
-	
+
 	public void testDummyBeanFactory() throws Exception {
 		Properties p = new Properties();
 		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
 		"org.springframework.beans.factory.access.BeanFactoryBootstrapTests$DummyBeanFactory");
 		
-		
 		System.setProperties(p);
-		//System.getProperties().list(System.out);
-		
+
 		BeanFactoryBootstrap.reinitialize();
 
 		try {
@@ -146,19 +150,21 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		}
 	}
 
+
 	public static class DummyBeanFactory implements BeanFactory {
-		
-		public Map m = new HashMap();
-		
+
+		public Map map = new HashMap();
+
 		 {
-			m.put("test", new TestBean());
-			m.put("s", new String());
+			this.map.put("test", new TestBean());
+			this.map.put("s", new String());
 		}
-		
+
 		public Object getBean(String name) {
-			Object bean = m.get(name);
-			if (bean == null)
+			Object bean = this.map.get(name);
+			if (bean == null) {
 				throw new NoSuchBeanDefinitionException(name, "no message");
+			}
 			return bean;
 		}
 
@@ -167,7 +173,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		}
 
 		public boolean containsBean(String name) {
-			return m.containsKey(name);
+			return this.map.containsKey(name);
 		}
 
 		public boolean isSingleton(String name) {
@@ -181,21 +187,6 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		public String[] getAliases(String name) {
 			throw new UnsupportedOperationException("getAliases");
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	protected void setUp() throws Exception {
-		// save and restore System properties, which get destroyed for the tests
-		_savedProps = System.getProperties();
-	}
-
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#tearDown()
-	 */
-	protected void tearDown() throws Exception {
-		System.setProperties(_savedProps);
 	}
 
 }
