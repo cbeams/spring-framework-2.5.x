@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.web.servlet.view;
 
 import java.util.Iterator;
@@ -17,55 +17,33 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Wrapper for a JSP or other resource within the same web application.
+ * Exposes model objects as request attributes and forwards the request to
+ * the specified resource URL using a RequestDispatcher. Will fall back to
+ * an include if already in an included request.
  *
- * <p>Exposes model objects as request attributes and forwards the request
- * to the specified resource URL using a RequestDispatcher.
+ * <p>A URL for this view is supposed to specify a resource within the web
+ * application, i.e. suitable for RequestDispatcher's forward/include methods.
  *
  * @author Rod Johnson
- * @version $Id: InternalResourceView.java,v 1.6 2003-12-15 03:53:40 colins Exp $
+ * @author Juergen Hoeller
+ * @version $Id: InternalResourceView.java,v 1.7 2003-12-15 08:33:57 jhoeller Exp $
+ * @see javax.servlet.RequestDispatcher#forward
+ * @see javax.servlet.RequestDispatcher#include
  */
-public class InternalResourceView extends AbstractView {
-
-	/** URL of the JSP or other resource within the WAR */
-	private String url;
+public class InternalResourceView extends AbstractUrlBasedView {
 
 	/**
 	 * Constructor for use as a bean.
 	 */
 	public InternalResourceView() {
 	}
-	 
+
 	/**
 	 * Create a new InternalResourceView with the given URL.
 	 * @param url the URL to forward to
 	 */
 	public InternalResourceView(String url) {
 		setUrl(url);
-	}
-
-	/**
-	 * Set the resource URL that this view forwards to.
-	 * @param url the URL of the resource this view forwards to
-	 */
-	public final void setUrl(String url) {
-		this.url = url;
-	}
-
-	/**
-	 * Return the resource URL that this view forwards to.
-	 * @return the URL of the resource this view forwards to
-	 */
-	protected final String getUrl() {
-		return url;
-	}
-
-	/**
-	 * Overridden lifecycle method to check that 'url' property is set.
-	 */
-	protected void initApplicationContext() throws IllegalArgumentException {
-		if (this.url == null) {
-			throw new IllegalArgumentException("Must set 'url' property in class [" + getClass().getName() + "]");
-		}
 	}
 
 	/**
@@ -79,20 +57,20 @@ public class InternalResourceView extends AbstractView {
 
 		// let the target resource set the content type
 		// simply forward to the JSP
-		RequestDispatcher rd = request.getRequestDispatcher(this.url);
+		RequestDispatcher rd = request.getRequestDispatcher(getUrl());
 		if (rd == null) {
-			throw new ServletException("Can't get RequestDispatcher for [" + this.url +
+			throw new ServletException("Can't get RequestDispatcher for [" + getUrl() +
 			                           "']: check that this file exists within your WAR");
 		}
 
 		// if already included, include again, else forward
 		if (request.getAttribute(WebUtils.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
 			rd.include(request, response);
-			logger.debug("Included resource [" + this.url + "] in InternalResourceView '" + getName() + "'");
+			logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getName() + "'");
 		}
 		else {
 			rd.forward(request, response);
-			logger.debug("Forwarded to resource [" + this.url + "] in InternalResourceView '" + getName() + "'");
+			logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getName() + "'");
 		}
 	}
 
@@ -126,5 +104,5 @@ public class InternalResourceView extends AbstractView {
 			logger.debug("Model is null. Nothing to expose to request.");
 		}
 	}
-	
+
 }

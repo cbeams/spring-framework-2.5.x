@@ -12,31 +12,33 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * View that redirects to an internal or external URL,
  * exposing all model attributes as HTTP query parameters.
+ *
+ * <p>A URL for this view is supposed to be a HTTP redirect URL,
+ * i.e. suitable for HttpServletResponse's sendRedirect method.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RedirectView.java,v 1.3 2003-11-21 22:34:58 jhoeller Exp $
+ * @version $Id: RedirectView.java,v 1.4 2003-12-15 08:33:57 jhoeller Exp $
+ * @see javax.servlet.http.HttpServletResponse#sendRedirect
  */
-public class RedirectView extends AbstractView {
+public class RedirectView extends AbstractUrlBasedView {
 
 	public static final String DEFAULT_ENCODING_SCHEME = "UTF-8";
 
 	private String encodingScheme = DEFAULT_ENCODING_SCHEME;
 
-	private String url;
-
+	/**
+	 * Constructor for use as a bean.
+	 */
 	public RedirectView() {
 	}
 
+	/**
+	 * Create a new RedirectView with the given URL.
+	 * @param url the URL to redirect to
+	 */
 	public RedirectView(String url) {
 		setUrl(url);
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	protected String getUrl() {
-		return url;
 	}
 
 	/**
@@ -51,15 +53,6 @@ public class RedirectView extends AbstractView {
    */
 	protected String getEncodingScheme() {
 		return this.encodingScheme;
-	}
-
-	/**
-	 * Overridden lifecycle method to check that 'url' property is set.
-	 */
-	protected void initApplicationContext() throws IllegalArgumentException {
-		if (this.url == null) {
-			throw new IllegalArgumentException("Must set 'url' property in class [" + getClass().getName() + "]");
-		}
 	}
 
 	/**

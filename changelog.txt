@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.64 2003-12-14 16:49:13 johnsonr Exp $
+$Id: changelog.txt,v 1.65 2003-12-15 08:35:41 jhoeller Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -68,6 +68,9 @@ Package org.springframework.transaction
 * introduced PropertiesTransactionAttributeSource, making properties parsing previously available in TransactionFactoryProxyBean available standalone
 * added TransactionAttributeSourceTransactionAroundAdvisor to allow pointcut to be used by default to target transaction interception
 
+Package org.springframework.ui
+* replaced "appRootMarker" mechanism in VelocityEngineFactory with "resourceLoaderPath" property
+
 Package org.springframework.validation
 * removed event propagation support in DataBinder
 
@@ -104,16 +107,19 @@ Package org.springframework.web
 * added additional "referenceData(request,page)" method to AbstractWizardFormController
 * added additional "getTargetPage(request,command,errors,currentPage)" method to AbstractWizardFormController
 * introduced ThrowawayController and ValidatableThrowawayController for WebWork/Maverick-style controllers
-* renamed org.springframework.web.servlet.view.velocity.VelocityConfiguration to VelocityConfig
+* added AbstractUrlBasedView and UrlBasedViewResolver base classes, for consistent handling of view URLs
+* renamed VelocityView's "templateName" property to "url" for consistency, deriving from AbstractUrlBasedView now
+* added VelocityViewResolver convenience class, deriving from UrlBasedViewResolver
 * removed "exposeDateFormatter" and "exposeCurrencyFormatter" properties in VelocityView
 * added "dateToolAttribute" to VelocityView, for exposing a DateTool instance (DateTool is from Velocity Tools)
+* renamed org.springframework.web.servlet.view.velocity.VelocityConfiguration to VelocityConfig
 
-Package org.springframework.metadata and supporting packages
-* New package providing a facade to source-level and other attribute metadata
-* Integration with Jakarta Commons Attributes
-* Added metadata-driven autoproxying to allow for .NET-style attribute-driven declarative services.
+New package org.springframework.metadata plus supporting packages
+* providing a facade to source-level and other attribute metadata
+* integration with Jakarta Commons Attributes as default backend implementation
+* added metadata-driven autoproxying to allow for .NET-style attribute-driven declarative services
 See the org.springframework.aop.framework.autoproxy.metadata package for tests illustrating this,
-using Commons Attributes to drive declarative transaction management, pooling and other services.
+using Commons Attributes to drive declarative transaction management, pooling, and other services.
 
 
 Changes in version 1.0 M3 (25.11.2003)

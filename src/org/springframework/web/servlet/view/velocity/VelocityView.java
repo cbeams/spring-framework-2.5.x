@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,7 +31,7 @@ import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
-import org.springframework.web.servlet.view.AbstractView;
+import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
  * View using Velocity template engine.
@@ -40,16 +39,17 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * <p>Exposes the following JavaBean properties:
  * <ul>
- * <li>templateName: name of the Velocity template to be cached
- * <li>dateToolAttribute (optional, default=null): set the name of the DateHool
- * helper object to expose in the Velocity context of this view, or null if
- * not needed. DateTool is from Velocity Tools.
- * <li>cacheTemplate (optional, default=false): whether or not the Velocity
+ * <li><b>url</b>: location of the Velocity template to be wrapped,
+ * relative to the Velocity resource loader path (see VelocityConfigurer).
+ * <li><b>dateToolAttribute</b> (optional, default=null): set the name of the
+ * DateTool helper object to expose in the Velocity context of this view,
+ * or null if not needed. DateTool is from Velocity Tools.
+ * <li><b>cacheTemplate</b> (optional, default=false): whether or not the Velocity
  * template should be cached. It should normally be true in production, but setting
  * this to false enables us to modify Velocity templates without restarting the
  * application (similar to JSPs). Note that this is a minor optimization only,
  * as Velocity itself caches templates in a modification-aware fashion.
- * <li>writerPoolSize (optional, default=40): number of Velocity writers
+ * <li><b>writerPoolSize</b> (optional, default=40): number of Velocity writers
  * (refer to Velocity documentation to see exactly what this means)
  * </ul>
  * 
@@ -57,17 +57,15 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.16 2003-12-13 00:32:21 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.17 2003-12-15 08:33:57 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  */
-public class VelocityView extends AbstractView {
+public class VelocityView extends AbstractUrlBasedView {
 
 	/** Default size for the Velocity writer pool */
 	public static final int DEFAULT_WRITER_POOL_SIZE = 40;
 
-
-	private String templateName;
 
 	private String dateToolAttribute;
 
@@ -85,16 +83,6 @@ public class VelocityView extends AbstractView {
 	/** Velocity Template */
 	private Template velocityTemplate;
 
-
-	/**
-	 * Set the name of the wrapped Velocity template.
-	 * This will cause the template to be loaded.
-	 * @param templateName the name of the wrapped Velocity template,
-	 * relative to the Velocity template root. For example, "/ic/interestResult.vm".
-	 */
-	public void setTemplateName(String templateName) throws ServletException {
-		this.templateName = templateName;
-	}
 
 	/**
 	 * Set the name of the DateHool helper object to expose in the Velocity context
@@ -129,9 +117,7 @@ public class VelocityView extends AbstractView {
  	* find the relevant VelocityEngine for this factory.
  	*/
 	protected void initApplicationContext() throws ApplicationContextException {
-		if (this.templateName == null) {
-			throw new IllegalArgumentException("Must set 'templateName' property in class [" + getClass().getName() + "]");
-		}
+		super.initApplicationContext();
 
 		try {
 			VelocityConfig vconfig = (VelocityConfig)
@@ -163,17 +149,17 @@ public class VelocityView extends AbstractView {
 	 */
 	private void loadTemplate() throws ApplicationContextException {
 		try {
-			this.velocityTemplate = this.velocityEngine.getTemplate(this.templateName);
+			this.velocityTemplate = this.velocityEngine.getTemplate(getUrl());
 		}
 		catch (ResourceNotFoundException ex) {
-			handleException("Can't load Velocity template '" + this.templateName +
+			handleException("Can't load Velocity template '" + getUrl() +
 											"': is it available in the template directory?", ex);
 		}
 		catch (ParseErrorException ex) {
-			handleException("Error parsing Velocity template '" + this.templateName + "'", ex);
+			handleException("Error parsing Velocity template '" + getUrl() + "'", ex);
 		}
 		catch (Exception ex) {
-			handleException("Unexpected error getting Velocity template '" + this.templateName + "'", ex);
+			handleException("Unexpected error getting Velocity template '" + getUrl() + "'", ex);
 		}
 	}
 
@@ -208,7 +194,7 @@ public class VelocityView extends AbstractView {
 
 		mergeTemplate(this.velocityTemplate, vContext, response);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Merged with Velocity template '" + this.templateName + "' in VelocityView '" + getName() + "'");
+			logger.debug("Merged with Velocity template '" + getUrl() + "' in VelocityView '" + getName() + "'");
 		}
 	}
 
