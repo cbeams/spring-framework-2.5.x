@@ -12,13 +12,13 @@ import org.apache.commons.logging.LogFactory;
  * Convenience superclass for configuration used in creating proxies,
  * to ensure that all proxy creators have consistent properties.
  * <br>
- * Note that it is now longer possible to configure subclasses to 
+ * Note that it is no longer possible to configure subclasses to 
  * expose the MethodInvocation. Interceptors should normally manage their own
  * ThreadLocals if they need to make resources available to advised objects.
  * If it's absolutely necessary to expose the MethodInvocation, use an
  * interceptor to do so.
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.6 2003-12-19 10:22:02 johnsonr Exp $
+ * @version $Id: ProxyConfig.java,v 1.7 2004-03-12 02:55:31 johnsonr Exp $
  */
 public class ProxyConfig {
 	
@@ -38,6 +38,12 @@ public class ProxyConfig {
 	private boolean optimize;
 	
 	/**
+	 * Is this config frozen: that is, should it be impossible
+	 * to change advice. Default is not frozen.
+	 */
+	private boolean frozen;
+	
+	/**
 	 * Should proxies obtained from this configuration expose
 	 * the AOP proxy for the AopContext class to retrieve for targets?
 	 * The default is false, as enabling this property may
@@ -49,10 +55,15 @@ public class ProxyConfig {
 	public ProxyConfig() {
 	}
 
+	/**
+	 * Copy configuration from the other config
+	 * @param other object to copy configuration from
+	 */
 	public void copyFrom(ProxyConfig other) {
 		this.optimize = other.getOptimize();
 		this.proxyTargetClass = other.proxyTargetClass;
 		this.exposeProxy = other.exposeProxy;
+		this.frozen = other.frozen;
 	}
 
 	public boolean getProxyTargetClass() {
@@ -120,9 +131,31 @@ public class ProxyConfig {
 		this.exposeProxy = exposeProxy;
 	}
 	
+
+	/**
+	 * @return whether the config is frozen, and no
+	 * advice changes can be made
+	 */
+	public boolean isFrozen() {
+		return frozen;
+	}
+
+	/**
+	 * Set whether this config should be frozen.
+	 * When a config is frozen, no advice changes can be
+	 * made. This is useful for optimization, and useful
+	 * when we don't want callers to be able to manipulate
+	 * configuration after casting to Advised.
+	 * @param frozen is this config frozen?
+	 */
+	public void setFrozen(boolean frozen) {
+		this.frozen = frozen;
+	}
+	
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("exposeProxy=" + exposeProxy + "; ");
+		sb.append("frozen=" + frozen + "; ");
 		sb.append("enableCglibSubclassOptimizations=" + optimize + "; ");
 		return sb.toString();
 	}
