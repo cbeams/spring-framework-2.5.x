@@ -22,7 +22,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.rules.predicates.beans.*;
+import org.springframework.rules.factory.Constraints;
+import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.util.ToStringBuilder;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.util.ToStringBuilder;
  * @author Keith Donald
  * @TODO move to validation package at some point...
  */
-public class DefaultRulesSource implements RulesSource {
+public class DefaultRulesSource extends Constraints implements RulesSource {
     private static final Log logger = LogFactory
             .getLog(DefaultRulesSource.class);
     private Map rules = new HashMap();
