@@ -107,25 +107,30 @@ public class MimeMessageHelper {
 
 	private MimeMultipart mimeMultipart;
 
-	private String encoding;
-
-	private boolean validateAddresses = false;
+	private final String encoding;
 
 	/**
-	 * <code>FileTypeMap</code> used to find the MIME-type of a file.
+	 * <code>FileTypeMap</code> used to determine the MIME type of a file.
 	 */
 	private FileTypeMap fileTypeMap = FileTypeMap.getDefaultFileTypeMap();
+
+	private boolean validateAddresses = false;
 
 
 	/**
 	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * assuming a simple text message (no multipart content,
 	 * i.e. no alternative texts and no inline elements or attachments).
+	 * <p>The character encoding for the message will be taken from
+	 * the passed-in MimeMessage object, if carried there. Else,
+	 * JavaMail's default encoding will be used.
 	 * @param mimeMessage MimeMessage to work on
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
+	 * @see #getDefaultEncoding(javax.mail.internet.MimeMessage)
+	 * @see JavaMailSenderImpl#setDefaultEncoding
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage) {
-		this.mimeMessage = mimeMessage;
+		this(mimeMessage, null);
 	}
 
 	/**
@@ -137,24 +142,26 @@ public class MimeMessageHelper {
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage, String encoding) {
-		this(mimeMessage);
-		this.encoding = encoding;
+		this.mimeMessage = mimeMessage;
+		this.encoding = (encoding != null ? encoding : getDefaultEncoding(mimeMessage));
+		this.fileTypeMap = getDefaultFileTypeMap(mimeMessage);
 	}
 
 	/**
 	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * in multipart mode (supporting alternative texts, inline
 	 * elements and attachments) if requested.
+	 * <p>The character encoding for the message will be taken from
+	 * the passed-in MimeMessage object, if carried there. Else,
+	 * JavaMail's default encoding will be used.
 	 * @param mimeMessage MimeMessage to work on
 	 * @param multipart whether to create a multipart message that
 	 * supports alternative texts, inline elements and attachments
+	 * @see #getDefaultEncoding(javax.mail.internet.MimeMessage)
+	 * @see JavaMailSenderImpl#setDefaultEncoding
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart) throws MessagingException {
-		this.mimeMessage = mimeMessage;
-		if (multipart) {
-			this.mimeMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);
-			this.mimeMessage.setContent(this.mimeMultipart);
-		}
+		this(mimeMessage, multipart, null);
 	}
 
 	/**
@@ -168,9 +175,16 @@ public class MimeMessageHelper {
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, String encoding)
 	    throws MessagingException {
-		this(mimeMessage, multipart);
-		this.encoding = encoding;
+
+		this.mimeMessage = mimeMessage;
+		if (multipart) {
+			this.mimeMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);
+			this.mimeMessage.setContent(this.mimeMultipart);
+		}
+		this.encoding = (encoding != null ? encoding : getDefaultEncoding(mimeMessage));
+		this.fileTypeMap = getDefaultFileTypeMap(mimeMessage);
 	}
+
 
 	/**
 	 * Return the underlying MimeMessage object.
@@ -205,10 +219,62 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Return the character encoding used for this message.
+	 * Determine the default encoding for the given MimeMessage.
+	 * @param mimeMessage the passed-in MimeMessage
+	 * @return the default encoding associated with the MimeMessage,
+	 * or null if none found
+	 */
+	protected String getDefaultEncoding(MimeMessage mimeMessage) {
+		if (mimeMessage instanceof SmartMimeMessage) {
+			return ((SmartMimeMessage) mimeMessage).getDefaultEncoding();
+		}
+		return null;
+	}
+
+	/**
+	 * Return the specific character encoding used for this message, if any.
 	 */
 	public String getEncoding() {
 		return encoding;
+	}
+
+	/**
+	 * Determine the default Java Activation FileTypeMap for the given MimeMessage.
+	 * @param mimeMessage the passed-in MimeMessage
+	 * @return the default FileTypeMap associated with the MimeMessage,
+	 * or the global default if none found for the message
+	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
+	 */
+	protected FileTypeMap getDefaultFileTypeMap(MimeMessage mimeMessage) {
+		if (mimeMessage instanceof SmartMimeMessage) {
+			return ((SmartMimeMessage) mimeMessage).getDefaultFileTypeMap();
+		}
+		return FileTypeMap.getDefaultFileTypeMap();
+	}
+
+	/**
+	 * Set the Java Activation Framework <code>FileTypeMap</code> to use
+	 * for determining the content type of inline content and attachments
+	 * that get added to the message.
+	 * <p>Default is the <code>FileTypeMap</code> that the underlying
+	 * MimeMessage carries, if any, or the Activation Framework's default
+	 * <code>FileTypeMap</code> instance else.
+	 * @see #addInline
+	 * @see #addAttachment
+	 * @see #getDefaultFileTypeMap(javax.mail.internet.MimeMessage)
+	 * @see JavaMailSenderImpl#setDefaultFileTypeMap
+	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
+	 * @see org.springframework.mail.javamail.support.ConfigurableFileTypeMap
+	 */
+	public void setFileTypeMap(FileTypeMap fileTypeMap) {
+		this.fileTypeMap = (fileTypeMap != null ? fileTypeMap : FileTypeMap.getDefaultFileTypeMap());
+	}
+
+	/**
+	 * Return the <code>FileTypeMap</code> used by this MimeMessageHelper.
+	 */
+	public FileTypeMap getFileTypeMap() {
+		return fileTypeMap;
 	}
 
 
@@ -262,14 +328,6 @@ public class MimeMessageHelper {
 		}
 	}
 
-	/**
-	 * Sets the <code>FileTypeMap</code> to use when adding attachments and inline content to
-	 * the message.
-	 */
-	public void setFileTypeMap(FileTypeMap fileTypeMap) {
-		Assert.notNull(fileTypeMap, "FileTypeMap must not be null");
-		this.fileTypeMap = fileTypeMap;
-	}
 
 	public void setFrom(InternetAddress from) throws MessagingException {
 		Assert.notNull(from, "From address must not be null");
@@ -583,8 +641,8 @@ public class MimeMessageHelper {
 	 * the content from, determining the InputStream and the content type
 	 * @throws MessagingException in case of errors
 	 * @see #setText
-	 * @see #addAttachment(String, File)
-	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
+	 * @see #addInline(String, java.io.File)
+	 * @see #addInline(String, org.springframework.core.io.Resource)
 	 */
 	public void addInline(String contentId, DataSource dataSource) throws MessagingException {
 		Assert.notNull(contentId, "Content ID must not be null");
@@ -612,13 +670,13 @@ public class MimeMessageHelper {
 	 * @param file the File resource to take the content from
 	 * @throws MessagingException in case of errors
 	 * @see #setText
-	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
-	 * @see #addAttachment(String, javax.activation.DataSource)
+	 * @see #addInline(String, org.springframework.core.io.Resource)
+	 * @see #addInline(String, javax.activation.DataSource)
 	 */
 	public void addInline(String contentId, File file) throws MessagingException {
 		Assert.notNull(file, "File must not be null");
 		FileDataSource dataSource = new FileDataSource(file);
-		dataSource.setFileTypeMap(fileTypeMap);
+		dataSource.setFileTypeMap(getFileTypeMap());
 		addInline(contentId, dataSource);
 	}
 
@@ -639,21 +697,21 @@ public class MimeMessageHelper {
 	 * @param resource the resource to take the content from
 	 * @throws MessagingException in case of errors
 	 * @see #setText
-	 * @see #addAttachment(String, File)
-	 * @see #addAttachment(String, javax.activation.DataSource)
+	 * @see #addInline(String, java.io.File)
+	 * @see #addInline(String, javax.activation.DataSource)
 	 */
 	public void addInline(String contentId, Resource resource) throws MessagingException {
 		Assert.notNull(resource, "Resource must not be null");
-		String contentType = fileTypeMap.getContentType(resource.getFilename());
+		String contentType = getFileTypeMap().getContentType(resource.getFilename());
 		addInline(contentId, resource, contentType);
 	}
 
 	/**
 	 * Add an inline element to the MimeMessage, taking the content from an
-	 * <code>org.springframework.core.InputStreamResource</code>.
-	 * <p>You can determine the content type for any given filename
-	 * via the Activation Framework's FileTypeMap utility:<br>
-	 * <code>FileTypeMap.getDefaultFileTypeMap().getContentType(myFilename)</code>
+	 * <code>org.springframework.core.InputStreamResource</code>, and
+	 * specifying the content type explicitly.
+	 * <p>You can determine the content type for any given filename via a Java
+	 * Activation Framework's FileTypeMap, for example the one held by this helper.
 	 * <p>Note that the InputStream returned by the InputStreamSource implementation
 	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
 	 * <code>getInputStream()</code> multiple times.
@@ -666,10 +724,9 @@ public class MimeMessageHelper {
 	 * @param contentType the content type to use for the element
 	 * @throws MessagingException in case of errors
 	 * @see #setText
-	 * @see #addAttachment(String, File)
-	 * @see #addAttachment(String, javax.activation.DataSource)
-	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
-	 * @see javax.activation.FileTypeMap#getContentType
+	 * @see #getFileTypeMap
+	 * @see #addInline(String, org.springframework.core.io.Resource)
+	 * @see #addInline(String, javax.activation.DataSource)
 	 */
 	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
 	    throws MessagingException {
@@ -722,7 +779,7 @@ public class MimeMessageHelper {
 	public void addAttachment(String attachmentFilename, File file) throws MessagingException {
 		Assert.notNull(file, "File must not be null");
 		FileDataSource dataSource = new FileDataSource(file);
-		dataSource.setFileTypeMap(fileTypeMap);
+		dataSource.setFileTypeMap(getFileTypeMap());
 		addAttachment(attachmentFilename, dataSource);
 	}
 
@@ -753,7 +810,7 @@ public class MimeMessageHelper {
 					"Passed-in Resource contains an open stream: invalid argument. " +
 					"JavaMail requires an InputStreamSource that creates a fresh stream for every call.");
 		}
-		String contentType = fileTypeMap.getContentType(attachmentFilename);
+		String contentType = getFileTypeMap().getContentType(attachmentFilename);
 		DataSource dataSource = createDataSource(inputStreamSource, contentType, attachmentFilename);
 		addAttachment(attachmentFilename, dataSource);
 	}
