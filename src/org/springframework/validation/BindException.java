@@ -265,8 +265,7 @@ public class BindException extends Exception implements Errors {
 		Object value = (fe != null) ? fe.getRejectedValue() : getBeanWrapper().getPropertyValue(field);
 		// apply custom editor, but not on binding failures like type mismatches
 		if (value != null && (fe == null || !fe.isBindingFailure())) {
-			Class type = getBeanWrapper().getPropertyType(field);
-			PropertyEditor customEditor = getBeanWrapper().findCustomEditor(type, field);
+			PropertyEditor customEditor = getBeanWrapper().findCustomEditor(value.getClass(), field);
 			if (customEditor != null) {
 				customEditor.setValue(value);
 				return customEditor.getAsText();
@@ -291,10 +290,18 @@ public class BindException extends Exception implements Errors {
 	 * Return a model Map for the obtained state, exposing an Errors
 	 * instance as '{@link #ERROR_KEY_PREFIX ERROR_KEY_PREFIX} + objectName'
 	 * and the object itself.
-	 * <p>Note that the Map is constructed each time you're calling this method,
-	 * adding things to the map and then re-calling it will not do...
+	 * <p>Note that the Map is constructed every time you're calling this method.
+	 * Adding things to the map and then re-calling this method will not work.
+	 * <p>The attributes in the model Map returned by this method are usually
+	 * included in the ModelAndView for a form view that uses Spring's bind tag,
+	 * which needs access to the Errors instance. Spring's SimpleFormController
+	 * will do this for you when rendering its form or success view. When
+	 * building the ModelAndView yourself, you need to include the attributes
+	 * from the model Map returned by this method yourself.
 	 * @see #getObjectName
 	 * @see #ERROR_KEY_PREFIX
+	 * @see org.springframework.web.servlet.ModelAndView
+	 * @see org.springframework.web.servlet.tags.BindTag
 	 */
 	public final Map getModel() {
 		Map model = new HashMap();

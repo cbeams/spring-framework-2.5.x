@@ -26,6 +26,7 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.DerivedTestBean;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.util.StringUtils;
 
@@ -390,7 +391,9 @@ public class ValidationTestSuite extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, "array", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
-				setValue(new TestBean("array" + text, 99));
+				DerivedTestBean tb = new DerivedTestBean();
+				tb.setName("array" + text);
+				setValue(tb);
 			}
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
@@ -411,8 +414,9 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD.tb.array", errors.getFieldError("array[0]").getCodes()[1]);
 		assertEquals("NOT_ROD.array[0]", errors.getFieldError("array[0]").getCodes()[2]);
 		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
-		assertEquals("NOT_ROD.org.springframework.beans.TestBean", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[5]);
+		assertEquals("arraya", errors.getFieldValue("array[0]"));
 
 		assertEquals(1, errors.getFieldErrorCount("map[key1]"));
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCode());
@@ -430,6 +434,37 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_NULL.map[key0]", errors.getFieldError("map[key0]").getCodes()[2]);
 		assertEquals("NOT_NULL.map", errors.getFieldError("map[key0]").getCodes()[3]);
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[4]);
+	}
+
+	public void testCustomEditorWithSubclass() {
+		IndexedTestBean tb = new IndexedTestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				DerivedTestBean tb = new DerivedTestBean();
+				tb.setName("array" + text);
+				setValue(tb);
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0]", "a");
+		binder.bind(pvs);
+		Errors errors = binder.getErrors();
+		errors.rejectValue("array[0]", "NOT_ROD", "are you sure you're not Rod?");
+
+		assertEquals("arraya", errors.getFieldValue("array[0]"));
+		assertEquals(1, errors.getFieldErrorCount("array[0]"));
+		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCode());
+		assertEquals("NOT_ROD.tb.array[0]", errors.getFieldError("array[0]").getCodes()[0]);
+		assertEquals("NOT_ROD.tb.array", errors.getFieldError("array[0]").getCodes()[1]);
+		assertEquals("NOT_ROD.array[0]", errors.getFieldError("array[0]").getCodes()[2]);
+		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
+		assertEquals("NOT_ROD.org.springframework.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[5]);
+		assertEquals("arraya", errors.getFieldValue("array[0]"));
 	}
 
 	public void testBindToStringArrayWithArrayEditor() {

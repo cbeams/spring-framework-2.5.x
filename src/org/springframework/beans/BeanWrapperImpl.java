@@ -76,7 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.43 2004-06-11 23:42:27 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.44 2004-06-14 14:18:50 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -308,11 +308,35 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 		}
 		// no property-specific editor -> check type-specific editor
-		return getCustomEditor(requiredType, requiredType);
+		return getCustomEditor(requiredType);
 	}
 
-	private PropertyEditor getCustomEditor(Object key, Class requiredType) {
-		CustomEditorHolder holder = (CustomEditorHolder) this.customEditors.get(key);
+	/**
+	 * Get custom editor that has been registered for the given property.
+	 * @return the custom editor, or null if none specific for this property
+	 */
+	private PropertyEditor getCustomEditor(String propertyName, Class requiredType) {
+		CustomEditorHolder holder = (CustomEditorHolder) this.customEditors.get(propertyName);
+		return (holder != null ? holder.getPropertyEditor(requiredType) : null);
+	}
+
+	/**
+	 * Get custom editor for the given type. If no direct match found,
+	 * try custom editor for superclass (which will in any case be able
+	 * to render a value as String via <code>getAsText</code>).
+	 * @see java.beans.PropertyEditor#getAsText
+	 * @return the custom editor, or null if none found for this type
+	 */
+	private PropertyEditor getCustomEditor(Class requiredType) {
+		CustomEditorHolder holder = (CustomEditorHolder) this.customEditors.get(requiredType);
+		if (holder == null) {
+			for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
+				Object key = it.next();
+				if (key instanceof Class && ((Class) key).isAssignableFrom(requiredType)) {
+					holder = (CustomEditorHolder) this.customEditors.get(key);
+				}
+			}
+		}
 		return (holder != null ? holder.getPropertyEditor(requiredType) : null);
 	}
 
