@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
-import org.springframework.mail.MailMessageException;
+import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 
@@ -72,13 +72,13 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(SimpleMailMessage[] simpleMessages) throws MailException {
-		List mimeMessages = new ArrayList();
-		for (int i = 0; i < simpleMessages.length; i++) {
-			SimpleMailMessage simpleMessage = simpleMessages[i];
-			if (logger.isDebugEnabled())
-				logger.debug("Sending email using the following mail properties [" + simpleMessage + "]");
-			MimeMessage mimeMessage = createMimeMessage();
-			try {
+		try {
+			List mimeMessages = new ArrayList();
+			for (int i = 0; i < simpleMessages.length; i++) {
+				SimpleMailMessage simpleMessage = simpleMessages[i];
+				if (logger.isDebugEnabled())
+					logger.debug("Sending email using the following mail properties [" + simpleMessage + "]");
+				MimeMessage mimeMessage = createMimeMessage();
 				if (simpleMessage.getFrom() != null) {
 					mimeMessage.setFrom(new InternetAddress(simpleMessage.getFrom()));
 				}
@@ -98,11 +98,15 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				}
 				mimeMessages.add(mimeMessage);
 			}
-			catch (MessagingException ex) {
-				throw new MailMessageException(ex);
-			}
+			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
 		}
-		send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+		catch (MessagingException ex) {
+			throw new MailParseException(ex);
+		}
+	}
+
+	public MimeMessage createMimeMessage() {
+		return new MimeMessage(this.session);
 	}
 
 	public void send(MimeMessage mimeMessage) throws MailException {
@@ -139,12 +143,27 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		}
 	}
 
-	protected Transport getTransport() throws NoSuchProviderException {
-		return this.session.getTransport(this.protocol);
+	public void send(MimeMessagePreparator mimeMessagePreparator) throws MailException {
+		send(new MimeMessagePreparator[] {mimeMessagePreparator});
 	}
 
-	public MimeMessage createMimeMessage() {
-		return new MimeMessage(this.session);
+	public void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException {
+		try {
+			List mimeMessages = new ArrayList();
+			for (int i = 0; i < mimeMessagePreparators.length; i++) {
+				MimeMessage mimeMessage = createMimeMessage();
+				mimeMessagePreparators[i].prepare(mimeMessage);
+				mimeMessages.add(mimeMessage);
+			}
+			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+		}
+		catch (MessagingException ex) {
+			throw new MailParseException(ex);
+		}
+	}
+
+	protected Transport getTransport() throws NoSuchProviderException {
+		return this.session.getTransport(this.protocol);
 	}
 
 }

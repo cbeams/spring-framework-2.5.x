@@ -16,7 +16,7 @@ public class MailSendException extends MailException {
 	}
 
 	public MailSendException(Throwable ex) {
-		super("Send failed: " + ex.getMessage(), ex);
+		super("Could not send mail: " + ex.getMessage(), ex);
 	}
 
 }
