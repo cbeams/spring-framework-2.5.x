@@ -19,7 +19,7 @@ package org.springframework.jdbc.support.rowset;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * Default implementation of Spring's SqlRowSetMetaData interface.
@@ -38,7 +38,34 @@ public class SqlRowSetMetaDataImpl implements SqlRowSetMetaData {
 		this.resultSetMetaData = resultSetMetaData;
 	}
 	
-	public String[] getColumnNames() throws DataAccessResourceFailureException {
+	public String getCatalogName(int column) throws InvalidResultSetAccessException {
+		try {
+			return this.resultSetMetaData.getCatalogName(column);
+		}
+		catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+	}
+	
+	public String getColumnClassName(int column) throws InvalidResultSetAccessException {
+		try {
+			return this.resultSetMetaData.getColumnClassName(column);
+		}
+		catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+	}
+
+	public int getColumnCount() throws InvalidResultSetAccessException {
+		try {
+			return this.resultSetMetaData.getColumnCount();
+		}
+		catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+	}
+
+	public String[] getColumnNames() throws InvalidResultSetAccessException {
 		if (this.columnNames == null) {
 			this.columnNames = new String[getColumnCount()];
 			for (int i = 0; i < getColumnCount(); i++) {
@@ -48,138 +75,111 @@ public class SqlRowSetMetaDataImpl implements SqlRowSetMetaData {
 		return this.columnNames;
 	}
 
-	public String getCatalogName(int column) throws DataAccessResourceFailureException {
-		try {
-			return this.resultSetMetaData.getCatalogName(column);
-		}
-		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
-		}
-	}
-	
-	public String getColumnClassName(int column) throws DataAccessResourceFailureException {
-		try {
-			return this.resultSetMetaData.getColumnClassName(column);
-		}
-		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
-		}
-	}
-
-	public int getColumnCount() throws DataAccessResourceFailureException {
-		try {
-			return this.resultSetMetaData.getColumnCount();
-		}
-		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
-		}
-	}
-
-	public int getColumnDisplaySize(int column) throws DataAccessResourceFailureException {
+	public int getColumnDisplaySize(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getColumnDisplaySize(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public String getColumnLabel(int column) throws DataAccessResourceFailureException {
+	public String getColumnLabel(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getColumnLabel(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public String getColumnName(int column) throws DataAccessResourceFailureException {
+	public String getColumnName(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getColumnName(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public int getColumnType(int column) throws DataAccessResourceFailureException {
+	public int getColumnType(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getColumnType(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public String getColumnTypeName(int column) throws DataAccessResourceFailureException {
+	public String getColumnTypeName(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getColumnTypeName(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public int getPrecision(int column) throws DataAccessResourceFailureException {
+	public int getPrecision(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getPrecision(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public int getScale(int column) throws DataAccessResourceFailureException {
+	public int getScale(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getScale(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public String getSchemaName(int column) throws DataAccessResourceFailureException {
+	public String getSchemaName(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getSchemaName(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public String getTableName(int column) throws DataAccessResourceFailureException {
+	public String getTableName(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getTableName(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public boolean isCaseSensitive(int column) throws DataAccessResourceFailureException {
+	public boolean isCaseSensitive(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.isCaseSensitive(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public boolean isCurrency(int column) throws DataAccessResourceFailureException {
+	public boolean isCurrency(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.isCurrency(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
-	public boolean isSigned(int column) throws DataAccessResourceFailureException {
+	public boolean isSigned(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.isSigned(column);
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	

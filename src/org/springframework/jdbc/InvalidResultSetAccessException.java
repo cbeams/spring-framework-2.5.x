@@ -21,40 +21,50 @@ import java.sql.SQLException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
- * Exception thrown when SQL specified is invalid. Such exceptions always have
- * a <code>java.sql.SQLException</code> root cause.
+ * Exception thrown when a ResultSet has been accessed in an invalid fashion.
+ * Such exceptions always have a <code>java.sql.SQLException</code> root cause.
  *
- * <p>It would be possible to have subclasses for no such table, no such column etc.
- * A custom SQLExceptionTranslator could create such more specific exceptions,
- * without affecting code using this class.
+ * <p>This typically happens when an invalid ResultSet column index or name
+ * has been specified. Also thrown by disconnected SqlRowSets.
  *
- * @author Rod Johnson
- * @see InvalidResultSetAccessException
+ * @author Juergen Hoeller
+ * @since 1.2
+ * @see BadSqlGrammarException
+ * @see org.springframework.jdbc.support.rowset.SqlRowSet
  */
-public class BadSqlGrammarException extends InvalidDataAccessResourceUsageException {
+public class InvalidResultSetAccessException extends InvalidDataAccessResourceUsageException {
 	
 	private String sql;
 
 	/**
-	 * Constructor for BadSqlGrammarException.
+	 * Constructor for InvalidResultSetAccessException.
 	 * @param task name of current task (may be null)
 	 * @param sql the offending SQL statement
 	 * @param ex the root cause
 	 */
-	public BadSqlGrammarException(String task, String sql, SQLException ex) {
-		super("Bad SQL grammar [" + sql + "]" + (task != null ? " in task '" + task + "'" : ""), ex);
+	public InvalidResultSetAccessException(String task, String sql, SQLException ex) {
+		super("Invalid ResultSet access for SQL [" + sql + "]" + (task != null ? " in task '" + task + "'" : ""), ex);
 		this.sql = sql;
 	}
 	
+	/**
+	 * Constructor for InvalidResultSetAccessException.
+	 * @param ex the root cause
+	 */
+	public InvalidResultSetAccessException(SQLException ex) {
+		super(ex.getMessage(), ex);
+	}
+
 	/**
 	 * Return the wrapped SQLException.
 	 */
 	public SQLException getSQLException() {
 		return (SQLException) getCause();
 	}
-	
+
 	/**
 	 * Return the SQL that caused the problem.
+	 * @return the offending SQL, if known
 	 */
 	public String getSql() {
 		return sql;

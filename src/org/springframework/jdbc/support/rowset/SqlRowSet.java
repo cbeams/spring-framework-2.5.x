@@ -23,23 +23,24 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
-import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * Mirror interface for <code>javax.sql.RowSet</code>, representing
  * disconnected <code>java.sql.ResultSet</code> data.
  *
  * <p>The main difference to the standard JDBC RowSet is that an SQLException
- * is never thrown here. This allows an SqlRowSet to be used without having to deal
- * with checked exceptions. An SqlRowSet will throw Spring's
- * <code>org.springframework.dao.DataRetrievalFailureException</code> instead
- * (when appropriate).
+ * is never thrown here. This allows a SqlRowSet to be used without having
+ * to deal with checked exceptions. A SqlRowSet will throw Spring's
+ * <code>org.springframework.jdbc.InvalidResultSetAccessException</code>
+ * instead (when appropriate).
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 1.2
  * @see javax.sql.RowSet
  * @see java.sql.ResultSet
+ * @see org.springframework.jdbc.InvalidResultSetAccessException
  * @see org.springframework.jdbc.core.JdbcTemplate#queryForRowSet
  */
 public interface SqlRowSet {
@@ -61,7 +62,7 @@ public interface SqlRowSet {
 	 * @return the column index for the given column name
 	 * @see java.sql.ResultSet#findColumn(String)
 	 */
-	int findColumn(String columnName) throws DataRetrievalFailureException;
+	int findColumn(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -70,7 +71,7 @@ public interface SqlRowSet {
 	 * @return an BigDecimal object representing the column value
 	 * @see java.sql.ResultSet#getBigDecimal(int)
 	 */
-	BigDecimal getBigDecimal(int columnIndex) throws DataRetrievalFailureException;
+	BigDecimal getBigDecimal(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -79,7 +80,7 @@ public interface SqlRowSet {
 	 * @return an BigDecimal object representing the column value
 	 * @see java.sql.ResultSet#getBigDecimal(java.lang.String)
 	 */
-	BigDecimal getBigDecimal(String columnName) throws DataRetrievalFailureException;
+	BigDecimal getBigDecimal(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -88,7 +89,7 @@ public interface SqlRowSet {
 	 * @return a boolean representing the column value
 	 * @see java.sql.ResultSet#getBoolean(int)
 	 */
-	boolean getBoolean(int columnIndex) throws DataRetrievalFailureException;
+	boolean getBoolean(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -97,7 +98,7 @@ public interface SqlRowSet {
 	 * @return a boolean representing the column value
 	 * @see java.sql.ResultSet#getBoolean(java.lang.String)
 	 */
-	boolean getBoolean(String columnName) throws DataRetrievalFailureException;
+	boolean getBoolean(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -106,7 +107,7 @@ public interface SqlRowSet {
 	 * @return a byte representing the column value
 	 * @see java.sql.ResultSet#getByte(int)
 	 */
-	byte getByte(int columnIndex) throws DataRetrievalFailureException;
+	byte getByte(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -115,7 +116,7 @@ public interface SqlRowSet {
 	 * @return a byte representing the column value
 	 * @see java.sql.ResultSet#getByte(java.lang.String)
 	 */
-	byte getByte(String columnName) throws DataRetrievalFailureException;
+	byte getByte(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -125,7 +126,7 @@ public interface SqlRowSet {
 	 * @return a Date object representing the column value
 	 * @see java.sql.ResultSet#getDate(int, java.util.Calendar)
 	 */
-	Date getDate(int columnIndex, Calendar cal) throws DataRetrievalFailureException;
+	Date getDate(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -134,7 +135,7 @@ public interface SqlRowSet {
 	 * @return a Date object representing the column value
 	 * @see java.sql.ResultSet#getDate(int)
 	 */
-	Date getDate(int columnIndex) throws DataRetrievalFailureException;
+	Date getDate(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -144,7 +145,7 @@ public interface SqlRowSet {
 	 * @return a Date object representing the column value
 	 * @see java.sql.ResultSet#getDate(java.lang.String, java.util.Calendar)
 	 */
-	Date getDate(String columnName, Calendar cal) throws DataRetrievalFailureException;
+	Date getDate(String columnName, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -153,7 +154,7 @@ public interface SqlRowSet {
 	 * @return a Date object representing the column value
 	 * @see java.sql.ResultSet#getDate(java.lang.String)
 	 */
-	Date getDate(String columnName) throws DataRetrievalFailureException;
+	Date getDate(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -162,7 +163,7 @@ public interface SqlRowSet {
 	 * @return a Double object representing the column value
 	 * @see java.sql.ResultSet#getDouble(int)
 	 */
-	double getDouble(int columnIndex) throws DataRetrievalFailureException;
+	double getDouble(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -171,7 +172,7 @@ public interface SqlRowSet {
 	 * @return a Double object representing the column value
 	 * @see java.sql.ResultSet#getDouble(java.lang.String)
 	 */
-	double getDouble(String columnName) throws DataRetrievalFailureException;
+	double getDouble(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -180,7 +181,7 @@ public interface SqlRowSet {
 	 * @return a float representing the column value
 	 * @see java.sql.ResultSet#getFloat(int)
 	 */
-	float getFloat(int columnIndex) throws DataRetrievalFailureException;
+	float getFloat(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -189,7 +190,7 @@ public interface SqlRowSet {
 	 * @return a float representing the column value
 	 * @see java.sql.ResultSet#getFloat(java.lang.String)
 	 */
-	float getFloat(String columnName) throws DataRetrievalFailureException;
+	float getFloat(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -198,7 +199,7 @@ public interface SqlRowSet {
 	 * @return an int representing the column value
 	 * @see java.sql.ResultSet#getInt(int)
 	 */
-	int getInt(int columnIndex) throws DataRetrievalFailureException;
+	int getInt(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -207,7 +208,7 @@ public interface SqlRowSet {
 	 * @return an int representing the column value
 	 * @see java.sql.ResultSet#getInt(java.lang.String)
 	 */
-	int getInt(String columnName) throws DataRetrievalFailureException;
+	int getInt(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -216,7 +217,7 @@ public interface SqlRowSet {
 	 * @return a long representing the column value
 	 * @see java.sql.ResultSet#getLong(int)
 	 */
-	long getLong(int columnIndex) throws DataRetrievalFailureException;
+	long getLong(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -225,7 +226,7 @@ public interface SqlRowSet {
 	 * @return a long representing the column value
 	 * @see java.sql.ResultSet#getLong(java.lang.String)
 	 */
-	long getLong(String columnName) throws DataRetrievalFailureException;
+	long getLong(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -235,7 +236,7 @@ public interface SqlRowSet {
 	 * @return a Object representing the column value
 	 * @see java.sql.ResultSet#getObject(int, java.util.Map)
 	 */
-	Object getObject(int columnIndex, Map map) throws DataRetrievalFailureException;
+	Object getObject(int columnIndex, Map map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -244,7 +245,7 @@ public interface SqlRowSet {
 	 * @return a Object representing the column value
 	 * @see java.sql.ResultSet#getObject(int)
 	 */
-	Object getObject(int columnIndex) throws DataRetrievalFailureException;
+	Object getObject(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -254,7 +255,7 @@ public interface SqlRowSet {
 	 * @return a Object representing the column value
 	 * @see java.sql.ResultSet#getObject(java.lang.String, java.util.Map)
 	 */
-	Object getObject(String columnName, Map map) throws DataRetrievalFailureException;
+	Object getObject(String columnName, Map map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -263,14 +264,14 @@ public interface SqlRowSet {
 	 * @return a Object representing the column value
 	 * @see java.sql.ResultSet#getObject(java.lang.String)
 	 */
-	Object getObject(String columnName) throws DataRetrievalFailureException;
+	Object getObject(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the current row number.
 	 * @return the current row number
 	 * @see java.sql.ResultSet#getRow()
 	 */
-	int getRow() throws DataRetrievalFailureException;
+	int getRow() throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -279,7 +280,7 @@ public interface SqlRowSet {
 	 * @return a short representing the column value
 	 * @see java.sql.ResultSet#getShort(int)
 	 */
-	short getShort(int columnIndex) throws DataRetrievalFailureException;
+	short getShort(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -288,7 +289,7 @@ public interface SqlRowSet {
 	 * @return a short representing the column value
 	 * @see java.sql.ResultSet#getShort(java.lang.String)
 	 */
-	short getShort(String columnName) throws DataRetrievalFailureException;
+	short getShort(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -297,7 +298,7 @@ public interface SqlRowSet {
 	 * @return a String representing the column value
 	 * @see java.sql.ResultSet#getString(int)
 	 */
-	String getString(int columnIndex) throws DataRetrievalFailureException;
+	String getString(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -306,7 +307,7 @@ public interface SqlRowSet {
 	 * @return a String representing the column value
 	 * @see java.sql.ResultSet#getString(java.lang.String)
 	 */
-	String getString(String columnName) throws DataRetrievalFailureException;
+	String getString(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -316,7 +317,7 @@ public interface SqlRowSet {
 	 * @return a Time object representing the column value
 	 * @see java.sql.ResultSet#getTime(int, java.util.Calendar)
 	 */
-	Time getTime(int columnIndex, Calendar cal) throws DataRetrievalFailureException;
+	Time getTime(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -325,7 +326,7 @@ public interface SqlRowSet {
 	 * @return a Time object representing the column value
 	 * @see java.sql.ResultSet#getTime(int)
 	 */
-	Time getTime(int columnIndex) throws DataRetrievalFailureException;
+	Time getTime(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -335,7 +336,7 @@ public interface SqlRowSet {
 	 * @return a Time object representing the column value
 	 * @see java.sql.ResultSet#getTime(java.lang.String, java.util.Calendar)
 	 */
-	Time getTime(String columnName, Calendar cal) throws DataRetrievalFailureException;
+	Time getTime(String columnName, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -344,7 +345,7 @@ public interface SqlRowSet {
 	 * @return a Time object representing the column value
 	 * @see java.sql.ResultSet#getTime(java.lang.String)
 	 */
-	Time getTime(String columnName) throws DataRetrievalFailureException;
+	Time getTime(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -354,7 +355,7 @@ public interface SqlRowSet {
 	 * @return a Timestamp object representing the column value
 	 * @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar)
 	 */
-	Timestamp getTimestamp(int columnIndex, Calendar cal) throws DataRetrievalFailureException;
+	Timestamp getTimestamp(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -363,7 +364,7 @@ public interface SqlRowSet {
 	 * @return a Timestamp object representing the column value
 	 * @see java.sql.ResultSet#getTimestamp(int)
 	 */
-	Timestamp getTimestamp(int columnIndex) throws DataRetrievalFailureException;
+	Timestamp getTimestamp(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -373,7 +374,7 @@ public interface SqlRowSet {
 	 * @return a Timestamp object representing the column value
 	 * @see java.sql.ResultSet#getTimestamp(java.lang.String, java.util.Calendar)
 	 */
-	Timestamp getTimestamp(String columnName, Calendar cal) throws DataRetrievalFailureException;
+	Timestamp getTimestamp(String columnName, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -382,14 +383,14 @@ public interface SqlRowSet {
 	 * @return a Timestamp object representing the column value
 	 * @see java.sql.ResultSet#getTimestamp(java.lang.String)
 	 */
-	Timestamp getTimestamp(String columnName) throws DataRetrievalFailureException;
+	Timestamp getTimestamp(String columnName) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves the type of the wrapped RowSet Object.
 	 * @return the RowSet type
 	 * @see java.sql.ResultSet#getType()
 	 */
-	int getType() throws DataRetrievalFailureException;
+	int getType() throws InvalidResultSetAccessException;
 
 
 	// ResultSet/RowSet navigation
@@ -400,82 +401,82 @@ public interface SqlRowSet {
 	 * @return true if the cursor is on the RowSet, false otherwise
 	 * @see java.sql.ResultSet#absolute(int)
 	 */
-	boolean absolute(int row) throws DataRetrievalFailureException;
+	boolean absolute(int row) throws InvalidResultSetAccessException;
 
 	/**
 	 * Moves the cursor to the end of this RowSet.
 	 * @see java.sql.ResultSet#afterLast()
 	 */
-	void afterLast() throws DataRetrievalFailureException;
+	void afterLast() throws InvalidResultSetAccessException;
 
 	/**
 	 * Moves the cursor to the front of this RowSet, just before the first row.
 	 * @see java.sql.ResultSet#beforeFirst()
 	 */
-	void beforeFirst() throws DataRetrievalFailureException;
+	void beforeFirst() throws InvalidResultSetAccessException;
 
 	/**
 	 * Moves the cursor to the first row of this RowSet.
 	 * @return true if the cursor is on a valid row, false otherwise
 	 * @see java.sql.ResultSet#first()
 	 */
-	boolean first() throws DataRetrievalFailureException;
+	boolean first() throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves whether the cursor is after the last row of this RowSet.
 	 * @return true if the cursor is after the last row, false otherwise
 	 * @see java.sql.ResultSet#isAfterLast()
 	 */
-	boolean isAfterLast() throws DataRetrievalFailureException;
+	boolean isAfterLast() throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves whether the cursor is after the first row of this RowSet.
 	 * @return true if the cursor is after the first row, false otherwise
 	 * @see java.sql.ResultSet#isBeforeFirst()
 	 */
-	boolean isBeforeFirst() throws DataRetrievalFailureException;
+	boolean isBeforeFirst() throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves whether the cursor is on the first row of this RowSet.
 	 * @return true if the cursor is after the first row, false otherwise
 	 * @see java.sql.ResultSet#isFirst()
 	 */
-	boolean isFirst() throws DataRetrievalFailureException;
+	boolean isFirst() throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves whether the cursor is on the last row of this RowSet.
 	 * @return true if the cursor is after the last row, false otherwise
 	 * @see java.sql.ResultSet#isLast()
 	 */
-	boolean isLast() throws DataRetrievalFailureException;
+	boolean isLast() throws InvalidResultSetAccessException;
 
 	/**
 	 * Moves the cursor to the last row of this RowSet.
 	 * @return true if the cursor is on a valid row, false otherwise
 	 * @see java.sql.ResultSet#last()
 	 */
-	boolean last() throws DataRetrievalFailureException;
+	boolean last() throws InvalidResultSetAccessException;
 
 	/**
 	 * Moves the cursor to the next row.
 	 * @return true if the new row is valid, false if there are no more rows
 	 * @see java.sql.ResultSet#next()
 	 */
-	boolean next() throws DataRetrievalFailureException;
+	boolean next() throws InvalidResultSetAccessException;
 
 	/**
 	 * Moves the cursor to the previous row.
 	 * @return true if the new row is valid, false if it is off the RowSet
 	 * @see java.sql.ResultSet#previous()
 	 */
-	boolean previous() throws DataRetrievalFailureException;
+	boolean previous() throws InvalidResultSetAccessException;
 
 	/**
 	 * Moves the cursor a relative number f rows, either positive or negative.
 	 * @return true if the cursor is on a row, false otherwise
 	 * @see java.sql.ResultSet#relative(int)
 	 */
-	boolean relative(int rows) throws DataRetrievalFailureException;
+	boolean relative(int rows) throws InvalidResultSetAccessException;
 
 	/**
 	 * Reports whether the last column read had a value of SQL <code>NULL</code>.
@@ -485,6 +486,6 @@ public interface SqlRowSet {
 	 * false otherwise
 	 * @see java.sql.ResultSet#wasNull()
 	 */
-	boolean wasNull() throws DataRetrievalFailureException;
+	boolean wasNull() throws InvalidResultSetAccessException;
 
 }

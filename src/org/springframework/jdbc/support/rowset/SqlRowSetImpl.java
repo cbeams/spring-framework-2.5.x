@@ -25,8 +25,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * Default implementation of Spring's SqlRowSet interface.
@@ -36,8 +35,9 @@ import org.springframework.dao.DataRetrievalFailureException;
  * appropriate Spring DataAccessException.
  *
  * <p>The passed-in ResultSets should already be disconnected if the
- * SqlRowSet is supposed to be usable in a disconnected fashion. This
- * means that you will usually pass in a <code>javax.sql.CachedRowSet</code>,
+ * SqlRowSet is supposed to be usable in a disconnected fashion.
+ * This means that you will usually pass in a
+ * <code>javax.sql.rowset.CachedRowSet</code>,
  * which implements the ResultSet interface.
  *
  * @author Thomas Risberg
@@ -53,18 +53,30 @@ public class SqlRowSetImpl implements SqlRowSet {
 	private final SqlRowSetMetaData rowSetMetaData;
 
 
-	public SqlRowSetImpl(ResultSet resultSet) throws DataAccessResourceFailureException {
+	/**
+	 * Create a new SqlRowSetImpl for the given ResultSet.
+	 * @param resultSet a disconnected ResultSet to wrap
+	 * (usually a <code>javax.sql.rowset.CachedRowSet</code>)
+	 * @throws InvalidResultSetAccessException if extracting
+	 * the ResultSetMetaData failed
+	 * @see javax.sql.rowset.CachedRowSet
+	 * @see java.sql.ResultSet#getMetaData
+	 * @see SqlRowSetMetaDataImpl
+	 */
+	public SqlRowSetImpl(ResultSet resultSet) throws InvalidResultSetAccessException {
 		this.resultSet = resultSet;
 		try {
 			this.rowSetMetaData = new SqlRowSetMetaDataImpl(resultSet.getMetaData());
 		}
 		catch (SQLException se) {
-			throw new DataAccessResourceFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
-	 *  Return the underlying ResultSet.
+	 * Return the underlying ResultSet
+	 * (usually a <code>javax.sql.rowset.CachedRowSet</code>).
+	 * @see javax.sql.rowset.CachedRowSet
 	 */
 	public ResultSet getResultSet() {
 		return this.resultSet;
@@ -83,382 +95,382 @@ public class SqlRowSetImpl implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#findColumn(String)
 	 */
-	public int findColumn(String columnName) throws DataRetrievalFailureException {
+	public int findColumn(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.findColumn(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getBigDecimal(int)
 	 */
-	public BigDecimal getBigDecimal(int columnIndex) throws DataRetrievalFailureException {
+	public BigDecimal getBigDecimal(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getBigDecimal(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getBigDecimal(String)
 	 */
-	public BigDecimal getBigDecimal(String columnName) throws DataRetrievalFailureException {
+	public BigDecimal getBigDecimal(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getBigDecimal(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getBoolean(int)
 	 */
-	public boolean getBoolean(int columnIndex) throws DataRetrievalFailureException {
+	public boolean getBoolean(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getBoolean(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getBoolean(String)
 	 */
-	public boolean getBoolean(String columnName) throws DataRetrievalFailureException {
+	public boolean getBoolean(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getBoolean(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getByte(int)
 	 */
-	public byte getByte(int columnIndex) throws DataRetrievalFailureException {
+	public byte getByte(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getByte(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getByte(String)
 	 */
-	public byte getByte(String columnName) throws DataRetrievalFailureException {
+	public byte getByte(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getByte(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getDate(int, java.util.Calendar)
 	 */
-	public Date getDate(int columnIndex, Calendar cal) throws DataRetrievalFailureException {
+	public Date getDate(int columnIndex, Calendar cal) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getDate(columnIndex, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getDate(int)
 	 */
-	public Date getDate(int columnIndex) throws DataRetrievalFailureException {
+	public Date getDate(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getDate(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	/**
 	 * @see java.sql.ResultSet#getDate(String, java.util.Calendar)
 	 */
-	public Date getDate(String columnName, Calendar cal) throws DataRetrievalFailureException {
+	public Date getDate(String columnName, Calendar cal) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getDate(columnName, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getDate(String)
 	 */
-	public Date getDate(String columnName) throws DataRetrievalFailureException {
+	public Date getDate(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getDate(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getDouble(int)
 	 */
-	public double getDouble(int columnIndex) throws DataRetrievalFailureException {
+	public double getDouble(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getDouble(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getDouble(String)
 	 */
-	public double getDouble(String columnName) throws DataRetrievalFailureException {
+	public double getDouble(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getDouble(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getFloat(int)
 	 */
-	public float getFloat(int columnIndex) throws DataRetrievalFailureException {
+	public float getFloat(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getFloat(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getFloat(String)
 	 */
-	public float getFloat(String columnName) throws DataRetrievalFailureException {
+	public float getFloat(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getFloat(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	/**
 	 * @see java.sql.ResultSet#getInt(int)
 	 */
-	public int getInt(int columnIndex) throws DataRetrievalFailureException {
+	public int getInt(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getInt(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getInt(String)
 	 */
-	public int getInt(String columnName) throws DataRetrievalFailureException {
+	public int getInt(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getInt(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getLong(int)
 	 */
-	public long getLong(int columnIndex) throws DataRetrievalFailureException {
+	public long getLong(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getLong(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getLong(String)
 	 */
-	public long getLong(String columnName) throws DataRetrievalFailureException {
+	public long getLong(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getLong(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getObject(int, java.util.Map)
 	 */
-	public Object getObject(int i, Map map) throws DataRetrievalFailureException {
+	public Object getObject(int i, Map map) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getObject(i, map);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getObject(int)
 	 */
-	public Object getObject(int columnIndex) throws DataRetrievalFailureException {
+	public Object getObject(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getObject(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getObject(String, java.util.Map)
 	 */
-	public Object getObject(String columnName, Map map) throws DataRetrievalFailureException {
+	public Object getObject(String columnName, Map map) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getObject(columnName, map);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getObject(String)
 	 */
-	public Object getObject(String columnName) throws DataRetrievalFailureException {
+	public Object getObject(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getObject(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getRow()
 	 */
-	public int getRow() throws DataRetrievalFailureException {
+	public int getRow() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getRow();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getShort(int)
 	 */
-	public short getShort(int columnIndex) throws DataRetrievalFailureException {
+	public short getShort(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getShort(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getShort(String)
 	 */
-	public short getShort(String columnName) throws DataRetrievalFailureException {
+	public short getShort(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getShort(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getString(int)
 	 */
-	public String getString(int columnIndex) throws DataRetrievalFailureException {
+	public String getString(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getString(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getString(String)
 	 */
-	public String getString(String columnName) throws DataRetrievalFailureException {
+	public String getString(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getString(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getTime(int, java.util.Calendar)
 	 */
-	public Time getTime(int columnIndex, Calendar cal) throws DataRetrievalFailureException {
+	public Time getTime(int columnIndex, Calendar cal) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTime(columnIndex, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getTime(int)
 	 */
-	public Time getTime(int columnIndex) throws DataRetrievalFailureException {
+	public Time getTime(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTime(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getTime(String, java.util.Calendar)
 	 */
-	public Time getTime(String columnName, Calendar cal) throws DataRetrievalFailureException {
+	public Time getTime(String columnName, Calendar cal) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTime(columnName, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getTime(String)
 	 */
-	public Time getTime(String columnName) throws DataRetrievalFailureException {
+	public Time getTime(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTime(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
@@ -466,24 +478,24 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 * @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar)
 	 */
 	public Timestamp getTimestamp(int columnIndex, Calendar cal)
-			throws DataRetrievalFailureException {
+			throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTimestamp(columnIndex, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getTimestamp(int)
 	 */
-	public Timestamp getTimestamp(int columnIndex) throws DataRetrievalFailureException {
+	public Timestamp getTimestamp(int columnIndex) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTimestamp(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
@@ -491,36 +503,36 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 * @see java.sql.ResultSet#getTimestamp(String, java.util.Calendar)
 	 */
 	public Timestamp getTimestamp(String columnName, Calendar cal)
-			throws DataRetrievalFailureException {
+			throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTimestamp(columnName, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getTimestamp(String)
 	 */
-	public Timestamp getTimestamp(String columnName) throws DataRetrievalFailureException {
+	public Timestamp getTimestamp(String columnName) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTimestamp(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getType()
 	 */
-	public int getType() throws DataRetrievalFailureException {
+	public int getType() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getType();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
@@ -530,156 +542,156 @@ public class SqlRowSetImpl implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#absolute(int)
 	 */
-	public boolean absolute(int row) throws DataRetrievalFailureException {
+	public boolean absolute(int row) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.absolute(row);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#afterLast()
 	 */
-	public void afterLast() throws DataRetrievalFailureException {
+	public void afterLast() throws InvalidResultSetAccessException {
 		try {
 			this.resultSet.afterLast();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#beforeFirst()
 	 */
-	public void beforeFirst() throws DataRetrievalFailureException {
+	public void beforeFirst() throws InvalidResultSetAccessException {
 		try {
 			this.resultSet.beforeFirst();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#first()
 	 */
-	public boolean first() throws DataRetrievalFailureException {
+	public boolean first() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.first();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#isAfterLast()
 	 */
-	public boolean isAfterLast() throws DataRetrievalFailureException {
+	public boolean isAfterLast() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.isAfterLast();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
 	/**
 	 * @see java.sql.ResultSet#isBeforeFirst()
 	 */
-	public boolean isBeforeFirst() throws DataRetrievalFailureException {
+	public boolean isBeforeFirst() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.isBeforeFirst();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#isFirst()
 	 */
-	public boolean isFirst() throws DataRetrievalFailureException {
+	public boolean isFirst() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.isFirst();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#isLast()
 	 */
-	public boolean isLast() throws DataRetrievalFailureException {
+	public boolean isLast() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.isLast();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#last()
 	 */
-	public boolean last() throws DataRetrievalFailureException {
+	public boolean last() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.last();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#next()
 	 */
-	public boolean next() throws DataRetrievalFailureException {
+	public boolean next() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.next();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#previous()
 	 */
-	public boolean previous() throws DataRetrievalFailureException {
+	public boolean previous() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.previous();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#relative(int)
 	 */
-	public boolean relative(int rows) throws DataRetrievalFailureException {
+	public boolean relative(int rows) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.relative(rows);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#wasNull()
 	 */
-	public boolean wasNull() throws DataRetrievalFailureException {
+	public boolean wasNull() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.wasNull();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
+			throw new InvalidResultSetAccessException(se);
 		}
 	}
 
