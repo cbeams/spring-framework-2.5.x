@@ -604,12 +604,26 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	/**
 	 * Test stateful interceptor
 	 */
-	public void testMixin() throws Throwable {
+	public void testMixinWithIntroductionAdvisor() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] { Lockable.class, ITestBean.class });
+		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
 		pc.addAdvisor(new LockMixinAdvisor());
 		pc.setTarget(tb);
 		
+		testTestBeanIntroduction(pc);
+	}
+	
+	public void testMixinWithIntroductionInfo() throws Throwable {
+		TestBean tb = new TestBean();
+		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
+		// We don't use an IntroductionAdvisor, we can just add an advice that implements IntroductionInfo
+		pc.addAdvice(new LockMixin());
+		pc.setTarget(tb);
+	
+		testTestBeanIntroduction(pc);
+	}
+	
+	private void testTestBeanIntroduction(ProxyFactory pc) {
 		int newAge = 65;
 		ITestBean itb = (ITestBean) createProxy(pc);
 		itb.setAge(newAge);
