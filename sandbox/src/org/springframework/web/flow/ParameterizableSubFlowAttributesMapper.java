@@ -195,21 +195,6 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 				}
 				else {
 					fromValue = from.getAttribute(fromName);
-					if (fromValue == null) {
-						if (isMapMissingAttributesToNull()) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("No value exists for attribute '" + fromName
-										+ "' in the from model map - thus, I will map a null value");
-							}
-						}
-						else {
-							if (logger.isDebugEnabled()) {
-								logger.debug("No value exists for attribute '" + fromName
-										+ "' in the from model map - thus, I will NOT map a value");
-							}
-							return;
-						}
-					}
 				}
 
 				//set target value
@@ -228,11 +213,28 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 					bw.setPropertyValue(propName, fromValue);
 				}
 				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Mapping attribute from name '" + fromName + "' to name '" + toName
-								+ "' with value '" + fromValue + "'");
+					if (fromValue == null && !from.containsAttribute(fromName)) {
+						if (isMapMissingAttributesToNull()) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("No value exists for attribute '" + fromName
+										+ "' in the from model - thus, I will map a null value");
+							}
+							to.setAttribute(toName, null);
+						}
+						else {
+							if (logger.isDebugEnabled()) {
+								logger.debug("No value exists for attribute '" + fromName
+										+ "' in the from model - thus, I will NOT map a value");
+							}
+						}
 					}
-					to.setAttribute(toName, fromValue);
+					else {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Mapping attribute from name '" + fromName + "' to name '" + toName
+									+ "' with value '" + fromValue + "'");
+						}
+						to.setAttribute(toName, fromValue);
+					}
 				}
 			}
 		}

@@ -291,10 +291,10 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 					+ "', details='" + binder.getTarget() + "'");
 		}
 		binder.bind(request);
+		onBind(request, model, binder.getTarget(), binder.getErrors());
 		if (logger.isDebugEnabled()) {
 			logger.debug("After bind of object '" + binder.getObjectName() + "', details='" + binder.getTarget() + "'");
 		}
-		onBind(request, model, binder.getTarget(), binder.getErrors());
 		if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
 			for (int i = 0; i < this.validators.length; i++) {
 				ValidationUtils.invokeValidator(this.validators[i], binder.getTarget(), binder.getErrors());
