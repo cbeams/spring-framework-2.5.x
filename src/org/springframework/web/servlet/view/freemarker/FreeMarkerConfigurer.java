@@ -53,7 +53,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
  *
  * @author Darren Davison
  * @since 3/3/2004
- * @version $Id: FreemarkerConfigurer.java,v 1.6 2004-03-20 14:04:18 jhoeller Exp $
+ * @version $Id: FreeMarkerConfigurer.java,v 1.1 2004-03-20 15:41:33 trisberg Exp $
  * @see #setConfigLocation
  * @see #setFreemarkerSettings
  * @see #setTemplateLoaderPath

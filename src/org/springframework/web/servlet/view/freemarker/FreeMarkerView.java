@@ -54,7 +54,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 3/3/2004
- * @version $Id: FreemarkerView.java,v 1.6 2004-03-20 14:04:18 jhoeller Exp $
+ * @version $Id: FreeMarkerView.java,v 1.1 2004-03-20 15:41:33 trisberg Exp $
  * @see #setUrl
  * @see #setEncoding
  * @see #setConfiguration
