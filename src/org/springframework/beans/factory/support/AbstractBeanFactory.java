@@ -268,10 +268,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			boolean singleton = true;
 
 			Object beanInstance = this.singletonCache.get(beanName);
-			if (beanInstance == CURRENTLY_IN_CREATION) {
-				throw new BeanCurrentlyInCreationException(beanName);
-			}
-			if (beanInstance != null) {
+			if (beanInstance != null && beanInstance != CURRENTLY_IN_CREATION) {
 				beanClass = beanInstance.getClass();
 				singleton = true;
 			}
@@ -570,12 +567,26 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
+	 * Return a RootBeanDefinition for the given bean name,
+	 * merging a child bean definition with its parent if necessary.
+	 * @param beanName the name of the bean definition
+	 * @return a (potentially merged) RootBeanDefinition for the given bean
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @throws BeansException in case of errors
+	 */
+	public RootBeanDefinition getMergedBeanDefinition(String beanName) throws BeansException {
+		return getMergedBeanDefinition(beanName, false);
+	}
+
+	/**
 	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a
 	 * child definition. Can ask the parent bean factory if not found in this instance.
 	 * @param beanName the name of the bean definition
 	 * @param includingAncestors whether to ask the parent bean factory if not found
 	 * in this instance
-	 * @return a merged RootBeanDefinition with overridden properties
+	 * @return a (potentially merged) RootBeanDefinition for the given bean
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @throws BeansException in case of errors
 	 */
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
 	    throws BeansException {
@@ -586,9 +597,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {
 				return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
 			}
-			else {
-				throw ex;
-			}
+			throw ex;
 		}
 	}
 
@@ -597,7 +606,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * parent if the given original bean definition is a child bean definition.
 	 * @param beanName the name of the bean definition
 	 * @param bd the original bean definition (Root/ChildBeanDefinition)
-	 * @return a merged RootBeanDefinition with overridden properties
+	 * @return a (potentially merged) RootBeanDefinition for the given bean
+	 * @throws BeansException in case of errors
 	 */
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd)
 			throws BeansException {
