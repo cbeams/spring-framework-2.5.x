@@ -16,8 +16,8 @@ distribution/website before using any of them in your own applications.
 - Apache Axis 1.1 (http://ws.apache.org/axis)
 - required for running JPetStore
 
-* c3p0/c3p0-0.8.5.jar
-- C3P0 0.8.5 connection pool (http://sourceforge.net/projects/c3p0)
+* c3p0/c3p0-0.8.5.1.jar
+- C3P0 0.8.5.1 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
@@ -215,8 +215,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-0.6.4.jar
-- JasperReports 0.6.4 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-0.6.5.jar
+- JasperReports 0.6.5 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
