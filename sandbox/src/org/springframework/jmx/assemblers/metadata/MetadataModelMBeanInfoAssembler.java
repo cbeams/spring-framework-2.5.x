@@ -114,14 +114,17 @@ public class MetadataModelMBeanInfoAssembler extends
      */
     private String getDescription(PropertyDescriptor pd) {
         
-        ManagedAttribute getter = MetadataReader.getManagedAttribute(attributes, pd.getReadMethod());
-        ManagedAttribute setter = MetadataReader.getManagedAttribute(attributes, pd.getWriteMethod());
+        Method readMethod = pd.getReadMethod();
+        Method writeMethod = pd.getWriteMethod();
+        
+        ManagedAttribute getter = (readMethod != null) ? MetadataReader.getManagedAttribute(attributes, readMethod) : null;
+        ManagedAttribute setter = (writeMethod != null) ? MetadataReader.getManagedAttribute(attributes, writeMethod) : null;
         
         StringBuffer sb = new StringBuffer();
         
-        if((getter.getDescription() != null) && (getter.getDescription().length() > 0)) {
+        if((getter != null) && (getter.getDescription() != null) && (getter.getDescription().length() > 0)) {
             return getter.getDescription();
-        } else if((setter.getDescription() != null) && (setter.getDescription().length() > 0)) {
+        } else if((setter != null) && (setter.getDescription() != null) && (setter.getDescription().length() > 0)) {
             return setter.getDescription();
         } else {
             return pd.getDisplayName();

@@ -12,8 +12,12 @@ package org.springframework.jmx;
 public class JmxTestBean {
 
     private String name;
+    
+    private String nickName;
 
     private int age;
+
+    private boolean isSuperman;
 
     /**
      * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Age Attribute")
@@ -50,6 +54,20 @@ public class JmxTestBean {
      */
     public String getName() {
         return name;
+    }
+    
+    /**
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Nick Name Attribute")
+     */
+    public String getNickName() {
+        return this.nickName;
+    }
+    
+    /**
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Is Superman Attribute")
+     */
+    public void setIsSuperman(boolean isSuperman) {
+        this.isSuperman = isSuperman;
     }
 
     /**

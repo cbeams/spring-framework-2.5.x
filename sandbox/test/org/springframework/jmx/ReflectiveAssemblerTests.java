@@ -26,7 +26,7 @@ public class ReflectiveAssemblerTests extends AbstractJmxAssemblerTests {
 	}
 	
 	protected int getExpectedAttributeCount() {
-	    return 2;
+	    return 4;
 	}
 	
 	protected ModelMBeanInfoAssembler getAssembler() {

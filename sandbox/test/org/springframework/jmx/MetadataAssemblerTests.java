@@ -44,6 +44,11 @@ public class MetadataAssemblerTests extends AbstractJmxAssemblerTests {
                 "The Name Attribute", attr.getDescription());
     }
 
+    /**
+     * Tests the situation where the attribute is 
+     * only defined on the getter
+     * @throws Exception
+     */
     public void testReadOnlyAttribute() throws Exception {
         ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 
@@ -63,13 +68,35 @@ public class MetadataAssemblerTests extends AbstractJmxAssemblerTests {
         assertTrue("The name attribute should be readable",
                 attr.isReadable());
     }
+    
+    /**
+     * Tests the situation where the property only has 
+     * a getter
+     * @throws Exception
+     */
+    public void testWithOnlyGetter() throws Exception {
+        ModelMBeanInfo inf = getMBeanInfoFromAssembler();
+        
+        ModelMBeanAttributeInfo attr = inf.getAttribute("nickName");
+        
+        assertNotNull("Attribute should not be null", attr);
+    }
+    
+    /**
+     * Tests the situation where the property only
+     * has a setter
+     * @throws Exception
+     */
+    public void testWithOnlySetter() throws Exception {
+        
+    }
 
     protected String getObjectName() {
         return OBJECT_NAME;
     }
 
     protected int getExpectedAttributeCount() {
-        return 2;
+        return 4;
     }
 
     protected int getExpectedOperationCount() {
