@@ -22,10 +22,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * This utility class offers convenient methods for invoking a validator
- * and for rejecting an empty field.
+ * This utility class offers convenient methods for invoking a Validator
+ * and for rejecting empty fields. Empty field checks in Validator
+ * implementations can become one-liners.
  *
- * <p>Used by BindUtils' bindAndValidate method.
+ * <p>Used by BindUtils' <code>bindAndValidate</code> method.
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
@@ -68,28 +69,33 @@ public abstract class ValidationUtils {
 	/**
 	 * Reject the given field with the given error code and message
 	 * if the value is empty.
-	 * @param errors Errors instance containing bound fields
-	 * @param field field name to check
-	 * @param errorCode to reject with
-	 * @param defaultMessage to reject with
+	 * <p>The object to validate does not have to be passed in,
+	 * as the Errors instance allows to check field values
+	 * (it will usually hold an internal reference to the target object).
+	 * @param errors Errors instance to register errors on
+	 * @param field the field name to check
+	 * @param errorCode error code, interpretable as message key
+	 * @param defaultMessage fallback default message
 	 */
-	public static void rejectIfEmpty(Errors errors, String field, String errorCode,
-			String defaultMessage) {
+	public static void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage) {
 		rejectIfEmpty(errors, field, errorCode, null, defaultMessage);
 	}
 
 	/**
 	 * Reject the given field with the given error code, error arguments
 	 * and message if the value is empty.
-	 * @param errors Errors instance containing bound fields
-	 * @param field field name to check
-	 * @param errorCode to reject with
+	 * <p>The object to validate does not have to be passed in,
+	 * as the Errors instance allows to check field values
+	 * (it will usually hold an internal reference to the target object).
+	 * @param errors Errors instance to register errors on
+	 * @param field the field name to check
+	 * @param errorCode error code, interpretable as message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be null)
-	 * @param defaultMessage to reject with
+	 * @param defaultMessage fallback default message
 	 */
-	public static void rejectIfEmpty(Errors errors, String field, String errorCode,
-			Object[] errorArgs, String defaultMessage) {
+	public static void rejectIfEmpty(
+			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
 		Object value = errors.getFieldValue(field);
 		if (value == null || !StringUtils.hasLength(value.toString())) {
 			errors.rejectValue(field, errorCode, errorArgs, defaultMessage);
@@ -99,28 +105,34 @@ public abstract class ValidationUtils {
 	/**
 	 * Reject the given field with the given error code and message
 	 * if the value is empty or just contains whitespace.
-	 * @param errors Errors instance containing bound fields
-	 * @param field field name to check
-	 * @param errorCode to reject with
-	 * @param defaultMessage to reject with
+	 * <p>The object to validate does not have to be passed in,
+	 * as the Errors instance allows to check field values
+	 * (it will usually hold an internal reference to the target object).
+	 * @param errors Errors instance to register errors on
+	 * @param field the field name to check
+	 * @param errorCode error code, interpretable as message key
+	 * @param defaultMessage fallback default message
 	 */
-	public static void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode,
-			String defaultMessage) {
+	public static void rejectIfEmptyOrWhitespace(
+			Errors errors, String field, String errorCode, String defaultMessage) {
 		rejectIfEmptyOrWhitespace(errors, field, errorCode, null, defaultMessage);
 	}
 
 	/**
 	 * Reject the given field with the given error code, error arguments
 	 * and message if the value is empty or just contains whitespace.
-	 * @param errors Errors instance containing bound fields
-	 * @param field field name to check
-	 * @param errorCode to reject with
+	 * <p>The object to validate does not have to be passed in,
+	 * as the Errors instance allows to check field values
+	 * (it will usually hold an internal reference to the target object).
+	 * @param errors Errors instance to register errors on
+	 * @param field the field name to check
+	 * @param errorCode error code, interpretable as message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be null)
-	 * @param defaultMessage to reject with
+	 * @param defaultMessage fallback default message
 	 */
-	public static void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode,
-			Object[] errorArgs, String defaultMessage) {
+	public static void rejectIfEmptyOrWhitespace(
+			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
 		Object value = errors.getFieldValue(field);
 		if (value == null ||!StringUtils.hasText(value.toString())) {
 			errors.rejectValue(field, errorCode, errorArgs, defaultMessage);
