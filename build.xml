@@ -478,6 +478,7 @@
 				<include name="lib/ant/**"/>
 				<include name="lib/axis/**"/>
 				<include name="lib/aopalliance/**"/>
+				<include name="lib/bsh/**"/>
 				<include name="lib/caucho/**"/>
 				<include name="lib/cglib/**"/>
 				<include name="lib/cos/**"/>
