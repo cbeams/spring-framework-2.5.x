@@ -51,8 +51,8 @@ public class CountriesPdfView extends AbstractPdfView {
 	private static final Font    HEADING_FONT = new Font( Font.HELVETICA, 12, Font.ITALIC, Color.black );
 	private static final Font    HEADING_DATA_FONT = new Font( Font.HELVETICA, 12, Font.ITALIC, Color.blue );
 	private static final Font    DATA_HEAD_FONT = new Font( Font.HELVETICA, 10, Font.ITALIC, Color.black );
-	private static final Font    TEXT_FONT = new Font( Font.TIMES_NEW_ROMAN, 8, Font.NORMAL, Color.black );
-	private static final Font    BOLD_FONT = new Font( Font.TIMES_NEW_ROMAN, 8, Font.BOLD, Color.black );
+	private static final Font    TEXT_FONT = new Font( Font.TIMES_ROMAN, 8, Font.NORMAL, Color.black );
+	private static final Font    BOLD_FONT = new Font( Font.TIMES_ROMAN, 8, Font.BOLD, Color.black );
 	private static final int     MARGIN = 32;
 
 	protected void buildPdfDocument(Map model, Document pdfDoc,	PdfWriter writer,	HttpServletRequest request,

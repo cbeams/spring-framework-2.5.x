@@ -90,7 +90,7 @@
 				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/itext-pdf">
-				<include name="iText.jar"/>
+				<include name="*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/poi">
 				<include name="*.jar"/>
