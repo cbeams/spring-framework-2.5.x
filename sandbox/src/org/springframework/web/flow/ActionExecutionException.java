@@ -10,7 +10,7 @@ package org.springframework.web.flow;
  */
 public class ActionExecutionException extends RuntimeException {
 	public ActionExecutionException(AbstractState state, Action action, Throwable cause) {
-		super("Execution of action of class '" + action.getClass() + "' in state '" + state.getId() + "' of flow '"
+		super("Executing action '" + action.getClass() + "' in state '" + state.getId() + "' of flow '"
 				+ state.getFlow().getId() + "' threw a unrecoverable exception", cause);
 	}
 }
