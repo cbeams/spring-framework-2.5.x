@@ -14,7 +14,6 @@ import org.springframework.web.flow.config.NoSuchActionException;
 import org.springframework.web.flow.config.NoSuchFlowAttributesMapperException;
 import org.springframework.web.flow.config.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.config.XmlFlowBuilder;
-import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 
 import junit.framework.TestCase;
 
@@ -86,7 +85,6 @@ public class XmlFlowBuilderTest extends TestCase {
 				throw new NoSuchFlowAttributesMapperException(flowAttributesMapperId);
 			}
 		});
-		builder.setFlowExecutionListener(new FlowExecutionListenerAdapter() {});
 		
 		flow=new FlowFactoryBean(builder).getFlow();
 	}

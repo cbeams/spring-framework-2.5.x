@@ -26,9 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
-import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.ProcessTemplate;
 
 /**
  * Singleton definition of a web flow.
@@ -136,6 +134,8 @@ import org.springframework.util.closure.ProcessTemplate;
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
+ * @author Erwin Vervaet
+ * 
  * @see ActionState
  * @see ViewState
  * @see SubFlowState
@@ -165,13 +165,6 @@ public class Flow implements Serializable {
 	private Set states = new LinkedHashSet(6);
 
 	/**
-	 * The list of listeners that should receive event callbacks during managed
-	 * flow executions (client sessions).
-	 */
-	private transient EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(
-			FlowExecutionListener.class);
-
-	/**
 	 * Construct a new flow definition with the given id. The id should be
 	 * unique among all flows.
 	 * @param id The flow identifier.
@@ -199,69 +192,6 @@ public class Flow implements Serializable {
 
 	public int hashCode() {
 		return id.hashCode();
-	}
-
-	/**
-	 * Add a flow execution listener; the added listener will receive callbacks
-	 * on events occuring in all client flow executions created for this flow
-	 * definition.
-	 * 
-	 * @param listener The execution listener to add
-	 */
-	public void addFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners.add(listener);
-	}
-
-	/**
-	 * Remove an existing flow execution listener; the removed listener will no
-	 * longer receive callbacks and if left unreferenced will be eligible for
-	 * garbage collection.
-	 * @param listener The execution listener to remove.
-	 */
-	public void removeFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners.remove(listener);
-	}
-
-	/**
-	 * Returns the number of execution listeners associated with this flow
-	 * definition.
-	 * @return The flow execution listener count
-	 */
-	public int getFlowExecutionListenerCount() {
-		return flowExecutionListeners.getListenerCount();
-	}
-
-	/**
-	 * Is at least one instance of the provided FlowExecutionListener
-	 * implementation present in the listener list?
-	 * @param listenerImplementationClass The flow execution listener
-	 *        implementation, must be a impl of FlowExecutionListener
-	 * @return true if present, false otherwise
-	 */
-	public boolean isFlowExecutionListenerAdded(Class listenerImplementationClass) {
-		Assert.isTrue(FlowExecutionListener.class.isAssignableFrom(listenerImplementationClass),
-				"Listener class must be a FlowSessionExecutionListener");
-		return this.flowExecutionListeners.isAdded(listenerImplementationClass);
-	}
-
-	/**
-	 * Is the provid FlowExecutionListener instance present in the listener
-	 * list?
-	 * @param listener The execution listener
-	 * @return true if present, false otherwise.
-	 */
-	public boolean isFlowExecutionListenerAdded(FlowExecutionListener listener) {
-		return this.flowExecutionListeners.isAdded(listener);
-	}
-
-	/**
-	 * Return a process template that knows how to iterate over the list of flow
-	 * execution listeners and dispatch each listener to a handler callback for
-	 * processing.
-	 * @return The iterator process template.
-	 */
-	public ProcessTemplate getFlowExecutionListenerIteratorTemplate() {
-		return flowExecutionListeners;
 	}
 
 	/**

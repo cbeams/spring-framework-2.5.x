@@ -4,11 +4,14 @@
 package org.springframework.web.flow;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 /**
  * Provides management information about the current state of a ongoing flow
  * execution.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface FlowExecutionInfo extends AttributesAccessor, Serializable {
 
@@ -102,4 +105,32 @@ public interface FlowExecutionInfo extends AttributesAccessor, Serializable {
 	 */
 	public FlowSessionStatus getStatus(String flowId) throws IllegalArgumentException;
 
+	/**
+	 * Add a flow execution listener; the added listener will receive callbacks
+	 * on events occuring in this flow execution.
+	 * @param listener The execution listener to add.
+	 */
+	public void addFlowExecutionListener(FlowExecutionListener listener);
+	
+	/**
+	 * Register given collection of flow execution listeners with this flow execution.
+	 * The added listeners will receive callbacks on events occuring in this flow
+	 * execution.
+	 * @param listeners The collection of listeners to add.
+	 */
+	public void addAllFlowExecutionListeners(FlowExecutionListener[] listeners);
+
+	/**
+	 * Remove an existing flow execution listener; the removed listener will no
+	 * longer receive callbacks and if left unreferenced will be eligible for
+	 * garbage collection.
+	 * @param listener The execution listener to remove.
+	 */
+	public void removeFlowExecutionListener(FlowExecutionListener listener);
+
+	/**
+	 * Returns an iterator looping over the list of listeners registered with
+	 * this flow execution.
+	 */
+	public Iterator getFlowExecutionListenersIterator();
 }

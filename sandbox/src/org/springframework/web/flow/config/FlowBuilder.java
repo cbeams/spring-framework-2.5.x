@@ -28,12 +28,6 @@ public interface FlowBuilder {
 	public void buildStates() throws FlowBuilderException;
 	
 	/**
-	 * Creates and/or links applicable flow execution listeners up to the flow
-	 * built by this builder.
-	 */
-	public void buildExecutionListeners() throws FlowBuilderException;
-	
-	/**
 	 * Get the fully constructed and configured Flow object - called by the
 	 * builder's assembler (director) after assembly.
 	 */

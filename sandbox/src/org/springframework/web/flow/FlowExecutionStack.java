@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.ProcessTemplate;
@@ -57,6 +58,13 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	private String lastEventId;
 
 	private long lastEventTimestamp;
+
+	/**
+	 * The list of listeners that should receive event callbacks during managed
+	 * flow executions (client sessions).
+	 */
+	private transient EventListenerListHelper flowExecutionListeners =
+		new EventListenerListHelper(FlowExecutionListener.class);
 
 	public FlowExecutionStack(Flow rootFlow) {
 		Assert.notNull(rootFlow, "The root flow definition is required");
@@ -390,21 +398,71 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		getActiveFlowSession().clearTransactionToken(tokenName);
 	}
 
-	// lifecycle event publishers
+	// lifecycle event management
 
-	protected ProcessTemplate getListenerIterator() {
-		return getRootFlow().getFlowExecutionListenerIteratorTemplate();
+	public void addFlowExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners.add(listener);
+	}
+	
+	public void addAllFlowExecutionListeners(FlowExecutionListener[] listeners) {
+		this.flowExecutionListeners.addAll(listeners);
 	}
 
-	protected int getListenerCount() {
-		return getRootFlow().getFlowExecutionListenerCount();
+	public void removeFlowExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners.remove(listener);
+	}
+	
+	public Iterator getFlowExecutionListenersIterator() {
+		return this.flowExecutionListeners.iterator();
+	}
+
+	/**
+	 * Is at least one instance of the provided FlowExecutionListener
+	 * implementation present in the listener list?
+	 * @param listenerImplementationClass The flow execution listener
+	 *        implementation, must be a impl of FlowExecutionListener
+	 * @return true if present, false otherwise
+	 */
+	public boolean isFlowExecutionListenerAdded(Class listenerImplementationClass) {
+		Assert.isTrue(FlowExecutionListener.class.isAssignableFrom(listenerImplementationClass),
+				"Listener class must be a FlowExecutionListener");
+		return this.flowExecutionListeners.isAdded(listenerImplementationClass);
+	}
+	
+	/**
+	 * Is the provid FlowExecutionListener instance present in the listener
+	 * list?
+	 * @param listener The execution listener
+	 * @return true if present, false otherwise.
+	 */
+	public boolean isFlowExecutionListenerAdded(FlowExecutionListener listener) {
+		return this.flowExecutionListeners.isAdded(listener);
+	}
+
+	/**
+	 * Return a process template that knows how to iterate over the list of flow
+	 * execution listeners and dispatch each listener to a handler callback for
+	 * processing.
+	 * @return The iterator process template.
+	 */
+	public ProcessTemplate getFlowExecutionListenerIteratorTemplate() {
+		return flowExecutionListeners;
+	}
+
+	/**
+	 * Returns the number of execution listeners associated with this flow
+	 * execution.
+	 * @return The flow execution listener count
+	 */
+	public int getFlowExecutionListenerCount() {
+		return flowExecutionListeners.getListenerCount();
 	}
 
 	protected void fireStarted() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution started event to " + getListenerCount() + " listener(s)");
+			logger.debug("Publishing flow session execution started event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getListenerIterator().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).started(FlowExecutionStack.this);
 			}
@@ -413,9 +471,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireRequestSubmitted(final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getListenerCount() + " listener(s)");
+			logger.debug("Publishing request submitted event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getListenerIterator().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).requestSubmitted(FlowExecutionStack.this, request);
 			}
@@ -424,9 +482,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireRequestProcessed(final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request processed event to " + getListenerCount() + " listener(s)");
+			logger.debug("Publishing request processed event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getListenerIterator().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).requestProcessed(FlowExecutionStack.this, request);
 			}
@@ -435,9 +493,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireEventSignaled(final String eventId) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event signaled event to " + getListenerCount() + " listener(s)");
+			logger.debug("Publishing event signaled event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getListenerIterator().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).eventSignaled(FlowExecutionStack.this, eventId);
 			}
@@ -446,9 +504,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireStateTransitioned(final AbstractState previousState) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state transitioned event to " + getListenerCount() + " listener(s)");
+			logger.debug("Publishing state transitioned event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getListenerIterator().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).stateTransitioned(FlowExecutionStack.this, previousState, getCurrentState());
 			}
@@ -457,10 +515,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireSubFlowSpawned() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow session execution started event to " + getListenerCount()
+			logger.debug("Publishing sub flow session execution started event to " + getFlowExecutionListenerCount()
 					+ " listener(s)");
 		}
-		getListenerIterator().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).subFlowSpawned(FlowExecutionStack.this);
 			}
@@ -469,9 +527,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireSubFlowEnded(final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow session ended event to " + getListenerCount() + " listener(s)");
+			logger.debug("Publishing sub flow session ended event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getListenerIterator().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).subFlowEnded(FlowExecutionStack.this, endedSession);
 			}
@@ -480,10 +538,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireEnded(final FlowSession endingRootFlowSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution ended event to "
-					+ endingRootFlowSession.getFlow().getFlowExecutionListenerCount() + " listener(s)");
+			logger.debug("Publishing flow session execution ended event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getListenerIterator().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).ended(FlowExecutionStack.this, endingRootFlowSession);
 			}
