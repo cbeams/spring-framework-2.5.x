@@ -21,9 +21,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 
@@ -45,10 +43,10 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 					JasperPrint filledReport, Map model, HttpServletResponse response)
 					throws Exception {
 
-				assertEquals("Invalid number of exporter parameters", 1, this.exporterParameters.size());
+				assertEquals("Invalid number of exporter parameters", 1, getExporterParameters().size());
 
 				JRExporterParameter key = JRHtmlExporterParameter.IMAGES_URI;
-				Object value = this.exporterParameters.get(key);
+				Object value = getExporterParameters().get(key);
 
 				assertNotNull("Value not mapped to correct key", value);
 				assertEquals("Incorrect value for parameter", "/foo/bar", value);

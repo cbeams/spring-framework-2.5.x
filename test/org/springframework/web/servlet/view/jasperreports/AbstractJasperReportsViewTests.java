@@ -285,7 +285,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		DataSource ds = getMockSqlDataSource();
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
-		view.setDataSource(ds);
+		view.setJdbcDataSource(ds);
 
 		Map model = getModel();
 		model.remove("dataSource");
@@ -303,7 +303,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		DataSource ds = getMockSqlDataSource();
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
-		view.setDataSource(ds);
+		view.setJdbcDataSource(ds);
 
 
 		try {

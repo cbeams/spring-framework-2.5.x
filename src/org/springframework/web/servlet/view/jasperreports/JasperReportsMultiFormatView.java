@@ -23,16 +23,11 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ClassUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Jasper Reports view class that allows for the actual rendering format to be
@@ -75,14 +70,10 @@ import org.apache.commons.logging.LogFactory;
 public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 
 	/**
-	 * <code>Log</code> for this class.
-	 */
-	private static final Log log = LogFactory.getLog(JasperReportsMultiFormatView.class);
-
-	/**
-	 * Default value used for format key
+	 * Default value used for format key.
 	 */
 	public static final String DEFAULT_FORMAT_KEY = "format";
+
 
 	/**
 	 * The key of the model parameter that holds the format key.
@@ -93,19 +84,20 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * Stores the format mappings, with the format discriminator
 	 * as key and the corresponding view class as value.
 	 */
-	private Map formatMappings = new HashMap();
+	private Map formatMappings;
 
 	/**
-	 * Stores the mappings of mapping keys to Content-Disposition header
-	 * values.
+	 * Stores the mappings of mapping keys to Content-Disposition header values.
 	 */
-	private Properties contentDispositionMappings = new Properties();
+	private Properties contentDispositionMappings;
+
 
   /**
 	 * Creates a new <code>JasperReportsMultiFormatView</code> instance
 	 * with a default set of mappings.
 	 */
 	public JasperReportsMultiFormatView() {
+		this.formatMappings = new HashMap(4);
 		this.formatMappings.put("csv", JasperReportsCsvView.class);
 		this.formatMappings.put("html", JasperReportsHtmlView.class);
 		this.formatMappings.put("pdf", JasperReportsPdfView.class);
@@ -131,12 +123,17 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * </ul>
 	 */
 	public void setFormatMappings(Properties mappingsWithClassNames) {
+		if (mappingsWithClassNames == null || mappingsWithClassNames.isEmpty()) {
+			throw new IllegalArgumentException("formatMappings must not be empty");
+		}
+
+		this.formatMappings = new HashMap(mappingsWithClassNames.size());
 		for (Enumeration discriminators = mappingsWithClassNames.propertyNames(); discriminators.hasMoreElements();) {
 			String discriminator = (String) discriminators.nextElement();
 			String className = mappingsWithClassNames.getProperty(discriminator);
 			try {
-				if(log.isDebugEnabled()) {
-					log.debug("Mapped view class [" + className + "] to mapping key [" + discriminator + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Mapped view class [" + className + "] to mapping key [" + discriminator + "]");
 				}
 				this.formatMappings.put(discriminator, ClassUtils.forName(className));
 			}
@@ -148,8 +145,8 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	}
 
 	/**
-	 * Sets the mappings of <code>Content-Disposition</code> header values to
-	 * mapping keys. If specified Spring will look at these mappings to determine
+	 * Set the mappings of <code>Content-Disposition</code> header values to
+	 * mapping keys. If specified, Spring will look at these mappings to determine
 	 * the value of the <code>Content-Disposition</code> header for a given
 	 * format mapping.
 	 */
@@ -163,17 +160,16 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * key to lookup the appropriate view class from the mappings. The rendering of the
 	 * report is then delegated to an instance of that view class.
 	 */
-	protected void renderReport(
-			JasperPrint populatedReport, Map model, HttpServletResponse response)
+	protected void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception {
 
 		String format = (String) model.get(this.formatKey);
 		if (format == null) {
-			throw new IllegalArgumentException("No format format found in model.");
+			throw new IllegalArgumentException("No format format found in model");
 		}
 
-		if(log.isDebugEnabled()) {
-			log.debug("Rendering report using format mapping key [" + format + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Rendering report using format mapping key [" + format + "]");
 		}
 
 		Class viewClass = (Class) this.formatMappings.get(format);
@@ -181,15 +177,15 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 			throw new IllegalArgumentException("Format discriminator [" + format + "] is not a configured mapping");
 		}
 
-		if(log.isDebugEnabled()) {
-			log.debug("Rendering report using view class [" + viewClass.getName() + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Rendering report using view class [" + viewClass.getName() + "]");
 		}
 
 		AbstractJasperReportsView view = (AbstractJasperReportsView) BeanUtils.instantiateClass(viewClass);
 
-		// copy appropriate properties across
-		view.setExporterParameters(this.exporterParameters);
-    view.setDataSource(this.dataSource);
+		// Copy appropriate properties across.
+		view.setExporterParameters(getExporterParameters());
+    view.setJdbcDataSource(getJdbcDataSource());
 		
 		response.setContentType(view.getContentType());
 
@@ -201,16 +197,16 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	/**
 	 * Adds/overwrites the <code>Content-Disposition</code> header value with the format-specific
 	 * value if the mappings have been specified and a valid one exists for the given format.
-	 * @param format  the format key of the mapping.
-	 * @param response  the <code>HttpServletResponse</code> to set the header in.
-	 * @see #setContentDispositionMappings(java.util.Properties)
+	 * @param format the format key of the mapping
+	 * @param response the <code>HttpServletResponse</code> to set the header in
+	 * @see #setContentDispositionMappings
 	 */
 	private void populateContentDispositionIfNecessary(String format, HttpServletResponse response) {
-		if(contentDispositionMappings != null && contentDispositionMappings.size() > 0) {
-			String header = contentDispositionMappings.getProperty(format);
-			if(header != null) {
-				if(log.isDebugEnabled()) {
-					log.debug("Setting Content-Disposition header to: [" + header + "]");
+		if (this.contentDispositionMappings != null) {
+			String header = this.contentDispositionMappings.getProperty(format);
+			if (header != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Setting Content-Disposition header to: [" + header + "]");
 				}
 				response.setHeader(HEADER_CONTENT_DISPOSITION, header);
 			}

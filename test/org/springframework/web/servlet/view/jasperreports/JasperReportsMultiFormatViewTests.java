@@ -22,8 +22,6 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JasperPrint;
 
 /**
@@ -106,6 +104,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		model.put("dataSource", getData());
 		return model;
 	}
+	
 
 	public static class ExporterParameterTestView extends AbstractJasperReportsView {
 
@@ -114,8 +113,8 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		protected void renderReport(JasperPrint filledReport, Map parameters, HttpServletResponse response)
 				throws Exception {
 
-			assertNotNull("Exporter parameters are null", this.exporterParameters);
-			assertEquals("Incorrect number of exporter parameters", 1, this.exporterParameters.size());
+			assertNotNull("Exporter parameters are null", getExporterParameters());
+			assertEquals("Incorrect number of exporter parameters", 1, getExporterParameters().size());
 		}
 	}
 

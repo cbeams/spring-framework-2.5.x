@@ -23,26 +23,23 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRAbstractExporter;
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
 
 import org.springframework.ui.jasperreports.JasperReportsUtils;
 
 /**
  * Extends <code>AbstractJasperReportsView</code> to provide basic rendering logic for
  * views that are fixed format, i.e. always PDF or always HTML.
- * <p/>
+ *
  * <p>Subclasses need to implement two template methods: <code>createExporter</code>
  * to create a JasperReports exporter for a specific output format, and
  * <code>useWriter</code> to determine whether to write text or binary content.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @since 1.1.5
  * @see #createExporter()
  * @see #useWriter()
- * @since 1.1.5
  */
 public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasperReportsView {
 
@@ -62,8 +59,8 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		// Prepare report for rendering.
 		JRAbstractExporter exporter = createExporter();
 
-		if (this.exporterParameters != null) {
-			exporter.setParameters(this.exporterParameters);
+		if (getExporterParameters() != null) {
+			exporter.setParameters(getExporterParameters());
 		}
 
 		if (useWriter()) {
@@ -91,19 +88,17 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * which will be used to render the report to the HTTP response.
 	 * <p>The <code>useWriter</code> method determines whether the
 	 * output will be written as text or as binary content.
-	 *
 	 * @see #useWriter
 	 */
 	protected abstract JRAbstractExporter createExporter();
 
 	/**
-		 * Return whether to use a <code>java.io.Writer</code> to write text content
-		 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
-		 * to write binary content to the response.
-		 *
-		 * @see javax.servlet.ServletResponse#getWriter
-		 * @see javax.servlet.ServletResponse#getOutputStream
-		 */
+	 * Return whether to use a <code>java.io.Writer</code> to write text content
+	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
+	 * to write binary content to the response.
+	 * @see javax.servlet.ServletResponse#getWriter
+	 * @see javax.servlet.ServletResponse#getOutputStream
+	 */
 	protected abstract boolean useWriter();
 
 }
