@@ -1265,18 +1265,18 @@ public class DependsOnExoticType {
     <emphasis>singleton</emphasis> fashion. The first request by the container
     for the factory to produce an object will cause the specified method
     invocation, whose return value will cached and returned for the current
-    and subsequent requests. An internal <method>singleton</method> property
+    and subsequent requests. An internal <literal>singleton</literal> property
     of the factory may be set to false, to cause it to invoke the target
     method each time it is asked for an object.</para>
 
     <para>A static target method may be specified by setting the
-    <method>targetMethod</method> property to a String representing the static
-    method name, with <method>targetClass</method> specifying the Class that
+    <literal>targetMethod</literal> property to a String representing the static
+    method name, with <literal>targetClass</literal> specifying the Class that
     the static method is defined on. Alternatively, a target instance method
-    may be specified, by setting the <method>targetObject</method> property as
-    the target object, and the <method>targetMethod</method> property as the
+    may be specified, by setting the <literal>targetObject</literal> property as
+    the target object, and the <literal>targetMethod</literal> property as the
     name of the method to call on that target object. Arguments for the method
-    invocation may be specified by setting the <method>args</method> property.</para>
+    invocation may be specified by setting the <literal>args</literal> property.</para>
   </sect1>
 
   <sect1 id="context-create">
