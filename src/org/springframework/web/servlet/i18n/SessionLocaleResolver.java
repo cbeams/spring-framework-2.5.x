@@ -29,25 +29,28 @@ import org.springframework.web.util.WebUtils;
  * session in case of a custom setting, with a fallback to the accept header locale.
  * This is most appropriate if the application needs user sessions anyway.
  *
- * <p>Custom controllers can override the user's locale by calling setLocale,
- * e.g. responding to a locale change request.
+ * <p>Custom controllers can override the user's locale by calling
+ * <code>setLocale</code>, e.g. responding to a locale change request.
  *
  * @author Juergen Hoeller
  * @since 27.02.2003
+ * @see #setLocale
  */
 public class SessionLocaleResolver implements LocaleResolver {
 
 	/**
-	 * Name of the session attribute that holds the locale. Only used
-	 * internally by this implementation. Use RequestContext.getLocale()
+	 * Name of the session attribute that holds the locale.
+	 * Only used internally by this implementation.
+	 * Use <code>RequestContext(Utils).getLocale()</code>
 	 * to retrieve the current locale in controllers or views.
 	 * @see org.springframework.web.servlet.support.RequestContext#getLocale
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
 	 */
 	public static final String LOCALE_SESSION_ATTRIBUTE_NAME = SessionLocaleResolver.class.getName() + ".LOCALE";
 
 	public Locale resolveLocale(HttpServletRequest request) {
 		Locale locale = (Locale) WebUtils.getSessionAttribute(request, LOCALE_SESSION_ATTRIBUTE_NAME);
-		// specific locale, or fallback to request locale?
+		// specific locale, or fallback to accept header locale?
 		return (locale != null ? locale : request.getLocale());
 	}
 

@@ -23,23 +23,26 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of ThemeResolver that uses a theme attribute in the user's
- * session in case of a custom setting, with a fallback to the fixed default theme.
+ * session in case of a custom setting, with a fallback to the default theme.
  * This is most appropriate if the application needs user sessions anyway.
  *
- * <p>Custom controllers can override the user's theme by calling setTheme,
- * e.g. responding to a theme change request.
+ * <p>Custom controllers can override the user's theme by calling
+ * <code>setThemeName</code>, e.g. responding to a theme change request.
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @since 17.06.2003
+ * @see #setThemeName
  */
 public class SessionThemeResolver extends AbstractThemeResolver {
 
 	/**
-	 * Name of the session attribute that holds the theme name. Only used
-	 * internally by this implementation. Use RequestContext.getTheme()
+	 * Name of the session attribute that holds the theme name.
+	 * Only used internally by this implementation.
+	 * Use <code>RequestContext(Utils).getTheme()</code>
 	 * to retrieve the current theme in controllers or views.
 	 * @see org.springframework.web.servlet.support.RequestContext#getTheme
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getTheme
 	 */
 	public static final String THEME_SESSION_ATTRIBUTE_NAME = SessionThemeResolver.class.getName() + ".THEME";
 

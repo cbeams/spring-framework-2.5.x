@@ -24,15 +24,16 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of ThemeResolver that uses a cookie sent back to the user
- * in case of a custom setting, with a fallback to the fixed locale.
+ * in case of a custom setting, with a fallback to the default theme.
  * This is especially useful for stateless applications without user sessions.
  *
- * <p>Custom controllers can thus override the user's theme by calling setTheme,
- * e.g. responding to a certain theme change request.
+ * <p>Custom controllers can thus override the user's theme by calling
+ * <code>setThemeName</code>, e.g. responding to a certain theme change request.
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @since 17.06.2003
+ * @see #setThemeName
  */
 public class CookieThemeResolver extends AbstractThemeResolver {
 
@@ -51,12 +52,14 @@ public class CookieThemeResolver extends AbstractThemeResolver {
 
 	public static final int DEFAULT_COOKIE_MAX_AGE = Integer.MAX_VALUE;
 
+
 	private String cookieName = DEFAULT_COOKIE_NAME;
 
 	private int cookieMaxAge = DEFAULT_COOKIE_MAX_AGE;
 
 	private String cookiePath = DEFAULT_COOKIE_PATH;
-	
+
+
 	/**
 	 * Use the given name for theme cookies, containing the theme name.
 	 */
@@ -64,6 +67,9 @@ public class CookieThemeResolver extends AbstractThemeResolver {
 		this.cookieName = cookieName;
 	}
 
+	/**
+	 * Return the name for theme cookies.
+	 */
 	public String getCookieName() {
 		return cookieName;
 	}
@@ -72,12 +78,15 @@ public class CookieThemeResolver extends AbstractThemeResolver {
 	 * Use the given path for theme cookies.
 	 * The cookie is only visible for URLs in the path and below. 
 	 */
-	public String getCookiePath() {
-		return cookiePath;
-	}
-
 	public void setCookiePath(String cookiePath) {
 		this.cookiePath = cookiePath;
+	}
+
+	/**
+	 * Return the path for theme cookies.
+	 */
+	public String getCookiePath() {
+		return cookiePath;
 	}
 
 	/**
@@ -88,9 +97,13 @@ public class CookieThemeResolver extends AbstractThemeResolver {
 		this.cookieMaxAge = cookieMaxAge;
 	}
 
+	/**
+	 * Return the maximum age for locale cookies.
+	 */
 	public int getCookieMaxAge() {
 		return cookieMaxAge;
 	}
+
 
 	public String resolveThemeName(HttpServletRequest request) {
 		// check theme for preparsed resp. preset theme
@@ -115,15 +128,15 @@ public class CookieThemeResolver extends AbstractThemeResolver {
 			// set request attribute and add cookie
 			request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, themeName);
 			cookie = new Cookie(getCookieName(), themeName);
+			cookie.setPath(getCookiePath());
 			cookie.setMaxAge(getCookieMaxAge());
-			cookie.setPath(cookiePath);
 		}
 		else {
 			// set request attribute to fallback theme and remove cookie
 			request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, getDefaultThemeName());
 			cookie = new Cookie(getCookieName(), "");
+			cookie.setPath(getCookiePath());
 			cookie.setMaxAge(0);
-			cookie.setPath(cookiePath);
 		}
 		response.addCookie(cookie);
 	}

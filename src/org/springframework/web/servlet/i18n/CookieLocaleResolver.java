@@ -31,12 +31,13 @@ import org.springframework.web.util.WebUtils;
  * in case of a custom setting, with a fallback to the accept header locale.
  * This is especially useful for stateless applications without user sessions.
  *
- * <p>Custom controllers can thus override the user's locale by calling setLocale,
- * e.g. responding to a certain locale change request.
+ * <p>Custom controllers can thus override the user's locale by calling
+ * <code>setLocale</code>, e.g. responding to a certain locale change request.
  *
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 27.02.2003
+ * @see #setLocale
  */
 public class CookieLocaleResolver implements LocaleResolver {
 
@@ -55,11 +56,13 @@ public class CookieLocaleResolver implements LocaleResolver {
 
 	public static final int DEFAULT_COOKIE_MAX_AGE = Integer.MAX_VALUE;
 
+
 	private String cookieName = DEFAULT_COOKIE_NAME;
 
 	private String cookiePath = DEFAULT_COOKIE_PATH;
 
 	private int cookieMaxAge = DEFAULT_COOKIE_MAX_AGE;
+
 
 	/**
 	 * Use the given name for locale cookies.
@@ -68,20 +71,26 @@ public class CookieLocaleResolver implements LocaleResolver {
 		this.cookieName = cookieName;
 	}
 
+	/**
+	 * Return the given name for locale cookies.
+	 */
 	public String getCookieName() {
 		return cookieName;
 	}
 
 	/**
-	 * Use the given path for theme cookies.
+	 * Use the given path for locale cookies.
 	 * The cookie is only visible for URLs in the path and below. 
+	 */
+	public void setCookiePath(String cookiePath) {
+		this.cookiePath = cookiePath;
+	}
+
+	/**
+	 * Return the path for locale cookies.
 	 */
 	public String getCookiePath() {
 		return cookiePath;
-	}
-
-	public void setCookiePath(String cookiePath) {
-		this.cookiePath = cookiePath;
 	}
 
 	/**
@@ -92,9 +101,13 @@ public class CookieLocaleResolver implements LocaleResolver {
 		this.cookieMaxAge = cookieMaxAge;
 	}
 
+	/**
+	 * Return the maximum age for locale cookies.
+	 */
 	public int getCookieMaxAge() {
 		return cookieMaxAge;
 	}
+
 
 	public Locale resolveLocale(HttpServletRequest request) {
 		// check locale for preparsed resp. preset locale
@@ -136,17 +149,19 @@ public class CookieLocaleResolver implements LocaleResolver {
 		if (locale != null) {
 			// set request attribute and add cookie
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, locale);
-			cookie = new Cookie(getCookieName(), locale.getLanguage() + " " + locale.getCountry() + " " + locale.getVariant());
+			cookie = new Cookie(getCookieName(), locale.getLanguage() + " " + locale.getCountry() +
+			                                     " " + locale.getVariant());
+			cookie.setPath(getCookiePath());
 			cookie.setMaxAge(getCookieMaxAge());
-			cookie.setPath(cookiePath);
 		}
 		else {
 			// set request attribute to fallback locale and remove cookie
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, request.getLocale());
 			cookie = new Cookie(getCookieName(), "");
+			cookie.setPath(getCookiePath());
 			cookie.setMaxAge(0);
-			cookie.setPath(cookiePath);
 		}
 		response.addCookie(cookie);
 	}
+
 }
