@@ -15,10 +15,6 @@
  */
 package org.springframework.web.flow.mvc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -70,7 +66,7 @@ public class FlowController extends AbstractController implements InitializingBe
 
 	private Flow flow;
 
-	private Collection flowExecutionListeners;
+	private FlowExecutionListener[] flowExecutionListeners;
 
 	private HttpFlowExecutionManager manager;
 
@@ -86,8 +82,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * lifecycle events.
 	 */
 	public void setFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners = new ArrayList(1);
-		this.flowExecutionListeners.add(listener);
+		this.flowExecutionListeners = new FlowExecutionListener[] { listener };
 	}
 
 	/**
@@ -95,13 +90,13 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * execution lifecycle events.
 	 */
 	public void setFlowExecutionListeners(FlowExecutionListener[] listeners) {
-		this.flowExecutionListeners = Arrays.asList(listeners);
+		this.flowExecutionListeners = listeners;
 	}
 
 	public void afterPropertiesSet() throws Exception {
-		//web flows need a session!
+		// web flows need a session!
 		setRequireSession(true);
-		//setup our flow execution manager
+		// setup our flow execution manager
 		this.manager = createHttpFlowExecutionManager();
 	}
 
@@ -116,7 +111,7 @@ public class FlowController extends AbstractController implements InitializingBe
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		//delegate to the flow execution manager to process the request
+		// delegate to the flow execution manager to process the request
 		return manager.handleRequest(request, response);
 	}
 }
