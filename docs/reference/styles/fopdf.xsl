@@ -56,6 +56,21 @@
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
+                    <fo:table-row>
+                        <fo:table-cell text-align="center">
+                            <fo:block font-family="Helvetica" font-size="12pt" padding="10mm">
+                                <xsl:text>Copyright (c) 2004  -  </xsl:text>
+                                <xsl:for-each select="bookinfo/authorgroup/author">
+                                    <xsl:if test="position() > 1">
+                                        <xsl:text>, </xsl:text>
+                                    </xsl:if>
+                                    <xsl:value-of select="firstname"/>
+                                    <xsl:text> </xsl:text>
+                                    <xsl:value-of select="surname"/>
+                                </xsl:for-each>
+                            </fo:block>
+                        </fo:table-cell>
+                    </fo:table-row>
                 </fo:table-body>
             </fo:table>
         </fo:block>
