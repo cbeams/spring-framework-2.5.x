@@ -30,6 +30,15 @@ import org.springframework.beans.factory.InitializingBean;
  * Optionally, a codebase URL can be specified for on-demand dynamic code download
  * from a remote location. For details, see HttpInvokerClientInterceptor docs.
  *
+ * <p>Serializes remote invocation objects and deserializes remote invocation
+ * result objects. Uses Java serialization just like RMI, but provides the
+ * same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
+ *
+ * <p><b>HTTP invoker is the recommended protocol for Java-to-Java remoting.</b>
+ * It is more powerful and more extensible than Hessian and Burlap, at the
+ * expense of being tied to Java. Nevertheless, it is as easy to set up as
+ * Hessian and Burlap, which is its main advantage compared to RMI.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setServiceInterface
@@ -37,6 +46,9 @@ import org.springframework.beans.factory.InitializingBean;
  * @see #setCodebaseUrl
  * @see HttpInvokerClientInterceptor
  * @see HttpInvokerServiceExporter
+ * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
+ * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
+ * @see org.springframework.remoting.caucho.BurlapProxyFactoryBean
  */
 public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor
 		implements FactoryBean, InitializingBean {

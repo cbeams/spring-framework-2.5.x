@@ -36,13 +36,22 @@ import org.springframework.web.servlet.mvc.Controller;
  * Web controller that exports the specified service bean as HTTP invoker
  * service endpoint, accessible via an HTTP invoker proxy.
  *
- * <p>Simply deserializes remote invocation objects and serializes remote
- * invocation results. Uses Java serialization just like RMI, but provides
- * the same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
+ * <p>Deserializes remote invocation objects and serializes remote invocation
+ * result objects. Uses Java serialization just like RMI, but provides the
+ * same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
+ *
+ * <p><b>HTTP invoker is the recommended protocol for Java-to-Java remoting.</b>
+ * It is more powerful and more extensible than Hessian and Burlap, at the
+ * expense of being tied to Java. Nevertheless, it is as easy to set up as
+ * Hessian and Burlap, which is its main advantage compared to RMI.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see HttpInvokerClientInterceptor
  * @see HttpInvokerProxyFactoryBean
+ * @see org.springframework.remoting.rmi.RmiServiceExporter
+ * @see org.springframework.remoting.caucho.HessianServiceExporter
+ * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
 public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 		implements Controller, InitializingBean {

@@ -48,7 +48,11 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
+ * @see BurlapClientInterceptor
  * @see BurlapProxyFactoryBean
+ * @see org.springframework.remoting.caucho.HessianServiceExporter
+ * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
+ * @see org.springframework.remoting.rmi.RmiServiceExporter
  */
 public class BurlapServiceExporter extends RemoteExporter implements Controller, InitializingBean {
 

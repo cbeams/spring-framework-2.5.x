@@ -35,10 +35,11 @@ import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
  * Interceptor for accessing conventional RMI services or RMI invokers.
  * The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
  *
- * <p>RMI invokers work at the RmiInvocationHandler level, needing only one stub
- * for any service. Service interfaces do not have to extend java.rmi.Remote or
- * throw RemoteException; Spring's unchecked RemoteAccessException will be thrown on
- * remote invocation failure. Of course, in and out parameters have to be serializable.
+ * <p>RMI invokers work at the RmiInvocationHandler level, needing only one stub for
+ * any service. Service interfaces do not have to extend <code>java.rmi.Remote</code>
+ * or throw <code>java.rmi.RemoteException</code>. Spring's unchecked
+ * RemoteAccessException will be thrown on remote invocation failure.
+ * Of course, in and out parameters have to be serializable.
  *
  * <p>With conventional RMI services, this invoker is typically used with the RMI
  * service interface. Alternatively, this invoker can also proxy a remote RMI service

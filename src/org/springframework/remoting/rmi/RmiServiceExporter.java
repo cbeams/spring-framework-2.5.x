@@ -45,8 +45,8 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
  * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
  * Effectively, any serializable Java object can be transported without hassle.
  * Hessian and Burlap have their own (de-)serialization mechanisms, but are
- * HTTP-based and thus much easier to setup than RMI. Alternatively, use Spring's
- * HTTP invoker to combine Java serialization with HTTP-based transport.
+ * HTTP-based and thus much easier to setup than RMI. Alternatively, consider
+ * Spring's HTTP invoker to combine Java serialization with HTTP-based transport.
  *
  * <p>Note: RMI makes a best-effort attempt to obtain the fully qualified host name.
  * If one cannot be determined, it will fall back and use the IP address. Depending

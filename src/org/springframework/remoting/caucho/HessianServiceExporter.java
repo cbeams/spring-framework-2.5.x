@@ -48,7 +48,11 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
+ * @see HessianClientInterceptor
  * @see HessianProxyFactoryBean
+ * @see org.springframework.remoting.caucho.BurlapServiceExporter
+ * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
+ * @see org.springframework.remoting.rmi.RmiServiceExporter
  */
 public class HessianServiceExporter extends RemoteExporter implements Controller, InitializingBean {
 

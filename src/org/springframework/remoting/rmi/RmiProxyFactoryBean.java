@@ -22,13 +22,14 @@ import org.springframework.beans.factory.FactoryBean;
 /**
  * Factory bean for RMI proxies, supporting both conventional RMI services and
  * RMI invokers. Behaves like the proxied service when used as bean reference,
- * exposing the specified service interface. Proxies will throw RemoteAccessException
- * on remote invocation failure instead of RMI's RemoteException.
+ * exposing the specified service interface. Proxies will throw Spring's unchecked
+ * RemoteAccessException on remote invocation failure instead of RMI's RemoteException.
  *
  * <p>The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
- * RMI invokers work at the RmiInvocationHandler level, needing only one stub
- * for any service. Service interfaces do not have to extend java.rmi.Remote or
- * throw RemoteException. Of course, in and out parameters have to be serializable.
+ * RMI invokers work at the RmiInvocationHandler level, using the same invoker stub
+ * for any service. Service interfaces do not have to extend <code>java.rmi.Remote</code>
+ * or throw <code>java.rmi.RemoteException</code>. Of course, in and out parameters
+ * have to be serializable.
  *
  * <p>With conventional RMI services, this proxy factory is typically used with the
  * RMI service interface. Alternatively, this factory can also proxy a remote RMI
@@ -40,8 +41,8 @@ import org.springframework.beans.factory.FactoryBean;
  * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
  * Effectively, any serializable Java object can be transported without hassle.
  * Hessian and Burlap have their own (de-)serialization mechanisms, but are
- * HTTP-based and thus much easier to setup than RMI. Alternatively, use Spring's
- * HTTP invoker to combine Java serialization with HTTP-based transport.
+ * HTTP-based and thus much easier to setup than RMI. Alternatively, consider
+ * Spring's HTTP invoker to combine Java serialization with HTTP-based transport.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003

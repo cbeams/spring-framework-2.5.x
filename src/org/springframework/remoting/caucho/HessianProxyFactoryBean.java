@@ -25,13 +25,22 @@ import org.springframework.beans.factory.FactoryBean;
  * Factory bean for Hessian proxies. Behaves like the proxied service when
  * used as bean reference, exposing the specified service interface.
  *
+ * <p>Hessian is a slim, binary RPC protocol.
+ * For information on Hessian, see the
+ * <a href="http://www.caucho.com/hessian">Hessian website</a>
+ *
  * <p>The service URL must be an HTTP URL exposing a Hessian service.
  * For details, see HessianClientInterceptor docs.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
+ * @see #setServiceInterface
+ * @see #setServiceUrl
  * @see HessianClientInterceptor
  * @see HessianServiceExporter
+ * @see org.springframework.remoting.caucho.BurlapProxyFactoryBean
+ * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
+ * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  */
 public class HessianProxyFactoryBean extends HessianClientInterceptor implements FactoryBean {
 
