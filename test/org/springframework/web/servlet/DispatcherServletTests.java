@@ -28,6 +28,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.TestBean;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -46,6 +47,7 @@ import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Rod Johnson
@@ -53,7 +55,7 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
  */
 public class DispatcherServletTests extends TestCase {
 	
-	static final String URL_KNOWN_ONLY_PARENT = "/knownOnlyToParent.do";
+	private static final String URL_KNOWN_ONLY_PARENT = "/knownOnlyToParent.do";
 
 	private MockServletConfig servletConfig;
 
@@ -446,13 +448,6 @@ public class DispatcherServletTests extends TestCase {
 				response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	public static class ControllerFromParent implements Controller {
-		
-		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-			return new ModelAndView(ControllerFromParent.class.getName());
-		}
-	}
-	
 	public void testNotDetectAllHandlerExceptionResolvers() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
@@ -489,6 +484,68 @@ public class DispatcherServletTests extends TestCase {
 			// expected
 			assertTrue(ex.getMessage().indexOf("failed0") != -1);
 		}
+	}
+
+	public void testCleanupAfterIncludeWithRemove() throws ServletException, IOException {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/main.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		request.setAttribute("test1", "value1");
+		request.setAttribute("test2", "value2");
+		WebApplicationContext wac = new StaticWebApplicationContext();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+
+		request.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/form.do");
+		simpleDispatcherServlet.service(request, response);
+		assertTrue("forwarded to form", "form".equals(response.getIncludedUrl()));
+
+		assertEquals("value1", request.getAttribute("test1"));
+		assertEquals("value2", request.getAttribute("test2"));
+		assertEquals(wac, request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertNull(request.getAttribute("command"));
+	}
+
+	public void testCleanupAfterIncludeWithRestore() throws ServletException, IOException {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/main.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		request.setAttribute("test1", "value1");
+		request.setAttribute("test2", "value2");
+		WebApplicationContext wac = new StaticWebApplicationContext();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		TestBean command = new TestBean();
+		request.setAttribute("command", command);
+
+		request.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/form.do");
+		simpleDispatcherServlet.service(request, response);
+		assertTrue("forwarded to form", "form".equals(response.getIncludedUrl()));
+
+		assertEquals("value1", request.getAttribute("test1"));
+		assertEquals("value2", request.getAttribute("test2"));
+		assertSame(wac, request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertSame(command, request.getAttribute("command"));
+	}
+
+	public void testNoCleanupAfterInclude() throws ServletException, IOException {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/main.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		request.setAttribute("test1", "value1");
+		request.setAttribute("test2", "value2");
+		WebApplicationContext wac = new StaticWebApplicationContext();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		TestBean command = new TestBean();
+		request.setAttribute("command", command);
+
+		request.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/form.do");
+		simpleDispatcherServlet.setCleanupAfterInclude(false);
+		simpleDispatcherServlet.service(request, response);
+		assertTrue("forwarded to form", "form".equals(response.getIncludedUrl()));
+
+		assertEquals("value1", request.getAttribute("test1"));
+		assertEquals("value2", request.getAttribute("test2"));
+		assertSame(wac, request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertNotSame(command, request.getAttribute("command"));
 	}
 
 	public void testThrowawayController() throws Exception {
@@ -543,12 +600,21 @@ public class DispatcherServletTests extends TestCase {
 			// expected
 		}
 
-		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, new StaticWebApplicationContext());
+		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
+				new StaticWebApplicationContext());
 		try {
 			RequestContextUtils.getWebApplicationContext(request, servletContext);
 		}
 		catch (IllegalStateException ex) {
 			fail("Should not have thrown IllegalStateException: " + ex.getMessage());
+		}
+	}
+
+
+	public static class ControllerFromParent implements Controller {
+
+		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+			return new ModelAndView(ControllerFromParent.class.getName());
 		}
 	}
 

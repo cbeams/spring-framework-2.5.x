@@ -18,6 +18,8 @@ package org.springframework.web.servlet;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -42,18 +44,17 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Concrete front controller for use within the web MVC framework.
+ * Central dispatcher for use within the web MVC framework,
+ * e.g. for web UI controllers or HTTP-based remote service exporters.
  * Dispatches to registered handlers for processing a web request.
- *
- * <p>This class and the MVC approach it delivers is discussed in Chapter 12 of
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002).
  *
  * <p>This servlet is very flexible: It can be used with just about any workflow,
  * with the installation of the appropriate adapter classes. It offers the
- * following functionality that distinguishes it from other MVC frameworks:
+ * following functionality that distinguishes it from other request-driven
+ * web MVC frameworks:
  *
  * <ul>
  * <li>It is based around a JavaBeans configuration mechanism.
@@ -92,19 +93,33 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * The ThemeResolver bean name is "themeResolver"; default is FixedThemeResolver.
  * </ul>
  *
- * <p>A web application can use any number of dispatcher servlets. Each servlet will
- * operate in its own namespace. Only the root application context will be shared.
+ * <p><b>A web application can use any number of DispatcherServlets.</b> Each servlet
+ * will operate in its own namespace. Only the root application context will be shared.
+ *
+ * <p>This class and the MVC approach it delivers is discussed in Chapter 12 of
+ * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
+ * by Rod Johnson (Wrox, 2002). Note that it is called <i>ControllerServlet</i> there;
+ * it has been renamed since to emphasize its dispatching role and avoid confusion
+ * with Controller objects that the DispatcherServlet will dispatch to.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see HandlerMapping
- * @see HandlerAdapter
- * @see ViewResolver
- * @see MultipartResolver
- * @see LocaleResolver
- * @see ThemeResolver
- * @see org.springframework.web.context.WebApplicationContext
  * @see org.springframework.web.context.ContextLoaderListener
+ * @see HandlerMapping
+ * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
+ * @see HandlerAdapter
+ * @see org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter
+ * @see org.springframework.web.servlet.mvc.Controller
+ * @see HandlerExceptionResolver
+ * @see org.springframework.web.servlet.handler.SimpleMappingExceptionResolver
+ * @see ViewResolver
+ * @see org.springframework.web.servlet.view.InternalResourceViewResolver
+ * @see MultipartResolver
+ * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
+ * @see LocaleResolver
+ * @see org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver
+ * @see ThemeResolver
+ * @see org.springframework.web.servlet.theme.FixedThemeResolver
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -188,6 +203,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 
+	/** Perform cleanup of request attributes after include request? */
+	private boolean cleanupAfterInclude = true;
+
 	/** Detect all HandlerMappings or just expect "handlerMapping" bean? */
 	private boolean detectAllHandlerMappings = true;
 
@@ -218,6 +236,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** List of ViewResolvers used by this servlet */
 	private List viewResolvers;
 
+
+	/**
+	 * Set whether to perform cleanup of request attributes after an include request,
+	 * i.e. whether to reset the original state of all request attributes after the
+	 * DispatcherServlet has processed within an include request. Else, just the
+	 * DispatcherServlet's own request attributes will be reset, but not model
+	 * attributes for JSPs or special attributes set by views (for example, JSTL's).
+	 * <p>Default is true, which is strongly recommended. Views should not rely on
+	 * request attributes having been set by (dynamic) includes. This allows JSP views
+	 * rendered by an included controller to use any model attributes, even with the
+	 * same names as in the main JSP, without causing side effects. Only turn this
+	 * off for special needs, for example to deliberately allow main JSPs to access
+	 * attributes from JSP views rendered by an included controller.
+	 */
+	public void setCleanupAfterInclude(boolean cleanupAfterInclude) {
+		this.cleanupAfterInclude = cleanupAfterInclude;
+	}
 
 	/**
 	 * Set whether to detect all HandlerMapping beans in this servlet's context.
@@ -483,6 +518,19 @@ public class DispatcherServlet extends FrameworkServlet {
 					request.getRequestURI() + "]");
 		}
 
+		// Keep a snapshot of the request attributes in case of an include,
+		// to be able to restore the original attributes after the include.
+		Map attributesSnapshot = null;
+		if (request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
+			logger.debug("Taking snapshot of request attributes before include");
+			attributesSnapshot = new HashMap();
+			Enumeration attrNames = request.getAttributeNames();
+			while (attrNames.hasMoreElements()) {
+				String attrName = (String) attrNames.nextElement();
+				attributesSnapshot.put(attrName, request.getAttribute(attrName));
+			}
+		}
+
 		// Make framework objects available for handlers.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
@@ -491,6 +539,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
+
 		try {
 			ModelAndView mv = null;
 			try {
@@ -509,7 +558,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 				mappedHandler = getHandler(processedRequest, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
-					// if we didn't find a handler
+					// If we didn't find a handler.
 					if (pageNotFoundLogger.isWarnEnabled()) {
 						pageNotFoundLogger.warn("No mapping for [" + request.getRequestURI() +
 								"] in DispatcherServlet with name '" + getServletName() + "'");
@@ -580,13 +629,33 @@ public class DispatcherServlet extends FrameworkServlet {
 
 			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 		}
+
 		catch (Exception ex) {
 			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 		}
+
 		finally {
 			// Clean up any resources used by a multipart request.
 			if (processedRequest instanceof MultipartHttpServletRequest && processedRequest != request) {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
+			}
+
+			// Restore the original attribute snapshot, in case of an include.
+			if (attributesSnapshot != null) {
+				logger.debug("Restoring snapshot of request attributes after include");
+				Enumeration attrNames = request.getAttributeNames();
+				while (attrNames.hasMoreElements()) {
+					String attrName = (String) attrNames.nextElement();
+					if (this.cleanupAfterInclude || attrName.startsWith(DispatcherServlet.class.getName())) {
+						Object attrValue = attributesSnapshot.get(attrName);
+						if (attrValue != null) {
+							request.setAttribute(attrName, attrValue);
+						}
+						else {
+							request.removeAttribute(attrName);
+						}
+					}
+				}
 			}
 		}
 	}
