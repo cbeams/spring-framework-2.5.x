@@ -168,7 +168,16 @@ public class UrlPathHelper {
 	 * @return the path within the web application
 	 */
 	public String getPathWithinApplication(HttpServletRequest request) {
-		return getRequestUri(request).substring(getContextPath(request).length());
+		String contextPath = getContextPath(request);
+		String requestUri = getRequestUri(request);
+		if (requestUri.startsWith(contextPath)) {
+			// Normal case: URI contains context path.
+			return requestUri.substring(contextPath.length());
+		}
+		else {
+			// Special case: rather unusual.
+			return requestUri;
+		}
 	}
 
 	/**
