@@ -110,8 +110,6 @@ public abstract class AbstractExcelView extends AbstractView {
 
 	private String url;
 
-	private HSSFWorkbook workbook;
-
 
 	public AbstractExcelView() {
 		setContentType("application/vnd.ms-excel");
@@ -130,28 +128,30 @@ public abstract class AbstractExcelView extends AbstractView {
 	 */
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		HSSFWorkbook workbook;
 		if (this.url != null) {
-			this.workbook = getTemplateSource(this.url, request);
+			workbook = getTemplateSource(this.url, request);
 		}
 		else {
-			this.workbook = new HSSFWorkbook();
+			workbook = new HSSFWorkbook();
 			logger.debug("Created Excel Workbook from scratch");
 		}
 
-		buildExcelDocument(model, this.workbook, request, response);
+		buildExcelDocument(model, workbook, request, response);
 
 		// response.setContentLength(workbook.getBytes().length);
 		response.setContentType(getContentType());
 		ServletOutputStream out = response.getOutputStream();
-		this.workbook.write(out);
+		workbook.write(out);
 		out.flush();
 	}
 
 	/**
-	 * Creates the workBook from an existing .xls document.
-	 * @param url url of the Excle template without localization part nor extension
-	 * @param request
-	 * @return HSSFWorkbook
+	 * Creates the workbook from an existing XLS document.
+	 * @param url URL of the Excel template without localization part nor extension
+	 * @param request current HTTP request
+	 * @return the HSSFWorkbook
 	 */
 	protected HSSFWorkbook getTemplateSource(String url, HttpServletRequest request)
 			throws ServletException, IOException {
@@ -193,13 +193,13 @@ public abstract class AbstractExcelView extends AbstractView {
 	/**
 	 * Subclasses must implement this method to create an Excel HSSFWorkbook document,
 	 * given the model.
-	 * @param model
-	 * @param wb The Excel workBook to complete
-	 * @param request in case we need locale etc. Shouldn't look at attributes
+	 * @param model the model Map
+	 * @param workbook the Excel workbook to complete
+	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 */
 	protected abstract void buildExcelDocument(
-			Map model,	HSSFWorkbook wb, HttpServletRequest request, HttpServletResponse response)
+			Map model, HSSFWorkbook workbook, HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 
 	/**
@@ -225,8 +225,8 @@ public abstract class AbstractExcelView extends AbstractView {
 
 	/**
 	 * Convenient method to set a String as text content in a cell.
-	 * @param cell The cell in which the text must be put
-	 * @param text The text to put in the cell
+	 * @param cell the cell in which the text must be put
+	 * @param text the text to put in the cell
 	 */
 	protected void setText(HSSFCell cell, String text) {
 		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
