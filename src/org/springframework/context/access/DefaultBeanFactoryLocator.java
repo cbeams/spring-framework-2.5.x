@@ -26,7 +26,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  * as the default name for the bean factory reference definition. It is not possible
  * nor legal to share definitions with SingletonBeanFactoryLocator, at the same time.
  * 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @author colin sampaleanu
  * 
  * @see org.springframework.context.access.LocatorFactory
@@ -37,9 +37,7 @@ public class DefaultBeanFactoryLocator extends SingletonBeanFactoryLocator {
 	public static final String BEANS_REFS_XML_NAME = "beanRefContext.xml";
 	
 	// the keyed singleton instances
-	private static DefaultBeanFactoryLocator _noSelectorInstance;
-
-	private static HashMap instances = new HashMap();
+	private static HashMap _instances = new HashMap();
 	
 	/**
 	 * Returns an instance which uses the default "beanRefContext.xml", as the name
@@ -67,15 +65,15 @@ public class DefaultBeanFactoryLocator extends SingletonBeanFactoryLocator {
 	public static BeanFactoryLocator getInstance(String selector)
 			throws FatalBeanException {
 
-		synchronized (instances) {
+		synchronized (_instances) {
 			_log.debug("DefaultBeanFactoryLocator.getInstance(): DefaultBeanFactoryLocator.class="
 				+ DefaultBeanFactoryLocator.class + "hash= " + DefaultBeanFactoryLocator.class.hashCode());
-			_log.debug("DefaultBeanFactoryLocator.getInstance(): instances.hashCode=" + instances.hashCode() + ", instances=" + instances);
+			_log.debug("DefaultBeanFactoryLocator.getInstance(): instances.hashCode=" + _instances.hashCode() + ", instances=" + _instances);
 			
-			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
+			BeanFactoryLocator bfl = (BeanFactoryLocator) _instances.get(selector);
 			if (bfl == null) {
 				bfl = new DefaultBeanFactoryLocator(selector);
-				instances.put(selector, bfl);
+				_instances.put(selector, bfl);
 			}
 
 			return bfl;

@@ -14,7 +14,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -237,7 +238,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  *   
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @author colin sampaleanu
  * 
  * @see org.springframework.context.access.LocatorFactory
@@ -248,18 +249,17 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 	public static final String BEANS_REFS_XML_NAME = "beanRefFactory.xml";
 
-	protected static final Logger _log = Logger
-			.getLogger(SingletonBeanFactoryLocator.class);
+	protected static final Log _log = LogFactory.getLog(SingletonBeanFactoryLocator.class);
 
 	// the keyed singleton instances
-	private static HashMap instances = new HashMap();
+	private static HashMap _instances = new HashMap();
 
 	// --- attributes
 
 	// we map BeanFactoryGroup objects by String keys, and by the definition object
-	private HashMap bfgInstancesByKey = new HashMap();
+	private HashMap _bfgInstancesByKey = new HashMap();
 
-	private HashMap bfgInstancesByObj = new HashMap();
+	private HashMap _bfgInstancesByObj = new HashMap();
 
 	private String _resourceName;
 
@@ -289,14 +289,14 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	public static BeanFactoryLocator getInstance(String selector)
 			throws FatalBeanException {
 
-		synchronized (instances) {
+		synchronized (_instances) {
 			_log.debug("SingletonBeanFactoryLocator.getInstance(): SingletonBeanFactoryLocator.class="
 				+ SingletonBeanFactoryLocator.class + ", hash= " + SingletonBeanFactoryLocator.class.hashCode());
-			_log.debug("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" + instances.hashCode() + ", instances=" + instances);
-			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
+			_log.debug("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" + _instances.hashCode() + ", instances=" + _instances);
+			BeanFactoryLocator bfl = (BeanFactoryLocator) _instances.get(selector);
 			if (bfl == null) {
 				bfl = new SingletonBeanFactoryLocator(selector);
-				instances.put(selector, bfl);
+				_instances.put(selector, bfl);
 			}
 
 			return bfl;
@@ -331,11 +331,11 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 */
 	public BeanFactoryRef useFactory(String factoryKey) throws FatalBeanException {
 
-		synchronized (bfgInstancesByKey) {
-			BeanFactoryGroup bfg = (BeanFactoryGroup) bfgInstancesByKey
+		synchronized (_bfgInstancesByKey) {
+			BeanFactoryGroup bfg = (BeanFactoryGroup) _bfgInstancesByKey
 					.get(_resourceName);
 
-			_log.debug("bfgInstancesByKey=" + bfgInstancesByKey);
+			_log.debug("bfgInstancesByKey=" + _bfgInstancesByKey);
 
 			if (bfg != null) {
 				_log.debug("Factory group with resourceName '" + _resourceName
@@ -377,8 +377,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				bfg.definition = groupContext;
 				bfg.resourceName = _resourceName;
 				bfg.refcount = 1;
-				bfgInstancesByKey.put(_resourceName, bfg);
-				bfgInstancesByObj.put(groupContext, bfg);
+				_bfgInstancesByKey.put(_resourceName, bfg);
+				_bfgInstancesByObj.put(groupContext, bfg);
 			}
 
 			BeanFactory groupContext = bfg.definition;
