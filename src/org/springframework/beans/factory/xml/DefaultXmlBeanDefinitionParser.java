@@ -172,7 +172,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 		List aliases = new ArrayList();
 		if (nameAttr != null && !"".equals(nameAttr)) {
-			aliases.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true)));
+			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true);
+			aliases.addAll(Arrays.asList(nameArr));
 		}
 
 		if (id == null || "".equals(id) && !aliases.isEmpty()) {
@@ -188,7 +189,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				logger.debug("Neither XML 'id' nor 'name' specified - using bean class name [" + id + "] as ID");
 			}
 			else {
-				throw new BeanDefinitionStoreException(this.resource, "", "Child bean definition has neither 'id' nor 'name'");
+				throw new BeanDefinitionStoreException(this.resource, "",
+																							 "Child bean definition has neither 'id' nor 'name'");
 			}
 		}
 
@@ -279,7 +281,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
-			throw new BeanDefinitionStoreException(this.resource, beanName, "Class [" + className + "] not found", ex);
+			throw new BeanDefinitionStoreException(this.resource, beanName,
+																						 "Bean class [" + className + "] not found", ex);
+		}
+		catch (NoClassDefFoundError err) {
+			throw new BeanDefinitionStoreException(this.resource, beanName,
+																						 "Class that bean class [" + className + "] depends on not found", err);
 		}
 	}
 
