@@ -221,10 +221,12 @@ public class DefaultMessageTranslator implements Visitor {
 
     private String getMessageCode(Object o) {
         if (o instanceof TypeResolvable) {
-            return ((TypeResolvable)o).getType();
-        } else {
-            return ClassUtils.getShortNameAsProperty(o.getClass());
+            String type = ((TypeResolvable)o).getType();
+            if (type != null) {
+                return type;
+            }
         }
+        return ClassUtils.getShortNameAsProperty(o.getClass());
     }
 
 

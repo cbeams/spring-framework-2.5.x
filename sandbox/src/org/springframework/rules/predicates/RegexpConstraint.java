@@ -19,14 +19,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.reporting.TypeResolvableSupport;
 
 /**
  * A constraint based on a regular expression pattern.
  * 
  * @author Keith Donald
  */
-public class RegexpConstraint implements UnaryPredicate {
-    Pattern pattern;
+public class RegexpConstraint extends TypeResolvableSupport implements
+        UnaryPredicate {
+    private Pattern pattern;
 
     /**
      * Creates a RegexpConstraint with the provided regular expression pattern
