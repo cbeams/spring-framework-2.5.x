@@ -27,7 +27,7 @@ import org.springframework.beans.BeanUtils;
  * Utility class that contains various methods useful for
  * the implementation of autowire-capable bean factories.
  * @author Juergen Hoeller
- * @since 1.1.1
+ * @since 1.1.2
  * @see AbstractAutowireCapableBeanFactory
  */
 public abstract class AutowireUtils {

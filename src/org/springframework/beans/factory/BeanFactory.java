@@ -155,6 +155,7 @@ public interface BeanFactory {
 	 * @param name the name of the bean to query
 	 * @return the type of the bean, or null if not determinable
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 1.1.2
 	 * @see #getBean
 	 * @see FactoryBean#getObjectType
 	 */

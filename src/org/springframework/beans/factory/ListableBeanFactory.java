@@ -111,6 +111,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if the beans could not be created
+	 * @since 1.1.2
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class)
 	 */
