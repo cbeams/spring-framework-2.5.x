@@ -335,7 +335,7 @@
 
 	</target>
 
-	<target name="sandbox-srczip" depends="initdist" description="Create source ZIP (containing all Java sources)">
+	<target name="sandbox-srczip" depends="initdist" description="Create sandbox source ZIP (containing all Java sources)">
 
 		<delete file="${dist.dir}/spring-sandbox-src.zip"/>
 
@@ -346,6 +346,19 @@
 		</zip>
 
 	</target>
+
+	<target name="mock-srczip" depends="initdist" description="Create mock source ZIP (containing all Java sources)">
+
+		<delete file="${dist.dir}/spring-mock-src.zip"/>
+
+		<zip zipfile="${dist.dir}/spring-mock-src.zip">
+			<fileset dir="${mock.dir}">
+				<include name="org/springframework/**"/>
+			</fileset>
+		</zip>
+
+	</target>
+
 
 	<target name="alljars" depends="modulejars,fulljar,mockjar,srczip" description="Create all JAR files"/>
 
