@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.object.SqlUpdate;
 import org.springframework.util.Assert;
 
 /**
@@ -60,8 +59,7 @@ public class BatchSqlUpdate extends SqlUpdate {
     /**
      * @see org.springframework.jdbc.object.SqlUpdate#update(java.lang.Object[])
      */
-    public int update(Object[] args)
-            throws InvalidDataAccessApiUsageException {
+    public int update(Object[] args) throws InvalidDataAccessApiUsageException {
         validateParameters(args);
         queue.addFirst(args);
         if (queue.size() == batchSize) {
@@ -70,6 +68,11 @@ public class BatchSqlUpdate extends SqlUpdate {
         return 0;
     }
 
+    /**
+     * Trigger any queued operations to be committed as a final batch.
+     * 
+     * @return The number of rows updated.
+     */
     public int flush() {
         if (queue.size() > 0) {
             return doBatchUpdate().length;
@@ -80,8 +83,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 
     protected int[] doBatchUpdate() {
         if (setter == null) {
-            setter = new SimplePreparedStatementSetter(
-                    getDeclaredParameters());
+            setter = new SimplePreparedStatementSetter(getDeclaredParameters());
         }
         int rows[] = getJdbcTemplate().batchUpdate(getSql(),
                 new BatchPreparedStatementSetter() {
@@ -89,8 +91,8 @@ public class BatchSqlUpdate extends SqlUpdate {
                         return queue.size();
                     }
 
-                    public void setValues(PreparedStatement statement,
-                            int index) throws SQLException {
+                    public void setValues(PreparedStatement statement, int index)
+                            throws SQLException {
                         setter.setPreparedStatementParameters(statement,
                                 (Object[])queue.removeLast());
                     }
