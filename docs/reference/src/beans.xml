@@ -411,9 +411,9 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       we will not elaborate too much on the advantages of Dependency
       Injection, it becomes evident upon usage that code gets much cleaner and
       reaching a higher grade of decoupling is much easier when beans do not
-      look up their dependencies, but are provided with them, and additionally do
-      not even know where the dependencies are located and of what actual type
-      they are.</para>
+      look up their dependencies, but are provided with them, and additionally
+      do not even know where the dependencies are located and of what actual
+      type they are.</para>
 
       <para>As touched on in the previous paragraph, Inversion of
       Control/Dependency Injection exists in two major variants:<itemizedlist
@@ -506,11 +506,11 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
             information about PropertyEditors and how to manually add custom
             ones, can be found in <xref
             linkend="beans-beanfactory-customeditors" />). When a bean
-            property is a Java Class type, Spring allows you to specify the value
-            for that property as a string value which is the name of the
-            class, and the <literal>ClassEditor</literal> PropertyEditor, which
-            is built-in, will take care of converting that class name to an
-            actual Class instance.</para>
+            property is a Java Class type, Spring allows you to specify the
+            value for that property as a string value which is the name of the
+            class, and the <literal>ClassEditor</literal> PropertyEditor,
+            which is built-in, will take care of converting that class name to
+            an actual Class instance.</para>
           </listitem>
 
           <listitem>
@@ -750,9 +750,8 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       <para>A <literal>bean</literal> element inside the
       <literal>property</literal> element is used to define a bean value
       inline, instead of referring to a bean defined elsewhere in the
-      BeanFactory. The inline bean definition does not need to have any
-      id defined.
-      <programlisting>&lt;bean id="outer" class="..."&gt;
+      BeanFactory. The inline bean definition does not need to have any id
+      defined. <programlisting>&lt;bean id="outer" class="..."&gt;
     &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
     &lt;property name="target"&gt;
         &lt;bean class="com.mycompany.PersonImpl"&gt;
@@ -1047,11 +1046,11 @@ public class ReplacementComputeValue implements MethodReplacer {
                 <entry>no</entry>
 
                 <entry>No autowiring at all. Bean references must be defined
-                via a <literal>ref</literal> element. This is the default,
-                and changing this is discouraged for larger deployments,
-                since explicitly specifying collaborators gives greater
-                control and clarity. To some extent, it is a form of
-                documentation about the structure of a system.</entry>
+                via a <literal>ref</literal> element. This is the default, and
+                changing this is discouraged for larger deployments, since
+                explicitly specifying collaborators gives greater control and
+                clarity. To some extent, it is a form of documentation about
+                the structure of a system.</entry>
               </row>
 
               <row>
@@ -1231,11 +1230,11 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para><emphasis>Note: generally, the use of the
         <literal>InitializingBean</literal> marker interface can be avoided
-        (and is discouraged since it unecessarily couples the code to
-        Spring). A bean definition provides support for a generic
-        initialization method to be specified. In the case of the
-        XmlBeanFactory, this is done via the <literal>init-method</literal>
-        attribute. For example, the following definition:</emphasis></para>
+        (and is discouraged since it unecessarily couples the code to Spring).
+        A bean definition provides support for a generic initialization method
+        to be specified. In the case of the XmlBeanFactory, this is done via
+        the <literal>init-method</literal> attribute. For example, the
+        following definition:</emphasis></para>
 
         <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/&gt;
 
@@ -1442,14 +1441,25 @@ public class AnotherExampleBean implements DisposableBean {
     &lt;!-- age should inherit value of 1 from parent --&gt;
 &lt;/bean&gt;</programlisting></para>
 
-    <para>The parent bean can not get instantiated on its own; it's just a
-    pure template that serves as parent definition for children. Trying to use
-    such parent beans on it's own (by referring to it as a ref property of
-    another bean, or doing an explicit getBean() call with the parent bean id,
-    will result in an error. Similarly, the container's internal
+    <para>the parent bean can not get instantiated on its own; it's
+    effectively just a pure template or abstract bean definition that serves
+    as parent definition for child definitions. Trying to use such parent
+    beans on it's own (by referring to it as a ref property of another bean,
+    or doing an explicit getBean() call with the parent bean id, will result
+    in an error. Similarly, the container's internal
     <emphasis>preInstantiateSingletons</emphasis> method will completely
     ignore bean definitions which don't have either a parent or class
     attribute set, since they are not complete.</para>
+
+    <para><emphasis>Important Note</emphasis>: there is no way to explicitly
+    declare a bean definition as abstract. If the bean does have a class
+    definition, then it can be instantiated. Note also that XmlBeanFactory
+    will by default pre-instantiate all singletons. Therefore it is important
+    that if you have a (parent) bean definition which you intend to use only
+    as a template, and the class is specified, you must make sure to set the
+    <emphasis>lazy-init</emphasis> attribute to <emphasis>true</emphasis> (or
+    mark the bean non-singleton), otherwise the XmlBeanFactory (and possibly
+    other containers) will actually pre-instantiate it.</para>
   </sect1>
 
   <sect1 id="beans-factory-client">
@@ -1584,8 +1594,8 @@ bf.addBeanPostProcessor(pp);
     custom editors (as also mentioned in <xref
     linkend="beans-beans-conversion" />).</para>
 
-    <para>In a BeanFactory, the process of applying a
-    BeanFactoryPostProcessor is manual, and will be similar to this:</para>
+    <para>In a BeanFactory, the process of applying a BeanFactoryPostProcessor
+    is manual, and will be similar to this:</para>
 
     <para><programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
 // create placeholderconfigurer to bring in some property
@@ -2077,9 +2087,9 @@ public class BlackListNotifier implement ApplicationListener {
       <title><literal>ApplicationContextAware</literal> marker
       interface</title>
 
-      <para>All marker interfaces available with BeanFactories still work.
-      The ApplicationContext does add one extra marker interface which beans
-      may implement,
+      <para>All marker interfaces available with BeanFactories still work. The
+      ApplicationContext does add one extra marker interface which beans may
+      implement,
       <literal>org.springframework.context.ApplicationContextAware</literal>.
       A bean which implements this interface and is deployed into the context
       will be called back on creation of the bean, using the interface's
@@ -2273,9 +2283,9 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     <literal>ContextLoaderServlet</literal>. They both have the same
     functionality but differ in that the listener cannot be used in Servlet
     2.2 compatible containers. Since the Servlet 2.4 specification, listeners
-    are required to initialize after startup of a web application. A lot of 2.3
-    compatible containers already implement this feature. It is up to you as
-    to which one you use, but all things being equal you should probably
+    are required to initialize after startup of a web application. A lot of
+    2.3 compatible containers already implement this feature. It is up to you
+    as to which one you use, but all things being equal you should probably
     prefer <literal>ContextLoaderListener</literal>; for more information on
     compatibility, have a look at the JavaDoc for the
     <literal>ContextLoaderServlet</literal>.</para>
