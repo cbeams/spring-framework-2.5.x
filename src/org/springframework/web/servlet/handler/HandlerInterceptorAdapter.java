@@ -30,17 +30,26 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-													 Object handler) throws Exception {
+	/**
+	 * This implementation always returns true.
+	 */
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+	    throws Exception {
 		return true;
 	}
 
-	public void postHandle(HttpServletRequest request, HttpServletResponse response,
-												 Object handler, ModelAndView modelAndView) throws Exception {
+	/**
+	 * This implementation is empty.
+	 */
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+	    ModelAndView modelAndView) throws Exception {
 	}
 
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-															Object handler, Exception ex) throws Exception {
+	/**
+	 * This implementation is empty.
+	 */
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+	    Exception ex) throws Exception {
 	}
 
 }

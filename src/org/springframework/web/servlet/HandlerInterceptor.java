@@ -79,8 +79,8 @@ public interface HandlerInterceptor {
 	 * assumes that this interceptor has already dealt with the response itself.
 	 * @throws Exception in case of errors
 	 */
-	boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-										Object handler) throws Exception;
+	boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+	    throws Exception;
 
 	/**
 	 * Intercept the execution of a handler. Called after HandlerAdapter actually
@@ -96,8 +96,8 @@ public interface HandlerInterceptor {
 	 * @param modelAndView the ModelAndView that the handler returned, can also be null
 	 * @throws Exception in case of errors
 	 */
-	void postHandle(HttpServletRequest request, HttpServletResponse response,
-									Object handler, ModelAndView modelAndView) throws Exception;
+	void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+	    ModelAndView modelAndView) throws Exception;
 
 	/**
 	 * Callback after completion of request processing, i.e. after rendering the view.
@@ -111,7 +111,7 @@ public interface HandlerInterceptor {
 	 * @param ex exception thrown on handler execution
 	 * @throws Exception in case of errors
 	 */
-	void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-											 Object handler, Exception ex) throws Exception;
+	void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+	    Exception ex) throws Exception;
 
 }

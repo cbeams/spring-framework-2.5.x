@@ -162,11 +162,11 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-												 ModelAndView modelAndView) {
+	    ModelAndView modelAndView) {
 	}
 
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-															Object handler, Exception ex) {
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+	    Exception ex) {
 	}
 
 }
