@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.69 2004-07-21 13:54:05 robharrop Exp $
+    $Id: build.xml,v 1.70 2004-07-23 08:56:44 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -315,6 +315,12 @@
 		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
 			todir="${dist.dir}" preservelastmodified="true"/>
 
+		<copy file="${src.dir}/org/springframework/web/servlet/view/velocity/spring.vm"
+			todir="${dist.dir}" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/web/servlet/view/freemarker/spring.ftl"
+			todir="${dist.dir}" preservelastmodified="true"/>
+
 	</target>
 
 
@@ -359,6 +365,8 @@
 			<include name="dist/*.jar"/>
 			<include name="dist/*.dtd"/>
 			<include name="dist/*.tld"/>
+			<include name="dist/*.vm"/>
+			<include name="dist/*.ftl"/>
 			<include name="docs/**"/>
 			<exclude name="docs/reference/**"/>
 			<include name="samples/countries/**"/>
