@@ -103,7 +103,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.findColumn(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -115,7 +115,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getArray(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -127,7 +127,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getArray(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -139,7 +139,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getBigDecimal(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -151,7 +151,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getBigDecimal(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -163,7 +163,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getBoolean(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -175,7 +175,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getBoolean(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -187,7 +187,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getByte(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -199,7 +199,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getByte(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -211,7 +211,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getDate(columnIndex, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -223,7 +223,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getDate(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	/**
@@ -234,7 +234,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getDate(columnName, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -246,7 +246,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getDate(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -258,7 +258,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getDouble(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -270,7 +270,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getDouble(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -282,7 +282,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getFloat(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -294,7 +294,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getFloat(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	/**
@@ -305,7 +305,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getInt(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -317,7 +317,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getInt(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -329,7 +329,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getLong(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -341,7 +341,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getLong(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -353,7 +353,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getObject(i, map);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -365,7 +365,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getObject(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -377,7 +377,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getObject(columnName, map);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -389,7 +389,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getObject(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -401,7 +401,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getRow();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -413,7 +413,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getShort(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -425,7 +425,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getShort(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -437,7 +437,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getString(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -449,7 +449,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getString(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -461,7 +461,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getTime(columnIndex, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -473,7 +473,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getTime(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -485,7 +485,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getTime(columnName, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -497,7 +497,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getTime(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -510,7 +510,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getTimestamp(columnIndex, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -522,7 +522,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getTimestamp(columnIndex);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -535,7 +535,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getTimestamp(columnName, cal);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -547,7 +547,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getTimestamp(columnName);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -559,7 +559,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.getType();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -580,7 +580,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.absolute(row);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -592,7 +592,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			rowSet.afterLast();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -604,7 +604,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			rowSet.beforeFirst();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -616,7 +616,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.first();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -628,7 +628,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.isAfterLast();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
@@ -640,7 +640,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.isBeforeFirst();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -652,7 +652,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.isFirst();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -664,7 +664,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.isLast();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -676,7 +676,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.last();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -688,7 +688,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			rowSet.moveToCurrentRow();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -700,7 +700,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.next();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -712,7 +712,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.previous();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -724,7 +724,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.relative(rows);
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	
@@ -736,7 +736,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 			return rowSet.wasNull();
 		}
 		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage());
+			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 
