@@ -63,16 +63,16 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	protected void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		// expose the model object as request attributes
+		// Expose the model object as request attributes.
 		exposeModelAsRequestAttributes(model, request);
 
-		// expose helpers as request attributes, if any
+		// Expose helpers as request attributes, if any.
 		exposeHelpers(request);
 
-		// determine the path for the request dispatcher
+		// Determine the path for the request dispatcher.
 		String dispatcherPath = prepareForRendering(request, response);
 
-		// forward to the resource (typically a JSP)
+		// Forward to the resource (typically a JSP).
 		// Note: The JSP is supposed to determine the content type itself.
 		RequestDispatcher rd = request.getRequestDispatcher(dispatcherPath);
 		if (rd == null) {
@@ -80,7 +80,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 					"Could not get RequestDispatcher for [" + getUrl() + "]: check that this file exists within your WAR");
 		}
 
-		// if already included, include again, else forward
+		// If already included, include again, else forward.
 		if (request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
 			rd.include(request, response);
 			if (logger.isDebugEnabled()) {
@@ -97,42 +97,38 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 	/**
 	 * Expose the model objects in the given map as request attributes.
-	 * Names will be taken from the map.
+	 * Names will be taken from the model Map.
 	 * <p>Called by renderMergedOutputModel.
 	 * This method is suitable for all resources reachable by RequestDispatcher.
 	 * @param model Map of model objects to expose
 	 * @param request current HTTP request
 	 * @see #renderMergedOutputModel
+	 * @see javax.servlet.RequestDispatcher
 	 */
 	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws Exception {
-		if (model != null) {
-			Iterator it = model.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				if (!(entry.getKey() instanceof String)) {
-					throw new ServletException(
-							"Invalid key [" + entry.getKey() + "] in model Map - only Strings allowed as model keys");
-				}
-				String modelName = (String) entry.getKey();
-				Object modelValue = entry.getValue();
-				if (modelValue != null) {
-					request.setAttribute(modelName, modelValue);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Added model object '" + modelName + "' of type [" + modelValue.getClass().getName() +
-						    "] to request in InternalResourceView '" + getBeanName() + "'");
-					}
-				}
-				else {
-					request.removeAttribute(modelName);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Removed model object '" + modelName +
-								"' from request in InternalResourceView '" + getBeanName() + "'");
-					}
+		Iterator it = model.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry) it.next();
+			if (!(entry.getKey() instanceof String)) {
+				throw new ServletException(
+						"Invalid key [" + entry.getKey() + "] in model Map - only Strings allowed as model keys");
+			}
+			String modelName = (String) entry.getKey();
+			Object modelValue = entry.getValue();
+			if (modelValue != null) {
+				request.setAttribute(modelName, modelValue);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Added model object '" + modelName + "' of type [" + modelValue.getClass().getName() +
+							"] to request in InternalResourceView '" + getBeanName() + "'");
 				}
 			}
-		}
-		else {
-			logger.debug("Model is null. Nothing to expose to request.");
+			else {
+				request.removeAttribute(modelName);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Removed model object '" + modelName +
+							"' from request in InternalResourceView '" + getBeanName() + "'");
+				}
+			}
 		}
 	}
 

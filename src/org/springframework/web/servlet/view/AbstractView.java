@@ -34,7 +34,8 @@ import org.springframework.web.servlet.support.RequestContext;
 /**
  * Abstract View superclass. Standard framework View implementations
  * and application-specific custom Views can extend this class
- * to simplify their implementation. Subclasses should be JavaBeans.
+ * to simplify their implementation. Subclasses should be JavaBeans,
+ * to allow for configuration as Spring-managed bean instances.
  *
  * <p>Extends WebApplicationObjectSupport, which will be helpful to some views.
  * Handles static attributes, and merging static with dynamic attributes.
@@ -246,8 +247,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>Default implementation creates a standard RequestContext instance for the
 	 * given request and model. Can be overridden in subclasses for custom instances.
 	 * @param request current HTTP request
-	 * @param model combined output Map, with dynamic values taking precedence
-	 * over static attributes
+	 * @param model combined output Map (never null),
+	 * with dynamic values taking precedence over static attributes
 	 * @return the RequestContext instance
 	 * @see #setRequestContextAttribute
 	 * @see org.springframework.web.servlet.support.RequestContext
@@ -262,8 +263,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * this would mean setting model objects as request attributes.
 	 * The second step will be the actual rendering of the view,
 	 * for example including the JSP via a RequestDispatcher.
-	 * @param model combined output Map, with dynamic values taking precedence
-	 * over static attributes
+	 * @param model combined output Map (never null),
+	 * with dynamic values taking precedence over static attributes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @throws Exception if rendering failed
