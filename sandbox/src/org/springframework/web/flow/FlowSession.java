@@ -41,6 +41,17 @@ import org.springframework.web.flow.support.FlowUtils;
  * The stack of executing flow sessions (managed within
  * <code>FlowExecutionStack</code>) represents the complete state of an
  * ongoing flow execution.
+ * <p>
+ * A flow session will go through several statuses during its lifecycle. Initially
+ * it will be {@link FlowSessionStatus#CREATED}. Once the flow session
+ * is activated in a flow execution, it becomes {@link FlowSessionStatus#ACTIVE}.
+ * If the flow session would spawn a sub flow session, it will become
+ * {@link FlowSessionStatus#SUSPENDED} untill the sub flow returns (ends).
+ * When the flow session is ended by the flow execution, its status becomes
+ * {@link FlowSessionStatus#ENDED}, ending its lifecycle.
+ * 
+ * @see org.springframework.web.flow.FlowExecution
+ * @see org.springframework.web.flow.FlowExecutionStack
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -91,27 +102,28 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	}
 
 	/**
-	 * @return The id of the flow associated with this flow session
+	 * Returns the id of the flow associated with this flow session.
 	 */
 	public String getFlowId() {
 		return getFlow().getId();
 	}
 
 	/**
-	 * @return The flow associated with this flow session
+	 * Returns the flow associated with this flow session.
 	 */
 	public Flow getFlow() {
 		return flow;
 	}
 
 	/**
-	 * @return The current status of this flow session
+	 * Returns the current status of this flow session.
 	 */
 	public FlowSessionStatus getStatus() {
 		return status;
 	}
 
 	/**
+	 * Set the status of this flow session.
 	 * @param status The new status to set
 	 */
 	public void setStatus(FlowSessionStatus status) {
@@ -120,14 +132,14 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	}
 
 	/**
-	 * @return The id of the state that is currently active in this flow session
+	 * Returns the id of the state that is currently active in this flow session.
 	 */
 	public String getCurrentStateId() {
 		return currentState.getId();
 	}
 
 	/**
-	 * @return The state that is currently active in this flow session
+	 * Returns the state that is currently active in this flow session
 	 */
 	public AbstractState getCurrentState() {
 		return currentState;
@@ -135,7 +147,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 
 	/**
 	 * Set the current state of this flow session.
-	 * @param newState Set the state that is currently active i this flow
+	 * @param newState The state that is currently active in this flow
 	 *        session
 	 */
 	protected void setCurrentState(AbstractState newState) {

@@ -18,7 +18,9 @@ package org.springframework.web.flow;
 import org.springframework.enums.ShortCodedEnum;
 
 /**
- * Possible flow session status enumerations.
+ * Enumeration of possible flow session statuses.
+ * 
+ * @see org.springframework.web.flow.FlowSession
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

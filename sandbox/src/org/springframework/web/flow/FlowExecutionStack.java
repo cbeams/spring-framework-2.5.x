@@ -38,10 +38,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Default implementation of FlowExecution that uses a stack-based data
- * structure to manage flow executions.
+ * structure to manage flow sessions.
  * <p>
  * This implementation of FlowExecution is Serializable so it can be safely
  * stored in an HTTP session.
+ * 
+ * @see org.springframework.web.flow.FlowSession
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -87,7 +89,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	private FlowExecutionListenerList listenerList = new FlowExecutionListenerList();
 
 	/**
-	 * Create a new flow execution executing for the provided flow.
+	 * Create a new flow execution executing the provided flow.
 	 * <p>
 	 * The default list of flow execution listeners configured for given flow
 	 * will also be notified of this flow execution.
@@ -116,7 +118,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * @return Whether or not this flow execution stack is empty
+	 * Returns whether or not this flow execution stack is empty.
 	 */
 	public boolean isEmpty() {
 		return executingFlowSessions.isEmpty();
@@ -127,7 +129,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * Check that this flow execution is active and throw an exception it it's
+	 * Check that this flow execution is active and throw an exception if it's
 	 * not.
 	 */
 	protected void assertActive() throws IllegalStateException {
@@ -402,7 +404,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * @return The flow session associated with the root flow
+	 * Returns the flow session associated with the root flow.
 	 */
 	public FlowSession getRootFlowSession() {
 		assertActive();
@@ -410,7 +412,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * @return The currently active flow session
+	 * Returns the currently active flow session.
 	 */
 	public FlowSession getActiveFlowSession() {
 		assertActive();
