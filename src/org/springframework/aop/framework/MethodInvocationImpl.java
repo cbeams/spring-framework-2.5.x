@@ -21,7 +21,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface 
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.4 2003-11-12 12:30:20 johnsonr Exp $
+ * @version $Id: MethodInvocationImpl.java,v 1.5 2003-11-12 20:17:58 johnsonr Exp $
  */
 public class MethodInvocationImpl implements MethodInvocation {
 	
@@ -42,8 +42,10 @@ public class MethodInvocationImpl implements MethodInvocation {
 	
 	private final Object proxy;
 	
-	/** Interceptors invoked in this list */
-	public final List interceptors;
+	/** 
+	 * Interceptors and any InterceptionAdvice that needs dynamic checks.
+	 **/
+	public final List interceptorsAndDynamicMethodMatchers;
 	
 	/** 
 	 * Any resources attached to this invocation.
@@ -58,23 +60,28 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 */
 	private int currentInterceptor = -1;
 	
+	private final Class targetClass;
+	
 	
 	/**
 	 * Construct a new MethodInvocation with given arguments
-	 * @param interceptors interceptors that should be applied
+	 * @param interceptorsAndDynamicInterceptionAdvice interceptors that should be applied,
+	 * along with any InterceptorAndDynamicMethodMatchers that need evaluation at runtime.
+	 * MethodMatchers included in this struct must already have been found to have matched as far
+	 * as was possibly statically.
 	 */
 	public MethodInvocationImpl(Object proxy, Object target, 
 					Class targetInterface, Method m, Object[] arguments,
-					List interceptors) {
-		//if (advices == null || advices.size() == 0) 
-		//	throw new AopConfigException("Must provide advices");				
+					Class targetClass,
+					List interceptorsAndDynamicMethodMatchers) {			
 						
 		this.proxy = proxy;
 		this.targetInterface = targetInterface;
+		this.targetClass = targetClass;
 		this.target = target;
 		this.method = m;
 		this.arguments = arguments;
-		this.interceptors = interceptors;
+		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
 	}
 	
 	
@@ -159,19 +166,12 @@ public class MethodInvocationImpl implements MethodInvocation {
 		return (this.arguments != null) ? this.arguments.length : 0;
 	}
 
-	public int getCurrentInterceptorIndex() {
-		return this.currentInterceptor;
+	public Interceptor getInterceptor(int index) {
+		if (index > this.interceptorsAndDynamicMethodMatchers.size() - 1)
+			throw new AspectException("Index " + index + " out of bounds: only " + this.interceptorsAndDynamicMethodMatchers.size() + " interceptors");
+		return (Interceptor) this.interceptorsAndDynamicMethodMatchers.get(index);
 	}
 
-	public Interceptor getInterceptor(int index) {
-		if (index > getNumberOfInterceptors() - 1)
-			throw new AspectException("Index " + index + " out of bounds: only " + getNumberOfInterceptors() + " interceptors");
-		return (Interceptor) this.interceptors.get(index);
-	}
-	
-	public int getNumberOfInterceptors() {
-		return this.interceptors.size();
-	}
 
 	public Class getTargetInterface() {
 		return this.targetInterface;
@@ -181,17 +181,30 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 * @see org.aopalliance.intercept.Invocation#proceed
 	 */
 	public Object proceed() throws Throwable {
-		if (this.currentInterceptor >= this.interceptors.size() - 1)
+		if (this.currentInterceptor >= this.interceptorsAndDynamicMethodMatchers.size() - 1)
 			throw new AspectException("All interceptors have already been invoked");
 		
 		// We begin with -1 and increment early
-		
-		// TODO could evaluate dynamic method matcher here: static part will already have
-		// been evaluated?
-		
-		// TODO think about removing cast
-		MethodInterceptor interceptor = (MethodInterceptor) this.interceptors.get(++this.currentInterceptor);
-		return interceptor.invoke(this);
+
+		Object interceptorOrInterceptionAdvice = this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptor);
+		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
+			// Evaluate dynamic method matcher here: static part will already have
+			// been evaluated and found to match
+			InterceptorAndDynamicMethodMatcher dm = (InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
+			if (dm.methodMatcher.matches(this.method, this.targetClass, this.arguments)) {
+				return dm.interceptor.invoke(this);
+			}
+			else {
+				// Dynamic matching failed
+				// Skip this interceptor and invoke the next in the chain
+				return proceed();
+			}
+		}
+		else {
+			// It's an interceptor so we just invoke it: the pointcut will have
+			// been evaluated statically before this object was constructed
+			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
+		}
 	}
 
 	/**

@@ -20,7 +20,7 @@ import org.springframework.beans.TestBean;
  * TODO COULD REFACTOR TO BE GENERIC
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class MethodInvocationTests extends TestCase {
 	
@@ -78,7 +78,7 @@ new Attrib4jAttributeRegistry());
 			}
 		});
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, is // list
+		m, null, null, is // list
 	);
 		Object rv = invocation.proceed();
 		assertTrue("correct response", rv == returnValue);
@@ -98,7 +98,7 @@ new Attrib4jAttributeRegistry());
 		is.add(interceptor);
 
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, is // list
+		m, null, null, is // list
 	);
 		assertTrue(invocation.getArgumentCount() == 0);
 		//assertTrue(invocation.getCurrentInterceptorIndex() == 0);
@@ -106,8 +106,8 @@ new Attrib4jAttributeRegistry());
 		Object rv = invocation.proceed();
 		assertTrue("correct response", rv == returnValue);
 
-		assertTrue(invocation.getCurrentInterceptorIndex() == 0);
-		assertTrue(invocation.getNumberOfInterceptors() == 1);
+		//assertTrue(invocation.getCurrentInterceptorIndex() == 0);
+		//assertTrue(invocation.getNumberOfInterceptors() == 1);
 
 		// Now it gets interesting
 		try {
@@ -115,9 +115,9 @@ new Attrib4jAttributeRegistry());
 			fail("Shouldn't allow illegal invocation number");
 		} catch (AspectException ex) {
 			// Shouldn't have changed position in interceptor chain
-			assertTrue(
-				"Shouldn't have changed current interceptor index",
-				invocation.getCurrentInterceptorIndex() == 0);
+			//assertTrue(
+			//	"Shouldn't have changed current interceptor index",
+			//	invocation.getCurrentInterceptorIndex() == 0);
 		}
 
 		try {
@@ -139,7 +139,7 @@ new Attrib4jAttributeRegistry());
 		}));
 
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, is // list
+		m, null, null, is // list
 	);
 
 		assertTrue("no bogus attachment", invocation.getAttachment("bogus") == null);
@@ -170,7 +170,7 @@ new Attrib4jAttributeRegistry());
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, target, m.getDeclaringClass(), //?
-		m, null, is // list
+		m, null, null, is // list
 	);
 
 		// if it hits target the test will fail with the UnsupportedOpException
