@@ -15,16 +15,15 @@
  */
 package org.springframework.web.flow.action;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeMapper;
 import org.springframework.binding.TypeConverter;
+import org.springframework.binding.TypeConverterRegistry;
+import org.springframework.binding.TypeConverters;
 import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
 import org.springframework.util.StringUtils;
@@ -38,6 +37,8 @@ public class SetAction extends AbstractAction {
 
 	private AttributeMapper requestParameterMapper;
 
+	private TypeConverterRegistry typeConverterRegistry;
+
 	/**
 	 * Creates a set action with an initially empty mappings list.
 	 */
@@ -49,10 +50,14 @@ public class SetAction extends AbstractAction {
 	 * Create a set action with the specified string mapping, where the string
 	 * is a request parameter name that should be mapped as a string attribute
 	 * in the flow model with the same name.
+	 * 
+	 * If the type to convert should be something other than a string, it maybe
+	 * be encoded within the mappings argument with a comma delimiter: e.g.
+	 * <code>myAttribute,java.lang.Short</code>
 	 * @param mapping the string mapping (e.g. "postalCode");
 	 */
 	public SetAction(String mapping) {
-		this(new String[] { mapping });
+		setMapping(mapping);
 	}
 
 	/**
@@ -64,7 +69,7 @@ public class SetAction extends AbstractAction {
 	 *        attribute value
 	 */
 	public SetAction(String mapping, TypeConverter valueTypeConverter) {
-		this(new Mapping(mapping, valueTypeConverter));
+		setMapping(mapping, valueTypeConverter);
 	}
 
 	/**
@@ -72,7 +77,7 @@ public class SetAction extends AbstractAction {
 	 * @param mapping the mapping
 	 */
 	public SetAction(Mapping mapping) {
-		this(new Mapping[] { mapping });
+		setMappings(new Mapping[] { mapping });
 	}
 
 	/**
@@ -82,7 +87,7 @@ public class SetAction extends AbstractAction {
 	 * @param mappings the string mappings
 	 */
 	public SetAction(String[] mappings) {
-		setRequestParameterMappings(Arrays.asList(mappings));
+		setMappings(mappings);
 	}
 
 	/**
@@ -93,11 +98,7 @@ public class SetAction extends AbstractAction {
 	 * @param valueTypeConverters the type converters
 	 */
 	public SetAction(String[] mappings, TypeConverter[] valueTypeConverters) {
-		Mapping[] maps = new Mapping[mappings.length];
-		for (int i = 0; i < mappings.length; i++) {
-			maps[i] = new Mapping(mappings[i], valueTypeConverters[i]);
-		}
-		setRequestParameterMappings(maps);
+		setMappings(mappings, valueTypeConverters);
 	}
 
 	/**
@@ -105,47 +106,59 @@ public class SetAction extends AbstractAction {
 	 * @param mappings The mappings
 	 */
 	public SetAction(Mapping[] mappings) {
-		setRequestParameterMappings(Arrays.asList(mappings));
+		setMappings(mappings);
 	}
 
-	/**
-	 * Create a set action with the specified mappings, where each collection
-	 * element is a request parameter name that should be mapped as an attribute
-	 * in the flow model.
-	 * @param mappings the mappings
-	 */
-	public SetAction(Collection mappings) {
-		setRequestParameterMappings(mappings);
+	public void setMapping(String mapping) {
+		setMappings(new String[] { mapping });
 	}
 
-	/**
-	 * Create a set action with the specified mappings, where each map entry
-	 * element is a request parameter name that should be mapped as an attribute
-	 * with a particular name in the flow model.
-	 * @param mappingsMap the mappings map
-	 */
-	public SetAction(Map mappingsMap) {
-		setRequestParameterMappingsMap(mappingsMap);
+	public void setMapping(String mapping, TypeConverter valueTypeConverter) {
+		setMappings(new String[] { mapping }, new TypeConverter[] { valueTypeConverter });
+	}
+
+	public void setMappings(String[] mappings) {
+		ClassEditor classEditor = new ClassEditor();
+		Mapping[] maps = new Mapping[mappings.length];
+		for (int i = 0; i < mappings.length; i++) {
+			String[] encodedMapping = StringUtils.commaDelimitedListToStringArray(mappings[i]);
+			if (encodedMapping.length == 2) {
+				classEditor.setAsText(encodedMapping[i]);
+				Class clazz = (Class)classEditor.getValue();
+				maps[i] = new Mapping(encodedMapping[0], getTypeConverterRegistry().getTypeConverter(clazz));
+			}
+			else {
+				maps[i] = new Mapping(mappings[i]);
+			}
+		}
+		setMappings(maps);
+	}
+
+	public void setTypeConverterRegistry(TypeConverterRegistry registry) {
+		this.typeConverterRegistry = registry;
+	}
+
+	protected TypeConverterRegistry getTypeConverterRegistry() {
+		synchronized (this) {
+			if (this.typeConverterRegistry == null) {
+				this.typeConverterRegistry = TypeConverters.instance();
+			}
+		}
+		return this.typeConverterRegistry;
+	}
+
+	public void setMappings(String[] mappings, TypeConverter[] valueTypeConverters) {
+		Mapping[] maps = new Mapping[mappings.length];
+		for (int i = 0; i < mappings.length; i++) {
+			maps[i] = new Mapping(mappings[i], valueTypeConverters[i]);
+		}
+		setMappings(maps);
 	}
 
 	/**
 	 * @param mappings
 	 */
-	public void setRequestParameterMappings(Mapping[] mappings) {
-		this.requestParameterMapper = new ParameterizableAttributeMapper(mappings);
-	}
-
-	/**
-	 * @param mappings
-	 */
-	public void setRequestParameterMappings(Collection mappings) {
-		this.requestParameterMapper = new ParameterizableAttributeMapper(mappings);
-	}
-
-	/**
-	 * @param mappings
-	 */
-	public void setRequestParameterMappingsMap(Map mappings) {
+	public void setMappings(Mapping[] mappings) {
 		this.requestParameterMapper = new ParameterizableAttributeMapper(mappings);
 	}
 

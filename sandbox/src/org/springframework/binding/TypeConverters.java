@@ -3,8 +3,6 @@
  */
 package org.springframework.binding;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -67,13 +65,5 @@ public class TypeConverters implements TypeConverterRegistry {
 
 	public TypeConverter getTypeConverter(Class clazz) {
 		return (TypeConverter)typeConverterRegistry.getBean(clazz.getName(), TypeConverter.class);
-	}
-
-	public TypeConverter getNumberToString(Class numberClass) {
-		return getTypeConverter(numberClass);
-	}
-
-	public TypeConverter getDateToString() {
-		return getTypeConverter(Date.class);
 	}
 }

@@ -60,7 +60,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setUserId) });
 
 		// set a user id in the model (selected from result list)
-		Action setAction = new SetAction("userId", TypeConverters.instance().getNumberToString(Long.class));
+		Action setAction = new SetAction("userId", TypeConverters.instance().getTypeConverter(Long.class));
 		addActionState(setUserId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
 
 		// view details for selected user id

@@ -50,7 +50,7 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 		String collegueDetail = "collegueDetail";
 		// set the selected collegue (chosen from the person's collegue list)
-		Action setAction = new SetAction(collegueId, TypeConverters.instance().getNumberToString(Long.class));
+		Action setAction = new SetAction(collegueId, TypeConverters.instance().getTypeConverter(Long.class));
 		addActionState(setCollegueId, setAction, onSuccess(collegueDetail));
 
 		// spawn subflow to view selected collegue details
