@@ -5,24 +5,17 @@
 	<HEAD>
 	</HEAD>
 	<BODY>
-	
 		<DIV align="left">Phone Book - A Spring Web Flow Sample</DIV>
-		
 		<HR>
-		
 		<DIV align="left">
 			<P>
 				<A href="search.htm">Phone Book</A>
 			</P>
-			
 			<P>
 				This sample application illustrates basic usage of the web flow controller.
 			</P>
 		</DIV>
-		
 		<HR>
-
 		<DIV align="right"></DIV>
-		
 	</BODY>
 </HTML>
