@@ -113,7 +113,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	/**
 	 * This is a single connection: Do not close it when returning to the "pool".
 	 */
-	public boolean shouldClose(Connection conn) {
+	public boolean shouldClose(Connection con) {
 		return false;
 	}
 

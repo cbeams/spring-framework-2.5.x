@@ -17,7 +17,7 @@
 package org.springframework.core;
 
 /**
- * Class used to find the current Java/JDK version.
+ * Helper class used to find the current Java/JDK version.
  * Usually we want to find if we're in a 1.4 or higher JVM.
  * (Spring does not support 1.2 JVMs.)
  * @author Rod Johnson
@@ -29,7 +29,7 @@ public class JdkVersion {
 	
 	public static final int JAVA_14 = 1;
 	
-	public static final int JAVA_50 = 2;
+	public static final int JAVA_15 = 2;
 
 	private static String javaVersion;
 
@@ -41,8 +41,8 @@ public class JdkVersion {
 		if (javaVersion.indexOf("1.4.") != -1) {
 			majorJavaVersion = JAVA_14;
 		}
-		else if (javaVersion.indexOf("1.5.") != -1 || javaVersion.indexOf("5.0.") != -1) {
-			majorJavaVersion = JAVA_50;
+		else if (javaVersion.indexOf("1.5.") != -1) {
+			majorJavaVersion = JAVA_15;
 		}
 		// else leave as 1.3 default
 	}
@@ -57,11 +57,11 @@ public class JdkVersion {
 
 	/**
 	 * Get the major version code. This means we can do things like
-	 * <code>if getMajorJavaVersion() < JAVA_14</code>.
+	 * <code>if (getMajorJavaVersion() < JAVA_14)</code>.
 	 * @return a code comparable to the JAVA_XX codes in this class
 	 * @see #JAVA_13
 	 * @see #JAVA_14
-	 * @see #JAVA_50
+	 * @see #JAVA_15
 	 */
 	public static int getMajorJavaVersion() {
 		return majorJavaVersion;

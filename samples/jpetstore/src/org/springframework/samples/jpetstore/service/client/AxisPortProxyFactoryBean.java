@@ -48,8 +48,8 @@ public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
 	protected void registerBeanMapping(TypeMapping mapping, Class type, String name) {
 		QName qName = new QName(this.namespace, name);
 		mapping.register(type, qName,
-										 new BeanSerializerFactory(type, qName),
-										 new BeanDeserializerFactory(type, qName));
+		    new BeanSerializerFactory(type, qName),
+		    new BeanDeserializerFactory(type, qName));
 	}
 
 }

@@ -124,7 +124,7 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 	 * This DataSource returns a new connection every time:
 	 * Close it when returning one to the "pool".
 	 */
-	public boolean shouldClose(Connection conn) {
+	public boolean shouldClose(Connection con) {
 		return true;
 	}
 
