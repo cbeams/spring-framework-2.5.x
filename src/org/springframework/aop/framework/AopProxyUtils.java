@@ -11,11 +11,9 @@ import java.util.Arrays;
 
 import org.aopalliance.intercept.AspectException;
 
-
 /**
- * 
  * @author Rod Johnson
- * @version $Id: AopProxyUtils.java,v 1.2 2003-12-02 11:54:10 johnsonr Exp $
+ * @version $Id: AopProxyUtils.java,v 1.3 2003-12-30 01:07:10 jhoeller Exp $
  */
 public abstract class AopProxyUtils {
 	
@@ -53,8 +51,7 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
-	 * Invoke the target directly via reflection
-	 * @return
+	 * Invoke the target directly via reflection.
 	 */
 	public static Object invokeJoinpointUsingReflection(Object target, Method m, Object[] args) throws Throwable {
 		//	Use reflection to invoke the method
@@ -64,9 +61,8 @@ public abstract class AopProxyUtils {
 		 }
 		 catch (InvocationTargetException ex) {
 			 // Invoked method threw a checked exception. 
-			 // We must rethrow it. The client won't see the interceptor
-			 Throwable t = ex.getTargetException();
-			 throw t;
+			 // We must rethrow it. The client won't see the interceptor.
+			 throw ex.getTargetException();
 		 }
 		 catch (IllegalArgumentException ex) {
 			throw new AspectException("AOP configuration seems to be invalid: tried calling " + m + " on [" + target + "]: " +  ex);
@@ -77,10 +73,7 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
-	 * Note the same as equality of the AdvisedSupport objects
-	 * @param a
-	 * @param b
-	 * @return
+	 * Note the same as equality of the AdvisedSupport objects.
 	 */
 	public static boolean equalsInProxy(AdvisedSupport a, AdvisedSupport b) {
 		if (a == b)
@@ -97,6 +90,5 @@ public abstract class AopProxyUtils {
 	
 		return a.getTargetSource().equals(b.getTargetSource());
 	}
-	
 
 }

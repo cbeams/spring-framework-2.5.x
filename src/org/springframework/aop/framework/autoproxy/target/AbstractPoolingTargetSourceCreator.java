@@ -10,17 +10,12 @@ import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * Convenient superclass for TargetSource creators that creating
- * pooling TargetSources.
+ * Convenient superclass for TargetSource creators that create pooling TargetSources.
  * @author Rod Johnson
- * @version $Id: AbstractPoolingTargetSourceCreator.java,v 1.2 2003-12-14 16:10:51 johnsonr Exp $
+ * @version $Id: AbstractPoolingTargetSourceCreator.java,v 1.3 2003-12-30 01:07:11 jhoeller Exp $
  */
 public abstract class AbstractPoolingTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
 
-	/**
-	 * @see org.springframework.aop.framework.support.TargetSourceCreator#getTargetSource(java.lang.Object,
-	 *      java.lang.String, org.springframework.beans.factory.ListableBeanFactory)
-	 */
 	protected final AbstractPrototypeTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory factory) {
 		PoolingAttribute poolingAttribute = getPoolingAttribute(bean, beanName, factory);
 		if (poolingAttribute == null) {
@@ -36,10 +31,7 @@ public abstract class AbstractPoolingTargetSourceCreator extends AbstractPrototy
 	/**
 	 * Create a new AbstractPoolingTargetSource. This implementation creates
 	 * a CommonsPoolTargetSource, but subclasses may wish to override that
-	 * behaviour.
-	 * Don't need to set bean name or call setBeanFactory
-	 * @param poolingAttribute
-	 * @return
+	 * behaviour. Don't need to set bean name or call setBeanFactory.
 	 */
 	protected AbstractPoolingTargetSource newPoolingTargetSource(PoolingAttribute poolingAttribute) {
 		AbstractPoolingTargetSource poolingTargetSource = new CommonsPoolTargetSource();
@@ -48,12 +40,12 @@ public abstract class AbstractPoolingTargetSourceCreator extends AbstractPrototy
 	}
 
 	/**
-	 * Return null for no pooling
-	 * @param bean
-	 * @param beanName
-	 * @param bf
-	 * @return
+	 * Create a PoolingAttribute for the given bean, if any.
+	 * @param bean the bean to create a PoolingAttribute for
+	 * @param beanName the name of the bean
+	 * @param beanFactory the current bean factory
+	 * @return the PoolingAttribute, or null for no pooling
 	 */
-	protected abstract PoolingAttribute getPoolingAttribute(Object bean, String beanName, BeanFactory bf);
+	protected abstract PoolingAttribute getPoolingAttribute(Object bean, String beanName, BeanFactory beanFactory);
 
 }

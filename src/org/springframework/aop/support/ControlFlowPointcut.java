@@ -10,15 +10,16 @@ import java.lang.reflect.Method;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
-import org.springframework.util.*;
+import org.springframework.util.ControlFlow;
+import org.springframework.util.ControlFlowFactory;
 
 /**
  * Pointcut and method matcher for use in simple <b>cflow</b>-style pointcut.
  * Note that evaluating such pointcuts is 10-15 times slower than evaluating
  * normal pointcuts, but they are useful in some cases.
- * @see org.springframework.aop.support.ControlFlow
+ * @see org.springframework.util.ControlFlow
  * @author Rod Johnson
- * @version $Id: ControlFlowPointcut.java,v 1.3 2003-12-21 11:58:59 johnsonr Exp $
+ * @version $Id: ControlFlowPointcut.java,v 1.4 2003-12-30 01:07:12 jhoeller Exp $
  */
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher {
 	
@@ -46,7 +47,6 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	/** 
 	 * Subclasses can override this for greater filtering (and performance).
-	 * @see org.springframework.aop.ClassFilter#matches(java.lang.Class)
 	 */
 	public boolean matches(Class clazz) {
 		return true;
@@ -55,47 +55,32 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	/**
 	 * Subclasses can override this if it's possible to filter out
 	 * some candidate classes.
-	 * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
 	 */
 	public boolean matches(Method m, Class targetClass) {
 		return true;
 	}
 
-	/**
-	 * @see org.springframework.aop.MethodMatcher#isRuntime()
-	 */
 	public boolean isRuntime() {
 		return true;
 	}
 
-	/**
-	 * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class, java.lang.Object[])
-	 */
 	public boolean matches(Method m, Class targetClass, Object[] args) {
 		++evaluations;
 		ControlFlow cflow = ControlFlowFactory.getInstance().createControlFlow();
 		return (methodName != null) ? cflow.under(clazz, methodName) : cflow.under(clazz);
 	}
-	
-	
+
 	/**
-	 * It's useful to know how many times we've fired, for optimization
-	 * @return
+	 * It's useful to know how many times we've fired, for optimization.
 	 */
 	public int getEvaluations() {
 		return evaluations;
 	}
 
-	/**
-	 * @see org.springframework.aop.Pointcut#getClassFilter()
-	 */
 	public ClassFilter getClassFilter() {
 		return this;
 	}
 
-	/**
-	 * @see org.springframework.aop.Pointcut#getMethodMatcher()
-	 */
 	public MethodMatcher getMethodMatcher() {
 		return this;
 	}

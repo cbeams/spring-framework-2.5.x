@@ -7,9 +7,8 @@ package org.springframework.aop.target;
 
 /**
  * Config interface for a pooling invoker.
- * @see org.springframework.aop.interceptor.AbstractPoolingInvokerInterceptor
  * @author Rod Johnson
- * @version $Id: PoolingConfig.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: PoolingConfig.java,v 1.2 2003-12-30 01:07:12 jhoeller Exp $
  */
 public interface PoolingConfig {
 	
@@ -18,10 +17,5 @@ public interface PoolingConfig {
 	int getActive() throws UnsupportedOperationException;
 	
 	int getFree() throws UnsupportedOperationException;
-	
-	/**
-	 * @return total number of invocations on pooled invoker
-	 */
-//	int getInvocations();
 
 }

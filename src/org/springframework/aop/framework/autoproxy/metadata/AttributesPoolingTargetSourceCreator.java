@@ -15,7 +15,7 @@ import org.springframework.metadata.Attributes;
 /**
  * PoolingTargetSourceCreator driven by metadata.
  * @author Rod Johnson
- * @version $Id: AttributesPoolingTargetSourceCreator.java,v 1.1 2003-12-12 21:31:25 johnsonr Exp $
+ * @version $Id: AttributesPoolingTargetSourceCreator.java,v 1.2 2003-12-30 01:07:11 jhoeller Exp $
  */
 public class AttributesPoolingTargetSourceCreator extends AbstractPoolingTargetSourceCreator {
 
@@ -25,11 +25,7 @@ public class AttributesPoolingTargetSourceCreator extends AbstractPoolingTargetS
 		this.attributes = attributes;
 	}
 
-	
-	/**
-	 * @see org.springframework.aop.framework.autoproxy.target.AbstractPoolingTargetSourceCreator#getPoolingAttribute(java.lang.Object, java.lang.String, org.springframework.beans.factory.BeanFactory)
-	 */
-	protected PoolingAttribute getPoolingAttribute(Object bean, String beanName, BeanFactory bf) {
+	protected PoolingAttribute getPoolingAttribute(Object bean, String beanName, BeanFactory beanFactory) {
 		Class beanClass = bean.getClass();
 		// See if there's a pooling attribute
 		Collection atts = attributes.getAttributes(beanClass, PoolingAttribute.class);

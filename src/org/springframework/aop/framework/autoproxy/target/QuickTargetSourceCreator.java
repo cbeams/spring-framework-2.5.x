@@ -18,14 +18,10 @@ import org.springframework.beans.factory.BeanFactory;
  * <li>! PrototypeTargetSource
  * 
  * @author Rod Johnson
- * @version $Id: QuickTargetSourceCreator.java,v 1.1 2003-12-14 16:10:51 johnsonr Exp $
+ * @version $Id: QuickTargetSourceCreator.java,v 1.2 2003-12-30 01:07:11 jhoeller Exp $
  */
 public class QuickTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
 
-	/**
-	 * @see org.springframework.aop.framework.support.TargetSourceCreator#getTargetSource(java.lang.Object,
-	 *      java.lang.String, org.springframework.beans.factory.ListableBeanFactory)
-	 */
 	protected final AbstractPrototypeTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory factory) {
 		if (beanName.startsWith(":")) {
 			CommonsPoolTargetSource cpts = new CommonsPoolTargetSource();

@@ -29,7 +29,7 @@ import org.springframework.beans.factory.DisposableBean;
  * a destroy() method to close down their pool.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPoolingTargetSource.java,v 1.3 2003-12-11 10:58:12 johnsonr Exp $
+ * @version $Id: AbstractPoolingTargetSource.java,v 1.4 2003-12-30 01:07:12 jhoeller Exp $
  */
 public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTargetSource implements PoolingConfig, DisposableBean {
 	
@@ -54,7 +54,6 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTarge
 		return this.maxSize;
 	}
 
-	
 	public final void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		super.setBeanFactory(beanFactory);
 		try {
@@ -67,8 +66,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTarge
 			throw new BeanInitializationException("Could not create instance pool", ex);
 		}
 	}
-	
-	
+
 	/**
 	 * Create the pool.
 	 * @param beanFactory owning BeanFactory, in case we need collaborators from it
@@ -93,14 +91,6 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTarge
 	 * @throws Exception to allow pooling APIs to throw exception
 	 */
 	public abstract void releaseTarget(Object target) throws Exception; 
-	
-	/**
-	 * @see org.springframework.aop.interceptor.PoolingConfig#getInvocations()
-	 */
-	public int getInvocations() {
-		throw new UnsupportedOperationException();
-	}
-	
 
 	/**
 	 * @return an IntroductionAdvisor that providing a mixin

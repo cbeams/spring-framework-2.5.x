@@ -9,14 +9,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.1 2003-12-11 14:51:37 johnsonr Exp $
+ * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.2 2003-12-30 01:07:11 jhoeller Exp $
  */
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 	
@@ -28,9 +28,6 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 		registerAdvisorAdapter(new ThrowsAdviceAdapter());
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapterRegistry#wrap(java.lang.Object)
-	 */
 	public Advisor wrap(Object advice) throws UnknownAdviceTypeException {
 		if (advice instanceof Advisor)
 			return (Advisor) advice;
@@ -46,9 +43,6 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 		throw new UnknownAdviceTypeException(advice);
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapterRegistry#createInterceptionAroundAdvisor(org.springframework.aop.Advisor)
-	 */
 	public Interceptor getInterceptor(Advisor advisor) throws UnknownAdviceTypeException {
 		if (advisor instanceof InterceptionAroundAdvisor)
 			return ((InterceptionAroundAdvisor) advisor).getInterceptor();
@@ -62,9 +56,6 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 		throw new UnknownAdviceTypeException(advisor);
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapterRegistry#registerAdvisorAdapter(org.springframework.aop.framework.adapter.AdvisorAdapter)
-	 */
 	public void registerAdvisorAdapter(AdvisorAdapter adapter) {
 		adapters.add(adapter);
 	}

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aopalliance.intercept.AspectException;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
@@ -16,7 +17,7 @@ import org.springframework.aop.Pointcut;
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.10 2003-12-17 09:25:59 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.11 2003-12-30 01:07:11 jhoeller Exp $
  */
 public abstract class AopUtils {
 	
@@ -167,7 +168,6 @@ public abstract class AopUtils {
 		if (advice instanceof InterceptionIntroductionAdvisor) {
 			return ((InterceptionIntroductionAdvisor) advice).getClassFilter().matches(targetClass);
 		}
-		
 		InterceptionAroundAdvisor interceptionAdvice = (InterceptionAroundAdvisor) advice;
 		return canApply(interceptionAdvice.getPointcut(), targetClass, proxyInterfaces);
 	}
