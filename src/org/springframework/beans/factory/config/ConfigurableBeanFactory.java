@@ -18,7 +18,7 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see ConfigurableListableBeanFactory
- * @version $Id: ConfigurableBeanFactory.java,v 1.8 2004-02-04 17:23:45 jhoeller Exp $
+ * @version $Id: ConfigurableBeanFactory.java,v 1.9 2004-03-17 08:53:46 jhoeller Exp $
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 
@@ -31,21 +31,22 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void setParentBeanFactory(BeanFactory parentBeanFactory);
 
 	/**
-	 * Register the given custom property editor for all properties
-	 * of the given type.
+	 * Register the given custom property editor for all properties of the given
+	 * type. To be invoked during factory configuration.
 	 * @param requiredType type of the property
 	 * @param propertyEditor editor to register
 	 */
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 
 	/**
-	 * Add a new BeanPostPrcoessor that will get applied to beans
-	 * created with this factory.
+	 * Add a new BeanPostPrcoessor that will get applied to beans created with
+	 * this factory. To be invoked during factory configuration.
 	 */
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 
 	/**
 	 * Ignore the given dependency type for autowiring.
+	 * To be invoked during factory configuration.
 	 * <p>This will typically be used for dependencies that are resolved
 	 * in other ways, like BeanFactory through BeanFactoryAware or
 	 * ApplicationContext through ApplicationContextAware.
@@ -77,6 +78,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	/**
 	 * Given a bean name, create an alias. We typically use this method to
 	 * support names that are illegal within XML ids (used for bean names).
+	 * <p>Typically invoked during factory configuration, but can also be
+	 * used for runtime registration of aliases. Therefore, a factory
+	 * implementation should synchronize alias access.
 	 * @param beanName name of the bean
 	 * @param alias alias that will behave the same as the bean name
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
@@ -88,6 +92,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	/**
 	 * Register the given existing object as singleton in the bean factory,
 	 * under the given bean name.
+	 * <p>Typically invoked during factory configuration, but can also be
+	 * used for runtime registration of singletons. Therefore, a factory
+	 * implementation should synchronize singleton access; it will have
+	 * to do this anyway if it supports lazy initialization of singletons.
 	 * @param beanName name of the bean
 	 * @param singletonObject the existing object
 	 * @throws BeansException if the singleton could not be registered
