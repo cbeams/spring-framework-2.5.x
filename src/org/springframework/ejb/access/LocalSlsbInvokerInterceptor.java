@@ -35,14 +35,16 @@ import org.aopalliance.intercept.MethodInvocation;
  * <p>In a bean container, this class is normally best used as a singleton. However,
  * if that bean container pre-instantiates singletons (as do the XML ApplicationContext
  * variants) you may have a problem if the bean container is loaded before the EJB
- * container loads the target EJB. That is because the JNDI lookup will be performed in
- * the init method of this class and cached, but the EJB will not have been bound at the
- * target location yet. The solution is to not pre-instantiate this factory object, but
- * allow it to be created on first use. In the XML containers, this is controlled via
- * the "lazy-init" attribute.
- *
+ * container loads the target EJB. That is because by default the JNDI lookup will be
+ * performed in the init method of this class and cached, but the EJB will not have been
+ * bound at the target location yet. The best solution is to set the lookupHomeOnStartup
+ * property to false, in which case the home will be fetched on first access to the EJB.
+ * (This flag is only true by default for backwards compatibility reasons).</p>
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see org.springframework.ejb.access.AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup(boolean)
+ * @see org.springframework.ejb.access.AbstractSlsbInvokerInterceptor#setCacheHome(boolean)
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
