@@ -113,8 +113,12 @@ public class Transition implements Serializable {
 
 	/**
 	 * @return The owning source ( <i>from </i>) state of this transition.
+	 * @throws IllegalStateException, if the source state has not been set.
 	 */
 	protected TransitionableState getSourceState() {
+		Assert
+				.state(sourceState != null,
+						"The source state is not yet been set--this transition must be added to exactly one owning state definition!");
 		return sourceState;
 	}
 

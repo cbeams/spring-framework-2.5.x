@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -258,6 +259,9 @@ public class Flow implements Serializable {
 	 * @return The state with that id, or null if none exists.
 	 */
 	public AbstractState getState(String stateId) {
+		if (!StringUtils.hasText(stateId)) {
+			return null;
+		}
 		Iterator it = statesIterator();
 		while (it.hasNext()) {
 			AbstractState state = (AbstractState)it.next();
