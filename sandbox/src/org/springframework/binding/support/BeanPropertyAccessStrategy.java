@@ -42,10 +42,10 @@ import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
 import org.springframework.binding.value.support.PropertyAdapter;
 import org.springframework.binding.value.support.ValueHolder;
-import org.springframework.enums.CodedEnum;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ToStringCreator;
+import org.springframework.util.enums.Enum;
 
 public class BeanPropertyAccessStrategy implements
         MutablePropertyAccessStrategy {
@@ -423,7 +423,7 @@ public class BeanPropertyAccessStrategy implements
         }
 
         public boolean isEnumeration(String propertyName) {
-            return CodedEnum.class.isAssignableFrom(beanWrapper
+            return Enum.class.isAssignableFrom(beanWrapper
                     .getPropertyDescriptor(propertyName).getPropertyType());
         }
 

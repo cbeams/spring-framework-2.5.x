@@ -25,7 +25,7 @@ import org.springframework.util.enums.support.StaticEnumResolver;
 /**
  * @author Rod Johnson
  */
-public class CodedEnumTests extends TestCase {
+public class EnumTests extends TestCase {
 
 	public void testForCodeFound() {
 		Dog golden = (Dog) StaticEnumResolver.instance().getEnum(Dog.class, new Short((short) 11));
