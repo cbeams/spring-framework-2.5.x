@@ -252,7 +252,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			return tm;
 		}
 		catch (NamingException ex) {
-			throw new CannotCreateTransactionException("JTA UserTransaction is not available at JNDI location [" +
+			throw new CannotCreateTransactionException("JTA TransactionManager is not available at JNDI location [" +
 			                                           transactionManagerName + "]", ex);
 		}
 	}
