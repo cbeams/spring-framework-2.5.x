@@ -4,9 +4,6 @@
  */
 package org.springframework.jms;
 
-import java.util.Hashtable;
-
-import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
@@ -19,26 +16,20 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
+import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.naming.spi.InitialContextFactory;
-import javax.naming.spi.InitialContextFactoryBuilder;
-import javax.naming.spi.NamingManager;
+
 
 import org.easymock.MockControl;
-
-import junit.framework.TestCase;
 
 /**
  * Unit test for the JmsSender using the JmsSender102 implementation.
  * 
  * 
  */
-public class JmsSender102Tests extends TestCase {
-
-	private static Context mockJndiContext;
-	private MockControl mockJndiControl;
+public class JmsSender102Tests extends JmsTestCase {
 
 	private MockControl queueConnectionFactoryControl;
 	private QueueConnectionFactory mockQueueConnectionFactory;
@@ -63,26 +54,6 @@ public class JmsSender102Tests extends TestCase {
 
 	private MockControl topicControl;
 	private Topic mockTopic;
-
-	static {
-		try {
-			NamingManager
-				.setInitialContextFactoryBuilder(
-					new InitialContextFactoryBuilder() {
-				public InitialContextFactory createInitialContextFactory(Hashtable hashtable)
-					throws NamingException {
-					return new InitialContextFactory() {
-						public Context getInitialContext(Hashtable hashtable)
-							throws NamingException {
-							return mockJndiContext;
-						}
-					};
-				}
-			});
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
-	}
 
 	/**
 	 * Constructor for JmsSenderTests.
@@ -156,13 +127,16 @@ public class JmsSender102Tests extends TestCase {
 		topicSessionControl = MockControl.createControl(TopicSession.class);
 		mockTopicSession = (TopicSession) topicSessionControl.getMock();
 
+		//Specify behavior of the TopicConnectionFactory
 		mockTopicConnectionFactory.createTopicConnection();
 		topicConnectionFactoryControl.setReturnValue(mockTopicConnection);
 		topicConnectionFactoryControl.replay();
 
+		//Specify behavior of the TopicConnection
 		mockTopicConnection.createTopicSession(true, Session.AUTO_ACKNOWLEDGE);
 		topicConnectionControl.setReturnValue(mockTopicSession);
 
+		//Specify behavior of the JndiContext
 		mockJndiContext.lookup("testTopic");
 		mockJndiControl.setReturnValue(mockTopic);
 	}
@@ -172,7 +146,8 @@ public class JmsSender102Tests extends TestCase {
 	 * @throws Exception
 	 */
 	public void testBeanProperties() throws Exception {
-		JmsSender sender = new JmsSender102(mockQueueConnectionFactory);
+		JmsSender102 sender = new JmsSender102();
+		sender.setConnectionFactory(mockQueueConnectionFactory);
 		assertTrue(
 			"connection factory ok",
 			sender.getConnectionFactory() == mockQueueConnectionFactory);
@@ -191,7 +166,8 @@ public class JmsSender102Tests extends TestCase {
 		//The default is for the JmsSender102 to send to queues.
 		//Test to make sure exeception is thrown and has reasonable
 		//message.
-		s102 = new JmsSender102(mockTopicConnectionFactory);
+		s102 = new JmsSender102();
+		s102.setConnectionFactory(mockTopicConnectionFactory);
 		try {
 			s102.afterPropertiesSet();
 			fail("IllegalArgumentException not thrown. Mismatch of Destination and ConnectionFactory types.");
@@ -202,7 +178,8 @@ public class JmsSender102Tests extends TestCase {
 				e.getMessage());
 		}
 
-		s102 = new JmsSender102(mockQueueConnectionFactory);
+		s102 = new JmsSender102();
+		s102.setConnectionFactory(mockQueueConnectionFactory);
 		s102.setPubSubDomain(true);
 		try {
 			s102.afterPropertiesSet();
@@ -216,43 +193,84 @@ public class JmsSender102Tests extends TestCase {
 	}
 
 	public void testSendQueue() throws Exception {
-		JmsSender sender = new JmsSender102(mockQueueConnectionFactory);
+		JmsSender102 sender = new JmsSender102();
+		sender.setConnectionFactory(mockQueueConnectionFactory);
 
-		MockControl queueSenderControl = MockControl.createControl(QueueSender.class);
-		QueueSender mockQueueSender = (QueueSender)queueSenderControl.getMock();
+		//Mock the javax.jms QueueSender
+		MockControl queueSenderControl =
+			MockControl.createControl(QueueSender.class);
+		QueueSender mockQueueSender =
+			(QueueSender) queueSenderControl.getMock();
 
-		MockControl messageControl = MockControl.createControl(TextMessage.class);
-		TextMessage mockMessage = (TextMessage)messageControl.getMock();
+		MockControl messageControl =
+			MockControl.createControl(TextMessage.class);
+		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
 		this.mockQueueConnection.close();
 		this.queueConnectionControl.replay();
-		
+
 		this.mockQueueSession.createSender(this.mockQueue);
 		this.queueSessionControl.setReturnValue(mockQueueSender);
 		this.mockQueueSession.createTextMessage("just testing");
 		this.queueSessionControl.setReturnValue(mockMessage);
 		this.queueSessionControl.replay();
-		
+
 		mockQueueSender.send(mockQueue, mockMessage);
 		queueSenderControl.replay();
 
-		sender.send("testQueue", new SimpleMessageCreator());
+		sender.send("testQueue", new MessageCreator() {
+			public Message createMessage(Session session) throws JMSException {
+				return session.createTextMessage("just testing");
+			}
+		});
 		
+		this.queueConnectionFactoryControl.verify();
+		this.queueConnectionControl.verify();
 		queueSenderControl.verify();
-		
+
 		this.queueSessionControl.verify();
 
 	}
 
-	/**
-	 * Inner class that implements the MessageCreator interface to
-	 * create a simple text message
-	 */
-	class SimpleMessageCreator implements MessageCreator {
-		public Message createMessage(Session session) throws JMSException {
-			return session.createTextMessage("just testing");
-		}
+	public void testSendTopic() throws Exception {
 
+		//Setup the test
+		JmsSender102 sender = new JmsSender102();
+		sender.setConnectionFactory(mockTopicConnectionFactory);
+
+		//Mock the javax.jms TopicPublisher
+		MockControl topicPublisherControl =
+			MockControl.createControl(TopicPublisher.class);
+		TopicPublisher mockTopicPublisher =
+			(TopicPublisher) topicPublisherControl.getMock();
+
+		MockControl messageControl =
+			MockControl.createControl(TextMessage.class);
+		TextMessage mockMessage = (TextMessage) messageControl.getMock();
+
+		this.mockTopicConnection.close();
+		this.topicConnectionControl.replay();
+
+		this.mockTopicSession.createPublisher(this.mockTopic);
+		this.topicSessionControl.setReturnValue(mockTopicPublisher);
+		this.mockTopicSession.createTextMessage("just testing");
+		this.topicSessionControl.setReturnValue(mockMessage);
+		this.topicSessionControl.replay();
+
+		mockTopicPublisher.publish(mockTopic, mockMessage);
+		topicPublisherControl.replay();
+
+		sender.setPubSubDomain(true);
+		sender.send("testTopic", new MessageCreator() {
+			public Message createMessage(Session session) throws JMSException {
+				return session.createTextMessage("just testing");
+			}
+		});
+
+		this.topicConnectionFactoryControl.verify();
+		this.topicConnectionControl.verify();
+		this.topicSessionControl.verify();
+		topicPublisherControl.verify();
 	}
 
 }
