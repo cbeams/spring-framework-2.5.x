@@ -11,6 +11,7 @@ import java.sql.SQLException;
 
 import org.springframework.apptests.AbstractTestCase;
 
+import com.meterware.httpunit.*;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebResponse;
@@ -26,7 +27,7 @@ import com.meterware.httpunit.WebResponse;
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.5 2004-01-08 01:29:26 davison Exp $
+ * @version $Id: AllTests.java,v 1.6 2004-02-21 15:24:53 davison Exp $
  */
 public class AllTests extends AbstractTestCase {
 
@@ -101,15 +102,22 @@ public class AllTests extends AbstractTestCase {
 			html = resp.getText();
 			assertTrue("Expected to find $18.50 subtotal in page", html.indexOf("Sub Total: $18.50") > -1);
 			
-			// double the order
+			// double the order (tests a Velocity View)
 			WebForm form = resp.getForms()[1];
 			form.setParameter("EST-4", "2");
 			resp = form.submit();
 			html = resp.getText();
 			assertTrue("Expected to find $37.00 subtotal in page", html.indexOf("Sub Total: $37.00") > -1);
 			
-			// checkout
-			resp = wc.getResponse( shopRoot + "newOrder.do");
+			// checkout (tests an XSLT view)
+			resp = wc.getResponse( shopRoot + "checkout.do");
+			html = resp.getText();
+			assertTrue("Expected to find $37.00 subtotal in page", html.indexOf("Cart total: $37.00") > -1);
+			WebLink l = resp.getLinks()[0];
+			
+			// click continue link to place order
+			resp = l.click();
+			//resp = wc.getResponse( shopRoot + "newOrder.do");
 			html = resp.getText();
 			assertTrue("Expected to be prompted for login", html.indexOf("Please enter your username and password") > -1);
 			form = resp.getForms()[1];

@@ -39,7 +39,10 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
-
+		<fileset dir="${spring.root}/lib/jdom">
+			<include name="jdom.jar"/>
+		</fileset>
+			
 	</path>
 
 
@@ -83,6 +86,7 @@
 		<copy todir="${build.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
 				<include name="**/*.xml"/>
+				<include name="**/*.xsl*"/>
 			</fileset>
 		</copy>
 
@@ -134,6 +138,9 @@
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/velocity">
+				<include name="*.jar"/>
+			</fileset>					
 		</copy>
 
 		<copy file="${weblib.dir}/jpetstore.jar" tofile="${client.dir}/jpetstore.jar"/>
@@ -157,8 +164,10 @@
 			<include name="WEB-INF/*.properties"/>
 			<include name="WEB-INF/classes/*.properties"/>
 			<include name="WEB-INF/classes/*.xml"/>
+			<include name="WEB-INF/classes/*.xsl*"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
+			<include name="WEB-INF/velocity/**"/>
 			<exclude name="**/.*"/>
 		</war>
 

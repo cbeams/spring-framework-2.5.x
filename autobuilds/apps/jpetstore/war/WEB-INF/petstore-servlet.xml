@@ -9,10 +9,23 @@
 
 	<!-- ========================= VIEW DEFINITIONS ========================= -->
 
+	<bean 
+		id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+		<property name="cache"><value>true</value></property>
+		<property name="basename"><value>views</value></property>
+	</bean>
+	<!--
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="viewClass"><value>org.springframework.web.servlet.view.JstlView</value></property>
 		<property name="prefix"><value>/WEB-INF/jsp/spring/</value></property>
 		<property name="suffix"><value>.jsp</value></property>
+	</bean>
+	-->
+	<bean 
+  		id="velocityConfig" 
+  		class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
+  		singleton="true">
+  		<property name="resourceLoaderPath"><value>/WEB-INF/velocity/</value></property>          
 	</bean>
 
 

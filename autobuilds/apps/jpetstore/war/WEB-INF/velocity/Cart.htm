@@ -1,0 +1,148 @@
+
+<html><head><title>JPetStore Demo</title>
+<meta content="text/html; charset=windows-1252" http-equiv="Content-Type" />
+<META HTTP-EQUIV="Cache-Control" CONTENT="max-age=0">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<meta http-equiv="expires" content="0">
+<META HTTP-EQUIV="Expires" CONTENT="Tue, 01 Jan 1980 1:00:00 GMT">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+</head>
+
+<body bgcolor="white">
+
+<table background="../images/bkg-topbar.gif" border="0" cellspacing="0" cellpadding="5" width="100%">
+  <tbody>
+  <tr>
+    <td><a href="${rc.contextPath}/shop/index.do">HOME</a></td>
+    <td align="right"><a href="${rc.contextPath}/shop/viewCart.do">CART</a>
+    |
+
+#if (! $userSession.account)
+      <a href="${rc.contextPath}/shop/signonForm.do">SIGN-IN</a>
+#else
+      <a href="${rc.contextPath}/shop/signoff.do">SIGN-OUT</a>
+      |
+      <a href="${rc.contextPath}/shop/editAccount.do">MY ACCOUNT</a>
+#end
+      |<a href="../help.html">HELP</a>
+    </td>
+    <td align="left" valign="bottom">
+      <form action="${rc.contextPath}/shop/searchProducts.do" method="post">
+			  <input type="hidden" name="search" value="true"/>
+        <input name="keyword" size="14" />&nbsp;<input border="0" src="../images/search.gif" type="image"/>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<p></p>
+<br>
+<center>
+<a href="${rc.contextPath}/shop/viewCategory.do?categoryId=FISH">
+FISH</a>
+|
+<a href="${rc.contextPath}/shop/viewCategory.do?categoryId=DOGS">
+DOGS</a>
+|
+<a href="${rc.contextPath}/shop/viewCategory.do?categoryId=REPTILES">
+REPTILES</a>
+|
+<a href="${rc.contextPath}/shop/viewCategory.do?categoryId=CATS">
+CATS</a>
+|
+<a href="${rc.contextPath}/shop/viewCategory.do?categoryId=BIRDS">
+BIRDS</a>
+</center>
+
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+<tr><td valign="top" width="20%" align="left">
+<table align="left" bgcolor="#008800" border="0" cellspacing="2" cellpadding="2">
+<tr><td bgcolor="#FFFF88">
+<a href="${rc.contextPath}/shop/index.do"><b><font color="BLACK" size="2">&lt;&lt; Main Menu</font></b></a>
+</td></tr>
+</table>
+</td><td valign="top" align="center">
+<h2 align="center">Shopping Cart (by Velocity!)</h2>
+<form action="${rc.contextPath}/shop/updateCartQuantities.do" method="post">
+<table align="center" bgcolor="#008800" border="0" cellspacing="2" cellpadding="5">
+  <tr bgcolor="#cccccc">
+  <td><b>Item ID</b></td>  <td><b>Product ID</b></td>  <td><b>Description</b></td> <td><b>In Stock?</b></td> <td><b>Quantity</b></td>  <td><b>List Price</b></td> <td><b>Total Cost</b></td>  <td>&nbsp;</td>
+  </tr>
+
+#if ($cart.numberOfItems == 0)
+<tr bgcolor="#FFFF88"><td colspan="8"><b>Your cart is empty.</b></td></tr>
+#end
+
+#foreach ($cartItem in $cart.cartItemList.pageList)
+  <tr bgcolor="#FFFF88">
+  <td><b>
+  <a href="${rc.contextPath}/shop/viewItem.do?itemId=$cartItem.item.itemId"/>
+    ${cartItem.item.itemId}
+  </a></b></td>
+  <td>${cartItem.item.productId}</td>
+  <td>
+    $!cartItem.item.attribute1
+    $!cartItem.item.attribute2
+    $!cartItem.item.attribute3
+    $!cartItem.item.attribute4
+    $!cartItem.item.attribute5
+    ${cartItem.item.product.name}
+   </td>
+  <td align="center">${cartItem.inStock}</td>
+  <td align="center">
+  <input type="text" size="3" name="${cartItem.item.itemId}" value="${cartItem.quantity}" />
+  </td>
+  <td align="right">$${cartItem.item.listPrice}</td>
+  <td align="right">$${cartItem.totalPrice}</td>
+  <td><a href="${rc.contextPath}/shop/removeItemFromCart.do?workingItemId=${cartItem.item.itemId}">
+    <img border="0" src="../images/button_remove.gif" />
+  </a></td>
+  </tr>
+#end
+
+<tr bgcolor="#FFFF88">
+<td colspan="7" align="right">
+<b>Sub Total: $${cart.subTotal}0</b><br/>
+<input type="image" border="0" src="../images/button_update_cart.gif" name="update" />
+</td>
+<td>&nbsp;</td>
+</tr>
+</table>
+<center>
+  #if (! $cart.cartItemList.firstPage)
+    <a href="viewCart.do?page=previousCart"><font color="green"><B>&lt;&lt; Prev</B></font></a>
+  #end
+  #if (! $cart.cartItemList.lastPage)
+    <a href="viewCart.do?page=nextCart"><font color="green"><B>Next &gt;&gt;</B></font></a>
+  #end
+</center>
+</form>
+
+#if ($cart.numberOfItems > 0)
+<br /><center><a href="${rc.contextPath}/shop/checkout.do"><img border="0" src="../images/button_checkout.gif" /></a></center>
+#end
+
+</td>
+
+<td valign="top" width="20%" align="right">
+#if (!$userSession.account.username && $userSession.account.listOption)
+    fav list has been omitted for brevity
+#end
+</td>
+
+</tr>
+</table>
+
+<br>
+#if ($userSession.account.bannerOption)
+	<table align="center" cellpadding="5" width="100%">
+	<tr><td>
+	<center>
+			${userSession.account.bannerName}
+			&nbsp;
+	</center>
+	</td></tr>
+	</table>
+#end
