@@ -25,6 +25,7 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.support.AopUtils;
 
 /**
@@ -34,15 +35,15 @@ import org.springframework.aop.support.AopUtils;
  * invokeJoinpoint() method to change this behavior, so this is also a useful
  * base class for more specialized MethodInvocation implementations.
  *
- * <p>It's possible to clone an invocation, to invoke proceed() repeatedly
- * (once per clone), using the invocableClone() method.
+ * <p>It's possible to clone an invocation, to invoke <code>proceed</code> repeatedly
+ * (once per clone), using the <code>invocableClone</code> method.
  * 
  * @author Rod Johnson
  * @see #invokeJoinpoint
  * @see #proceed
  * @see #invocableClone
  */
-public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
+public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
 
 	protected final Object proxy;
 

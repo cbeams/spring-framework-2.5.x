@@ -17,9 +17,10 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.util.Assert;
 
 /**
@@ -102,9 +103,9 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 			Object retVal = AopUtils.invokeJoinpointUsingReflection(this.delegate, mi.getMethod(), mi.getArguments());
 			
 			// Massage return value if possible: if the delegate returned itself,
-			// we really want to return the proxy
-			if (retVal == delegate && (mi instanceof ReflectiveMethodInvocation)) {
-			    retVal = ((ReflectiveMethodInvocation) mi).getProxy();
+			// we really want to return the proxy.
+			if (retVal == delegate && (mi instanceof ProxyMethodInvocation)) {
+				retVal = ((ProxyMethodInvocation) mi).getProxy();
 			}
 			return retVal;
 		}
