@@ -22,8 +22,16 @@ import java.util.Map;
 
 import org.springframework.binding.support.AttributeSetterSupport;
 
+/**
+ * Holder for data placed in a specific scope, for example "request scope" or
+ * "flow scope".
+ * @author Keith Donald
+ */
 public class Scope extends AttributeSetterSupport implements Serializable {
 
+	/**
+	 * The data holder map.
+	 */
 	private Map attributes = new HashMap();
 
 	public boolean containsAttribute(String attributeName) {
@@ -41,11 +49,11 @@ public class Scope extends AttributeSetterSupport implements Serializable {
 	public Object setAttribute(String attributeName, Object attributeValue) {
 		return this.attributes.put(attributeName, attributeValue);
 	}
-	
+
 	public Object removeAttribute(String attributeName) {
 		return this.attributes.remove(attributeName);
 	}
-	
+
 	public int size() {
 		return this.attributes.size();
 	}

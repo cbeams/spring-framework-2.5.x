@@ -15,35 +15,38 @@
  */
 package org.springframework.web.flow;
 
+/**
+ * Interface to demarcate an application transaction for a flow session using a
+ * token-based mechanism.
+ * @author Keith Donald
+ */
 public interface TransactionSynchronizer {
 
 	/**
-	 * Is given request participating in the active transaction of the model?
+	 * Is the active flow session participating in a transaction?
 	 * @param clear indicates whether or not the transaction should end after
 	 *        checking it
-	 * @return True when the request is participating in the active transaction
-	 *         of the model, false otherwise
+	 * @return True if it is participating in the active transaction, false
+	 *         otherwise
 	 */
 	public boolean inTransaction(boolean clear);
 
 	/**
-	 * Assert that given request is participating in the active transaction of
-	 * the model.
+	 * Assert that the active flow session is participating in a transaction.
 	 * @param clear indicates whether or not the transaction should end after
 	 *        checking it
-	 * @throws IllegalStateException The request is not participating in the
-	 *         active transaction of the model or there is no transaction active
-	 *         in the model
+	 * @throws IllegalStateException The flow execution is not participating in
+	 *         a active transaction
 	 */
 	public void assertInTransaction(boolean clear) throws IllegalStateException;
 
 	/**
-	 * Start a new transaction on this context.
+	 * Start a new transaction on the active flow session.
 	 */
 	public void beginTransaction();
 
 	/**
-	 * End the active transaction on this context.
+	 * End the active transaction on the active flow session.
 	 */
 	public void endTransaction();
 
