@@ -66,6 +66,13 @@ public class CallableStatementCreatorFactory {
 		return new CallableStatementCreatorImpl(inParams != null ? inParams : new HashMap());
 	}
 
+	/**
+	 * Return a new CallableStatementCreator instance given this parameter mapper.
+	 * @param inParamMapper ParameterMapper implementation that will return a Map of parameters. May not be null.
+	 */
+	public CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
+		return new CallableStatementCreatorImpl(inParamMapper);
+	}
 
 	/**
 	 * CallableStatementCreator implementation returned by this class.
@@ -73,15 +80,35 @@ public class CallableStatementCreatorFactory {
 	private class CallableStatementCreatorImpl implements CallableStatementCreator {
 
 		private Map inParameters;
+		private ParameterMapper inParameterMapper;
 		
 		/**
 		 * @param inParams list of SqlParameter objects. May not be null
 		 */
 		private CallableStatementCreatorImpl(final Map inParams) {
 			this.inParameters = inParams;
+			this.inParameterMapper = null;
 		}
-		
+
+		/**
+		 * @param inParamMapper ParameterMapper implementation for mapping input parameters. May not be null
+		 */
+		private CallableStatementCreatorImpl(final ParameterMapper inParamMapper) {
+			this.inParameters = null;
+			this.inParameterMapper = inParamMapper;
+		}
+
 		public CallableStatement createCallableStatement(Connection conn) throws SQLException {
+			
+			/* If we were given a ParameterMapper - we must let the mapper do its thing to create the Map */
+			if (inParameterMapper != null) {
+				inParameters = inParameterMapper.createMap(conn);
+			}
+			else {
+				if (inParameters == null) {
+					throw new InvalidDataAccessApiUsageException("A ParameterMapper or a Map of parameters must be provided");
+				}
+			}
 
 			CallableStatement cs = conn.prepareCall(callString);
 

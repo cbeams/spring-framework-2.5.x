@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
 
 /**
@@ -24,7 +25,7 @@ import org.springframework.jdbc.core.SqlParameter;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: StoredProcedure.java,v 1.5 2003-11-03 17:01:14 johnsonr Exp $
+ * @version $Id: StoredProcedure.java,v 1.6 2003-11-17 23:21:42 trisberg Exp $
  */
 public abstract class StoredProcedure extends SqlCall {
 
@@ -87,6 +88,31 @@ public abstract class StoredProcedure extends SqlCall {
 		validateParameters(inParams);
 		logger.debug("Executing call: " + getCallString());
 		Map retValues = getJdbcTemplate().execute(newCallableStatementCreator(inParams), this.getDeclaredParameters());
+
+		return retValues;
+	}
+
+	/**
+	 * Execute the stored procedure. Subclasses should define a strongly typed
+	 * execute method (with a meaningful name) that invokes this method, passing in
+	 * a ParameterMapper that will populate the input map.  This allows mapping database 
+	 * specific features since the ParameterMapper has access to the Connection object.
+	 * The execute method is also responsible for extracting typed values from the output map. 
+	 * Subclass execute methods will often take domain objects as arguments and return values.
+	 * Alternatively, they can return void.
+	 * @param inParams map of input parameters, keyed by name as in parameter
+	 * declarations. Output parameters need not (but can be) included in this map.
+	 * It is legal for map entries to be null, and this will produce the correct
+	 * behavior using a NULL argument to the stored procedure.
+	 * @return map of output params, keyed by name as in parameter declarations.
+	 * Output parameters will appear here, with their values after the
+	 * stored procedure has been called.
+	 */
+	public Map execute(final ParameterMapper inParamMapper) throws InvalidDataAccessApiUsageException {
+		//validateParameters(inParams);
+		logger.debug("Executing call using ParameterMapper: " + getCallString());
+		logger.info("Executing call using ParameterMapper: " + getCallString());
+		Map retValues = getJdbcTemplate().execute(newCallableStatementCreator(inParamMapper), this.getDeclaredParameters());
 
 		return retValues;
 	}
