@@ -14,8 +14,8 @@
   implement EJBs and functionality within them. Additionally, using Spring to
   access services provided by EJBs allows the implementation of those services
   to later transparently be switched between local EJB, remote EJB, or POJO
-  (plain java object) implementations of those services, without the client
-  code client code having to be changed.</para>
+  (plain java object) variants, without the client code client code having to
+  be changed.</para>
 
   <para>In this chapter, we look at how Spring can help you access and
   implement EJBs. Spring provides particular value when accessing stateless
