@@ -228,7 +228,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				DataSource cpds = ((LocalDataSourceConnectionProvider) cp).getDataSource();
 				if (this.dataSource == null) {
 					// use the SessionFactory's DataSource for exposing transactions to JDBC code
-					logger.info("Using DataSource [" + cpds +	"] from Hibernate SessionFactory for HibernateTransactionManager");
+					logger.info("Using DataSource [" + cpds +
+											"] from Hibernate SessionFactory for HibernateTransactionManager");
 					this.dataSource = cpds;
 				}
 				else if (this.dataSource == cpds) {
@@ -245,8 +246,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected Object doGetTransaction() {
 		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
-			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(this.sessionFactory);
-			logger.debug("Found thread-bound session [" + sessionHolder.getSession() + "] for Hibernate transaction");
+			SessionHolder sessionHolder =
+					(SessionHolder) TransactionSynchronizationManager.getResource(this.sessionFactory);
+			logger.debug("Found thread-bound session [" + sessionHolder.getSession() +
+									 "] for Hibernate transaction");
 			return new HibernateTransactionObject(sessionHolder);
 		}
 		else {
@@ -273,12 +276,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.setSessionHolder(new SessionHolder(session));
 		}
 
+		txObject.getSessionHolder().setSynchronizedWithTransaction(true);
+		Session session = txObject.getSessionHolder().getSession();
 		try {
-			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
-			Session session = txObject.getSessionHolder().getSession();
-			if (debugEnabled) {
-				logger.debug("Beginning Hibernate transaction on session [" + session + "]");
-			}
 
 			// apply read-only
 			if (definition.isReadOnly()) {
@@ -326,11 +326,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
 
-			// bind the session holder to the thread
-			if (txObject.isNewSessionHolder()) {
-				TransactionSynchronizationManager.bindResource(this.sessionFactory, txObject.getSessionHolder());
-			}
-
 			// register the Hibernate Session's JDBC Connection for the DataSource, if set
 			if (this.dataSource != null) {
 				ConnectionHolder conHolder = new ConnectionHolder(session.connection());
@@ -339,11 +334,21 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 				TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
 			}
+
+			// bind the session holder to the thread
+			if (txObject.isNewSessionHolder()) {
+				TransactionSynchronizationManager.bindResource(this.sessionFactory, txObject.getSessionHolder());
+			}
 		}
-		catch (SQLException ex) {
-			throw new CannotCreateTransactionException("Could not set transaction isolation", ex);
-		}
-		catch (HibernateException ex) {
+
+		catch (Exception ex) {
+			try {
+				SessionFactoryUtils.closeSessionIfNecessary(session, this.sessionFactory);
+			}
+			catch (CleanupFailureDataAccessException ex2) {
+				// just log it, to keep the transaction-related exception
+				logger.error("Could not close Hibernate session after transaction begin failed", ex2);
+			}
 			throw new CannotCreateTransactionException("Could not create Hibernate transaction", ex);
 		}
 	}
@@ -351,7 +356,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	protected Object doSuspend(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 		txObject.setSessionHolder(null);
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		ConnectionHolder connectionHolder = null;
 		if (this.dataSource != null) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(this.dataSource);
@@ -409,7 +415,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().getTransaction().rollback();
 		}
 		catch (net.sf.hibernate.TransactionException ex) {
-			throw new TransactionSystemException("Could not rollback Hibernate transaction", ex);
+			throw new TransactionSystemException("Could not roll back Hibernate transaction", ex);
 		}
 		catch (JDBCException ex) {
 			// shouldn't really happen, as a rollback doesn't cause a flush
@@ -433,15 +439,18 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
+		// remove the session holder from the thread
+		if (txObject.isNewSessionHolder()) {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+		}
+
 		// remove the JDBC connection holder from the thread, if set
 		if (this.dataSource != null) {
 			TransactionSynchronizationManager.unbindResource(this.dataSource);
 		}
 
-		// remove the session holder from the thread
-		if (txObject.isNewSessionHolder()) {
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-		}
+		txObject.getSessionHolder().setSynchronizedWithTransaction(false);
+		txObject.getSessionHolder().clearTimeout();
 
 		try {
 			Connection con = txObject.getSessionHolder().getSession().connection();
@@ -479,7 +488,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 			catch (CleanupFailureDataAccessException ex) {
 				// just log it, to keep a transaction-related exception
-				logger.error("Count not close Hibernate session after transaction", ex);
+				logger.error("Could not close Hibernate session after transaction", ex);
 			}
 		}
 		else {
