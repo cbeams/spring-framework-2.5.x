@@ -141,8 +141,8 @@ public abstract class TransitionableState extends AbstractState {
 		}
 	}
 
-	public String toString() {
-		return new ToStringCreator(this).append("id", getId()).append("transitions", transitions).toString();
+	protected void createToString(ToStringCreator creator) {
+		creator.append("transitions", transitions);
 	}
 
 }

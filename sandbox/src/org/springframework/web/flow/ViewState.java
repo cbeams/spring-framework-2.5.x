@@ -18,6 +18,7 @@ package org.springframework.web.flow;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -99,8 +100,6 @@ public class ViewState extends TransitionableState {
 	 * model map needed when the view is rendered, for populating dynamic
 	 * content.
 	 * 
-	 * @param flow The flow definition associated with the executing flow
-	 *        session
 	 * @param sessionExecutionStack The session execution stack, tracking the
 	 *        current active flow session
 	 * @param request The client http request
@@ -110,15 +109,22 @@ public class ViewState extends TransitionableState {
 	 */
 	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		if (viewName != null) {
+		if (StringUtils.hasText(getViewName())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Returning view name '" + viewName + "' to render");
+			}
 			return new ViewDescriptor(viewName, sessionExecution.getAttributes());
 		}
 		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Returning a view descriptor null object; no view to render");
+			}
 			return ViewDescriptor.NULL_OBJECT;
 		}
 	}
 
 	protected void createToString(ToStringCreator creator) {
+		super.createToString(creator);
 		creator.append("viewName", viewName);
 	}
 }
