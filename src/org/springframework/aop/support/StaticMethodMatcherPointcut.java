@@ -21,16 +21,32 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 
 /**
- * Convenient superclass when we want to force subclasses to
- * implement MethodMatcher interface, but subclasses
- * will want to be pointcuts. The getClassFilter() method can
- * be overriden to customize ClassFilter behaviour as well.
+ * Convenient superclass when we want to force subclasses to implement the
+ * MethodMatcher interface, but subclasses will want to be pointcuts.
+ *
+ * <p>The "classFilter" property can be set to customize ClassFilter behavior.
+ * The default is <code>ClassFilter.TRUE</code>.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @see #setClassFilter
+ * @see org.springframework.aop.ClassFilter#TRUE
  */
 public abstract class StaticMethodMatcherPointcut extends StaticMethodMatcher implements Pointcut {
 
+	private ClassFilter classFilter = ClassFilter.TRUE;
+
+	/**
+	 * Set the ClassFilter to use for this pointcut.
+	 * Default is <code>ClassFilter.TRUE</code>.
+	 * @see org.springframework.aop.ClassFilter#TRUE
+	 */
+	public void setClassFilter(ClassFilter classFilter) {
+		this.classFilter = classFilter;
+	}
+
 	public ClassFilter getClassFilter() {
-		return ClassFilter.TRUE;
+		return classFilter;
 	}
 
 	public final MethodMatcher getMethodMatcher() {
