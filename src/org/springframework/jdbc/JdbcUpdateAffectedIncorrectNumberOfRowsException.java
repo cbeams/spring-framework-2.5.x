@@ -46,7 +46,7 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 		return actual;
 	}
 
-	public boolean getDataWasUpdated() {
+	public boolean wasDataUpdated() {
 		return getActualRowsAffected() > 0;
 	}
 

@@ -23,7 +23,7 @@ package org.springframework.dao;
  * updated 3.
  * @author Rod Johnson
  */
-public abstract class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAccessResourceUsageException {
+public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAccessResourceUsageException {
 
 	/**
 	 * Constructor for IncorrectUpdateSemanticsDataAccessException.
@@ -44,9 +44,20 @@ public abstract class IncorrectUpdateSemanticsDataAccessException extends Invali
 	
 	/**
 	 * Return whether data was updated.
-	 * @return whether data was updated (as opposed to being incorrectly
-	 * updated). If this method returns true, there's nothing to roll back.
+	 * If this method returns false, there's nothing to roll back.
+	 * <p>The default implementation always returns true.
+	 * This can be overridden in subclasses.
 	 */
-	public abstract boolean getDataWasUpdated();
+	public boolean wasDataUpdated() {
+		return getDataWasUpdated();
+	}
+
+	/**
+	 * @deprecated in favor of <code>wasDataUpdated</code>
+	 * @see #wasDataUpdated
+	 */
+	public boolean getDataWasUpdated() {
+		return true;
+	}
 
 }
