@@ -110,11 +110,15 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Set the default parent bean for this bean factory.
-	 * If a child bean definition (i.e. a definition without class
-	 * attribute) handled by this factory doesn't provide a parent
-	 * attribute, this default value gets used.
-	 * <p>Can be used e.g. for view definition files, to define a
-	 * parent with common attributes for all views.
+	 * If a child bean definition handled by this factory provides neither
+	 * a parent nor a class attribute, this default value gets used.
+	 * <p>Can be used e.g. for view definition files, to define a parent
+	 * with a default view class and common attributes for all views.
+	 * View definitions that define their own parent or carry their own
+	 * class can still override this.
+	 * <p>Strictly speaking, the rule that a default parent setting does
+	 * not apply to a bean definition that carries a class is there for
+	 * backwards compatiblity reasons. It still matches the typical use case.
 	 */
 	public void setDefaultParentBean(String defaultParentBean) {
 		this.defaultParentBean = defaultParentBean;
@@ -360,7 +364,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			logger.debug(pvs.toString());
 		}
 
-		if (parent == null && !beanName.equals(this.defaultParentBean)) {
+		// Just use default parent if we're not dealing with the parent itself,
+		// and if there's no class name specified. The latter has to happen for
+		// backwards compatibility reasons.
+		if (parent == null && className == null && !beanName.equals(this.defaultParentBean)) {
 			parent = this.defaultParentBean;
 		}
 

@@ -104,9 +104,14 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	 * Set the default parent for views defined in the ResourceBundle.
 	 * This avoids repeated "yyy1.parent=xxx", "yyy2.parent=xxx" definitions
 	 * in the bundle, especially if all defined views share the same parent.
-	 * The parent will typically define the view class and common attributes.
+	 * <p>The parent will typically define the view class and common attributes.
 	 * Concrete views might simply consist of an URL definition then:
 	 * a la "yyy1.url=/my.jsp", "yyy2.url=/your.jsp".
+	 * <p>View definitions that define their own parent or carry their own
+	 * class can still override this. Strictly speaking, the rule that a
+	 * default parent setting does not apply to a bean definition that
+	 * carries a class is there for backwards compatiblity reasons.
+	 * It still matches the typical use case.
 	 * @param defaultParentView the default parent view
 	 */
 	public void setDefaultParentView(String defaultParentView) {
