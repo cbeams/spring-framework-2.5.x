@@ -723,7 +723,7 @@ public abstract class SessionFactoryUtils {
 			logger.error("Could not close Hibernate session", ex.getSQLException());
 		}
 		catch (HibernateException ex) {
-			logger.error("Could not close Hibernate session");
+			logger.error("Could not close Hibernate session", ex);
 		}
 	}
 
