@@ -1019,7 +1019,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public EndState createFinishEndState() {
-		return new EndState(getDefaultSuccessEndStateId());
+		return new EndState(getDefaultFinishEndStateId());
 	}
 
 	/**
@@ -1027,7 +1027,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public EndState createFinishEndState(String viewName) {
-		return new EndState(getDefaultSuccessEndStateId(), viewName);
+		return new EndState(getDefaultFinishEndStateId(), viewName);
 	}
 
 	/**
@@ -1146,7 +1146,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public Transition onSuccessEnd() {
-		return onSuccess(getDefaultSuccessEndStateId());
+		return onSuccess(getDefaultFinishEndStateId());
 	}
 
 	/**
@@ -1176,7 +1176,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public Transition onSubmitEnd() {
-		return onSubmit(getDefaultBackEndStateId());
+		return onSubmit(getDefaultFinishEndStateId());
 	}
 
 	/**
@@ -1318,13 +1318,13 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public Transition onFinishEnd() {
-		return onFinish(getDefaultSuccessEndStateId());
+		return onFinish(getDefaultFinishEndStateId());
 	}
 
 	/**
 	 * @return
 	 */
-	public String getDefaultSuccessEndStateId() {
+	public String getDefaultFinishEndStateId() {
 		return EndState.DEFAULT_FINISH_STATE_ID;
 	}
 
