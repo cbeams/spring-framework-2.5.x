@@ -17,10 +17,10 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditor;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +53,7 @@ public class BindException extends Exception implements Errors {
 	 */
 	public static final String ERROR_KEY_PREFIX = BindException.class.getName() + ".";
 
-	private final List errors = new ArrayList();
+	private final List errors = new LinkedList();
 
 	private final BeanWrapper beanWrapper;
 
@@ -193,11 +193,11 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public List getGlobalErrors() {
-		List result = new ArrayList();
+		List result = new LinkedList();
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			ObjectError fe = (ObjectError) it.next();
-			if (!(fe instanceof FieldError)) {
-				result.add(fe);
+			Object error = it.next();
+			if (!(error instanceof FieldError)) {
+				result.add(error);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -205,9 +205,9 @@ public class BindException extends Exception implements Errors {
 
 	public ObjectError getGlobalError() {
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			ObjectError fe = (ObjectError) it.next();
-			if (!(fe instanceof FieldError)) {
-				return fe;
+			ObjectError objectError = (ObjectError) it.next();
+			if (!(objectError instanceof FieldError)) {
+				return objectError;
 			}
 		}
 		return null;
@@ -222,12 +222,12 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public List getFieldErrors(String field) {
-		List result = new ArrayList();
+		List result = new LinkedList();
 		field = fixedField(field);
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			ObjectError fe = (ObjectError) it.next();
-			if (fe instanceof FieldError && field.equals(((FieldError) fe).getField())) {
-				result.add(fe);
+			Object error = it.next();
+			if (error instanceof FieldError && isMatchingFieldError(field, ((FieldError) error))) {
+				result.add(error);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -236,12 +236,26 @@ public class BindException extends Exception implements Errors {
 	public FieldError getFieldError(String field) {
 		field = fixedField(field);
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			ObjectError fe = (ObjectError) it.next();
-			if (fe instanceof FieldError && field.equals(((FieldError) fe).getField())) {
-				return (FieldError) fe;
+			Object error = it.next();
+			if (error instanceof FieldError) {
+				FieldError fe = (FieldError) error;
+				if (isMatchingFieldError(field, fe)) {
+					return fe;
+				}
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Check whether the given FieldError matches the given field.
+	 * @param field the field that we are looking up FieldErrors for
+	 * @param fieldError the candidate FieldError
+	 * @return whether the FieldError matches the given field
+	 */
+	protected boolean isMatchingFieldError(String field, FieldError fieldError) {
+		return (field.equals(fieldError.getField()) ||
+				(field.endsWith("*") && fieldError.getField().startsWith(field.substring(0, field.length() - 1))));
 	}
 
 	public Object getFieldValue(String field) {

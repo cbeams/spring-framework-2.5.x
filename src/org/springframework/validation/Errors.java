@@ -149,6 +149,8 @@ public interface Errors {
 
 	/**
 	 * Get all errors associated with the given field.
+	 * <p>Should support full field names like "name" but also pattern
+	 * matches like "na*" or "address.*".
 	 * @param field the field name
 	 * @return List of FieldError instances
 	 */
@@ -163,7 +165,7 @@ public interface Errors {
 	/**
 	 * Return the current value of the given field, either the current
 	 * bean property value or a rejected update from the last binding.
-	 * Allows for convenient access to user-specified field values,
+	 * <p>Allows for convenient access to user-specified field values,
 	 * even if there were type mismatches.
 	 * @param field the field name
 	 * @return the current value of the given field

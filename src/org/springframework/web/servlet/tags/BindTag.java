@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.tags;
 
@@ -57,16 +57,20 @@ public class BindTag extends RequestContextAwareTag {
 	private PropertyEditor editor;
 
 	/**
-	 * Set the path that this tag should apply.
-	 * Can be a bean (e.g. "person"), or a bean property
-	 * (e.g. "person.name"), also supporting nested beans.
+	 * Set the path that this tag should apply. Can be a bean (e.g. "person")
+	 * to get global errors, or a bean property (e.g. "person.name") to get
+	 * field errors (also supporting nested fields and "person.na*" mappings).
+	 * "person.*" will return all errors for the specified bean, both global
+	 * and field errors.
+	 * @see org.springframework.validation.Errors#getGlobalErrors
+	 * @see org.springframework.validation.Errors#getFieldErrors
 	 */
 	public void setPath(String path) {
 		this.path = path;
 	}
 
 	/**
-	 * Retrieve the path that this tag applies to
+	 * Retrieve the path that this tag applies to.
 	 * @return the path that this tag applies to,
 	 * or <code>null</code> if none
 	 */
@@ -95,7 +99,7 @@ public class BindTag extends RequestContextAwareTag {
 		this.errors = getRequestContext().getErrors(name, false);
 		if (this.errors == null) {
 			throw new JspTagException("Could not find Errors instance for bean '" + name + "' in request: " +
-			                          "add the Errors model to your ModelAndView via errors.getModel()");
+																"add the Errors model to your ModelAndView via errors.getModel()");
 		}
 
 		List fes = null;
@@ -104,6 +108,9 @@ public class BindTag extends RequestContextAwareTag {
 		if (this.property != null) {
 			if ("*".equals(this.property)) {
 				fes = this.errors.getAllErrors();
+			}
+			else if (this.property.endsWith("*")) {
+				fes = this.errors.getFieldErrors(this.property);
 			}
 			else {
 				fes = this.errors.getFieldErrors(this.property);
@@ -116,7 +123,7 @@ public class BindTag extends RequestContextAwareTag {
 											"] is not of type BindException");
 				}
 				if (isHtmlEscape() && value instanceof String) {
-					value = HtmlUtils.htmlEscape((String)value);
+					value = HtmlUtils.htmlEscape((String) value);
 				}
 			}
 		}
@@ -124,7 +131,7 @@ public class BindTag extends RequestContextAwareTag {
 			fes = this.errors.getGlobalErrors();
 		}
 
-		// instantiate the status object
+		// create the status object
 		BindStatus status = new BindStatus(this.property, value, getErrorCodes(fes), getErrorMessages(fes));
 		this.pageContext.setAttribute(STATUS_VARIABLE_NAME, status);
 		return EVAL_BODY_INCLUDE;

@@ -17,8 +17,8 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditorSupport;
-import java.util.Map;
 import java.util.Locale;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -159,6 +159,7 @@ public class ValidationTestSuite extends TestCase {
 
 	public void testCustomEditorForSingleProperty() {
 		TestBean tb = new TestBean();
+		tb.setSpouse(new TestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
@@ -173,10 +174,12 @@ public class ValidationTestSuite extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "value"));
 		pvs.addPropertyValue(new PropertyValue("touchy", "value"));
+		pvs.addPropertyValue(new PropertyValue("spouse.name", "sue"));
 		binder.bind(pvs);
 
 		binder.getErrors().rejectValue("name", "someCode", "someMessage");
 		binder.getErrors().rejectValue("touchy", "someCode", "someMessage");
+		binder.getErrors().rejectValue("spouse.name", "someCode", "someMessage");
 
 		assertEquals("", binder.getErrors().getNestedPath());
 		assertEquals("value", binder.getErrors().getFieldValue("name"));
@@ -185,6 +188,10 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("value", binder.getErrors().getFieldValue("touchy"));
 		assertEquals("value", binder.getErrors().getFieldError("touchy").getRejectedValue());
 		assertEquals("value", tb.getTouchy());
+
+		assertTrue(binder.getErrors().hasFieldErrors("spouse.*"));
+		assertEquals(1, binder.getErrors().getFieldErrorCount("spouse.*"));
+		assertEquals("spouse.name", binder.getErrors().getFieldError("spouse.*").getField());
 	}
 
 	public void testCustomEditorForPrimitiveProperty() {
