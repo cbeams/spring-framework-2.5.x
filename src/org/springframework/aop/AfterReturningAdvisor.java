@@ -10,15 +10,16 @@ package org.springframework.aop;
  * Advisor that delivers <b>after returning</b> advice:
  * executed on method execution without an exception being thrown.
  * Such advice is targeted by a pointcut.
- * After advice is less general than around advice. Anything that
+ * <p>
+ * After returning advice is less general than around advice. Anything that
  * can be done with after returning advice can be done with around advice.
  * However, there is still value in offering after advice, as it
  * provides a simpler programming model (no need to invoke the next
  * in a chain of interceptors).
  * @author Rod Johnson
- * @version $Id: AfterReturningAdvisor.java,v 1.1 2004-01-05 18:47:00 johnsonr Exp $
+ * @version $Id: AfterReturningAdvisor.java,v 1.2 2004-01-14 10:31:38 johnsonr Exp $
  */
-public interface AfterReturningAdvisor extends Advisor, PointcutAdvisor {
+public interface AfterReturningAdvisor extends PointcutAdvisor {
 	
 	/**
 	 * @return the after advice that should be executed if the pointcut
