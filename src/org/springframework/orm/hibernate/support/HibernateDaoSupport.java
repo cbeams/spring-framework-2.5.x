@@ -128,13 +128,25 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 
 
 	/**
-	 * Get a Hibernate Session, either from the current transaction or
-	 * a new one. The latter is only allowed if the "allowCreate" setting
-	 * of this bean's HibernateTemplate is true.
+	 * Get a Hibernate Session, either from the current transaction or a new one.
+	 * The latter is only allowed if the "allowCreate" setting of this bean's
+	 * HibernateTemplate is true.
+	 * <p><b>Note that this is not meant to be invoked from HibernateTemplate code
+	 * but rather just in plain Hibernate code.</b> Either rely on a thread-bound
+	 * Session (via HibernateInterceptor), or use it in combination with
+	 * <code>closeSessionIfNecessary</code>.
+	 * <p>In general, it is recommended to use HibernateTemplate, either with
+	 * the provided convenience operations or with a custom HibernateCallback
+	 * that provides you with a Session to work on. HibernateTemplate will care
+	 * for all resource management and for proper exception conversion.
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @see #closeSessionIfNecessary
+	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession(SessionFactory, boolean)
+	 * @see org.springframework.orm.hibernate.HibernateInterceptor
 	 * @see org.springframework.orm.hibernate.HibernateTemplate
+	 * @see org.springframework.orm.hibernate.HibernateCallback
 	 */
 	protected final Session getSession()
 	    throws DataAccessResourceFailureException, IllegalStateException {
@@ -144,30 +156,47 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	/**
 	 * Get a Hibernate Session, either from the current transaction or
 	 * a new one. The latter is only allowed if "allowCreate" is true.
+	 * <p><b>Note that this is not meant to be invoked from HibernateTemplate code
+	 * but rather just in plain Hibernate code.</b> Either rely on a thread-bound
+	 * Session (via HibernateInterceptor), or use it in combination with
+	 * <code>closeSessionIfNecessary</code>.
+	 * <p>In general, it is recommended to use HibernateTemplate, either with
+	 * the provided convenience operations or with a custom HibernateCallback
+	 * that provides you with a Session to work on. HibernateTemplate will care
+	 * for all resource management and for proper exception conversion.
 	 * @param allowCreate if a new Session should be created if no thread-bound found
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @see #closeSessionIfNecessary
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession(SessionFactory, boolean)
+	 * @see org.springframework.orm.hibernate.HibernateInterceptor
+	 * @see org.springframework.orm.hibernate.HibernateTemplate
+	 * @see org.springframework.orm.hibernate.HibernateCallback
 	 */
 	protected final Session getSession(boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 		return (!allowCreate ?
 		    SessionFactoryUtils.getSession(getSessionFactory(), false) :
-				SessionFactoryUtils.getSession(getSessionFactory(),
-				                               this.hibernateTemplate.getEntityInterceptor(),
-																			 this.hibernateTemplate.getJdbcExceptionTranslator()));
+				SessionFactoryUtils.getSession(
+						getSessionFactory(),
+						this.hibernateTemplate.getEntityInterceptor(),
+						this.hibernateTemplate.getJdbcExceptionTranslator()));
 	}
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception from
 	 * the org.springframework.dao hierarchy. Will automatically detect
 	 * wrapped SQLExceptions and convert them accordingly.
-	 * <p>Delegates to the convertHibernateAccessException method of this
-	 * DAO's HibernateTemplate.
+	 * <p>Delegates to the <code>convertHibernateAccessException</code>
+	 * method of this DAO's HibernateTemplate.
+	 * <p>Typically used in plain Hibernate code, in combination with
+	 * <code>getSession</code> and <code>closeSessionIfNecessary</code>.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see #setHibernateTemplate
+	 * @see #getSession
+	 * @see #closeSessionIfNecessary
 	 * @see org.springframework.orm.hibernate.HibernateTemplate#convertHibernateAccessException
 	 */
 	protected final DataAccessException convertHibernateAccessException(HibernateException ex) {
@@ -177,6 +206,8 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	/**
 	 * Close the given Hibernate Session if necessary, created via this bean's
 	 * SessionFactory, if it isn't bound to the thread.
+	 * <p>Typically used in plain Hibernate code, in combination with
+	 * <code>getSession</code> and <code>convertHibernateAccessException</code>.
 	 * @param session Session to close
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#closeSessionIfNecessary
 	 */
