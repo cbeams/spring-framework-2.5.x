@@ -5,7 +5,6 @@
 
 package org.springframework.web.servlet;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -82,7 +81,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.19 2003-12-09 08:47:37 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.20 2003-12-12 19:45:37 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -341,6 +340,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		// If no multipart resolver is set, simply use the existing request.
 		HttpServletRequest processedRequest = request;
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+			if (request instanceof MultipartHttpServletRequest) {
+				throw new ServletException("Request is already a MultipartHttpServletRequest - have you registered both " +
+				                           "a MultipartFilter and a 'multipartResolver' bean for this DispatcherServlet?");
+			}
 			request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
 			processedRequest = this.multipartResolver.resolveMultipart(request);
 		}
@@ -421,7 +424,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		finally {
 			// clean up any resources used by a multipart request
-			if (this.multipartResolver != null && request instanceof MultipartHttpServletRequest) {
+			if (this.multipartResolver != null && processedRequest instanceof MultipartHttpServletRequest) {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
 		}
@@ -489,11 +492,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Render the given ModelAndView. This is the last stage in handling a request.
 	 * It may involve resolving the view by name.
-	 * @throws ServletException if the view cannot be resolved.
-	 * @throws IOException if there's a problem rendering the view
+	 * @throws Exception if there's a problem rendering the view
 	 */
 	private void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response, Locale locale)
-	    throws ServletException, IOException {
+	    throws Exception {
 		View view = null;
 		if (mv.isReference()) {
 			// we need to resolve this view name
