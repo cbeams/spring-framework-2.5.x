@@ -46,7 +46,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class HttpFlowExecutionManager {
 
-	private static final Log logger = LogFactory.getLog(HttpFlowExecutionManager.class);
+	protected static final Log logger = LogFactory.getLog(HttpFlowExecutionManager.class);
 
 	private Flow flow;
 
@@ -125,8 +125,7 @@ public class HttpFlowExecutionManager {
 	 * @return the model and view to render
 	 * @throws Exception in case of errors
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response, Map inputAttributes)
-			throws Exception {
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		FlowExecution flowExecution;
 		ModelAndView modelAndView;
 		if (isNewFlowExecutionRequest(request)) {
@@ -136,7 +135,7 @@ public class HttpFlowExecutionManager {
 				this.flow = getFlow(request);
 			}
 			flowExecution = createFlowExecution(flow);
-			modelAndView = flowExecution.start(inputAttributes, request, response);
+			modelAndView = flowExecution.start(getFlowExecutionInput(request), request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -187,7 +186,31 @@ public class HttpFlowExecutionManager {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning selected model and view " + modelAndView);
 		}
+		postProcessRequest(request, response, flowExecution);
 		return modelAndView;
+	}
+
+	/**
+	 * Post process hook subclasses may override
+	 * @param request
+	 * @param response
+	 * @param flowExecution
+	 */
+	protected void postProcessRequest(HttpServletRequest request, HttpServletResponse response,
+			FlowExecution flowExecution) {
+
+	}
+
+	/**
+	 * Create a input attributes for new flow executions started by the exeution
+	 * manager.
+	 * <p>
+	 * Default implementation returns null. Subclasses can override if needed.
+	 * @param request current HTTP request
+	 * @return a Map with reference data entries, or null if none
+	 */
+	protected Map getFlowExecutionInput(HttpServletRequest request) {
+		return null;
 	}
 
 	/**

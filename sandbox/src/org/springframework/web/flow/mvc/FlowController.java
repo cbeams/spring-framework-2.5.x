@@ -18,7 +18,6 @@ package org.springframework.web.flow.mvc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -80,18 +79,6 @@ public class FlowController extends AbstractController implements InitializingBe
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		//delegate to the flow execution manager process the request
-		return manager.handleRequest(request, response, getFlowExecutionInput(request));
-	}
-
-	/**
-	 * Create a input attributes for new flow executions started by the exeution
-	 * manager.
-	 * <p>
-	 * Default implementation returns null. Subclasses can override if needed.
-	 * @param request current HTTP request
-	 * @return a Map with reference data entries, or null if none
-	 */
-	protected Map getFlowExecutionInput(HttpServletRequest request) {
-		return null;
+		return manager.handleRequest(request, response);
 	}
 }

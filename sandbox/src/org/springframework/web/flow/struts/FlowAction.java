@@ -25,7 +25,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
@@ -91,33 +90,10 @@ public class FlowAction extends TemplateAction {
 						new BeanFactoryFlowServiceLocator(getWebApplicationContext()));
 			}
 		}
-		if (form instanceof BindingActionForm) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Setting binding action form key '" + getActionFormAttributeName() + "' to form " + form);
-			}
-			// our form is a 'special' BindingActionForm, set under a generic
-			// attribute so it'll be accessible to binding flow action beans
-			request.setAttribute(getActionFormAttributeName(), form);
-		}
-		ModelAndView modelAndView = this.executionManager.handleRequest(request, response,
-				getFlowExecutionInput(request));
-		// this is not very clean
+		ModelAndView modelAndView = this.executionManager.handleRequest(request, response);
+		// this is not very clean (pulling attribute from hard coded name)
 		FlowExecution flowExecution = (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
-		if (flowExecution.isActive()) {
-			// struts specific
-			String mappingFlowId = getFlowId(mapping);
-			if (StringUtils.hasText(mappingFlowId)) {
-				String actionPathName = StringUtils.replace(mappingFlowId, ".", "/");
-				String actionFormBeanName = actionPathName + "Form";
-				if (logger.isDebugEnabled()) {
-					logger.debug("Setting '" + getActionPathAttributeName() + "' attribute to value '" + actionPathName
-							+ "' in request scope.");
-					logger.debug("Setting action form attribute '" + actionFormBeanName + "' to form '" + form
-							+ "' in request scope.");
-				}
-				request.setAttribute(getActionPathAttributeName(), actionPathName);
-				request.setAttribute(actionFormBeanName, form);
-			}
+		if (flowExecution != null && flowExecution.isActive()) {
 			if (form instanceof BindingActionForm) {
 				BindingActionForm bindingForm = (BindingActionForm)form;
 				bindingForm.setErrors((Errors)flowExecution.getAttribute(AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME,
@@ -126,10 +102,6 @@ public class FlowAction extends TemplateAction {
 			}
 		}
 		return createForwardFromModelAndView(modelAndView, mapping, request);
-	}
-
-	protected Map getFlowExecutionInput(HttpServletRequest request) {
-		return null;
 	}
 
 	/**
