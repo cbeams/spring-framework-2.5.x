@@ -255,6 +255,10 @@
                    Fonts & Styles
     ################################################### -->      
 
+    <!-- Left aligned text and no hyphenation -->
+    <xsl:param name="alignment">left</xsl:param>
+    <xsl:param name="hyphenate">false</xsl:param>
+
     <!-- Default Font size -->
     <xsl:param name="body.font.master">11</xsl:param>
     <xsl:param name="body.font.small">8</xsl:param>
