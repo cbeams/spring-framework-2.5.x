@@ -24,18 +24,18 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
 import org.springframework.beans.ITestBean;
@@ -43,6 +43,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.ClassPathResource;
@@ -53,7 +54,7 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.27 2004-04-01 15:36:03 jhoeller Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.28 2004-06-18 10:56:54 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -224,6 +225,27 @@ public class ProxyFactoryBeanTests extends TestCase {
 			assertTrue(thrown == ex);
 		}
 	}
+	
+	public static class DependsOnITestBean {
+		public final ITestBean tb;
+		public DependsOnITestBean(ITestBean tb) {
+			this.tb = tb;
+		}
+	}
+	
+	/**
+	 * Test that inner bean for target means that we can use
+	 * autowire without ambiguity from target and proxy
+	 */
+	public void testTargetAsInnerBean() {
+		ListableBeanFactory bf = new XmlBeanFactory(new ClassPathResource("innerBeanTarget.xml", getClass()));
+		ITestBean itb = (ITestBean) bf.getBean("testBean");
+		assertEquals("innerBeanTarget", itb.getName());
+		assertEquals("Only have proxy and interceptor: no target", 3, bf.getBeanDefinitionCount());
+		DependsOnITestBean doit = (DependsOnITestBean) bf.getBean("autowireCheck");
+		assertSame(itb, doit.tb);
+	}
+	
 	
 	/**
 	 * Should see effect immediately on behaviour.
