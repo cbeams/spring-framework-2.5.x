@@ -19,6 +19,7 @@ package org.springframework.transaction.jta;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.Properties;
 
 import javax.naming.NamingException;
 import javax.transaction.HeuristicMixedException;
@@ -272,6 +273,22 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public JndiTemplate getJndiTemplate() {
 		return jndiTemplate;
+	}
+
+	/**
+	 * Set the JNDI environment to use for JNDI lookups.
+	 * Creates a JndiTemplate with the given environment settings.
+	 * @see #setJndiTemplate
+	 */
+	public void setJndiEnvironment(Properties jndiEnvironment) {
+		this.jndiTemplate = new JndiTemplate(jndiEnvironment);
+	}
+
+	/**
+	 * Return the JNDI environment to use for JNDI lookups.
+	 */
+	public Properties getJndiEnvironment() {
+		return this.jndiTemplate.getEnvironment();
 	}
 
 	/**
