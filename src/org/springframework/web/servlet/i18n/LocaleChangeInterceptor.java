@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.i18n;
 
@@ -50,9 +50,9 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException {
-		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
 		String newLocale = request.getParameter(this.paramName);
 		if (newLocale != null) {
+			LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
 			LocaleEditor localeEditor = new LocaleEditor();
 			localeEditor.setAsText(newLocale);
 			localeResolver.setLocale(request, response, (Locale) localeEditor.getValue());
