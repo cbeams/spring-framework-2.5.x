@@ -9,17 +9,10 @@ import org.springframework.web.flow.FlowAttributesMapper;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
+ * Simple helper adapter for flow service locator interface.  For testing.
  * @author Keith Donald
  */
 public class FlowServiceLocatorAdapter implements FlowServiceLocator {
-
-	public Action getAction(String actionId) throws ServiceLookupException {
-		throw new UnsupportedOperationException();
-	}
-
-	public Action getAction(Class actionImplementationClass) throws ServiceLookupException {
-		throw new UnsupportedOperationException();
-	}
 
 	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
@@ -34,8 +27,15 @@ public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 		throw new UnsupportedOperationException();
 	}
 
-	public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)
-			throws ServiceLookupException {
+	public Action getAction(String actionId) throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+
+	public Action getAction(Class actionImplementationClass) throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+
+	public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
 

@@ -60,14 +60,14 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * configured flows. Used to resolve the Flow to be tested by
 	 * <code>id</code>.
 	 */
-	private FlowServiceLocator flowServiceLocator;
+	private FlowLocator flowLocator;
 
 	/**
 	 * Set the flow service locator
 	 * @param flowServiceLocator the locator
 	 */
-	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
-		this.flowServiceLocator = flowServiceLocator;
+	public void setFlowLocator(FlowServiceLocator flowLocator) {
+		this.flowLocator = flowLocator;
 	}
 
 	/**
@@ -78,7 +78,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 */
 	protected Flow getFlow() throws NoSuchFlowDefinitionException {
 		if (this.flow == null) {
-			setFlow(getFlowServiceLocator().getFlow(flowId(), flowBuilderClass()));
+			setFlow(getFlowLocator().getFlow(flowId(), flowBuilderClass()));
 		}
 		return flow;
 	}
@@ -115,8 +115,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 		setFlow(new FlowFactoryBean(flowBuilder).getFlow());
 	}
 
-	protected FlowServiceLocator getFlowServiceLocator() {
-		return flowServiceLocator;
+	protected FlowLocator getFlowLocator() {
+		return flowLocator;
 	}
 
 	/**
@@ -128,18 +128,9 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 *         (returned when the first view state is entered.)
 	 */
 	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
-		this.flowExecution = createFlowExecution(getFlow());
+		this.flowExecution = getFlow().createExecution();
 		setupFlowExecution(flowExecution);
 		return this.flowExecution.start(input, request, response);
-	}
-
-	/**
-	 * Factory method to create a new flow execution for the flow to be tested.
-	 * @param flow The flow to be tested
-	 * @return A new flow execution.
-	 */
-	protected FlowExecution createFlowExecution(Flow flow) {
-		return new FlowExecutionStack(flow);
 	}
 
 	/**
