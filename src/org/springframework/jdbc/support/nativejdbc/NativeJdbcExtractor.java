@@ -50,6 +50,18 @@ public interface NativeJdbcExtractor {
 	Connection getNativeConnection(Connection con) throws SQLException;
 
 	/**
+	 * Retrieve the underlying native JDBC Connection for the given Statement.
+	 * Supposed to return the Statement.getConnection if not capable of unwrapping.
+	 * <p>Having this extra method allows for more efficient unwrapping if data
+	 * access code already has a Statement. Statement.getConnection() often returns
+	 * the native JDBC Connection even if the Statement itself is wrapped by a pool. 
+	 * @param stmt the Statement handle, potentially wrapped by a connection pool
+	 * @return the underlying native JDBC Connection, if possible
+	 * @throws SQLException if thrown by JDBC methods
+	 */
+	Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException;
+
+	/**
 	 * Retrieve the underlying native JDBC Statement for the given Statement.
 	 * Supposed to return the given Statement if not capable of unwrapping.
 	 * @param stmt the Statement handle, potentially wrapped by a connection pool

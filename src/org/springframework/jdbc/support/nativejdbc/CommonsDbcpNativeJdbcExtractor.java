@@ -42,6 +42,10 @@ public class CommonsDbcpNativeJdbcExtractor implements NativeJdbcExtractor {
 		return con;
 	}
 
+	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
+		return getNativeConnection(stmt.getConnection());
+	}
+
 	public Statement getNativeStatement(Statement stmt) {
 		if (stmt instanceof DelegatingStatement) {
 			return ((DelegatingStatement) stmt).getInnermostDelegate();

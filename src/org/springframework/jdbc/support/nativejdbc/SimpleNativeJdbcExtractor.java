@@ -23,15 +23,15 @@ import java.sql.Statement;
  */
 public class SimpleNativeJdbcExtractor implements NativeJdbcExtractor {
 
-	private boolean nativeConnectionNecessaryForNativeStatements;
+	private boolean nativeConnectionNecessaryForNativeStatements = false;
 
 	/**
 	 * Set whether it is necessary to work on the native Connection to
-	 * receive native Statements and ResultSets.
+	 * receive native Statements and ResultSets. Default is false.
 	 * <p>This makes sense if you need to work with native Statements/ResultSets
-	 * but your pool does not allow to extract the native JDBC objects from its
-	 * wrappers but returns the native Connection on Statement.getConnection,
-	 * like C3P0
+	 * from a pool that does not allow to extract the native JDBC objects from
+	 * its wrappers but returns the native Connection on Statement.getConnection,
+	 * like C3P0.
 	 */
 	public void setNativeConnectionNecessaryForNativeStatements(boolean nativeConnectionNecessary) {
 		this.nativeConnectionNecessaryForNativeStatements = nativeConnectionNecessary;
@@ -53,6 +53,10 @@ public class SimpleNativeJdbcExtractor implements NativeJdbcExtractor {
 		finally {
 			stmt.close();
 		}
+	}
+
+	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
+		return stmt.getConnection();
 	}
 
 	public Statement getNativeStatement(Statement stmt) {
