@@ -52,13 +52,14 @@ public class ModelAndView {
 	/** Model */
 	private Map model;
 
+
 	/**
 	 * Convenient constructor when there is no model data to expose.
 	 * @param view View object to render
 	 */
 	public ModelAndView(View view) {
 		this.view = view;
-		this.model = new HashMap();
+		this.model = new HashMap(0);
 	}
 
 	/**
@@ -68,7 +69,7 @@ public class ModelAndView {
 	 */
 	public ModelAndView(String viewName) {
 		this.viewName = viewName;
-		this.model = new HashMap();
+		this.model = new HashMap(0);
 	}
 
 	/**
@@ -103,7 +104,8 @@ public class ModelAndView {
 	 * @param modelObject the single model object
 	 */
 	public ModelAndView(View view, String modelName, Object modelObject) {
-		this(view);
+		this.view = view;
+		this.model = new HashMap(1);
 		this.model.put(modelName, modelObject);
 	}
 
@@ -115,21 +117,11 @@ public class ModelAndView {
 	 * @param modelObject the single model object
 	 */
 	public ModelAndView(String viewName, String modelName, Object modelObject) {
-		this(viewName);
+		this.viewName = viewName;
+		this.model = new HashMap(1);
 		this.model.put(modelName, modelObject);
 	}
 
-	/**
-	 * Add an object to the model.
-	 * @param modelName name of the object to add to the model
-	 * @param modelObject object to add to the model. May not be null.
-	 * @return this ModelAndView, convenient to allow usages like
-	 * return modelAndView.addObject("foo", bar);
-	 */
-	public ModelAndView addObject(String modelName, Object modelObject) {
-		this.model.put(modelName, modelObject);
-		return this;
-	}
 
 	/**
 	 * Set a View object for this ModelAndView. Will override any
@@ -181,6 +173,19 @@ public class ModelAndView {
 	public Map getModel() {
 		return model;
 	}
+
+	/**
+	 * Add an object to the model.
+	 * @param modelName name of the object to add to the model
+	 * @param modelObject object to add to the model. May not be null.
+	 * @return this ModelAndView, convenient to allow usages like
+	 * return modelAndView.addObject("foo", bar);
+	 */
+	public ModelAndView addObject(String modelName, Object modelObject) {
+		this.model.put(modelName, modelObject);
+		return this;
+	}
+	
 
 	/**
 	 * Return diagnostic information about this model and view.
