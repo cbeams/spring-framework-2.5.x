@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,64 +17,55 @@
 package org.springframework.jmx.export.metadata;
 
 /**
+ * Metadata about JMX operation parameters.
+ * Used in conjuction with a ManagedOperation attribute.
  * @author Rob Harrop
+ * @since 1.2
+ * @see ManagedOperation
  */
 public class ManagedOperationParameter {
 
-	/**
-	 * Stores the index of the parameter.
-	 */
 	private int index = 0;
 
-	/**
-	 * Stores the name of the parameter.
-	 */
 	private String name = "";
 
-	/**
-	 * Stores the description of the parameter.
-	 */
 	private String description = "";
 
+
 	/**
-	 * Gets the parameter description.
+	 * Set the index of the parameter in the operation signature.
 	 */
-	public String getDescription() {
-		return description;
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 	/**
-	 * Sets the parameter description.
+	 * Return the index of the parameter in the operation signature.
 	 */
-	public void setDescription(String description) {
-		this.description = description;
+	public int getIndex() {
+		return index;
 	}
 
 	/**
-	 * Set the parameter name.
+	 * Set the name of the parameter in the operation signature.
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	/**
-	 * Gets the parameter name.
+	 * Return the name of the parameter in the operation signature.
 	 */
 	public String getName() {
 		return this.name;
 	}
 
-	/**
-	 * Gets the index of the parameter in the operation signature.
-	 */
-	public int getIndex() {
-		return index;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
-  /**
-	 * Sets the index of the parameter
-	 */ 
-	public void setIndex(int index) {
-		this.index = index;
+	public String getDescription() {
+		return description;
 	}
+
 }

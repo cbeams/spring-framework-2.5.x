@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,13 @@ import org.springframework.metadata.Attributes;
  * Implementation of the <code>JmxAttributeSource</code> interface that
  * reads metadata via Spring's <code>Attributes</code> abstraction.
  *
+ * <p>Typically used for reading in source-level attributes via
+ * Commons Attributes.
+ *
  * @author Rob Harrop
+ * @since 1.2
  * @see org.springframework.metadata.Attributes
  * @see org.springframework.metadata.commons.CommonsAttributes
- * @since 1.2
  */
 public class AttributesJmxAttributeSource implements JmxAttributeSource, InitializingBean {
 
@@ -79,7 +82,6 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	/**
 	 * If the specified class has a <code>ManagedResource</code> attribute,
 	 * then it is returned. Otherwise returns null.
-	 *
 	 * @param clazz the class to read the attribute data from
 	 * @return the attribute, or null if not found
 	 * @throws InvalidMetadataException if more than one attribute exists
@@ -100,16 +102,16 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	/**
 	 * If the specified method has a <code>ManagedAttribute</code> attribute,
 	 * then it is returned. Otherwise returns null.
-	 *
 	 * @param method the method to read the attribute data from
 	 * @return the attribute, or null if not found
 	 * @throws InvalidMetadataException if more than one attribute exists,
-	 *                                  or if the supplied method does not represent a JavaBean property
+	 * or if the supplied method does not represent a JavaBean property
 	 */
 	public ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd == null) {
-			throw new InvalidMetadataException("The ManagedAttribute attribute is only valid for JavaBean properties: " +
+			throw new InvalidMetadataException(
+					"The ManagedAttribute attribute is only valid for JavaBean properties: " +
 					"use ManagedOperation for methods");
 		}
 		Collection attrs = this.attributes.getAttributes(method, ManagedAttribute.class);
@@ -127,16 +129,16 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	/**
 	 * If the specified method has a <code>ManagedOperation</code> attribute,
 	 * then it is returned. Otherwise return null.
-	 *
 	 * @param method the method to read the attribute data from
 	 * @return the attribute, or null if not found
 	 * @throws InvalidMetadataException if more than one attribute exists,
-	 *                                  or if the supplied method represents a JavaBean property
+	 * or if the supplied method represents a JavaBean property
 	 */
 	public ManagedOperation getManagedOperation(Method method) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
-			throw new InvalidMetadataException("The ManagedOperation attribute is not valid for JavaBean properties: " +
+			throw new InvalidMetadataException(
+					"The ManagedOperation attribute is not valid for JavaBean properties: " +
 					"use ManagedAttribute instead");
 		}
 		Collection attrs = this.attributes.getAttributes(method, ManagedOperation.class);
@@ -152,40 +154,36 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	}
 
 	/**
-	 * If the specified method has <code>ManagedOperationParameters</code> then these
-	 * are returned, otherwise a zero length array of <code>ManagedOperationParameter</code>
-	 * is returned.
-	 *
-	 * @param method the <code>Method</code> to get the <code>ManagedOperationParameter</code>s for.
-	 * @return the array of <code>ManagedOperationParameter</code>.
-	 * @throws InvalidMetadataException if the number of <code>ManagedOperationParameter</code>s does not match the number
-	 *                                  of parameters in the <code>Method</code>
+	 * If the specified method has <code>ManagedOperationParameter</code> attributes,
+	 * then these are returned, otherwise a zero length array is returned.
+	 * @param method the method to get the managed operation parameters for
+	 * @return the array of ManagedOperationParameter objects
+	 * @throws InvalidMetadataException if the number of ManagedOperationParameter
+	 * attributes does not match the number of parameters in the method
 	 */
-	public ManagedOperationParameter[] getManagedOperationParameters(Method method) throws InvalidMetadataException {
-		Collection attrs = this.attributes.getAttributes(method, ManagedOperationParameter.class);
+	public ManagedOperationParameter[] getManagedOperationParameters(Method method)
+			throws InvalidMetadataException {
 
+		Collection attrs = this.attributes.getAttributes(method, ManagedOperationParameter.class);
 		if (attrs.size() == 0) {
 			return new ManagedOperationParameter[0];
 		}
 		else if (attrs.size() != method.getParameterTypes().length) {
-			throw new InvalidMetadataException("Method [" + method +
-					"] has an incorrect number of ManagedOperationParameters specified");
+			throw new InvalidMetadataException(
+					"Method [" + method + "] has an incorrect number of ManagedOperationParameters specified");
 		}
 		else {
 			ManagedOperationParameter[] params = new ManagedOperationParameter[attrs.size()];
-
-			for (Iterator itr = attrs.iterator(); itr.hasNext();) {
-				ManagedOperationParameter param = (ManagedOperationParameter) itr.next();
-
+			for (Iterator it = attrs.iterator(); it.hasNext();) {
+				ManagedOperationParameter param = (ManagedOperationParameter) it.next();
 				if (param.getIndex() < 0 || param.getIndex() >= params.length) {
-					throw new InvalidMetadataException("ManagedOperationParameter index for [" +
-							param.getName() + "] is out of bounds.");
+					throw new InvalidMetadataException(
+							"ManagedOperationParameter index for [" + param.getName() + "] is out of bounds");
 				}
-
 				params[param.getIndex()] = param;
 			}
-
 			return params;
 		}
 	}
+
 }

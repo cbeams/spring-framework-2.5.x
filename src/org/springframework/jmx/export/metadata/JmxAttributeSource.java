@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 
 /**
  * Interface used by the <code>MetadataMBeanInfoAssembler</code> to
- * read source level metadata from a managed resource's class.
+ * read source-level metadata from a managed resource's class.
  * @author Rob Harrop
  * @since 1.2
  * @see org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler#setAttributeSource
@@ -29,8 +29,8 @@ import java.lang.reflect.Method;
 public interface JmxAttributeSource {
 
 	/**
-	 * Sub-classes should return an instance of <code>ManagedResource</code> if
-	 * the supplied <code>Class</code> has the appropriate metadata.
+	 * Implementations should return an instance of <code>ManagedResource</code>
+	 * if the supplied <code>Class</code> has the appropriate metadata.
 	 * Otherwise should return <code>null</code>.
 	 * @param clazz the class to read the attribute data from
 	 * @return the attribute, or null if not found
@@ -39,8 +39,8 @@ public interface JmxAttributeSource {
 	ManagedResource getManagedResource(Class clazz) throws InvalidMetadataException;
 
 	/**
-	 * Sub-class should return an instance of <code>ManagedAttribute</code> if
-	 * the supplied <code>Method</code> has the corresponding metadata.
+	 * Implementations should return an instance of <code>ManagedAttribute</code>
+	 * if the supplied <code>Method</code> has the corresponding metadata.
 	 * Otherwise should return <code>null</code>.
 	 * @param method the method to read the attribute data from
 	 * @return the attribute, or null if not found
@@ -49,8 +49,8 @@ public interface JmxAttributeSource {
 	ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException;
 
 	/**
-	 * Sub-class should return an instance of <code>ManagedOperation</code> if
-	 * the supplied <code>Method</code> has the corresponding metadata.
+	 * Implementations should return an instance of <code>ManagedOperation</code>
+	 * if the supplied <code>Method</code> has the corresponding metadata.
 	 * Otherwise should return <code>null</code>.
 	 * @param method the method to read the attribute data from
 	 * @return the attribute, or null if not found
@@ -59,8 +59,8 @@ public interface JmxAttributeSource {
 	ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException;
 
 	/**
-	 * Sub-class should return an array of <code>ManagedOperationParameter</code> if
-	 * the supplied <code>Method</code> has the corresponding metadata. Otherwise
+	 * Implementations should return an array of <code>ManagedOperationParameter</code>
+	 * if the supplied <code>Method</code> has the corresponding metadata. Otherwise
 	 * should return an empty array if no metadata is found.
 	 * @param method the <code>Method</code> to read the metadata from.
 	 * @return the parameter information.
