@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+
+<!--
+    autobuilds-jboss4 project build file
+    
+    Targets to compile and build the sample apps and test server
+    environments and run various HttpUnit tests against them.
+    
+    $Id: jboss4-build.xml,v 1.1 2004-09-29 15:50:50 davison Exp $
+-->
+<project name="autobuilds-jboss4" basedir="." default="usage">
+
+    
+    <property name="appserver.distname" value="jboss-${jboss4.version}" />
+    <property name="deploy.dir" value="server/default/deploy" />
+    
+    
+
+    <path id="server-classpath">
+        <fileset dir="${servers.install.dir}/${appserver.distname}">
+            <include name="bin/run.jar" />
+            <include name="bin/shutdown.jar" />
+            <include name="server/default/lib/*.jar" />
+            <include name="lib/*.jar" />
+        </fileset>
+    </path>
+    
+
+
+    <!--
+        usage
+    -->
+    <target name="usage">        
+        <echo>
+Spring Framework
+=============================================================================
+
+${ant.file} 
+
+This file should not be called directly.  See the documentation in the
+autobuilds directory for information.
+=============================================================================
+        </echo>
+
+    </target>
+    
+    
+    <!--
+        get-server
+        
+        d/l from url if we don't already have it
+    -->
+    <target name="get-server" unless="server.binary.present">
+        <echo message="Downloading ${jboss4.url} to ${tarballs.dir}/${jboss4.tarball}" />
+        <get
+            src="${jboss4.url}"
+            dest="${tarballs.dir}/${jboss4.tarball}" /> 
+    </target>
+        
+        
+        
+    <!--
+        extract-server
+        
+        extract server to installs area and configure from
+        local config files
+    -->
+    <target name="extract-server">
+        <!-- check latest d/l available -->
+        <available file="${tarballs.dir}/${jboss4.tarball}" property="server.binary.present"/>
+        <antcall target="get-server"/>
+        
+        <untar 
+            compression="gzip" 
+            src="${tarballs.dir}/${jboss4.tarball}"
+            dest="${servers.install.dir}" />
+            
+        <copy todir="${servers.install.dir}/${appserver.distname}" overwrite="true">
+            <fileset dir="${servers.conf.dir}/${target.server}">
+                <include name="**/*" />
+            </fileset>
+        </copy>
+    </target>
+    
+    
+    <!--
+        deploy
+        
+        based on a system or other property (often set in the batch file / shell script
+        calling this target) deploy to the target server
+    -->
+    <target name="deploy" depends="extract-server">
+        <copy todir="${servers.install.dir}/${appserver.distname}/${deploy.dir}">
+            <fileset dir="${autobuilds.samples.dir}/${target.app}/dist">
+                <include name="*" />
+                <exclude name="**/autobuild*" />
+            </fileset>
+        </copy>
+        <!--
+        <mkdir dir="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}"/>
+        <unwar src="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}.war"
+               dest="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}" />
+        -->
+    </target>
+    
+    
+    <!--
+        start-server
+        
+        start the tomcat server if it's a current target appserver
+    -->
+    <target name="start-server">
+        <echo message="##  ----------------------------------------------------------------" />
+        <echo message="##  Starting server ${target.server}" />
+        <echo message="##  ----------------------------------------------------------------" />
+        <!--
+            java -server -cp bin/run.jar:/opt/sun-jdk-1.4.1.02/lib/tools.jar org.jboss.Main -c default
+        -->         
+        <java 
+            classname="org.jboss.Main"
+            fork="true"
+            dir="${servers.install.dir}/${appserver.distname}">
+        
+            <jvmarg value="-server" />
+
+            <arg value="-c"/>
+            <arg value="default"/>
+            
+            <classpath refid="server-classpath" />
+            
+        </java>
+    </target>
+    
+    
+    <!--
+        stop-server
+        
+        stop the target server
+    -->
+    <target name="stop-server">
+        <echo message="##  ----------------------------------------------------------------" />
+        <echo message="##  Stopping server ${target.server}" />
+        <echo message="##  ----------------------------------------------------------------" />
+        <!--
+            java -cp bin/shutdown.jar:client/jnet.jar org.jboss.Shutdown -S
+        -->     
+        <java 
+            classname="org.jboss.Shutdown"
+            fork="true"
+            dir="${servers.install.dir}/${appserver.distname}">
+        
+            <arg value="-S"/>
+            
+            <classpath refid="server-classpath" />
+            
+        </java>
+        
+        <copy 
+            file="${servers.install.dir}/${appserver.distname}/server/default/log/server.log" 
+            tofile="${reports.dir}/${target.server}_server.log"
+            failonerror="false"/>
+            
+    </target>
+    
+</project>

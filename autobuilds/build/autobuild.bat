@@ -8,11 +8,16 @@
 ::    application    - the sample app to build and test
 ::    server         - the target server to deploy upon
 ::
-:: $Id: autobuild.bat,v 1.5 2004-04-16 20:35:37 colins Exp $
+:: $Id: autobuild.bat,v 1.6 2004-09-29 15:50:50 davison Exp $
 ::
 :: ---------------------------------------------------------------------------
 
-set USAGE="Usage: %0 [-u] sample-app target-server"
+set USAGE="Usage: %0 [-k] [-u] sample-app target-server"
+set USAGE=
+set NEWARG=
+set APP=
+set SERVER=
+set ALLPROPS=
 
 :: ---------------------------------------------------------------------------
 
@@ -47,7 +52,7 @@ set USAGE="Usage: %0 [-u] sample-app target-server"
 ::  ensure environment exists for 1st use
     call ant -q setup
     echo Please see the file %BUILDLOG% for build logging and unit test results
-    call ant -Dtarget.app=%APP% -Dtarget.server=%SERVER% main
+    call ant -Dtarget.app=%APP% -Dtarget.server=%SERVER% %ALLPROPS% main
     goto end
     
 :noserver
@@ -63,8 +68,3 @@ set USAGE="Usage: %0 [-u] sample-app target-server"
     goto end
     
 :end
-    set USAGE=
-    set NEWARG=
-    set APP=
-    set SERVER=
-    set ALLPROPS=

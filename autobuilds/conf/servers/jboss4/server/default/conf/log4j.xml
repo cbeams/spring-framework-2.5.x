@@ -7,7 +7,7 @@
 <!--                                                                       -->
 <!-- ===================================================================== -->
 
-<!-- $Id: log4j.xml,v 1.2 2004-09-29 15:50:50 davison Exp $ -->
+<!-- $Id: log4j.xml,v 1.1 2004-09-29 15:50:51 davison Exp $ -->
 
 <!--
    | For more configuration infromation and examples see the Jakarta Log4j
@@ -43,7 +43,6 @@
       </layout>
    </appender>
 
-
    <!-- ============================== -->
    <!-- Append messages to the console -->
    <!-- ============================== -->
@@ -67,8 +66,8 @@
          <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
       </layout>
    </appender>
-   
-   
+
+
    <!-- ================ -->
    <!-- Limit categories -->
    <!-- ================ -->
@@ -77,7 +76,6 @@
      <priority value="WARN"/>
    </category>
 
-   
 
    <!-- ======================= -->
    <!-- Setup the Root category -->
@@ -87,6 +85,5 @@
       <appender-ref ref="CONSOLE"/>
       <appender-ref ref="FILE"/>
    </root>
-
 
 </log4j:configuration>
