@@ -390,9 +390,10 @@
         <xsl:attribute name="space-before.minimum">1em</xsl:attribute>
         <xsl:attribute name="space-before.optimum">1em</xsl:attribute>
         <xsl:attribute name="space-before.maximum">1em</xsl:attribute>
-        <xsl:attribute name="space-after.minimum">0.1em</xsl:attribute>
+        <!-- alef: commented out because footnotes were screwed because of it -->
+        <!--<xsl:attribute name="space-after.minimum">0.1em</xsl:attribute>
         <xsl:attribute name="space-after.optimum">0.1em</xsl:attribute>
-        <xsl:attribute name="space-after.maximum">0.1em</xsl:attribute>
+        <xsl:attribute name="space-after.maximum">0.1em</xsl:attribute>-->
         <xsl:attribute name="border-color">#444444</xsl:attribute>
         <xsl:attribute name="border-style">solid</xsl:attribute>
         <xsl:attribute name="border-width">0.1pt</xsl:attribute>      
