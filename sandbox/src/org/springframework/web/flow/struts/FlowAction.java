@@ -45,13 +45,13 @@ import org.springframework.web.util.WebUtils;
  * Consult the JavaDoc of that class for more information on how requests are
  * processed.
  * <p>
- * This class also has aware of the <code>BindingActionForm</code> adapter,
+ * This class also is aware of the <code>BindingActionForm</code> adapter,
  * which adapts Spring's data binding infrastructure (based on POJO binding, a
  * standard Errors interface, and property editor type conversion) to the Struts
  * action form model. This gives backend web-tier developers full support for
  * POJO-based binding with minimal hassel, while still providing consistency
  * to view developers who already have a lot of experience with Struts for markup
- * and request dispatch.
+ * and request dispatching.
  * <p>
  * Below is an example <code>struts-config.xml</code> configuration for a
  * Flow-action that fronts a single top-level flow:
@@ -76,31 +76,27 @@ import org.springframework.web.util.WebUtils;
  * request scope, acting as an adapter enabling POJO-based binding and
  * validation with Spring.
  * <p>
- * Other notes regarding web-flow Struts integration:
+ * Other notes regarding Struts web-flow integration:
  * <ul>
  * <li>Logical view names returned when <code>ViewStates</code> and
  * <code>EndStates</code> are entered are mapped to physical view templates
- * using standard Struts action forwards (typically global forwards.)
+ * using standard Struts action forwards (typically global forwards).
  * <li>Use of the BindingActionForm requires some minor setup in
  * <code>struts-config.xml</code>. Specifically:
  * <ol>
  * <li>A custom BindingActionForm-aware request processor is needed, to defer
- * form population:
+ * form population:<br>
  * 
- * <pre>
- * 
- *    &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
- *  
- * </pre>
+ * <tt>
+ * &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
+ * </tt>
  * 
  * <li>A <code>BindingPlugin</code> is needed, to plugin a Errors-aware
- * <code>jakarta-commons-beanutils</code> adapter:
+ * <code>jakarta-commons-beanutils</code> adapter:<br>
  * 
- * <pre>
- * 
- *       &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
- *  
- * </pre>
+ * <tt>
+ * &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
+ * </tt>
  * 
  * </ol>
  * </ul>
