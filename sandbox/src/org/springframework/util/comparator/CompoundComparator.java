@@ -17,6 +17,7 @@ package org.springframework.util.comparator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -49,8 +50,8 @@ public class CompoundComparator implements Comparator, Serializable {
     }
 
     /**
-     * Construct a CompoundComparator from the Comparators in the Array. All
-     * Comparators will default to the forward sort order.
+     * Construct a CompoundComparator from the Comparators in the provided
+     * array. All Comparators will default to the forward sort order.
      * 
      * @param list
      *            the list of comparators
@@ -60,15 +61,22 @@ public class CompoundComparator implements Comparator, Serializable {
     }
 
     /**
-     * Construct a CompoundComparator from the Comparators in the given List.
-     * The sort order of each column will be drawn from the given BitSet. If a
-     * bit at a comparator index is <i>false </i>, the forward sort order is
-     * used; else a reverse sort order is used.
+     * Construct a CompoundComparator from the SortDefinitions in the provided
+     * array.
      * 
-     * @param list
-     *            the list of Comparators.
-     * @param sortOrder
-     *            The sort order for each Comparator.
+     * @param sortDefinitions
+     *            the sortDefinition array
+     */
+    public CompoundComparator(SortDefinition[] sortDefinitions) {
+        this(Arrays.asList(sortDefinitions));
+    }
+
+    /**
+     * Construct a CompoundComparator from the SortDefinitions in the provided
+     * list.
+     * 
+     * @param sortDefinitions
+     *            the sortDefinition list
      */
     public CompoundComparator(List sortDefinitions) {
         Assert.notNull(sortDefinitions,
@@ -77,22 +85,23 @@ public class CompoundComparator implements Comparator, Serializable {
     }
 
     /**
-     * Add a Comparator to the end of the chain using the forward sort order
+     * Add a Comparator to the end of the chain using forward (ascending) sort
+     * order
      * 
      * @param comparator
-     *            Comparator with the forward sort order
+     *            Comparator with forward sort order
      */
     public void addComparator(Comparator comparator) {
         addComparator(comparator, SortOrder.ASCENDING);
     }
 
     /**
-     * Add a Comparator to the end of the chain using the given sort order
+     * Add a Comparator to the end of the chain using the provided sort order
      * 
      * @param comparator
      *            Comparator to add to the end of the chain
-     * @param reverse
-     *            false -> forward sort order; true -> reverse sort order
+     * @param order
+     *            The sort order
      */
     public void addComparator(Comparator comparator, SortOrder order) {
         sortDefinitions.add(new SortDefinition(comparator, order));
@@ -108,24 +117,25 @@ public class CompoundComparator implements Comparator, Serializable {
      *            Comparator to place at the given index
      */
     public void setComparator(int index, Comparator comparator) {
-        setComparator(index, comparator, SortOrder.ASCENDING);
+        setComparator(index, comparator, null);
     }
 
     /**
-     * Replace the Comparator at the given index in the ComparatorChain, using
-     * the given sort order
+     * Replace the Comparator at the given index using the given sort order
      * 
      * @param index
      *            index of the Comparator to replace
      * @param comparator
      *            Comparator to set
-     * @param reverse
-     *            false -> forward sort order; true -> reverse sort order
+     * @param order
+     *            the sort order
      */
     public void setComparator(int index, Comparator comparator, SortOrder order) {
         SortDefinition definition = getSortDefinition(index);
         definition.setComparator(comparator);
-        definition.setOrder(order);
+        if (order != null) {
+            definition.setOrder(order);
+        }
     }
 
     private SortDefinition getSortDefinition(int index) {

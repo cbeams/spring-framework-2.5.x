@@ -23,25 +23,29 @@ import java.util.List;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 
+/**
+ * A sort definition encapsulating a comparator to sort by and a order property
+ * denoting whether comparison results should be treated in forward (standard
+ * ascending) order or flipped for reverse (descending) order.
+ * 
+ * @author Keith Donald
+ */
 public class SortDefinition implements Comparator, Serializable {
     private Comparator comparator;
 
     private SortOrder order;
 
+    /**
+     * Static factory method creating a sort definition list from the provided
+     * comparator array. All sort definitions sort in forward (ascending) order.
+     * 
+     * @param comparators
+     * @return A sort definition list
+     */
     public static List createSortDefinitionList(Comparator[] comparators) {
         List sortDefinitions = new ArrayList(comparators.length);
         for (int i = 0; i < comparators.length; i++) {
             sortDefinitions.add(new SortDefinition(comparators[i]));
-        }
-        return sortDefinitions;
-    }
-
-    public static List createSortDefinitionList(Object[][] comparatorOrders) {
-        List sortDefinitions = new ArrayList(comparatorOrders.length);
-        for (int i = 0; i < comparatorOrders.length; i++) {
-            Object[] array = (Object[])comparatorOrders[i];
-            sortDefinitions.add(new SortDefinition((Comparator)array[0],
-                    (SortOrder)array[1]));
         }
         return sortDefinitions;
     }
@@ -85,7 +89,7 @@ public class SortDefinition implements Comparator, Serializable {
     }
 
     public void flipOrder() {
-        this.order = SortOrder.flip(order);
+        this.order = SortOrder.flip(this.order);
     }
 
     public String toString() {

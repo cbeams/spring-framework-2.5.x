@@ -17,6 +17,11 @@ package org.springframework.util.comparator;
 
 import java.io.Serializable;
 
+/**
+ * A Sort Order enum type - may be ASCENDING (forward) or DESCENDING (reverse).
+ * 
+ * @author Keith Donald
+ */
 public class SortOrder implements Serializable {
 
     public static final SortOrder ASCENDING = new SortOrder(true);

@@ -106,7 +106,7 @@ public class ComparatorTest extends TestCase {
         assertTrue(c.compare(dog1, dog2) == 0);
         c.addComparator(new PropertyComparator("firstName"));
         assertTrue(c.compare(dog1, dog2) > 0);
-        
+
         dog2.setLastName("konikk dog");
         assertTrue(c.compare(dog2, dog1) > 0);
     }
@@ -126,6 +126,22 @@ public class ComparatorTest extends TestCase {
         assertTrue(c.compare(dog1, dog2) > 0);
         c.flipOrder();
         assertTrue(c.compare(dog1, dog2) < 0);
+    }
+
+    public void testStaticFactoryMethods() {
+        CompoundComparator c = new CompoundComparator(SortDefinition
+                .createSortDefinitionList(new Comparator[] {
+                        new PropertyComparator("lastName"),
+                        new PropertyComparator("firstName") }));
+        Dog dog1 = new Dog();
+        dog1.setFirstName("macy");
+        dog1.setLastName("grayspots");
+
+        Dog dog2 = new Dog();
+        dog2.setFirstName("biscuit");
+        dog2.setLastName("grayspots");
+
+        assertTrue(c.compare(dog1, dog2) > 0);
     }
 
     private static class Dog implements Comparable {
