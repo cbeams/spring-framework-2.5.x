@@ -56,10 +56,6 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 		return flowServiceLocator;
 	}
 
-	/**
-	 * Creates and/or links applicable flow execution listeners up to the flow
-	 * built by this builder.
-	 */
 	public void buildExecutionListeners() throws FlowBuilderException {
 		if (!this.flowExecutionListeners.isEmpty()) {
 			getFlow().getFlowExecutionListenerList().add(

@@ -9,7 +9,7 @@ import org.springframework.web.flow.Flow;
  * Builder interface used to build flows.
  * 
  * <p>
- * Flow builders are <i>executed </i> by the FlowFactoryBean.
+ * Flow builders are <i>executed</i> by the FlowFactoryBean.
  * 
  * @see org.springframework.web.flow.config.FlowFactoryBean
  * 
@@ -30,7 +30,7 @@ public interface FlowBuilder {
 	public void buildStates() throws FlowBuilderException;
 
 	/**
-	 * Creates and/or links to applicable flow execution listeners up to the
+	 * Creates and/or links applicable flow execution listeners up to the
 	 * flow built by this builder. This set of listeners will be treated as the
 	 * default set associated with each execution created for the flow built by
 	 * this builder.
