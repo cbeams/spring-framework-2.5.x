@@ -24,9 +24,6 @@ public abstract class AbstractBeanPropertyExpression implements
         setPropertyName(propertyName);
     }
 
-    /**
-     * @see org.springframework.rules.predicates.beans.BeanPropertyExpression#getPropertyName()
-     */
     public String getPropertyName() {
         return propertyName;
     }
@@ -36,7 +33,7 @@ public abstract class AbstractBeanPropertyExpression implements
         this.propertyName = propertyName;
     }
 
-    public final boolean test(Object o) {
+    public boolean test(Object o) {
         if (o instanceof AspectAccessStrategy) {
             return test((AspectAccessStrategy)o);
         }
