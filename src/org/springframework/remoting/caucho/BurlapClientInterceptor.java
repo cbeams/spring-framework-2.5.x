@@ -60,6 +60,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	/**
 	 * Set the username that this factory should use to access the remote service.
 	 * Default is none.
+	 * <p>The username will be sent by Burlap via HTTP Basic Authentication.
 	 * @see com.caucho.burlap.client.BurlapProxyFactory#setUser
 	 */
 	public void setUsername(String username) {
@@ -69,6 +70,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	/**
 	 * Set the password that this factory should use to access the remote service.
 	 * Default is none.
+	 * <p>The password will be sent by Burlap via HTTP Basic Authentication.
 	 * @see com.caucho.burlap.client.BurlapProxyFactory#setPassword
 	 */
 	public void setPassword(String password) {
@@ -77,6 +79,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 
 	/**
 	 * Set whether overloaded methods should be enabled for remote invocations.
+	 * Default is false.
 	 * @see com.caucho.burlap.client.BurlapProxyFactory#setOverloadEnabled
 	 */
 	public void setOverloadEnabled(boolean overloadEnabled) {
