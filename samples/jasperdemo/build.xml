@@ -57,7 +57,10 @@
 				<include name="commons-beanutils.jar"/>
 			</lib>
 			<lib dir="${spring.root}/lib/bsh">
-				<include name="bsh-2.0b1.jar"/>
+				<include name="bsh*.jar"/>
+			</lib>
+			<lib dir="${spring.root}/lib/poi">
+				<include name="poi*.jar"/>
 			</lib>
 			<fileset dir="${dir.src.war}">
 				<include name="index.jsp"/>

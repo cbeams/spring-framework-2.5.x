@@ -91,6 +91,8 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  */
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
+	private static final String CONTENT_DISPOSITION = "Content-Disposition";
+
 	/**
 	 * A String key used to lookup the <code>JRDataSource</code> in the model.
 	 */
@@ -119,6 +121,15 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	private Map subReports;
 
+	/**
+	 * Stores the headers to written with each response
+	 */
+	private Properties headers;
+
+	/**
+	 * Stores the default Content-Disposition header. Used to make IE play nice.
+	 */
+	private String contentDisposition = "inline";
 
 	/**
 	 * Set the name of the model attribute that represents the report data.
@@ -151,6 +162,14 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	public void setSubReportUrls(Properties subReports) {
 		this.subReportUrls = subReports;
+	}
+
+	/**
+	 * Specify the set of headers that are included in each of response.
+	 * @param headers the headers to write to each response.
+	 */
+	public void setHeaders(Properties headers) {
+		this.headers = headers;
 	}
 
 	/**
@@ -202,6 +221,14 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 				Resource resource = getApplicationContext().getResource(path);
 				this.subReports.put(key, loadReport(resource));
 			}
+		}
+
+		if(headers == null) {
+			headers = new Properties();
+		}
+
+		if(!headers.containsKey(CONTENT_DISPOSITION)) {
+			headers.setProperty(CONTENT_DISPOSITION, contentDisposition);
 		}
 	}
 
@@ -362,6 +389,12 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		// Prepare report for rendering.
 		JRAbstractExporter exporter = createExporter();
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, dataSource);
+
+		// set the headers
+		for(Enumeration en = headers.propertyNames(); en.hasMoreElements();) {
+			String key = (String)en.nextElement();
+			response.addHeader(key, headers.getProperty(key));
+		}
 
 		if (useWriter()) {
 			// Render report into HttpServletResponse's Writer.

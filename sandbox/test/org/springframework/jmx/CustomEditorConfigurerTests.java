@@ -34,6 +34,7 @@ public class CustomEditorConfigurerTests extends AbstractJmxTests {
 	}
 
 	public void testDatesInJmx() throws Exception {
+		System.out.println(server.getClass().getName());
 		ObjectName oname = new ObjectName("bean:name=dateRange");
 
 		Date startJmx = (Date) server.getAttribute(oname, "startDate");

@@ -20,7 +20,7 @@ package org.springframework.jmx;
  * @@org.springframework.jmx.metadata.ManagedResource
  *    (description="My Managed Bean", objectName="spring:bean=test",
  *    log=true, logFile="jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate",
- *    persistPeriod=200, persistLocation="foo", persistName="bar")
+ *    persistPeriod=200, persistLocation="./foo", persistName="bar.jmx")
  *
  * @author Rob Harrop
  */

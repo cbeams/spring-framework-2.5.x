@@ -244,6 +244,41 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 		}
 	}
 
+	public void testContentDisposition() throws Exception {
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+		view.render(getModel(), request, response);
+		assertEquals("Invalid content type", "inline", response.getHeader("Content-Disposition"));
+
+	}
+
+	public void testOverrideContentDisposition() throws Exception {
+		Properties headers = new Properties();
+		String cd = "attachment";
+		headers.setProperty("Content-Disposition", cd);
+
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+		view.setHeaders(headers);
+		view.render(getModel(), request, response);
+		assertEquals("Invalid content type", cd, response.getHeader("Content-Disposition"));
+	}
+
+	public void testSetCustomHeaders() throws Exception {
+		Properties headers = new Properties();
+
+		String key = "foo";
+		String value = "bar";
+
+		headers.setProperty(key, value);
+
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+		view.setHeaders(headers);
+		view.render(getModel(), request, response);
+
+		assertNotNull("Header not present", response.getHeader(key));
+		assertEquals("Invalid header value", value, response.getHeader(key));
+
+	}
+
 	private AbstractJasperReportsView getView(String url) throws Exception {
 		AbstractJasperReportsView view = getViewImplementation();
 		view.setUrl(url);

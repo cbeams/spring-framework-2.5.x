@@ -112,7 +112,9 @@ Package org.springframework.web
 * added JspAwareRequestContext as subclass of RequestContext, populated from JSP PageContext (and aware of page scope)
 * Spring JSP tags work outside DispatcherServlet too, falling back to root WebApplicationContext and JSTL/request locale
 * AbstractJasperReportsView sets content length header for IE when writing to the OutputStream (like AbstractPdfView)
-
+* AbstractJasperReportsView now support declarative configuration of sub-reports and sub-report data sources.
+* AbstractJasperReportsView now sets the Content-Disposition header to inline to make IE play nice.
+* AbstractJasperReportsView now allows for the response headers to be specified via the [headers] property. 
 
 Changes in version 1.1.3 (12.12.2004)
 -------------------------------------
