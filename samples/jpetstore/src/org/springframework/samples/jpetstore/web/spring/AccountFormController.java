@@ -67,12 +67,14 @@ public class AccountFormController extends SimpleFormController {
 			rejectIfEmpty(errors, "account.username", "USER_ID_REQUIRED", "User ID is required.");
 			if (account.getPassword() == null || account.getPassword().length() < 1 ||
 					!account.getPassword().equals(accountForm.getRepeatedPassword())) {
-			 errors.reject("PASSWORD_MISMATCH", "Passwords did not match or were not provided.  Matching passwords are required.");
+			 errors.reject("PASSWORD_MISMATCH",
+					 "Passwords did not match or were not provided. Matching passwords are required.");
 			}
 		}
 		else if (account.getPassword() != null && account.getPassword().length() > 0) {
 		  if (!account.getPassword().equals(accountForm.getRepeatedPassword())) {
-				errors.reject("PASSWORD_MISMATCH", "Passwords did not match.  Matching passwords are required.");
+				errors.reject("PASSWORD_MISMATCH",
+						"Passwords did not match. Matching passwords are required.");
 		  }
 	  }
  	}
@@ -91,8 +93,9 @@ public class AccountFormController extends SimpleFormController {
 		return model;
 	}
 
-	protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
-																	Object command, BindException errors) throws Exception {
+	protected ModelAndView onSubmit(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
+			throws Exception {
 		AccountForm accountForm = (AccountForm) command;
 		if (accountForm.isNewAccount()) {
 			this.petStore.insertAccount(accountForm.getAccount());
@@ -101,7 +104,8 @@ public class AccountFormController extends SimpleFormController {
 			this.petStore.updateAccount(accountForm.getAccount());
 		}
 		UserSession userSession = new UserSession(this.petStore.getAccount(accountForm.getAccount().getUsername()));
-		PagedListHolder myList = new PagedListHolder(this.petStore.getProductListByCategory(accountForm.getAccount().getFavouriteCategoryId()));
+		PagedListHolder myList = new PagedListHolder(
+				this.petStore.getProductListByCategory(accountForm.getAccount().getFavouriteCategoryId()));
 		myList.setPageSize(4);
 		userSession.setMyList(myList);
 		request.getSession().setAttribute("userSession", userSession);
