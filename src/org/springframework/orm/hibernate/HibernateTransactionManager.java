@@ -70,8 +70,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * SessionFactory. To achieve this, configure both to the same JNDI DataSource,
  * or preferably create the SessionFactory with LocalSessionFactoryBean and
  * a local DataSource (which will be auto-detected by this transaction manager).
- * In the latter case, the Hibernate settings do not have to define a connection
- * provider at all, avoiding duplicated configuration.
  *
  * <p>JTA respectively JtaTransactionManager is necessary for accessing multiple
  * transactional resources. The DataSource that Hibernate uses needs to be JTA-enabled
@@ -96,6 +94,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @since 02.05.2003
  * @see #setSessionFactory
  * @see #setDataSource
+ * @see LocalSessionFactoryBean
  * @see SessionFactoryUtils#getSession
  * @see SessionFactoryUtils#applyTransactionTimeout
  * @see SessionFactoryUtils#closeSessionIfNecessary
@@ -104,6 +103,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
  * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  */
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
