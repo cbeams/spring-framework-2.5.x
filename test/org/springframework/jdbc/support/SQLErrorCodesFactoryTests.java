@@ -275,7 +275,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertIsDB2(sec);
 		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2/");
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2%");
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-2");
 		assertIsEmpty(sec);
 	}
 
