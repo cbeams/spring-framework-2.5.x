@@ -34,7 +34,7 @@ public abstract class Log4jConfigurer {
 	 * Initialize Log4J with the given configuration.
 	 * Assumes an XML file in case of a ".xml" file extension.
 	 * @param location location of the config file
-	 * @param refreshInterval interval between config file refresh checks
+	 * @param refreshInterval interval between config file refresh checks, in milliseconds
 	 * @throws FileNotFoundException if the location specifies an invalid file path
 	 */
 	public static void initLogging(String location, long refreshInterval) throws FileNotFoundException {

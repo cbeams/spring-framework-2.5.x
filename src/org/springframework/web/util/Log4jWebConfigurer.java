@@ -11,9 +11,10 @@ import org.springframework.util.Log4jConfigurer;
  * supporting 2 init parameters at the servlet context level (i.e. context-param
  * in web.xml):
  * <ul>
- * <li>"log4jLocation": name of the Log4J config file (relative to the web application
- * root directory, e.g. "WEB-INF/log4j.properties");
- * <li>"log4jRefreshInterval": interval between config file refresh* checks.
+ * <li>"log4jConfigLocation": name of the Log4J config file (relative to the web
+ * application root directory, e.g. "WEB-INF/log4j.properties");
+ * <li>"log4jRefreshInterval": interval between config file refresh* checks, in
+ * milliseconds.
  * </ul>
  *
  * <p>Note: initLogging should be called before any other Spring activity (when using
