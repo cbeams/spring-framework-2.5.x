@@ -131,10 +131,13 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler == null) {
 			// pattern match?
+			String bestPathMatch = null;
 			for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
 				String registeredPath = (String) it.next();
-				if (PathMatcher.match(registeredPath, urlPath)) {
+				if (PathMatcher.match(registeredPath, urlPath) &&
+						(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
 					handler = this.handlerMap.get(registeredPath);
+					bestPathMatch = registeredPath;
 				}
 			}
 		}

@@ -69,11 +69,16 @@ public class SimpleUrlHandlerMappingTests extends TestCase {
 		wac.setConfigLocations(new String[] {"/org/springframework/web/servlet/handler/map2.xml"});
 		wac.refresh();
 		Object bean = wac.getBean("mainController");
+		Object otherBean = wac.getBean("otherController");
 		HandlerMapping hm = (HandlerMapping) wac.getBean(beanName);
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest("GET", "/welcome.x");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == otherBean);
 
 		req = new MockHttpServletRequest("GET", "/");
 		req.setServletPath("/welcome.html");
