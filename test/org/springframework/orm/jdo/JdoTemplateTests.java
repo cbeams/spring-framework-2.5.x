@@ -19,10 +19,12 @@ import junit.framework.TestCase;
 
 import org.easymock.MockControl;
 
+import org.springframework.dao.DataIntegrityViolationException;
+
 /**
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @version $Id: JdoTemplateTests.java,v 1.3 2003-11-04 22:59:17 jhoeller Exp $
+ * @version $Id: JdoTemplateTests.java,v 1.4 2003-11-05 09:48:25 jhoeller Exp $
  */
 public class JdoTemplateTests extends TestCase {
 
@@ -175,6 +177,27 @@ public class JdoTemplateTests extends TestCase {
 		catch (JdoSystemException ex) {
 			// expected
 		}
+
+		MockControl dialectControl = MockControl.createControl(JdoDialect.class);
+		JdoDialect dialect = (JdoDialect) dialectControl.getMock();
+		final JDOException ex = new JDOException();
+		dialect.translateException(ex);
+		dialectControl.setReturnValue(new DataIntegrityViolationException("test", ex));
+		dialectControl.replay();
+		try {
+			JdoTemplate template = createTemplate();
+			template.setJdoDialect(dialect);
+			template.execute(new JdoCallback() {
+				public Object doInJdo(PersistenceManager pm) {
+					throw ex;
+				}
+			});
+			fail("Should have thrown DataIntegrityViolationException");
+		}
+		catch (DataIntegrityViolationException dive) {
+			// expected
+		}
+		dialectControl.verify();
 	}
 
 	private JdoTemplate createTemplate() {

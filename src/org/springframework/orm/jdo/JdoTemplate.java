@@ -127,14 +127,22 @@ public class JdoTemplate extends JdoAccessor {
 	}
 
 	/**
-	 * Convert the given JDOException to an appropriate exception from
-	 * the org.springframework.dao hierarchy.
+	 * Convert the given JDOException to an appropriate exception from the
+	 * org.springframework.dao hierarchy. Delegates to the JdoDialect if set, falls
+	 * back to PersistenceManagerFactoryUtils' standard exception translation else.
+	 * May be overridden in subclasses.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
+	 * @see JdoDialect#translateException
+	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
 	protected DataAccessException convertJdoAccessException(JDOException ex) {
-		return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+		if (getJdoDialect() != null) {
+			return getJdoDialect().translateException(ex);
+		}
+		else {
+			return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+		}
 	}
 
 }
-
