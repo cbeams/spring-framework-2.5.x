@@ -34,14 +34,14 @@ public interface FlowExecution extends FlowExecutionMBean {
 	 * Start this flow execution, transitioning it to the start state and
 	 * returning the starting model and view descriptor. Typically called by a
 	 * flow controller, but also in test code.
-	 * @param startingEvent the event that occured that triggered flow execution
+	 * @param originatingEvent the event that occured that triggered flow execution
 	 *        creation
 	 * @return the starting view descriptor, which returns control to the client
 	 *         and requests that a view be rendered with model data
 	 * @throws IllegalStateException if this execution has already been started,
 	 *         or no state is marked as the start state.
 	 */
-	public ViewDescriptor start(Event startingEvent) throws IllegalStateException;
+	public ViewDescriptor start(Event originatingEvent) throws IllegalStateException;
 
 	/**
 	 * Signal an occurence of the specified event in this flow execution.
