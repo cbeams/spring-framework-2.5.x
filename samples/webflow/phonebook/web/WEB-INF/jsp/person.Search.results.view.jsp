@@ -14,7 +14,7 @@
 		</FORM>
 		<DIV align="left">
 			<P>
-				<TABLE border="0">
+				<TABLE>
 					<TR>
 						<TD>
 							<DIV align="left">Search Results</DIV>
