@@ -59,7 +59,7 @@ import org.springframework.util.MethodInvoker;
  * &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
  *   &lt;property name="targetObject">&lt;ref local='sysProps'/>&lt;/property>
  *   &lt;property name="targetMethod">&lt;value>getProperty&lt;/value>&lt;/property>
- *   &lt;property name="args">
+ *   &lt;property name="arguments">
  *     &lt;list>
  *       &lt;value>|java.version|&lt;/value>
  *     &lt;/list>
@@ -70,18 +70,18 @@ import org.springframework.util.MethodInvoker;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBean.java,v 1.8 2004-03-21 15:46:59 colins Exp $
+ * @version $Id: MethodInvokingFactoryBean.java,v 1.9 2004-03-29 20:46:24 jhoeller Exp $
  */
 public class MethodInvokingFactoryBean extends MethodInvoker implements FactoryBean, InitializingBean {
 
 	private boolean singleton = true;
 
-	// stores the method call result in the singleton case
+	/** method call result in the singleton case */
 	private Object singletonObject;
 
 	/**
-	 * Set if a singleton should be created, or a new object on each request
-	 * else. Default is true.
+	 * Set if a singleton should be created, or a new object on each
+	 * request else. Default is true.
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;

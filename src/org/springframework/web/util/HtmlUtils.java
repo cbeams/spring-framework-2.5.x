@@ -605,9 +605,9 @@ public abstract class HtmlUtils {
 	 * and all reference types (decimal, hex, and entity).
 	 * <p>Correctly converts the following formats:
 	 * <blockquote>
-	 * &#<i>Decimal</i>; - <i>(Example: &#68;)</i><br>
-	 * &#x<i>Hex</i>;<br> - <i>(Example: &#xE5;) case insensitive</i>
-	 * &#<i>Entity</i>; - <i>(Example: &amp;) case sensitive</i>
+	 * &amp;#<i>Decimal</i>; - <i>(Example: &amp;#68;)</i><br>
+	 * &amp;#x<i>Hex</i>; - <i>(Example: &amp;#xE5;) case insensitive</i><br>
+	 * &amp;#<i>Entity</i>; - <i>(Example: &amp;amp;) case sensitive</i>
 	 * </blockquote>
 	 * Gracefully handles malformed character references by copying original
 	 * characters as is when encountered.<p>
