@@ -15,23 +15,30 @@
  */
 package org.springframework.web.flow;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import org.springframework.binding.AttributeAccessor;
+import org.springframework.util.ToStringCreator;
 
-/**
- * Base superclass for <code>Event</code> sub-types. An event is an occurence
- * of something. Subclasses typically report the occurence of events from
- * different sources; e.g, a http servlet request.
- * @author Keith Donald
- */
-public interface Event extends AttributeAccessor, Serializable {
-	public String getId();
+public abstract class Event implements AttributeAccessor {
+	public abstract String getId();
 
-	public String getStateId();
+	public abstract String getStateId();
 
-	public Map getParameters();
+	public abstract Map getParameters();
 
-	public Object getParameter(String parameterName);
+	public abstract Object getParameter(String parameterName);
+
+	public boolean containsAttribute(String attributeName) {
+		return getParameters().containsKey(attributeName);
+	}
+
+	public Object getAttribute(String attributeName) {
+		return getParameter(attributeName);
+	}
+
+	public String toString() {
+		return new ToStringCreator(this).append("id", getId()).append("stateId", getStateId()).append("parameters",
+				getParameters()).toString();
+	}
 }

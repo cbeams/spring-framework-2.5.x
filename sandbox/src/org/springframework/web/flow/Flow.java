@@ -58,11 +58,9 @@ import org.springframework.util.ToStringCreator;
  * A flow object also acts as a factory for <code>FlowExecution</code>s
  * executing the flow as the top-level flow. See the {@link #createExecution()}
  * method for more information.
- * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
- * 
  * @see org.springframework.web.flow.ActionState
  * @see org.springframework.web.flow.ViewState
  * @see org.springframework.web.flow.SubFlowState
@@ -149,7 +147,7 @@ public class Flow {
 	 *         flow; specifically, if another state shares the same ID as the
 	 *         one provided
 	 */
-	protected void add(AbstractState state) throws IllegalArgumentException {
+	protected void add(State state) throws IllegalArgumentException {
 		if (this != state.getFlow()) {
 			throw new IllegalArgumentException("State " + state + " cannot be added to this flow '" + getId()
 					+ "' - it already belongs to a different flow");
@@ -236,7 +234,7 @@ public class Flow {
 	 * Check that given state is present in the flow and throw an exception if
 	 * it's not.
 	 */
-	private void assertValidState(AbstractState state) throws NoSuchFlowStateException {
+	private void assertValidState(State state) throws NoSuchFlowStateException {
 		getRequiredState(state.getId());
 	}
 
@@ -247,8 +245,8 @@ public class Flow {
 	 * @return The state with that id
 	 * @throws NoSuchFlowStateException No state exists with that id.
 	 */
-	public AbstractState getRequiredState(String stateId) throws NoSuchFlowStateException {
-		AbstractState state = getState(stateId);
+	public State getRequiredState(String stateId) throws NoSuchFlowStateException {
+		State state = getState(stateId);
 		if (state == null) {
 			throw new NoSuchFlowStateException(this, stateId);
 		}
@@ -261,13 +259,13 @@ public class Flow {
 	 * @param stateId The state id
 	 * @return The state with that id, or null if none exists.
 	 */
-	public AbstractState getState(String stateId) {
+	public State getState(String stateId) {
 		if (!StringUtils.hasText(stateId)) {
 			return null;
 		}
 		Iterator it = statesIterator();
 		while (it.hasNext()) {
-			AbstractState state = (AbstractState)it.next();
+			State state = (State)it.next();
 			if (state.getId().equals(stateId)) {
 				return state;
 			}
@@ -280,10 +278,10 @@ public class Flow {
 	 * @param state the state
 	 * @return true if yes (the same instance is present), false otherwise
 	 */
-	protected boolean containsStateInstance(AbstractState state) {
+	protected boolean containsStateInstance(State state) {
 		Iterator it = statesIterator();
 		while (it.hasNext()) {
-			AbstractState s = (AbstractState)it.next();
+			State s = (State)it.next();
 			if (s == state) {
 				return true;
 			}
@@ -309,7 +307,7 @@ public class Flow {
 	 *         id
 	 */
 	public TransitionableState getRequiredTransitionableState(String stateId) throws NoSuchFlowStateException {
-		AbstractState state = getRequiredState(stateId);
+		State state = getRequiredState(stateId);
 		Assert.state(state.isTransitionable(), "This state '" + stateId + "' of flow '" + getId()
 				+ "' must be transitionable");
 		return (TransitionableState)state;
@@ -325,7 +323,7 @@ public class Flow {
 		Iterator it = statesIterator();
 		List stateIds = new ArrayList();
 		while (it.hasNext()) {
-			stateIds.add(((AbstractState)it.next()).getId());
+			stateIds.add(((State)it.next()).getId());
 		}
 		return (String[])stateIds.toArray(new String[0]);
 	}

@@ -31,7 +31,7 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class TransitionableState extends AbstractState {
+public abstract class TransitionableState extends State {
 
 	private Set transitions = new LinkedHashSet();
 
@@ -96,8 +96,8 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws CannotExecuteStateTransitionException if a state transition could
 	 *         not be executed.
 	 */
-	protected ViewDescriptor signalEvent(Event event, StateContext context) throws EventNotSupportedException,
-			CannotExecuteStateTransitionException {
+	protected ViewDescriptor executeTransitionOnEvent(Event event, StateContext context)
+			throws EventNotSupportedException, CannotExecuteStateTransitionException {
 		context.setEvent(event);
 		Transition transition = getRequiredTransition(context);
 		return transition.execute(context);
@@ -174,7 +174,7 @@ public abstract class TransitionableState extends AbstractState {
 	 * @param eventId the event id to check
 	 * @return true or false
 	 */
-	public boolean transitionForOccurenceOf(Event event, StateContext context) {
+	public boolean isTransitionForOccurrenceOf(Event event, StateContext context) {
 		context.setEvent(event);
 		return getTransition(context) != null;
 	}

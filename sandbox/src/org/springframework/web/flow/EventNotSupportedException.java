@@ -18,10 +18,9 @@ package org.springframework.web.flow;
 import org.springframework.util.Styler;
 
 /**
- * Thrown when the event identified by <code>eventId</code> does not map to a valid
- * transition in the current state. That is, there is no "handler" transition for
- * the given event in the current state.
- * 
+ * Thrown when the event signaled does not map to a valid transition in the
+ * current state. That is, there is no "handler" transition for the given event
+ * in the current state.
  * @author Keith Donald
  * @author Erwin Vervaet
  */

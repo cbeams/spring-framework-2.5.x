@@ -45,12 +45,10 @@ import org.springframework.web.flow.support.AttributeSetterSupport;
  * session, it will become {@link FlowSessionStatus#SUSPENDED} untill the sub
  * flow returns (ends). When the flow session is ended by the flow execution,
  * its status becomes {@link FlowSessionStatus#ENDED}, ending its lifecycle.
- * 
- * @see org.springframework.web.flow.FlowExecution
- * @see org.springframework.web.flow.FlowExecutionStack
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
+ * @see org.springframework.web.flow.FlowExecution
+ * @see org.springframework.web.flow.FlowExecutionStack
  */
 public class FlowSession extends AttributeSetterSupport implements Serializable {
 
@@ -66,7 +64,7 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 	/**
 	 * The current state of this flow session.
 	 */
-	private transient AbstractState currentState;
+	private transient State currentState;
 
 	/**
 	 * The session status; may be CREATED, ACTIVE, SUSPENDED, or ENDED.
@@ -150,7 +148,7 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 	/**
 	 * Returns the state that is currently active in this flow session
 	 */
-	public AbstractState getCurrentState() {
+	public State getCurrentState() {
 		return currentState;
 	}
 
@@ -158,7 +156,7 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 	 * Set the current state of this flow session.
 	 * @param newState The state that is currently active in this flow session
 	 */
-	protected void setCurrentState(AbstractState newState) {
+	protected void setCurrentState(State newState) {
 		Assert.notNull(newState, "The newState is required");
 		Assert.isTrue(this.flow == newState.getFlow(),
 				"The newState belongs to the flow associated with this flow session");
@@ -257,7 +255,6 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 		// implementation note: we cannot integrate this code into the
 		// readObject()
 		// method since we need the flow locator!
-
 		Assert.state(this.flow == null, "The flow is already set - already restored");
 		Assert.state(this.currentState == null, "The current state is already set - already restored");
 		Assert

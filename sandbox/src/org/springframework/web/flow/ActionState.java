@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.Styler;
-import org.springframework.web.flow.support.AbstractEvent;
 
 /**
  * A transitionable state that executes one or more actions when entered. If
@@ -274,7 +273,7 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Hook method implementation that initiates state processing.
-	 * 
+	 * <p>
 	 * This implementation iterates over each configured Action for this state
 	 * and executes it.
 	 */
@@ -288,8 +287,8 @@ public class ActionState extends TransitionableState {
 			executionCount++;
 			if (event != null) {
 				eventIds[executionCount - 1] = event.getId();
-				if (transitionForOccurenceOf(event, context)) {
-					return signalEvent(event, context);
+				if (isTransitionForOccurrenceOf(event, context)) {
+					return executeTransitionOnEvent(event, context);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
@@ -409,7 +408,7 @@ public class ActionState extends TransitionableState {
 			}
 		}
 
-		private static class ActionNameQualifiedEvent extends AbstractEvent {
+		private static class ActionNameQualifiedEvent extends Event {
 			private String actionName;
 			
 			private Event event;

@@ -41,10 +41,9 @@ import org.springframework.web.flow.support.RandomGuid;
  * <p>
  * This implementation of FlowExecution is Serializable so it can be safely
  * stored in an HTTP session.
- * 
- * @see org.springframework.web.flow.FlowSession
  * @author Keith Donald
  * @author Erwin Vervaet
+ * @see org.springframework.web.flow.FlowSession
  */
 public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Serializable {
 
@@ -263,7 +262,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		return rootFlow;
 	}
 
-	public AbstractState getCurrentState() {
+	public State getCurrentState() {
 		return getActiveFlowSession().getCurrentState();
 	}
 
@@ -271,7 +270,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * Set the state that is currently active in this flow execution.
 	 * @param newState The new current state
 	 */
-	protected void setCurrentState(AbstractState newState) {
+	protected void setCurrentState(State newState) {
 		getActiveFlowSession().setCurrentState(newState);
 	}
 
@@ -318,7 +317,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		}
 		LocalFlowExecutionContext context = new LocalFlowExecutionContext(event, this);
 		context.fireRequestSubmitted(event);
-		ViewDescriptor view = state.signalEvent(event, context);
+		ViewDescriptor view = state.executeTransitionOnEvent(event, context);
 		context.fireRequestProcessed(event);
 		return view;
 	}

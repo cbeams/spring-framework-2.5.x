@@ -36,7 +36,7 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class AbstractState {
+public abstract class State {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -60,7 +60,7 @@ public abstract class AbstractState {
 	 * @throws IllegalArgumentException if this state cannot be added to the
 	 *         flow
 	 */
-	public AbstractState(Flow flow, String id) throws IllegalArgumentException {
+	public State(Flow flow, String id) throws IllegalArgumentException {
 		setId(id);
 		setFlow(flow);
 		flow.add(this);

@@ -16,7 +16,7 @@
 package org.springframework.web.flow;
 
 /**
- * Central client facade interface of the Flow system.
+ * Central client facade service interface for the flow system.
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -60,5 +60,4 @@ public interface FlowExecution extends FlowExecutionMBean {
 	 *        lifecycle events in this flow execution
 	 */
 	public void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners);
-
 }

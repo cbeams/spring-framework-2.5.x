@@ -17,8 +17,6 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeSetter;
 
@@ -187,13 +185,13 @@ public interface FlowExecutionContext extends AttributeAccessor {
 	 * @param attributes
 	 */
 	public void setFlowAttributes(Map attributes);
-	
+
 	/**
 	 * @param attributeName
 	 * @return
 	 */
 	public Object removeFlowAttribute(String attributeName);
-	
+
 	/**
 	 * Returns the data model for this flow model, suitable for exposing to web
 	 * views.

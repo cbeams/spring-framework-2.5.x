@@ -23,7 +23,6 @@ import org.springframework.util.closure.ProcessTemplate;
 
 /**
  * A strongly typed listener list class for FlowExecutionListeners.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */

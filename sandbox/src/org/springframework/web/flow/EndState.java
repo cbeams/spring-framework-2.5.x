@@ -17,7 +17,6 @@ package org.springframework.web.flow;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * Terminates an active web flow session when entered. If the terminated session
@@ -34,12 +33,11 @@ import org.springframework.web.flow.support.LocalEvent;
  * result.) On the other hand, if no <code>viewName</code> is specified <b>and</b>
  * this EndState reliniquishes control back to a parent flow, view rendering
  * responsibility is falls on the parent flow.
- * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
  */
-public class EndState extends AbstractState {
+public class EndState extends State {
 
 	private String viewName;
 
@@ -116,7 +114,7 @@ public class EndState extends AbstractState {
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
-			return ((TransitionableState)resumingState).signalEvent(createSubFlowResultEvent(), context);
+			return ((TransitionableState)resumingState).executeTransitionOnEvent(createSubFlowResultEvent(), context);
 		}
 		else {
 			// entire flow execution has ended, return ending view if applicable

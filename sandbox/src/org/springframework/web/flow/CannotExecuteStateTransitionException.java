@@ -17,7 +17,6 @@ package org.springframework.web.flow;
 
 /**
  * Thrown if the flow subsystem cannot execute a state transition.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -32,17 +31,17 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	 * @param state The source state of the transition
 	 * @param cause The underlying cause of this exception
 	 */
-	public CannotExecuteStateTransitionException(AbstractState state, Throwable cause) {
+	public CannotExecuteStateTransitionException(State state, Throwable cause) {
 		super(state.getFlow(), cause);
 		this.stateIdTransitioningFrom = state.getId();
 	}
-	
+
 	/**
 	 * Creates a new state transition execution exception.
 	 * @param state The source state
 	 * @param message The message of what went wrong.
 	 */
-	public CannotExecuteStateTransitionException(AbstractState state, String message) {
+	public CannotExecuteStateTransitionException(State state, String message) {
 		super(state.getFlow(), message);
 		this.stateIdTransitioningFrom = state.getId();
 	}

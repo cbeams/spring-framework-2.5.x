@@ -1,5 +1,17 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.web.flow;
 
@@ -39,7 +51,7 @@ public class LocalFlowExecutionContext implements StateContext {
 		return this.flowExecutionStack.getRootFlow();
 	}
 
-	public AbstractState getCurrentState() {
+	public State getCurrentState() {
 		return this.flowExecutionStack.getCurrentState();
 	}
 
@@ -75,8 +87,8 @@ public class LocalFlowExecutionContext implements StateContext {
 		}
 	}
 
-	public void setCurrentState(AbstractState state) {
-		AbstractState previousState = this.flowExecutionStack.getCurrentState();
+	public void setCurrentState(State state) {
+		State previousState = this.flowExecutionStack.getCurrentState();
 		this.flowExecutionStack.setCurrentState(state);
 		fireStateTransitioned(previousState);
 	}
@@ -284,7 +296,7 @@ public class LocalFlowExecutionContext implements StateContext {
 	 * Notify all interested listeners that a state transition happened in this
 	 * flow execution.
 	 */
-	protected void fireStateTransitioned(final AbstractState previousState) {
+	protected void fireStateTransitioned(final State previousState) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing state transitioned event to " + getListenerList().size() + " listener(s)");
 		}

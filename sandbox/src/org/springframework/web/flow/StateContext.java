@@ -5,10 +5,11 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
-public interface StateContext extends FlowExecutionContext {
-	public AbstractState getCurrentState();
 
-	public void setCurrentState(AbstractState state);
+public interface StateContext extends FlowExecutionContext {
+	public State getCurrentState();
+
+	public void setCurrentState(State state);
 
 	public void setEvent(Event lastEvent);
 

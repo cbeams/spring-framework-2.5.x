@@ -18,12 +18,11 @@ package org.springframework.web.flow;
 /**
  * Thrown if an unhandled, uncoverable exception is thrown when an action is
  * executed in an action state.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class ActionExecutionException extends RuntimeException {
-	
+
 	/**
 	 * Create a new action execution exception.
 	 * @param state The action state that was executing the action

@@ -19,9 +19,8 @@ package org.springframework.web.flow;
  * Interface to be implemented by objects that wish to listen and respond to the
  * lifecycle of a FlowExecution.
  * <p>
- * An 'observer' that is very "aspect" like, allowing you to insert 'cross
- * cutting' behaivior at well-defined points within a flow execution lifecycle.
- * 
+ * An 'observer' that is very aspect like, allowing you to insert 'cross
+ * cutting' behavior at well-defined points within a flow execution lifecycle.
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -62,8 +61,7 @@ public interface FlowExecutionListener {
 	 * @param previousState <i>From </i> state of the transition
 	 * @param newState <i>To </i> state of the transition
 	 */
-	public void stateTransitioned(FlowExecutionContext context, AbstractState previousState,
-			AbstractState newState);
+	public void stateTransitioned(FlowExecutionContext context, State previousState, State newState);
 
 	/**
 	 * Called when a sub flow is spawned.

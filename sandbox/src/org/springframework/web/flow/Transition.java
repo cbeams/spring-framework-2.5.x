@@ -57,7 +57,7 @@ public class Transition {
 	/**
 	 * The target state that this transition should transition to when executed.
 	 */
-	private AbstractState targetState;
+	private State targetState;
 
 	/**
 	 * The state id for the target state; needed to lazily resolve the target
@@ -122,13 +122,13 @@ public class Transition {
 	 * Returns the target (<i>to</i>) state of this transition.
 	 * @throws NoSuchFlowStateException When the target state cannot be found
 	 */
-	protected AbstractState getTargetState() throws NoSuchFlowStateException {
+	protected State getTargetState() throws NoSuchFlowStateException {
 		synchronized (this) {
 			if (this.targetState != null) {
 				return this.targetState;
 			}
 		}
-		AbstractState targetState = getSourceState().getFlow().getRequiredState(getTargetStateId());
+		State targetState = getSourceState().getFlow().getRequiredState(getTargetStateId());
 		synchronized (this) {
 			this.targetState = targetState;
 		}
@@ -180,7 +180,7 @@ public class Transition {
 
 	/**
 	 * Execute this transition.
-	 * @param flowExecution A flow execution stack, tracking any suspended
+	 * @param context A flow execution stack, tracking any suspended
 	 *        parent flows that spawned this flow (as a subflow)
 	 * @param request the client http request
 	 * @param response the server http response
@@ -189,18 +189,18 @@ public class Transition {
 	 * @throws CannotExecuteStateTransitionException thrown when this transition
 	 *         cannot be executed
 	 */
-	protected ViewDescriptor execute(StateContext flowExecution) throws CannotExecuteStateTransitionException {
+	protected ViewDescriptor execute(StateContext context) throws CannotExecuteStateTransitionException {
 		try {
-			ViewDescriptor viewDescriptor = getTargetState().enter(flowExecution);
+			ViewDescriptor viewDescriptor = getTargetState().enter(context);
 			if (logger.isDebugEnabled()) {
-				if (flowExecution.isFlowExecutionActive()) {
+				if (context.isFlowExecutionActive()) {
 					logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
-							+ flowExecution.getCurrentState().getId() + "' in flow '"
-							+ flowExecution.getActiveFlow().getId() + "'");
+							+ context.getCurrentState().getId() + "' in flow '"
+							+ context.getActiveFlow().getId() + "'");
 				}
 				else {
 					logger.debug("Transition '" + this + "' executed; as a result, the flow '"
-							+ flowExecution.getRootFlow().getId() + "' execution has ended");
+							+ context.getRootFlow().getId() + "' execution has ended");
 				}
 			}
 			return viewDescriptor;

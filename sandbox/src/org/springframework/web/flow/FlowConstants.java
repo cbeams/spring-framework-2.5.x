@@ -17,7 +17,6 @@ package org.springframework.web.flow;
 
 /**
  * Constants used by the Spring web.flow system.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
