@@ -61,7 +61,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.10 2003-11-03 09:27:46 johnsonr Exp $
+ * @version $Id: JdbcTemplate.java,v 1.11 2003-11-03 15:12:57 johnsonr Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -153,8 +153,7 @@ public class JdbcTemplate implements InitializingBean {
 	 */
 	public synchronized SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
-			this.exceptionTranslator =
-			    SQLExceptionTranslatorFactory.getInstance().getDefaultTranslator(this.dataSource);
+			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
 		}
 		return this.exceptionTranslator;
 	}
@@ -164,6 +163,13 @@ public class JdbcTemplate implements InitializingBean {
 	 */
 	public void setQueryExecutor(QueryExecutor queryExecutor) {
 		this.queryExecutor = queryExecutor;
+	}
+	
+	/**
+	 * @return the current QueryExecutor implementation.
+	 */
+	public QueryExecutor getQueryExecutor() {
+		return this.queryExecutor;
 	}
 
 	/**
