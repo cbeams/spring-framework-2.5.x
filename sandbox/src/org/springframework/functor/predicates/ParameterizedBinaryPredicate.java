@@ -21,11 +21,11 @@ import org.springframework.functor.UnaryPredicate;
 /**
  * @author Keith Donald
  */
-public class BindConstantUnaryPredicate implements UnaryPredicate {
+public class ParameterizedBinaryPredicate implements UnaryPredicate {
     private BinaryPredicate predicate;
     private Object constant;
 
-    public BindConstantUnaryPredicate(BinaryPredicate predicate,
+    public ParameterizedBinaryPredicate(BinaryPredicate predicate,
             Object constantToBind) {
         this.predicate = predicate;
         this.constant = constantToBind;
