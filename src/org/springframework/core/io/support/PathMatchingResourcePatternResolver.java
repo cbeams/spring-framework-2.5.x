@@ -69,7 +69,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private final ResourceLoader resourceLoader;
 
-	private final ClassLoader classLoader;
+	private ClassLoader classLoader;
 
 
 	/**
@@ -80,7 +80,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	public PathMatchingResourcePatternResolver() {
 		this.resourceLoader = new DefaultResourceLoader();
-		this.classLoader = null;
 	}
 
 	/**
@@ -104,7 +103,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
-		this.classLoader = null;
 	}
 
 	/**
@@ -193,7 +191,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Resource rootDirResource = this.resourceLoader.getResource(rootDirPath);
 		List result = doFindPathMatchingFileResources(rootDirResource, subPattern);
 		if (logger.isInfoEnabled()) {
-			logger.info("Resolved location pattern [" + locationPattern + "] to file paths " + result);
+			logger.info("Resolved location pattern [" + locationPattern + "] to resources " + result);
 		}
 		return (Resource[]) result.toArray(new Resource[result.size()]);
 	}
