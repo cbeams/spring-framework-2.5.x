@@ -16,9 +16,14 @@
 
 package org.springframework.orm.jdo;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
+
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -70,7 +75,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see JdoCallback
  * @see JdoTransactionManager
  */
-public class JdoTemplate extends JdoAccessor {
+public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	private boolean allowCreate = true;
 
@@ -108,23 +113,10 @@ public class JdoTemplate extends JdoAccessor {
 		return allowCreate;
 	}
 
-	/**
-	 * Execute the action specified by the given action object within a
-	 * PersistenceManager. Application exceptions thrown by the action object
-	 * get propagated to the caller (can only be unchecked). JDO exceptions
-	 * are transformed into appropriate DAO ones. Allows for returning a
-	 * result object, i.e. a domain object or a collection of domain objects.
-	 * <p>Note: Callback code is not supposed to handle transactions itself!
-	 * Use an appropriate transaction manager like JdoTransactionManager.
-	 * @param action action object that specifies the JDO action
-	 * @return a result object returned by the action, or null
-	 * @throws DataAccessException in case of JDO errors
-	 * @see JdoTransactionManager
-	 * @see org.springframework.dao
-	 * @see org.springframework.transaction
-	 */
+
 	public Object execute(JdoCallback action) throws DataAccessException {
-		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), this.allowCreate);
+		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(),
+																																								 this.allowCreate);
 		boolean existingTransaction = TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory());
 		try {
 			Object result = action.doInJdo(pm);
@@ -141,6 +133,157 @@ public class JdoTemplate extends JdoAccessor {
 		finally {
 			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
 		}
+	}
+
+	public Collection executeFind(JdoCallback action) throws DataAccessException {
+		return (Collection) execute(action);
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for load, save, delete
+	//-------------------------------------------------------------------------
+
+	public Object getObjectById(final Serializable objectId) throws DataAccessException {
+		return execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				return pm.getObjectById(objectId, true);
+			}
+		});
+	}
+
+	public Object getObjectById(final Class entityClass, final Serializable idValue) throws DataAccessException {
+		return execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Object oid = pm.newObjectIdInstance(entityClass, idValue.toString());
+				return pm.getObjectById(oid, true);
+			}
+		});
+	}
+
+	public void evict(final Object entity) throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.evict(entity);
+				return null;
+			}
+		});
+	}
+
+	public void refresh(final Object entity) throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.refresh(entity);
+				return null;
+			}
+		});
+	}
+
+	public void makePersistent(final Object entity) throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.makePersistent(entity);
+				return null;
+			}
+		});
+	}
+
+	public void deletePersistent(final Object entity) throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.deletePersistent(entity);
+				return null;
+			}
+		});
+	}
+
+	public void deletePersistentAll(final Collection entities) throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.deletePersistentAll(entities);
+				return null;
+			}
+		});
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods
+	//-------------------------------------------------------------------------
+
+	public Collection find(final Class entityClass) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(entityClass);
+				return query.execute();
+			}
+		});
+	}
+
+	public Collection find(final Class entityClass, final String filter) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(entityClass, filter);
+				return query.execute();
+			}
+		});
+	}
+
+	public Collection find(final Class entityClass, final String filter, final String ordering)
+			throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(entityClass, filter);
+				query.setOrdering(ordering);
+				return query.execute();
+			}
+		});
+	}
+
+	public Collection find(final Class entityClass, final String filter, final String parameters,
+												 final Object[] values) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(entityClass, filter);
+				query.declareParameters(parameters);
+				return query.executeWithArray(values);
+			}
+		});
+	}
+
+	public Collection find(final Class entityClass, final String filter, final String parameters,
+												 final Object[] values, final String ordering) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(entityClass, filter);
+				query.declareParameters(parameters);
+				query.setOrdering(ordering);
+				return query.executeWithArray(values);
+			}
+		});
+	}
+
+	public Collection find(final Class entityClass, final String filter, final String parameters,
+												 final Map values) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(entityClass, filter);
+				query.declareParameters(parameters);
+				return query.executeWithMap(values);
+			}
+		});
+	}
+
+	public Collection find(final Class entityClass, final String filter, final String parameters,
+												 final Map values, final String ordering) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(entityClass, filter);
+				query.declareParameters(parameters);
+				query.setOrdering(ordering);
+				return query.executeWithMap(values);
+			}
+		});
 	}
 
 }
