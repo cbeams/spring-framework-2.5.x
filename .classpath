@@ -9,6 +9,9 @@
 	<classpathentry kind="src" path="samples/jpetstore/src"/>
 	<classpathentry kind="src" path="samples/tiles-example/src"/>
 	<classpathentry kind="src" path="samples/imagedb/src"/>
+	<classpathentry kind="src" path="samples/webflow/phonebook/src"/>
+	<classpathentry kind="src" path="samples/webflow/itemlist/src"/>
+	<classpathentry kind="src" path="samples/webflow/fileupload/src"/>
 	<classpathentry output="target/autobuilds/classes" kind="src" path="autobuilds/src"/>
 	<classpathentry output="target/sandbox/classes" kind="src" path="sandbox/src"/>
 	<classpathentry output="target/sandbox/test-classes" kind="src" path="sandbox/test"/>
