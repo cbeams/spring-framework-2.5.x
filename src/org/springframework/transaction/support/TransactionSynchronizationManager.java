@@ -86,7 +86,7 @@ public abstract class TransactionSynchronizationManager {
 	 * <p>Mainly for debugging purposes. Resource managers should always invoke
 	 * hasResource for a specific resource key that they are interested in.
 	 * @return Map with resource keys and resource objects,
-	 * or null if currently none bound
+	 * or empty Map if currently none bound
 	 * @see #hasResource
 	 */
 	public static Map getResourceMap() {
