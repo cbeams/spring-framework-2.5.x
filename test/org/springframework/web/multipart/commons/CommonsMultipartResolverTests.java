@@ -139,8 +139,8 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 		assertEquals("type1", file1.getContentType());
 		assertEquals("type2", file2.getContentType());
-		assertEquals("field1.txt", file1.getOriginalFileName());
-		assertEquals("field2.txt", file2.getOriginalFileName());
+		assertEquals("field1.txt", file1.getOriginalFilename());
+		assertEquals("field2.txt", file2.getOriginalFilename());
 		assertEquals("text1", new String(file1.getBytes()));
 		assertEquals("text2", new String(file2.getBytes()));
 		assertEquals(5, file1.getSize());

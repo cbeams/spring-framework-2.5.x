@@ -98,7 +98,7 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 			return (multipartRequest.getFile(this.name) == null);
 		}
 
-		public String getOriginalFileName() {
+		public String getOriginalFilename() {
 			return multipartRequest.getOriginalFileName(this.name);
 		}
 
@@ -134,7 +134,7 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 				if (tempFile.renameTo(dest)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Multipart file [" + getName() + "] with original file name [" +
-												 getOriginalFileName() + "], stored at [" + tempFile.getAbsolutePath() +
+												 getOriginalFilename() + "], stored at [" + tempFile.getAbsolutePath() +
 												 "]: moved to [" + dest.getAbsolutePath() + "]");
 					}
 				}
@@ -142,7 +142,7 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 					FileCopyUtils.copy(tempFile, dest);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Multipart file [" + getName() + "] with original file name [" +
-												 getOriginalFileName() + "], stored at [" + tempFile.getAbsolutePath() +
+												 getOriginalFilename() + "], stored at [" + tempFile.getAbsolutePath() +
 												 "]: copied to [" + dest.getAbsolutePath() + "]");
 					}
 				}

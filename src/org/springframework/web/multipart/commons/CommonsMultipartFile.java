@@ -49,7 +49,7 @@ public class CommonsMultipartFile implements MultipartFile {
 		return (this.fileItem.getName() == null || this.fileItem.getName().length() == 0);
 	}
 
-	public String getOriginalFileName() {
+	public String getOriginalFilename() {
 		return (!isEmpty() ? new File(this.fileItem.getName()).getName() : null);
 	}
 
@@ -82,7 +82,7 @@ public class CommonsMultipartFile implements MultipartFile {
 					action = ((DefaultFileItem) this.fileItem).getStoreLocation().exists() ? "copied" : "moved";
 				}
 				logger.debug("Multipart file [" + getName() + "] with original file name [" +
-										 getOriginalFileName() + "], stored " + getStorageDescription() + ": " +
+										 getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
 				             action + " to [" + dest.getAbsolutePath() + "]");
 			}
 		}

@@ -39,7 +39,7 @@ public interface MultipartFile {
 	 * but it typically will not with any other than Opera.
 	 * @return the original filename, or null if empty
 	 */
-	String getOriginalFileName();
+	String getOriginalFilename();
 
 	/**
 	 * Return the content type of the file.

@@ -169,7 +169,7 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 					multipartFiles.put(file.getName(), file);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Found multipart file [" + file.getName() + "] of size " + file.getSize() +
-						             " bytes with original file name [" + file.getOriginalFileName() +
+						             " bytes with original file name [" + file.getOriginalFilename() +
 						             "], stored " + file.getStorageDescription());
 					}
 				}
@@ -187,7 +187,7 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 			String name = (String) i.next();
 			CommonsMultipartFile file = (CommonsMultipartFile) multipartFiles.get(name);
 			logger.debug("Cleaning up multipart file [" + file.getName() + "] with original file name [" +
-			             file.getOriginalFileName() + "], stored " + file.getStorageDescription());
+			             file.getOriginalFilename() + "], stored " + file.getStorageDescription());
 			file.getFileItem().delete();
 		}
 	}
