@@ -44,6 +44,7 @@ import java.util.Map;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Colin Sampaleanu
  * @since 1.1.2
  */
 public abstract class Assert {
@@ -250,6 +251,27 @@ public abstract class Assert {
 				"Object of class '" + (obj != null ? obj.getClass().getName() : "[null]") +
 				"' must be an instance of '" + clazz.getName() + "'");
 	}
+    
+    /**
+     * Assert that the provided object is an instance of the provided class.
+     * <pre>
+     * Assert.instanceOf(Foo.class, foo);</pre>
+     * @param clazz the required class
+     * @param obj the object to check
+     * @param message a message which will be prepended to the message produced by
+     * the function itself, and which may be used to provide context. It should
+     * normally end in a ":" or ". " so that the function generate message looks
+     * ok when prepended to it.
+     * @throws IllegalArgumentException if the object is not an instance of clazz
+     * @see Class#isInstance
+     */
+    public static void isInstanceOf(Class clazz, Object obj, String message) {
+        Assert.notNull(clazz, "The clazz to perform the instanceof assertion cannot be null");
+        Assert.isTrue(clazz.isInstance(obj), message + 
+                "Object of class '" + (obj != null ? obj.getClass().getName() : "[null]") +
+                "' must be an instance of '" + clazz.getName() + "'");
+    }
+    
 
 	/**
 	 * Assert a boolean expression, throwing <code>IllegalStateException</code>
