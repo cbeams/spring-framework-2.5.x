@@ -16,7 +16,7 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
  * 
  * @author Rod Johnson
  * @since 10-Jul-2003
- * @version $Id: LockMixin.java,v 1.3 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: LockMixin.java,v 1.4 2004-03-09 04:46:25 johnsonr Exp $
  */
 public class LockMixin extends DelegatingIntroductionInterceptor implements Lockable {
 	
@@ -46,7 +46,7 @@ public class LockMixin extends DelegatingIntroductionInterceptor implements Lock
 	 * @see org.aopalliance.MethodInterceptor#invoke(org.aopalliance.MethodInvocation)
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		if (locked() && invocation.getMethod().getName().indexOf("set") != -1)
+		if (locked() && invocation.getMethod().getName().indexOf("set") == 0)
 			throw new LockedException();
 		return super.invoke(invocation);
 	}
