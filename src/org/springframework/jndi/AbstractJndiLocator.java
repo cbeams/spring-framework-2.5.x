@@ -18,7 +18,7 @@ import org.springframework.beans.factory.InitializingBean;
  * the "java:comp/env/" prefix expected by J2EE applications when accessing
  * a locally mapped (ENC - Environmental Naming Context) resource. If it
  * doesn't, the "java:comp/env/" prefix will be prepended if the "resourceRef"
- * property is true (the default is <storng>false</strong>) and no other scheme
+ * property is true (the default is <strong>false</strong>) and no other scheme
  * like "java:" is given.
  *
  * <p>Subclasses must implement the located() method to cache the results
@@ -34,7 +34,7 @@ import org.springframework.beans.factory.InitializingBean;
  * this class (i.e. lazy load it instead).<p> 
  *
  * @author Rod Johnson
- * @version $Id: AbstractJndiLocator.java,v 1.6 2004-02-18 19:39:02 colins Exp $
+ * @version $Id: AbstractJndiLocator.java,v 1.7 2004-02-27 14:59:00 luke_t Exp $
  * @see #setResourceRef
  */
 public abstract class AbstractJndiLocator implements InitializingBean {
