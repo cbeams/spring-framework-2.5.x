@@ -11,6 +11,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.BeanUtils;
+
 /**
  * Miscellaneous utilities for web applications.
  * Also used by various framework classes.
@@ -114,6 +116,24 @@ public abstract class WebUtils {
 				session.removeAttribute(name);
 			}
 		}
+	}
+
+	/**
+	 * Get the specified session attribute, creating and setting a new attribute if
+	 * no existing found. The given class needs to have a public no-arg constructor.
+	 * Useful for on-demand state objects in a web tier, like shopping carts.
+	 * @param request current HTTP request
+	 * @param name the name of the session attribute
+	 * @param clazz the class to instantiate for a new attribute
+	 * @return the value of the session attribute, newly created if not found
+	 */
+	public static Object getOrCreateSessionAttribute(HttpServletRequest request, String name, Class clazz) {
+		Object sessionObject = getSessionAttribute(request, name);
+		if (sessionObject == null) {
+			sessionObject = BeanUtils.instantiateClass(clazz);
+			request.getSession(true).setAttribute(name, sessionObject);
+		}
+		return sessionObject;
 	}
 
 	/**
