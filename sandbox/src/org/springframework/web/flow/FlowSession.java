@@ -94,16 +94,12 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
 		Object value = getAttribute(attributeName);
-		assertValueNotNull(attributeName, value);
-		return value;
-	}
-
-	private void assertValueNotNull(String attributeName, Object value) throws IllegalStateException {
 		if (value == null) {
 			throw new IllegalStateException("Required attribute '" + attributeName
 					+ "' is not present in flow scope for flow '" + getFlowId()
 					+ "'; attributes currently in scope are = " + DefaultObjectStyler.call(attributes));
 		}
+		return value;
 	}
 
 	public Object getRequiredAttribute(String attributeName, Class clazz) throws IllegalStateException {
