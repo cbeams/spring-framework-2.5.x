@@ -50,6 +50,14 @@ import org.springframework.remoting.support.RemoteInvocation;
  * Effectively, any serializable Java object can be transported without hassle.
  * Hessian and Burlap have their own (de-)serialization mechanisms, but are
  * HTTP-based and thus much easier to setup than RMI. 
+ * 
+ * <p>Note: be careful when exporting objects to servers running on multi-homed machines
+ * or when changing from Windows to certain Linux-based environments. Changes might 
+ * occur as to where (on what network device or IP-address) objects will be bound.
+ * Changing the IP-address can be done by specifying the system property 
+ * <code>java.rmi.server.host</code> (in your application server for example).
+ * Exceptions resulting from proxies with wrong location information typically include
+ * messages like 'Could not connect to 127.0.0.1'.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
