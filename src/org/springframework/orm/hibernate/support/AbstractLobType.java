@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate.support;
 
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,6 +25,7 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionManager;
 
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.UserType;
 import net.sf.hibernate.util.EqualsHelper;
 import org.apache.commons.logging.Log;
@@ -114,8 +116,14 @@ public abstract class AbstractLobType implements UserType {
 	 * passing in the LobHandler of this type.
 	 * @see #nullSafeGetInternal
 	 */
-	public final Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws SQLException {
-		return nullSafeGetInternal(rs, rs.findColumn(names[0]), this.lobHandler);
+	public final Object nullSafeGet(ResultSet rs, String[] names, Object owner)
+			throws HibernateException, SQLException {
+		try {
+			return nullSafeGetInternal(rs, rs.findColumn(names[0]), this.lobHandler);
+		}
+		catch (IOException ex) {
+			throw new HibernateException("I/O errors during LOB access", ex);
+		}
 	}
 
 	/**
@@ -124,9 +132,15 @@ public abstract class AbstractLobType implements UserType {
 	 * LobHandler of this type.
 	 * @see #nullSafeSetInternal
 	 */
-	public final void nullSafeSet(PreparedStatement st, Object value, int index) throws SQLException {
+	public final void nullSafeSet(PreparedStatement st, Object value, int index)
+			throws HibernateException, SQLException {
 		LobCreator lobCreator = this.lobHandler.getLobCreator();
-		nullSafeSetInternal(st, index, value, lobCreator);
+		try {
+			nullSafeSetInternal(st, index, value, lobCreator);
+		}
+		catch (IOException ex) {
+			throw new HibernateException("I/O errors during LOB access", ex);
+		}
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering Spring transaction synchronization for Hibernate LOB type");
 			TransactionSynchronizationManager.registerSynchronization(
@@ -160,9 +174,10 @@ public abstract class AbstractLobType implements UserType {
 	 * @param lobHandler the LobHandler to use
 	 * @return the extracted value
 	 * @throws SQLException if thrown by JDBC methods
+	 * @throws IOException if thrown by streaming methods
 	 */
 	protected abstract Object nullSafeGetInternal(ResultSet rs, int index, LobHandler lobHandler)
-			throws SQLException;
+			throws SQLException, IOException;
 
 	/**
 	 * Template method to set the given value on the given statement.
@@ -171,9 +186,11 @@ public abstract class AbstractLobType implements UserType {
 	 * @param value the value to set
 	 * @param lobCreator the LobCreator to use
 	 * @throws SQLException if thrown by JDBC methods
+	 * @throws IOException if thrown by streaming methods
 	 */
 	protected abstract void nullSafeSetInternal(
-	    PreparedStatement ps, int index, Object value, LobCreator lobCreator) throws SQLException;
+	    PreparedStatement ps, int index, Object value, LobCreator lobCreator)
+			throws SQLException, IOException;
 
 
 	/**
