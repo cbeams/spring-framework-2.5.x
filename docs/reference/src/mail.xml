@@ -28,7 +28,7 @@
 
     <para>Spring also provides a subinterface of <literal>MailSender</literal>
     for specialized <emphasis>JavaMail</emphasis> features such as MIME
-    messages, namely <literal>org.springframework.mail.javamail.JavaMail</literal>
+    messages, namely <literal>org.springframework.mail.javamail.JavaMailSender</literal>
     It also provides a callback interface for praparation of JavaMail MIME
     messages, namely <literal>org.springframework.mail.javamail.MimeMessage</literal></para>
 
