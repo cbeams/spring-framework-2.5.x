@@ -61,7 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.61 2004-07-27 09:25:00 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.62 2004-07-29 08:40:43 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
@@ -253,11 +253,13 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 			else {
 				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-				beanClass = bd.getBeanClass();
+				if (bd.hasBeanClass()) {
+					beanClass = bd.getBeanClass();
+				}
 				singleton = bd.isSingleton();
 			}
 			// in case of FactoryBean, return singleton status of created object if not a dereference
-			if (FactoryBean.class.isAssignableFrom(beanClass) && !isFactoryDereference(name)) {
+			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) && !isFactoryDereference(name)) {
 				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 				return factoryBean.isSingleton();
 			}

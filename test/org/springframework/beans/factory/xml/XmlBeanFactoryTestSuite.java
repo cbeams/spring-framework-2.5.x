@@ -65,7 +65,7 @@ import org.springframework.util.StopWatch;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.58 2004-07-28 07:35:58 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.59 2004-07-29 08:41:12 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -205,6 +205,13 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(inherits2.getAge() == 13);
 		// Shouldn't have changed first instance
 		assertTrue(inherits.getAge() == 1);
+	}
+
+	public void testGetBeansOfTypeWithParentWithoutClass() {
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		Map tbs = parent.getBeansOfType(TestBean.class, true, true);
+		assertEquals(2, tbs.size());
+		assertTrue(parent.isSingleton("inheritedTestBeanWithoutClass"));
 	}
 
 	public void testDependenciesMaterializeThis() throws Exception {
