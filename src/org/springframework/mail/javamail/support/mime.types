@@ -3,6 +3,7 @@
 # Defaults for the Java Activation Framework
 # Additional extensions registered in this file:
 # text/plain				java c c++ pl cc h
+#
 ################################################################################
 
 text/html				html htm HTML HTM
@@ -303,3 +304,4 @@ application/vis5d			v5d
 application/iges			igs
 # Autocad WHIP vector drawings
 drawing/x-dwf				dwf
+
