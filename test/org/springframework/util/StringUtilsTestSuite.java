@@ -265,6 +265,12 @@ public class StringUtilsTestSuite extends TestCase {
         assertEquals("i am capitalized", StringUtils.uncapitalize(capitalized));
     }
 
+    public void testCapitalize() throws Exception {
+        String capitalized = "i am not capitalized";
+        assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
+    }
+
+
 	public void testPathEquals() {
 		assertTrue(
 			"Must be true for the same strings",

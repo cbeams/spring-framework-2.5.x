@@ -40,7 +40,7 @@ import java.util.TreeSet;
  * @author Juergen Hoeller
  * @author Keith Donald
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.12 2004-05-08 20:28:59 pawlakjp Exp $
+ * @version $Id: StringUtils.java,v 1.13 2004-05-17 17:52:58 kdonald Exp $
  * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
@@ -347,24 +347,42 @@ public abstract class StringUtils {
 		return qualifiedName.substring(qualifiedName.lastIndexOf(separator) + 1);
 	}
 
-	/**
-	 * Uncapitalizes a <code>String</code>, changing the first letter to
-	 * lower case as per {@link Character#toLowerCase(char)}.
-	 * No other letters are changed.
-	 * @param str the String to uncapitalize, may be null
-	 * @return the uncapitalized String, <code>null</code> if null
-	 * String input
-	 */
-	public static String uncapitalize(String str) {
-		int strLen;
-		if (str == null || (strLen = str.length()) == 0) {
-			return str;
-		}
-		StringBuffer buf = new StringBuffer(strLen);
-		buf.append(Character.toLowerCase(str.charAt(0)));
-		buf.append(str.substring(1));
-		return buf.toString();
-	}
+    /**
+     * Capitalizes a <code>String</code>, changing the first letter to
+     * upper case as per {@link Character#toLowerCase(char)}.
+     * No other letters are changed.
+     * @param str the String to capitalize, may be null
+     * @return the capitalized String, <code>null</code> if null
+     */
+    public static String capitalize(String str) {
+        return changeFirstCharacterCase(true, str);
+    }
+
+    /**
+     * Uncapitalizes a <code>String</code>, changing the first letter to
+     * lower case as per {@link Character#toLowerCase(char)}.
+     * No other letters are changed.
+     * @param str the String to uncapitalize, may be null
+     * @return the uncapitalized String, <code>null</code> if null
+     */
+    public static String uncapitalize(String str) {
+        return changeFirstCharacterCase(false, str);
+    }
+
+    private static String changeFirstCharacterCase(boolean capitalize, String str) {
+        int strLen;
+        if (str == null || (strLen = str.length()) == 0) {
+            return str;
+        }
+        StringBuffer buf = new StringBuffer(strLen);
+        if (capitalize) {
+            buf.append(Character.toUpperCase(str.charAt(0)));
+        } else {
+            buf.append(Character.toLowerCase(str.charAt(0)));
+        }
+        buf.append(str.substring(1));
+        return buf.toString();
+    }
 
 	/**
 	 * Normalizes the path by suppressing sequences like "path/.." and inner 
