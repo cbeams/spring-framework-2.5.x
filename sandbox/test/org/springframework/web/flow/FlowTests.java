@@ -56,8 +56,8 @@ public class FlowTests extends TestCase {
 		String viewStateId = flow.view(PERSON_DETAILS);
 		String bindAndValidateStateId = flow.bindAndValidate(PERSON_DETAILS);
 
-		MockControl flowDaoMc = MockControl.createControl(FlowDao.class);
-		FlowDao dao = (FlowDao)flowDaoMc.getMock();
+		MockControl flowDaoMc = MockControl.createControl(FlowServiceLocator.class);
+		FlowServiceLocator dao = (FlowServiceLocator)flowDaoMc.getMock();
 		dao.getActionBean(getStateId);
 		flowDaoMc.setReturnValue(new NoOpActionBean());
 		dao.getActionBean(bindAndValidateStateId);
