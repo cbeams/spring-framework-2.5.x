@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 
 <project name="phonebook" default="usage" basedir=".">
-	<property id="user properties" file="${user.home}/refdata.build.properties" />
 	<property id="build properties" file="build.properties" />
 	<property id="project properties" file="project.properties" />
 	<property file="${toplevel.build.properties}" />

@@ -1,0 +1,26 @@
+# points to ant 1.6.2 build system for building samples
+builds.dir=../../../builds
+
+############################################################
+# user-definable build properties neccessary to build samples
+# ensure these properties are correct for your environment
+############################################################
+
+# location where development tools reside (e.g libs, templates, master builds)
+devtools.dir=c:/development/spring-training/devtools
+
+# location of spring related jars
+spring.dir=${devtools.dir}/lib/spring
+
+# location of spring webflow jar
+spring.webflow.jar=${spring.dir}/spring-webflow.jar
+
+# location of spring webflow support jar
+spring.webflow.support.jar=${spring.dir}/spring-webflow-support.jar
+
+# location of apps (e.g tomcat, weblogic, etc.)
+apps.dir=c:/development/apps
+
+# location of tomcat, for sample app deployment
+tomcat.dir=${apps.dir}/tomcat/${tomcat.version}
+
