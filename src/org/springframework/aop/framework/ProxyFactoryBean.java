@@ -351,13 +351,15 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * bean factory
 	 */
 	private void addAdvisorOnChainCreation(Object next, String name) {
-		logger.debug("Adding advisor or TargetSource [" + next + "] with name [" + name + "]");
-		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Adding advisor or TargetSource [" + next + "] with name [" + name + "]");
+		}
+
 		// Can only use interceptorName -> TargetSource conversion once,
 		// for the last entry in the interceptorNames list.
 		if (this.targetName != null) {
-			throw new AopConfigException("TargetSource specified more than once in interceptorNames list:" +
-					"Specify in targetSource property or ONCE at the END of the interceptorNames list");
+			throw new AopConfigException(
+			    "Cannot add further advisors after non-advisor bean name in interceptorNames");
 		}
 		
 		// We need to convert to an Advisor if necessary so that our source reference matches
@@ -383,7 +385,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 			// The default set by AdvisedSupport superclass is OK.
 			if (this.targetSource != EMPTY_TARGET_SOURCE) {
 				throw new AopConfigException("TargetSource specified more than once: " +
-						"Specify in targetSource property or at the END of the interceptorNames list");
+						"Specify in target property or targetSource property or at the END of the interceptorNames list");
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Adding TargetSource [" + advisor + "] with name [" + name + "]");
@@ -395,14 +397,18 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 	
 	private void refreshTarget() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Refreshing target with name '" + this.targetName + "'");
-		}
 		if (this.targetName == null) {
-			throw new AopConfigException("Target name cannot be null when refreshing!");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Not refreshing target: bean name not specified in interceptorNames");
+			}
 		}
-		Object target = this.beanFactory.getBean(this.targetName);
-		setTarget(target);
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Refreshing target with name '" + this.targetName + "'");
+			}
+			Object target = this.beanFactory.getBean(this.targetName);
+			setTarget(target);
+		}
 	}
 
 	/**
@@ -410,8 +416,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private Object namedBeanToAdvisorOrTargetSource(Object next) {
 		try {
-			Advisor adv = this.advisorAdapterRegistry.wrap(next);
-			return adv;
+			return this.advisorAdapterRegistry.wrap(next);
 		}
 		catch (UnknownAdviceTypeException ex) {
 			// Treat it as a TargetSource

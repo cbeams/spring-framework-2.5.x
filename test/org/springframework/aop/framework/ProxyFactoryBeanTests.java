@@ -103,7 +103,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		catch (BeanCreationException ex) {
 			// Root cause of the problem must be an AOP exception
 			AopConfigException aex = (AopConfigException) ex.getCause();
-			assertTrue(aex.getMessage().indexOf("TargetSource") != -1);
+			assertTrue(aex.getMessage().indexOf("non-advisor") != -1);
 		}
 	}
 	
@@ -591,7 +591,68 @@ public class ProxyFactoryBeanTests extends TestCase {
 		Person p = (Person) bf.getBean("interceptorNotSerializableSingleton");
 		assertFalse("Not serializable because an interceptor isn't serializable", SerializationTestUtils.isSerializable(p));
 	}
-	
+
+	/*
+	public void testPrototypeAdvisor() {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTests.xml", getClass()));
+
+		ITestBean bean1 = (ITestBean) bf.getBean("prototypeTestBeanProxy");
+		ITestBean bean2 = (ITestBean) bf.getBean("prototypeTestBeanProxy");
+
+		bean1.setAge(3);
+		bean2.setAge(4);
+
+		assertEquals(3, bean1.getAge());
+		assertEquals(4, bean2.getAge());
+
+		((Lockable) bean1).lock();
+
+		try {
+			bean1.setAge(5);
+			fail("expected LockedException");
+		}
+		catch (LockedException ex) {
+			// expected
+		}
+
+		try {
+			bean2.setAge(6);
+		}
+		catch (LockedException ex) {
+			fail("did not expect LockedException");
+		}
+	}
+
+	public void testPrototypeInterceptorSingletonTarget() {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTests.xml", getClass()));
+
+		ITestBean bean1 = (ITestBean) bf.getBean("prototypeTestBeanProxySingletonTarget");
+		ITestBean bean2 = (ITestBean) bf.getBean("prototypeTestBeanProxySingletonTarget");
+
+		bean1.setAge(1);
+		bean2.setAge(2);
+
+		assertEquals(2, bean1.getAge());
+
+		((Lockable) bean1).lock();
+
+		try {
+			bean1.setAge(5);
+			fail("expected LockedException");
+		}
+		catch (LockedException ex) {
+			// expected
+		}
+
+		try {
+			bean2.setAge(6);
+		}
+		catch (LockedException ex) {
+			fail("did not expect LockedException");
+		}
+	}
+	*/
+
 
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.

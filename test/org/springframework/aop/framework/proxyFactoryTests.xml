@@ -148,7 +148,37 @@
 		class="org.springframework.context.event.ConsoleListener">
 	</bean>
 	
+	<bean id="prototypeLockMixinAdvisor" class="org.springframework.aop.framework.LockMixinAdvisor" singleton="false"/>
 
-</beans>		
-	
-	
+	<bean id="prototypeTestBean" class="org.springframework.beans.TestBean" singleton="false"/>
+
+	<bean id="prototypeTestBeanProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>
+		<property name="singleton"><value>false</value></property>
+		<property name="interceptorNames">
+			<list>
+				<value>prototypeLockMixinAdvisor</value>
+				<value>prototypeTestBean</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="prototypeLockMixinInterceptor" class="org.springframework.aop.framework.LockMixin" singleton="false"/>
+
+	<bean id="prototypeTestBeanProxySingletonTarget" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<list>
+				<value>org.springframework.beans.ITestBean</value>
+				<value>org.springframework.aop.framework.Lockable</value>
+			</list>
+		</property>
+		<property name="singleton"><value>false</value></property>
+		<property name="target"><ref local="prototypeTestBean"/></property>
+		<property name="interceptorNames">
+			<list>
+				<value>prototypeLockMixinInterceptor</value>
+			</list>
+		</property>
+	</bean>
+
+</beans>
