@@ -210,8 +210,9 @@ public class SimpleFormController extends AbstractFormController {
 	 * the object to the database. Implementations can also perform custom validation and
 	 * call showForm to return to the form. Do <i>not</i> implement multiple onSubmit
 	 * methods: In that case, just this method will be called by the controller.
-	 * <p>Call errors.getModel() to populate the ModelAndView model with the command and
-	 * the Errors instance, under the command name, as expected by the "spring:bind" tag.
+	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * with the command and the Errors instance, under the specified command name,
+	 * as expected by the "spring:bind" tag.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
@@ -221,6 +222,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #onSubmit(Object, BindException)
 	 * @see #showForm
 	 * @see org.springframework.validation.Errors
+	 * @see org.springframework.validation.BindException#getModel
 	 */
 	protected ModelAndView onSubmit(HttpServletRequest request,	HttpServletResponse response,
 																	Object command,	BindException errors) throws Exception {
@@ -235,8 +237,9 @@ public class SimpleFormController extends AbstractFormController {
 	 * rendering the success view with the command and Errors instance as model.
 	 * <p>Subclasses can override this to provide custom submission handling that
 	 * does not need request and response.
-	 * <p>Call errors.getModel() to populate the ModelAndView model with the command and
-	 * the Errors instance, under the command name, as expected by the "spring:bind" tag.
+	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * with the command and the Errors instance, under the specified command name,
+	 * as expected by the "spring:bind" tag.
 	 * @param command form object with request parameters bound onto it
 	 * @param errors Errors instance without errors
 	 * @return the prepared model and view, or null
@@ -244,6 +247,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
 	 * @see #onSubmit(Object)
 	 * @see org.springframework.validation.Errors
+	 * @see org.springframework.validation.BindException#getModel
 	 */
 	protected ModelAndView onSubmit(Object command, BindException errors) throws Exception {
 		ModelAndView mv = onSubmit(command);
@@ -270,7 +274,6 @@ public class SimpleFormController extends AbstractFormController {
 	 * @param command form object with request parameters bound onto it
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
-	 * @deprecated in favor of onSubmit(command, errors)
 	 * @see #onSubmit(Object, BindException)
 	 */
 	protected ModelAndView onSubmit(Object command) throws Exception {
