@@ -24,7 +24,7 @@ import java.util.Set;
  * Bean exposing a map. Used for bean factory tests.
  * @author Rod Johnson
  * @since 05-Jun-2003
- * @version $Id: HasMap.java,v 1.4 2004-05-18 08:03:31 jhoeller Exp $
+ * @version $Id: HasMap.java,v 1.5 2004-06-23 10:39:01 jhoeller Exp $
  */
 public class HasMap {
 	
@@ -39,6 +39,9 @@ public class HasMap {
 	private Class[] classArray;
 	
 	private Integer[] intArray;
+
+	private HasMap() {
+	}
 
 	public Map getMap() {
 		return map;

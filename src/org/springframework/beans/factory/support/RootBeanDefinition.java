@@ -32,7 +32,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RootBeanDefinition.java,v 1.20 2004-04-22 07:58:23 jhoeller Exp $
+ * @version $Id: RootBeanDefinition.java,v 1.21 2004-06-23 10:39:00 jhoeller Exp $
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -329,9 +329,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 			if (FactoryBean.class.isAssignableFrom(getBeanClass()) && !isSingleton()) {
 				throw new BeanDefinitionValidationException("FactoryBean must be defined as singleton - " +
 																										"FactoryBeans themselves are not allowed to be prototypes");
-			}
-			if (getBeanClass().getConstructors().length == 0) {
-				throw new BeanDefinitionValidationException("No public constructor in class [" + getBeanClass() + "]");
 			}
 		}
 	}

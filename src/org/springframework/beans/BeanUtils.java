@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,50 +32,56 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.16 2004-06-11 23:38:14 jhoeller Exp $
+ * @version $Id: BeanUtils.java,v 1.17 2004-06-23 10:38:31 jhoeller Exp $
  */
 public abstract class BeanUtils {
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
-	 * As this method doesn't try to load classes by name, it should avoid class-loading issues.
+	 * As this method doesn't try to load classes by name, it should avoid
+	 * class-loading issues.
+	 * <p>Note that this method tries to set the constructor accessible
+	 * if given a non-accessible (i.e. non-public) constructor.
 	 * @param clazz class to instantiate
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Class clazz) throws BeansException {
 		try {
-			return clazz.newInstance();
+			return instantiateClass(clazz.getDeclaredConstructor(null), null);
 		}
-		catch (InstantiationException ex) {
+		catch (NoSuchMethodException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + clazz.getName() +
-																	 "]; Is it an interface or an abstract class? Does it have a no-arg constructor?", ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + clazz.getName() +
-																	 "]; has class definition changed? Is there a public no-arg constructor?", ex);
+			                             "]: no default constructor found", ex);
 		}
 	}
 
 	/**
 	 * Convenience method to instantiate a class using the given constructor.
-	 * As this method doesn't try to load classes by name, it should avoid class-loading issues.
+	 * As this method doesn't try to load classes by name, it should avoid
+	 * class-loading issues.
+	 * <p>Note that this method tries to set the constructor accessible
+	 * if given a non-accessible (i.e. non-public) constructor.
 	 * @param constructor constructor to instantiate
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Constructor constructor, Object[] arguments) throws BeansException {
 		try {
+			if (!Modifier.isPublic(constructor.getModifiers())) {
+				constructor.setAccessible(true);
+			}
 			return constructor.newInstance(arguments);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new FatalBeanException("Illegal arguments when trying to instantiate constructor: " + constructor, ex);
 		}
 		catch (InstantiationException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
-			                             "]; is it an interface or an abstract class?", ex);
+			                             "]: Is it an interface or an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
-			                             "]; has class definition changed? Is there a public constructor?", ex);
+			                             "]: Has the class definition changed? Is the constructor accessible?", ex);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
+			                             "]: illegal arguments for constructor", ex);
 		}
 		catch (InvocationTargetException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +

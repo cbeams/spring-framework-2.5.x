@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -310,11 +311,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
-		Constructor[] constructors = mergedBeanDefinition.getBeanClass().getConstructors();
+		Constructor[] constructors = mergedBeanDefinition.getBeanClass().getDeclaredConstructors();
 		Arrays.sort(constructors, new Comparator() {
 			public int compare(Object o1, Object o2) {
-				int c1pl = ((Constructor) o1).getParameterTypes().length;
-				int c2pl = ((Constructor) o2).getParameterTypes().length;
+				Constructor c1 = (Constructor) o1;
+				Constructor c2 = (Constructor) o2;
+				boolean p1 = Modifier.isPublic(c1.getModifiers());
+				boolean p2 = Modifier.isPublic(c2.getModifiers());
+				if (p1 != p2) {
+					return (p1 ? -1 : 1);
+				}
+				int c1pl = c1.getParameterTypes().length;
+				int c2pl = c2.getParameterTypes().length;
 				return (new Integer(c1pl)).compareTo(new Integer(c2pl)) * -1;
 			}
 		});

@@ -627,6 +627,9 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 
 
 	public static class NoDependencies {
+
+		private NoDependencies() {
+		}
 	}
 
 
@@ -636,6 +639,10 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 
 		public ConstructorDependency(TestBean spouse) {
 			this.spouse = spouse;
+		}
+
+		private ConstructorDependency(TestBean spouse, TestBean otherSpouse) {
+			throw new IllegalArgumentException("Should never be called");
 		}
 	}
 
