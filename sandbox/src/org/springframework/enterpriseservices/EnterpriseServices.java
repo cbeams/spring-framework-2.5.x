@@ -10,8 +10,8 @@ import java.util.List;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.framework.support.AdvisorAutoProxyCreator;
-import org.springframework.aop.interceptor.AbstractPoolingInvokerInterceptor;
-import org.springframework.aop.interceptor.CommonsPoolingInvokerInterceptor;
+import org.springframework.aop.target.AbstractPoolingTargetSource;
+import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -26,7 +26,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * use Spring Metadata.
  * Has knowledge of pooling and other specific enterprise aspects.
  * @author Rod Johnson
- * @version $Id: EnterpriseServices.java,v 1.3 2003-11-24 21:49:05 jhoeller Exp $
+ * @version $Id: EnterpriseServices.java,v 1.4 2003-12-05 17:54:31 johnsonr Exp $
  */
 public class EnterpriseServices extends AdvisorAutoProxyCreator  {
 
@@ -61,6 +61,7 @@ public class EnterpriseServices extends AdvisorAutoProxyCreator  {
 	 * TODO everything else could be pulled up into a superclass
 	 * @see org.springframework.aop.framework.support.AbstractAutoProxyCreator#createInvokerInterceptor(java.lang.Object, java.lang.String)
 	 */
+	/*
 	protected Interceptor createInvokerInterceptor(Object bean, String beanName, RootBeanDefinition definition) {
 		
 		List l = this.attributes.getAttributes(bean.getClass(), PoolingAttribute.class);
@@ -71,7 +72,7 @@ public class EnterpriseServices extends AdvisorAutoProxyCreator  {
 			logger.info("Configuring pooling...");
 			
 			PoolingAttribute pa = (PoolingAttribute) l.get(0);
-			AbstractPoolingInvokerInterceptor cpii = createPoolingInvoker();
+			AbstractPoolingTargetSource cpii = createPoolingInvoker();
 			cpii.setMaxSize(pa.getSize());
 			cpii.setTargetBeanName(beanName);
 			try {
@@ -89,10 +90,11 @@ public class EnterpriseServices extends AdvisorAutoProxyCreator  {
 			return super.createInvokerInterceptor(bean, beanName);
 		}
 	}
+	*/
 
 	// TODO could pull into a strategy? or differentiate by subclasses
-	protected AbstractPoolingInvokerInterceptor createPoolingInvoker() {
-		CommonsPoolingInvokerInterceptor cpii = new CommonsPoolingInvokerInterceptor();
+	protected AbstractPoolingTargetSource createPoolingInvoker() {
+		CommonsPoolTargetSource cpii = new CommonsPoolTargetSource();
 		return cpii;
 	}
 	

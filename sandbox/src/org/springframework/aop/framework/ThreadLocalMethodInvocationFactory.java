@@ -14,7 +14,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * TODO reentrance tests
  * @author Rod Johnson
- * @version $Id: ThreadLocalMethodInvocationFactory.java,v 1.4 2003-12-02 22:28:40 johnsonr Exp $
+ * @version $Id: ThreadLocalMethodInvocationFactory.java,v 1.5 2003-12-05 17:54:31 johnsonr Exp $
  */
 public class ThreadLocalMethodInvocationFactory extends SimpleMethodInvocationFactory {
 	
@@ -22,11 +22,16 @@ public class ThreadLocalMethodInvocationFactory extends SimpleMethodInvocationFa
 	
 	private HashMap methodCache = new HashMap();
 	
+	
 	public ThreadLocalMethodInvocationFactory() {
 	}
 	
-	public MethodInvocation getMethodInvocation(AdvisedSupport advised, Object proxy, Method method, Class targetClass, Object[] args, List interceptorsAndDynamicInterceptionAdvice) {
-		
+	/**
+	 * @see org.springframework.aop.framework.MethodInvocationFactory#getMethodInvocation(java.lang.Object, java.lang.reflect.Method, java.lang.Class, java.lang.Object, java.lang.Object[], java.util.List, org.springframework.aop.framework.AdvisedSupport)
+	 */
+	public MethodInvocation getMethodInvocation(Object proxy, Method method, Class targetClass, Object target, Object[] args,
+			List interceptorsAndDynamicInterceptionAdvice, AdvisedSupport advised) {
+			
 		ReflectiveMethodInvocation mii = (ReflectiveMethodInvocation) instance.get();
 		// Need to use OLD to replace so as not to zap existing
 		if (mii == null) {
@@ -36,7 +41,7 @@ public class ThreadLocalMethodInvocationFactory extends SimpleMethodInvocationFa
 
 		mii.populate(
 			proxy,
-			advised.getTarget(),
+			target,
 			method.getDeclaringClass(),
 			method,
 			args,
