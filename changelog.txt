@@ -6,8 +6,13 @@ http://www.springframework.org
 Changes in version 1.1.2 (15.11.2004)
 -------------------------------------
 
+General
+* fixed compilation on JDK 1.5 with "-source 1.5" (renamed "enum" variables, fixed "getMethod"/"invoke" ambiguities)
+* renamed all remaining "*TestSuite" class to "*Tests", for consistent naming of test cases
+
 Package org.springframework.aop
 * reworked ProxyFactoryBean and AbstractPrototypeBasedTargetSource to leverage BeanFactory's "getType" method
+* added "perl5" flag to RegexpMethodPointcutAdvisor: on uses ORO (the default), off uses the JDK 1.4 regexp package
 * reworked DebugInterceptor to log to Commons Logging at debug level rather than to the console
 
 Package org.springframework.beans
@@ -17,16 +22,33 @@ Package org.springframework.beans
 * refactored AbstractBeanFactory's "getBean" implementation to do more aggressive upfront type checking
 * moved "destroyBean" implementation from AbstractAutowireCapableBeanFactory up to AbstractBeanFactory
 * refined internal structure and visibilities of AbstractBeanFactory and AbstractAutowireCapableBeanFactory
+* reworked DefaultListableBeanFactory's "getBeansOfType" implementation, always detecting FactoryBeans correctly now
+* PropertyPlaceholderConfigurer does not try to parse its own bean definition (ignoring unresolvable locations there)
+* added PropertyPathFactoryBean, allowing to evaluate the property path of a target bean and expose the result
+* FieldRetrievingFactoryBean considers its bean name as static field expression if no other properties specified
 * fixed PropertiesBeanDefinitionReader to allow bean names that contain dots
 * DefaultXmlBeanDefinitionParser allows unnamed child bean definitions too (using class or parent as bean name)
-* added PropertyPathFactoryBean, allowing to evaluate the property path of a target bean and expose the result
+* allow "bean*" rather than "bean+" in XML bean definitions, i.e. no bean definitions in a file (just imports)
+
+Package org.springframework.context
+* AbstractApplicationContext automatically registers a context-aware URLEditor now (delegating to the ResourceLoader)
+
+Package org.springframework.core
+* ResourceEditor resolves all placeholders in a path as system properties now, not just the first one
 
 Package org.springframework.orm
 * fixed LocalSessionFactoryBean to call "configure" after "setNamingStrategy" (in case of a specified "configLocation")
+* added "load(entity, id)" method to HibernateOperations and HibernateTemplate
 
 Package org.springframework.scheduling
 * moved "configTimeDataSourceHolder" from LocalDataSourceJobStore to SchedulerFactoryBean
 * fixed LocalDataSourceJobStore to suppress a shutdown attempt on a Spring-provided DataSource
+
+Package org.springframework.util
+* introduced Assert class, mainly for checking method parameters and invariants within the framework
+
+Package org.springframework.validation
+* DataBinder does not accept an empty String (without text content) as value for a required field
 
 Package org.springframework.web
 * fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
