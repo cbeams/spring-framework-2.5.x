@@ -15,24 +15,19 @@
  */
 package org.springframework.web.flow.action;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeMapper;
 import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
-import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionContext;
 
 /**
- * Maps parameters in the http servlet request to attributes <i>set</i> in the
- * flow model.
+ * Maps parameters in an event to attributes <i>set</i> into flow scope.
  * @author Keith Donald
  */
 public class SetAction extends AbstractAction {
 
-	private AttributeMapper requestParameterMapper;
+	private AttributeMapper eventParameterMapper;
 
 	/**
 	 * Creates a set action with an initially empty mappings list.
@@ -69,45 +64,21 @@ public class SetAction extends AbstractAction {
 	 * @param mappings the mappings
 	 */
 	public void setMappings(Mapping[] mappings) {
-		this.requestParameterMapper = new ParameterizableAttributeMapper(mappings);
+		this.eventParameterMapper = new ParameterizableAttributeMapper(mappings);
 	}
 
 	/**
 	 * Set to completely customize the attribute mapper strategy.
 	 * @param mapper The strategy
 	 */
-	public void setRequestParameterMapper(AttributeMapper mapper) {
-		this.requestParameterMapper = mapper;
+	public void setEventParameterMapper(AttributeMapper mapper) {
+		this.eventParameterMapper = mapper;
 	}
 
 	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
-		if (requestParameterMapper != null) {
-			this.requestParameterMapper.map(context.getEvent(), context.flowScope());
+		if (eventParameterMapper != null) {
+			this.eventParameterMapper.map(context.getEvent(), context.flowScope());
 		}
 		return success();
-	}
-
-	/**
-	 * Adapts request parameter access to the attribute accessor interface.
-	 * @author Keith Donald
-	 */
-	public static class RequestParameterAttributeAccessorAdapter implements AttributeAccessor {
-
-		private HttpServletRequest request;
-
-		/**
-		 * Create a new request parameter attribute accessor.
-		 */
-		public RequestParameterAttributeAccessorAdapter(HttpServletRequest request) {
-			this.request = request;
-		}
-
-		public boolean containsAttribute(String attributeName) {
-			return StringUtils.hasText(request.getParameter(attributeName));
-		}
-
-		public Object getAttribute(String attributeName) {
-			return request.getParameter(attributeName);
-		}
 	}
 }
