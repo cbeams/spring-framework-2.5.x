@@ -118,8 +118,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 			return home.getClass().getMethod("create", (Class[]) null);
 		}
 		catch (NoSuchMethodException ex) {
-			throw new AspectException(
-					"EJB home [" + this.cachedHome + "] has no no-arg create() method");
+			throw new AspectException("EJB home [" + home + "] has no no-arg create() method");
 		}
 	}
 
