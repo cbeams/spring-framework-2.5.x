@@ -38,6 +38,7 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
+ * @author Erwin Vervaet
  */
 public class BindAndValidateAction extends AbstractAction implements InitializingBean {
 
@@ -45,7 +46,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	 * Constant <code>ActionResult</code> marker that indicates to the base
 	 * BindAndValidate action that it should attempt to return a default
 	 * <code>success</code> or <code>error</code> event. What event to
-	 * returned is calculated based on whether any errors were generated during
+	 * return is calculated based on whether any errors were generated during
 	 * the bind and validate process.
 	 */
 	protected static final ActionResult USE_DEFAULT_EVENT = ActionResult.NULL_RESULT;

@@ -268,27 +268,27 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName, Errors.class);
 	}
 
-	/*
+	/**
 	 * 
 	 */
 	public final ActionResult execute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Action bean '" + getClass().getName() + "' beginning execution");
+			logger.debug("Action '" + getClass().getName() + "' beginning execution");
 		}
 		try {
 			ActionResult event = onPreExecute(request, response, model);
 			if (event == null) {
 				event = doExecuteAction(request, response, model);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Action bean '" + getClass().getName() + "' completed execution; event result is "
+					logger.debug("Action '" + getClass().getName() + "' completed execution; event result is "
 							+ event);
 				}
 				onPostExecute(request, response, model);
 				if (logger.isInfoEnabled()) {
 					if (event == null) {
 						logger
-								.info("Retured action bean event is [null]; that's ok so long as another action associated "
+								.info("Retured action event is [null]; that's ok so long as another action associated "
 										+ "with the currently executing flow state returns a valid event");
 					}
 				}
