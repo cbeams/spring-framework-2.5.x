@@ -26,6 +26,7 @@ import java.util.StringTokenizer;
 import junit.framework.TestCase;
 
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 
@@ -344,6 +345,69 @@ public class CustomEditorTestSuite extends TestCase {
 		fail("Should have thrown BeansException");
 	}
 
+	public void testCustomBooleanEditor() {
+		CustomBooleanEditor editor = new CustomBooleanEditor(false);
+		editor.setAsText("true");
+		assertEquals(Boolean.TRUE, editor.getValue());
+		assertEquals("true", editor.getAsText());
+		editor.setAsText("false");
+		assertEquals(Boolean.FALSE, editor.getValue());
+		assertEquals("false", editor.getAsText());
+		editor.setValue(null);
+		assertEquals(null, editor.getValue());
+		assertEquals("", editor.getAsText());
+	}
+
+	public void testCustomBooleanEditorWithEmptyAsNull() {
+		CustomBooleanEditor editor = new CustomBooleanEditor(true);
+		editor.setAsText("true");
+		assertEquals(Boolean.TRUE, editor.getValue());
+		assertEquals("true", editor.getAsText());
+		editor.setAsText("false");
+		assertEquals(Boolean.FALSE, editor.getValue());
+		assertEquals("false", editor.getAsText());
+		editor.setValue(null);
+		assertEquals(null, editor.getValue());
+		assertEquals("", editor.getAsText());
+	}
+
+	public void testCustomDateEditor() {
+		CustomDateEditor editor = new CustomDateEditor(null, false);
+		editor.setValue(null);
+		assertEquals(null, editor.getValue());
+		assertEquals("", editor.getAsText());
+	}
+
+	public void testCustomDateEditorWithEmptyAsNull() {
+		CustomDateEditor editor = new CustomDateEditor(null, true);
+		editor.setValue(null);
+		assertEquals(null, editor.getValue());
+		assertEquals("", editor.getAsText());
+	}
+
+	public void testCustomNumberEditor() {
+		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, false);
+		editor.setAsText("5");
+		assertEquals(new Integer(5), editor.getValue());
+		assertEquals("5", editor.getAsText());
+		editor.setValue(null);
+		assertEquals(null, editor.getValue());
+		assertEquals("", editor.getAsText());
+	}
+
+	public void testCustomNumberEditorWithEmptyAsNull() {
+		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, true);
+		editor.setAsText("5");
+		assertEquals(new Integer(5), editor.getValue());
+		assertEquals("5", editor.getAsText());
+		editor.setAsText("");
+		assertEquals(null, editor.getValue());
+		assertEquals("", editor.getAsText());
+		editor.setValue(null);
+		assertEquals(null, editor.getValue());
+		assertEquals("", editor.getAsText());
+	}
+
 	public void testStringTrimmerEditor() {
 		StringTrimmerEditor editor = new StringTrimmerEditor(false);
 		editor.setAsText("test");
@@ -356,7 +420,7 @@ public class CustomEditorTestSuite extends TestCase {
 		assertEquals("", editor.getValue());
 		assertEquals("", editor.getAsText());
 		editor.setValue(null);
-		assertEquals("null", editor.getAsText());
+		assertEquals("", editor.getAsText());
 	}
 
 	public void testStringTrimmerEditorWithEmptyAsNull() {

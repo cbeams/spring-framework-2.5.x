@@ -131,8 +131,8 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 					setValue(new BigDecimal(Double.toString(number.doubleValue())));
 				}
 				else {
-					throw new IllegalArgumentException("Cannot convert [" + text + "] to [" +
-																						 this.numberClass.getName() + "]");
+					throw new IllegalArgumentException(
+							"Cannot convert [" + text + "] into value of class [" + this.numberClass.getName() + "]");
 				}
 			}
 			catch (ParseException ex) {
@@ -164,12 +164,15 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 				setValue(new BigDecimal(text));
 			}
 			else {
-				throw new IllegalArgumentException("Cannot convert [" + text + "] to [" +
-																					 this.numberClass.getName() + "]");
+				throw new IllegalArgumentException(
+						"Cannot convert [" + text + "] to [" + this.numberClass.getName() + "]");
 			}
 		}
 	}
 
+	/**
+	 * Format the Number as String, using the specified NumberFormat.
+	 */
 	public String getAsText() {
 		Object value = getValue();
 		if (value != null) {
@@ -183,7 +186,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 			}
 		}
 		else {
-			return (this.allowEmpty ? "" : "null");
+			return "";
 		}
 	}
 

@@ -55,8 +55,7 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 	}
 
 	public String getAsText() {
-		// if null is considered as empty, return empty string for it rather than "null"
-		return (this.emptyAsNull && getValue() == null ? "" : super.getAsText());
+		return (getValue() == null ? "" : super.getAsText());
 	}
 
 }

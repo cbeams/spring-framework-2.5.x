@@ -83,12 +83,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * Format the Date as String, using the specified DateFormat.
 	 */
 	public String getAsText() {
-		if (getValue() != null) {
-			return this.dateFormat.format((Date) getValue());
-		}
-		else {
-			return (this.allowEmpty ? "" : "null");
-		}
+		return (getValue() == null ? "" : this.dateFormat.format((Date) getValue()));
 	}
 
 }
