@@ -71,6 +71,7 @@ public class JdoTemplateTests extends TestCase {
 
 	public void testTemplateExecuteWithNotAllowCreate() {
 		JdoTemplate jt = new JdoTemplate();
+		jt.setPersistenceManagerFactory(pmf);
 		jt.setAllowCreate(false);
 		try {
 			jt.execute(new JdoCallback() {

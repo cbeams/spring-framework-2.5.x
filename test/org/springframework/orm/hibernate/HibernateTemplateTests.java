@@ -127,6 +127,7 @@ public class HibernateTemplateTests extends TestCase {
 
 	public void testExecuteWithNotAllowCreate() {
 		HibernateTemplate ht = new HibernateTemplate();
+		ht.setSessionFactory(sf);
 		ht.setAllowCreate(false);
 		try {
 			ht.execute(new HibernateCallback() {
