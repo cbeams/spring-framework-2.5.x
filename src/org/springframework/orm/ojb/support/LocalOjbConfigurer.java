@@ -23,6 +23,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
  * This configurer needs to be defined as Spring bean when using
  * LocalDataSourceConnectionFactory, to expose the Spring BeanFactory
  * to the corresponding static field of the connection factory.
+ * See LocalDataSourceConnectionFactory's javadoc for usage details.
  *
  * <p>It is clearly not ideal to use a static field here, but unfortunately
  * OJB creates an instance of the configured ConnectionFactory at broker
@@ -33,7 +34,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
  * @since 03.07.2004
  * @see LocalDataSourceConnectionFactory
  */
-public class LocalDataSourceConnectionConfigurer implements BeanFactoryAware {
+public class LocalOjbConfigurer implements BeanFactoryAware {
 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		LocalDataSourceConnectionFactory.beanFactory = beanFactory;

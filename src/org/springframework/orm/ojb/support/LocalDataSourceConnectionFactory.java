@@ -32,23 +32,20 @@ import org.springframework.beans.factory.BeanFactory;
  * <p>Define the following entry in your OJB.properties to use this connection factory:
  *
  * <pre>
- * ConnectionFactoryClass=org.springframework.orm.ojb.support.LocalDataSourceConnectionFactory
- * </pre>
+ * ConnectionFactoryClass=org.springframework.orm.ojb.support.LocalDataSourceConnectionFactory</pre>
  *
  * Interprets JCD aliases in OJB's JDBC connection descriptors as Spring bean names.
- * For example, the following will delegate to the Spring bean named "dataSource":
+ * For example, the following will delegate to the Spring bean named "myDataSource":
  *
  * <pre>
- * &lt;jdbc-connection-descriptor jcd-alias="dataSource" default-connection="true" useAutoCommit="1"/&gt;
- * </pre>
+ * &lt;jdbc-connection-descriptor jcd-alias="myDataSource" default-connection="true" useAutoCommit="1"/&gt;</pre>
  *
- * Depends on LocalDataSourceConnectionConfigurer being defined as Spring bean,
- * which will expose the Spring BeanFactory to the corresponding static field of
- * this connection factory.
+ * Depends on LocalOjbConfigurer being defined as Spring bean, which will expose
+ * the Spring BeanFactory to the corresponding static field of this connection factory.
  *
  * @author Juergen Hoeller
  * @since 03.07.2004
- * @see LocalDataSourceConnectionConfigurer
+ * @see LocalOjbConfigurer
  */
 public class LocalDataSourceConnectionFactory extends ConnectionFactoryManagedImpl {
 
@@ -60,7 +57,7 @@ public class LocalDataSourceConnectionFactory extends ConnectionFactoryManagedIm
 	public LocalDataSourceConnectionFactory() {
 		if (beanFactory == null) {
 			throw new IllegalStateException("No BeanFactory found for configuration - " +
-																			"LocalDataSourceConnectionConfigurer must be defined as Spring bean");
+																			"LocalOjbConfigurer must be defined as Spring bean");
 		}
 	}
 
