@@ -144,9 +144,9 @@ distribution/website before using any of them in your own applications.
 
 * jakarta-commons/commons-collections.jar
 - Commons Collections 3.1 (http://jakarta.apache.org/commons/collections)
+- required for building the framework
 - optional for using linked/identity maps in Spring core (on JDK <= 1.4)
-- required for running JPetStore's Struts web tier (by Struts)
-- required for running Petclinic (by Hibernate and OJB)
+- required for running Petclinic, JPetStore, Image Database (by Commons DBCP, Hibernate, OJB)
 
 * jakarta-commons/commons-dbcp.jar
 - Commons DBCP 1.2.1 (http://jakarta.apache.org/commons/dbcp)
@@ -172,10 +172,6 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
-* jakarta-commons/commons-lang.jar
-- Commons Lang 1.0.1 (http://jakarta.apache.org/commons/lang)
-- required for running JPetStore's Struts web tier
-
 * jakarta-commons/commons-logging.jar
 - Commons Logging 1.0.4 (http://jakarta.apache.org/commons/logging)
 - required for building the framework
@@ -183,11 +179,11 @@ distribution/website before using any of them in your own applications.
 
 * jakarta-commons/commons-pool.jar
 - Commons Pool 1.2 (http://jakarta.apache.org/commons/pool)
-- required for running JPetStore and Image Database
+- required for running JPetStore and Image Database (by Commons DBCP)
 
 * jakarta-commons/commons-validator.jar
 - Commons Validator 1.1.3 (http://jakarta.apache.org/commons/validator)
-- required for running JPetStore's Struts web tier
+- required for running JPetStore's Struts web tier on servers that eagerly load tag libraries (e.g. Resin)
 
 * jakarta-taglibs/standard.jar
 - Jakarta's JSTL implementation 1.0.6 (http://jakarta.apache.org/taglibs)
