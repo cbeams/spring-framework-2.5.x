@@ -23,63 +23,58 @@ import org.springframework.util.SerializationTestUtils;
 import junit.framework.TestCase;
 
 /**
- * @author Rod Johnson
- * @since 23-Jul-2003
- * @version $Id: RegexpMethodPointcutTests.java,v 1.6 2004-07-25 11:58:12 johnsonr Exp $
+ * @author Dmitriy Kopylenko
+ * @since 1.1
+ * @version $Id: AbstractRegexpMethodPointcutTests.java,v 1.1 2004-07-28 18:35:27 dkopylenko Exp $
  */
-public class RegexpMethodPointcutTests extends TestCase {
+public abstract class AbstractRegexpMethodPointcutTests extends TestCase {
+    
+    protected AbstractRegexpMethodPointcut rpc;
 
 	public void testNoPatternSupplied() throws Exception {
-		Perl5RegexpMethodPointcut rpc = new Perl5RegexpMethodPointcut();
 		noPatternSuppliedTests(rpc);
 	}
 	
 	public void testSerializationWithNoPatternSupplied() throws Exception {
-		Perl5RegexpMethodPointcut rpc = new Perl5RegexpMethodPointcut();
-		rpc = (Perl5RegexpMethodPointcut) SerializationTestUtils.serializeAndDeserialize(rpc);
+		rpc = (AbstractRegexpMethodPointcut) SerializationTestUtils.serializeAndDeserialize(rpc);
 		noPatternSuppliedTests(rpc);
 	}
 	
-	protected void noPatternSuppliedTests(Perl5RegexpMethodPointcut rpc) throws Exception {
+	protected void noPatternSuppliedTests(AbstractRegexpMethodPointcut rpc) throws Exception {
 		assertFalse(rpc.matches(Object.class.getMethod("hashCode", null), String.class));
 		assertFalse(rpc.matches(Object.class.getMethod("wait", null), Object.class));
 		assertEquals(0, rpc.getPatterns().length);
 	}
 	
 	public void testExactMatch() throws Exception {
-		Perl5RegexpMethodPointcut rpc = new Perl5RegexpMethodPointcut();
 		rpc.setPattern("java.lang.Object.hashCode");
 		exactMatchTests(rpc);
-		rpc = (Perl5RegexpMethodPointcut) SerializationTestUtils.serializeAndDeserialize(rpc);
+		rpc = (AbstractRegexpMethodPointcut) SerializationTestUtils.serializeAndDeserialize(rpc);
 		exactMatchTests(rpc);
 	}
 	
-	protected void exactMatchTests(Perl5RegexpMethodPointcut rpc) throws Exception {
+	protected void exactMatchTests(AbstractRegexpMethodPointcut rpc) throws Exception {
 		// assumes rpc.setPattern("java.lang.Object.hashCode");
 		assertTrue(rpc.matches(Object.class.getMethod("hashCode", null), String.class));
 		assertFalse(rpc.matches(Object.class.getMethod("wait", null), Object.class));
 	}
 	
 	public void testWildcard() throws Exception {
-		Perl5RegexpMethodPointcut rpc = new Perl5RegexpMethodPointcut();
 		rpc.setPattern(".*Object.hashCode");
 		assertTrue(rpc.matches(Object.class.getMethod("hashCode", null), Object.class));
 		assertFalse(rpc.matches(Object.class.getMethod("wait", null), Object.class));
 	}
 	
 	public void testWildcardForOneClass() throws Exception {
-		Perl5RegexpMethodPointcut rpc = new Perl5RegexpMethodPointcut();
 		rpc.setPattern("java.lang.Object.*");
 		assertTrue(rpc.matches(Object.class.getMethod("hashCode", null), String.class));
 		assertTrue(rpc.matches(Object.class.getMethod("wait", null), String.class));
 	}
 	
 	public void testMatchesObjectClass() throws Exception {
-		Perl5RegexpMethodPointcut rpc = new Perl5RegexpMethodPointcut();
 		rpc.setPattern("java.lang.Object.*");
 		assertTrue(rpc.matches(Exception.class.getMethod("hashCode", null), ServletException.class));
 		// Doesn't match a method from Throwable
 		assertFalse(rpc.matches(Exception.class.getMethod("getMessage", null), Exception.class));
 	}
-
 }
