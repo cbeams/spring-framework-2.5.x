@@ -9,9 +9,9 @@ import java.io.InputStream;
  * Convenience base class for Resource implementations,
  * pre-implementing typical behavior.
  *
- * <p>The "exists" method will check whether an InputStream can be opened;
- * "isOpen" will always return false; "getFile" throws an exception;
- * and "toString" will return the description.
+ * <p>The "exists" method will check whether a File or InputStream
+ * can be opened; "isOpen" will always return false; "getFile" throws
+ * an exception; and "toString" will return the description.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -19,16 +19,25 @@ import java.io.InputStream;
 public abstract class AbstractResource implements Resource {
 
 	/**
-	 * This implementations checks whether an InputStream can be opened.
+	 * This implementation checks whether a File can be opened,
+	 * falling back to whether an InputStream can be opened.
+	 * This will cover both directories and content resources.
 	 */
 	public boolean exists() {
+		// try file existence
 		try {
-			InputStream is = getInputStream();
-			is.close();
-			return true;
+			return getFile().exists();
 		}
 		catch (IOException ex) {
-			return false;
+			// fall back to stream existence
+			try {
+				InputStream is = getInputStream();
+				is.close();
+				return true;
+			}
+			catch (IOException ex2) {
+				return false;
+			}
 		}
 	}
 
