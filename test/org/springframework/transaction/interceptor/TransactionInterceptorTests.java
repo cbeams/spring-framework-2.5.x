@@ -27,7 +27,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * testing the helper implementation.
  * @author Rod Johnson
  * @since 16-Mar-2003
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class TransactionInterceptorTests extends TestCase {
 
@@ -46,6 +46,8 @@ public class TransactionInterceptorTests extends TestCase {
 
 		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
 		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
+		r.getAttributes(ITestBean.class);
+		arControl.setReturnValue(null);
 		r.getAttributes(ITestBean.class.getMethod("getName", null));
 		arControl.setReturnValue(null);
 		arControl.replay();
@@ -71,7 +73,6 @@ public class TransactionInterceptorTests extends TestCase {
 
 		arControl.verify();
 		ptxControl.verify();
-
 	}
 
 	/**
@@ -335,6 +336,8 @@ public class TransactionInterceptorTests extends TestCase {
 		r.getAttributes(m);
 		arControl.setReturnValue(new Object[] { txatt }, 1);
 		Method m2 = ITestBean.class.getMethod("getName", null);
+		r.getAttributes(ITestBean.class);
+		arControl.setReturnValue(null);
 		r.getAttributes(m2);
 		arControl.setReturnValue(null);
 		arControl.replay();
