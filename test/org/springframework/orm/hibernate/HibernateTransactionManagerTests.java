@@ -38,6 +38,7 @@ import org.easymock.MockControl;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -100,6 +101,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		tm.setSessionFactory(sf);
 		tm.setDataSource(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -1102,6 +1104,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		tm.setNestedTransactionAllowed(true);
 		tm.setSessionFactory(sf);
 		tm.setDataSource(ds);

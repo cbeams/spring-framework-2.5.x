@@ -38,7 +38,6 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
@@ -128,7 +127,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	private Object entityInterceptor;
 
-	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+	private SQLExceptionTranslator jdbcExceptionTranslator;
 
 	/**
 	 * Just needed for entityInterceptorBeanName.
@@ -287,14 +286,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Return the JDBC exception translator for this transaction manager.
 	 * Creates a default one for the specified SessionFactory if none set.
+	 * @see #setJdbcExceptionTranslator
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
 		if (this.jdbcExceptionTranslator == null) {
 			if (getDataSource() != null) {
-				setJdbcExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(getDataSource()));
+				this.jdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
 			}
 			else {
-				setJdbcExceptionTranslator(SessionFactoryUtils.newJdbcExceptionTranslator(getSessionFactory()));
+				this.jdbcExceptionTranslator = SessionFactoryUtils.newJdbcExceptionTranslator(getSessionFactory());
 			}
 		}
 		return this.jdbcExceptionTranslator;
