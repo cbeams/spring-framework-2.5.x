@@ -17,17 +17,11 @@
 package org.springframework.web.servlet.tags;
 
 import java.beans.PropertyEditor;
-import java.util.List;
 
-import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
-import org.springframework.context.NoSuchMessageException;
-import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.util.ExpressionEvaluationUtils;
-import org.springframework.web.util.HtmlUtils;
 
 /**
  * <p>Bind tag, supporting evaluation of binding errors for a certain
@@ -49,13 +43,9 @@ public class BindTag extends RequestContextAwareTag {
 	public static final String STATUS_VARIABLE_NAME = "status";
 
 	private String path;
-
-	private String property;
-
-	private Errors errors;
-
-	private PropertyEditor editor;
-
+	
+	private BindStatus status;
+	
 	/**
 	 * Set the path that this tag should apply. Can be a bean (e.g. "person")
 	 * to get global errors, or a bean property (e.g. "person.name") to get
@@ -80,85 +70,17 @@ public class BindTag extends RequestContextAwareTag {
 
 	protected final int doStartTagInternal() throws Exception {
 		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", this.path, pageContext);
-
-		// determine name of the object and property
-		String name = null;
-
-		int dotPos = resolvedPath.indexOf('.');
-		if (dotPos == -1) {
-			// property not set, only the object itself
-			name = resolvedPath;
-			this.property = null;
+		
+		try {
+		    status = new BindStatus(getRequestContext(), resolvedPath, isHtmlEscape());
+		    
+		} catch (IllegalStateException e) {
+		    throw new JspTagException(e.getMessage());
 		}
-		else {
-			name = resolvedPath.substring(0, dotPos);
-			this.property = resolvedPath.substring(dotPos + 1);
-		}
-
-		// retrieve Errors object
-		this.errors = getRequestContext().getErrors(name, false);
-		if (this.errors == null) {
-			throw new JspTagException("Could not find Errors instance for bean '" + name + "' in request: " +
-																"add the Errors model to your ModelAndView via errors.getModel()");
-		}
-
-		List fes = null;
-		Object value = null;
-
-		if (this.property != null) {
-			if ("*".equals(this.property)) {
-				fes = this.errors.getAllErrors();
-			}
-			else if (this.property.endsWith("*")) {
-				fes = this.errors.getFieldErrors(this.property);
-			}
-			else {
-				fes = this.errors.getFieldErrors(this.property);
-				value = this.errors.getFieldValue(this.property);
-				if (this.errors instanceof BindException) {
-					this.editor = ((BindException) this.errors).getCustomEditor(this.property);
-				}
-				else {
-					logger.warn("Cannot not expose custom property editor because Errors instance [" + this.errors +
-											"] is not of type BindException");
-				}
-				if (isHtmlEscape() && value instanceof String) {
-					value = HtmlUtils.htmlEscape((String) value);
-				}
-			}
-		}
-		else {
-			fes = this.errors.getGlobalErrors();
-		}
-
+		
 		// create the status object
-		BindStatus status = new BindStatus(this.property, value, getErrorCodes(fes), getErrorMessages(fes));
 		this.pageContext.setAttribute(STATUS_VARIABLE_NAME, status);
 		return EVAL_BODY_INCLUDE;
-	}
-
-	/**
-	 * Extract the error codes from the given ObjectError list.
-	 */
-	private String[] getErrorCodes(List fes) {
-		String[] codes = new String[fes.size()];
-		for (int i = 0; i < fes.size(); i++) {
-			ObjectError error = (ObjectError) fes.get(i);
-			codes[i] = error.getCode();
-		}
-		return codes;
-	}
-
-	/**
-	 * Extract the error messages from the given ObjectError list.
-	 */
-	private String[] getErrorMessages(List fes) throws NoSuchMessageException, JspException {
-		String[] messages = new String[fes.size()];
-		for (int i = 0; i < fes.size(); i++) {
-			ObjectError error = (ObjectError) fes.get(i);
-			messages[i] = getRequestContext().getMessage(error, isHtmlEscape());
-		}
-		return messages;
 	}
 
 	/**
@@ -169,7 +91,7 @@ public class BindTag extends RequestContextAwareTag {
 	 * or <code>null</code> if none
 	 */
 	public final String getProperty() {
-		return property;
+		return (status == null ? null : status.getExpression());
 	}
 
 	/**
@@ -178,7 +100,7 @@ public class BindTag extends RequestContextAwareTag {
 	 * @return the current Errors instance, or null if none
 	 */
 	public final Errors getErrors() {
-		return errors;
+	    return (status == null ? null : status.getErrors());
 	}
 
 	/**
@@ -187,15 +109,12 @@ public class BindTag extends RequestContextAwareTag {
 	 * @return the current PropertyEditor, or null if none
 	 */
 	public final PropertyEditor getEditor() {
-		return editor;
+		return (status == null ? null : status.getEditor());
 	}
 
 	public void doFinally() {
 		super.doFinally();
 		this.path = null;
-		this.property = null;
-		this.errors = null;
-		this.editor = null;
 	}
 
 }
