@@ -1,5 +1,5 @@
 <chapter id="scheduling">
-  <title>Scheduling jobs using Quartz or Timers</title>
+  <title>Scheduling jobs using Quartz or Timer</title>
   
   <sect1>
   	<title>Introduction</title>
@@ -15,7 +15,7 @@
   </sect1>
   
   <sect1>
-  	<title>Using the Opensymphone Quartz Scheduler</title>
+  	<title>Using the OpenSymphony Quartz Scheduler</title>
   	<para>
   		Quartz uses <literal>Triggers</literal>, <literal>Jobs</literal> and 
   		<literal>JobDetail</literal> ro realize scheduling of all kinds of jobs.
