@@ -37,7 +37,7 @@ public class PropertyComparator implements Comparator, Serializable {
     private transient BeanWrapper beanWrapper;
 
     /**
-     * Constructs a BeanPropertyComparator without a property set. Until
+     * Constructs a PropertyComparator without a property set. Until
      * {@link #setProperty}is called with a non-null value, this comparator
      * will compare the beans by natural-order only.
      */
@@ -48,11 +48,11 @@ public class PropertyComparator implements Comparator, Serializable {
     /**
      * Constructs a property-based comparator for beans. This compares two beans
      * by the property specified in the property parameter. This constructor
-     * creates a <code>BeanPropertyComparator</code> that uses a
+     * creates a <code>PropertyComparator</code> that uses a
      * <code>ComparableComparator</code> to compare the property values.
      * 
      * Passing <code>null</code> to this constructor will cause the
-     * BeanPropertyComparator to compare beans based on natural order, that is
+     * PropertyComparator to compare beans based on natural order, that is
      * <code>java.lang.Comparable</code>.
      * 
      * @param property
@@ -67,14 +67,14 @@ public class PropertyComparator implements Comparator, Serializable {
 
     /**
      * Constructs a property-based comparator for beans. This constructor
-     * creates a BeanPropertyComparator that uses the supplied Comparator to
+     * creates a PropertyComparator that uses the supplied Comparator to
      * compare the property values.
      * 
      * @param property
      *            Name of a bean property; may contain the name of a simple,
      *            nested, indexed, mapped, or combined property.
      * @param comparator
-     *            BeanPropertyComparator will pass the values of the specified
+     *            PropertyComparator will pass the values of the specified
      *            bean property to this Comparator.
      */
     public PropertyComparator(String property, Comparator comparator) {
