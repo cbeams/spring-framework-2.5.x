@@ -22,9 +22,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
@@ -855,6 +858,41 @@ public class BeanWrapperTests extends TestCase {
 		catch (NotReadablePropertyException ex) {
 			assertTrue(ex.getMessage().indexOf(TestBean.class.getName()) != -1);
 		}
+	}
+
+	public void testMatchingCollections() {
+		IndexedTestBean tb = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		Set set = new HashSet();
+		bw.setPropertyValue("set", set);
+		SortedSet sortedSet = new TreeSet();
+		bw.setPropertyValue("sortedSet", sortedSet);
+		List list = new LinkedList();
+		bw.setPropertyValue("list", list);
+		assertEquals(set, tb.getSet());
+		assertEquals(sortedSet, tb.getSortedSet());
+		assertEquals(list, tb.getList());
+	}
+
+	public void testNonMatchingCollections() {
+		IndexedTestBean tb = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		List set = new LinkedList();
+		set.add("set1");
+		bw.setPropertyValue("set", set);
+		List sortedSet = new ArrayList();
+		sortedSet.add("sortedSet1");
+		bw.setPropertyValue("sortedSet", sortedSet);
+		Set list = new HashSet();
+		list.add("list1");
+		bw.setPropertyValue("list", list);
+		System.out.println(tb.getSet().getClass());
+		assertEquals(1, tb.getSet().size());
+		assertTrue(tb.getSet().containsAll(set));
+		assertEquals(1, tb.getSortedSet().size());
+		assertTrue(tb.getSortedSet().containsAll(sortedSet));
+		assertEquals(1, tb.getList().size());
+		assertTrue(tb.getList().containsAll(list));
 	}
 
 

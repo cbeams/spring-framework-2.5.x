@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.SortedSet;
 
 /**
  * @author Juergen Hoeller
@@ -32,6 +33,8 @@ public class IndexedTestBean {
 	private TestBean[] array;
 
 	private List list;
+
+	private SortedSet sortedSet;
 
 	private Set set;
 
@@ -89,6 +92,14 @@ public class IndexedTestBean {
 
 	public void setList(List list) {
 		this.list = list;
+	}
+
+	public SortedSet getSortedSet() {
+		return sortedSet;
+	}
+
+	public void setSortedSet(SortedSet sortedSet) {
+		this.sortedSet = sortedSet;
 	}
 
 	public Set getSet() {
