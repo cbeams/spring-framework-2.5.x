@@ -17,17 +17,22 @@ import org.apache.struts.tiles.DefinitionsFactoryException;
 import org.apache.struts.tiles.TilesUtilImpl;
 
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.view.JstlView;
+import org.springframework.web.servlet.view.InternalResourceView;
 
 /**
  * TilesView retrieves a Tiles definition.
  * The "url" property is interpreted as name of a Tiles definition.
+ *
+ * <p>TilesJstlView with JSTL support is a separate class,
+ * mainly to avoid JSTL dependencies in this class.
+ *
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @see #setUrl
  * @see TilesConfigurer
+ * @see TilesJstlView
  */
-public class TilesView extends JstlView {
+public class TilesView extends InternalResourceView {
 
 	/**
 	 * The actual rendering of the Tiles definition.
@@ -35,21 +40,16 @@ public class TilesView extends JstlView {
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 
-		exposeModelsAsRequestAttributes(model, request);
-		response.setContentType("text/html");
-
 		try {
-			// get the required objects
+			// get definitions factory
 			DefinitionsFactory factory = (DefinitionsFactory) getApplicationContext().sharedObject(TilesUtilImpl.DEFINITIONS_FACTORY);
 			if (factory == null) {
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 				                   "Tiles definitions factory not found: TilesConfigurer not defined?");
 			}
 
-			// get current tile context if any
-			ComponentContext tileContext = ComponentContext.getContext(request);
+			// get component definition
 			ServletContext sc = ((WebApplicationContext) getApplicationContext()).getServletContext();
-
 			ComponentDefinition definition = factory.getDefinition(getUrl(), request, sc);
 			if (definition == null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND,
@@ -57,8 +57,10 @@ public class TilesView extends JstlView {
 				return;
 			}
 
-			String uri = definition.getPath();
-			Controller controller = definition.getOrCreateController();
+			exposeModelsAsRequestAttributes(model, request);
+
+			// get current tile context
+			ComponentContext tileContext = ComponentContext.getContext(request);
 			if (tileContext == null) {
 				tileContext = new ComponentContext(definition.getAttributes());
 				ComponentContext.setContext(tileContext, request);
@@ -67,13 +69,14 @@ public class TilesView extends JstlView {
 				tileContext.addMissing(definition.getAttributes());
 			}
 
-			// process the definition
 			// execute controller associated to definition, if any
+			Controller controller = definition.getOrCreateController();
 			if (controller != null) {
 				controller.perform(tileContext, request, response, sc);
 			}
 
-			RequestDispatcher rd = request.getRequestDispatcher(uri);
+			// process the definition
+			RequestDispatcher rd = request.getRequestDispatcher(definition.getPath());
 			if (rd == null) {
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
