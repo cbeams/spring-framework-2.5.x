@@ -258,11 +258,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void refresh() throws BeansException, IllegalStateException {
 		this.startupTime = System.currentTimeMillis();
 
-		// tell subclass to refresh the internal bean factory
+		// Tell subclass to refresh the internal bean factory.
 		refreshBeanFactory();
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
-		// configure the bean factory with context-specific editors
+		// Configure the bean factory with context-specific editors.
 		beanFactory.registerCustomEditor(Resource.class,
 		    new ResourceEditor(this));
 		beanFactory.registerCustomEditor(URL.class,
@@ -272,15 +272,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.registerCustomEditor(Resource[].class,
 		    new ResourceArrayPropertyEditor(this.resourcePatternResolver));
 
-		// configure the bean factory with context semantics
+		// Configure the bean factory with context semantics.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		beanFactory.ignoreDependencyType(ResourceLoader.class);
 		beanFactory.ignoreDependencyType(ApplicationContext.class);
 
-		// allows post-processing of the bean factory in context subclasses
+		// Allows post-processing of the bean factory in context subclasses.
 		postProcessBeanFactory(beanFactory);
 
-		// invoke factory processors registered with the context instance
+		// Invoke factory processors registered with the context instance.
 		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
 			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
 			factoryProcessor.postProcessBeanFactory(beanFactory);
@@ -295,28 +295,28 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 
-		// invoke factory processors registered as beans in the context
+		// Invoke factory processors registered as beans in the context.
 		invokeBeanFactoryPostProcessors();
 
-		// register bean processor that intercept bean creation
+		// Register bean processors that intercept bean creation.
 		registerBeanPostProcessors();
 
-		// initialize message source for this context
+		// Initialize message source for this context.
 		initMessageSource();
 
-		// initialize event multicaster for this context
+		// Initialize event multicaster for this context.
 		initApplicationEventMulticaster();
 
-		// initialize other special beans in specific context subclasses
+		// Initialize other special beans in specific context subclasses.
 		onRefresh();
 
-		// check for listener beans and register them
+		// Check for listener beans and register them.
 		refreshListeners();
 
-		// instantiate singletons this late to allow them to access the message source
+		// iIstantiate singletons this late to allow them to access the message source.
 		beanFactory.preInstantiateSingletons();
 
-		// last step: publish corresponding event
+		// Last step: publish corresponding event.
 		publishEvent(new ContextRefreshedEvent(this));
 	}
 
@@ -381,53 +381,61 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Use parent's if none defined in this context.
 	 */
 	private void initMessageSource() throws BeansException {
-		try {
+		if (containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
 			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME);
 			// Make MessageSource aware of parent MessageSource.
 			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
 				MessageSource parentMessageSource = getInternalParentMessageSource();
-				// Only set parent MessageSource if not dealing with the parent MessageSource itself.
-				if (this.messageSource != parentMessageSource) {
-					((HierarchicalMessageSource) this.messageSource).setParentMessageSource(parentMessageSource);
-				}
+				((HierarchicalMessageSource) this.messageSource).setParentMessageSource(parentMessageSource);
 			}
 			if (logger.isInfoEnabled()) {
 				logger.info("Using MessageSource [" + this.messageSource + "]");
 			}
 		}
-		catch (NoSuchBeanDefinitionException ex) {
+		else {
 			// Use empty message source to be able to accept getMessage calls.
 			StaticMessageSource sms = new StaticMessageSource();
 			sms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = sms;
 			if (logger.isInfoEnabled()) {
 				logger.info("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
-						"': using default [" + this.messageSource+ "]");
+						"': using default [" + this.messageSource + "]");
 			}
 		}
 	}
 
 	/**
 	 * Initialize the ApplicationEventMulticaster.
-	 * Use SimpleApplicationEventMulticaster if none defined in the context.
+	 * Uses SimpleApplicationEventMulticaster if none defined in the context.
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	private void initApplicationEventMulticaster() throws BeansException {
-		try {
+		if (containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
 					(ApplicationEventMulticaster) getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
 			}
 		}
-		catch (NoSuchBeanDefinitionException ex) {
+		else {
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster();
 			if (logger.isInfoEnabled()) {
 				logger.info("Unable to locate ApplicationEventMulticaster with name '" +
 						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
-						"': using default [" + this.applicationEventMulticaster+ "]");
+						"': using default [" + this.applicationEventMulticaster + "]");
 			}
 		}
+	}
+
+	/**
+	 * Return whether the local bean factory of this context contains a bean
+	 * of the given name, ignoring beans defined in ancestor contexts.
+	 * <p>Needs to check both bean definitions and manually registered singletons.
+	 * We cannot use <code>containsBean</code> here, as we do not want a bean
+	 * from an ancestor bean factory.
+	 */
+	private boolean containsLocalBean(String beanName) {
+		return (containsBeanDefinition(beanName) || getBeanFactory().containsSingleton(beanName));
 	}
 
 	/**
@@ -445,7 +453,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Doesn't affect other listeners, which can be added without being beans.
 	 */
 	private void refreshListeners() throws BeansException {
-		logger.info("Refreshing listeners");
+		logger.debug("Refreshing listeners");
 		Collection listeners = getBeansOfType(ApplicationListener.class, false, false).values();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found " + listeners.size() + " listeners in bean factory");
