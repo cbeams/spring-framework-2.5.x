@@ -9,7 +9,7 @@
 	This script should normally be managed from a shell script or 
 	batch file (supplied).
 	
-	$Id: build.xml,v 1.8 2004-02-21 15:24:56 davison Exp $
+	$Id: build.xml,v 1.9 2004-05-26 00:08:23 davison Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
@@ -128,6 +128,12 @@
 		init
 	-->
 	<target name="init">
+
+		<mkdir dir="${target.root.dir}" />
+		<mkdir dir="${bin.dir}" />
+		<mkdir dir="${reports.dir}" />
+		<mkdir dir="${servers.install.dir}" />
+		
 		<tstamp>		
 	        <format property="TODAY_UK" pattern="yyyy-MM-dd" locale="en"/>
 	    </tstamp>
@@ -232,11 +238,6 @@ realclean       --> delete ALL build products and sandbox.
 		create required environment
 	-->
 	<target name="setup" depends="clean">
-		<mkdir dir="${target.root.dir}" />
-		<mkdir dir="${bin.dir}" />
-		<mkdir dir="${reports.dir}" />
-		<mkdir dir="${servers.install.dir}" />
-		
 		<condition property="hsql.required">
 			<or>
 				<equals arg1="petclinic" arg2="${target.app}" />
@@ -270,6 +271,7 @@ realclean       --> delete ALL build products and sandbox.
 		<echo message="#  ----------------------------------------------------------------" />
 		<echo message="#  Performing build of spring.jar" />
 		<echo message="#  ----------------------------------------------------------------" />
+		<ant dir="${spring.root.dir}" target="clean" inheritall="false" />
 		<ant dir="${spring.root.dir}" target="build" inheritall="false" />
 		<ant dir="${spring.root.dir}" target="fulljar" inheritall="false" />		
 	</target>
@@ -282,6 +284,7 @@ realclean       --> delete ALL build products and sandbox.
 		compile classes used in the deployment and testing
 	-->
 	<target name="build">
+		<mkdir dir="${bin.dir}"/>
 		<javac  srcdir="${src.dir}" destdir="${bin.dir}">
 			<classpath refid="test-classpath"/>
 		</javac>
