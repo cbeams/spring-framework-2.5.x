@@ -6,24 +6,29 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditor;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
+import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.PropertyAccessExceptionsException;
 
 /**
  * Binder that allows for binding property values to a target object.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.7 2004-02-02 11:22:54 jhoeller Exp $
+ * @version $Id: DataBinder.java,v 1.8 2004-02-19 07:13:34 jhoeller Exp $
  */
 public class DataBinder {
 
 	public static final String MISSING_FIELD_ERROR_CODE = "required";
 
 	private BindException errors;
+
+	private String[] allowedFields;
 
 	private String[] requiredFields;
 
@@ -59,6 +64,25 @@ public class DataBinder {
 	}
 
 	/**
+	 * Register fields that should be allowed for binding. Default is all
+	 * fields. Restrict this for example to avoid unwanted modifications
+	 * by malicious users when binding HTTP request parameters.
+	 * @param allowedFields array of field names
+	 * @see org.springframework.web.bind.ServletRequestDataBinder
+	 */
+	public void setAllowedFields(String[] allowedFields) {
+		this.allowedFields = allowedFields;
+	}
+
+	/**
+	 * Return the fields that should be allowed for binding.
+	 * @return array of field names
+	 */
+	public String[] getAllowedFields() {
+		return allowedFields;
+	}
+
+	/**
 	 * Register fields that are required for each binding process.
 	 * @param requiredFields array of field names
 	 */
@@ -70,7 +94,7 @@ public class DataBinder {
 	 * Return the fields that are required for each binding process.
 	 * @return array of field names
 	 */
-	protected String[] getRequiredFields() {
+	public String[] getRequiredFields() {
 		return requiredFields;
 	}
 
@@ -105,6 +129,19 @@ public class DataBinder {
 	 * @param pvs property values to bind
 	 */
 	public void bind(PropertyValues pvs) {
+		// check for fields to bind
+		if (this.allowedFields != null) {
+			PropertyValue[] pvArray = pvs.getPropertyValues();
+			List allowedFieldsList = Arrays.asList(this.allowedFields);
+			MutablePropertyValues mpvs = new MutablePropertyValues();
+			for (int i = 0; i < pvArray.length; i++) {
+				if (allowedFieldsList.contains(pvArray[i].getName())) {
+					mpvs.addPropertyValue(pvArray[i]);
+				}
+			}
+			pvs = mpvs;
+		}
+
 		// check for missing fields
 		if (this.requiredFields != null) {
 			for (int i = 0; i < this.requiredFields.length; i++) {
@@ -117,6 +154,7 @@ public class DataBinder {
 				}
 			}
 		}
+
 		try {
 			// bind request parameters onto params, ignoring unknown properties
 			this.errors.getBeanWrapper().setPropertyValues(pvs, true);
@@ -136,7 +174,9 @@ public class DataBinder {
 	/**
 	 * Close this DataBinder, which may result in throwing
 	 * a BindException if it encountered any errors
+	 * @return the model Map, containing target object and Errors instance
 	 * @throws BindException if there were any errors in the bind operation
+	 * @see BindException#getModel
 	 */
 	public Map close() throws BindException {
 		if (this.errors.hasErrors()) {

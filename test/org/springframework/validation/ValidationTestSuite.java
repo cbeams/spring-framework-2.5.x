@@ -67,6 +67,26 @@ public class ValidationTestSuite extends TestCase {
 		}
 	}
 
+	public void testBindingWithAllowedFields() throws Exception {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		binder.setAllowedFields(new String[] {"name", "myparam"});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		pvs.addPropertyValue(new PropertyValue("age", "32x"));
+
+		binder.bind(pvs);
+		binder.close();
+
+		assertTrue("changed name correctly", rod.getName().equals("Rod"));
+		assertTrue("did not change age", rod.getAge() == 0);
+
+		Map m = binder.getErrors().getModel();
+		assertTrue("There is one element in map", m.size() == 2);
+		TestBean tb = (TestBean) m.get("person");
+		assertTrue("Same object", tb.equals(rod));
+	}
+
 	public void testCustomEditorForSingleProperty() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
