@@ -17,8 +17,14 @@
 
 package org.springframework.web.servlet.mvc;
 
+import java.util.Properties;
+
 import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,8 +32,10 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Rod Johnson
@@ -60,6 +68,26 @@ public class ControllerTestSuite extends TestCase {
 	}
 
 	public void testServletForwardingController() throws Exception {
+		ServletForwardingController sfc = new ServletForwardingController();
+		sfc.setServletName("action");
+		doTestServletForwardingController(sfc, false);
+	}
+
+	public void testServletForwardingControllerWithInclude() throws Exception {
+		ServletForwardingController sfc = new ServletForwardingController();
+		sfc.setServletName("action");
+		doTestServletForwardingController(sfc, true);
+	}
+
+	public void testServletForwardingControllerWithBeanName() throws Exception {
+		ServletForwardingController sfc = new ServletForwardingController();
+		sfc.setBeanName("action");
+		doTestServletForwardingController(sfc, false);
+	}
+
+	private void doTestServletForwardingController(ServletForwardingController sfc, boolean include)
+			throws Exception {
+
 		MockControl requestControl = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) requestControl.getMock();
 		MockControl responseControl = MockControl.createControl(HttpServletResponse.class);
@@ -73,8 +101,18 @@ public class ControllerTestSuite extends TestCase {
 		requestControl.setReturnValue("GET", 1);
 		context.getNamedDispatcher("action");
 		contextControl.setReturnValue(dispatcher, 1);
-		dispatcher.forward(request, response);
-		dispatcherControl.setVoidCallable(1);
+		if (include) {
+			request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE);
+			requestControl.setReturnValue("somePath", 1);
+			dispatcher.include(request, response);
+			dispatcherControl.setVoidCallable(1);
+		}
+		else {
+			request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE);
+			requestControl.setReturnValue(null, 1);
+			dispatcher.forward(request, response);
+			dispatcherControl.setVoidCallable(1);
+		}
 		requestControl.replay();
 		contextControl.replay();
 		dispatcherControl.replay();
@@ -92,37 +130,91 @@ public class ControllerTestSuite extends TestCase {
 		dispatcherControl.verify();
 	}
 
-	public void testServletForwardingControllerWithBeanName() throws Exception {
-		MockControl requestControl = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) requestControl.getMock();
-		MockControl responseControl = MockControl.createControl(HttpServletResponse.class);
-		HttpServletResponse response = (HttpServletResponse) responseControl.getMock();
-		MockControl contextControl = MockControl.createControl(ServletContext.class);
-		ServletContext context = (ServletContext) contextControl.getMock();
-		MockControl dispatcherControl = MockControl.createControl(RequestDispatcher.class);
-		RequestDispatcher dispatcher = (RequestDispatcher) dispatcherControl.getMock();
+	public void testServletWrappingController() throws Exception {
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/somePath");
+		HttpServletResponse response = new MockHttpServletResponse();
 
-		request.getMethod();
-		requestControl.setReturnValue("GET", 1);
-		context.getNamedDispatcher("action");
-		contextControl.setReturnValue(dispatcher, 1);
-		dispatcher.forward(request, response);
-		dispatcherControl.setVoidCallable(1);
-		requestControl.replay();
-		contextControl.replay();
-		dispatcherControl.replay();
+		ServletWrappingController swc = new ServletWrappingController();
+		swc.setServletClass(TestServlet.class);
+		swc.setServletName("action");
+		Properties props = new Properties();
+		props.setProperty("config", "myValue");
+		swc.setInitParameters(props);
 
-		StaticWebApplicationContext sac = new StaticWebApplicationContext();
-		sac.setServletContext(context);
-		ServletForwardingController swc = new ServletForwardingController();
-		swc.setBeanName("action");
-		swc.setApplicationContext(sac);
-		swc.initApplicationContext();
+		swc.afterPropertiesSet();
+		assertNotNull(TestServlet.config);
+		assertEquals("action", TestServlet.config.getServletName());
+		assertEquals("myValue", TestServlet.config.getInitParameter("config"));
+		assertNull(TestServlet.request);
+		assertFalse(TestServlet.destroyed);
+
 		assertNull(swc.handleRequest(request, response));
+		assertEquals(request, TestServlet.request);
+		assertEquals(response, TestServlet.response);
+		assertFalse(TestServlet.destroyed);
 
-		requestControl.verify();
-		contextControl.verify();
-		dispatcherControl.verify();
+		swc.destroy();
+		assertTrue(TestServlet.destroyed);
+	}
+
+	public void testServletWrappingControllerWithBeanName() throws Exception {
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/somePath");
+		HttpServletResponse response = new MockHttpServletResponse();
+
+		ServletWrappingController swc = new ServletWrappingController();
+		swc.setServletClass(TestServlet.class);
+		swc.setBeanName("action");
+
+		swc.afterPropertiesSet();
+		assertNotNull(TestServlet.config);
+		assertEquals("action", TestServlet.config.getServletName());
+		assertNull(TestServlet.request);
+		assertFalse(TestServlet.destroyed);
+
+		assertNull(swc.handleRequest(request, response));
+		assertEquals(request, TestServlet.request);
+		assertEquals(response, TestServlet.response);
+		assertFalse(TestServlet.destroyed);
+
+		swc.destroy();
+		assertTrue(TestServlet.destroyed);
+	}
+
+
+	public static class TestServlet implements Servlet {
+
+		private static ServletConfig config;
+		private static ServletRequest request;
+		private static ServletResponse response;
+		private static boolean destroyed;
+
+		public TestServlet() {
+			config = null;
+			request = null;
+			response = null;
+			destroyed = false;
+		}
+
+		public void init(ServletConfig servletConfig) {
+			config = servletConfig;
+		}
+
+		public ServletConfig getServletConfig() {
+			return config;
+		}
+
+		public void service(ServletRequest servletRequest, ServletResponse servletResponse) {
+			request = servletRequest;
+			response = servletResponse;
+		}
+
+		public String getServletInfo() {
+			return "TestServlet";
+		}
+
+		public void destroy() {
+			destroyed = true;
+		}
 	}
 
 }

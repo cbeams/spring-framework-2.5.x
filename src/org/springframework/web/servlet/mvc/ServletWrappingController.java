@@ -31,14 +31,15 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Spring Controller implementation that wraps a servlet instance that it manages
- * internally. Such a wrapped servlet is not known outside of this controller.
+ * Spring Controller implementation that wraps a servlet instance which it manages
+ * internally. Such a wrapped servlet is not known outside of this controller;
+ * its entire lifecycle is covered here (in contrast to ServletForwardingController).
  *
  * <p>Useful to invoke an existing servlet via Spring's dispatching infrastructure,
  * for example to apply Spring HandlerInterceptors to its requests. This will work
  * even in a Servlet 2.2 container that does not support Servlet filters.
  *
- * <p>In particular, the main intent of this controller is to allow to apply
+ * <p>In particular, the main intent of this controller is to allow for applying
  * Spring's OpenSessionInViewInterceptor or OpenPersistenceManagerInViewInterceptor
  * to Struts actions in a Servlet 2.2 container. The Struts ActionServlet will be
  * wrapped by this controller in such a scenario, rather than defined in web.xml.
@@ -48,13 +49,13 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>Note that Struts has a special requirement in that it parses web.xml to
  * find its servlet mapping. Therefore, you need to specify the DispatcherServlet's
  * servlet name as "servletName" on this controller, so that Struts finds the
- * DispatcherServlet's mapping (assuming that it refers to the ActionServlet).
+ * DispatcherServlet's mapping (thinking that it refers to the ActionServlet).
  *
  * <p>In a Servlet 2.3 container, when not using Spring's own web MVC framework,
  * it is recommended to use classic servlet mapping in combination with a filter,
  * for example Spring's OpenSessionInViewFilter or OpenPersistenceManagerInViewFilter.
  *
- * <b>Example:</b> a DispatcherServlet XML context, forwarding *.do to the Struts
+ * <p><b>Example:</b> a DispatcherServlet XML context, forwarding "*.do" to the Struts
  * ActionServlet wrapped by a ServletWrappingController. All such requests will go
  * through the configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
  * From the Struts point of view, everything will work as usual.
@@ -77,7 +78,9 @@ import org.springframework.web.servlet.ModelAndView;
  *   &lt;property name="servletClass"&gt;
  *     &lt;value&gt;org.apache.struts.action.ActionServlet&lt;/value&gt;
  *   &lt;/property&gt;
- *   &lt;property name="servletName"&gt;&lt;value&gt;action&lt;/value&gt;&lt;/property&gt;
+ *   &lt;property name="servletName"&gt;
+ *     &lt;value&gt;action&lt;/value&gt;
+ *   &lt;/property&gt;
  *   &lt;property name="initParameters"&gt;
  *     &lt;props&gt;
  *       &lt;prop key="config"&gt;/WEB-INF/struts-config.xml&lt;/prop&gt;
@@ -86,11 +89,12 @@ import org.springframework.web.servlet.ModelAndView;
  * &lt;/bean&gt;</pre>
  *
  * Thanks to Keith Garry Boyce for pointing out the issue with Struts in a
- * Servlet 2.2 container, and for providing a prototype that accesses Struts
+ * Servlet 2.2 container, and for providing a prototype for accessing Struts
  * through Spring's web dispatching infrastructure!
  *
  * @author Juergen Hoeller
  * @since 1.1.1
+ * @see ServletForwardingController
  * @see org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor
  * @see org.springframework.orm.hibernate.support.OpenSessionInViewFilter
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor
@@ -113,7 +117,6 @@ public class ServletWrappingController extends AbstractController
 	/**
 	 * Set the class of the servlet to wrap.
 	 * Needs to implement <code>javax.servlet.Servlet</code>.
-	 *
 	 * @see javax.servlet.Servlet
 	 */
 	public void setServletClass(Class servletClass) {
@@ -166,6 +169,11 @@ public class ServletWrappingController extends AbstractController
 	}
 
 
+	/**
+	 * Internal implementation of the ServletConfig interface, to be passed
+	 * to the wrapped servlet. Delegates to ServletWrappingController fields
+	 * and methods to provide init parameters and other environment info.
+	 */
 	private class DelegatingServletConfig implements ServletConfig {
 
 		public String getServletName() {

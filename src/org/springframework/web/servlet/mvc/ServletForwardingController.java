@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Spring Controller implementation that forwards to a named servlet,
@@ -34,42 +35,40 @@ import org.springframework.web.servlet.ModelAndView;
  * for example to apply Spring HandlerInterceptors to its requests. This will work
  * even in a Servlet 2.2 container that does not support Servlet filters.
  *
- * <p>In particular, the main intent of this controller is to allow to apply
+ * <p>In particular, the main intent of this controller is to allow for applying
  * Spring's OpenSessionInViewInterceptor or OpenPersistenceManagerInViewInterceptor
- * to Struts actions in a Servlet 2.2 container. The specified "servlet-name" will
- * simply refer to a Struts ActionServlet definition in web.xml in such a scenario.
- * You then need to map "/*.do" (or whatever pattern you choose for your Struts actions)
- * onto this controller, which will in turn forward to the Struts ActionServlet.
+ * to servlets in a Servlet 2.2 container. The specified "servlet-name" will
+ * simply refer to a custom servlet definition in web.xml in such a scenario.
+ * You then need to map "/myservlet" (or whatever path you choose for your servlet)
+ * onto this controller, which will in turn forward to your servlet.
  *
  * <p>In a Servlet 2.3 container, when not using Spring's own web MVC framework,
  * it is recommended to use classic servlet mapping in combination with a filter,
  * for example Spring's OpenSessionInViewFilter or OpenPersistenceManagerInViewFilter.
  *
- * <p><b>Example:</b> web.xml, mapping all *.do requests to a Spring dispatcher.
- * Also defines a Struts ActionServlet, but <i>without</i> servlet mapping.
- * All remaining Struts configuration is as usual, just like if the *.do mapping
- * pointed directly at the ActionServlet.
+ * <p><b>Example:</b> web.xml, mapping all "/myservlet" requests to a Spring dispatcher.
+ * Also defines a custom "myServlet", but <i>without</i> servlet mapping.
  *
  * <pre>
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;action&lt;/servlet-name&gt;
- *   &lt;servlet-class&gt;org.apache.struts.action.ActionServlet&lt;/servlet-class&gt;
+ *   &lt;servlet-name&gt;myServlet&lt;/servlet-name&gt;
+ *   &lt;servlet-class&gt;mypackage.TestServlet&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  *
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;
+ *   &lt;servlet-name&gt;myDispatcher&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  *
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;
+ *   &lt;servlet-name&gt;myDispatcher&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;/myservlet&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;</pre>
  *
- * <b>Example:</b> dispatcher-servlet.xml, in turn forwarding *.do to the Struts
- * ActionServlet (identified by servlet name). All such requests will go through
- * the configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
- * From the Struts point of view, everything will work as usual.
+ * <b>Example:</b> myDispatcher-servlet.xml, in turn forwarding "/myservlet" to your
+ * servlet (identified by servlet name). All such requests will go through the
+ * configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
+ * From the servlet point of view, everything will work as usual.
  *
  * <pre>
  * &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
@@ -80,17 +79,18 @@ import org.springframework.web.servlet.ModelAndView;
  *   &lt;/property&gt;
  *   &lt;property name="mappings"&gt;
  *     &lt;props&gt;
- *       &lt;prop key="*.do"&gt;strutsForwardingController&lt;/prop&gt;
+ *       &lt;prop key="/myservlet"&gt;myServletForwardingController&lt;/prop&gt;
  *     &lt;/props&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;
  *
- * &lt;bean id="strutsForwardingController" class="org.springframework.web.servlet.mvc.ServletWrappingController"&gt;
- *   &lt;property name="servletName"&gt;&lt;value&gt;action&lt;/value&gt;&lt;/property&gt;
+ * &lt;bean id="myServletForwardingController" class="org.springframework.web.servlet.mvc.ServletForwardingController"&gt;
+ *   &lt;property name="servletName"&gt;&lt;value&gt;myServlet&lt;/value&gt;&lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 1.1.1
+ * @see ServletWrappingController
  * @see org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor
  * @see org.springframework.orm.hibernate.support.OpenSessionInViewFilter
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor
@@ -127,7 +127,21 @@ public class ServletForwardingController extends AbstractController implements B
 		if (rd == null) {
 			throw new ServletException("No servlet with name '" + this.servletName + "' defined in web.xml");
 		}
-		rd.forward(request, response);
+		// if already included, include again, else forward
+		if (request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
+			rd.include(request, response);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Included servlet [" + this.servletName +
+						"] in ServletForwardingController '" + this.beanName + "'");
+			}
+		}
+		else {
+			rd.forward(request, response);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Forwarded to servlet [" + this.servletName +
+						"] in ServletForwardingController '" + this.beanName + "'");
+			}
+		}
 		return null;
 	}
 
