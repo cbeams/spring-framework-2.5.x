@@ -3,7 +3,7 @@
 <web-app id="WebApp">
 	<filter>
 		<filter-name>flowCleanup</filter-name>
-		<filter-class>org.springframework.web.flow.support.FlowExecutionCleanupFilter</filter-class>
+		<filter-class>org.springframework.web.flow.support.ExpiredFlowCleanupFilter</filter-class>
 		<init-param>
 			<param-name>timeout</param-name>
 			<param-value>1</param-value> <!-- 1 minute timeout for demo purposes -->

@@ -24,7 +24,7 @@
 						refreshing or back button use will not allow you to resubmit data.
 					</LI>
 					<LI>
-						Flow expiry and cleanup using the FlowExecutionCleanupFilter:
+						Flow expiry and cleanup using the ExpiredFlowCleanupFilter:
 						after 1 minute of idle time, a web flow will expire and
 						will no longer be available for request processing.
 					</LI>
