@@ -42,7 +42,6 @@ import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -64,7 +63,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.29 2003-12-01 09:06:41 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.30 2003-12-04 18:44:21 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -303,19 +302,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 	}
 
-	public void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck)
-			throws BeansException {
-		if (autowireMode != AUTOWIRE_BY_NAME && autowireMode != AUTOWIRE_BY_TYPE) {
-			throw new IllegalArgumentException("Just constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE allowed");
-		}
-		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), null);
-		bd.setAutowire(autowireMode);
-		if (dependencyCheck) {
-			bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
-		}
-		populateBean("(existing bean)", bd, new BeanWrapperImpl(existingBean));
-	}
-
 
 	//---------------------------------------------------------------------
 	// Implementation of ConfigurableBeanFactory interface
@@ -416,12 +402,12 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			}
 			else if (bd instanceof ChildBeanDefinition) {
 				ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
-				// Deep copy
+				// deep copy
 				RootBeanDefinition rbd = new RootBeanDefinition(getMergedBeanDefinition(cbd.getParentName(), true));
-				// Override settings
+				// override settings
 				rbd.setSingleton(cbd.isSingleton());
 				rbd.setLazyInit(cbd.isLazyInit());
-				// Override properties
+				// override properties
 				for (int i = 0; i < cbd.getPropertyValues().getPropertyValues().length; i++) {
 					rbd.addPropertyValue(cbd.getPropertyValues().getPropertyValues()[i]);
 				}
@@ -451,6 +437,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 */
 	protected Object getObjectForSharedInstance(String name, Object beanInstance) {
 		String beanName = transformedBeanName(name);
+
 		// Don't let calling code try to dereference the
 		// bean factory if the bean isn't a factory
 		if (isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
@@ -463,28 +450,22 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		// a reference to the factory.
 		if (beanInstance instanceof FactoryBean) {
 			if (!isFactoryDereference(name)) {
-				// configure and return new bean instance from factory
+				// return bean instance from factory
 				FactoryBean factory = (FactoryBean) beanInstance;
 				logger.debug("Bean with name '" + beanName + "' is a factory bean");
 				try {
 					beanInstance = factory.getObject();
 				}
+				catch (BeansException ex) {
+					throw ex;
+				}
 				catch (Exception ex) {
 					throw new FatalBeanException("FactoryBean threw exception on object creation", ex);
 				}
-
 				if (beanInstance == null) {
 					throw new FactoryBeanCircularReferenceException(
 					    "Factory bean '" + beanName + "' returned null object - " +
 					    "possible cause: not fully initialized due to circular bean reference");
-				}
-				// set pass-through properties
-				if (factory instanceof PropertyValuesProviderFactoryBean) {
-					PropertyValues pvs = ((PropertyValuesProviderFactoryBean) factory).getPropertyValues(beanName);
-					if (pvs != null) {
-						logger.debug("Applying pass-through properties to bean with name '" + beanName + "'");
-						new BeanWrapperImpl(beanInstance).setPropertyValues(pvs);
-					}
 				}
 			}
 			else {
@@ -790,6 +771,28 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 	}
 
+	protected Object applyBeanPostProcessors(Object existingBean, String name) throws BeansException {
+		if (existingBean instanceof BeanNameAware) {
+			logger.debug("Invoking setBeanName() on BeanNameAware existingBean with name '" + name + "'");
+			((BeanNameAware) existingBean).setBeanName(name);
+		}
+
+		if (existingBean instanceof BeanFactoryAware) {
+			logger.debug("Invoking setBeanFactory() on BeanFactoryAware existingBean with name '" + name + "'");
+			((BeanFactoryAware) existingBean).setBeanFactory(this);
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking BeanPostProcessors on existingBean with name '" + name + "'");
+		}
+		Object result = existingBean;
+		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+			result = beanProcessor.postProcessBean(result, name);
+		}
+		return result;
+	}
+
 	/**
 	 * Perform a dependency check that all properties exposed have been set,
 	 * if desired. Dependency checks can be objects (collaborating beans),
@@ -968,10 +971,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	private void callLifecycleMethodsIfNecessary(Object bean, String name, RootBeanDefinition rbd, BeanWrapper bw)
 	    throws BeansException {
 
-		if (bean instanceof BeanNameAware) {
-			((BeanNameAware) bean).setBeanName(name);
-		}
-
 		if (bean instanceof InitializingBean) {
 			logger.debug("Calling afterPropertiesSet() on bean with name '" + name + "'");
 			try {
@@ -990,30 +989,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			bw.invoke(rbd.getInitMethodName(), null);
 			// Can throw MethodInvocationException
 		}
-
-		if (bean instanceof BeanFactoryAware) {
-			logger.debug("Calling setBeanFactory() on BeanFactoryAware bean with name '" + name + "'");
-			((BeanFactoryAware) bean).setBeanFactory(this);
-		}
-	}
-
-	/**
-	 * Apply BeanPostProcessors to a new bean instance.
-	 * The returned bean instance may be a wrapper around the original.
-	 * @param bean the new bean instance
-	 * @param name the name of the bean
-	 * @return the bean instance to use, either the original or a wrapped one
-	 */
-	private Object applyBeanPostProcessors(Object bean, String name) throws BeansException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors on bean with name '" + name + "'");
-		}
-		Object result = bean;
-		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
-			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
-			result = beanProcessor.postProcessBean(result, name);
-		}
-		return result;
 	}
 
 	/**

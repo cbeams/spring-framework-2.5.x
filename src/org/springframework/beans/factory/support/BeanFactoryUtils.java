@@ -23,7 +23,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtils.java,v 1.6 2003-11-21 15:33:31 jhoeller Exp $
+ * @version $Id: BeanFactoryUtils.java,v 1.7 2003-12-04 18:44:21 jhoeller Exp $
  */
 public abstract class BeanFactoryUtils {
 	
@@ -85,6 +85,9 @@ public abstract class BeanFactoryUtils {
 	 * Useful convenience method when we don't care about bean names.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
+	 * @param includePrototypes whether to include prototype beans too or just singletons
+	 * (also applies to FactoryBeans)
+	 * @param includeFactoryBeans whether to include FactoryBeans too or just normal beans
 	 * @return the Map of bean instances, or an empty Map if none
 	 * @throws BeansException if the beans could not be created
 	 */
@@ -115,6 +118,9 @@ public abstract class BeanFactoryUtils {
 	 * Useful convenience method when we expect a single bean and don't care about the bean name.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
+	 * @param includePrototypes whether to include prototype beans too or just singletons
+	 * (also applies to FactoryBeans)
+	 * @param includeFactoryBeans whether to include FactoryBeans too or just normal beans
 	 * @return the Map of bean instances, or an empty Map if none
 	 * @throws NoSuchBeanDefinitionException if 0 or more than 1 beans of the given type were found
 	 * @throws BeansException if the bean could not be created
@@ -129,6 +135,44 @@ public abstract class BeanFactoryUtils {
 		else {
 			throw new NoSuchBeanDefinitionException(type, "Expected single bean but found " + beansOfType.size());
 		}
+	}
+
+	/**
+	 * Return a single bean of the given type or subtypes, not looking in ancestor factories.
+	 * Useful convenience method when we expect a single bean and don't care about the bean name.
+	 * @param lbf the bean factory
+	 * @param type type of bean to match
+	 * @param includePrototypes whether to include prototype beans too or just singletons
+	 * (also applies to FactoryBeans)
+	 * @param includeFactoryBeans whether to include FactoryBeans too or just normal beans
+	 * @return the Map of bean instances, or an empty Map if none
+	 * @throws NoSuchBeanDefinitionException if 0 or more than 1 beans of the given type were found
+	 * @throws BeansException if the bean could not be created
+	 */
+	public static Object beanOfType(ListableBeanFactory lbf, Class type,
+	                                boolean includePrototypes, boolean includeFactoryBeans)
+	    throws BeansException {
+		Map beansOfType = lbf.getBeansOfType(type, includePrototypes, includeFactoryBeans);
+		if (beansOfType.size() == 1) {
+			return beansOfType.values().iterator().next();
+		}
+		else {
+			throw new NoSuchBeanDefinitionException(type, "Expected single bean but found " + beansOfType.size());
+		}
+	}
+
+	/**
+	 * Return a single bean of the given type or subtypes, not looking in ancestor factories.
+	 * Useful convenience method when we expect a single bean and don't care about the bean name.
+	 * This version of beanOfType automatically includes prototypes and FactoryBeans.
+	 * @param lbf the bean factory
+	 * @param type type of bean to match
+	 * @return the Map of bean instances, or an empty Map if none
+	 * @throws NoSuchBeanDefinitionException if 0 or more than 1 beans of the given type were found
+	 * @throws BeansException if the bean could not be created
+	 */
+	public static Object beanOfType(ListableBeanFactory lbf, Class type) throws BeansException {
+		return beanOfType(lbf, type, true, true);
 	}
 
 }

@@ -1,6 +1,6 @@
 package org.springframework.beans.factory.config;
 
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.AutowireCapableBeanFactory;
 
 /**
  * SPI interface to be implemented by most if not all listable bean factories.
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * @since 03.11.2003
  * @see org.springframework.context.support.AbstractApplicationContext#getBeanFactory
  */
-public interface ConfigurableListableBeanFactory extends ListableBeanFactory, ConfigurableBeanFactory {
+public interface ConfigurableListableBeanFactory extends AutowireCapableBeanFactory, ConfigurableBeanFactory {
 
 	/**
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering

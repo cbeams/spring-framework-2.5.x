@@ -7,13 +7,13 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.BeanFactory;
 
 /** 
 * Root bean definitions have a class and properties.
 * @author Rod Johnson
-* @version $Id: RootBeanDefinition.java,v 1.11 2003-11-28 21:09:22 jhoeller Exp $
+* @version $Id: RootBeanDefinition.java,v 1.12 2003-12-04 18:44:21 jhoeller Exp $
 */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
@@ -27,9 +27,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	public static final int AUTOWIRE_NO = 0;
 
-	public static final int AUTOWIRE_BY_NAME = BeanFactory.AUTOWIRE_BY_NAME;
+	public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
 
-	public static final int AUTOWIRE_BY_TYPE = BeanFactory.AUTOWIRE_BY_TYPE;
+	public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
 
 	public static final int AUTOWIRE_CONSTRUCTOR = 3;
 

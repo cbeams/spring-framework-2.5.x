@@ -33,21 +33,9 @@ import org.springframework.beans.BeansException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13 April 2001
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface BeanFactory {
-
-	/**
-	 * Constant that indicates autowiring by name.
-	 * @see #autowireExistingBean
-	 */
-	public static final int AUTOWIRE_BY_NAME = 1;
-
-	/**
-	 * Constant that indicates autowiring by type.
-	 * @see #autowireExistingBean
-	 */
-	public static final int AUTOWIRE_BY_TYPE = 2;
 
 	/**
 	 * Return an instance (possibly shared or independent) of the given bean name.
@@ -104,17 +92,5 @@ public interface BeanFactory {
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
 	 */
 	String[] getAliases(String name) throws NoSuchBeanDefinitionException;
-
-	/**
-	 * Autowire the given existing bean instance by name or type.
-	 * @param existingBean the existing bean instance
-	 * @param autowireMode by name or type, using the constants in this interface
-	 * @param dependencyCheck whether to perform a dependency check for object
-	 * @throws BeansException if wiring failed
-	 * @see #AUTOWIRE_BY_NAME
-	 * @see #AUTOWIRE_BY_TYPE
-	 */
-	void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck)
-			throws BeansException;
 
 }
