@@ -881,7 +881,7 @@
 			<classpath location="${target.classes.dir}"/>
 			<classpath location="${sandbox.target.classes.dir}"/>
 			<classpath location="${target.testclasses.dir}"/>
-		    <classpath location="{target.mockclasses.dir}"/>
+		    <classpath location="${target.mockclasses.dir}"/>
 		</javac>
 
 		<!-- Pick up logging config from test directory -->
@@ -915,7 +915,7 @@
 			<classpath location="${sandbox.target.testclasses.dir}"/>
 			<classpath location="${sandbox.target.classes.dir}"/>
 			<classpath location="${target.testclasses.dir}"/>
-		    <classpath location="{target.mockclasses.dir}"/>
+		    <classpath location="${target.mockclasses.dir}"/>
 			    
 			<!-- Need files loaded as resources -->
 			<classpath location="${sandbox.test.dir}"/>
@@ -952,7 +952,7 @@
 				<classpath location="${sandbox.target.testclasses.dir}"/>
 				<classpath location="${sandbox.target.classes.dir}"/>
 				<classpath location="${target.testclasses.dir}"/>
-			    <classpath location="{target.mockclasses.dir}"/>
+			    <classpath location="${target.mockclasses.dir}"/>
 				<!-- Need files loaded as resources -->
 				<classpath location="${sandbox.test.dir}"/>
 
