@@ -35,7 +35,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.7 2004-02-07 00:18:27 jhoeller Exp $
+ * @version $Id: AbstractView.java,v 1.8 2004-03-14 21:41:16 jhoeller Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View, BeanNameAware {
@@ -59,7 +59,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @param beanName the view's name. May not be null.
 	 * Views should use this for log messages.
 	 */
-	public final void setBeanName(String beanName) {
+	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
@@ -68,7 +68,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * if the view was correctly configured.
 	 * @return the view's name
 	 */
-	public final String getBeanName() {
+	public String getBeanName() {
 		return beanName;
 	}
 
@@ -78,7 +78,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * to set the content type, e.g. in case of JSPs.
 	 * @param contentType content type for this view
 	 */
-	public final void setContentType(String contentType) {
+	public void setContentType(String contentType) {
 		this.contentType = contentType;
 	}
 
@@ -86,7 +86,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Return the content type for this view.
 	 * @return content type for this view
 	 */
-	protected final String getContentType() {
+	protected String getContentType() {
 		return this.contentType;
 	}
 
@@ -95,7 +95,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * or null if not needed.
 	 * @param requestContextAttribute name of the RequestContext attribute
 	 */
-	public final void setRequestContextAttribute(String requestContextAttribute) {
+	public void setRequestContextAttribute(String requestContextAttribute) {
 		this.requestContextAttribute = requestContextAttribute;
 	}
 
@@ -108,7 +108,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * or a "props" element in XML bean definitions.
 	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
 	 */
-	public final void setAttributes(Properties props) {
+	public void setAttributes(Properties props) {
 		setAttributesMap(props);
 	}
 
@@ -120,7 +120,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @param attributes Map with name Strings as keys and attribute
 	 * objects as values
 	 */
-	public final void setAttributesMap(Map attributes) {
+	public void setAttributesMap(Map attributes) {
 		if (attributes != null) {
 			Iterator itr = attributes.keySet().iterator();
 			while (itr.hasNext()) {
@@ -135,7 +135,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Set static attributes as a CSV string.
 	 * Format is attname0={value1},attname1={value1}
 	 */
-	public final void setAttributesCSV(String propString) throws IllegalArgumentException {
+	public void setAttributesCSV(String propString) throws IllegalArgumentException {
 		if (propString == null)
 			// Leave static attributes unchanged
 			return;
@@ -170,7 +170,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @param name name of attribute to expose
 	 * @param value object to expose
 	 */
-	public final void addStaticAttribute(String name, Object value) {
+	public void addStaticAttribute(String name, Object value) {
 		logger.debug("Set static attribute with name '" + name + "' and value [" + value + "] on view");
 		this.staticAttributes.put(name, value);
 	}
@@ -179,7 +179,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Handy for testing. Return the static attributes held in this view.
 	 * @return the static attributes in this view
 	 */
-	public final Map getStaticAttributes() {
+	public Map getStaticAttributes() {
 		return Collections.unmodifiableMap(this.staticAttributes);
 	}
 
