@@ -110,7 +110,7 @@ public class CollectionFactory {
 			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
 		}
 		else if (commonsCollections3xAvailable) {
-			logger.debug("Creating org.apache.commons.collections.map.LinkedMap;");
+			logger.debug("Creating org.apache.commons.collections.map.LinkedMap");
 			return CommonsCollectionFactory.createCommonsLinkedMap(initialCapacity);
 		}
 		else {
@@ -134,7 +134,7 @@ public class CollectionFactory {
 			return Jdk14CollectionFactory.createIdentityHashMap(initialCapacity);
 		}
 		else if (commonsCollections3xAvailable) {
-			logger.debug("Creating org.apache.commons.collections.map.IdentityMap;");
+			logger.debug("Creating org.apache.commons.collections.map.IdentityMap");
 			return CommonsCollectionFactory.createCommonsIdentityMap(initialCapacity);
 		}
 		else {

@@ -36,8 +36,9 @@ import org.springframework.transaction.TransactionStatus;
  * TransactionInterceptor, or an AspectJ aspect. This enables the underlying
  * Spring transaction infrastructure to be used easily to implement an aspect
  * for any aspect system.
- * <p>
- * Subclasses are responsible for calling methods in this class in the correct order.
+ *
+ * <p>Subclasses are responsible for calling methods in this class in the
+ * correct order.
  *
  * <p>Uses the <b>Strategy</b> design pattern. A PlatformTransactionManager
  * implementation will perform the actual transaction management.
@@ -46,12 +47,12 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  * 
- * <p>A transaction aspect is serializable if its 
- * PlatformTransactionManager and TransactionAttributeSource
- * are serializable.
+ * <p>A transaction aspect is serializable if its PlatformTransactionManager
+ * and TransactionAttributeSource are serializable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @since 1.1
  */
 public class TransactionAspectSupport implements InitializingBean, Serializable {
 
@@ -175,7 +176,7 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 			throw new IllegalArgumentException(
 					"Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
 					"If there are no transactional methods, don't use a TransactionInterceptor " +
-					"respectively a transactional proxy.");
+					"or TransactionProxyFactoryBean.");
 		}
 	}
 

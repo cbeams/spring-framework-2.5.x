@@ -248,7 +248,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (mergedBeanDefinition.getDependsOn() != null) {
 			for (int i = 0; i < mergedBeanDefinition.getDependsOn().length; i++) {
-				// guarantee initialization of beans that the current one depends on
+				// Guarantee initialization of beans that the current one depends on.
 				getBean(mergedBeanDefinition.getDependsOn()[i]);
 			}
 		}
@@ -259,7 +259,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		boolean eagerlyCached = false;
 
 		try {
-			// instantiate bean
+			// Instantiate the bean.
 			errorMessage = "Instantiation of bean failed";
 
 			if (mergedBeanDefinition.getFactoryMethodName() != null)  {
@@ -270,7 +270,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
 			}
 			else {
-				// use no-arg constructor
+				// No special handling: simply use no-arg constructor.
 				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this);
 				instanceWrapper = createBeanWrapper(beanInstance);
 				initBeanWrapper(instanceWrapper);
@@ -284,9 +284,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				eagerlyCached = true;
 			}
 
-			// initialize bean
+			// Initialize the bean instance.
 			errorMessage = "Initialization of bean failed";
-
 			populateBean(beanName, mergedBeanDefinition, instanceWrapper);
 
 			if (bean instanceof BeanNameAware) {
@@ -381,7 +380,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			factoryClass = mergedBeanDefinition.getBeanClass();
 		}
 
-		// try all methods with this name to see if they match constructor arguments
+		// Try all methods with this name to see if they match constructor arguments.
 		for (int i = 0; i < factoryClass.getMethods().length; i++) {
 			Method factoryMethod = factoryClass.getMethods()[i];
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
@@ -477,7 +476,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			catch (BeansException ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Ignoring constructor [" + constructors[i] + "] of bean '" + beanName +
-							"': could not satisfy dependencies. Detail: " + ex.getMessage());
+							"': could not satisfy dependencies", ex);
 				}
 				if (i == constructors.length - 1 && constructorToUse == null) {
 					// all constructors tried
@@ -636,12 +635,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 			MutablePropertyValues mpvs = new MutablePropertyValues(pvs);
 
-			// add property values based on autowire by name if it's applied
+			// Add property values based on autowire by name if applicable.
 			if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
 				autowireByName(beanName, mergedBeanDefinition, bw, mpvs);
 			}
 
-			// add property values based on autowire by type if it's applied
+			// Add property values based on autowire by type if applicable.
 			if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 				autowireByType(beanName, mergedBeanDefinition, bw, mpvs);
 			}
