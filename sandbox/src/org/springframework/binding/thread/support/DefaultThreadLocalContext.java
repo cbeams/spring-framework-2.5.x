@@ -13,16 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util.thread.support;
+package org.springframework.binding.thread.support;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeSetter;
-import org.springframework.util.thread.ThreadCleanupBroadcaster;
-import org.springframework.util.thread.ThreadCleanupListener;
-import org.springframework.util.thread.ThreadLocalContext;
+import org.springframework.binding.thread.ThreadCleanupBroadcaster;
+import org.springframework.binding.thread.ThreadCleanupListener;
+import org.springframework.binding.thread.ThreadLocalContext;
 
 public class DefaultThreadLocalContext implements ThreadLocalContext, ThreadCleanupListener, AttributeAccessor,
 		AttributeSetter {

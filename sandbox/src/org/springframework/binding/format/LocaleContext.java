@@ -1,7 +1,7 @@
 /*
  * Copyright 2004-2005 the original author or authors.
  */
-package org.springframework.context;
+package org.springframework.binding.format;
 
 import java.util.Locale;
 

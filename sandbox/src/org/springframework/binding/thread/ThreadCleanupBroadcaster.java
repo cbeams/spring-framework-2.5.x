@@ -13,8 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util.thread;
+package org.springframework.binding.thread;
 
-public interface ThreadCleanupListener {
-	public void onCleanup();
+public interface ThreadCleanupBroadcaster {
+	public void addThreadCleanupListener(ThreadCleanupListener listener);
+
+	public void removeThreadCleanupListener(ThreadCleanupListener listener);
+
+	public void fireCleanupEvent();
 }

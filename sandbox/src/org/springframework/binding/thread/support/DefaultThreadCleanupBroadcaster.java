@@ -13,13 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util.thread.support;
+package org.springframework.binding.thread.support;
 
 import java.util.Iterator;
 
+import org.springframework.binding.thread.ThreadCleanupBroadcaster;
+import org.springframework.binding.thread.ThreadCleanupListener;
 import org.springframework.util.EventListenerListHelper;
-import org.springframework.util.thread.ThreadCleanupBroadcaster;
-import org.springframework.util.thread.ThreadCleanupListener;
 
 public class DefaultThreadCleanupBroadcaster implements ThreadCleanupBroadcaster {
 	private ThreadLocal listenerListHolder = new ThreadLocal();
