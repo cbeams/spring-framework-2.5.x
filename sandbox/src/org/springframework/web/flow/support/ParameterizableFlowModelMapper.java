@@ -23,8 +23,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.web.flow.AttributeMapper;
-import org.springframework.web.flow.AttributeSetter;
+import org.springframework.binding.AttributeMapper;
+import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.support.ParameterizableAttributeMapper;
 import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.MutableFlowModel;
