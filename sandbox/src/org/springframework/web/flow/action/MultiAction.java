@@ -31,29 +31,23 @@ import org.springframework.web.flow.RequestContext;
  * subclasses should follow the following signature:
  * 
  * <pre>
- * 
  *     public Event ${executeMethodName}(RequestContext context)
- *  
  * </pre>
  * 
  * By default, the ${executeMethodName} will be the name of the <b>current state</b>
  * of the flow, so the follow state definition
  * 
  * <pre>
- * 
  *      &lt;action-state id=&quot;search&quot;&gt;
  *          &lt;action bean=&quot;my.search.action&quot;/&gt;
  *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
  *      &lt;/action-state&gt;
- *  
  * </pre>
  * 
  * ... will execute the method:
  * 
  * <pre>
- * 
  *      public Event search(RequestContext context)
- *  
  * </pre>
  * 
  * <p>

@@ -33,72 +33,72 @@ import org.springframework.binding.AttributeSource;
 public class JUnitAssertSupport extends Assert {
 
 	/**
-	 * Assert that an attribute with specified name is present in given model.
+	 * Assert that an attribute with specified name is present in given attributes.
 	 */
-	public void assertAttributePresent(AttributeSource model, String attributeName) {
-		assertTrue("The model attribute '" + attributeName + "' is not present in model but should be", model
+	public void assertAttributePresent(AttributeSource attributes, String attributeName) {
+		assertTrue("The attributes attribute '" + attributeName + "' is not present in attributes but should be", attributes
 				.containsAttribute(attributeName));
 	}
 
 	/**
 	 * Assert that an attribute with specified name is not present in given
-	 * model.
+	 * attributes.
 	 */
-	public void assertAttributeNotPresent(AttributeSource model, String attributeName) {
-		assertTrue("The model attribute '" + attributeName + "' is present in model but shouldn't be", !model
+	public void assertAttributeNotPresent(AttributeSource attributes, String attributeName) {
+		assertTrue("The attributes attribute '" + attributeName + "' is present in attributes but shouldn't be", !attributes
 				.containsAttribute(attributeName));
 	}
 
 	/**
-	 * Assert that an attribute exists in the model map of the specified type.
-	 * @param model the model map
+	 * Assert that an attribute exists in the attributes map of the specified type.
+	 * @param attributes the attributes map
 	 * @param attributeName the attribute name
 	 * @param clazz the required type
 	 */
-	public void assertAttributeInstanceOf(AttributeSource model, String attributeName, Class clazz) {
-		assertAttributePresent(model, attributeName);
-		org.springframework.util.Assert.isInstanceOf(clazz, model.getAttribute(attributeName));
+	public void assertAttributeInstanceOf(AttributeSource attributes, String attributeName, Class clazz) {
+		assertAttributePresent(attributes, attributeName);
+		org.springframework.util.Assert.isInstanceOf(clazz, attributes.getAttribute(attributeName));
 	}
 
 	/**
-	 * Assert that an attribute exists in the model map of the specified value.
-	 * @param model the model map
+	 * Assert that an attribute exists in the attributes map of the specified value.
+	 * @param attributes the attributes map
 	 * @param attributeName the attribute name
 	 * @param attributeValue the attribute value
 	 */
-	public void assertAttributeEquals(AttributeSource model, String attributeName, Object attributeValue) {
+	public void assertAttributeEquals(AttributeSource attributes, String attributeName, Object attributeValue) {
 		if (attributeValue != null) {
-			assertAttributeInstanceOf(model, attributeName, attributeValue.getClass());
+			assertAttributeInstanceOf(attributes, attributeName, attributeValue.getClass());
 		}
-		assertEquals("The model attribute '" + attributeName + "' must equal '" + attributeValue + "'", attributeValue,
-				model.getAttribute(attributeName));
+		assertEquals("The attributes attribute '" + attributeName + "' must equal '" + attributeValue + "'", attributeValue,
+				attributes.getAttribute(attributeName));
 	}
 
 	/**
-	 * Assert that a collection exists in the model map under the provided
+	 * Assert that a collection exists in the attributes map under the provided
 	 * attribute name, with the specified size.
-	 * @param model the model map
+	 * @param attributes the attributes map
 	 * @param attributeName the attribute name
 	 * @param size the expected collection size
 	 */
-	public void assertCollectionAttributeSize(AttributeSource model, String attributeName, int size) {
-		assertAttributeInstanceOf(model, attributeName, Collection.class);
-		assertEquals("The model collection attribute '" + attributeName + "' must have " + size + " elements", size,
-				((Collection)model.getAttribute(attributeName)).size());
+	public void assertCollectionAttributeSize(AttributeSource attributes, String attributeName, int size) {
+		assertAttributeInstanceOf(attributes, attributeName, Collection.class);
+		assertEquals("The attributes collection attribute '" + attributeName + "' must have " + size + " elements", size,
+				((Collection)attributes.getAttribute(attributeName)).size());
 	}
 
 	/**
-	 * Assert that a bean property attribute in the model map has a property
+	 * Assert that a bean property attribute in the attributes map has a property
 	 * with the provided property value.
-	 * @param model the model map
+	 * @param attributes the attributes map
 	 * @param attributeName the attribute name (of a javabean)
 	 * @param propertyName the bean property name
 	 * @param propertyValue the expected property value
 	 */
-	public void assertAttributePropertyEquals(AttributeSource model, String attributeName, String propertyName,
+	public void assertAttributePropertyEquals(AttributeSource attributes, String attributeName, String propertyName,
 			Object propertyValue) {
-		assertAttributePresent(model, attributeName);
-		Object value = model.getAttribute(attributeName);
+		assertAttributePresent(attributes, attributeName);
+		Object value = attributes.getAttribute(attributeName);
 		org.springframework.util.Assert.isTrue(!BeanUtils.isSimpleProperty(value.getClass()),
 				"Attribute value must be a bean");
 		BeanWrapper wrapper = new BeanWrapperImpl(value);
