@@ -115,7 +115,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		return startFlow(new MockHttpServletRequest(), new MockHttpServletResponse(), input);
 	}
 
-	protected ModelAndView executeEvent(String eventId, MockHttpServletRequest request, MockHttpServletResponse response) {
+	protected ModelAndView signalEvent(String eventId, MockHttpServletRequest request, MockHttpServletResponse response) {
 		return getFlowSessionExecution().signalEvent(eventId, getCurrentStateId(), request, response);
 	}
 
