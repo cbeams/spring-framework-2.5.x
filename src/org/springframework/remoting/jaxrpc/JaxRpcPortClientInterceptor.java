@@ -145,7 +145,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Can be different from the JAX-RPC port interface, if using a non-RMI business
 	 * interface for exposed proxies.
 	 * <p>The interface must be suitable for a JAX-RPC port, it "portInterface"
-	 * is not set.
+	 * is not set. Else, it must match the methods in the port interface but can
+	 * be a non-RMI business interface.
 	 * @see #setPortInterface
 	 */
 	public void setServiceInterface(Class serviceInterface) {
@@ -164,7 +165,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Set the JAX-RPC port interface to use. Only needs to be set if the exposed
-	 * service interface is different from the port interface.
+	 * service interface is different from the port interface, i.e. when using
+	 * a non-RMI business interface as service interface for exposed proxies.
 	 * <p>The interface must be suitable for a JAX-RPC port.
 	 * @see #setServiceInterface
 	 */
@@ -194,6 +196,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 		if (this.jaxRpcService == null) {
 			this.jaxRpcService = createJaxRpcService();
+			postProcessJaxRpcService(this.jaxRpcService);
 		}
 
 		this.portQName = getQName(this.portName);
@@ -228,6 +231,23 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		}
 
 		this.portProxy = remoteObj;
+		postProcessPortProxy(this.portProxy);
+	}
+
+	/**
+	 * Post-process the given JAX-RPC Service. Called by afterPropertiesSet.
+	 * Useful for example to register custom type mappings.
+	 * @param service the current JAX-RPC Service
+	 * @see javax.xml.rpc.Service#getTypeMappingRegistry
+	 */
+	protected void postProcessJaxRpcService(Service service) {
+	}
+
+	/**
+	 * Post-process the given JAX-RPC port proxy. Called by afterPropertiesSet.
+	 * @param portProxy the current JAX-RPC port proxy
+	 */
+	protected void postProcessPortProxy(Remote portProxy) {
 	}
 
 	/**
@@ -236,6 +256,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	public Remote getPortProxy() {
 		return portProxy;
 	}
+
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		try {
