@@ -26,8 +26,9 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public class BeanPropertyExpression implements UnaryPredicate {
-    private String propertyName;
+public class BeanPropertyExpression
+    extends AbstractBeanPropertyExpression
+    implements UnaryPredicate {
     private String otherPropertyName;
     private BinaryPredicate beanPropertyExpression;
 
@@ -46,10 +47,9 @@ public class BeanPropertyExpression implements UnaryPredicate {
         String propertyName,
         String otherPropertyName,
         BinaryPredicate beanPropertyExpression) {
-        Assert.notNull(propertyName);
+        super(propertyName);
         Assert.notNull(otherPropertyName);
         Assert.notNull(beanPropertyExpression);
-        this.propertyName = propertyName;
         this.otherPropertyName = otherPropertyName;
         this.beanPropertyExpression = beanPropertyExpression;
     }
@@ -62,7 +62,7 @@ public class BeanPropertyExpression implements UnaryPredicate {
      */
     public boolean test(Object bean) {
         return beanPropertyExpression.test(
-            GetProperty.instance().evaluate(bean, propertyName),
+            GetProperty.instance().evaluate(bean, getPropertyName()),
             GetProperty.instance().evaluate(bean, otherPropertyName));
     }
 

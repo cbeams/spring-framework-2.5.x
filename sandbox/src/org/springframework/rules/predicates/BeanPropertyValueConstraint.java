@@ -15,47 +15,47 @@
  */
 package org.springframework.rules.predicates;
 
-import org.springframework.rules.BinaryPredicate;
 import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.functions.GetProperty;
+import org.springframework.util.Assert;
 
 /**
  * A unary predicate that returns the result of a <code>boolean</code>
- * expression that tests a variable bean property value against a constant
- * parameter value. For example: <code>pet.age > 5</code>
+ * expression that tests a variable bean property value against a predicate
+ * (constraint). For example: <code>pet.age is required</code>
  * 
  * @author Keith Donald
  */
-public class ParameterizedBeanPropertyExpression implements UnaryPredicate {
-    private UnaryPredicate parameterizedExpression;
+public class BeanPropertyValueConstraint
+    extends AbstractBeanPropertyExpression
+    implements UnaryPredicate {
+    private UnaryPredicate valueConstraint;
 
     /**
-     * Creates a BeanPropertyExpressionTester.
+     * Creates a BeanPropertyValueConstraint.
      * 
      * @param propertyName
-     *            The property participating in the expression.
-     * @param expression
-     *            The expression predicate (tester).
-     * @param parameter
-     *            The constant parameter value participating in the expression.
+     *            The constrained property.
+     * @param valueConstraint
+     *            The property value constraint (tester).
      */
-    public ParameterizedBeanPropertyExpression(
+    public BeanPropertyValueConstraint(
         String propertyName,
-        BinaryPredicate expression,
-        Object parameter) {
-        ParameterizedBinaryPredicate valueConstraint =
-            new ParameterizedBinaryPredicate(expression, parameter);
-        this.parameterizedExpression =
-            new BeanPropertyValueConstraint(propertyName, valueConstraint);
+        UnaryPredicate valueConstraint) {
+        super(propertyName);
+        Assert.notNull(valueConstraint);
+        this.valueConstraint = valueConstraint;
     }
 
     /**
      * Tests the value of the configured propertyName for this bean against the
-     * configured parameter value using the configured binary predicate.
+     * configured predicate constraint.
      * 
      * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
      */
     public boolean test(Object bean) {
-        return parameterizedExpression.test(bean);
+        return valueConstraint.test(
+            GetProperty.instance().evaluate(bean, getPropertyName()));
     }
 
 }
