@@ -19,14 +19,13 @@ package org.springframework.beans.factory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
-
 /**
  * Simple test of BeanFactory initialization and lifecycle callbacks.
  * 
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @since 12-Mar-2003
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LifecycleBean implements BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
@@ -87,6 +86,18 @@ public class LifecycleBean implements BeanNameAware, BeanFactoryAware, Initializ
 			throw new RuntimeException("Factory called afterPropertiesSet twice");
 		}
 		this.inited = true;
+	}
+	
+	public void declaredInitMethod() {
+		
+		if (!this.inited) {
+			throw new RuntimeException("Factory didn't call afterPropertiesSet before declared init method");
+		}		
+		
+		if (this.initedViaDeclaredInitMethod) {
+			throw new RuntimeException("Factory called declared init method twice");
+		}
+		this.initedViaDeclaredInitMethod = true;
 	}
 
 	public void postProcessAfterInit() {
