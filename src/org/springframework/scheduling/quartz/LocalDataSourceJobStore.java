@@ -38,6 +38,10 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * kind of Spring-managed transaction, as it uses Spring's DataSourceUtils
  * connection handling methods that are aware of a current transaction.
  *
+ * <p>Note that all Quartz Scheduler operations that affect the persistent
+ * job store should usually be performed within active transaction, as they
+ * assume to get proper locks etc.
+ *
  * @author Juergen Hoeller
  * @since 07.06.2004
  * @see SchedulerFactoryBean#setDataSource
@@ -51,7 +55,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
 	    throws SchedulerConfigException {
 
-		// DataSource names are not needed here, but checked in base class
+		// DataSource names are not needed here, but checked in base class.
 		setDataSource("dummy");
 		setNonManagedTXDataSource("dummy");
 
@@ -67,15 +71,20 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	}
 
 	protected Connection getConnection() {
-		// not preparing connection, as this is driven by the transaction
+		// Do not prepare connection here, as this is driven by the transaction.
 		return DataSourceUtils.getConnection(this.dataSource);
 	}
 
 	protected Connection getNonManagedTXConnection() throws JobPersistenceException {
 		try {
+			// Do a direct DataSource.getConnection() call,
+			// as we never want to have a transactional connection here.
+			// Of course, this is usually called by a Quartz thread,
+			// so there can't be an active transaction anyway...
 			Connection con = this.dataSource.getConnection();
 
-			// following block copied from base class implementation
+			// Following block copied from base class implementation,
+			// due to lack of specific hooks in the base class.
 			if (!isDontSetNonManagedTXConnectionAutoCommitFalse()) {
 				con.setAutoCommit(false);
 			}
@@ -91,7 +100,15 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	}
 
 	protected void closeConnection(Connection con) {
+		// will work for transactional and non-transactional connections
 		DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+	}
+
+	/**
+	 * Do not perform the base class' DataSource shutdown here:
+	 * A Spring-provided DataSource has its own lifecycle.
+	 */
+	public void shutdown() {
 	}
 
 }
