@@ -15,12 +15,14 @@
  */
 package org.springframework.jmx.invokers;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.JMException;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.management.MBeanException;
+import javax.management.ObjectName;
 
 import org.springframework.jmx.MBeanInvoker;
+import org.springframework.jmx.ManagedResourceAlreadyRegisteredException;
 
 /**
  * Abstract MBeanInvoker providing basic services for all MBeanInvoker
@@ -30,71 +32,60 @@ import org.springframework.jmx.MBeanInvoker;
  */
 public abstract class AbstractMBeanInvoker implements MBeanInvoker {
 
-    /**
-     * Store a reference to the resource managed by this invoker
-     */
-    protected Object managedResource = null;
+	/**
+	 * Store the managed resources. Keyed by ObjectName
+	 */
+	private Map managedResources = new HashMap();
 
-    /**
-     * Set the resource to be managed.
-     */
-    public void setManagedResource(Object managedResource) {
-        this.managedResource = managedResource;
-        afterManagedResourceSet();
-    }
+	/**
+	 * Register a managed resource
+	 */
+	public void registerManagedResource(ObjectName objectName,
+			Object managedResource) {
 
-    /**
-     * Retreive the managed resource.
-     */
-    public Object getManagedResource() {
-        return this.managedResource;
-    }
+		if (managedResources.containsKey(objectName)) {
+			throw new ManagedResourceAlreadyRegisteredException(
+					"The managed resource with ObjectName " + objectName
+							+ " has already been registered with this invoker");
+		}
 
-    /**
-     * Checks to see if an attribute is being accessed as an operation rather
-     * than as an attribute. This behavior is forbidden by the JMX 1.2
-     * specification.
-     * 
-     * @param methodName
-     */
-    protected void checkForInvalidAttributeInvoke(String methodName)
-            throws MBeanException {
-        // TODO: this check isn't very accurate - make it more so
-        if ((methodName.startsWith("get") || (methodName.startsWith("set")))) {
-            throw new MBeanException(
-                    null,
-                    "Cannot access an attribute using invoke. Please use the appropriate get/setAttribute method");
-        }
-    }
+		synchronized(managedResources) {
+			managedResources.put(objectName, managedResource);
+		}
+		
+		afterManagedResourceRegister(objectName, managedResource);
+	}
 
-    /**
-     * Called after the managed resource is stored. Allows subclasses to
-     * prebuild any operation or attribute caches as required.
-     *  
-     */
-    protected void afterManagedResourceSet() {
-        ;
-    }
+	/**
+	 * Retreive a managed resource.
+	 */
+	public Object getManagedResource(ObjectName objectName) {
+		return managedResources.get(objectName);
+	}
 
-    /**
-     * Retreive a set of attributes matching the names provided.
-     * 
-     * @param attributeNames
-     *            The names of the attributes whose values you wish to retreive
-     * @return An <tt>AttributeList</tt> instance containing the retreived
-     *         attributes and their values.
-     */
-    public AttributeList getAttributes(String[] attributeNames) {
-        AttributeList attributes = new AttributeList();
+	/**
+	 * Checks to see if an attribute is being accessed as an operation rather
+	 * than as an attribute. This behavior is forbidden by the JMX 1.2
+	 * specification.
+	 * 
+	 * @param methodName
+	 */
+	protected void checkForInvalidAttributeInvoke(String methodName)
+			throws MBeanException {
+		// TODO: this check isn't very accurate - make it more so
+		if ((methodName.startsWith("get") || (methodName.startsWith("set")))) {
+			throw new MBeanException(
+					null,
+					"Cannot access an attribute using invoke. Please use the appropriate get/setAttribute method");
+		}
+	}
 
-        for (int x = 0; x < attributeNames.length; x++) {
-            try {
-                attributes.add(new Attribute(attributeNames[x],
-                        getAttribute(attributeNames[x])));
-            } catch (JMException ex) {
-                // TODO: do we skip or fail here?
-            }
-        }
-        return attributes;
-    }
+	/**
+	 * Called after a managed resource is registered. Allows sub classes
+	 * to preparse a managed resource and cache any data needed.
+	 *  
+	 */
+	protected void afterManagedResourceRegister(ObjectName objectName, Object managedResource) {
+		;
+	}
 }

@@ -23,6 +23,7 @@ import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
+import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import org.springframework.jmx.JmxUtils;
@@ -39,28 +40,19 @@ import net.sf.cglib.reflect.FastMethod;
  */
 public class CglibMBeanInvoker extends AbstractMBeanInvoker {
 
-	/**
-	 * Cglib class wrapper for the managed resource class.
-	 */
-	private FastClass fastClass;
-	
-	/**
-	 * Provides a map like interface to the bean properties.
-	 * Used to access the JMX attributes of the Bean.
-	 */
-	private BeanMap beanMap;
-
+	private static final Map fastClassCache  = new HashMap();
 	private static final Map methodCache = new HashMap();
-
+	private static final Map beanMapCache = new HashMap();
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.springframework.jmx.MBeanInvoker#getAttribute(java.lang.String)
 	 */
-	public Object getAttribute(String attributeName)
+	public Object getAttribute(ObjectName objectName, String attributeName)
 			throws AttributeNotFoundException, MBeanException,
 			ReflectionException {
-		
+		BeanMap beanMap = getBeanMap(objectName);
 		return beanMap.get(attributeName);
 	}
 
@@ -69,23 +61,26 @@ public class CglibMBeanInvoker extends AbstractMBeanInvoker {
 	 * 
 	 * @see org.springframework.jmx.MBeanInvoker#setAttribute(javax.management.Attribute)
 	 */
-	public void setAttribute(Attribute attribute)
+	public void setAttribute(ObjectName objectName, Attribute attribute)
 			throws AttributeNotFoundException, InvalidAttributeValueException,
 			MBeanException, ReflectionException {
+		BeanMap beanMap = getBeanMap(objectName);
 		beanMap.put(attribute.getName(), attribute.getValue());
 	}
 
-	public Object invoke(String method, Object[] args, String[] signature)
+	public Object invoke(ObjectName objectName, String method, Object[] args, String[] signature)
 			throws MBeanException, ReflectionException {
 
 		// check for invalid attribute access
 		checkForInvalidAttributeInvoke(method);
 
-		return invokeInternal(method, args, signature);
+		return invokeInternal(objectName, method, args, signature);
 	}
 
-	private Object invokeInternal(String method, Object[] args, String[] signature) throws ReflectionException {
-		FastMethod fm = getFastMethod(method, signature);
+	private Object invokeInternal(ObjectName objectName, String method, Object[] args, String[] signature) throws ReflectionException {
+		Object managedResource = getManagedResource(objectName);
+		
+		FastMethod fm = getFastMethod(managedResource, method, signature);
 		try {
 			return fm.invoke(managedResource, args);
 		} catch (InvocationTargetException ex) {
@@ -95,7 +90,7 @@ public class CglibMBeanInvoker extends AbstractMBeanInvoker {
 		}
 	}
 	
-	private FastMethod getFastMethod(String method, String[] signature)
+	private FastMethod getFastMethod(Object managedResource, String method, String[] signature)
 			throws ReflectionException {
 		try {
 			// create cache key
@@ -105,6 +100,7 @@ public class CglibMBeanInvoker extends AbstractMBeanInvoker {
 			if (fm != null)
 				return fm;
 
+			FastClass fastClass = getFastClass(managedResource);
 			fm = fastClass.getMethod(method, JmxUtils.typeNamesToTypes(signature));
 			methodCache.put(mk, fm);
 			
@@ -114,8 +110,25 @@ public class CglibMBeanInvoker extends AbstractMBeanInvoker {
 		}
 	}
 
-	protected void afterManagedResourceSet() {
-		fastClass = FastClass.create(managedResource.getClass());
-		beanMap = BeanMap.create(managedResource);
+	protected void afterManagedResourceRegister(ObjectName objectName, Object managedResource) {
+		FastClass fastClass = FastClass.create(managedResource.getClass());
+		
+		synchronized(fastClassCache) {
+			fastClassCache.put(managedResource.getClass(), fastClass);
+		}
+		
+		BeanMap beanMap = BeanMap.create(managedResource);
+		
+		synchronized(beanMapCache) {
+			beanMapCache.put(objectName, beanMap);
+		}
+	}
+	
+	private FastClass getFastClass(Object managedResource) {
+		return (FastClass)fastClassCache.get(managedResource.getClass());
+	}
+	
+	private BeanMap getBeanMap(ObjectName objectName) {
+		return (BeanMap)beanMapCache.get(objectName);
 	}
 }

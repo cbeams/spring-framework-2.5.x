@@ -24,6 +24,7 @@ import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
+import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import org.springframework.beans.BeanWrapper;
@@ -42,47 +43,42 @@ import org.springframework.jmx.invokers.MethodKey;
 public class ReflectiveMBeanInvoker extends AbstractMBeanInvoker {
 
 	/**
-	 * BeanWrapper instance around the managed resource. Used
-	 * for accessing property values using JavaBean style naming
-	 */
-	private BeanWrapper resourceWrapper = null;
-
-	/**
 	 * Cache to store methods retreived using reflection for faster
 	 * retreival on subsequent invocations.
 	 * @see ReflectiveMBeanInvoker.MethodKey
 	 */
-	private static Map methodCache = new HashMap();
-
-	/**
-	 * The <tt>Class</tt> of the managed resource.
-	 */
-	private Class managedResourceClass = null;
+	private static final Map methodCache = new HashMap();
+	
+	private static final Map beanWrapperCache = new HashMap();
 
 	/**
 	 * Retreive the value of the named attribute using reflection.
 	 * @param attributeName The name of the attribute whose value you want to retreive
 	 * @return The value of the named attribute
 	 */
-	public Object getAttribute(String attributeName)
+	public Object getAttribute(ObjectName objectName, String attributeName)
 			throws AttributeNotFoundException, MBeanException,
 			ReflectionException {
-		return resourceWrapper.getPropertyValue(attributeName);
+		BeanWrapper beanWrapper = getBeanWrapper(objectName);
+		return beanWrapper.getPropertyValue(attributeName);
 	}
 
-	public void setAttribute(Attribute attribute)
+	public void setAttribute(ObjectName objectName, Attribute attribute)
 			throws AttributeNotFoundException, InvalidAttributeValueException,
 			MBeanException, ReflectionException {
-		resourceWrapper.setPropertyValue(attribute.getName(), attribute
+		BeanWrapper beanWrapper = getBeanWrapper(objectName);
+		beanWrapper.setPropertyValue(attribute.getName(), attribute
 				.getValue());
 	}
 
 	/**
 	 * Invoke a method using reflection.
 	 */
-	public Object invoke(String method, Object[] args, String[] signature)
+	public Object invoke(ObjectName objectName, String method, Object[] args, String[] signature)
 			throws MBeanException, ReflectionException {
 
+		Object managedResource = getManagedResource(objectName);
+		
 		// check for invalid attribute invocation
 		checkForInvalidAttributeInvoke(method);
 
@@ -99,7 +95,7 @@ public class ReflectiveMBeanInvoker extends AbstractMBeanInvoker {
 			if (m == null) {
 				Class[] types = JmxUtils.typeNamesToTypes(signature);
 
-				m = managedResourceClass.getMethod(method, types);
+				m = managedResource.getClass().getMethod(method, types);
 				methodCache.put(mk, m);
 			}
 			
@@ -120,12 +116,16 @@ public class ReflectiveMBeanInvoker extends AbstractMBeanInvoker {
 		}
 	}
 
-	/**
-	 * Creates a BeanWrapper instance around the managed resource 
-	 * and also stores the <tt>Class</tt> of the managed resource.
-	 */
-	protected void afterManagedResourceSet() {
-		resourceWrapper = new BeanWrapperImpl(managedResource);
-		managedResourceClass = managedResource.getClass();
+
+	protected void afterManagedResourceRegister(ObjectName objectName, Object managedResource) {
+		BeanWrapper beanWrapper = new BeanWrapperImpl(managedResource);
+	
+		synchronized(beanWrapperCache) {
+			beanWrapperCache.put(objectName, beanWrapper);
+		}
+	}
+	
+	private BeanWrapper getBeanWrapper(ObjectName objectName) {
+		return (BeanWrapper)beanWrapperCache.get(objectName);
 	}
 }

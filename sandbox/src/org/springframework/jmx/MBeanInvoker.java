@@ -16,10 +16,10 @@
 package org.springframework.jmx;
 
 import javax.management.Attribute;
-import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
+import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 /**
@@ -31,18 +31,13 @@ import javax.management.ReflectionException;
 public interface MBeanInvoker {
 
 	/**
-	 * Called by <tt>JmxMBeanAdapter</tt>. Provides the invoker with
-	 * the resource on which invocations are to be made.
-	 * @param managedResource
+	 * Called by the framework to register a resource as being managed by
+	 * this invoker.
+	 * @param objectName The <tt>ObjectName</tt> instance associated with the resource.
+	 * @param managedResource The managed resource
 	 */
-    public void setManagedResource(Object managedResource);
-
-    /**
-     * Return the resource upon which invocations are targeted.
-     * @return The managed resource.
-     */
-    public Object getManagedResource();
-
+	public void registerManagedResource(ObjectName objectName, Object managedResource);
+	
     /**
      * Retreive the value of the specified attribute
      * @param attributeName The name of the attribute to retreive
@@ -51,19 +46,12 @@ public interface MBeanInvoker {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object getAttribute(String attributeName)
+    public Object getAttribute(ObjectName objectName, String attributeName)
             throws AttributeNotFoundException, MBeanException,
             ReflectionException;
 
-    /**
-     * Retreive an <tt>AttributeList</tt> for the specified
-     * attribute names.
-     * @param attributeNames The names of the attribute to retreive
-     * @return
-     */
-    public AttributeList getAttributes(String[] attributeNames);
 
-    public void setAttribute(Attribute attribute)
+    public void setAttribute(ObjectName objectName, Attribute attribute)
             throws AttributeNotFoundException, InvalidAttributeValueException,
             MBeanException, ReflectionException;
 
@@ -76,6 +64,6 @@ public interface MBeanInvoker {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object invoke(String method, Object[] args, String[] signature)
+    public Object invoke(ObjectName objectName, String method, Object[] args, String[] signature)
             throws MBeanException, ReflectionException;
 }

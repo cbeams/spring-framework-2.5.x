@@ -38,6 +38,7 @@ import javax.management.NotificationBroadcasterSupport;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
+import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.RuntimeOperationsException;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
@@ -66,7 +67,9 @@ public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
     /**
      * MBeanInvoker responsible for invocations against this MBean
      */
-    private MBeanInvoker invoker = null;
+    private final MBeanInvoker invoker;
+    
+    private final ObjectName objectName;
 
     /**
      * Management Interface metadata for this MBean
@@ -108,8 +111,9 @@ public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
      *            An implementation of MBeanInvoker used to invoke operations on
      *            the MBean
      */
-    public ModelMBeanImpl(MBeanInvoker invoker) {
+    public ModelMBeanImpl(MBeanInvoker invoker, ObjectName objectName) {
         this.invoker = invoker;
+        this.objectName = objectName;
 
         // create broadcaster support object
         attributeNotificationBroadcaster = new NotificationBroadcasterSupport();
@@ -135,8 +139,8 @@ public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
 
         this.managedResource = managedResource;
 
-        // pass the managed resource to the invoker
-        invoker.setManagedResource(managedResource);
+        // register the managed resource with the invoker
+        invoker.registerManagedResource(objectName, managedResource);
     }
 
     /**
@@ -149,7 +153,7 @@ public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
     public Object getAttribute(String attributeName)
             throws AttributeNotFoundException, MBeanException,
             ReflectionException {
-        return invoker.getAttribute(attributeName);
+        return invoker.getAttribute(objectName, attributeName);
     }
 
     /**
@@ -160,7 +164,7 @@ public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
             MBeanException, ReflectionException {
         Attribute current = new Attribute(attribute.getName(),
                 getAttribute(attribute.getName()));
-        invoker.setAttribute(attribute);
+        invoker.setAttribute(objectName, attribute);
         sendAttributeChangeNotification(current, attribute);
     }
 
@@ -169,7 +173,17 @@ public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
      * reflection
      */
     public AttributeList getAttributes(String[] attributeNames) {
-        return invoker.getAttributes(attributeNames);
+    	AttributeList attributes = new AttributeList();
+
+		for (int x = 0; x < attributeNames.length; x++) {
+			try {
+				attributes.add(new Attribute(attributeNames[x],
+						getAttribute(attributeNames[x])));
+			} catch (JMException ex) {
+				// TODO: do we skip or fail here?
+			}
+		}
+		return attributes;
     }
 
     /**
@@ -191,7 +205,7 @@ public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
 
     public Object invoke(String method, Object[] args, String[] signature)
             throws MBeanException, ReflectionException {
-        return invoker.invoke(method, args, signature);
+        return invoker.invoke(objectName, method, args, signature);
     }
 
     public MBeanInfo getMBeanInfo() {
