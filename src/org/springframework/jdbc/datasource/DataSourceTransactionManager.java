@@ -24,7 +24,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
@@ -242,7 +241,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		// reset connection
 		Connection con = txObject.getConnectionHolder().getConnection();
 		try {
-			if (txObject.getMustRestoreAutoCommit()) {
+			if (txObject.isMustRestoreAutoCommit()) {
 				con.setAutoCommit(true);
 			}
 			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
@@ -257,4 +256,31 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 	}
 
+
+	/**
+	 * DataSource transaction object, representing a ConnectionHolder.
+	 * Used as transaction object by DataSourceTransactionManager.
+	 *
+	 * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
+	 * to manage JDBC 3.0 Savepoints.
+	 *
+	 * @see ConnectionHolder
+	 */
+	private static class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
+
+		private boolean mustRestoreAutoCommit;
+
+		private void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
+			this.mustRestoreAutoCommit = mustRestoreAutoCommit;
+		}
+
+		private boolean isMustRestoreAutoCommit() {
+			return mustRestoreAutoCommit;
+		}
+
+		public boolean isRollbackOnly() {
+			return getConnectionHolder().isRollbackOnly();
+		}
+
+	}
 }

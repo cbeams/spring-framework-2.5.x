@@ -25,6 +25,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
+import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -409,6 +410,57 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 */
 	protected DataAccessException convertJdoAccessException(JDOException ex) {
 		return getJdoDialect().translateException(ex);
+	}
+
+
+	/**
+	 * JDO transaction object, representing a PersistenceManagerHolder.
+	 * Used as transaction object by JdoTransactionManager.
+	 *
+	 * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
+	 * to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
+	 *
+	 * @see PersistenceManagerHolder
+	 */
+	private static class JdoTransactionObject extends JdbcTransactionObjectSupport {
+
+		private PersistenceManagerHolder persistenceManagerHolder;
+
+		private boolean newPersistenceManagerHolder;
+
+		private Object transactionData;
+
+		private void setPersistenceManagerHolder(
+				PersistenceManagerHolder persistenceManagerHolder, boolean newPersistenceManagerHolder) {
+			this.persistenceManagerHolder = persistenceManagerHolder;
+			this.newPersistenceManagerHolder = newPersistenceManagerHolder;
+		}
+
+		private PersistenceManagerHolder getPersistenceManagerHolder() {
+			return persistenceManagerHolder;
+		}
+
+		private boolean isNewPersistenceManagerHolder() {
+			return newPersistenceManagerHolder;
+		}
+
+		private boolean hasTransaction() {
+			return (this.persistenceManagerHolder != null &&
+					this.persistenceManagerHolder.getPersistenceManager() != null &&
+					this.persistenceManagerHolder.getPersistenceManager().currentTransaction().isActive());
+		}
+
+		private void setTransactionData(Object transactionData) {
+			this.transactionData = transactionData;
+		}
+
+		private Object getTransactionData() {
+			return transactionData;
+		}
+
+		public boolean isRollbackOnly() {
+			return getPersistenceManagerHolder().isRollbackOnly();
+		}
 	}
 
 

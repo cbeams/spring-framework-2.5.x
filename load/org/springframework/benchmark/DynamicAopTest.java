@@ -29,7 +29,7 @@ public class DynamicAopTest extends AbstractTest {
 
 		MethodInterceptor static1 = new Advices.NopInterceptor();
 
-		pf.addInterceptor(static1);
+		pf.addAdvice(static1);
 		Advisor static3 = new Advices.SetterPointCut(new Advices.NopInterceptor());
 		Advisor static4 = new Advices.SetterPointCut(new Advices.ReadDataInterceptor());
 

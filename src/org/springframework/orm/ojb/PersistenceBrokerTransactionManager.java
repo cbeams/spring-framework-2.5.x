@@ -28,6 +28,7 @@ import org.apache.ojb.broker.accesslayer.LookupException;
 
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
@@ -295,6 +296,33 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 			logger.debug("Closing OJB persistence broker [" + pb + "] after transaction");
 		}
 		closePersistenceBrokerIfNecessary(pb);
+	}
+
+
+	/**
+	 * OJB transaction object, representing a PersistenceBrokerHolder.
+	 * Used as transaction object by PersistenceBrokerTransactionManager.
+	 *
+	 * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
+	 * to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
+	 *
+	 * @see PersistenceBrokerHolder
+	 */
+	private static class PersistenceBrokerTransactionObject extends JdbcTransactionObjectSupport {
+
+		private PersistenceBrokerHolder persistenceBrokerHolder;
+
+		private void setPersistenceBrokerHolder(PersistenceBrokerHolder persistenceBrokerHolder) {
+			this.persistenceBrokerHolder = persistenceBrokerHolder;
+		}
+
+		private PersistenceBrokerHolder getPersistenceBrokerHolder() {
+			return persistenceBrokerHolder;
+		}
+
+		public boolean isRollbackOnly() {
+			return getPersistenceBrokerHolder().isRollbackOnly();
+		}
 	}
 
 

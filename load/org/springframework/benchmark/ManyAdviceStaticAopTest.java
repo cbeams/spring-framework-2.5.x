@@ -6,36 +6,30 @@
 package org.springframework.benchmark;
 
 import org.aopalliance.intercept.MethodInterceptor;
+
 import org.springframework.aop.framework.ProxyFactory;
 
 /**
- * 
  * @author Rod Johnson
  */
 public class ManyAdviceStaticAopTest extends StaticAopTest {
 
 	private int advices;
 
-	/**
-	 * @see org.springframework.benchmark.StaticAopTest#addFurtherAdvice(org.springframework.aop.framework.ProxyFactory)
-	 */
+	public void setAdvices(int advices) {
+		this.advices = advices;
+	}
+
 	protected void addFurtherAdvice(ProxyFactory pf) {
-		
 		System.err.println("Adding " + advices + " further advices");
 		
 		for (int i = 0; i < advices; i++) {
 			MethodInterceptor mi = new Advices.NopInterceptor();
-			pf.addInterceptor(mi);
+			pf.addAdvice(mi);
 		}
-		if (pf.getAdvisors().length <= this.advices) 
+		if (pf.getAdvisors().length <= this.advices) {
 			throw new RuntimeException("Too few advices");
-	}
-
-	/**
-	 * @param i
-	 */
-	public void setAdvices(int advices) {
-		this.advices = advices;
+		}
 	}
 
 }

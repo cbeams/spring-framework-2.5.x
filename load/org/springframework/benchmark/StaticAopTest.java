@@ -33,8 +33,8 @@ public class StaticAopTest extends AbstractTest implements InitializingBean {
 
 		MethodInterceptor static2 = new Advices.ReadDataInterceptor();
 
-		pf.addInterceptor(static1);
-		pf.addInterceptor(static2);
+		pf.addAdvice(static1);
+		pf.addAdvice(static2);
 
 		Advisor static3 = new Advices.SetterPointCut(new Advices.NopInterceptor());
 		Advisor static4 = new Advices.SetterPointCut(new Advices.ReadDataInterceptor());
@@ -57,8 +57,7 @@ public class StaticAopTest extends AbstractTest implements InitializingBean {
 	
 	
 	/**
-	 * These advices won't be tested
-	 * @param pf
+	 * These advices won't be tested.
 	 */
 	protected void addFurtherAdvice(ProxyFactory pf) {
 	}
@@ -83,14 +82,16 @@ public class StaticAopTest extends AbstractTest implements InitializingBean {
 		this.advised.getName();
 		this.advised.setName(NAME2);
 
-		if (!this.advised.getName().equals(NAME2))
-			throw new TestFailedException("Name should have been " + "tony");
+		if (!this.advised.getName().equals(NAME2)) {
+			throw new TestFailedException("Name should have been tony");
+		}
 
 		this.advised.setName(null);
 			
 		// Interceptor on this
-		if (this.advised.returnsThis() != this.advised)
+		if (this.advised.returnsThis() != this.advised) {
 			throw new TestFailedException("return this should have been magiced");
+		}
 	}
 
 }

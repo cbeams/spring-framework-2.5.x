@@ -35,6 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -571,6 +572,44 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		else {
 			return new HibernateJdbcException(ex);
+		}
+	}
+
+
+	/**
+	 * Hibernate transaction object, representing a SessionHolder.
+	 * Used as transaction object by HibernateTransactionManager.
+	 *
+	 * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
+	 * to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
+	 *
+	 * @see SessionHolder
+	 */
+	private static class HibernateTransactionObject extends JdbcTransactionObjectSupport {
+
+		private SessionHolder sessionHolder;
+
+		private boolean newSessionHolder;
+
+		private void setSessionHolder(SessionHolder sessionHolder, boolean newSessionHolder) {
+			this.sessionHolder = sessionHolder;
+			this.newSessionHolder = newSessionHolder;
+		}
+
+		private SessionHolder getSessionHolder() {
+			return sessionHolder;
+		}
+
+		private boolean isNewSessionHolder() {
+			return newSessionHolder;
+		}
+
+		private boolean hasTransaction() {
+			return (this.sessionHolder != null && this.sessionHolder.getTransaction() != null);
+		}
+
+		public boolean isRollbackOnly() {
+			return getSessionHolder().isRollbackOnly();
 		}
 	}
 

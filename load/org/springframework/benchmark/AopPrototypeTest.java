@@ -12,7 +12,6 @@ import org.springframework.load.AbstractTest;
 import org.springframework.load.TestFailedException;
 
 /**
- * 
  * @author Rod Johnson
  */
 public class AopPrototypeTest extends AbstractTest {
@@ -26,8 +25,8 @@ public class AopPrototypeTest extends AbstractTest {
 
 		MethodInterceptor static2 = new Advices.ReadDataInterceptor();
 
-		pf.addInterceptor(static1);
-		pf.addInterceptor(static2);
+		pf.addAdvice(static1);
+		pf.addAdvice(static2);
 
 		Advisor static3 = new Advices.SetterPointCut(new Advices.NopInterceptor());
 		Advisor static4 = new Advices.SetterPointCut(new Advices.ReadDataInterceptor());

@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.util.ResponseTimeMonitor;
 import org.springframework.util.ResponseTimeMonitorImpl;
@@ -210,7 +211,7 @@ public abstract class AbstractTest implements Test, BeanNameAware {
 	 */
 	public final double getTestsPerSecondCount() {
 		double res = 0.0;
-		double totalTime = runningTimer.getTotalTime();
+		double totalTime = runningTimer.getTotalTimeMillis();
 		double testCompleted = getTestsCompletedCount();
 		
 		if (testCompleted == 0.0) 
@@ -230,21 +231,21 @@ public abstract class AbstractTest implements Test, BeanNameAware {
 	 * @see org.springframework.load.TestStatus#getTotalWorkingTime()
 	 */
 	public final long getTotalWorkingTime() {
-		return runningTimer.getTotalTime();
+		return runningTimer.getTotalTimeMillis();
 	}
 
 	/**
 	 * @see org.springframework.load.TestStatus#getElapsedTime()
 	 */
 	public final long getElapsedTime() {
-		return elapsedTimer.getTotalTime();
+		return elapsedTimer.getTotalTimeMillis();
 	}
 
 	/**
 	 * @see org.springframework.load.TestStatus#getTotalPauseTime()
 	 */
 	public final long getTotalPauseTime() {
-		return pauseTimer.getTotalTime();
+		return pauseTimer.getTotalTimeMillis();
 	}
 
 	public final TestFailedException[] getFailureExceptions() {
@@ -305,7 +306,7 @@ public abstract class AbstractTest implements Test, BeanNameAware {
 			finally {
 				++completedTests;
 				runningTimer.stop();
-				responseTimeMonitorImpl.recordResponseTime(runningTimer.getLastInterval());
+				responseTimeMonitorImpl.recordResponseTime(runningTimer.getLastTaskTimeMillis());
 			}
 		} // for each test
 		elapsedTimer.stop();

@@ -71,7 +71,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		if (autoCommit) {
-			// Must restore autocommit
+			// must restore autoCommit
 			con.setAutoCommit(true);
 			conControl.setVoidCallable(1);
 		}
@@ -95,9 +95,6 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 				assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue("Is new transaction", status.isNewTransaction());
-				DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-				assertEquals("Preserved information about old autocommit setting",
-						autoCommit, ((DataSourceTransactionObject) defStatus.getTransaction()).getMustRestoreAutoCommit());
 			}
 		});
 
@@ -156,9 +153,6 @@ public class DataSourceTransactionManagerTests extends TestCase {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue("Is new transaction", status.isNewTransaction());
-					DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-					assertEquals("Preserved information about old autocommit setting",
-											autoCommit, ((DataSourceTransactionObject) defStatus.getTransaction()).getMustRestoreAutoCommit());
 					throw ex;
 				}
 			});
