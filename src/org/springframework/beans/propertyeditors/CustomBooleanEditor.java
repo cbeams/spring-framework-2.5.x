@@ -41,19 +41,55 @@ import org.springframework.util.StringUtils;
 public class CustomBooleanEditor extends PropertyEditorSupport {
 
 	public static final String VALUE_TRUE = "true";
-
 	public static final String VALUE_FALSE = "false";
+
+	public static final String VALUE_ON = "on";
+	public static final String VALUE_OFF = "off";
+
+	public static final String VALUE_YES = "yes";
+	public static final String VALUE_NO = "no";
+
+	private final String trueString;
+
+	private final String falseString;
 
 	private final boolean allowEmpty;
 
 	/**
-	 * Create a new CustomBooleanEditor instance.
+	 * Create a new CustomBooleanEditor instance,
+	 * with "true" and "false" as recognized String values.
 	 * <p>The "allowEmpty" parameter states if an empty String should
 	 * be allowed for parsing, i.e. get interpreted as null value.
 	 * Else, an IllegalArgumentException gets thrown in that case.
 	 * @param allowEmpty if empty strings should be allowed
 	 */
 	public CustomBooleanEditor(boolean allowEmpty) {
+		this(VALUE_TRUE, VALUE_FALSE, allowEmpty);
+	}
+
+	/**
+	 * Create a new CustomBooleanEditor instance,
+	 * with configurable String values for true and false.
+	 * <p>The "allowEmpty" parameter states if an empty String should
+	 * be allowed for parsing, i.e. get interpreted as null value.
+	 * Else, an IllegalArgumentException gets thrown in that case.
+	 * @param trueString the String value that represents true:
+	 * for example, "true" (VALUE_TRUE), "on" (VALUE_ON),
+	 * "yes" (VALUE_YES) or some custom value
+	 * @param falseString the String value that represents false:
+	 * for example, "false" (VALUE_FALSE), "off" (VALUE_OFF),
+	 * "no" (VALUE_NO) or some custom value
+	 * @param allowEmpty if empty strings should be allowed
+	 * @see #VALUE_TRUE
+	 * @see #VALUE_FALSE
+	 * @see #VALUE_ON
+	 * @see #VALUE_OFF
+	 * @see #VALUE_YES
+	 * @see #VALUE_NO
+	 */
+	public CustomBooleanEditor(String trueString, String falseString, boolean allowEmpty) {
+		this.trueString = trueString;
+		this.falseString = falseString;
 		this.allowEmpty = allowEmpty;
 	}
 
@@ -61,10 +97,10 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			setValue(null);
 		}
-		else if (text.equalsIgnoreCase(VALUE_TRUE)) {
+		else if (text.equalsIgnoreCase(this.trueString)) {
 			setValue(Boolean.TRUE);
 		}
-		else if (text.equalsIgnoreCase(VALUE_FALSE)) {
+		else if (text.equalsIgnoreCase(this.falseString)) {
 			setValue(Boolean.FALSE);
 		}
 		else
@@ -72,7 +108,15 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 	}
 
 	public String getAsText() {
-		return (getValue() == null ? "" : getValue().toString());
+		if (Boolean.TRUE.equals(getValue())) {
+			return this.trueString;
+		}
+		else if (Boolean.FALSE.equals(getValue())) {
+			return this.falseString;
+		}
+		else {
+			return "";
+		}
 	}
 
 }
