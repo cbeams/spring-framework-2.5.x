@@ -23,6 +23,7 @@ import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.MessageCodesResolver;
+import org.springframework.validation.PropertyEditorRegistrar;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -390,7 +391,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 	 */
 	protected void initBinder(HttpServletRequest request, AttributesAccessor model, ServletRequestDataBinder binder) {
 		if (propertyEditorRegistrar != null) {
-			propertyEditorRegistrar.registerCustomEditors(binder, model);
+			propertyEditorRegistrar.registerCustomEditors(binder);
 		}
 		else {
 			if (logger.isInfoEnabled()) {

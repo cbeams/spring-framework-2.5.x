@@ -37,6 +37,10 @@ public class SubFlowState extends TransitionableState {
 
 	private FlowAttributesMapper attributesMapper;
 
+	public SubFlowState(Flow flow, String id) {
+		super(flow, id);
+	}
+
 	public SubFlowState(Flow flow, String id, String subFlowId, Transition transition) {
 		this(flow, id, subFlowId, null, new Transition[] { transition });
 	}

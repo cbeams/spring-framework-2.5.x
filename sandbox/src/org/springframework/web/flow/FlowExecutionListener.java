@@ -26,54 +26,54 @@ public interface FlowExecutionListener {
 
 	/**
 	 * Called when a new flow session execution was started.
-	 * @param sessionExecution
+	 * @param flowExecution
 	 */
-	public void started(FlowExecution sessionExecution);
+	public void started(FlowExecution flowExecution);
 
 	/**
 	 * Called when a new client HTTP request is submitted to manipulate this
 	 * session execution.
-	 * @param sessionExecution
+	 * @param flowExecution
 	 * @param request
 	 */
-	public void requestSubmitted(FlowExecution sessionExecution, HttpServletRequest request);
+	public void requestSubmitted(FlowExecution flowExecution, HttpServletRequest request);
 
 	/**
 	 * Called when a new client HTTP request is processed.
-	 * @param sessionExecution
+	 * @param flowExecution
 	 * @param request
 	 */
-	public void requestProcessed(FlowExecution sessionExecution, HttpServletRequest request);
+	public void requestProcessed(FlowExecution flowExecution, HttpServletRequest request);
 
 	/**
 	 * Called when an event is signaled in a state, prior to a state transition.
-	 * @param sessionExecution
+	 * @param flowExecution
 	 * @param eventId
 	 */
-	public void eventSignaled(FlowExecution sessionExecution, String eventId);
+	public void eventSignaled(FlowExecution flowExecution, String eventId);
 
 	/**
 	 * Called when a state transitions, after the transition occurs.
-	 * @param sessionExecution
+	 * @param flowExecution
 	 * @param previousState
 	 * @param newState
 	 */
-	public void stateTransitioned(FlowExecution sessionExecution, AbstractState previousState,
+	public void stateTransitioned(FlowExecution flowExecution, AbstractState previousState,
 			AbstractState newState);
 
 	/**
 	 * Called when a sub flow is spawned.
-	 * @param sessionExecution
+	 * @param flowExecution
 	 */
-	public void subFlowSpawned(FlowExecution sessionExecution);
+	public void subFlowSpawned(FlowExecution flowExecution);
 
 	/**
 	 * Called when a sub flow is ended.
-	 * @param sessionExecution
+	 * @param flowExecution
 	 * @param endedSession
 	 */
-	public void subFlowEnded(FlowExecution sessionExecution, FlowSession endedSession);
+	public void subFlowEnded(FlowExecution flowExecution, FlowSession endedSession);
 
-	public void ended(FlowExecution sessionExecution, FlowSession endedRootFlowSession);
+	public void ended(FlowExecution flowExecution, FlowSession endedRootFlowSession);
 
 }

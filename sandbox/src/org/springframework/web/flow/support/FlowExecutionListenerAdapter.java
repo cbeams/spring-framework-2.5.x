@@ -18,42 +18,41 @@ package org.springframework.web.flow.support;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.flow.AbstractState;
-import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionListener;
+import org.springframework.web.flow.FlowSession;
 
 public class FlowExecutionListenerAdapter implements FlowExecutionListener {
 
-	public void started(FlowExecution sessionExecution) {
+	public void started(FlowExecution flowExecution) {
 
 	}
 
-	public void requestSubmitted(FlowExecution sessionExecution, HttpServletRequest request) {
+	public void requestSubmitted(FlowExecution flowExecution, HttpServletRequest request) {
 
 	}
 
-	public void requestProcessed(FlowExecution sessionExecution, HttpServletRequest request) {
+	public void requestProcessed(FlowExecution flowExecution, HttpServletRequest request) {
 
 	}
 
-	public void eventSignaled(FlowExecution sessionExecution, String id) {
+	public void eventSignaled(FlowExecution flowExecution, String id) {
 
 	}
 
-	public void stateTransitioned(FlowExecution sessionExecution, AbstractState previousState,
-			AbstractState newState) {
+	public void stateTransitioned(FlowExecution flowExecution, AbstractState previousState, AbstractState newState) {
 
 	}
 
-	public void subFlowEnded(FlowExecution sessionExecution, FlowSession endedSession) {
+	public void subFlowEnded(FlowExecution flowExecution, FlowSession endedSession) {
 
 	}
 
-	public void subFlowSpawned(FlowExecution sessionExecution) {
+	public void subFlowSpawned(FlowExecution flowExecution) {
 
 	}
 
-	public void ended(FlowExecution sessionExecution, FlowSession endedRootFlowSession) {
+	public void ended(FlowExecution flowExecution, FlowSession endedRootFlowSession) {
 
 	}
 

@@ -149,7 +149,7 @@ public class FlowAction extends TemplateAction {
 			// No existing flow session execution to lookup as no _flowSessionId
 			// was provided - start a new one
 			FlowExecutionStartResult startResult = getEventProcessor(mapping).start(request, response, null);
-			sessionExecution = startResult.getFlowSessionExecutionInfo();
+			sessionExecution = startResult.getFlowExecutionInfo();
 			viewDescriptor = startResult.getStartingView();
 			saveInHttpSession(sessionExecution, request);
 		}

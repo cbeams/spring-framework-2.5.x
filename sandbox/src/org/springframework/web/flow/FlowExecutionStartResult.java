@@ -11,20 +11,20 @@ import java.io.Serializable;
  * @author Keith Donald
  */
 public class FlowExecutionStartResult implements Serializable {
-	private FlowExecutionInfo sessionInfo;
+	private FlowExecutionInfo executionInfo;
 
 	private ViewDescriptor startingView;
 
-	public FlowExecutionStartResult(FlowExecutionInfo sessionInfo, ViewDescriptor startingView) {
-		this.sessionInfo = sessionInfo;
+	public FlowExecutionStartResult(FlowExecutionInfo executionInfo, ViewDescriptor startingView) {
+		this.executionInfo = executionInfo;
 		this.startingView = startingView;
 	}
 
 	/**
 	 * @return Returns the sessionInfo.
 	 */
-	public FlowExecutionInfo getFlowSessionExecutionInfo() {
-		return sessionInfo;
+	public FlowExecutionInfo getFlowExecutionInfo() {
+		return executionInfo;
 	}
 
 	/**

@@ -35,12 +35,8 @@ public class ViewState extends TransitionableState {
 	 */
 	private String viewName;
 
-	public ViewState(Flow flow, String id, Transition transition) {
-		this(flow, id, new Transition[] { transition });
-	}
-
-	public ViewState(Flow flow, String id, Transition[] transitions) {
-		this(flow, id, id, transitions);
+	public ViewState(Flow flow, String id) {
+		super(flow, id);
 	}
 
 	public ViewState(Flow flow, String id, String viewName) {
@@ -48,16 +44,22 @@ public class ViewState extends TransitionableState {
 		setViewName(viewName);
 	}
 
+	public ViewState(Flow flow, String id, Transition transition) {
+		super(flow, id, transition);
+	}
+
+	public ViewState(Flow flow, String id, Transition[] transitions) {
+		super(flow, id, transitions);
+	}
+
 	public ViewState(Flow flow, String id, String viewName, Transition transition) {
-		super(flow, id);
+		super(flow, id, transition);
 		setViewName(viewName);
-		add(transition);
 	}
 
 	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) {
-		super(flow, id);
+		super(flow, id, transitions);
 		setViewName(viewName);
-		addAll(transitions);
 	}
 
 	public String getViewName() {

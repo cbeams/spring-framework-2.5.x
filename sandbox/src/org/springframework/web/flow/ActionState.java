@@ -34,6 +34,10 @@ public class ActionState extends TransitionableState {
 
 	private Set actionBeans;
 
+	public ActionState(Flow flow, String id) {
+		super(flow, id);
+	}
+	
 	public ActionState(Flow flow, String id, Transition transition) {
 		super(flow, id, transition);
 		setActionBeanName(buildActionBeanNameFromStateId(id));
