@@ -35,9 +35,9 @@ import org.springframework.web.flow.MutableFlowModel;
  * backing form object and errors instance, and retrieve any supporting
  * reference data (typically to populate drop downs). Basically, this action
  * exists to setup any dynamic data needed for rendering by a view template.
- * 
+ * <p>
  * Fully instantiable as is, or by a custom subclass. This action differs from a
- * standard BindAndValidate action in that it doesn't do validation (not needed
+ * standard BindAndValidateAction in that it doesn't do validation (not needed
  * during form setup), is capable of form prepopulation from request parameters,
  * and has a specific <code>setupReferenceData</code> hook.
  * 
@@ -46,11 +46,11 @@ import org.springframework.web.flow.MutableFlowModel;
  */
 public class SetupFormAction extends BindAndValidateAction {
 
+	private static final String NOT_MAPPED_PLACEHOLDER_ATTRIBUTE = "notMapped";
+
+	private static final String NOT_MAPPED_COLLECTION_PLACEHOLDER_ATTRIBUTE = "notMappedItems";
+
 	private static final String NOT_MAPPED_PLACEHOLDER_VALUE = "!NOT MAPPED!";
-
-	private static final String NOT_MAPPED_COLLECTION_PLACEHOLDER_PARAMETER_NAME = "_notMappedItems";
-
-	private static final String NOT_MAPPED_PLACEHOLDER_PARAMETER_NAME = "_notMapped";
 
 	private boolean prepopulateFromRequest;
 
@@ -103,11 +103,14 @@ public class SetupFormAction extends BindAndValidateAction {
 			// placeholders indicating attributes on forms that have not been
 			// mapped to dynamic fields on backing objects - for use during
 			// development only
-			model.setAttribute(NOT_MAPPED_PLACEHOLDER_PARAMETER_NAME, NOT_MAPPED_PLACEHOLDER_VALUE);
-			model.setAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_PARAMETER_NAME, createNotMappedEnumSet());
+			model.setAttribute(NOT_MAPPED_PLACEHOLDER_ATTRIBUTE, NOT_MAPPED_PLACEHOLDER_VALUE);
+			model.setAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_ATTRIBUTE, createNotMappedEnumSet());
 		}
 	}
 
+	/**
+	 * Helper method to setup a set of placeholder data. 
+	 */
 	private Set createNotMappedEnumSet() {
 		Set notMapped = new HashSet();
 		notMapped.add(new NotMappedEnum(1));
@@ -116,6 +119,10 @@ public class SetupFormAction extends BindAndValidateAction {
 		return notMapped;
 	}
 
+	/**
+	 * Helper class used as placeholder data in the <code>exportViewPlaceholders()</code>
+	 * method.
+	 */
 	private static final class NotMappedEnum extends ShortCodedEnum {
 		public NotMappedEnum(int code) {
 			super(code, NOT_MAPPED_PLACEHOLDER_VALUE);
@@ -126,24 +133,34 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * Template method to be implemented by subclasses to setup any reference
 	 * data needed to support this form. For example, a subclass may load
 	 * reference data from the DB or a 2nd level cache and place it in the
-	 * request.
+	 * request or flow model.
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 */
 	protected void setupReferenceData(HttpServletRequest request, MutableFlowModel model)
 			throws ReferenceDataSetupException, ServletRequestBindingException {
-
 	}
 
 	/**
 	 * Exception thrown when reference data setup fails.
+	 * 
 	 * @author Keith Donald
 	 */
 	protected static class ReferenceDataSetupException extends RuntimeException {
+		
+		/**
+		 * Create a new reference data setup exception.
+		 * @param message a descriptive message
+		 * @param cause the underlying cause of this exception
+		 */
 		public ReferenceDataSetupException(String message, Throwable cause) {
 			super(message, cause);
 		}
 
+		/**
+		 * Create a new reference data setup exception.
+		 * @param cause the underlying cause of this exception
+		 */
 		public ReferenceDataSetupException(Exception cause) {
 			super(cause);
 		}
