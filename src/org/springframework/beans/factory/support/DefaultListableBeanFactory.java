@@ -19,11 +19,9 @@ package org.springframework.beans.factory.support;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -43,7 +41,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.19 2004-03-19 17:45:36 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.20 2004-03-22 14:07:47 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -99,7 +97,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * it's best used only in application initialization.
 	 */
 	public String[] getBeanDefinitionNames(Class type) {
-		Set matches = new HashSet();
+		List matches = new ArrayList();
 		Iterator it = this.beanDefinitionNames.iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
@@ -107,7 +105,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				matches.add(name);
 			}
 		}
-		matches.addAll(Arrays.asList(getSingletonNames(type)));
 		return (String[]) matches.toArray(new String[matches.size()]);
 	}
 
@@ -115,7 +112,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return this.beanDefinitionMap.containsKey(name);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) throws BeansException {
+	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+			throws BeansException {
+
 		String[] beanNames = getBeanDefinitionNames(type);
 		Map result = new HashMap();
 		for (int i = 0; i < beanNames.length; i++) {
@@ -123,6 +122,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				result.put(beanNames[i], getBean(beanNames[i]));
 			}
 		}
+
+		String[] singletonNames = getSingletonNames(type);
+		for (int i = 0; i < singletonNames.length; i++) {
+			result.put(singletonNames[i], getBean(singletonNames[i]));
+		}
+
 		if (includeFactoryBeans) {
 			String[] factoryNames = getBeanDefinitionNames(FactoryBean.class);
 			for (int i = 0; i < factoryNames.length; i++) {
@@ -145,6 +150,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 		}
+
 		return result;
 	}
 

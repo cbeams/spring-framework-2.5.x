@@ -392,12 +392,6 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		lbf.registerSingleton("singletonObject", singletonObject);
 		assertTrue(lbf.containsBean("singletonObject"));
 		assertTrue(lbf.isSingleton("singletonObject"));
-		assertEquals(2, lbf.getBeanDefinitionNames().length);
-		assertEquals("singletonObject", lbf.getBeanDefinitionNames()[0]);
-		assertEquals(1, lbf.getBeanDefinitionNames(ITestBean.class).length);
-		assertEquals("singletonObject", lbf.getBeanDefinitionNames(ITestBean.class)[0]);
-		assertEquals(1, lbf.getBeanDefinitionNames(TestBean.class).length);
-		assertEquals("singletonObject", lbf.getBeanDefinitionNames(TestBean.class)[0]);
 		assertEquals(0, lbf.getAliases("singletonObject").length);
 		DependenciesBean test = (DependenciesBean) lbf.getBean("test");
 		assertEquals(singletonObject, lbf.getBean("singletonObject"));
