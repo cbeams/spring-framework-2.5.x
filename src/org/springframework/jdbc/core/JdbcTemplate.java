@@ -815,6 +815,20 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 	}
 
+	/**
+	 * Retrieve a standard JDBC object from a ResultSet using the getObject method.
+	 * This method includes a "hack" to get around Oracle returning a non standard object 
+	 * for their TIMESTAMP datatype. 
+	 * @param rs is the ResultSet holding the data
+	 * @param index is the column index
+	 * @return the Object returned
+	 */
+	private static Object getJdbcObject(ResultSet rs, int index) throws SQLException {
+		Object o = rs.getObject(index);
+		if (o.getClass().getName().startsWith("oracle.sql.TIMESTAMP"))
+			o = rs.getTimestamp(index);
+		return o;
+	}
 
 	/**
 	 * Simple adapter for PreparedStatementCreator, allowing to use a plain SQL statement.
@@ -959,7 +973,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			while (rs.next()) {
 				Map mapOfColValues = CollectionFactory.createLinkedMapIfPossible(numberOfColumns);
 				for (int i = 1; i <= numberOfColumns; i++) {
-					mapOfColValues.put(rsmd.getColumnName(i), rs.getObject(i));
+					Object o = getJdbcObject(rs, i);
+					mapOfColValues.put(rsmd.getColumnName(i), o);
 				}
 				listOfRows.add(mapOfColValues);
 			}
@@ -989,7 +1004,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (!rs.next()) {
 				throw new IncorrectResultSizeDataAccessException("Expected single row but found none", 1, 0);
 			}
-			Object result = rs.getObject(1);
+			Object result = getJdbcObject(rs, 1);
 			if (rs.next()) {
 				throw new IncorrectResultSizeDataAccessException("Expected single row but found more than one", 1, -1);
 			}
