@@ -798,7 +798,7 @@
 			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
 		</java>
 
-		<java classname="org.apache.fop.apps.Fop" fork="true" dir="${doc.ref.dir}">
+		<java classname="org.apache.fop.apps.Fop" fork="true" maxmemory="256m" dir="${doc.ref.dir}">
 			<classpath>
 				<fileset dir="${basedir}/${doc.ref.dir}/lib">
 					<include name="**/*.jar"/>
