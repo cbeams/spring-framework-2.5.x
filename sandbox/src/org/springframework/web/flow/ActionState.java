@@ -301,8 +301,8 @@ public class ActionState extends TransitionableState {
 	 * <p>
 	 * This implementation iterates over each configured <code>Action</code>
 	 * instance and executes it. Execution continues until a <code>Action</code>
-	 * returns a result event that matches a state transition, or the list of
-	 * all actions is exhausted.
+	 * returns a result event that matches a state transition in this request
+	 * context, or the set of all actions is exhausted.
 	 * @param context the state execution context
 	 * @return ViewDescriptor a view descriptor signaling that control should be
 	 *         returned to the client and a view rendered
