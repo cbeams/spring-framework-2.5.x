@@ -399,7 +399,7 @@
       <literal>TransactionStatus</literal> objects you can initiate
       transactions, rollback and commit.</para>
 
-      <para><programlisting>DefaultTransactionDefinition def = new DefaultTransactionDefinition()
+      <para><programlisting>DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 TransactionStatus status = transactionManager.getTransaction(def);
