@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 
 
 /**
@@ -33,7 +34,8 @@ public class PropertiesTestSuiteLoader  {
 			
 			System.out.println("Loading properties file '" + file + "'. Looking for bean definitions...");
 			
-			lbf.registerBeanDefinitions(props, null);
+			PropertiesBeanDefinitionReader bdr = new PropertiesBeanDefinitionReader(lbf);
+			bdr.registerBeanDefinitions(props, null);
 			
 			// Get the BeanFactoryTestSuite instance
 			BeanFactoryTestSuite testSuite = (BeanFactoryTestSuite) lbf.getBean("suite");
