@@ -3,13 +3,15 @@ package org.springframework.web.flow.mvc;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.Assert;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.FlowExecutionListener;
+import org.springframework.web.flow.FlowExecutionListenerList;
 import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
-import org.springframework.web.flow.struts.FlowAction;
+import org.springframework.web.flow.config.FlowConstants;
+import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.util.WebUtils;
@@ -21,38 +23,52 @@ public class FlowController extends AbstractController {
 
 	private Flow flow;
 
-	private FlowExecutionListener[] flowExecutionListeners;
+	private FlowExecutionListenerList flowExecutionListenerList;
+
+	private FlowServiceLocator flowServiceLocator;
 
 	public void setFlow(Flow flow) {
 		this.flow = flow;
 	}
 
+	public void setFlowExecutionListenerList(FlowExecutionListenerList flowExecutionListenerList) {
+		this.flowExecutionListenerList = flowExecutionListenerList;
+	}
+
+	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
+		this.flowServiceLocator = flowServiceLocator;
+	}
+
+	protected String getFlowIdParameterName() {
+		return FlowConstants.FLOW_ID_PARAMETER;
+	}
+
 	protected String getFlowExecutionIdParameterName() {
-		return FlowAction.FLOW_EXECUTION_ID_PARAMETER;
+		return FlowConstants.FLOW_EXECUTION_ID_PARAMETER;
 	}
 
 	protected String getCurrentStateIdParameterName() {
-		return FlowAction.CURRENT_STATE_ID_PARAMETER;
+		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
 	}
 
 	protected String getEventIdParameterName() {
-		return FlowAction.EVENT_ID_PARAMETER;
+		return FlowConstants.EVENT_ID_PARAMETER;
 	}
 
 	private String getEventIdAttributeName() {
-		return FlowAction.EVENT_ID_ATTRIBUTE;
+		return FlowConstants.EVENT_ID_ATTRIBUTE;
 	}
 
 	protected String getNotSetEventIdParameterMarker() {
-		return FlowAction.NOT_SET_EVENT_ID;
+		return FlowConstants.NOT_SET_EVENT_ID;
 	}
 
 	protected String getFlowExecutionIdAttributeName() {
-		return FlowAction.FLOW_EXECUTION_ID_ATTRIBUTE;
+		return FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE;
 	}
 
 	protected String getCurrentStateIdAttributeName() {
-		return FlowAction.CURRENT_STATE_ID_ATTRIBUTE;
+		return FlowConstants.CURRENT_STATE_ID_ATTRIBUTE;
 	}
 
 	protected String getFlowExecutionInfoAttributeName() {
@@ -62,12 +78,17 @@ public class FlowController extends AbstractController {
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		FlowExecution flowExecution;
-		ModelAndView mv;
-		if (RequestUtils.getStringParameter(request, getFlowExecutionIdParameterName(), null) == null) {
-			// No existing flow execution to lookup as no _flowExecutionId
-			// was provided - start a new one
+		ModelAndView modelAndView;
+		if (isNewFlowExecutionRequest(request)) {
+			// start a new flow execution
+			if (flow == null) {
+				// try to extract flow definition to use from request
+				Assert.notNull(flowServiceLocator, "The flow service locator is required");
+				flow = flowServiceLocator.getFlow(RequestUtils.getRequiredStringParameter(request,
+						getFlowIdParameterName()));
+			}
 			flowExecution = createFlowExecution(flow);
-			mv = flowExecution.start(null, request, response);
+			modelAndView = flowExecution.start(null, request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -108,7 +129,7 @@ public class FlowController extends AbstractController {
 			}
 
 			// execute the signaled event within the current state
-			mv = flowExecution.signalEvent(eventId, stateId, request, response);
+			modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
 		}
 
 		if (!flowExecution.isActive()) {
@@ -117,7 +138,7 @@ public class FlowController extends AbstractController {
 		}
 		else {
 			// We're still in the flow, inject flow model into request
-			if (mv != null) {
+			if (modelAndView != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("[Placing information about the new current flow state in request scope]");
 					logger.debug("    - " + getFlowExecutionIdAttributeName() + "=" + flowExecution.getId());
@@ -130,18 +151,19 @@ public class FlowController extends AbstractController {
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Returning selected model and view " + mv);
+			logger.debug("Returning selected model and view " + modelAndView);
 		}
-		return mv;
+		return modelAndView;
 	}
 
-	public void setFlowExecutionListeners(FlowExecutionListener[] flowExecutionListeners) {
-		this.flowExecutionListeners = flowExecutionListeners;
+	protected boolean isNewFlowExecutionRequest(HttpServletRequest request) {
+		return RequestUtils.getStringParameter(request, getFlowExecutionIdParameterName(), null) == null;
 	}
 
 	protected FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = new FlowExecutionStack(flow);
-		flowExecution.addFlowExecutionListeners(flowExecutionListeners);
+		flowExecution.getListenerList().add(flow.getFlowExecutionListenerList());
+		flowExecution.getListenerList().add(flowExecutionListenerList);
 		return flowExecution;
 	}
 

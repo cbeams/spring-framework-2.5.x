@@ -8,6 +8,26 @@ package org.springframework.web.flow.config;
  */
 public abstract class FlowConstants {
 
+	// controller constants
+	
+	public static final String CURRENT_STATE_ID_ATTRIBUTE = "currentStateId";
+
+	public static final String FLOW_EXECUTION_ID_ATTRIBUTE = "flowExecutionId";
+
+	public static final String EVENT_ID_ATTRIBUTE = "_mapped_eventId";
+
+	public static final String FLOW_ID_PARAMETER = "_flowId";
+
+	public static final String FLOW_EXECUTION_ID_PARAMETER = "_flowExecutionId";
+
+	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
+
+	public static final String EVENT_ID_PARAMETER = "_eventId";
+
+	public static String NOT_SET_EVENT_ID = "@NOT_SET@";
+
+	// event and state constants
+	
 	/**
 	 * The <code>ADD</code> action state/event identifier.
 	 */
@@ -158,14 +178,8 @@ public abstract class FlowConstants {
 	 */
 	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
 
-	/**
-	 * Comment for <code>TRANSACTION_TOKEN_ATTRIBUTE_NAME</code>
-	 */
 	public static final String TRANSACTION_TOKEN_ATTRIBUTE_NAME = "txToken";
 
-	/**
-	 * Comment for <code>TRANSACTION_TOKEN_PARAMETER_NAME</code>
-	 */
 	public static final String TRANSACTION_TOKEN_PARAMETER_NAME = "_txToken";
 
 	protected FlowConstants() {

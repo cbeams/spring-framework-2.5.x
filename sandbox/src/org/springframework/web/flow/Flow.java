@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.ToStringCreator;
+import org.springframework.web.flow.config.AbstractFlowBuilder;
+import org.springframework.web.flow.config.FlowBuilder;
 
 /**
  * Singleton definition of a web flow.
@@ -165,6 +167,11 @@ public class Flow implements Serializable {
 	private Set states = new LinkedHashSet(6);
 
 	/**
+	 * The default listener list for all flow executions created for this flow.
+	 */
+	private FlowExecutionListenerList flowExecutionListenerList = new FlowExecutionListenerList();
+
+	/**
 	 * Construct a new flow definition with the given id. The id should be
 	 * unique among all flows.
 	 * @param id The flow identifier.
@@ -192,6 +199,15 @@ public class Flow implements Serializable {
 
 	public int hashCode() {
 		return id.hashCode();
+	}
+
+	/**
+	 * Returns the default set of flow execution listeners for all executions
+	 * created for this flow. The set returnd is a mutable list object.
+	 * @return The set of flow execution listeners;
+	 */
+	public FlowExecutionListenerList getFlowExecutionListenerList() {
+		return this.flowExecutionListenerList;
 	}
 
 	/**

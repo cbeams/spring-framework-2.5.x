@@ -24,15 +24,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
 import org.springframework.web.flow.action.AbstractAction;
+import org.springframework.web.flow.config.FlowConstants;
+import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
@@ -46,52 +48,40 @@ import org.springframework.web.struts.TemplateAction;
  */
 public class FlowAction extends TemplateAction {
 
-	public static final String CURRENT_STATE_ID_ATTRIBUTE = "currentStateId";
-
-	public static final String FLOW_EXECUTION_ID_ATTRIBUTE = "flowExecutionId";
-
-	public static final String EVENT_ID_ATTRIBUTE = "_mapped_eventId";
-
-	public static final String FLOW_EXECUTION_ID_PARAMETER = "_flowExecutionId";
-
-	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
-
-	public static final String EVENT_ID_PARAMETER = "_eventId";
-
-	public static String NOT_SET_EVENT_ID = "@NOT_SET@";
-
 	public static String ACTION_FORM_ATTRIBUTE = "_bindingActionForm";
 
 	public static final String ACTION_PATH_ATTRIBUTE = "actionPath";
-	
-	private FlowExecutionListener[] flowExecutionListeners;
+
+	protected String getFlowIdParameterName() {
+		return FlowConstants.FLOW_ID_PARAMETER;
+	}
 
 	protected String getFlowExecutionIdParameterName() {
-		return FLOW_EXECUTION_ID_PARAMETER;
+		return FlowConstants.FLOW_EXECUTION_ID_PARAMETER;
 	}
 
 	protected String getCurrentStateIdParameterName() {
-		return CURRENT_STATE_ID_PARAMETER;
+		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
 	}
 
 	protected String getEventIdParameterName() {
-		return EVENT_ID_PARAMETER;
+		return FlowConstants.EVENT_ID_PARAMETER;
 	}
 
 	protected String getNotSetEventIdParameterMarker() {
-		return NOT_SET_EVENT_ID;
+		return FlowConstants.NOT_SET_EVENT_ID;
 	}
 
 	protected String getFlowExecutionIdAttributeName() {
-		return FLOW_EXECUTION_ID_ATTRIBUTE;
+		return FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE;
 	}
 
 	protected String getCurrentStateIdAttributeName() {
-		return CURRENT_STATE_ID_ATTRIBUTE;
+		return FlowConstants.CURRENT_STATE_ID_ATTRIBUTE;
 	}
 
 	private String getEventIdAttributeName() {
-		return EVENT_ID_ATTRIBUTE;
+		return FlowConstants.EVENT_ID_ATTRIBUTE;
 	}
 
 	protected String getFlowExecutionInfoAttributeName() {
@@ -106,22 +96,35 @@ public class FlowAction extends TemplateAction {
 		return ACTION_FORM_ATTRIBUTE;
 	}
 
-	protected Flow getFlow(ActionMapping mapping) {
-		return (Flow)getBean(getFlowId(mapping), Flow.class);
+	protected FlowServiceLocator getFlowServiceLocator() {
+		return (FlowServiceLocator)BeanFactoryUtils.beanOfType(getWebApplicationContext(), FlowServiceLocator.class);
 	}
 
-	protected String getFlowId(ActionMapping mapping) {
+	protected Flow getFlow(ActionMapping mapping) {
+		return getFlow(getFlowId(mapping));
+	}
+
+	private String getFlowId(ActionMapping mapping) {
 		Assert.isInstanceOf(FlowActionMapping.class, mapping);
 		return ((FlowActionMapping)mapping).getFlowId();
 	}
 
+	protected Flow getFlow(String flowId) {
+		if (StringUtils.hasText(flowId)) {
+			return (Flow)getFlowServiceLocator().getFlow(flowId);
+		}
+		else {
+			return null;
+		}
+	}
+
 	/**
-	 * The main entry point for this action. Looks for a flow execution ID in the
-	 * request. If none exists, it creates one. If one exists, it looks in the
-	 * user's session find the current FlowExecution. The request
-	 * should also contain the current state ID and event ID. These String
-	 * values can be passed to the FlowExecution to execute the action.
-	 * Execution will typically result in a state transition.
+	 * The main entry point for this action. Looks for a flow execution ID in
+	 * the request. If none exists, it creates one. If one exists, it looks in
+	 * the user's session find the current FlowExecution. The request should
+	 * also contain the current state ID and event ID. These String values can
+	 * be passed to the FlowExecution to execute the action. Execution will
+	 * typically result in a state transition.
 	 * @see org.springframework.web.struts.TemplateAction#doExecuteAction(org.apache.struts.action.ActionMapping,
 	 *      org.apache.struts.action.ActionForm,
 	 *      javax.servlet.http.HttpServletRequest,
@@ -142,14 +145,17 @@ public class FlowAction extends TemplateAction {
 		// end struts specific
 
 		FlowExecution flowExecution;
-		ModelAndView mv;
+		ModelAndView modelAndView;
 
-		if (getStringParameter(request, getFlowExecutionIdParameterName()) == null) {
-			// No existing flow execution to lookup as no _flowExecutionId
-			// was provided - start a new one
+		if (isNewFlowExecutionRequest(request)) {
+			// start a new flow execution
 			Flow flow = getFlow(mapping);
+			if (flow == null) {
+				// try to extract flow definition to use from request
+				getFlow(getRequiredStringParameter(request, getFlowIdParameterName()));
+			}
 			flowExecution = createFlowExecution(flow);
-			mv = flowExecution.start(null, request, response);
+			modelAndView = flowExecution.start(null, request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -181,7 +187,8 @@ public class FlowAction extends TemplateAction {
 								+ flowExecution.getCaption() + "' -- programmer error?");
 			}
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
-				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '" + getNotSetEventIdParameterMarker()
+				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '"
+						+ getNotSetEventIdParameterMarker()
 						+ "' - this is likely a view (jsp, etc) configuration error - " + "the '"
 						+ getEventIdParameterName()
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
@@ -189,7 +196,7 @@ public class FlowAction extends TemplateAction {
 			}
 			else {
 				// execute the signaled event within the current state
-				mv = flowExecution.signalEvent(eventId, stateId, request, response);
+				modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
 			}
 		}
 
@@ -199,7 +206,7 @@ public class FlowAction extends TemplateAction {
 		}
 		else {
 			// We're still in the flow, inject flow model into request
-			if (mv != null) {
+			if (modelAndView != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("[Placing information about the new current flow state in request scope]");
 					logger.debug("    - " + getFlowExecutionIdAttributeName() + "=" + flowExecution.getId());
@@ -234,24 +241,24 @@ public class FlowAction extends TemplateAction {
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Returning selected model and view " + mv);
+			logger.debug("Returning selected model and view " + modelAndView);
 		}
-		return createForwardFromModelAndView(mv, mapping, request);
+		return createForwardFromModelAndView(modelAndView, mapping, request);
 	}
-	
-	public void setFlowExecutionListeners(FlowExecutionListener[] flowExecutionListeners) {
-		this.flowExecutionListeners = flowExecutionListeners;
+
+	protected boolean isNewFlowExecutionRequest(HttpServletRequest request) {
+		return getStringParameter(request, getFlowExecutionIdParameterName()) == null;
 	}
-	
+
 	protected FlowExecution createFlowExecution(Flow flow) {
-		FlowExecution flowExecution = new FlowExecutionStack(flow);
-		flowExecution.addFlowExecutionListeners(flowExecutionListeners);
+		FlowExecutionStack flowExecution = new FlowExecutionStack(flow);
+		flowExecution.getListenerList().add(flow.getFlowExecutionListenerList());
 		return flowExecution;
 	}
 
 	/**
-	 * Return a Struts ActionForward given a ModelAndView. We need to add
-	 * all attributes from the ModelAndView as request attributes.
+	 * Return a Struts ActionForward given a ModelAndView. We need to add all
+	 * attributes from the ModelAndView as request attributes.
 	 */
 	private ActionForward createForwardFromModelAndView(ModelAndView mv, ActionMapping mapping,
 			HttpServletRequest request) {

@@ -23,6 +23,8 @@ import org.apache.struts.action.ActionMapping;
 public class FlowActionMapping extends ActionMapping {
 	private String flowId;
 
+	private String flowExecutionListenerListId;
+
 	/**
 	 * @return Returns the flowId.
 	 */
@@ -35,5 +37,19 @@ public class FlowActionMapping extends ActionMapping {
 	 */
 	public void setFlowId(String flowId) {
 		this.flowId = flowId;
+	}
+
+	/**
+	 * @return Returns the flowExecutionListenersId.
+	 */
+	public String getFlowExecutionListenerListId() {
+		return flowExecutionListenerListId;
+	}
+
+	/**
+	 * @param flowExecutionListenersId The flowExecutionListenersId to set.
+	 */
+	public void setFlowExecutionListenersId(String flowExecutionListenersId) {
+		this.flowExecutionListenerListId = flowExecutionListenersId;
 	}
 }
