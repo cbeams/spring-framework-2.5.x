@@ -26,7 +26,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 /**
  * SqlUpdate subclass that performs batch update operations. Encapsulates
- * queuing up records to be inserted, and commits them as a single batch once
+ * queuing up records to be updated, and adds them as a single batch once
  * the <code>batchSize</code> has been met.
  * 
  * @author Keith Donald
@@ -62,8 +62,9 @@ public class BatchSqlUpdate extends SqlUpdate {
     }
 
     /**
-     * Set the batch size - this operation will queue up objects until the batch
-     * size is met, at which it will empty the queue and add the batch.
+     * Set the batch size - when invoked this <code>SqlUpdate</code> will
+     * queue up objects until the batch size is met, at which it will empty the
+     * queue and add the batch.
      * 
      * @param batchSize
      *            The batch size.
@@ -83,9 +84,9 @@ public class BatchSqlUpdate extends SqlUpdate {
     }
 
     /**
-     * Trigger any queued update operations to be committed as a final batch.
+     * Trigger any queued update operations to be added as a final batch.
      * This should always be called during normal execution to ensure any still
-     * queued records are committed.
+     * queued records are added.
      * 
      * @return The number of rows updated.
      */
