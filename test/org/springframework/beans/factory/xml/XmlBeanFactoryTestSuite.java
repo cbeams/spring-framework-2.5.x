@@ -16,7 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,6 +40,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -53,11 +57,12 @@ import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.41 2004-03-29 20:45:31 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.42 2004-04-01 14:56:39 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -1013,6 +1018,26 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		mapFactory.setSourceMap(new TreeMap());
 		mapFactory.afterPropertiesSet();
 		assertTrue(mapFactory.getObject() instanceof HashMap);
+	}
+
+	public void testResourceAndInputStream() throws IOException {
+		InputStream is = getClass().getResourceAsStream("resource.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
+		ResourceTestBean resource2 = (ResourceTestBean) xbf.getBean("resource2");
+		assertTrue(resource1.getResource() instanceof ClassPathResource);
+		StringWriter writer = new StringWriter();
+		FileCopyUtils.copy(new InputStreamReader(resource1.getResource().getInputStream()), writer);
+		assertEquals("test", writer.toString());
+		writer = new StringWriter();
+		FileCopyUtils.copy(new InputStreamReader(resource1.getInputStream()), writer);
+		assertEquals("test", writer.toString());
+		writer = new StringWriter();
+		FileCopyUtils.copy(new InputStreamReader(resource2.getResource().getInputStream()), writer);
+		assertEquals("test", writer.toString());
+		writer = new StringWriter();
+		FileCopyUtils.copy(new InputStreamReader(resource2.getInputStream()), writer);
+		assertEquals("test", writer.toString());
 	}
 
 

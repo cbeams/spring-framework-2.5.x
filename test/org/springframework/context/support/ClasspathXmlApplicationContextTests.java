@@ -16,13 +16,18 @@
 
 package org.springframework.context.support;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+
 import junit.framework.TestCase;
 
+import org.springframework.beans.ResourceTestBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.FileCopyUtils;
+
 public class ClasspathXmlApplicationContextTests extends TestCase {
-	
-	public ClasspathXmlApplicationContextTests(String name) {
-		super(name);
-	}
 	
 	public void testMultiple() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
@@ -30,6 +35,33 @@ public class ClasspathXmlApplicationContextTests extends TestCase {
 				"/org/springframework/context/support/contextB.xml",
 				"/org/springframework/context/support/contextC.xml",
 				"/org/springframework/context/support/contextA.xml" });
+	}
+
+	public void testResourceAndInputStream() throws IOException {
+		ClassPathXmlApplicationContext ctx =
+		    new ClassPathXmlApplicationContext("/org/springframework/beans/factory/xml/resource.xml") {
+			public Resource getResource(String location) {
+				if ("classpath:org/springframework/beans/factory/xml/test.properties".equals(location)) {
+					return new ClassPathResource("test.properties", ClasspathXmlApplicationContextTests.class);
+				}
+				return super.getResource(location);
+			}
+		};
+		ResourceTestBean resource1 = (ResourceTestBean) ctx.getBean("resource1");
+		ResourceTestBean resource2 = (ResourceTestBean) ctx.getBean("resource2");
+		assertTrue(resource1.getResource() instanceof ClassPathResource);
+		StringWriter writer = new StringWriter();
+		FileCopyUtils.copy(new InputStreamReader(resource1.getResource().getInputStream()), writer);
+		assertEquals("contexttest", writer.toString());
+		writer = new StringWriter();
+		FileCopyUtils.copy(new InputStreamReader(resource1.getInputStream()), writer);
+		assertEquals("contexttest", writer.toString());
+		writer = new StringWriter();
+		FileCopyUtils.copy(new InputStreamReader(resource2.getResource().getInputStream()), writer);
+		assertEquals("contexttest", writer.toString());
+		writer = new StringWriter();
+		FileCopyUtils.copy(new InputStreamReader(resource2.getInputStream()), writer);
+		assertEquals("contexttest", writer.toString());
 	}
 
 }
