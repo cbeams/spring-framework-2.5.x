@@ -707,9 +707,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected Object resolveReference(String beanName, RootBeanDefinition mergedBeanDefinition,
 																		String argName, RuntimeBeanReference ref) throws BeansException {
-		try {
+		if (logger.isDebugEnabled()) {
 			logger.debug("Resolving reference from property '" + argName + "' in bean '" +
-			             beanName + "' to bean '" + ref.getBeanName() + "'");
+									 beanName + "' to bean '" + ref.getBeanName() + "'");
+		}
+		try {
 			return getBean(ref.getBeanName());
 		}
 		catch (BeansException ex) {
@@ -769,13 +771,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws Exception {
 
 		if (bean instanceof InitializingBean) {
-			logger.debug("Calling afterPropertiesSet() on bean with beanName '" + beanName + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Calling afterPropertiesSet() on bean with beanName '" + beanName + "'");
+			}
 			((InitializingBean) bean).afterPropertiesSet();
 		}
 
 		if (mergedBeanDefinition.getInitMethodName() != null) {
-			logger.debug("Calling custom init method '" + mergedBeanDefinition.getInitMethodName() +
-									 "' on bean with beanName '" + beanName + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Calling custom init method '" + mergedBeanDefinition.getInitMethodName() +
+										 "' on bean with beanName '" + beanName + "'");
+			}
 			try {
 				bean.getClass().getMethod(mergedBeanDefinition.getInitMethodName(), null).invoke(bean, null);
 			}
@@ -805,7 +811,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	protected void destroyBean(String beanName, Object bean) {
-		logger.debug("Retrieving depending beans for bean '" + beanName + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieving depending beans for bean '" + beanName + "'");
+		}
 		String[] dependingBeans = getDependingBeanNames(beanName);
 		if (dependingBeans != null) {
 			for (int i = 0; i < dependingBeans.length; i++) {
@@ -813,7 +821,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
-		logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
+		}
 		for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
 			Object beanProcessor = getBeanPostProcessors().get(i);
 			if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
@@ -822,7 +832,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		if (bean instanceof DisposableBean) {
-			logger.debug("Calling destroy() on bean with name '" + beanName + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Calling destroy() on bean with name '" + beanName + "'");
+			}
 			try {
 				((DisposableBean) bean).destroy();
 			}
@@ -834,8 +846,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
 			if (bd.getDestroyMethodName() != null) {
-				logger.debug("Calling custom destroy method '" + bd.getDestroyMethodName() +
-										 "' on bean with name '" + beanName + "'");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Calling custom destroy method '" + bd.getDestroyMethodName() +
+											 "' on bean with name '" + beanName + "'");
+				}
 				invokeCustomDestroyMethod(beanName, bean, bd.getDestroyMethodName());
 			}
 		}

@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.21 2004-05-27 08:56:42 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.22 2004-05-31 17:15:13 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -253,7 +253,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (bd.getDependsOn() != null) {
 					List dependsOn = Arrays.asList(bd.getDependsOn());
 					if (dependsOn.contains(beanName)) {
-						logger.debug("Found depending bean '" + beanDefinitionNames[i] + "' for bean '" + beanName + "'");
+						if (logger.isDebugEnabled()) {
+							logger.debug("Found depending bean '" + beanDefinitionNames[i] + "' for bean '" + beanName + "'");
+						}
 						dependingBeanNames.add(beanDefinitionNames[i]);
 					}
 				}

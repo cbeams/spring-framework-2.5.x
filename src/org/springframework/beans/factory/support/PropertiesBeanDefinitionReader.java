@@ -261,7 +261,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				int sepIndx = nameAndProperty.indexOf(SEPARATOR);
 				if (sepIndx != -1) {
 					String beanName = nameAndProperty.substring(0, sepIndx);
-					logger.debug("Found bean name '" + beanName + "'");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found bean name '" + beanName + "'");
+					}
 					if (!getBeanFactory().containsBeanDefinition(beanName)) {
 						// If we haven't already registered it...
 						registerBeanDefinition(beanName, m, prefix + beanName, resourceDescription);
@@ -271,7 +273,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				else {
 					// Ignore it: it wasn't a valid bean name and property,
 					// although it did start with the required prefix
-					logger.debug("Invalid bean name and property [" + nameAndProperty + "]");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Invalid bean name and property [" + nameAndProperty + "]");
+					}
 				}
 			}	// if the key started with the prefix we're looking for
 		}	// while there are more keys

@@ -61,7 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.55 2004-05-27 16:54:17 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.56 2004-05-31 17:15:13 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
@@ -305,7 +305,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 	}
 
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
-		logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
+		}
 		synchronized (this.aliasMap) {
 			Object registeredName = this.aliasMap.get(alias);
 			if (registeredName != null) {
