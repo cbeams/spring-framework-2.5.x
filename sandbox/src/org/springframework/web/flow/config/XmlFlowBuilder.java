@@ -36,21 +36,34 @@ import org.xml.sax.SAXParseException;
  */
 public class XmlFlowBuilder extends BaseFlowBuilder {
 
-	private static final String FLOW_ATTRIBUTE = "flow";
-	private static final String ACTION_STATE_NAME = "action-state";
-	private static final String VIEW_STATE_NAME = "view-state";
-	private static final String SUB_FLOW_STATE_NAME = "sub-flow-state";
-	private static final String END_STATE_NAME = "end-state";
-	private static final String ACTION_NAME = "action";
-	private static final String TRANSITION_NAME = "transition";
-	
 	private static final String ID_ATTRIBUTE = "id";
-	private static final String START_STATE_ATTRIBUTE = "start-state";
-	private static final String ATTRIBUTES_MAPPER_ATTRIBUTE = "attributes-mapper";
+
+	private static final String START_STATE_ELEMENT_ATTRIBUTE = "start-state";
+
+	private static final String ACTION_STATE_ELEMENT = "action-state";
+
+	private static final String ACTION_ELEMENT = "action";
+
 	private static final String NAME_ATTRIBUTE = "name";
+
+	private static final String VIEW_STATE_ELEMENT = "view-state";
+
 	private static final String VIEW_ATTRIBUTE = "view";
+
 	private static final String MARKER_ATTRIBUTE = "marker";
+
+	private static final String SUB_FLOW_STATE_ELEMENT = "sub-flow-state";
+
+	private static final String FLOW_ATTRIBUTE = "flow";
+
+	private static final String ATTRIBUTES_MAPPER_ATTRIBUTE = "attributes-mapper";
+
+	private static final String END_STATE_ELEMENT = "end-state";
+
+	private static final String TRANSITION_ELEMENT = "transition";
+
 	private static final String EVENT_ATTRIBUTE = "event";
+
 	private static final String TO_ATTRIBUTE = "to";
 
 	private Resource resource;
@@ -148,7 +161,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected Flow parseFlowDefinition(Document doc) {
 		Element root = doc.getDocumentElement();
 		String id = root.getAttribute(ID_ATTRIBUTE);
-		String startStateId = root.getAttribute(START_STATE_ATTRIBUTE);
+		String startStateId = root.getAttribute(START_STATE_ELEMENT_ATTRIBUTE);
 
 		Flow flow = createFlow(id);
 
@@ -157,16 +170,16 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			Node node = nodeList.item(i);
 			if (node instanceof Element) {
 				Element element = (Element)node;
-				if (ACTION_STATE_NAME.equals(element.getNodeName())) {
+				if (ACTION_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddActionState(flow, element);
 				}
-				else if (VIEW_STATE_NAME.equals(element.getNodeName())) {
+				else if (VIEW_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddViewState(flow, element);
 				}
-				else if (SUB_FLOW_STATE_NAME.equals(element.getNodeName())) {
+				else if (SUB_FLOW_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddSubFlowState(flow, element);
 				}
-				else if (END_STATE_NAME.equals(element.getNodeName())) {
+				else if (END_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddEndState(flow, element);
 				}
 			}
@@ -217,7 +230,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			Node childNode = childNodeList.item(i);
 			if (childNode instanceof Element) {
 				Element childElement = (Element)childNode;
-				if (ACTION_NAME.equals(childElement.getNodeName())) {
+				if (ACTION_ELEMENT.equals(childElement.getNodeName())) {
 					actions.add(parseAction(childElement));
 				}
 			}
@@ -226,9 +239,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 
 	protected Action parseAction(Element element) {
-		String name = element.getAttribute(NAME_ATTRIBUTE);
-
-		return getFlowServiceLocator().getAction(name);
+		String actionName = element.getAttribute(NAME_ATTRIBUTE);
+		return getFlowServiceLocator().getAction(actionName);
 	}
 
 	protected Transition[] parseTransitions(Element element) {
@@ -239,7 +251,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			Node childNode = childNodeList.item(i);
 			if (childNode instanceof Element) {
 				Element childElement = (Element)childNode;
-				if (TRANSITION_NAME.equals(childElement.getNodeName())) {
+				if (TRANSITION_ELEMENT.equals(childElement.getNodeName())) {
 					transitions.add(parseTransition(childElement));
 				}
 			}
