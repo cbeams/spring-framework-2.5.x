@@ -76,6 +76,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private String[] mappingResources;
 
+	private String[] mappingResourceJars;
+
 	private Properties hibernateProperties;
 
 	private DataSource dataSource;
@@ -101,12 +103,22 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Set Hibernate mapping resources to be found in the class path,
-	 * like "/example.hbm.xml".
+	 * like "example.hbm.xml" or "mypackage/example.hbm.xml".
 	 * <p>Can be used to override values from a Hibernate XML config file,
 	 * or to specify all mappings locally.
 	 */
 	public void setMappingResources(String[] mappingResources) {
 		this.mappingResources = mappingResources;
+	}
+
+	/**
+	 * Set jar files in the class path that contain Hibernate mapping resources,
+	 * like "example.hbm.jar".
+	 * <p>Can be used to override values from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 */
+	public void setMappingResourceJars(String[] mappingResourceJars) {
+		this.mappingResourceJars = mappingResourceJars;
 	}
 
 	/**
@@ -170,7 +182,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		// create Configuration instance
 		Configuration config = newConfiguration();
 
-		if (this.configLocation == null && this.mappingResources == null) {
+		if (this.configLocation == null && this.mappingResources == null &&
+				this.mappingResourceJars == null) {
 			// default Hibernate configuration from "/hibernate.cfg.xml"
 			config.configure();
 		}
@@ -179,7 +192,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			// load Hibernate configuration from given location
 			String resourceLocation = this.configLocation;
 			if (!resourceLocation.startsWith("/")) {
-				// always use root, as relative loading doesn't make sense
+				// loaded with Class.getResourceStream -> use leading slash to load from root
 				resourceLocation = "/" + resourceLocation;
 			}
 			config.configure(resourceLocation);
@@ -188,7 +201,24 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		if (this.mappingResources != null) {
 			// register given Hibernate mapping definitions, contained in resource files
 			for (int i = 0; i < this.mappingResources.length; i++) {
-				config.addResource(this.mappingResources[i], Thread.currentThread().getContextClassLoader());
+				String resourcePath = this.mappingResources[i];
+				if (resourcePath.startsWith("/")) {
+					// loaded via ClassLoader.getResourceAsStream -> never use leading slash
+					resourcePath = resourcePath.substring(1);
+				}
+				config.addResource(resourcePath, Thread.currentThread().getContextClassLoader());
+			}
+		}
+
+		if (this.mappingResourceJars != null) {
+			// register given Hibernate mapping definitions, contained in resources in jar files
+			for (int i = 0; i < this.mappingResourceJars.length; i++) {
+				String resourcePath = this.mappingResourceJars[i];
+				if (resourcePath.startsWith("/")) {
+					// loaded via ClassLoader.getResourceAsStream -> never use leading slash
+					resourcePath = resourcePath.substring(1);
+				}
+				config.addJar(resourcePath);
 			}
 		}
 
