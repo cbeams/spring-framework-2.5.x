@@ -108,10 +108,9 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * Renders the view given the specified model.
 	 * @see org.springframework.web.servlet.view.AbstractView#renderMergedOutputModel(java.util.Map, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
-	protected final void renderMergedOutputModel(Map model,
-																							 HttpServletRequest request,
-																							 HttpServletResponse response)
-			throws ServletException, IOException {
+	protected final void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
+		throws ServletException, IOException {
+
 		if (null != url) {
 			wb = getTemplateSource(url, request);
 		}
@@ -119,7 +118,6 @@ public abstract class AbstractExcelView extends AbstractView {
 			wb = new HSSFWorkbook();
 			logger.info("Excel WorkBook created from scratch");
 		}
-
 		buildExcelDocument(model, wb, request, response);
 
 		// response.setContentLength(wb.getBytes().length);
@@ -135,7 +133,9 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * @param request
 	 * @return HSSFWorkbook
 	 */
-	protected HSSFWorkbook getTemplateSource(String url, HttpServletRequest request) throws ServletException {
+	protected HSSFWorkbook getTemplateSource(String url, HttpServletRequest request) 
+		throws ServletException {
+
 		String source = null;
 		String realPath = null;
 		FileInputStream inputFile = null;
@@ -174,9 +174,9 @@ public abstract class AbstractExcelView extends AbstractView {
 			}
 			catch (FileNotFoundException e) {
 				throw new ApplicationContextException(
-						"Can't resolve real path for EXCEL template at '"
-						+ source
-						+ "'; probably results from container restriction: override ExcelView.getTemplateSource() to use an alternative approach to getRealPath()");
+					"Can't resolve real path for EXCEL template at '"
+					+ source
+					+ "'; probably results from container restriction: override ExcelView.getTemplateSource() to use an alternative approach to getRealPath()");
 			}
 		}
 		// Create the Excel document from source
@@ -199,10 +199,11 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * @param request in case we need locale etc. Shouldn't look at attributes
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 */
-	protected abstract void buildExcelDocument(Map model,
-																						 HSSFWorkbook wb,
-																						 HttpServletRequest request,
-																						 HttpServletResponse response);
+	protected abstract void buildExcelDocument(
+		Map model, 
+		HSSFWorkbook wb, 
+		HttpServletRequest request,
+		HttpServletResponse response);
 
 	/**
 	 * Convenient method to obtain the cell in the given sheet, row and column
