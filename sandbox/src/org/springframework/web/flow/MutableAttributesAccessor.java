@@ -32,16 +32,16 @@ public interface MutableAttributesAccessor extends AttributesAccessor {
 	public void setAttribute(String attributeName, Object attributeValue);
 
 	/**
-	 * Remove the specified attribute, if it exists.
-	 * @param attributeName The attribute name.
-	 */
-	public void removeAttribute(String attributeName);
-
-	/**
 	 * Perform a bulk-set operation on a number of attributes.
 	 * @param attributes The map of attributes (name=value pairs).
 	 */
 	public void setAttributes(Map attributes);
+
+	/**
+	 * Remove the specified attribute, if it exists.
+	 * @param attributeName The attribute name.
+	 */
+	public void removeAttribute(String attributeName);
 
 	/**
 	 * Save a new transaction token in this model.

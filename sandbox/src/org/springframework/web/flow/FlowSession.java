@@ -42,7 +42,7 @@ import org.springframework.web.flow.support.FlowUtils;
  */
 public class FlowSession implements MutableAttributesAccessor, Serializable {
 
-	private static final Log logger = LogFactory.getLog(FlowSession.class);
+	protected final Log logger = LogFactory.getLog(FlowSession.class);
 
 	private Flow flow;
 
@@ -51,6 +51,10 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	private FlowSessionStatus status;
 
 	private Map attributes = new HashMap();
+	
+	public FlowSession(Flow flow) {
+		this(flow, null);
+	}
 
 	public FlowSession(Flow flow, Map input) {
 		Assert.notNull(flow, "The flow is required");
@@ -76,12 +80,12 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		this.status = status;
 	}
 
-	public AbstractState getCurrentState() {
-		return currentState;
-	}
-
 	public String getCurrentStateId() {
 		return currentState.getId();
+	}
+
+	public AbstractState getCurrentState() {
+		return currentState;
 	}
 
 	protected void setCurrentState(AbstractState newState) {
@@ -99,6 +103,16 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 		this.currentState = newState;
 	}
+	
+	protected String getDefaultTransactionTokenAttributeName() {
+		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
+	}
+
+	protected String getDefaultTransactionTokenParameterName() {
+		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
+	}
+	
+	//methods implementing AttributesAccessor
 
 	public Map getAttributes() {
 		return Collections.unmodifiableMap(attributes);
@@ -133,6 +147,20 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 		return value;
 	}
+	
+	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException {
+		getRequiredAttribute(attributeName, requiredType);
+	}
+
+	public void assertAttributePresent(String attributeName) throws IllegalStateException {
+		getRequiredAttribute(attributeName);
+	}
+	
+	public void assertInTransaction(HttpServletRequest request, boolean clear) throws IllegalStateException {
+		Assert.state(FlowUtils.isTokenValid(this, request, getDefaultTransactionTokenAttributeName(),
+				getDefaultTransactionTokenParameterName(), clear),
+				"The request is not running in the context of an application transaction");
+	}
 
 	public boolean containsAttribute(String attributeName) {
 		return attributes.containsKey(attributeName);
@@ -147,13 +175,10 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 			return false;
 		}
 	}
-
-	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException {
-		getRequiredAttribute(attributeName, requiredType);
-	}
-
-	public void assertAttributePresent(String attributeName) throws IllegalStateException {
-		getRequiredAttribute(attributeName);
+	
+	public boolean inTransaction(HttpServletRequest request, boolean clear) {
+		return FlowUtils.isTokenValid(this, request, getDefaultTransactionTokenAttributeName(),
+				getDefaultTransactionTokenParameterName(), clear);
 	}
 
 	public Collection attributeNames() {
@@ -179,6 +204,8 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 		return filteredEntries;
 	}
+	
+	//methods implementing MutableAttributesAccessor
 
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (logger.isDebugEnabled()) {
@@ -205,25 +232,6 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 			logger.debug("Removing flow '" + getFlowId() + "' attribute '" + attributeName);
 		}
 		this.attributes.remove(attributeName);
-	}
-
-	public void assertInTransaction(HttpServletRequest request, boolean clear) throws IllegalStateException {
-		Assert.state(FlowUtils.isTokenValid(this, request, getDefaultTransactionTokenAttributeName(),
-				getDefaultTransactionTokenParameterName(), clear),
-				"The request is not running in the context of an application transaction");
-	}
-
-	public boolean inTransaction(HttpServletRequest request, boolean clear) {
-		return FlowUtils.isTokenValid(this, request, getDefaultTransactionTokenAttributeName(),
-				getDefaultTransactionTokenParameterName(), clear);
-	}
-
-	protected String getDefaultTransactionTokenAttributeName() {
-		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
-	}
-
-	protected String getDefaultTransactionTokenParameterName() {
-		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
 	}
 
 	public void setTransactionToken() {

@@ -74,7 +74,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 	}
 
 	protected FlowExecution createFlowExecution(Flow flow) {
-		return flow.createFlowExecution();
+		return new FlowExecutionStack(flow);
 	}
 
 	protected ModelAndView startFlow(Map input) {

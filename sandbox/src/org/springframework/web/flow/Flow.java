@@ -48,10 +48,6 @@ import org.springframework.web.flow.config.FlowBuilder;
  * Each Flow has exactly one start state. A start state is simply a marker for
  * the state the Flow should transition to when a start event is signaled.
  * 
- * When a start event is signaled by a requesting client, a new
- * <code>FlowExecution</code> is created, which tracks a single client
- * instance of this flow.
- * 
  * To give you an example of what a web flow definition might look like, the
  * following piece of java code defines a web flow equivalent to the work flow
  * implemented by Spring MVC's simple form controller:
@@ -203,8 +199,8 @@ public class Flow implements Serializable {
 
 	/**
 	 * Returns the default set of flow execution listeners for all executions
-	 * created for this flow. The set returnd is a mutable list object.
-	 * @return The set of flow execution listeners;
+	 * created for this flow. The set returned is a mutable list object.
+	 * @return The set of flow execution listeners
 	 */
 	public FlowExecutionListenerList getFlowExecutionListenerList() {
 		return this.flowExecutionListenerList;
@@ -382,17 +378,6 @@ public class Flow implements Serializable {
 			stateIds.add(((AbstractState)it.next()).getId());
 		}
 		return (String[])stateIds.toArray(new String[0]);
-	}
-
-	/**
-	 * Factory method that produces a new flow execution instance for this flow
-	 * on each invocation.
-	 * @return A new flow execution, not yet started.
-	 */
-	public FlowExecution createFlowExecution() {
-		FlowExecutionStack flowExecution = new FlowExecutionStack(this);
-		flowExecution.getListenerList().add(getFlowExecutionListenerList());
-		return flowExecution;
 	}
 
 	public String toString() {
