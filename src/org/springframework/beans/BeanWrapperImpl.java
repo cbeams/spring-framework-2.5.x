@@ -166,6 +166,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.
+		this.defaultEditors.put(Collection.class, new CustomCollectionEditor(Collection.class));
 		this.defaultEditors.put(Set.class, new CustomCollectionEditor(Set.class));
 		this.defaultEditors.put(SortedSet.class, new CustomCollectionEditor(SortedSet.class));
 		this.defaultEditors.put(List.class, new CustomCollectionEditor(List.class));

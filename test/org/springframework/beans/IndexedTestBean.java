@@ -17,12 +17,13 @@
 package org.springframework.beans;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * @author Juergen Hoeller
@@ -37,6 +38,8 @@ public class IndexedTestBean {
 	private SortedSet sortedSet;
 
 	private Set set;
+
+	private Collection collection;
 
 	private Map map;
 
@@ -108,6 +111,14 @@ public class IndexedTestBean {
 
 	public void setSet(Set set) {
 		this.set = set;
+	}
+
+	public Collection getCollection() {
+		return collection;
+	}
+
+	public void setCollection(Collection collection) {
+		this.collection = collection;
 	}
 
 	public Map getMap() {
