@@ -29,7 +29,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.DataAccessUtils;
@@ -82,7 +81,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * @see org.springframework.jdbc.datasource
  * @see org.springframework.jdbc.object
  */
-public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, InitializingBean {
+public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/** Custom NativeJdbcExtractor */
 	private NativeJdbcExtractor nativeJdbcExtractor;
