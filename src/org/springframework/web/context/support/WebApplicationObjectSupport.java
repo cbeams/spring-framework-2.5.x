@@ -34,19 +34,35 @@ import org.springframework.web.util.WebUtils;
 public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport {
 
 	/**
-	 * Return the current application context as WebApplicationContext.
+	 * Overrides the base class behavior to enforce running in an ApplicationContext.
+	 * All accessors will throw IllegalStateException if not running in a context.
+	 * @see #getApplicationContext
+	 * @see #getMessageSourceAccessor
+	 * @see #getWebApplicationContext
+	 * @see #getServletContext
+	 * @see #getTempDir
 	 */
-	protected final WebApplicationContext getWebApplicationContext() {
+	protected boolean isContextRequired() {
+		return true;
+	}
+
+	/**
+	 * Return the current application context as WebApplicationContext.
+	 * @throws IllegalStateException if not running in a WebApplicationContext
+	 */
+	protected final WebApplicationContext getWebApplicationContext() throws IllegalStateException {
 		ApplicationContext ctx = getApplicationContext();
 		if (!(ctx instanceof WebApplicationContext)) {
-			throw new IllegalStateException("WebApplicationObjectSupport instance [" + this +
-																			"] does not run in a WebApplicationContext but in: " + ctx);
+			throw new IllegalStateException(
+					"WebApplicationObjectSupport instance [" + this +
+					"] does not run in a WebApplicationContext but in: " + ctx);
 		}
 		return (WebApplicationContext) getApplicationContext();
 	}
 
 	/**
 	 * Return the current ServletContext.
+	 * @throws IllegalStateException if not running in a WebApplicationContext
 	 */
 	protected final ServletContext getServletContext() {
 		return getWebApplicationContext().getServletContext();
@@ -56,6 +72,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * Return the temporary directory for the current web application,
 	 * as provided by the servlet container.
 	 * @return the File representing the temporary directory
+	 * @throws IllegalStateException if not running in a WebApplicationContext
 	 */
 	protected final File getTempDir() {
 		return WebUtils.getTempDir(getServletContext());

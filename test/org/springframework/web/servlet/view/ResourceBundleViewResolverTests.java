@@ -125,9 +125,8 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	
 	public void testNoSuchBasename() throws Exception {
 		try {
-			ResourceBundleViewResolver rb2 = new ResourceBundleViewResolver();
-			rb2.setBasename("weoriwoierqupowiuer");
-			View v = rb2.resolveViewName("debugView", Locale.ENGLISH);
+			rb.setBasename("weoriwoierqupowiuer");
+			View v = rb.resolveViewName("debugView", Locale.ENGLISH);
 			fail("No such basename: all requests should fail with exception");
 		}
 		catch (MissingResourceException ex) {
