@@ -73,7 +73,7 @@ public abstract class Assert {
 	 */
 	public static void isTrue(boolean expression) {
         if (!expression) { throw new IllegalArgumentException(
-        	"[Assertion failed] - this expression must be true.");
+        	"[Assertion failed] - this expression must be true");
         }
 	}
 
@@ -104,7 +104,7 @@ public abstract class Assert {
 	 */
     public static void state(boolean expression) {
         if (!expression) { throw new IllegalStateException(
-                "[Assertion failed] - this state invariant must be true."); }
+                "[Assertion failed] - this state invariant must be true"); }
     }
 
 	/**
@@ -130,16 +130,16 @@ public abstract class Assert {
 	 */
 	public static void notNull(Object object) {
 		if (object == null) {
-			throw new IllegalArgumentException("[Assertion failed] - this argument is required: it cannot be null");
+			throw new IllegalArgumentException("[Assertion failed] - this argument is required; it cannot be null");
 		}
 	}
 
 	/**
 	 * Assert that a string is not empty; that is, it must not be null and not empty.
 	 * <pre>
-	 * Assert.hasText(name, "Name must not be empty");</pre>
+	 * Assert.hasLength(name, "Name must not be empty");</pre>
 	 * @param text the string to check
-	 * @see StringUtils#hasText
+	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(String text, String message) {
 		if (!StringUtils.hasLength(text)) {
@@ -150,13 +150,13 @@ public abstract class Assert {
 	/**
 	 * Assert that a string is not empty; that is, it must not be null and not empty.
 	 * <pre>
-	 * Assert.hasText(name);</pre>
+	 * Assert.hasLength(name);</pre>
 	 * @param text the string to check
-	 * @see StringUtils#hasText
+	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(String text) {
 		if (!StringUtils.hasLength(text)) {
-			throw new IllegalArgumentException("[Assertion failed] - This string argument must have length: it cannot be null or empty");
+			throw new IllegalArgumentException("[Assertion failed] - This string argument must have length; it cannot be null or empty");
 		}
 	}
 
@@ -184,7 +184,7 @@ public abstract class Assert {
 	 */
 	public static void hasText(String text) {
 		if (!StringUtils.hasText(text)) {
-			throw new IllegalArgumentException("[Assertion failed] - This string argument must have text: it cannot be null, empty, or blank");
+			throw new IllegalArgumentException("[Assertion failed] - This string argument must have text; it cannot be null, empty, or blank");
 		}
 	}
 
@@ -225,6 +225,7 @@ public abstract class Assert {
 	 * <pre>
 	 * Assert.notEmpty(collection, "Collection must have elements");</pre>
 	 * @param collection the collection to check
+	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the collection is <code>null</code>
 	 * or has no elements
 	 */
@@ -276,7 +277,7 @@ public abstract class Assert {
 	 */
 	public static void notEmpty(Map map) {
 		if (map == null || map.isEmpty()) {
-			throw new IllegalArgumentException("[Assertion failed] - this map must not be empty: it must contain at least one entry");
+			throw new IllegalArgumentException("[Assertion failed] - this map must not be empty; it must contain at least one entry");
 		}
 	}
 
