@@ -15,6 +15,9 @@
  */
 package org.springframework.web.flow;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -56,9 +59,9 @@ import org.springframework.util.ToStringCreator;
  * context of other request-driven frameworks like Struts or WebWork, for
  * example).
  * <p>
- * A flow object also acts as a factory for <code>FlowExecution</code>s executing
- * the flow as the top-level flow. See the {@link #createExecution()} method for
- * more information.
+ * A flow object also acts as a factory for <code>FlowExecution</code>s
+ * executing the flow as the top-level flow. See the {@link #createExecution()}
+ * method for more information.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -336,28 +339,21 @@ public class Flow implements Serializable {
 	 * for this flow on every invocation. Typically called by controller clients
 	 * that need to manage a new flow execution; might also be called by flow
 	 * execution test code.
-	 * @return A new flow execution, used by the caller to manage a single client
-	 *         instance of an executing flow (typically managed in the http
-	 *         session.)
+	 * @return A new flow execution, used by the caller to manage a single
+	 *         client instance of an executing flow (typically managed in the
+	 *         http session.)
 	 */
 	public FlowExecution createExecution() {
 		return new FlowExecutionStack(this);
 	}
 
-	/**
-	 * Returns true if this flow equals the other one; two flows are treated as
-	 * equal if they share the same ID.
-	 */
-	public boolean equals(Object o) {
-		if (!(o instanceof Flow)) {
-			return false;
+	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
+		in.defaultReadObject();
+		Iterator it = statesIterator();
+		while (it.hasNext()) {
+			AbstractState state = (AbstractState)it.next();
+			state.setFlow(this);
 		}
-		Flow flow = (Flow)o;
-		return id.equals(flow.id);
-	}
-
-	public int hashCode() {
-		return id.hashCode();
 	}
 
 	public String toString() {

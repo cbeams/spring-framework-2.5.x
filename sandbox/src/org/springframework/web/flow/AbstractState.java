@@ -99,7 +99,7 @@ public abstract class AbstractState implements Serializable {
 	/**
 	 * Set the owning flow.
 	 */
-	private void setFlow(Flow flow) {
+	protected void setFlow(Flow flow) {
 		Assert.notNull(flow, "The owning flow is required");
 		this.flow = flow;
 	}
@@ -143,23 +143,6 @@ public abstract class AbstractState implements Serializable {
 	 */
 	protected abstract ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response);
-
-	/**
-	 * Returns <code>true</code> if this state equals another. Two states are
-	 * equal if they have the same owning <code>flow</code> and
-	 * <code>id</code>.
-	 */
-	public boolean equals(Object o) {
-		if (!(o instanceof AbstractState)) {
-			return false;
-		}
-		AbstractState s = (AbstractState)o;
-		return flow.equals(s.flow) && id.equals(s.id);
-	}
-
-	public int hashCode() {
-		return (flow != null ? flow.hashCode() : 0) + id.hashCode();
-	}
 
 	public String toString() {
 		ToStringCreator creator = new ToStringCreator(this).append("id", getId());
