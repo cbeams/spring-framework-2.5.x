@@ -324,7 +324,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// We don't have arguments passed in programmatically, so we need to resolve the
 		// arguments specified in the constructor arguments held in the bean definition.
 		if (args == null) {
-			expectedArgCount = cargs.getNrOfArguments();
+			expectedArgCount = cargs.getArgumentCount();
 			resolveConstructorArguments(beanName, mergedBeanDefinition, cargs, resolvedValues);
 		}
 		else {
@@ -489,7 +489,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			String beanName, RootBeanDefinition mergedBeanDefinition,
 			ConstructorArgumentValues cargs, ConstructorArgumentValues resolvedValues) {
 		int minNrOfArgs;
-		minNrOfArgs = cargs.getNrOfArguments();
+		minNrOfArgs = cargs.getArgumentCount();
 		for (Iterator it = cargs.getIndexedArgumentValues().entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			int index = ((Integer) entry.getKey()).intValue();
