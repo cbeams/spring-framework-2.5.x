@@ -89,7 +89,7 @@
 				<include name="cos.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/freemarker">
-				<include name="freemarker-2.3*.jar"/>
+				<include name="freemarker.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-collections.jar"/>
