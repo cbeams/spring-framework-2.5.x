@@ -49,23 +49,23 @@ import org.springframework.web.flow.action.MultiAction;
  * 	}
  * 
  * public void buildStates() {
- *           // get customer information
- *           addActionState(&quot;getDetails&quot;,
- *               action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *               on(success(), &quot;viewDetails&quot;));
- *           // view customer information               
- *           addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *               on(submit(), &quot;bindAndValidate&quot;);
- *           // bind and validate customer information updates 
- *           addActionState(&quot;bindAndValidate&quot;,
- *               action(&quot;customer.Detail.bindAndValidate&quot;),
- *               new Transition[] {
- *                   on(error(), &quot;viewDetails&quot;),
- *                   on(success(), &quot;finish&quot;)
- *               }
- *           // finish
- *           addEndState(&quot;finish&quot;);
- *        }}
+ *            // get customer information
+ *            addActionState(&quot;getDetails&quot;,
+ *                action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *                on(success(), &quot;viewDetails&quot;));
+ *            // view customer information               
+ *            addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *                on(submit(), &quot;bindAndValidate&quot;);
+ *            // bind and validate customer information updates 
+ *            addActionState(&quot;bindAndValidate&quot;,
+ *                action(&quot;customer.Detail.bindAndValidate&quot;),
+ *                new Transition[] {
+ *                    on(error(), &quot;viewDetails&quot;),
+ *                    on(success(), &quot;finish&quot;)
+ *                }
+ *            // finish
+ *            addEndState(&quot;finish&quot;);
+ *         }}
  * 
  * </pre>
  * 
@@ -660,15 +660,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
-	 * <li>On the occurence of event ${actionName}.${eventId}, transition to
-	 * state ${stateId}.
+	 * <li>On the occurence of event ${eventId} retuned by the action with name
+	 * ${actionName}, transition to state ${stateId}.
 	 * </ul>
 	 * @param actionName the action name qualifier
 	 * @param eventId The event id
 	 * @param stateId the state Id
 	 * @return the transition
 	 */
-	protected Transition on(String actionName, String eventId, String stateId) {
+	protected Transition on(String eventId, String actionName, String stateId) {
 		return new Transition(join(actionName, eventId), stateId);
 	}
 
