@@ -1,12 +1,6 @@
 /*
- * Generic framework code included with 
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). 
- * This code is free to use and modify. However, please
- * acknowledge the source and include the above URL in each
- * class using or derived from this code. 
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
  
 package org.springframework.web.servlet.view.velocity;
@@ -16,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -28,13 +23,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.io.VelocityWriter;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.util.SimplePool;
+import org.springframework.beans.factory.support.BeanFactoryUtils;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractView;
 
@@ -55,8 +52,13 @@ import org.springframework.web.servlet.view.AbstractView;
  * if we do date formatting. Velocity is currently weak in this area.
  * <li>exposeCurrencyFormatter: whether to expose a Currency formatter helper object
  * </ul>
- *
+ * 
+ * <p>
+ * Depends on a VelocityConfiguration object such as VelocityConfigurer
+ * being accessible in the current web application context.
+ 
  * @author Rod Johnson
+ * @version $Id: VelocityView.java,v 1.2 2003-09-20 16:32:40 johnsonr Exp $
  * @see VelocityConfigurer
  */
 public class VelocityView extends AbstractView {
@@ -70,6 +72,9 @@ public class VelocityView extends AbstractView {
 	/** Encoding for the output stream */
 	public static final String DEFAULT_OUTPUT_ENCODING = "ISO-8859-1";
 
+
+	/** Instance of Velocity */
+	private VelocityEngine velocityEngine;
 
 	private int poolSize = 40;
 
@@ -86,11 +91,35 @@ public class VelocityView extends AbstractView {
 	private Template velocityTemplate;
 
 	/** The encoding to use when generating outputing */
-	private static String encoding = null;
+	private String encoding = null;
 
 	/** Cache of writers */
 	private SimplePool writerPool = new SimplePool(40);
 
+
+	/**
+ 	* Invoked on startup. Looks for a single VelocityConfiguration bean to
+ 	* find the relevant VelocityEngine for this factory.
+ 	*/
+	protected void initApplicationContext() throws ApplicationContextException {
+		Collection c = BeanFactoryUtils.beansOfTypeIncludingAncestors(VelocityConfiguration.class, getWebApplicationContext());
+		
+		if (c.size() == 1) {
+			// We need exactly one VelocityConfiguration bean
+			VelocityConfiguration vconfig = (VelocityConfiguration) c.iterator().next();
+			this.velocityEngine = vconfig.getVelocityEngine();
+		}
+		else {
+			throw new ApplicationContextException("Must define a VelocityConfiguration bean in this web application context (may be inherited):" +				"VelocityConfigurer is the usual implementation. " +				"This bean may be given any name.");
+		}
+		 
+		// TODO remove this dependence on RuntimeSingleton
+		encoding = RuntimeSingleton.getString(VelocityEngine.OUTPUT_ENCODING, DEFAULT_OUTPUT_ENCODING);
+		
+		// Check that we can get the template, even if we might subsequently get it again
+		loadTemplate();
+	}
+	
 
 	public void setPoolSize(int sz) {
 		this.poolSize = sz;
@@ -125,34 +154,31 @@ public class VelocityView extends AbstractView {
 	 */
 	public void setTemplateName(String templateName) throws ServletException {
 		this.templateName = templateName;
-		encoding = RuntimeSingleton.getString(RuntimeSingleton.OUTPUT_ENCODING, DEFAULT_OUTPUT_ENCODING);
-		// Check that we can get the template, even if we might subsequently get it again
-		loadTemplate();
 	}
 	
 	
 	/**
 	 * Load the Velocity template that is to be cached in this class.
 	 */
-	private void loadTemplate() throws ServletException {
-		String mesg = "Velocity resource loader is: [" + Velocity.getProperty("class.resource.loader.class") + "]; ";
+	private void loadTemplate() throws ApplicationContextException {
+		String mesg = "Velocity resource loader is: [" + this.velocityEngine.getProperty("class.resource.loader.class") + "]; ";
 		try {
-			this.velocityTemplate = RuntimeSingleton.getTemplate(this.templateName);
+			this.velocityTemplate = this.velocityEngine.getTemplate(this.templateName);
 		}
 		catch (ResourceNotFoundException ex) {
 			mesg += "Can't load Velocity template '" + this.templateName + "': is it on the classpath, under /WEB-INF/classes?";
 			logger.error(mesg, ex);
-			throw new ServletException(mesg, ex);
+			throw new ApplicationContextException(mesg, ex);
 		} 
 		catch (ParseErrorException ex) {
 			mesg += "Error parsing Velocity template '" + this.templateName + "'";
 			logger.error(mesg, ex);
-			throw new ServletException(mesg, ex);
+			throw new ApplicationContextException(mesg, ex);
 		} 
 		catch (Exception ex) {
 			mesg += "Unexpected error getting Velocity template '" + this.templateName + "'";
 			logger.error(mesg, ex);
-			throw new ServletException(mesg, ex);
+			throw new ApplicationContextException(mesg, ex);
 		}
 	}
 	
@@ -281,16 +307,16 @@ public class VelocityView extends AbstractView {
 	 * @param context context created by the createContext() method
 	 * @param response servlet reponse (use this to get the OutputStream or Writer)
 	 */
-	private void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
+	protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
 		ServletOutputStream output = response.getOutputStream();
 		VelocityWriter vw = null;
 		try {
 			vw = (VelocityWriter) this.writerPool.get();
 			if (vw == null) {
-				vw = new VelocityWriter(new OutputStreamWriter(output, this.encoding), 4 * 1024, true);
+				vw = new VelocityWriter(new OutputStreamWriter(output, encoding), 4 * 1024, true);
 			}
 			else {
-				vw.recycle(new OutputStreamWriter(output, this.encoding));
+				vw.recycle(new OutputStreamWriter(output, encoding));
 			}
 			template.merge(context, vw);
 		}

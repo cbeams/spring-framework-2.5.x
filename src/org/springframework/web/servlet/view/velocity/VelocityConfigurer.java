@@ -1,12 +1,6 @@
 /*
- * Generic framework code included with 
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). 
- * This code is free to use and modify. However, please
- * acknowledge the source and include the above URL in each
- * class using or derived from this code. 
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
  
 package org.springframework.web.servlet.view.velocity;
@@ -20,14 +14,14 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.velocity.app.Velocity;
-
+import org.apache.velocity.app.VelocityEngine;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.util.WebUtils;
 
 /**
+ * Implementation of VelocityConfiguration interface.
  * JavaBean to configure Velocity, by setting the configLocation of the Velocity
  * properties file. This bean must be included in the application context of any
  * application using Velocity with the Spring Framework.
@@ -46,12 +40,15 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>This bean exists purely to configure Velocity. It exposes no methods other than
  * initialization methods, and is not meant to be referenced by application components.
+ * It exposes the VelocityEngine via its implementation of the
+ * VelocityConfiguration interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see VelocityView
+ * @version $Id: VelocityConfigurer.java,v 1.3 2003-09-20 16:32:40 johnsonr Exp $
  */
-public class VelocityConfigurer extends WebApplicationObjectSupport {
+public class VelocityConfigurer extends WebApplicationObjectSupport implements VelocityConfiguration {
 
 	public static final String DEFAULT_CONFIG_LOCATION = "WEB-INF/velocity.properties";
 
@@ -66,6 +63,11 @@ public class VelocityConfigurer extends WebApplicationObjectSupport {
 	private String webAppRootMarker = DEFAULT_WEB_APP_ROOT_MARKER;
 
 	private boolean overrideLogging = true;
+	
+	/**
+	 * It's the job of this class to initialize and expose this
+	 */
+	private VelocityEngine velocityEngine;
 
 	/**
 	 * Set location of the Velocity config file. Default value is
@@ -109,6 +111,9 @@ public class VelocityConfigurer extends WebApplicationObjectSupport {
 	 * Initializes the Velocity runtime.
 	 */
 	protected void initApplicationContext() throws ApplicationContextException {
+		
+		this.velocityEngine = new VelocityEngine();
+		
 		try {
 			Properties prop = new Properties();
 			// try default config location as fallback
@@ -131,21 +136,22 @@ public class VelocityConfigurer extends WebApplicationObjectSupport {
 			if (resourceBase == null) {
 				logger.warn("Cannot replace marker [" + this.webAppRootMarker + "] with resource base because the WAR file is not expanded");
 			}
-			// set properties
+			
+			// Set properties
 			for (Iterator it = prop.keySet().iterator(); it.hasNext();) {
 				String key = (String) it.next();
 				String value = prop.getProperty(key);
 				if (resourceBase != null) {
 					value = StringUtils.replace(value, this.webAppRootMarker, resourceBase);
 				}
-				Velocity.setProperty(key, value);
+				this.velocityEngine.setProperty(key, value);
 			}
 			// log via Commons Logging?
 			if (this.overrideLogging) {
-				Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
+				this.velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
 			}
 			// perform initialization
-			Velocity.init();
+			this.velocityEngine.init();
 		}
 		catch (ServletException ex) {
 			throw new ApplicationContextException("Error loading Velocity config from [" + this.configLocation + "]", ex);
@@ -158,6 +164,14 @@ public class VelocityConfigurer extends WebApplicationObjectSupport {
 				"Error initializing Velocity from properties file [" + this.configLocation + "] (loaded OK)",
 				ex);
 		}
+	}
+	
+
+	/**
+	 * @see org.springframework.web.servlet.view.velocity.VelocityConfiguration#getVelocityEngine()
+	 */
+	public VelocityEngine getVelocityEngine() {
+		return this.velocityEngine;
 	}
 
 }
