@@ -29,31 +29,37 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
- * Flow builder that builds a flow based on the definitions found in an XML file.
+ * Flow builder that builds a flow based on the definitions found in an XML
+ * file.
  * 
  * @author Erwin Vervaet
  */
 public class XmlFlowBuilder extends BaseFlowBuilder {
-	
+
+	private static final String ID_ATTRIBUTE = "id";
+
 	private Resource resource;
+
 	private Document doc;
 
 	private boolean validating = true;
-	private EntityResolver entityResolver=new FlowDtdResolver();
-	
+
+	private EntityResolver entityResolver = new FlowDtdResolver();
+
 	public XmlFlowBuilder() {
 	}
-	
+
 	public XmlFlowBuilder(Resource resource) {
-		this.resource=resource;
+		this.resource = resource;
 	}
-	
+
 	public void setResource(Resource resource) {
 		this.resource = resource;
 	}
 
 	/**
-	 * Set if the XML parser should validate the document and thus enforce a DTD.
+	 * Set if the XML parser should validate the document and thus enforce a
+	 * DTD.
 	 */
 	public void setValidating(boolean validating) {
 		this.validating = validating;
@@ -69,28 +75,47 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	public void setEntityResolver(EntityResolver entityResolver) {
 		this.entityResolver = entityResolver;
 	}
-	
-	protected Document loadFlowDefinition() throws IOException, ParserConfigurationException, SAXException {
-		InputStream is=null;
+
+	public void init() throws FlowBuilderException {
 		try {
-			DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+			doc = loadFlowDefinition();
+		}
+		catch (IOException e) {
+			throw new FlowBuilderException("Cannot load the XML flow definition resource", e);
+		}
+		catch (ParserConfigurationException e) {
+			throw new FlowBuilderException("Cannot configure parser to the XML flow definition", e);
+		}
+		catch (SAXException e) {
+			throw new FlowBuilderException("Cannot parse the flow definition XML document", e);
+		}
+	}
+
+	public void buildStates() throws FlowBuilderException {
+		setFlow(parseFlowDefinition(doc));
+	}
+
+	protected Document loadFlowDefinition() throws IOException, ParserConfigurationException, SAXException {
+		InputStream is = null;
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			factory.setValidating(this.validating);
-			DocumentBuilder docBuilder=factory.newDocumentBuilder();
+			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			docBuilder.setErrorHandler(new ErrorHandler() {
 				public void error(SAXParseException ex) throws SAXException {
 					throw ex;
 				}
-				
+
 				public void fatalError(SAXParseException ex) throws SAXException {
 					throw ex;
 				}
-				
+
 				public void warning(SAXParseException ex) throws SAXException {
 					logger.warn("Ignored XML validation warning: " + ex.getMessage(), ex);
 				}
 			});
 			docBuilder.setEntityResolver(this.entityResolver);
-			is=resource.getInputStream();
+			is = resource.getInputStream();
 			return docBuilder.parse(is);
 		}
 		finally {
@@ -104,20 +129,19 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			}
 		}
 	}
-	
+
 	protected Flow parseFlowDefinition(Document doc) {
-		Element root=doc.getDocumentElement();
-		
-		String id=root.getAttribute("id");
-		String startStateId=root.getAttribute("start-state");
-		
-		Flow flow=createFlow(id);
-		
-		NodeList nodeList=root.getChildNodes();
-		for (int i=0; i<nodeList.getLength(); i++) {
-			Node node=nodeList.item(i);
+		Element root = doc.getDocumentElement();
+		String id = root.getAttribute(ID_ATTRIBUTE);
+		String startStateId = root.getAttribute("start-state");
+
+		Flow flow = createFlow(id);
+
+		NodeList nodeList = root.getChildNodes();
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node node = nodeList.item(i);
 			if (node instanceof Element) {
-				Element element=(Element)node;
+				Element element = (Element)node;
 				if ("action-state".equals(element.getNodeName())) {
 					parseAndAddActionState(flow, element);
 				}
@@ -132,129 +156,97 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				}
 			}
 		}
-		
+
 		flow.setStartState((TransitionableState)flow.getState(startStateId));
-		
+
 		return flow;
 	}
-	
-	protected void parseAndAddActionState(Flow flow, Element element) {
-		String id=element.getAttribute("id");
 
-		Action[] actions=parseActions(element);
-		Transition[] transitions=parseTransitions(element);
-		
+	protected void parseAndAddActionState(Flow flow, Element element) {
+		String id = element.getAttribute(ID_ATTRIBUTE);
+		Action[] actions = parseActions(element);
+		Transition[] transitions = parseTransitions(element);
 		new ActionState(flow, id, actions, transitions);
 	}
-	
+
 	protected void parseAndAddViewState(Flow flow, Element element) {
-		String id=element.getAttribute("id");
-		String viewName=parseViewName(element);
-
-		Transition[] transitions=parseTransitions(element);
-
+		String id = element.getAttribute(ID_ATTRIBUTE);
+		String viewName = parseViewName(element);
+		Transition[] transitions = parseTransitions(element);
 		new ViewState(flow, id, viewName, transitions);
 	}
-	
+
 	protected void parseAndAddSubFlowState(Flow flow, Element element) {
-		String id=element.getAttribute("id");
-		String flowName=element.getAttribute("flow");
-		
-		Flow subFlow=getFlowServiceLocator().getFlow(flowName);
-		
-		FlowAttributesMapper mapper=null;
+		String id = element.getAttribute(ID_ATTRIBUTE);
+		String flowName = element.getAttribute("flow");
+		Flow subFlow = getFlowServiceLocator().getFlow(flowName);
+		FlowAttributesMapper mapper = null;
 		if (element.hasAttribute("attributes-mapper")) {
-			mapper=getFlowServiceLocator().getFlowAttributesMapper(element.getAttribute("attributes-mapper"));
+			mapper = getFlowServiceLocator().getFlowAttributesMapper(element.getAttribute("attributes-mapper"));
 		}
-
-		Transition[] transitions=parseTransitions(element);
-
+		Transition[] transitions = parseTransitions(element);
 		new SubFlowState(flow, id, subFlow, mapper, transitions);
 	}
-	
+
 	protected void parseAndAddEndState(Flow flow, Element element) {
-		String id=element.getAttribute("id");
-		String viewName=parseViewName(element);
-		
+		String id = element.getAttribute(ID_ATTRIBUTE);
+		String viewName = parseViewName(element);
 		new EndState(flow, id, viewName);
 	}
-	
-	protected Action[] parseActions(Element element) {
-		List actions=new LinkedList();
 
-		NodeList childNodeList=element.getChildNodes();
-		for (int i=0; i<childNodeList.getLength(); i++) {
-			Node childNode=childNodeList.item(i);
+	protected Action[] parseActions(Element element) {
+		List actions = new LinkedList();
+
+		NodeList childNodeList = element.getChildNodes();
+		for (int i = 0; i < childNodeList.getLength(); i++) {
+			Node childNode = childNodeList.item(i);
 			if (childNode instanceof Element) {
-				Element childElement=(Element)childNode;
+				Element childElement = (Element)childNode;
 				if ("action".equals(childElement.getNodeName())) {
 					actions.add(parseAction(childElement));
 				}
 			}
 		}
-
 		return (Action[])actions.toArray(new Action[actions.size()]);
 	}
 
 	protected Action parseAction(Element element) {
-		String name=element.getAttribute("name");
-		
+		String name = element.getAttribute("name");
+
 		return getFlowServiceLocator().getAction(name);
 	}
-	
+
 	protected Transition[] parseTransitions(Element element) {
-		List transitions=new LinkedList();
-		
-		NodeList childNodeList=element.getChildNodes();
-		for (int i=0; i<childNodeList.getLength(); i++) {
-			Node childNode=childNodeList.item(i);
+		List transitions = new LinkedList();
+
+		NodeList childNodeList = element.getChildNodes();
+		for (int i = 0; i < childNodeList.getLength(); i++) {
+			Node childNode = childNodeList.item(i);
 			if (childNode instanceof Element) {
-				Element childElement=(Element)childNode;
+				Element childElement = (Element)childNode;
 				if ("transition".equals(childElement.getNodeName())) {
 					transitions.add(parseTransition(childElement));
 				}
 			}
 		}
-		
 		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
 	}
-	
+
 	protected Transition parseTransition(Element element) {
-		String event=element.getAttribute("event");
-		String to=element.getAttribute("to");
-		
+		String event = element.getAttribute("event");
+		String to = element.getAttribute("to");
 		return new Transition(event, to);
 	}
-	
+
 	protected String parseViewName(Element element) {
-		String viewName=element.getAttribute("id");
+		String viewName = element.getAttribute(ID_ATTRIBUTE);
 		if (element.hasAttribute("view")) {
-			viewName=element.getAttribute("view");
+			viewName = element.getAttribute("view");
 		}
-		boolean marker=new Boolean(element.getAttribute("marker")).booleanValue();
+		boolean marker = new Boolean(element.getAttribute("marker")).booleanValue();
 		if (marker) {
-			viewName=null;
+			viewName = null;
 		}
 		return viewName;
 	}
-
-	public void init() throws FlowBuilderException {
-		try {
-			doc=loadFlowDefinition();
-		}
-		catch (IOException e) {
-			throw new FlowBuilderException("cannot load flow definition", e);
-		}
-		catch (ParserConfigurationException e) {
-			throw new FlowBuilderException("cannot configure parser to load flow definition", e);
-		}
-		catch (SAXException e) {
-			throw new FlowBuilderException("cannot parse flow definition", e);
-		}
-	}
-
-	public void buildStates() throws FlowBuilderException {
-		setFlow(parseFlowDefinition(doc));
-	}
-
 }

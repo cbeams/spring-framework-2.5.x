@@ -45,7 +45,6 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		if (!Action.class.isAssignableFrom(actionImplementationClass)) {
 			throw new IllegalArgumentException("Your action implementation '" + actionImplementationClass
 					+ "' must implement the '" + Action.class.getName() + "' interface");
-
 		}
 		try {
 			return (Action)BeanFactoryUtils.beanOfType(getListableBeanFactory(), actionImplementationClass);
@@ -127,5 +126,4 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			throw new NoSuchFlowAttributesMapperException(flowAttributesMapperImplementationClass, e);
 		}
 	}
-
 }

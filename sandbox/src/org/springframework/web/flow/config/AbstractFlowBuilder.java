@@ -1580,5 +1580,4 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	protected String getDefaultFlowAttributesMapperId() {
 		return attributesMapper(getFlow().getId());
 	}
-
 }

@@ -1,7 +1,7 @@
 package org.springframework.web.flow.config;
 
 /**
- * <p>Exception thrown to indicate a problem while building a flow.
+ * Exception thrown to indicate a problem while building a flow.
  * 
  * @author Erwin Vervaet
  */
@@ -21,5 +21,4 @@ public class FlowBuilderException extends RuntimeException {
 	public FlowBuilderException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
 }

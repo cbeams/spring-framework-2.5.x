@@ -22,10 +22,11 @@ public abstract class BaseFlowBuilder implements FlowBuilder {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private FlowServiceLocator flowServiceLocator;
+
 	private Collection flowExecutionListeners = new ArrayList(6);
-	
+
 	private Flow flow;
-	
+
 	public FlowServiceLocator getFlowServiceLocator() {
 		return flowServiceLocator;
 	}
@@ -33,7 +34,7 @@ public abstract class BaseFlowBuilder implements FlowBuilder {
 	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
 		this.flowServiceLocator = flowServiceLocator;
 	}
-	
+
 	public Collection getFlowExecutionListeners() {
 		return flowExecutionListeners;
 	}
@@ -54,16 +55,16 @@ public abstract class BaseFlowBuilder implements FlowBuilder {
 	protected Flow getFlow() {
 		return flow;
 	}
-	
+
 	/**
 	 * Set the flow being built by this builder.
 	 */
 	protected void setFlow(Flow flow) {
 		this.flow = flow;
 	}
-	
+
 	public void buildExecutionListeners() throws FlowBuilderException {
-		for (Iterator listeners=getFlowExecutionListeners().iterator(); listeners.hasNext(); ) {
+		for (Iterator listeners = getFlowExecutionListeners().iterator(); listeners.hasNext();) {
 			flow.addFlowExecutionListener((FlowExecutionListener)listeners.next());
 		}
 	}
@@ -72,8 +73,8 @@ public abstract class BaseFlowBuilder implements FlowBuilder {
 		return getFlow();
 	}
 
-	//hooks for subclassing
-	
+	// hooks for subclassing
+
 	/**
 	 * Create the instance of the Flow built by this builder. Subclasses may
 	 * override to return a custom Flow implementation.
@@ -84,5 +85,4 @@ public abstract class BaseFlowBuilder implements FlowBuilder {
 	protected Flow createFlow(String id) {
 		return new Flow(id);
 	}
-
 }

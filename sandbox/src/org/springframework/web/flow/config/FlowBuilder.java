@@ -6,7 +6,7 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.Flow;
 
 /**
- * Builder interface used to build flows from some sort of configuration.
+ * Builder interface used to build flows.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
