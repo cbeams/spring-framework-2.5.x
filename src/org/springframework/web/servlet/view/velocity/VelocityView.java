@@ -40,7 +40,6 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
 
 /**
  * View using the Velocity template engine.
- * Based on code in the VelocityServlet shipped with Velocity.
  *
  * <p>Exposes the following JavaBean properties:
  * <ul>
@@ -67,6 +66,9 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * <p>Depends on a VelocityConfig object such as VelocityConfigurer being
  * accessible in the current web application context, with any bean name.
  * Alternatively, you can set the VelocityEngine object as bean property.
+ *
+ * <p>Note: Spring's Velocity support requires Velocity 1.3 or higher, and optionally
+ * Velocity Tools 1.0 or 1.1 (depending on the use of DateTool and/or NumberTool).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -238,8 +240,9 @@ public class VelocityView extends AbstractTemplateView {
 
 
 	/**
-	 * Process the model map by merging it with the Velocity template. Output is directed
-	 * to the response. This method can be overridden if custom behavior is needed.
+	 * Process the model map by merging it with the Velocity template.
+	 * Output is directed to the servlet response.
+	 * <p>This method can be overridden if custom behavior is needed.
 	 */
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -248,8 +251,9 @@ public class VelocityView extends AbstractTemplateView {
 		exposeHelpers(model, request);
 
 		// create Velocity Context from model
-		Context velocityContext = createVelocityContext(model);
-		exposeHelpers(velocityContext, request);
+		Context velocityContext = createVelocityContext(model, request, response);
+
+		exposeHelpers(velocityContext, request, response);
 		exposeToolAttributes(velocityContext, request);
 
 		doRender(velocityContext, response);
@@ -258,9 +262,9 @@ public class VelocityView extends AbstractTemplateView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
-	 * <p>Called by renderMergedTemplateModel. The default implementation is empty.
-	 * This method can be overridden to add custom helpers to the model.
-	 * @param model the model that will be passed to the template at merge time
+	 * <p>Called by <code>renderMergedTemplateModel</code>. The default implementation
+	 * is empty. This method can be overridden to add custom helpers to the model.
+	 * @param model the model that will be passed to the template for merging
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding model attributes
 	 * @see #renderMergedTemplateModel
@@ -269,7 +273,23 @@ public class VelocityView extends AbstractTemplateView {
 	}
 
 	/**
-	 * Create a Velocity Context instance for the given model.
+	 * Create a Velocity Context instance for the given model,
+	 * to be passed to the template for merging.
+	 * <p>Default implementation delegates to <code>createVelocityContext(model)</code>.
+	 * @param model the model Map, containing the model attributes
+	 * to be exposed to the view
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return the Velocity Context
+	 * @see #createVelocityContext(Map)
+	 */
+	protected Context createVelocityContext(Map model, HttpServletRequest request, HttpServletResponse response) {
+		return createVelocityContext(model);
+	}
+
+	/**
+	 * Create a Velocity Context instance for the given model,
+	 * to be passed to the template for merging.
 	 * <p>Default implementation creates an instance of Velocity's
 	 * VelocityContext implementation class.
 	 * @param model the model Map, containing the model attributes
@@ -284,12 +304,29 @@ public class VelocityView extends AbstractTemplateView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
-	 * <p>Called by renderMergedTemplateModel. The default implementations is empty.
-	 * This method can be overridden to add custom helpers to the Velocity context.
-	 * @param velocityContext Velocity context that will be passed to the template at merge time
+	 * <p>Called by <code>renderMergedTemplateModel</code>. Default implementation
+	 * delegates to <code>exposeHelpers(velocityContext, request)</code>. This method
+	 * can be overridden to add special tools to the context, needing the servlet response
+	 * to initialize (see Velocity Tools, for example LinkTool and ViewTool/ChainedContext).
+	 * @param velocityContext Velocity context that will be passed to the template
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @throws Exception if there's a fatal error while we're adding model attributes
+	 * @see #exposeHelpers(org.apache.velocity.context.Context, HttpServletRequest)
+	 */
+	protected void exposeHelpers(Context velocityContext, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		exposeHelpers(velocityContext, request);
+	}
+
+	/**
+	 * Expose helpers unique to each rendering operation. This is necessary so that
+	 * different rendering operations can't overwrite each other's formats etc.
+	 * <p>Default implementation is empty. This method can be overridden to add
+	 * custom helpers to the Velocity context.
+	 * @param velocityContext Velocity context that will be passed to the template
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding model attributes
-	 * @deprecated in favor of exposeHelpers(Map, HttpServletRequest)
 	 * @see #exposeHelpers(Map, HttpServletRequest)
 	 */
 	protected void exposeHelpers(Context velocityContext, HttpServletRequest request) throws Exception {
@@ -297,11 +334,15 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Expose the tool attributes, according to corresponding bean property settings.
-	 * @param velocityContext Velocity context that will be passed to the template at merge time
+	 * <p>Do not override this method unless for further tools driven by bean properties.
+	 * Override one of the <code>exposeHelpers</code> methods to add custom helpers.
+	 * @param velocityContext Velocity context that will be passed to the template
 	 * @param request current HTTP request
 	 * @see #setVelocityFormatterAttribute
 	 * @see #setDateToolAttribute
 	 * @see #setNumberToolAttribute
+	 * @see #exposeHelpers(Map, HttpServletRequest)
+	 * @see #exposeHelpers(org.apache.velocity.context.Context, HttpServletRequest, HttpServletResponse)
 	 */
 	protected void exposeToolAttributes(Context velocityContext, HttpServletRequest request) {
 		if (this.velocityFormatterAttribute != null) {
@@ -397,13 +438,13 @@ public class VelocityView extends AbstractTemplateView {
 
 
 	/**
-	 * Subclass of DateTool from Velocity tools,
-	 * using the RequestContext Locale instead of the default Locale.
+	 * Subclass of DateTool from Velocity Tools, using a passed-in Locale
+	 * (usually the RequestContext Locale) instead of the default Locale.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
 	 */
 	private static class LocaleAwareDateTool extends DateTool {
 
-		private Locale locale;
+		private final Locale locale;
 
 		private LocaleAwareDateTool(Locale locale) {
 			this.locale = locale;
@@ -416,13 +457,13 @@ public class VelocityView extends AbstractTemplateView {
 
 
 	/**
-	 * Subclass of NumberTool from Velocity tools,
-	 * using the RequestContext Locale instead of the default Locale.
+	 * Subclass of NumberTool from Velocity Tools, using a passed-in Locale
+	 * (usually the RequestContext Locale) instead of the default Locale.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
 	 */
 	private static class LocaleAwareNumberTool extends NumberTool {
 
-		private Locale locale;
+		private final Locale locale;
 
 		private LocaleAwareNumberTool(Locale locale) {
 			this.locale = locale;
