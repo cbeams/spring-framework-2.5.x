@@ -23,8 +23,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
@@ -37,6 +35,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
+import org.springframework.util.xml.SimpleSaxErrorHandler;
 
 /**
  * Bean definition reader for XML bean definitions. Delegates the actual XML
@@ -59,6 +58,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private boolean validating = true;
 
+	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
+
 	private EntityResolver entityResolver = new BeansDtdResolver();
 
 	private Class parserClass = DefaultXmlBeanDefinitionParser.class;
@@ -76,6 +77,18 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public void setValidating(boolean validating) {
 		this.validating = validating;
+	}
+
+	/**
+	 * Set an implementation of the <code>org.xml.sax.ErrorHandler</code>
+	 * interface for custom handling of XML parsing errors and warnings.
+	 * <p>If not set, a default SimpleSaxErrorHandler is used that simply
+	 * logs warnings using the logger instance of the view class,
+	 * and rethrows errors to discontinue the XML transformation.
+	 * @see org.springframework.util.xml.SimpleSaxErrorHandler
+	 */
+ 	public void setErrorHandler(ErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
 	}
 
 	/**
@@ -124,7 +137,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			}
 			factory.setValidating(this.validating);
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
-			docBuilder.setErrorHandler(new BeansErrorHandler());
+			docBuilder.setErrorHandler(this.errorHandler);
 			if (this.entityResolver != null) {
 				docBuilder.setEntityResolver(this.entityResolver);
 			}
@@ -173,30 +186,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
 		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
 		return parser.registerBeanDefinitions(this, doc, resource);
-	}
-
-
-	/**
-	 * Private implementation of SAX ErrorHandler used when validating XML.
-	 */
-	private static class BeansErrorHandler implements ErrorHandler {
-
-		/**
-		 * We can't use the enclosing class' logger as it's protected and inherited.
-		 */
-		private final static Log logger = LogFactory.getLog(XmlBeanDefinitionReader.class);
-
-		public void error(SAXParseException ex) throws SAXException {
-			throw ex;
-		}
-
-		public void fatalError(SAXParseException ex) throws SAXException {
-			throw ex;
-		}
-
-		public void warning(SAXParseException ex) throws SAXException {
-			logger.warn("Ignored XML validation warning: " + ex.getMessage(), ex);
-		}
 	}
 
 }

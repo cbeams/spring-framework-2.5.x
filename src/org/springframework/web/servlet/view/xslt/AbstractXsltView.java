@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.view.xslt;
 
@@ -25,15 +25,26 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.*;
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.w3c.dom.Node;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
+import org.springframework.util.xml.SimpleTransformErrorListener;
 import org.springframework.web.servlet.view.AbstractView;
-import org.w3c.dom.Node;
 
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
@@ -58,15 +69,21 @@ import org.w3c.dom.Node;
 public abstract class AbstractXsltView extends AbstractView {
 
 	public static final String DEFAULT_ROOT = "DocRoot";
-	
-	
-	/** URL of stylesheet */
+
+
+	/**
+	 * URL of stylesheet
+	 */
 	private Resource stylesheetLocation;
 
-	/** Document root element name, normally overridden in the view definition config */
+	/**
+	 * Document root element name, normally overridden in the view definition config
+	 */
 	private String root = DEFAULT_ROOT;
 
-	/** Custom URIResolver, set by subclass or as bean property */
+	/**
+	 * Custom URIResolver, set by subclass or as bean property
+	 */
 	private URIResolver uriResolver;
 
 	private boolean cache = true;
@@ -75,8 +92,8 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	/** XSLT Template */
 	private Templates templates;
-    
-    private ErrorListener errorListener = new DefaultErrorListener();
+
+	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
 
 
 	/**
@@ -86,11 +103,11 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	public void setStylesheetLocation(Resource stylesheetLocation) {
 		this.stylesheetLocation = stylesheetLocation;
-        if (transformerFactory != null)
-            cacheTemplates();
+		if (transformerFactory != null)
+			cacheTemplates();
 	}
 
-	/** 
+	/**
 	 * Document root element name. Default is "DocRoot".
 	 * Only used if we're not passed a single Node as model.
 	 * @param root document root element name
@@ -110,7 +127,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	public void setUriResolver(URIResolver uriResolver) {
 		this.uriResolver = uriResolver;
 	}
-	
+
 	/**
 	 * Set whether to activate the cache. Default is true.
 	 */
@@ -118,16 +135,17 @@ public abstract class AbstractXsltView extends AbstractView {
 		this.cache = cache;
 	}
 
-    /**
-     * Sets an implementation of the ErrorListener interface for custom handling of
-     * transformation errors and warnings.  If not set, a default implementation is used
-     * that simply logs errors and warnings to the logger instance used by this class.
-     * 
-     * @param listener the implementation to use.
-     */
-    public void setErrorListener(ErrorListener listener) {
-        errorListener = listener;
-    }
+	/**
+	 * Set an implementation of the <code>javax.xml.transform.ErrorListener</code>
+	 * interface for custom handling of transformation errors and warnings.
+	 * <p>If not set, a default SimpleTransformErrorListener is used that simply
+	 * logs warnings using the logger instance of the view class,
+	 * and rethrows errors to discontinue the XML transformation.
+	 * @see org.springframework.util.xml.SimpleTransformErrorListener
+	 */
+	public void setErrorListener(ErrorListener errorListener) {
+		this.errorListener = errorListener;
+	}
 
 
 	/**
@@ -135,12 +153,12 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	protected final void initApplicationContext() throws ApplicationContextException {
 		this.transformerFactory = TransformerFactory.newInstance();
-        this.transformerFactory.setErrorListener(errorListener);
-        
+		this.transformerFactory.setErrorListener(this.errorListener);
+
 		if (this.uriResolver != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Using custom URIResolver [" + this.uriResolver + "] in XSLT view with name '" +
-										getBeanName() + "'");
+						getBeanName() + "'");
 			}
 			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
@@ -150,7 +168,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		}
 
 		cacheTemplates();
-	}	
+	}
 
 	private synchronized void cacheTemplates() throws ApplicationContextException {
 		if (this.stylesheetLocation != null) {
@@ -161,13 +179,13 @@ public abstract class AbstractXsltView extends AbstractView {
 				}
 			}
 			catch (TransformerConfigurationException ex) {
-				throw new ApplicationContextException(
-					"Can't load stylesheet from " + this.stylesheetLocation + " in XSLT view '" + getBeanName() + "'", ex);
+				throw new ApplicationContextException("Can't load stylesheet from " + this.stylesheetLocation +
+						" in XSLT view '" + getBeanName() + "'", ex);
 			}
 		}
 	}
 
-	/** 
+	/**
 	 * Load the stylesheet. Subclasses can override this.
 	 */
 	protected Source getStylesheetSource(Resource stylesheetLocation) throws ApplicationContextException {
@@ -175,9 +193,9 @@ public abstract class AbstractXsltView extends AbstractView {
 			logger.debug("Loading XSLT stylesheet from " + stylesheetLocation);
 		}
 		try {
-			URL url = stylesheetLocation.getURL(); 
-			String urlPath = url.toString(); 
-			String systemId = urlPath.substring(0, urlPath.lastIndexOf('/') + 1); 
+			URL url = stylesheetLocation.getURL();
+			String urlPath = url.toString();
+			String systemId = urlPath.substring(0, urlPath.lastIndexOf('/') + 1);
 			return new StreamSource(url.openStream(), systemId);
 		}
 		catch (IOException ex) {
@@ -185,8 +203,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		}
 	}
 
-	protected final void renderMergedOutputModel(
-			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected final void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (!this.cache) {
 			logger.warn("DEBUG SETTING: NOT THREADSAFE AND WILL IMPAIR PERFORMANCE: template will be refreshed");
 			cacheTemplates();
@@ -205,11 +222,11 @@ public abstract class AbstractXsltView extends AbstractView {
 			response.setContentType(getContentType());
 		}
 
-        /*
-         * the preferred method has subclasses creating a Source rather than a Node for
-         * transformation.  Support for Nodes is retained for compatibility
-         */ 
-        Source source = null;
+		/*
+		 * the preferred method has subclasses creating a Source rather than a Node for
+		 * transformation.  Support for Nodes is retained for compatibility
+		 */
+		Source source = null;
 		Node dom = null;
 		String docRoot = null;
 
@@ -232,58 +249,55 @@ public abstract class AbstractXsltView extends AbstractView {
 			logger.debug("No need to domify: was passed an XML Node or Source");
 			source = singleModel instanceof Node ? new DOMSource((Node) singleModel) : (Source) singleModel;
 		}
-		else { 			
+		else {
 			// docRoot local variable takes precedence
 			dom = createDomNode(model, (docRoot == null) ? this.root : docRoot, request, response);
-            if (dom != null)
-                source = new DOMSource(dom);
-            else
-                source = createXsltSource(model, (docRoot == null) ? this.root : docRoot, request, response);
-        }
-        
+			if (dom != null)
+				source = new DOMSource(dom);
+			else
+				source = createXsltSource(model, (docRoot == null) ? this.root : docRoot, request, response);
+		}
+
 		doTransform(model, source, request, response);
 	}
 
 	/**
-     * Return the XML node to transform.
-     * Subclasses must implement either this method or <coe>createDomNode</code> which is retained
-     * only for backward compatibility.
-     * 
-     * @param model the model Map
-     * @param root name for root element. This can be supplied as a bean property
-     * to concrete subclasses within the view definition file, but will be overridden
-     * in the case of a single object in the model map to be the key for that object.
-     * If no root property is specified and multiple model objects exist, a default
-     * root tag name will be supplied. 
-     * @param request HTTP request. Subclasses won't normally use this, as
-     * request processing should have been complete. However, we might to
-     * create a RequestContext to expose as part of the model.
-     * @param response HTTP response. Subclasses won't normally use this,
-     * however there may sometimes be a need to set cookies.
-     * @return the xslt Source to transform
-     * @throws Exception we let this method throw any exception; the
-     * AbstractXlstView superclass will catch exceptions
-     */
-    protected Source createXsltSource(
-        Map model, String string, HttpServletRequest request, HttpServletResponse response) 
-        throws Exception {
-        return null;
-    }
-
-    /**
 	 * Return the XML node to transform.
-	 * This method is deprecated from version 1.1.5 with the preferred extension point
-     * being <code>createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)</code>
-     * instead.  Code that previously implemented this method can now override the preferred
-     * method, wrapping the Node with <code>new DOMSource(node)</code> and returning that.
-     * 
-     * @deprecated in favour of createXsltSource(Map, String, HttpServletRequest, HttpServletResponse) 
+	 * Subclasses must implement either this method or <coe>createDomNode</code> which is retained
+	 * only for backward compatibility.
 	 * @param model the model Map
 	 * @param root name for root element. This can be supplied as a bean property
 	 * to concrete subclasses within the view definition file, but will be overridden
 	 * in the case of a single object in the model map to be the key for that object.
 	 * If no root property is specified and multiple model objects exist, a default
-	 * root tag name will be supplied. 
+	 * root tag name will be supplied.
+	 * @param request HTTP request. Subclasses won't normally use this, as
+	 * request processing should have been complete. However, we might to
+	 * create a RequestContext to expose as part of the model.
+	 * @param response HTTP response. Subclasses won't normally use this,
+	 * however there may sometimes be a need to set cookies.
+	 * @return the xslt Source to transform
+	 * @throws Exception we let this method throw any exception; the
+	 * AbstractXlstView superclass will catch exceptions
+	 */
+	protected Source createXsltSource(
+			Map model, String root, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		return null;
+	}
+
+	/**
+	 * Return the XML node to transform.
+	 * This method is deprecated from version 1.1.5 with the preferred extension point
+	 * being <code>createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)</code>
+	 * instead.  Code that previously implemented this method can now override the preferred
+	 * method, wrapping the Node with <code>new DOMSource(node)</code> and returning that.
+	 * @param model the model Map
+	 * @param root name for root element. This can be supplied as a bean property
+	 * to concrete subclasses within the view definition file, but will be overridden
+	 * in the case of a single object in the model map to be the key for that object.
+	 * If no root property is specified and multiple model objects exist, a default
+	 * root tag name will be supplied.
 	 * @param request HTTP request. Subclasses won't normally use this, as
 	 * request processing should have been complete. However, we might to
 	 * create a RequestContext to expose as part of the model.
@@ -292,11 +306,11 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @return the XML node to transform
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
+	 * @deprecated in favour of createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)
 	 */
-	protected Node createDomNode(
-		Map model, String root, HttpServletRequest request, HttpServletResponse response)
-		throws Exception {
-        return null;
+	protected Node createDomNode(Map model, String root, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		return null;
 	}
 
 	/**
@@ -304,8 +318,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * <p>Default implementation delegates to the doTransform version
 	 * that takes a Result argument, building a StreamResult for the
 	 * ServletResponse OutputStream.
-	 * @deprecated the preferred method is doTransform(Map model, Source source, HttpServletRequest request, HttpServletResponse response)
-     * @param model the model Map
+	 * @param model the model Map
 	 * @param dom the XNL node to transform
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -314,104 +327,100 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @see #doTransform(Node, Map, Result, String)
 	 * @see javax.xml.transform.stream.StreamResult
 	 * @see javax.servlet.ServletResponse#getOutputStream
-     * @see #doTransform(Map, Source, HttpServletRequest, HttpServletResponse)
+	 * @see #doTransform(Map, Source, HttpServletRequest, HttpServletResponse)
+	 * @deprecated the preferred method is doTransform(Map model, Source source, HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doTransform(Map model, Node dom, HttpServletRequest request, HttpServletResponse response)
-	    throws Exception {
-		doTransform(
-				new DOMSource(dom), getParameters(request),
+			throws Exception {
+		doTransform(new DOMSource(dom), getParameters(request),
 				new StreamResult(new BufferedOutputStream(response.getOutputStream())),
 				response.getCharacterEncoding());
 	}
 
 	/**
-     * Perform the actual transformation, writing to the HTTP response.
-     * <p>Default implementation delegates to the doTransform version
-     * that takes a Result argument, building a StreamResult for the
-     * ServletResponse OutputStream.
-     * @param model the model Map
-     * @param source the Source to transform
-     * @param request current HTTP request
-     * @param response current HTTP response
-     * @throws Exception we let this method throw any exception; the
-     * AbstractXlstView superclass will catch exceptions
-     * @see #doTransform(Node, Map, Result, String)
-     * @see javax.xml.transform.stream.StreamResult
-     * @see javax.servlet.ServletResponse#getOutputStream
-     */
-    protected void doTransform(Map model, Source source, HttpServletRequest request, HttpServletResponse response)
-        throws Exception {
-        doTransform(
-                source, getParameters(request),
-                new StreamResult(new BufferedOutputStream(response.getOutputStream())),
-                response.getCharacterEncoding());
-    }
+	 * Perform the actual transformation, writing to the HTTP response.
+	 * <p>Default implementation delegates to the doTransform version
+	 * that takes a Result argument, building a StreamResult for the
+	 * ServletResponse OutputStream.
+	 * @param model the model Map
+	 * @param source the Source to transform
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @throws Exception we let this method throw any exception; the
+	 * AbstractXlstView superclass will catch exceptions
+	 * @see #doTransform(Node, Map, Result, String)
+	 * @see javax.xml.transform.stream.StreamResult
+	 * @see javax.servlet.ServletResponse#getOutputStream
+	 */
+	protected void doTransform(Map model, Source source, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		doTransform(source, getParameters(request),
+				new StreamResult(new BufferedOutputStream(response.getOutputStream())),
+				response.getCharacterEncoding());
+	}
 
-    /**
+	/**
 	 * Perform the actual transformation, writing to the given result.  Simply delegates to the
-     * doTransform(Source, Map, Result, String) version.
-     * 
-	 * @deprecated the preferred method is doTransform(Source source, Map parameters, Result result, String encoding)
-     * @param dom the XML node to transform
+	 * doTransform(Source, Map, Result, String) version.
+	 * @param dom the XML node to transform
 	 * @param parameters a Map of parameters to be applied to the stylesheet
 	 * @param result the result to write to
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
-     * @see #doTransform(Source, Map, Result, String)
+	 * @see #doTransform(Source, Map, Result, String)
+	 * @deprecated the preferred method is doTransform(Source source, Map parameters, Result result, String encoding)
 	 */
 	protected void doTransform(Node dom, Map parameters, Result result, String encoding)
-	    throws Exception {
+			throws Exception {
 		doTransform(new DOMSource(dom), parameters, result, encoding);
 	}
 
-    /**
-     * Perform the actual transformation, writing to the given result.
-     * @param source the Source to transform
-     * @param parameters a Map of parameters to be applied to the stylesheet
-     * @param result the result to write to
-     * @throws Exception we let this method throw any exception; the
-     * AbstractXlstView superclass will catch exceptions
-     */
-    protected void doTransform(Source source, Map parameters, Result result, String encoding)
-        throws Exception {
-        try {
-            Transformer trans = (this.templates != null) ?
-                this.templates.newTransformer() : // we have a stylesheet
-                    this.transformerFactory.newTransformer(); // just a copy
-                
-            // apply any subclass supplied parameters to the transformer
-            if (parameters != null) {
-                for (Iterator iter = parameters.entrySet().iterator(); iter.hasNext();) {
-                    Map.Entry entry = (Map.Entry) iter.next();
-                    trans.setParameter(entry.getKey().toString(), entry.getValue());
-                }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Added parameters [" + parameters + "] to transformer object");
-                }
-            }
+	/**
+	 * Perform the actual transformation, writing to the given result.
+	 * @param source the Source to transform
+	 * @param parameters a Map of parameters to be applied to the stylesheet
+	 * @param result the result to write to
+	 * @throws Exception we let this method throw any exception; the
+	 * AbstractXlstView superclass will catch exceptions
+	 */
+	protected void doTransform(Source source, Map parameters, Result result, String encoding)
+			throws Exception {
+		try {
+			Transformer trans = (this.templates != null) ?
+					this.templates.newTransformer() : // we have a stylesheet
+					this.transformerFactory.newTransformer(); // just a copy
 
-            trans.setOutputProperty(OutputKeys.ENCODING, encoding);
-            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			// apply any subclass supplied parameters to the transformer
+			if (parameters != null) {
+				for (Iterator iter = parameters.entrySet().iterator(); iter.hasNext();) {
+					Map.Entry entry = (Map.Entry) iter.next();
+					trans.setParameter(entry.getKey().toString(), entry.getValue());
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Added parameters [" + parameters + "] to transformer object");
+				}
+			}
 
-            // Xalan-specific, but won't do any harm in other XSLT engines
-            trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			trans.setOutputProperty(OutputKeys.ENCODING, encoding);
+			trans.setOutputProperty(OutputKeys.INDENT, "yes");
 
-            trans.transform(source, result);
-            if (logger.isDebugEnabled()) {
-                logger.debug("XSLT transformed with stylesheet [" + this.stylesheetLocation + "]");
-            }
-        }
-        catch (TransformerConfigurationException ex) {
-            throw new ServletException(
-                "Couldn't create XSLT transformer for stylesheet [" + this.stylesheetLocation +
-                "] in XSLT view with name [" + getBeanName() + "]", ex);
-        }
-        catch (TransformerException ex) {
-            throw new ServletException(
-                "Couldn't perform transform with stylesheet [" + this.stylesheetLocation +
-                "] in XSLT view with name [" + getBeanName() + "]", ex);
-        }
-    }
+			// Xalan-specific, but won't do any harm in other XSLT engines
+			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+			trans.transform(source, result);
+			if (logger.isDebugEnabled()) {
+				logger.debug("XSLT transformed with stylesheet [" + this.stylesheetLocation + "]");
+			}
+		}
+		catch (TransformerConfigurationException ex) {
+			throw new ServletException("Couldn't create XSLT transformer for stylesheet [" + this.stylesheetLocation +
+					"] in XSLT view with name [" + getBeanName() + "]", ex);
+		}
+		catch (TransformerException ex) {
+			throw new ServletException("Couldn't perform transform with stylesheet [" + this.stylesheetLocation +
+					"] in XSLT view with name [" + getBeanName() + "]", ex);
+		}
+	}
 
 	/**
 	 * Return a Map of parameters to be applied to the stylesheet.
@@ -439,38 +448,5 @@ public abstract class AbstractXsltView extends AbstractView {
 	protected Map getParameters() {
 		return null;
 	}
-    
-    /**
-     * Default implementation of the ErrorListener interface that simply logs to the
-     * current logger instance.  Clients of AbstractXsltView can override this
-     * by supplying their own implementation to the errorListener property.
-     * 
-     * @author Darren Davison
-     * @since 1.2
-     */
-    private class DefaultErrorListener implements ErrorListener {
-
-        /**
-         * @see javax.xml.transform.ErrorListener#warning
-         */
-        public void warning(TransformerException e) throws TransformerException {
-            logger.warn(e.getMessage(), e);
-        }
-
-        /**
-         * @see javax.xml.transform.ErrorListener#error
-         */
-        public void error(TransformerException e) throws TransformerException {
-            logger.error(e.getMessage(), e);
-        }
-
-        /**
-         * @see javax.xml.transform.ErrorListener#fatalError
-         */
-        public void fatalError(TransformerException e) throws TransformerException {
-            logger.fatal(e.getMessage(), e);
-        }
-        
-    }
 
 }
