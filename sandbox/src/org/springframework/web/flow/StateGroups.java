@@ -31,6 +31,12 @@ public class StateGroups implements Serializable {
 
 	private Set stateGroups = new LinkedHashSet(6);
 
+	private Flow flow;
+
+	public StateGroups(Flow flow) {
+		this.flow = flow;
+	}
+
 	public void add(AbstractState state) {
 		add(DEFAULT_GROUP_ID, state);
 	}
@@ -50,7 +56,7 @@ public class StateGroups implements Serializable {
 	private StateGroup getOrCreateGroup(String groupId) {
 		StateGroup group = getGroup(groupId);
 		if (group == null) {
-			group = new StateGroup(groupId);
+			group = new StateGroup(flow, groupId);
 			add(group);
 		}
 		return group;

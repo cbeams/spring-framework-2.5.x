@@ -16,7 +16,6 @@
 package org.springframework.web.flow;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -34,8 +33,11 @@ public class StateGroup implements Serializable {
 
 	private Set states = new LinkedHashSet(6);
 
-	public StateGroup(String id) {
+	private Flow flow;
+
+	public StateGroup(Flow flow, String id) {
 		Assert.hasText("The state group is required");
+		this.flow = flow;
 		this.id = id;
 	}
 
@@ -44,11 +46,22 @@ public class StateGroup implements Serializable {
 	}
 
 	public boolean add(AbstractState state) {
-		return states.add(states);
+		boolean added = states.add(states);
+		if (added) {
+			state.setFlow(flow);
+		}
+		return added;
 	}
 
 	public boolean addAll(AbstractState[] states) {
-		return this.states.addAll(Arrays.asList(states));
+		boolean anyAdded = false;
+		for (int i = 0; i < states.length; i++) {
+			boolean added = add(states[i]);
+			if (!anyAdded && added) {
+				anyAdded = true;
+			}
+		}
+		return anyAdded;
 	}
 
 	public boolean equals(Object o) {

@@ -22,7 +22,7 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 
 	public BeanFactoryAwareFlow() {
 		super();
-		setFlowDao(new BeanFactoryFlowServiceLocator());
+		setServiceLocator(new BeanFactoryFlowServiceLocator());
 	}
 
 	/**
@@ -42,10 +42,10 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 		super(id, startStateId, new BeanFactoryFlowServiceLocator(), states);
 	}
 
-	public void setFlowDao(FlowServiceLocator dao) {
+	public void setServiceLocator(FlowServiceLocator dao) {
 		Assert.isInstanceOf(BeanFactoryFlowServiceLocator.class, dao,
 				"The FlowDao must be a BeanFactoryFlowDao implementation for BeanFactoryAwareFlows: ");
-		super.setFlowDao(dao);
+		super.setServiceLocator(dao);
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

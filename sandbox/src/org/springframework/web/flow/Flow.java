@@ -313,9 +313,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private FlowStartStateMarker startState;
 
-	private StateGroups stateGroups = new StateGroups();
+	private StateGroups stateGroups = new StateGroups(this);
 
-	private transient FlowServiceLocator flowDao;
+	private transient FlowServiceLocator serviceLocator;
 
 	private transient EventListenerListHelper flowSessionExecutionListeners = new EventListenerListHelper(
 			FlowSessionExecutionListener.class);
@@ -333,11 +333,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param id
-	 * @param flowDao
+	 * @param serviceLocator
 	 */
-	public Flow(String id, FlowServiceLocator flowDao) {
+	public Flow(String id, FlowServiceLocator serviceLocator) {
 		setId(id);
-		setFlowDao(flowDao);
+		setServiceLocator(serviceLocator);
 	}
 
 	/**
@@ -345,9 +345,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param startStateId
 	 * @param states
 	 */
-	public Flow(String id, String startStateId, FlowServiceLocator flowDao, AbstractState[] states) {
+	public Flow(String id, String startStateId, FlowServiceLocator serviceLocator, AbstractState[] states) {
 		setId(id);
-		setFlowDao(flowDao);
+		setServiceLocator(serviceLocator);
 		addAll(states);
 		setStartState(startStateId);
 	}
@@ -357,11 +357,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 		this.id = id;
 	}
 
-	/**
-	 * @param dao
-	 */
-	public void setFlowDao(FlowServiceLocator dao) {
-		this.flowDao = dao;
+	public void setServiceLocator(FlowServiceLocator serviceLocator) {
+		this.serviceLocator = serviceLocator;
 	}
 
 	public boolean equals(Object o) {
@@ -441,14 +438,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public FlowServiceLocator getServiceLocator() {
-		assertFlowDaoSet();
-		return this.flowDao;
+		assertServiceLocatorSet();
+		return this.serviceLocator;
 	}
 
-	private void assertFlowDaoSet() {
-		Assert.notNull(flowDao,
-				"The flow DAO reference you asked for is required to lookup subflow, action bean, and attributes mapper services; "
-						+ "however, it is not set on this flow definiton -- programmer error?");
+	private void assertServiceLocatorSet() {
+		Assert.notNull(serviceLocator, "The flow service locator reference you asked for is required "
+				+ "to lookup subflow, action bean, and attributes mapper services; "
+				+ "however, it is not set on this flow definiton -- programmer error?");
 	}
 
 	/**
