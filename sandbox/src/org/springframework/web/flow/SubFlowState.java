@@ -103,9 +103,9 @@ public class SubFlowState extends TransitionableState {
 					.createSpawnedSubFlowAttributesMap(sessionExecution);
 		}
 		else {
-			if (logger.isInfoEnabled()) {
-				logger.info("No attributes mapper is configured for this subflow state '" + getId()
-						+ "' - note: as a result, no attributes in the parent flow '"
+			if (logger.isDebugEnabled()) {
+				logger.debug("No attributes mapper is configured for this subflow state '" + getId()
+						+ "'; as a result, no attributes in the parent flow '"
 						+ sessionExecution.getActiveFlowId() + "' scope will be passed to the spawned subflow '"
 						+ subFlow.getId() + "'");
 			}
