@@ -39,7 +39,6 @@ import org.easymock.MockControl;
 
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.orm.hibernate.MockJtaTransaction;
 import org.springframework.orm.hibernate.SessionFactoryUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -189,7 +188,7 @@ public class LobTypeTests extends TestCase {
 	public void testClobStringTypeWithJtaSynchronization() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockJtaTransaction transaction = new MockJtaTransaction();
+		org.springframework.transaction.MockJtaTransaction transaction = new org.springframework.transaction.MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getTransaction();
@@ -217,7 +216,7 @@ public class LobTypeTests extends TestCase {
 	public void testClobStringTypeWithJtaSynchronizationAndRollback() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockJtaTransaction transaction = new MockJtaTransaction();
+		org.springframework.transaction.MockJtaTransaction transaction = new org.springframework.transaction.MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getTransaction();
@@ -276,7 +275,7 @@ public class LobTypeTests extends TestCase {
 	public void testBlobByteArrayTypeWithJtaSynchronization() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockJtaTransaction transaction = new MockJtaTransaction();
+		org.springframework.transaction.MockJtaTransaction transaction = new org.springframework.transaction.MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getTransaction();
@@ -305,7 +304,7 @@ public class LobTypeTests extends TestCase {
 	public void testBlobByteArrayTypeWithJtaSynchronizationAndRollback() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockJtaTransaction transaction = new MockJtaTransaction();
+		org.springframework.transaction.MockJtaTransaction transaction = new org.springframework.transaction.MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getTransaction();
@@ -396,7 +395,7 @@ public class LobTypeTests extends TestCase {
 	public void testBlobSerializableTypeWithJtaSynchronization() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockJtaTransaction transaction = new MockJtaTransaction();
+		org.springframework.transaction.MockJtaTransaction transaction = new org.springframework.transaction.MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getTransaction();
@@ -441,7 +440,7 @@ public class LobTypeTests extends TestCase {
 	public void testBlobSerializableTypeWithJtaSynchronizationAndRollback() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockJtaTransaction transaction = new MockJtaTransaction();
+		org.springframework.transaction.MockJtaTransaction transaction = new org.springframework.transaction.MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getTransaction();

@@ -34,6 +34,7 @@ import net.sf.hibernate.engine.SessionImplementor;
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.MockJtaTransaction;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.jta.JtaTransactionManager;
@@ -775,7 +776,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
-		final HibernateException flushEx = new HibernateException("flush failure");
 		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
@@ -1106,7 +1106,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 	private void doTestJtaSessionSynchronizationWithPreBound(boolean flushNever) throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockJtaTransaction transaction = new MockJtaTransaction();
+		MockJtaTransaction transaction = new org.springframework.transaction.MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();

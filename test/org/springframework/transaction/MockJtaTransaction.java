@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate;
+package org.springframework.transaction;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
