@@ -12,28 +12,38 @@
     Dependency Injection as people have also recently started to name this
     pattern (see <xref linkend="background-ioc" /> for some resources on this
     topic). The <literal>BeanFactory</literal> provides an advanced
-    configuration mechanism capable of managing beans of any nature, using
-    potentially any kind of storage facility. The
+    configuration mechanism capable of managing beans (objects) of any nature,
+    using potentially any kind of storage facility. The
     <literal>ApplicationContext</literal> builds on top of the BeanFactory and
     adds other functionality such as integration with Springs AOP features,
-    messaging (using <emphasis>i18n</emphasis>), the capability of having
-    contexts inherit from other contexts and defining application-layer
-    specific contexts, such as the
+    messaging (using <emphasis>i18n (i.e. internationalization)</emphasis>),
+    the capability of having contexts inherit from other contexts and defining
+    application-layer specific contexts, such as the
     <literal>WebApplicationContext</literal>.</para>
 
     <para>In short, the <literal>BeanFactory</literal> provides the
     configuration framework and basic functionality, while the
     <literal>ApplicationContext</literal> adds enhanced capabilities to it,
-    some of them more J2EE and enterprise-centric.</para>
+    some of them perhaps more J2EE and enterprise-centric. In general, an
+    ApplicationContext is a complete superset of a BeanFactory, and any
+    description of BeanFactory capabilities and behavior should be considered
+    to applly to ApplicationContexts as well.</para>
+
+    <para>Users are sometimes unsure whether BeanFactory or ApplicationContext
+    are best suited for use in a particular situation. Normally when building
+    most applications in a J2EE-environment, <emphasis>the best option is to
+    use the ApplicationContext</emphasis>, since it offers all the features of
+    the BeanFactory and adds on to it, allowing a more framework style usage
+    of the Spring Framework and allowing initialization using a
+    ServletContextListener such as <literal>ContextLoaderListener</literal>.
+    The main usage scenario when you might prefer to use the BeanFactory is
+    when memory usage is the greatest concern (such as in an applet), and you
+    don't need all the features of the ApplicationContext.</para>
 
     <para>This chapter is roughly divided into two parts, the first part
     covering the basic principles that apply to both the BeanFactory and the
     ApplicationContext. The second part will cover some of the features that
     only apply to the ApplicationContext.</para>
-
-    <para>In order to get you started using the BeanFactory and the
-    ApplicationContext we'll first introduce you to a couple of basic
-    principles that might be handy to know when using these classes.</para>
 
     <para><itemizedlist spacing="compact">
         <listitem>
@@ -56,10 +66,10 @@
           used to convert properties of beans to human-readable Strings and
           vice versa. As the PropertyEditor Javadoc (<ulink
           url="http://java.sun.com/j2se/1.4.2/docs/api/"></ulink>) states, the
-          <literal>getAsText()</literal>-method should return a human-readable
+          <literal>getAsText()</literal>method should return a human-readable
           String representing the property the editor is (so-called) editing.
-          The <literal>setAsText()</literal>-method should be able to parse
-          the same String and (using the
+          The <literal>setAsText()</literal>method should be able to parse the
+          same String and (using the
           <literal>setValue(Object)</literal>-method) set the resulting value
           of the property. PropertyEditors are heavily used in Spring, not
           only by the BeanFactory to transform the Strings defined in the
@@ -79,30 +89,86 @@
         </listitem>
       </itemizedlist></para>
 
-    <para>Note: users are sometimes unsure whether BeanFactory or
-    ApplicationContext are best suited for use in a particular situation.
-    Normally when building most applications in a J2EE-environment, the better
-    option would be to use the ApplicationContext, since it offers all the
-    features of the BeanFactory and adds on to it, allowing a more framework
-    style usage of the Spring Framework and allowing initialization using a
-    ServletContextListener such as <literal>ContextLoaderListener</literal>.
-    The main usage scenario when you might prefer to use the BeanFactory is
-    when memory usage is the greatest concern (such as in an applet), and you
-    don't need all the features of the ApplicationContext.</para>
+    <para></para>
   </sect1>
 
   <sect1 id="beans-basics">
     <title>BeanFactory and BeanDefinitions - the basics</title>
 
+    <sect2 id="beans-factory">
+      <title>The BeanFactory</title>
+
+      <para>The BeanFactory is the actual <emphasis>container</emphasis> which
+      instantiates, configures, and manages a number of beans. These beans
+      typically collaborate with one another, and thus have dependencies
+      between themselves. These dependencies are reflected in the
+      configuration data used by the BeanFactory (although some dependencies
+      may not be visible as configuration data, but rather be a function of
+      programmatic interactions between beans at runtime).</para>
+
+      <para>A BeanFactory is represented by the interface
+      <literal>org.springframework.beans.factory.BeanFactory</literal>, for
+      which there are multiple implementations. The most commonly used simple
+      BeanFactory implementation is
+      <literal>org.springframework.beans.factory.xml.XmlBeanFactory</literal>.
+      (This should be qualified with the reminder that ApplicationContexts are
+      a subclass of BeanFactory, and most users ultimately prefer to use XML
+      variants of ApplicationContext).</para>
+
+      <para>Although for most scenarios, almost all user code managed by the
+      BeanFactory does not have to be aware of the BeanFactory, the
+      BeanFactory does have to be instantiated somehow. This can happen via
+      explicit user code such as:<programlisting>InputStream is = new FileInputStream("beans.xml");
+XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
+
+      <para>or<programlisting>ClassPathResource res = new ClassPathResource("beans.xml");
+XmlBeanFactory factory = new XmlBeanFactory(res);</programlisting></para>
+
+      <para>or<programlisting>ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
+        new String[] {"applicationContext.xml", "applicationContext-part2.xml"});
+// of course, an ApplicationContext is just a BeanFactory
+BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
+
+      <para>For many usage scenarios, user code will not have to instantiate
+      the BeanFactory, since Spring Framework code will do it. For example,
+      the web layer provides support code to load a Spring ApplicationContext
+      automatically as part of the normal startup process of a J2EE web-app.
+      This declarative process is described <link
+      linkend="context-create">here</link>:</para>
+
+      <para>While programmatic manipulation of BeanFactories will be described
+      later, the following sections will concentrate on describing the
+      configuration of BeanFactories.</para>
+
+      <para>A BeanFactory configuration consists of, at it's most basic level,
+      definitions of one or more beans that the BeanFactory must manage. In an
+      XmlBeanFactory, these are configured as one or more
+      <literal>bean</literal> elements inside a top-level
+      <literal>beans</literal> element.<programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
+
+&lt;beans&gt;
+  
+  &lt;bean id="..." class="..."&gt;
+    ...
+  &lt;/bean&gt;
+  &lt;bean id="..." class="..."&gt;
+    ...
+  &lt;/bean&gt;
+
+  ...
+
+&lt;/beans&gt;</programlisting></para>
+    </sect2>
+
     <sect2 id="beans-definition">
       <title>The BeanDefinition</title>
 
-      <para>As already stated in the introduction, bean definitions describe
-      beans managed by a <literal>BeanFactory</literal> or
-      <literal>ApplicationContext</literal>. Bean definitions contain the
-      following information: <itemizedlist spacing="compact">
+      <para>Bean definitions inside an XmlBeanFactory variant contain, among
+      other information, the following details: <itemizedlist
+          spacing="compact">
           <listitem>
-            <para>A classname: this is normally the actual implementation
+            <para>a classname: this is normally the actual implementation
             class of the bean being described in the bean definition. However,
             if the bean is to be constructed by calling a static
             <emphasis>factory</emphasis> method instead of using a normal
@@ -111,41 +177,32 @@
           </listitem>
 
           <listitem>
-            <para>Bean behavioral configuration elements, which state how the
+            <para>bean behavioral configuration elements, which state how the
             bean should behave in the container (i.e. prototype or singleton,
             autowiring mode, dependency checking mode, initialization and
             destruction methods)</para>
           </listitem>
 
           <listitem>
-            <para>Property values to set in the newly created bean. An example
-            would be the number of connections to use in a bean that manages a
-            connection pool (either specified as a property or as a
-            constructor argument), or the class that should be used to create
-            the connection pool</para>
+            <para>constructor arguments and property values to set in the
+            newly created bean. An example would be the number of connections
+            to use in a bean that manages a connection pool (either specified
+            as a property or as a constructor argument), or the pool size
+            limit.</para>
           </listitem>
 
           <listitem>
-            <para>Other beans your bean needs to do its work, i.e.
+            <para>other beans a bean needs to do its work, i.e.
             <emphasis>collaborators</emphasis> (also specified as properties
             or as constructor arguments). These can also be called
             dependencies.</para>
           </listitem>
         </itemizedlist></para>
 
-      <para>In the list above, we mentioned the use of constructor arguments,
-      as well as setters. Spring supports two types of IoC: type 2 and type 3
-      (Constructor Dependency Injection and Setter Dependency Injection). What
-      that basically means is that when new objects are constructed you can
-      set properties of the object using both regular JavaBean style setter
-      methods, and also directory as arguments which you specify to the
-      constructors (or static factory method used instead of a
-      constructor).</para>
-
       <para>The concepts listed above directly translate to a set of elements
-      the bean definition consists of. These elements are listed below, along
-      with a link to further documentation about each of them. <table
-          frame="all">
+      the bean definition consists of. Some of these element groups are are
+      listed below, along with a link to further documentation about each of
+      them. <table frame="all">
           <title>Bean definition explanation</title>
 
           <tgroup cols="2">
@@ -169,19 +226,25 @@
               </row>
 
               <row>
+                <entry>id and name</entry>
+
+                <entry><xref linkend="beans-beanname" /></entry>
+              </row>
+
+              <row>
                 <entry>singleton or prototype</entry>
 
                 <entry><xref linkend="beans-factory-modes" /></entry>
               </row>
 
               <row>
-                <entry>bean properties</entry>
+                <entry>constructor arguments</entry>
 
                 <entry><xref linkend="beans-factory-collaborators" /></entry>
               </row>
 
               <row>
-                <entry>constructor arguments</entry>
+                <entry>bean properties</entry>
 
                 <entry><xref linkend="beans-factory-collaborators" /></entry>
               </row>
@@ -212,28 +275,12 @@
             </tbody>
           </tgroup>
         </table></para>
-    </sect2>
 
-    <sect2 id="beans-factory">
-      <title>The BeanFactory</title>
-
-      <para>The BeanFactory is the actual <emphasis>container</emphasis>
-      (although we don't like to use the word container too much, since it
-      sounds somwhat <emphasis>heavy</emphasis>), containing and managing your
-      beans. A BeanFactory loads BeanDefinitions and, upon request,
-      instantiates one (or possibly more) instances of the bean in question
-      and manages it by calling lifecycle methods.</para>
-
-      <para>All of the features described in <xref
-      linkend="beans-definition" /> will be configurable for each of your
-      beans using one of the out-of-the-box BeanFactory implementations. In
-      general, because <literal>XmlBeanFactory</literal> is the most powerful
-      and most used BeanFactory implementation (including its supersets, the
-      XML variants of the ApplicationContext), the following text will often
-      describe BeanFactory and BeanDefinition capabilities and configuration
-      aspects, in terms of the explicit <literal>XmlBeanFactory</literal>
-      elements and attributes which are applicable to that
-      functionality.</para>
+      <para>Note that a bean definition is represented by the real interface
+      <literal>org.springframework.beans.factory.config.BeanDefinition</literal>,
+      and its various subinterfaces and implementations. However, it is very
+      unlikely that most user code would ever work with a
+      BeanDefinition.</para>
     </sect2>
 
     <sect2 id="beans-factory-class">
@@ -324,7 +371,7 @@
       extra ones can essentially be considered aliases.</para>
 
       <para>In an XmlBeanFactory (including ApplicationContext variants), you
-      user the <literal>id</literal> or <literal>name</literal> attributes to
+      use the <literal>id</literal> or <literal>name</literal> attributes to
       specify the bean id(s), and at least one id must be specified in one or
       both of these attributes. The <literal>id</literal> attribute allows you
       to specify one id, and as it is marked in the XML DTD (definition
@@ -335,7 +382,8 @@
       usually not really a constraint, but if you have a need to use one of
       these characters, or want to introduce other aliases to the bean, you
       may also or instead specify one or more bean ids (separated by a comma
-      (,) or semicolon (;) via the <literal>name</literal> attribute.</para>
+      (<literal>,</literal>) or semicolon (<literal>;</literal>) via the
+      <literal>name</literal> attribute.</para>
     </sect2>
 
     <sect2 id="beans-factory-modes">
@@ -447,7 +495,7 @@
       also supports injecting setter-based dependencies after some
       dependencies have already been supplied via the constructor approach.)
       The configuration for the dependencies comes in the form of a
-      <literal>BeanDefinition</literal>, which is used together with
+      <literal>BeanDefinition</literal>, which is used together with JavaBeans
       <literal>PropertyEditors</literal> to know how to convert properties
       from one format to another. The actual values being passed around are
       done in the form of <literal>PropertyValue</literal> objects. However,
@@ -486,7 +534,7 @@
             it was specified in, to the actual type of that property or
             constructor argument. By default Spring can convert a value
             supplied in string format to all built-in types, such as
-            <literal>int</literal>, <literal>Long</literal>,
+            <literal>int</literal>, <literal>long</literal>,
             <literal>String</literal>, <literal>boolean</literal>, etc.
             Additionally, when talking about the XML based BeanFactory
             variants (including the ApplicationContext variants), these have
@@ -1042,7 +1090,7 @@ public class ReplacementComputeValue implements MethodReplacer {
                 value and changing this is discouraged for larger deployments,
                 since explicitely specifying collaborators gives greater
                 control and clarity. To some extent, it is a form of
-                documentation about the structure of a system. </entry>
+                documentation about the structure of a system.</entry>
               </row>
 
               <row>
@@ -1348,21 +1396,21 @@ public class AnotherExampleBean implements DisposableBean {
       <title>FactoryBean</title>
 
       <para>The
-      <literal>org.springframework.beans.factory.FactoryBean</literal> is to
-      be implemented by objects that <emphasis>are themselves
+      <literal>org.springframework.beans.factory.FactoryBean</literal>
+      interface is to be implemented by objects that <emphasis>are themselves
       factories</emphasis>. The BeanFactory interface provides three method:
       <itemizedlist spacing="compact">
           <listitem>
             <para><literal>Object getObject()</literal>: has to return an
             instance of the object this factory creates. The instance can
-            possibly be shared (depending on this factory providing singleton
-            or prototypes).</para>
+            possibly be shared (depending on whether this factory returns
+            singletons or prototypes).</para>
           </listitem>
 
           <listitem>
             <para><literal>boolean isSingleton()</literal>: has to return
-            <literal>true</literal> if this FactoryBean returns singletons,
-            <literal>false</literal> otherwise</para>
+            <emphasis>true</emphasis> if this FactoryBean returns singletons,
+            <emphasis>false</emphasis> otherwise</para>
           </listitem>
 
           <listitem>
@@ -1378,12 +1426,12 @@ public class AnotherExampleBean implements DisposableBean {
   <sect1 id="beans-factory-client">
     <title>Interacting with the BeanFactory</title>
 
-    <para>Essentially, the BeanFactory is nothing more than the interface for
-    an advanced factory capable of maintaining a registry of different beans
-    and their dependencies. The BeanFactory enables you to read bean
-    definitions and access them using the bean factory. When using just the
-    BeanFactory you would create one and read in some bean definitions in the
-    XML format as follows: <programlisting>InputStream is = new FileInputStream("beans.xml");
+    <para>A BeanFactory is essentially nothing more than the interface for an
+    advanced factory capable of maintaining a registry of different beans and
+    their dependencies. The BeanFactory enables you to read bean definitions
+    and access them using the bean factory. When using just the BeanFactory
+    you would create one and read in some bean definitions in the XML format
+    as follows: <programlisting>InputStream is = new FileInputStream("beans.xml");
 XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
 
     <para>Basically that's all there is to it. Using
@@ -1461,114 +1509,6 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
     you can implement custom behavior (like adding custom editors) using the
     BeanFactoryPostProcessor. Each of the features the config-package offers
     is described below:</para>
-
-    <sect2 id="beans-factory-postprocessor">
-      <title>The <literal>BeanFactoryPostProcessor</literal></title>
-
-      <para>The BeanFactoryPostProcessor is the superclass for all post
-      processors that are capable of applying changes to the BeanFactory (or
-      beans in it) after the factory has been initialized. The
-      BeanFactoryPostProcessor can be used to add custom editors (as also
-      mentioned in <xref linkend="beans-beans-conversion" />). Some
-      out-of-the-box post processors are available, like the
-      <literal>PropertyResourceConfigurer</literal> and the
-      <literal>PropertyPlaceHolderConfigurer</literal>, both described below,
-      and <literal>BeanNameAutoProxyCreator</literal>, very useful for
-      wrapping other beans transactionally, as described later in this
-      manual.</para>
-    </sect2>
-
-    <sect2 id="beans-factory-placeholderconfigurer">
-      <title>The <literal>PropertyPlaceholderConfigurer</literal></title>
-
-      <para>The <literal>PropertyPlaceholderConfigurer</literal> is an
-      excellent solution when you want to externalize a few properties from a
-      file containing bean definitions. Say you want to let the person
-      responsible for deploying applications just fill in database URLs,
-      usernames and passwords. You could of course let him change the XML file
-      containing bean definitions, but that would be risky. Instead, use the
-      <literal>PropertyPlaceHolderConfigurer</literal> to - at runtime -
-      replace those properties by values from a properties file.</para>
-
-      <para>In the example below, a datasource is defined, and we will
-      configure some properties from an external Properties file. At runtime,
-      we will apply a <literal>PropertyPlaceholderConfigurer</literal> to the
-      BeanFactory which will replace some properties of the datasource:</para>
-
-      <programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-    &lt;property name="driverClassName"&gt;&lt;value&gt;${jdbc.driverClassName}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="url"&gt;&lt;value&gt;${jdbc.url}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="username"&gt;&lt;value&gt;${jdbc.username}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="password"&gt;&lt;value&gt;${jdbc.password}&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting>
-
-      <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
-jdbc.url=jdbc:hsqldb:hsql://production:9002
-jdbc.username=sa
-jdbc.password=root</programlisting>
-
-      <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
-PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
-cfg.setLocation(new FileSystemResource("jdbc.properties"));
-cfg.postProcessBeanFactory(factory);</programlisting>
-
-      <para>The <literal>PropertyPlaceHolderConfigurer</literal> does not only
-      look for properties in the properties file you're defining, but also
-      checks against the System properties if it cannot find the properties
-      you're trying to replace. This behavior can be customized by tweaking
-      with the <literal>systemPropertiesMode</literal> property of the
-      configurer. It has three values, one to tell the configurer to always
-      override, one to let it <emphasis>never</emphasis> override and one to
-      let it override only if the property cannot be found in the properties
-      file specified. Please consult the JavaDoc for the
-      PropertiesPlaceHolderConfigurer for more information.</para>
-    </sect2>
-  </sect1>
-
-  <sect1 id="beans-factoryimpl">
-    <title>BeanFactory structure and implementations (WIP)</title>
-
-    <emphasis>From here on, up till the Context stuff, needs an
-    overhaul.</emphasis>
-
-    <para>The <literal>beans</literal> package contains a couple of different
-    implementations. Concrete BeanFactories include the XmlBeanFactory which
-    is the most popular format at the moment. However, the
-    <literal>ListableBeanFactory</literal> is also a nice one, which is
-    capable of reading bean definitions from properties files.</para>
-
-    <sect2 id="beans-factoryimpl-structure"><title>Structure of the beans
-    package</title> <para> Include UML and description here </para></sect2>
-
-    <sect2 id="beans-factoryimpl-xml"><title>The
-    <literal>XmlBeanFactory</literal></title> <para> The
-    <literal>XmlBeanFactory</literal> is the most often-used implementation of
-    the BeanFactory and is capable of reading bean definitions from XML files.
-    XML files need to adhere to the Spring DTD, included in Appendix </para>
-    <para> A couple of implementations of the BeanFactory come out-of-the-box.
-    The <literal>XmlBeanFactory</literal> supports a bean definitions to be
-    specified in XML files and the <literal>ListableBeanFactory</literal>
-    supports bean definitions in the form of properties files. Most people use
-    the XmlBeanFactory. However, implementing your own BeanFactory that
-    supports bean definition in a database should not be to big an issue.
-    Let's first discuss the XmlBeanFactory and the ListableBeanFactory and
-    their features. </para> <para> Basically the two BeanFactory
-    implementations Spring comes with provide all the features described
-    above, like specifying the lifecycle methods, specifying whether or not to
-    do autowiring, etcetera. The only way they differ is the way the
-    configuration data (the bean definitions) are stored. </para></sect2>
-
-    <sect2 id="beans-factoryimpl-xml2"><title>Bean definitions specified in
-    XML (<literal>XmlBeanFactory</literal>)</title> <para> One of the
-    implementations of the BeanFactory is the
-    <literal>XmlBeanFactory</literal> (located in the package
-    <literal>org.springframework.beans.factory.xml</literal>) which offers you
-    the ability to specify bean definition in XML files as the name might have
-    already told you. Spring comes with a DTD to do validation of the XML
-    you're writing to specify beans in order to make things a bit more easy.
-    The DTD is quite well documented so you should find everything you need in
-    there as well. Here we will discuss the format shortly and provide some
-    examples. </para></sect2>
   </sect1>
 
   <sect1 id="context-introduction">
@@ -1930,14 +1870,81 @@ public class BlackListNotifier implement ApplicationListener {
     <para>Where the BeanFactory can be customized programmatically using
     <literal>BeanFactoryPostProcessor</literal>, the ApplicationContext can be
     customized using special beans, defined in your ApplicationContext</para>
+
+    <sect2 id="beans-factory-postprocessor">
+      <title>The <literal>BeanFactoryPostProcessor</literal></title>
+
+      <para>org.springframework.beans.factory.config.BeanFactoryPostProcessor
+      is the superclass for all post processors that are capable of
+      automatically applying changes to the ApplicationContext (or beans in
+      it) after the factory has been initialized. (BeanFactoryPostProcessors
+      are in fact also usable with regular BeanFactories, but do not get
+      applied automatically. Rather than trying to modify your code to apply
+      these post-processors to simple BeanFactories, it's easier to just use
+      ApplicationContexts). The BeanFactoryPostProcessor can be used to add
+      custom editors (as also mentioned in <xref
+      linkend="beans-beans-conversion" />). Some out-of-the-box post
+      processors are available, like the
+      <literal>PropertyResourceConfigurer</literal> and the
+      <literal>PropertyPlaceHolderConfigurer</literal>, both described below,
+      and <literal>BeanNameAutoProxyCreator</literal>, very useful for
+      wrapping other beans transactionally, as described later in this
+      manual.</para>
+    </sect2>
+
+    <sect2 id="beans-factory-placeholderconfigurer">
+      <title>The <literal>PropertyPlaceholderConfigurer</literal></title>
+
+      <para>The <literal>PropertyPlaceholderConfigurer</literal> is an
+      excellent solution when you want to externalize a few properties from a
+      file containing bean definitions. Say you want to let the person
+      responsible for deploying applications just fill in database URLs,
+      usernames and passwords. You could of course let him change the XML file
+      containing bean definitions, but that would be risky. Instead, use the
+      <literal>PropertyPlaceHolderConfigurer</literal> to - at runtime -
+      replace those properties by values from a properties file.</para>
+
+      <para>In the example below, a datasource is defined, and we will
+      configure some properties from an external Properties file. At runtime,
+      we will apply a <literal>PropertyPlaceholderConfigurer</literal> to the
+      BeanFactory which will replace some properties of the datasource:</para>
+
+      <programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName"&gt;&lt;value&gt;${jdbc.driverClassName}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="url"&gt;&lt;value&gt;${jdbc.url}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="username"&gt;&lt;value&gt;${jdbc.username}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="password"&gt;&lt;value&gt;${jdbc.password}&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+      <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
+jdbc.url=jdbc:hsqldb:hsql://production:9002
+jdbc.username=sa
+jdbc.password=root</programlisting>
+
+      <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+cfg.setLocation(new FileSystemResource("jdbc.properties"));
+cfg.postProcessBeanFactory(factory);</programlisting>
+
+      <para>The <literal>PropertyPlaceHolderConfigurer</literal> does not only
+      look for properties in the properties file you're defining, but also
+      checks against the System properties if it cannot find the properties
+      you're trying to replace. This behavior can be customized by tweaking
+      with the <literal>systemPropertiesMode</literal> property of the
+      configurer. It has three values, one to tell the configurer to always
+      override, one to let it <emphasis>never</emphasis> override and one to
+      let it override only if the property cannot be found in the properties
+      file specified. Please consult the JavaDoc for the
+      PropertiesPlaceHolderConfigurer for more information.</para>
+    </sect2>
   </sect1>
 
   <sect1 id="beans-customeditors">
-    <title>Registering additional custom editors</title>
+    <title>Registering additional custom PropertyEditors</title>
 
-    <para>When in need of a custom editor in your BeanFactory or
-    ApplicationContext (e.g. you have some exotic type that you need to
-    express as a property in a BeanFactory XML file), you can use the
+    <para>When in need of a custom editor in your ApplicationContext (e.g. you
+    have some exotic type that you need to express as a property in an
+    ApplicationContext XML file), you can use the
     <literal>CustomEditorConfigurer</literal>, which is a special kind of
     <literal>BeanFactoryPostProcessor</literal> (more about those can be found
     in <xref linkend="beans-factory-customizing" />). Consider the following
@@ -1957,11 +1964,11 @@ public class DependsOnExoticType {
     public void setType(ExoticType type) {
         this.type = type;
     }
-}</programlisting> Wiring this up should be done something like this:
+}</programlisting>Wiring this up should be done in a fashion similar to this:
     <programlisting>&lt;bean id="sample" class="example.DependsOnExoticType"&gt;
     &lt;property name="type"&gt;&lt;value&gt;exoticTypeTwo&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting> When you want to do this, you would need to
-    create a PropertyEditor and wire it up using the
+&lt;/bean&gt;</programlisting>When you want to do this, you would need to
+    create a JavaBeans PropertyEditor and wire it up using the
     <literal>CustomEditorConfigurer</literal>: <programlisting>public class ExoticTypeEditor extends PropertyEditorSupport {
 
     private String format;
@@ -1977,7 +1984,7 @@ public class DependsOnExoticType {
         ExoticType type = new ExoticType(text);
         setValue(type);
     }
-}</programlisting> To actually register it, do the following: <programlisting>&lt;bean id="customEditorConfigurer" 
+}</programlisting>To actually register it, do the following: <programlisting>&lt;bean id="customEditorConfigurer" 
     class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
     &lt;property name="customEditors"&gt;
         &lt;map&gt;
