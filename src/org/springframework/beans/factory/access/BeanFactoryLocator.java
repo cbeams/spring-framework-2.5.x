@@ -19,7 +19,7 @@ package org.springframework.beans.factory.access;
 import org.springframework.beans.BeansException;
 
 /**
- * <p>An interface for a class used to lookup/use, and optionally allow the
+ * An interface for a class used to lookup/use, and optionally allow the
  * release of a BeanFactory, or BeanFactory subclass such as ApplicationContext.
  *
  * <p>Where this interface is implemented as a singleton class such as

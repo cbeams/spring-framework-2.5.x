@@ -99,7 +99,7 @@ public class ContextLoader {
 	 * parent context is obtained.
 	 * <p>This will normally be set to <code>classpath*:beanRefContext.xml</code>
 	 * to match the default applied for the
-	 * {@link ContextSingletonBeanFactoryLocator#getInstance()}method.
+	 * {@link ContextSingletonBeanFactoryLocator#getInstance()} method.
 	 */
 	public static final String LOCATOR_FACTORY_SELECTOR_PARAM = "locatorFactorySelector";
 
@@ -108,11 +108,11 @@ public class ContextLoader {
 	 * context using the default implementation of
 	 * {@link #loadParentContext(ServletContext servletContext)}. Specifies the
 	 * 'factoryKey' used in the
-	 * {@link BeanFactoryLocator#useBeanFactory(String factoryKey)}method call
+	 * {@link BeanFactoryLocator#useBeanFactory(String factoryKey)} method call
 	 * used to obtain the parent application context from the BeanFactoryLocator
 	 * instance.
 	 */
-	public static final String BEAN_FACTORY_LOCATOR_FACTORY_KEY_PARAM = "parentContextKey";
+	public static final String LOCATOR_FACTORY_KEY_PARAM = "parentContextKey";
 
 
 	private final Log logger = LogFactory.getLog(ContextLoader.class);
@@ -237,7 +237,7 @@ public class ContextLoader {
 	 * having a parent context to the root web application context.
 	 * <p>The default implementation uses ContextSingletonBeanFactoryLocator,
 	 * configured via {@link #LOCATOR_FACTORY_SELECTOR_PARAM} and
-	 * {@link #BEAN_FACTORY_LOCATOR_FACTORY_KEY_PARAM}, to load a parent context
+	 * {@link #LOCATOR_FACTORY_KEY_PARAM}, to load a parent context
 	 * which will be shared by all other users of ContextsingletonBeanFactoryLocator
 	 * which also use the same configuration parameters.
 	 * @param servletContext current servlet context
@@ -252,14 +252,14 @@ public class ContextLoader {
 		ApplicationContext parentContext = null;
 
 		String locatorFactorySelector = servletContext.getInitParameter(LOCATOR_FACTORY_SELECTOR_PARAM);
-		String parentContextKey = servletContext.getInitParameter(BEAN_FACTORY_LOCATOR_FACTORY_KEY_PARAM);
+		String parentContextKey = servletContext.getInitParameter(LOCATOR_FACTORY_KEY_PARAM);
 
 		if (locatorFactorySelector != null) {
 			BeanFactoryLocator locator = ContextSingletonBeanFactoryLocator.getInstance(locatorFactorySelector);
 
 			if (logger.isInfoEnabled()) {
-				logger.info("Getting parent context definition: using parent context key of '"
-						+ parentContextKey + "' with BeanFactoryLocator");
+				logger.info("Getting parent context definition: using parent context key of '" +
+						parentContextKey + "' with BeanFactoryLocator");
 			}
 
 			this.beanFactoryRef = locator.useBeanFactory(parentContextKey);

@@ -22,20 +22,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * <p>
  * ApplicationContext-specific implementation of BeanFactoryReference,
  * wrapping a newly created ApplicationContext, closing it on release.
- * </p>
- * 
- * <p>
- * As per BeanFactoryReference contract, release may be called more than once,
+ *
+ * <p>As per BeanFactoryReference contract, release may be called more than once,
  * with subsequent calls not doing anything. However, callging getFactory after
  * a release call will cause an exception.
- * </p>
- * 
+ *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
  * @since 13.02.2004
+ * @see org.springframework.context.ConfigurableApplicationContext#close
  */
 public class ContextBeanFactoryReference implements BeanFactoryReference {
 
@@ -46,22 +43,21 @@ public class ContextBeanFactoryReference implements BeanFactoryReference {
 	}
 
 	public BeanFactory getFactory() {
-		ApplicationContext retval = applicationContext;
-		if (retval == null)
+		if (this.applicationContext == null) {
 			throw new IllegalStateException(
 					"ApplicationContext owned by this BeanFactoryReference has been released");
-		return retval;
+		}
+		return this.applicationContext;
 	}
 
 	public void release() {
-		
-		if (applicationContext != null) {
+		if (this.applicationContext != null) {
 			ApplicationContext savedCtx;
 			
-			// we don't actually guarantee thread-safty, but it's not a lot of extra work
+			// We don't actually guarantee thread-safty, but it's not a lot of extra work.
 			synchronized (this) {
-				savedCtx = applicationContext;
-				applicationContext = null;
+				savedCtx = this.applicationContext;
+				this.applicationContext = null;
 			}
 
 			if (savedCtx != null && savedCtx instanceof ConfigurableApplicationContext) {
@@ -69,4 +65,5 @@ public class ContextBeanFactoryReference implements BeanFactoryReference {
 			}
 		}
 	}
+
 }

@@ -21,14 +21,24 @@ import org.springframework.beans.FatalBeanException;
 /**
  * Exception thrown if a bean factory could not be loaded by a bootstrap class.
  * @author Rod Johnson
- * @since 02-Dec-02
+ * @since 02.12.2002
  */
 public class BootstrapException extends FatalBeanException {
 
+	/**
+	 * Create a new BootstrapException with the specified message.
+	 * @param msg the detail message
+	 */
 	public BootstrapException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Create a new BootstrapException with the specified message
+	 * and root cause.
+	 * @param msg the detail message
+	 * @param ex the root cause
+	 */
 	public BootstrapException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

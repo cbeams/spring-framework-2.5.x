@@ -37,7 +37,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * ApplicationContext specific features are needed in the bean reference definition
  * itself.</p>
  *
- * <p><strong>Note: </strong>This class uses <strong>classpath*:beanRefContext.xml</strong>
+ * <p><strong>Note:</strong> This class uses <strong>classpath*:beanRefContext.xml</strong>
  * as the default name for the bean factory reference definition. It is not possible
  * nor legal to share definitions with SingletonBeanFactoryLocator at the same time.
  * 
@@ -49,7 +49,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	public static final String BEANS_REFS_XML_NAME = "classpath*:beanRefContext.xml";
 	
 	// the keyed singleton instances
-	private static Map instances = new HashMap();
+	private static final Map instances = new HashMap();
 
 
 	/**
@@ -63,31 +63,30 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	}
 
 	/**
-	 * <p>Returns an instance which uses the the specified selector, as the name of the
+	 * Returns an instance which uses the the specified selector, as the name of the
 	 * definition file(s). In the case of a name with a Spring 'classpath*:' prefix,
 	 * or with no prefix, which is treated the same, the current thread's context
-	 * classloader's getResources() method will be called with this value to get all
+	 * class loader's getResources() method will be called with this value to get all
 	 * resources having that name. These resources will then be combined to form a
 	 * definition. In the case where the name uses a Spring 'classpath:' prefix, or
 	 * a standard URL prefix, then only one resource file will be loaded as the
-	 * definition.</p> 
-	 * 
+	 * definition.
 	 * @param selector the name of the resource(s) which will be read and combine to
 	 * form the definition for the SingletonBeanFactoryLocator instance. The one file
 	 * or multiple fragments with this name must form a valid ApplicationContext
 	 * definition.
 	 */
 	public static BeanFactoryLocator getInstance(String selector) throws BeansException {
-		
-		// for backwards compatibility, we prepend 'classpath*:' to the selector name if there
-		// is no other prefix (i.e. classpath*:, classpath:, or some URL prefix
-		if (selector.indexOf(':') == -1)
+		// For backwards compatibility, we prepend 'classpath*:' to the selector name if there
+		// is no other prefix (i.e. classpath*:, classpath:, or some URL prefix.
+		if (selector.indexOf(':') == -1) {
 			selector = ResourcePatternResolver.CLASSPATH_URL_PREFIX + selector;
-		
+		}
+
 		synchronized (instances) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("ContextSingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
-				             instances.hashCode() + ", instances=" + instances);
+						instances.hashCode() + ", instances=" + instances);
 			}
 			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
 			if (bfl == null) {
@@ -138,19 +137,18 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 		}
 	}
 	
-    /**
-     * Overrides default method to work with ApplicationContext
-     */
+	/**
+	 * Overrides default method to work with ApplicationContext
+	 */
 	protected void destroyDefinition(BeanFactory groupDef, String resourceName) throws BeansException {
-
 		if (groupDef instanceof ConfigurableApplicationContext) {
 			// debugging trace only
 			if (logger.isDebugEnabled()) {
-				logger.debug("ContextSingletonBeanFactoryLocator group with resourceName '"
-						+ resourceName
-						+ "' being released, as no more references.");
+				logger.debug("ContextSingletonBeanFactoryLocator group with resourceName '" +
+						resourceName + "' being released, as there are no more references");
 			}
 			((ConfigurableApplicationContext) groupDef).close();
 		}
 	}
+
 }

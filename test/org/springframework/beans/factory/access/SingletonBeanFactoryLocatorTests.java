@@ -42,7 +42,7 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 	}
 
 	/**
-	 * Worker method so subclass can use it too
+	 * Worker method so subclass can use it too.
 	 */
 	protected void basicFunctionalityTest(SingletonBeanFactoryLocator facLoc) {
 		

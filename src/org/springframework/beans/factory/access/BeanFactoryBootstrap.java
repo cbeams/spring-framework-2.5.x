@@ -21,26 +21,26 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.util.Assert;
 
 /**
  * One singleton to rule them all. Reads System properties, which
  * must contain the definition of a bootstrap bean factory using
  * the Properties syntax supported by PropertiesBeanDefinitionReader.
  *
- * <oo>The name of the bootstrap factory must be "bootstrapBeanFactory".
- * 
+ * <p>The name of the bootstrap factory must be "bootstrapBeanFactory".
  * Thus a typical definition might be:
- * <code>
- * bootstrapBeanFactory.class=com.mycompany.MyBeanFactory
- * </code>
  *
- * <p>Use as follows:
- * <code>
- * BeanFactory bf = BeanFactoryBootstrap.getInstance().getBeanFactory();
- * </code>
+ * <pre>
+ * bootstrapBeanFactory.class=com.mycompany.MyBeanFactory</pre>
+ *
+ * Use as follows:
+ *
+ * <pre>
+ * BeanFactory bf = BeanFactoryBootstrap.getInstance().getBeanFactory();</pre>
  *
  * @author Rod Johnson
- * @since December 2, 2002
+ * @since 02.12.2002
  * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
  */
 public class BeanFactoryBootstrap {
@@ -72,11 +72,10 @@ public class BeanFactoryBootstrap {
 	 * @throws org.springframework.beans.BeansException
 	 */
 	public static BeanFactoryBootstrap getInstance() throws BeansException {
-		if (startupException != null)
+		if (startupException != null) {
 			throw startupException;
-		// Really an assertion
-		if (instance == null)
-			throw new BootstrapException("Anomaly: instance and exception null", null);
+		}
+		Assert.notNull(instance);
 		return instance;
 	}
 	
@@ -91,7 +90,7 @@ public class BeanFactoryBootstrap {
 	}
 
 
-	/** The Singleton instance */
+	/** the singleton instance */
 	private BeanFactory bootstrapFactory;
 	
 	/**
@@ -102,13 +101,11 @@ public class BeanFactoryBootstrap {
 		PropertiesBeanDefinitionReader propReader = new PropertiesBeanDefinitionReader(startupFactory);
 		try {
 			propReader.registerBeanDefinitions(System.getProperties());
-			this.bootstrapFactory = (BeanFactory) startupFactory.getBean(BEAN_FACTORY_BEAN_NAME);
-		}
-		catch (ClassCastException ex) {
-			throw new BootstrapException("Bootstrap bean factory class does not implement BeanFactory interface", ex);
+			this.bootstrapFactory = (BeanFactory) startupFactory.getBean(BEAN_FACTORY_BEAN_NAME, BeanFactory.class);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			throw new BootstrapException("No bean named '" + BEAN_FACTORY_BEAN_NAME + "' in system properties: [" + startupFactory + "]", null);
+			throw new BootstrapException(
+					"No bean named '" + BEAN_FACTORY_BEAN_NAME + "' in system properties: [" + startupFactory + "]");
 		}
 		catch (BeansException ex) {
 			throw new BootstrapException("Failed to bootstrap bean factory", ex);
