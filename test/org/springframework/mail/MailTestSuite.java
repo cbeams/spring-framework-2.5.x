@@ -29,7 +29,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailTestSuite.java,v 1.8 2003-10-21 14:44:42 jhoeller Exp $
+ * @version $Id: MailTestSuite.java,v 1.9 2003-11-07 09:05:59 jhoeller Exp $
  */
 public class MailTestSuite extends TestCase {
 
@@ -74,6 +74,7 @@ public class MailTestSuite extends TestCase {
 	public void testJavaMailSenderWithSimpleMessage() throws MailException, MessagingException, IOException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
+		sender.setPort(30);
 		sender.setUsername("username");
 		sender.setPassword("password");
 
@@ -86,9 +87,10 @@ public class MailTestSuite extends TestCase {
 		simpleMessage.setText("my text");
 		sender.send(simpleMessage);
 
-		assertEquals(sender.transport.getConnectedHost(), "host");
-		assertEquals(sender.transport.getConnectedUsername(), "username");
-		assertEquals(sender.transport.getConnectedPassword(), "password");
+		assertEquals("host", sender.transport.getConnectedHost());
+		assertEquals(30, sender.transport.getConnectedPort());
+		assertEquals("username", sender.transport.getConnectedUsername());
+		assertEquals("password", sender.transport.getConnectedPassword());
 		assertTrue(sender.transport.isCloseCalled());
 
 		assertEquals(1, sender.transport.getSentMessages().size());
@@ -336,6 +338,7 @@ public class MailTestSuite extends TestCase {
 	private static class MockTransport extends Transport {
 
 		private String connectedHost = null;
+		private int connectedPort = -2;
 		private String connectedUsername = null;
 		private String connectedPassword = null;
 		private boolean closeCalled = false;
@@ -347,6 +350,10 @@ public class MailTestSuite extends TestCase {
 
 		public String getConnectedHost() {
 			return connectedHost;
+		}
+
+		public int getConnectedPort() {
+			return connectedPort;
 		}
 
 		public String getConnectedUsername() {
@@ -369,8 +376,9 @@ public class MailTestSuite extends TestCase {
 			return (MimeMessage) this.sentMessages.get(index);
 		}
 
-		public void connect(String host, String username, String password) throws MessagingException {
+		public void connect(String host, int port, String username, String password) throws MessagingException {
 			this.connectedHost = host;
+			this.connectedPort = port;
 			this.connectedUsername = username;
 			this.connectedPassword = password;
 		}
