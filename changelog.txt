@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.145 2004-05-19 17:04:52 jhoeller Exp $
+$Id: changelog.txt,v 1.146 2004-05-22 13:59:35 jhoeller Exp $
 
 
 Changes in version 1.0.2 (23.5.2003)
@@ -13,6 +13,7 @@ Package org.springframework.beans
 * PropertyValue and MutablePropertyValues implement java.io.Serializable
 * added "addPropertyValues(PropertyValues)" and "addPropertyValues(Map)" methods to MutablePropertyValues
 * BeanWrapperImpl applies default PropertyEditors to non-String values too, rather than just custom editors
+* fixed BeanWrapperImpl's custom editor detection to avoid potential NPE in case of indexed/mapped properties
 * ClassEditor properly handles "java.lang.String[]"-style array class names, converting them to array classes
 * fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to properly handle null values in "getAsText"
 * PropertiesEditor supports population of java.util.Properties from a java.util.Map, for example from an XML "map" tag
@@ -27,6 +28,7 @@ Package org.springframework.beans
 Package org.springframework.context
 * added ResourceMapFactoryBean class to context.support, for resolving properties into a Map with Resource values
 * fixed AbstractMessageSource's parent checks to correctly respect the child's "useCodeAsDefaultMessage" setting
+* added overloaded DefaultMessageSourceResolvable constructor that takes a single "codes" argument
 * AbstractApplicationContext uses ResourceEditor with ResourceLoader argument rather than former ContextResourceEditor
 * removed AbstractApplicationContext's "resolveConfigLocations" method, superseded by ResourcePatternResolver mechanism
 * added "getResourcePatternResolver" callback to AbstractXmlApplicationContext, for resolving config location patterns
@@ -62,6 +64,7 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * added "namingStrategy" property to LocalSessionFactoryBean, for specifying a custom Hibernate NamingStrategy
+* SessionFactoryUtils autodetects JTA TransactionManager with Hibernate JCA Connector too, for Session synchronization
 
 Package org.springframework.remoting
 * exposed HessianProxyFactory's "overloadEnabled" property in HessianClientInterceptor
@@ -70,6 +73,7 @@ Package org.springframework.remoting
 * factored out Burlap proxy creation into "createBurlapProxy" method in BurlapClientInterceptor
 
 Package org.springframework.samples
+* changed JPetStore's Axis namespace to "urn:JPetStore" (also made namespace configurable at client side)
 * reworked DefaultImageDatabase's "streamImage" implementation to leverage AbstractLobStreamingResultSetExtractor
 * reworked DefaultImageDatabase's "storeImage" implementation to leverage AbstractLobCreatingPreparedStatementCallback
 
@@ -85,13 +89,19 @@ Package org.springframework.ui
 
 Package org.springframework.util
 * added "copy(String, Writer)" and "copyToString(Reader)" methods to FileCopyUtils
+* fixed MethodInvoker's handling of null arguments, to properly allow for any null values
 * added "determineRootDir" method to PathMatcher, refined "retrieveMatchingFiles" implementation
 * added "cleanPath" and "pathEquals" methods to StringUtils
+
+Package org.springframework.validation
+* added "getArgumentsForBindingError" method to DataBinder, for missing required fields and for type mismatches
+* default argument for DataBinder binding errors is MessageSourceResolvable with "objectName.field"/ "field" as codes
 
 Package org.springframework.web
 * WebUtils' "setWebAppRootSystemProperty" method uses StringUtils.pathEquals when checking an existing property value
 * fixed MultipartFile.isEmpty implementation for both Commons FileUpload and COS, also checking the file size
 * fixed ServletRequestDataBinder to correctly check for required fields in case of a multipart request
+* added public "setFilterConfig"/"getFilterConfig" methods to GenericFilterBean, for compatibility with WebLogic 6.1
 * reworked FilterConfigPropertyValues into inner class of GenericFilterBean
 * added implicit registration of ResourceEditor with ServletContextResourceLoader to GenericFilterBean
 * added "initBeanWrapper" callback to GenericFilterBean, to allow for registering custom editors
@@ -103,11 +113,14 @@ Package org.springframework.web
 * added "detectAllHandlerExceptionResolvers" to DispatcherServlet, expecting a single HandlerExceptionResolver when off
 * added "detectAllViewResolvers" property to DispatcherServlet, expecting a single ViewResolver when off
 * XmlViewResolver, ResourceBundleViewResolver and BeanNameViewResolver implement Ordered to allow for order values
+* added AbstractTemplateView allowing request and session attributes to be exposed in FreeMarker and Velocity views
 * refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
 * added "throws Exception" to ParameterizableViewController's "handleRequestInternal" method, for easier subclassing
 * added "validators" property to BaseCommandController, allowing to specify multiple Validators per controller
-* removed final marker from SimpleFormController's "showForm" implementation, allowing to override it for special cases 
+* removed final marker from SimpleFormController's "showForm" implementation, allowing to override it for special cases
 * added "doSubmitAction" template method to SimpleFormController, for submit actions without caring about ModelAndView
+* changed AbstractFormController's "getFormSessionAttributeName" to use class name rather than Class.toString
+* changed AbstractWizardFormController's "getPageSessionAttributeName" to use class name rather than Class.toString
 * AbstractWizardFormController's checks for page-specific binding errors, showing the corresponding page again
 * AbstractWizardFormController's "getCurrentPage" method can be invoked from "processFinish" implementations
 * AbstractWizardFormController optionally supports "_page" request parameter, for proper handling of back button usage
@@ -115,7 +128,6 @@ Package org.springframework.web
 * reworked JSP tag implementations to implement the TryCatchFinally interface for eager resource cleanup
 * factored out common Struts Action delegation code from DelegationActionProxy to DelegatingActionUtils
 * added DelegatingRequestProcessor and DelegatingTilesRequestProcessor as alternatives to DelegatingActionProxy
-* added AbstractTemplateView allowing request and session attributes to be exposed in FreeMarker and Velocity views
 
 
 Changes in version 1.0.1 (22.4.2003)
