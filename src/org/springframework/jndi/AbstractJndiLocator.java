@@ -18,19 +18,17 @@ package org.springframework.jndi;
 
 import javax.naming.NamingException;
 
-import org.springframework.beans.factory.InitializingBean;
-
 /**
  * Convenient superclass for JNDI-based service locators. Subclasses are
- * JavaBeans, exposing a jndiName property. This may or may not include
+ * JavaBeans, exposing a "jndiName" property. This may or may not include
  * the "java:comp/env/" prefix expected by J2EE applications when accessing
  * a locally mapped (ENC - Environmental Naming Context) resource. If it
  * doesn't, the "java:comp/env/" prefix will be prepended if the "resourceRef"
  * property is true (the default is <strong>false</strong>) and no other scheme
  * like "java:" is given.
  *
- * <p>Subclasses must implement the located() method to cache the results
- * of the JNDI lookup. They don't need to worry about error handling.
+ * <p>Subclasses must implement the <code>located</code> method to cache the
+ * results of the JNDI lookup. They don't need to worry about error handling.
  * 
  * <p><b>Assumptions:</b> The resource obtained from JNDI can be cached.
  * 
@@ -45,12 +43,13 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @deprecated Derive from JndiObjectLocator instead, invoking the lookup method
  * whenever the subclass needs it (instead of waiting for a "located" callback).
+ * @see #located
  * @see JndiObjectLocator
  */
-public abstract class AbstractJndiLocator extends JndiObjectLocator implements InitializingBean {
+public abstract class AbstractJndiLocator extends JndiObjectLocator {
 
 	/**
-	 * Check the jndiName property and initiate a lookup.
+	 * Check the "jndiName" property and initiate a lookup.
 	 * <p>The JNDI object will thus be fetched eagerly on initialization.
 	 * For refreshing the JNDI object, subclasses can invoke <code>lookup</code>
 	 * at any later time.
