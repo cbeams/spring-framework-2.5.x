@@ -1658,6 +1658,64 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlStatement.verify();
 	}
 
+	public void testQueryForIntValueNotFound() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = -3";
+
+		MockControl ctrlResultSetMetaData;
+		ResultSetMetaData mockResultSetMetaData;
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		Statement mockStatement;
+
+		try {
+			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+			mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+			mockResultSetMetaData.getColumnCount();
+			ctrlResultSetMetaData.setReturnValue(1);
+			
+			ctrlResultSet = MockControl.createControl(ResultSet.class);
+			mockResultSet = (ResultSet) ctrlResultSet.getMock();
+			mockResultSet.getMetaData();
+			ctrlResultSet.setReturnValue(mockResultSetMetaData);
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(true);
+			mockResultSet.getObject(1);
+			ctrlResultSet.setReturnValue(null);
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(false);
+			mockResultSet.close();
+			ctrlResultSet.setVoidCallable();
+
+			ctrlStatement = MockControl.createControl(Statement.class);
+			mockStatement = (Statement) ctrlStatement.getMock();
+			mockStatement.executeQuery(sql);
+			ctrlStatement.setReturnValue(mockResultSet);
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+			mockStatement.close();
+			ctrlStatement.setVoidCallable();
+
+			mockConnection.createStatement();
+			ctrlConnection.setReturnValue(mockStatement);
+		}
+		catch (SQLException sex) {
+			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
+		}
+
+		ctrlResultSetMetaData.replay();
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		int i = template.queryForInt(sql);
+		assertEquals("Return of an int", 0, i);
+
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
 	public void testQueryForLong() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 

@@ -825,7 +825,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 */
 	private static Object getJdbcObject(ResultSet rs, int index) throws SQLException {
 		Object o = rs.getObject(index);
-		if (o.getClass().getName().startsWith("oracle.sql.TIMESTAMP"))
+		//if (o.getClass().getName().startsWith("oracle.sql.TIMESTAMP"))
+		if (o != null && o.getClass().getName().startsWith("oracle.sql.TIMESTAMP"))
 			o = rs.getTimestamp(index);
 		return o;
 	}
