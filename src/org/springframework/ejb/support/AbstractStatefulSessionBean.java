@@ -14,12 +14,19 @@ import org.springframework.beans.factory.support.BootstrapException;
  * the ejbActivate() and ejbPassivate() lifecycle methods
  * to comply with the requirements of the EJB specification.
  *
- * <p><b>NB: Subclasses should invoke the loadBeanFactory()
+ * <p><b>Note: Subclasses should invoke the loadBeanFactory()
  * method in their custom ejbCreate() and ejbActivate methods,
  * and should invoke the unloadBeanFactory() method in their
  * ejbPassive method.</b>
- *
- * @version $Id: AbstractStatefulSessionBean.java,v 1.3 2003-12-07 23:23:07 colins Exp $
+ * 
+ * <p><b>Note: The default BeanFactoryLoader used by this class's
+ * superclass is <b>not</b> serializable. When using the default
+ * BeanFactoryLoader, or another variant which is not serializable,
+ * subclasses must call setBeanFactoryLoader(null) in ejbPassivate,
+ * with a corresponding call to setBeanFactoryLoader(xxx) in 
+ * ejbActivate unless relying on the default loader.
+ * 
+ * @version $Id: AbstractStatefulSessionBean.java,v 1.4 2003-12-12 19:22:13 colins Exp $
  * @author Rod Johnson
  * @author Colin Sampaleanu
  */

@@ -30,12 +30,14 @@ import org.springframework.beans.factory.support.BootstrapException;
  * EJB lifecycle methods, as this violates the EJB specification.
  *
  * @author Rod Johnson
- * @version $Id: AbstractEnterpriseBean.java,v 1.3 2003-12-07 23:23:07 colins Exp $
+ * @version $Id: AbstractEnterpriseBean.java,v 1.4 2003-12-12 19:22:13 colins Exp $
  */
 abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
-	/** Logger, available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Logger, available to subclasses. Not final since Stateful session beans will have
+	 * to remove it and restore it in ejbPassivae/ejbActivate */
+	protected Log logger = LogFactory.getLog(getClass());
 
 	/** Spring BeanFactory that provides the namespace for this EJB */
 	private BeanFactory beanFactory;
