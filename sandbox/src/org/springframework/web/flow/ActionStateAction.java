@@ -77,7 +77,7 @@ public class ActionStateAction {
 	 * @param targetAction The action
 	 */
 	public ActionStateAction(Action targetAction) {
-		this.targetAction = targetAction;
+		setTargetAction(targetAction);
 	}
 
 	/**
@@ -87,6 +87,7 @@ public class ActionStateAction {
 	 * @param name the name of the action
 	 */
 	public ActionStateAction(Action targetAction, String name) {
+		setTargetAction(targetAction);
 		this.properties = new HashMap(1);
 		setName(name);
 		this.targetAction = targetAction;
@@ -100,10 +101,10 @@ public class ActionStateAction {
 	 * @param description the description of the action
 	 */
 	public ActionStateAction(Action targetAction, String name, String description) {
+		setTargetAction(targetAction);
 		this.properties = new HashMap(1);
 		setName(name);
 		setDescription(description);
-		this.targetAction = targetAction;
 	}
 
 	/**
@@ -114,8 +115,10 @@ public class ActionStateAction {
 	 *        state
 	 */
 	public ActionStateAction(Action targetAction, Map properties) {
-		this.properties = new HashMap(properties);
-		this.targetAction = targetAction;
+		setTargetAction(targetAction);
+		if (properties != null) {
+			this.properties = new HashMap(properties);
+		}
 	}
 
 	/**
@@ -128,6 +131,11 @@ public class ActionStateAction {
 		this.state = state;
 	}
 
+	private void setTargetAction(Action action) {
+		Assert.notNull(targetAction, "The target Action instance is required");
+		this.targetAction = targetAction;
+	}
+	
 	private void setName(String name) {
 		if (StringUtils.hasText(name)) {
 			this.properties.put(NAME_PROPERTY, name);
