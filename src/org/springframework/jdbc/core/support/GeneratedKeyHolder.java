@@ -37,7 +37,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	private List keyList = new LinkedList();
 
 	/* Return single key value
-	 * @see org.springframework.jdbc.core.support.KeyRetriever#getKey()
+	 * @see org.springframework.jdbc.core.support.KeyHolder#getKey()
 	 */
 	public Object getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
 		if (keyList.size() == 0)
@@ -56,7 +56,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 		}
 	}
 	/* Return the Map of keys
-	 * @see org.springframework.jdbc.core.support.KeyRetriever#getKeys()
+	 * @see org.springframework.jdbc.core.support.KeyHolder#getKeys()
 	 */
 	public Map getKeys() throws InvalidDataAccessApiUsageException {
 		if (keyList.size() == 0)
@@ -69,7 +69,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 		return (Map)keyList.get(0);
 	}
 	/* Return the List containing the keys
-	 * @see org.springframework.jdbc.core.support.KeyRetriever#getKeyList()
+	 * @see org.springframework.jdbc.core.support.KeyHolder#getKeyList()
 	 */
 	public List getKeyList() {
 		return keyList;
