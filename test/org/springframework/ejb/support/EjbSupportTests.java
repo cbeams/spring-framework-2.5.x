@@ -88,7 +88,7 @@ public class EjbSupportTests extends TestCase {
 	}
 	
 	/**
-	 * Check there's a helpful message if no JNDI key is present
+	 * Check there's a helpful message if no JNDI key is present.
 	 */
 	public void testHelpfulNamingLookupMessage() throws NamingException, CreateException {
 		SimpleNamingContextBuilder.emptyActivatedContextBuilder();
@@ -123,8 +123,7 @@ public class EjbSupportTests extends TestCase {
 		
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLocator bfl = new BeanFactoryLocator() {
-			public BeanFactoryReference useBeanFactory(String factoryKey)
-					throws FatalBeanException {
+			public BeanFactoryReference useBeanFactory(String factoryKey) throws FatalBeanException {
 				return new BeanFactoryReference() {
 					public BeanFactory getFactory() {
 						return bf;
@@ -170,8 +169,7 @@ public class EjbSupportTests extends TestCase {
 	
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLocator bfl = new BeanFactoryLocator() {
-			public BeanFactoryReference useBeanFactory(String factoryKey)
-					throws FatalBeanException {
+			public BeanFactoryReference useBeanFactory(String factoryKey) throws FatalBeanException {
 				return new BeanFactoryReference() {
 					public BeanFactory getFactory() {
 						return bf;
@@ -187,8 +185,7 @@ public class EjbSupportTests extends TestCase {
 			protected void onEjbCreate() {
 				assertTrue(getBeanFactory() == bf);
 			}
-
-			public void onMessage(Message arg0) {
+			public void onMessage(Message msg) {
 				throw new UnsupportedOperationException("onMessage");
 			}
 		};
@@ -204,10 +201,8 @@ public class EjbSupportTests extends TestCase {
 		SessionContext sc = (SessionContext) mc.getMock();
 		mc.replay();
 	
-		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLocator bfl = new BeanFactoryLocator() {
-			public BeanFactoryReference useBeanFactory(String factoryKey)
-					throws FatalBeanException {
+			public BeanFactoryReference useBeanFactory(String factoryKey) throws FatalBeanException {
 				throw new BootstrapException("", null);
 		}};
 
@@ -227,4 +222,5 @@ public class EjbSupportTests extends TestCase {
 			// Ok
 		}
 	}
+
 }

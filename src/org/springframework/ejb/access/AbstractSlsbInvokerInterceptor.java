@@ -127,9 +127,9 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * Return the EJB home object to use. Called for each invocation.
 	 * <p>Default implementation returns the home created on initialization,
 	 * if any; else, it invokes lookup to get a new proxy for each invocation.
-	 * <p>Can be overridden in subclasses, for example to cache a home for
-	 * a given amount of time before recreating it, or to test the home
-	 * whether it is still alive.
+	 * <p>Can be overridden in subclasses, for example to cache a home object
+	 * for a given amount of time before recreating it, or to test the home
+	 * object whether it is still alive.
 	 * @return the EJB home object to use for an invocation
 	 * @throws NamingException if proxy creation failed
 	 * @see #lookup
@@ -137,7 +137,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 */
 	protected Object getHome() throws NamingException {
 		if (!this.cacheHome || (this.lookupHomeOnStartup && !isHomeRefreshable())) {
-			return (this.cachedHome != null ? this.cachedHome: lookup());
+			return (this.cachedHome != null ? this.cachedHome : lookup());
 		}
 		else {
 			synchronized (this) {
@@ -159,7 +159,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	}
 
 	/**
-	 * Invoke the create() method on the cached EJB home.
+	 * Invoke the create() method on the cached EJB home object.
 	 * @return a new EJBObject or EJBLocalObject
 	 * @throws NamingException if thrown by JNDI
 	 * @throws InvocationTargetException if thrown by the create method
