@@ -225,6 +225,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			patternStart = (asteriskIndex > questionMarkIndex ? asteriskIndex : questionMarkIndex);
 		}
 		int rootDirEnd = location.lastIndexOf('/', patternStart);
+		if (rootDirEnd == -1) {
+			rootDirEnd = location.lastIndexOf(":", patternStart) + 1;
+		}
 		return (rootDirEnd != -1 ? location.substring(0, rootDirEnd) : "");
 	}
 
