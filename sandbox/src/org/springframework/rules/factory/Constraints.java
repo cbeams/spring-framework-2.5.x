@@ -31,6 +31,7 @@ import org.springframework.rules.predicates.InGroup;
 import org.springframework.rules.predicates.LessThan;
 import org.springframework.rules.predicates.LessThanEqualTo;
 import org.springframework.rules.predicates.Like;
+import org.springframework.rules.predicates.MethodInvokingConstraint;
 import org.springframework.rules.predicates.ParameterizedBinaryPredicate;
 import org.springframework.rules.predicates.Range;
 import org.springframework.rules.predicates.Required;
@@ -293,7 +294,6 @@ public class Constraints {
         return new InGroup(group);
     }
 
-
     /**
      * Returns a required predicate.
      * 
@@ -312,6 +312,21 @@ public class Constraints {
      */
     public UnaryPredicate maxLength(int maxLength) {
         return new StringLengthConstraint(maxLength);
+    }
+
+    /**
+     * Returns a constraint whose test is determined by a boolean method on a
+     * target object.
+     * 
+     * @param targetObject
+     *            The targetObject
+     * @param methodName
+     *            The method name
+     * @return The predicate.
+     */
+    public UnaryPredicate method(Object target, String methodName,
+            String constraintType) {
+        return new MethodInvokingConstraint(target, methodName, constraintType);
     }
 
     /**
