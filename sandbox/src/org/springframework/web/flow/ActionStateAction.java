@@ -142,7 +142,7 @@ public class ActionStateAction {
 	 * @param caption the caption
 	 */
 	public void setCaption(String caption) {
-		this.properties.put(CAPTION_PROPERTY, caption);
+		setProperty(CAPTION_PROPERTY, caption);
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class ActionStateAction {
 	 * @param description the long description
 	 */
 	public void setDescription(String description) {
-		this.properties.put(DESCRIPTION_PROPERTY, description);
+		setProperty(DESCRIPTION_PROPERTY, description);
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class ActionStateAction {
 	 * @param resultQualifier the result qualifier.
 	 */
 	public void setResultQualifier(String resultQualifier) {
-		this.properties.put(RESULT_QUALIFIER_PROPERTY, resultQualifier);
+		setProperty(RESULT_QUALIFIER_PROPERTY, resultQualifier);
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class ActionStateAction {
 	 *        <code>Event ${methodName}(RequestContext context)</code>
 	 */
 	public void setExecuteMethodName(String executeMethodName) {
-		this.properties.put(EXECUTE_METHOD_NAME_PROPERTY, executeMethodName);
+		setProperty(EXECUTE_METHOD_NAME_PROPERTY, executeMethodName);
 	}
 
 	/**
