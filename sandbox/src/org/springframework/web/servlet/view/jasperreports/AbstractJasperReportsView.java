@@ -21,30 +21,55 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
+ * Base view class for all JasperReports views.
+ * 
  * @author robh
- *  
  */
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
+	/**
+	 * The <code>JasperReport</code> that is used to render the view.
+	 */
 	private JasperReport report;
 
+	/**
+	 * A <code>Resource</code> instance that is the source of the
+	 * <code>JasperReport</code>.
+	 */
 	private Resource reportResource;
 
+	/**
+	 * Finds the <code>JRDataSource</code> to use for rendering the report and
+	 * then invokes the renderView() method that should be implemented by the
+	 * subclass.
+	 * 
+	 * @param model
+	 *            A <code>Map</code> containing the model data. Should contain
+	 *            an instance of <code>JRDataSource</code>.
+	 * @throws NoDataSourceException
+	 *             Thrown if the <code>model</code> parameter does not contain
+	 *             an instance of <code>JRDataSource</code>
+	 */
 	protected final void renderMergedOutputModel(Map model,
 			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+			throws Exception, NoDataSourceException {
 
 		JRDataSource dataSource = locateDataSource(model);
 
 		if (dataSource == null) {
 			throw new NoDataSourceException("No Report DataSource Supplied.");
-		} 
+		}
 
 		response.setContentType(getContentType());
 		renderView(report, model, dataSource, response);
 	}
 
-	protected void initApplicationContext() {
+	/**
+	 * 
+	 */
+	protected void initApplicationContext()
+			throws UnrecognizedReportExtensionException,
+			JasperReportsInitializationException, ReportFileNotFoundException {
 		super.initApplicationContext();
 
 		String reportPath = getUrl();
@@ -57,13 +82,14 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			if (reportPath.endsWith(".jasper")) {
 				report = JasperManager.loadReport(reportResource
 						.getInputStream());
-			} else if(reportPath.endsWith(".jrxml")){
+			} else if (reportPath.endsWith(".jrxml")) {
 				// attempt a compile!
 				JRBshCompiler compiler = new JRBshCompiler();
 				report = compiler.compileReport(JasperManager
 						.loadXmlDesign(reportResource.getInputStream()));
 			} else {
-				throw new UnrecognizedReportExtensionException("Report URL must end in either .jasper or .jrxml");
+				throw new UnrecognizedReportExtensionException(
+						"Report URL must end in either .jasper or .jrxml");
 			}
 		} catch (JRException ex) {
 			throw new JasperReportsInitializationException(

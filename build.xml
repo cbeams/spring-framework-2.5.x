@@ -975,7 +975,8 @@
 			<mkdir dir="${summary.dir}"/>
 
 			<junit printsummary="yes" haltonfailure="no" haltonerror="no">
-
+				<jvmarg line="-Djava.awt.headless=true"/>
+			    
 				<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 				<classpath location="${sandbox.target.testclasses.dir}"/>
 				<classpath location="${sandbox.target.classes.dir}"/>
