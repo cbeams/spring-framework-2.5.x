@@ -1,7 +1,7 @@
 package org.springframework.samples.petclinic;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -19,14 +19,14 @@ public abstract class AbstractClinicTests extends TestCase {
 	private Clinic clinic;
 
 	protected void setUp() throws Exception {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getContextLocation());
-		clinic = (Clinic) ctx.getBean("clinic");
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getContextConfigLocation());
+		this.clinic = (Clinic) ctx.getBean("clinic");
 	}
 
-	protected abstract String getContextLocation();
+	protected abstract String getContextConfigLocation();
 
 	public void testGetVets() {
-		List vets = clinic.getVets();
+		Collection vets = this.clinic.getVets();
 		assertEquals(6, vets.size());
 		Vet v1 = (Vet) EntityUtils.getById(vets, Vet.class, 2);
 		assertEquals("Leary", v1.getLastName());
@@ -40,7 +40,7 @@ public abstract class AbstractClinicTests extends TestCase {
 	}
 
 	public void testGetPetTypes() {
-		List petTypes = clinic.getPetTypes();
+		Collection petTypes = this.clinic.getPetTypes();
 		assertEquals(6, petTypes.size());
 		PetType t1 = (PetType) EntityUtils.getById(petTypes, PetType.class, 1);
 		assertEquals("cat", t1.getName());
@@ -49,83 +49,83 @@ public abstract class AbstractClinicTests extends TestCase {
 	}
 
 	public void testFindOwners() {
-		List owners = clinic.findOwners("Davis");
+		Collection owners = this.clinic.findOwners("Davis");
 		assertEquals(2, owners.size());
-		owners = clinic.findOwners("Daviss");
+		owners = this.clinic.findOwners("Daviss");
 		assertEquals(0, owners.size());
 	}
 
 	public void testLoadOwner() {
-		Owner o1 = clinic.loadOwner(1);
+		Owner o1 = this.clinic.loadOwner(1);
 		assertTrue(o1.getLastName().startsWith("Franklin"));
-		Owner o10 = clinic.loadOwner(10);
+		Owner o10 = this.clinic.loadOwner(10);
 		assertEquals("Carlos", o10.getFirstName());
 	}
 
 	public void testInsertOwner() {
-		List owners = clinic.findOwners("Schultz");
+		Collection owners = this.clinic.findOwners("Schultz");
 		int found = owners.size();
 		Owner owner = new Owner();
 		owner.setLastName("Schultz");
-		clinic.storeOwner(owner);
+		this.clinic.storeOwner(owner);
 		assertTrue(!owner.isNew());
-		owners = clinic.findOwners("Schultz");
+		owners = this.clinic.findOwners("Schultz");
 		assertEquals(found + 1, owners.size());
 	}
 
 	public void testUpdateOwner() throws Exception {
-		Owner o1 = clinic.loadOwner(1);
+		Owner o1 = this.clinic.loadOwner(1);
 		String old = o1.getLastName();
 		o1.setLastName(old + "X");
-		clinic.storeOwner(o1);
-		o1 = clinic.loadOwner(1);
+		this.clinic.storeOwner(o1);
+		o1 = this.clinic.loadOwner(1);
 		assertEquals(old + "X", o1.getLastName());
 	}
 
 	public void testLoadPet() {
-		List types = clinic.getPetTypes();
-		Pet p7 = clinic.loadPet(7);
+		Collection types = this.clinic.getPetTypes();
+		Pet p7 = this.clinic.loadPet(7);
 		assertTrue(p7.getName().startsWith("Samantha"));
 		assertEquals(EntityUtils.getById(types, PetType.class, 1).getId(), p7.getType().getId());
 		assertEquals("Jean", p7.getOwner().getFirstName());
-		Pet p6 = clinic.loadPet(6);
+		Pet p6 = this.clinic.loadPet(6);
 		assertEquals("George", p6.getName());
 		assertEquals(EntityUtils.getById(types, PetType.class, 4).getId(), p6.getType().getId());
 		assertEquals("Peter", p6.getOwner().getFirstName());
 	}
 
 	public void testInsertPet() {
-		Owner o6 = clinic.loadOwner(6);
+		Owner o6 = this.clinic.loadOwner(6);
 		int found = o6.getPets().size();
 		Pet pet = new Pet();
 		pet.setName("bowser");
 		o6.addPet(pet);
-		List types = clinic.getPetTypes();
+		Collection types = this.clinic.getPetTypes();
 		pet.setType((PetType) EntityUtils.getById(types, PetType.class, 2));
 		pet.setBirthDate(new Date());
 		assertEquals(found + 1, o6.getPets().size());
-		clinic.storePet(pet);
+		this.clinic.storePet(pet);
 		assertTrue(!pet.isNew());
-		o6 = clinic.loadOwner(6);
+		o6 = this.clinic.loadOwner(6);
 		assertEquals(found + 1, o6.getPets().size());
 	}
 
 	public void testUpdatePet() throws Exception {
-		Pet p7 = clinic.loadPet(7);
+		Pet p7 = this.clinic.loadPet(7);
 		String old = p7.getName();
 		p7.setName(old + "X");
-		clinic.storePet(p7);
-		p7 = clinic.loadPet(7);
+		this.clinic.storePet(p7);
+		p7 = this.clinic.loadPet(7);
 		assertEquals(old + "X", p7.getName());
 	}
 
 	public void testInsertVisit() {
-		Pet p7 = clinic.loadPet(7);
+		Pet p7 = this.clinic.loadPet(7);
 		int found = p7.getVisits().size();
 		Visit visit = new Visit();
 		p7.addVisit(visit);
 		visit.setDescription("test");
-		clinic.storeVisit(visit);
+		this.clinic.storeVisit(visit);
 		assertTrue(!visit.isNew());
 		assertEquals(found + 1, p7.getVisits().size());
 	}

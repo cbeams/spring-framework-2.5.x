@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -32,9 +31,10 @@ abstract public class AbstractClinicForm extends SimpleFormController {
 		return this.clinic;
 	}
 
-	public void afterPropertiesSet() throws Exception {
-		if (clinic == null)
-			throw new ApplicationContextException("Must set clinic bean property on " + getClass());
+	public void afterPropertiesSet() {
+		if (this.clinic == null) {
+			throw new IllegalArgumentException("'clinic' is required");
+		}
 	}
 
 	/**
@@ -54,7 +54,7 @@ abstract public class AbstractClinicForm extends SimpleFormController {
 	protected ModelAndView disallowDuplicateFormSubmission(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		BindException errors = new BindException(formBackingObject(request), getCommandName());
-		errors.reject("duplicateFormSubmission", null, "Duplicate form submission");
+		errors.reject("duplicateFormSubmission", "Duplicate form submission");
 		return showForm(request, response, errors);
 	}
 
