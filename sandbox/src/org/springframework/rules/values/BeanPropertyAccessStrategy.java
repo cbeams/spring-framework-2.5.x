@@ -88,17 +88,6 @@ public class BeanPropertyAccessStrategy implements
             String nestedPropertyName, final BeanPropertyAccessStrategy parent) {
         this(nestedDomainObjectHolder);
         this.nestedPath = nestedPropertyName;
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Subscribing to parent bean holder; value="
-                    + parent.getDomainObject() + "]");
-        }
-        parent.getDomainObjectHolder().addValueListener(new ValueListener() {
-            public void valueChanged() {
-                System.out.println("parent value changed");
-                beanHolder.set(parent.getPropertyValue(getFinalPath(parent,
-                        nestedPath)));
-            }
-        });
     }
 
     public Object getPropertyValue(String propertyName) throws BeansException {
