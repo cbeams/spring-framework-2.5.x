@@ -24,7 +24,7 @@ import java.util.Iterator;
  * 
  * @author Keith Donald
  */
-public class Algorithms {
+public abstract class Algorithms {
 
     private Algorithms() {
     
