@@ -18,6 +18,7 @@ package org.springframework.rules.predicates;
 import java.util.Iterator;
 
 import org.springframework.rules.BeanPropertyExpression;
+import org.springframework.rules.UnaryPredicate;
 
 /**
  * Abstract base class for unary predicates which compose other predicates.
@@ -33,6 +34,10 @@ public class CompoundBeanPropertyExpression implements BeanPropertyExpression {
         return e.getPropertyName();
     }
 
+    public UnaryPredicate getPredicate() {
+        return compoundPredicate;
+    }
+    
     /**
      * Constructs a compound predicate with no initial members. It is expected
      * the client will call "add" to add individual predicates.
