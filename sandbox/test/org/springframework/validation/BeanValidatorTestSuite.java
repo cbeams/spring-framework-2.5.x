@@ -1,15 +1,18 @@
 package org.springframework.validation;
 
+import java.beans.BeanInfo;
 import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.BeanInfoSupport;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.validation.rules.MaxLength;
 import org.springframework.validation.rules.Required;
 import org.springframework.validation.support.BeanValidatorBuilder;
+import org.springframework.validation.support.BeanValidatorConstants;
 import org.springframework.validation.support.DefaultBeanValidationService;
 import org.springframework.validation.support.ValidationResultsCollectorAdapter;
 
@@ -19,9 +22,42 @@ import org.springframework.validation.support.ValidationResultsCollectorAdapter;
 public class BeanValidatorTestSuite extends TestCase {
     ApplicationContext context;
 
-    public void testAttributesValidatorSource() {
+    public void testLoadingFromAttributesValidatorSource() {
         getAttributesBeanValidatorSource().loadValidators(Pet.class);
+        BeanInfoSupport support = new BeanInfoSupport(Pet.class);
+        BeanInfo beanInfo = support.getRootBeanInfo();
+        assertTrue(
+            ((Boolean)beanInfo
+                .getBeanDescriptor()
+                .getValue(BeanValidatorConstants.VALIDATED_PROPERTY))
+                .booleanValue());
+        assertTrue(
+            ((Boolean)support
+                .getPropertyDescriptor(beanInfo, "nickName")
+                .getValue(BeanValidatorConstants.VALIDATED_PROPERTY))
+                .booleanValue());
+        assertEquals(
+            "nickName",
+            ((PropertyValidator)support
+                .getPropertyDescriptor(beanInfo, "nickName")
+                .getValue(BeanValidatorConstants.VALIDATOR_PROPERTY))
+                .getPropertyName());
+        beanInfo = support.getNestedBeanInfo("name");
+        assertEquals(
+            "lastName",
+            ((PropertyValidator)support
+                .getPropertyDescriptor(beanInfo, "lastName")
+                .getValue(BeanValidatorConstants.VALIDATOR_PROPERTY))
+                .getPropertyName());
+        assertNull(
+            support.getPropertyDescriptor(beanInfo, "firstName").getValue(
+                BeanValidatorConstants.VALIDATOR_PROPERTY));
+        assertNull(
+            support
+                .getPropertyDescriptor(beanInfo, "firstName")
+                .getValue(BeanValidatorConstants.VALIDATED_PROPERTY));
     }
+
     public void testBasicValidationWorkflow() {
         ValidationResultsCollectorAdapter results =
             new ValidationResultsCollectorAdapter();
