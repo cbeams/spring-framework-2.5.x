@@ -26,7 +26,7 @@ import com.meterware.httpunit.WebResponse;
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.4 2004-01-05 00:27:44 davison Exp $
+ * @version $Id: AllTests.java,v 1.5 2004-01-08 01:29:26 davison Exp $
  */
 public class AllTests extends AbstractTestCase {
 
@@ -34,14 +34,15 @@ public class AllTests extends AbstractTestCase {
 	private WebResponse resp;
 	private WebForm form;
 	
+	String shopRoot = testServer + "/jpetstore/shop/";
+		
 		
     /**
      * Constructor for AllTests.
      * @param arg0
      */
     public AllTests(String arg0) {
-        super(arg0);  
-		wc = new WebConversation();
+        super(arg0);  		
     }
     
     /**
@@ -49,7 +50,8 @@ public class AllTests extends AbstractTestCase {
      */
     public void testHomePage() {
 		try {
-            resp = wc.getResponse( testServer + "/jpetstore/" );
+			wc = new WebConversation();
+			resp = wc.getResponse( testServer + "/jpetstore/" );
             String title = resp.getTitle();
             assertEquals(title, "JPetStore Demo");
                         
@@ -62,16 +64,22 @@ public class AllTests extends AbstractTestCase {
      * complete purchase case
      */
     public void testPurchase() {
-    	String shopRoot = testServer + "/jpetstore/shop/";
-		try {
-			resp = wc.getResponse( shopRoot + "index.do" );
-			String html = resp.getText();		
+    	try {
+			wc = new WebConversation();
+    		resp = wc.getResponse(testServer + "/jpetstore/");
+    		    		    		
+    		resp = wc.getResponse( shopRoot + "index.do" );
+    		String html;		
 			
 			// links for pet categories apparent?
-			assertTrue("Expected to find a link for FISH category in page", html.indexOf("viewCategory.do?categoryId=FISH") > -1);
-			assertTrue("Expected to find a link for CATS category in page", html.indexOf("viewCategory.do?categoryId=CATS") > -1);
-			assertTrue("Expected to find a link for DOGS category in page", html.indexOf("viewCategory.do?categoryId=DOGS") > -1);
-			assertTrue("Expected to find a link for BIRDS category in page", html.indexOf("viewCategory.do?categoryId=BIRDS") > -1);
+			boolean gotFish = false;
+			boolean gotDogs = false;
+			for (int z = 0; z < resp.getLinks().length; z++) {
+				if (resp.getLinks()[z].getURLString().indexOf("categoryId=FISH") > -1) gotFish = true;
+				if (resp.getLinks()[z].getURLString().indexOf("categoryId=DOGS") > -1) gotDogs = true;				
+			}
+			assertTrue("Expected to find a link for FISH category in page", gotFish);
+			assertTrue("Expected to find a link for DOGS category in page", gotDogs);
 			
 			// see fish
 			resp = wc.getResponse( shopRoot + "viewCategory.do?categoryId=FISH" );
@@ -165,7 +173,8 @@ public class AllTests extends AbstractTestCase {
 	 */
 	public void testSearch() {
 		try {
-			resp = wc.getResponse( testServer + "/jpetstore/" );
+			wc = new WebConversation();
+			resp = wc.getResponse( shopRoot + "index.do" );
 			form = resp.getForms()[0];
 			form.setParameter("keyword", "koi");
 			resp = form.submit();
