@@ -18,7 +18,8 @@ import org.springframework.validation.PropertyValidationRule;
 
 /**
  * Convenience super class for PropertyValidationRules. Rules are only required
- * to implement the <code>validate</code> method.
+ * to implement the <code>validate</code> method, which encapsulates the
+ * business logic for enforcing the property value constraint.
  * 
  * @author Keith Donald
  */
@@ -31,7 +32,7 @@ public abstract class AbstractPropertyValidationRule
     private String ERROR_PREFIX = "errors.";
 
     public abstract boolean validate(Object context, Object value);
-    
+
     public MessageSourceResolvable createTypingHint(String propertyNamePath) {
         return new DefaultMessageSourceResolvable(
             new String[] { getTypingHintCode()},
@@ -139,13 +140,25 @@ public abstract class AbstractPropertyValidationRule
      * path. The following message codes are tried:
      * 
      * <pre>
-     *  [objectPrefix].[propertyName] [propertyName]
+     *  [propertyNamePath] [parentBeanPrefix].[propertyName] [propertyName]
      * </pre>
      * 
-     * For example: name.lastName would correspond to codes:
+     * 
+     * 
+     * For example, property name path <code>pet.name.lastName</code> would
+     * correspond to codes:
      * 
      * <pre>
-     *  name.lastName lastName
+     *  pet.name.lastName name.lastName lastName
+     * </pre>
+     * 
+     * 
+     * 
+     * As another example, the property name path <code>pet.name.lastName.junior</code>
+     * would correspond to codes:
+     * 
+     * <pre>
+     *  pet.name.lastName.junior lastName.junior junior
      * </pre>
      * 
      * @return The resolvable property name message.
@@ -160,12 +173,16 @@ public abstract class AbstractPropertyValidationRule
             propertyCodes = new String[] { propertyName };
         } else {
             propertyName = tokens[tokens.length - 1];
-            String beanPropertyPath = tokens[tokens.length - 2];
-            propertyCodes =
-                new String[] {
-                    propertyNamePath,
-                    beanPropertyPath + '.' + propertyName,
-                    propertyName };
+            if (tokens.length > 2) {
+                String beanPropertyPath = tokens[tokens.length - 2];
+                propertyCodes =
+                    new String[] {
+                        propertyNamePath,
+                        beanPropertyPath + '.' + propertyName,
+                        propertyName };
+            } else {
+                propertyCodes = new String[] { propertyNamePath, propertyName };
+            }
         }
         DefaultMessageSourceResolvable resolvable =
             new DefaultMessageSourceResolvable(propertyCodes, null, null);
