@@ -49,7 +49,7 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementations throws a FileNotFoundException, assuming
+	 * This implementation throws a FileNotFoundException, assuming
 	 * that the resource cannot be resolved to an absolute file path.
 	 */
 	public File getFile() throws IOException {
@@ -57,11 +57,27 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementations returns the description of this resource.
+	 * This implementation returns the description of this resource.
 	 * @see #getDescription
 	 */
 	public String toString() {
 		return getDescription();
+	}
+
+	/**
+	 * This implementation compares description strings.
+	 * @see #getDescription
+	 */
+	public boolean equals(Object obj) {
+		return (obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription()));
+	}
+
+	/**
+	 * This implementation returns the description's hash code.
+	 * @see #getDescription
+	 */
+	public int hashCode() {
+		return getDescription().hashCode();
 	}
 
 }
