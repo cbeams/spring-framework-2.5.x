@@ -17,9 +17,8 @@
 package org.springframework.context;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -45,10 +44,12 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	void setParent(ApplicationContext parent);
 
 	/**
-	 * Return the internal bean factory of this application context.
-	 * Can be used to access specific functionality of the factory.
+	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
+	 * bean factory of this application context on refresh, before any of the
+	 * bean definitions get evaluated. To be invoked during context configuration.
+	 * @param beanFactoryPostProcessor the factory processor to register
 	 */
-	ConfigurableListableBeanFactory getBeanFactory();
+	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor);
 
 	/**
 	 * Load or refresh the persistent representation of the configuration,
@@ -57,6 +58,19 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	 * @throws org.springframework.beans.BeansException if the bean factory could not be initialized
 	 */
 	void refresh() throws BeansException;
+
+	/**
+	 * Return the internal bean factory of this application context.
+	 * Can be used to access specific functionality of the factory.
+	 * <p>Note that this is just guaranteed to return a non-null instance
+	 * <i>after</i> the context has been refreshed at least once.
+	 * <p>Note: Do not use this to post-process the bean factory; singletons
+	 * will already have been instantiated before. Use a BeanFactoryPostProcessor
+	 * to intercept the bean factory setup process before beans get touched.
+	 * @see #refresh
+	 * @see #addBeanFactoryPostProcessor
+	 */
+	ConfigurableListableBeanFactory getBeanFactory();
 
 	/**
 	 * Close this application context, releasing all resources and locks that the
