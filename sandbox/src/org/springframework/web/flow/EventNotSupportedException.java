@@ -20,7 +20,9 @@ import org.springframework.util.DefaultObjectStyler;
 /**
  * Thrown when no event with id <code>eventId</code> exists in the specified
  * state for the specified flow.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class EventNotSupportedException extends FlowNavigationException {
 
@@ -28,12 +30,23 @@ public class EventNotSupportedException extends FlowNavigationException {
 
 	private String eventId;
 
+	/**
+	 * Create a new unsupported event exception
+	 * @param state State that does not support the event
+	 * @param eventId Unsupported event
+	 */
 	public EventNotSupportedException(TransitionableState state, String eventId) {
 		super(state.getFlow());
 		this.state = state;
 		this.eventId = eventId;
 	}
 
+	/**
+	 * Create a new unsupported event exception
+	 * @param state State that does not support the event
+	 * @param eventId Unsupported event
+	 * @param cause Underlying cause of this exception
+	 */
 	public EventNotSupportedException(TransitionableState state, String eventId, Throwable cause) {
 		super(state.getFlow(), cause);
 		this.state = state;

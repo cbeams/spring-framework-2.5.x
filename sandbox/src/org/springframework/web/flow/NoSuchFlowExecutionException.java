@@ -18,11 +18,19 @@ package org.springframework.web.flow;
 /**
  * Thrown when no flow session exists by the specified
  * <code>flowSessionId</code>.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class NoSuchFlowExecutionException extends RuntimeException {
+	
 	private String flowExecutionId;
 
+	/**
+	 * Create a new flow execution exception.
+	 * @param flowExecutionId Id of the flow execution that cannot be found
+	 * @param cause The underlying cause of this exception
+	 */
 	public NoSuchFlowExecutionException(String flowExecutionId, Throwable cause) {
 		super(cause);
 		this.flowExecutionId = flowExecutionId;

@@ -16,36 +16,58 @@
 package org.springframework.web.flow;
 
 /**
+ * Abstract superclass of all navigation exceptions.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public abstract class FlowNavigationException extends RuntimeException {
 
 	private Flow flow;
 
+	/**
+	 * Create a new navigation exception.
+	 * @param flow The flow in which the navigation exception occured
+	 */
 	public FlowNavigationException(Flow flow) {
 		super();
-		setFlow(flow);
-	}
-
-	public FlowNavigationException(Flow flow, String message) {
-		super(message);
-		setFlow(flow);
-	}
-
-	public FlowNavigationException(Flow flow, String message, Throwable cause) {
-		super(message, cause);
-		setFlow(flow);
-	}
-
-	public FlowNavigationException(Flow flow, Throwable cause) {
-		super(cause);
-		setFlow(flow);
-	}
-
-	private void setFlow(Flow flow) {
 		this.flow = flow;
 	}
 
+	/**
+	 * Create a new navigation exception.
+	 * @param flow The flow in which the navigation exception occured
+	 * @param message A descriptive message
+	 */
+	public FlowNavigationException(Flow flow, String message) {
+		super(message);
+		this.flow = flow;
+	}
+
+	/**
+	 * Create a new navigation exception.
+	 * @param flow The flow in which the navigation exception occured
+	 * @param message A descriptive message
+	 * @param cause The underlying cause of the exception
+	 */
+	public FlowNavigationException(Flow flow, String message, Throwable cause) {
+		super(message, cause);
+		this.flow = flow;
+	}
+
+	/**
+	 * Create a new navigation exception.
+	 * @param flow The flow in which the navigation exception occured
+	 * @param cause The underlying cause of the exception
+	 */
+	public FlowNavigationException(Flow flow, Throwable cause) {
+		super(cause);
+		this.flow = flow;
+	}
+
+	/**
+	 * @return The flow in which the navigation exception occured.
+	 */
 	protected Flow getFlow() {
 		return flow;
 	}

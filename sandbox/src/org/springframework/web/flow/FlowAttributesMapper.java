@@ -22,7 +22,9 @@ import java.util.Map;
  * child flow session, when the child flow is spawned. In addition, this
  * interface maps attributes of a child flow session back up to a resuming
  * parent flow, when the child session ends.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface FlowAttributesMapper {
 

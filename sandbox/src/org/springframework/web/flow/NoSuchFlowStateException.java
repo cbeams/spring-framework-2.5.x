@@ -15,21 +15,21 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Iterator;
-
-
 /**
  * Thrown when a state could not be found in a flow, on lookup by
  * <code>stateId</code>.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class NoSuchFlowStateException extends FlowNavigationException {
 
 	private String stateId;
 
 	/**
-	 * @param flow
-	 * @param message
+	 * Create a new flow state exception.
+	 * @param flow The containing flow
+	 * @param stateId The state id that cannot be found
 	 */
 	public NoSuchFlowStateException(Flow flow, String stateId) {
 		super(flow);
@@ -37,9 +37,10 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 	}
 
 	/**
-	 * @param flow
-	 * @param message
-	 * @param cause
+	 * Create a new flow state exception.
+	 * @param flow The containing flow
+	 * @param stateId The state id that cannot be found
+	 * @param cause The underlying cause of this exception
 	 */
 	public NoSuchFlowStateException(Flow flow, String stateId, Throwable cause) {
 		super(flow, cause);
@@ -47,15 +48,7 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 	}
 
 	public String getMessage() {
-		Iterator it = getFlow().statesIterator();
-		StringBuffer statesStrBuffer = new StringBuffer(512);
-		while (it.hasNext()) {
-			statesStrBuffer.append(((AbstractState)it.next()).getId());
-			if (it.hasNext()) {
-				statesStrBuffer.append(", ");
-			}
-		}
 		return "No state with state id '" + stateId + "' exists for flow '" + getFlow().getId()
-				+ "' -- valid states are '[" + statesStrBuffer.toString() + "]' -- programmer error?";
+				+ "' -- valid states are " + getFlow().getStateIds() + "-- programmer error?";
 	}
 }
