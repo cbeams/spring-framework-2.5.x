@@ -23,6 +23,7 @@ package org.springframework.web.flow;
  * @author Erwin Vervaet
  */
 public class ActionExecutionException extends RuntimeException {
+	
 	/**
 	 * Create a new action execution exception.
 	 * @param state The action state that was executing the action
@@ -30,7 +31,7 @@ public class ActionExecutionException extends RuntimeException {
 	 * @param cause The underlying cause of this exception
 	 */
 	public ActionExecutionException(ActionState state, ActionState.NamedAction action, Throwable cause) {
-		super("Executing action '" + action + "' in state '" + state.getId() + "' of flow '"
-				+ state.getFlow().getId() + "' threw an unrecoverable exception", cause);
+		super("Executing action '" + action + "' in state '" + state.getId() + "' of flow '" + state.getFlow().getId()
+				+ "' threw an unrecoverable exception", cause);
 	}
 }

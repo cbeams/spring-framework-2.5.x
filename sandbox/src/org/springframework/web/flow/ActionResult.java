@@ -22,12 +22,20 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
- * A result parameter object describing the outcome of an Action execution. The
- * <code>id</code> of the result is treated as a transitional
- * <code>eventId</code> in the current state of the Action's execution.
+ * A result parameter object describing the outcome of an Action execution. By
+ * default, the <code>id</code> of the result is treated as a transitional
+ * <code>eventId</code> in the current state of the Action's execution. This
+ * class may be subclassed to return additional result contextual information to
+ * the action state in charge of deciding how to handle it.
  * @author Keith Donald
  */
 public class ActionResult implements Serializable {
+
+	/**
+	 * Null object that indicates there was a <code>null</code> result.
+	 * Sometimes this is useful to return within a specific Action
+	 * implementation whose result calcutation is deferred to superclass logic.
+	 */
 	public static final ActionResult NULL_RESULT = new ActionResult();
 
 	private String id;
@@ -36,11 +44,21 @@ public class ActionResult implements Serializable {
 
 	}
 
+	/**
+	 * Constructs a new action result with the specified result identifier.
+	 * <p>
+	 * <code>e.g new ActionResult("success")</code>
+	 * @param id The result indentifier
+	 */
 	public ActionResult(String id) {
 		Assert.hasText(id, "The action result id is required");
 		this.id = id;
 	}
 
+	/**
+	 * @return Returns the result identifier. Typically used as the basis for a
+	 *         state transition in the action state that processes this result.
+	 */
 	public String getId() {
 		return id;
 	}
