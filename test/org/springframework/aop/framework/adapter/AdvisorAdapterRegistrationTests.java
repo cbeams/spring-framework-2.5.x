@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework.adapter;
 
+import junit.framework.TestCase;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.SimpleBeforeAdviceImpl;
 import org.springframework.aop.framework.Advised;
@@ -23,33 +25,23 @@ import org.springframework.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import junit.framework.TestCase;
-
 /**
- * TestCase for AdvisorAdapterRegistrationManager mechanism
+ * TestCase for AdvisorAdapterRegistrationManager mechanism.
  * @author Dmitriy Kopylenko
- * @version $Id: AdvisorAdapterRegistrationTests.java,v 1.2 2004-03-18 03:01:16 trisberg Exp $
+ * @version $Id: AdvisorAdapterRegistrationTests.java,v 1.3 2004-03-19 17:19:46 jhoeller Exp $
  */
 public class AdvisorAdapterRegistrationTests extends TestCase {
-
-	/**
-	 * @param arg0
-	 */
-	public AdvisorAdapterRegistrationTests(String arg0) {
-		super(arg0);
-	}
 
 	public void testAdvisorAdapterRegistrationManagerNotPresentInContext() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withoutBPPContext.xml");
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
-
-		//Just invoke any method to see if advice fired
+		// just invoke any method to see if advice fired
 		try {
 			tb.getName();
 			fail("Should throw UnknownAdviceTypeException");
 		}
 		catch (UnknownAdviceTypeException ex) {
-			//expected
+			// expected
 			assertEquals(0, getAdviceImpl(tb).getInvocationCounter());
 		}
 	}
@@ -57,8 +49,7 @@ public class AdvisorAdapterRegistrationTests extends TestCase {
 	public void testAdvisorAdapterRegistrationManagerPresentInContext() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withBPPContext.xml");
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
-
-		//Just invoke any method to see if advice fired
+		// just invoke any method to see if advice fired
 		try {
 			tb.getName();
 			assertEquals(1, getAdviceImpl(tb).getInvocationCounter());
@@ -73,4 +64,5 @@ public class AdvisorAdapterRegistrationTests extends TestCase {
 		Advisor advisor = advised.getAdvisors()[0];
 		return (SimpleBeforeAdviceImpl) advisor.getAdvice();
 	}
+
 }
