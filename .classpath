@@ -31,6 +31,8 @@
     <classpathentry kind="src" path="samples/lightcountries/src"/>
     <classpathentry kind="src" path="sandbox/src"/>
     <classpathentry kind="src" path="sandbox/test"/>
+    <classpathentry kind="src" path="benchmark/cmt/src"/>
+    <classpathentry kind="src" path="benchmark/cmt/test"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-beanutils.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-collections.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-dbcp.jar"/>
@@ -51,5 +53,7 @@
     <classpathentry kind="lib" path="lib/httpclient/httpclient.jar"/>
     <classpathentry kind="lib" path="lib/struts/struts-1.1.jar"/>
     <classpathentry kind="lib" path="lib/dom4j/dom4j.jar"/>
+    <classpathentry kind="lib" path="lib/ibatis/ibatis-db.jar"/>
+    <classpathentry kind="lib" path="lib/jdom/jdom.jar"/>
     <classpathentry kind="output" path="target/other-classes"/>
 </classpath>
