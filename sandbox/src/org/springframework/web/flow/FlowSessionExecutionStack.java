@@ -114,7 +114,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 			return NO_SESSION;
 		}
 		else {
-			return (FlowSession)executingFlowSessions.get(executingFlowSessions.size() - 1);
+			return (FlowSession)executingFlowSessions.get(0);
 		}
 	}
 
