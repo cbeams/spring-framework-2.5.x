@@ -46,69 +46,68 @@ public abstract class AbstractCachingViewResolver extends ApplicationObjectSuppo
 	 * least 20%. Increased object churn probably eventually makes the
 	 * problem even worse.
 	 */
-	public void setCache(boolean cache) {
+	public final void setCache(boolean cache) {
 		this.cache = cache;
 	}
 
 	/**
-	 * If caching is enabled.
+	 * Return if caching is enabled.
 	 */
-	public boolean isCache() {
+	public final boolean isCache() {
 		return cache;
 	}
 
 	public final View resolveViewName(String viewName, Locale locale) throws ServletException {
-		View v = null;
-		if (!cache) {
+		View view = null;
+		if (!this.cache) {
 			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: this will severely impair performance");
-			v = loadAndConfigureView(viewName, locale);
+			view = loadAndConfigureView(viewName, locale);
 		}
 		else {
 			// We're caching - don't really need synchronization
-			v = (View) this.viewHash.get(getCacheKey(viewName, locale));
-			if (v == null) {
+			view = (View) this.viewHash.get(getCacheKey(viewName, locale));
+			if (view == null) {
 				// Ask the subclass to load the View
-				v = loadAndConfigureView(viewName, locale);
+				view = loadAndConfigureView(viewName, locale);
 			}
 		}
-		return v;
+		return view;
 	}
 
 	/**
 	 * Configure the given View. Only invoked once per View.
 	 * Configuration means giving the View its name, and 
-	 * setting the ApplicationContext on the View if necessary
+	 * setting the ApplicationContext on the View if necessary.
 	 */
 	private View loadAndConfigureView(String viewname, Locale locale) throws ServletException {
-
 		// Ask the subclass to load the view
-		View v = loadView(viewname, locale);
-		if (v == null)
+		View view = loadView(viewname, locale);
+		if (view == null)
 			throw new ServletException("Cannot resolve view name '" + viewname + "'");
 			
 		// Configure view
-		v.setName(viewname);
+		view.setName(viewname);
 
 		// Give the view access to the ApplicationContext
 		// if it needs it
-		if (v instanceof ApplicationContextAware) {
+		if (view instanceof ApplicationContextAware) {
 			try {
-				((ApplicationContextAware) v).setApplicationContext(getApplicationContext());
+				((ApplicationContextAware) view).setApplicationContext(getApplicationContext());
 			}
 			catch (ApplicationContextException ex) {
-				throw new ServletException("Error initializing View [" + v + "]: " + ex.getMessage(), ex);
+				throw new ServletException("Error initializing View [" + view + "]: " + ex.getMessage(), ex);
 			}
 
 			String cacheKey = getCacheKey(viewname, locale);
 			logger.info("Cached view '" + cacheKey + "'");
-			this.viewHash.put(cacheKey, v);
+			this.viewHash.put(cacheKey, view);
 		}
 
-		return v;
+		return view;
 	}
 
 	/**
-	 * Returns the cache key for the given viewname and the given locale.
+	 * Return the cache key for the given viewname and the given locale.
 	 * Needs to regard the locale, as a different locale can lead to a different view!
 	 */
 	private String getCacheKey(String viewname, Locale locale) {
