@@ -16,7 +16,11 @@
 
 package org.springframework.web.servlet.view;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -95,11 +99,14 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	private String contentType;
 
-	private String requestContextAttribute;
-
 	private boolean redirectContextRelative = true;
 
 	private boolean redirectHttp10Compatible = true;
+
+	private String requestContextAttribute;
+
+	/** Map of static attributes, keyed by attribute name (String) */
+	private final Map	staticAttributes = new HashMap();
 
 
 	/**
@@ -153,15 +160,6 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
-	 * Set the name of the RequestContext attribute for all views.
-	 * @param requestContextAttribute name of the RequestContext attribute
-	 * @see AbstractView#setRequestContextAttribute
-	 */
-	public void setRequestContextAttribute(String requestContextAttribute) {
-		this.requestContextAttribute = requestContextAttribute;
-	}
-
-	/**
 	 * Set whether to interpret a given redirect URL that starts with a
 	 * slash ("/") as relative to the current ServletContext, i.e. as
 	 * relative to the web application root.
@@ -193,6 +191,59 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 */
 	public void setRedirectHttp10Compatible(boolean redirectHttp10Compatible) {
 		this.redirectHttp10Compatible = redirectHttp10Compatible;
+	}
+
+	/**
+	 * Set the name of the RequestContext attribute for all views.
+	 * @param requestContextAttribute name of the RequestContext attribute
+	 * @see AbstractView#setRequestContextAttribute
+	 */
+	public void setRequestContextAttribute(String requestContextAttribute) {
+		this.requestContextAttribute = requestContextAttribute;
+	}
+
+	/**
+	 * Set static attributes from a <code>java.util.Properties</code> object,
+	 * for all views returned by this resolver.
+	 * <p>This is the most convenient way to set static attributes. Note that
+	 * static attributes can be overridden by dynamic attributes, if a value
+	 * with the same name is included in the model.
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
+	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
+	 * @see AbstractView#setAttributes
+	 */
+	public void setAttributes(Properties props) {
+		setAttributesMap(props);
+	}
+
+	/**
+	 * Set static attributes from a Map, for all views returned by this resolver.
+	 * This allows to set any kind of attribute values, for example bean references.
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
+	 * @param attributes Map with name Strings as keys and attribute objects as values
+	 * @see AbstractView#setAttributesMap
+	 */
+	public void setAttributesMap(Map attributes) {
+		if (attributes != null) {
+			Iterator it = attributes.keySet().iterator();
+			while (it.hasNext()) {
+				String name = (String) it.next();
+				Object value = attributes.get(name);
+				this.staticAttributes.put(name, value);
+			}
+		}
+	}
+
+	/**
+	 * Allow Map access to the static attributes for views returned by
+	 * this resolver, with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "attributesMap[myKey]". This is particularly useful for
+	 * adding or overriding entries in child view definitions.
+	 */
+	public Map getAttributesMap() {
+		return this.staticAttributes;
 	}
 
 	protected void initApplicationContext() {
@@ -247,6 +298,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 			view.setContentType(this.contentType);
 		}
 		view.setRequestContextAttribute(this.requestContextAttribute);
+		view.setAttributesMap(this.staticAttributes);
 		return view;
 	}
 
