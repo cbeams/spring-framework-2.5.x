@@ -1,7 +1,7 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/CompoundFormModel.java,v 1.1 2004-06-14 16:06:22 kdonald Exp $
- * $Revision: 1.1 $
- * $Date: 2004-06-14 16:06:22 $
+ * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/CompoundFormModel.java,v 1.2 2004-06-14 18:35:55 kdonald Exp $
+ * $Revision: 1.2 $
+ * $Date: 2004-06-14 18:35:55 $
  * 
  * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
  */
@@ -106,6 +106,14 @@ public class CompoundFormModel implements FormModel {
                                 .removeValidationListener(listener);
                     }
                 });
+    }
+
+    public Object getFormObject() {
+        return domainObjectAccessStrategy.getDomainObject();
+    }
+    
+    public ValueModel getFormObjectHolder() {
+        return domainObjectAccessStrategy.getDomainObjectHolder();
     }
 
     /**

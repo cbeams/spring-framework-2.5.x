@@ -80,7 +80,15 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
         return false;
     }
 
-    protected Class getDomainObjectClass() {
+    public Object getFormObject() {
+        return domainObjectAccessStrategy.getDomainObject();
+    }
+    
+    public ValueModel getFormObjectHolder() {
+        return domainObjectAccessStrategy.getDomainObjectHolder();
+    }
+    
+    protected Class getFormObjectClass() {
         return domainObjectAccessStrategy.getDomainObject().getClass();
     }
 

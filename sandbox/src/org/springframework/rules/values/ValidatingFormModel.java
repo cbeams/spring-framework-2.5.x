@@ -113,7 +113,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
     protected void onNewFormValueModel(String domainObjectProperty,
             ValueModel formValueModel) {
         BeanPropertyExpression constraint = rulesSource.getRules(
-                getDomainObjectClass(), domainObjectProperty);
+                getFormObjectClass(), domainObjectProperty);
         if (constraint != null) {
             FormValueModelValidator validator = new FormValueModelValidator(
                     constraint, formValueModel);

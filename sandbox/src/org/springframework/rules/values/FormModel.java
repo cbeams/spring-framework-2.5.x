@@ -23,6 +23,10 @@ public interface FormModel {
 
     public void removeValidationListener(ValidationListener listener);
 
+    public Object getFormObject();
+    
+    public ValueModel getFormObjectHolder();
+    
     public boolean hasErrors();
 
     public void commit();
