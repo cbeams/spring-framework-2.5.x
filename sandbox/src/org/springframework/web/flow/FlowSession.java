@@ -37,6 +37,9 @@ import org.springframework.web.flow.support.FlowUtils;
 /**
  * A single client session instance for a flow participating in a FlowExecution.
  * 
+ * <p>
+ * Transaction maintenance is implemented using a <i>synchronizer token</i>.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -48,14 +51,23 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	private AbstractState currentState;
 
-	private FlowSessionStatus status;
+	private FlowSessionStatus status=FlowSessionStatus.CREATED;
 
 	private Map attributes = new HashMap();
 	
+	/**
+	 * Create a new flow session.
+	 * @param flow The flow associated with this session
+	 */
 	public FlowSession(Flow flow) {
 		this(flow, null);
 	}
 
+	/**
+	 * Create a new flow session.
+	 * @param flow The flow associated with this flow session
+	 * @param input The input parameters used to populate the flow session
+	 */
 	public FlowSession(Flow flow, Map input) {
 		Assert.notNull(flow, "The flow is required");
 		this.flow = flow;
@@ -64,30 +76,52 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 	}
 
+	/**
+	 * @return The id of the flow associated with this flow session
+	 */
 	public String getFlowId() {
 		return getFlow().getId();
 	}
 
+	/**
+	 * @return The flow associated with this flow session
+	 */
 	public Flow getFlow() {
 		return flow;
 	}
 
+	/**
+	 * @return The current status of this flow session
+	 */
 	public FlowSessionStatus getStatus() {
 		return status;
 	}
 
+	/**
+	 * @param status The new status to set
+	 */
 	public void setStatus(FlowSessionStatus status) {
+		Assert.notNull(status);
 		this.status = status;
 	}
 
+	/**
+	 * @return The id of the state that is currently active in this flow session
+	 */
 	public String getCurrentStateId() {
 		return currentState.getId();
 	}
 
+	/**
+	 * @return The state that is currently active in this flow session
+	 */
 	public AbstractState getCurrentState() {
 		return currentState;
 	}
 
+	/**
+	 * @param newState Set the state that is currently active i this flow session
+	 */
 	protected void setCurrentState(AbstractState newState) {
 		Assert.notNull(newState, "The newState is required");
 		Assert.isTrue(this.flow == newState.getFlow(),
@@ -104,16 +138,27 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		this.currentState = newState;
 	}
 	
-	protected String getDefaultTransactionTokenAttributeName() {
+	/**
+	 * Get the name for the transaction token attribute.
+	 * Defaults to "txToken".
+	 */
+	protected String getTransactionTokenAttributeName() {
 		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
 	}
 
-	protected String getDefaultTransactionTokenParameterName() {
+	/**
+	 * Get the name for the transaction token parameter in requests.
+	 * Defaults to "_txToken".
+	 */
+	protected String getTransactionTokenParameterName() {
 		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
 	}
 	
 	//methods implementing AttributesAccessor
 
+	/**
+	 * @return Map of all model attributes in this flow session
+	 */
 	public Map getAttributes() {
 		return Collections.unmodifiableMap(attributes);
 	}
@@ -157,8 +202,8 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	}
 	
 	public void assertInTransaction(HttpServletRequest request, boolean clear) throws IllegalStateException {
-		Assert.state(FlowUtils.isTokenValid(this, request, getDefaultTransactionTokenAttributeName(),
-				getDefaultTransactionTokenParameterName(), clear),
+		Assert.state(FlowUtils.isTokenValid(this, request, getTransactionTokenAttributeName(),
+				getTransactionTokenParameterName(), clear),
 				"The request is not running in the context of an application transaction");
 	}
 
@@ -177,8 +222,8 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	}
 	
 	public boolean inTransaction(HttpServletRequest request, boolean clear) {
-		return FlowUtils.isTokenValid(this, request, getDefaultTransactionTokenAttributeName(),
-				getDefaultTransactionTokenParameterName(), clear);
+		return FlowUtils.isTokenValid(this, request, getTransactionTokenAttributeName(),
+				getTransactionTokenParameterName(), clear);
 	}
 
 	public Collection attributeNames() {
@@ -234,12 +279,12 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		this.attributes.remove(attributeName);
 	}
 
-	public void setTransactionToken() {
-		FlowUtils.setToken(this, getDefaultTransactionTokenAttributeName());
+	public void beginTransaction() {
+		FlowUtils.setToken(this, getTransactionTokenAttributeName());
 	}
 
-	public void clearTransactionToken() {
-		FlowUtils.clearToken(this, getDefaultTransactionTokenAttributeName());
+	public void endTransaction() {
+		FlowUtils.clearToken(this, getTransactionTokenAttributeName());
 	}
 
 	public String toString() {

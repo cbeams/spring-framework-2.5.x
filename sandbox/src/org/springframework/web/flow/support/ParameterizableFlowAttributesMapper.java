@@ -364,11 +364,11 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 			throw new UnsupportedOperationException();
 		}
 
-		public void setTransactionToken() {
+		public void beginTransaction() {
 			throw new UnsupportedOperationException();
 		}
 
-		public void clearTransactionToken() {
+		public void endTransaction() {
 			throw new UnsupportedOperationException();
 		}
 	}

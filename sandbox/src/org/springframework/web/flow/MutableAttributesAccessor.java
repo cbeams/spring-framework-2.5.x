@@ -20,7 +20,16 @@ import java.util.Map;
 /**
  * Extension of attributes accessor allowing for mutable operations; if you dont
  * need mutability, pass AttributesAccessor around instead--it's safer.
+ * 
+ * <p>
+ * The attributes stored in the flow model are accessed using this interface.
+ * 
+ * <p>
+ * Implementers of this interface (e.g. the flow model) can have an 
+ * <i>active transaction</i> and to start and stop transactions.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface MutableAttributesAccessor extends AttributesAccessor {
 
@@ -44,18 +53,12 @@ public interface MutableAttributesAccessor extends AttributesAccessor {
 	public void removeAttribute(String attributeName);
 
 	/**
-	 * Save a new transaction token in this model.
-	 * 
-	 * @param tokenName the key used to save the token in the model map
+	 * Start a new transaction on this model.
 	 */
-	public void setTransactionToken();
+	public void beginTransaction();
 
 	/**
-	 * Reset the saved transaction token in this model. This indicates that
-	 * transactional token checking will not be needed on the next request that
-	 * is submitted.
-	 * 
-	 * @param tokenName the key used to save the token in the model map
+	 * End the active transaction on this model.
 	 */
-	public void clearTransactionToken();
+	public void endTransaction();
 }

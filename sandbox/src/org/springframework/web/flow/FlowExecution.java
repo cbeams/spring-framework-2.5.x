@@ -1,5 +1,17 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.web.flow;
 
@@ -13,15 +25,20 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * Subinterface of <code>FlowExecutionInfo</code> that exposes mutable
  * operations. Designed for use by the front <code>FlowController</code> and
- * <code>FlowSessionExecutionListener</code>, which are more privleged than
+ * <code>FlowExecutionListener</code>, which are more privileged than
  * pure for-management clients. This interface may also be used in situations
  * where other privileged objects need access to flow definition configuration
- * details during session execution.
+ * details during flow execution.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAccessor {
 
+	/**
+	 * A flow execution is available as an attribute from the
+	 * <code>getAttribute()</code> method using this priviledged name.
+	 */
 	public static String ATTRIBUTE_NAME = "flowExecution";
 
 	/**
@@ -62,10 +79,10 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	 * Signal an occurence of the specified event in the (optionally) provided
 	 * state of this flow execution.
 	 * @param eventId The event that occured
-	 * @param stateId The state the event occured in
+	 * @param stateId The state the event occured in (can be null)
 	 * @param request The current http request
 	 * @param response The current http response
-	 * @return The next model and view descriptor to display for this flow.
+	 * @return The next model and view descriptor to display for this flow execution.
 	 */
 	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
 			HttpServletResponse response);

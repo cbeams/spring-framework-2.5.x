@@ -1,5 +1,17 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.web.flow;
 
@@ -11,7 +23,9 @@ import org.springframework.util.closure.ProcessTemplate;
 
 /**
  * A strongly typed listener list class for FlowExecutionListeners.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class FlowExecutionListenerList {
 
@@ -22,21 +36,21 @@ public class FlowExecutionListenerList {
 	private EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(FlowExecutionListener.class);
 
 	/**
-	 * @param listener
+	 * @param listener The listener to add
 	 */
 	public boolean add(FlowExecutionListener listener) {
 		return this.flowExecutionListeners.add(listener);
 	}
 
 	/**
-	 * @param listeners
+	 * @param listeners The listeners to add
 	 */
 	public boolean add(FlowExecutionListener[] listeners) {
 		return this.flowExecutionListeners.addAll(listeners);
 	}
 
 	/**
-	 * @param flowExecutionListenerList
+	 * @param flowExecutionListenerList The listeners to add
 	 */
 	public boolean add(FlowExecutionListenerList flowExecutionListenerList) {
 		if (flowExecutionListenerList == null) {
@@ -53,14 +67,14 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * @param listener
+	 * @param listener the listener to remove
 	 */
 	public void remove(FlowExecutionListener listener) {
 		this.flowExecutionListeners.remove(listener);
 	}
 
 	/**
-	 *  
+	 * Remove all listeners from the list.
 	 */
 	public void clear() {
 		this.flowExecutionListeners.clear();
@@ -70,7 +84,7 @@ public class FlowExecutionListenerList {
 	 * Is at least one instance of the provided FlowExecutionListener
 	 * implementation present in the listener list?
 	 * @param listenerImplementationClass The flow execution listener
-	 *        implementation, must be a impl of FlowExecutionListener
+	 *        implementation, must be an impl of FlowExecutionListener
 	 * @return true if present, false otherwise
 	 */
 	public boolean isAdded(Class listenerImplementationClass) {
@@ -90,7 +104,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * @return
+	 * @return An iterator looping over all listeners in this list
 	 */
 	public Iterator iterator() {
 		return this.flowExecutionListeners.iterator();
@@ -107,8 +121,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Returns the number of execution listeners associated with this flow
-	 * execution.
+	 * Returns the number of execution listeners in this list.
 	 * @return The flow execution listener count
 	 */
 	public int size() {
@@ -117,7 +130,7 @@ public class FlowExecutionListenerList {
 
 	/**
 	 * Is this listener list empty?
-	 * @return
+	 * @return true or false
 	 */
 	public boolean isEmpty() {
 		return flowExecutionListeners.isEmpty();

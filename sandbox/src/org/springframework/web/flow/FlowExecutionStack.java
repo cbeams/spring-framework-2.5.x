@@ -97,6 +97,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return "[sessionId=" + getId() + ", " + getQualifiedActiveFlowId() + "]";
 	}
 	
+	/**
+	 * @return Whether or not this flow execution stack is empty
+	 */
 	public boolean isEmpty() {
 		return executingFlowSessions.isEmpty();
 	}
@@ -105,7 +108,11 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return !isEmpty();
 	}
 	
-	protected void assertActive() {
+	/**
+	 * Check that this flow execution is active and throw an exception
+	 * it it's not.
+	 */
+	protected void assertActive() throws IllegalStateException {
 		if (!isActive()) {
 			throw new IllegalStateException(
 					"No active flow sessions executing - this flow execution has ended (or has never been started)");
@@ -161,6 +168,11 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return lastEventId;
 	}
 	
+	/**
+	 * Set the last event id processed by this flow execution. This will
+	 * also update the last event timestamp.
+	 * @param eventId The last event id to set
+	 */
 	public void setLastEventId(String eventId) {
 		Assert.notNull(eventId, "The eventId is required");
 		this.lastEventId = eventId;
@@ -219,6 +231,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return getActiveFlowSession().getCurrentState();
 	}
 	
+	/**
+	 * Set the state that is currently active in this flow execution.
+	 * @param newState The new current state
+	 */
 	protected void setCurrentState(AbstractState newState) {
 		AbstractState previousState = getActiveFlowSession().getCurrentState();
 		getActiveFlowSession().setCurrentState(newState);
@@ -263,27 +279,70 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	
 	//flow session management helpers
 
-	public ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response) {
-		activate(createFlowSession(flow, input));
-		return flow.getStartState().enter(this, request, response);
+	/**
+	 * Spawn a new sub flow in this flow execution stack. This will
+	 * <ol>
+	 * <li>create a new flow session for given sub flow</li>
+	 * <li>activate this new flow session</li>
+	 * <li>start the sub flow in its start state</li>
+	 * </ol>
+	 * @param subFlow The sub flow to spawn
+	 * @param input The input parameters used to populate the flow session
+	 *        for the subflow
+	 * @param request The current HTTP request
+	 * @param response The current HTTP response
+	 * @return A view descriptor containing model and view information needed to
+	 *         render the results of the newly spawned sub flow.
+	 */
+	public ModelAndView spawn(Flow subFlow, Map input, HttpServletRequest request, HttpServletResponse response) {
+		activate(createFlowSession(subFlow, input));
+		return subFlow.getStartState().enter(this, request, response);
 	}
 
-	public ModelAndView spawn(Flow flow, String stateId, Map input, HttpServletRequest request,
-			HttpServletResponse response) {
-		activate(createFlowSession(flow, input));
-		return flow.getRequiredTransitionableState(stateId).enter(this, request, response);
+	/**
+	 * Spawn a new sub flow in this flow execution stack. This will
+	 * <ol>
+	 * <li>create a new flow session for given sub flow</li>
+	 * <li>activate this new flow session</li>
+	 * <li>start the sub flow in specified state</li>
+	 * </ol>
+	 * @param subFlow The sub flow to spawn
+	 * @param stateId The id of the state in which the sub flow will start
+	 * @param input The input parameters used to populate the flow session
+	 *        for the subflow
+	 * @param request The current HTTP request
+	 * @param response The current HTTP response
+	 * @return A view descriptor containing model and view information needed to
+	 *         render the results of the newly spawned sub flow.
+	 * @throws NoSuchFlowStateException If there is no state with specified id
+	 *         in the subflow
+	 */
+	public ModelAndView spawn(Flow subFlow, String stateId, Map input, HttpServletRequest request,
+			HttpServletResponse response) throws NoSuchFlowStateException {
+		activate(createFlowSession(subFlow, input));
+		return subFlow.getRequiredTransitionableState(stateId).enter(this, request, response);
 	}
 	
+	/**
+	 * Create a new flow session object. Subclasses can override this to
+	 * return a special implementation if required.
+	 * @param flow The flow that should be associated with the flow session
+	 * @param input The input parameters used to populate the flow session
+	 * @return The newly created flow session
+	 */
 	public FlowSession createFlowSession(Flow flow, Map input) {
 		return new FlowSession(flow, input);
 	}
 
 	/**
+	 * Activate given flow session in this flow execution stack. This will
+	 * push the flow session onto the stack and mark it as the active flow
+	 * session.
 	 * @param flowSession the flow session to activate
 	 */
 	public void activate(FlowSession flowSession) {
 		if (executingFlowSessions.contains(flowSession)) {
-			throw new IllegalArgumentException("Flow session '" + flowSession + "' is already on the stack");
+			throw new IllegalArgumentException("Flow session '" + flowSession + "' has already been activated before");
 		}
 		if (!executingFlowSessions.isEmpty()) {
 			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
@@ -299,6 +358,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 	
 	/**
+	 * End the active flow session of this flow execution. This will pop
+	 * the top element from the stack and activate the now top flow session.
 	 * @return the flow session that ended
 	 */
 	public FlowSession endActiveSession() {
@@ -314,11 +375,17 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return endingSession;
 	}
 
+	/**
+	 * @return The flow session associated with the root flow
+	 */
 	public FlowSession getRootFlowSession() {
 		assertActive();
 		return (FlowSession)executingFlowSessions.get(0);
 	}
 
+	/**
+	 * @return The currently active flow session
+	 */
 	public FlowSession getActiveFlowSession() {
 		assertActive();
 		return (FlowSession)executingFlowSessions.peek();
@@ -326,6 +393,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	
 	//methods implementing AttributesAccessor
 
+	/**
+	 * @return Map of all model attributes in the active flow session
+	 */
 	public Map getAttributes() {
 		return getActiveFlowSession().getAttributes();
 	}
@@ -434,16 +504,19 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		getActiveFlowSession().removeAttribute(attributeName);
 	}
 
-	public void setTransactionToken() {
-		getActiveFlowSession().setTransactionToken();
+	public void beginTransaction() {
+		getActiveFlowSession().beginTransaction();
 	}
 
-	public void clearTransactionToken() {
-		getActiveFlowSession().clearTransactionToken();
+	public void endTransaction() {
+		getActiveFlowSession().endTransaction();
 	}
 
 	//lifecycle event management
 
+	/**
+	 * Notify all interested listeners that flow execution has started.
+	 */
 	protected void fireStarted() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow session execution started event to " + getListenerList().size()
@@ -456,6 +529,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		});
 	}
 
+	/**
+	 * Notify all interested listeners that a request was submitted to this
+	 * flow execution.
+	 */
 	protected void fireRequestSubmitted(final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing request submitted event to " + getListenerList().size() + " listener(s)");
@@ -467,6 +544,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		});
 	}
 
+	/**
+	 * Notify all interested listeners that this flow execution finished
+	 * processing a request.
+	 */
 	protected void fireRequestProcessed(final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing request processed event to " + getListenerList().size() + " listener(s)");
@@ -478,6 +559,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		});
 	}
 
+	/**
+	 * Notify all interested listeners that an event was signaled in this
+	 * flow execution.
+	 */
 	protected void fireEventSignaled(final String eventId) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing event signaled event to " + getListenerList().size() + " listener(s)");
@@ -489,6 +574,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		});
 	}
 
+	/**
+	 * Notify all interested listeners that a state transition happened
+	 * in this flow execution.
+	 */
 	protected void fireStateTransitioned(final AbstractState previousState) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing state transitioned event to " + getListenerList().size() + " listener(s)");
@@ -500,6 +589,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		});
 	}
 
+	/**
+	 * Notify all interested listeners that a sub flow was spawned in this
+	 * flow execution.
+	 */
 	protected void fireSubFlowSpawned() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing sub flow session execution started event to " + getListenerList().size()
@@ -512,6 +605,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		});
 	}
 
+	/**
+	 * Notify all interested listeners that a sub flow ended in this flow
+	 * execution.
+	 */
 	protected void fireSubFlowEnded(final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing sub flow session ended event to " + getListenerList().size() + " listener(s)");
@@ -523,6 +620,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		});
 	}
 
+	/**
+	 * Notify all interested listeners that flow execution has ended.
+	 */
 	protected void fireEnded(final FlowSession endingRootFlowSession) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow session execution ended event to " + getListenerList().size()

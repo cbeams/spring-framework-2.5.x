@@ -25,14 +25,23 @@ import org.springframework.util.closure.Constraint;
  * A simple interface for accessing attributes - helps prevent accidental
  * misuse/manipulation of more enabling interfaces like Map, for example --
  * through better encapsulation.
+ * 
+ * <p>
+ * The attributes stored in the flow model are accessed using this interface.
+ * 
+ * <p>
+ * Implementers of this interface (e.g. the flow model) can have an 
+ * <i>active transaction</i> and provide methods to check if an incoming
+ * HTTP request is participating in that transaction.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface AttributesAccessor {
 
 	/**
-	 * Get the attribute value associated the provided name, returning
+	 * Get the attribute value associated with the provided name, returning
 	 * <code>null</code> if not found.
-	 * 
 	 * @param attributeName The attribute name
 	 * @return The attribute value, or null if not found.
 	 */
@@ -91,9 +100,14 @@ public interface AttributesAccessor {
 	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException;
 	
 	/**
-	 * @param request
-	 * @param reset
-	 * @throws IllegalStateException
+	 * Assert that given request is participating in the active transaction
+	 * of the model.
+	 * @param request The current HTTP request
+	 * @param reset indicates whether or not the transaction should end 
+	 *        after checking it
+	 * @throws IllegalStateException The request is not participating in the
+	 *         active transaction of the model or there is no transaction
+	 *         active in the model 
 	 */
 	public void assertInTransaction(HttpServletRequest request, boolean reset) throws IllegalStateException;
 	
@@ -107,15 +121,18 @@ public interface AttributesAccessor {
 	/**
 	 * Does the attribute by the provided name and type exist in this model?
 	 * @param attributeName the attribute name
-	 * @param requiredType ther attribute value type
+	 * @param requiredType the attribute value type
 	 * @return true if so, false otherwise.
 	 */
 	public boolean containsAttribute(String attributeName, Class requiredType);
 
 	/**
-	 * @param request
-	 * @param reset
-	 * @return
+	 * Is given request participating in the active transaction of the model?
+	 * @param request The current HTTP request
+	 * @param reset indicates whether or not the transaction should end 
+	 *        after checking it
+	 * @return True when the request is participating in the
+	 *         active transaction of the model, false otherwise
 	 */
 	public boolean inTransaction(HttpServletRequest request, boolean reset);
 
