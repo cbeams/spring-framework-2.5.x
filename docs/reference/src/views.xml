@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.19 2004-07-02 00:24:09 davison Exp $-->
+<!--$Id: views.xml,v 1.20 2004-07-26 23:38:52 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -438,26 +438,20 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
         <para>A standard set of Velocity macros are maintained within the
         <literal>spring.jar</literal> file, so they are always available to a
         suitably configured application, however they can only be used if your
-        Velocity view uses an extended class;
-        <literal>VelocityFormView</literal>. Note that this class is <emphasis
-        role="bold">not required</emphasis> for any aspect of HTML form
-        handling <emphasis role="bold">except</emphasis> where you wish to
-        take advantage of the Spring VM's. Below is an example of a
-        view.properties file showing correct configuration of such a
-        view</para>
+        Velocity view sets the bean property
+        <literal>exposeSpringMacroHelpers</literal> to <literal>true</literal>
+        . The same property can be set on
+        <literal>VelocityViewResolver</literal> too if you happen to be using
+        it, in which case all of your views will inherit the value from it.
+        Note that this property is <emphasis role="bold">not
+        required</emphasis> for any aspect of HTML form handling <emphasis
+        role="bold">except</emphasis> where you wish to take advantage of the
+        Spring VM's. Below is an example of a view.properties file showing
+        correct configuration of such a view</para>
 
-        <programlisting>personFormV.class=org.springframework.web.servlet.view.velocity.VelocityFormView
+        <programlisting>personFormV.class=org.springframework.web.servlet.view.velocity.VelocityView
 personFormV.url=personForm.vm
-personFormV.requestContextAttribute=rc</programlisting>
-
-        <para>Note that the <literal>RequestContext</literal> attribute is
-        required for <literal>VelocityFormView</literal>'s to work correctly.
-        Either set the property on individual views, or optionally on the
-        <literal>ViewResolver</literal> itself so that all views have a
-        <literal>RequestContext</literal> available to them. Here we set the
-        name to be rc and our <literal>personViewV</literal> will now have an
-        additional object available to them via the reference
-        <literal>$rc</literal></para>
+personFormV.exposeSpringMacroHelpers=true</programlisting>
       </sect3>
 
       <sect3 id="view-velocity-validationmessages">
@@ -471,19 +465,19 @@ personFormV.requestContextAttribute=rc</programlisting>
 ...
 &lt;form action="" method="POST"&gt;
   Name: 
-  #springBind( "command.name" false )
+  #springBind( "command.name" )
   &lt;input type="text" name="${status.expression}" value="$!status.value" /&gt;&lt;br&gt;
   #foreach($error in $status.errorMessages) &lt;b&gt;$error&lt;/b&gt; &lt;br&gt; #end
   &lt;br&gt;
 
   Age: 
-  #springBind( "command.age" false )
+  #springBind( "command.age" )
   &lt;input type="text" name="${status.expression}" value="$!status.value" /&gt;&lt;br&gt;
   #foreach($error in $status.errorMessages) &lt;b&gt;$error&lt;/b&gt; &lt;br&gt; #end
   &lt;br&gt;
   
   Street: 
-  #springBind( "command.address.street" false )
+  #springBindEscaped( "command.address.street" true )
   &lt;input type="text" name="${status.expression}" value="$!status.value" /&gt;&lt;br&gt;
   #foreach($error in $status.errorMessages) &lt;b&gt;$error&lt;/b&gt; &lt;br&gt; #end
   &lt;br&gt;
@@ -498,11 +492,16 @@ personFormV.requestContextAttribute=rc</programlisting>
         unless you changed it in your FormController properties) followed by a
         period and the name of the field on the command object you wish to
         bind to. Nested fields can be used too as shown in the example above
-        for the 'Street' field.</para>
+        for the 'Street' field. The <literal>#springBind</literal> macro
+        assumes the default HTML escaping behaviour specified by the
+        ServletContext parameter <literal>defaultHtmlEscape</literal> in
+        web.xml</para>
 
-        <para>The second argument to the <literal>#springBind</literal> macro
-        determines whether HTML escaping should be used in the status error
-        messages or values. Set to true or false as required.</para>
+        <para>The optional form of the macro called
+        <literal>#springBindEscaped</literal> takes a second argument and
+        explicitly specifies whether HTML escaping should be used in the
+        status error messages or values. Set to true or false as
+        required.</para>
       </sect3>
     </sect2>
   </sect1>
@@ -546,17 +545,17 @@ personFormV.requestContextAttribute=rc</programlisting>
       <title>Form handling</title>
 
       <para>FreeMarker macros are available within spring.jar similar to the
-      Velocity macros and all of the same principals apply. Here's an example
-      view definition making use of the
-      <literal>FreeMarkerFormView</literal><programlisting>personFormF.class=org.springframework.web.servlet.view.freemarker.FreeMarkerFormView
+      Velocity macros and all of the same principals apply Seee above for
+      details of this. Here's an example view definition making use of the
+      Spring macros in a <literal>FreeMarkerView</literal><programlisting>personFormF.class=org.springframework.web.servlet.view.freemarker.FreeMarkerView
 personFormF.url=personForm.ftl
-personFormF.requestContextAttribute=rc</programlisting></para>
+personFormF.exposeSpringMacroHelpers=true</programlisting></para>
 
       <sect3>
         <title>Binding fields in the HTML form</title>
 
         <para>Here's the FreeMarker equivalent of the Velocity example
-        above:<programlisting>&lt;#import "/org/springframework/web/servlet/view/freemarker/spring.ftl" as spring /&gt;
+        above:<programlisting>&lt;#import "/spring.ftl" as spring /&gt;
 
 &lt;html&gt;
 ...
@@ -574,7 +573,7 @@ personFormF.requestContextAttribute=rc</programlisting></para>
   &lt;br&gt;
   
   Street:
-  &lt;@spring.bind "command.address.street" /&gt; 
+  &lt;@spring.bindEscaped "command.address.street", true /&gt; 
   &lt;input type="text" name="${spring.status.expression}" value="${spring.status.value?default("")}" /&gt;&lt;br&gt;
   &lt;#list spring.status.errorMessages as error&gt; &lt;b&gt;${error}&lt;/b&gt; &lt;br&gt; &lt;/#list&gt;
   &lt;br&gt;
@@ -586,8 +585,16 @@ personFormF.requestContextAttribute=rc</programlisting></para>
 
         <para>Note that a critical difference with FreeMarker is that the
         Spring macros have to be imported into the template under their own
-        namespace. This is done in the first line of the file shown
-        above.</para>
+        namespace. This is done in the first line of the file shown above. The
+        <literal>&lt;@spring.bind&gt;</literal> macro assumes the default HTML
+        escaping behaviour specified by the ServletContext parameter
+        <literal>defaultHtmlEscape</literal> in web.xml</para>
+
+        <para>There is an optional form of the macro called
+        <literal>&lt;@spring.bindEscaped&gt;</literal> which takes a second
+        argument and explicitly specifies whether HTML escaping should be used
+        in the status error messages or values. Set to true or false as
+        required.</para>
       </sect3>
     </sect2>
   </sect1>
@@ -959,17 +966,15 @@ public class PDFPage extends AbstractPdfView {
 
     <para>Tapestry is a powerful, component-oriented web application framework
     from Apache's Jakarta project (<ulink
-    url="http://jakarta.apache.org/tapestry"></ulink>). Spring Framework is a
-    powerful J2EE application framework which is built around the concept of a
-    lightweight container. While Spring has its own powerful web ui layer,
-    there are a number of unique advantages to building a J2EE application
-    using a combination of Tapestry for the web ui, and the Spring container
-    for the lower layers. This document attempts to detail a few best
-    practices for combining these two frameworks. It is expected that you are
-    relatively familiar with both Tapestry and Spring Framework basics, so
-    they will not be explained here. General introductory documentation for
-    both Tapestry and Spring Framework are available on their respective web
-    sites.</para>
+    url="http://jakarta.apache.org/tapestry"></ulink>). While Spring has its
+    own powerful web ui layer, there are a number of unique advantages to
+    building a J2EE application using a combination of Tapestry for the web
+    ui, and the Spring container for the lower layers. This document attempts
+    to detail a few best practices for combining these two frameworks. It is
+    expected that you are relatively familiar with both Tapestry and Spring
+    Framework basics, so they will not be explained here. General introductory
+    documentation for both Tapestry and Spring Framework are available on
+    their respective web sites.</para>
 
     <sect2 id="view-tapestry-architecture">
       <title>Architecture</title>
