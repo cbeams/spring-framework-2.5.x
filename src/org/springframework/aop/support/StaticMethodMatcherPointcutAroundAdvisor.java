@@ -6,17 +6,14 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.InterceptionAroundAdvisor;
-import org.springframework.aop.Pointcut;
 
 /**
- * Convenient superclass for static method pointcuts that hold an IntroductionInterceptor,
- * making them an Advice. nalogous to the old Spring StaticMethodPointcut.
+ * Convenient superclass for static method pointcuts that hold interception 
+ * around advice, via an AOP Alliance Interceptor.
  * @author Rod Johnson
- * @version $Id: StaticMethodMatcherPointcutAroundAdvisor.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: StaticMethodMatcherPointcutAroundAdvisor.java,v 1.3 2004-01-13 16:34:31 johnsonr Exp $
  */
-public abstract class StaticMethodMatcherPointcutAroundAdvisor extends StaticMethodMatcherPointcut implements InterceptionAroundAdvisor {
-
-	private boolean isPerInstance;
+public abstract class StaticMethodMatcherPointcutAroundAdvisor extends StaticMethodMatcherPointcutAdvisor implements InterceptionAroundAdvisor {
 
 	private Interceptor interceptor;
 	
@@ -33,20 +30,8 @@ public abstract class StaticMethodMatcherPointcutAroundAdvisor extends StaticMet
 		this.interceptor = interceptor;
 	}
 	
-	public void setIsPerInstance(boolean isPerInstance) {
-		this.isPerInstance = isPerInstance;
-	}
-
 	public Interceptor getInterceptor() {
 		return interceptor;
-	}
-
-	public final Pointcut getPointcut() {
-		return this;
-	}
-
-	public boolean isPerInstance() {
-		return this.isPerInstance;
 	}
 
 }

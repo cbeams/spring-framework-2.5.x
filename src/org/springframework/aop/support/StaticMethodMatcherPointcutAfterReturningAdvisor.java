@@ -6,17 +6,14 @@ import java.lang.reflect.Method;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.AfterReturningAdvisor;
 import org.springframework.aop.MethodAfterReturningAdvice;
-import org.springframework.aop.Pointcut;
 
 /**
- * Convenient superclass for static method pointcuts that hold a a BeforeAdvice,
- * making them an Advice. Analogous to the old Spring StaticMethodPointcut.
+ * Convenient superclass for static method pointcuts that hold a MethodAfterReturningAdvice,
+ * making them an Advisor.
  * @author Rod Johnson
- * @version $Id: StaticMethodMatcherPointcutAfterReturningAdvisor.java,v 1.1 2004-01-05 18:47:01 johnsonr Exp $
+ * @version $Id: StaticMethodMatcherPointcutAfterReturningAdvisor.java,v 1.2 2004-01-13 16:34:31 johnsonr Exp $
  */
-public abstract class StaticMethodMatcherPointcutAfterReturningAdvisor extends StaticMethodMatcherPointcut implements AfterReturningAdvisor {
-
-	private boolean isPerInstance;
+public abstract class StaticMethodMatcherPointcutAfterReturningAdvisor extends StaticMethodMatcherPointcutAdvisor implements AfterReturningAdvisor {
 
 	private MethodAfterReturningAdvice afterAdvice;
 	
@@ -32,18 +29,6 @@ public abstract class StaticMethodMatcherPointcutAfterReturningAdvisor extends S
 
 	public AfterReturningAdvice getAfterReturningAdvice() {
 		return afterAdvice;
-	}
-
-	public final Pointcut getPointcut() {
-		return this;
-	}
-	
-
-	/**
-	 * @see org.springframework.aop.Advisor#isPerInstance()
-	 */
-	public boolean isPerInstance() {
-		throw new UnsupportedOperationException();
 	}
 
 }

@@ -3,7 +3,6 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 
-import org.springframework.aop.Pointcut;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.ThrowsAdvisor;
 
@@ -11,9 +10,9 @@ import org.springframework.aop.ThrowsAdvisor;
  * Convenient superclass for static method pointcuts that hold a a ThrowsAdvice,
  * making them an Advisor. Analogous to the old Spring StaticMethodPointcut.
  * @author Rod Johnson
- * @version $Id: StaticMethodMatcherPointcutThrowsAdvisor.java,v 1.2 2003-12-11 09:18:57 johnsonr Exp $
+ * @version $Id: StaticMethodMatcherPointcutThrowsAdvisor.java,v 1.3 2004-01-13 16:34:31 johnsonr Exp $
  */
-public abstract class StaticMethodMatcherPointcutThrowsAdvisor extends StaticMethodMatcherPointcut implements ThrowsAdvisor {
+public abstract class StaticMethodMatcherPointcutThrowsAdvisor extends StaticMethodMatcherPointcutAdvisor implements ThrowsAdvisor {
 
 	private ThrowsAdvice throwsAdvice;
 	
@@ -33,14 +32,6 @@ public abstract class StaticMethodMatcherPointcutThrowsAdvisor extends StaticMet
 
 	public ThrowsAdvice getThrowsAdvice() {
 		return throwsAdvice;
-	}
-
-	public final Pointcut getPointcut() {
-		return this;
-	}
-
-	public boolean isPerInstance() {
-		throw new UnsupportedOperationException();
 	}
 
 }
