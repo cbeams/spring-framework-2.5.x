@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,12 @@ import org.springframework.metadata.Attributes;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of TransactionAttributeSource that uses
- * attributes from an Attributes implementation.
+ * Implementation of the <code>TransactionAttributeSource</code> interface that
+ * reads metadata via Spring's <code>Attributes</code> abstraction.
+ *
+ * <p>Typically used for reading in source-level attributes via
+ * Commons Attributes.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.metadata.Attributes
