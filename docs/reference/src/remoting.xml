@@ -179,7 +179,7 @@ public class SimpleObject {
 				containing the simple object and the service linking configuration bits:
 				<programlisting><![CDATA[
 <bean class="example.SimpleObject">
-	<property name="accountService"><ref bean="accountService"/></bean>
+	<property name="accountService"><ref bean="accountService"/></property>
 </bean>
 
 <bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
