@@ -1,6 +1,6 @@
 package org.springframework.samples.petclinic.web;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,7 +45,7 @@ public class FindOwnersForm	extends AbstractClinicForm {
 		Owner owner = (Owner) command;
 
 		// find owners by last name
-		List results = getClinic().findOwners(owner.getLastName());
+		Collection results = getClinic().findOwners(owner.getLastName());
 
 		if (results.size() < 1) {
 			// no owners found
@@ -59,7 +59,7 @@ public class FindOwnersForm	extends AbstractClinicForm {
 		}
 
 		// 1 owner found
-		owner = (Owner) results.get(0);
+		owner = (Owner) results.iterator().next();
 		return new ModelAndView(getSuccessView(), "ownerId", Long.toString(owner.getId()));
 	}
 
