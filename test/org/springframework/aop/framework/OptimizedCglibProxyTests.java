@@ -19,7 +19,7 @@ import org.springframework.beans.TestBean;
  * TargetSources or do other things that this proxy can't do.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: OptimizedCglibProxyTests.java,v 1.2 2003-12-11 09:01:26 johnsonr Exp $
+ * @version $Id: OptimizedCglibProxyTests.java,v 1.3 2003-12-19 10:19:50 johnsonr Exp $
  */
 public class OptimizedCglibProxyTests extends CglibProxyTests {
 	
@@ -32,7 +32,7 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 	 */
 	protected Object createProxy(AdvisedSupport as) {
 		as.setProxyTargetClass(true);
-		as.setEnableCglibSubclassOptimizations(true);
+		as.setOptimize(true);
 		Object proxy = as.createAopProxy().getProxy();
 		assertTrue(AopUtils.isCglibProxy(proxy));
 		return proxy;
@@ -40,24 +40,14 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 	
 	protected AopProxy createAopProxy(AdvisedSupport as) {
 		as.setProxyTargetClass(true);
-		return new OptimizedCglib1AopProxy(as);
+		as.setOptimize(true);
+		return new Cglib2AopProxy(as);
 	}
 	
 	protected boolean requiresTarget() {
 		return true;
 	}
 	
-	public void testCannotBeConstructedWithDynamicTargetSource() {
-		try {
-			AdvisedSupport as = new AdvisedSupport();
-			as.setTargetSource(new HotSwappableTargetSource(new TestBean()));
-			OptimizedCglib1AopProxy proxy = new OptimizedCglib1AopProxy(as);
-			fail("Shouldn't allow optimized proxy to be created with null target source");
-		} 
-		catch (AopConfigException ex) {
-			// Ok
-		}
-	}
 	
 	/**
 	 * Inherited version checks identity with original object. We change that,
@@ -179,10 +169,12 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 	}
 
 	/**
-	 * Overriden to remove comparisons with target
+	 * Overriden to remove comparisons with target 
+	 * FOR OLD FIELD_COPY APPROACH
 	 * @see org.springframework.aop.framework.AbstractAopProxyTests#testTargetCanGetProxy()
 	 */
-	public void testTargetCanGetProxy() {
+	/*
+	 public void testTargetCanGetProxy() {
 		NopInterceptor di = new NopInterceptor();
 		INeedsToSeeProxy target = new TargetChecker();
 		ProxyFactory pf1 = new ProxyFactory(target);
@@ -204,6 +196,7 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 	//	assertEquals("2 more invocations via AOP as the first call was reentrant through the proxy", 5, di.getCount());
 		assertEquals("Increment happened", 2, proxied.getCount());
 	}
+	*/
 
 
 }

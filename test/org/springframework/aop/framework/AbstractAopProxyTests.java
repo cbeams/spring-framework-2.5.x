@@ -38,7 +38,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.13 2003-12-11 14:52:29 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.14 2003-12-19 10:19:50 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -460,8 +460,12 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		catch (UndeclaredThrowableException thrown) {			
 			assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
 		}
-		catch (net.sf.cglib.UndeclaredThrowableException thrown) {			
-			assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
+		//catch (net.sf.cglib.proxy.UndeclaredThrowableException thrown) {			
+		//	assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
+		//}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			fail("Didn't expect exception: " + ex);
 		}
 	}
 	
