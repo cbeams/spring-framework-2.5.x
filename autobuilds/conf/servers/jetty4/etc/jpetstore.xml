@@ -4,7 +4,7 @@
 <!--
 	Jetty server config for Spring autobuild testing
 	
-	$Id: jpetstore.xml,v 1.1 2003-12-19 01:44:35 davison Exp $
+	$Id: jpetstore.xml,v 1.2 2004-01-08 01:34:46 davison Exp $
  -->
  
 <Configure class="org.mortbay.jetty.Server">
@@ -68,7 +68,7 @@
   <!-- Add root context web applications.                              -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
-    <Arg>/</Arg>
+    <Arg>/jpetstore</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jpetstore.war</Arg>
   </Call>
 

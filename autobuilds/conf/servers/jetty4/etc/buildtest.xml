@@ -4,7 +4,7 @@
 <!--
 	Jetty server config for Spring autobuild testing
 	
-	$Id: countries.xml,v 1.1 2003-12-19 01:44:35 davison Exp $
+	$Id: buildtest.xml,v 1.1 2004-01-08 01:34:46 davison Exp $
  -->
  
 <Configure class="org.mortbay.jetty.Server">
@@ -18,8 +18,8 @@
     <Call name="disableLog"/>
     <Call name="add">
       <Arg>
-        <New class="org.mortbay.util.OutputStreamLogSink">  
-          <Set name="filename"><SystemProperty name="reports.dir" default="../.."/>/reports/countries_jetty_app.log</Set>
+        <New class="org.mortbay.util.OutputStreamLogSink">
+          <Set name="filename"><SystemProperty name="reports.dir" default="../../reports"/>/buildtest_jetty_app.log</Set>
           <Set name="retainDays">90</Set>
           <Set name="append">true</Set>
           <Set name="logLabels">true</Set>
@@ -68,8 +68,8 @@
   <!-- Add root context web applications.                              -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
-    <Arg>/</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/countries.war</Arg>
+    <Arg>/buildtest</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/buildtest.war</Arg>
   </Call>
 
 

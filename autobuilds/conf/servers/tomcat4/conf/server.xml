@@ -1,7 +1,7 @@
 <!--
 	Tomcat server config for Spring autobuild testing
 	
-	$Id: server.xml,v 1.2 2004-01-05 00:28:52 davison Exp $
+	$Id: server.xml,v 1.3 2004-01-08 01:34:46 davison Exp $
  -->
 
 <Server port="13005" shutdown="SHUTDOWN" debug="0">
@@ -110,74 +110,7 @@
   		</Context>
   		
   		
-		<Context 
-			path="/petclinic" 
-			docBase="petclinic" 
-			debug="4" 
-			reloadable="true">
-  			
-  			<Logger 
-  				className="org.apache.catalina.logger.FileLogger" 
-  				directory="../../reports" 
-        		prefix="petclinic_tomcat4_app_" 
-  				suffix=".log" 
-  				timestamp="true"/>
-
-			<!-- Define a database connection pool for HSQL -->
-  			<!-- NOTE: make sure that a copy of hsqldb.jar is in the TOMCAT common/lib directory -->
-  			<!--
-  			<Resource 
-  				name="jdbc/petclinicHSQL" 
-  				auth="Container" 
-  				type="javax.sql.DataSource"/>
-  			
-  			<ResourceParams name="jdbc/petclinicHSQL">
-    			<parameter>
-      				<name>factory</name>
-      				<value>org.apache.commons.dbcp.BasicDataSourceFactory</value>
-    			</parameter>
-
-    			<parameter>
-      				<name>driverClassName</name>
-      				<value>org.hsqldb.jdbcDriver</value>
-    			</parameter>
-    			<parameter>
-      				<name>url</name>
-      				<value>jdbc:hsqldb:hsql://localhost:9001</value>
-    			</parameter>
-    			<parameter>
-      				<name>username</name>
-      				<value>sa</value>
-    			</parameter>
-
-    			<parameter>
-      				<name>maxActive</name>
-      				<value>50</value>
-    			</parameter>
-    			<parameter>
-      				<name>maxIdle</name>
-      				<value>10</value>
-    			</parameter>
-    			<parameter>
-      				<name>maxWait</name>
-      				<value>10000</value>
-    			</parameter>
-    			<parameter>
-      				<name>removeAbandoned</name>
-      				<value>true</value>
-    			</parameter>
-    			<parameter>
-      				<name>removeAbandonedTimeout</name>
-      				<value>60</value>
-    			</parameter>
-    			<parameter>
-      				<name>logAbandoned</name>
-      				<value>true</value>
-    			</parameter>
-  			</ResourceParams>
-  			-->
-
-		</Context>
+		
 
       </Host>
 
