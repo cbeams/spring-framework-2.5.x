@@ -682,7 +682,9 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 			}
 			Message message = (timeout >= 0) ?
 					consumer.receive(timeout) : consumer.receive();
-			message.acknowledge();
+			if (message != null) {
+				message.acknowledge();
+			}
 			if (isSessionTransacted()) {
 				session.commit();
 			}
