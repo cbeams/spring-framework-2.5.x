@@ -20,7 +20,6 @@ package org.springframework.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.StringUtils;
@@ -35,14 +34,8 @@ import org.springframework.util.StringUtils;
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/** List of PropertyValue objects */
-	private List propertyValueList = new ArrayList();
+	private final ArrayList propertyValueList;
 	
-	/** 
-	 * Cached PropertyValues for quicker access.
-	 * Updated on writes.
-	 */
-	private PropertyValue[] propertyValueArray = new PropertyValue[0];
-
 	/**
 	 * Creates a new empty MutablePropertyValues object.
 	 * Property values can be added with the addPropertyValue methods.
@@ -50,6 +43,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * @see #addPropertyValue(String, Object)
 	 */
 	public MutablePropertyValues() {
+		this.propertyValueList = new ArrayList();
 	}
 
 	/**
@@ -61,15 +55,17 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public MutablePropertyValues(PropertyValues source) {
 		// We can optimize this because it's all new:
-		// there is no replacement of existing property values
+		// There is no replacement of existing property values.
 		if (source != null) {
 			PropertyValue[] pvs = source.getPropertyValues();
-			this.propertyValueArray = new PropertyValue[pvs.length];
+			this.propertyValueList = new ArrayList(pvs.length);
 			for (int i = 0; i < pvs.length; i++) {
 				PropertyValue newPv = new PropertyValue(pvs[i].getName(), pvs[i].getValue());
-				propertyValueArray[i] = newPv;
-				propertyValueList.add(newPv);
+				this.propertyValueList.add(newPv);
 			}
+		}
+		else {
+			this.propertyValueList = new ArrayList(0);
 		}
 	}
 
@@ -80,17 +76,22 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * @see #addPropertyValues(Map)
 	 */
 	public MutablePropertyValues(Map source) {
-		addPropertyValues(source);
-		recache();
+		// We can optimize this because it's all new:
+		// There is no replacement of existing property values.
+		if (source != null) {
+			this.propertyValueList = new ArrayList(source.size());
+			Iterator it = source.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				PropertyValue newPv = new PropertyValue((String) entry.getKey(), entry.getValue());
+				this.propertyValueList.add(newPv);
+			}
+		}
+		else {
+			this.propertyValueList = new ArrayList(0);
+		}
 	}
 	
-	/**
-	 * Rebuild the cached array	 
-	 */
-	private void recache() {
-		this.propertyValueArray = (PropertyValue[]) this.propertyValueList.toArray(new PropertyValue[propertyValueList.size()]);
-	}
-
 	/**
 	 * Copy all given PropertyValues into this object. Guarantees PropertyValue
 	 * references are independent, although it can't deep copy objects currently
@@ -103,9 +104,9 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		if (source != null) {
 			PropertyValue[] pvs = source.getPropertyValues();
 			for (int i = 0; i < pvs.length; i++) {
-				addPropertyValue(new PropertyValue(pvs[i].getName(), pvs[i].getValue()));
+				PropertyValue newPv = new PropertyValue(pvs[i].getName(), pvs[i].getValue());
+				addPropertyValue(newPv);
 			}
-			recache();
 		}
 		return this;
 	}
@@ -114,17 +115,17 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * Add all property values from the given Map.
 	 * @param source Map with property values keyed by property name,
 	 * which must be a String
-	 * @return this object to allow creating objects, adding multiple PropertyValues
-	 * in a single statement
+	 * @return this object to allow creating objects, adding multiple
+	 * PropertyValues in a single statement
 	 */
 	public MutablePropertyValues addPropertyValues(Map source) {
 		if (source != null) {
-			Iterator it = source.keySet().iterator();
+			Iterator it = source.entrySet().iterator();
 			while (it.hasNext()) {
-				String key = (String) it.next();
-				addPropertyValue(new PropertyValue(key, source.get(key)));
+				Map.Entry entry = (Map.Entry) it.next();
+				PropertyValue newPv = new PropertyValue((String) entry.getKey(), entry.getValue());
+				addPropertyValue(newPv);
 			}
-			recache();
 		}
 		return this;
 	}
@@ -133,8 +134,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * Add a PropertyValue object, replacing any existing one
 	 * for the respective property.
 	 * @param pv PropertyValue object to add
-	 * @return this object to allow creating objects, adding multiple PropertyValues
-	 * in a single statement
+	 * @return this object to allow creating objects, adding multiple
+	 * PropertyValues in a single statement
 	 */
 	public MutablePropertyValues addPropertyValue(PropertyValue pv) {
 		for (int i = 0; i < this.propertyValueList.size(); i++) {
@@ -145,7 +146,6 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			}
 		}
 		this.propertyValueList.add(pv);
-		recache();
 		return this;
 	}
 
@@ -166,12 +166,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public void removePropertyValue(PropertyValue pv) {
 		this.propertyValueList.remove(pv);
-		recache();
 	}
 
 	/**
-	 * Overloaded version of removePropertyValue that takes
-	 * a property name.
+	 * Overloaded version of removePropertyValue that takes a property name.
 	 * @param propertyName name of the property
 	 * @see #removePropertyValue(PropertyValue)
 	 */
@@ -185,34 +183,36 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public void setPropertyValueAt(PropertyValue pv, int i) {
 		this.propertyValueList.set(i, pv);
-		this.propertyValueArray[i] = pv;
 	}
 
 	public PropertyValue[] getPropertyValues() {
-		return propertyValueArray;
+		return (PropertyValue[])
+				this.propertyValueList.toArray(new PropertyValue[this.propertyValueList.size()]);
 	}
 
 	public PropertyValue getPropertyValue(String propertyName) {
-		for (int i = 0; i < this.propertyValueArray.length; i++) {
-			if (propertyValueArray[i].getName().equals(propertyName)) {
-				return propertyValueArray[i];
+		for (int i = 0; i < this.propertyValueList.size(); i++) {
+			PropertyValue pv = (PropertyValue) propertyValueList.get(i);
+			if (pv.getName().equals(propertyName)) {
+				return pv;
 			}
 		}
 		return null;
 	}
 
 	public boolean contains(String propertyName) {
-		return getPropertyValue(propertyName) != null;
+		return (getPropertyValue(propertyName) != null);
 	}
 
 	public PropertyValues changesSince(PropertyValues old) {
 		MutablePropertyValues changes = new MutablePropertyValues();
-		if (old == this)
+		if (old == this) {
 			return changes;
+		}
 
 		// for each property value in the new set
-		for (int i = 0; i < this.propertyValueArray.length; i++) {
-			PropertyValue newPv = propertyValueArray[i];
+		for (Iterator it = this.propertyValueList.iterator(); it.hasNext();) {
+			PropertyValue newPv = (PropertyValue) it.next();
 			// if there wasn't an old one, add it
 			PropertyValue pvOld = old.getPropertyValue(newPv.getName());
 			if (pvOld == null) {
@@ -228,8 +228,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	public String toString() {
 		PropertyValue[] pvs = getPropertyValues();
-		StringBuffer sb = new StringBuffer("MutablePropertyValues: length=" + pvs.length + "; ");
-		sb.append(StringUtils.arrayToDelimitedString(pvs, ","));
+		StringBuffer sb = new StringBuffer("PropertyValues: length=" + pvs.length + "; ");
+		sb.append(StringUtils.arrayToDelimitedString(pvs, "; "));
 		return sb.toString();
 	}
 
