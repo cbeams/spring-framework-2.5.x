@@ -32,7 +32,6 @@ import org.springframework.transaction.support.ResourceHolderSupport;
  * @author Juergen Hoeller
  * @since 06.05.2003
  * @see DataSourceTransactionManager
- * @see DataSourceTransactionObject
  * @see DataSourceUtils
  */
 public class ConnectionHolder extends ResourceHolderSupport {

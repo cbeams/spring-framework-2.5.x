@@ -90,10 +90,10 @@ public abstract class NumberUtils {
 	 * @see java.lang.Short#valueOf
 	 * @see java.lang.Integer#valueOf
 	 * @see java.lang.Long#valueOf
-	 * @see java.math.BigInteger(String)
+	 * @see java.math.BigInteger#BigInteger(String)
 	 * @see java.lang.Float#valueOf
 	 * @see java.lang.Double#valueOf
-	 * @see java.math.BigDecimal(String)
+	 * @see java.math.BigDecimal#BigDecimal(String)
 	 */
 	public static Number parseNumber(String text, Class targetClass) {
 		if (targetClass.equals(Short.class)) {

@@ -77,7 +77,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * <p>The given URL will be considered as relative to the web server,
 	 * not as relative to the current ServletContext.
 	 * @param url the URL to redirect to
-	 * @see RedirectView(String, boolean)
+	 * @see #RedirectView(String, boolean)
 	 */
 	public RedirectView(String url) {
 		setUrl(url);
