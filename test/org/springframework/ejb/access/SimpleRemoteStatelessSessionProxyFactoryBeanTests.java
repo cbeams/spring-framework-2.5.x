@@ -23,7 +23,7 @@ import org.springframework.jndi.JndiTemplate;
  * Tests Business Methods pattern
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBeanTests.java,v 1.3 2003-09-21 09:02:43 johnsonr Exp $
+ * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBeanTests.java,v 1.4 2003-12-19 11:28:17 jhoeller Exp $
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase {
 
@@ -63,7 +63,8 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 		fb.setJndiName(jndiName);
 		fb.setBusinessInterface(MyBusinessMethods.class);
 		fb.setJndiTemplate(jt);
-		
+		fb.setInContainer(true);
+
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
 
@@ -103,6 +104,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 		fb.setJndiName(jndiName);
 		fb.setBusinessInterface(MyBusinessMethods.class);
 		fb.setJndiTemplate(jt);
+		fb.setInContainer(true);
 	
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
