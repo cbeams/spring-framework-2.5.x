@@ -18,11 +18,11 @@ package org.springframework.rules;
 import java.util.Stack;
 
 import org.springframework.rules.functions.GetProperty;
-import org.springframework.rules.predicates.BeanPropertiesExpression;
-import org.springframework.rules.predicates.BeanPropertyValueConstraint;
-import org.springframework.rules.predicates.ParameterizedBeanPropertyExpression;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryNot;
+import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
+import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
+import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;

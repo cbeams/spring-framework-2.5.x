@@ -8,14 +8,11 @@ import junit.framework.TestCase;
 
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.functions.StringLength;
-import org.springframework.rules.predicates.BeanPropertiesExpression;
-import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.EqualTo;
 import org.springframework.rules.predicates.GreaterThan;
 import org.springframework.rules.predicates.GreaterThanEqualTo;
 import org.springframework.rules.predicates.LessThan;
 import org.springframework.rules.predicates.LessThanEqualTo;
-import org.springframework.rules.predicates.ParameterizedBeanPropertyExpression;
 import org.springframework.rules.predicates.ParameterizedBinaryPredicate;
 import org.springframework.rules.predicates.Range;
 import org.springframework.rules.predicates.Required;
@@ -24,6 +21,9 @@ import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
+import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
+import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
+import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 
 /**
  * @author Keith Donald

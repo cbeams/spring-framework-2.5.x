@@ -13,12 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.predicates;
+package org.springframework.rules.predicates.beans;
 
 import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.rules.LogicalOperator;
+import org.springframework.rules.predicates.CompoundUnaryPredicate;
+import org.springframework.rules.predicates.UnaryAnd;
+import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

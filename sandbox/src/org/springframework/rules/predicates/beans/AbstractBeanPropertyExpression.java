@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms of the Apache Software
  * License.
  */
-package org.springframework.rules.predicates;
+package org.springframework.rules.predicates.beans;
 
 import org.springframework.rules.BeanPropertyExpression;
 import org.springframework.util.Assert;

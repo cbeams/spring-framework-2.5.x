@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.predicates;
+package org.springframework.rules.predicates.beans;
 
 import org.springframework.rules.BinaryPredicate;
 import org.springframework.rules.functions.GetProperty;

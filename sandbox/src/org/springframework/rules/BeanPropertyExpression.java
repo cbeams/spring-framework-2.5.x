@@ -15,7 +15,6 @@ public interface BeanPropertyExpression extends UnaryPredicate {
      * Returns the constrained property name.
      * 
      * @return The property name
-     *  
      */
     public String getPropertyName();
 }

@@ -22,10 +22,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.CompoundUnaryPredicate;
 import org.springframework.rules.predicates.UnaryAnd;
+import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
 import org.springframework.validation.Errors;

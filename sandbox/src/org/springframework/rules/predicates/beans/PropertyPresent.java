@@ -13,10 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.predicates;
+package org.springframework.rules.predicates.beans;
 
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
+import org.springframework.rules.predicates.Required;
 
 /**
  * Predicate that tests if the specified bean property is "present" - that is,
