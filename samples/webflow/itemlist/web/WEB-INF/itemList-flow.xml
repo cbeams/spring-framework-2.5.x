@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
+	"http://www.springframework.org/dtd/web-flow.dtd">
+
+<web-flow id="itemList" start-state="itemList.view">
+
+	<view-state id="itemList.view">
+		<transition event="add" to="item.create"/>
+	</view-state>
+
+	<action-state id="item.create">
+		<action bean="item.create"/>
+		<transition event="success" to="item.view"/>
+	</action-state>
+	
+	<view-state id="item.view">
+		<transition event="submit" to="item.add"/>
+	</view-state>
+	
+	<action-state id="item.add">
+		<action bean="item.add"/>
+		<transition event="success" to="itemList.view"/>
+		<transition event="txError" to="itemList.view"/>
+	</action-state>
+	
+</web-flow>
