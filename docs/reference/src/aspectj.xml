@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter>
+  <title>AspectJ Integration</title>
+
+  <sect1>
+    <title>Overview</title>
+
+    <para>Spring&#39;s proxy-based AOP framework is well suited for handling
+    many generic middleware and application-specific problems. However, there
+    are times when a more powerful AOP solution is required: for example, if
+    we need to add additional fields to a class, or advise fine-grained
+    objects that aren&#39;t created by the Spring IoC container.</para>
+
+    <para>We recommend the use of AspectJ in such cases. Accordingly, as of
+    version 1.1, Spring provides a powerful integration with AspectJ.</para>
+  </sect1>
+
+  <sect1>
+    <title>Configuring AspectJ aspects using Spring IoC</title>
+
+    <para>The most important part of the Spring/AspectJ integration allows
+    Spring to configure AspectJ aspects using Dependency Injection. This
+    brings similar benefits to aspects as to objects. For example:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>There is no need for aspects to use ad hoc configuration
+        mechanisms; they can be configured in the same, consistent, approach
+        used for the entire application.</para>
+      </listitem>
+
+      <listitem>
+        <para>Aspects can depend on application objects. For example, a
+        security aspect can depend on a security manager, as we&#39;ll see in
+        an example shortly. </para>
+      </listitem>
+
+      <listitem>
+        <para>It&#39;s possible to obtain a reference to an aspect through the
+        relevant Spring context. This can allow for dynamic reconfiguration of
+        the aspect.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>AspectJ aspects can expose JavaBean properties for Setter Injection,
+    and even implement Spring lifecycle interfaces such as <literal>BeanFactoryAware</literal>.</para>
+
+    <remark>Note that AspectJ aspects cannot use Constructor Injection or
+    Method Injection. This limitation is due to the fact that aspects do not
+    have constructors that can be invoked like constructors of objects.</remark>
+
+    <sect2>
+      <title>&#34;Singleton&#34; aspects</title>
+
+      <para>In most cases, AspectJ aspects are singletons, with one instance
+      per class loader. This single instance is responsible for advising
+      multiple object instances.</para>
+
+      <para>A Spring IoC container cannot instantiate an aspect, as aspects
+      don&#39;t have callable constructors. But it can obtain a reference to
+      an aspect using the static <literal>aspectOf()</literal> method that
+      AspectJ defines for all aspects, and it can inject dependencies into
+      that aspect.</para>
+
+      <sect3>
+        <title>Example</title>
+
+        <para>Consider a security aspect, which depends on a security manager.
+        This aspects applies to all changes in the value of the
+        <literal>balance</literal> instance variable in the
+        <literal>Account</literal> class. (We couldn&#39;t do this in the same
+        way using Spring AOP.)</para>
+
+        <para>The AspectJ code for the aspect (one of the Spring/AspectJ
+        samples), is shown below. Note that the dependency on the
+        <literal>SecurityManager</literal> interface is expressed in a
+        JavaBean property:</para>
+
+        <para><programlisting>public aspect BalanceChangeSecurityAspect {
+
+   private SecurityManager securityManager;
+
+   public void setSecurityManager(SecurityManager securityManager) {
+      this.securityManager = securityManager;
+   }
+
+   private pointcut balanceChanged() : 
+      set(int Account.balance);
+
+   before() : balanceChanged() {
+      this.securityManager.checkAuthorizedToModify();
+   }
+}</programlisting></para>
+
+        <para>We configure this aspect in the same way as an ordinary class.
+        Note that the way in which we set the property reference is identical.
+        Note that we must use the <literal>factory-method</literal> attribute
+        to specify that we want the aspect &#34;created&#34; using the
+        <literal>aspectOf()</literal> static method. In fact, this is
+        <emphasis>locating</emphasis>, rather than, <literal>creating</literal>,
+        the aspect, but the Spring container doesn&#39;t care:</para>
+
+        <para><programlisting>&#60;bean id=&#34;securityAspect&#34; 
+   class=&#34;org.springframework.samples.aspectj.bank.BalanceChangeSecurityAspect&#34; 
+   factory-method=&#34;aspectOf&#34;
+&#62;
+   &#60;property name=&#34;securityManager&#34;&#62;
+      &#60;ref local=&#34;securityManager&#34;/&#62;
+   &#60;/property&#62;
+&#60;/bean&#62;</programlisting></para>
+
+        <para>We don&#39;t need to do anything in Spring configuration to
+        target this aspect. It contains the pointcut information in AspectJ
+        code that controls where it applies. Thus it can apply even to objects
+        not managed by the Spring IoC container.</para>
+      </sect3>
+
+      <sect3>
+        <title>Ordering issues</title>
+
+        <para>to be completed</para>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>Non-singleton aspects</title>
+
+      <para>** Complete material on pertarget etc.</para>
+    </sect2>
+
+    <sect2>
+      <title>Gotchas</title>
+
+      <para>to be completed</para>
+
+      <para>- Singleton issue</para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Using AspectJ pointcuts to target Spring advice</title>
+
+    <para>In a future release of Spring, we plan to provide the ability for
+    AspectJ pointcut expressions to be used in Spring XML or other bean
+    definition files, to target Spring advice. This will allow some of the
+    power of the AspectJ pointcut model to be applied to Spring&#39;s
+    proxy-based AOP framework. This will work in pure Java, and will not
+    require the AspectJ compiler. Only the subset of AspectJ pointcuts
+    relating to method invocation will be usable.</para>
+
+    <para>This feature is scheduled for Spring 1.2. It depends on AspectJ
+    enhancements. </para>
+
+    <para>This feature replaces our previous plan to create a pointcut
+    expression language for Spring.</para>
+  </sect1>
+
+  <sect1>
+    <title>Spring aspects for AspectJ</title>
+
+    <para>In a future release of Spring (probably 1.2), we will package some
+    Spring services, such as the declarative transaction management service,
+    as AspectJ aspects. This will enable them to be used by AspectJ users
+    without dependence on the Spring AOP framework--potentially, even without
+    dependence on the Spring IoC container.</para>
+
+    <para>This feature is probably of more interest to AspectJ users than
+    Spring users.</para>
+  </sect1>
+</chapter>
