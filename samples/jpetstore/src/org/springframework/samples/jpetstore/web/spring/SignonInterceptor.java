@@ -11,6 +11,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * @author Juergen Hoeller
  * @since 01.12.2003
+ * @version $Id: SignonInterceptor.java,v 1.3 2003-12-22 21:09:21 dkopylenko Exp $
  */
 public class SignonInterceptor extends HandlerInterceptorAdapter {
 
@@ -18,7 +19,7 @@ public class SignonInterceptor extends HandlerInterceptorAdapter {
 			throws Exception {
 		UserSession userSession = (UserSession) WebUtils.getSessionAttribute(request, "userSession");
 		if (userSession == null) {
-			String url = request.getRequestURI();
+			String url = request.getServletPath();
 			String query = request.getQueryString();
 			ModelAndView modelAndView = new ModelAndView("SignonForm");
 			if (query != null) {
