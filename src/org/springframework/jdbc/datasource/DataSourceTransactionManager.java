@@ -12,11 +12,10 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 
 /**
- * PlatformTransactionManager implementation for single data sources.
+ * PlatformTransactionManager implementation for single JDBC data sources.
  * Binds a JDBC connection from the specified data source to the thread,
  * potentially allowing for one thread connection per data source.
  *
@@ -70,7 +69,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	/**
 	 * Set the J2EE DataSource that this instance should manage transactions for.
 	 */
-	public final void setDataSource(DataSource dataSource) {
+	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
@@ -93,9 +92,11 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			ConnectionHolder holder = (ConnectionHolder) DataSourceUtils.getThreadObjectManager().getThreadObject(this.dataSource);
 			return new DataSourceTransactionObject(holder);
 		}
-		// no existing transaction -> create new holder
-		ConnectionHolder holder = new ConnectionHolder(DataSourceUtils.getConnection(this.dataSource));
-		return new DataSourceTransactionObject(holder);
+		else {
+			// no existing transaction -> create new holder
+			ConnectionHolder holder = new ConnectionHolder(DataSourceUtils.getConnection(this.dataSource));
+			return new DataSourceTransactionObject(holder);
+		}
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
@@ -124,7 +125,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 					con.setReadOnly(true);
 				}
 				catch (Exception ex) {
-					// driver has thrown SQLException or UnsupportedOperationException
+					// SQLException or UnsupportedOperationException
 					logger.warn("Could not set JDBC connection read-only", ex);
 				}
 			}
@@ -141,7 +142,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			DataSourceUtils.getThreadObjectManager().bindThreadObject(this.dataSource, txObject.getConnectionHolder());
 		}
 		catch (SQLException ex) {
-			throw new CannotCreateTransactionException("Cannot configure connection", ex);
+			throw new CannotCreateTransactionException("Could not configure connection", ex);
 		}
 	}
 
@@ -157,10 +158,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			txObject.getConnectionHolder().getConnection().commit();
 		}
 		catch (SQLException ex) {
-			throw new UnexpectedRollbackException("Cannot commit", ex);
-		}
-		finally {
-			closeConnection(txObject);
+			throw new TransactionSystemException("Could not commit", ex);
 		}
 	}
 
@@ -171,10 +169,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			txObject.getConnectionHolder().getConnection().rollback();
 		}
 		catch (SQLException ex) {
-			throw new TransactionSystemException("Cannot rollback", ex);
-		}
-		finally {
-			closeConnection(txObject);
+			throw new TransactionSystemException("Could not rollback", ex);
 		}
 	}
 
@@ -184,8 +179,10 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		txObject.getConnectionHolder().setRollbackOnly();
 	}
 
-	private void closeConnection(DataSourceTransactionObject txObject) {
-		// remote the connection holder from the thread
+	protected void cleanupAfterCompletion(Object transaction) {
+		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
+
+		// remove the connection holder from the thread
 		DataSourceUtils.getThreadObjectManager().removeThreadObject(this.dataSource);
 		// reset connection
 		Connection con = txObject.getConnectionHolder().getConnection();
@@ -194,35 +191,28 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			// reset to auto-commit
 			con.setAutoCommit(true);
 
-			// reset read-only
-			try {
-				if (con.isReadOnly()) {
-					con.setReadOnly(false);
-				}
-			}
-			catch (Exception ex) {
-				// driver has thrown SQLException or UnsupportedOperationException
-				logger.warn("Could not reset read-only status of JDBC connection", ex);
-			}
-
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (txObject.getPreviousIsolationLevel() != null) {
 				logger.debug("Resetting isolation level to " + txObject.getPreviousIsolationLevel());
 				con.setTransactionIsolation(txObject.getPreviousIsolationLevel().intValue());
 			}
+
+			// reset read-only
+			if (con.isReadOnly()) {
+				con.setReadOnly(false);
+			}
+		}
+		catch (Exception ex) {
+			// SQLException or UnsupportedOperationException
+			logger.warn("Could not reset JDBC connection", ex);
 		}
 
-		catch (SQLException ex) {
-			logger.warn("Could not reset JDBC connection [" + con + "]", ex);
+		try {
+			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
-		finally {
-			try {
-				DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
-			}
-			catch (CleanupFailureDataAccessException ex) {
-				// just log it, to keep a transaction-related exception
-				logger.error("Cannot close connection after transaction", ex);
-			}
+		catch (CleanupFailureDataAccessException ex) {
+			// just log it, to keep a transaction-related exception
+			logger.error("Could not close connection after transaction", ex);
 		}
 	}
 

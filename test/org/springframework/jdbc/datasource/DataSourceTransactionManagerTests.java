@@ -7,15 +7,14 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -313,7 +312,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
 		con.commit();
-		conControl.setThrowable(new SQLException("Cannot commit"));
+		conControl.setThrowable(new SQLException("Cannot commit"), 1);
 		con.setAutoCommit(true);
 		conControl.setVoidCallable(1);
 		con.isReadOnly();
@@ -331,9 +330,49 @@ public class DataSourceTransactionManagerTests extends TestCase {
 					// something transactional
 				}
 			});
-			fail("Should have thrown UnexpectedRollbackException");
+			fail("Should have thrown TransactionSystemException");
 		}
-		catch (UnexpectedRollbackException ex) {
+		catch (TransactionSystemException ex) {
+			// expected
+		}
+
+		conControl.verify();
+	}
+
+	public void testDataSourceTransactionManagerWithExceptionOnCommitAndRollbackOnCommitFailure() throws Exception {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		DataSource ds = (DataSource) dsControl.getMock();
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		con.setAutoCommit(false);
+		conControl.setVoidCallable(1);
+		con.commit();
+		conControl.setThrowable(new SQLException("Cannot commit"), 1);
+		con.rollback();
+		conControl.setVoidCallable(1);
+		con.setAutoCommit(true);
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+		conControl.replay();
+		dsControl.replay();
+
+		DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);
+		tm.setRollbackOnCommitFailure(true);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					// something transactional
+				}
+			});
+			fail("Should have thrown TransactionSystemException");
+		}
+		catch (TransactionSystemException ex) {
 			// expected
 		}
 
@@ -350,7 +389,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
 		con.rollback();
-		conControl.setThrowable(new SQLException("Cannot rollback"));
+		conControl.setThrowable(new SQLException("Cannot rollback"), 1);
 		con.setAutoCommit(true);
 		conControl.setVoidCallable(1);
 		con.isReadOnly();
