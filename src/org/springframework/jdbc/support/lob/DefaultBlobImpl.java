@@ -19,7 +19,7 @@ import org.springframework.util.FileCopyUtils;
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
- * @see DefaultBlobCreator
+ * @see DefaultLobHandler
  */
 public class DefaultBlobImpl implements Blob {
 

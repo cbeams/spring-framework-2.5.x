@@ -10,8 +10,9 @@ import java.sql.PreparedStatement;
 
 import junit.framework.TestCase;
 
-import org.springframework.jdbc.support.lob.DefaultBlobCreator;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.DefaultBlobImpl;
+import org.springframework.jdbc.support.lob.BlobCreator;
 import org.springframework.util.FileCopyUtils;
 
 import org.easymock.MockControl;
@@ -20,10 +21,10 @@ import org.easymock.MockControl;
  * @author Juergen Hoeller
  * @since 17.12.2003
  */
-public class BlobCreatorTests extends TestCase {
+public class DefaultLobHandlerTests extends TestCase {
 
-	public void testDefaultCreateBlob() throws SQLException, IOException {
-		DefaultBlobCreator blobCreator = new DefaultBlobCreator();
+	public void testCreateBlob() throws SQLException, IOException {
+		BlobCreator blobCreator = (new DefaultLobHandler()).getBlobCreator();
 
 		Blob blob = blobCreator.createBlob(null, "testContent".getBytes());
 		assertTrue(blob instanceof DefaultBlobImpl);
@@ -42,8 +43,21 @@ public class BlobCreatorTests extends TestCase {
 		assertEquals("testContent", new String(blob.getBytes(1, (int) blob.length())));
 	}
 
-	public void testDefaultSetBlobAsBinaryStream() throws SQLException, IOException {
-		DefaultBlobCreator blobCreator = new DefaultBlobCreator();
+	public void testSetBlobAsBytes() throws SQLException {
+		BlobCreator blobCreator = (new DefaultLobHandler()).getBlobCreator();
+		byte[] bytes = "testContent".getBytes();
+
+		MockControl psControl = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement ps = (PreparedStatement) psControl.getMock();
+		ps.setBytes(1, bytes);
+		psControl.replay();
+
+		blobCreator.setBlobAsBytes(ps, 1, bytes);
+		psControl.verify();
+	}
+
+	public void testSetBlobAsBinaryStream() throws SQLException, IOException {
+		BlobCreator blobCreator = (new DefaultLobHandler()).getBlobCreator();
 		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
 
 		MockControl psControl = MockControl.createControl(PreparedStatement.class);
