@@ -2,6 +2,7 @@ package org.springframework.transaction.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -36,7 +37,7 @@ import org.springframework.transaction.TransactionStatus;
  * @see org.springframework.transaction.PlatformTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-public class TransactionTemplate extends DefaultTransactionDefinition {
+public class TransactionTemplate extends DefaultTransactionDefinition implements InitializingBean{
 
 	private final Log logger = LogFactory.getLog(getClass());
 
