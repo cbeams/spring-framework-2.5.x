@@ -13,8 +13,8 @@ import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestDataBinder;
 
 /**
- * <p>Controller implementation which creates an object (the command object)
- * on receipt of a request and attempts to populate this object with request parameters.</p>
+ * <p>Controller implementation which creates an object (the command object) on
+ * receipt of a request and attempts to populate this object with request parameters.</p>
  *
  * <p>This controller is the base for all controllers wishing to populate
  * JavaBeans based on request parameters, validate the content of such
@@ -251,11 +251,17 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Create a new binder instance for the given command and request.
+	 * Called by bindAndValidate. Can be overridden to plug in custom
+	 * ServletRequestDataBinder subclasses.
+	 * <p>Default implementation creates a standard ServletRequestDataBinder
+	 * and invokes initBinder. Note that initBinder will not be invoked
+	 * automatically if you override this method!
 	 * @param command command to bind onto
 	 * @param request current request
 	 * @return the new binder instance
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
+	 * @see #initBinder
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command) throws Exception {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
