@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -65,6 +66,7 @@ public abstract class GenericFilterBean implements Filter {
 	/* The FilterConfig of this filter */
 	private FilterConfig filterConfig;
 
+
 	/**
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
@@ -76,8 +78,26 @@ public abstract class GenericFilterBean implements Filter {
 	}
 
 	/**
+	 * Alternative way of initializing this filter.
+	 * Used by Servlet Filter version that shipped with WebLogic 6.1.
+	 * @param filterConfig the configuration for this filter
+	 * @throws FatalBeanException wrapping a ServletException
+	 * thrown by the init method
+	 * @see #init
+	 */
+	public final void setFilterConfig(FilterConfig filterConfig) {
+		try {
+			init(filterConfig);
+		}
+		catch (ServletException ex) {
+			throw new FatalBeanException("Couldn't initialize filter bean", ex);
+		}
+	}
+
+	/**
 	 * Map config parameters onto bean properties of this filter, and
 	 * invoke subclass initialization.
+	 * @param filterConfig the configuration for this filter
 	 * @throws ServletException if bean properties are invalid (or required
 	 * properties are missing), or if subclass initialization fails.
 	 * @see #initFilterBean
@@ -117,11 +137,13 @@ public abstract class GenericFilterBean implements Filter {
 	}
 
 	/**
-	 * Make the FilterConfig of this filter available to subclasses.
+	 * Make the FilterConfig of this filter available.
 	 * Analogous to GenericServlet's getServletConfig.
+	 * <p>Public to resemble the getFilterConfig method of the
+	 * Servlet Filter version that shipped with WebLogic 6.1.
 	 * @see javax.servlet.GenericServlet#getServletConfig
 	 */
-	protected final FilterConfig getFilterConfig() {
+	public final FilterConfig getFilterConfig() {
 		return this.filterConfig;
 	}
 
