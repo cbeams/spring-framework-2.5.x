@@ -66,7 +66,7 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * attribute mapper of the specified implementation class, using the given
 	 * autowire policy. Note: not all registries may support this advanced
 	 * feature (Spring does though ;-)).
-	 * @param implementationClass the implementation class
+	 * @param attributeMapperImplementationClass the implementation class
 	 * @param autowireMode the autowire policy
 	 * @return the instantiated (and possibly autowired) attribute mapper
 	 */
