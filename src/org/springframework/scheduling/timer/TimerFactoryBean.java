@@ -34,8 +34,8 @@ import org.springframework.beans.factory.InitializingBean;
  * itself in application code.
  *
  * <p>Note that Timer uses a TimerTask instance that is shared between
- * repeated executions, in contrast to Quartz which instantiates a new Job
- * for each execution.
+ * repeated executions, in contrast to Quartz which instantiates a new
+ * Job for each execution.
  *
  * @author Juergen Hoeller
  * @since 19.02.2004
@@ -53,6 +53,7 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 
 	private Timer timer;
 
+
 	/**
 	 * Register a list of ScheduledTimerTask objects with the Timer that
 	 * this FactoryBean creates.
@@ -66,7 +67,7 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	/**
 	 * Set whether the timer should use a daemon thread,
 	 * just executing as long as the application itself is running.
-	 * Default is true: In a J2EE environment, the container is in
+	 * <p>Default is true: In a J2EE environment, the container is in
 	 * control of the application lifecycle.
 	 * @see java.util.Timer#Timer(boolean)
 	 */
@@ -101,6 +102,7 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 		return new Timer(daemon);
 	}
 
+
 	public Object getObject() {
 		return this.timer;
 	}
@@ -115,6 +117,7 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 
 	/**
 	 * This implementation cancels the Timer, stopping all scheduled tasks.
+	 * @see java.util.Timer#cancel
 	 */
 	public void destroy() {
 		logger.info("Cancelling Timer");

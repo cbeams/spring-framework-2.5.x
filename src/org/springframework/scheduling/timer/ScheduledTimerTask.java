@@ -47,6 +47,7 @@ public class ScheduledTimerTask {
 
 	private boolean fixedRate = false;
 
+
 	public ScheduledTimerTask() {
 	}
 
@@ -56,6 +57,7 @@ public class ScheduledTimerTask {
 		this.period = period;
 		this.fixedRate = fixedRate;
 	}
+
 
 	/**
 	 * Set the TimerTask to schedule.
@@ -106,7 +108,7 @@ public class ScheduledTimerTask {
 	/**
 	 * Set whether to schedule as fixed-rate execution, rather than
 	 * fixed-delay execution. Default is false, i.e. fixed delay.
-	 * See Timer javadoc for details on those execution modes.
+	 * <p>See Timer javadoc for details on those execution modes.
 	 * @see java.util.Timer#schedule(TimerTask, long, long)
 	 * @see java.util.Timer#scheduleAtFixedRate(TimerTask, long, long)
 	 */
