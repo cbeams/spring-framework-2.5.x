@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -83,7 +84,7 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 	}
 
 	/**
-	 * Set the maximum allowed file size (in bytes) before uploads are refused.
+	 * Set the maximum allowed size (in bytes) before uploads are refused.
 	 * -1 indicates no limit (the default).
 	 * @param maxUploadSize the maximum file size allowed
 	 */
@@ -92,7 +93,7 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 	}
 
 	/**
-	 * Return the maximum allowed file size (in bytes) before uploads are refused.
+	 * Return the maximum allowed size (in bytes) before uploads are refused.
 	 */
 	protected int getMaxUploadSize() {
 		return maxUploadSize;
@@ -170,7 +171,14 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 			return new CosMultipartHttpServletRequest(request, multipartRequest);
 		}
 		catch (IOException ex) {
-			throw new MultipartException("Could not parse multipart request", ex);
+			// Unfortunately, COS always throws an IOException,
+			// so we need to check the error message here!
+			if (ex.getMessage().indexOf("exceeds limit") != -1) {
+				throw new MaxUploadSizeExceededException(this.maxUploadSize, ex);
+			}
+			else {
+				throw new MultipartException("Could not parse multipart request", ex);
+			}
 		}
 	}
 

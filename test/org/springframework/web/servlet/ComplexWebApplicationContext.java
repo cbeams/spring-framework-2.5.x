@@ -37,6 +37,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -93,7 +94,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("order", "1");
-		pvs.addPropertyValue("exceptionMappings", "java.lang.IllegalAccessException=failed2\norg.springframework.web.bind.ServletRequestBindingException=failed3");
+		pvs.addPropertyValue("exceptionMappings", "java.lang.IllegalAccessException=failed2\n" +
+		                                          "org.springframework.web.bind.ServletRequestBindingException=failed3");
 		pvs.addPropertyValue("defaultErrorView", "failed0");
 		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
 
@@ -303,6 +305,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
+			if (request.getAttribute("fail") != null) {
+				throw new MaxUploadSizeExceededException("failed");
+			}
 			if (request instanceof MultipartHttpServletRequest) {
 				throw new IllegalStateException("Already a multipart request");
 			}

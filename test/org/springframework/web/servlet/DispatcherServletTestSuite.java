@@ -33,7 +33,9 @@ import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockServletConfig;
 import org.springframework.web.mock.MockServletContext;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.mvc.BaseCommandController;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -195,8 +197,20 @@ public class DispatcherServletTestSuite extends TestCase {
 				(ComplexWebApplicationContext.MockMultipartResolver) complexDispatcherServlet.getWebApplicationContext().getBean("multipartResolver");
 		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
 		complexDispatcherServlet.doGet(multipartRequest, response);
+		System.out.println(response.forwarded);
 		multipartResolver.cleanupMultipart(multipartRequest);
 		assertTrue(multipartResolver.cleaned);
+	}
+
+	public void testMultipartResolutionFailed() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do;abc=def");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		request.setAttribute("fail", Boolean.TRUE);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.doGet(request, response);
+		assertTrue("forwarded to failed", "failed0.jsp".equals(response.forwarded));
+		assertTrue("correct exception", request.getAttribute(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE) instanceof MaxUploadSizeExceededException);
 	}
 
 	public void testHandlerInterceptorAbort() throws Exception {

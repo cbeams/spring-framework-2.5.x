@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -232,6 +233,9 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 				}
 			}
 			return new DefaultMultipartHttpServletRequest(request, multipartFiles, parameters);
+		}
+		catch (FileUploadBase.SizeLimitExceededException ex) {
+			throw new MaxUploadSizeExceededException(this.fileUpload.getSizeMax(), ex);
 		}
 		catch (FileUploadException ex) {
 			throw new MultipartException("Could not parse multipart request", ex);
