@@ -3,20 +3,26 @@
 
 <beans>
 
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
-		<property name="suffix"><value>.jsp</value></property>
+	<!-- A generic front controller for the entire app.  A view that kicks off a new flow execution
+	     may parameterize this controller with a _flowId parameter.  A view participating in an
+	     existing flow execution may simply pass it the appropriate _flowExecutionId and _eventId. -->
+	<bean id="phonebookFrontController" name="/phonebook.htm" class="org.springframework.web.flow.mvc.FlowController">
+		<property name="cacheSeconds"><value>0</value></property>
 	</bean>
 	
 	<!-- search flow beans -->
 
+	<!-- A specific front controller, managing executions of the search flow.
+         Note: this definition is completely optional, as we can define a generic controller
+         for the entire app as above and have views parameterize it with the top-level flow
+         we wish to create a new execution for (or an existing _flowExecutionId if participating in an
+         existing flow.)  -->
 	<bean id="searchFrontController" name="/search.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="cacheSeconds"><value>0</value></property>
 		<property name="flow"><ref bean="person.Search"/></property>
 	</bean>
-	
-	<!-- xml flow builder definition for the search flow -->
-	<!--
+
+	<!-- Xml FlowBuilder definition for the search flow -->
 	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
@@ -24,14 +30,19 @@
 			</bean>
 		</property>
 	</bean>
-	-->
 	
-	<!-- java flow builder definition for the search flow -->
+	<!-- Java FlowBuilder definition for the search flow.
+	     Uncomment if you wish to plugin this FlowBuilder instead of the xml implementation!
+	     (be sure to comment out the xml variant)
+	     Notice the consistency: you may plug in any other FlowBuilder implementation in
+	     exactly the same fashion -->
+	<--
 	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.samples.phonebook.web.flow.SearchPersonFlowBuilder" autowire="byType"/>
 		</property>
 	</bean>
+	-->
 	
 	<bean id="person.Search.criteria.bindAndValidate" class="org.springframework.web.flow.action.BindAndValidateAction">
 		<property name="formObjectName"><value>query</value></property>
@@ -45,10 +56,18 @@
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
+	<!-- The set action sets request parameter attribute(s) as attributes in the flow model.
+	     The exact mapping(s) policies are fully configurable; in this case, the
+	     "id" request parameter is mapped to the "id" attribute and converted
+	     to a java.lang.Long in the target flow model!  -->
 	<bean id="person.Search.id.set" class="org.springframework.web.flow.action.SetAction">
 		<property name="mapping"><value>id,java.lang.Long</value></property>
 	</bean>
 
+	<!-- The model mapper maps attributes in a parent flow down to a spawning child subflow
+	     as input.  The mapper may also map output attributes up to the parent flow when the child
+	     subflow ends.  In this case the "id" attribute will be mapped to the "id" attribute,
+	     as the Person.Detail flow expects that a person ID be provided as as input when spawned. -->
 	<bean id="id.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">
 		<property name="inputMappings">
 			<list>
@@ -64,8 +83,7 @@
 		<property name="flow"><ref bean="person.Detail"/></property>
 	</bean>
 
-	<!-- xml flow builder definition for the detail flow -->
-	<!--
+	<!-- xml FlowBuilder definition for the detail flow -->
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
@@ -75,29 +93,45 @@
 			</bean>
 		</property>
 	</bean>
-	-->
 	
-	<!-- java flow builder definition for the detail flow -->
+	<!-- Java flow builder definition for the detail flow.
+	     Uncomment if you wish to plugin this flow builder instead of the xml implementation!
+	     (be sure to comment out the xml variant)
+	     Notice the consistency: you may plug in any other FlowBuilder implementation in
+	     exactly the same fashion -->
+	<--
+	<!--
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.samples.phonebook.web.flow.PersonDetailFlowBuilder" autowire="byType"/>
 		</property>
 	</bean>
-
+	-->
+	
 	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction" autowire="byType">
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
+	<!-- A converter registry, a lightweight alternative to the PropertyEditor -->
 	<bean id="converter.locator" class="org.springframework.binding.convert.support.DefaultConverterLocator" autowire="byType"/>
 
+	<!-- A formatter registry, a thread-safe cache for Formatters -->
 	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterLocator"/>
 
+	<!-- The set action sets request parameter attribute(s) as attributes in the flow model.
+	     The exact mapping(s) policies are fully configurable; in this case, the
+	     "id" request parameter is mapped to the "colleagueId" attribute and converted
+	     to a java.lang.Long in the target flow model!  -->
 	<bean id="person.Detail.colleagueId.set" class="org.springframework.web.flow.action.SetAction">
 		<property name="mapping">
 			<value>id->colleagueId,java.lang.Long</value>
 		</property>
 	</bean>
 
+	<!-- The model mapper maps attributes in a parent flow down to a spawning child subflow
+	     as input.  The mapper may also map output attributes up to the parent flow when the child
+	     subflow ends.  In this case the "colleagueId" attribute will be mapped to the "id" attribute,
+	     as the Person.Detail flow expects that a person ID be provided as as input when spawned. -->
 	<bean id="colleagueId.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">
 		<property name="inputMappings">
 			<map>
@@ -105,5 +139,10 @@
 			</map>
 		</property>
 	</bean>
-	
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
+		<property name="suffix"><value>.jsp</value></property>
+	</bean>
+
 </beans>
