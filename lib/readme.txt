@@ -50,11 +50,11 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's FreeMarker support
 
 * hibernate/ehcache.jar
-- EHCache 0.6 (http://ehcache.sourceforge.net)
+- EHCache 0.7 (http://ehcache.sourceforge.net)
 - required for running Petclinic (by Hibernate)
 
 * hibernate/hibernate2.jar, hibernate/odmg.jar
-- Hibernate 2.1.3 (http://www.hibernate.org)
+- Hibernate 2.1.4 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
@@ -146,7 +146,7 @@ distribution/website before using any of them in your own applications.
 - required for running Petclinic (by Hibernate)
 
 * jakarta-commons/commons-dbcp.jar
-- Commons DBCP 1.2 (http://jakarta.apache.org/commons/dbcp)
+- Commons DBCP 1.2.1 (http://jakarta.apache.org/commons/dbcp)
 - required for building the framework
 - required at runtime when using Spring's CommonsDbcpNativeJdbcExtractor
 - required for running JPetStore and Image Database
