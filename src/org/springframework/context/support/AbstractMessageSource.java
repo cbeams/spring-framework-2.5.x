@@ -43,11 +43,12 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 
 	private boolean useCodeAsDefaultMessage = false;
 
-	public final void setParentMessageSource(MessageSource parent) {
+
+	public void setParentMessageSource(MessageSource parent) {
 		this.parentMessageSource = parent;
 	}
 
-	public final MessageSource getParentMessageSource() {
+	public MessageSource getParentMessageSource() {
 		return parentMessageSource;
 	}
 
@@ -60,6 +61,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	public void setUseCodeAsDefaultMessage(boolean useCodeAsDefaultMessage) {
 		this.useCodeAsDefaultMessage = useCodeAsDefaultMessage;
 	}
+
 
 	public final String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
 		try {
@@ -119,7 +121,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		}
 		MessageFormat messageFormat = resolveCode(code, locale);
 		if (messageFormat != null) {
-			return messageFormat.format(resolveArgs(args, locale));
+			return messageFormat.format(resolveArguments(args, locale));
 		}
 		else {
 			if (this.parentMessageSource != null) {
@@ -135,18 +137,17 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	}
 
 	/**
-	 * Search through an array of objects, finds any MessageSourceResolvable
-	 * objects, and resolves them.
+	 * Search through the given array of objects, find any
+	 * MessageSourceResolvable objects and resolve them.
 	 * <p>Allows for messages to have MessageSourceResolvables as arguments.
-	 * @param args array of arguments for a Message
+	 * @param args array of arguments for a message
 	 * @param locale the locale to resolve through
-	 * @return an array of arguments that have any MessageSourceResolvables resolved
+	 * @return an array of arguments with any MessageSourceResolvables resolved
 	 */
-	private Object[] resolveArgs(Object[] args, Locale locale) {
+	private Object[] resolveArguments(Object[] args, Locale locale) {
 		if (args == null) {
 			return new Object[0];
 		}
-
 		List resolvedArgs = new ArrayList();
 		for (int i = 0; i < args.length; i++) {
 			if (args[i] instanceof MessageSourceResolvable) {
@@ -157,17 +158,17 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 				resolvedArgs.add(args[i]);
 			}
 		}
-
 		return resolvedArgs.toArray(new Object[resolvedArgs.size()]);
 	}
+	
 
 	/**
 	 * Subclasses must implement this method to resolve a message.
 	 * <p>Returns a MessageFormat instance rather than a message String,
 	 * to allow for appropriate caching of MessageFormats in subclasses.
 	 * @param code the code of the message to resolve
-	 * @param locale the Locale to resolve the code for.
-	 * Subclasses are encouraged to support internationalization.
+	 * @param locale the Locale to resolve the code for
+	 * (subclasses are encouraged to support internationalization)
 	 * @return the MessageFormat for the message, or null if not found
 	 */
 	protected abstract MessageFormat resolveCode(String code, Locale locale);
