@@ -48,8 +48,7 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 		parent.refresh();
 		parent.addListener(parentListener) ;
 
-		StaticMessageSource parentMessageSource = (StaticMessageSource) parent.getBean("messageSource");
-		parentMessageSource.addMessage("code1", Locale.getDefault(), "message1");
+		parent.getStaticMessageSource().addMessage("code1", Locale.getDefault(), "message1");
 
 		this.sac = new StaticApplicationContext(parent);
 		sac.registerSingleton("beanThatListens", BeanThatListens.class, new MutablePropertyValues());
@@ -60,15 +59,14 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 		sac.refresh();
 		sac.addListener(listener);
 
-		StaticMessageSource sacMessageSource = (StaticMessageSource) sac.getBean("messageSource");
-		sacMessageSource.addMessage("code2", Locale.getDefault(), "message2");
+		sac.getStaticMessageSource().addMessage("code2", Locale.getDefault(), "message2");
 
 		return sac;
 	}
 
 	/** Overridden */
 	public void testCount() {
-		assertCount(16);
+		assertCount(15);
 	}
 
 }

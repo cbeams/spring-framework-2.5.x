@@ -50,7 +50,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	/** Overridden */
 	public void testCount() {
 		// These are only checked for current Ctx (not parent ctx)
-		assertCount(16);
+		assertCount(15);
 	}
 
 	public void testMessageSource() throws NoSuchMessageException {
@@ -199,11 +199,9 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 		Map m = new HashMap();
 		m.put("name", "Roderick");
-		parent.registerPrototype("rod", org.springframework.beans.TestBean.class,
-		                         new MutablePropertyValues(m));
+		parent.registerPrototype("rod", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
-		parent.registerPrototype("father", org.springframework.beans.TestBean.class,
-		                         new MutablePropertyValues(m));
+		parent.registerPrototype("father", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
 
 		parent.refresh();
 		parent.addListener(parentListener);
@@ -221,12 +219,11 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		sac.refresh();
 		sac.addListener(listener);
 
-		StaticMessageSource staticMsgSrc = (StaticMessageSource) sac.getBean(
-		    AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME);
-		staticMsgSrc.addMessage("message.format.example1", Locale.US, MSG_TXT1_US);
-		staticMsgSrc.addMessage("message.format.example2", Locale.US, MSG_TXT2_US);
-		staticMsgSrc.addMessage("message.format.example3", Locale.US, MSG_TXT3_US);
-		staticMsgSrc.addMessage("message.format.example1", Locale.UK, MSG_TXT1_UK);
+		StaticMessageSource messageSource = sac.getStaticMessageSource();
+		messageSource.addMessage("message.format.example1", Locale.US, MSG_TXT1_US);
+		messageSource.addMessage("message.format.example2", Locale.US, MSG_TXT2_US);
+		messageSource.addMessage("message.format.example3", Locale.US, MSG_TXT3_US);
+		messageSource.addMessage("message.format.example1", Locale.UK, MSG_TXT1_UK);
 
 		return sac;
 	}
