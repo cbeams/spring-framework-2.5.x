@@ -19,15 +19,15 @@ public class ClassLoaderUtilsTests extends TestCase {
 
 	public void	testClassPackageAsResourcePath() {
 		String result =	ClassLoaderUtils.classPackageAsResourcePath(Proxy.class);
-		assertTrue(result.equals("/java/lang/reflect"));
+		assertTrue(result.equals("java/lang/reflect"));
 	}
 
 	public void	testAddResourcePathToPackagePath() {
-		String result =	"/java/lang/reflect/xyzabc.xml";
+		String result =	"java/lang/reflect/xyzabc.xml";
 		assertEquals(result, ClassLoaderUtils.addResourcePathToPackagePath(Proxy.class,	"xyzabc.xml"));
 		assertEquals(result, ClassLoaderUtils.addResourcePathToPackagePath(Proxy.class,	"/xyzabc.xml"));
 	
-		assertEquals("/java/lang/reflect/a/b/c/d.xml",
+		assertEquals("java/lang/reflect/a/b/c/d.xml",
 						ClassLoaderUtils.addResourcePathToPackagePath(Proxy.class, "a/b/c/d.xml"));
 	}
 

@@ -66,14 +66,17 @@ public abstract class ClassLoaderUtils {
 	}
 
 	/**
-	 * Return a path suitable for use with Class.getResource. Built by taking
-	 * the package of the specified	class file,	converting all dots	('.') to slashes
-	 * ('/'), adding a trailing	slash, and concatenating the specified resource	name
-	 * to this.	As such, this function may be used to build	a path suitable	for	loading
-	 * a resource file that	is in the same package as a	class file.
+	 * Return a path suitable for use with ClassLoader.getResource (also suitable
+	 * for use with Class.getResource by prepending a slash ('/') to the return
+	 * value. Built by taking the package of the specified class file, converting
+	 * all dots	('.') to slashes ('/'), adding a trailing slash if necesssary, and
+	 * concatenating the specified resource name to this. As such, this function may
+	 * be used to build a path suitable for loading a resource file that is in the
+	 * same package as a class file.
 	 * @param clazz	the	Class whose	package	will be	used as	the	base.
 	 * @param resourceName the resource	name to	append.	A leading slash	is optional.
 	 * @return the built-up	resource path
+	 * @see java.lang.ClassLoader#getResource
 	 * @see java.lang.Class#getResource
 	 */
 	public static String addResourcePathToPackagePath(Class	clazz, String resourceName)	{
@@ -84,17 +87,24 @@ public abstract class ClassLoaderUtils {
 	}
 
 	/**
-	 * Given an	input class	object,	returns	a string which consists	of the class's package
-	 * name	as a pathname, i.e., a leading '/' is added, and all dots ('.')	are	replaced by
-	 * slashes ('/'). A	trailing slash is <b>not</b> added.
-	 * @param clazz	the	input class. A null value will result in "/" being returned.
-	 * @return a path which	represents the package name, including a leading slash
+	 * Given an	input class	object,	returns	a string which consists	of the class's
+	 * package name	as a pathname, i.e., all dots ('.')	are	replaced by slashes
+	 * ('/'). Neither a leading nor trailing slash is added. The result could be
+	 * concatenated with a slash and the name of a resource, and fed directly to
+	 * ClassLoader.getResource(). For it to be fed to Class.getResource, a leading
+	 * slash would also have to be prepended to the return value. 
+	 * @param clazz	the	input class. A null value or the default (empty) package
+	 * will result in an empty string ("") being returned.
+	 * @return a path which	represents the package name
+	 * @see java.lang.ClassLoader#getResource
+	 * @see java.lang.Class#getResource
 	 */
 	public static String classPackageAsResourcePath(Class clazz) {
-		StringBuffer retval	= new StringBuffer("/");
-		if (clazz != null)
-			retval.append(clazz.getPackage().getName().replace('.', '/'));
-		return retval.toString();
+		
+		if (clazz == null || clazz.getPackage() == null)
+			return "";
+
+		return clazz.getPackage().getName().replace('.', '/');
 	}
   
 	/**
