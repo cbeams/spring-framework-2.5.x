@@ -34,10 +34,12 @@ public class JmsSender11 extends AbstractJmsSender {
         MessageCreator messageCreator,
         int deliveryMode,
         int priority,
-        int timetoLive)
+        long timetoLive)
         throws JmsException {
         send(
             destinationName,
+            null,
+            false,
             messageCreator,
             false,
             deliveryMode,
@@ -47,7 +49,30 @@ public class JmsSender11 extends AbstractJmsSender {
 
     public void send(String destinationName, MessageCreator messageCreator)
         throws JmsException {
-        send(destinationName, messageCreator, true, 0, 0, 0);
+        send(destinationName, null, false, messageCreator, true, 0, 0, 0);
+    }
+
+    public void send(Destination d, MessageCreator messageCreator)
+        throws JmsException {
+		send(null, d, true, messageCreator, true, 0, 0, 0);
+    }
+
+    public void send(
+        Destination d,
+        MessageCreator messageCreator,
+        int deliveryMode,
+        int priority,
+        long timeToLive) {
+        	
+			send(null,
+				 d,
+				 true,
+				 messageCreator,
+				 false,
+				 deliveryMode,
+				 priority,
+				 timeToLive);	
+
     }
 
     public void send(String destinationName, JmsSenderCallback callback)
@@ -57,27 +82,35 @@ public class JmsSender11 extends AbstractJmsSender {
     }
 
     public void execute(SessionCallback action) throws JmsException {
-        throw new RuntimeException("not yet impl.");
-        // TODO Auto-generated method stub
+        Connection connection = null;
+        try {
+            connection = getConnectionFactory().createConnection();
+            Session session =
+                connection.createSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
+            action.doInJms(session);
 
-    }
-
-    public void execute(TopicSessionCallback action) throws JmsException {
-        throw new RuntimeException("not yet impl.");
-        // TODO Auto-generated method stub
-
-    }
-
-    public void execute(QueueSessionCallback action) throws JmsException {
-        throw new RuntimeException("not yet impl.");
-        // TODO Auto-generated method stub
-
+        } catch (JMSException e) {
+            throw new JmsException("Could not call SessionCallback", e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    logger.warn("Failed to close the connection", e);
+                }
+            }
+        }
     }
 
     /**
      * Send a message on a destination optionally using values for deliveryMode,
      * priority, and timetoLive.
-     * @param queueName the queue to send the message to
+     * @param destinationName the queue to send the message to
+     * @param destination the destination to send the message to
+     * @param explicitDestination if true, use the javax.jms.Destination parameter, otherwise lookup
+     * the javax.jms.Destination using the string destinationName.
      * @param messageCreator the message creator callback used to create a message
      * @param ignoreQOS if true, send the message using default values of the
      * deliveryMode, priority, and timetoLive.  Some vendors administration options
@@ -88,11 +121,13 @@ public class JmsSender11 extends AbstractJmsSender {
      */
     private void send(
         String destinationName,
+        Destination destination,
+        boolean explicitDestination,
         MessageCreator messageCreator,
         boolean ignoreQOS,
         int deliveryMode,
         int priority,
-        int timetoLive) {
+        long timetoLive) {
 
         Connection connection = null;
         try {
@@ -101,28 +136,31 @@ public class JmsSender11 extends AbstractJmsSender {
                 connection.createSession(
                     isSessionTransacted(),
                     getSessionAcknowledgeMode());
-            Destination dest =
-                (Destination) getJmsAdmin().lookup(
-                    destinationName,
-                    isEnabledDynamicDestinations(),
-                    isPubSubDomain());
+
+            if (!explicitDestination) {
+                destination =
+                    (Destination) getJmsAdmin().lookup(
+                        destinationName,
+                        isEnabledDynamicDestinations(),
+                        isPubSubDomain());
+            }
             if (logger.isInfoEnabled()) {
                 logger.info(
                     "Looked up destination with name ["
                         + destinationName
                         + "]");
             }
-            MessageProducer producer = session.createProducer(dest);
+            MessageProducer producer = session.createProducer(destination);
 
             Message message = messageCreator.createMessage(session);
             if (logger.isInfoEnabled()) {
                 logger.info("Message created was [" + message + "]");
             }
             if (ignoreQOS) {
-                producer.send(dest, message);
+                producer.send(destination, message);
             } else {
                 producer.send(
-                    dest,
+                    destination,
                     message,
                     deliveryMode,
                     priority,
@@ -144,4 +182,5 @@ public class JmsSender11 extends AbstractJmsSender {
             }
         }
     }
+
 }
