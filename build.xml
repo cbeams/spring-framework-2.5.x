@@ -1364,6 +1364,7 @@
 			<doctitle><![CDATA[<h1>Spring Web Flow</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright (C) 2004-2005 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
+			<classpath location="${target.mockclasses.dir}"/>
 			<classpath location="${target.classes.dir}"/>
 			<packageset dir="${sandbox.src.dir}">
 				<include name="org/springframework/web/flow/**"/>
@@ -1390,7 +1391,7 @@
 		</zip>
 	</target>
 
-    <target name="webflow.release" depends="build,webflow.jar,webflow.support.jar,webflow.javadoc,webflow.srczip" description="Release webflow">
+    <target name="webflow.release" depends="build,buildmock,webflow.jar,webflow.support.jar,webflow.javadoc,webflow.srczip" description="Release webflow">
         <mkdir dir="${target.release.dir}"/>
 		<delete file="${target.release.dir}/${webflow.release.zip}"/>
 
