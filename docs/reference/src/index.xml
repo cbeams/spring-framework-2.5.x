@@ -4,10 +4,9 @@
 [
 <!ENTITY overview					SYSTEM "overview.xml">
 <!ENTITY beans						SYSTEM "beans.xml">
-<!ENTITY context					SYSTEM "context.xml">
 <!ENTITY mail						SYSTEM "mail.xml">
 <!ENTITY validation					SYSTEM "validation.xml">
-<!ENTITY transaction					SYSTEM "transaction.xml">
+<!ENTITY transaction				SYSTEM "transaction.xml">
 <!ENTITY aop						SYSTEM "aop.xml">
 <!ENTITY metadata					SYSTEM "metadata.xml">
 <!ENTITY jdbc						SYSTEM "jdbc.xml">
@@ -16,6 +15,7 @@
 <!ENTITY integration				SYSTEM "integration.xml">
 <!ENTITY ejb						SYSTEM "ejb.xml">
 <!ENTITY background					SYSTEM "background.xml">
+<!ENTITY dtd					    SYSTEM "dtd.xml">
 ]>
 
 
@@ -34,8 +34,6 @@
 	    &background;
 
 	    &beans;
-	    
-	    &context;
 	    
 	    &validation;
 	    
@@ -60,6 +58,10 @@
 	    <!-- &remoting; -->
 	    
 	    &mail;
+	    
+	    &dtd;
+	    
+
 	
 </book>
 
