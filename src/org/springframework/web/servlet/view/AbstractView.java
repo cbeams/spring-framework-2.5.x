@@ -227,27 +227,43 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		}
 
 		// consolidate static and dynamic model attributes
-		Map mergedModel = new HashMap(this.staticAttributes);
+		Map mergedModel = new HashMap(this.staticAttributes.size() + (model != null ? model.size() : 0));
+		mergedModel.putAll(this.staticAttributes);
 		if (model != null) {
 			mergedModel.putAll(model);
 		}
 
 		// expose RequestContext?
 		if (this.requestContextAttribute != null) {
-			mergedModel.put(this.requestContextAttribute, new RequestContext(request, mergedModel));
+			mergedModel.put(this.requestContextAttribute, createRequestContext(request, mergedModel));
 		}
 
 		renderMergedOutputModel(mergedModel, request, response);
 	}
 
-	/** 
+	/**
+	 * Create a RequestContext to expose under the specified attribute name.
+	 * <p>Default implementation creates a standard RequestContext instance for the
+	 * given request and model. Can be overridden in subclasses for custom instances.
+	 * @param request current HTTP request
+	 * @param model combined output Map, with dynamic values taking precedence
+	 * over static attributes
+	 * @return the RequestContext instance
+	 * @see #setRequestContextAttribute
+	 * @see org.springframework.web.servlet.support.RequestContext
+	 */
+	protected RequestContext createRequestContext(HttpServletRequest request, Map model) {
+		return new RequestContext(request, model);
+	}
+
+	/**
 	 * Subclasses must implement this method to actually render the view.
 	 * <p>The first step will be preparing the request: In the JSP case,
 	 * this would mean setting model objects as request attributes.
 	 * The second step will be the actual rendering of the view,
 	 * for example including the JSP via a RequestDispatcher.
-	 * @param model combined output Map, with dynamic values taking
-	 * precedence over static attributes
+	 * @param model combined output Map, with dynamic values taking precedence
+	 * over static attributes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @throws Exception if rendering failed
