@@ -15,14 +15,14 @@
  */
 package org.springframework.samples.fileupload.web.flow;
 
-import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.TransactionSynchronizer;
+import org.springframework.validation.DataBinder;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.action.BindAndValidateAction;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 
 public class ProcessUploadAction extends BindAndValidateAction {
-
-	protected void initBinder(TransactionSynchronizer context, ServletRequestDataBinder binder) {
+	
+	protected void initBinder(RequestContext context, DataBinder binder) {
 		// to actually be able to convert a multipart object to a byte[]
 		// we have to register a custom editor (in this case the
 		// ByteArrayMultipartFileEditor)
