@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-$Id: changelog.txt,v 1.29 2003-10-14 16:36:29 jhoeller Exp $
+$Id: changelog.txt,v 1.30 2003-10-22 17:10:33 jhoeller Exp $
 
-Changes in version 1.0 M2 (XX.10.2003)
+Changes in version 1.0 M2 (23.10.2003)
 --------------------------------------
 * added optional dependency checking for bean factories, ensuring that all bean properties have been set before use
 * added non-default "autowire" functionality so that bean factories can optionally configure dependencies automatically
@@ -11,6 +11,7 @@ Changes in version 1.0 M2 (XX.10.2003)
 * added BeanPostProcessor interface and support for it in AbstractBeanFactory and AbstractApplicationContext
 * moved BeanFactoryPostProcessor from context.support to beans.factory.support package
 * reworked AbstractBeanFactory's circular reference detection into eager singleton caching
+* redefined XmlBeanFactory "ref" tag: "local" for local bean ids, "bean" for any bean name ("external" deprecated now)
 * reworked XmlBeanFactory's alias handling to allow for multiple aliases in the "name" attribute of the bean tag
 * reworked AopUtils and AOP ProxyFactory configuration options
 * introduced auto proxy creator classes in org.springframework.aop.framework.support, implementing BeanPostProcessor
@@ -41,11 +42,14 @@ Changes in version 1.0 M2 (XX.10.2003)
 * renamed AbstractFormController's "processSubmit" method to "processFormSubmission"
 * added overloaded "getInitialPage(request,command)" method to AbstractWizardFormController
 * added spring:transform tag, providing support for transforming reference data
+* refactored Velocity support into generic VelocityEngineFactory and web-specific VelocityConfigurer for views
 * Velocity support in web framework uses VelocityEngine now to allow for different Velocity configs in same web app
 * fixed TilesView content type handling
 * added tiles-example showing how to use Tiles in conjunction with Spring
 * added documentation on tags in docs/taglib
 * added build scripts and directory structure to webapp-minimal skeleton to allow use as a kickstart for user projects
+* combined webapp-typical/hibernate/aop skeletons into one single webapp-typical with multiple context definitions
+* introduced alternative Hibernate implementation of Petclinic, now shipping as the default configuration
 
 Changes in version 1.0 M1 (30.8.2003)
 -------------------------------------
