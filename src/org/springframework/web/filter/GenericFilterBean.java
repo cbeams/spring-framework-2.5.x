@@ -16,8 +16,9 @@
 
 package org.springframework.web.filter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
@@ -30,7 +31,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
  * Simple base implementation of javax.servlet.Filter that treats its config
@@ -49,10 +57,10 @@ public abstract class GenericFilterBean implements Filter {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * May be null. List of required properties (Strings) that must
-	 * be supplied as config parameters to this servlet.
+	 * Set of required properties (Strings) that must be supplied as
+	 * config parameters to this filter.
 	 */
-	private List requiredProperties = new ArrayList();
+	private final Set requiredProperties = new HashSet();
 
 	/* The FilterConfig of this filter */
 	private FilterConfig filterConfig;
@@ -64,7 +72,7 @@ public abstract class GenericFilterBean implements Filter {
 	 * @param property name of the required property
 	 */
 	protected final void addRequiredProperty(String property) {
-		requiredProperties.add(property);
+		this.requiredProperties.add(property);
 	}
 
 	/**
@@ -82,6 +90,9 @@ public abstract class GenericFilterBean implements Filter {
 		try {
 			PropertyValues pvs = new FilterConfigPropertyValues(filterConfig, this.requiredProperties);
 			BeanWrapper bw = new BeanWrapperImpl(this);
+			ResourceLoader resourceLoader = new ServletContextResourceLoader(filterConfig.getServletContext());
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
+			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs);
 		}
 		catch (BeansException ex) {
@@ -93,6 +104,16 @@ public abstract class GenericFilterBean implements Filter {
 		// let subclasses do whatever initialization they like
 		initFilterBean();
 		logger.info("Filter '" + filterConfig.getFilterName() + "' configured successfully");
+	}
+
+	/**
+	 * Initialize the BeanWrapper for this GenericFilterBean,
+	 * possibly with custom editors.
+	 * @param bw the BeanWrapper to initialize
+	 * @throws BeansException if thrown by BeanWrapper methods
+	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
+	 */
+	protected void initBeanWrapper(BeanWrapper bw) throws BeansException {
 	}
 
 	/**
@@ -124,7 +145,7 @@ public abstract class GenericFilterBean implements Filter {
 
 	/**
 	 * Subclasses may override this to perform custom initialization.
-	 * All bean properties of this servlet will have been set before this
+	 * All bean properties of this filter will have been set before this
 	 * method is invoked. This default implementation does nothing.
 	 * @throws ServletException if subclass initialization fails
 	 */
@@ -136,6 +157,42 @@ public abstract class GenericFilterBean implements Filter {
 	 * This default implementation does nothing.
 	 */
 	public void destroy() {
+	}
+
+
+	/**
+	 * PropertyValues implementation created from FilterConfig init parameters.
+	 */
+	private static class FilterConfigPropertyValues extends MutablePropertyValues {
+
+		/**
+		 * Create new FilterConfigPropertyValues.
+		 * @param config FilterConfig we'll use to take PropertyValues from
+		 * @param requiredProperties set of property names we need, where
+		 * we can't accept default values
+		 * @throws ServletException if any required properties are missing
+		 */
+		private FilterConfigPropertyValues(FilterConfig config, Set requiredProperties) throws ServletException {
+			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
+					new HashSet(requiredProperties) : null;
+
+			Enumeration enum = config.getInitParameterNames();
+			while (enum.hasMoreElements()) {
+				String property = (String) enum.nextElement();
+				Object value = config.getInitParameter(property);
+				addPropertyValue(new PropertyValue(property, value));
+				if (missingProps != null) {
+					missingProps.remove(property);
+				}
+			}
+
+			// fail if we are still missing properties
+			if (missingProps != null && missingProps.size() > 0) {
+				throw new ServletException("Initialization from FilterConfig for filter '" + config.getFilterName() +
+																	 "' failed; the following required properties were missing: " +
+																	 StringUtils.collectionToDelimitedString(missingProps, ", "));
+			}
+		}
 	}
 
 }
