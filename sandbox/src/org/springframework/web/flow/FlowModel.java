@@ -50,15 +50,7 @@ import org.springframework.util.closure.Constraint;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowModel {
-
-	/**
-	 * Get the attribute value associated with the provided name, returning
-	 * <code>null</code> if not found.
-	 * @param attributeName The attribute name
-	 * @return The attribute value, or null if not found.
-	 */
-	public Object getAttribute(String attributeName);
+public interface FlowModel extends AttributeAccessor {
 
 	/**
 	 * Get the attribute value associated with the provided name and make sure
@@ -125,13 +117,6 @@ public interface FlowModel {
 	public void assertInTransaction(HttpServletRequest request, boolean reset) throws IllegalStateException;
 
 	/**
-	 * Does the attribute by the provided name exist in this model?
-	 * @param attributeName the attribute name
-	 * @return true if so, false otherwise.
-	 */
-	public boolean containsAttribute(String attributeName);
-
-	/**
 	 * Does the attribute by the provided name and type exist in this model?
 	 * @param attributeName the attribute name
 	 * @param requiredType the attribute value type
@@ -175,10 +160,10 @@ public interface FlowModel {
 	 * @return The entries that match the criteria.
 	 */
 	public Collection findAttributes(Constraint criteria);
-	
+
 	/**
-	 * Returns the data model for this flow model, suitable for exporting to
-	 * web views.
+	 * Returns the data model for this flow model, suitable for exporting to web
+	 * views.
 	 * @return Map of model attributes for this flow model.
 	 */
 	public Map getModel();

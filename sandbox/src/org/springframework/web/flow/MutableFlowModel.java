@@ -31,14 +31,7 @@ import java.util.Map;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface MutableFlowModel extends FlowModel {
-
-	/**
-	 * Set the attribute with the provided name to the value provided.
-	 * @param attributeName The attribute name
-	 * @param attributeValue The attribute value
-	 */
-	public void setAttribute(String attributeName, Object attributeValue);
+public interface MutableFlowModel extends FlowModel, AttributeSetter {
 
 	/**
 	 * Perform a bulk-set operation on a number of attributes.
