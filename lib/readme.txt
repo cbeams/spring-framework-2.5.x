@@ -168,7 +168,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-httpclient.jar
-- Commons HttpClient 2.0.1 (http://jakarta.apache.org/commons/httpclient)
+- Commons HttpClient 2.0.2 (http://jakarta.apache.org/commons/httpclient)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
