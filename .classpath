@@ -22,16 +22,12 @@
     <classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/caucho/burlap-2.1.7.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/caucho/hessian-2.1.7.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/jstl/jstl.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/jstl/standard.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/cglib/bcel-5.1.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/cglib/cglib-1.0.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/regexp/jakarta-oro-2.0.7.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/aop-alliance/aopalliance.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/itext-pdf/iText.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/poi/poi-2.0-pre3-20030728.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/poi/poi-2.0-pre3-20030728.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/easymock/easymock.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-beanutils.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-collections.jar"/>
@@ -49,7 +45,6 @@
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-pool.jar"/>
     <classpathentry kind="lib" path="lib/qdox/qdox-1.2.jar"/>
     <classpathentry kind="lib" path="lib/ant/ant.jar"/>
-    <classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
     <classpathentry kind="lib" path="lib/httpclient/httpclient.jar"/>
     <classpathentry kind="lib" path="lib/struts/struts-1.1.jar"/>
     <classpathentry kind="lib" path="lib/dom4j/dom4j.jar"/>
@@ -61,6 +56,12 @@
     <classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.0.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api-SNAPSHOT.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler-SNAPSHOT.jar"/>
-    <classpathentry kind="lib" path="lib/jakarta-commons/xjavadoc-1.0.jar"/>
+    <classpathentry kind="lib" path="lib/cglib/cglib-2.0-RC2.jar"/>
+    <classpathentry kind="lib" path="lib/j2ee/jaxrpc.jar"/>
+    <classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.0.jar"/>
+    <classpathentry kind="lib" path="lib/axis/axis.jar"/>
+    <classpathentry kind="lib" path="lib/j2ee/jstl.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
+    <classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
     <classpathentry kind="output" path="target/other-classes"/>
 </classpath>
