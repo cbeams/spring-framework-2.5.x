@@ -24,8 +24,8 @@ import org.springframework.util.StringUtils;
  * 
  * <pre>
  *  public String ToStringStyler.styleValue(Object value) {
- *  reflectiveVistorSupport.doVisit(this, value)
- *  // visit&lt;valueType&gt; callback will be invoked using reflection
+ *      reflectiveVistorSupport.invokeVisit(this, value)
+ *       // visit&lt;valueType&gt; callback will be invoked using reflection
  *  }
  * </pre>
  * 
