@@ -33,7 +33,7 @@ import org.springframework.remoting.RemoteConnectFailureException;
 
 /**
  * Factored-out methods for performing invocations within an RMI client.
- * Can handle both RMI and non-RMI service interfaces working on an RMI proxy.
+ * Can handle both RMI and non-RMI service interfaces working on an RMI stub.
  * @author Juergen Hoeller
  * @since 1.1
  */
@@ -42,24 +42,24 @@ public abstract class RmiClientInterceptorUtils {
 	private static final Log logger = LogFactory.getLog(RmiClientInterceptorUtils.class);
 
 	/**
-	 * Apply the given method invocation to the given RMI proxy.
-	 * <p>Delegate to the corresponding method if the RMI proxy does not directly
+	 * Apply the given method invocation to the given RMI stub.
+	 * <p>Delegate to the corresponding method if the RMI stub does not directly
 	 * implemented the invoked method. This typically happens when a non-RMI service
 	 * interface is used for an RMI service. The methods of such a service interface
-	 * have to match the RMI proxy methods, but they typically don't declare
-	 * java.rmi.RemoteException: A RemoteException thrown by the RMI proxy will
+	 * have to match the RMI stub methods, but they typically don't declare
+	 * java.rmi.RemoteException: A RemoteException thrown by the RMI stub will
 	 * be automatically converted to Spring's RemoteAccessException.
 	 * @param invocation the AOP MethodInvocation
-	 * @param rmiProxy the RMI proxy
+	 * @param stub the RMI stub
 	 * @param serviceName the name of the service (for debugging purposes)
 	 * @return the invocation result, if any
 	 * @throws Throwable exception to be thrown to the caller
 	 * @see java.rmi.RemoteException
 	 * @see org.springframework.remoting.RemoteAccessException
 	 */
-	public static Object invoke(MethodInvocation invocation, Remote rmiProxy, String serviceName) throws Throwable {
+	public static Object invoke(MethodInvocation invocation, Remote stub, String serviceName) throws Throwable {
 		try {
-			return doInvoke(invocation, rmiProxy);
+			return doInvoke(invocation, stub);
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
@@ -76,26 +76,26 @@ public abstract class RmiClientInterceptorUtils {
 	}
 
 	/**
-	 * Perform a raw method invocation on the given RMI proxy,
+	 * Perform a raw method invocation on the given RMI stub,
 	 * letting reflection exceptions through as-is.
 	 * @param invocation the AOP MethodInvocation
-	 * @param rmiProxy the RMI proxy
+	 * @param stub the RMI stub
 	 * @return the invocation result, if any
 	 * @throws NoSuchMethodException if thrown by reflection
 	 * @throws IllegalAccessException if thrown by reflection
 	 * @throws InvocationTargetException if thrown by reflection
 	 */
-	public static Object doInvoke(MethodInvocation invocation, Remote rmiProxy)
+	public static Object doInvoke(MethodInvocation invocation, Remote stub)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Method method = invocation.getMethod();
-		if (method.getDeclaringClass().isInstance(rmiProxy)) {
+		if (method.getDeclaringClass().isInstance(stub)) {
 			// directly implemented
-			return method.invoke(rmiProxy, invocation.getArguments());
+			return method.invoke(stub, invocation.getArguments());
 		}
 		else {
 			// not directly implemented
-			Method proxyMethod = rmiProxy.getClass().getMethod(method.getName(), method.getParameterTypes());
-			return proxyMethod.invoke(rmiProxy, invocation.getArguments());
+			Method stubMethod = stub.getClass().getMethod(method.getName(), method.getParameterTypes());
+			return stubMethod.invoke(stub, invocation.getArguments());
 		}
 	}
 

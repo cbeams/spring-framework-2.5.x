@@ -59,144 +59,143 @@ import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 		implements MethodInterceptor, InitializingBean {
 
-	private boolean lookupRmiProxyOnStartup = true;
+	private boolean lookupStubOnStartup = true;
 
-	private boolean cacheRmiProxy = true;
+	private boolean cacheStub = true;
 
-	private boolean refreshRmiProxyOnConnectFailure = false;
+	private boolean refreshStubOnConnectFailure = false;
 
-	private Remote cachedRmiProxy;
+	private Remote cachedStub;
 
 
 	/**
-	 * Set whether to look up the RMI proxy on startup. Default is true.
+	 * Set whether to look up the RMI stub on startup. Default is true.
 	 * <p>Can be turned off to allow for late start of the RMI server.
-	 * In this case, the RMI proxy will be fetched on first access.
-	 * @see #setCacheRmiProxy
+	 * In this case, the RMI stub will be fetched on first access.
+	 * @see #setCacheStub
 	 */
-	public void setLookupRmiProxyOnStartup(boolean lookupRmiProxyOnStartup) {
-		this.lookupRmiProxyOnStartup = lookupRmiProxyOnStartup;
+	public void setLookupStubOnStartup(boolean lookupStubOnStartup) {
+		this.lookupStubOnStartup = lookupStubOnStartup;
 	}
 
 	/**
-	 * Set whether to cache the RMI proxy once it has been located.
+	 * Set whether to cache the RMI stub once it has been located.
 	 * Default is true.
 	 * <p>Can be turned off to allow for hot restart of the RMI server.
-	 * In this case, the RMI proxy will be fetched for each invocation.
-	 * @see #setLookupRmiProxyOnStartup
+	 * In this case, the RMI stub will be fetched for each invocation.
+	 * @see #setLookupStubOnStartup
 	 */
-	public void setCacheRmiProxy(boolean cacheRmiProxy) {
-		this.cacheRmiProxy = cacheRmiProxy;
+	public void setCacheStub(boolean cacheStub) {
+		this.cacheStub = cacheStub;
 	}
 
 	/**
-	 * Set whether to refresh the RMI proxy on connect failure.
+	 * Set whether to refresh the RMI stub on connect failure.
 	 * Default is false.
 	 * <p>Can be turned on to allow for hot restart of the RMI server.
-	 * If a cached RMI proxy throws a ConnectException, a fresh proxy
+	 * If a cached RMI stub throws a ConnectException, a fresh proxy
 	 * will be fetched and the invocation will be retried.
 	 * @see java.rmi.ConnectException
 	 */
-	public void setRefreshRmiProxyOnConnectFailure(boolean refreshRmiProxyOnConnectFailure) {
-		this.refreshRmiProxyOnConnectFailure = refreshRmiProxyOnConnectFailure;
+	public void setRefreshStubOnConnectFailure(boolean refreshStubOnConnectFailure) {
+		this.refreshStubOnConnectFailure = refreshStubOnConnectFailure;
 	}
 
 
 	/**
-	 * Fetches RMI proxy on startup, if necessary.
-	 * @see #setLookupRmiProxyOnStartup
-	 * @see #lookupRmiProxy
+	 * Fetches RMI stub on startup, if necessary.
+	 * @see #setLookupStubOnStartup
+	 * @see #lookupStub
 	 */
 	public void afterPropertiesSet() throws Exception {
 		if (getServiceUrl() == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
-		// cache RMI proxy on initialization?
-		if (this.lookupRmiProxyOnStartup) {
-			Remote remoteObj = lookupRmiProxy();
+		// cache RMI stub on initialization?
+		if (this.lookupStubOnStartup) {
+			Remote remoteObj = lookupStub();
 			if (logger.isInfoEnabled()) {
 				if (remoteObj instanceof RmiInvocationHandler) {
-					logger.info("RMI object [" + getServiceUrl() + "] is an RMI invoker");
+					logger.info("RMI stub [" + getServiceUrl() + "] is an RMI invoker");
 				}
 				else if (getServiceInterface() != null) {
 					boolean isImpl = getServiceInterface().isInstance(remoteObj);
 					logger.info("Using service interface [" + getServiceInterface().getName() +
-					    "] for RMI object [" + getServiceUrl() + "] - " +
+					    "] for RMI stub [" + getServiceUrl() + "] - " +
 					    (!isImpl ? "not " : "") + "directly implemented");
 				}
 			}
-			if (this.cacheRmiProxy) {
-				this.cachedRmiProxy = remoteObj;
+			if (this.cacheStub) {
+				this.cachedStub = remoteObj;
 			}
 		}
 	}
 
 	/**
-	 * Create the RMI proxy, typically by looking it up.
-	 * Called on interceptor initialization if cacheRmiProxy is true;
-	 * else called for each invocation by getRmiProxy().
+	 * Create the RMI stub, typically by looking it up.
+	 * Called on interceptor initialization if cacheStub is true;
+	 * else called for each invocation by getStub().
 	 * <p>Default implementation looks up the service URL via java.rmi.Naming.
 	 * Can be overridden in subclasses.
-	 * @return the RMI proxy to store in this interceptor
+	 * @return the RMI stub to store in this interceptor
 	 * @throws Exception if proxy creation failed
-	 * @see #setCacheRmiProxy
-	 * @see #getRmiProxy()
+	 * @see #setCacheStub
+	 * @see #getStub()
 	 * @see java.rmi.Naming#lookup
 	 */
-	protected Remote lookupRmiProxy() throws Exception {
-		Remote rmiProxy = Naming.lookup(getServiceUrl());
+	protected Remote lookupStub() throws Exception {
+		Remote stub = Naming.lookup(getServiceUrl());
 		if (logger.isInfoEnabled()) {
-			logger.info("Located object with RMI URL [" + getServiceUrl() + "]: value=[" + rmiProxy + "]");
+			logger.info("Located object with RMI URL [" + getServiceUrl() + "]: value=[" + stub + "]");
 		}
-		return rmiProxy;
+		return stub;
 	}
 
 	/**
-	 * Return the RMI proxy to use. Called for each invocation.
+	 * Return the RMI stub to use. Called for each invocation.
 	 * <p>Default implementation returns the proxy created on initialization,
-	 * if any; else, it invokes createRmiProxy to get a new proxy for each
-	 * invocation.
+	 * if any; else, it invokes lookupStub to get a new proxy for each invocation.
 	 * <p>Can be overridden in subclasses, for example to cache a proxy for
 	 * a given amount of time before recreating it, or to test the proxy
 	 * whether it is still alive.
-	 * @return the RMI proxy to use for an invocation
+	 * @return the RMI stub to use for an invocation
 	 * @throws Exception if proxy creation failed
-	 * @see #lookupRmiProxy
+	 * @see #lookupStub
 	 */
-	protected Remote getRmiProxy() throws Exception {
-		if (!this.cacheRmiProxy || (this.lookupRmiProxyOnStartup && !this.refreshRmiProxyOnConnectFailure)) {
-			return (this.cachedRmiProxy != null ? this.cachedRmiProxy : lookupRmiProxy());
+	protected Remote getStub() throws Exception {
+		if (!this.cacheStub || (this.lookupStubOnStartup && !this.refreshStubOnConnectFailure)) {
+			return (this.cachedStub != null ? this.cachedStub : lookupStub());
 		}
 		else {
 			synchronized (this) {
-				if (this.cachedRmiProxy == null) {
-					this.cachedRmiProxy = lookupRmiProxy();
+				if (this.cachedStub == null) {
+					this.cachedStub = lookupStub();
 				}
-				return this.cachedRmiProxy;
+				return this.cachedStub;
 			}
 		}
 	}
 
 
 	/**
-	 * Fetches an RMI proxy and delegates to doInvoke.
+	 * Fetches an RMI stub and delegates to doInvoke.
 	 * If configured to refresh on connect failure, it will call
 	 * refreshAndRetry on ConnectException.
-	 * @see #getRmiProxy
+	 * @see #getStub
 	 * @see #doInvoke(MethodInvocation, Remote)
 	 * @see #refreshAndRetry
 	 * @see java.rmi.ConnectException
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		Remote rmiProxy = null;
+		Remote stub = null;
 		try {
-			rmiProxy = getRmiProxy();
+			stub = getStub();
 		}
 		catch (Throwable ex) {
 			throw new RemoteLookupFailureException("RMI lookup for service [" + getServiceUrl() + "] failed", ex);
 		}
 		try {
-			return doInvoke(invocation, rmiProxy);
+			return doInvoke(invocation, stub);
 		}
 		catch (RemoteConnectFailureException ex) {
 			return handleRemoteConnectFailure(invocation, ex);
@@ -207,7 +206,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
-		if (this.refreshRmiProxyOnConnectFailure) {
+		if (this.refreshStubOnConnectFailure) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Could not connect to RMI service [" + getServiceUrl() + "] - retrying", ex);
 			}
@@ -222,7 +221,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 	/**
-	 * Refresh the RMI proxy and retry the given invocation.
+	 * Refresh the RMI stub and retry the given invocation.
 	 * Called by invoke on connect failure.
 	 * @param invocation the AOP method invocation
 	 * @return the invocation result, if any
@@ -230,33 +229,33 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @see #invoke
 	 */
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
-		Remote freshRmiProxy = null;
+		Remote freshStub = null;
 		synchronized (this) {
 			try {
-				freshRmiProxy = lookupRmiProxy();
-				if (this.cacheRmiProxy) {
-					this.cachedRmiProxy = freshRmiProxy;
+				freshStub = lookupStub();
+				if (this.cacheStub) {
+					this.cachedStub = freshStub;
 				}
 			}
 			catch (Throwable ex) {
 				throw new RemoteLookupFailureException("RMI lookup for service [" + getServiceUrl() + "] failed", ex);
 			}
 		}
-		return doInvoke(invocation, freshRmiProxy);
+		return doInvoke(invocation, freshStub);
 	}
 
 	/**
-	 * Perform the given invocation on the given RMI proxy.
+	 * Perform the given invocation on the given RMI stub.
 	 * @param invocation the AOP method invocation
-	 * @param rmiProxy the RMI proxy to invoke
+	 * @param stub the RMI stub to invoke
 	 * @return the invocation result, if any
 	 * @throws Throwable in case of invocation failure
 	 */
-	protected Object doInvoke(MethodInvocation invocation, Remote rmiProxy) throws Throwable {
-		if (rmiProxy instanceof RmiInvocationHandler) {
+	protected Object doInvoke(MethodInvocation invocation, Remote stub) throws Throwable {
+		if (stub instanceof RmiInvocationHandler) {
 			// RMI invoker
 			try {
-				return doInvoke(invocation, (RmiInvocationHandler) rmiProxy);
+				return doInvoke(invocation, (RmiInvocationHandler) stub);
 			}
 			catch (RemoteException ex) {
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
@@ -270,8 +269,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 			}
 		}
 		else {
-			// traditional RMI proxy
-			return RmiClientInterceptorUtils.invoke(invocation, rmiProxy, getServiceUrl());
+			// traditional RMI stub
+			return RmiClientInterceptorUtils.invoke(invocation, stub, getServiceUrl());
 		}
 	}
 
