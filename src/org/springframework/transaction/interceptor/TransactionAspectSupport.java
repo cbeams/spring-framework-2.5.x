@@ -16,12 +16,15 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
+import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -41,12 +44,16 @@ import org.springframework.transaction.TransactionStatus;
  * <p>This class could set JTA as default transaction manager as that
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
+ * 
+ * <p>A transaction aspect is serializable if its 
+ * PlatformTransactionManager and TransactionAttributeSource
+ * are serializable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: TransactionAspectSupport.java,v 1.6 2004-07-24 04:45:07 dkopylenko Exp $
+ * @version $Id: TransactionAspectSupport.java,v 1.7 2004-07-26 18:00:40 johnsonr Exp $
  */
-public class TransactionAspectSupport implements InitializingBean {
+public class TransactionAspectSupport implements InitializingBean, Serializable {
 
 	/**
 	 * Holder to support the currentTransactionStatus() method, and communication
@@ -91,8 +98,12 @@ public class TransactionAspectSupport implements InitializingBean {
 		return info;
 	}
 
-
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Transient to avoid serialization. Not static as we want it
+	 * to be the correct logger for subclasses. Reconstituted in
+	 * readObject().
+	 */
+	protected transient Log logger = LogFactory.getLog(getClass());
 
 	/** Delegate used to create, commit and rollback transactions */
 	protected PlatformTransactionManager transactionManager;
@@ -279,7 +290,25 @@ public class TransactionAspectSupport implements InitializingBean {
 		}
 	}
 
-
+	
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+	
+	private void readObject(ObjectInputStream ois) throws IOException {
+		// Rely on default serialization, just initialize state after deserialization
+		try {
+			ois.defaultReadObject();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new AspectException("Failed to deserialize Spring AOP transaction aspect:" +
+					"Check that Spring AOP libraries are available on the client side", ex);
+		}
+		
+		// Initialize transient fields
+		this.logger = LogFactory.getLog(getClass());
+	}
+	
 	/**
 	 * Opaque object used to hold Transaction information. Subclasses
 	 * must pass it back to methods on this class, but not see its internals.
