@@ -4,10 +4,11 @@
 package org.springframework.binding.format;
 
 /**
- * Source for formatters - formatters are typically NOT thread safe, because
- * *Format objects generally aren't thread safe: so implementations of this
- * service should take care to synchronize them or ensure one instance per
- * thread.
+ * Source for shared and commonly used <code>Formatters</code>.
+ * <p>
+ * Formatters are typically not thread safe as <code>Format</code> objects
+ * aren't thread safe: so implementations of this service should take care to
+ * synchronize them as neccessary.
  * @author Keith Donald
  */
 public interface FormatterLocator {
@@ -77,9 +78,9 @@ public interface FormatterLocator {
 	 * @return the currency formatter
 	 */
 	public Formatter getCurrencyFormatter();
-	
+
 	/**
-	 * Returns the default formatter for the specified value class.
+	 * Returns the labelede num formatter for the specified value class.
 	 * @param labeledEnumClass The value class
 	 * @return the formatter
 	 */
