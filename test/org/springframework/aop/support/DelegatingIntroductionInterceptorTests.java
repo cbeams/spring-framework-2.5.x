@@ -37,7 +37,7 @@ import org.springframework.util.SerializationTestUtils;
  * 
  * @author Rod Johnson
  * @since 13-May-2003
- * @version $Id: DelegatingIntroductionInterceptorTests.java,v 1.9 2004-07-24 18:48:17 johnsonr Exp $
+ * @version $Id: DelegatingIntroductionInterceptorTests.java,v 1.10 2004-08-04 10:54:24 johnsonr Exp $
  */
 public class DelegatingIntroductionInterceptorTests extends TestCase {
 
@@ -188,6 +188,25 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		assertTrue(!(o instanceof TimeStamped));
 	}
 	
+	public void testIntroductionInterceptorDoesntReplaceToString() throws Exception {
+		TestBean raw = new TestBean();
+		assertTrue(! (raw instanceof TimeStamped));
+		ProxyFactory factory = new ProxyFactory(raw);
+	
+		TimeStamped ts = new SerializableTimeStamped(0);
+
+		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts) {
+			public String toString() {
+				throw new UnsupportedOperationException("Shouldn't be invoked");
+			}
+		}));
+		
+		TimeStamped tsp = (TimeStamped) factory.getProxy();
+		assertEquals(0, tsp.getTimeStamp());
+	
+		assertEquals(raw.toString(), tsp.toString());
+	}
+	
 	protected static class SerializableTimeStamped implements TimeStamped, Serializable {
 		private final long ts;
 		public SerializableTimeStamped(long ts) {
@@ -223,6 +242,20 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		assertEquals(name, p1.getName());
 		assertEquals(time, ((TimeStamped) p1).getTimeStamp());
 	}
+	
+//	public void testDelegatingIntroductionInterceptorDoesntMakeNonserializableSerializable() throws Exception {
+//		// Target is NOT serialiable
+//		TestBean raw = new TestBean();
+//		ProxyFactory factory = new ProxyFactory(raw);
+//		factory.addInterface(Person.class);
+//		long time = 1000;
+//		TimeStamped ts = new SerializableTimeStamped(time);
+//	
+//		factory.addAdvisor(new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
+//		Object proxy = factory.getProxy();
+//		
+//		assertFalse(proxy instanceof Serializable);
+//	}
 
 
 	public static class TargetClass extends TestBean implements TimeStamped {
