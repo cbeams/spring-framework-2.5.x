@@ -16,7 +16,5 @@
 package org.springframework.web.flow;
 
 public interface TransitionCriteria {
-	public String getCaption();
-
 	public boolean test(FlowExecutionContext context);
 }

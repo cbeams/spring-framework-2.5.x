@@ -214,12 +214,8 @@ public class Transition {
 			return true;
 		}
 
-		public String getCaption() {
-			return WILDCARD_EVENT_ID;
-		}
-
 		public String toString() {
-			return getCaption();
+			return WILDCARD_EVENT_ID;
 		}
 	};
 
@@ -230,16 +226,12 @@ public class Transition {
 			this.eventId = eventId;
 		}
 
-		public String getCaption() {
-			return eventId;
-		}
-
 		public boolean test(FlowExecutionContext context) {
 			return context.getLastEvent().getId().equals(eventId);
 		}
 
 		public String toString() {
-			return getCaption();
+			return eventId;
 		}
 	}
 
