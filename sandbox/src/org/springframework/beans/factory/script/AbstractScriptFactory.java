@@ -19,19 +19,14 @@ package org.springframework.beans.factory.script;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.dynamic.AbstractDynamicObjectConverter;
 import org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ResourceLoader;
@@ -41,16 +36,12 @@ import org.springframework.core.io.ResourceLoader;
  * Separate out post processor
  * 
  * @author Rod Johnson
- * @version $Id: AbstractScriptFactory.java,v 1.3 2004-08-04 18:39:39 johnsonr Exp $
+ * @version $Id: AbstractScriptFactory.java,v 1.4 2004-08-05 10:22:06 johnsonr Exp $
  */
-public abstract class AbstractScriptFactory implements ScriptContext, ApplicationContextAware, BeanFactoryAware,
+public abstract class AbstractScriptFactory extends AbstractDynamicObjectConverter implements ScriptContext, ApplicationContextAware, BeanFactoryAware,
 		BeanPostProcessor {
 
 	private ResourceLoader resourceLoader;
-
-	private int expirySeconds;
-
-	protected final Log log = LogFactory.getLog(getClass());
 
 	/** Location to Script */
 	private Map scripts = new HashMap();
@@ -60,14 +51,9 @@ public abstract class AbstractScriptFactory implements ScriptContext, Applicatio
 	 */
 	private Map objectMap = new HashMap();
 
-	private ConfigurableListableBeanFactory beanFactory;
 
 	public void setApplicationContext(ApplicationContext ac) {
 		this.resourceLoader = ac;
-	}
-
-	public void setBeanFactory(BeanFactory beanFactory) {
-		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
 	/**
@@ -83,20 +69,6 @@ public abstract class AbstractScriptFactory implements ScriptContext, Applicatio
 		return resourceLoader;
 	}
 
-	/**
-	 * @return Returns the defaultPollIntervalSeconds.
-	 */
-	public int getPollIntervalSeconds() {
-		return expirySeconds;
-	}
-
-	/**
-	 * @param defaultPollIntervalSeconds
-	 *            The defaultPollIntervalSeconds to set.
-	 */
-	public void setExpirySeconds(int defaultPollIntervalSeconds) {
-		this.expirySeconds = defaultPollIntervalSeconds;
-	}
 
 	public Object create(String className, String[] interfaceNames) throws BeansException {
 		Script script = configuredScript(className, interfaceNames);
@@ -137,13 +109,6 @@ public abstract class AbstractScriptFactory implements ScriptContext, Applicatio
 	 */
 	protected abstract Script createScript(String location) throws BeansException;
 
-	
-	protected boolean isDynamicScript(BeanDefinition bd) {
-		if (!(bd instanceof RootBeanDefinition))
-			return false;
-		RootBeanDefinition rbd = (RootBeanDefinition) bd;
-		return rbd.isSingleton() && "create".equals(rbd.getFactoryMethodName());
-	}
 
 	/**
 	 * Find out what script this object was created from, if we created it
@@ -155,55 +120,32 @@ public abstract class AbstractScriptFactory implements ScriptContext, Applicatio
 	}
 
 	/**
-	 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization(java.lang.Object,
-	 *      java.lang.String)
-	 */
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		return bean;
-	}
-
-	/**
+	 * Will already have the TargetSource and introduction
+	 * advisor in place
 	 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object,
 	 *      java.lang.String)
 	 */
-	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException { 
-
-		// Find the script managed by this class that created that bean.
-		// If it's null, we didn't create it.
-		Script script = lookupScript(bean);
+	protected void customizeProxyFactory(Object bean, ProxyFactory pf) {
+		DynamicScriptTargetSource ts = (DynamicScriptTargetSource) pf.getTargetSource();
+		Script script = ts.getScript();
 		
-		if (script != null) {
-			ProxyFactory pf = new ProxyFactory();
-	
-			// Force the use of CGLIB
-			pf.setProxyTargetClass(false);
-
-			// Add Script interfaces
-			for (int i = 0; i < script.getInterfaces().length; i++) {
-				pf.addInterface(script.getInterfaces()[i]);
-			}
-			// Add interfaces implemented by Script
-			// TODO optional
-			Class[] intfs = AopUtils.getAllInterfaces(bean);
-			for (int i = 0; i < intfs.length; i++) {
-				pf.addInterface(intfs[i]);
-			}
-	
-			AbstractRefreshableTargetSource targetSource = new DynamicScriptTargetSource(bean, beanFactory, beanName, script);
-			targetSource.setExpirySeconds(expirySeconds);
-			//targetSource.setExpirableObject(script);
-			pf.setTargetSource(targetSource);
-			
-			pf.addAdvisor(new DefaultIntroductionAdvisor(targetSource, DynamicScript.class));
-			
-			log.info("Installed refreshable TargetSource " + pf.getTargetSource() + " for bean '" + beanName + "'");
-	
-			Object wrapped = pf.getProxy();
-			return wrapped;
+		// Add Script interfaces
+		for (int i = 0; i < script.getInterfaces().length; i++) {
+			pf.addInterface(script.getInterfaces()[i]);
 		}
-		else {
-			return bean;
-		}
+	}
 
+	/**
+	 * @see org.springframework.beans.factory.dynamic.AbstractDynamicObjectConverter#createRefreshableTargetSource(java.lang.Object, org.springframework.beans.factory.config.ConfigurableListableBeanFactory, java.lang.String)
+	 */
+	protected AbstractRefreshableTargetSource createRefreshableTargetSource(Object bean,
+			ConfigurableListableBeanFactory beanFactory, String beanName) {
+		Script script = lookupScript(bean);
+		if (script == null) {
+			return null;
+		}
+		AbstractRefreshableTargetSource targetSource = new DynamicScriptTargetSource(bean, beanFactory, beanName, script);
+		targetSource.setExpirySeconds(getExpirySeconds());
+		return targetSource;
 	}
 }

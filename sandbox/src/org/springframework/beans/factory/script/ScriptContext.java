@@ -21,12 +21,12 @@ import org.springframework.core.io.ResourceLoader;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ScriptContext.java,v 1.1 2004-08-02 17:01:59 johnsonr Exp $
+ * @version $Id: ScriptContext.java,v 1.2 2004-08-05 10:22:06 johnsonr Exp $
  */
 public interface ScriptContext {
 	
 	ResourceLoader getResourceLoader();
 	
-	int getPollIntervalSeconds();
+	//int getPollIntervalSeconds();
 
 }
