@@ -23,6 +23,7 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.action.SetAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
+import org.springframework.web.flow.config.AutowireMode;
 import org.springframework.web.flow.config.FlowBuilderException;
 
 /**
@@ -54,7 +55,7 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 	public void buildStates() throws FlowBuilderException {
 		// get the person given a userid as input
-		addGetState(executeAction(GetPersonAction.class));
+		addGetState(createAction(GetPersonAction.class, AutowireMode.BY_TYPE));
 
 		String colleagueId = "colleagueId";
 		String setColleagueId = set(colleagueId);

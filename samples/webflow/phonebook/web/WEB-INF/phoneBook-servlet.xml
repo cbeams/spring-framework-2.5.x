@@ -104,8 +104,6 @@
 	</bean>
 	-->
 	
-	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction" autowire="byType"/>
-
 	<!-- A type conversion service, a more flexible/threadsafe/lightweight alternative to the PropertyEditor! -->
 	<bean id="conversion.service" class="org.springframework.binding.convert.support.DefaultConversionService" autowire="byType"/>
 
