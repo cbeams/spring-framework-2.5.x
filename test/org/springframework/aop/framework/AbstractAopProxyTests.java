@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
@@ -34,6 +33,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
@@ -42,6 +42,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
@@ -51,7 +52,6 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
@@ -59,7 +59,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.39 2004-07-26 14:25:48 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.40 2004-07-27 16:20:41 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -273,6 +273,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		
 		// This should work as SerializablePerson is equal
 		assertEquals("Proxies should be equal, even after one was serialized", p, p2);
+		assertEquals("Proxies should be equal, even after one was serialized", p2, p);
 		
 		// Check we can add a new advisor to the target
 		NopInterceptor ni = new NopInterceptor();
@@ -916,6 +917,26 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		h.put(proxy2, value2);
 		assertEquals(h.get(proxy1), value1);
 		assertEquals(h.get(proxy2), value2);
+	}
+	
+	/**
+	 * Check that the string is informative.
+	 *
+	 */
+	public void testProxyConfigString() {
+		TestBean target = new TestBean();
+		ProxyFactory pc = new ProxyFactory(target);
+		pc.setInterfaces(new Class[] { ITestBean.class } );
+		pc.addAdvice(new NopInterceptor());
+		MethodBeforeAdvice mba = new CountingBeforeAdvice();
+		Advisor advisor = new DefaultPointcutAdvisor(new NameMatchMethodPointcut(), mba);
+		pc.addAdvisor(advisor);
+		ITestBean proxied = (ITestBean) createProxy(pc);
+		
+		String proxyConfigString = ((Advised) proxied).toProxyConfigString();
+		System.err.println(proxyConfigString);
+		assertTrue(proxyConfigString.indexOf(advisor.toString()) != -1);
+		assertTrue(proxyConfigString.indexOf("1 interface") != -1);
 	}
 	
 	public void testAdviceSupportListeners() throws Throwable {
