@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanWrapperTestSuite.java,v 1.22 2004-06-09 06:14:37 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.23 2004-06-11 23:42:29 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -312,7 +312,7 @@ public class BeanWrapperTestSuite extends TestCase {
 	public void testStringArrayPropertyWithCustomEditor() throws Exception {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
-		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+		bw.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
 			public void setAsText(String text) {
 				setValue(text.substring(1));
 			}
@@ -1032,7 +1032,7 @@ public class BeanWrapperTestSuite extends TestCase {
 	public void testIndexedPropertiesWithDirectAccessAndPropertyEditors() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
-		bw.registerCustomEditor(String.class, "array", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "array", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array" + text, 99));
 			}
@@ -1040,7 +1040,7 @@ public class BeanWrapperTestSuite extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		bw.registerCustomEditor(String.class, "list", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "list", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("list" + text, 99));
 			}
@@ -1048,7 +1048,7 @@ public class BeanWrapperTestSuite extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		bw.registerCustomEditor(String.class, "map", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("map" + text, 99));
 			}
@@ -1076,7 +1076,7 @@ public class BeanWrapperTestSuite extends TestCase {
 	public void testIndexedPropertiesWithDirectAccessAndSpecificPropertyEditors() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
-		bw.registerCustomEditor(String.class, "array[0]", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "array[0]", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array0" + text, 99));
 			}
@@ -1084,7 +1084,7 @@ public class BeanWrapperTestSuite extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		bw.registerCustomEditor(String.class, "array[1]", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "array[1]", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array1" + text, 99));
 			}
@@ -1092,7 +1092,7 @@ public class BeanWrapperTestSuite extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		bw.registerCustomEditor(String.class, "list[0]", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "list[0]", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("list0" + text, 99));
 			}
@@ -1100,7 +1100,7 @@ public class BeanWrapperTestSuite extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		bw.registerCustomEditor(String.class, "list[1]", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "list[1]", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("list1" + text, 99));
 			}
@@ -1108,7 +1108,7 @@ public class BeanWrapperTestSuite extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		bw.registerCustomEditor(String.class, "map[key1]", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "map[key1]", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("mapkey1" + text, 99));
 			}
@@ -1116,7 +1116,7 @@ public class BeanWrapperTestSuite extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		bw.registerCustomEditor(String.class, "map[key2]", new PropertyEditorSupport() {
+		bw.registerCustomEditor(TestBean.class, "map[key2]", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("mapkey2" + text, 99));
 			}
@@ -1139,6 +1139,22 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals("list1d", ((TestBean) bean.getList().get(1)).getName());
 		assertEquals("mapkey1e", ((TestBean) bean.getMap().get("key1")).getName());
 		assertEquals("mapkey2f", ((TestBean) bean.getMap().get("key2")).getName());
+	}
+
+	public void testIndexedPropertiesWithListPropertyEditor() {
+		IndexedTestBean bean = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.registerCustomEditor(List.class, "list", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				List result = new ArrayList();
+				result.add(new TestBean("list" + text, 99));
+				setValue(result);
+			}
+		});
+		bw.setPropertyValue("list", "1");
+		assertEquals("list1", ((TestBean) bean.getList().get(0)).getName());
+		bw.setPropertyValue("list[0]", "test");
+		assertEquals("test", bean.getList().get(0));
 	}
 
 	public void testArrayToArrayConversion() throws PropertyVetoException {
