@@ -9,18 +9,30 @@
     JMS API between versions 1.0.2 and 1.1.
     </para>
 
-    <para>The package <literal>org.springframework.jms</literal> provides 
+    <para>The package <literal>org.springframework.jms.core</literal> provides 
     the core funtionality for using JMS.  It contains the interface 
-    <literal>JmsTemplate</literal> and implementations that execute the 
+    <literal>JmsOperations</literal> and implementations, 
+    <literal>JmsTemplate102, JmsTemplate11</literal>
+    that execute the 
     part of the JMS API 
-    responsible for creation and release of JMS resources and delegates 
-    the essence of the JMS processing task to user implemented callback 
-    interfaces.  It also contains the interface <literal>JmsAdmin</literal> 
+    responsible for creation and release of JMS resources.  The
+    design principal common to all Spring template classes is to
+    provide helper methods to perform common operations and for more
+    sophisticated usage, delegate the essence of the JMS processing 
+    task to user implemented callback 
+    interfaces.  The core package also contains the interface 
+    <literal>JmsAdmin</literal> 
     for obtaining JMS destinations from JNDI creating dynamic
     destinations.  Exceptions that are thrown during JMS processing 
-    are converted to a mirrored hierarchy of unchecked exceptions.  If
-    there are any provider specific subclasses of the checked 
-    javax.jms.JMSException, then it is wrapped in the unchecked JmsException.
+    are converted to a mirrored hierarchy of unchecked exceptions and
+    are contained in the package 
+    <literal>org.springframework.jms</literal>
+    If there are any provider specific subclasses of the checked 
+    javax.jms.JMSException, this exception is wrapped in the 
+    unchecked JmsException.
+    The package <literal>org.springframework.jms.converter</literal>
+    provides the ability to marhsall Java objects to and from JMS
+    Messages.
     </para>
 
     <para>JMS functionality can be roughly divided into two areas of
@@ -237,9 +249,9 @@ import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.Session;
 
-import org.springframework.jms.JmsTemplate;
-import org.springframework.jms.JmsTemplate102;
-import org.springframework.jms.MessageCreator;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.JmsTemplate102;
+import org.springframework.jms.core.MessageCreator;
 
 public class JmsQueueSender {
 
@@ -311,13 +323,17 @@ public void simpleSend() {
       Java objects to/from a JMS Message.  If a JmsTemplate has a 
       conveter defined, then send operations
       that take a Java object as an argument will perform the conversion 
-      to a JMS message on your behalf.  Converters allow your application code
+      from and object to a JMS message on your behalf.  
+      Converters allow your application code
       to concentrate on what object is being sent or recieved via JMS and 
       not the details of how it is represented as a JMS message.
       The <literal>Converter</literal> interface interface encapsulates this
       functionality.  The <literal>MapMessageConverter</literal> is a
       provided implementation that converts from a JavaBean to a 
-      MapMessage.
+      MapMessage.  Other popular implementations choices for Converters
+      are to leverage an existing XML marashalling packages, such as 
+      JAXB, Castor, XMLBean, or XStream, to create a TextMessage 
+      representing the object.
       </para>
       <para>A simple converter for the purposes of sending a message
       is show below</para>
@@ -384,6 +400,42 @@ public void sendObject() {
         });
 }
       </programlisting>
+      <para>The motiviation for the MapMessageConverter was to 
+      provide simple lightweight converter for complex Java objects and
+      to provide ease of access across multiple JMS language bindings
+      such as C++ and C#.  As compared to using XML marshalling, this 
+      approach has the advantage that it does not require one to coordinate
+      multiple XML marshalling packages across different languages.
+      However, in order to support conversion of a nested object graph, 
+      the JMS provider needs to support nested MapMessages.
+      </para>
+      <para>As a simple example, and Person object with name and age
+      properties would transform into a MapMessage of the type
+      </para>
+
+      <para>Information about what class to create when unmarshalling
+      the message is contained in a specially named fields, 
+      <literal>uqn__</literal>.  This refers to the unqualified classname
+      of the object contained in the MapMessage.  Properties are not used
+      since there are no properties for nested messages.  During
+      the unmarshalling process, the fully qualified classname is 
+      resolved by prepending the value of the property
+      property <literal>PackageName</literal> to the unqualified name.
+      The <literal>DateFormat</literal> used to convert Date to 
+      String is set using the property <literal>DateFormatPattern</literal>.
+      The default value is <literal>EEE, d MMM yyyy HH:mm:ss z</literal>
+      based on the pattern in IETF RFC 1123.  
+      </para>
+      <para>Using provider specific extensions to the MapMessage such as
+      nested map messages and support for arrays are enabled or disabled
+      by setting <literal>isArraySupportEnabled</literal> and
+      <literal>isNestedMessageSupportEnabled</literal>.
+      When these extensioned are enabled, a boolean JMS message property
+      is set using the field name specified in the bean 
+      property <literal>ExtensionPropertyName</literal>.
+      </para>
+      
+      
     </sect2>
     <sect2>
         <title>SessionCallback and ProducerCallback</title>
@@ -394,7 +446,7 @@ public void sendObject() {
         and <literal>ProduerCallback</literal> expose the JMS Session
         and Session/MessageProducer pair respectfully.  The 
         <literal>execute()</literal> methods on JmsTemplate call these
-        callback methods.
+        callback methods.  Here is an example of their use:
         </para>
     </sect2>
     <sect2>
@@ -448,7 +500,7 @@ public void sendObject() {
             &lt;property name="producer"&gt;&lt;ref bean="jmsProducer"/&gt;&lt;/property&gt;
     &lt;/bean&gt;
     
-    &lt;bean id="jmsProducer" class="org.springframework.jms.JmsProducerFactoryBean"&gt;
+    &lt;bean id="jmsProducer" class="org.springframework.jms.core.JmsProducerFactoryBean"&gt;
             &lt;property name="session"&gt;&lt;ref bean="jmsSession"/&gt;&lt;/property&gt;                  
             &lt;property name="destination"&gt;&lt;ref bean="queue"/&gt;&lt;/property&gt;
             &lt;property name="priority"&gt;&lt;value&gt;6&lt;/value&gt;&lt;/property&gt;
@@ -458,12 +510,12 @@ public void sendObject() {
             &lt;property name="jndiName"&gt;&lt;value&gt;testQueueJndi&lt;/value&gt;&lt;/property&gt;
     &lt;/bean&gt;
     
-    &lt;bean id="jmsSession" class="org.springframework.jms.JmsSessionFactoryBean"&gt;
+    &lt;bean id="jmsSession" class="org.springframework.jms.core.JmsSessionFactoryBean"&gt;
             &lt;property name="transacted"&gt;&lt;value&gt;false&lt;/value&gt;&lt;/property&gt;
             &lt;property name="connection"&gt;&lt;ref bean="jmsConnection"/&gt;&lt;/property&gt;            
     &lt;/bean&gt;
     
-    &lt;bean id="jmsConnection" class="org.springframework.jms.JmsConnectionFactoryBean"&gt;
+    &lt;bean id="jmsConnection" class="org.springframework.jms.core.JmsConnectionFactoryBean"&gt;
             &lt;property name="connectionFactory"&gt;&lt;ref bean="jmsConnFactory"/&gt;&lt;/property&gt;
     &lt;/bean&gt;
     
@@ -524,7 +576,7 @@ public class JmsSendExample
     application context description
     </para>
     <programlisting>
-&lt;bean id="jmsConsumer" class="org.springframework.jms.JmsConsumerFactoryBean"&gt;
+&lt;bean id="jmsConsumer" class="org.springframework.jms.core.JmsConsumerFactoryBean"&gt;
         &lt;property name="session"&gt;&lt;ref bean="jmsSession"/&gt;&lt;/property&gt;
         &lt;property name="destination"&gt;&lt;ref bean="queue"/&gt;&lt;/property&gt;
         &lt;property name="messageListener"&gt;&lt;ref bean="msgListener"/&gt;&lt;/property&gt;
