@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.123 2004-04-07 12:27:49 trisberg Exp $
+$Id: changelog.txt,v 1.124 2004-04-07 14:28:47 trisberg Exp $
 
 
 Changes in version 1.0.1 (7.4.2003)
@@ -32,7 +32,7 @@ Package org.springframework.context
 * EventPublicationInterceptor implements ApplicationContextAware rather than extending ApplicationObjectSupport
 
 Package org.springframework.jdbc.object
-* added method setSqlReadyForUse for indicating that the sql should be used as provided, no need to add parameter placeholders
+* added method setSqlReadyForUse to StoredProcedure for indicating that the sql should be used as provided, no need to add parameter placeholders
 
 Package org.springframework.jdbc.support
 * changed SQLErrorCodesFactory now does cache database product name in a Map based on hashCode from DataSource to avoid unnecessary meta data lookups
