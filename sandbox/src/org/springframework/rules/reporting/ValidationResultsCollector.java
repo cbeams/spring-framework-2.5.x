@@ -49,13 +49,14 @@ public class ValidationResultsCollector implements Visitor {
             final UnaryPredicate constraint) {
         this.resultsBuilder = new ValidationResultsBuilder() {
             public void constraintSatisfied() {
-                results = new ValueValidationResults(argument);
             }
-
             public void constraintViolated(UnaryPredicate constraint) {
                 results = new ValueValidationResults(argument, constraint);
             }
         };
+        if (results == null) {
+            results = new ValueValidationResults(argument);
+        }
         this.argument = argument;
         visitorSupport.invokeVisit(this, constraint);
         return results;
