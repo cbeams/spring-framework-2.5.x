@@ -24,6 +24,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionServlet;
+import org.apache.struts.config.ModuleConfig;
 
 import org.springframework.beans.BeansException;
 import org.springframework.web.context.WebApplicationContext;
@@ -59,7 +60,13 @@ import org.springframework.web.context.WebApplicationContext;
  *   &lt;property name="..."&gt;...&lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * If you want to avoid having to specify DelegatingActionProxy as Action
+ * Note that you can use a single ContextLoaderPlugIn for all Struts modules.
+ * That context can in turn be loaded from multiple XML files, for example split
+ * according to Struts modules. Alternatively, define one ContextLoaderPlugIn per
+ * Struts module, specifying appropriate "contextConfigLocation" parameters.
+ * In both cases, the Spring bean name has to include the module prefix.
+ *
+ * <p>If you want to avoid having to specify DelegatingActionProxy as Action
  * type in your struts-config, for example to be able to generate your
  * Struts config file with XDoclet, consider
  * {@link DelegatingRequestProcessor DelegatingRequestProcessor}.
@@ -87,40 +94,6 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public class DelegatingActionProxy extends Action {
 
-	private WebApplicationContext webApplicationContext;
-
-	/**
-	 * Initialize the WebApplicationContext for this Action.
-	 * @see #initWebApplicationContext
-	 */
-	public void setServlet(ActionServlet actionServlet) {
-		super.setServlet(actionServlet);
-		if (actionServlet != null) {
-			this.webApplicationContext = initWebApplicationContext(actionServlet);
-		}
-	}
-
-	/**
-	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the
-	 * ServletContext, containing the Struts Action beans to delegate to.
-	 * @param actionServlet the associated ActionServlet
-	 * @return the WebApplicationContext
-	 * @throws IllegalStateException if no WebApplicationContext could be found
-	 * @see DelegatingActionUtils#initWebApplicationContext
-	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_ATTRIBUTE
-	 */
-	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet)
-			throws IllegalStateException {
-		return DelegatingActionUtils.initWebApplicationContext(actionServlet);
-	}
-
-	/**
-	 * Return the WebApplicationContext that this proxy delegates to.
-	 */
-	protected final WebApplicationContext getWebApplicationContext() {
-		return webApplicationContext;
-	}
-
 	/**
 	 * Pass the execute call on to the Spring-managed delegate Action.
 	 * @see #getDelegateAction
@@ -142,8 +115,25 @@ public class DelegatingActionProxy extends Action {
 	 * @see #determineActionBeanName
 	 */
 	protected Action getDelegateAction(ActionMapping mapping) throws BeansException {
+		WebApplicationContext wac = getWebApplicationContext(getServlet(), mapping.getModuleConfig());
 		String beanName = determineActionBeanName(mapping);
-		return (Action) this.webApplicationContext.getBean(beanName, Action.class);
+		return (Action) wac.getBean(beanName, Action.class);
+	}
+
+	/**
+	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the
+	 * ServletContext, containing the Struts Action beans to delegate to.
+	 * @param actionServlet the associated ActionServlet
+	 * @param moduleConfig the associated ModuleConfig
+	 * @return the WebApplicationContext
+	 * @throws IllegalStateException if no WebApplicationContext could be found
+	 * @see DelegatingActionUtils#getRequiredWebApplicationContext
+	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
+	 */
+	protected WebApplicationContext getWebApplicationContext(ActionServlet actionServlet,
+																													 ModuleConfig moduleConfig)
+			throws IllegalStateException {
+		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 
 	/**

@@ -47,7 +47,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @since 06.04.2004
- * @see ContextLoaderPlugIn#SERVLET_CONTEXT_ATTRIBUTE
+ * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
  * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
  * @see org.springframework.web.context.ContextLoaderListener
  * @see org.springframework.web.context.ContextLoaderServlet
@@ -85,14 +85,14 @@ public abstract class DispatchActionSupport extends DispatchAction {
 	 * @param actionServlet the associated ActionServlet
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
-	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_ATTRIBUTE
+	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#getWebApplicationContext
 	 */
 	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet)
 			throws IllegalStateException {
 		ServletContext sc = actionServlet.getServletContext();
 		WebApplicationContext wac = (WebApplicationContext)
-				sc.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_ATTRIBUTE);
+				sc.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX);
 		if (wac == null) {
 			wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		}

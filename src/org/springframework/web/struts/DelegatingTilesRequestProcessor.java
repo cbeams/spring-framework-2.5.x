@@ -61,7 +61,7 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 	public void init(ActionServlet actionServlet, ModuleConfig moduleConfig) throws ServletException {
 		super.init(actionServlet, moduleConfig);
 		if (actionServlet != null) {
-			this.webApplicationContext = initWebApplicationContext(actionServlet);
+			this.webApplicationContext = initWebApplicationContext(actionServlet, moduleConfig);
 		}
 	}
 
@@ -69,14 +69,16 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the
 	 * ServletContext, containing the Struts Action beans to delegate to.
 	 * @param actionServlet the associated ActionServlet
+	 * @param moduleConfig the associated ModuleConfig
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
-	 * @see DelegatingActionUtils#initWebApplicationContext
-	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_ATTRIBUTE
+	 * @see DelegatingActionUtils#getRequiredWebApplicationContext
+	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
-	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet)
+	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet,
+																														ModuleConfig moduleConfig)
 			throws IllegalStateException {
-		return DelegatingActionUtils.initWebApplicationContext(actionServlet);
+		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 
 	/**

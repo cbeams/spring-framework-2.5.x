@@ -56,7 +56,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  *
  * <pre>
  * &lt;plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"&gt;
- *   &lt;set-property property="contextConfigLocation" value="/WEB-INF/action-servlet.xml,/WEB-INF/myContext.xml"/&gt;
+ *   &lt;set-property property="contextConfigLocation" value="/WEB-INF/action-servlet.xml /WEB-INF/myContext.xml"/&gt;
  * &lt;/plug-in&gt;</pre>
  *
  * Beans defined in the ContextLoaderPlugin context can be accessed
@@ -72,7 +72,13 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * <p>A special usage of this PlugIn is to define Struts Actions themselves
  * as beans, typically wiring them with middle tier components defined in the
  * root context. Such Actions will then be delegated to by proxy definitions
- * in the Struts configuration, using the DelegatingActionProxy class.
+ * in the Struts configuration, using the DelegatingActionProxy class or
+ * the DelegatingRequestProcessor.
+ *
+ * <p>Note that you can use a single ContextLoaderPlugIn for all Struts modules.
+ * That context can in turn be loaded from multiple XML files, for example split
+ * according to Struts modules. Alternatively, define one ContextLoaderPlugIn per
+ * Struts module, specifying appropriate "contextConfigLocation" parameters.
  *
  * <p>Note: The idea of delegating to Spring-managed Struts Actions originated in
  * Don Brown's <a href="http://struts.sourceforge.net/struts-spring">Spring Struts Plugin</a>.
@@ -83,7 +89,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  *
  * @author Juergen Hoeller
  * @since 05.04.2004
- * @see #SERVLET_CONTEXT_ATTRIBUTE
+ * @see #SERVLET_CONTEXT_PREFIX
  * @see ActionSupport
  * @see DispatchActionSupport
  * @see DelegatingActionProxy
@@ -108,8 +114,11 @@ public class ContextLoaderPlugIn implements PlugIn {
 	 */
 	public static final Class DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
 
-	/** Name of the ServletContext attribute for the WebApplicationContext */
-	public static final String SERVLET_CONTEXT_ATTRIBUTE = ContextLoaderPlugIn.class.getName() + ".CONTEXT";
+	/**
+	 * Prefix for the ServletContext attribute for the WebApplicationContext.
+	 * The completion is the Struts module name.
+	 */
+	public static final String SERVLET_CONTEXT_PREFIX = ContextLoaderPlugIn.class.getName() + ".CONTEXT.";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -125,6 +134,9 @@ public class ContextLoaderPlugIn implements PlugIn {
 
 	/** The Struts ActionServlet that this PlugIn is registered with */
 	private ActionServlet actionServlet;
+
+	/** The Struts ModuleConfig that this PlugIn is registered with */
+	private ModuleConfig moduleConfig;
 
 	/** WebApplicationContext for the ActionServlet */
 	private WebApplicationContext webApplicationContext;
@@ -173,7 +185,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 		if (namespace != null) {
 			return namespace;
 		}
-		if (this.actionServlet != null){
+		if (this.actionServlet != null) {
 			return this.actionServlet.getServletName() + DEFAULT_NAMESPACE_SUFFIX;
 		}
 		return null;
@@ -206,10 +218,11 @@ public class ContextLoaderPlugIn implements PlugIn {
 		}
 
 		this.actionServlet = actionServlet;
+		this.moduleConfig = moduleConfig;
 		try {
 			this.webApplicationContext = initWebApplicationContext();
 		}
-		catch (BeansException ex) {
+		catch (RuntimeException ex) {
 			logger.error("Context initialization failed", ex);
 			throw ex;
 		}
@@ -225,27 +238,30 @@ public class ContextLoaderPlugIn implements PlugIn {
 	/**
 	 * Initialize and publish the WebApplicationContext for the ActionServlet.
 	 * Delegates to createWebApplicationContext for actual creation.
-	 * Can be overridden in subclasses.
+	 * <p>Can be overridden in subclasses.
 	 * @throws org.springframework.beans.BeansException if the context couldn't be initialized
+	 * @throws IllegalStateException if there is already a context for the Struts ActionServlet
 	 * @see #createWebApplicationContext
 	 */
-	protected WebApplicationContext initWebApplicationContext() throws BeansException {
+	protected WebApplicationContext initWebApplicationContext() throws BeansException, IllegalStateException {
+		String servletName = this.actionServlet.getServletName();
 		this.actionServlet.getServletContext().log("Initializing WebApplicationContext for servlet '" +
-																							 this.actionServlet.getServletName() + "'");
+																							 servletName + "'");
 		ServletContext servletContext = this.actionServlet.getServletContext();
 		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 
 		WebApplicationContext wac = createWebApplicationContext(parent);
 		if (logger.isInfoEnabled()) {
-			logger.info("Using context class '" + wac.getClass().getName() + "' for servlet '" +
-									this.actionServlet.getServletName() + "'");
+			logger.info("Using context class '" + wac.getClass().getName() + "' for servlet '" + servletName + "'");
 		}
 
 		// publish the context as a servlet context attribute
-		servletContext.setAttribute(SERVLET_CONTEXT_ATTRIBUTE, wac);
+		String modulePrefix = this.moduleConfig.getPrefix();
+		String attrName = SERVLET_CONTEXT_PREFIX + modulePrefix;
+		servletContext.setAttribute(attrName, wac);
 		if (logger.isInfoEnabled()) {
-			logger.info("Published WebApplicationContext of servlet '" + this.actionServlet.getServletName() +
-									"' as ServletContext attribute with name [" + SERVLET_CONTEXT_ATTRIBUTE + "]");
+			logger.info("Published WebApplicationContext of servlet '" + servletName + "' for module '" +
+									modulePrefix + "' as ServletContext attribute with name [" + attrName + "]");
 		}
 		return wac;
 	}

@@ -68,7 +68,13 @@ import org.springframework.web.context.WebApplicationContext;
  *   &lt;property name="..."&gt;...&lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * If you also need the Tiles setup functionality of the original
+ * Note that you can use a single ContextLoaderPlugIn for all Struts modules.
+ * That context can in turn be loaded from multiple XML files, for example split
+ * according to Struts modules. Alternatively, define one ContextLoaderPlugIn per
+ * Struts module, specifying appropriate "contextConfigLocation" parameters.
+ * In both cases, the Spring bean name has to include the module prefix.
+ *
+ * <p>If you also need the Tiles setup functionality of the original
  * TilesRequestProcessor, use DelegatingTilesRequestProcessor. As there's just
  * a single central class to customize in Struts, we have to provide another
  * subclass here, covering both the Tiles and the Spring delegation aspect.
@@ -99,7 +105,7 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 	public void init(ActionServlet actionServlet, ModuleConfig moduleConfig) throws ServletException {
 		super.init(actionServlet, moduleConfig);
 		if (actionServlet != null) {
-			this.webApplicationContext = initWebApplicationContext(actionServlet);
+			this.webApplicationContext = initWebApplicationContext(actionServlet, moduleConfig);
 		}
 	}
 
@@ -107,14 +113,16 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the
 	 * ServletContext, containing the Struts Action beans to delegate to.
 	 * @param actionServlet the associated ActionServlet
+	 * @param moduleConfig the associated ModuleConfig
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
-	 * @see DelegatingActionUtils#initWebApplicationContext
-	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_ATTRIBUTE
+	 * @see DelegatingActionUtils#getRequiredWebApplicationContext
+	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
-	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet)
+	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet,
+																														ModuleConfig moduleConfig)
 			throws IllegalStateException {
-		return DelegatingActionUtils.initWebApplicationContext(actionServlet);
+		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 
 	/**

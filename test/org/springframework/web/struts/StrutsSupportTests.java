@@ -46,7 +46,7 @@ public class StrutsSupportTests extends TestCase {
 		final ServletContext servletContext = new MockServletContext();
 		wac.setServletContext(servletContext);
 		wac.refresh();
-		servletContext.setAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_ATTRIBUTE, wac);
+		servletContext.setAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX, wac);
 
 		ActionServlet actionServlet = new ActionServlet() {
 			public ServletContext getServletContext() {
@@ -94,7 +94,7 @@ public class StrutsSupportTests extends TestCase {
 		final ServletContext servletContext = new MockServletContext();
 		wac.setServletContext(servletContext);
 		wac.refresh();
-		servletContext.setAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_ATTRIBUTE, wac);
+		servletContext.setAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX, wac);
 
 		ActionServlet actionServlet = new ActionServlet() {
 			public ServletContext getServletContext() {
@@ -147,13 +147,16 @@ public class StrutsSupportTests extends TestCase {
 				return servletContext;
 			}
 		};
+
 		MockControl moduleConfigControl = MockControl.createControl(ModuleConfig.class);
 		ModuleConfig moduleConfig = (ModuleConfig) moduleConfigControl.getMock();
 		moduleConfig.getPrefix();
-		moduleConfigControl.setReturnValue(null);
+		moduleConfigControl.setReturnValue("", 3);
 		moduleConfigControl.replay();
 
 		plugin.init(actionServlet, moduleConfig);
+		assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) != null);
+
 		DelegatingActionProxy proxy = new DelegatingActionProxy();
 		proxy.setServlet(actionServlet);
 		ActionMapping mapping = new ActionMapping();
@@ -185,13 +188,65 @@ public class StrutsSupportTests extends TestCase {
 				return servletContext;
 			}
 		};
+
 		MockControl moduleConfigControl = MockControl.createControl(ModuleConfig.class);
 		ModuleConfig moduleConfig = (ModuleConfig) moduleConfigControl.getMock();
 		moduleConfig.getPrefix();
-		moduleConfigControl.setReturnValue("/module");
+		moduleConfigControl.setReturnValue("/module", 3);
 		moduleConfigControl.replay();
 
 		plugin.init(actionServlet, moduleConfig);
+		assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) == null);
+		assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + "/module") != null);
+
+		DelegatingActionProxy proxy = new DelegatingActionProxy();
+		proxy.setServlet(actionServlet);
+		ActionMapping mapping = new ActionMapping();
+		mapping.setPath("/test2");
+		mapping.setModuleConfig(moduleConfig);
+		ActionForward forward = proxy.execute(mapping, null,
+																					new MockHttpServletRequest(servletContext),
+																					new MockHttpServletResponse());
+		assertEquals("/module/test2", forward.getPath());
+
+		TestAction testAction = (TestAction) plugin.getWebApplicationContext().getBean("/module/test2");
+		assertTrue(testAction.getServlet() != null);
+		proxy.setServlet(null);
+		plugin.destroy();
+		assertTrue(testAction.getServlet() == null);
+
+		moduleConfigControl.verify();
+	}
+
+	public void testDelegatingActionProxyWithModuleAndDefaultContext() throws Exception {
+		final MockServletContext servletContext = new MockServletContext("/org/springframework/web/struts/WEB-INF");
+		ContextLoaderPlugIn plugin = new ContextLoaderPlugIn();
+		plugin.setContextConfigLocation("action-servlet.xml");
+		ActionServlet actionServlet = new ActionServlet() {
+			public String getServletName() {
+				return "action";
+			}
+			public ServletContext getServletContext() {
+				return servletContext;
+			}
+		};
+
+		MockControl defaultModuleConfigControl = MockControl.createControl(ModuleConfig.class);
+		ModuleConfig defaultModuleConfig = (ModuleConfig) defaultModuleConfigControl.getMock();
+		defaultModuleConfig.getPrefix();
+		defaultModuleConfigControl.setReturnValue("", 1);
+		defaultModuleConfigControl.replay();
+
+		MockControl moduleConfigControl = MockControl.createControl(ModuleConfig.class);
+		ModuleConfig moduleConfig = (ModuleConfig) moduleConfigControl.getMock();
+		moduleConfig.getPrefix();
+		moduleConfigControl.setReturnValue("/module", 2);
+		moduleConfigControl.replay();
+
+		plugin.init(actionServlet, defaultModuleConfig);
+		assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) != null);
+		assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + "/module") == null);
+
 		DelegatingActionProxy proxy = new DelegatingActionProxy();
 		proxy.setServlet(actionServlet);
 		ActionMapping mapping = new ActionMapping();

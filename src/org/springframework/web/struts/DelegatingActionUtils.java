@@ -20,8 +20,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionServlet;
+import org.apache.struts.config.ModuleConfig;
 
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -47,19 +47,30 @@ public abstract class DelegatingActionUtils {
 	/**
 	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the
 	 * ServletContext, containing the Struts Action beans to delegate to.
+	 * <p>Checks for a module-specific context first, falling back to the
+	 * context for the default module else.
 	 * @param actionServlet the associated ActionServlet
+	 * @param moduleConfig the associated ModuleConfig
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
-	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_ATTRIBUTE
+	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
-	public static WebApplicationContext initWebApplicationContext(ActionServlet actionServlet)
-			throws IllegalStateException {
-		WebApplicationContext wac = (WebApplicationContext)
-				actionServlet.getServletContext().getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_ATTRIBUTE);
+	public static WebApplicationContext getRequiredWebApplicationContext(
+			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
+		// try module-specific attribute
+		String modulePrefix = moduleConfig.getPrefix();
+		String attrName = ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + modulePrefix;
+		WebApplicationContext wac = (WebApplicationContext) actionServlet.getServletContext().getAttribute(attrName);
+		// if not found, try attribute for default module
+		if (wac == null && !"".equals(modulePrefix)) {
+			attrName = ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX;
+			wac = (WebApplicationContext) actionServlet.getServletContext().getAttribute(attrName);
+		}
+		// if no context found, throw an exception
 		if (wac == null) {
 			throw new IllegalStateException("Could not find ContextLoaderPlugIn's WebApplicationContext as " +
-																			"ServletContext attribute [" + ContextLoaderPlugIn.SERVLET_CONTEXT_ATTRIBUTE +
-																			"] - did you register " + ContextLoaderPlugIn.class.getName() + "?");
+																			"ServletContext attribute [" + attrName +
+																			"] - did you register [" + ContextLoaderPlugIn.class.getName() + "]?");
 		}
 		return wac;
 	}
@@ -75,7 +86,7 @@ public abstract class DelegatingActionUtils {
 	public static String determineActionBeanName(ActionMapping mapping) {
 		String prefix = mapping.getModuleConfig().getPrefix();
 		String path = mapping.getPath();
-		String beanName = StringUtils.hasLength(prefix) ? prefix + path : path;
+		String beanName = prefix + path;
 		if (logger.isDebugEnabled()) {
 			logger.debug("DelegatingActionProxy with mapping path '" + path + "' and module prefix '" +
 			             prefix + "' delegating to Spring bean with name [" + beanName + "]");
