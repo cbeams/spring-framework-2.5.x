@@ -17,6 +17,7 @@
 package org.springframework.mail.javamail;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailParseException;
+import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 
@@ -191,13 +193,13 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(SimpleMailMessage[] simpleMessages) throws MailException {
-		try {
-			List mimeMessages = new ArrayList();
-			for (int i = 0; i < simpleMessages.length; i++) {
-				SimpleMailMessage simpleMessage = simpleMessages[i];
-				if (logger.isDebugEnabled()) {
-					logger.debug("Creating new MIME message using the following mail properties: " + simpleMessage);
-				}
+		List mimeMessages = new ArrayList(simpleMessages.length);
+		for (int i = 0; i < simpleMessages.length; i++) {
+			SimpleMailMessage simpleMessage = simpleMessages[i];
+			if (logger.isDebugEnabled()) {
+				logger.debug("Creating new MIME message using the following mail properties: " + simpleMessage);
+			}
+			try {
 				MimeMessageHelper message = new MimeMessageHelper(createMimeMessage());
 				if (simpleMessage.getFrom() != null) {
 					message.setFrom(simpleMessage.getFrom());
@@ -225,11 +227,11 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				}
 				mimeMessages.add(message.getMimeMessage());
 			}
-			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
+			catch (MessagingException ex) {
+				throw new MailParseException("Could not parse SimpleMailMessage: " + simpleMessage, ex);
+			}
 		}
-		catch (MessagingException ex) {
-			throw new MailParseException(ex);
-		}
+		send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
 	}
 
 
@@ -239,6 +241,15 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	public MimeMessage createMimeMessage() {
 		return new MimeMessage(getSession());
+	}
+
+	public MimeMessage createMimeMessage(InputStream contentStream) throws MailException {
+		try {
+			return new MimeMessage(getSession(), contentStream);
+		}
+		catch (MessagingException ex) {
+			throw new MailParseException("Could not parse raw MIME content", ex);
+		}
 	}
 
 	public void send(MimeMessage mimeMessage) throws MailException {
@@ -301,6 +312,9 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		}
 		catch (IOException ex) {
 			throw new MailParseException(ex);
+		}
+		catch (Exception ex) {
+			throw new MailPreparationException(ex);
 		}
 	}
 

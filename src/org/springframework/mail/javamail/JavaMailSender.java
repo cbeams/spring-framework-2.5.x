@@ -16,6 +16,8 @@
 
 package org.springframework.mail.javamail;
 
+import java.io.InputStream;
+
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.mail.MailException;
@@ -53,10 +55,23 @@ public interface JavaMailSender extends MailSender {
 	MimeMessage createMimeMessage();
 
 	/**
+	 * Create a new JavaMail MimeMessage for the underlying JavaMail Session
+	 * of this sender, using the given input stream as the message source.
+	 * @param contentStream the raw MIME input stream for the message
+	 * @return the new MimeMessage instance
+	 * @throws org.springframework.mail.MailParseException
+	 * in case of message creation failure
+	*/
+	MimeMessage createMimeMessage(InputStream contentStream) throws MailException;
+
+	/**
 	 * Send the given JavaMail MIME message.
 	 * The message needs to have been created with createMimeMessage.
 	 * @param mimeMessage message to send
-	 * @throws MailException in case of message, authentication or send errors
+	 * @throws org.springframework.mail.MailAuthenticationException
+	 * in case of authentication failure
+	 * @throws org.springframework.mail.MailSendException
+	 * in case of failure when sending the message
 	 * @see #createMimeMessage
 	 */
 	void send(MimeMessage mimeMessage) throws MailException;
@@ -65,7 +80,10 @@ public interface JavaMailSender extends MailSender {
 	 * Send the given array of JavaMail MIME messages in batch.
 	 * The messages need to have been created with createMimeMessage.
 	 * @param mimeMessages messages to send
-	 * @throws MailException in case of message, authentication or send errors
+	 * @throws org.springframework.mail.MailAuthenticationException
+	 * in case of authentication failure
+	 * @throws org.springframework.mail.MailSendException
+	 * in case of failure when sending a message
 	 * @see #createMimeMessage
 	 */
 	void send(MimeMessage[] mimeMessages) throws MailException;
@@ -75,7 +93,14 @@ public interface JavaMailSender extends MailSender {
 	 * Alternative way to prepare MimeMessage instances, instead of createMimeMessage
 	 * and send(MimeMessage) calls. Takes care of proper exception conversion.
 	 * @param mimeMessagePreparator the preparator to use
-	 * @throws MailException in case of message, authentication or send errors
+	 * @throws org.springframework.mail.MailPreparationException
+	 * in case of failure when preparing the message
+	 * @throws org.springframework.mail.MailParseException
+	 * in case of failure when parsing the message
+	 * @throws org.springframework.mail.MailAuthenticationException
+	 * in case of authentication failure
+	 * @throws org.springframework.mail.MailSendException
+	 * in case of failure when sending the message
 	 */
 	void send(MimeMessagePreparator mimeMessagePreparator) throws MailException;
 
@@ -84,7 +109,14 @@ public interface JavaMailSender extends MailSender {
 	 * Alternative way to prepare MimeMessage instances, instead of createMimeMessage
 	 * and send(MimeMessage[]) calls. Takes care of proper exception conversion.
 	 * @param mimeMessagePreparators the preparator to use
-	 * @throws MailException in case of message, authentication or send errors
+	 * @throws org.springframework.mail.MailPreparationException
+	 * in case of failure when preparing a message
+	 * @throws org.springframework.mail.MailParseException
+	 * in case of failure when parsing a message
+	 * @throws org.springframework.mail.MailAuthenticationException
+	 * in case of authentication failure
+	 * @throws org.springframework.mail.MailSendException
+	 * in case of failure when sending a message
 	 */
 	void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException;
 
