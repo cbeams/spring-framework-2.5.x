@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.aop.framework.adapter;
 
 import java.util.LinkedList;
@@ -10,16 +10,17 @@ import java.util.List;
 
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * @author Rod Johnson
- * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.6 2004-02-22 10:39:02 johnsonr Exp $
+ * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.7 2004-02-23 15:49:56 dkopylenko Exp $
  */
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
-	
+
 	private List adapters = new LinkedList();
-	
+
 	public DefaultAdvisorAdapterRegistry() {
 		// register well-known adapters
 		registerAdvisorAdapter(new BeforeAdviceAdapter());
@@ -28,18 +29,22 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 	}
 
 	public Advisor wrap(Object advice) throws UnknownAdviceTypeException {
+		return wrap(advice, null);
+	}
+
+	public Advisor wrap(Object advice, Pointcut pointcut) throws UnknownAdviceTypeException {
 		if (advice instanceof Advisor) {
 			return (Advisor) advice;
 		}
 		if (advice instanceof Interceptor) {
 			// So well-known it doesn't even need an adapter
-			return new DefaultPointcutAdvisor(advice);
+			return getAdvisor(advice, pointcut);
 		}
 		for (int i = 0; i < this.adapters.size(); i++) {
 			// Check that it is supported
 			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
 			if (adapter.supportsAdvice(advice)) {
-				return new DefaultPointcutAdvisor(advice);
+				return getAdvisor(advice, pointcut);
 			}
 		}
 		throw new UnknownAdviceTypeException(advice);
@@ -61,6 +66,15 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 
 	public void registerAdvisorAdapter(AdvisorAdapter adapter) {
 		this.adapters.add(adapter);
+	}
+
+	private Advisor getAdvisor(Object advice, Pointcut pointcut) {
+		if (pointcut == null) {
+			return new DefaultPointcutAdvisor(advice);
+		}
+		else {
+			return new DefaultPointcutAdvisor(pointcut, advice);
+		}
 	}
 
 }
