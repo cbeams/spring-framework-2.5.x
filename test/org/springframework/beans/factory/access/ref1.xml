@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: ref1.xml,v 1.1 2004-01-27 00:03:45 colins Exp $ -->
+<!-- $Id: ref1.xml,v 1.2 2004-09-24 20:21:47 colins Exp $ -->
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
+<!-- we are only using one definition file for the purposes of this test, since we do not have multiple
+	classloaders available in the environment to allow combining multiple files of the same name, but
+	of course the contents within could be spread out across multiple files of the same name withing
+	different jars -->
+	
 <beans>
 
+  <!-- this definition could be inside one beanRefFactory.xml file -->
   <bean id="a.qualified.name.of.some.sort"
   	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
     <constructor-arg>
       <value>org/springframework/beans/factory/access/beans1.xml</value>
    	</constructor-arg>
   </bean>
-
+  
+  <!-- while the following two could be inside another, also on the classpath,
+	perhaps coming from another component jar -->
+  
+  <bean id="another.qualified.name"
+  	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
+    <constructor-arg>
+      <list><value>org/springframework/beans/factory/access/beans2.xml</value></list>
+   	</constructor-arg>
+    <constructor-arg>
+      <ref bean="a.qualified.name.of.some.sort"/>
+   	</constructor-arg>
+  </bean>
+  
+  <bean id="a.qualified.name.which.is.an.alias" class="java.lang.String">
+    <constructor-arg><value>another.qualified.name</value></constructor-arg>
+  </bean>
+  
 </beans>

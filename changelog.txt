@@ -17,6 +17,7 @@ Package org.springframework.beans
 * removed "getDependentBeanNames" hook and implementation from AbstractAutowireCapable/DefaultListableBeanFactory
 * fixed DefaultListableBeanFactory's "getBeansOfType" implementation to correctly ignore abstract FactoryBeans
 * added "import" element for XML bean definitions, to allow for loading further bean definitions from relative paths
+* modified SingletonBeanFactoryLocator to work in environments where resources returned by classloader are not on filesystem
 
 Package org.springframework.context
 * factored out the "publishEvent" method into the ApplicationEventPublisher interface, extended by ApplicationContext
@@ -24,6 +25,7 @@ Package org.springframework.context
 * reworked EventPublicationInterceptor to implement ApplicationEventPublisherAware rather than ApplicationContextAware
 * AbstractApplicationContext uses the internal MessageSource as "parentMessageSource", if the parent context allows to
 * AbstractMessageSource delegates to the parent's "getMessageInternal" method, to avoid "useCodeAsDefaultMessage" trap  
+* ContextSingletonBeanFactoryLocator resource handling modified in similar fashion described above for SingletonBeanFactoryLocator
 
 Package org.springframework.core
 * fixed "createRelative" implementation in ClassPathResource to correctly handle relative subdirectories

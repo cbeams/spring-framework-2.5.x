@@ -24,6 +24,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
@@ -45,29 +46,36 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  */
 public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLocator {
 
-	public static final String BEANS_REFS_XML_NAME = "beanRefContext.xml";
+	public static final String BEANS_REFS_XML_NAME = "classpath*:beanRefContext.xml";
 	
 	// the keyed singleton instances
 	private static Map instances = new HashMap();
 
 
 	/**
-	 * Returns an instance which uses the default "beanRefContext.xml", as the name
-	 * of the definition file(s). All resources returned by the current thread's context
-	 * classloader's getResources() method with this name will be combined to create a
-	 * definition, which is just a BeanFactory.
+	 * Returns an instance which uses the default "classpath*:beanRefContext.xml", as
+	 * the name of the definition file(s). All resources returned by the current
+	 * thread's context classloader's getResources() method with this name will be
+	 * combined to create a definition, which is just a BeanFactory.
 	 */
 	public static BeanFactoryLocator getInstance() throws BeansException {
 		return getInstance(BEANS_REFS_XML_NAME);
 	}
 
 	/**
-	 * Returns an instance which uses the the specified selector, as the name of the
-	 * definition file(s). All resources returned by the current thread's context
-	 * classloader's getResources() method with this name will be combined to create a
-	 * definition, which is just a a BeanFactory.
+	 * <p>Returns an instance which uses the the specified selector, as the name of the
+	 * definition file(s). In the case of a name with a Spring 'classpath*:' prefix,
+	 * or with no prefix, which is treated the same, the current thread's context
+	 * classloader's getResources() method will be called with this value to get all
+	 * resources having that name. These resources will then be combined to form a
+	 * definition. In the case where the name uses a Spring 'classpath:' prefix, or
+	 * a standard URL prefix, then only one resource file will be loaded as the
+	 * definition.</p> 
+	 * 
 	 * @param selector the name of the resource(s) which will be read and combine to
-	 * form the definition for the SingletonBeanFactoryLocator instance
+	 * form the definition for the SingletonBeanFactoryLocator instance. The one file
+	 * or multiple fragments with this name must form a valid ApplicationContext
+	 * definition.
 	 */
 	public static BeanFactoryLocator getInstance(String selector) throws BeansException {
 		synchronized (instances) {
@@ -108,8 +116,9 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 * instead of the default BeanFactory. This does not affect what can actually
 	 * be loaded by that definition.
 	 */
-	protected BeanFactory createDefinition(String[] resources) throws BeansException {
-		return new FileSystemXmlApplicationContext(resources);
+	protected BeanFactory createDefinition(String resourceName, String factoryKey)
+			throws BeansException {
+		return new ClassPathXmlApplicationContext(resourceName);
 	}
 	
     /**
