@@ -143,6 +143,14 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 		return model.getRequiredAttribute(LOCAL_FORM_OBJECT_NAME, formObjectClass);
 	}
 
+	/**
+	 * @param model
+	 * @return
+	 */
+	protected Object getLocalFormObject(AttributesAccessor model) {
+		return model.getRequiredAttribute(LOCAL_FORM_OBJECT_NAME);
+	}
+
 	protected Errors getLocalFormErrors(AttributesAccessor model) {
 		return (Errors)model.getRequiredAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class);
 	}
@@ -157,6 +165,10 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	 */
 	protected Object getRequiredFormObject(AttributesAccessor model, String formObjectName, Class formObjectClass) {
 		return model.getRequiredAttribute(formObjectName, formObjectClass);
+	}
+
+	protected Object getRequiredFormObject(AttributesAccessor model, String formObjectName) {
+		return model.getRequiredAttribute(formObjectName);
 	}
 
 	protected Errors getRequiredFormErrors(AttributesAccessor model, String formObjectName) {
