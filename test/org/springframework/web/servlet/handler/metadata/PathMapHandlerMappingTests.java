@@ -16,10 +16,7 @@
 
 package org.springframework.web.servlet.handler.metadata;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -104,13 +101,8 @@ public class PathMapHandlerMappingTests extends TestCase {
 			classToPathMaps.put(clazz, pms);
 		}
 
-		protected Collection getClassNamesWithPathMapAttributes() {
-			Collection names = new ArrayList(classToPathMaps.size());
-			for (Iterator itr = classToPathMaps.keySet().iterator(); itr.hasNext(); ) {
-				Class clazz = (Class) itr.next();
-				names.add(clazz.getName());
-			}
-			return names;
+		protected Class[] getClassesWithPathMapAttributes() {
+			return (Class[]) classToPathMaps.keySet().toArray(new Class[classToPathMaps.size()]);
 		}
 
 		protected PathMap[] getPathMapAttributes(Class handlerClass) {

@@ -16,9 +16,8 @@
 
 package org.springframework.web.servlet.handler.metadata;
 
-import java.util.Collection;
-import java.util.Iterator;
-
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContextException;
@@ -45,6 +44,7 @@ import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
  * Controllers with attributes will be picked up by each DispatcherServlet's context.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMapping {
 	
@@ -54,66 +54,73 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 	 * by the current DispatcherServlet.
 	 * @see org.springframework.context.support.ApplicationObjectSupport#initApplicationContext()
 	 */
-	public void initApplicationContext() throws ApplicationContextException {
+	public void initApplicationContext() throws BeansException {
+		if (!(getApplicationContext() instanceof ConfigurableApplicationContext)) {
+			throw new ApplicationContextException(
+					"[" + getClass().getName() + "] needs to run in a ConfigurableApplicationContext");
+		}
+		ConfigurableListableBeanFactory beanFactory =
+				((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory();
+
 		try {
-			logger.info("Looking for attribute-defined URL mappings in application context: " + getApplicationContext());
-			
-			Collection names = getClassNamesWithPathMapAttributes();
-			logger.info("Found " + names.size() + " attribute-targeted handlers");				
-			
-			// For each classname returned by the Commons Attribute indexer
-			for (Iterator itr = names.iterator(); itr.hasNext();) {
-				String handlerClassName = (String) itr.next();
-				Class handlerClass = Class.forName(handlerClassName);
-				if (!(getApplicationContext() instanceof ConfigurableApplicationContext)) {
-					throw new ApplicationContextException("AbstractPathMapHandlerMapping needs to run in a ConfigurableApplicationContext");
-				}
-				ConfigurableListableBeanFactory beanFactory =
-						((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory();
+			Class[] handlerClasses = getClassesWithPathMapAttributes();
+			if (logger.isInfoEnabled()) {
+				logger.info("Found " + handlerClasses.length + " attribute-targeted handlers");
+			}
+
+			// for each Class returned by the Commons Attribute indexer
+			for (int i = 0; i < handlerClasses.length; i++) {
+				Class handlerClass = handlerClasses[i];
 
 				// Autowire the given handler class via AutowireCapableBeanFactory.
 				// Either autowires a constructor or by type, depending on the
 				// constructors available in the given class.
 				Object handler = beanFactory.autowire(handlerClass, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, true);
-				
+
 				// We now have an "autowired" handler, that may reference beans in the
 				// application context. We now add the new handler to the factory.
 				// This isn't necessary for the handler to work, but is useful if we want
 				// to enumerate controllers in the factory etc.
-				beanFactory.registerSingleton(handlerClassName, handler);
+				beanFactory.registerSingleton(handlerClass.getName(), handler);
 
 				// There may be multiple paths mapped to this handler,
 				PathMap[] pathMaps = getPathMapAttributes(handlerClass);
-				for (int i = 0; i < pathMaps.length; i++) {				
-					PathMap pathMap = pathMaps[i];
+				for (int j = 0; j < pathMaps.length; j++) {
+					PathMap pathMap = pathMaps[j];
 					String path = pathMap.getUrl();
 					if (!path.startsWith("/")) {
 						path = "/" + path;
 					}
-					
-					logger.info("Mapping path [" + path + "] to class with name '" + handlerClassName + "'");
+
+					if (logger.isInfoEnabled()) {
+						logger.info("Mapping path [" + path + "] to class [" + handlerClass.getName() + "]");
+					}
 					registerHandler(path, handler);
 				}
 			}
 		}
-		catch (ClassNotFoundException ex) {
-			// Shouldn't happen: Attributes API gave us the class name.
-			throw new ApplicationContextException("Failed to load a class returned in an attribute index: " +
-																						"internal error in Commons Attributes indexing?", ex);
+		catch (BeansException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new BeanInitializationException("Could not retrieve PathMap attributes", ex);
 		}
 	}
 
 	/**
-	 * Use an attribute index to get a Collection of FQNs of
-	 * classes with the required PathMap attribute.
+	 * Use an attribute index to get a Collection of Class objects
+	 * with the required PathMap attribute.
+	 * @return a array of Class objects
 	 */
-	protected abstract Collection getClassNamesWithPathMapAttributes();
+	protected abstract Class[] getClassesWithPathMapAttributes() throws Exception;
 
 	/**
-	 * Use Attributes API to find PathMap attributes for the given class.
+	 * Use Attributes API to find PathMap attributes for the given handler class.
 	 * We know there's at least one, as the getClassNamesWithPathMapAttributes
 	 * method return this class name.
+	 * @param handlerClass the handler class to look for
+	 * @return an array of PathMap objects
 	 */
-	protected abstract PathMap[] getPathMapAttributes(Class handlerClass);
+	protected abstract PathMap[] getPathMapAttributes(Class handlerClass) throws Exception;
 
 }
