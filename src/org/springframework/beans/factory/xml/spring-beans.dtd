@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.27 2004-05-27 17:07:17 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.28 2004-06-19 08:42:44 jhoeller Exp $
 -->
 
 
@@ -253,6 +253,7 @@
 -->
 <!ATTLIST ref bean CDATA #IMPLIED>
 <!ATTLIST ref local IDREF #IMPLIED>
+<!ATTLIST ref parent CDATA #IMPLIED>
 
 <!--
 	Defines a string property value, which must also be the id of another
@@ -266,7 +267,7 @@
 <!--
 	ID refs must specify a name of the target bean.
 	The "bean" attribute can reference any name from any bean in the context,
-	to be checked at runtime by future Spring implementations.
+	potentially to be checked at runtime by bean factory implementations.
 	Local references, using the "local" attribute, have to use bean ids;
 	they can be checked by this DTD, thus should be preferred for references
 	within the same bean factory XML file.

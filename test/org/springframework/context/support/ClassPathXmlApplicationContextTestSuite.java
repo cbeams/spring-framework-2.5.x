@@ -23,9 +23,15 @@ import java.io.StringWriter;
 import junit.framework.TestCase;
 
 import org.springframework.beans.ResourceTestBean;
+import org.springframework.beans.TestBean;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * @author Juergen Hoeller
@@ -48,6 +54,24 @@ public class ClassPathXmlApplicationContextTestSuite extends TestCase {
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
+	}
+
+	public void testChildWithProxy() throws Exception {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"/org/springframework/context/support/context*.xml");
+		ClassPathXmlApplicationContext child = new ClassPathXmlApplicationContext(
+				new String[] {"/org/springframework/context/support/childWithProxy.xml"}, ctx);
+		assertTrue(AopUtils.isAopProxy(child.getBean("assemblerOne")));
+		assertTrue(AopUtils.isAopProxy(child.getBean("assemblerTwo")));
+	}
+
+	public void testSelfReference() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("test"));
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, pvs));
+		TestBean test = (TestBean) lbf.getBean("test");
+		assertEquals(test, test.getSpouse());
 	}
 
 	public void testResourceAndInputStream() throws IOException {

@@ -91,6 +91,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String IDREF_ELEMENT = "idref";
 	public static final String BEAN_REF_ATTRIBUTE = "bean";
 	public static final String LOCAL_REF_ATTRIBUTE = "local";
+	public static final String PARENT_REF_ATTRIBUTE = "parent";
 	public static final String LIST_ELEMENT = "list";
 	public static final String SET_ELEMENT = "set";
 	public static final String MAP_ELEMENT = "map";
@@ -444,8 +445,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				// a reference to the id of another bean in the same XML file
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if ("".equals(beanRef)) {
-					throw new BeanDefinitionStoreException(this.resource, beanName,
-																								 "Either 'bean' or 'local' is required for a reference");
+					// a reference to the id of another bean in the same XML file
+					beanRef = ele.getAttribute(PARENT_REF_ATTRIBUTE);
+					if ("".equals(beanRef)) {
+						throw new BeanDefinitionStoreException(this.resource, beanName,
+																									 "'bean', 'local' or 'parent' is required for a reference");
+					}
+					return new RuntimeBeanReference(beanRef, true);
 				}
 			}
 			return new RuntimeBeanReference(beanRef);

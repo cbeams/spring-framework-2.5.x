@@ -185,6 +185,15 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		}
 	}
 
+	public void testSelfReference() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("self"));
+		lbf.registerBeanDefinition("self", new RootBeanDefinition(TestBean.class, pvs));
+		TestBean self = (TestBean) lbf.getBean("self");
+		assertEquals(self, self.getSpouse());
+	}
+
 	public void testPrototype() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();

@@ -717,7 +717,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 									 beanName + "' to bean '" + ref.getBeanName() + "'");
 		}
 		try {
-			return getBean(ref.getBeanName());
+			if (ref.isToParent()) {
+				if (getParentBeanFactory() == null) {
+					throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
+																					"Can't resolve reference to bean '" + ref.getBeanName() +
+																					"' in parent factory: no parent factory available");
+				}
+				return getParentBeanFactory().getBean(ref.getBeanName());
+			}
+			else {
+				return getBean(ref.getBeanName());
+			}
 		}
 		catch (BeansException ex) {
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,

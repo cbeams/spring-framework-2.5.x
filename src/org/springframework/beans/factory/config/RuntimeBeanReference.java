@@ -21,17 +21,36 @@ package org.springframework.beans.factory.config;
  * object when it's a reference to another bean in this factory
  * to be resolved at runtime.
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class RuntimeBeanReference {
 	
 	private final String beanName;
 
+	private final boolean toParent;
+
 	/**
-	 * Create a new RuntimeBeanReference to the given bean name.
+	 * Create a new RuntimeBeanReference to the given bean name,
+	 * without explicitly marking it as reference to a bean in
+	 * the parent factory.
 	 * @param beanName name of the target bean
 	 */
 	public RuntimeBeanReference(String beanName) {
 		this.beanName = beanName;
+		this.toParent = false;
+	}
+
+	/**
+	 * Create a new RuntimeBeanReference to the given bean name,
+	 * with the option to mark it as reference to a bean in
+	 * the parent factory.
+	 * @param beanName name of the target bean
+	 * @param toParent whether this is an explicit reference to
+	 * a bean in the parent factory
+	 */
+	public RuntimeBeanReference(String beanName, boolean toParent) {
+		this.beanName = beanName;
+		this.toParent = toParent;
 	}
 
 	/**
@@ -39,6 +58,14 @@ public class RuntimeBeanReference {
 	 */
 	public String getBeanName() {
 		return beanName;
+	}
+
+	/**
+	 * Return whether this is an explicit reference to a bean
+	 * in the parent factory.
+	 */
+	public boolean isToParent() {
+		return toParent;
 	}
 
 	public String toString() {
