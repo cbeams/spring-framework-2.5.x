@@ -186,6 +186,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
+					ht.setExposeNativeSession(true);
 					List htl = ht.executeFind(new HibernateCallback() {
 						public Object doInHibernate(Session sess) {
 							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
@@ -194,6 +195,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 						}
 					});
 					ht = new HibernateTemplate(sf);
+					ht.setExposeNativeSession(true);
 					htl = ht.executeFind(new HibernateCallback() {
 						public Object doInHibernate(Session sess) {
 							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
@@ -292,6 +294,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
+					ht.setExposeNativeSession(true);
 					List htl = ht.executeFind(new HibernateCallback() {
 						public Object doInHibernate(Session sess) {
 							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
@@ -300,6 +303,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 						}
 					});
 					ht = new HibernateTemplate(sf);
+					ht.setExposeNativeSession(true);
 					htl = ht.executeFind(new HibernateCallback() {
 						public Object doInHibernate(Session sess) {
 							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
@@ -378,6 +382,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 						assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 						HibernateTemplate ht = new HibernateTemplate(sf);
+						ht.setExposeNativeSession(true);
 						List htl = ht.executeFind(new HibernateCallback() {
 							public Object doInHibernate(Session sess) {
 								assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
@@ -386,6 +391,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 							}
 						});
 						ht = new HibernateTemplate(sf);
+						ht.setExposeNativeSession(true);
 						htl = ht.executeFind(new HibernateCallback() {
 							public Object doInHibernate(Session sess) {
 								assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
@@ -547,6 +553,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 						assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 						HibernateTemplate ht = new HibernateTemplate(sf);
+						ht.setExposeNativeSession(true);
 						List htl = null;
 						for (int i = 0; i < 5; i++) {
 							htl = ht.executeFind(new HibernateCallback() {
@@ -639,6 +646,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 								assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 								assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 								HibernateTemplate ht = new HibernateTemplate(sf);
+								ht.setExposeNativeSession(true);
 								for (int i = 0; i < 5; i++) {
 									ht.execute(new HibernateCallback() {
 										public Object doInHibernate(Session sess) {
@@ -708,6 +716,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setExposeNativeSession(true);
 		for (int i = 0; i < 5; i++) {
 			ht.executeFind(new HibernateCallback() {
 				public Object doInHibernate(Session sess) {
@@ -777,6 +786,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setExposeNativeSession(true);
 		ht.executeFind(new HibernateCallback() {
 			public Object doInHibernate(Session sess) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
@@ -846,6 +856,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setExposeNativeSession(true);
 		for (int i = 0; i < 5; i++) {
 			ht.executeFind(new HibernateCallback() {
 				public Object doInHibernate(Session sess) {
@@ -914,6 +925,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		try {
 			assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 			HibernateTemplate ht = new HibernateTemplate(sf);
+			ht.setExposeNativeSession(true);
 			for (int i = 0; i < 5; i++) {
 				ht.executeFind(new HibernateCallback() {
 					public Object doInHibernate(Session sess) {
@@ -997,6 +1009,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 			}
 
 			HibernateTemplate ht = new HibernateTemplate(sf);
+			ht.setExposeNativeSession(true);
 			for (int i = 0; i < 5; i++) {
 				ht.executeFind(new HibernateCallback() {
 					public Object doInHibernate(Session sess) {

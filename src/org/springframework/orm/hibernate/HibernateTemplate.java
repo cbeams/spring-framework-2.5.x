@@ -17,6 +17,10 @@
 package org.springframework.orm.hibernate;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -111,6 +115,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	private boolean allowCreate = true;
 
+	private boolean exposeNativeSession = false;
+
 	private boolean checkWriteOperations = true;
 
 	private boolean cacheQueries = false;
@@ -162,6 +168,30 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	public boolean isAllowCreate() {
 		return allowCreate;
+	}
+
+	/**
+	 * Set whether to expose the native Hibernate Session to HibernateCallback
+	 * code. Default is false; instead, a Session proxy will be returned,
+	 * suppressing <code>close</code> calls and automatically applying
+	 * query cache settings and transaction timeouts.
+	 * @see HibernateCallback
+	 * @see net.sf.hibernate.Session
+	 * @see #setCacheQueries
+	 * @see #setQueryCacheRegion
+	 * @see #prepareQuery
+	 * @see #prepareCriteria
+	 */
+	public void setExposeNativeSession(boolean exposeNativeSession) {
+		this.exposeNativeSession = exposeNativeSession;
+	}
+
+	/**
+	 * Return whether to expose the native Hibernate Session to HibernateCallback
+	 * code, or rather a Session proxy.
+	 */
+	public boolean isExposeNativeSession() {
+		return exposeNativeSession;
 	}
 
 	/**
@@ -231,6 +261,22 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	public Object execute(HibernateCallback action) throws DataAccessException {
+		return execute(action, isExposeNativeSession());
+	}
+
+	public List executeFind(HibernateCallback action) throws DataAccessException {
+		return (List) execute(action, isExposeNativeSession());
+	}
+
+	/**
+	 * Execute the action specified by the given action object within a Session.
+	 * @param action callback object that specifies the Hibernate action
+	 * @param exposeNativeSession whether to expose the native Hibernate Session
+	 * to callback code
+	 * @return a result object returned by the action, or null
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 */
+	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
 		Session session = (!isAllowCreate() ?
 				SessionFactoryUtils.getSession(getSessionFactory(), false) :
 				SessionFactoryUtils.getSession(
@@ -240,7 +286,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			session.setFlushMode(FlushMode.NEVER);
 		}
 		try {
-			Object result = action.doInHibernate(session);
+			Session sessionToExpose = (exposeNativeSession ? session : createSessionProxy(session));
+			Object result = action.doInHibernate(sessionToExpose);
 			flushIfNecessary(session, existingTransaction);
 			return result;
 		}
@@ -259,8 +306,20 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		}
 	}
 
-	public List executeFind(HibernateCallback action) throws DataAccessException {
-		return (List) execute(action);
+	/**
+	 * Create a close-suppressing proxy for the given Hibernate Session.
+	 * The proxy also prepares returned Query and Criteria objects.
+	 * @param session the Hibernate Session to create a proxy for
+	 * @return the Session proxy
+	 * @see net.sf.hibernate.Session#close
+	 * @see #prepareQuery
+	 * @see #prepareCriteria
+	 */
+	protected Session createSessionProxy(Session session) {
+		return (Session) Proxy.newProxyInstance(
+				getClass().getClassLoader(),
+				new Class[] {Session.class},
+				new CloseSuppressingInvocationHandler(session));
 	}
 
 
@@ -273,7 +332,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				return session.get(entityClass, id);
 			}
-		});
+		}, true);
 	}
 
 	public Object get(final Class entityClass, final Serializable id, final LockMode lockMode)
@@ -282,7 +341,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				return session.get(entityClass, id, lockMode);
 			}
-		});
+		}, true);
 	}
 
 	public Object load(final Class entityClass, final Serializable id) throws DataAccessException {
@@ -290,7 +349,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				return session.load(entityClass, id);
 			}
-		});
+		}, true);
 	}
 
 	public Object load(final Class entityClass, final Serializable id, final LockMode lockMode)
@@ -299,16 +358,17 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				return session.load(entityClass, id, lockMode);
 			}
-		});
+		}, true);
 	}
 
 	public List loadAll(final Class entityClass) throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Criteria criteria = createCriteria(session, entityClass);
+				Criteria criteria = session.createCriteria(entityClass);
+				prepareCriteria(criteria);
 				return criteria.list();
 			}
-		});
+		}, true);
 	}
 
 	public void load(final Object entity, final Serializable id) throws DataAccessException {
@@ -317,7 +377,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.load(entity, id);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void refresh(final Object entity) throws DataAccessException {
@@ -326,7 +386,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.refresh(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void refresh(final Object entity, final LockMode lockMode) throws DataAccessException {
@@ -335,7 +395,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.refresh(entity, lockMode);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public boolean contains(final Object entity) throws DataAccessException {
@@ -343,7 +403,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				return new Boolean(session.contains(entity));
 			}
-		});
+		}, true);
 		return result.booleanValue();
 	}
 
@@ -353,7 +413,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.evict(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void initialize(Object proxy) throws DataAccessException {
@@ -376,7 +436,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.lock(entity, lockMode);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public Serializable save(final Object entity) throws DataAccessException {
@@ -385,7 +445,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				checkWriteOperationAllowed(session);
 				return session.save(entity);
 			}
-		});
+		}, true);
 	}
 
 	public void save(final Object entity, final Serializable id) throws DataAccessException {
@@ -395,7 +455,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.save(entity, id);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void saveOrUpdate(final Object entity) throws DataAccessException {
@@ -405,7 +465,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.saveOrUpdate(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public Object saveOrUpdateCopy(final Object entity) throws DataAccessException {
@@ -414,7 +474,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				checkWriteOperationAllowed(session);
 				return session.saveOrUpdateCopy(entity);
 			}
-		});
+		}, true);
 	}
 
 	public void update(final Object entity) throws DataAccessException {
@@ -424,7 +484,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.update(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void update(final Object entity, final LockMode lockMode) throws DataAccessException {
@@ -435,7 +495,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.lock(entity, lockMode);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void delete(final Object entity) throws DataAccessException {
@@ -445,7 +505,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.delete(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
@@ -456,7 +516,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.delete(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void deleteAll(final Collection entities) throws DataAccessException {
@@ -468,7 +528,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void flush() throws DataAccessException {
@@ -477,7 +537,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.flush();
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void clear() throws DataAccessException {
@@ -486,7 +546,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.clear();
 				return null;
 			}
-		});
+		}, true);
 	}
 
 
@@ -495,12 +555,13 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	//-------------------------------------------------------------------------
 
 	public List find(final String queryString) throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List find(String queryString, Object value) throws DataAccessException {
@@ -509,9 +570,10 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List find(final String queryString, final Object value, final Type type)
 			throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				if (type != null) {
 					queryObject.setParameter(0, value, type);
 				}
@@ -520,7 +582,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List find(String queryString, Object[] values) throws DataAccessException {
@@ -532,9 +594,10 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		if (types != null && values.length != types.length) {
 			throw new IllegalArgumentException("Length of values array must match length of types array");
 		}
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				for (int i = 0; i < values.length; i++) {
 					if (types != null) {
 						queryObject.setParameter(i, values[i], types[i]);
@@ -545,7 +608,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List findByNamedParam(String queryString, String paramName, Object value)
@@ -556,13 +619,14 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public List findByNamedParam(
 	    final String queryString, final String paramName, final Object value, final Type type)
 			throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				applyNamedParameterToQuery(queryObject, paramName, value, type);
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List findByNamedParam(String queryString, String[] paramNames, Object[] values)
@@ -579,26 +643,28 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		if (types != null && paramNames.length != types.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of types array");
 		}
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				for (int i = 0; i < values.length; i++) {
 					applyNamedParameterToQuery(queryObject, paramNames[i], values[i], (types != null ? types[i] : null));
 				}
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List findByValueBean(final String queryString, final Object valueBean)
 			throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 
@@ -607,12 +673,12 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	//-------------------------------------------------------------------------
 
 	public List findByNamedQuery(final String queryName) throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List findByNamedQuery(final String queryName, final Object value) throws DataAccessException {
@@ -621,7 +687,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByNamedQuery(final String queryName, final Object value, final Type type)
 			throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				if (type != null) {
@@ -632,7 +698,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List findByNamedQuery(String queryName, Object[] values) throws DataAccessException {
@@ -644,7 +710,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		if (types != null && values.length != types.length) {
 			throw new IllegalArgumentException("Length of values array must match length of types array");
 		}
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				for (int i = 0; i < values.length; i++) {
@@ -657,7 +723,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	/**
@@ -708,13 +774,13 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public List findByNamedQueryAndNamedParam(
 	    final String queryName, final String paramName, final Object value, final Type type)
 			throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				applyNamedParameterToQuery(queryObject, paramName, value, type);
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List findByNamedQueryAndNamedParam(String queryName, String[] paramNames, Object[] values)
@@ -731,7 +797,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		if (types != null && paramNames.length != types.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of types array");
 		}
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				for (int i = 0; i < values.length; i++) {
@@ -739,18 +805,18 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 	public List findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
 			throws DataAccessException {
-		return executeFind(new HibernateCallback() {
+		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				queryObject.setProperties(valueBean);
 				return queryObject.list();
 			}
-		});
+		}, true);
 	}
 
 
@@ -761,10 +827,11 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Iterator iterate(final String queryString) throws DataAccessException {
 		return (Iterator) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				return queryObject.iterate();
 			}
-		});
+		}, true);
 	}
 
 	public Iterator iterate(String queryString, Object value) throws DataAccessException {
@@ -775,7 +842,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throws DataAccessException {
 		return (Iterator) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				if (type != null) {
 					queryObject.setParameter(0, value, type);
 				}
@@ -784,7 +852,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.iterate();
 			}
-		});
+		}, true);
 	}
 
 	public Iterator iterate(String queryString, Object[] values) throws DataAccessException {
@@ -798,7 +866,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		}
 		return (Iterator) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Query queryObject = createQuery(session, queryString);
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
 				for (int i = 0; i < values.length; i++) {
 					if (types != null) {
 						queryObject.setParameter(i, values[i], types[i]);
@@ -809,7 +878,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.iterate();
 			}
-		});
+		}, true);
 	}
 
 	public void closeIterator(Iterator it) throws DataAccessException {
@@ -827,7 +896,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				checkWriteOperationAllowed(session);
 				return new Integer(session.delete(queryString));
 			}
-		});
+		}, true);
 		return deleteCount.intValue();
 	}
 
@@ -838,7 +907,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				checkWriteOperationAllowed(session);
 				return new Integer(session.delete(queryString, value, type));
 			}
-		});
+		}, true);
 		return deleteCount.intValue();
 	}
 
@@ -849,7 +918,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				checkWriteOperationAllowed(session);
 				return new Integer(session.delete(queryString, values, types));
 			}
-		});
+		}, true);
 		return deleteCount.intValue();
 	}
 
@@ -876,62 +945,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	/**
-	 * Create a Query object for the given Session and the given query string.
-	 * <b>To be used within a HibernateCallback</b>:
-	 * <pre>
-	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
-	 *   public Object doInHibernate(Session session) throws HibernateException {
-	 *     Query query = hibernateTemplate.createQuery(session, "...");
-	 *     ...
-	 *     return query.list();
-	 *   }
-	 * });</pre>
-	 * Applies query cache settings and a transaction timeout, if any. If you don't
-	 * use either of those, the call is equivalent to <code>Session.createQuery</code>.
-	 * @param session current Hibernate Session
-	 * @param queryString the HQL query string
-	 * @return the Query object
-	 * @throws HibernateException if the Query could not be created
-	 * @see HibernateCallback#doInHibernate
-	 * @see #setCacheQueries
-	 * @see SessionFactoryUtils#applyTransactionTimeout
-	 * @see net.sf.hibernate.Session#createQuery
-	 */
-	public Query createQuery(Session session, String queryString) throws HibernateException {
-		Query queryObject = session.createQuery(queryString);
-		prepareQuery(queryObject);
-		return queryObject;
-	}
-
-	/**
-	 * Create a named Query object for the given Session and the given query name.
-	 * <b>To be used within a HibernateCallback</b>:
-	 * <pre>
-	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
-	 *   public Object doInHibernate(Session session) throws HibernateException {
-	 *     Query query = hibernateTemplate.getNamedQuery(session, "...");
-	 *     ...
-	 *     return query.list();
-	 *   }
-	 * });</pre>
-	 * Applies query cache settings and a transaction timeout, if any. If you don't
-	 * use either of those, the call is equivalent to <code>Session.getNamedQuery</code>.
-	 * @param session current Hibernate Session
-	 * @param queryName the name of the query in the Hibernate mapping file
-	 * @return the Query object
-	 * @throws HibernateException if the Query could not be created
-	 * @see HibernateCallback#doInHibernate
-	 * @see #setCacheQueries
-	 * @see SessionFactoryUtils#applyTransactionTimeout
-	 * @see net.sf.hibernate.Session#getNamedQuery
-	 */
-	public Query getNamedQuery(Session session, String queryName) throws HibernateException {
-		Query queryObject = session.getNamedQuery(queryName);
-		prepareQuery(queryObject);
-		return queryObject;
-	}
-
-	/**
 	 * Prepare the given Query object, applying cache settings and/or
 	 * a transaction timeout.
 	 * @param queryObject the Query object to prepare
@@ -950,30 +963,14 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	/**
-	 * Create a Criteria object for the given Session and the given entity class.
-	 * <b>To be used within a HibernateCallback</b>:
-	 * <pre>
-	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
-	 *   public Object doInHibernate(Session session) throws HibernateException {
-	 *     Criteria criteria = hibernateTemplate.createCriteria(session, MyClass.class);
-	 *     ...
-	 *     return query.list();
-	 *   }
-	 * });</pre>
-	 * Applies query cache settings and a transaction timeout, if any. If you don't
-	 * use either of those, the call is equivalent to <code>Session.createCriteria</code>.
-	 * @param session current Hibernate Session
-	 * @param entityClass the entity class to create the Criteria for
-	 * @return the Query object
-	 * @throws HibernateException if the Criteria could not be created
-	 * @see HibernateCallback#doInHibernate
+	 * Prepare the given Criteria object, applying cache settings and/or
+	 * a transaction timeout.
+	 * @param criteria the Criteria object to prepare
 	 * @see #setCacheQueries
 	 * @see #setQueryCacheRegion
 	 * @see SessionFactoryUtils#applyTransactionTimeout
-	 * @see net.sf.hibernate.Session#createCriteria
 	 */
-	public Criteria createCriteria(Session session, Class entityClass) throws HibernateException {
-		Criteria criteria = session.createCriteria(entityClass);
+	protected void prepareCriteria(Criteria criteria) {
 		if (isCacheQueries()) {
 			criteria.setCacheable(true);
 			if (getQueryCacheRegion() != null) {
@@ -981,9 +978,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			}
 		}
 		SessionFactoryUtils.applyTransactionTimeout(criteria, getSessionFactory());
-		return criteria;
 	}
-
 
 	/**
 	 * Apply the given name parameter to the given Query object.
@@ -1017,6 +1012,146 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			}
 			else {
 				queryObject.setParameter(paramName, value);
+			}
+		}
+	}
+
+
+	/**
+	 * Create a Query object for the given Session and the given query string.
+	 * <b>To be used within a HibernateCallback</b>:
+	 * <pre>
+	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
+	 *   public Object doInHibernate(Session session) throws HibernateException {
+	 *     Query query = hibernateTemplate.createQuery(session, "...");
+	 *     ...
+	 *     return query.list();
+	 *   }
+	 * });</pre>
+	 * Applies query cache settings and a transaction timeout, if any. If you don't
+	 * use either of those, the call is equivalent to <code>Session.createQuery</code>.
+	 * @param session current Hibernate Session
+	 * @param queryString the HQL query string
+	 * @return the Query object
+	 * @throws HibernateException if the Query could not be created
+	 * @deprecated Use <code>session.createQuery</code> instead, which will now
+	 * automatically apply the template's query cache settings and the transation
+	 * timeout (through the use of a special Session proxy).
+	 * @see HibernateCallback#doInHibernate
+	 * @see #setCacheQueries
+	 * @see SessionFactoryUtils#applyTransactionTimeout
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	public Query createQuery(Session session, String queryString) throws HibernateException {
+		Query queryObject = session.createQuery(queryString);
+		prepareQuery(queryObject);
+		return queryObject;
+	}
+
+	/**
+	 * Create a named Query object for the given Session and the given query name.
+	 * <b>To be used within a HibernateCallback</b>:
+	 * <pre>
+	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
+	 *   public Object doInHibernate(Session session) throws HibernateException {
+	 *     Query query = hibernateTemplate.getNamedQuery(session, "...");
+	 *     ...
+	 *     return query.list();
+	 *   }
+	 * });</pre>
+	 * Applies query cache settings and a transaction timeout, if any. If you don't
+	 * use either of those, the call is equivalent to <code>Session.getNamedQuery</code>.
+	 * @param session current Hibernate Session
+	 * @param queryName the name of the query in the Hibernate mapping file
+	 * @return the Query object
+	 * @throws HibernateException if the Query could not be created
+	 * @deprecated Use <code>session.getNamedQuery</code> instead, which will now
+	 * automatically apply the template's query cache settings and the transation
+	 * timeout (through the use of a special Session proxy).
+	 * @see HibernateCallback#doInHibernate
+	 * @see #setCacheQueries
+	 * @see SessionFactoryUtils#applyTransactionTimeout
+	 * @see net.sf.hibernate.Session#getNamedQuery
+	 */
+	public Query getNamedQuery(Session session, String queryName) throws HibernateException {
+		Query queryObject = session.getNamedQuery(queryName);
+		prepareQuery(queryObject);
+		return queryObject;
+	}
+
+	/**
+	 * Create a Criteria object for the given Session and the given entity class.
+	 * <b>To be used within a HibernateCallback</b>:
+	 * <pre>
+	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
+	 *   public Object doInHibernate(Session session) throws HibernateException {
+	 *     Criteria criteria = hibernateTemplate.createCriteria(session, MyClass.class);
+	 *     ...
+	 *     return query.list();
+	 *   }
+	 * });</pre>
+	 * Applies query cache settings and a transaction timeout, if any. If you don't
+	 * use either of those, the call is equivalent to <code>Session.createCriteria</code>.
+	 * @param session current Hibernate Session
+	 * @param entityClass the entity class to create the Criteria for
+	 * @return the Query object
+	 * @throws HibernateException if the Criteria could not be created
+	 * @deprecated Use <code>session.createCriteria</code> instead, which will now
+	 * automatically apply the template's query cache settings and the transation
+	 * timeout (through the use of a special Session proxy).
+	 * @see HibernateCallback#doInHibernate
+	 * @see #setCacheQueries
+	 * @see #setQueryCacheRegion
+	 * @see SessionFactoryUtils#applyTransactionTimeout
+	 * @see net.sf.hibernate.Session#createCriteria
+	 */
+	public Criteria createCriteria(Session session, Class entityClass) throws HibernateException {
+		Criteria criteria = session.createCriteria(entityClass);
+		prepareCriteria(criteria);
+		return criteria;
+	}
+
+
+	/**
+	 * Invocation handler that suppresses close calls on Hibernate Sessions.
+	 * Also prepares returned Query and Criteria objects.
+	 * @see net.sf.hibernate.Session#close
+	 * @see #prepareQuery
+	 * @see #prepareCriteria
+	 */
+	private class CloseSuppressingInvocationHandler implements InvocationHandler {
+
+		private static final String SESSION_CLOSE_METHOD_NAME = "close";
+
+		private final Session target;
+
+		public CloseSuppressingInvocationHandler(Session target) {
+			this.target = target;
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// Handle close method: suppress, not valid.
+			if (method.getName().equals(SESSION_CLOSE_METHOD_NAME)) {
+				return null;
+			}
+
+			// Invoke method on target connection.
+			try {
+				Object retVal = method.invoke(this.target, args);
+
+				// If return value is a Query or Criteria, apply transaction timeout.
+				// Applies to createQuery, getNamedQuery, createCriteria.
+				if (retVal instanceof Query) {
+					prepareQuery(((Query) retVal));
+				}
+				if (retVal instanceof Criteria) {
+					prepareCriteria(((Criteria) retVal));
+				}
+
+				return retVal;
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
 			}
 		}
 	}

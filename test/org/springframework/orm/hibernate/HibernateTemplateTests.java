@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate;
 
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -212,6 +213,168 @@ public class HibernateTemplateTests extends TestCase {
 		});
 		assertTrue("Correct result list", result == l);
 		interceptorControl.verify();
+	}
+
+	public void testExecuteWithCacheQueries() throws HibernateException {
+		MockControl query1Control = MockControl.createControl(Query.class);
+		Query query1 = (Query) query1Control.getMock();
+		MockControl query2Control = MockControl.createControl(Query.class);
+		Query query2 = (Query) query2Control.getMock();
+		MockControl criteriaControl = MockControl.createControl(Criteria.class);
+		Criteria criteria = (Criteria) criteriaControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query");
+		sessionControl.setReturnValue(query1);
+		query1.setCacheable(true);
+		query1Control.setReturnValue(query1, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query2);
+		query2.setCacheable(true);
+		query2Control.setReturnValue(query2, 1);
+		session.createCriteria(TestBean.class);
+		sessionControl.setReturnValue(criteria, 1);
+		criteria.setCacheable(true);
+		criteriaControl.setReturnValue(criteria, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		query1Control.replay();
+		query2Control.replay();
+		criteriaControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setCacheQueries(true);
+		ht.execute(new HibernateCallback() {
+			public Object doInHibernate(Session sess) throws HibernateException {
+				assertNotSame(session, sess);
+				assertTrue(Proxy.isProxyClass(sess.getClass()));
+				sess.createQuery("some query");
+				sess.getNamedQuery("some query name");
+				sess.createCriteria(TestBean.class);
+				// should be ignored
+				sess.close();
+				return null;
+			}
+		});
+
+		query1Control.verify();
+		query2Control.verify();
+		criteriaControl.verify();
+	}
+
+	public void testExecuteWithCacheQueriesAndCacheRegion() throws HibernateException {
+		MockControl query1Control = MockControl.createControl(Query.class);
+		Query query1 = (Query) query1Control.getMock();
+		MockControl query2Control = MockControl.createControl(Query.class);
+		Query query2 = (Query) query2Control.getMock();
+		MockControl criteriaControl = MockControl.createControl(Criteria.class);
+		Criteria criteria = (Criteria) criteriaControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query");
+		sessionControl.setReturnValue(query1);
+		query1.setCacheable(true);
+		query1Control.setReturnValue(query1, 1);
+		query1.setCacheRegion("myRegion");
+		query1Control.setReturnValue(query1, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query2);
+		query2.setCacheable(true);
+		query2Control.setReturnValue(query2, 1);
+		query2.setCacheRegion("myRegion");
+		query2Control.setReturnValue(query2, 1);
+		session.createCriteria(TestBean.class);
+		sessionControl.setReturnValue(criteria, 1);
+		criteria.setCacheable(true);
+		criteriaControl.setReturnValue(criteria, 1);
+		criteria.setCacheRegion("myRegion");
+		criteriaControl.setReturnValue(criteria, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		query1Control.replay();
+		query2Control.replay();
+		criteriaControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setCacheQueries(true);
+		ht.setQueryCacheRegion("myRegion");
+		ht.execute(new HibernateCallback() {
+			public Object doInHibernate(Session sess) throws HibernateException {
+				assertNotSame(session, sess);
+				assertTrue(Proxy.isProxyClass(sess.getClass()));
+				sess.createQuery("some query");
+				sess.getNamedQuery("some query name");
+				sess.createCriteria(TestBean.class);
+				// should be ignored
+				sess.close();
+				return null;
+			}
+		});
+
+		query1Control.verify();
+		query2Control.verify();
+		criteriaControl.verify();
+	}
+
+	public void testExecuteWithCacheQueriesAndCacheRegionAndNativeSession() throws HibernateException {
+		MockControl query1Control = MockControl.createControl(Query.class);
+		Query query1 = (Query) query1Control.getMock();
+		MockControl query2Control = MockControl.createControl(Query.class);
+		Query query2 = (Query) query2Control.getMock();
+		MockControl criteriaControl = MockControl.createControl(Criteria.class);
+		Criteria criteria = (Criteria) criteriaControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query");
+		sessionControl.setReturnValue(query1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query2);
+		session.createCriteria(TestBean.class);
+		sessionControl.setReturnValue(criteria, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		query1Control.replay();
+		query2Control.replay();
+		criteriaControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setExposeNativeSession(true);
+		ht.setCacheQueries(true);
+		ht.setQueryCacheRegion("myRegion");
+		ht.execute(new HibernateCallback() {
+			public Object doInHibernate(Session sess) throws HibernateException {
+				assertSame(session, sess);
+				sess.createQuery("some query");
+				sess.getNamedQuery("some query name");
+				sess.createCriteria(TestBean.class);
+				return null;
+			}
+		});
+
+		query1Control.verify();
+		query2Control.verify();
+		criteriaControl.verify();
 	}
 
 	public void testGet() throws HibernateException {

@@ -913,6 +913,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
 				assertTrue("Has thread transaction", sessionHolder.getTransaction() != null);
 				HibernateTemplate ht = new HibernateTemplate(sf);
+				ht.setExposeNativeSession(true);
 				return ht.executeFind(new HibernateCallback() {
 					public Object doInHibernate(Session sess) throws HibernateException {
 						assertEquals(session, sess);
@@ -998,6 +999,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 					public void doInTransactionWithoutResult(TransactionStatus status) {
 						status.setRollbackOnly();
 						HibernateTemplate ht = new HibernateTemplate(sf);
+						ht.setExposeNativeSession(true);
 						ht.execute(new HibernateCallback() {
 							public Object doInHibernate(Session sess) throws HibernateException {
 								assertEquals(session, sess);
@@ -1021,6 +1023,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
 				assertEquals(tx2, sessionHolder.getTransaction());
 				HibernateTemplate ht = new HibernateTemplate(sf);
+				ht.setExposeNativeSession(true);
 				ht.execute(new HibernateCallback() {
 					public Object doInHibernate(Session sess) throws HibernateException {
 						assertEquals(session, sess);
