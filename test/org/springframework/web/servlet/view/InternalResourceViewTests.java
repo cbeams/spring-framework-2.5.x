@@ -60,7 +60,7 @@ public class InternalResourceViewTests extends TestCase {
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
-		
+
 		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
 		wacControl.replay();
@@ -94,7 +94,7 @@ public class InternalResourceViewTests extends TestCase {
 		reqControl.verify();
 	}
 	
-	public void testInclude() throws Exception {
+	public void testIncludeOnAttribute() throws Exception {
 		HashMap model = new HashMap();
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
@@ -122,6 +122,46 @@ public class InternalResourceViewTests extends TestCase {
 		reqControl.replay();
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		InternalResourceView v = new InternalResourceView();
+		v.setUrl(url);
+		v.setApplicationContext(wac);
+
+		// Can now try multiple tests
+		v.render(model, request, response);
+		assertEquals(url, response.getIncludedUrl());
+		wacControl.verify();
+		reqControl.verify();
+	}
+
+	public void testIncludeOnCommitted() throws Exception {
+		HashMap model = new HashMap();
+		Object obj = new Integer(1);
+		model.put("foo", "bar");
+		model.put("I", obj);
+
+		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
+		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
+		wacControl.replay();
+
+		String url = "forward-to";
+
+		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
+		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
+		Set keys = model.keySet();
+		for (Iterator iter = keys.iterator(); iter.hasNext();) {
+			String key = (String) iter.next();
+			request.setAttribute(key, model.get(key));
+			reqControl.setVoidCallable(1);
+		}
+
+		request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE);
+		reqControl.setReturnValue(null);
+		request.getRequestDispatcher(url);
+		reqControl.setReturnValue(new MockRequestDispatcher(url));
+		reqControl.replay();
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.setCommitted(true);
 		InternalResourceView v = new InternalResourceView();
 		v.setUrl(url);
 		v.setApplicationContext(wac);

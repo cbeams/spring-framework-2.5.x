@@ -29,16 +29,22 @@ import org.springframework.web.util.UrlPathHelper;
 /**
  * Wrapper for a JSP or other resource within the same web application.
  * Exposes model objects as request attributes and forwards the request to
- * the specified resource URL using a RequestDispatcher. Will fall back to
- * an include if already in an included request.
+ * the specified resource URL using a RequestDispatcher.
  *
  * <p>A URL for this view is supposed to specify a resource within the web
- * application, i.e. suitable for RequestDispatcher's forward/include methods.
+ * application, suitable for RequestDispatcher's <code>forward</code> or
+ * <code>include</code> method.
+ *
+ * <p>If operating within an already included request or within a response that
+ * has already been committed, this view will fall back to an include instead of
+ * a forward. This can be enforced by calling <code>response.flushBuffer()</code>
+ * (which will commit the response) before rendering the view.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see javax.servlet.RequestDispatcher#forward
  * @see javax.servlet.RequestDispatcher#include
+ * @see javax.servlet.ServletResponse#flushBuffer
  */
 public class InternalResourceView extends AbstractUrlBasedView {
 
@@ -80,8 +86,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 					"Could not get RequestDispatcher for [" + getUrl() + "]: check that this file exists within your WAR");
 		}
 
-		// If already included, include again, else forward.
-		if (request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
+		// If already included or response already committed, perform include, else forward.
+		if (useInclude(request, response)) {
 			rd.include(request, response);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
@@ -162,6 +168,25 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		return getUrl();
+	}
+
+	/**
+	 * Determine whether to use RequestDispatcher's <code>include</code> or
+	 * <code>forward</code> method.
+	 * <p>Performs a check whether an include URI attribute is found in the request,
+	 * indicating an include request, and whether the response has already been committed.
+	 * In both cases, an include will be performed, as a forward is not possible anymore.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return <code>true</code> for include, <code>false</code> for forward
+	 * @see javax.servlet.RequestDispatcher#forward
+	 * @see javax.servlet.RequestDispatcher#include
+	 * @see javax.servlet.ServletResponse#isCommitted
+	 * @see org.springframework.web.util.UrlPathHelper#INCLUDE_URI_REQUEST_ATTRIBUTE
+	 */
+	protected boolean useInclude(HttpServletRequest request, HttpServletResponse response) {
+		return request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null ||
+				response.isCommitted();
 	}
 
 }
