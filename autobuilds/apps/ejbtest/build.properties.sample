@@ -1,0 +1,40 @@
+# -----------------------------------------------------------------------------
+# build.properties
+# 
+# Use this file to ajust the build of the Cactus EJB Sample to your local
+# environment. Specifically, you will want to define the installation
+# directory of any container you want to test against in this file, or the
+# port on which the containers will be started.
+# 
+# $Id: build.properties.sample,v 1.1 2004-04-16 23:13:35 colins Exp $
+# -----------------------------------------------------------------------------
+
+# WARNING:  The relative paths below are relative to the directory where the
+# build.xml file is located.
+
+# -----------------------------------------------------------------------------
+# Mandatory properties
+# -----------------------------------------------------------------------------
+
+# The location of the J2EE 1.3 jar. Note: The J2EE jar from Sun is not 
+# redistributable. Hence the reason we're not providing it in the Cactus
+# distribution. You'll need to download it manually and put it in 
+# ../../lib/j2ee-1.3.jar
+
+# -----------------------------------------------------------------------------
+# Optional properties
+# -----------------------------------------------------------------------------
+
+# The port to use for starting the servers during unit testing. If not
+# specified, it defaults to port 8080.
+#cactus.port = 8081
+
+# J2EE containers for the tests
+
+# Note: If you don't want to run the test on a given servlet engine, just
+#       comment it's home property. For example, if you don't want to run the
+#       tests on JBoss 3.x, comment the "cactus.home.jboss3x" property.
+
+#cactus.home.orion1x = c:/Apps/orion-1.6.0
+#cactus.home.orion2x = c:/Apps/orion-2.0.2
+#cactus.home.jboss3x = c:dev/jboss-3.2.3

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE application
+  PUBLIC '-//Sun Microsystems, Inc.//DTD J2EE Application 1.3//EN'
+  'http://java.sun.com/j2ee/dtds/application_1_3.dtd'>
+
+<!-- TODO: In the future you won't have to create a specific
+     application.xml in which you have to declare a Cactus test
+     war if you don't have a war in your EAR -->
+     
+<application>
+  <display-name>ejbtest</display-name>
+  <description>Cactus EJB Sample for J2EE 1.3</description>
+
+  <module>
+    <java>spring.jar</java>
+  </module>
+  <module>
+    <java>aopalliance.jar</java>
+  </module>
+  <module>
+    <java>commons-logging.jar</java>
+  </module>
+
+  <module>
+    <ejb>ejbtest-ejb.jar</ejb>
+  </module>
+  <module>
+    <web>
+      <web-uri>ejbtest-cactified.war</web-uri>
+      <context-root>/ejbtest</context-root>
+    </web>
+  </module>
+
+</application>

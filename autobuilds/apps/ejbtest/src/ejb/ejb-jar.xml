@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE ejb-jar PUBLIC
+'-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 1.1//EN'
+'http://java.sun.com/j2ee/dtds/ejb-jar_1_1.dtd'>
+
+<ejb-jar>
+  <display-name>ejbtest</display-name>
+  <enterprise-beans>
+    <session>
+      <description>Converter Session Bean</description>
+      <display-name>Converter</display-name>
+      <ejb-name>Converter</ejb-name>
+      <home>org.apache.cactus.sample.ejb.ConverterHome</home>
+      <remote>org.apache.cactus.sample.ejb.Converter</remote>
+      <ejb-class>org.apache.cactus.sample.ejb.ConverterEJB</ejb-class>
+      <session-type>Stateless</session-type>
+      <transaction-type>Container</transaction-type>
+    </session>
+    <session>
+      <description>CmtJtaNoSpringTx Session Bean</description>
+      <display-name>CmtJtaNoSpringTx</display-name>
+      <ejb-name>CmtJtaNoSpringTx</ejb-name>
+      <home>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTxHome</home>
+      <remote>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx</remote>
+      <ejb-class>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTxEJB</ejb-class>
+      <session-type>Stateless</session-type>
+      <transaction-type>Container</transaction-type>
+    </session>
+
+  </enterprise-beans>
+  <assembly-descriptor>
+    <container-transaction>
+      <method>
+        <ejb-name>Converter</ejb-name>
+        <method-intf>Remote</method-intf>
+        <method-name>*</method-name>
+      </method>
+      <trans-attribute>NotSupported</trans-attribute>
+    </container-transaction>
+    <container-transaction>
+      <method>
+        <ejb-name>CmtJtaNoSpringTx</ejb-name>
+        <method-intf>Remote</method-intf>
+        <method-name>*</method-name>
+      </method>
+      <trans-attribute>NotSupported</trans-attribute>
+    </container-transaction>
+  </assembly-descriptor>
+</ejb-jar>
