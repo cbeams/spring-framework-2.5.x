@@ -3,6 +3,8 @@ package org.springframework.beans;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 import org.springframework.util.StringUtils;
 
@@ -17,7 +19,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 18 April 2001
- * @version $Id: PropertyAccessExceptionsException.java,v 1.1 2004-02-02 11:33:34 jhoeller Exp $
+ * @version $Id: PropertyAccessExceptionsException.java,v 1.2 2004-02-07 00:14:02 jhoeller Exp $
  */
 public class PropertyAccessExceptionsException extends BeansException {
 
@@ -69,10 +71,10 @@ public class PropertyAccessExceptionsException extends BeansException {
 	 * Return the exception for this field, or null if there isn't one.
 	 */
 	public PropertyAccessException getPropertyAccessException(String propertyName) {
-		for (Iterator itr = this.exceptions.iterator(); itr.hasNext();) {
-			PropertyAccessException pve = (PropertyAccessException) itr.next();
-			if (propertyName.equals(pve.getPropertyChangeEvent().getPropertyName())) {
-				return pve;
+		for (Iterator it = this.exceptions.iterator(); it.hasNext();) {
+			PropertyAccessException pae = (PropertyAccessException) it.next();
+			if (propertyName.equals(pae.getPropertyChangeEvent().getPropertyName())) {
+				return pae;
 			}
 		}
 		return null;
@@ -83,9 +85,24 @@ public class PropertyAccessExceptionsException extends BeansException {
 		this.exceptions.add(ex);
 	}
 
+	public void printStackTrace(PrintStream ps) {
+		ps.println(this);
+		for (Iterator it = this.exceptions.iterator(); it.hasNext();) {
+			PropertyAccessException pae = (PropertyAccessException) it.next();
+			pae.printStackTrace(ps);
+		}
+	}
+
+	public void printStackTrace(PrintWriter pw) {
+		pw.println(this);
+		for (Iterator it = this.exceptions.iterator(); it.hasNext();) {
+			PropertyAccessException pae = (PropertyAccessException) it.next();
+			pae.printStackTrace(pw);
+		}
+	}
+
 	public String toString() {
-		return "PropertyAccessExceptionsException (" + getExceptionCount() + " errors):\n" +
-				StringUtils.collectionToDelimitedString(this.exceptions, "\n");
+		return "PropertyAccessExceptionsException (" + getExceptionCount() + " errors)";
 	}
 
 }
