@@ -27,7 +27,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AbstractDynamicObjectAutoProxyCreator.java,v 1.1 2004-08-10 14:27:23 johnsonr Exp $
+ * @version $Id: AbstractDynamicObjectAutoProxyCreator.java,v 1.2 2004-08-10 21:15:19 jhoeller Exp $
  */
 public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAutoProxyCreator {
 	
@@ -47,9 +47,9 @@ public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAuto
 
 
 	/**
-	 * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#getInterceptorsAndAdvisorsForBean(java.lang.Object, java.lang.String, TargetSource)
+	 * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#getAdvicesAndAdvisorsForBean(java.lang.Object, java.lang.String, TargetSource)
 	 */
-	protected Object[] getInterceptorsAndAdvisorsForBean(Object bean, String beanName, TargetSource targetSource) throws BeansException {
+	protected Object[] getAdvicesAndAdvisorsForBean(Object bean, String beanName, TargetSource targetSource) throws BeansException {
 		if (targetSource == null) {
 			return DO_NOT_PROXY;
 		}

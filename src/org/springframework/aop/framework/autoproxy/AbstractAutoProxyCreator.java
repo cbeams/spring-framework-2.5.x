@@ -72,7 +72,7 @@ import org.springframework.core.Ordered;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since October 13, 2003
- * @version $Id: AbstractAutoProxyCreator.java,v 1.13 2004-08-10 19:29:44 jhoeller Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.14 2004-08-10 21:15:20 jhoeller Exp $
  * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
  */
@@ -81,14 +81,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	/**
 	 * Convenience constant for subclasses: Return value for "do not proxy".
-	 * @see #getInterceptorsAndAdvisorsForBean
+	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	protected static final Object[] DO_NOT_PROXY = null;
 
 	/**
 	 * Convenience constant for subclasses: Return value for
 	 * "proxy without additional interceptors, just the common ones".
-	 * @see #getInterceptorsAndAdvisorsForBean
+	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	protected static final Object[] PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS = new Object[0];
 
@@ -193,7 +193,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Create a proxy with the configured interceptors if the bean is
 	 * identified as one to proxy by the subclass.
-	 * @see #getInterceptorsAndAdvisorsForBean
+	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		// Check for special cases. We don't want to try to autoproxy a part of the autoproxying
@@ -205,7 +205,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 		TargetSource targetSource = getCustomTargetSource(bean, beanName);
 
-		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, beanName, targetSource);
+		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean, beanName, targetSource);
 
 		// proxy if we have advice or if a TargetSourceCreator wants to do some
 		// fancy stuff such as pooling
@@ -338,10 +338,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	/**
-	 * Return whether the given bean is to be proxied,
-	 * and what additional interceptors and pointcuts to apply.
-	 * <b>The third parameter, customTargetSource, is new in Spring 1.1;
-	 * add it to existing implementations of this method.</b>
+	 * Return whether the given bean is to be proxied, what additional
+	 * advices (e.g. AOP Alliance interceptors) and advisors to apply.
+	 * <p>The previous name of this method was "getInterceptorAndAdvisorForBean".
+	 * It has been renamed in the course of general terminology clarification
+	 * in Spring 1.1. An AOP Alliance Interceptor is just a special form of
+	 * Advice, so the generic Advice term is preferred now.
+	 * <p>The third parameter, customTargetSource, is new in Spring 1.1;
+	 * add it to existing implementations of this method.
 	 * @param bean the new bean instance
 	 * @param beanName the name of the bean
 	 * @param customTargetSource targetSource returned by getTargetSource() method:
@@ -355,7 +359,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
-	protected abstract Object[] getInterceptorsAndAdvisorsForBean(
+	protected abstract Object[] getAdvicesAndAdvisorsForBean(
 			Object bean, String beanName, TargetSource customTargetSource) throws BeansException;
 
 }

@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy;
 
@@ -44,7 +44,7 @@ import org.springframework.context.support.StaticMessageSource;
 /**
  * @author Juergen Hoeller
  * @since 09.12.2003
- * @version $Id: AutoProxyCreatorTestSuite.java,v 1.8 2004-08-10 19:32:41 jhoeller Exp $
+ * @version $Id: AutoProxyCreatorTestSuite.java,v 1.9 2004-08-10 21:15:20 jhoeller Exp $
  */
 public class AutoProxyCreatorTestSuite extends TestCase {
 
@@ -88,7 +88,7 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 		sac.registerSingleton("beanThatListens", BeanThatListens.class, new MutablePropertyValues());
 		sac.registerSingleton("aca", ACATest.class, new MutablePropertyValues());
 		sac.registerPrototype("aca-prototype", ACATest.class, new MutablePropertyValues());
-		
+
 		sac.refresh();
 
 		StaticMessageSource sacMessageSource = (StaticMessageSource) sac.getBean("messageSource");
@@ -136,7 +136,7 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 			setOrder(0);
 		}
 
-		protected Object[] getInterceptorsAndAdvisorsForBean(
+		protected Object[] getAdvicesAndAdvisorsForBean(
 				Object bean, String name, TargetSource customTargetSource) {
 			if (bean instanceof StaticMessageSource || bean instanceof IndexedTestBean)
 				return DO_NOT_PROXY;

@@ -46,7 +46,7 @@ import org.springframework.core.OrderComparator;
  * at the end of the advisor chain in undefined order.
  *
  * @author Rod Johnson
- * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.9 2004-08-10 14:19:16 johnsonr Exp $
+ * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.10 2004-08-10 21:15:20 jhoeller Exp $
  * @see #findCandidateAdvisors
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
@@ -61,13 +61,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		findCandidateAdvisors();
 	}
 
-	protected Object[] getInterceptorsAndAdvisorsForBean(Object bean, String name, TargetSource targetSource) {
-		List advices = findEligibleAdvisors(bean.getClass());
-		if (advices.isEmpty()) {
+	protected Object[] getAdvicesAndAdvisorsForBean(Object bean, String name, TargetSource targetSource) {
+		List advisors = findEligibleAdvisors(bean.getClass());
+		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
 		}
-		advices = sortAdvisors(advices);
-		return advices.toArray();
+		advisors = sortAdvisors(advisors);
+		return advisors.toArray();
 	}
 
 	/**
@@ -76,25 +76,30 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #findCandidateAdvisors
 	 */
 	protected List findEligibleAdvisors(Class clazz) {
-		List candidateAdvice = findCandidateAdvisors();
-		List eligibleAdvice = new LinkedList();
-		for (int i = 0; i < candidateAdvice.size(); i++) {
+		List candidateAdvisors = findCandidateAdvisors();
+		List eligibleAdvisors = new LinkedList();
+		for (int i = 0; i < candidateAdvisors.size(); i++) {
 			// Sun, give me generics, please!
-			Advisor candidate = (Advisor) candidateAdvice.get(i);
+			Advisor candidate = (Advisor) candidateAdvisors.get(i);
 			if (AopUtils.canApply(candidate, clazz, null)) {
-				eligibleAdvice.add(candidate);
-				logger.info("Candidate Advice [" + candidate + "] accepted for class [" + clazz.getName() + "]");
+				eligibleAdvisors.add(candidate);
+				if (logger.isInfoEnabled()) {
+					logger.info("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
+				}
 			}
 			else {
-				logger.info("Candidate Advice [" + candidate + "] rejected for class [" + clazz.getName() + "]");
+				if (logger.isInfoEnabled()) {
+					logger.info("Candidate advisor [" + candidate + "] rejected for class [" + clazz.getName() + "]");
+				}
 			}
 		}
-		return eligibleAdvice;
+		return eligibleAdvisors;
 	}
 
 	/**
 	 * Sort advisors based on ordering.
 	 * @see org.springframework.core.Ordered
+	 * @see org.springframework.core.OrderComparator
 	 */
 	protected List sortAdvisors(List advisors) {
 		Collections.sort(advisors, new OrderComparator());
@@ -110,14 +115,14 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 */
 	protected boolean shouldSkip(Object bean, String name) {
 		// TODO consider pulling this test into AbstractBeanFactory.applyPostProcessors(),
-		// to protect all PostProcessors
+		// to protect all PostProcessors.
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
 		return cflow.under(getClass(), "findCandidateAdvisors");
 	}
 
 	/**
-	 * Find all candidate advices to use in auto proxying.
-	 * @return list of Advisor
+	 * Find all candidate advisors to use in auto-proxying.
+	 * @return list of Advisors
 	 */
 	protected abstract List findCandidateAdvisors();
 
