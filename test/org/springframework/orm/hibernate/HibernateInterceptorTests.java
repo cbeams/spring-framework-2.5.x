@@ -156,7 +156,7 @@ public class HibernateInterceptorTests extends TestCase {
 		}
 		catch (DataIntegrityViolationException ex) {
 			// expected
-			assertEquals(sqlex, ex.getRootCause());
+			assertEquals(sqlex, ex.getCause());
 		}
 
 		sfControl.verify();

@@ -53,8 +53,8 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	private PersistenceManagerFactory persistenceManagerFactory;
 
 	/**
-	 * Set the location of the JDO properties config file as classpath
-	 * resource, e.g. "/kodo.properties".
+	 * Set the location of the JDO properties config file, for example
+	 * as classpath resource "classpath:kodo.properties".
 	 * <p>Note: Can be omitted when all necessary properties are
 	 * specified locally via this bean.
 	 */
