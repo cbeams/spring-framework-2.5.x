@@ -16,9 +16,6 @@
 
 package org.springframework.mail.javamail;
 
-import java.io.IOException;
-
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 /**
@@ -30,7 +27,7 @@ import javax.mail.internet.MimeMessage;
  *
  * <p>It is often convenient to use a MimeMessageHelper for populating
  * the passed-in MimeMessage, particularly when working with attachments
- * or special character sets.
+ * or special character encodings.
  *
  * @author Juergen Hoeller
  * @since 07.10.2003
@@ -43,11 +40,13 @@ public interface MimeMessagePreparator {
 	/**
 	 * Prepare the given new MimeMessage instance.
 	 * @param mimeMessage the message to prepare
-	 * @throws MessagingException passing any exceptions thrown by MimeMessage
+	 * @throws javax.mail.MessagingException passing any exceptions thrown by MimeMessage
 	 * methods through for automatic conversion to the MailException hierarchy
-	 * @throws IOException passing any exceptions thrown by MimeMessage methods
+	 * @throws java.io.IOException passing any exceptions thrown by MimeMessage methods
 	 * through for automatic conversion to the MailException hierarchy
+	 * @throws Exception if mail preparation failed, for example when a
+	 * Velocity template cannot be rendered for the mail text
 	 */
-	void prepare(MimeMessage mimeMessage) throws MessagingException, IOException;
+	void prepare(MimeMessage mimeMessage) throws Exception;
 
 }
