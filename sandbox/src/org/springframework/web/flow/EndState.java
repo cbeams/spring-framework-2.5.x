@@ -43,7 +43,7 @@ public class EndState extends AbstractState {
 		return true;
 	}
 
-	protected ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		ViewDescriptor descriptor;
 		if (viewName != null) {

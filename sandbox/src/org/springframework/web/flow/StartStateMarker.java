@@ -47,25 +47,25 @@ public class StartStateMarker implements Serializable {
 		return state;
 	}
 
-	public FlowSessionExecutionStartResult start(HttpServletRequest request, HttpServletResponse response,
+	public FlowExecutionStartResult start(HttpServletRequest request, HttpServletResponse response,
 			Map inputAttributes) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Starting new session for flow '" + flow.getId() + "' in start state '" + getStartState()
 					+ "' with input attributes '" + DefaultObjectStyler.call(inputAttributes) + "'");
 		}
-		FlowSessionExecutionStack sessionExecution = createFlowSessionExecutionStack();
+		FlowExecutionStack sessionExecution = createFlowSessionExecutionStack();
 		ViewDescriptor startingView = startIn(sessionExecution, request, response, inputAttributes);
-		return new FlowSessionExecutionStartResult(sessionExecution, startingView);
+		return new FlowExecutionStartResult(sessionExecution, startingView);
 	}
 
-	public ViewDescriptor startIn(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+	public ViewDescriptor startIn(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) {
 		sessionExecution.activate(flow.createSession(inputAttributes));
 		return getStartState().enter(sessionExecution, request, response);
 	}
 
-	protected FlowSessionExecutionStack createFlowSessionExecutionStack() {
-		return new FlowSessionExecutionStack();
+	protected FlowExecutionStack createFlowSessionExecutionStack() {
+		return new FlowExecutionStack();
 	}
 
 }

@@ -318,7 +318,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	private transient FlowServiceLocator serviceLocator;
 
 	private transient EventListenerListHelper flowSessionExecutionListeners = new EventListenerListHelper(
-			FlowSessionExecutionListener.class);
+			FlowExecutionListener.class);
 
 	protected Flow() {
 
@@ -376,14 +376,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @param listener
 	 */
-	public void addFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
+	public void addFlowSessionExecutionListener(FlowExecutionListener listener) {
 		this.flowSessionExecutionListeners.add(listener);
 	}
 
 	/**
 	 * @param listener
 	 */
-	public void removeFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
+	public void removeFlowSessionExecutionListener(FlowExecutionListener listener) {
 		this.flowSessionExecutionListeners.remove(listener);
 	}
 
@@ -399,7 +399,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public boolean isFlowSessionExecutionListenerAdded(Class listenerClass) {
-		Assert.isTrue(FlowSessionExecutionListener.class.isAssignableFrom(listenerClass),
+		Assert.isTrue(FlowExecutionListener.class.isAssignableFrom(listenerClass),
 				"Listener class must be a FlowSessionExecutionListener");
 		return this.flowSessionExecutionListeners.isAdded(listenerClass);
 	}
@@ -408,7 +408,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param listener
 	 * @return
 	 */
-	public boolean isFlowSessionExecutionListenerAdded(FlowSessionExecutionListener listener) {
+	public boolean isFlowSessionExecutionListenerAdded(FlowExecutionListener listener) {
 		return this.flowSessionExecutionListeners.isAdded(listener);
 	}
 
@@ -422,7 +422,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @param listener
 	 */
-	public void setFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
+	public void setFlowSessionExecutionListener(FlowExecutionListener listener) {
 		this.flowSessionExecutionListeners.clear();
 		this.flowSessionExecutionListeners.add(listener);
 	}
@@ -720,7 +720,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/*
 	 * see #FlowEventProcessor.start
 	 */
-	public FlowSessionExecutionStartResult start(HttpServletRequest request, HttpServletResponse response,
+	public FlowExecutionStartResult start(HttpServletRequest request, HttpServletResponse response,
 			Map inputAttributes) throws IllegalStateException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("A new session for flow '" + getId() + "' was requested; processing...");
@@ -731,11 +731,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/*
 	 * see #FlowEventProcessor.execute
 	 */
-	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionInfo sessionExecution,
+	public ViewDescriptor execute(String eventId, String stateId, FlowExecutionInfo sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
 		Assert.isTrue(sessionExecution.isActive(),
 				"The currently executing flow stack is not active - this should not happen");
-		FlowSessionExecutionStack sessionExecutionInternal = ((FlowSessionExecutionStack)sessionExecution);
+		FlowExecutionStack sessionExecutionInternal = ((FlowExecutionStack)sessionExecution);
 		fireRequestSubmitted(sessionExecutionInternal, request);
 		TransitionableState state = sessionExecutionInternal.getActiveFlow().getRequiredTransitionableState(stateId);
 		ViewDescriptor view = state.execute(eventId, sessionExecutionInternal, request, response);
@@ -746,7 +746,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/*
 	 * see #FlowEventProcessor.resume
 	 */
-	public FlowSessionExecutionStartResult resume(String stateId, HttpServletRequest request,
+	public FlowExecutionStartResult resume(String stateId, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("A new session resuming in state '" + stateId + "' for flow '" + getId()
@@ -763,7 +763,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowAttributes
 	 * @return
 	 */
-	public ViewDescriptor spawnIn(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+	public ViewDescriptor spawnIn(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) {
 		return getStartStateMarker().startIn(sessionExecution, request, response, inputAttributes);
 	}
@@ -775,7 +775,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowAttributes
 	 * @return
 	 */
-	public ViewDescriptor spawnIn(FlowSessionExecutionStack sessionExecution, String stateId,
+	public ViewDescriptor spawnIn(FlowExecutionStack sessionExecution, String stateId,
 			HttpServletRequest request, HttpServletResponse response, Map inputAttributes) {
 		TransitionableState state = getRequiredTransitionableState(stateId);
 		return new StartStateMarker(this, state).startIn(sessionExecution, request, response, inputAttributes);
@@ -791,26 +791,26 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	// lifecycle event publishers
 
-	protected void fireRequestSubmitted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+	protected void fireRequestSubmitted(final FlowExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing request submitted event to " + getFlowSessionExecutionListenerCount()
 					+ " listener(s)");
 		}
 		getFlowSessionExecutionListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowSessionExecutionListener)o).requestSubmitted(sessionExecution, request);
+				((FlowExecutionListener)o).requestSubmitted(sessionExecution, request);
 			}
 		});
 	}
 
-	protected void fireRequestProcessed(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+	protected void fireRequestProcessed(final FlowExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing request processed event to " + getFlowSessionExecutionListenerCount()
 					+ " listener(s)");
 		}
 		getFlowSessionExecutionListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowSessionExecutionListener)o).requestProcessed(sessionExecution, request);
+				((FlowExecutionListener)o).requestProcessed(sessionExecution, request);
 			}
 		});
 	}

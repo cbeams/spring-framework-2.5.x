@@ -22,13 +22,13 @@ import javax.servlet.http.HttpServletRequest;
  * Flow object.
  * @author Keith Donald
  */
-public interface FlowSessionExecutionListener {
+public interface FlowExecutionListener {
 
 	/**
 	 * Called when a new flow session execution was started.
 	 * @param sessionExecution
 	 */
-	public void started(FlowSessionExecution sessionExecution);
+	public void started(FlowExecution sessionExecution);
 
 	/**
 	 * Called when a new client HTTP request is submitted to manipulate this
@@ -36,21 +36,21 @@ public interface FlowSessionExecutionListener {
 	 * @param sessionExecution
 	 * @param request
 	 */
-	public void requestSubmitted(FlowSessionExecution sessionExecution, HttpServletRequest request);
+	public void requestSubmitted(FlowExecution sessionExecution, HttpServletRequest request);
 
 	/**
 	 * Called when a new client HTTP request is processed.
 	 * @param sessionExecution
 	 * @param request
 	 */
-	public void requestProcessed(FlowSessionExecution sessionExecution, HttpServletRequest request);
+	public void requestProcessed(FlowExecution sessionExecution, HttpServletRequest request);
 
 	/**
 	 * Called when an event is signaled in a state, prior to a state transition.
 	 * @param sessionExecution
 	 * @param eventId
 	 */
-	public void eventSignaled(FlowSessionExecution sessionExecution, String eventId);
+	public void eventSignaled(FlowExecution sessionExecution, String eventId);
 
 	/**
 	 * Called when a state transitions, after the transition occurs.
@@ -58,22 +58,22 @@ public interface FlowSessionExecutionListener {
 	 * @param previousState
 	 * @param newState
 	 */
-	public void stateTransitioned(FlowSessionExecution sessionExecution, AbstractState previousState,
+	public void stateTransitioned(FlowExecution sessionExecution, AbstractState previousState,
 			AbstractState newState);
 
 	/**
 	 * Called when a sub flow is spawned.
 	 * @param sessionExecution
 	 */
-	public void subFlowSpawned(FlowSessionExecution sessionExecution);
+	public void subFlowSpawned(FlowExecution sessionExecution);
 
 	/**
 	 * Called when a sub flow is ended.
 	 * @param sessionExecution
 	 * @param endedSession
 	 */
-	public void subFlowEnded(FlowSessionExecution sessionExecution, FlowSession endedSession);
+	public void subFlowEnded(FlowExecution sessionExecution, FlowSession endedSession);
 
-	public void ended(FlowSessionExecution sessionExecution, FlowSession endedRootFlowSession);
+	public void ended(FlowExecution sessionExecution, FlowSession endedRootFlowSession);
 
 }

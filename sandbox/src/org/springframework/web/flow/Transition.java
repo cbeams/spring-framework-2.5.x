@@ -100,7 +100,7 @@ public class Transition implements Serializable {
 		return eventIdCriteria.test(eventId);
 	}
 
-	public ViewDescriptor execute(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+	public ViewDescriptor execute(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		try {
 			return getTargetState().enter(sessionExecution, request, response);

@@ -102,7 +102,7 @@ public class SubFlowState extends TransitionableState {
 		return attributesMapperId;
 	}
 
-	protected ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		Flow subFlow = getSubFlow();
 		if (logger.isDebugEnabled()) {

@@ -170,7 +170,7 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	public final ViewDescriptor enter(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+	public final ViewDescriptor enter(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Entering state '" + this + "' in flow '" + sessionExecution.getActiveFlowId() + "'");
@@ -188,7 +188,7 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected abstract ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecutionStack,
+	protected abstract ViewDescriptor doEnterState(FlowExecutionStack sessionExecutionStack,
 			HttpServletRequest request, HttpServletResponse response);
 
 	public String toString() {

@@ -179,7 +179,7 @@ public class ActionState extends TransitionableState {
 	 * and not the ActionBean instance, the instance is retrieved from the
 	 * <code>FlowServiceLocator</code>
 	 */
-	protected ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		Iterator it = actionBeanIterator();
 		int beanExecutionCount = 0;

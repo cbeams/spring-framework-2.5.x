@@ -1,7 +1,7 @@
 /*
  * Copyright 2004-2005 the original author or authors.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.support;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -9,6 +9,9 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
+import org.springframework.web.flow.AbstractState;
+import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowServiceLocator;
 
 /**
  * Specialization of Flow that is aware of the Spring <code>BeanFactory</code>

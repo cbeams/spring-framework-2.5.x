@@ -25,9 +25,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.ActionBeanEvent;
-import org.springframework.web.flow.FlowSessionExecutionInfo;
-import org.springframework.web.flow.FlowUtils;
+import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.support.FlowUtils;
 
 /**
  * @author Keith Donald
@@ -57,7 +57,7 @@ public class MultiActionBean extends AbstractActionBean {
 
 	protected ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException, ServletRequestBindingException {
-		FlowSessionExecutionInfo sessionExecution = FlowUtils.getFlowSessionExecutionInfo(model);
+		FlowExecutionInfo sessionExecution = FlowUtils.getFlowSessionExecutionInfo(model);
 		String eventId = sessionExecution.getLastEventId();
 		String handlerMethodName = methodNameResolver.getHandlerMethodName(eventId);
 		try {

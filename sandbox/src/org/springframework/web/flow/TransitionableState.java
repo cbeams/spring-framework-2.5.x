@@ -80,7 +80,7 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws CannotExecuteStateTransitionException if the <code>eventId</code>
 	 *         does not map to a valid transition for this state.
 	 */
-	public ViewDescriptor execute(String eventId, FlowSessionExecutionStack sessionExecution,
+	public ViewDescriptor execute(String eventId, FlowExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws CannotExecuteStateTransitionException {
 		updateCurrentStateIfNeccessary(eventId, sessionExecution);
 		if (logger.isDebugEnabled()) {
@@ -114,7 +114,7 @@ public abstract class TransitionableState extends AbstractState {
 		throw new EventNotSupportedException(this, eventId);
 	}
 
-	protected void updateCurrentStateIfNeccessary(String eventId, FlowSessionExecutionStack sessionExecution) {
+	protected void updateCurrentStateIfNeccessary(String eventId, FlowExecutionStack sessionExecution) {
 		if (!this.equals(sessionExecution.getCurrentState())) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Event '" + eventId + "' in state '" + getId()

@@ -28,18 +28,21 @@ public interface FlowAttributesMapper {
 
 	/**
 	 * Create a map of model attributes that should be passed to the child flow.
-	 * @param parentFlowAttributes The parent flow attributes, the possible set
-	 *        to pass down to the child.
-	 * @return A map of attributes to pass to the newly spawned child subflow.
+	 * @param parentFlowModel The parent flow attributes, the possible set to
+	 *        pass down to the child.
+	 * @return A map of attributes to pass as input down to the newly spawned
+	 *         child subflow.
 	 */
-	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowAttributes);
+	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowModel);
 
 	/**
 	 * Map relavent attributes of an ending sub flow model back up to a resuming
 	 * parent flow model.
-	 * @param subFlowAttributes The child's attributes
-	 * @param parentFlowAttributes The parent's attributes.
+	 * @param subFlowAttributes The child's attributes that should be mapped
+	 *        from
+	 * @param parentFlowAttributes The parent's attributes that should be mapped
+	 *        to
 	 */
-	public void mapToResumingParentFlow(AttributesAccessor subFlowAttributes,
-			MutableAttributesAccessor parentFlowAttributes);
+	public void mapToResumingParentFlow(AttributesAccessor endingSubFlowModel,
+			MutableAttributesAccessor resumingParentFlowModel);
 }

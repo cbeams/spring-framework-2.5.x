@@ -38,8 +38,8 @@ import org.springframework.web.util.SessionKeyUtils;
  * 
  * @author Keith Donald
  */
-public class FlowSessionExecutionStack implements FlowSessionExecution, Serializable {
-	private static final Log logger = LogFactory.getLog(FlowSessionExecutionStack.class);
+public class FlowExecutionStack implements FlowExecution, Serializable {
+	private static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	private String id;
 
@@ -51,7 +51,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 
 	private long lastEventTimestamp;
 
-	public FlowSessionExecutionStack() {
+	public FlowExecutionStack() {
 		this.id = SessionKeyUtils.generateMD5SessionKey(String.valueOf(this), true);
 	}
 
@@ -328,7 +328,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		}
 		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowSessionExecutionListener)o).started(FlowSessionExecutionStack.this);
+				((FlowExecutionListener)o).started(FlowExecutionStack.this);
 			}
 		});
 	}
@@ -339,7 +339,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		}
 		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowSessionExecutionListener)o).eventSignaled(FlowSessionExecutionStack.this, eventId);
+				((FlowExecutionListener)o).eventSignaled(FlowExecutionStack.this, eventId);
 			}
 		});
 	}
@@ -350,7 +350,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		}
 		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowSessionExecutionListener)o).stateTransitioned(FlowSessionExecutionStack.this, previousState,
+				((FlowExecutionListener)o).stateTransitioned(FlowExecutionStack.this, previousState,
 						getCurrentState());
 			}
 		});
@@ -362,7 +362,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		}
 		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowSessionExecutionListener)o).subFlowSpawned(FlowSessionExecutionStack.this);
+				((FlowExecutionListener)o).subFlowSpawned(FlowExecutionStack.this);
 			}
 		});
 	}
@@ -373,7 +373,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		}
 		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowSessionExecutionListener)o).subFlowEnded(FlowSessionExecutionStack.this, endedSession);
+				((FlowExecutionListener)o).subFlowEnded(FlowExecutionStack.this, endedSession);
 			}
 		});
 	}
@@ -385,7 +385,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		}
 		endingRootFlowSession.getFlow().getFlowSessionExecutionListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowSessionExecutionListener)o).ended(FlowSessionExecutionStack.this, endingRootFlowSession);
+				((FlowExecutionListener)o).ended(FlowExecutionStack.this, endingRootFlowSession);
 			}
 		});
 	}

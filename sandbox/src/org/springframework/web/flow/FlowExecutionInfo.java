@@ -10,7 +10,7 @@ import java.io.Serializable;
  * session execution.
  * @author Keith Donald
  */
-public interface FlowSessionExecutionInfo extends AttributesAccessor, Serializable {
+public interface FlowExecutionInfo extends AttributesAccessor, Serializable {
 
 	public static String ATTRIBUTE_NAME = "flowSessionExecutionInfo";
 

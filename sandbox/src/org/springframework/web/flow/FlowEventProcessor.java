@@ -55,7 +55,7 @@ public interface FlowEventProcessor {
 	 * @throws IllegalStateException if the event processor has not been
 	 *         configured with a valid start state.
 	 */
-	public FlowSessionExecutionStartResult start(HttpServletRequest request, HttpServletResponse response, Map input)
+	public FlowExecutionStartResult start(HttpServletRequest request, HttpServletResponse response, Map input)
 			throws IllegalStateException;
 
 	/**
@@ -74,7 +74,7 @@ public interface FlowEventProcessor {
 	 * @throws IllegalStateException if the event processor has not been
 	 *         configured with a valid start state.
 	 */
-	public FlowSessionExecutionStartResult resume(String stateId, HttpServletRequest request,
+	public FlowExecutionStartResult resume(String stateId, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) throws IllegalStateException;
 
 	/**
@@ -96,7 +96,7 @@ public interface FlowEventProcessor {
 	 *         or if the <code>stateId</code> does not map to a valid flow
 	 *         state.
 	 */
-	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionInfo sessionExecution,
+	public ViewDescriptor execute(String eventId, String stateId, FlowExecutionInfo sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException;
 
 }

@@ -10,12 +10,12 @@ import java.io.Serializable;
  * execution for a flow.
  * @author Keith Donald
  */
-public class FlowSessionExecutionStartResult implements Serializable {
-	private FlowSessionExecutionInfo sessionInfo;
+public class FlowExecutionStartResult implements Serializable {
+	private FlowExecutionInfo sessionInfo;
 
 	private ViewDescriptor startingView;
 
-	public FlowSessionExecutionStartResult(FlowSessionExecutionInfo sessionInfo, ViewDescriptor startingView) {
+	public FlowExecutionStartResult(FlowExecutionInfo sessionInfo, ViewDescriptor startingView) {
 		this.sessionInfo = sessionInfo;
 		this.startingView = startingView;
 	}
@@ -23,7 +23,7 @@ public class FlowSessionExecutionStartResult implements Serializable {
 	/**
 	 * @return Returns the sessionInfo.
 	 */
-	public FlowSessionExecutionInfo getFlowSessionExecutionInfo() {
+	public FlowExecutionInfo getFlowSessionExecutionInfo() {
 		return sessionInfo;
 	}
 

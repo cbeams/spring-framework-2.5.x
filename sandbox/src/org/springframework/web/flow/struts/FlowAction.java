@@ -29,8 +29,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowEventProcessor;
-import org.springframework.web.flow.FlowSessionExecutionInfo;
-import org.springframework.web.flow.FlowSessionExecutionStartResult;
+import org.springframework.web.flow.FlowExecutionInfo;
+import org.springframework.web.flow.FlowExecutionStartResult;
 import org.springframework.web.flow.NoSuchFlowSessionException;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.AbstractActionBean;
@@ -91,7 +91,7 @@ public class FlowAction extends TemplateAction {
 	}
 
 	protected String getFlowSessionExecutionInfoAttributeName() {
-		return FlowSessionExecutionInfo.ATTRIBUTE_NAME;
+		return FlowExecutionInfo.ATTRIBUTE_NAME;
 	}
 
 	protected String getActionPathAttributeName() {
@@ -142,13 +142,13 @@ public class FlowAction extends TemplateAction {
 		}
 		// end struts specific
 
-		FlowSessionExecutionInfo sessionExecution;
+		FlowExecutionInfo sessionExecution;
 		ViewDescriptor viewDescriptor = null;
 
 		if (getStringParameter(request, getFlowSessionIdParameterName()) == null) {
 			// No existing flow session execution to lookup as no _flowSessionId
 			// was provided - start a new one
-			FlowSessionExecutionStartResult startResult = getEventProcessor(mapping).start(request, response, null);
+			FlowExecutionStartResult startResult = getEventProcessor(mapping).start(request, response, null);
 			sessionExecution = startResult.getFlowSessionExecutionInfo();
 			viewDescriptor = startResult.getStartingView();
 			saveInHttpSession(sessionExecution, request);
@@ -276,24 +276,24 @@ public class FlowAction extends TemplateAction {
 		}
 	}
 
-	protected FlowSessionExecutionInfo getRequiredFlowSessionExecution(String flowSessionId, HttpServletRequest request)
+	protected FlowExecutionInfo getRequiredFlowSessionExecution(String flowSessionId, HttpServletRequest request)
 			throws NoSuchFlowSessionException {
 		try {
-			return (FlowSessionExecutionInfo)getRequiredSessionAttribute(request, flowSessionId);
+			return (FlowExecutionInfo)getRequiredSessionAttribute(request, flowSessionId);
 		}
 		catch (IllegalStateException e) {
 			throw new NoSuchFlowSessionException(flowSessionId, e);
 		}
 	}
 
-	protected void saveInHttpSession(FlowSessionExecutionInfo sessionInfo, HttpServletRequest request) {
+	protected void saveInHttpSession(FlowExecutionInfo sessionInfo, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Saving flow session '" + sessionInfo.getId() + "' in HTTP session");
 		}
 		request.getSession().setAttribute(sessionInfo.getId(), sessionInfo);
 	}
 
-	private void removeFromHttpSession(FlowSessionExecutionInfo sessionInfo, HttpServletRequest request) {
+	private void removeFromHttpSession(FlowExecutionInfo sessionInfo, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removing flow session '" + sessionInfo.getId() + "' from HTTP session");
 		}
