@@ -952,9 +952,91 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testJtaSessionSynchronizationWithRemoteTransaction() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+
+		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
+		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+
+		for (int j = 0; j < 2; j++) {
+			tmControl.reset();
+			sfControl.reset();
+			sessionControl.reset();
+
+			tm.getStatus();
+			tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
+			tm.getTransaction();
+			tmControl.setReturnValue(transaction, 6);
+
+			sf.getConnectionProvider();
+			sfControl.setReturnValue(null, 1);
+			sf.openSession();
+			sfControl.setReturnValue(session, 1);
+			sf.getTransactionManager();
+			sfControl.setReturnValue(tm, 6);
+			session.getFlushMode();
+			sessionControl.setReturnValue(FlushMode.AUTO, 1);
+			session.flush();
+			sessionControl.setVoidCallable(1);
+			session.close();
+			sessionControl.setReturnValue(null, 1);
+
+			tmControl.replay();
+			sfControl.replay();
+			sessionControl.replay();
+
+			if (j == 0) {
+				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+			}
+			else {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+			}
+
+			HibernateTemplate ht = new HibernateTemplate(sf);
+			for (int i = 0; i < 5; i++) {
+				ht.executeFind(new HibernateCallback() {
+					public Object doInHibernate(Session sess) {
+						assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+						assertEquals(session, sess);
+						return null;
+					}
+				});
+			}
+
+			final Synchronization synchronization = transaction.getSynchronization();
+			assertTrue("JTA synchronization registered", synchronization != null);
+
+			// Call synchronization in a new thread, to simulate a synchronization
+			// triggered by a new remote call from a remote transaction coordinator.
+			Thread synch = new Thread() {
+				public void run() {
+					synchronization.beforeCompletion();
+					synchronization.afterCompletion(Status.STATUS_COMMITTED);
+				}
+			};
+			synch.start();
+			synch.join();
+
+			assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+			assertTrue("Thread session holder empty", sessionHolder.isEmpty());
+			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+			tmControl.verify();
+			sfControl.verify();
+			sessionControl.verify();
+		}
+
+		TransactionSynchronizationManager.unbindResource(sf);
+	}
+
 	protected void tearDown() {
-		//assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		//assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }
