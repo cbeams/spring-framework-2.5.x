@@ -21,14 +21,6 @@ import org.springframework.core.io.Resource;
  *
  */
 public class MockApplicationContext implements ApplicationContext {
-
-    public Map getBeansOfType(Class type) throws BeansException {
-        return null;
-    }
-    
-    public Class getType(String name) throws NoSuchBeanDefinitionException {
-        return null;
-    }
     
     /* (non-Javadoc)
 	 * @see org.springframework.context.ApplicationContext#getParent()
@@ -187,5 +179,25 @@ public class MockApplicationContext implements ApplicationContext {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    /* (non-Javadoc)
+     * @see org.springframework.beans.factory.ListableBeanFactory#getBeansOfType(java.lang.Class)
+     */
+    public Map getBeansOfType(Class type) throws BeansException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.beans.factory.BeanFactory#getType(java.lang.String)
+     */
+    public Class getType(String name) throws NoSuchBeanDefinitionException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+
+
 
 }

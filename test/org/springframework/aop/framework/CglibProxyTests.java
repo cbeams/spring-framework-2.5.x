@@ -17,143 +17,164 @@
 package org.springframework.aop.framework;
 
 import net.sf.cglib.core.CodeGenerationException;
+
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
-
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
  * Additional and overriden tests for the CGLIB proxy.
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 
-	protected Object createProxy(AdvisedSupport as) {
-		as.setProxyTargetClass(true);
-		Object proxy = as.createAopProxy().getProxy();
-		assertTrue(AopUtils.isCglibProxy(proxy));
-		return proxy;
-	}
+    protected Object createProxy(AdvisedSupport as) {
+        as.setProxyTargetClass(true);
+        Object proxy = as.createAopProxy().getProxy();
+        assertTrue(AopUtils.isCglibProxy(proxy));
+        return proxy;
+    }
 
-	protected AopProxy createAopProxy(AdvisedSupport as) {
-		as.setProxyTargetClass(true);
-		return new Cglib2AopProxy(as);
-	}
+    protected AopProxy createAopProxy(AdvisedSupport as) {
+        as.setProxyTargetClass(true);
+        return new Cglib2AopProxy(as);
+    }
 
-	protected boolean requiresTarget() {
-		return true;
-	}
+    protected boolean requiresTarget() {
+        return true;
+    }
 
-	public void testNullConfig() {
-		try {
-			AopProxy aop = new Cglib2AopProxy(null);
-			aop.getProxy();
-			fail("Shouldn't allow null interceptors");
-		} catch (AopConfigException ex) {
-			// Ok
-		}
-	}
+    public void testNullConfig() {
+        try {
+            AopProxy aop = new Cglib2AopProxy(null);
+            aop.getProxy();
+            fail("Shouldn't allow null interceptors");
+        } catch (AopConfigException ex) {
+            // Ok
+        }
+    }
 
-	public void testNoTarget() {
-		AdvisedSupport pc = new AdvisedSupport(new Class[]{ITestBean.class});
-		pc.addAdvice(new NopInterceptor());
-		try {
-			AopProxy aop = createAopProxy(pc);
-			aop.getProxy();
-			fail("Shouldn't allow no target with CGLIB proxy");
-		}
-		catch (AopConfigException ex) {
-			// Ok
-		}
-	}
-	
-	public void testProtectedMethodInvocation() throws Throwable {
-		ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
-		mockTargetSource.setTarget(bean);
-		
-		AdvisedSupport as = new AdvisedSupport(new Class[]{});
-		as.setTargetSource(mockTargetSource);
-		as.addAdvice(new NopInterceptor());
-		AopProxy aop = new Cglib2AopProxy(as);
-		
-		Object proxy = aop.getProxy();
-		
-		assertTrue("CGLIB proxy not generated", AopUtils.isCglibProxy(proxy));
-	}
+    public void testNoTarget() {
+        AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+        pc.addAdvice(new NopInterceptor());
+        try {
+            AopProxy aop = createAopProxy(pc);
+            aop.getProxy();
+            fail("Shouldn't allow no target with CGLIB proxy");
+        } catch (AopConfigException ex) {
+            // Ok
+        }
+    }
 
-	public void testProxyCanBeClassNotInterface() throws Throwable {
-		TestBean raw = new TestBean();
-		raw.setAge(32);
-		mockTargetSource.setTarget(raw);
-		AdvisedSupport pc = new AdvisedSupport(new Class[]{});
-		pc.setTargetSource(mockTargetSource);
-		AopProxy aop = new Cglib2AopProxy(pc);
+    public void testProtectedMethodInvocation() throws Throwable {
+        ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
+        mockTargetSource.setTarget(bean);
 
-		Object proxy = aop.getProxy();
-		assertTrue("Proxy is CGLIB enhanced", AopUtils.isCglibProxy(proxy));
-		assertTrue(proxy instanceof ITestBean);
-		assertTrue(proxy instanceof TestBean);
-		TestBean tb = (TestBean) proxy;
-		assertEquals("Correct age", 32, tb.getAge());
-	}
+        AdvisedSupport as = new AdvisedSupport(new Class[] {});
+        as.setTargetSource(mockTargetSource);
+        as.addAdvice(new NopInterceptor());
+        AopProxy aop = new Cglib2AopProxy(as);
 
-	public void testCGLIBProxyingGivesMeaningfulExceptionIfAskedToProxyNonvisibleClass() {
-		class YouCantSeeThis {
-			void hidden() {
-			}
-		}
-		YouCantSeeThis mine = new YouCantSeeThis();
-		try {
-			ProxyFactory pf = new ProxyFactory(mine);
-			pf.getProxy();
-			fail("Shouldn't be able to proxy non-visible class with CGLIB");
-		} 
-		catch (AspectException ex) {
-			// Check that stack trace is preserved
-			// FIX: CGLIB will throw an IllegalArgumentException when trying to
-			// create a proxy of a class where the constructor is not visible - Rob Harrop.
-			assertTrue(ex.getCause() instanceof CodeGenerationException ||
-					ex.getCause() instanceof IllegalArgumentException);
+        Object proxy = aop.getProxy();
 
-			// Check that error message is helpful
+        assertTrue("CGLIB proxy not generated", AopUtils.isCglibProxy(proxy));
+    }
 
-			// TODO check why these methods fail with NPE on AOP Alliance code
-			//ex.printStackTrace();
-			//assertTrue(ex.getMessage().indexOf("final") != -1);
-			//assertTrue(ex.getMessage().indexOf("visible") != -1);
-		}
-	}
+    public void testProxyCanBeClassNotInterface() throws Throwable {
+        TestBean raw = new TestBean();
+        raw.setAge(32);
+        mockTargetSource.setTarget(raw);
+        AdvisedSupport pc = new AdvisedSupport(new Class[] {});
+        pc.setTargetSource(mockTargetSource);
+        AopProxy aop = new Cglib2AopProxy(pc);
 
-	public void testMultipleProxies() {
-		TestBean target = new TestBean();
-		target.setAge(20);
-		TestBean target2 = new TestBean();
-		target2.setAge(21);
+        Object proxy = aop.getProxy();
+        assertTrue("Proxy is CGLIB enhanced", AopUtils.isCglibProxy(proxy));
+        assertTrue(proxy instanceof ITestBean);
+        assertTrue(proxy instanceof TestBean);
+        TestBean tb = (TestBean) proxy;
+        assertEquals("Correct age", 32, tb.getAge());
+    }
 
-		ITestBean proxy1 = getAdvisedProxy(target);
-		ITestBean proxy2 = getAdvisedProxy(target2);
-		assertTrue(proxy1.getClass() == proxy2.getClass());
-		assertEquals(target.getAge(), proxy1.getAge());
-		assertEquals(target2.getAge(), proxy2.getAge());
-	}
+    public void testCGLIBProxyingGivesMeaningfulExceptionIfAskedToProxyNonvisibleClass() {
+        class YouCantSeeThis {
+            void hidden() {
+            }
+        }
+        YouCantSeeThis mine = new YouCantSeeThis();
+        try {
+            ProxyFactory pf = new ProxyFactory(mine);
+            pf.getProxy();
+            fail("Shouldn't be able to proxy non-visible class with CGLIB");
+        } catch (AspectException ex) {
+            // Check that stack trace is preserved
+            // FIX: CGLIB will throw an IllegalArgumentException when trying to
+            // create a proxy
+            // of a class where the constructor is not visible - Rob Harrop
+            assertTrue((ex.getCause() instanceof CodeGenerationException)
+                    || (ex.getCause() instanceof IllegalArgumentException));
 
-	private ITestBean getAdvisedProxy(TestBean target) {
-		ProxyFactory pf = new ProxyFactory(new Class[]{ITestBean.class});
-		pf.setProxyTargetClass(true);
+            // Check that error message is helpful
 
-		MethodInterceptor static1 = new NopInterceptor();
-		pf.addAdvice(static1);
+            // TODO check why these methods fail with NPE on AOP Alliance code
+            //ex.printStackTrace();
+            //assertTrue(ex.getMessage().indexOf("final") != -1);
+            //assertTrue(ex.getMessage().indexOf("visible") != -1);
+        }
 
-		pf.setTarget(target);
-		pf.setFrozen(true);
-		pf.setExposeProxy(false);
+    }
 
-		return (ITestBean)pf.getProxy();
-	}
+    public void testFoo() {
+        CglibTestBean bean = new CglibTestBean();
+        bean.setName("Rob Harrop");
 
+        mockTargetSource.setTarget(bean);
+
+        AdvisedSupport as = new AdvisedSupport(new Class[] {});
+        as.setTargetSource(mockTargetSource);
+        as.addAdvice(new NopInterceptor());
+        AopProxy aop = new Cglib2AopProxy(as);
+
+        CglibTestBean proxy = (CglibTestBean) aop.getProxy();
+
+        assertEquals(
+                "The name property has been overwritten by the constructor",
+                "Rob Harrop", proxy.getName());
+    }
+
+    public void testMultipleProxies() {
+
+        TestBean target = new TestBean();
+        target.setAge(20);
+        TestBean target2 = new TestBean();
+        target2.setAge(21);
+
+        ITestBean proxy1 = getAdvisedProxy(target);
+        ITestBean proxy2 = getAdvisedProxy(target2);
+        assertTrue(proxy1.getClass() == proxy2.getClass());
+        assertEquals(target.getAge(), proxy1.getAge());
+        assertEquals(target2.getAge(), proxy2.getAge());
+    }
+
+    private ITestBean getAdvisedProxy(TestBean target) {
+
+        ProxyFactory pf = new ProxyFactory(new Class[] { ITestBean.class });
+        pf.setProxyTargetClass(true);
+
+        MethodInterceptor static1 = new NopInterceptor();
+        pf.addAdvice(static1);
+
+        pf.setTarget(target);
+        pf.setFrozen(true);
+        pf.setExposeProxy(false);
+
+        return (ITestBean) pf.getProxy();
+
+    }
 }
