@@ -52,10 +52,11 @@
 
     <para>Finally, the package
     <literal>org.springframework.jms.connection</literal>
-    provides implemenations of the ConnectionFactory suitable for use
-    in stand alone applications and also a PlatformTransactionManager
-    for JMS.  This allows for reuse of transactional JMS code across both 
-    a J2EE and a standalone environment.
+    provides an implemenation of the ConnectionFactory suitable for use
+    in standalone applications.  It also contains an implementation
+    of Spring's <literal>PlatformTransactionManager</literal>
+    for JMS This allows for integration of JMS as a transactional
+    resource into Spring's transaction management mechanisms.
     </para>
 
   </sect1>    
@@ -162,21 +163,39 @@
     </sect2>
     <sect2>
       <title>Transaction Management</title>
-      <para>Using JMS API inside an managed environment
-      when creating a <literal>Session</literal> from a Connection can
-      be confusing because the JMS API only has only one factory method to
-      create a Session and it requires values for the transaction and
-      acknolwegement modes.  In a managed environment, setting these
-      values in the responsibility of the container, so these values
-      are ignored by the vendors wrapper to the JMS Connection.
+      <para>Spring provides an implementation of the 
+      <literal>PlatformTransactionManager</literal> interface for JMS called
+      <literal>JmsTransactionManager</literal> which manages 
+      transactions for a single JMS ConnectionFactory.  This allows JMS
+      applications to leverage the managed transaction features of 
+      Spring as described in <literal>Chapter 6</literal>.
+      The <literal>JmsTransactionManager</literal> binds a Connection/Session
+      pair from the specified ConnectionFactory to the thread.  However,
+      in a J2EE environment the ConnectionFactory will pool connections 
+      and sessions, so the instances that are bound to the thread depend
+      on the pooling behavior.  In a standalone environment, using Spring's
+      <literal>SingleConnectionFactory</literal> will result in a 
+      using a single JMS Connection and each transaction having its own
+      Session.  The <literal>JmsTemplate</literal> can also be used with 
+      a <literal>JtaTransactionManager</literal> and an XA-capable
+      JMS ConnectionFactory for performing distributed transactions.
+      </para>
+      <para>Reusing code across a managed and unmanaged transactional 
+      environment can be confusing when using JMS API to create
+      a <literal>Session</literal> from a Connection.
+      This is because the JMS API only has only one 
+      factory method to create a Session and it requires values for 
+      the transaction and acknolwegement modes.  In a managed environment, 
+      setting these values in the responsibility of the environments
+      transactional infrastructure, so these values are ignored by the 
+      vendors wrapper to the JMS Connection.
       When using the <literal>JmsTemplate</literal> in an unmanaged
       environment you can specify these values
       though the use of the properties <literal>SessionTransacted</literal>
       and <literal>SessionAcknowledgeMode</literal>.
-      </para>
-      <para>Spring provides a JmsTransactionManager to demarcate
-      transactions at a higher level in the application. 
-      TODO...
+      When using a <literal>PlatformTransactionManager</literal> with 
+      <literal>JmsTemplate</literal>, the template will always be
+      given a transactional JMS Session.
       </para>
     </sect2>
     <sect2>
