@@ -20,22 +20,30 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
+import org.easymock.MockControl;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.cfg.ImprovedNamingStrategy;
+import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.connection.UserSuppliedConnectionProvider;
-import org.easymock.MockControl;
+import org.hibernate.engine.FilterDefinition;
 
+import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -307,6 +315,88 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		catch (IllegalArgumentException ex) {
 			// expected
 			assertTrue("Correct exception", ex.getMessage().equals(entityInterceptor.toString()));
+		}
+	}
+
+	public void testLocalSessionFactoryBeanWithNamingStrategy() throws Exception {
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public Configuration setNamingStrategy(NamingStrategy namingStrategy) {
+						throw new IllegalArgumentException(namingStrategy.toString());
+					}
+				};
+			}
+		};
+		sfb.setMappingResources(new String[0]);
+		sfb.setDataSource(new DriverManagerDataSource());
+		sfb.setNamingStrategy(ImprovedNamingStrategy.INSTANCE);
+		try {
+			sfb.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+			assertTrue("Correct exception", ex.getMessage().equals(ImprovedNamingStrategy.INSTANCE.toString()));
+		}
+	}
+
+	public void testLocalSessionFactoryBeanWithEventListeners() throws Exception {
+		final Map registeredListeners = new HashMap();
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public void setListener(String type, Object listener) {
+						registeredListeners.put(type, listener);
+					}
+				};
+			}
+			protected SessionFactory newSessionFactory(Configuration config) {
+				return null;
+			}
+		};
+		sfb.setMappingResources(new String[0]);
+		sfb.setDataSource(new DriverManagerDataSource());
+		Map listeners = new HashMap();
+		listeners.put("flush", "myListener");
+		listeners.put("create", "yourListener");
+		sfb.setEventListeners(listeners);
+		sfb.afterPropertiesSet();
+		assertEquals(listeners, registeredListeners);
+	}
+
+	public void testLocalSessionFactoryBeanWithFilterDefinitions() throws Exception {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("filterDefinitions.xml", getClass()));
+		FilterTestLocalSessionFactoryBean sf = (FilterTestLocalSessionFactoryBean) xbf.getBean("&sessionFactory");
+		assertEquals(2, sf.registeredFilterDefinitions.size());
+		FilterDefinition filter1 = (FilterDefinition) sf.registeredFilterDefinitions.get(0);
+		FilterDefinition filter2 = (FilterDefinition) sf.registeredFilterDefinitions.get(1);
+
+		assertEquals("filter1", filter1.getFilterName());
+		assertEquals(2, filter1.getParameterNames().size());
+		assertEquals(Hibernate.STRING, filter1.getParameterType("param1"));
+		assertEquals(Hibernate.LONG, filter1.getParameterType("otherParam"));
+		assertEquals("someCondition", filter1.getDefaultFilterCondition());
+
+		assertEquals("filter2", filter2.getFilterName());
+		assertEquals(1, filter2.getParameterNames().size());
+		assertEquals(Hibernate.INTEGER, filter2.getParameterType("myParam"));
+	}
+
+
+	public static class FilterTestLocalSessionFactoryBean extends LocalSessionFactoryBean {
+
+		public List registeredFilterDefinitions = new LinkedList();
+
+		protected Configuration newConfiguration() throws HibernateException {
+			return new Configuration() {
+				public void addFilterDefinition(FilterDefinition definition) {
+					registeredFilterDefinitions.add(definition);
+				}
+			};
+		}
+		protected SessionFactory newSessionFactory(Configuration config) {
+			return null;
 		}
 	}
 
