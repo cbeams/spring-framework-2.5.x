@@ -33,7 +33,7 @@ in JNDI.
 <!ATTLIST collection-cache usage (read-only|read-write|nonstrict-read-write|transactional) #REQUIRED>
 
 <!ELEMENT listener EMPTY>
-<!ATTLIST listener type (auto-flush|merge|create|delete|dirty-check|evict|flush|flush-entity|load|load-collection|lock|refresh|replicate|save-update|pre-load|pre-update|pre-insert|pre-delete|post-load|post-update|post-insert|post-delete) #REQUIRED>
+<!ATTLIST listener type (auto-flush|merge|create|delete|dirty-check|evict|flush|flush-entity|load|load-collection|lock|refresh|replicate|save-update|save|update|pre-load|pre-update|pre-insert|pre-delete|post-load|post-update|post-insert|post-delete) #REQUIRED>
 <!ATTLIST listener class CDATA #REQUIRED>
 
 <!ELEMENT session-factory (property*, mapping*, (class-cache|collection-cache)*, listener*, filter-def*)>

@@ -101,8 +101,9 @@ arbitrary number of queries, and import declarations of arbitrary classes.
 <!--
 	FILTER-DEF element; top-level filter definition.
 -->
-<!ELEMENT filter-def (filter-param*)>
+<!ELEMENT filter-def (#PCDATA|filter-param)*>
 	<!ATTLIST filter-def name CDATA #REQUIRED> <!-- The filter name -->
+	<!ATTLIST filter-def condition CDATA #IMPLIED>
 
 <!--
 	FILTER-PARAM element; qualifies parameters found within a FILTER-DEF
@@ -204,7 +205,7 @@ application through a property of the Java class. -->
 	(property|many-to-one|one-to-one|component|dynamic-component|any|map|set|list|bag|idbag|array|primitive-array|query-list)*,
 	join*, 
 	subclass*,
-	loader?,sql-insert?,sql-delete?,sql-update?
+	loader?,sql-insert?,sql-update?,sql-delete?
 )>
 	<!ATTLIST subclass entity-name CDATA #IMPLIED>
 	<!ATTLIST subclass name CDATA #IMPLIED>
@@ -476,7 +477,7 @@ relationship from the collection table to the enclosing class. -->
 	<!ATTLIST map where CDATA #IMPLIED>																<!-- default: none -->
 	<!ATTLIST map batch-size CDATA #IMPLIED>
 	<!ATTLIST map outer-join (true|false|auto) #IMPLIED>
-	<!ATTLIST map fetch (join|select) #IMPLIED>
+	<!ATTLIST map fetch (join|select|subselect) #IMPLIED>
 	<!ATTLIST map check CDATA #IMPLIED>																<!-- default: none -->	
 	<!ATTLIST map persister CDATA #IMPLIED>														
 	<!ATTLIST map collection-type CDATA #IMPLIED>	
@@ -508,7 +509,7 @@ relationship from the collection table to the enclosing class. -->
 	<!ATTLIST set where CDATA #IMPLIED>																<!-- default: none -->
 	<!ATTLIST set batch-size CDATA #IMPLIED>
 	<!ATTLIST set outer-join (true|false|auto) #IMPLIED>
-	<!ATTLIST set fetch (join|select) #IMPLIED>
+	<!ATTLIST set fetch (join|select|subselect) #IMPLIED>
 	<!ATTLIST set persister CDATA #IMPLIED>	
 	<!ATTLIST set collection-type CDATA #IMPLIED>														
 	<!ATTLIST set check CDATA #IMPLIED>																<!-- default: none -->
@@ -539,7 +540,7 @@ relationship from the collection table to the enclosing class. -->
 	<!ATTLIST bag where CDATA #IMPLIED>																<!-- default: none -->
 	<!ATTLIST bag batch-size CDATA #IMPLIED>
 	<!ATTLIST bag outer-join (true|false|auto) #IMPLIED>
-	<!ATTLIST bag fetch (join|select) #IMPLIED>
+	<!ATTLIST bag fetch (join|select|subselect) #IMPLIED>
 	<!ATTLIST bag persister CDATA #IMPLIED>															
 	<!ATTLIST bag collection-type CDATA #IMPLIED>	
 	<!ATTLIST bag check CDATA #IMPLIED>																<!-- default: none -->
@@ -570,7 +571,7 @@ relationship from the collection table to the enclosing class. -->
 	<!ATTLIST idbag where CDATA #IMPLIED>															<!-- default: none -->
 	<!ATTLIST idbag batch-size CDATA #IMPLIED>
 	<!ATTLIST idbag outer-join (true|false|auto) #IMPLIED>
-	<!ATTLIST idbag fetch (join|select) #IMPLIED>
+	<!ATTLIST idbag fetch (join|select|subselect) #IMPLIED>
 	<!ATTLIST idbag persister CDATA #IMPLIED>															
 	<!ATTLIST idbag collection-type CDATA #IMPLIED>
 	<!ATTLIST idbag check CDATA #IMPLIED>															<!-- default: none -->
@@ -601,7 +602,7 @@ relationship from the collection table to the enclosing class. -->
 	<!ATTLIST list where CDATA #IMPLIED>														 	<!-- default: none -->
 	<!ATTLIST list batch-size CDATA #IMPLIED>
 	<!ATTLIST list outer-join (true|false|auto) #IMPLIED>
-	<!ATTLIST list fetch (join|select) #IMPLIED>
+	<!ATTLIST list fetch (join|select|subselect) #IMPLIED>
 	<!ATTLIST list persister CDATA #IMPLIED>																
 	<!ATTLIST list collection-type CDATA #IMPLIED>
 	<!ATTLIST list check CDATA #IMPLIED>															<!-- default: none -->
@@ -631,7 +632,7 @@ relationship from the collection table to the enclosing class. -->
 	<!ATTLIST array where CDATA #IMPLIED>															<!-- default: none -->
 	<!ATTLIST array batch-size CDATA #IMPLIED>
 	<!ATTLIST array outer-join (true|false|auto) #IMPLIED>
-	<!ATTLIST array fetch (join|select) #IMPLIED>
+	<!ATTLIST array fetch (join|select|subselect) #IMPLIED>
 	<!ATTLIST array persister CDATA #IMPLIED>															
 	<!ATTLIST array collection-type CDATA #IMPLIED>
 	<!ATTLIST array check CDATA #IMPLIED>															<!-- default: none -->
@@ -658,7 +659,7 @@ relationship from the collection table to the enclosing class. -->
 	<!ATTLIST primitive-array where CDATA #IMPLIED>									<!-- default: none -->
 	<!ATTLIST primitive-array batch-size CDATA #IMPLIED>
 	<!ATTLIST primitive-array outer-join (true|false|auto) #IMPLIED>
-	<!ATTLIST primitive-array fetch (join|select) #IMPLIED>
+	<!ATTLIST primitive-array fetch (join|select|subselect) #IMPLIED>
 	<!ATTLIST primitive-array persister CDATA #IMPLIED>																
 	<!ATTLIST primitive-array collection-type CDATA #IMPLIED>
 	<!ATTLIST primitive-array check CDATA #IMPLIED>									<!-- default: none -->
@@ -865,6 +866,7 @@ a property of the domain model -->
 	<!ATTLIST sql-query cache-region CDATA #IMPLIED>
 	<!ATTLIST sql-query fetch-size CDATA #IMPLIED>
 	<!ATTLIST sql-query timeout CDATA #IMPLIED>
+	<!ATTLIST sql-query callable (true|false) "false"> 
 
 <!--
 	Defines a return component for a sql-query.  Alias refers to the alias
@@ -875,17 +877,28 @@ a property of the domain model -->
 	and takes the form "ClassName.propertyName"; role refers to the property path for an eager fetch
 	and takes the form "owningAlias.propertyName"
 -->
-<!ELEMENT return EMPTY>
+<!ELEMENT return (return-discriminator?,return-property)*>
 	<!ATTLIST return alias CDATA #REQUIRED>
-	<!ATTLIST return class CDATA #REQUIRED>
+	<!ATTLIST return entity-name CDATA #IMPLIED>
+	<!ATTLIST return class CDATA #IMPLIED>
 	<!ATTLIST return lock-mode (none|read|upgrade|upgrade-nowait|write) "read">	
 
-<!ELEMENT return-join EMPTY>
+<!ELEMENT return-property (return-column*)> 
+	<!ATTLIST return-property name CDATA #REQUIRED>
+	<!ATTLIST return-property column CDATA #IMPLIED>
+
+<!ELEMENT return-column EMPTY> 
+	<!ATTLIST return-column name CDATA #REQUIRED>
+
+<!ELEMENT return-discriminator EMPTY> 
+	<!ATTLIST return-discriminator column CDATA #REQUIRED>
+	
+<!ELEMENT return-join EMPTY> <!-- TODO: (return-property)* -->
 	<!ATTLIST return-join alias CDATA #REQUIRED>
 	<!ATTLIST return-join property CDATA #REQUIRED>
 	<!ATTLIST return-join lock-mode (none|read|upgrade|upgrade-nowait|write) "read">
 
-<!ELEMENT load-collection EMPTY>
+<!ELEMENT load-collection EMPTY> <!-- TODO: (return-property)* -->
 	<!ATTLIST load-collection alias CDATA #REQUIRED>
 	<!ATTLIST load-collection role CDATA #REQUIRED>
 	<!ATTLIST load-collection lock-mode (none|read|upgrade|upgrade-nowait|write) "read">
