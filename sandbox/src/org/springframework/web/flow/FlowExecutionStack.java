@@ -31,9 +31,9 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
-import org.springframework.web.flow.support.RandomGuid;
 
 /**
  * Default implementation of FlowExecution that uses a stack-based data

@@ -140,7 +140,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public FlowAttributeMapper getFlowModelMapper(String flowModelMapperId)
+	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId)
 			throws ServiceLookupException {
 		try {
 			return (FlowAttributeMapper)getBeanFactory().getBean(flowModelMapperId, FlowAttributeMapper.class);
@@ -150,7 +150,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public FlowAttributeMapper getFlowModelMapper(Class flowModelMapperImplementationClass)
+	public FlowAttributeMapper getFlowAttributeMapper(Class flowModelMapperImplementationClass)
 			throws ServiceLookupException {
 		if (!FlowAttributeMapper.class.isAssignableFrom(flowModelMapperImplementationClass)) {
 			throw new IllegalArgumentException("Your model mapper implementation '"

@@ -140,7 +140,7 @@ public class XmlFlowBuilderTests extends TestCase {
 			throw new NoSuchFlowDefinitionException(flowDefinitionId);
 		}
 
-		public FlowAttributeMapper getFlowModelMapper(String flowModelMapperId) throws ServiceLookupException {
+		public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
 			if ("modelMapper1".equals(flowModelMapperId)) {
 				return new FlowAttributeMapper() {
 					public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {

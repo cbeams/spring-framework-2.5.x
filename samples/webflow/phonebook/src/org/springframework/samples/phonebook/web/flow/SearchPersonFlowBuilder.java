@@ -80,7 +80,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		addActionState(setId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
 
 		// view details for selected user id
-		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useModelMapper(ID), new Transition[] {
+		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useAttributeMapper(ID), new Transition[] {
 				onFinish(view(RESULTS)), onError("error") });
 
 		// end - an error occured

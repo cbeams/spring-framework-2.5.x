@@ -31,7 +31,7 @@ import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
-import org.springframework.web.flow.support.HttpFlowExecutionManager;
+import org.springframework.web.flow.support.HttpServletFlowExecutionManager;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
 import org.springframework.web.util.WebUtils;
@@ -43,7 +43,7 @@ import org.springframework.web.util.WebUtils;
  * executions by parameterization with the appropriate <code>flowId</code> in
  * views that start new flow executions.
  * <p>
- * Requests are managed by and delegated to a {@link HttpFlowExecutionManager},
+ * Requests are managed by and delegated to a {@link HttpServletFlowExecutionManager},
  * allowing reuse of common front flow controller logic in other environments.
  * Consult the JavaDoc of that class for more information on how requests are
  * processed.
@@ -126,7 +126,7 @@ import org.springframework.web.util.WebUtils;
  * binding and validation that addresses the proliferation of
  * <code>ActionForm</code> classes found in traditional Struts-based apps.
  * 
- * @see org.springframework.web.flow.support.HttpFlowExecutionManager
+ * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
  * @see org.springframework.web.struts.BindingActionForm
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -136,7 +136,7 @@ public class FlowAction extends TemplateAction {
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
-		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(getFlowId(mapping), locator,
+		HttpServletFlowExecutionManager executionManager = new HttpServletFlowExecutionManager(getFlowId(mapping), locator,
 				new FlowExecutionListener[] { createActionFormAdapter(request, form) });
 		ViewDescriptor viewDescriptor = executionManager.handleRequest(request, response);
 		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);

@@ -64,7 +64,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 				}
 			}
 
-			public FlowAttributeMapper getFlowModelMapper(String id) throws ServiceLookupException {
+			public FlowAttributeMapper getFlowAttributeMapper(String id) throws ServiceLookupException {
 				if (id.equals("personId.modelMapper")) {
 					return new PersonIdMapper();
 				}
@@ -105,7 +105,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 		public void buildStates() {
 			addGetState(PERSONS_LIST);
 			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
-			addSubFlowState(PERSON_DETAILS, useModelMapper("personId"), get(PERSONS_LIST));
+			addSubFlowState(PERSON_DETAILS, useAttributeMapper("personId"), get(PERSONS_LIST));
 			addFinishEndState();
 		}
 	}
@@ -119,7 +119,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 			addGetState(PERSONS_LIST, executeAction(NoOpAction.class));
 			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
 			addSubFlowState(PERSON_DETAILS, TestDetailFlowBuilderLookupByType.class,
-					useModelMapper(PersonIdMapper.class), get(PERSONS_LIST));
+					useAttributeMapper(PersonIdMapper.class), get(PERSONS_LIST));
 			addFinishEndState();
 		}
 	}

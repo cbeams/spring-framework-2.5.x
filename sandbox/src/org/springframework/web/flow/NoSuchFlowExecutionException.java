@@ -19,7 +19,6 @@ package org.springframework.web.flow;
  * Thrown when no flow execution exists by the specified
  * <code>flowExecutionId</code>. This might occur if the flow execution timed
  * out, but a client view still references it.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */

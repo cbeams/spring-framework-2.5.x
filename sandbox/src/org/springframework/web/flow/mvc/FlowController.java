@@ -26,13 +26,13 @@ import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
-import org.springframework.web.flow.support.HttpFlowExecutionManager;
+import org.springframework.web.flow.support.HttpServletFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
  * Web controller for the Spring MVC framework that handles requests using a web
- * flow. Requests are managed using an {@link HttpFlowExecutionManager}.
+ * flow. Requests are managed using an {@link HttpServletFlowExecutionManager}.
  * Consult the JavaDoc of that class for more information on how requests are
  * processed.
  * <p>
@@ -61,7 +61,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * </tr>
  * </table>
  * 
- * @see org.springframework.web.flow.support.HttpFlowExecutionManager
+ * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
  * @author Erwin Vervaet
  * @author Keith Donald
  */
@@ -71,7 +71,7 @@ public class FlowController extends AbstractController implements InitializingBe
 
 	private FlowExecutionListener[] flowExecutionListeners;
 
-	private HttpFlowExecutionManager manager;
+	private HttpServletFlowExecutionManager manager;
 
 	/**
 	 * Set the top level fow started by this controller. This is optional.
@@ -107,9 +107,9 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * Create a new HTTP flow execution manager. Subclasses can override this to
 	 * return a specialed manager.
 	 */
-	protected HttpFlowExecutionManager createHttpFlowExecutionManager() {
+	protected HttpServletFlowExecutionManager createHttpFlowExecutionManager() {
 		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
-		return new HttpFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners) {
+		return new HttpServletFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners) {
 			protected Map getFlowExecutionInput(HttpServletRequest request) {
 				return FlowController.this.getFlowExecutionInput(request);
 			}

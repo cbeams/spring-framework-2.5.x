@@ -47,11 +47,11 @@ public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 		throw new UnsupportedOperationException();
 	}
 
-	public FlowAttributeMapper getFlowModelMapper(String flowModelMapperId) throws ServiceLookupException {
+	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
 
-	public FlowAttributeMapper getFlowModelMapper(Class flowModelMapperImplementationClass)
+	public FlowAttributeMapper getFlowAttributeMapper(Class flowModelMapperImplementationClass)
 			throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}

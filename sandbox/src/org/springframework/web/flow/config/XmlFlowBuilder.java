@@ -342,7 +342,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Flow subFlow = getFlowServiceLocator().getFlow(flowName);
 		FlowAttributeMapper mapper = null;
 		if (element.hasAttribute(MODEL_MAPPER_ATTRIBUTE)) {
-			mapper = getFlowServiceLocator().getFlowModelMapper(element.getAttribute(MODEL_MAPPER_ATTRIBUTE));
+			mapper = getFlowServiceLocator().getFlowAttributeMapper(element.getAttribute(MODEL_MAPPER_ATTRIBUTE));
 		}
 		Transition[] transitions = parseTransitions(element);
 		new SubFlowState(flow, id, subFlow, mapper, transitions);

@@ -17,7 +17,6 @@ package org.springframework.web.flow;
 
 /**
  * Thrown when a flow definition cannot be found.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -41,7 +40,7 @@ public class NoSuchFlowDefinitionException extends ServiceLookupException {
 	public NoSuchFlowDefinitionException(Class serviceImplementationClass, Throwable cause) {
 		super(serviceImplementationClass, cause);
 	}
-	
+
 	/**
 	 * Create a new flow definition lookup exception.
 	 * @param serviceId The id of the service that cannot be found

@@ -26,8 +26,8 @@ import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
 /**
- * Java-based flow builder that builds the person details flow, exactly
- * like it is defined in the "detail-flow.xml" XML flow definition.
+ * Java-based flow builder that builds the person details flow, exactly like it
+ * is defined in the "detail-flow.xml" XML flow definition.
  * <p>
  * This encapsulates the page flow of viewing a person's details and their
  * collegues in a reusable, self-contained module.
@@ -66,8 +66,8 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 		addActionState(setColleagueId, setAction, onSuccess(PERSON_DETAIL));
 
 		// spawn subflow to view selected colleague details
-		addSubFlowState(PERSON_DETAIL, PersonDetailFlowBuilder.class, useModelMapper(colleagueId), new Transition[] {
-				onFinishGet(), onErrorEnd() });
+		addSubFlowState(PERSON_DETAIL, PersonDetailFlowBuilder.class, useAttributeMapper(colleagueId),
+				new Transition[] { onFinishGet(), onErrorEnd() });
 
 		// end
 		addFinishEndState();
