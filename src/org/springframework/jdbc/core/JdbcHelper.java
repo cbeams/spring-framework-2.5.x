@@ -29,7 +29,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  *
  * @author Rod Johnson
  * @since May 30, 2001
- * @version $Id: JdbcHelper.java,v 1.2 2003-08-17 20:37:03 jhoeller Exp $
+ * @version $Id: JdbcHelper.java,v 1.3 2003-08-26 17:21:52 jhoeller Exp $
  */
 public class JdbcHelper {
 
@@ -126,10 +126,6 @@ public class JdbcHelper {
 
 			public Object[] getIDs() {
 				return l.toArray();
-			}
-
-			public String getSql() {
-				return sql;
 			}
 		}
 
