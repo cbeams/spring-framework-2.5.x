@@ -17,18 +17,18 @@
 package org.springframework.dao;
 
 /**
- * Exception thrown on an optimistic locking violation. This exception will
- * be thrown either by O/R mapping tools or by custom DAO implementations.
+ * Exception thrown on failure to aquire a lock during an update i.e select for update statement. 
+ * This exception will be thrown either by O/R mapping tools or by custom DAO implementations.
  * @author Rod Johnson
- * @version $Id: OptimisticLockingFailureException.java,v 1.6 2004-07-01 02:34:21 trisberg Exp $
+ * @version $Id: CannotAcquireLockException.java,v 1.1 2004-07-01 02:34:21 trisberg Exp $
  */
-public class OptimisticLockingFailureException extends ConcurrencyFailureException {
+public class CannotAcquireLockException extends ConcurrencyFailureException {
 
-	public OptimisticLockingFailureException(String msg) {
+	public CannotAcquireLockException(String msg) {
 		super(msg);
 	}
 
-	public OptimisticLockingFailureException(String msg, Throwable ex) {
+	public CannotAcquireLockException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
 

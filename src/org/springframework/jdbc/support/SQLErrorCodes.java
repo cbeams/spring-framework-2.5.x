@@ -24,7 +24,7 @@ import java.util.List;
  * Normally loaded through a BeanFactory
  * implementation. Used by the SQLErrorCodeSQLExceptionTranslator.
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodes.java,v 1.6 2004-06-30 12:54:27 trisberg Exp $
+ * @version $Id: SQLErrorCodes.java,v 1.7 2004-07-01 02:34:43 trisberg Exp $
  */
 public class SQLErrorCodes {
 
@@ -39,6 +39,8 @@ public class SQLErrorCodes {
 	private String[] dataRetrievalFailureCodes = new String[0];
 	
 	private String[] optimisticLockingFailureCodes = new String[0];
+	
+	private String[] cannotAcquireLockCodes = new String[0];
 	
 	private String[] dataAccessResourceFailureCodes = new String[0];
 	
@@ -113,6 +115,19 @@ public class SQLErrorCodes {
 	public void setOptimisticLockingFailureCodes(
 			String[] optimisticLockingFailureCodes) {
 		this.optimisticLockingFailureCodes = optimisticLockingFailureCodes;
+	}
+
+	/**
+	 * @return Returns the cannotAcquireLockCodes.
+	 */
+	public String[] getCannotAcquireLockCodes() {
+		return cannotAcquireLockCodes;
+	}
+	/**
+	 * @param cannotAcquireLockCodes The cannotAcquireLockCodes to set.
+	 */
+	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {
+		this.cannotAcquireLockCodes = cannotAcquireLockCodes;
 	}
 
 	/**

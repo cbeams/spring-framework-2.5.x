@@ -35,6 +35,7 @@
   <bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
     <property name="badSqlGrammarCodes"><value>900,903,904,917,936,942,17006</value></property>
     <property name="dataIntegrityViolationCodes"><value>1,1400,1722,2291</value></property>
+    <property name="cannotAcquireLockCodes"><value>54</value></property>
   </bean>
 
   <bean id="Informix" class="org.springframework.jdbc.support.SQLErrorCodes">

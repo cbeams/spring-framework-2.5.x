@@ -46,7 +46,7 @@ import org.springframework.core.io.Resource;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SQLErrorCodesFactory.java,v 1.17 2004-06-30 15:39:25 jhoeller Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.18 2004-07-01 02:34:43 trisberg Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -138,6 +138,12 @@ public class SQLErrorCodesFactory {
 				}
 				else {
 					Arrays.sort(ec.getOptimisticLockingFailureCodes());
+				}
+				if (ec.getCannotAcquireLockCodes() == null) {
+					ec.setCannotAcquireLockCodes(new String[0]);
+				}
+				else {
+					Arrays.sort(ec.getCannotAcquireLockCodes());
 				}
 				if (ec.getDataAccessResourceFailureCodes() == null) {
 					ec.setDataAccessResourceFailureCodes(new String[0]);

@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.178 2004-06-30 12:56:19 trisberg Exp $
+$Id: changelog.txt,v 1.179 2004-07-01 02:34:44 trisberg Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -42,9 +42,12 @@ Package org.springframework.core
 * PathMatchingResourcePatternResolver can retrieve multiple class path resources with the same name
 
 Package org.springframework.dao
+* added new ConcurrencyFailureException and its subclasses CannotAcquireLockException and CannotSerializeTransactionException
+* changed OptimisticLockingFailureException to inherit from ConcurrencyFailureException
 * fixed DataAccessUtils' "requiredUniqueResult" method, to correctly throw an IncorrectResultSizeDataAccessException
 
 Package org.springframework.jdbc
+* added new standard translation category for CannotAcquireLockException to SqlErrorCodeSQLExceptionTranslator and sql-error-codes.xml
 * added feature to allow for defining custom translations using CustomSQLErrorCodesTranslation defined in the sql-error-codes.xml
 * DataSourceUtils' "closeConnectionIfNecessary" logs error on SQLException rather than rethrowing an exception
 * removed CannotCloseJdbcConnectionException, as it is not used anymore

@@ -17,7 +17,6 @@
 package org.springframework.jdbc.support;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,6 +25,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -50,7 +50,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
  * 
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.9 2004-06-30 12:54:27 trisberg Exp $
+ * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.10 2004-07-01 02:34:43 trisberg Exp $
  * @see org.springframework.jdbc.support.SQLErrorCodesFactory
  */
 public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslator {
@@ -149,7 +149,7 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 					CustomSQLErrorCodesTranslation customCode = (CustomSQLErrorCodesTranslation) customIter.next();
 					if (Arrays.binarySearch(customCode.getErrorCodes(), errorCode) >= 0) {
 						Class exceptionClass = null;
-						RuntimeException customException = null;
+						DataAccessException customException = null;
 						try {
 							exceptionClass = getClass().getClassLoader().loadClass(customCode.getExceptionClass());
 						} catch (ClassNotFoundException e) {
@@ -188,48 +188,43 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 									Class[] messageAndSqlAndSqlExArgsClass = new Class[] {String.class, String.class, SQLException.class};
 									Object[] messageAndSqlAndSqlExArgs = new Object[] {task, sql, sqlex};
 									exceptionConstructor = exceptionClass.getConstructor(messageAndSqlAndSqlExArgsClass);
-									customException = (RuntimeException)exceptionConstructor.newInstance(messageAndSqlAndSqlExArgs);
+									customException = (DataAccessException)exceptionConstructor.newInstance(messageAndSqlAndSqlExArgs);
 									break;
 								case MESSAGE_SQL_THROWABLE_CONSTRUCTOR:
 									Class[] messageAndSqlAndThrowableArgsClass = new Class[] {String.class, String.class, Throwable.class};
 									Object[] messageAndSqlAndThrowableArgs = new Object[] {task, sql, sqlex};
 									exceptionConstructor = exceptionClass.getConstructor(messageAndSqlAndThrowableArgsClass);
-									customException = (RuntimeException)exceptionConstructor.newInstance(messageAndSqlAndThrowableArgs);
+									customException = (DataAccessException)exceptionConstructor.newInstance(messageAndSqlAndThrowableArgs);
 									break;
 								case MESSAGE_SQLEX_CONSTRUCTOR:
 									Class[] messageAndSqlExArgsClass = new Class[] {String.class, SQLException.class};
 									Object[] messageAndSqlExArgs = new Object[] {task + ": " + sqlex.getMessage(), sqlex};
 									exceptionConstructor = exceptionClass.getConstructor(messageAndSqlExArgsClass);
-									customException = (RuntimeException)exceptionConstructor.newInstance(messageAndSqlExArgs);
+									customException = (DataAccessException)exceptionConstructor.newInstance(messageAndSqlExArgs);
 									break;
 								case MESSAGE_THROWABLE_CONSTRUCTOR:
 									Class[] messageAndThrowableArgsClass = new Class[] {String.class, Throwable.class};
 									Object[] messageAndThrowableArgs = new Object[] {task + ": " + sqlex.getMessage(), sqlex};
 									exceptionConstructor = exceptionClass.getConstructor(messageAndThrowableArgsClass);
-									customException = (RuntimeException)exceptionConstructor.newInstance(messageAndThrowableArgs);
+									customException = (DataAccessException)exceptionConstructor.newInstance(messageAndThrowableArgs);
 									break;
 								case MESSAGE_ONLY_CONSTRUCTOR:
 									Class[] messageOnlyArgsClass = new Class[] {String.class};
 									Object[] messageOnlyArgs = new Object[] {task + ": " + sqlex.getMessage()};
 									exceptionConstructor = exceptionClass.getConstructor(messageOnlyArgsClass);
-									customException = (RuntimeException)exceptionConstructor.newInstance(messageOnlyArgs);
+									customException = (DataAccessException)exceptionConstructor.newInstance(messageOnlyArgs);
 									break;
+								default:
+									logger.warn("Unable to find necessary constructor for custom exception class " + customCode.getExceptionClass());
 								}
-							} catch (InstantiationException e) {
-								logger.warn("Unable to instantiate custom exception class (" + e + ")" + customCode.getExceptionClass());
-							} catch (NoSuchMethodException e) {
-								logger.warn("Unable to instantiate custom exception class (" + e + ")" + customCode.getExceptionClass());
-							} catch (InvocationTargetException e) {
-								logger.warn("Unable to instantiate custom exception class (" + e + ")" + customCode.getExceptionClass());
-							} catch (IllegalAccessException e) {
-								logger.warn("Unable to instantiate custom exception class (" + e + ")" + customCode.getExceptionClass());
+							} catch (ClassCastException cce) {
+								logger.warn("Unable to instantiate custom exception class " + customCode.getExceptionClass() + ".  It is not a subclass of " + DataAccessException.class);
+							} catch (Exception e) {
+								logger.warn("Unable to instantiate custom exception class " + customCode.getExceptionClass() + " (" + e + ")");
 							}
 							if (customException != null) {
 								logCustomTranslation(task, sql, sqlex);
-								return (DataAccessException)customException;
-							}
-							else {
-								logger.warn("Unable to find needed constructor for custom exception class " + customCode.getExceptionClass());
+								return customException;
 							}
 								
 						}
@@ -253,6 +248,10 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 			else if (Arrays.binarySearch(this.sqlErrorCodes.getOptimisticLockingFailureCodes() , errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new OptimisticLockingFailureException(task + ": " + sqlex.getMessage(), sqlex);
+			}
+			else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotAcquireLockCodes() , errorCode) >= 0) {
+				logTranslation(task, sql, sqlex);
+				return new CannotAcquireLockException(task + ": " + sqlex.getMessage(), sqlex);
 			}
 			else if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes() , errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);

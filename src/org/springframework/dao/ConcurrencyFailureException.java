@@ -17,18 +17,19 @@
 package org.springframework.dao;
 
 /**
- * Exception thrown on an optimistic locking violation. This exception will
- * be thrown either by O/R mapping tools or by custom DAO implementations.
- * @author Rod Johnson
- * @version $Id: OptimisticLockingFailureException.java,v 1.6 2004-07-01 02:34:21 trisberg Exp $
+ * Exception thrown on aconcurrency failure.  This exception should be sublassed to 
+ * indicate the type of failure - optimistic locking, failur to acquire lock etc.
+ * This exception will be thrown either by O/R mapping tools or by custom DAO implementations.
+ * @author Thomas Risberg
+ * @since 30.06.2004
  */
-public class OptimisticLockingFailureException extends ConcurrencyFailureException {
+public class ConcurrencyFailureException extends DataAccessException {
 
-	public OptimisticLockingFailureException(String msg) {
+	public ConcurrencyFailureException(String msg) {
 		super(msg);
 	}
 
-	public OptimisticLockingFailureException(String msg, Throwable ex) {
+	public ConcurrencyFailureException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
 
