@@ -2,7 +2,6 @@ package org.springframework.samples.petclinic.web;
 
 import org.springframework.samples.petclinic.Owner;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 

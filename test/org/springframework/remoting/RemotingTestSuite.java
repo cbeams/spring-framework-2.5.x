@@ -9,7 +9,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import org.springframework.remoting.rmi.RmiProxyFactoryBean;
-import org.springframework.remoting.rmi.RmiServiceExporter;
 
 /**
  * @author Juergen Hoeller

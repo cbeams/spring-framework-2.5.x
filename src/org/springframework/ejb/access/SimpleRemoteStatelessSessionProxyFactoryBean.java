@@ -6,7 +6,6 @@
 package org.springframework.ejb.access;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
@@ -15,7 +14,7 @@ import org.springframework.beans.factory.FactoryBean;
  * rather than rely on this class.
  * @author Rod Johnson
  * @since 09-May-2003
- * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBean.java,v 1.3 2003-10-31 17:05:11 jhoeller Exp $
+ * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBean.java,v 1.4 2003-11-10 21:03:27 colins Exp $
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSlsbInvokerInterceptor
     implements FactoryBean {

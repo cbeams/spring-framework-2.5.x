@@ -8,7 +8,6 @@ package org.springframework.context;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 
@@ -35,7 +34,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * </ul>
  *
  * @author Rod Johnson
- * @version $Id: ApplicationContext.java,v 1.5 2003-11-04 23:10:02 jhoeller Exp $
+ * @version $Id: ApplicationContext.java,v 1.6 2003-11-10 21:03:28 colins Exp $
  */
 public interface ApplicationContext extends MessageSource, ListableBeanFactory, HierarchicalBeanFactory {
 	

@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.view.AbstractView;
 
 import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.pdf.PdfWriter;
  
@@ -30,7 +29,7 @@ import com.lowagie.text.pdf.PdfWriter;
  * <br>NB: Internet Explorer requires a .pdf extension, as
  * it doesn't always respect the declared content type.
  * <br>Exposes page width and height as bean properties.
- * @version $Id: AbstractPdfView.java,v 1.4 2003-11-02 13:07:38 johnsonr Exp $
+ * @version $Id: AbstractPdfView.java,v 1.5 2003-11-10 21:03:28 colins Exp $
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
  */
