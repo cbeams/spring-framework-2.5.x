@@ -23,7 +23,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Mock object based tests for TransactionInterceptor.
  * @author Rod Johnson
  * @since 16-Mar-2003
-*  @version $Id: TransactionInterceptorTests.java,v 1.13 2004-06-30 11:35:01 johnsonr Exp $
+*  @version $Id: TransactionInterceptorTests.java,v 1.14 2004-06-30 13:33:41 johnsonr Exp $
  */
 public class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 	
@@ -42,6 +42,15 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addAdvice(0, ti);
 		return pf.getProxy();
+	}
+	
+	/**
+	 * Bit of a hack: we need at least one test method on this class
+	 * (as opposed to inherited test methods)
+	 * to interest Eclipse in running it as a test case
+	 */
+	public void testMe() {
+		
 	}
 
 }
