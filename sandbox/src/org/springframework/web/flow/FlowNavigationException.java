@@ -25,6 +25,9 @@ package org.springframework.web.flow;
  */
 public abstract class FlowNavigationException extends RuntimeException {
 
+	/**
+	 * The definition of the flow where the exception was thrown.
+	 */
 	private Flow flow;
 
 	/**

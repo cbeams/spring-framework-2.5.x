@@ -56,6 +56,9 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 */
 	private String id;
 
+	/**
+	 * The time at which this object was created.
+	 */
 	private long creationTimestamp;
 
 	/**
@@ -153,11 +156,11 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		}
 	}
 
-	public String getActiveFlowId() {
+	public String getActiveFlowId() throws IllegalStateException {
 		return getActiveFlowSession().getFlow().getId();
 	}
 
-	public String getQualifiedActiveFlowId() {
+	public String getQualifiedActiveFlowId() throws IllegalStateException {
 		assertActive();
 		Iterator it = executingFlowSessions.iterator();
 		StringBuffer qualifiedName = new StringBuffer(128);
@@ -194,7 +197,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		return executingFlowSessions.size() == 1;
 	}
 
-	public String getCurrentStateId() {
+	public String getCurrentStateId() throws IllegalStateException {
 		return getActiveFlowSession().getCurrentState().getId();
 	}
 
@@ -321,7 +324,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	// flow session management helpers
-	
+
 	/**
 	 * Activate given flow session in this flow execution stack. This will push
 	 * the flow session onto the stack and mark it as the active flow session.

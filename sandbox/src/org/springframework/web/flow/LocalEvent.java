@@ -21,27 +21,67 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 
+/**
+ * A implementation of the <code>Event</code> base class for signaling events
+ * from an internal, local source within a flow artifact such as an
+ * <code>Action</code> or <code>State</code> definition. This is the
+ * simplest <code>Event</code> implementation.
+ * @author Keith Donald
+ */
 public class LocalEvent extends Event {
+
+	/**
+	 * The event identifier.
+	 */
 	private String id;
 
+	/**
+	 * The state in which this event was signaled (optional)
+	 */
 	private String stateId;
 
+	/**
+	 * Event parameters (optional)
+	 */
 	private Map parameters;
 
+	/**
+	 * Create a local event with the specified <code>id</code>.
+	 * @param id the event identifier
+	 */
 	public LocalEvent(String id) {
 		setId(id);
 	}
 
+	/**
+	 * Create a local event with the specified <code>id</code> occuring in the
+	 * state with the specified <code>stateId</code>.
+	 * @param id the event identifier
+	 * @param stateId the state in which this event occured
+	 */
 	public LocalEvent(String id, String stateId) {
 		setId(id);
 		this.stateId = stateId;
 	}
 
+	/**
+	 * Create a local event with the specified <code>id</code> with the
+	 * provided contextual parameters.
+	 * @param id the event identifier
+	 * @param parameters the event parameters
+	 */
 	public LocalEvent(String id, Map parameters) {
 		setId(id);
 		setParameters(parameters);
 	}
 
+	/**
+	 * Create a local event with the specified <code>id</code> occuring in the
+	 * state with the specified <code>stateId</code>.
+	 * @param id the event identifier
+	 * @param stateId the state in which this event occured
+	 * @param parameters contextual parameters
+	 */
 	public LocalEvent(String id, String stateId, Map parameters) {
 		setId(id);
 		this.stateId = stateId;

@@ -28,8 +28,7 @@ import org.springframework.util.ToStringCreator;
 
 /**
  * A single client session instance for a <code>Flow</code> participating in a
- * <code>FlowExecution</code>. Also a <code>MutableFlowModel</code>, as
- * the flow session acts as a "flow-scope" data model.
+ * <code>FlowExecution</code>. Also acts as a "flow-scope" data model.
  * <p>
  * The stack of executing flow sessions (managed within
  * <code>FlowExecutionStack</code>) represents the complete state of an
@@ -39,7 +38,7 @@ import org.springframework.util.ToStringCreator;
  * Initially it will be {@link FlowSessionStatus#CREATED}. Once the flow
  * session is activated in a flow execution, it becomes
  * {@link FlowSessionStatus#ACTIVE}. If the flow session would spawn a sub flow
- * session, it will become {@link FlowSessionStatus#SUSPENDED} untill the sub
+ * session, it will become {@link FlowSessionStatus#SUSPENDED} until the sub
  * flow returns (ends). When the flow session is ended by the flow execution,
  * its status becomes {@link FlowSessionStatus#ENDED}, ending its lifecycle.
  * @author Keith Donald
@@ -156,14 +155,23 @@ public class FlowSession implements Serializable {
 		this.currentState = newState;
 	}
 
+	/**
+	 * Return the data model providing access to data in "flow scope".
+	 * @return The flow scope
+	 */
 	public Scope flowScope() {
 		return this.attributes;
 	}
-	
+
+	/**
+	 * Returns a model map of flow-scoped attributes suitable for exposing to
+	 * views for rendering purposes.
+	 * @return
+	 */
 	public Map getModel() {
 		return this.attributes.getAttributeMap();
 	}
-	
+
 	// custom serialization
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.flow.getId());
