@@ -15,6 +15,7 @@
  */ 
 package org.springframework.functor;
 
+import org.springframework.functor.predicates.EqualTo;
 import org.springframework.functor.predicates.GreaterThan;
 import org.springframework.functor.predicates.GreaterThanEqualTo;
 import org.springframework.functor.predicates.LessThan;
@@ -24,6 +25,12 @@ import org.springframework.functor.predicates.LessThanEqualTo;
  * @author Keith Donald
  */
 public abstract class BinaryOperator {
+    public static final BinaryOperator EQUAL_TO = new BinaryOperator("==") {
+        public BinaryPredicate getPredicate() {
+            return EqualTo.instance();
+        }
+    };
+
     public static final BinaryOperator LESS_THAN = new BinaryOperator("<") {
         public BinaryPredicate getPredicate() {
             return LessThan.instance();
