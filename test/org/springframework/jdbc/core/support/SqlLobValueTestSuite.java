@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Date;
 
 import junit.framework.TestCase;
@@ -97,14 +98,9 @@ public class SqlLobValueTestSuite extends TestCase {
 		// set a matcher to match the byte array!
 		lobCreatorControl.setMatcher(new ArgumentsMatcher() {			
 			public boolean matches(Object[] arg0, Object[] arg1) {
-				byte[] one = (byte[])arg0[2];
-				byte[] two = (byte[])arg1[2];
-				for (int i = 0; i < one.length; i++) {
-					if (one[i] != two[i]) {
-						return false;
-					}
-				}
-				return true;
+				byte[] one = (byte[]) arg0[2];
+				byte[] two = (byte[]) arg1[2];
+				return Arrays.equals(one, two);
 			}
 			public String toString(Object[] arg0) {				
 				return "bla";
@@ -273,7 +269,6 @@ public class SqlLobValueTestSuite extends TestCase {
 		catch (IllegalArgumentException e) {
 			// expected
 		}
-		
 	}
 
 }
