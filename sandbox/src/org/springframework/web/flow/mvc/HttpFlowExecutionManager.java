@@ -166,7 +166,6 @@ public class HttpFlowExecutionManager {
 			// execute the signaled event within the current state
 			modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
 		}
-
 		if (!flowExecution.isActive()) {
 			// event execution resulted in the entire flow ending, cleanup
 			removeFromHttpSession(flowExecution, request);
