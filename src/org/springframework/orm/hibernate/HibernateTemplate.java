@@ -453,6 +453,63 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
+	public List find(final String queryString, final String paramName, final Object value)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				applyNamedParameterToQuery(queryObject, paramName, value, null);
+				return queryObject.list();
+			}
+		});
+	}
+
+	public List find(final String queryString, final String paramName, final Object value, final Type type)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				applyNamedParameterToQuery(queryObject, paramName, value, type);
+				return queryObject.list();
+			}
+		});
+	}
+
+	public List find(final String queryString, final String[] paramNames, final Object[] values)
+			throws DataAccessException {
+		if (paramNames.length != values.length) {
+			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
+		}
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				for (int i = 0; i < values.length; i++) {
+					applyNamedParameterToQuery(queryObject, paramNames[i], values[i], null);
+				}
+				return queryObject.list();
+			}
+		});
+	}
+
+	public List find(final String queryString, final String[] paramNames, final Object[] values,
+									 final Type[] types) throws DataAccessException {
+		if (paramNames.length != values.length) {
+			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
+		}
+		if (paramNames.length != types.length) {
+			throw new IllegalArgumentException("Length of paramNames array must match length of types array");
+		}
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				for (int i = 0; i < values.length; i++) {
+					applyNamedParameterToQuery(queryObject, paramNames[i], values[i], types[i]);
+				}
+				return queryObject.list();
+			}
+		});
+	}
+
 	public List findByValueBean(final String queryString, final Object valueBean)
 			throws DataAccessException {
 		return executeFind(new HibernateCallback() {
@@ -529,7 +586,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return executeFind(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
-				queryObject.setParameter(paramName, value);
+				applyNamedParameterToQuery(queryObject, paramName, value, null);
 				return queryObject.list();
 			}
 		});
@@ -540,7 +597,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return executeFind(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
-				queryObject.setParameter(paramName, value, type);
+				applyNamedParameterToQuery(queryObject, paramName, value, type);
 				return queryObject.list();
 			}
 		});
@@ -555,7 +612,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				for (int i = 0; i < values.length; i++) {
-					queryObject.setParameter(paramNames[i], values[i]);
+					applyNamedParameterToQuery(queryObject, paramNames[i], values[i], null);
 				}
 				return queryObject.list();
 			}
@@ -574,7 +631,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				for (int i = 0; i < values.length; i++) {
-					queryObject.setParameter(paramNames[i], values[i], types[i]);
+					applyNamedParameterToQuery(queryObject, paramNames[i], values[i], types[i]);
 				}
 				return queryObject.list();
 			}
@@ -724,6 +781,42 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return criteria;
 	}
 
+
+	/**
+	 * Apply the given name parameter to the given Query object.
+	 * @param queryObject the Query object
+	 * @param paramName the name of the parameter
+	 * @param value the value of the parameter
+	 * @param type Hibernate type of the parameter (or null if none specified)
+	 * @throws HibernateException if thrown by the Query object
+	 */
+	protected void applyNamedParameterToQuery(Query queryObject, String paramName, Object value, Type type)
+			throws HibernateException {
+		if (value instanceof Collection) {
+			if (type != null) {
+				queryObject.setParameterList(paramName, (Collection) value, type);
+			}
+			else {
+				queryObject.setParameterList(paramName, (Collection) value);
+			}
+		}
+		else if (value instanceof Object[]) {
+			if (type != null) {
+				queryObject.setParameterList(paramName, (Object[]) value, type);
+			}
+			else {
+				queryObject.setParameterList(paramName, (Object[]) value);
+			}
+		}
+		else {
+			if (type != null) {
+				queryObject.setParameter(paramName, value, type);
+			}
+			else {
+				queryObject.setParameter(paramName, value);
+			}
+		}
+	}
 
 	/**
 	 * Check whether write operations are allowed on the given Session.
