@@ -89,7 +89,7 @@ public class ContextLoader {
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected WebApplicationContext createWebApplicationContext(ServletContext servletContext,
-																															ApplicationContext parent) throws BeansException {
+																ApplicationContext parent) throws BeansException {
 		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		Class contextClass = DEFAULT_CONTEXT_CLASS;
 		if (contextClassName != null) {
