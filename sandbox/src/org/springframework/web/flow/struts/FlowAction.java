@@ -57,21 +57,15 @@ import org.springframework.web.util.WebUtils;
  * and request dispatching.
  * <p>
  * Below is an example <code>struts-config.xml</code> configuration for a
- * Flow-action that fronts a single top-level flow:
+ * FlowAction that fronts a single top-level flow:
  * 
  * <pre>
- * 
- *  
- *   
- *                 &lt;action path=&quot;/userRegistration&quot;
- *                     type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
- *                     name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
- *                     className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
- *                         &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
- *                 &lt;/action&gt;
- *    
- *   
- *  
+ * &lt;action path=&quot;/userRegistration&quot;
+ * 	type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
+ * 	name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
+ * 	className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
+ * 	&lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
+ * &lt;/action&gt;
  * </pre>
  * 
  * This example associates the logical request URL
@@ -88,41 +82,46 @@ import org.springframework.web.util.WebUtils;
  * <li>Logical view names returned when <code>ViewStates</code> and
  * <code>EndStates</code> are entered are mapped to physical view templates
  * using standard Struts action forwards (typically global forwards).
- * <li>Use of the BindingActionForm requires some minor setup in
+ * <li>Use of the <code>BindingActionForm</code> requires some minor setup in
  * <code>struts-config.xml</code>. Specifically:
  * <ol>
  * <li>A custom BindingActionForm-aware request processor is needed, to defer
- * form population:<br>
+ * form population:
  * 
- * <tt>
+ * <pre>
  * &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
- * </tt>
+ * </pre>
  * 
- * <li>A <code>BindingPlugin</code> is needed, to plugin a Errors-aware
- * <code>jakarta-commons-beanutils</code> adapter:<br>
+ * <li>A <code>BindingPlugin</code> is needed, to plugin an Errors-aware
+ * <code>jakarta-commons-beanutils</code> adapter:
  * 
- * <tt>
+ * <pre>
  * &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
- * </tt>
+ * </pre>
  * 
  * </ol>
  * </ul>
- * The benefits here are substantial--developers now have a powerful webflow
+ * The benefits here are substantial: developers now have a powerful web flow
  * capability integrated with Struts, with a consistent-approach to POJO-based
  * binding and validation that addresses the proliferation of
  * <code>ActionForm</code> classes found in traditional Struts-based apps.
- * @author Keith Donald
- * @author Erwin Vervaet
+ * 
+ * @see org.springframework.web.flow.struts.FlowActionMapping
  * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
  * @see org.springframework.web.struts.BindingActionForm
+ * @see org.springframework.web.struts.BindingRequestProcessor
+ * @see org.springframework.web.struts.BindingPlugin
+ * 
+ * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class FlowAction extends TemplateAction {
 
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
-		HttpServletFlowExecutionManager flowExecutionManager = new HttpServletFlowExecutionManager(getFlowId(mapping),
-				locator);
+		HttpServletFlowExecutionManager flowExecutionManager =
+			new HttpServletFlowExecutionManager(getFlowId(mapping), locator);
 		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
 		ViewDescriptor viewDescriptor = flowExecutionManager.handleRequest(request, response, actionFormAdapter);
 		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
@@ -138,10 +137,10 @@ public class FlowAction extends TemplateAction {
 	}
 
 	/**
-	 * Creates a flow execution listener that takes a spring Errors instance
+	 * Creates a flow execution listener that takes a Spring Errors instance
 	 * supporting POJO-based data binding in request scope under a well-defined
 	 * name and adapts it to the Struts Action form model.
-	 * @param request The request
+	 * @param request the request
 	 * @param form the action form
 	 * @return the adapter
 	 */
@@ -151,8 +150,9 @@ public class FlowAction extends TemplateAction {
 				if (context.isFlowExecutionActive()) {
 					if (form instanceof BindingActionForm) {
 						BindingActionForm bindingForm = (BindingActionForm)form;
-						bindingForm.setErrors((Errors)context.getRequestScope().getAttribute(
-								FormObjectAccessor.FORM_OBJECT_ATTRIBUTE_NAME, Errors.class));
+						bindingForm.setErrors(
+								(Errors)context.getRequestScope().getAttribute(
+										FormObjectAccessor.FORM_OBJECT_ATTRIBUTE_NAME, Errors.class));
 						bindingForm.setRequest(request);
 					}
 				}
@@ -176,7 +176,7 @@ public class FlowAction extends TemplateAction {
 		}
 		else {
 			if (logger.isInfoEnabled()) {
-				logger.info("No model and view; returning a [null] forward");
+				logger.info("No view descriptor; returning a [null] forward");
 			}
 			return null;
 		}
