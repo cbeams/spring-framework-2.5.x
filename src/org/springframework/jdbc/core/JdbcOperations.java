@@ -191,13 +191,14 @@ public interface JdbcOperations {
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
 	 * a static query with a PreparedStatement, use the overloaded queryForList
 	 * method with null as argument array.
-	 * <p>This method is useful for running static SQL with a known outcome.
-	 * The results will be mapped to an ArrayList (one entry for each row) of
+	 * <p>The results will be mapped to an ArrayList (one entry for each row) of
 	 * HashMaps (one entry for each column using the column name as the key).
 	 * @param sql SQL query to execute
 	 * @return an ArrayList that contains a HashMap per row
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForList(String, Object[])
+	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
+	 * (allowing for different column name case, typed access, etc)
+	 * @see #queryForRowSet(String)
 	 */
 	List queryForList(String sql) throws DataAccessException;
 
@@ -315,7 +316,7 @@ public interface JdbcOperations {
 	 * sub-interface that provides a result List).
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rse object that will extract results
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
@@ -380,7 +381,7 @@ public interface JdbcOperations {
 	 * sub-interface that provides a result List).
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
@@ -438,7 +439,7 @@ public interface JdbcOperations {
 	 * via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rowMapper object that will map one object per row
 	 * @return the result List of mapped objects
 	 * @throws DataAccessException if the query fails
@@ -452,7 +453,7 @@ public interface JdbcOperations {
 	 * object via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @param rowMapper object that will map one object per row
@@ -470,7 +471,7 @@ public interface JdbcOperations {
 	 * object via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rowMapper object that will map one object per row
 	 * @return the single mapped object
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
@@ -507,7 +508,7 @@ public interface JdbcOperations {
 	 * result will be directly mapped to the corresponding object type.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or null in case of SQL NULL
 	 * @throws DataAccessException if the query fails
@@ -541,7 +542,7 @@ public interface JdbcOperations {
 	 * in a long value.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return the long value, or 0 in case of SQL NULL
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForLong(String)
@@ -573,7 +574,7 @@ public interface JdbcOperations {
 	 * in an int value.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return the int value, or 0 in case of SQL NULL
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForInt(String)
@@ -583,33 +584,34 @@ public interface JdbcOperations {
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
 	 * list of arguments to bind to the query, expecting a result list.
-	 * <p>This method is useful for running static SQL with a known outcome.
-	 * The results will be mapped to an ArrayList (one entry for each row) of
+	 * <p>The results will be mapped to an ArrayList (one entry for each row) of
 	 * HashMaps (one entry for each column using the column name as the key).
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @return an ArrayList that contains a HashMap per row
 	 * @throws DataAccessException if the query fails
-	 * @see #queryForList(String)
-	 * @see java.sql.Types
+	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
+	 * (allowing for different column name case, typed access, etc)
+	 * @see #queryForRowSet(String, Object[], int[])
 	 */
 	List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
 	 * list of arguments to bind to the query, expecting a result list.
-	 * <p>This method is useful for running static SQL with a known outcome.
-	 * The results will be mapped to an ArrayList (one entry for each row) of
+	 * <p>The results will be mapped to an ArrayList (one entry for each row) of
 	 * HashMaps (one entry for each column using the column name as the key).
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return an ArrayList that contains a HashMap per row
 	 * @throws DataAccessException if the query fails
-	 * @see #queryForList(String)
+	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
+	 * (allowing for different column name case, typed access, etc)
+	 * @see #queryForRowSet(String, Object[])
 	 */
 	List queryForList(String sql, Object[] args) throws DataAccessException;
 
@@ -638,7 +640,7 @@ public interface JdbcOperations {
 	 * disconnection fashion. This wrapper will translate any SQLExceptions thrown.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return an SqlRowSet that wraps a javax.sql.RowSet
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForRowSet(String)
@@ -695,7 +697,7 @@ public interface JdbcOperations {
 	 * Issue an update via a prepared statement, binding the given arguments.
 	 * @param sql SQL, containing bind parameters
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
