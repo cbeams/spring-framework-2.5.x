@@ -20,8 +20,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.rules.Algorithms;
 import org.springframework.rules.RulesSource;
@@ -32,13 +30,8 @@ import org.springframework.util.Assert;
 /**
  * @author Keith Donald
  */
-public class CompoundFormModel implements FormModel, NestingFormModel {
-    private static final Log logger = LogFactory
-            .getLog(CompoundFormModel.class);
-
-    private MutablePropertyAccessStrategy domainObjectAccessStrategy;
-
-    private boolean bufferChanges;
+public class CompoundFormModel extends AbstractFormModel implements FormModel,
+        NestingFormModel {
 
     private Map formModels = new LinkedHashMap(9);
 
@@ -60,21 +53,17 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     public CompoundFormModel(
             MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
-        this.domainObjectAccessStrategy = domainObjectAccessStrategy;
-        this.bufferChanges = bufferChanges;
+        super(domainObjectAccessStrategy);
+        setBufferChangesDefault(bufferChanges);
     }
 
     public void setRulesSource(RulesSource rulesSource) {
         this.rulesSource = rulesSource;
     }
 
-    public void setBufferChangesDefault(boolean bufferChanges) {
-        this.bufferChanges = bufferChanges;
-    }
-
     public MutableFormModel createChild(String childFormModelName) {
         ValidatingFormModel childModel = new ValidatingFormModel(
-                domainObjectAccessStrategy, bufferChanges);
+                getAccessStrategy(), getBufferChangesDefault());
         childModel.setRulesSource(rulesSource);
         addChildModel(childFormModelName, childModel);
         return childModel;
@@ -83,12 +72,12 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     public MutableFormModel createChild(String childFormModelName,
             String parentPropertyFormObjectPath) {
         ValueModel valueHolder = new PropertyAdapter(
-                domainObjectAccessStrategy, parentPropertyFormObjectPath);
-        if (bufferChanges) {
+                getPropertyAccessStrategy(), parentPropertyFormObjectPath);
+        if (getBufferChangesDefault()) {
             valueHolder = new BufferedValueModel(valueHolder);
         }
         boolean enabledDefault = valueHolder.get() != null;
-        Class valueClass = domainObjectAccessStrategy
+        Class valueClass = getPropertyAccessStrategy()
                 .getMetadataAccessStrategy().getPropertyType(
                         parentPropertyFormObjectPath);
         new ChildFormObjectSetter(valueHolder, valueClass);
@@ -127,12 +116,12 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public MutableFormModel createChild(String childFormModelName,
             ValueModel childFormObjectHolder, boolean enabled) {
-        MutablePropertyAccessStrategy childObjectAccessStrategy = domainObjectAccessStrategy
+        MutablePropertyAccessStrategy childObjectAccessStrategy = getPropertyAccessStrategy()
                 .newNestedAccessor(childFormObjectHolder);
         ValidatingFormModel childModel = new ValidatingFormModel(
                 childObjectAccessStrategy);
         childModel.setEnabled(enabled);
-        childModel.setBufferChangesDefault(bufferChanges);
+        childModel.setBufferChangesDefault(getBufferChangesDefault());
         childModel.setRulesSource(rulesSource);
         addChildModel(childFormModelName, childModel);
         return childModel;
@@ -160,14 +149,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                         ((FormModel)formModel).addValidationListener(listener);
                     }
                 });
-    }
-
-    public void addCommitListener(CommitListener listener) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void removeCommitListener(CommitListener listener) {
-        throw new UnsupportedOperationException();
     }
 
     public void addValidationListener(ValidationListener listener,
@@ -200,41 +181,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 });
     }
 
-    public void addValueListener(String formProperty,
-            ValueListener valueListener) {
-        ValueModel valueModel = getValueModel(formProperty);
-        assertValueModelNotNull(valueModel, formProperty);
-        valueModel.addValueListener(valueListener);
-    }
-
-    public void removeValueListener(String formProperty,
-            ValueListener valueListener) {
-        ValueModel valueModel = getValueModel(formProperty);
-        assertValueModelNotNull(valueModel, formProperty);
-        valueModel.removeValueListener(valueListener);
-    }
-
-    private void assertValueModelNotNull(ValueModel valueModel,
-            String formProperty) {
-        Assert
-                .isTrue(
-                        valueModel != null,
-                        "The property '"
-                                + formProperty
-                                + "' has not been added to this form model (or to any parents.)");
-    }
-
-    public String getDisplayValue(String formProperty) {
-        // todo
-        return "";
-    }
-
-    public Object getValue(String formProperty) {
-        ValueModel valueModel = getValueModel(formProperty);
-        assertValueModelNotNull(valueModel, formProperty);
-        return valueModel.get();
-    }
-
     public ValueModel getDisplayValueModel(String formProperty) {
         // todo
         return null;
@@ -263,12 +209,13 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         return null;
     }
 
-    public Object getFormObject() {
-        return domainObjectAccessStrategy.getDomainObject();
-    }
-
-    public ValueModel getFormObjectHolder() {
-        return domainObjectAccessStrategy.getDomainObjectHolder();
+    protected void handleEnabledChange() {
+        Algorithms.instance().forEachIn(formModels.values(),
+                new UnaryProcedure() {
+                    public void run(Object formModel) {
+                        ((FormModel)formModel).setEnabled(isEnabled());
+                    }
+                });
     }
 
     public boolean getHasErrors() {
@@ -300,18 +247,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 });
     }
 
-    public boolean isEnabled() {
-        return true;
-    }
-
-    public void setEnabled(boolean enabled) {
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean getBufferChangesDefault() {
-        return bufferChanges;
-    }
-
     public boolean hasErrors(String childModelName) {
         FormModel model = getChildFormModel(childModelName);
         Assert.notNull(model, "No child model by name " + childModelName
@@ -320,12 +255,15 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     }
 
     public void commit() {
-        Algorithms.instance().forEachIn(formModels.values(),
-                new UnaryProcedure() {
-                    public void run(Object formModel) {
-                        ((FormModel)formModel).commit();
-                    }
-                });
+        if (preEditCommit()) {
+            Algorithms.instance().forEachIn(formModels.values(),
+                    new UnaryProcedure() {
+                        public void run(Object formModel) {
+                            ((FormModel)formModel).commit();
+                        }
+                    });
+            postEditCommit();
+        }
     }
 
     public void revert() {
@@ -336,5 +274,4 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                     }
                 });
     }
-
 }
