@@ -21,10 +21,10 @@ import org.springframework.binding.AttributeAccessor;
 import org.springframework.util.ToStringCreator;
 
 /**
- * Signals the occurence of something that happens relavent to the web.flow
- * system. Each event has a string id. An event may contain information about
- * the state in which it occured. Events may have parameters. Events are
- * immutable.
+ * Signals the occurence of a <i>request</i> that is relevant to the web flow
+ * system. Each event has a string id. An event may optionally contain
+ * information about the state in which it occured. Events may have
+ * parameters. Events are immutable.
  * <p>
  * For example, a "submit" event might signal that a Submit button was pressed
  * in a web browser. A "success" event might signal an action executed
@@ -34,7 +34,9 @@ import org.springframework.util.ToStringCreator;
  * event does not define a generic contract or role, it is expected that
  * specializations of this base class be "Events" and not part of some other
  * inheritence hierarchy.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public abstract class Event implements AttributeAccessor {
 
@@ -45,31 +47,39 @@ public abstract class Event implements AttributeAccessor {
 	public abstract String getId();
 
 	/**
-	 * The time in which the event occured
+	 * Returns the time at which the event occured.
 	 * @return the timestamp
 	 */
 	public abstract long getTimestamp();
 
 	/**
 	 * Returns the state in which this event occured (optional).
-	 * @return The state id
+	 * @return the state id, or <code>null</code> if not specified
 	 */
 	public abstract String getStateId();
 
 	/**
-	 * Returns a unmodifiable parameter map storing parameters associated with
+	 * Returns an unmodifiable parameter map storing parameters associated with
 	 * this event.
-	 * @return The events parameters
+	 * @return the parameters of the event
 	 */
 	public abstract Map getParameters();
 
 	/**
 	 * Returns a parameter value given a parameter name, or <code>null</code>
 	 * if no parameter was found.
-	 * @param parameterName
-	 * @return
+	 * @param parameterName the name of the parameter
+	 * @return the parameter value, or <code>null</code> if the parameter is
+	 *         not present in the request
 	 */
 	public abstract Object getParameter(String parameterName);
+	
+	/**
+	 * Returns the underlying client <i>request</i> that triggered this event.
+	 */
+	public abstract Object getRequestEvent();
+	
+	// implementing AttributeAccessor
 
 	public boolean containsAttribute(String attributeName) {
 		return getParameters().containsKey(attributeName);

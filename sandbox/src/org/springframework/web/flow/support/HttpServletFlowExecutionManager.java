@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecution;
@@ -38,14 +39,15 @@ import org.springframework.web.util.WebUtils;
  * execution. This class provides numerous methods that can be extended in
  * subclasses to fine-tune the execution algorithm.
  * <p>
- * The <code>handleRequest()</code> method implements the following algorithm:
+ * The {@link #handleRequest(HttpServletRequest, HttpServletResponse, FlowExecutionListener) handleRequest}
+ * method implements the following algorithm:
  * <ol>
  * <li>Look for a flow execution id in the request (in a parameter named
  * "_flowExecutionId").</li>
  * <li>If a flow execution id is not found, a new flow execution will be
  * created. The top-level flow for which the execution is created is determined
  * by first looking for a flow id specified in the request using the "_flowId"
- * request parameter. If this parameter is set, the specified flow will be used,
+ * request parameter. If this parameter is present, the specified flow will be used,
  * after lookup using a flow locator. If no "_flowId" parameter is present, the
  * default top-level flow configured for this manager is used.</li>
  * <li>If a flow execution id is found, the corresponding flow execution is
@@ -56,6 +58,7 @@ import org.springframework.web.util.WebUtils;
  * ("_currentStateId") and event id ("_eventId") parameter values will be
  * obtained from the request and will be signaled in the flow execution.</li>
  * </ol>
+ * 
  * @author Erwin Vervaet
  * @author Keith Donald
  */
@@ -131,8 +134,8 @@ public class HttpServletFlowExecutionManager {
 	}
 
 	/**
-	 * Returns the flow locator to use for lookup of possible other flows
-	 * specified using the "_flowId" request parameter
+	 * Returns the flow locator to use for lookup of flows specified using
+	 * the "_flowId" request parameter
 	 */
 	protected FlowLocator getFlowLocator() {
 		return flowLocator;
@@ -144,24 +147,35 @@ public class HttpServletFlowExecutionManager {
 	 * The main entry point into managed HTTP-based flow executions.
 	 * @param request the current HTTP request
 	 * @param response the current HTTP response
-	 * @return the model and view to render
+	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
 	 */
 	public ViewDescriptor handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		return handleRequest(request, response, null);
 	}
 
+	/**
+	 * The main entry point into managed HTTP-based flow executions.
+	 * @param request the current HTTP request
+	 * @param response the current HTTP response
+	 * @param executionListener a listener interested in flow execution lifecycle
+	 *        events that happen <i>while handling this request</i>
+	 * @return the view descriptor of the model and view to render
+	 * @throws Exception in case of errors
+	 */
 	public ViewDescriptor handleRequest(HttpServletRequest request, HttpServletResponse response,
 			FlowExecutionListener executionListener) throws Exception {
 		FlowExecution flowExecution;
-		ViewDescriptor modelAndView;
+		ViewDescriptor viewDesc;
 		if (isNewFlowExecutionRequest(request)) {
 			// start a new flow execution
 			flowExecution = createFlowExecution(getFlow(request));
+			
 			if (executionListener != null) {
 				flowExecution.getListenerList().add(executionListener);
 			}
-			modelAndView = flowExecution.start(new HttpServletRequestEvent(request));
+			
+			viewDesc = flowExecution.start(createEvent(request));
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -169,8 +183,7 @@ public class HttpServletFlowExecutionManager {
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(request);
 
-			// rehydrate the execution if neccessary (if it had been serialized
-			// out)
+			// rehydrate the execution if neccessary (if it had been serialized out)
 			flowExecution.rehydrate(getFlowLocator(), flowExecutionListeners);
 
 			if (executionListener != null) {
@@ -178,21 +191,25 @@ public class HttpServletFlowExecutionManager {
 			}
 
 			// signal the event within the current state
-			modelAndView = flowExecution.signalEvent(new HttpServletRequestEvent(request));
+			viewDesc = flowExecution.signalEvent(createEvent(request));
 		}
 		if (!flowExecution.isActive()) {
 			// event execution resulted in the entire flow ending, cleanup
 			removeFromHttpSession(flowExecution, request);
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Returning selected model and view " + modelAndView);
-		}
+
 		if (executionListener != null) {
 			flowExecution.getListenerList().remove(executionListener);
 		}
-		return modelAndView;
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Returning selected view descriptor " + viewDesc);
+		}
+		return viewDesc;
 	}
 
+	// subclassing hooks
+	
 	/**
 	 * Obtain a flow to use from given request. If there is a flow id parameter
 	 * specified in the request, the flow with that id will be returend after
@@ -211,11 +228,18 @@ public class HttpServletFlowExecutionManager {
 			return this.flowLocator.getFlow(flowId);
 		}
 	}
+	
+	/**
+	 * Create a flow event wrapping given request.
+	 */
+	protected Event createEvent(HttpServletRequest request) {
+		return new HttpServletRequestEvent(request);
+	}
 
 	/**
 	 * Create a new flow execution for given flow.
-	 * @param flow The flow
-	 * @return The created flow execution
+	 * @param flow the flow
+	 * @return the created flow execution
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = flow.createExecution();
@@ -232,8 +256,6 @@ public class HttpServletFlowExecutionManager {
 	protected boolean isNewFlowExecutionRequest(HttpServletRequest request) {
 		return request.getParameter(getFlowExecutionIdParameterName()) == null;
 	}
-
-	// subclassing hooks
 
 	/**
 	 * Returns the name of the flow id parameter in the request ("_flowId").

@@ -23,11 +23,13 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * A implementation of the <code>Event</code> base class for signaling events
+ * An implementation of the <code>Event</code> base class for signaling events
  * from an internal, local source within a flow artifact such as an
  * <code>Action</code> or <code>State</code> definition. This is the
  * simplest <code>Event</code> implementation.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class LocalEvent extends Event {
 
@@ -37,17 +39,17 @@ public class LocalEvent extends Event {
 	private String id;
 
 	/**
-	 * The event timestamp
+	 * The event timestamp.
 	 */
 	private long timestamp = new Date().getTime();
 
 	/**
-	 * The state in which this event was signaled (optional)
+	 * The state in which this event was signaled (optional).
 	 */
 	private String stateId;
 
 	/**
-	 * Event parameters (optional)
+	 * Event parameters (optional).
 	 */
 	private Map parameters;
 
@@ -71,7 +73,7 @@ public class LocalEvent extends Event {
 	}
 
 	/**
-	 * Create a local event with the specified <code>id</code> with the
+	 * Create a local event with the specified <code>id</code> and the
 	 * provided contextual parameters.
 	 * @param id the event identifier
 	 * @param parameters the event parameters
@@ -83,7 +85,8 @@ public class LocalEvent extends Event {
 
 	/**
 	 * Create a local event with the specified <code>id</code> occuring in the
-	 * state with the specified <code>stateId</code>.
+	 * state with the specified <code>stateId</code> and the provided
+	 * contextual parameters.
 	 * @param id the event identifier
 	 * @param stateId the state in which this event occured
 	 * @param parameters contextual parameters
@@ -94,11 +97,17 @@ public class LocalEvent extends Event {
 		setParameters(parameters);
 	}
 
+	/**
+	 * Set the event identifier.
+	 */
 	private void setId(String id) {
 		Assert.hasText(id, "The event id is required");
 		this.id = id;
 	}
 
+	/**
+	 * Set the contextual parameters.
+	 */
 	private void setParameters(Map parameters) {
 		if (parameters != null) {
 			this.parameters = new HashMap(parameters);
@@ -133,5 +142,9 @@ public class LocalEvent extends Event {
 		else {
 			return null;
 		}
+	}
+	
+	public Object getRequestEvent() {
+		return null; //this is an internal event!
 	}
 }

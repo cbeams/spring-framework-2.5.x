@@ -460,6 +460,10 @@ public class ActionState extends TransitionableState {
 			public String getStateId() {
 				return event.getStateId();
 			}
+
+			public Object getRequestEvent() {
+				return event.getRequestEvent();
+			}
 		}
 
 		public String toString() {

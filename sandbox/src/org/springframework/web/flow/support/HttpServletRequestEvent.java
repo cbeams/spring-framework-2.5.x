@@ -24,10 +24,13 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowConstants;
 
 /**
- * An event that orginated from an incoming http servlet request.
+ * A flow event that orginated from an incoming HTTP servlet request.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class HttpServletRequestEvent extends Event {
 
@@ -42,30 +45,20 @@ public class HttpServletRequestEvent extends Event {
 	private HttpServletRequest request;
 
 	/**
-	 * Construct a event for the specified servlet request.
-	 * @param request the request
+	 * Construct a flow event for the specified servlet request.
+	 * @param request the HTTP servlet request
 	 */
 	public HttpServletRequestEvent(HttpServletRequest request) {
 		Assert.notNull(request);
 		this.request = request;
 	}
 
-	/**
-	 * Return the underlying http servlet request.
-	 * @return the request.
-	 */
-	public HttpServletRequest getRequest() {
-		return request;
-	}
-
 	public String getId() {
 		try {
-			return RequestUtils.getRequiredStringParameter(request, "_eventId");
+			return RequestUtils.getRequiredStringParameter(request, getEventIdParameterName());
 		}
 		catch (ServletRequestBindingException e) {
-			IllegalArgumentException iae = new IllegalArgumentException("The event id is not present in the request");
-			iae.initCause(e);
-			throw iae;
+			throw new IllegalArgumentException("The event id is not present in the request: " + e.getMessage());
 		}
 	}
 
@@ -74,7 +67,7 @@ public class HttpServletRequestEvent extends Event {
 	}
 
 	public String getStateId() {
-		return request.getParameter("_currentStateId");
+		return request.getParameter(getCurrentStateIdParameterName());
 	}
 
 	public Object getParameter(String parameterName) {
@@ -84,4 +77,26 @@ public class HttpServletRequestEvent extends Event {
 	public Map getParameters() {
 		return request.getParameterMap();
 	}
+	
+	public Object getRequestEvent() {
+		return request;
+	}
+	
+	// subclassing hooks
+	
+	/**
+	 * Returns the name of the event id parameter in the request ("_eventId").
+	 */
+	protected String getEventIdParameterName() {
+		return FlowConstants.EVENT_ID_PARAMETER;
+	}
+	
+	/**
+	 * Returns the name of the current state id parameter in the request
+	 * ("_currentStateId").
+	 */
+	protected String getCurrentStateIdParameterName() {
+		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
+	}
+
 }

@@ -28,13 +28,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.flow.FlowExecutionMBean;
+import org.springframework.web.flow.FlowExecution;
 
 /**
  * Servlet 2.3 filter that cleans up expired web flow executions in the HTTP
  * session associated with the request being filtered. A flow execution has
  * expired when it has not handled any requests for more than a specified
  * timeout period.
+ * 
  * <p>
  * This filter can be configured in the <tt>web.xml</tt> deployment descriptor
  * of your web application. Here's an example:
@@ -67,12 +68,14 @@ import org.springframework.web.flow.FlowExecutionMBean;
  * <tr>
  * <td>timeout</td>
  * <td>10</td>
- * <td>Specifies the flow execution timeout in <b>minutes </b>. If the flow
- * execution is inactive for more that this period of time it will expire and be
+ * <td>Specifies the flow execution timeout in <b>minutes</b>. If the flow
+ * execution is inactive for more than this period of time it will expire and be
  * removed from the HTTP session.</td>
  * </tr>
- * </table> These parameters can be configured using <tt>init-param</tt>
+ * </table>
+ * These parameters can be configured using <tt>init-param</tt>
  * values in the deployment descriptor.
+ * 
  * @author Erwin Vervaet
  */
 public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
@@ -124,8 +127,8 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 		while (names.hasMoreElements()) {
 			String name = (String)names.nextElement();
 			Object value = session.getAttribute(name);
-			if (value instanceof FlowExecutionMBean) {
-				FlowExecutionMBean flowExecution = (FlowExecutionMBean)value;
+			if (value instanceof FlowExecution) {
+				FlowExecution flowExecution = (FlowExecution)value;
 				if (hasExpired(request, flowExecution)) {
 					namesToBeDeleted.add(name);
 					if (logger.isInfoEnabled()) {
@@ -151,7 +154,7 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 	 * @param flowExecution the web flow execution that needs to be checked for
 	 *        expiry
 	 */
-	protected boolean hasExpired(HttpServletRequest request, FlowExecutionMBean flowExecution) {
+	protected boolean hasExpired(HttpServletRequest request, FlowExecution flowExecution) {
 		return (System.currentTimeMillis() - flowExecution.getLastEventTimestamp()) > (getTimeout() * 60000);
 	}
 }
