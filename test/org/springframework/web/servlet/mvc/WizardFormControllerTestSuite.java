@@ -89,6 +89,9 @@ public class WizardFormControllerTestSuite extends TestCase {
 		params.clear();
 		params.setProperty(AbstractWizardFormController.PARAM_FINISH, "value");
 		performRequest(wizard, session, params, -1, "myname", 32, null);
+
+		assertTrue(session.getAttribute(wizard.getFormSessionAttributeName()) == null);
+		assertTrue(session.getAttribute(wizard.getPageSessionAttributeName()) == null);
 	}
 
 	public void testDirtyBack() throws Exception {
@@ -165,6 +168,9 @@ public class WizardFormControllerTestSuite extends TestCase {
 		Properties params = new Properties();
 		params.setProperty(AbstractWizardFormController.PARAM_CANCEL, "value");
 		performRequest(wizard, session, params, -2, null, 0, null);
+
+		assertTrue(session.getAttribute(wizard.getFormSessionAttributeName()) == null);
+		assertTrue(session.getAttribute(wizard.getPageSessionAttributeName()) == null);
 
 		session = performRequest(wizard, null, null, 0, null, 0, null);
 		params = new Properties();
@@ -243,7 +249,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 	}
 
 
-	private static class TestWizardController extends AbstractWizardFormController {
+	private class TestWizardController extends AbstractWizardFormController {
 
 		public TestWizardController(Class commandClass, String beanName) {
 			setCommandClass(commandClass);
@@ -271,12 +277,14 @@ public class WizardFormControllerTestSuite extends TestCase {
 		protected ModelAndView processFinish(HttpServletRequest request, HttpServletResponse response,
 		                                     Object command, BindException errors)
 		    throws ServletException, IOException {
+			assertTrue(getCurrentPage(request) == 0 || getCurrentPage(request) == 1);
 			return new ModelAndView("success", getCommandName(), command);
 		}
 
 		protected ModelAndView processCancel(HttpServletRequest request, HttpServletResponse response,
 		                                    Object command, BindException errors)
 		    throws ServletException, IOException {
+			assertTrue(getCurrentPage(request) == 0 || getCurrentPage(request) == 1);
 			return new ModelAndView("abort", getCommandName(), command);
 		}
 	}
