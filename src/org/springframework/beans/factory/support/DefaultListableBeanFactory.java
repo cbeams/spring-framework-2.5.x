@@ -34,6 +34,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.CollectionFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -302,43 +303,46 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of BeanDefinitionRegistry interface
 	//---------------------------------------------------------------------
 
-	public void registerBeanDefinition(String name, BeanDefinition beanDefinition)
+	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
+
+		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.notNull(beanDefinition, "Bean definition must not be null");
 
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
 				((AbstractBeanDefinition) beanDefinition).validate();
 			}
 			catch (BeanDefinitionValidationException ex) {
-				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), name,
+				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 						"Validation of bean definition with name failed", ex);
 			}
 		}
 
-		Object oldBeanDefinition = this.beanDefinitionMap.get(name);
+		Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
 		if (oldBeanDefinition != null) {
 			if (!this.allowBeanDefinitionOverriding) {
-				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), name,
-						"Cannot register bean definition [" + beanDefinition + "] for bean '" + name +
+				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
+						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
 						"': there's already [" + oldBeanDefinition + "] bound");
 			}
 			else {
 				if (logger.isInfoEnabled()) {
-					logger.info("Overriding bean definition for bean '" + name +
+					logger.info("Overriding bean definition for bean '" + beanName +
 							"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
 				}
 			}
 		}
 		else {
-			this.beanDefinitionNames.add(name);
+			this.beanDefinitionNames.add(beanName);
 		}
-		this.beanDefinitionMap.put(name, beanDefinition);
+		this.beanDefinitionMap.put(beanName, beanDefinition);
 
 		// Remove corresponding bean from singleton cache, if any.
 		// Shouldn't usually be necessary, rather just meant for overriding
 		// a context's default beans (e.g. the default StaticMessageSource
 		// in a StaticApplicationContext).
-		removeSingleton(name);
+		removeSingleton(beanName);
 	}
 
 

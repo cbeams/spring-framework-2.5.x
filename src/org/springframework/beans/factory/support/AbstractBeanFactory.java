@@ -392,6 +392,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
+		Assert.notNull(requiredType, "Required type must not be null");
 		Assert.notNull(propertyEditor, "PropertyEditor must not be null");
 		this.customEditors.put(requiredType, propertyEditor);
 	}
@@ -457,7 +458,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
-		Assert.notNull(alias, "Alias must not be null");
+		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(alias, "Alias must not be empty");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
 		}
@@ -472,6 +474,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
+		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.notNull(singletonObject, "Singleton object must not be null");
 		synchronized (this.singletonCache) {
 			Object oldObject = this.singletonCache.get(beanName);
@@ -491,6 +494,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param singletonObject the singleton object
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
+		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.notNull(singletonObject, "Singleton object must not be null");
 		this.singletonCache.put(beanName, singletonObject);
 	}
@@ -501,6 +505,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName the name of the bean
 	 */
 	protected void removeSingleton(String beanName) {
+		Assert.hasText(beanName, "Bean name must not be empty");
 		this.singletonCache.remove(beanName);
 		this.disposableBeans.remove(beanName);
 	}
@@ -522,6 +527,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public boolean containsSingleton(String beanName) {
+		Assert.hasText(beanName, "Bean name must not be empty");
 		return this.singletonCache.containsKey(beanName);
 	}
 

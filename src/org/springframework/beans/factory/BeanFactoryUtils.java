@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
+import org.springframework.util.Assert;
 
 /**
  * Convenience methods operating on bean factories, returning bean instances,
@@ -47,9 +48,7 @@ public abstract class BeanFactoryUtils {
 	 * Return the bean name, stripping out the factory dereference prefix if necessary.
 	 */
 	public static String transformedBeanName(String name) {
-		if (name == null) {
-			throw new IllegalArgumentException("Cannot get bean with null name");
-		}
+		Assert.notNull(name, "Name must not be null");
 		String beanName = name;
 		if (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
 			beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());

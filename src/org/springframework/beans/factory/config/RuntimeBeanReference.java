@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.util.Assert;
+
 /** 
  * Immutable placeholder class used for the value of a PropertyValue
  * object when it's a reference to another bean in this factory
@@ -36,8 +38,7 @@ public class RuntimeBeanReference {
 	 * @param beanName name of the target bean
 	 */
 	public RuntimeBeanReference(String beanName) {
-		this.beanName = beanName;
-		this.toParent = false;
+		this(beanName, false);
 	}
 
 	/**
@@ -49,6 +50,7 @@ public class RuntimeBeanReference {
 	 * a bean in the parent factory
 	 */
 	public RuntimeBeanReference(String beanName, boolean toParent) {
+		Assert.hasText(beanName, "Bean name must not be empty");
 		this.beanName = beanName;
 		this.toParent = toParent;
 	}
