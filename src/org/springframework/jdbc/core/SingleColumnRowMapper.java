@@ -30,9 +30,9 @@ import org.springframework.util.NumberUtils;
  * a single result value per row. Expects to work on a ResultSet
  * that just contains a single column.
  *
- * <p>The type of the result value for each row needs to be specified.
+ * <p>The type of the result value for each row can be specified.
  * The value for the single column will be extracted from the ResultSet
- * and converted into that target type.
+ * and converted into the specified target type.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -41,13 +41,29 @@ import org.springframework.util.NumberUtils;
  */
 public class SingleColumnRowMapper implements RowMapper {
 
-	private final Class requiredType;
+	private Class requiredType;
+
+	/**
+	 * Create a new SingleColumnRowMapper.
+	 * @see #setRequiredType
+	 */
+	public SingleColumnRowMapper() {
+	}
 
 	/**
 	 * Create a new SingleColumnRowMapper.
 	 * @param requiredType the type that each result object is expected to match
 	 */
 	public SingleColumnRowMapper(Class requiredType) {
+		this.requiredType = requiredType;
+	}
+
+	/**
+	 * Set the type that each result object is expected to match.
+	 * <p>If not specified, the column value will be exposed as
+	 * returned by the JDBC driver.
+	 */
+	public void setRequiredType(Class requiredType) {
 		this.requiredType = requiredType;
 	}
 
