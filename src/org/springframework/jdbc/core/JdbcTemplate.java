@@ -9,9 +9,11 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +22,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -65,7 +66,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.21 2004-02-07 00:12:39 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.22 2004-02-16 20:50:26 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -153,6 +154,86 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	//-------------------------------------------------------------------------
 	// Public methods
 	//-------------------------------------------------------------------------
+
+	/**
+	 * Execute a statement given static SQL.
+	 * Uses a JDBC Statement, not a PreparedStatement. This method is useful for 
+	 * running static sql with a known outcome.  The results will be mapped to either 
+	 * an ArrayList (one entry for each row) of HashMaps (one entry for each column using the 
+	 * column name as the key) or in the case of a single row/single column query the returned 
+	 * result will be directly mapped to the corresponding object type.  
+	 * Update statements will return an Integer containing the update count. 
+	 * @param sql SQL statement to execute
+	 * @return the results from the statement execution
+	 * @throws DataAccessException if there is any problem executing
+	 * the statement
+	 */
+	public Object runSqlStatement(String sql) throws DataAccessException {
+		Object returnValue = null;
+		if (sql == null) {
+			throw new InvalidDataAccessApiUsageException("SQL may not be null");
+		}
+		if (containsBindVariables(sql)) {
+			throw new InvalidDataAccessApiUsageException(
+				"Cannot execute [" + sql + "] as a static statement: it contains bind variables");
+		}
+		Connection con = DataSourceUtils.getConnection(getDataSource());
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing static SQL statement [" + sql + "] using a java.sql.Statement");
+			}
+			Connection conToUse = con;
+			if (this.nativeJdbcExtractor != null &&
+				this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
+			stmt = conToUse.createStatement();
+			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
+			Statement stmtToUse = stmt;
+			if (this.nativeJdbcExtractor != null) {
+				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
+			}
+			// execute and process based on whether a resultset was returned or not
+			if (stmtToUse.execute(sql)) {
+				rs = stmtToUse.executeQuery(sql);
+				ResultSet rsToUse = rs;
+				if (this.nativeJdbcExtractor != null) {
+					rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
+				}
+				ResultSetMetaData rsmd = rs.getMetaData();
+				int numberOfColumns = rsmd.getColumnCount();
+				ArrayList listOfRows = new ArrayList();
+				while (rsToUse.next()) {
+					HashMap mapOfColValues = new HashMap(numberOfColumns);
+					for (int i = 1; i <= numberOfColumns; i++) {
+						mapOfColValues.put(rsmd.getColumnName(i), rsToUse.getObject(i));
+					}
+					listOfRows.add(mapOfColValues);
+				}
+				if (listOfRows.size() == 1 && numberOfColumns == 1)
+					returnValue = ((ArrayList) listOfRows.get(0)).get(0);
+				else
+					returnValue = listOfRows;
+			}
+			else {
+				returnValue = new Integer(stmt.getUpdateCount());
+			}
+			SQLWarning warning = stmt.getWarnings();
+			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
+		}
+		catch (SQLException ex) {
+			throw getExceptionTranslator().translate("JdbcTemplate.query(sql)", sql, ex);
+		}
+		finally {
+			if (rs != null)
+				JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeStatement(stmt);
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+		}
+		return returnValue;
+	}
 
 	/**
 	 * Execute a query given static SQL.
