@@ -4,8 +4,8 @@ import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
  * SPI interface to be implemented by most if not all listable bean factories.
- * Currently just a combination of ListableBeanFactory and ConfigurableBeanFactory.
- * 
+ * In addition to ConfigurableBeanFactory, provides a way to pre-instantiate singletons.
+ *
  * <p>Allows for framework-internal plug'n'play, e.g. in AbstractApplicationContext.
  *
  * @author Juergen Hoeller
@@ -15,8 +15,8 @@ import org.springframework.beans.factory.ListableBeanFactory;
 public interface ConfigurableListableBeanFactory extends ListableBeanFactory, ConfigurableBeanFactory {
 
 	/**
-	 * Ensure that all singletons are instantiated.
-	 * To be invoked at the end of factory setup, if desired.
+	 * Ensure that all non-lazy-init singletons are instantiated, also considering
+	 * FactoryBeans. Typically invoked at the end of factory setup, if desired.
 	 */
 	void preInstantiateSingletons();
 
