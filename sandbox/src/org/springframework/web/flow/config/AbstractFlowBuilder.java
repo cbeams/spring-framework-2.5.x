@@ -15,6 +15,8 @@
  */
 package org.springframework.web.flow.config;
 
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.util.closure.Constraint;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
@@ -124,6 +126,18 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
 
+	protected AbstractFlowBuilder() {
+		super();
+	}
+	
+	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator) {
+		super(flowServiceLocator);
+	}
+	
+	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator, FlowCreator flowCreator) {
+		super(flowServiceLocator, flowCreator);
+	}
+	
 	public final void init() throws FlowBuilderException {
 		setFlow(createFlow(flowId()));
 	}
@@ -382,12 +396,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Request that the attribute mapper with the specified name prefix be used
 	 * to map attributes between a parent flow and a spawning subflow when the
 	 * subflow state being constructed is entered.
-	 * @param attributesMapperBeanNamePrefix The attribute mapper prefix
+	 * @param attributesMapperIdPrefix The attribute mapper prefix
 	 * @return The attributes mapper
 	 */
-	protected FlowAttributesMapper useAttributesMapper(String attributesMapperBeanNamePrefix)
+	protected FlowAttributesMapper useAttributesMapper(String attributesMapperIdPrefix)
 			throws NoSuchFlowAttributesMapperException {
-		return getFlowServiceLocator().getFlowAttributesMapper(attributesMapper(attributesMapperBeanNamePrefix));
+		if (!StringUtils.hasText(attributesMapperIdPrefix)) {
+			return null;
+		}
+		return getFlowServiceLocator().getFlowAttributesMapper(attributesMapper(attributesMapperIdPrefix));
 	}
 
 	/**
@@ -2173,15 +2190,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * @param attributesMapperBeanNamePrefix
+	 * @param attributesMapperIdPrefix
 	 * @return
 	 */
-	protected String attributesMapper(String attributesMapperBeanNamePrefix) {
-		if (!attributesMapperBeanNamePrefix.endsWith(ATTRIBUTES_MAPPER_ID_SUFFIX)) {
-			return attributesMapperBeanNamePrefix + DOT_SEPARATOR + ATTRIBUTES_MAPPER_ID_SUFFIX;
+	protected String attributesMapper(String attributesMapperIdPrefix) {
+		Assert.notNull(attributesMapperIdPrefix, "The attributes mapper id prefix is required");
+		if (!attributesMapperIdPrefix.endsWith(ATTRIBUTES_MAPPER_ID_SUFFIX)) {
+			return attributesMapperIdPrefix + DOT_SEPARATOR + ATTRIBUTES_MAPPER_ID_SUFFIX;
 		}
 		else {
-			return attributesMapperBeanNamePrefix;
+			return attributesMapperIdPrefix;
 		}
 	}
 
