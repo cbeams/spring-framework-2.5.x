@@ -46,15 +46,15 @@ public interface Action {
 	 * current request. Execution is typically triggered in production when an
 	 * <code>ActionState</code> is entered in an ongoing
 	 * <code>FlowExecution</code> for a specific <code>Flow</code>
-	 * definition. The result of execution is used as grounds for a
-	 * transition in the calling action state.
+	 * definition. The result of execution is used as grounds for a transition
+	 * in the calling action state.
 	 * <p>
-	 * Note: The <code>MutableAttributesAccessor</code> model argument to this
-	 * method provides access to the <b>data model </b> of the active flow
-	 * session. All attributes in the flow model are considered in "flow scope";
-	 * that is, they exist for the life of the flow session and will be cleaned
-	 * up when the flow session ends. All attributes in the flow model are
-	 * automatically exported for convenient access by the views.
+	 * Note: The <code>FlowModel</code> argument to this method provides
+	 * access to the <b>data model </b> of the active flow session. All
+	 * attributes in the flow model are considered in "flow scope"; that is,
+	 * they exist for the life of the flow session and will be cleaned up when
+	 * the flow session ends. All attributes in the flow model are automatically
+	 * exported for convenient access by the views.
 	 * <p>
 	 * Note: The flow model should not be used as a general purpose cache; but
 	 * rather as a context for data needed locally by the flows this action
