@@ -79,6 +79,8 @@ Package org.springframework.web
 * InternalResourceView performs an include if the response has already been committed (-> forward not possible anymore)
 * JstlView and TilesJstlView respect a JSTL "localizationContext" config in web.xml, checking those messages first
 * added overloaded "createVelocityContext" and "exposeHelpers" methods to VelocityView, with passed-in servlet response
+* added "toolAttributes" property to VelocityView, taking attribute name / tool class name pairs for tools to expose
+* added VelocityToolboxView subclass, supporting Velocity Tools toolboxes and special ViewTools (part of Velocity Tools)
 * factored out "doRender" and "getTemplate(name)" methods in VelocityView, for easy subclassing (multiple templates etc)
 * factored out "doRender" and "getTemplate(name, Locale)" methods in FreeMarkerView, for easy subclassing
 * changed value for "selected" attribute from "true" to "selected" in Velocity and FreeMarker macros (spring.vm/ftl)
