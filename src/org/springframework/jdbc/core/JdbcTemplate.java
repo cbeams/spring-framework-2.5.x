@@ -34,10 +34,13 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
@@ -79,8 +82,11 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.40 2004-04-30 10:39:23 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.41 2004-05-26 10:11:21 jhoeller Exp $
  * @since May 3, 2001
+ * @see ResultSetExtractor
+ * @see RowCallbackHandler
+ * @see RowMapper
  * @see org.springframework.dao
  * @see org.springframework.jdbc.datasource
  * @see org.springframework.jdbc.object
@@ -795,11 +801,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			List listOfRows = new ArrayList();
 			while (rs.next()) {
 				Map mapOfColValues = null;
-				// a LinkedHashMap will preserve column order, but is not available pre 1.4
-				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14)
+				// a LinkedHashMap will preserve column order, but is not available pre-1.4
+				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 					mapOfColValues = new HashMap(numberOfColumns);
-				else
+				}
+				else {
 					mapOfColValues = new LinkedHashMap(numberOfColumns);
+				}
 				for (int i = 1; i <= numberOfColumns; i++) {
 					mapOfColValues.put(rsmd.getColumnName(i), rs.getObject(i));
 				}
@@ -825,20 +833,21 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int nrOfColumns = rsmd.getColumnCount();
 			if (nrOfColumns != 1) {
-				throw new InvalidDataAccessApiUsageException("Expected single column, but received " + nrOfColumns + " columns");
+				throw new IncorrectResultSizeDataAccessException("Expected single column but found " + nrOfColumns,
+																												 1, nrOfColumns);
 			}
 			if (!rs.next()) {
-				throw new InvalidDataAccessApiUsageException("Expected single row, not empty ResultSet");
+				throw new IncorrectResultSizeDataAccessException("Expected single row but found none", 1, 0);
 			}
 			Object result = rs.getObject(1);
 			if (rs.next()) {
-				throw new InvalidDataAccessApiUsageException("Expected single row, not more than one");
+				throw new IncorrectResultSizeDataAccessException("Expected single row but found more than one", 1, -1);
 			}
 			if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
-				throw new InvalidDataAccessApiUsageException("Result object (db-type=\"" + rsmd.getColumnTypeName(1) +
-																										 "\" value=\"" + result + "\") is of type [" +
-																										 rsmd.getColumnClassName(1) + "] and not of required type [" +
-																										 this.requiredType.getName() + "]");
+				throw new TypeMismatchDataAccessException("Result object (db-type=\"" + rsmd.getColumnTypeName(1) +
+																									"\" value=\"" + result + "\") is of type [" +
+																									rsmd.getColumnClassName(1) + "] and not of required type [" +
+																									this.requiredType.getName() + "]");
 			}
 			return result;
 		}

@@ -19,10 +19,20 @@ package org.springframework.jdbc.core;
 import java.util.List;
 
 /**
- * Extension of RowCallbackHandler interfaces that saves the
- * accumulated results as a List.
+ * Extension of RowCallbackHandler interface that saves the accumulated results
+ * as a List.
+ *
+ * <p>Allows to make a results list available in a uniform manner. JdbcTemplate's
+ * query methods will return the results list in that case, else returning null
+ * (-> result state is solely available from RowCallbackHandler object).
+ *
+ * <p>A convenient out-of-the-box implementation of ResultReader is the
+ * RowMapperResultReader adapter which delegates row mapping to a RowMapper.
+ * Note that a RowMapper object is typically stateless and thus reusable;
+ * just the RowMapperResultReader adapter is stateful.
+ *
  * @author Rod Johnson
- * @version $Id: ResultReader.java,v 1.4 2004-03-18 02:46:08 trisberg Exp $
+ * @see RowMapperResultReader
  */
 public interface ResultReader extends RowCallbackHandler {
 	 

@@ -29,9 +29,18 @@ import java.sql.SQLException;
  * for callback handlers that actually do something, and will benefit
  * from the dimension information it provides.
  *
+ * <p>A usage example with JdbcTemplate:
+ *
+ * <pre>
+ * JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
+ * 
+ * RowCountCallbackHandler countCallback = new RowCountCallbackHandler();  // not reusable
+ * jdbcTemplate.query("select * from user", countCallback);
+ * int rowCount = countCallback.getRowCount();</pre>
+ *
  * @author Rod Johnson
  * @since May 3, 2001
- * @version $Id: RowCountCallbackHandler.java,v 1.3 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: RowCountCallbackHandler.java,v 1.4 2004-05-26 10:11:21 jhoeller Exp $
  */
 public class RowCountCallbackHandler implements RowCallbackHandler {
 

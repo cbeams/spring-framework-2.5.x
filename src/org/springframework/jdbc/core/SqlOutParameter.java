@@ -29,15 +29,11 @@ package org.springframework.jdbc.core;
  */
 public class SqlOutParameter extends SqlParameter {
 
-	private boolean resultSetSupported = false;
-
 	private RowCallbackHandler rowCallbackHandler = null;
 
 	private RowMapper rowMapper = null;
 
-	private boolean rowMapperSupported = false;
-
-	private int rowsExpected = 0;
+	private int rowsExpected = -1;
 
 	/**
 	 * Create a new OutputParameter, supplying name and SQL type
@@ -55,27 +51,25 @@ public class SqlOutParameter extends SqlParameter {
 	public SqlOutParameter(String name, int type, RowCallbackHandler rch) {
 		super(name, type);
 		this.rowCallbackHandler = rch;
-		this.resultSetSupported = true;
+	}
+
+	public SqlOutParameter(String name, int type, RowMapper rm) {
+		super(name, type);
+		this.rowMapper = rm;
 	}
 
 	public SqlOutParameter(String name, int type, RowMapper rm, int rowsExpected) {
 		super(name, type);
 		this.rowMapper = rm;
-		this.resultSetSupported = true;
 		this.rowsExpected = rowsExpected;
-		this.rowMapperSupported = true;
 	}
 
-	public SqlOutParameter(String name, int type, RowMapper rm) {
-		this(name, type, rm, 0);
-	}
-	
 	public boolean isResultSetSupported() {
-		return resultSetSupported;
+		return (this.rowCallbackHandler != null || this.rowMapper != null);
 	}
 	
 	public boolean isRowMapperSupported() {
-		return rowMapperSupported;
+		return (this.rowMapper != null);
 	}
 
 	public RowCallbackHandler getRowCallbackHandler() {
@@ -85,10 +79,12 @@ public class SqlOutParameter extends SqlParameter {
 	/**
 	 * Return new instance of the implementation of a ResultReader usable for
 	 * returned ResultSets. This implementation invokes the RowMapper's
-	 * implementation of the mapRow method.
+	 * implementation of the mapRow method, via a RowMapperResultReader adapter.
+	 * @see #isRowMapperSupported
+	 * @see RowMapperResultReader
 	 */
 	protected final ResultReader newResultReader() {
-		return new ResultReaderStoredProcImpl(rowsExpected, rowMapper);
+		return new RowMapperResultReader(this.rowMapper, this.rowsExpected);
 	}
 	
 }

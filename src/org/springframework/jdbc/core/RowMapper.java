@@ -20,11 +20,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /** 
- * An interfaces used by the StoredProcedure class for mapping returned result sets.
+ * An interface used by JdbcTemplate for mapping returned result sets.
  * Implementations of this interface perform the actual work of mapping
  * rows, but don't need to worry about exception handling. SQLExceptions
  * will be caught and handled correctly by the JdbcTemplate class.
+ *
+ * <p>Typically used either for JdbcTemplate's query methods (with
+ * RowMapperResultReader adapters) or for out parameters of stored procedures.
+ * RowMapper objects are typically stateless and thus reusable; they are
+ * ideal choices for implementing row-mapping logic in a single place.
+ *
+ * <p>Alternatively, consider subclassing MappingSqlQuery from the jdbc.object
+ * package: Instead of working with separate JdbcTemplate and RowMapper objects,
+ * you can have executable query objects (containing row-mapping logic) there.
+ *
  * @author Thomas Risberg
+ * @see JdbcTemplate
+ * @see RowMapperResultReader
+ * @see org.springframework.jdbc.object.MappingSqlQuery
  */
 public interface RowMapper {
 	

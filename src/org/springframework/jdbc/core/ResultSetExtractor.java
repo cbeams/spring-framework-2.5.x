@@ -23,19 +23,27 @@ import java.sql.SQLException;
 import org.springframework.dao.DataAccessException;
 
 /** 
- * Callback interface used by the JdbcTemplate class's doWithResultSetXXXX() methods.
- * Implementations of this interface perform the actual work of extracting results,
- * but don't need to worry about exception handling. SQLExceptions
+ * Callback interface used by JdbcTemplate's query methods.
+ * Implementations of this interface perform the actual work of extracting
+ * results, but don't need to worry about exception handling. SQLExceptions
  * will be caught and handled correctly by the JdbcTemplate class.
  *
- * <p>This interface is mainly used internally by JdbcTemplate.
- * The RowCallbackHandler is usually a simpler choice for passing to callback methods.
+ * <p>This interface is mainly used within the JDBC framework.
+ * A RowCallbackHandler is usually a simpler choice for ResultSet processing,
+ * in particular a RowMapperResultReader in combination with a RowMapper.
+ *
+ * <p>Note: In contrast to a RowCallbackHandler, a ResultSetExtractor object
+ * is typically stateless and thus reusable, as long as it doesn't keep
+ * result state within the object.
  *
  * @author Rod Johnson
  * @since April 24, 2003
- * @version $Id: ResultSetExtractor.java,v 1.4 2004-04-28 07:20:33 jhoeller Exp $
+ * @version $Id: ResultSetExtractor.java,v 1.5 2004-05-26 10:11:21 jhoeller Exp $
  * @see JdbcTemplate
  * @see RowCallbackHandler
+ * @see ResultReader
+ * @see RowMapperResultReader
+ * @see RowMapper
  */
 public interface ResultSetExtractor {
 	
