@@ -70,7 +70,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @since 18.02.2004
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
- * @version $Id: SchedulerFactoryBean.java,v 1.12 2004-07-22 09:54:01 jhoeller Exp $
+ * @version $Id: SchedulerFactoryBean.java,v 1.13 2004-08-02 16:02:12 jhoeller Exp $
  */
 public class SchedulerFactoryBean
     implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
@@ -585,6 +585,10 @@ public class SchedulerFactoryBean
 	}
 
 
+	/**
+	 * Exception to be thrown if the Quartz scheduler cannot be started
+	 * after the specified delay has passed.
+	 */
 	public static class DelayedSchedulerStartException extends NestedRuntimeException {
 
 		private DelayedSchedulerStartException(SchedulerException ex) {

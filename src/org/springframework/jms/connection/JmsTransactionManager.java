@@ -30,8 +30,32 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
+ * PlatformTransactionManager implementation for a single JMS ConnectionFactory.
+ * Binds a JMS Connection/Session pair from the specified ConnectionFactory to
+ * the thread, potentially allowing for one thread session per connection factory.
+ *
+ * <p>This local strategy is an alternative to executing JMS operations within
+ * JTA transactions. Its advantage is that it is able to work in any environment,
+ * for example a standalone application or a test suite. It is <i>not</i> able to
+ * provide XA transactions, for example to share transactions with data access.
+ *
+ * <p>JmsTemplate will auto-detect such thread-bound connection/session pairs
+ * and automatically participate in them. There is currently no support for
+ * letting plain JMS code participate in such transactions.
+ *
+ * <p>This transaction strategy will typically be used in combination with
+ * SingleConnectionFactory, which uses a single JMS connection for all JMS
+ * access to save resources, typically in a standalone application. Each
+ * transaction will then use the same JMS Connection but its own JMS Session.
+ *
+ * <p>Turns off transaction synchronization by default, as this manager might
+ * be used alongside a datastore-based Spring transaction manager like
+ * DataSourceTransactionManager, which has stronger needs for synchronization.
+ *
  * @author Juergen Hoeller
  * @since 25.07.2004
+ * @see org.springframework.jms.core.JmsTemplate
+ * @see SingleConnectionFactory
  */
 public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 
@@ -46,7 +70,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 	 * <p>Turns off transaction synchronization by default, as this manager might
 	 * be used alongside a datastore-based Spring transaction manager like
 	 * DataSourceTransactionManager, which has stronger needs for synchronization.
-	 * Only onee manager is allowed to drive synchronization at any point of time.
+	 * Only one manager is allowed to drive synchronization at any point of time.
 	 * @see #setConnectionFactory
 	 * @see #setTransactionSynchronization
 	 */

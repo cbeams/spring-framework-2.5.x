@@ -28,7 +28,7 @@ import org.springframework.core.io.ResourceLoader;
 
 /**
  * Subclass of Quartz' JobSchedulingDataProcessor that considers
- * give filenames as Spring resource locations.
+ * given filenames as Spring resource locations.
  * @author Juergen Hoeller
  * @since 07.06.2004
  * @see org.springframework.core.io.ResourceLoader
@@ -52,6 +52,9 @@ public class ResourceJobSchedulingDataProcessor extends JobSchedulingDataProcess
 	}
 
 
+	/**
+	 * Exception to be thrown if a resource cannot be loaded.
+	 */
 	public static class JobSchedulingDataInitializationException extends NestedRuntimeException {
 
 		private JobSchedulingDataInitializationException(IOException ex) {

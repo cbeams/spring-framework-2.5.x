@@ -24,6 +24,11 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * Adapter to use the ThrowawayController workflow interface with the
+ * generic DispatcherServlet. Does not support last-modified checks.
+ *
+ * <p>This is an SPI class, not used directly by application code.
+ *
  * @author Juergen Hoeller
  * @since 08.12.2003
  */

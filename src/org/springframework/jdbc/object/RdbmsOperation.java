@@ -35,14 +35,14 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
 
 /**
- * Root of the JDBC object hierarchy, as described in Chapter 9 of
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">
- * Expert One-On-One J2EE Design and Development</a> by Rod Johnson (Wrox, 2002).
- *
- * <p>An "RDBMS operation" is a multithreaded, reusable object representing
- * a query, update or stored procedure. An RDBMS operation is <b>not</b> a command,
+ * An "RDBMS operation" is a multithreaded, reusable object representing a
+ * query, update or stored procedure. An RDBMS operation is <b>not</b> a command,
  * as a command isn't reusable. However, execute methods may take commands as
  * arguments. Subclasses should be Java beans, allowing easy configuration.
+ *
+ * <p>Root of the JDBC object hierarchy, as described in Chapter 9 of
+ * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">
+ * Expert One-On-One J2EE Design and Development</a> by Rod Johnson (Wrox, 2002).
  *
  * <p>This class and subclasses throw runtime exceptions, defined in the
  * org.springframework.dao package (and as thrown by the org.springframework.jdbc.core
@@ -53,7 +53,8 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  * The appropriate execute or update method can then be invoked.
  *
  * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.14 2004-07-28 09:40:00 jhoeller Exp $
+ * @version $Id: RdbmsOperation.java,v 1.15 2004-08-02 16:01:57 jhoeller Exp $
+ * @see #compile
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
  */

@@ -22,8 +22,18 @@ import org.springframework.beans.BeansException;
 import org.springframework.web.servlet.View;
 
 /**
+ * Abstract base class for template view resolvers like
+ * VelocityViewResolver and FreeMarkerViewResolver.
+ *
+ * <p>Provides a convenient way to specify AbstractTemplateView's
+ * exposure flags for request attributes, session attributes,
+ * and Spring's macro helpers.
+ *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see AbstractTemplateView
+ * @see org.springframework.web.servlet.view.velocity.VelocityViewResolver
+ * @see org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver
  */
 public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
