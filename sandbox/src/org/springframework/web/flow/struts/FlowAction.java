@@ -185,6 +185,8 @@ public class FlowAction extends TemplateAction {
 				}
 				request.setAttribute(getFlowSessionIdAttributeName(), sessionExecution.getId());
 				request.setAttribute(getCurrentStateIdAttributeName(), sessionExecution.getCurrentStateId());
+				request.setAttribute(FlowSessionExecutionInfo.FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME,
+						sessionExecution);
 
 				// struts specific
 				String mappingFlowId = getFlowId(mapping);

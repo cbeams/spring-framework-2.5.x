@@ -41,7 +41,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 
 	private String id;
 
-	private FlowSession NO_SESSION = new FlowSession(null, null);
+	private FlowSession NO_SESSION = new FlowSession("", "");
 
 	private Stack executingFlowSessions = new Stack();
 
@@ -103,6 +103,19 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 
 	public Map getAttributes() {
 		return getActiveFlowSession().getAttributes();
+	}
+
+	public String getRootFlowId() {
+		return getRootFlowSession().getFlowId();
+	}
+
+	private FlowSession getRootFlowSession() {
+		if (!isActive()) {
+			return NO_SESSION;
+		}
+		else {
+			return (FlowSession)executingFlowSessions.get(executingFlowSessions.size() - 1);
+		}
 	}
 
 	/**

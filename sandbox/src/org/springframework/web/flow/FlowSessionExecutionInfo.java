@@ -33,14 +33,6 @@ public interface FlowSessionExecutionInfo extends AttributesAccessor, Serializab
 	public boolean isActive();
 
 	/**
-	 * Are we currently in the root flow? There can be any depth of nested
-	 * subflows below this, but sometimes the first subflow below the root may
-	 * require special treatment.
-	 * @return whether we're in the root flow
-	 */
-	public boolean isRootFlowActive();
-
-	/**
 	 * Get the id of the active flow definition.
 	 * @return
 	 */
@@ -60,6 +52,21 @@ public interface FlowSessionExecutionInfo extends AttributesAccessor, Serializab
 	 * @return
 	 */
 	public String[] getFlowIdStack();
+
+	/**
+	 * Return the id of the root level flow definition. May be the same as the
+	 * active flow id if the active flow is the root flow.
+	 * @return The root flow id
+	 */
+	public String getRootFlowId();
+
+	/**
+	 * Are we currently in the root flow? There can be any depth of nested
+	 * subflows below this, but sometimes the first subflow below the root may
+	 * require special treatment.
+	 * @return whether we're in the root flow
+	 */
+	public boolean isRootFlowActive();
 
 	/**
 	 * @return
@@ -92,5 +99,5 @@ public interface FlowSessionExecutionInfo extends AttributesAccessor, Serializab
 	 * @return The status
 	 */
 	public FlowSessionStatus getStatus(String flowId) throws IllegalArgumentException;
-	
+
 }
