@@ -52,10 +52,18 @@ public class ClobStringType implements UserType {
 	}
 
 	public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws SQLException {
+		if (this.lobHandler == null) {
+			throw new IllegalStateException("No LobHandler found for configuration - " +
+																			"lobHandler property must be set on LocalSessionFactoryBean");
+		}
 		return this.lobHandler.getClobAsString(rs, rs.findColumn(names[0]));
 	}
 
 	public void nullSafeSet(PreparedStatement st, Object value, int index) throws SQLException {
+		if (this.lobHandler == null) {
+			throw new IllegalStateException("No LobHandler found for configuration - " +
+																			"lobHandler property must be set on LocalSessionFactoryBean");
+		}
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			throw new IllegalStateException("ClobStringType requires active transaction synchronization");
 		}

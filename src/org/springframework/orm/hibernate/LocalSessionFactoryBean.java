@@ -89,11 +89,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @see net.sf.hibernate.type.Type
 	 */
 	public static LobHandler getConfigTimeLobHandler() {
-		LobHandler result = (LobHandler) configTimeLobHandlerHolder.get();
-		if (result == null) {
-			throw new IllegalStateException("No LobHandler found for configuration - lobHandler property must be set on LocalSessionFactoryBean");
-		}
-		return result;
+		return (LobHandler) configTimeLobHandlerHolder.get();
 	}
 
 
