@@ -15,6 +15,9 @@
  */
 package org.springframework.web.flow.action;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,7 +34,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Base action implementation that provides a number of helper methods generally
- * useful to any controller/command action.  These include:
+ * useful to any controller/command action. These include:
  * <ul>
  * <li>Creating common <code>ActionResult</code> objects
  * <li>Accessing request parameters
@@ -354,7 +357,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	private void exportErrors(MutableAttributesAccessor model, BindException errors) {
-		// also bind it under the local (to flow) alias, so other actions can find it easily
+		// also bind it under the local (to flow) alias, so other actions can
+		// find it easily
 		model.setAttribute(LOCAL_FORM_OBJECT_NAME, errors.getTarget());
 		model.setAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, errors);
 		model.setAttributes(errors.getModel());
