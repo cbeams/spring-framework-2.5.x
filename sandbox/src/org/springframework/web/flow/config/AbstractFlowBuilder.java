@@ -50,12 +50,12 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		return flow;
 	}
 
-	protected void setFlow(Flow flow) {
-		this.flow = flow;
+	public final void initFlow() {
+		this.flow = createFlow();
 	}
 
-	public void createFlow() {
-		setFlow(new Flow(flowId()));
+	protected Flow createFlow() {
+		return new Flow(flowId());
 	}
 
 	protected abstract String flowId();

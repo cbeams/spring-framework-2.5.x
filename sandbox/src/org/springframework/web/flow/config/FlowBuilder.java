@@ -9,7 +9,7 @@ import org.springframework.web.flow.Flow;
  * @author Keith Donald
  */
 public interface FlowBuilder {
-	public void createFlow();
+	public void initFlow();
 	public void buildStates();
 	public void buildExecutionListeners();
 	public Flow getResult();

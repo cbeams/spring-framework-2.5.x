@@ -47,7 +47,7 @@ public class FlowFactoryBean implements FactoryBean {
 		}
 
 		public void assemble() {
-			this.builder.createFlow();
+			this.builder.initFlow();
 			this.builder.buildStates();
 			this.builder.buildExecutionListeners();
 		}
