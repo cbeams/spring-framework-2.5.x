@@ -158,7 +158,7 @@ public class StatementCreatorUtilsTests extends TestCase {
 
 	public void testSetParameterValueWithDateAndUnknownType() throws SQLException {
 		java.util.Date date = new java.util.Date(1000);
-		ps.setObject(1, new java.sql.Date(1000));
+		ps.setObject(1, new java.sql.Timestamp(1000));
 		psControl.setVoidCallable(1);
 		psControl.replay();
 		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, date);
@@ -166,7 +166,7 @@ public class StatementCreatorUtilsTests extends TestCase {
 
 	public void testSetParameterValueWithCalendarAndUnknownType() throws SQLException {
 		java.util.Calendar cal = new GregorianCalendar();
-		ps.setObject(1, new java.sql.Date(cal.getTime().getTime()));
+		ps.setObject(1, new java.sql.Timestamp(cal.getTime().getTime()));
 		psControl.setVoidCallable(1);
 		psControl.replay();
 		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, cal);
