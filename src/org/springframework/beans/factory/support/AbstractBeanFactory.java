@@ -189,7 +189,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		String beanName = transformedBeanName(name);
 		Object bean = null;
 
-		// eagerly check singleton cache for manually registered singletons
+		// Eagerly check singleton cache for manually registered singletons.
 		Object sharedInstance = this.singletonCache.get(beanName);
 		if (sharedInstance != null) {
 			if (sharedInstance == CURRENTLY_IN_CREATION) {
@@ -202,28 +202,27 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 
 		else {
-			// check if bean definition exists
+			// Check if bean definition exists in this factory.
 			RootBeanDefinition mergedBeanDefinition = null;
 			try {
 				mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				// not found -> check parent
+				// Not found -> check parent.
 				if (this.parentBeanFactory instanceof AbstractBeanFactory) {
-					// delegation to parent with args only possible for AbstractBeanFactory
+					// Delegation to parent with args only possible for AbstractBeanFactory.
 					return ((AbstractBeanFactory) this.parentBeanFactory).getBean(name, requiredType, args);
 				}
 				else if (this.parentBeanFactory != null && args == null) {
-					// no args -> delegate to standard getBean method
+					// No args -> delegate to standard getBean method.
 					return this.parentBeanFactory.getBean(name, requiredType);
 				}
 				throw ex;
 			}
 
-			// checked merged bean definition
 			checkMergedBeanDefinition(mergedBeanDefinition, beanName, requiredType, args);
 
-			// create bean instance
+			// Create bean instance.
 			if (mergedBeanDefinition.isSingleton()) {
 				synchronized (this.singletonCache) {
 					// re-check singleton cache within synchronized block
@@ -246,12 +245,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				bean = getObjectForSharedInstance(name, sharedInstance);
 			}
 			else {
-				// prototype
+				// It's a prototype -> create a new instance.
 				bean = createBean(name, mergedBeanDefinition, args);
 			}
 		}
 
-		// check if required type matches the type of the actual bean instance
+		// Check if required type matches the type of the actual bean instance.
 		if (requiredType != null && !requiredType.isAssignableFrom(bean.getClass())) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 		}
@@ -267,7 +266,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			return true;
 		}
 		else {
-			// not found -> check parent
+			// Not found -> check parent.
 			if (this.parentBeanFactory != null) {
 				return this.parentBeanFactory.containsBean(name);
 			}
@@ -308,7 +307,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			return singleton;
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// not found -> check parent
+			// Not found -> check parent.
 			if (this.parentBeanFactory != null) {
 				return this.parentBeanFactory.isSingleton(name);
 			}
@@ -351,7 +350,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			return beanClass;
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// not found -> check parent
+			// Not found -> check parent.
 			if (this.parentBeanFactory != null) {
 				return this.parentBeanFactory.getType(name);
 			}
@@ -361,9 +360,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		// check if bean actually exists in this bean factory
+		// Check if bean actually exists in this bean factory.
 		if (this.singletonCache.containsKey(beanName) || containsBeanDefinition(beanName)) {
-			// if found, gather aliases
+			// If found, gather aliases.
 			List aliases = new ArrayList();
 			synchronized (this.aliasMap) {
 				for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
@@ -376,7 +375,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			return (String[]) aliases.toArray(new String[aliases.size()]);
 		}
 		else {
-			// not found -> check parent
+			// Not found -> check parent.
 			if (this.parentBeanFactory != null) {
 				return this.parentBeanFactory.getAliases(name);
 			}
@@ -462,8 +461,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		synchronized (this.aliasMap) {
 			Object registeredName = this.aliasMap.get(alias);
 			if (registeredName != null) {
-				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" + beanName +
-						"': it's already registered for bean name '" + registeredName + "'");
+				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
+						beanName + "': it's already registered for bean name '" + registeredName + "'");
 			}
 			this.aliasMap.put(alias, beanName);
 		}
@@ -505,10 +504,17 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/**
 	 * Return the names of beans in the singleton cache.
 	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * @return the names of beans in the singleton cache
 	 */
 	public String[] getSingletonNames() {
 		return (String[]) this.singletonCache.keySet().toArray(new String[this.singletonCache.size()]);
+	}
+
+	/**
+	 * Return the number of beans in the singleton cache.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 */
+	public int getSingletonCount() {
+		return this.singletonCache.size();
 	}
 
 	/**
@@ -532,7 +538,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// not found -> check parent
+			// Not found -> check parent.
 			if (this.parentBeanFactory != null) {
 				return this.parentBeanFactory.isSingleton(name);
 			}
@@ -783,7 +789,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		String beanName = transformedBeanName(name);
 
 		// Don't let calling code try to dereference the
-		// bean factory if the bean isn't a factory
+		// bean factory if the bean isn't a factory.
 		if (isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
 			throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
 		}
@@ -793,7 +799,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		// caller actually wants a reference to the factory.
 		if (beanInstance instanceof FactoryBean) {
 			if (!isFactoryDereference(name)) {
-				// return bean instance from factory
+				// Return bean instance from factory.
 				FactoryBean factory = (FactoryBean) beanInstance;
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean with name '" + beanName + "' is a factory bean");
@@ -806,11 +812,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				}
 				if (beanInstance == null) {
 					throw new FactoryBeanCircularReferenceException(
-					    beanName, "FactoryBean returned null object: not fully initialized due to circular bean reference");
+					    beanName, "FactoryBean returned null object: not fully initialized due to circular bean reference?");
 				}
 			}
 			else {
-	 			// the user wants the factory itself
+	 			// The user wants the factory itself.
 				if (logger.isDebugEnabled()) {
 					logger.debug("Calling code asked for FactoryBean instance for name '" + beanName + "'");
 				}
@@ -836,11 +842,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			for (Iterator it = dependencies.iterator(); it.hasNext();) {
 				String dependentBeanName = (String) it.next();
 				if (containsBean(dependentBeanName)) {
-					// registered singleton
+					// It's a registered singleton.
 					destroySingleton(dependentBeanName);
 				}
 				else {
-					// disposable inner bean
+					// It's a disposable inner bean.
 					destroyDisposableBean(dependentBeanName);
 				}
 			}
