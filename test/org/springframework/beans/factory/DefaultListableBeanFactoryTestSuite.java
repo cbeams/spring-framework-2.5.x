@@ -1,7 +1,7 @@
-
-
 package org.springframework.beans.factory;
 
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -10,13 +10,15 @@ import junit.framework.TestCase;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.support.BeanFactoryUtils;
-import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
+import org.springframework.beans.factory.xml.DependenciesBean;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 
 /**
  * This largely tests Properties population:
@@ -280,6 +282,26 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		assertTrue("Test bean age is 48", tb.getAge() == 48);
 	}
 
+	public void testBeanDefinitionOverriding() throws BeansException {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, null));
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class, null));
+		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
+	}
+
+	public void testBeanDefinitionOverridingNotAllowed() throws BeansException {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setAllowBeanDefinitionOverriding(false);
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, null));
+		try {
+			lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class, null));
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// expected
+		}
+	}
+
 	public void testBeanReferenceWithNewSyntax() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf = new DefaultListableBeanFactory();
@@ -305,6 +327,18 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
 		TestBean r = (TestBean) lbf.getBean("r");
 		assertTrue(r.getName().equals(name));
+	}
+
+	public void testCustomEditor() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		NumberFormat nf = NumberFormat.getInstance(Locale.UK);
+		lbf.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("myFloat", "1.1");
+		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, pvs));
+		TestBean testBean = (TestBean) lbf.getBean("testBean");
+		System.out.println(testBean.getMyFloat().floatValue());
+		assertTrue(testBean.getMyFloat().floatValue() == 1.1f);
 	}
 
 	public void testRegisterExistingSingletonWithReference() {
