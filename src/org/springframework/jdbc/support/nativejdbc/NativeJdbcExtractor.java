@@ -31,17 +31,35 @@ import java.sql.Statement;
  *
  * <p>Note: Setting a custom NativeJdbcExtractor is just necessary if you want to
  * cast to database-specific implementations, like OracleConnection/OracleResultSet.
- * Else, any wrapped JDBC object will be fine too.
+ * Else, any wrapped JDBC object will be fine.
  *
  * <p>Note: To be able to support any pool's strategy of native ResultSet wrapping,
  * it is advisable to get both the native Statement <i>and</i> the native ResultSet
  * via this extractor. Some pools just allow to unwrap the Statement, some just to
  * unwrap the ResultSet - the above strategy will cover both. It is typically
- * <i>not</i> necessary to unwrap the Connection to retrieve the native ResultSet.
+ * <i>not</i> necessary to unwrap the Connection to retrieve a native ResultSet.
+ *
+ * <p>When working with a simple connection pool that wraps Connections but not
+ * Statements, a SimpleNativeJdbcExtractor is often sufficient. However, some
+ * pools (like Jakarta's Commons DBCP) wrap <i>all</i> JDBC objects that they
+ * return: Therefore, you need to use a specific NativeJdbcExtractor (like
+ * CommonsDbcpNativeJdbcExtractor) with them.
+ *
+ * <p>JdbcTemplate can properly apply a NativeJdbcExtractor if specified, correctly
+ * unwrapping all JDBC objects that it creates. Note that this is just necessary
+ * if you want to cast to native implementations in your data access code.
+ *
+ * <p>The Oracle-specific implementation of Spring's LobHandler interface needs
+ * a NativeJdbcExtractor to be able to work on the native OracleConnection.
+ * This is also necessary for other Oracle-specific features that you may want
+ * to leverage in your applications, like InterMedia.
  *
  * @author Juergen Hoeller
  * @since 25.08.2003
+ * @see SimpleNativeJdbcExtractor
+ * @see CommonsDbcpNativeJdbcExtractor
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
+ * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
  */
 public interface NativeJdbcExtractor {
 
@@ -82,7 +100,8 @@ public interface NativeJdbcExtractor {
 	 * Retrieve the underlying native JDBC Connection for the given Connection.
 	 * Supposed to return the given Connection if not capable of unwrapping.
 	 * @param con the Connection handle, potentially wrapped by a connection pool
-	 * @return the underlying native JDBC Connection, if possible
+	 * @return the underlying native JDBC Connection, if possible;
+	 * else, the original Connection
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	Connection getNativeConnection(Connection con) throws SQLException;
@@ -94,7 +113,8 @@ public interface NativeJdbcExtractor {
 	 * access code already has a Statement. Statement.getConnection() often returns
 	 * the native JDBC Connection even if the Statement itself is wrapped by a pool. 
 	 * @param stmt the Statement handle, potentially wrapped by a connection pool
-	 * @return the underlying native JDBC Connection, if possible
+	 * @return the underlying native JDBC Connection, if possible;
+	 * else, the original Connection
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException;
@@ -103,7 +123,8 @@ public interface NativeJdbcExtractor {
 	 * Retrieve the underlying native JDBC Statement for the given Statement.
 	 * Supposed to return the given Statement if not capable of unwrapping.
 	 * @param stmt the Statement handle, potentially wrapped by a connection pool
-	 * @return the underlying native JDBC Statement, if possible
+	 * @return the underlying native JDBC Statement, if possible;
+	 * else, the original Connection
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	Statement getNativeStatement(Statement stmt) throws SQLException;
@@ -112,7 +133,8 @@ public interface NativeJdbcExtractor {
 	 * Retrieve the underlying native JDBC PreparedStatement for the given statement.
 	 * Supposed to return the given PreparedStatement if not capable of unwrapping.
 	 * @param ps the PreparedStatement handle, potentially wrapped by a connection pool
-	 * @return the underlying native JDBC PreparedStatement, if possible
+	 * @return the underlying native JDBC PreparedStatement, if possible;
+	 * else, the original Connection
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException;
@@ -121,7 +143,8 @@ public interface NativeJdbcExtractor {
 	 * Retrieve the underlying native JDBC CallableStatement for the given statement.
 	 * Supposed to return the given CallableStatement if not capable of unwrapping.
 	 * @param cs the CallableStatement handle, potentially wrapped by a connection pool
-	 * @return the underlying native JDBC CallableStatement, if possible
+	 * @return the underlying native JDBC CallableStatement, if possible;
+	 * else, the original Connection
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException;
@@ -130,7 +153,8 @@ public interface NativeJdbcExtractor {
 	 * Retrieve the underlying native JDBC ResultSet for the given statement.
 	 * Supposed to return the given ResultSet if not capable of unwrapping.
 	 * @param rs the ResultSet handle, potentially wrapped by a connection pool
-	 * @return the underlying native JDBC ResultSet, if possible
+	 * @return the underlying native JDBC ResultSet, if possible;
+	 * else, the original Connection
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	ResultSet getNativeResultSet(ResultSet rs) throws SQLException;

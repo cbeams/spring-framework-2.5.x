@@ -78,6 +78,8 @@ import org.springframework.util.FileCopyUtils;
  */
 public class OracleLobHandler implements LobHandler {
 
+	private static final String CONNECTION_CLASS_NAME = "oracle.jdbc.OracleConnection";
+
 	private static final String BLOB_CLASS_NAME = "oracle.sql.BLOB";
 
 	private static final String CLOB_CLASS_NAME = "oracle.sql.CLOB";
@@ -129,17 +131,23 @@ public class OracleLobHandler implements LobHandler {
 
 	/**
 	 * Set an appropriate NativeJdbcExtractor to be able to retrieve the underlying
-	 * native oracle.jdbc.OracleConnection. This is necessary for any DataSource-based
-	 * connection pool, as such a pool needs to return wrapped Connection handles.
+	 * native oracle.jdbc.OracleConnection. This is necessary for DataSource-based
+	 * connection pools, as such pools need to return wrapped JDBC object handles.
+	 * <p>Effectively, this LobHandler just invokes a single NativeJdbcExtractor
+	 * method, namely getNativeConnectionFromStatement with a PreparedStatement
+	 * argument, falling back to a PreparedStatement.getConnection() call if no
+	 * extractor is set. So if PreparedStatement.getConnection() returns a native
+	 * JDBC Connection with your pool, you don't need to specify an extractor.
+	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor#getNativeConnectionFromStatement
 	 * @see oracle.jdbc.OracleConnection
 	 */
-	public void setNativeJdbcExtractor(NativeJdbcExtractor extractor) {
-		this.nativeJdbcExtractor = extractor;
+	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
+		this.nativeJdbcExtractor = nativeJdbcExtractor;
 	}
 
 	/**
 	 * Set whether to cache the temporary LOB in the buffer cache.
-	 * This value will be passed into BLOB/CLOB.createTemporary.
+	 * This value will be passed into BLOB/CLOB.createTemporary. Default is true.
 	 * @see oracle.sql.BLOB#createTemporary
 	 * @see oracle.sql.CLOB#createTemporary
 	 */
@@ -345,7 +353,7 @@ public class OracleLobHandler implements LobHandler {
 		protected Connection getOracleConnection(PreparedStatement ps) throws SQLException, ClassNotFoundException {
 			Connection conToUse = (nativeJdbcExtractor != null) ?
 					nativeJdbcExtractor.getNativeConnectionFromStatement(ps) : ps.getConnection();
-			Class oracleConnectionClass = Class.forName("oracle.jdbc.OracleConnection");
+			Class oracleConnectionClass = Class.forName(CONNECTION_CLASS_NAME);
 			if (!oracleConnectionClass.isAssignableFrom(conToUse.getClass())) {
 				throw new InvalidDataAccessApiUsageException("OracleLobHandler needs to work on OracleConnection - " +
 																										 "maybe set the nativeJdbcExtractor property?");
