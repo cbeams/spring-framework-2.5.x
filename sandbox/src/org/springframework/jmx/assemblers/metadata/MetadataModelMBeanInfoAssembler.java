@@ -282,8 +282,8 @@ public class MetadataModelMBeanInfoAssembler extends
      * Used for auto detection of beans. Checks to see if the bean's class has a
      * ManagedResource attribute. If so it will add it list of included beans
      */
-    public boolean includeBean(String beanName, Object bean) {
-        if (attributeSource.getManagedResource(bean.getClass()) != null) {
+    public boolean includeBean(String beanName, Class beanClass) {
+        if (attributeSource.getManagedResource(beanClass) != null) {
             return true;
         } else {
             return false;

@@ -22,5 +22,5 @@ package org.springframework.jmx.assemblers;
 public interface AutodetectCapableModelMBeanInfoAssembler extends
         ModelMBeanInfoAssembler {
 
-    public boolean includeBean(String beanName, Object bean);
+    public boolean includeBean(String beanName, Class beanClass);
 }
