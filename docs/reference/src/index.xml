@@ -8,6 +8,7 @@
 <!ENTITY validation			SYSTEM "validation.xml">
 <!ENTITY transaction		SYSTEM "transaction.xml">
 <!ENTITY aop				SYSTEM "aop.xml">
+<!ENTITY aspectj			SYSTEM "aspectj.xml">
 <!ENTITY metadata			SYSTEM "metadata.xml">
 <!ENTITY dao				SYSTEM "dao.xml">
 <!ENTITY jdbc				SYSTEM "jdbc.xml">
@@ -78,6 +79,8 @@
 	    <!-- &util; -->
 
 	    &aop;
+		
+		&aspectj;
 	    
 	    &transaction;
 	    
