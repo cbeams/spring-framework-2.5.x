@@ -23,9 +23,7 @@ import java.util.Set;
 
 import org.springframework.binding.MutablePropertyAccessStrategy;
 import org.springframework.binding.support.BeanPropertyAccessStrategy;
-import org.springframework.rules.BinaryConstraint;
-import org.springframework.rules.Closure;
-import org.springframework.rules.Constraint;
+import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
 import org.springframework.rules.constraint.EqualTo;
@@ -51,13 +49,16 @@ import org.springframework.rules.constraint.property.NegatedPropertyConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
+import org.springframework.util.closure.Closure;
+import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.support.AlgorithmsAccessorSupport;
 
 /**
  * A factory for easing the construction and composition of predicates.
  *
  * @author Keith Donald
  */
-public class Constraints {
+public class Constraints extends AlgorithmsAccessorSupport {
 
 	private static final Constraints INSTANCE = new Constraints();
 

@@ -25,8 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.value.BoundValueModel;
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
-import org.springframework.rules.Closure;
 import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.closure.Closure;
 
 /**
  * Base helper implementation of a value model.

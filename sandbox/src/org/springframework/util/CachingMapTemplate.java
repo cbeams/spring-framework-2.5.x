@@ -15,6 +15,7 @@
  */
 package org.springframework.util;
 
+import java.io.Serializable;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
@@ -29,35 +30,39 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Cache with weak keys and soft values. This class is abstract template; cache
- * implementations should subclass and override the create(key) method which
- * encapsulates new expensive object creation.
+ * A template encapsulating the workflow for caching expensive values in a map.
+ * Supports caching weak or strong keys with soft values.
+ * <p>
+ * <p>
+ * This class is abstract template; cache implementations should subclass and
+ * override the create(key) method which encapsulates new expensive object
+ * creation.
  * 
  * @author Keith Donald
- * @author Bob Lee
- * @see http://www.crazybob.org
  */
-public abstract class Cache {
-    private static final Log logger = LogFactory.getLog(Cache.class);
+public abstract class CachingMapTemplate implements Serializable {
+    private static Object NULL_VALUE = new Object();
 
-    static Object NULL_VALUE = new Object();
-    Map map;
-    ReferenceQueue queue = new ReferenceQueue();
+    private transient final Log logger = LogFactory.getLog(getClass());
+
+    private Map map;
+
+    private transient ReferenceQueue queue = new ReferenceQueue();
 
     /**
      * Creates cache; defaults to weak keys.
      */
-    public Cache() {
+    public CachingMapTemplate() {
         this(true);
     }
-    
+
     /**
      * Creates cache.
      * 
      * @param weakKeys
      *            Use weak references for keys.
      */
-    public Cache(boolean weakKeys) {
+    public CachingMapTemplate(boolean weakKeys) {
         this.map = weakKeys ? (Map)new WeakHashMap() : new HashMap();
         this.map = Collections.synchronizedMap(this.map);
     }
@@ -70,15 +75,10 @@ public abstract class Cache {
      * @param size
      *            The initial cache size.
      */
-    public Cache(boolean weakKeys, int size) {
+    public CachingMapTemplate(boolean weakKeys, int size) {
         this.map = weakKeys ? (Map)new WeakHashMap(size) : new HashMap(size);
         this.map = Collections.synchronizedMap(this.map);
     }
-
-    /**
-     * Creates value for key. Called by get() if value isn't cached.
-     */
-    protected abstract Object create(Object key);
 
     /**
      * Gets value for key. Creates and caches value if it doesn't already exist
@@ -88,8 +88,8 @@ public abstract class Cache {
         Object value = internalGet(key);
         if (value == null) {
             if (logger.isDebugEnabled()) {
-                logger.debug(
-                    "Creating new expensive value with key '" + key + "'");
+                logger.debug("Creating new expensive value with key '" + key
+                        + "'");
             }
             value = create(key);
             if (value == null) {
@@ -99,21 +99,26 @@ public abstract class Cache {
                 logger.debug("Caching value '" + value + "'");
             }
             put(key, value);
-        } else {
+        }
+        else {
             if (logger.isDebugEnabled()) {
-                logger.debug(
-                    "Found expensive value with key '" + key + "' in cache.");
+                logger.debug("Returning cached value with key '" + key);
             }
         }
         return (value == NULL_VALUE) ? null : value;
     }
+
+    /**
+     * Creates value for key. Called by get() if value isn't cached.
+     */
+    protected abstract Object create(Object key);
 
     private void put(Object key, Object value) {
         this.map.put(key, new ValueReference(key, value));
     }
 
     /**
-     * Returns the size of the cache.
+     * Returns the size of the map.
      * 
      * @return The cache size.
      */
@@ -122,31 +127,37 @@ public abstract class Cache {
     }
 
     /**
-     * Empties the cache, removing all entries.
+     * Empties the map, removing all entries.
      */
     public void clear() {
         map.clear();
     }
-    
+
+    /**
+     * @return An iterator over the keys in this map.
+     */
     public Iterator keys() {
         return map.keySet().iterator();
     }
-    
+
+    /**
+     * @return An iterator over the values in this map.
+     */
     public Iterator values() {
         return new ValuesIterator(map.values().iterator());
     }
-    
+
     /**
-     * Delegates to the underlying values iterator, retrieving
-     * the object stored at each value reference.
+     * Delegates to the underlying values iterator, retrieving the object stored
+     * at each value reference.
      */
     static class ValuesIterator implements Iterator {
         private Iterator it;
-        
+
         public ValuesIterator(Iterator it) {
             this.it = it;
         }
-        
+
         public boolean hasNext() {
             return it.hasNext();
         }
@@ -159,7 +170,7 @@ public abstract class Cache {
             it.remove();
         }
     }
-    
+
     public Iterator entries() {
         return map.entrySet().iterator();
     }
@@ -174,22 +185,22 @@ public abstract class Cache {
         Reference reference;
         while ((reference = this.queue.poll()) != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug(
-                    "Removing claimed soft reference '" + reference + "'");
+                logger.debug("Removing claimed soft reference '" + reference
+                        + "'");
             }
             map.remove(((ValueReference)reference).getKey());
         }
     }
 
-    class ValueReference extends SoftReference {
+    private class ValueReference extends SoftReference {
         WeakReference keyReference;
 
-        ValueReference(Object key, Object value) {
+        public ValueReference(Object key, Object value) {
             super(value, queue);
             this.keyReference = new WeakReference(key);
         }
 
-        Object getKey() {
+        public Object getKey() {
             return this.keyReference.get();
         }
 
@@ -199,10 +210,8 @@ public abstract class Cache {
     }
 
     public String toString() {
-        return new ToStringBuilder(this)
-            .append("weakKeys", (map instanceof WeakHashMap))
-            .append("size", map.size())
-            .append("contents", map)
-            .toString();
+        return new ToStringCreator(this).append("weakKeys",
+                (map instanceof WeakHashMap)).append("size", map.size())
+                .append("contents", map).toString();
     }
 }

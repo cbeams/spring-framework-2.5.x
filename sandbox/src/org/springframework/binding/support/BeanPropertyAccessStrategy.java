@@ -45,7 +45,7 @@ import org.springframework.binding.value.support.ValueHolder;
 import org.springframework.enums.CodedEnum;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ToStringBuilder;
+import org.springframework.util.ToStringCreator;
 
 public class BeanPropertyAccessStrategy implements
         MutablePropertyAccessStrategy {
@@ -451,7 +451,7 @@ public class BeanPropertyAccessStrategy implements
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("beanHolder", beanHolder)
+        return new ToStringCreator(this).append("beanHolder", beanHolder)
                 .toString();
     }
 

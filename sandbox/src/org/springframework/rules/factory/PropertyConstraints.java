@@ -15,9 +15,9 @@
  */
 package org.springframework.rules.factory;
 
-import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.util.Assert;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Helper class for creating bean property constraints.

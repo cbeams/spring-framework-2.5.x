@@ -17,13 +17,13 @@ package org.springframework.rules.reporting;
 
 import java.util.Iterator;
 
-import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.Or;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
 import org.springframework.util.Assert;
+import org.springframework.util.closure.Constraint;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
 

@@ -16,8 +16,8 @@
 package org.springframework.rules.constraint.property;
 
 import org.springframework.binding.PropertyAccessStrategy;
-import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.Required;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Predicate that tests if the specified bean property is "present" - that is,

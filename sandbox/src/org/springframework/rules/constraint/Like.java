@@ -16,8 +16,8 @@
 package org.springframework.rules.constraint;
 
 import org.springframework.enums.StringCodedEnum;
-import org.springframework.rules.Constraint;
 import org.springframework.util.StringUtils;
+import org.springframework.util.closure.Constraint;
 
 /**
  * A like predicate, supporting "starts with%", "%ends with", and "%contains%".

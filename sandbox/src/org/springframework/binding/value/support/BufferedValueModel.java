@@ -17,9 +17,9 @@ package org.springframework.binding.value.support;
 
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
-import org.springframework.rules.Closure;
-import org.springframework.rules.closure.NoArgBlock;
-import org.springframework.util.ToStringBuilder;
+import org.springframework.util.ToStringCreator;
+import org.springframework.util.closure.Closure;
+import org.springframework.util.closure.support.NoArgBlock;
 
 /**
  * A value model that wraps another value model; delaying or buffering changes
@@ -199,7 +199,7 @@ public class BufferedValueModel extends AbstractValueModel implements
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("bufferedValue", bufferedValue)
+        return new ToStringCreator(this).append("bufferedValue", bufferedValue)
                 .toString();
     }
 

@@ -15,11 +15,11 @@
  */
 package org.springframework.rules.factory;
 
-import org.springframework.rules.Closure;
-import org.springframework.rules.Constraint;
-import org.springframework.rules.ProcessTemplate;
-import org.springframework.rules.closure.ClosureChain;
-import org.springframework.rules.closure.ConstrainedBlock;
+import org.springframework.util.closure.Closure;
+import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.ProcessTemplate;
+import org.springframework.util.closure.support.ClosureChain;
+import org.springframework.util.closure.support.ConstrainedBlock;
 
 /**
  * A factory for easing the construction and composition of functions.

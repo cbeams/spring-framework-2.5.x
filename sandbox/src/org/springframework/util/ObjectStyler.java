@@ -30,5 +30,5 @@ public interface ObjectStyler {
      *            The object to be styled.
      * @return The styled string.
      */
-    public String style(Object value);
+    public String style(Object object);
 }

@@ -15,6 +15,7 @@
  */
 package org.springframework.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.text.NumberFormat;
 import java.util.Collection;
@@ -33,13 +34,36 @@ import org.springframework.util.visitor.Visitor;
  * @author Keith Donald
  */
 public class DefaultObjectStyler implements Visitor, ObjectStyler {
+
     private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
+
+    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
     private static final String EMPTY = "[empty]";
 
     private static final String NULL = "[null]";
 
+    private static final String COLLECTION = "collection";
+
+    private static final String SET = "set";
+
+    private static final String LIST = "list";
+
+    private static final String MAP = "map";
+
+    private static final String ARRAY = "array";
+
     private static final ObjectStyler INSTANCE = new DefaultObjectStyler();
+
+    /**
+     * Return the default object styler singleton instance, for convenient
+     * access.
+     * 
+     * @return The default object styler
+     */
+    public static ObjectStyler instance() {
+        return INSTANCE;
+    }
 
     /**
      * Static accessor that calls the default styler's style method.
@@ -84,7 +108,7 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
 
     String visit(Map value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
-        buffer.append("map[");
+        buffer.append(MAP + "[");
         for (Iterator i = value.entrySet().iterator(); i.hasNext();) {
             Map.Entry entry = (Map.Entry)i.next();
             buffer.append(style(entry));
@@ -105,7 +129,7 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
 
     String visit(Collection value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
-        buffer.append(getTypeString(value) + "[");
+        buffer.append(getCollectionTypeString(value) + "[");
         for (Iterator i = value.iterator(); i.hasNext();) {
             buffer.append(style(i.next()));
             if (i.hasNext()) {
@@ -119,15 +143,15 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
         return buffer.toString();
     }
 
-    private String getTypeString(Collection value) {
+    private String getCollectionTypeString(Collection value) {
         if (value instanceof List) {
-            return "list";
+            return LIST;
         }
         else if (value instanceof Set) {
-            return "set";
+            return SET;
         }
         else {
-            return "collection";
+            return COLLECTION;
         }
     }
 
@@ -146,7 +170,8 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
 
     private String styleArray(Object[] array) {
         StringBuffer buffer = new StringBuffer(array.length * 8 + 16);
-        buffer.append("array<"
+        buffer.append(ARRAY
+                + "<"
                 + StringUtils.delete(ClassUtils.getShortName(array.getClass()),
                         ";") + ">[");
         for (int i = 0; i < array.length - 1; i++) {
@@ -165,11 +190,38 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
 
     private Object[] getObjectArray(Object value) {
         if (value.getClass().getComponentType().isPrimitive()) {
-            return ArrayUtils.toObjectArrayFromPrimitive(value);
+            return toObjectArrayFromPrimitive(value);
         }
         else {
             return (Object[])value;
         }
+    }
+
+    /**
+     * Convert a primitive array to an object array of wrapper objects.
+     * 
+     * @param primitiveArray
+     *            The primitive array
+     * @return The object array.
+     * @throws IllegalArgumentException
+     *             if the parameter is not a primitive array.
+     */
+    private static Object[] toObjectArrayFromPrimitive(Object primitiveArray) {
+        if (primitiveArray == null) { return EMPTY_OBJECT_ARRAY; }
+        Class clazz = primitiveArray.getClass();
+        Assert.isTrue(clazz.isArray(),
+                "The specified parameter is not an array.");
+        Assert.isTrue(clazz.getComponentType().isPrimitive(),
+                "The specified parameter is not a primitive array.");
+
+        // get array length and create Object output array
+        int length = Array.getLength(primitiveArray);
+        Object[] newArray = new Object[length];
+        // wrap and copy elements
+        for (int i = 0; i < length; i++) {
+            newArray[i] = Array.get(primitiveArray, i);
+        }
+        return newArray;
     }
 
 }

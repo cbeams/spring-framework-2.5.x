@@ -16,9 +16,9 @@
 package org.springframework.rules.constraint.property;
 
 import org.springframework.binding.PropertyAccessStrategy;
-import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.Required;
 import org.springframework.util.Assert;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Validates a property value as 'required' if some other condition is true.

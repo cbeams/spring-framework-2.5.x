@@ -15,7 +15,7 @@
  */
 package org.springframework.rules.constraint;
 
-import org.springframework.rules.BinaryConstraint;
+import org.springframework.rules.closure.BinaryConstraint;
 
 /**
  * Type-safe enum class for supported binary operators.

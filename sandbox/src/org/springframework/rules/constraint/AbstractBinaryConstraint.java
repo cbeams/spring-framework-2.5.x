@@ -15,7 +15,7 @@
  */
 package org.springframework.rules.constraint;
 
-import org.springframework.rules.BinaryConstraint;
+import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.util.Assert;
 
 public abstract class AbstractBinaryConstraint implements BinaryConstraint {

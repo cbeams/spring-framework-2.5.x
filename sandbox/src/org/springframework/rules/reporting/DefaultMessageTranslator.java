@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
 import org.springframework.rules.constraint.Not;
@@ -42,6 +41,7 @@ import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.closure.Constraint;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
 

@@ -23,120 +23,86 @@ import java.util.Comparator;
  * false first.
  */
 public final class BooleanComparator implements Comparator, Serializable {
+    private static final BooleanComparator TRUE_FIRST = new BooleanComparator(
+            true);
 
-	/** Constant "true first" reference. */
-	private static final BooleanComparator TRUE_FIRST = new BooleanComparator(
-			true);
+    private static final BooleanComparator FALSE_FIRST = new BooleanComparator(
+            false);
 
-	/** Constant "false first" reference. */
-	private static final BooleanComparator FALSE_FIRST = new BooleanComparator(
-			false);
+    private boolean trueFirst = false;
 
-	/**
-	 * <code>true</code> iff <code>true</code> values sort before
-	 * <code>false</code> values.
-	 */
-	private boolean trueFirst = false;
+    /**
+     * Returns a BooleanComparator instance that sorts <code>true</code>
+     * values before <code>false</code> values.
+     * 
+     * @return the true first singleton BooleanComparator
+     */
+    public static BooleanComparator trueFirst() {
+        return TRUE_FIRST;
+    }
 
-	/**
-	 * Returns a BooleanComparator instance that sorts <code>true</code>
-	 * values before <code>false</code> values.
-	 *
-	 * @return the true first singleton BooleanComparator
-	 */
-	public static BooleanComparator trueFirst() {
-		return TRUE_FIRST;
-	}
+    /**
+     * Returns a BooleanComparator instance that sorts <code>false</code>
+     * values before <code>true</code> values.
+     * 
+     * @return the false first singleton BooleanComparator
+     */
+    public static BooleanComparator falseFirst() {
+        return FALSE_FIRST;
+    }
 
-	/**
-	 * Returns a BooleanComparator instance that sorts <code>false</code>
-	 * values before <code>true</code> values.
-	 *
-	 * @return the false first singleton BooleanComparator
-	 */
-	public static BooleanComparator falseFirst() {
-		return FALSE_FIRST;
-	}
+    /**
+     * Returns a BooleanComparator instance that sorts
+     * <code><i>trueFirst</i></code> values.
+     * 
+     * @param trueFirst
+     *            when <code>true</code>, sort <code>true</code>, when
+     *            <code>false</code>, sort <code>false</code>
+     * @return a singleton BooleanComparator instance
+     */
+    public static BooleanComparator getBooleanComparator(boolean trueFirst) {
+        return trueFirst ? TRUE_FIRST : FALSE_FIRST;
+    }
 
-	/**
-	 * Returns a BooleanComparator instance that sorts
-	 * <code><i>trueFirst</i></code> values before
-	 * <code>&#x21;<i>trueFirst</i></code> values.
-	 *
-	 * @param trueFirst
-	 *            when <code>true</code>, sort
-	 *            <code>true</code> <code>Boolean</code> s before
-	 *            <code>false</code>
-	 * @return a singleton BooleanComparator instance
-	 */
-	public static BooleanComparator getBooleanComparator(boolean trueFirst) {
-		return trueFirst ? TRUE_FIRST : FALSE_FIRST;
-	}
+    private BooleanComparator(boolean trueFirst) {
+        this.trueFirst = trueFirst;
+    }
 
-	/**
-	 * Creates a <code>BooleanComparator</code> that sorts <code>false</code>
-	 * values before <code>true</code> values.
-	 * <p>
-	 * Equivalent to
-	 * {@link #BooleanComparator(boolean) BooleanComparator(false)}.
-	 * <p>
-	 * Please use the static factory instead whenever possible.
-	 */
-	public BooleanComparator() {
-		this(false);
-	}
+    public boolean isTrueFirst() {
+        return trueFirst;
+    }
 
-	/**
-	 * Creates a <code>BooleanComparator</code> that sorts
-	 * <code><i>trueFirst</i></code> values before
-	 * <code>&#x21;<i>trueFirst</i></code> values.
-	 * <p>
-	 * Please use the static factories instead whenever possible.
-	 *
-	 * @param trueFirst
-	 *            when <code>true</code>, sort <code>true</code> boolean
-	 *            values before <code>false</code>
-	 */
-	public BooleanComparator(boolean trueFirst) {
-		this.trueFirst = trueFirst;
-	}
+    public int compare(Object obj1, Object obj2) {
+        return compare((Boolean)obj1, (Boolean)obj2);
+    }
 
-	public boolean isTrueFirst() {
-		return trueFirst;
-	}
+    /**
+     * Compares two non- <code>null</code> <code>Boolean</code> objects
+     * according to the value of {@link #trueFirst}.
+     * 
+     * @param b1
+     *            the first boolean to compare
+     * @param b2
+     *            the second boolean to compare
+     * @return negative if obj1 is less, positive if greater, zero if equal
+     * @throws NullPointerException
+     *             when either argument <code>null</code>
+     */
+    public int compare(Boolean b1, Boolean b2) {
+        boolean v1 = b1.booleanValue();
+        boolean v2 = b2.booleanValue();
+        return (v1 ^ v2) ? ((v1 ^ trueFirst) ? 1 : -1) : 0;
+    }
 
-	public int compare(Object obj1, Object obj2) {
-		return compare((Boolean) obj1, (Boolean) obj2);
-	}
+    public int hashCode() {
+        int hash = "BooleanComparator".hashCode();
+        return trueFirst ? -1 * hash : hash;
+    }
 
-	/**
-	 * Compares two non- <code>null</code> <code>Boolean</code> objects
-	 * according to the value of {@link #trueFirst}.
-	 *
-	 * @param b1
-	 *            the first boolean to compare
-	 * @param b2
-	 *            the second boolean to compare
-	 * @return negative if obj1 is less, positive if greater, zero if equal
-	 * @throws NullPointerException
-	 *             when either argument <code>null</code>
-	 */
-	public int compare(Boolean b1, Boolean b2) {
-		boolean v1 = b1.booleanValue();
-		boolean v2 = b2.booleanValue();
-
-		return (v1 ^ v2) ? ((v1 ^ trueFirst) ? 1 : -1) : 0;
-	}
-
-	public int hashCode() {
-		int hash = "BooleanComparator".hashCode();
-		return trueFirst ? -1 * hash : hash;
-	}
-
-	public boolean equals(Object object) {
-		return (this == object)
-				|| ((object instanceof BooleanComparator) && (this.trueFirst == ((BooleanComparator) object).trueFirst));
-	}
+    public boolean equals(Object object) {
+        return (this == object)
+                || ((object instanceof BooleanComparator) && (this.trueFirst == ((BooleanComparator)object).trueFirst));
+    }
 
 }
 

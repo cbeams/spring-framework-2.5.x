@@ -15,8 +15,8 @@
  */
 package org.springframework.binding.value.support;
 
-import org.springframework.rules.Closure;
 import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.closure.Closure;
 
 /**
  * @author Keith Donald

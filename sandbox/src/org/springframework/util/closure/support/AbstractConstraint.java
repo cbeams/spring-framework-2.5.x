@@ -13,32 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.constraint;
+package org.springframework.util.closure.support;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.springframework.rules.Constraint;
-import org.springframework.rules.support.AlgorithmsAccessorSupport;
+import org.springframework.util.closure.Constraint;
 
 public abstract class AbstractConstraint extends AlgorithmsAccessorSupport
 		implements Constraint, Serializable {
 
-	public boolean all(Collection collection) {
-		return all(collection, this);
+	public boolean allTrue(Collection collection) {
+		return allTrue(collection, this);
 	}
 
-	public boolean all(Iterator it) {
-		return all(it, this);
+	public boolean allTrue(Iterator it) {
+		return allTrue(it, this);
 	}
 
-	public boolean any(Collection collection) {
-		return any(collection, this);
+	public boolean anyTrue(Collection collection) {
+		return anyTrue(collection, this);
 	}
 
-	public boolean any(Iterator it) {
-		return any(it, this);
+	public boolean anyTrue(Iterator it) {
+		return anyTrue(it, this);
 	}
 
 	public Collection findAll(Collection collection) {

@@ -15,8 +15,8 @@
  */
 package org.springframework.rules.constraint;
 
-import org.springframework.rules.Constraint;
 import org.springframework.rules.reporting.TypeResolvableSupport;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Convenient abstract super class for predicates whose type's are resolvable,

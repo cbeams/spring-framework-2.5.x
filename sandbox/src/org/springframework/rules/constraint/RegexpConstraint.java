@@ -18,8 +18,8 @@ package org.springframework.rules.constraint;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.rules.Constraint;
 import org.springframework.rules.reporting.TypeResolvableSupport;
+import org.springframework.util.closure.Constraint;
 
 /**
  * A constraint based on a regular expression pattern.

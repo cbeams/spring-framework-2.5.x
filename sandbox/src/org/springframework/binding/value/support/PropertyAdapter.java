@@ -20,7 +20,7 @@ import java.beans.PropertyChangeListener;
 
 import org.springframework.binding.MutablePropertyAccessStrategy;
 import org.springframework.binding.value.ValueChangeListener;
-import org.springframework.util.ToStringBuilder;
+import org.springframework.util.ToStringCreator;
 
 /**
  * Adapts access to a domain model property to the value model interface. The
@@ -98,7 +98,7 @@ public class PropertyAdapter extends AbstractValueModel implements
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("propertyName", propertyName)
+        return new ToStringCreator(this).append("propertyName", propertyName)
                 .append("propertyAccessStrategy", propertyAccessStrategy)
                 .toString();
     }

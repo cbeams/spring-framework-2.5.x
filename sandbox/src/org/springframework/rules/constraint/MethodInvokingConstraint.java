@@ -17,9 +17,9 @@ package org.springframework.rules.constraint;
 
 import java.lang.reflect.Method;
 
-import org.springframework.rules.Constraint;
 import org.springframework.rules.reporting.TypeResolvable;
 import org.springframework.util.Assert;
+import org.springframework.util.closure.Constraint;
 
 /**
  * A adapter that can adapt a method on an object that accepts a single argument

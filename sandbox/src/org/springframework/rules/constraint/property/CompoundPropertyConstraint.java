@@ -17,65 +17,64 @@ package org.springframework.rules.constraint.property;
 
 import java.util.Iterator;
 
-import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.CompoundConstraint;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Abstract base class for unary predicates which compose other predicates.
- *
+ * 
  * @author Keith Donald
  */
 public class CompoundPropertyConstraint implements PropertyConstraint {
 
-	private CompoundConstraint compoundPredicate;
+    private CompoundConstraint compoundPredicate;
 
-	public String getPropertyName() {
-		PropertyConstraint e =
-				(PropertyConstraint) compoundPredicate.iterator().next();
-		return e.getPropertyName();
-	}
+    public String getPropertyName() {
+        PropertyConstraint e = (PropertyConstraint)compoundPredicate.iterator()
+                .next();
+        return e.getPropertyName();
+    }
 
-	public Constraint getPredicate() {
-		return compoundPredicate;
-	}
+    public Constraint getPredicate() {
+        return compoundPredicate;
+    }
 
-	/**
-	 * Constructs a compound predicate with no initial members. It is expected
-	 * the client will call "add" to add individual predicates.
-	 */
-	public CompoundPropertyConstraint(CompoundConstraint compoundPredicate) {
-		this.compoundPredicate = compoundPredicate;
-		this.compoundPredicate.validateTypeSafety(PropertyConstraint.class);
-	}
+    /**
+     * Constructs a compound predicate with no initial members. It is expected
+     * the client will call "add" to add individual predicates.
+     */
+    public CompoundPropertyConstraint(CompoundConstraint compoundPredicate) {
+        this.compoundPredicate = compoundPredicate;
+    }
 
-	/**
-	 * Add the specified predicate to the set of predicates aggregated by this
-	 * compound predicate.
-	 *
-	 * @param predicate
-	 *            the predicate to add
-	 * @return A reference to this, to support chaining.
-	 */
-	public CompoundPropertyConstraint add(PropertyConstraint expression) {
-		this.compoundPredicate.add(expression);
-		return this;
-	}
+    /**
+     * Add the specified predicate to the set of predicates aggregated by this
+     * compound predicate.
+     * 
+     * @param predicate
+     *            the predicate to add
+     * @return A reference to this, to support chaining.
+     */
+    public CompoundPropertyConstraint add(PropertyConstraint expression) {
+        this.compoundPredicate.add(expression);
+        return this;
+    }
 
-	/**
-	 * Return an iterator over the aggregated predicates.
-	 *
-	 * @return An iterator
-	 */
-	public Iterator iterator() {
-		return compoundPredicate.iterator();
-	}
+    /**
+     * Return an iterator over the aggregated predicates.
+     * 
+     * @return An iterator
+     */
+    public Iterator iterator() {
+        return compoundPredicate.iterator();
+    }
 
-	public boolean test(Object bean) {
-		return compoundPredicate.test(bean);
-	}
+    public boolean test(Object bean) {
+        return compoundPredicate.test(bean);
+    }
 
-	public String toString() {
-		return compoundPredicate.toString();
-	}
+    public String toString() {
+        return compoundPredicate.toString();
+    }
 
 }

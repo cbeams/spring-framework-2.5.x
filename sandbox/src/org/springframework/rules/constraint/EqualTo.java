@@ -15,10 +15,10 @@
  */
 package org.springframework.rules.constraint;
 
-import org.springframework.rules.BinaryConstraint;
-import org.springframework.rules.Constraint;
+import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.factory.Constraints;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Predicate that tests object equality (not identity.)

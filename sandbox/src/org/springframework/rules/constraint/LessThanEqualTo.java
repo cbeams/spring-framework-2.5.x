@@ -17,7 +17,7 @@ package org.springframework.rules.constraint;
 
 import java.util.Comparator;
 
-import org.springframework.rules.BinaryConstraint;
+import org.springframework.rules.closure.BinaryConstraint;
 
 /**
  * Predicate that tests if one comparable object is less than or equal to

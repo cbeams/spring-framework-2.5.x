@@ -24,10 +24,10 @@ public interface Visitable {
 
     /**
      * Accept a visitor and perform a dispatch. Within accept(), Vistables pass
-     * themselves back to the visitor. The visitor then executes an
-     * encapsulated algorithm unique to that type of Visitable object. As an
-     * alternative to defining Vistable implementations, consider using
-     * ReflectiveVisitorSupport.
+     * themselves back to the visitor. The visitor then executes an encapsulated
+     * algorithm unique to that type of Visitable object. As an alternative to
+     * defining specific Vistable implementations, consider using the generic
+     * <code>ReflectiveVisitorSupport</code>.
      * 
      * @param visitor
      *            The visitor to accept.

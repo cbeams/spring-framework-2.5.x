@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.Cache;
+import org.springframework.util.CachingMapTemplate;
 
 /**
  * Helper implementation of a reflective visitor.
@@ -32,28 +32,19 @@ import org.springframework.util.Cache;
  * data argument to accept (double-dispatch.) For example:
  * 
  * <pre>
+ *       public String ToStringStyler.styleValue(Object value) {
+ *           reflectiveVistorSupport.invokeVisit(this, value)
+ *       }
  * 
- *  
- *   
- *    
- *     
- *      
- *         public String ToStringStyler.styleValue(Object value) {
- *             // visit(&lt;valueType&gt; arg) callback will be invoked using reflection
- *             reflectiveVistorSupport.invokeVisit(this, value)
- *         }
- *       
- *      
- *     
- *    
- *   
- *  
+ *       // visit call back will be invoked via reflection
+ *       public String visit(&lt;valueType&gt; arg) {
+ *          // process argument of type &lt;valueType&gt; 
+ *       }
  * </pre>
  * 
  * @author Keith Donald
- * @author Bob Lee
  */
-public class ReflectiveVisitorSupport {
+public final class ReflectiveVisitorSupport {
     private static final Log logger = LogFactory
             .getLog(ReflectiveVisitorSupport.class);
 
@@ -61,18 +52,24 @@ public class ReflectiveVisitorSupport {
 
     private static final String VISIT_NULL = "visitNull";
 
-    Cache visitorClassVisitMethods = new Cache() {
+    private CachingMapTemplate visitorClassVisitMethods = new CachingMapTemplate() {
         public Object create(Object key) {
             return new ClassVisitMethods((Class)key);
         }
     };
 
-    /** Maps parameter class names to visitor methods. */
+    /**
+     * Internal class caching visitor methods by argument class.
+     */
     private static final class ClassVisitMethods {
-        Cache visitMethodCache = new Cache() {
-            public Object create(Object key) {
-                if (key == null) { return findNullVisitorMethod(); }
-                Method method = findVisitMethodByClass((Class)key);
+        private Class visitorClass;
+
+        private Method defaultVisitMethod;
+
+        private CachingMapTemplate visitMethodCache = new CachingMapTemplate() {
+            public Object create(Object argumentClazz) {
+                if (argumentClazz == null) { return findNullVisitorMethod(); }
+                Method method = findVisitMethod((Class)argumentClazz);
                 if (method == null) {
                     method = findDefaultVisitMethod();
                 }
@@ -80,23 +77,22 @@ public class ReflectiveVisitorSupport {
             }
         };
 
-        private Class visitorClass;
-
-        private Method defaultVisitMethod;
-
-        /** Constructor. */
         private ClassVisitMethods(Class visitorClass) {
             this.visitorClass = visitorClass;
         }
 
-        /** Is the method a visitor? */
-        public boolean isVisitor(Method method) {
-            Class[] params = method.getParameterTypes();
-            return (method.getName().equals(VISIT_METHOD)
-                    && (params.length == 1) && (params[0] != Object.class));
+        private Method findNullVisitorMethod() {
+            for (Class clazz = visitorClass; clazz != null; clazz = clazz
+                    .getSuperclass()) {
+                try {
+                    return clazz.getDeclaredMethod(VISIT_NULL, null);
+                }
+                catch (NoSuchMethodException e) {
+                }
+            }
+            return findDefaultVisitMethod();
         }
 
-        /** Gets visitDefault() method. */
         private Method findDefaultVisitMethod() {
             if (defaultVisitMethod != null) { return defaultVisitMethod; }
             final Class[] args = { Object.class };
@@ -113,59 +109,46 @@ public class ReflectiveVisitorSupport {
             return null;
         }
 
-        private Method findNullVisitorMethod() {
-            for (Class clazz = visitorClass; clazz != null; clazz = clazz
-                    .getSuperclass()) {
-                try {
-                    return clazz.getDeclaredMethod(VISIT_NULL, null);
-                }
-                catch (NoSuchMethodException e) {
-                }
-            }
-            return findDefaultVisitMethod();
-        }
-
         /**
-         * Gets a visitor method for the specified argument type.
+         * Gets a cached visitor method for the specified argument type.
          * 
          * @param clazz
          *            Method parameter type.
          * @return Visitor method with parameter type.
          */
         public Method getVisitMethod(Class argumentClass) {
-            // get mapped visit() method.
             return (Method)visitMethodCache.get(argumentClass);
         }
 
         /**
          * Traverses class hierarchy looking for applicable visit() method.
          */
-        private Method findVisitMethodByClass(Class rootClass) {
-            // this works by queueing up classes to be processed.
-            // not the fastest, but fast enough and very straightforward.
-            if (rootClass == Object.class) { return null; }
+        private Method findVisitMethod(Class rootArgumentType) {
+            if (rootArgumentType == Object.class) { return null; }
             LinkedList classQueue = new LinkedList();
-            classQueue.addFirst(rootClass);
+            classQueue.addFirst(rootArgumentType);
 
             while (!classQueue.isEmpty()) {
-                Class clazz = (Class)classQueue.removeLast();
-                // check for a visitor method matching this type.
+                Class argumentType = (Class)classQueue.removeLast();
+                // check for a visit method on the visitor class matching this
+                // argument type
                 try {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Looking for method " + VISIT_METHOD + "("
-                                + clazz + ")");
+                                + argumentType + ")");
                     }
-                    return findVisitMethod(visitorClass, clazz);
+                    return findVisitMethod(visitorClass, argumentType);
                 }
                 catch (NoSuchMethodException e) {
-                    // queue up the super class if it's not of type Object.
-                    if (!clazz.isInterface()
-                            && (clazz.getSuperclass() != Object.class)) {
-                        classQueue.addFirst(clazz.getSuperclass());
+                    // queue up the argument super class if it's not of type
+                    // Object.
+                    if (!argumentType.isInterface()
+                            && (argumentType.getSuperclass() != Object.class)) {
+                        classQueue.addFirst(argumentType.getSuperclass());
                     }
 
-                    // queue up interfaces.
-                    Class[] interfaces = clazz.getInterfaces();
+                    // queue up argument's implemented interfaces.
+                    Class[] interfaces = argumentType.getInterfaces();
                     for (int i = 0; i < interfaces.length; i++) {
                         classQueue.addFirst(interfaces[i]);
                     }
@@ -175,15 +158,17 @@ public class ReflectiveVisitorSupport {
             return findDefaultVisitMethod();
         }
 
-        private Method findVisitMethod(Class visitorClass, Class clazz)
+        private Method findVisitMethod(Class visitorClass, Class argumentType)
                 throws NoSuchMethodException {
             try {
                 return visitorClass.getDeclaredMethod(VISIT_METHOD,
-                        new Class[] { clazz });
+                        new Class[] { argumentType });
             }
             catch (NoSuchMethodException e) {
+                // try visitorClass superclasses
                 if (visitorClass.getSuperclass() != Object.class) {
-                    return findVisitMethod(visitorClass.getSuperclass(), clazz);
+                    return findVisitMethod(visitorClass.getSuperclass(),
+                            argumentType);
                 }
                 else {
                     throw e;
@@ -202,20 +187,21 @@ public class ReflectiveVisitorSupport {
      * argument.
      * 
      * @param visitor,
-     *            The visitor encapsulating the logic to process the argument.
+     *            The visitor encapsulating the logic to process the argument
      * @param argument,
-     *            The argument to dispatch, or a instanceof Vistable.
+     *            The argument to dispatch, or a instanceof Vistable
      * @throws IllegalArgumentException
-     *             if the visitor parameter is null.
-     * @see org.springframework.utils.visitor.Visitor#visit(java.lang.Object)
+     *             if the visitor parameter is null
      */
     public final Object invokeVisit(Visitor visitor, Object argument) {
-        Assert.notNull(visitor, "No Visitor specified");
+        Assert.notNull(visitor, "The visitor to visit is required");
         if (argument instanceof Visitable) {
+            // trigger call back on visitor by invoking accept
             callAccept((Visitable)argument, visitor);
             return null;
         }
         else {
+            // perform call back on the visitor by reflection
             Method method = getMethod(visitor.getClass(), argument);
             if (method == null) {
                 logger

@@ -16,7 +16,7 @@
 package org.springframework.rules.constraint.property;
 
 import org.springframework.binding.PropertyAccessStrategy;
-import org.springframework.rules.BinaryConstraint;
+import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.util.Assert;
 
 /**

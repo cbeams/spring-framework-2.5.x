@@ -15,7 +15,7 @@
  */
 package org.springframework.binding.value.support;
 
-import org.springframework.util.ToStringBuilder;
+import org.springframework.util.ToStringCreator;
 
 /**
  * A simple value model that contains a single value. Notifies listeners when
@@ -55,6 +55,6 @@ public class ValueHolder extends AbstractValueModel {
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("value", getValue()).toString();
+        return new ToStringCreator(this).append("value", getValue()).toString();
     }
 }

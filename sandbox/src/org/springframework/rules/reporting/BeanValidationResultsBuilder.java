@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.springframework.binding.PropertyAccessStrategy;
 import org.springframework.binding.support.BeanPropertyAccessStrategy;
-import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
+import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald

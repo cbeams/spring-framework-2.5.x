@@ -15,10 +15,10 @@
  */
 package org.springframework.rules.support;
 
-import org.springframework.rules.Constraint;
 import org.springframework.rules.Rules;
 import org.springframework.rules.RulesProvider;
 import org.springframework.rules.constraint.property.PropertyConstraint;
+import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald

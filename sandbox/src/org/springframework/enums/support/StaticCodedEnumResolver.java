@@ -22,10 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.enums.CodedEnum;
-import org.springframework.rules.Closure;
-import org.springframework.rules.ProcessTemplate;
-import org.springframework.rules.closure.Block;
 import org.springframework.util.Assert;
+import org.springframework.util.closure.Closure;
+import org.springframework.util.closure.ProcessTemplate;
+import org.springframework.util.closure.support.Block;
 
 /**
  * Resolves statically (in java code) defined enumerations.

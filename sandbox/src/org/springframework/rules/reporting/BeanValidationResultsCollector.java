@@ -15,16 +15,16 @@
  */
 package org.springframework.rules.reporting;
 
-import org.springframework.rules.Constraint;
 import org.springframework.rules.Rules;
-import org.springframework.rules.closure.Block;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
-import org.springframework.rules.support.Algorithms;
 import org.springframework.util.Assert;
+import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.support.Algorithms;
+import org.springframework.util.closure.support.Block;
 import org.springframework.util.visitor.Visitor;
 
 /**
