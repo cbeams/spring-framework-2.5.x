@@ -335,12 +335,14 @@
       </listitem>
     </itemizedlist>
 
-    <para>The first approach is recommended, so we'll focus on it here.</para>
+    <para>We generally recommand the first approach.</para>
 
     <para>The second approach is similar to using the JTA
     <literal>UserTransaction</literal> API (although exception handling is
     less cumbersome).</para>
-
+    
+    <sect2>
+    	<title>Using the <literal>TransactionTemplate</literal></title>
     <para>The <literal>TransactionTemplate</literal> adopts the same approach
     as other Spring <emphasis>templates</emphasis> such as
     <literal>JdbcTemplate</literal> and <literal>HibernateTemplate</literal>.
@@ -369,7 +371,7 @@
     }
 });</programlisting></para>
 
-    <para>Code within the callback can role the transaction back by calling
+    <para>Code within the callback can roll the transaction back by calling
     the <literal>setRollbackOnly()</literal> method on the
     <literal>TransactionStatus</literal> object.</para>
 
@@ -382,6 +384,30 @@
     <literal>PlatformTransactionManager</literal>. There's no JNDI lookup or
     static magic here: it's a simple interface. As usual, you can use Spring
     to simplify your unit testing.</para>
+  </sect2>
+  <sect2>
+  	<title>Using the <literal>PlatformTransactionManager</literal></title>
+  	<para>
+  	  You can also use the <literal>org.springframework.transaction.PlatformTransactionManager</literal>
+  	  directly to manage your transaction. Simply pass the implementation of the PlatformTransactionManager
+  	  you're using to your bean via a bean reference. Then, using the <literal>TransactionDefinition</literal>
+  	  and <literal>TransactionStatus</literal> objects you can initiate transactions, rollback and commit.
+  	</para>
+  	
+    <para><programlisting>DefaultTransactionDefinition def = new DefaultTransactionDefinition()
+def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+TransactionStatus status = transactionManager.getTransactionDefinition(def);
+
+try {
+    // execute your business logic here
+} catch (MyException ex) {
+    transactionManager.rollback(status);
+    throw ex;
+}
+transactionManager.commit(status);</programlisting></para>
+  </sect2>
+  	  
   </sect1>
 
   <sect1>
