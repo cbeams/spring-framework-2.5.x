@@ -63,7 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.14 2003-11-21 09:55:42 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.15 2003-11-21 22:41:23 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -139,8 +139,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Create new empty BeanWrapperImpl. Object needs to be set afterwards.
-	 * @see #setObject
+	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
+	 * @see #setWrappedInstance
 	 */
 	public BeanWrapperImpl() {
 	}
@@ -151,7 +151,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object) throws BeansException {
-		setObject(object);
+		setWrappedInstance(object);
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object, String nestedPath) throws BeansException {
-		setObject(object);
+		setWrappedInstance(object);
 		this.nestedPath = nestedPath;
 	}
 
@@ -172,16 +172,21 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws BeansException if the class cannot be wrapped by a BeanWrapper
 	 */
 	public BeanWrapperImpl(Class clazz) throws BeansException {
-		setObject(BeanUtils.instantiateClass(clazz));
+		setWrappedInstance(BeanUtils.instantiateClass(clazz));
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of BeanWrapper
+	//---------------------------------------------------------------------
+
 	/**
-	 * Implementation method to switch the target object, replacing the cached introspection results
-	 * only if the class of the new object is different to that of the replaced object
+	 * Switches the target object, replacing the cached introspection results only
+	 * if the class of the new object is different to that of the replaced object.
 	 * @param object new target
 	 * @throws BeansException if the object cannot be changed
 	 */
-	private void setObject(Object object) throws BeansException {
+	public void setWrappedInstance(Object object) throws BeansException {
 		if (object == null)
 			throw new FatalBeanException("Cannot set BeanWrapperImpl target to a null object", null);
 		this.object = object;
@@ -191,15 +196,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		setEventPropagationEnabled(this.eventPropagationEnabled);
 		// assert: cachedIntrospectionResults != null
-	}
-
-
-	//---------------------------------------------------------------------
-	// Implementation of BeanWrapper
-	//---------------------------------------------------------------------
-
-	public void setWrappedInstance(Object object) throws BeansException {
-		setObject(object);
 	}
 
 	public void newWrappedInstance() throws BeansException {
