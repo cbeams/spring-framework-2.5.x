@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Terminates a active web flow session when entered.
+ * Terminates an active web flow session when entered.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -70,12 +70,12 @@ public class EndState extends AbstractState {
 				logger.debug("Resuming parent flow '" + flowExecution.getActiveFlowId() + "' in state '"
 						+ flowExecution.getCurrentStateId() + "'");
 			}
-			Assert.isInstanceOf(FlowAttributesMapper.class, flowExecution.getCurrentState());
-			FlowAttributesMapper resumingState = (FlowAttributesMapper)flowExecution.getCurrentState();
+			Assert.isInstanceOf(SubFlowState.class, flowExecution.getCurrentState());
+			SubFlowState resumingState = (SubFlowState)flowExecution.getCurrentState();
 			resumingState.mapSubFlowOutputAttributes(endingFlowSession, flowExecution.getActiveFlowSession());
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
-			return ((TransitionableState)resumingState).signalEvent(getId(), flowExecution, request, response);
+			return resumingState.signalEvent(getId(), flowExecution, request, response);
 		}
 		else {
 			// entire flow execution has ended, return ending view if applicable
