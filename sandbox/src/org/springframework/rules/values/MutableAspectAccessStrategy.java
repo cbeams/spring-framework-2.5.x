@@ -1,7 +1,7 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/MutableAspectAccessStrategy.java,v 1.1 2004-06-12 16:32:18 kdonald Exp $
- * $Revision: 1.1 $
- * $Date: 2004-06-12 16:32:18 $
+ * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/MutableAspectAccessStrategy.java,v 1.2 2004-06-13 11:35:31 kdonald Exp $
+ * $Revision: 1.2 $
+ * $Date: 2004-06-13 11:35:31 $
  * 
  * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
  */
@@ -16,7 +16,4 @@ public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
     public void removeValueListener(ValueListener o, String aspect);
 
     public void setValue(String aspect, Object value);
-
-    public Object getDomainObject();
-    
 }

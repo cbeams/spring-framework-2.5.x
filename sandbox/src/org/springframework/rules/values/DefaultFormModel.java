@@ -1,7 +1,7 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/DefaultFormModel.java,v 1.2 2004-06-12 16:32:18 kdonald Exp $
- * $Revision: 1.2 $
- * $Date: 2004-06-12 16:32:18 $
+ * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/DefaultFormModel.java,v 1.3 2004-06-13 11:35:31 kdonald Exp $
+ * $Revision: 1.3 $
+ * $Date: 2004-06-13 11:35:31 $
  * 
  * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
  */
@@ -21,6 +21,8 @@ public class DefaultFormModel implements FormModel {
 
     private MutableAspectAccessStrategy domainObjectAccessStrategy;
 
+    private Object domainObject;
+    
     private ValueModel domainObjectHolder;
 
     private ValueModel commitTrigger;
