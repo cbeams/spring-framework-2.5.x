@@ -1,14 +1,15 @@
 package org.springframework.samples.petclinic.validation;
 
 import org.springframework.samples.petclinic.Visit;
-
 import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 /**
- * JavaBean <code>Validator</code> for <code>Visit</code> Forms.
+ * <code>Validator</code> for <code>Visit</code> forms.
  *
  * @author Ken Krebs
+ * @author Juergen Hoeller
  */
 public class VisitValidator implements Validator {
 
@@ -17,11 +18,7 @@ public class VisitValidator implements Validator {
 	}
 
 	public void validate(Object obj, Errors errors) {
-		Visit visit = (Visit) obj;
-		String description = visit.getDescription();
-		if (description == null || "".equals(description)) {
-			errors.rejectValue("description", "required", null, "required");
-		}
+		ValidationUtils.rejectIfEmpty(errors, "description", "required", "required");
 	}
 
 }

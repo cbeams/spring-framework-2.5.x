@@ -1,13 +1,15 @@
 package org.springframework.samples.petclinic.validation;
 
 import org.springframework.samples.petclinic.Pet;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 /**
- * JavaBean <code>Validator</code> for <code>Pet</code> Forms.
+ * <code>Validator</code> for <code>Pet</code> forms.
  *
  * @author Ken Krebs
+ * @author Juergen Hoeller
  */
 public class PetValidator implements Validator {
 
@@ -17,12 +19,13 @@ public class PetValidator implements Validator {
 
 	public void validate(Object obj, Errors errors) {
 		Pet pet = (Pet) obj;
+
 		String name = pet.getName();
-		if (name == null || "".equals(name)) {
-			errors.rejectValue("name", "required", null, "required");
+		if (!StringUtils.hasLength(name)) {
+			errors.rejectValue("name", "required", "required");
 		}
-		if (pet.isNew() && pet.getOwner().getPet(name, true) != null) {
-			errors.rejectValue("name", "duplicate", null, "already exists");
+		else if (pet.isNew() && pet.getOwner().getPet(name, true) != null) {
+			errors.rejectValue("name", "duplicate", "already exists");
 		}
 	}
 

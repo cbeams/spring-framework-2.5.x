@@ -1,14 +1,16 @@
 package org.springframework.samples.petclinic.validation;
 
 import org.springframework.samples.petclinic.Owner;
-
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 /**
- * JavaBean <code>Validator</code> for <code>Owner</code> Forms.
+ * <code>Validator</code> for <code>Owner</code> forms.
  *
  * @author Ken Krebs
+ * @author Juergen Hoeller
  */
 public class OwnerValidator implements Validator {
 
@@ -18,31 +20,22 @@ public class OwnerValidator implements Validator {
 
 	public void validate(Object obj, Errors errors) {
 		Owner owner = (Owner) obj;
-		String firstName = owner.getFirstName();
-		if (firstName == null || "".equals(firstName)) {
-			errors.rejectValue("firstName", "required", null, "required");
-		}
-		String lastName = owner.getLastName();
-		if (lastName == null || "".equals(lastName)) {
-			errors.rejectValue("lastName", "required", null, "required");
-		}
-		String address = owner.getAddress();
-		if (address == null || "".equals(address)) {
-			errors.rejectValue("address", "required", null, "required");
-		}
-		String city = owner.getCity();
-		if (city == null || "".equals(city)) {
-			errors.rejectValue("city", "required", null, "required");
-		}
+
+		ValidationUtils.rejectIfEmpty(errors, "firstName", "required", "required");
+		ValidationUtils.rejectIfEmpty(errors, "lastName", "required", "required");
+		ValidationUtils.rejectIfEmpty(errors, "address", "required", "required");
+		ValidationUtils.rejectIfEmpty(errors, "city", "required", "required");
+
 		String telephone = owner.getTelephone();
-		if (telephone == null || "".equals(telephone)) {
-			errors.rejectValue("telephone", "required", null, "required");
-			return;
+		if (!StringUtils.hasLength(telephone)) {
+			errors.rejectValue("telephone", "required", "required");
 		}
-		for (int i = 0; i < telephone.length(); ++i) {
-			if ((Character.isDigit(telephone.charAt(i))) == false) {
-				errors.rejectValue("telephone", "nonNumeric", null, "non-numeric");
-				break;
+		else {
+			for (int i = 0; i < telephone.length(); ++i) {
+				if ((Character.isDigit(telephone.charAt(i))) == false) {
+					errors.rejectValue("telephone", "nonNumeric", "non-numeric");
+					break;
+				}
 			}
 		}
 	}
