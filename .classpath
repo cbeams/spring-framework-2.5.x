@@ -66,7 +66,6 @@
 	<classpathentry kind="lib" path="lib/aopalliance/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/axis/saaj.jar"/>
 	<classpathentry kind="lib" path="lib/axis/wsdl4j.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate/odmg.jar"/>
 	<classpathentry kind="lib" path="lib/hsqldb/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-discovery.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-validator.jar"/>
@@ -95,7 +94,6 @@
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/struts/struts.jar"/>
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-view-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/cayenne/cayenne-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/itext/itext-1.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-common-2.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-codec.jar"/>
@@ -109,5 +107,6 @@
 	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/ognl/ognl.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/rowset.jar"/>
+	<classpathentry kind="lib" path="lib/cayenne/cayenne-nodeps.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
