@@ -60,9 +60,11 @@ import org.xml.sax.SAXParseException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.6 2003-10-04 15:57:20 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.7 2003-10-10 13:56:41 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
+
+	public static final String BEAN_NAME_DELIMITERS = ",; ";
 
 	/**
 	 * Value of a T/F attribute that represents true.
@@ -301,9 +303,9 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 		String name = el.getAttribute(NAME_ATTRIBUTE);
 		if (name != null && !"".equals(name)) {
-			// Automatically create aliases from the name CSV.
+			// Automatically create aliases from the name.
 			// Used for names that aren't legal in id attributes.
-			String[] aliases = StringUtils.commaDelimitedListToStringArray(name);
+			String[] aliases = StringUtils.tokenizeToStringArray(name, BEAN_NAME_DELIMITERS, true, true);
 			for (int i = 0; i < aliases.length; i++) {
 				registerAlias(id, aliases[i]);
 			}
