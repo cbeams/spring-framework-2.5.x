@@ -198,11 +198,11 @@ public abstract class SessionFactoryUtils {
 					TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 				}
 
-				else if (sessionFactory instanceof SessionFactoryImplementor) {
+				else {
 					// JTA synchronization is only possible with a javax.transaction.TransactionManager.
 					// We'll check the Hibernate SessionFactory: If a TransactionManagerLookup is specified
 					// in Hibernate configuration, it will contain a TransactionManager reference.
-					TransactionManager jtaTm = ((SessionFactoryImplementor) sessionFactory).getTransactionManager();
+					TransactionManager jtaTm = getJtaTransactionManager(sessionFactory, session);
 					if (jtaTm != null) {
 						try {
 							if (jtaTm.getStatus() == Status.STATUS_ACTIVE || jtaTm.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
@@ -232,6 +232,35 @@ public abstract class SessionFactoryUtils {
 		catch (HibernateException ex) {
 			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex);
 		}
+	}
+
+	/**
+	 * Try to retrieve the JTA TransactionManager from the given SessionFactory
+	 * and/or Session. Check the passed-in SessionFactory for implementing
+	 * SessionFactoryImplementor (the usual case), falling back to the
+	 * SessionFactory reference that the Session itself carries (for example,
+	 * when using Hibernate's JCA Connector, i.e. JCASessionFactoryImpl).
+	 * @param sessionFactory passed-in Hibernate SessionFactory
+	 * @param session newly created Hibernate Session
+	 * @return the JTA TransactionManager, if any
+	 * @see javax.transaction.TransactionManager
+	 * @see SessionFactoryImplementor#getTransactionManager
+	 * @see Session#getSessionFactory
+	 * @see net.sf.hibernate.impl.SessionFactoryImpl
+	 * @see net.sf.hibernate.jca.JCASessionFactoryImpl
+	 */
+	private static TransactionManager getJtaTransactionManager(SessionFactory sessionFactory, Session session) {
+		SessionFactoryImplementor sessionFactoryImpl = null;
+		if (sessionFactory instanceof SessionFactoryImplementor) {
+			sessionFactoryImpl = ((SessionFactoryImplementor) sessionFactory);
+		}
+		else {
+			SessionFactory internalFactory = session.getSessionFactory();
+			if (internalFactory instanceof SessionFactoryImplementor) {
+				sessionFactoryImpl = (SessionFactoryImplementor) internalFactory;
+			}
+		}
+		return (sessionFactoryImpl != null ? sessionFactoryImpl.getTransactionManager() : null);
 	}
 
 	/**
@@ -352,14 +381,13 @@ public abstract class SessionFactoryUtils {
 		private boolean hibernateTransactionCompletion;
 
 		private SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory,
-		                               SQLExceptionTranslator jdbcExceptionTranslator, boolean newSession) {
+																				 SQLExceptionTranslator jdbcExceptionTranslator, boolean newSession) {
 			this.sessionHolder = sessionHolder;
 			this.sessionFactory = sessionFactory;
 			this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 			// check whether the SessionFactory has a JTA TransactionManager
 			this.hibernateTransactionCompletion =
-					(sessionFactory instanceof SessionFactoryImplementor &&
-					 ((SessionFactoryImplementor) sessionFactory).getTransactionManager() != null);
+					(getJtaTransactionManager(sessionFactory, sessionHolder.getSession()) != null);
 			this.newSession = newSession;
 		}
 

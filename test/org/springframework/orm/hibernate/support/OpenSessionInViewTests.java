@@ -59,6 +59,8 @@ public class OpenSessionInViewTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
 		session.setFlushMode(FlushMode.NEVER);
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
@@ -104,6 +106,8 @@ public class OpenSessionInViewTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
 		sfControl.replay();
 		sessionControl.replay();
 		interceptor.preHandle(request, response, "handler");
@@ -142,6 +146,8 @@ public class OpenSessionInViewTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
 		session.setFlushMode(FlushMode.NEVER);
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -156,6 +162,8 @@ public class OpenSessionInViewTests extends TestCase {
 
 		sf2.openSession();
 		sf2Control.setReturnValue(session2, 1);
+		session2.getSessionFactory();
+		session2Control.setReturnValue(sf);
 		session2.setFlushMode(FlushMode.NEVER);
 		session2Control.setVoidCallable(1);
 		session2.close();

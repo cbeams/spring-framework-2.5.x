@@ -46,6 +46,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -73,6 +75,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
 		session.setFlushMode(FlushMode.NEVER);
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -154,6 +158,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
 		SQLException sqlex = new SQLException("argh", "27");
 		session.flush();
 		sessionControl.setThrowable(new JDBCException(sqlex), 1);
@@ -187,6 +193,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		sf.openSession(entityInterceptor);
 		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
