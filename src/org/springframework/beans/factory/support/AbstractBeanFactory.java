@@ -6,6 +6,7 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
+import java.beans.PropertyEditor;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.30 2003-12-04 18:44:21 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.31 2003-12-10 08:53:19 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -86,6 +87,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 	/** Parent bean factory, for bean inheritance support */
 	private BeanFactory parentBeanFactory;
+
+	private Map customEditors = new HashMap();
 
 	/** BeanPostProcessors to apply on createBean */
 	private final List beanPostProcessors = new ArrayList();
@@ -119,33 +122,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	public AbstractBeanFactory(BeanFactory parentBeanFactory) {
 		this();
 		this.parentBeanFactory = parentBeanFactory;
-	}
-
-	public BeanFactory getParentBeanFactory() {
-		return parentBeanFactory;
-	}
-
-	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
-		this.beanPostProcessors.add(beanPostProcessor);
-	}
-
-	/**
-	 * Return the list of BeanPostProcessors that will get applied
-	 * to beans created with this factory.
-	 */
-	public List getBeanPostProcessors() {
-		return beanPostProcessors;
-	}
-
-	public void ignoreDependencyType(Class type) {
-		this.ignoreDependencyTypes.add(type);
-	}
-
-	/**
-	 * Return the set of classes that will get ignored for autowiring.
-	 */
-	public Set getIgnoredDependencyTypes() {
-		return ignoreDependencyTypes;
 	}
 
 
@@ -304,8 +280,52 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 
 	//---------------------------------------------------------------------
+	// Implementation of HierarchicalBeanFactory interface
+	//---------------------------------------------------------------------
+
+	public BeanFactory getParentBeanFactory() {
+		return parentBeanFactory;
+	}
+
+
+	//---------------------------------------------------------------------
 	// Implementation of ConfigurableBeanFactory interface
 	//---------------------------------------------------------------------
+
+	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
+		this.customEditors.put(requiredType, propertyEditor);
+	}
+
+	/**
+	 * Return the map of custom editors, with Classes as keys
+	 * and PropertyEditors as values.
+	 */
+	public Map getCustomEditors() {
+		return customEditors;
+	}
+
+	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+		this.beanPostProcessors.add(beanPostProcessor);
+	}
+
+	/**
+	 * Return the list of BeanPostProcessors that will get applied
+	 * to beans created with this factory.
+	 */
+	public List getBeanPostProcessors() {
+		return beanPostProcessors;
+	}
+
+	public void ignoreDependencyType(Class type) {
+		this.ignoreDependencyTypes.add(type);
+	}
+
+	/**
+	 * Return the set of classes that will get ignored for autowiring.
+	 */
+	public Set getIgnoredDependencyTypes() {
+		return ignoreDependencyTypes;
+	}
 
 	public PropertyValues getPropertyValues(String beanName) {
 		return getBeanDefinition(beanName).getPropertyValues();
@@ -504,6 +524,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 		else {
 			instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
+			initBeanWrapper(instanceWrapper);
 		}
 
 		Object bean = instanceWrapper.getWrappedInstance();
@@ -524,6 +545,18 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			this.singletonCache.put(beanName, bean);
 		}
 		return bean;
+	}
+
+	/**
+	 * Initialize the given BeanWrapper with the custom editors registered
+	 * with this factory.
+	 * @param bw the BeanWrapper to initialize
+	 */
+	protected void initBeanWrapper(BeanWrapper bw) {
+		for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
+			Class clazz = (Class) it.next();
+			bw.registerCustomEditor(clazz, (PropertyEditor) this.customEditors.get(clazz));
+		}
 	}
 
 	/**
@@ -578,6 +611,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		});
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
+		initBeanWrapper(bw);
 		Constructor constructorToUse = null;
 		Object[] argsToUse = null;
 		int minTypeDiffWeight = Integer.MAX_VALUE;

@@ -1,5 +1,7 @@
 package org.springframework.beans.factory.config;
 
+import java.beans.PropertyEditor;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -19,6 +21,14 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * @see ConfigurableListableBeanFactory
  */
 public interface ConfigurableBeanFactory extends BeanFactory {
+
+	/**
+	 * Register the given custom property editor for all properties
+	 * of the given type.
+	 * @param requiredType type of the property
+	 * @param propertyEditor editor to register
+	 */
+	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 
 	/**
 	 * Add a new BeanPostPrcoessor that will get applied to beans
