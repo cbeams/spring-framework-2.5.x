@@ -171,9 +171,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * should always return the same proxy instance (which implies the same target)
 	 * or whether it should return a new prototype instance, which implies that
 	 * the target and interceptors may be new instances also, if they are obtained
-	 * from prototype bean definitions.
-	 * This allows for fine control of independence/uniqueness in the object graph.
-	 * @param singleton
+	 * from prototype bean definitions. This allows for fine control of
+	 * independence/uniqueness in the object graph.
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
@@ -193,7 +192,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		createAdvisorChain();
 		if (this.singleton) {
 			this.targetSource = freshTargetSource();
-			// eagerly initialize the shared singleton instance
+			// Eagerly initialize the shared singleton instance.
 			getSingletonInstance();
 			// We must listen to superclass advice change events to recache the singleton
 			// instance if necessary.
@@ -323,16 +322,17 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 	
 	/**
-	 * Look at bean factory metadata to work out whether
-	 * this bean name, which concludes the interceptorNames list,
-	 * is an Advisor or Advice, or may be a target
+	 * Look at bean factory metadata to work out whether this bean name,
+	 * which concludes the interceptorNames list, is an Advisor or Advice,
+	 * or may be a target.
 	 * @param beanName bean name to check
 	 * @return true if it's an Advisor or Advice
 	 */
 	private boolean isNamedBeanAnAdvisorOrAdvice(String beanName) {
 		Class namedBeanClass = this.beanFactory.getType(beanName);
 		if (namedBeanClass != null) {
-			return Advisor.class.isAssignableFrom(namedBeanClass) || Advice.class.isAssignableFrom(namedBeanClass);
+			return Advisor.class.isAssignableFrom(namedBeanClass) ||
+					Advice.class.isAssignableFrom(namedBeanClass);
 		}
 		// Treat it as an Advisor if we can't tell.
 		return true;
@@ -502,15 +502,15 @@ public class ProxyFactoryBean extends AdvisedSupport
 		}
 		
 		public Advice getAdvice() {
-			throw new UnsupportedOperationException("Cannot invoke methods: " + message);
+			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}
 		
 		public boolean isPerInstance() {
-			throw new UnsupportedOperationException("Cannot invoke methods: " + message);
+			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}
 		
 		public String toString() {
-			return message;
+			return this.message;
 		}
 	}
 
