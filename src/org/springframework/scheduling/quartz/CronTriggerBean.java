@@ -62,6 +62,33 @@ public class CronTriggerBean extends CronTrigger
 
 	private String beanName;
 
+
+	/**
+	 * Set the misfire instruction via the name of the corresponding
+	 * constant in the SimpleTrigger class. Default is
+	 * MISFIRE_INSTRUCTION_SMART_POLICY.
+	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_FIRE_ONCE_NOW
+	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_DO_NOTHING
+	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
+	 */
+	public void setMisfireInstructionName(String constantName) {
+		setMisfireInstruction(constants.asNumber(constantName).intValue());
+	}
+
+	/**
+	 * Set a list of TriggerListener names for this job, referring to
+	 * non-global TriggerListeners registered with the Scheduler.
+	 * <p>A TriggerListener name always refers to the name returned
+	 * by the TriggerListener implementation.
+	 * @see SchedulerFactoryBean#setTriggerListeners
+	 * @see org.quartz.TriggerListener#getName
+	 */
+	public void setTriggerListenerNames(String[] names) {
+		for (int i = 0; i < names.length; i++) {
+			addTriggerListener(names[i]);
+		}
+	}
+
 	/**
 	 * Set the JobDetail that this trigger should be associated with.
 	 * <p>This is typically used with a bean reference if the JobDetail
@@ -78,21 +105,10 @@ public class CronTriggerBean extends CronTrigger
 		return jobDetail;
 	}
 
-	/**
-	 * Set the misfire instruction via the name of the corresponding
-	 * constant in the SimpleTrigger class. Default is
-	 * MISFIRE_INSTRUCTION_SMART_POLICY.
-	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_FIRE_ONCE_NOW
-	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_DO_NOTHING
-	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
-	 */
-	public void setMisfireInstructionName(String constantName) {
-		setMisfireInstruction(constants.asNumber(constantName).intValue());
-	}
-
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
+
 
 	public void afterPropertiesSet() throws ParseException {
 		if (getName() == null) {

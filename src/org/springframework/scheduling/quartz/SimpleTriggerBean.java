@@ -57,14 +57,58 @@ public class SimpleTriggerBean extends SimpleTrigger
 
 	private static final Constants constants = new Constants(SimpleTrigger.class);
 
-	private JobDetail jobDetail;
-
 	private long startDelay = 0;
+
+	private JobDetail jobDetail;
 
 	private String beanName;
 
+
 	public SimpleTriggerBean() {
 		setRepeatCount(REPEAT_INDEFINITELY);
+	}
+
+	/**
+	 * Set the misfire instruction via the name of the corresponding
+	 * constant in the SimpleTrigger class. Default is
+	 * MISFIRE_INSTRUCTION_SMART_POLICY.
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_FIRE_NOW
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_EXISTING_REPEAT_COUNT
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_REMAINING_REPEAT_COUNT
+	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
+	 */
+	public void setMisfireInstructionName(String constantName) {
+		setMisfireInstruction(constants.asNumber(constantName).intValue());
+	}
+
+	/**
+	 * Set a list of TriggerListener names for this job, referring to
+	 * non-global TriggerListeners registered with the Scheduler.
+	 * <p>A TriggerListener name always refers to the name returned
+	 * by the TriggerListener implementation.
+	 * @see SchedulerFactoryBean#setTriggerListeners
+	 * @see org.quartz.TriggerListener#getName
+	 */
+	public void setTriggerListenerNames(String[] names) {
+		for (int i = 0; i < names.length; i++) {
+			addTriggerListener(names[i]);
+		}
+	}
+
+	/**
+	 * Set the delay before starting the job for the first time.
+	 * The given number of milliseconds will be added to the current
+	 * time to calculate the start time. Default is 0.
+	 * <p>This delay will just be applied if no custom start time was
+	 * specified. However, in typical usage within a Spring context,
+	 * the start time will be the container startup time anyway.
+	 * Specifying a relative delay is appropriate in that case.
+	 * @see #setStartTime
+	 */
+	public void setStartDelay(long startDelay) {
+		this.startDelay = startDelay;
 	}
 
 	/**
@@ -83,38 +127,10 @@ public class SimpleTriggerBean extends SimpleTrigger
 		return jobDetail;
 	}
 
-	/**
-	 * Set the delay before starting the job for the first time.
-	 * The given number of milliseconds will be added to the current
-	 * time to calculate the start time. Default is 0.
-	 * <p>This delay will just be applied if no custom start time was
-	 * specified. However, in typical usage within a Spring context,
-	 * the start time will be the container startup time anyway.
-	 * Specifying a relative delay is appropriate in that case.
-	 * @see #setStartTime
-	 */
-	public void setStartDelay(long startDelay) {
-		this.startDelay = startDelay;
-	}
-
-	/**
-	 * Set the misfire instruction via the name of the corresponding
-	 * constant in the SimpleTrigger class. Default is
-	 * MISFIRE_INSTRUCTION_SMART_POLICY.
-	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_FIRE_NOW
-	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
-	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT
-	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_EXISTING_REPEAT_COUNT
-	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_REMAINING_REPEAT_COUNT
-	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
-	 */
-	public void setMisfireInstructionName(String constantName) {
-		setMisfireInstruction(constants.asNumber(constantName).intValue());
-	}
-
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
+
 
 	public void afterPropertiesSet() throws ParseException {
 		if (getName() == null) {
