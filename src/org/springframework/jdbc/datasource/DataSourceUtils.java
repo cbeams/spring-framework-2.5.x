@@ -160,6 +160,11 @@ public abstract class DataSourceUtils {
 	 * Actually get a JDBC Connection for the given DataSource.
 	 * Same as getConnection, but throwing the original SQLException.
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
+	 * @param dataSource DataSource to get Connection from
+	 * @param allowSynchronization if a new JDBC Connection is supposed to be
+	 * registered with transaction synchronization (if synchronization is active).
+	 * This will always be true for typical data access code.
+	 * @return a JDBC Connection from this DataSource
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #getConnection(DataSource, boolean)
 	 * @see TransactionAwareDataSourceProxy
@@ -188,7 +193,7 @@ public abstract class DataSourceUtils {
 
 	/**
 	 * Prepare the given Connection with the given transaction semantics.
-	 * @param con Connection to prepare
+	 * @param con the Connection to prepare
 	 * @param definition the transaction definition to apply
 	 * @return the previous isolation level, if any
 	 * @throws SQLException if thrown by JDBC methods
@@ -230,7 +235,7 @@ public abstract class DataSourceUtils {
 	/**
 	 * Reset the given Connection after a transaction,
 	 * regarding read-only flag and isolation level.
-	 * @param con Conneciton to reset
+	 * @param con the Connection to reset
 	 * @param previousIsolationLevel the isolation level to restore, if any
 	 * @see #prepareConnectionForTransaction
 	 */
@@ -294,16 +299,19 @@ public abstract class DataSourceUtils {
 	 * Actually close a JDBC Connection for the given DataSource.
 	 * Same as closeConnectionIfNecessary, but throwing the original SQLException.
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
+	 * @param con Connection to close if necessary
+	 * (if this is null, the call will be ignored)
+	 * @param dataSource DataSource that the Connection came from
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #closeConnectionIfNecessary
 	 * @see TransactionAwareDataSourceProxy
 	 */
-	protected static void doCloseConnectionIfNecessary(Connection con, DataSource ds) throws SQLException {
+	protected static void doCloseConnectionIfNecessary(Connection con, DataSource dataSource) throws SQLException {
 		if (con == null) {
 			return;
 		}
 
-		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
+		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (conHolder != null && con == conHolder.getConnection()) {
 			// It's the transactional Connection: Don't close it.
 			return;
@@ -311,7 +319,7 @@ public abstract class DataSourceUtils {
 		
 		// Leave the Connection open only if the DataSource is our
 		// special data source, and it wants the Connection left open.
-		if (!(ds instanceof SmartDataSource) || ((SmartDataSource) ds).shouldClose(con)) {
+		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {
 			logger.debug("Closing JDBC connection");
 			con.close();
 		}

@@ -92,11 +92,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public static final int SYNCHRONIZATION_NEVER = 2;
 
-	/** Transient to optimize serialization */
-	protected transient Log logger = LogFactory.getLog(getClass());
 
 	/** Constants instance for AbstractPlatformTransactionManager */
 	private static final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
+
+	/** Transient to optimize serialization */
+	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private int transactionSynchronization = SYNCHRONIZATION_ALWAYS;
 

@@ -22,6 +22,9 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -32,6 +35,9 @@ import org.springframework.beans.factory.InitializingBean;
  * @since 19.07.2004
  */
 public abstract class DelegatingDataSource implements DataSource, InitializingBean {
+
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private DataSource targetDataSource;
 

@@ -27,7 +27,7 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 /**
- * Proxy for a target DataSource that is aware of Spring-managed transactions.
+ * Proxy for a target DataSource, adding awareness of Spring-managed transactions.
  * Similar to a transactional JNDI DataSource as provided by a J2EE server.
  *
  * <p>Delegates to DataSourceUtils for automatically participating in thread-bound
@@ -60,6 +60,7 @@ import javax.sql.DataSource;
  * @see DataSourceUtils#doGetConnection
  * @see DataSourceUtils#doCloseConnectionIfNecessary
  * @see DataSourceUtils#applyTransactionTimeout
+ * @see ConnectionProxy
  * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
  */
 public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
@@ -83,8 +84,11 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	/**
 	 * Delegate to DataSourceUtils for automatically participating in Spring-managed
 	 * transactions. Throws the original SQLException, if any.
+	 * <p>The returned Connection handle implements the ConnectionProxy interface,
+	 * allowing to retrieve the underlying target Connection.
 	 * @return a transactional Connection if any, a new one else
 	 * @see DataSourceUtils#doGetConnection
+	 * @see ConnectionProxy#getTargetConnection
 	 */
 	public Connection getConnection() throws SQLException {
 		Connection con = DataSourceUtils.doGetConnection(getTargetDataSource(), true);
@@ -95,14 +99,15 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * Wrap the given Connection with a proxy that delegates every method call to it
 	 * but delegates close calls to DataSourceUtils.
 	 * @param target the original Connection to wrap
+	 * @param dataSource DataSource that the Connection came from
 	 * @return the wrapped Connection
 	 * @see DataSourceUtils#doCloseConnectionIfNecessary
 	 */
-	protected Connection getTransactionAwareConnectionProxy(Connection target, DataSource ds) {
+	protected Connection getTransactionAwareConnectionProxy(Connection target, DataSource dataSource) {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
 				new Class[] {ConnectionProxy.class},
-				new TransactionAwareInvocationHandler(target, ds));
+				new TransactionAwareInvocationHandler(target, dataSource));
 	}
 
 
