@@ -225,7 +225,7 @@ public abstract class PersistenceManagerFactoryUtils {
 			pm.close();
 		}
 		catch (JDOException ex) {
-			logger.error("Cannot close JDO persistence manager", ex);
+			logger.error("Could not close JDO persistence manager", ex);
 		}
 	}
 

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.jdo;
 
@@ -416,7 +416,6 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * Invocation handler that suppresses close calls on JDO PersistenceManagers.
 	 * Also prepares returned Query and Criteria objects.
 	 * @see javax.jdo.PersistenceManager#close
-	 * @see #prepareQuery
 	 */
 	private class CloseSuppressingInvocationHandler implements InvocationHandler {
 
