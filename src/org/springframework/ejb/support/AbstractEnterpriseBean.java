@@ -21,17 +21,21 @@ import org.springframework.beans.factory.support.BootstrapException;
  * BeanFactory. Subclasses act as a facade, with the business logic
  * deferred to beans in the BeanFactory.
  *
- * <p>Default is to use an XmlBeanFactoryLoader. For a strategy
- * other than loading an XML bean factory from the classpath
- * (with a JNDI name specified) call the setBeanFactoryLoader()
- * method <i>before</i> your EJB's ejbCreate() method is invoked
- * --for example, in setSessionContext().
+ * <p>Default is to use an XmlApplicationContextBeanFactoryLoader, which
+ * will initialize an XmlApplicationContext from the classpath (based
+ * on a JNDI name specified). For a lighter weight implementation when
+ * ApplicationContext usage is not required, setBeanFactoryLoader() may
+ * be called (<i>before</i> your EJB's ejbCreate() method is invoked, 
+ * for example, in setSessionContext()) with a value of XmlBeanFactoryLoader,
+ * which will load an XML bean factory from the classpath. Alternately,
+ * setBeanFactoryLoader() may be called with a completely custom
+ * implementation of the BeanFactoryLoader.
  *
  * <p>Note that we cannot use final for our implementation of
  * EJB lifecycle methods, as this violates the EJB specification.
  *
  * @author Rod Johnson
- * @version $Id: AbstractEnterpriseBean.java,v 1.5 2004-01-04 23:43:42 jhoeller Exp $
+ * @version $Id: AbstractEnterpriseBean.java,v 1.6 2004-01-18 00:09:10 colins Exp $
  */
 abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
@@ -41,7 +45,10 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 */
 	protected Log logger = LogFactory.getLog(getClass());
 
-	/** Helper strategy that knows how to load Spring BeanFactory */
+	/**
+	 * Helper strategy that knows how to load Spring BeanFactory (or
+	 * ApplicationContext subclass).
+	 */
 	private BeanFactoryLoader beanFactoryLoader;
 
 	/** Spring BeanFactory that provides the namespace for this EJB */
@@ -55,7 +62,7 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 */
 	void loadBeanFactory() throws BootstrapException {
 		if (this.beanFactoryLoader == null) {
-			this.beanFactoryLoader = new XmlBeanFactoryLoader();
+			this.beanFactoryLoader = new XmlApplicationContextBeanFactoryLoader();
 		}
 		this.beanFactory = this.beanFactoryLoader.loadBeanFactory();
 	}
