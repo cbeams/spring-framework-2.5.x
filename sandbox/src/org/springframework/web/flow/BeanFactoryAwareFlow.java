@@ -6,8 +6,10 @@ package org.springframework.web.flow;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
 
@@ -71,14 +73,31 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 		return beanFactory;
 	}
 
+	protected ListableBeanFactory getListableBeanFactory() {
+		Assert.isInstanceOf(ListableBeanFactory.class, getBeanFactory());
+		return (ListableBeanFactory)beanFactory;
+	}
+
 	protected AutowireCapableBeanFactory getAutowireCapableBeanFactory() {
 		Assert.isInstanceOf(AutowireCapableBeanFactory.class, getBeanFactory());
 		return (AutowireCapableBeanFactory)beanFactory;
 	}
 
+	protected Flow getFlow(Class flowClassName) {
+		Assert.isTrue(Flow.class.isAssignableFrom(flowClassName), "The class '" + flowClassName
+				+ "' must be a subclass of '" + Flow.class.getName() + "'");
+		return (Flow)BeanFactoryUtils.beanOfTypeIncludingAncestors(getListableBeanFactory(), flowClassName);
+	}
+
 	protected ActionBean getActionBean(Class actionBeanClassName) {
-		return (ActionBean)getAutowireCapableBeanFactory().autowire(actionBeanClassName,
-				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+		Assert.isTrue(ActionBean.class.isAssignableFrom(actionBeanClassName), "The class '" + actionBeanClassName
+				+ "' must implement the '" + ActionBean.class.getName() + "' interface");
+		return (ActionBean)BeanFactoryUtils.beanOfTypeIncludingAncestors(getListableBeanFactory(), actionBeanClassName);
+	}
+
+	protected FlowAttributesMapper getAttributesMapper(String attributesMapperBeanNamePrefix) {
+		return (FlowAttributesMapper)getBeanFactory().getBean(attributesMapper(attributesMapperBeanNamePrefix),
+				FlowAttributesMapper.class);
 	}
 
 }
