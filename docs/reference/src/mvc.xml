@@ -399,7 +399,7 @@ public class SampleController extends AbstractController {
 		HttpServletResponse response)
 	throws Exception {
 	
-		ModelAndView mav = new ModelAndView("index", null);
+		ModelAndView mav = new ModelAndView("foo", new HashMap());
 	}
 }
 				]]></programlisting>
