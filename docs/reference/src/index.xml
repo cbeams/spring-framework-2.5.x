@@ -43,6 +43,8 @@
 	    
 	    &metadata;
 	    
+	    &jdbc;
+
 	    &mvc;
 	    
 	    &integration;

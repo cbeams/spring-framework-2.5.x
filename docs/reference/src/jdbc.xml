@@ -1,6 +1,43 @@
 <chapter id="jdbc">
 
-    <title>Data Access using JDBC</title>
+  <title>Data Access using JDBC</title>
+
+  <sect1 id="jdbc-introduction">
+    <title>Introduction</title>
+    <para>
+      The JDBC abstraction framework provided by Spring consists of three different packages
+      <literal>core</literal>, <literal>datasource</literal> and <literal>object</literal>.  
+    </para>
+    <para>
+      The <literal>org.springframework.jdbc.core</literal> 
+      package does as its name suggests contain the classes that provide the
+      core functionality.  This includes various SQLExceptionTranslator and DataFieldMaxValueIncrementer 
+      implementations as well as a DAO base class for JdbcTemplate usage.
+    </para>
+    <para>
+      The <literal>org.springframework.jdbc.datasource</literal> 
+      package contains a utility class for easy DataSource access,
+      and various simple DataSource implementations that can be used for testing and running unmodified
+      JDBC code outside of a J2EE container.  The utility class provides static methods to obtain connections 
+      from JNDI and to close connections if necessary. It has support for thread-bound connections, 
+      e.g. for use with DataSourceTransactionManager.
+    </para>
+    <para>
+      Finally, the <literal>org.springframework.jdbc.object</literal> 
+      package contains classes that represent RDBMS queries, updates,
+      and stored procedures as threadsafe, reusable objects. This approach is modelled by JDO, although of 
+      course objects returned by queries are <quote>disconnected</quote> from the database.  This higher level 
+      of JDBC abstraction depends on the lower-level abstraction in the <literal>org.springframework.jdbc.core</literal>
+      package.
+    </para>
+    <para>
+      Exceptions thrown during JDBC processing are translated to exceptions defined in the 
+      <literal>org.springframework.dao</literal> package.  This means that code using the Spring JDBC abstraction 
+      layer does not need to implement JDBC or RDBMS-specific error handling.  All translated exceptions are 
+      unchecked giving you the option of catching the exceptions that you can recover from while allowing other 
+      exceptions to be propageted to the caller.      
+    </para>
+  </sect1>
 
 </chapter>
 
