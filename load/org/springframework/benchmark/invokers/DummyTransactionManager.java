@@ -13,7 +13,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: DummyTransactionManager.java,v 1.2 2004-01-20 10:41:09 jhoeller Exp $
+ * @version $Id: DummyTransactionManager.java,v 1.3 2004-01-27 02:02:31 dkopylenko Exp $
  */
 public class DummyTransactionManager extends AbstractPlatformTransactionManager {
 
@@ -35,6 +35,22 @@ public class DummyTransactionManager extends AbstractPlatformTransactionManager 
 	}
 
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) throws TransactionException {
+	}
+
+	
+	protected void doCleanupAfterCompletion(Object transaction) {
+	}
+
+	
+	protected void doResume(Object transaction, Object suspendedResources) throws TransactionException {
+	}
+
+	protected Object doSuspend(Object transaction) throws TransactionException {
+		return null;
+	}
+
+	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
+		return false;
 	}
 
 }
