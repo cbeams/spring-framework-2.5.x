@@ -301,7 +301,7 @@ public class JmsSender102 extends AbstractJmsSender
 
     }
 
-    public void exeucte(JmsSenderCallback callback)
+    public void execute(JmsSenderCallback callback)
         throws JmsException
     {
         // TODO Auto-generated method stub
