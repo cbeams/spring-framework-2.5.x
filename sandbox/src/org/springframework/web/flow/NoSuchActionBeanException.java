@@ -20,7 +20,7 @@ public class NoSuchActionBeanException extends FlowNavigationException {
 	}
 
 	public String getMessage() {
-		return "No action bean could be retrieved with id '" + state.getActionBeanName() + "' for state '" + state.getId()
+		return "No action bean could be retrieved with id '" + state.getActionBeanName() + "' for action state '" + state.getId()
 				+ "' of flow '" + getFlow().getId() + "' -- programmer error?";
 	}
 

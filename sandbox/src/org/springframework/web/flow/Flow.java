@@ -260,7 +260,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
 	 */
-	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "AttributesMapper";
+	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
