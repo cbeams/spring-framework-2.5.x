@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.4 2003-08-29 14:35:47 jhoeller Exp $
+    $Id: build.xml,v 1.5 2003-08-30 02:59:33 jhoeller Exp $
 
     See page 594 of "Expert One-on-One J2EE" for a description
     of the JAR files produced by this build script, and how
@@ -87,11 +87,11 @@
 	</target>
 
 
-	<target name="beans" depends="build,initdist" description="Create JAR file for bean container">
+	<target name="beans" depends="build,initdist" description="Create JAR file for minimal bean container">
 
 		<delete file="${dist.dir}/${spring-beans.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-beans.jar}" index="true">
+		<jar jarfile="${dist.dir}/${spring-beans.jar}">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/core/**"/>
@@ -99,120 +99,72 @@
 				<include name="org/springframework/util/StringUtils*"/>
 			</fileset>
 			<manifest>
-				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
 
 	</target>
 
 
-	<target name="aop" depends="build,initdist" description="Create JAR file for AOP-enabled bean container)">
-
-		<delete file="${dist.dir}/${spring-aop.jar}"/>
-
-		<jar jarfile="${dist.dir}/${spring-aop.jar}" index="true">
-			<fileset dir="${build.dir}">
-				<include name="org/springframework/aop/**"/>
-				<include name="org/springframework/beans/**"/>
-				<include name="org/springframework/core/**"/>
-				<include name="org/springframework/util/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Spring-Version" value="${spring-version-detail}"/>
-			</manifest>
-		</jar>
-
-	</target>
-
-
-	<target name="jdbc" depends="build,initdist" description="Create JAR file for use as JDBC access library">
-
-		<delete file="${dist.dir}/${spring-jdbc.jar}"/>
-
-		<jar jarfile="${dist.dir}/${spring-jdbc.jar}" index="true">
-			<fileset dir="${build.dir}">
-				<include name="org/springframework/beans/**"/>
-				<include name="org/springframework/core/**"/>
-				<include name="org/springframework/dao/**"/>
-				<include name="org/springframework/ejb/support/**"/>
-				<include name="org/springframework/jdbc/**"/>
-				<exclude name="org/springframework/jdbc/datasource/DataSourceTransaction*"/>
-				<include name="org/springframework/jndi/**"/>
-				<include name="org/springframework/util/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Spring-Version" value="${spring-version-detail}"/>
-			</manifest>
-		</jar>
-
-	</target>
-
-
-	<target name="orm" depends="build,initdist" description="Create JAR file for use as persistence and transaction library">
-
-		<delete file="${dist.dir}/${spring-orm.jar}"/>
-
-		<jar jarfile="${dist.dir}/${spring-orm.jar}" index="true">
-			<fileset dir="${build.dir}">
-				<include name="org/springframework/aop/**"/>
-				<include name="org/springframework/beans/**"/>
-				<include name="org/springframework/core/**"/>
-				<include name="org/springframework/dao/**"/>
-				<include name="org/springframework/ejb/**"/>
-				<include name="org/springframework/jdbc/**"/>
-				<include name="org/springframework/jndi/**"/>
-				<include name="org/springframework/orm/**"/>
-				<include name="org/springframework/transaction/**"/>
-				<include name="org/springframework/util/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Spring-Version" value="${spring-version-detail}"/>
-			</manifest>
-		</jar>
-
-	</target>
-
-
-	<target name="context" depends="build,initdist" description="Create JAR file for use as general application framework">
+	<target name="context" depends="build,initdist" description="Create JAR file for non-J2EE application context">
 
 		<delete file="${dist.dir}/${spring-context.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-context.jar}" index="true">
+		<jar jarfile="${dist.dir}/${spring-context.jar}">
+			<fileset dir="${build.dir}">
+				<include name="org/springframework/aop/**"/>
+				<include name="org/springframework/beans/**"/>
+				<include name="org/springframework/context/**"/>
+				<include name="org/springframework/core/**"/>
+				<include name="org/springframework/util/**"/>
+				<include name="org/springframework/ui/**"/>
+				<include name="org/springframework/validation/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="jdbc" depends="build,initdist" description="Create JAR file for context with JDBC support">
+
+		<delete file="${dist.dir}/${spring-jdbc.jar}"/>
+
+		<jar jarfile="${dist.dir}/${spring-jdbc.jar}">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/context/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/dao/**"/>
-				<include name="org/springframework/ejb/**"/>
 				<include name="org/springframework/jdbc/**"/>
 				<include name="org/springframework/jndi/**"/>
-				<include name="org/springframework/orm/**"/>
 				<include name="org/springframework/transaction/**"/>
 				<include name="org/springframework/validation/**"/>
 				<include name="org/springframework/ui/**"/>
 				<include name="org/springframework/util/**"/>
-				<include name="org/springframework/web/**"/>
-				<exclude name="org/springframework/web/servlet/**"/>
+				<include name="org/springframework/validation/**"/>
 			</fileset>
 			<manifest>
-				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
 
 	</target>
 
 
-	<target name="full" depends="build,initdist" description="Create JAR file with all Spring classes, including web MVC and remoting">
+	<target name="fulljar" depends="build,initdist" description="Create JAR file with all Spring classes">
 
-		<delete file="${dist.dir}/${spring-full.jar}"/>
+		<delete file="${dist.dir}/${spring.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-full.jar}" index="true">
+		<jar jarfile="${dist.dir}/${spring.jar}">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/**"/>
 			</fileset>
 			<manifest>
-				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
 
@@ -238,7 +190,7 @@
 	<!--
 		Note: Contained classes overlap, e.g. spring-full contains everything.
 	-->
-	<target name="alljars" depends="beans,aop,jdbc,orm,context,full,srczip" description="Create all JAR files"/>
+	<target name="alljars" depends="beans,context,jdbc,fulljar,srczip" description="Create all JAR files"/>
 
 
 	<target name="javadoc" description="Generate framework Javadocs.">
@@ -252,17 +204,6 @@
 			<bottom><![CDATA[<i>Rod Johnson and Spring contributors 2001-2003.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
 		</javadoc>
-
-	</target>
-
-
-	<target name="checkstyle" description="Run the checkstyle optional task to check for adherence to coding conventions">
-
-		<taskdef name="checkstyle" classname="com.puppycrawl.tools.checkstyle.CheckStyleTask"/>
-
-		<checkstyle failureProperty="checkstyle.failure" failOnViolation="false" properties="checkstyleConventions.properties">
-			<fileset dir="${src.dir}" includes="org/springframework/beans/BeanWrapperImpl.java"/>
-		</checkstyle>
 
 	</target>
 
@@ -281,6 +222,7 @@
 				<include name="src/**"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/aop-alliance/**"/>
+				<include name="lib/jakarta-commons/commons-logging.jar"/>
 				<include name="lib/j2ee/servlet.jar"/>
 				<include name="lib/j2ee/jdbc2_0-stdext.jar"/>
 				<include name="lib/itext-pdf/**"/>
@@ -288,7 +230,9 @@
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
 				<include name="lib/poi/**"/>
-				<include name="samples/**"/>
+				<include name="samples/skeletons/**"/>
+				<include name="samples/countries/**"/>
+				<include name="samples/petclinic/**"/>
 				<include name="*.txt"/>
 			</zipfileset>
 		</zip>
@@ -306,7 +250,7 @@
 			<classpath refid="master-classpath"/>
 			<classpath location="${build.dir}"/>
 		</javac>
-		
+
 		<!-- Pick up logging config from test directory -->
 		<copy todir="${testbuild.dir}" preservelastmodified="true">
 			<fileset dir="${test.dir}">

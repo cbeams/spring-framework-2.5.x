@@ -1,10 +1,10 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-Changes in version 1.0 M1 (29.8.2003)
+Changes in version 1.0 M1 (30.8.2003)
 -------------------------------------
 * changed package structure from com.interface21 to org.springframework
-* revised distribution jar files (spring-beans, -aop, -jdbc, -orm, -context, -full)
+* revised distribution jar files (spring-beans, spring-context, spring-jdbc, spring)
 * introduced DisposableBean interface
 * introduced "destroy-method" attribute for XML bean definitions
 * support for CSV as XML bean "name" to be able to define multiple aliases

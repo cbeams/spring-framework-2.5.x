@@ -47,37 +47,27 @@ This product includes software developed by the Apache Software Foundation (http
 
 3. DISTRIBUTION JAR FILES
 
-The "dist" directory contains the following (overlapping) jar files for use in applications. Each addresses a typical usage of the Spring Framework, specifying the respective contents and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
+The "dist" directory contains the following overlapping jar files for use in applications. Each addresses a typical usage of the Spring Framework, specifying the respective contents and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
 * "spring-beans" (~90 KB)
-- Target: basic bean container for wiring up within restricted environments like applets
+- Target: minimal bean container for wiring up within restricted environments like applets
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging
 
-* "spring-aop" (~145 KB)
-- Target: AOP-enabled bean container for wiring up and proxying any kind of components
-- Contents: bean container, utilities, AOP framework
-- Dependencies: Commons Logging, AOP Alliance (Log4J, CGLIB)
+* "spring-context" (~190 KB)
+- Target: basic application context for use outside a J2EE container
+- Contents: bean container, utilities, AOP framework, application context, validation framework
+- Dependencies: Commons Logging, (Log4J, AOP Alliance, CGLIB)
 
-* "spring-jdbc" (~230 KB)
-- Target: JDBC access library, e.g. for use within EJBs or to enrich existing applications
-- Contents: bean container, utilities, JDBC support, EJB support
-- Dependencies: Commons Logging (Log4J, EJB 2.0)
+* "spring-jdbc" (~340 KB)
+- Target: application context with transaction framework and JDBC support
+- Contents: bean container, utilities, AOP framework, application context, validation framework, transaction framework, JDBC support
+- Dependencies: Commons Logging, (Log4J, AOP Alliance, CGLIB; JTA)
 
-* "spring-orm" (~350 KB)
-- Target: persistence and transaction library for JDBC/Hibernate/JDO, including AOP support
-- Contents: bean container, utilities, AOP framework, transaction framework, JDBC support, O/R Mapping support, EJB access and support
-- Dependencies: Commons Logging, AOP Alliance (Log4J, CGLIB; JTA, Hibernate, JDO, EJB 2.0)
-
-* "spring-context" (~430 KB)
-- Target: application framework for use within or outside a J2EE container, e.g. for serving as middle tier application context within Struts or Tapestry web applications, or for standalone applications
-- Contents: bean container, utilities, AOP framework, transaction framework, JDBC support, O/R Mapping support, EJB access and support, application context, web application context, validation framework
-- Dependencies: Commons Logging, AOP Alliance (Log4J, CGLIB; JTA, Hibernate, JDO, EJB 2.0; Servlet 2.2)
-
-* "spring-full" (~550 KB)
-- Target: web application framework for use within a J2EE container, including Spring's own web MVC and remoting support (and of course, suitable for any other usage where jar size does not matter)
-- Contents: bean container, utilities, AOP framework, transaction framework, JDBC support, O/R Mapping support, EJB access and support, application context, web application context, validation framework, web MVC framework, remoting support
-- Dependencies: Commons Logging, AOP Alliance (Log4J, CGLIB; JTA, Hibernate, JDO, EJB 2.0; Servlet 2.3, JSP 1.2, JSTL, Velocity, iText, POI, Hessian, Burlap)
+* "spring" (~560 KB)
+- Target: full application framework for use within a J2EE container (and of course suitable where jar size does not matter)
+- Contents: bean container, utilities, AOP framework, EJB support, transaction framework, JDBC support, O/R Mapping support, application context, web application context, validation framework, web MVC framework, remoting support
+- Dependencies: Commons Logging, (Log4J, AOP Alliance, CGLIB; JTA; Hibernate, JDO; EJB 2.0, Servlet 2.3, JSP 1.2, JSTL; Velocity, iText, POI; Hessian, Burlap)
 
 Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like Xerces, the JDBC 2.0 standard extension interfaces, and JNDI have to be added when using XML bean definitions, JDBC DataSource setup, and JNDI lookups, respectively.
 
