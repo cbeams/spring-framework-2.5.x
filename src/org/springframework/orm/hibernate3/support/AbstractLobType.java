@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ public abstract class AbstractLobType implements UserType {
 		}
 
 		try {
-			return nullSafeGetInternal(rs, rs.findColumn(names[0]), this.lobHandler);
+			return nullSafeGetInternal(rs, names, owner, this.lobHandler);
 		}
 		catch (IOException ex) {
 			throw new HibernateException("I/O errors during LOB access", ex);
@@ -219,14 +219,16 @@ public abstract class AbstractLobType implements UserType {
 	/**
 	 * Template method to extract a value from the given result set.
 	 * @param rs the ResultSet to extract from
-	 * @param index the index in the ResultSet
+	 * @param names the column names
+	 * @param owner the containing entity
 	 * @param lobHandler the LobHandler to use
 	 * @return the extracted value
 	 * @throws SQLException if thrown by JDBC methods
 	 * @throws IOException if thrown by streaming methods
 	 * @throws HibernateException in case of any other exceptions
 	 */
-	protected abstract Object nullSafeGetInternal(ResultSet rs, int index, LobHandler lobHandler)
+	protected abstract Object nullSafeGetInternal(
+			ResultSet rs, String[] names, Object owner, LobHandler lobHandler)
 			throws SQLException, IOException, HibernateException;
 
 	/**
