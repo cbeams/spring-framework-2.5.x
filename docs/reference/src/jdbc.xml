@@ -6,15 +6,12 @@
     <title>Introduction</title>
 
     <para>The JDBC abstraction framework provided by Spring consists of four
-    different packages <literal>core</literal>,
-    <literal><literal>datasource</literal></literal>, <literal>object and
-    <literal>support</literal></literal>.</para>
+    different packages <literal>core</literal>, <literal>datasource</literal>,
+		<literal>object</literal>, and <literal>support</literal>.</para>
 
-    <para>The <literal>org.springframework.jdbc.core</literal> package does as
-    its name suggests contain the classes that provide the core functionality.
-    This includes various SQLExceptionTranslator and
-    DataFieldMaxValueIncrementer implementations as well as a DAO base class
-    for JdbcTemplate usage.</para>
+    <para>The <literal>org.springframework.jdbc.core</literal> package contains
+		the JdbcTemplate class and its various callback interfaces, plus a variety
+		of related classes.</para>
 
     <para>The <literal>org.springframework.jdbc.datasource</literal> package
     contains a utility class for easy DataSource access, and various simple
@@ -293,10 +290,9 @@ public class RunAQuery {
 
       <para>There are also a number of update methods that you can use. I will
       show an example where we update a column for a certain primary key. In
-      this example I am using an SQL statement that has place holders for tow
-      parameters. Most of the query and update methods have this
-      functionality. The parameter values are passed in as an array of
-      objects.</para>
+      this example I am using an SQL statement that has place holders for row
+      parameters. Most of the query and update methods have this functionality.
+			The parameter values are passed in as an array of objects.</para>
 
       <programlisting>import javax.sql.DataSource;
 
@@ -423,8 +419,8 @@ public class ExecuteAnUpdate {
       <para>Supports custom isolation levels, and timeouts that get applied as
       appropriate JDBC statement query timeouts. To support the latter,
       application code must either use <literal>JdbcTemplate</literal> or call
-      <literal>DataSourceUtils.<literal>applyTransactionTimeout</literal></literal>
-      method for each created statement.</para>
+      <literal>DataSourceUtils.applyTransactionTimeout</literal> method for
+			each created statement.</para>
 
       <para>This implementation can be used instead of
       <literal>JtaTransactionManager</literal> in the single resource case, as
@@ -587,7 +583,7 @@ public class UpdateCreditRating  extends SqlUpdate {
 
       <para>Here is an example of a program that calls a function sysdate()
       that comes with any Oracle database. To use the stored procedure
-      functionality you have to create a class tha extends
+      functionality you have to create a class that extends
       <literal>StoredProcedure</literal>. There are no input parameters, but
       there is an output parameter that is declared as a date using the class
       <literal>SqlOutParameter</literal>. The <literal>execute()</literal>
@@ -605,15 +601,12 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.datasource.*;
 import org.springframework.jdbc.object.StoredProcedure;
 
-public class TestSP {
+public class TestStoredProcedure {
 
     public static void main(String[] args)  {
-        
-        System.out.println("DB TestSP!");
-        TestSP t = new TestSP();
+        TestStoredProcedure t = new TestStoredProcedure();
         t.test();
         System.out.println("Done!");
-        
     }
     
     void test() {
@@ -626,7 +619,6 @@ public class TestSP {
         MyStoredProcedure sproc = new MyStoredProcedure(ds);
         Map res = sproc.execute();
         printMap(res);
-                
     }
 
     private class MyStoredProcedure extends StoredProcedure {

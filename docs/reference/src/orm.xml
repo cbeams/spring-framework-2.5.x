@@ -33,15 +33,15 @@
         <para><emphasis>To avoid vendor lock-in, and allow mix-and-match
         implementation strategies.</emphasis> While Hibernate is powerful,
         flexible, open source and free, it still uses a proprietary API.
-        Furthermore one could agrue that iBatis is a bit lightweight, although
+        Furthermore one could argue that iBatis is a bit lightweight, although
         it's excellent for use in application that don't require complex O/R
         mapping strategies. Given the choice, it's usually desirable to
         implement major application functionality using standard or abstracted
         APIs, in case you need to switch to another implementation for reasons
         of functionality, performance, or any other concerns. For example,
         Spring's abstraction of Hibernate Transactions and Exceptions, along
-        with its IoC approach which allow you to easily swap in mapper/DAO
-        objects implementing data-access functionality, make it easy to
+        with its IoC approach which allows you to easily swap in mapper/DAO
+        objects implementing data-access functionality, makes it easy to
         isolate all Hibernate-specific code in one area of your application,
         without sacrificing any of the power of Hibernate. Higher level
         service code dealing with the DAOs has no need to know anything about
@@ -72,7 +72,7 @@
         safe handling of Hibernate Sessions. Related code using Hibernate
         generally needs to use the same Hibernate Session object for
         efficiency and proper transaction handling. Spring makes it easy to
-        transparaently create and bind a session tot he current thread, using
+        transparently create and bind a session tot he current thread, using
         either a declarative, AOP method interceptor approach, or by using an
         explicit, template wrapper class at the Java code level. Thus Spring
         solves many of the usage issues that repeatedly arise on the Hibernate
@@ -80,7 +80,7 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>Exception wrapping.</emphasis>Spring can wrap
+        <para><emphasis>Exception wrapping.</emphasis> Spring can wrap
         exceptions from you O/R mapping tool of choice, converting them from
         proprietary, checked exceptions, to a set of abstracted runtime
         exceptions. This allows you to handle most persistence exceptions,
@@ -103,20 +103,14 @@
         managers, without your Hibernate related code being affected. As an
         added benefit, JDBC-related code can fully integrate transactionally
         with the code you use to do O/R mapping. This is useful for handling
-        functionality not implemented in for example Hibernate or
-        iBatis.</para>
+        functionality not implemented in, for example, Hibernate or iBatis.
+				</para>
       </listitem>
     </itemizedlist>
   </sect1>
 
   <sect1 id="orm-hibernate">
     <title>Hibernate</title>
-
-    <sect2>
-      <title></title>
-
-      <para></para>
-    </sect2>
 
     <sect2>
       <title>Resource Management</title>
@@ -283,7 +277,7 @@
       <para>A callback implementation can effectively be used for any
       Hibernate data access. <classname>HibernateTemplate</classname> will
       ensure that <classname>Session</classname>s are properly opened and
-      closed, and automatically participae in transactions. The template
+      closed, and automatically participate in transactions. The template
       instances are thread-safe and reusable, they can thus be kept as
       instance variables of the surrounding class. For simple single step
       actions like a single find, load, saveOrUpdate, or delete call,
@@ -823,17 +817,11 @@ ProductService productService =
     </sect2>
 
     <sect2>
-      <title>Skeletons and Samples</title>
+      <title>Samples</title>
 
-      <para>For a commented and detailed sample configuration of a J2EE web
-      app with Spring and Hibernate, have a look at the "webapp-typical"
-      skeleton, included in the Spring Framework distribution. It outlines
-      various data source and transaction manager configuration options that
-      are suitable for JDBC and Hibernate apps. It also shows how to configure
-      AOP interceptors, focussing on the transaction interceptor. As of
-      release 1.0 M2, the Petclinic sample in the Spring distribution offers
-      alternative DAO implementations and application context configurations
-      for JDBC and Hibernate. Petclinic can therefore serve as working sample
+      <para>The Petclinic sample in the Spring distribution offers alternative
+			DAO implementations and application context configurations for Hibernate,
+			JDBC, and Apache OJB. Petclinic can therefore serve as working sample
       app that illustrates the use of Hibernate in a Spring web app. It also
       leverages declarative transaction demarcation with different transaction
       strategies.</para>
@@ -843,7 +831,7 @@ ProductService productService =
   <sect1>
     <title>JDO</title>
 
-    <para>ToDO</para>
+    <para>ToDo</para>
   </sect1>
 
   <sect1>
