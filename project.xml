@@ -329,6 +329,11 @@
          <id>jdom</id>
          <version>b9</version>
       </dependency>
+       <dependency>
+         <groupId>jotm</groupId>
+         <artifactId>jotm</artifactId>
+         <version>1.4.3</version>
+      </dependency>
       <dependency>
          <id>jstl</id>
          <version>1.0.2</version>
