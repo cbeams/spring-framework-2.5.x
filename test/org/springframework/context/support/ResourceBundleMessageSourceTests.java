@@ -113,17 +113,17 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 	public void testReloadableResourceBundleMessageSourceWithDefaultCharset() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		ms.setDefaultCharset("ISO-8859-1");
+		ms.setDefaultEncoding("ISO-8859-1");
 		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
 	}
 
 	public void testReloadableResourceBundleMessageSourceWithInappropriateDefaultCharset() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		ms.setDefaultCharset("unicode");
+		ms.setDefaultEncoding("unicode");
 		Properties fileCharsets = new Properties();
 		fileCharsets.setProperty("org/springframework/context/support/messages_de", "unicode");
-		ms.setFileCharsets(fileCharsets);
+		ms.setFileEncodings(fileCharsets);
 		ms.setFallbackToSystemLocale(false);
 		try {
 			ms.getMessage("code1", null, Locale.ENGLISH);
@@ -140,7 +140,7 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		ms.setFallbackToSystemLocale(false);
 		Properties fileCharsets = new Properties();
 		fileCharsets.setProperty("org/springframework/context/support/messages", "unicode");
-		ms.setFileCharsets(fileCharsets);
+		ms.setFileEncodings(fileCharsets);
 		try {
 			ms.getMessage("code1", null, Locale.ENGLISH);
 			fail("Should have thrown NoSuchMessageException");
@@ -156,7 +156,7 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		ms.setFallbackToSystemLocale(false);
 		Properties fileCharsets = new Properties();
 		fileCharsets.setProperty("org/springframework/context/support/messages_de", "unicode");
-		ms.setFileCharsets(fileCharsets);
+		ms.setFileEncodings(fileCharsets);
 		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
 	}
 

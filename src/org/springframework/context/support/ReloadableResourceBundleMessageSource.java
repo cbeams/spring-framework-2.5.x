@@ -47,8 +47,8 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @see #setCacheSeconds
  * @see #setBasenames
- * @see #setDefaultCharset
- * @see #setFileCharsets
+ * @see #setDefaultEncoding
+ * @see #setFileEncodings
  * @see #setPropertiesPersister
  * @see #setResourceLoader
  * @see org.springframework.util.DefaultPropertiesPersister
@@ -63,9 +63,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	private String[] basenames;
 
-	private String defaultCharset;
+	private String defaultEncoding;
 
-	private Properties fileCharsets;
+	private Properties fileEncodings;
 
 	private boolean fallbackToSystemLocale = true;
 
@@ -115,24 +115,24 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * Set the default charset to use for parsing properties files.
 	 * Used if no file-specific charset is specified for a file.
 	 * <p>Default is none, using java.util.Properties' default charset.
-	 * @see #setFileCharsets
+	 * @see #setFileEncodings
 	 * @see org.springframework.util.PropertiesPersister#load
 	 */
-	public void setDefaultCharset(String defaultCharset) {
-		this.defaultCharset = defaultCharset;
+	public void setDefaultEncoding(String defaultEncoding) {
+		this.defaultEncoding = defaultEncoding;
 	}
 
 	/**
 	 * Set per-file charsets to use for parsing properties files.
-	 * @param fileCharsets Properties with filenames as keys and charset
+	 * @param fileEncodings Properties with filenames as keys and charset
 	 * names as values. Filenames have to match the basename syntax,
 	 * with optional locale-specific appendices: e.g. "WEB-INF/messages"
 	 * or "WEB-INF/messages_en".
 	 * @see #setBasenames
 	 * @see org.springframework.util.PropertiesPersister#load
 	 */
-	public void setFileCharsets(Properties fileCharsets) {
-		this.fileCharsets = fileCharsets;
+	public void setFileEncodings(Properties fileEncodings) {
+		this.fileEncodings = fileEncodings;
 	}
 
 	/**
@@ -322,11 +322,11 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			Properties props = new Properties();
 			try {
 				String charset = null;
-				if (this.fileCharsets != null) {
-					charset = this.fileCharsets.getProperty(filename);
+				if (this.fileEncodings != null) {
+					charset = this.fileEncodings.getProperty(filename);
 				}
 				if (charset == null) {
-					charset = this.defaultCharset;
+					charset = this.defaultEncoding;
 				}
 				if (charset != null) {
 					if (logger.isDebugEnabled()) {
