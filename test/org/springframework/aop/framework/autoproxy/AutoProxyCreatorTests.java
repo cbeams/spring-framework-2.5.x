@@ -17,11 +17,6 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -34,10 +29,10 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DummyFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.ACATest;
-import org.springframework.context.BeanThatListens;
+import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
 
@@ -47,87 +42,86 @@ import org.springframework.context.support.StaticMessageSource;
  */
 public class AutoProxyCreatorTests extends TestCase {
 
-	private static final String TEST_INTERCEPTOR_FOR_CREATOR_BEAN_NAME = "testInterceptorForCreator";
-	
-	protected StaticApplicationContext sac;
+	public void testCustomAutoProxyCreator() {
+		StaticApplicationContext sac = new StaticApplicationContext();
+		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class, null);
+		sac.registerSingleton("singletonNoInterceptor", TestBean.class, null);
+		sac.registerSingleton("singletonToBeProxied", TestBean.class, null);
+		sac.registerPrototype("prototypeToBeProxied", TestBean.class, null);
+		sac.refresh();
 
-	protected void setUp() throws Exception {
-		StaticApplicationContext parent = new StaticApplicationContext();
-		Map m = new HashMap();
-		m.put("name", "Roderick");
-		parent.registerPrototype("rod", TestBean.class, new MutablePropertyValues(m));
-		m.put("name", "Albert");
-		parent.registerPrototype("father", TestBean.class, new MutablePropertyValues(m));
-		parent.refresh();
+		MessageSource messageSource = (MessageSource) sac.getBean("messageSource");
+		ITestBean singletonNoInterceptor = (ITestBean) sac.getBean("singletonNoInterceptor");
+		ITestBean singletonToBeProxied = (ITestBean) sac.getBean("singletonToBeProxied");
+		ITestBean prototypeToBeProxied = (ITestBean) sac.getBean("prototypeToBeProxied");
+		assertFalse(AopUtils.isCglibProxy(messageSource));
+		assertTrue(AopUtils.isCglibProxy(singletonNoInterceptor));
+		assertTrue(AopUtils.isCglibProxy(singletonToBeProxied));
+		assertTrue(AopUtils.isCglibProxy(prototypeToBeProxied));
 
-		StaticMessageSource parentMessageSource = (StaticMessageSource) parent.getBean("messageSource");
-		parentMessageSource.addMessage("code1", Locale.getDefault(), "message1");
+		TestAutoProxyCreator tapc = (TestAutoProxyCreator) sac.getBean("testAutoProxyCreator");
+		assertEquals(0, tapc.testInterceptor.nrOfInvocations);
+		singletonNoInterceptor.getName();
+		assertEquals(0, tapc.testInterceptor.nrOfInvocations);
+		singletonToBeProxied.getAge();
+		assertEquals(1, tapc.testInterceptor.nrOfInvocations);
+		prototypeToBeProxied.getSpouse();
+		assertEquals(2, tapc.testInterceptor.nrOfInvocations);
+	}
 
-		this.sac = new StaticApplicationContext(parent);
+	public void testBeanNameAutoProxyCreator() {
+		StaticApplicationContext sac = new StaticApplicationContext();
 
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("singleton", "false");
-		sac.registerSingleton("prototypeFactory", DummyFactory.class, pvs);
+		sac.registerSingleton("testInterceptor", TestInterceptor.class, null);
 
-		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class, new MutablePropertyValues());
+		RootBeanDefinition proxyCreator = new RootBeanDefinition(BeanNameAutoProxyCreator.class, null);
+		proxyCreator.getPropertyValues().addPropertyValue("interceptorNames", "testInterceptor");
+		proxyCreator.getPropertyValues().addPropertyValue("beanNames", "singletonToBeProxied,innerBean");
+		sac.getDefaultListableBeanFactory().registerBeanDefinition("beanNameAutoProxyCreator", proxyCreator);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		RootBeanDefinition innerBean = new RootBeanDefinition(TestBean.class, null);
 		bd.getPropertyValues().addPropertyValue("spouse", new BeanDefinitionHolder(innerBean, "innerBean"));
-		sac.getDefaultListableBeanFactory().registerBeanDefinition("autoProxyTest", bd);
+		sac.getDefaultListableBeanFactory().registerBeanDefinition("singletonToBeProxied", bd);
 
-		sac.registerSingleton("autoProxyTest2", IndexedTestBean.class, new MutablePropertyValues());
-		sac.registerSingleton(TEST_INTERCEPTOR_FOR_CREATOR_BEAN_NAME, TestInterceptor.class, new MutablePropertyValues());
-
-		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("beanNames", "autoProxyTest,autoProxyTest2,prototypeFac*,innerBean");
-		List interceptors = new LinkedList();
-		interceptors.add(TEST_INTERCEPTOR_FOR_CREATOR_BEAN_NAME);
-		pvs.addPropertyValue("interceptorNames", interceptors);
-		sac.registerSingleton("beanNameAutoProxyCreator", BeanNameAutoProxyCreator.class, pvs);
-
-		sac.registerSingleton("beanThatListens", BeanThatListens.class, new MutablePropertyValues());
-		sac.registerSingleton("aca", ACATest.class, new MutablePropertyValues());
-		sac.registerPrototype("aca-prototype", ACATest.class, new MutablePropertyValues());
+		sac.registerSingleton("autowiredIndexedTestBean", IndexedTestBean.class, new MutablePropertyValues());
 
 		sac.refresh();
 
-		StaticMessageSource sacMessageSource = (StaticMessageSource) sac.getBean("messageSource");
-		sacMessageSource.addMessage("code2", Locale.getDefault(), "message2");
+		MessageSource messageSource = (MessageSource) sac.getBean("messageSource");
+		ITestBean singletonToBeProxied = (ITestBean) sac.getBean("singletonToBeProxied");
+		assertFalse(Proxy.isProxyClass(messageSource.getClass()));
+		assertTrue(Proxy.isProxyClass(singletonToBeProxied.getClass()));
+		assertTrue(Proxy.isProxyClass(singletonToBeProxied.getSpouse().getClass()));
+
+		// test whether autowiring succeeded with auto proxy creation
+		assertEquals(sac.getBean("autowiredIndexedTestBean"), singletonToBeProxied.getNestedIndexedBean());
+
+		TestInterceptor ti = (TestInterceptor) sac.getBean("testInterceptor");
+		// already 2: getSpouse + getNestedIndexedBean calls above
+		assertEquals(2, ti.nrOfInvocations);
+		singletonToBeProxied.getName();
+		singletonToBeProxied.getSpouse().getName();
+		assertEquals(5, ti.nrOfInvocations);
 	}
 
-	public void testBeanPostProcessors() {
-		assertEquals(sac.getBean("autoProxyTest2"), ((ITestBean) sac.getBean("autoProxyTest")).getNestedIndexedBean());
-		String[] beanNames = sac.getBeanDefinitionNames();
-		for (int i = 0; i < beanNames.length; i++) {
-			if (beanNames[i].equals("autoProxyTest")) {
-				Object bean = sac.getBean(beanNames[i]);
-				assertTrue("J2SE proxy for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
-						Proxy.isProxyClass(bean.getClass()));
-			}
-			else if (beanNames[i].equals("prototypeFactory")) {
-				Object bean = sac.getBean("&" + beanNames[i]);
-				assertTrue("J2SE proxy for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
-						Proxy.isProxyClass(bean.getClass()));
-			}
-			else if (!beanNames[i].equals("messageSource") && !beanNames[i].endsWith("Creator")) {
-				Object bean = sac.getBean(beanNames[i]);
-				assertTrue("Enhanced bean class for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
-						AopUtils.isCglibProxy(bean));
-			}
-		}
-		ACATest aca = (ACATest) sac.getBean("aca");
-		aca.getApplicationContext();
-		aca.getApplicationContext();
-		ACATest acaPr = (ACATest) sac.getBean("aca-prototype");
-		acaPr.getApplicationContext();
-		TestInterceptor ti = (TestInterceptor) sac.getBean(TEST_INTERCEPTOR_FOR_CREATOR_BEAN_NAME);
-		
-		// TODO Juergen please fix this.
-		// The value was 11, but failed following refactoring on 9/10/04
-		assertEquals(10, ti.nrOfInvocations);
+	public void testAutoProxyCreatorWithFactoryBean() {
+		StaticApplicationContext sac = new StaticApplicationContext();
+		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class, null);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("singleton", "false");
+		sac.registerSingleton("prototypeFactoryToBeProxied", DummyFactory.class, pvs);
+
+		sac.refresh();
+
+		FactoryBean prototypeFactory = (FactoryBean) sac.getBean("&prototypeFactoryToBeProxied");
+		assertTrue(AopUtils.isCglibProxy(prototypeFactory));
+
 		TestAutoProxyCreator tapc = (TestAutoProxyCreator) sac.getBean("testAutoProxyCreator");
-		assertEquals(3, tapc.testInterceptor.nrOfInvocations);
+		tapc.testInterceptor.nrOfInvocations = 0;
+		sac.getBean("prototypeFactoryToBeProxied");
+		assertEquals(1, tapc.testInterceptor.nrOfInvocations);
 	}
 
 
@@ -141,11 +135,11 @@ public class AutoProxyCreatorTests extends TestCase {
 		}
 
 		protected Object[] getAdvicesAndAdvisorsForBean(Object bean, String name, TargetSource customTargetSource) {
-			if (bean instanceof StaticMessageSource || bean instanceof IndexedTestBean) {
+			if (bean instanceof StaticMessageSource) {
 				return DO_NOT_PROXY;
 			}
-			else if (name.startsWith("aca")) {
-				return new Object[] {testInterceptor};
+			else if (name.endsWith("ToBeProxied")) {
+				return new Object[] {this.testInterceptor};
 			}
 			else {
 				return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
@@ -163,7 +157,7 @@ public class AutoProxyCreatorTests extends TestCase {
 
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			if (!invocation.getMethod().getName().equals("finalize")) {
-				nrOfInvocations++;
+				this.nrOfInvocations++;
 			}
 			return invocation.proceed();
 		}
