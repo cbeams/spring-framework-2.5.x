@@ -18,14 +18,18 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.AfterReturningAdvisor;
 import org.springframework.aop.BeforeAdvisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
+import org.springframework.aop.MethodAfterReturningAdvice;
 import org.springframework.aop.ThrowsAdvisor;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.DefaultAfterReturningAdvisor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.SimpleIntroductionAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAfterReturningAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutBeforeAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutThrowsAdvisor;
@@ -38,7 +42,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.14 2003-12-19 10:19:50 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.15 2004-01-05 18:47:01 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -1149,6 +1153,67 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		// Shouldn't have changed value in joinpoint
 		assertEquals(target.getAge(), proxied.getAge());
 	}
+	
+	
+	public void testAfterReturningAdvisorIsInvoked() {
+		class SummingAfterAdvice implements MethodAfterReturningAdvice {
+			public int sum;
+			public void afterReturning(Object returnValue, Method m, Object[] args, Object target) throws Throwable {
+				sum += ((Integer) returnValue).intValue();
+			}
+		};
+		SummingAfterAdvice aa = new SummingAfterAdvice();
+		AfterReturningAdvisor matchesInt = new StaticMethodMatcherPointcutAfterReturningAdvisor(aa) {
+			public boolean matches(Method m, Class targetClass) {
+				return m.getReturnType() == int.class;
+			}
+		};
+		TestBean target = new TestBean();
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addInterceptor(new NopInterceptor());
+		pf.addAdvisor(matchesInt);
+		assertEquals("Advisor was added", matchesInt, pf.getAdvisors()[1]);
+		ITestBean proxied = (ITestBean) createProxy(pf);
+		assertEquals(0, aa.sum);
+		int i1 = 12;
+		int i2 = 13;
+		
+		// Won't be advised
+		proxied.setAge(i1);
+		assertEquals(i1, proxied.getAge());
+		assertEquals(i1, aa.sum);
+		proxied.setAge(i2);
+		assertEquals(i2, proxied.getAge());
+		assertEquals(i1 + i2, aa.sum);
+		assertEquals(i2, proxied.getAge());
+	}
+	
+	public void testAfterReturningAdvisorIsNotInvokedOnException() {
+		CountingAfterReturningAdvice car = new CountingAfterReturningAdvice();
+		AfterReturningAdvisor advisor = new DefaultAfterReturningAdvisor(car);
+		TestBean target = new TestBean();
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addInterceptor(new NopInterceptor());
+		pf.addAdvisor(advisor);
+		assertEquals("Advisor was added", advisor, pf.getAdvisors()[1]);
+		ITestBean proxied = (ITestBean) createProxy(pf);
+		assertEquals(0, car.getCalls());
+		int age = 10;
+		proxied.setAge(age);
+		assertEquals(age, proxied.getAge());
+		assertEquals(2, car.getCalls());
+		Exception exc = new Exception();
+		// On exception it won't be invoked
+		try {
+			proxied.exceptional(exc);
+			fail();
+		}
+		catch (Throwable t) {
+			assertSame(exc, t);
+		}
+		assertEquals(2, car.getCalls());
+	}
+	
 	
 	public void testThrowsAdvisorIsInvoked() throws Throwable {
 		// Reacts to ServletException and RemoteException

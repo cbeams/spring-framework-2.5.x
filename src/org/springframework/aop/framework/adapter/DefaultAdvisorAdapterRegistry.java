@@ -16,7 +16,7 @@ import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 
 /**
  * @author Rod Johnson
- * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.2 2003-12-30 01:07:11 jhoeller Exp $
+ * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.3 2004-01-05 18:47:00 johnsonr Exp $
  */
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 	
@@ -26,6 +26,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 		// Register well-known adapters
 		registerAdvisorAdapter(new BeforeAdviceAdapter());
 		registerAdvisorAdapter(new ThrowsAdviceAdapter());
+		registerAdvisorAdapter(new AfterReturningAdviceAdapter());
 	}
 
 	public Advisor wrap(Object advice) throws UnknownAdviceTypeException {

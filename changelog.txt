@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.72 2004-01-05 17:11:01 jhoeller Exp $
+$Id: changelog.txt,v 1.73 2004-01-05 18:46:45 johnsonr Exp $
 
 
 Changes in version 1.0 RC1 (xx.01.2003)
@@ -9,6 +9,7 @@ Changes in version 1.0 RC1 (xx.01.2003)
 * added "xdoclet/xjavadoc.jar" to release target in the framework build script (needed for building with attributes)
 * removed Servlet 2.3 "getServletContextName" call from ServletContextResource, for Servlet 2.2 compatibility
 * turned AbstractWizardFormController's "getCurrentPage" method non-final, to be overridden if determined by request
+* added AfterReturning advice to complete AOP advice types
 
 
 Changes in version 1.0 M4 (04.01.2003)
