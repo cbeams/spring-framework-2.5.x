@@ -5,9 +5,10 @@ import java.lang.reflect.InvocationTargetException;
 import javax.ejb.EJBObject;
 
 /**
- * Superclass for interceptors proxying remote Stateless Session Beans.
+ * <p>Superclass for interceptors proxying remote Stateless Session Beans.</p>
+ * 
  * @author Rod Johnson
- * @version $Id: AbstractRemoteSlsbInvokerInterceptor.java,v 1.4 2003-12-30 01:11:55 jhoeller Exp $
+ * @version $Id: AbstractRemoteSlsbInvokerInterceptor.java,v 1.5 2004-02-16 02:03:56 colins Exp $
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 	
@@ -30,5 +31,4 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 		}
 		return session;
 	}
-
 }

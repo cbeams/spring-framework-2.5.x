@@ -16,23 +16,36 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.MethodInvocationException;
 
 /**
- * Interceptor that invokes a local Stateless Session Bean, after caching
- * the home object. A local EJB home can never go stale.
+ * <p>Interceptor that invokes a local Stateless Session Bean, after caching
+ * the home object. A local EJB home can never go stale.</p>
+ * 
+ * <p>See {@link org.springframework.jndi.AbstractJndiLocator} for info on
+ * how to specify the JNDI location of the target EJB</p>
+ * 
+ * <p>In a bean container, this class is normally best used as a singleton. However,
+ * if that bean container pre-instantiates singletons (as do the XML ApplicationContext
+ * variants) you may have a problem if the bean container is loaded before the EJB
+ * container loads the target EJB. That is because the JNDI lookup will be performed in
+ * the init method of this class and cached, but the EJB will not have been bound at the
+ * target location yet. The solution is to not pre-instantiate this factory object, but
+ * allow it to be created on first use. In the XML containers, this is controlled via
+ * the lazy-init attribute.</p>
+ * 
  * @author Rod Johnson
- * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.5 2003-12-30 01:11:55 jhoeller Exp $
+ * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.6 2004-02-16 02:03:56 colins Exp $
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
 	protected EJBLocalObject newSessionBeanInstance() throws InvocationTargetException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Trying to create reference to remote EJB");
+			logger.debug("Trying to create reference to local EJB");
 		}
 
 		// Call superclass to invoke the EJB create method on the cached home
 		EJBLocalObject session = (EJBLocalObject) create();
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Obtained reference to remote EJB: " + session);
+			logger.debug("Obtained reference to local EJB: " + session);
 		}
 		return session;
 	}
