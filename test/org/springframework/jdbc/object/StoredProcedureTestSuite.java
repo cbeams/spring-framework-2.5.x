@@ -51,7 +51,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Thomas Risberg
  * @author Trevor Cook
  * @author Rod Johnson
- * @version $Id: StoredProcedureTestSuite.java,v 1.15 2004-05-21 19:25:42 jhoeller Exp $
+ * @version $Id: StoredProcedureTestSuite.java,v 1.16 2004-06-04 12:50:37 trisberg Exp $
  */
 public class StoredProcedureTestSuite extends AbstractJdbcTests {
 
@@ -416,7 +416,7 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 	}
 
 	public void testParameterMapper() throws Exception {
-		mockCallable.setObject(1, "EasyMock for interface java.sql.Connection", Types.VARCHAR);
+		mockCallable.setString(1, "EasyMock for interface java.sql.Connection");
 		ctrlCallable.setVoidCallable();
 		mockCallable.registerOutParameter(2, Types.VARCHAR);
 		ctrlCallable.setVoidCallable();

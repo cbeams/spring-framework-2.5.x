@@ -17,6 +17,7 @@
 package org.springframework.jdbc.support;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,17 +27,22 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.jdbc.core.SqlLobValue;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
+import org.springframework.jdbc.support.lob.LobCreator;
+import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
  * Utility methods for SQL statements.
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.9 2004-04-22 07:45:02 jhoeller Exp $
+ * @version $Id: JdbcUtils.java,v 1.10 2004-06-04 12:50:05 trisberg Exp $
  */
 public class JdbcUtils {
 
@@ -147,6 +153,99 @@ public class JdbcUtils {
 			}
 		}
 		return count;
+	}
+
+	/**
+	 * Set the value for a parameter.  The method used is based on the SQL Type of the parameter and 
+	 * we can handle complex types like Arrays and LOBs.
+	 * 
+	 * @param ps the prepared statement or callable statement
+	 * @param sqlColIndx index of the column we are setting
+	 * @param declaredParameter the parameter as it is declared including type
+	 * @param inValue the value to set
+	 * @throws SQLException
+	 */
+	public static void setParameterValue(PreparedStatement ps, int sqlColIndx, SqlParameter declaredParameter, Object inValue) throws SQLException {
+		LobHandler lh;
+		// input parameters must be supplied
+		if (inValue == null && declaredParameter.getTypeName() != null) {
+			ps.setNull(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getTypeName());
+		}
+		else
+			if (inValue != null) {
+				switch (declaredParameter.getSqlType()) {
+					case Types.VARCHAR:
+						ps.setString(sqlColIndx, inValue.toString());
+						break;
+					case Types.BLOB:
+						if (inValue instanceof SqlLobValue) {
+							lh = declaredParameter.getLobHandler();
+							if (lh == null)
+								lh = new DefaultLobHandler();
+							LobCreator lc = ((SqlLobValue) inValue).newLobCreator(lh);
+							switch (((SqlLobValue) inValue).getType()) {
+								case SqlLobValue.STREAM:
+									lc.setBlobAsBinaryStream(ps, sqlColIndx,((SqlLobValue) inValue).getStream(), ((SqlLobValue) inValue).getLength());
+									break;
+								case SqlLobValue.BYTES:
+									lc.setBlobAsBytes(ps, sqlColIndx,((SqlLobValue) inValue).getBytes());
+									break;
+							}
+						}
+						else {
+							ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
+						}
+						break;
+					case Types.CLOB:
+						if (inValue instanceof SqlLobValue) {
+							lh = declaredParameter.getLobHandler();
+							if (lh == null)
+								lh = new DefaultLobHandler();
+							LobCreator lc = ((SqlLobValue) inValue).newLobCreator(lh);
+							switch (((SqlLobValue) inValue).getType()) {
+								case SqlLobValue.STREAM:
+									lc.setClobAsAsciiStream(ps, sqlColIndx,((SqlLobValue) inValue).getStream(), ((SqlLobValue) inValue).getLength());
+									break;
+								case SqlLobValue.READER:
+									lc.setClobAsCharacterStream(ps, sqlColIndx,((SqlLobValue) inValue).getReader(), ((SqlLobValue) inValue).getLength());
+									break;
+								case SqlLobValue.STRING:
+									lc.setClobAsString(ps, sqlColIndx,((SqlLobValue) inValue).getString());
+									break;
+							}
+						}
+						else {
+							ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
+						}
+						break;
+					default:
+						ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
+						break;
+				}
+			}
+			else {
+				ps.setNull(sqlColIndx, declaredParameter.getSqlType());
+			}
+	}
+
+	/**
+	 * Close any LobCreators on any of the parameters passed to an execute method.
+	 * Classes using PreparedStatements or CallableStatements should invoke this method 
+	 * after every update()/execute() method invokation.
+	 * @param parameters parameters supplied. May be null.
+	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
+	 */
+	public static void cleanupParameters(Object[] parameters) {
+		
+		if (parameters != null) {
+			for (int i = 0; i < parameters.length; i++ ) {
+				Object inValue = parameters[i];
+				if (inValue instanceof SqlLobValue) {
+					((SqlLobValue)inValue).closeLobCreator();
+				}
+			}
+		}
+
 	}
 
 	/**

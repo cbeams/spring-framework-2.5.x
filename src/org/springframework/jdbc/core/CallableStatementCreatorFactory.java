@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Helper class that can efficiently create multiple CallableStatementCreator
@@ -160,42 +161,33 @@ public class CallableStatementCreatorFactory {
 
 			int sqlColIndx = 1;
 			for (int i = 0; i < declaredParameters.size(); i++) {
-				SqlParameter p = (SqlParameter) declaredParameters.get(i);
-				if (!this.inParameters.containsKey(p.getName()) && !(p instanceof SqlOutParameter) &&
-				    !(p instanceof SqlReturnResultSet)) {
-					throw new InvalidDataAccessApiUsageException("Required input parameter '" + p.getName() + "' is missing");
+				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
+				if (!this.inParameters.containsKey(declaredParameter.getName()) &&
+						!(declaredParameter instanceof SqlOutParameter) && 
+						!(declaredParameter instanceof SqlReturnResultSet)) {
+					throw new InvalidDataAccessApiUsageException("Required input parameter '" + declaredParameter.getName() + "' is missing");
 				}
 				// the value may still be null
-				Object in = this.inParameters.get(p.getName());
-				if (!(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet)) {
-					// input parameters must be supplied
-					if (in == null && p.getTypeName() != null) {
-						cs.setNull(sqlColIndx, p.getSqlType(), p.getTypeName());
-					}
-					else
-						if (in != null) {
-							cs.setObject(sqlColIndx, in, p.getSqlType());
-						}
-						else {
-							cs.setNull(sqlColIndx, p.getSqlType());
-						}
+				Object inValue = this.inParameters.get(declaredParameter.getName());
+				if (!(declaredParameter instanceof SqlOutParameter) && !(declaredParameter instanceof SqlReturnResultSet)) {
+					JdbcUtils.setParameterValue(cs, sqlColIndx, declaredParameter, inValue);
 				}
 				else {
 					// It's an output parameter. Skip SqlReturnResultSet parameters
 					// It need not (but may be) supplied by the caller.
-					if (p instanceof SqlOutParameter) {
-						if (p.getTypeName() != null) {
-							cs.registerOutParameter(sqlColIndx, p.getSqlType(), p.getTypeName());
+					if (declaredParameter instanceof SqlOutParameter) {
+						if (declaredParameter.getTypeName() != null) {
+							cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getTypeName());
 						}
 						else {
-							cs.registerOutParameter(sqlColIndx, p.getSqlType());
+							cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType());
 						}
-						if (in != null) {
-							cs.setObject(sqlColIndx, in, p.getSqlType());
+						if (inValue != null) {
+							cs.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
 						}
 					}
 				}
-				if (!(p instanceof SqlReturnResultSet)) {
+				if (!(declaredParameter instanceof SqlReturnResultSet)) {
 					sqlColIndx++;
 				}
 			}

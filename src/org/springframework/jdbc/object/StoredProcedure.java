@@ -25,6 +25,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Superclass for object abstractions of RDBMS stored procedures.
@@ -37,7 +38,7 @@ import org.springframework.jdbc.core.SqlParameter;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: StoredProcedure.java,v 1.12 2004-05-29 21:20:23 jhoeller Exp $
+ * @version $Id: StoredProcedure.java,v 1.13 2004-06-04 12:50:37 trisberg Exp $
  */
 public abstract class StoredProcedure extends SqlCall {
 
@@ -98,7 +99,9 @@ public abstract class StoredProcedure extends SqlCall {
 	 */
 	public Map execute(final Map inParams) throws DataAccessException {
 		validateParameters(inParams.values().toArray());
-		return getJdbcTemplate().call(newCallableStatementCreator(inParams), getDeclaredParameters());
+		Map out = getJdbcTemplate().call(newCallableStatementCreator(inParams), getDeclaredParameters());
+		JdbcUtils.cleanupParameters(inParams.values().toArray());
+		return out;
 	}
 
 	/**

@@ -1,6 +1,15 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.157 2004-06-03 00:33:52 jhoeller Exp $
+$Id: changelog.txt,v 1.158 2004-06-04 12:50:37 trisberg Exp $
+
+
+Changes in version 1.0.3 (?.?.2004)
+-----------------------------------
+
+
+Package org.springframework.jdbc
+* added support for CLOB/BLOB to SqlUpdate and StoredProcedure
+* refactored the CallableStatement/PreparedStatement.setXxxx method invokations into its own utility method JdbcUtils.setParameters 
 
 
 Changes in version 1.0.2 (3.6.2004)

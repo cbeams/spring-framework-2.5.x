@@ -20,20 +20,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Helper class that can efficiently create multiple PreparedStatementCreator
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.11 2004-05-28 14:11:41 jhoeller Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.12 2004-06-04 12:50:36 trisberg Exp $
  */
 public class PreparedStatementCreatorFactory {
 
@@ -164,7 +164,7 @@ public class PreparedStatementCreatorFactory {
 			}
 			else {
 				ps = con.prepareStatement(sql, resultSetType,
-																	updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
+					updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
 
 			setValues(ps);
@@ -175,20 +175,9 @@ public class PreparedStatementCreatorFactory {
 			// Set arguments: Does nothing if there are no parameters.
 			for (int i = 0; i < this.parameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
-				// we need SQL type to be able to set null
-				if (this.parameters.get(i) == null) {
-					ps.setNull(i + 1, declaredParameter.getSqlType());
-				}
-				else {
-					switch (declaredParameter.getSqlType()) {
-						case Types.VARCHAR:
-							ps.setString(i + 1, this.parameters.get(i).toString());
-							break;
-						default :
-							ps.setObject(i + 1, this.parameters.get(i), declaredParameter.getSqlType());
-							break;
-					}
-				}
+				Object in = this.parameters.get(i);
+				int sqlColIndx = i + 1;
+				JdbcUtils.setParameterValue(ps, sqlColIndx, declaredParameter, in);
 			}
 		}
 
