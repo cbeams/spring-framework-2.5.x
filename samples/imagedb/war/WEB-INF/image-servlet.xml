@@ -33,8 +33,7 @@
 	<!-- Simple ViewResolver for FreeMarker, appending ".ftl" to logical view names -->
 	<!-- Uncomment this and comment out the above to switch to the FreeMarker view -->
 	<!--
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-		<property name="viewClass"><value>org.springframework.web.servlet.view.freemarker.FreeMarkerView</value></property>
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
 		<property name="suffix"><value>.ftl</value></property>
 	</bean>
 	-->
