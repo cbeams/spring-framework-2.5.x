@@ -938,7 +938,7 @@
 
       <para>The <literal>ProxyFactoryBean</literal>, like other Spring
       <literal>FactoryBean</literal> implementations, introduces a level of
-      introduction. If you define a <literal>ProxyFactoryBean</literal> with
+      indirection. If you define a <literal>ProxyFactoryBean</literal> with
       name <literal>foo</literal>, what objects referencing
       <literal>foo</literal> see is not the
       <literal>ProxyFactoryBean</literal> instance itself, but an object
@@ -1103,7 +1103,7 @@
       references. The reason for this is that if the ProxyFactoryBean's
       singleton property is set to false, it must be able to return
       independent proxy instances. If any of the advisors is itself a
-      prototype, and independent instance would need to be returned, so it's
+      prototype, an independent instance would need to be returned, so it's
       necessary to be able to obtain an instance of the prototype from the
       factory; holding a reference isn't sufficient.</remark>
 
@@ -1341,7 +1341,9 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
     Any AOP proxy can be cast to this interface, whatever other interfaces it
     implements. This interface includes the following methods:</para>
 
-    <programlisting>void addInterceptor(Interceptor interceptor) throws AopConfigException;
+    <programlisting>Advisor[] getAdvisors();
+
+void addInterceptor(Interceptor interceptor) throws AopConfigException;
 
 void addInterceptor(int pos, Interceptor interceptor) 
         throws AopConfigException;
