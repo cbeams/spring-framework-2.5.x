@@ -354,24 +354,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate OPTIONS requests to servletWrapper respectively doService.
-	 * @see #doService
-	 */
-	protected final void doOptions(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
-		serviceWrapper(request, response);
-	}
-
-	/**
-	 * Delegate TRACE requests to servletWrapper respectively doService.
-	 * @see #doService
-	 */
-	protected final void doTrace(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
-		serviceWrapper(request, response);
-	}
-
-	/**
 	 * Handle this request, publishing an event regardless of the outcome.
 	 * The actually event handling is performed by the abstract doService() method.
 	 */
