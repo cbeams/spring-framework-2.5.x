@@ -22,8 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Convenient superclass for JNDI accessors that provides jndiTemplate
- * and jndiEnvironment bean properties.
+ * Convenient superclass for JNDI accessors that provides "jndiTemplate"
+ * and "jndiEnvironment" bean properties.
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setJndiTemplate
@@ -31,12 +31,15 @@ import org.apache.commons.logging.LogFactory;
  */
 public class JndiAccessor {
 
+	/**
+	 * Logger, available to subclasses.
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private JndiTemplate jndiTemplate = new JndiTemplate();
 
 	/**
-	 * Set the JNDI template to use for the JNDI lookup.
+	 * Set the JNDI template to use for JNDI lookups.
 	 * You can also specify JNDI environment settings via setJndiEnvironment.
 	 * @see #setJndiEnvironment
 	 */
@@ -45,14 +48,14 @@ public class JndiAccessor {
 	}
 
 	/**
-	 * Return the JNDI template to use for the JNDI lookup.
+	 * Return the JNDI template to use for JNDI lookups.
 	 */
 	public JndiTemplate getJndiTemplate() {
 		return jndiTemplate;
 	}
 
 	/**
-	 * Set the JNDI environment to use for the JNDI lookup.
+	 * Set the JNDI environment to use for JNDI lookups.
 	 * Creates a JndiTemplate with the given environment settings.
 	 * @see #setJndiTemplate
 	 */
@@ -61,7 +64,7 @@ public class JndiAccessor {
 	}
 
 	/**
-	 * Return the JNDI enviromment to use for the JNDI lookup.
+	 * Return the JNDI environment to use for JNDI lookups.
 	 */
 	public Properties getJndiEnvironment() {
 		return this.jndiTemplate.getEnvironment();
