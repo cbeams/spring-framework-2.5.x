@@ -25,6 +25,8 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
     private MBeanServer mbeanServer;
 
     private JmxObjectProxyFactory factory;
+    
+    private Class[] proxyInterfaces;
 
     public void setMBeanServer(MBeanServer mbeanServer) {
         this.mbeanServer = mbeanServer;
@@ -36,6 +38,10 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
 
     public void setUseCglib(boolean useCglib) {
         this.useCglib = useCglib;
+    }
+    
+    public void setProxyInterfaces(Class[] proxyInterfaces) {
+        this.proxyInterfaces = proxyInterfaces;
     }
 
     public Object getObject() throws Exception {
@@ -56,8 +62,15 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
         if (useCglib) {
             factory = new CglibJmxObjectProxyFactory();
         } else {
+            
+            if((proxyInterfaces == null) || (proxyInterfaces.length == 0)) {
+                throw new IllegalArgumentException("You must specify at least one interface to proxy when using the JDK proxy");
+            }
+            
             factory = new JdkJmxObjectProxyFactory();
         }
+        
+        factory.setProxyInterfaces(proxyInterfaces);
 
         proxy = factory.createProxy(mbeanServer, name);
     }

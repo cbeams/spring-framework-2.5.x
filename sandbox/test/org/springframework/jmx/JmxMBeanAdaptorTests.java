@@ -25,7 +25,7 @@ public class JmxMBeanAdaptorTests extends TestCase {
         JmxMBeanAdapter adaptor = new JmxMBeanAdapter();
         adaptor.setBeans(getBeanMap());
         adaptor.setServer(server);
-        adaptor.afterPropertiesSet();
+        adaptor.registerBeans();
         assertTrue("The bean was not registered with the MBeanServer", beanExists(server, ObjectName.getInstance(OBJECT_NAME)));
     }
     
@@ -34,6 +34,7 @@ public class JmxMBeanAdaptorTests extends TestCase {
         JmxMBeanAdapter adaptor = new JmxMBeanAdapter();
         adaptor.setBeans(getBeanMap());
         adaptor.afterPropertiesSet();
+        adaptor.registerBeans();
         assertTrue("The bean was not registered with the MBeanServer", beanExists(server, ObjectName.getInstance(OBJECT_NAME)));
     }
 

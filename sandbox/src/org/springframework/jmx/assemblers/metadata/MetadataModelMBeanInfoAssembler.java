@@ -27,6 +27,7 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.jmx.AbstractModelMBeanInfoAssembler;
+import org.springframework.jmx.AutodetectCapableModelMBeanInfoAssembler;
 import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.exceptions.MBeanAssemblyException;
 import org.springframework.jmx.metadata.support.ManagedAttribute;
@@ -45,7 +46,7 @@ import org.springframework.metadata.commons.CommonsAttributes;
  * @author Rob Harrop
  */
 public class MetadataModelMBeanInfoAssembler extends
-        AbstractModelMBeanInfoAssembler {
+        AbstractModelMBeanInfoAssembler implements AutodetectCapableModelMBeanInfoAssembler{
 
     /**
      * Attributes implementation. Default is Commons Attributes
@@ -186,5 +187,18 @@ public class MetadataModelMBeanInfoAssembler extends
 
         ModelMBeanOperationInfo[] result = JmxUtils.shrink(info, attrCount);
         return result;
+    }
+
+    /**
+     * Used for auto detection of beans. Checks to see if
+     * the bean's class has a ManagedResource attribute. If so
+     * it will add it list of included beans
+     */
+    public boolean includeBean(String beanName, Object bean) {
+        if(MetadataReader.getManagedResource(attributes, bean.getClass()) != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

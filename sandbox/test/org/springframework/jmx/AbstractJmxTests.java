@@ -26,7 +26,11 @@ public class AbstractJmxTests extends TestCase {
 
     public void setUp() {
         server = MBeanServerFactory.createMBeanServer();
-        ctx = new FileSystemXmlApplicationContext("./sandbox/test/org/springframework/jmx/applicationContext.xml");
+        ctx = new FileSystemXmlApplicationContext(getApplicationContextPath());
+    }
+
+    protected String getApplicationContextPath() {
+        return "./sandbox/test/org/springframework/jmx/applicationContext.xml";
     }
 
     public void tearDown() throws Exception {

@@ -23,11 +23,36 @@ public class JmxProxyFactoryBeanTests extends AbstractJmxTests {
     }
     
     public void testWithJdkProxyFactory() throws Exception {
-        JmxProxyFactoryBean fb = new JmxProxyFactoryBean();
+        JmxProxyFactoryBean fb = getProxyFactory();
         fb.setUseCglib(false);
+        fb.setProxyInterfaces(new Class[]{IJmxTestBean.class});
+        
+        IJmxTestBean bean = (IJmxTestBean)fb.getObject();
+
+    }
+    
+    public void testInvalidJdkProxy() throws Exception {
+        JmxProxyFactoryBean fb = getProxyFactory();
+        fb.setUseCglib(false);
+        
+        try {
+            fb.afterPropertiesSet();
+            fail("Should not be able to JDK proxy settings with no proxy interfaces");
+        } catch(Exception ex) {
+            // good
+        }
+    }
+    
+    public void testWithCglibProxyFactory() throws Exception {
+        JmxProxyFactoryBean fb = getProxyFactory();
+        JmxTestBean bean = (JmxTestBean)fb.getObject();
+    }
+
+    private JmxProxyFactoryBean getProxyFactory() {
+        JmxProxyFactoryBean fb = new JmxProxyFactoryBean();
         fb.setMBeanServer(server);
         fb.setObjectName(OBJECT_NAME);
-
+        return fb;
     }
 
 }
