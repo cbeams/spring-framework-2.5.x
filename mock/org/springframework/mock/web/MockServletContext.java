@@ -129,7 +129,14 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public URL getResource(String path) throws MalformedURLException {
-		return new URL(getResourceLocation(path));
+		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
+		try {
+			return resource.getURL();
+		}
+		catch (IOException ex) {
+			logger.info("Couldn't get URL for resource " + resource, ex);
+			return null;
+		}
 	}
 
 	public InputStream getResourceAsStream(String path) {
@@ -138,7 +145,7 @@ public class MockServletContext implements ServletContext {
 			return resource.getInputStream();
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't open resource " + resource, ex);
+			logger.info("Couldn't open InputStream for resource " + resource, ex);
 			return null;
 		}
 	}
@@ -181,7 +188,7 @@ public class MockServletContext implements ServletContext {
 			return resource.getFile().getAbsolutePath();
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't determine real path of resource " + resource, ex);
+			logger.info("Couldn't determine real path of resource " + resource, ex);
 			return null;
 		}
 	}
