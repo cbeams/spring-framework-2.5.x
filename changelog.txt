@@ -10,7 +10,11 @@ Package org.springframework.beans
 * reworked BeanWrapperImpl's property-specific custom editor handling to allow registration for uninitialized subpaths
 
 Package org.springframework.orm
-* fixed SessionFactoryUtils' synchronization for JtaTransasctionManager with a Hibernate TransactionManagerLookup
+* fixed SessionFactoryUtils' synchronization for JtaTransactionManager with a Hibernate TransactionManagerLookup
+
+Package org.springframework.jms
+* reworked DynamicDestinationResolver to work with both JMS 1.1 and JMS 1.0.2
+* reworked JndiDestinationResolver to delegate for dynamic destinations, by default to a DynamicDestinationResolver
 
 Package org.springframework.jndi
 * added "rebind" operation to JndiTemplate, analogous to the existing "lookup", "bind" and "unbind" operations
@@ -23,7 +27,7 @@ Package org.springframework.remoting
 * added JndiRmiClientInterceptor and JndiRmiProxyFactoryBean, for fetching PortableRemoteObject RMI services from JNDI
 
 Package org.springframework.validation
-* fixed BindException to also apply getAsText of a custom PropertyEditor in case of a null value
+* fixed BindException to apply "getAsText" of a custom PropertyEditor even in case of a null value
 
 
 Changes in version 1.1 RC2 (19.8.2004)
