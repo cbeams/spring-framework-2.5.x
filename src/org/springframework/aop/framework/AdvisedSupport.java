@@ -27,6 +27,7 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -364,15 +365,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 	
 	public void removeAdvisor(int index) throws AopConfigException {
-		if (isFrozen())
+		if (isFrozen()) {
 			throw new AopConfigException("Cannot remove Advisor: config is frozen");
-		if (index < 0 || index > advisors.size() - 1)
+		}
+		if (index < 0 || index > this.advisors.size() - 1) {
 			throw new AopConfigException("Advisor index " + index + " is out of bounds: " +
-					"Only have " + advisors.size() + " advisors");
-		Advisor advisor = (Advisor) advisors.get(index);
+					"Only have " + this.advisors.size() + " advisors");
+		}
+
+		Advisor advisor = (Advisor) this.advisors.get(index);
 		if (advisor instanceof IntroductionAdvisor) {
 			IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
-			// We need to remove interfaces
+			// we need to remove interfaces
 			for (int j = 0; j < ia.getInterfaces().length; j++) {
 				removeInterface(ia.getInterfaces()[j]);
 			}
@@ -429,7 +433,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Replace the given advisor.
-	 * <p><b>NB:</b>If the advisor is an IntroductionAdvisor
+	 * <p><b>NB:</b> If the advisor is an IntroductionAdvisor
 	 * and the replacement is not or implements different interfaces,
 	 * the proxy will need to be re-obtained or the old interfaces
 	 * won't be supported and the new interface won't be implemented.
@@ -553,27 +557,30 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * subclass state.
 	 */
 	protected Object writeReplace() throws ObjectStreamException {
-		logger.info("Disconnecting AdvisedSupport " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Disconnecting " + this);
+		}
+
 		// Copy state to avoid dependencies
-        // on BeanFactories etc. that subclasses may have
-        AdvisedSupport copy = this;
-        
-        // If we're in a non-serializable subclass,
-        // copy into an AdvisedSupport object.
-        if (getClass() != AdvisedSupport.class) {
-        	copy = new AdvisedSupport();
-        	copy.copyConfigurationFrom(this);
-        }
-        
-        // May return this
-        return copy;
-    }
+		// on BeanFactories etc. that subclasses may have.
+		AdvisedSupport copy = this;
+
+		// If we're in a non-serializable subclass,
+		// copy into an AdvisedSupport object.
+		if (getClass() != AdvisedSupport.class) {
+			copy = new AdvisedSupport();
+			copy.copyConfigurationFrom(this);
+		}
+
+		// may return this
+		return copy;
+	}
 	 
 	/**
-	 * Used to initialize transient state
+	 * Used to initialize transient state.
 	 */
 	protected Object readResolve() throws ObjectStreamException {
-		// Initialize transient fields
+		// initialize transient fields
 		this.logger = LogFactory.getLog(getClass());
 		this.isActive = true;
 		this.listeners = new LinkedList();
