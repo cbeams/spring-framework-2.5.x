@@ -43,7 +43,7 @@
           the methods that need to be called upon initialization and
           destruction, whether or not the bean needs to be autowired and some
           other aspects. The <literal>XmlBeanFactory</literal> for example is
-          capalbe of reading bean definitions from an XML file, where
+          capable of reading bean definitions from an XML file, where
           properties, as well as collaborators and lifecycle methods are
           defined in XML</para>
         </listitem>
@@ -62,7 +62,7 @@
           <literal>setValue(Object)</literal>-method) set the resulting value
           of the property. PropertyEditors are heavily used in Spring, not
           only by for example the BeanFactory to transform the Strings defined
-          in the XML containing beans, to properties of those beans, but also
+          in the XML-containing beans, to properties of those beans, but also
           by the MVC framework to convert request parameters submitted by a
           user after filling a form to properties of command objects that
           might be of some completely different type</para>
@@ -128,13 +128,14 @@
         </itemizedlist></para>
 
       <para>In the list above, we mentioned the use of constructor arguments,
-      as well as setters. Spring support two types of IoC: type 2 and type 3.
+      as well as setters. Spring supports two types of IoC: type 2 and type 3
+      (Constructor Dependency Injection and Setter Dependency Injection).
       What that basically means is that when new objects are constructed you
       can set properties of the object using both regular JavaBean style
       setter methods, and also directory as arguments which you specify to the
       constructors..</para>
 
-      <para>The concepts listed above, directly translate to a set of elements
+      <para>The concepts listed above directly translate to a set of elements
       the bean definition consists of. These elements are listed below, along
       with a link to further documentation about each of them. <table
           frame="all">
@@ -228,19 +229,19 @@
 
       <para>Of course you need to specify the actual class of your bean, that
       should be obvious. There are no special requirements as to what this
-      class is or hwo it's implemented (i.e.it does not have to implement a
+      class is or how it's implemented (i.e. it does not have to implement a
       special interface to make it Spring compatible). Just specifying the
-      bean class should be enough. However, dependending on what type of IoC
-      you are going to use for that specific bean, you should have a default
+      bean class should be enough. However, depending on what type of IoC
+      you are going to use for that specific bean, you may need a default
       constructor.</para>
 
-      <para>The BeanFactory cannot only manage beans, but is able to manage
+      <para>The BeanFactory isn't limited to just managing beans, it is also able to manage
       virtually <emphasis>any</emphasis> class you want it to manage. Most
       people using Spring prefer to have actual beans (having just a default
       constructor and appropriate setters and getters modelled after the
       properties) in the BeanFactory, but it it's also possible to have more
       exotic non-bean-style classes in your BeanFactory. If, for example, you
-      need to user a legacy connection pool that absolutely does not adhere to
+      need to use a legacy connection pool that absolutely does not adhere to
       the bean specification, no worries, Spring can manage it as well.</para>
 
       <para>Using the XmlBeanFactory you can specify your bean class as
@@ -266,7 +267,7 @@
       document) as a real XML element ID attribute, the parser is able to do
       some extra validation when other elements point back to this one. As
       such, it is the preferred way to specify a bean id. However, the XML
-      spec does limit the charactes which are legal in XML IDs. This is
+      spec does limit the characters which are legal in XML IDs. This is
       usually not really a constraint, but if you have a need to use one of
       these characters, or want to introduce other aliases to the bean, you
       may also or instead specify one or more bean ids (separated by a comma
@@ -280,13 +281,13 @@
       non-singleton. (The latter is also called a prototype, although the term
       is used loosely as as it doesn't quite fit). When a bean is a singleton,
       only one <emphasis>shared</emphasis> instance of the bean will be
-      managed and all requests for beans with and id or ids matching that bean
+      managed and all requests for beans with an id or ids matching that bean
       definition will result in that one specific bean instance being
       returned.</para>
 
       <para>The non-singleton, prototype mode of a bean deployment results in
       the <emphasis>creation of a new bean instance</emphasis> every time a
-      request for that specific bean is done. This is ideal for situation
+      request for that specific bean is done. This is ideal for situations
       where for example each user needs an independent user object or
       something similar.</para>
 
@@ -297,7 +298,7 @@
       change the mode to prototype when absolutely necessary.</para>
 
       <para>In the example below, two beans are declared of which one is
-      defined as a singleton, and the other one as a non-singleton
+      defined as a singleton, and the other one is a non-singleton
       (prototype). <literal>exampleBean</literal> is created each and every
       time a client asks the BeanFactory for this bean, while
       <literal>yetAnotherExample</literal> is only created once; a reference
@@ -473,9 +474,9 @@
       file, directly relate to the <literal>PropertyValues</literal> object
       from the <literal>RootBeanDefinition</literal>)</para>
 
-      <para>Then, an example of using the BeanFactory for IoC type 3 (using
-      constructors). Below you can find a snippet from an XML configuration
-      file that specifies constructor arguments and the actual bean,
+      <para>Then, an example of using the BeanFactory for IoC type 3 (Constructor
+      Dependency Injection). Below is a snippet from an XML configuration
+      that specifies constructor arguments and the actual bean,
       specifying the constructor <programlisting>&lt;bean id="exampleBean"
       class="examples.ExampleBean"&gt; &lt;constructor-arg&gt;&lt;ref
       bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
@@ -518,15 +519,15 @@
     <sect2 id="beans-factory-dependson">
       <title>Using <literal>depends-on</literal></title>
 
-      <para>In normal situations, Spring resolves references to bean using for
+      <para>In normal situations, Spring resolves references to beans using for
       instance the <literal>&lt;ref bean/&gt;</literal>-tag. When just using
-      those tags, without having special needs for initialization, you don't
+      those tags, without having special initialization needs, you don't
       have to use the <literal>depends-on</literal>-tag. However, when you're
       using statics (which you of course shouldn't ;-) that need
-      initialization or some beans needs to be initialized because of
+      initialization or some bean needs to be initialized because of
       something else needing preparation, you can use the
-      <literal>depends-on</literal>-tag, which will ensure all beans you're
-      mentioning there, will get initialized before their actually set on the
+      <literal>depends-on</literal>-tag. This will ensure all beans you've listed
+      as dependencies will get initialized before they're actually set on the
       bean. For example: <programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="manager"&gt;
     &lt;property name="manager"&gt;&lt;ref local="manager"/&gt;
 &lt;/bean&gt;
@@ -610,9 +611,8 @@
     <sect2 id="beans-factory-dependencies">
       <title>Checking for dependencies</title>
 
-      <para>Spring also offers the capability for checking required
-      dependencies of your beans. This feature might come in handy when
-      certain properties really need to be set and when you can't provide
+      <para>Spring also has the capability of checking required
+      dependencies on your beans. This feature might come in handy when      certain properties really need to be set and when you can't provide
       default values (which is an often used approach). Dependency checking
       can be done in three different ways. Dependency checking can also be
       enabled and disabled per bean, just as the autowiring functionality. The

@@ -6,7 +6,7 @@
     <title>The Spring transaction abstraction</title>
 
     <para>Spring provides a consistent abstraction for transaction management.
-    This abstraction is one of the most important of Spring's abstractiions,
+    This abstraction is one of the most important of Spring's abstractions,
     and delivers the following benefits:<itemizedlist>
         <listitem>
           <para>Provides a consistent programming model across different
@@ -79,7 +79,7 @@
 
     <para>With programmatic transaction management developers work with the
     Spring transaction abstraction, which can run over any underlying
-    transaction infrastructure. With the preferred, declarative, model,
+    transaction infrastructure. With the preferred declarative model
     developers typically write little or no code related to transaction
     management, and hence don't depend on Spring's or any other transaction
     API.</para>
@@ -149,7 +149,7 @@
         transaction. However, there are several options specificying behaviour
         if a transactional method is executed when a transaction context
         already exists: For example, simply running in the existing
-        transaction (the commonest case); or suspending the existing
+        transaction (the most common case); or suspending the existing
         transaction and creating a new transaction. Spring offers the
         transaction propagation options familiar from EJB CMT.</para>
       </listitem>
@@ -233,16 +233,16 @@
 
 &lt;bean id="transactionManager" 
     class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>We
-    can use Hibernate local transactions easy, as shown in the following
+    can use Hibernate local transactions easily, as shown in the following
     examples from the Spring <emphasis role="bold">PetClinic</emphasis> sample
     application.</para>
 
     <para>In this case, we need to define a Hibernate LocalSessionFactory,
     which application code will use to obtain Hibernate Sessions.</para>
 
-    <para>The DataSource bean definition will be as either of the above
-    examples, and is not shown. (If it's a container DataSource, it should be
-    non-transactional, as Spring, rather than the container, will manage
+    <para>The DataSource bean definition will be similar to one of the above
+    examples, and is not shown. (If it's a container DataSource it should be
+    non-transactional as Spring, rather than the container, will manage
     transactions.)</para>
 
     <para>The "transactionManager" bean in this case is of class
@@ -417,7 +417,7 @@ transactionManager.commit(status);</programlisting></para>
     enabled by Spring AOP.</para>
 
     <remark>Most Spring users choose declarative transaction management. It is
-    the option with least impact on application code, and hence is most
+    the option with the least impact on application code, and hence is most
     consistent with the ideals of a n<emphasis>on-invasive
     </emphasis>lightweight container.</remark>
 
@@ -476,7 +476,7 @@ transactionManager.commit(status);</programlisting></para>
     to depend on the transaction infrastructure. For example, they typically
     don't need to import any Spring APIs, transaction or other.</para>
 
-    <para>While the EJB default behaviour is the for the EJB container to
+    <para>While the EJB default behaviour is for the EJB container to
     automatically roll back the transaction on a <emphasis>system
     exception</emphasis> (usually a runtime exception), EJB CMT does not roll
     back the transaction automatically on an <emphasis>application
@@ -608,7 +608,7 @@ transactionManager.commit(status);</programlisting></para>
   &lt;bean id="autoProxyCreator" 
       class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
     &lt;property name="interceptorNames"&gt;
-      &lt;list&gt;T
+      &lt;list&gt;
         &lt;idref local="matchAllTxInterceptor"/&gt;
         &lt;idref bean="hibInterceptor"/&gt;
       &lt;/list&gt;
