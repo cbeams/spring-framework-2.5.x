@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jdbc.core.DatabaseMetaDataCallbackHandler;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
@@ -36,7 +35,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.7 2004-04-06 21:39:20 trisberg Exp $
+ * @version $Id: JdbcUtils.java,v 1.8 2004-04-21 01:12:34 trisberg Exp $
  */
 public class JdbcUtils {
 
@@ -76,8 +75,13 @@ public class JdbcUtils {
 
 	/**
 	 * Extract database meta data.
-	 * This method will never throw an exception - it will always return null, even if the metadata
-	 * or connection calls fail.  Metadata lookups are usually not fatal so check the returned data for nulls.
+	 * This method will open a connection to the database and retrieve the database metadata.
+	 * Since this method is called before the exception translation feature is configured for
+	 * a datasource, this method can not rely on the SQLException translation functionality.
+	 * Any exceptions will be wrapped in a MetaDataAccessException.  This is a checked exception
+	 * and any calling code should catch and handle this exception.  You can just log the
+	 * error and hope for the best, but there is probably a more serious error that will
+	 * reappear when you try to access the database again.   
 	 * @param call back handler that will do the actual work
 	 * @return object containing the extracted information
 	 */

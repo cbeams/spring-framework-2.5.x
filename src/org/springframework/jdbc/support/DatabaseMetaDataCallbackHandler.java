@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.jdbc.core;
+package org.springframework.jdbc.support;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -23,7 +23,7 @@ import java.sql.SQLException;
  * A callback interfaces used by the JdbcTemplate class. Implementations of this interface 
  * perform the actual work of extracting database meta data, but don't need to worry about 
  * exception handling. SQLExceptions will be caught and handled correctly by the 
- * JdbcTemplate class.
+ * JdbcUtils class.
  * @author Thomas Risberg
  */
 public interface DatabaseMetaDataCallbackHandler {

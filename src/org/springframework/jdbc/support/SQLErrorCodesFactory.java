@@ -31,7 +31,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.DatabaseMetaDataCallbackHandler;
 
 /**
  * Factory for creating SQLErrorCodes based on the
@@ -44,7 +43,7 @@ import org.springframework.jdbc.core.DatabaseMetaDataCallbackHandler;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
- * @version $Id: SQLErrorCodesFactory.java,v 1.10 2004-04-06 21:39:20 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.11 2004-04-21 01:12:34 trisberg Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
