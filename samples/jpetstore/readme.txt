@@ -20,7 +20,7 @@ Compared to the original JPetStore, this implementation is significantly
 improved in terms of internal structure and loose coupling: Leveraging Spring's
 application context concept, there's a central place for wiring application
 objects now. The most notable improvement is the former PetStoreLogic, now
-called PetStoreFacade: It it not concerned with transaction details anymore.
+called PetStoreFacade: it is no longer concerned with transaction details.
 
 Note that the Spring-based web tier implementation is deliberately similar to
 the Struts-based one and does not aim to improve in terms of in-place error
@@ -42,4 +42,20 @@ The war file will be created in the 'dist' directory.
 To be able to execute the web application with its default settings,
 you'll need to start the HSQLDB instance in the db/hsqldb directory
 first, using server.bat.
+
+
+===========================================================
+See the /attributes directory for an example of declarative transaction management
+driven by source-level metadata attributes. This provides a simple model,
+similar to that of .NET Enterprise Services, but which is extensible to 
+arbitrary (possibly application-specific) declarative services.
+
+This directory has its own build file, which invokes the attribute compilation
+process and builds the WAR using its own application context XML files, under
+its WEB-INF subdirectory.
+
+The attribute support is provided by Jakarta Commons Attributes.
+
+Note that three files must be copied into $ANT_HOME/lib for the attribute
+compilation process to work: see /attributes/build.xml for details.
 
