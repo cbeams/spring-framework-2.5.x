@@ -112,6 +112,10 @@ public class DispatchMethodInvoker {
 		this.methodCache.clear();
 	}
 
+	/**
+	 * Sets the expected return type for the dispatch methods.
+	 * @param returnType The expected return type
+	 */
 	public void setReturnType(Class returnType) {
 		this.returnType = returnType;
 	}
@@ -163,6 +167,10 @@ public class DispatchMethodInvoker {
 		return parameterTypes;
 	}
 
+	/**
+	 * Returns the expected return type of the dispatch methods.
+	 * @return the expected return type, or null if void
+	 */
 	public Class getReturnType() {
 		return returnType;
 	}
