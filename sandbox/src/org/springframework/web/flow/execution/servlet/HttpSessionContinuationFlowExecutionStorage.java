@@ -79,5 +79,9 @@ public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlow
 
 	public void remove(String id, Event requestingEvent) throws FlowExecutionStorageException {
 		// nothing to do
+		// note that we shouldn't remove the identified flow execution continuation
+		// because that id actually identifies the 'previous' flow execution, not the
+		// one that has ended (because that one is never saved so doesn't even have
+		// an id!)
 	}
 }
