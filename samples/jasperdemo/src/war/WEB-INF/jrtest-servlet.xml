@@ -37,19 +37,23 @@
 		</property>
 	</bean>
 
+	<bean id="htmlReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView">
+		<property name="url">
+			<value>/WEB-INF/reports/simpleReport.jrxml</value>
+		</property>
+		<property name="exporterParameters">
+			<map>
+				<entry key="net.sf.jasperreports.engine.export.JRHtmlExporterParameter.HTML_FOOTER">
+					<value>Footer by Spring!&lt;/td&gt;&lt;td width="50%"&gt;&amp;nbsp; &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="mappings">
 			<props>
-
-				<prop key="/simpleReport*.*">controller</prop>
-				<!--<prop key="/simpleReport.pdf">controller</prop>
-				<prop key="/simpleReportPost.pdf">controller</prop>
-				<prop key="/simpleReportPost.action">controller</prop>
-				<prop key="/simpleReportCompile.pdf">controller</prop>
-				<prop key="/simpleReportHtml.html">controller</prop>
-				<prop key="/simpleReportCsv.csv">controller</prop>
-				<prop key="/simpleReportExcel.xls">controller</prop>-->
-				<prop key="/subReport.pdf">controller</prop>
+				<prop key="/*.*">controller</prop>
 			</props>
 		</property>
 	</bean>
@@ -72,6 +76,7 @@
 				<prop key="/simpleReportExcel.xls">handleSimpleReportExcel</prop>
 				<prop key="/simpleReportMulti.*">handleSimpleReportMulti</prop>
 				<prop key="/subReport.pdf">handleSubReport</prop>
+				<prop key="/exporterParameters.html">handleExporterParameters</prop>
 			</props>
 		</property>
 	</bean>
