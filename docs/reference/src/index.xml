@@ -2,28 +2,29 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
                       "../lib/docbook-dtd/docbookx.dtd"
 [
-<!ENTITY overview					SYSTEM "overview.xml">
-<!ENTITY beans						SYSTEM "beans.xml">
-<!ENTITY mail						SYSTEM "mail.xml">
-<!ENTITY validation					SYSTEM "validation.xml">
-<!ENTITY transaction				SYSTEM "transaction.xml">
-<!ENTITY aop						SYSTEM "aop.xml">
-<!ENTITY metadata					SYSTEM "metadata.xml">
-<!ENTITY jdbc						SYSTEM "jdbc.xml">
-<!ENTITY orm						SYSTEM "orm.xml">
-<!ENTITY mvc			        	SYSTEM "mvc.xml">
-<!ENTITY views                      SYSTEM "views.xml">
-<!ENTITY ejb						SYSTEM "ejb.xml">
-<!ENTITY background					SYSTEM "background.xml">
-<!ENTITY dtd					    SYSTEM "dtd.xml">
+<!ENTITY overview			SYSTEM "overview.xml">
+<!ENTITY beans				SYSTEM "beans.xml">
+<!ENTITY mail				SYSTEM "mail.xml">
+<!ENTITY validation			SYSTEM "validation.xml">
+<!ENTITY transaction			SYSTEM "transaction.xml">
+<!ENTITY aop				SYSTEM "aop.xml">
+<!ENTITY metadata			SYSTEM "metadata.xml">
+<!ENTITY dao				SYSTEM "dao.xml">
+<!ENTITY jdbc				SYSTEM "jdbc.xml">
+<!ENTITY orm				SYSTEM "orm.xml">
+<!ENTITY mvc				SYSTEM "mvc.xml">
+<!ENTITY views				SYSTEM "views.xml">
+<!ENTITY ejb				SYSTEM "ejb.xml">
+<!ENTITY background			SYSTEM "background.xml">
+<!ENTITY dtd				SYSTEM "dtd.xml">
 ]>
 
 
 <book>
 
     <bookinfo>
-        <title>Spring Framework - J2EE Made Easy</title>
-        <subtitle>Spring Framework Reference Documentation (WORK IN PROGRESS!!!)</subtitle>
+        <title>Spring - java/j2ee Application Framework</title>
+        <subtitle>Reference Documentation (Work in progress.)</subtitle>
         <releaseinfo>1.0</releaseinfo>
         
         <authorgroup>
@@ -72,6 +73,8 @@
 	    
 	    &metadata;
 	    
+	    &dao;
+
 	    &jdbc;
 
 	    &mvc;

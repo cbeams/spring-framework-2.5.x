@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="dao">
+  <title>DAO support</title>
+
+  <sect1 id="dao-introduction">
+    <title>Introduction</title>
+
+    <para>The DAO (Data Access Object) support in Spring is primarily aimed at
+    making it easy to work with data access technologies like JDBC, Hibernate
+    or JDO in a standardized way. This allows you to switch between them
+    fairly easily and it also allows you to code without worrying about
+    catching exceptions that are specific to each tecnology. Spring provides a
+    convenient translation from technology specific exceptions like
+    <literal>SQLException</literal> to its own exception hierarchy with the
+    <literal>DataAccessException</literal> as the root exception. These
+    exceptions wrap the original exception so there is never any risk that you
+    would lose any information as to what might have gone wrong.</para>
+
+    <para>Spring can also wrap Hibernate exceptions, converting them from
+    proprietary, checked exceptions, to a set of abstracted runtime
+    exceptions. This allows you to handle most persistence exceptions, which
+    are non-recoverable, only in the appropriate layers, without annoying
+    boilerplate catches/throws, and exception declarations. You can still trap
+    and handle exceptions anywhere you need to. As we mentioned above, JDBC
+    exceptions (including DB specific dialects) are also converted to the same
+    hierarchy, meaning that you can perform some operations with JDBC within a
+    consistent programming model.</para>
+
+    <para>The exception hierarchy that Spring uses is oulined in the following
+    graph:</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/DataAccessException.gif" />
+      </imageobject>
+    </mediaobject>
+
+    <para></para>
+
+    <para></para>
+
+    <para></para>
+  </sect1>
+</chapter>
