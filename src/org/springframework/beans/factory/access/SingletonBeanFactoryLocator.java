@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -350,7 +350,6 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		this.resourceName = resourceName;
 	}
 
-	// see superclass JavaDoc: org.springframework.beans.factory.access.BeanFactoryLocator#useBeanFactory(java.lang.String)
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		synchronized (this.bfgInstancesByKey) {
 			BeanFactoryGroup bfg = (BeanFactoryGroup) this.bfgInstancesByKey
@@ -367,8 +366,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			else {
 				// this group definition doesn't exist, we need to try to load it
 				if (logger.isDebugEnabled()) {
-					logger.debug("Factory group with resourceName '" + this.resourceName
-							+ "' requested. Creating new instance.");
+					logger.debug("Factory group with resource name [" + this.resourceName
+							+ "] requested. Creating new instance.");
 				}
 				
 				BeanFactory groupContext = createDefinition(this.resourceName, factoryKey);
@@ -387,11 +386,9 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			try {
 				bean = groupContext.getBean(lookupId);
 			}
-			catch (BeansException e) {
-				throw new FatalBeanException(
-						"Unable to return specified BeanFactory instance: factoryKey="
-								+ factoryKey + ", from group with resourceName: "
-								+ this.resourceName, e);
+			catch (BeansException ex) {
+				throw new FatalBeanException("Unable to return specified BeanFactory instance: factory key [" +
+						factoryKey + "], from group with resource name [" + this.resourceName + "]", ex);
 			}
 
 			if (bean instanceof String) {
@@ -400,21 +397,18 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				try {
 					bean = groupContext.getBean(lookupId);
 				}
-				catch (BeansException e) {
-					throw new FatalBeanException(
-							"Unable to return specified BeanFactory instance: lookupId="
-									+ lookupId + ", factoryKey=" + factoryKey
-									+ ", from group with resourceName: "
-									+ this.resourceName, e);
+				catch (BeansException ex) {
+					throw new FatalBeanException("Unable to return specified BeanFactory instance: lookup ID [" +
+							lookupId + "], factory key [" + factoryKey + "], from group with resource name [" +
+							this.resourceName + "]", ex);
 				}
 			}
 
-			if (!(bean instanceof BeanFactory))
-				throw new FatalBeanException(
-						"Returned bean is not BeanFactory or its subclass. lookupId="
-								+ lookupId + ", factoryKey=" + factoryKey
-								+ ", from group with resourceName: " + this.resourceName
-								+ ". Returned cbject class is: " + bean.getClass());
+			if (!(bean instanceof BeanFactory)) {
+				throw new FatalBeanException("Returned bean is not BeanFactory or its subclass. lookup ID [" +
+						lookupId + "], factory key [" + factoryKey + "], from group with resource name [" +
+						this.resourceName + "]. Returned object class is [" + bean.getClass().getName() + "]");
+			}
 
 			final BeanFactory beanFactory = (BeanFactory) bean;
 
@@ -444,7 +438,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 						}
 						else {
 							logger.warn("Tried to release a SingletonBeanFactoryLocator (or subclass) group definition " +
-													"more times than it has actually been used. resourceName='" + resourceName + "'");
+									"more times than it has actually been used. Resource name [" + resourceName + "]");
 						}
 					}
 				}
@@ -458,12 +452,10 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * This is split out as a separate method so that subclasses can override the actual
 	 * type used (to be an ApplicationContext, for example).
 	 */
-	protected BeanFactory createDefinition(String resourceName, String factoryKey)
-			throws BeansException {
+	protected BeanFactory createDefinition(String resourceName, String factoryKey) throws BeansException {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
-		ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(
-				new DefaultResourceLoader());
+		ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 		Resource[] configResources;
 		try {
@@ -474,9 +466,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		}
 
 		if (configResources.length == 0)
-			throw new FatalBeanException(
-					"Unable to find resource for specified definition. Group:"
-							+ this.resourceName + ", contextId:" + factoryKey);
+			throw new FatalBeanException("Unable to find resource for specified definition. " +
+					"Group resource name [" + this.resourceName + "], factory key [" + factoryKey + "]");
 
 		try {
 			for (int j = 0; j < configResources.length; j++)
@@ -485,30 +476,28 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			factory.preInstantiateSingletons();
 		}
 		catch (BeansException e) {
-			throw new FatalBeanException(
-					"Unable to load group definition. Group resource name:"
-							+ this.resourceName + ", factoryKey:" + factoryKey, e);
+			throw new FatalBeanException("Unable to load group definition. " +
+					"Group resource name [" + this.resourceName + "], factory key [" + factoryKey + "]");
 		}
 		return factory;
-		
 	}
 	
-    /**
-     * Destroy definition in separate method so subclass may work with other definition types
-     */
+	/**
+	 * Destroy definition in separate method so subclass may work with other definition types.
+	 */
 	protected void destroyDefinition(BeanFactory groupDef, String resourceName) throws BeansException {
 		if (groupDef instanceof ConfigurableBeanFactory) {
 			// debugging trace only
 			if (logger.isDebugEnabled()) {
-				logger.debug("Factory group with resourceName '"
-						+ resourceName
-						+ "' being released, as no more references.");
+				logger.debug("Factory group with resource name '" + resourceName +
+						"' being released, as there are no more references to it.");
 			}
 			((ConfigurableBeanFactory) groupDef).destroySingletons();
 		}
 	}
 
-	// We track BeanFactory instances with this class
+
+	// We track BeanFactory instances with this class.
 	private static class BeanFactoryGroup {
 
 		private BeanFactory definition;
