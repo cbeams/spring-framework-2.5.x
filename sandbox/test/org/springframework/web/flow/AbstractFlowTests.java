@@ -40,7 +40,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
     }
 
     protected void assertModelAttributePresent(Map attributeMap, String attributeName) {
-        assertNotNull("The model attribute '" + attributeMap + "' is not present", attributeMap.get(attributeName));
+        assertNotNull("The model attribute '" + attributeName + "' is not present", attributeMap.get(attributeName));
     }
 
     protected void assertModelAttributeInstanceOf(Map attributeMap, String attributeName, Class clazz) {
