@@ -11,7 +11,6 @@ import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
 import org.springframework.samples.petclinic.util.EntityUtils;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -40,18 +39,18 @@ public class AddPetForm extends AbstractClinicForm {
 		return pet;
 	}
 
-	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors) {
+	protected void onBind(HttpServletRequest request, Object command) {
 		Pet pet = (Pet) command;
-		long typeId = Long.parseLong(request.getParameter("typeId"));
+		int typeId = Integer.parseInt(request.getParameter("typeId"));
 		pet.setType((PetType) EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
 	}
 
-	/** Method inserts a new <code>Pet</code>. */
+	/** Method inserts a new Pet */
 	protected ModelAndView onSubmit(Object command) throws ServletException {
 		Pet pet = (Pet) command;
 		// delegate the insert to the Business layer
 		getClinic().storePet(pet);
-		return new ModelAndView(getSuccessView(), "ownerId", Long.toString(pet.getOwner().getId()));
+		return new ModelAndView(getSuccessView(), "ownerId", Integer.toString(pet.getOwner().getId()));
 	}
 
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
