@@ -45,15 +45,15 @@ import org.springframework.util.ClassUtils;
  * 
  * @author Colin Sampaleanu
  */
-public class BasicMappedPersistenceTest extends TestCase {
+public class BasicMappedPersistenceTests extends TestCase {
 
-  public static final String CONTEXT = ClassUtils.classPackageAsResourcePath(BasicMappedPersistenceTest.class)
+  public static final String CONTEXT = ClassUtils.classPackageAsResourcePath(BasicMappedPersistenceTests.class)
       + "/BasicMappedPersistenceTestContext.xml";
 
   // ids for storing contexts as quasi singletons between individual tests. Hibernate SessionFactory
   // setup would kill us otherwise
-  public static final String APP_CONTEXT_ID = "BasicMappedPersistenceTest.appContext";
-  public static final String APP_CONTEXT2_ID = "BasicMappedPersistenceTest.appContext2";
+  public static final String APP_CONTEXT_ID = "BasicMappedPersistenceTests.appContext";
+  public static final String APP_CONTEXT2_ID = "BasicMappedPersistenceTests.appContext2";
 
   // --- attributes
   // per-TestSuite specific vars, via ResourceManager!
@@ -65,7 +65,7 @@ public class BasicMappedPersistenceTest extends TestCase {
   // --- methods
   // --- attributes
   public static Test suite() {
-    return new TestSetup(new TestSuite(BasicMappedPersistenceTest.class)) {
+    return new TestSetup(new TestSuite(BasicMappedPersistenceTests.class)) {
 
       protected void setUp() throws Exception {
         try {

@@ -26,17 +26,16 @@ import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 
 /**
- * Test usage of EJB Remote proxy with and without a cached home. Also test EJB Local proxy (home
- * cache is not changed for this, since there is no difference in behaviour from remote).
+ * Test calling into a CMT EJB which then calls into a POJO which is NOT wrapped
+ * with Spring transactions, including one test in which that POJO calls into another
+ * another POJO which does persistence via Hibernate.
  * 
  * @author colin sampaleanu
  */
-public class SimpleEjbLocalRemoteAndCachedHomeTest extends TestCase {
+public class CmtWrappedEjbDelegatingToSpringTxWrappedPojoTests extends TestCase {
 
 	// --- statics
-	public static final String SERVICE_ID_CACHE_ON = "cachedHomeProxy";
-	public static final String SERVICE_ID_CACHE_OFF = "noCachedHomeProxy";
-	public static final String SERVICE_ID_LOCAL_PROXY = "simpleEjbLocalProxy";
+	public static final String SERVICE_ID_LOCAL_PROXY = "simpleWithCmtAndSpringTx";
 
 	// --- attributes
 
@@ -46,7 +45,7 @@ public class SimpleEjbLocalRemoteAndCachedHomeTest extends TestCase {
 
 	public static Test suite() {
 		ServletTestSuite suite = new ServletTestSuite();
-		suite.addTestSuite(SimpleEjbLocalRemoteAndCachedHomeTest.class);
+		suite.addTestSuite(CmtWrappedEjbDelegatingToSpringTxWrappedPojoTests.class);
 		return suite;
 	}
 
@@ -59,24 +58,27 @@ public class SimpleEjbLocalRemoteAndCachedHomeTest extends TestCase {
 		bfr.release();
 	}
 
-	public void testRemoteInvocationsWithCache() {
-		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_CACHE_ON);
-		ejb.echo("hello");
-		ejb.echo("hello");
-		ejb.echo("hello");
-	}
-
-	public void testRemoteInvocationsWithNoCache() {
-		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_CACHE_OFF);
-		ejb.echo("hello");
-		ejb.echo("hello");
-		ejb.echo("hello");
-	}
-	
-	public void testLocalInvocations() {
+	public void testCmtDelegatingToOneLayerOfSpringTx() {
 		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
 		ejb.echo("hello");
-		ejb.echo("hello");
-		ejb.echo("hello");
+		ejb.echo("hello2");
+		ejb.echo2("whatever");
+		ejb.echo2("whatever2");
 	}
+	
+	public void xxxtestCmtDelegatingToTwoLayersOfSpringTxIncludingHibernatePersistence() {
+		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
+		ejb.echo("hello");
+		ejb.echo("hello2");
+		ejb.echo2("whatever");
+		ejb.echo2("whatever2");
+		ejb.echo3("goodbye");
+		ejb.echo3("goodbye2");
+	}
+	
+	public void xxxtestSingleMultiLayerTxCallStack() {
+		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
+		ejb.echo3("goodbye");
+	}
+	
 }

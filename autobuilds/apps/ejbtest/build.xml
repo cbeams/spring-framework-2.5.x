@@ -383,7 +383,7 @@
       <formatter type="xml"/>
       <batchtest>
         <fileset dir="${src.cactus.dir}">
-          <include name="**/*Test.java"/>
+          <include name="**/*Tests.java"/>
           <exclude name="**/Test*All.java"/>
         </fileset>
       </batchtest>

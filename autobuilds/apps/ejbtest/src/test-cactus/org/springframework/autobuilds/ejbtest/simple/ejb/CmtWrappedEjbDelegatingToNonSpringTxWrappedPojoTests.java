@@ -32,10 +32,10 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
  * 
  * @author colin sampaleanu
  */
-public class CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest extends TestCase {
+public class CmtWrappedEjbDelegatingToNonSpringTxWrappedPojoTests extends TestCase {
 
 	// --- statics
-	public static final String SERVICE_ID_LOCAL_PROXY = "simpleEjbLocalProxy";
+	public static final String SERVICE_ID_LOCAL_PROXY = "simpleWithCmtAndNoSpringTx";
 
 	// --- attributes
 
@@ -45,7 +45,7 @@ public class CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest extends TestCase {
 
 	public static Test suite() {
 		ServletTestSuite suite = new ServletTestSuite();
-		suite.addTestSuite(CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest.class);
+		suite.addTestSuite(CmtWrappedEjbDelegatingToNonSpringTxWrappedPojoTests.class);
 		return suite;
 	}
 

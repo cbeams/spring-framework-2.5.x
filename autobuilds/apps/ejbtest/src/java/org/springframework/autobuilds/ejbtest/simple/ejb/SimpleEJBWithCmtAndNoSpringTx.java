@@ -29,7 +29,13 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.ejb.support.AbstractStatelessSessionBean;
 
 /**
- * <p>Simple test EJB.</p>
+ * <p>Simple test EJB. This is used to demonstrat an EJB working without CMT
+ * (Container Managed Transactions) for the EJB, but  without Spring Transactions,
+ * in a JTA environment. Each EJB method delegates to a POJO service object which
+ * has been transactionally wrapped. In this kind of a setup, you muse ensure that
+ * one EJB method does not combine multiple calls into the POJO service object,
+ * since each of those calls would end up being a separate (unrelated) transaction.
+ * So the EJB can be considered just a facade.</p>
  *
  * <p>Note for XDoclet users. XDoclet is not smart enough to see that this class's
  * superclass implements SessionBean. If you are using XDoclet (not the case here,
@@ -44,14 +50,14 @@ import org.springframework.ejb.support.AbstractStatelessSessionBean;
  * 
  * @author colin sampaleanu
  */
-public class SimpleEJB extends AbstractStatelessSessionBean
+public class SimpleEJBWithCmtAndNoSpringTx extends AbstractStatelessSessionBean
 		implements SimpleService {
 
 	// --- statics
 	public static final String POJO_SERVICE_ID = "delegatingSimpleService2";
 
 	protected static final Log logger = LogFactory
-			.getLog(SimpleEJB.class);
+			.getLog(SimpleEJBWithCmtAndNoSpringTx.class);
 
 	// --- attributes
 	SessionFactory sessionFactory;
@@ -94,7 +100,7 @@ public class SimpleEJB extends AbstractStatelessSessionBean
 	 * @see org.springframework.autobuilds.ejbtest.hibernate.tx.CmtJtaNoSpringTx#testMethod(java.lang.String)
 	 */
 	public String echo(String input) {
-		return "(SimpleEJB: hello " + input + ")";
+		return "(SimpleEJBWithCmtAndNoSpringTx: hello " + input + ")";
 	}
 
 	/* 

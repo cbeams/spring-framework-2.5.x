@@ -69,7 +69,7 @@ import org.apache.cactus.ServletTestCase;
  * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
  * 
  */
-public class ConverterEJBTest extends ServletTestCase {
+public class ConverterEJBTests extends ServletTestCase {
 	/**
 	 * Class under test
 	 */
