@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import com.ibatis.db.sqlmap.MappedStatement;
 import com.ibatis.db.sqlmap.SqlMap;
 import com.ibatis.sqlmap.client.SqlMapClient;
+import com.ibatis.sqlmap.client.SqlMapExecutor;
 import com.ibatis.sqlmap.client.SqlMapSession;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
@@ -101,11 +102,11 @@ public class SqlMapTestSuite extends TestCase {
 		final SqlMapSession sms = (SqlMapSession) smsControl.getMock();
 		MockControl smcControl = MockControl.createControl(SqlMapClient.class);
 		SqlMapClient smc = (SqlMapClient) smcControl.getMock();
-		smc.getSession();
+		smc.openSession();
 		smcControl.setReturnValue(sms);
 		sms.setUserConnection(con);
 		smsControl.setVoidCallable();
-		sms.setUserConnection(null);
+		sms.close();
 		smsControl.setVoidCallable();
 		smsControl.replay();
 		smcControl.replay();
@@ -115,8 +116,8 @@ public class SqlMapTestSuite extends TestCase {
 		template.setSqlMapClient(smc);
 		template.afterPropertiesSet();
 		Object result = template.execute(new SqlMapClientCallback() {
-			public Object doInSqlMapSession(SqlMapSession session) throws SQLException {
-				assertTrue(session == sms);
+			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+				assertTrue(executor == sms);
 				return "done";
 			}
 		});
@@ -134,7 +135,6 @@ public class SqlMapTestSuite extends TestCase {
 		testDao.setDataSource(ds);
 		assertEquals(ds, testDao.getDSource());
 
-		final MappedStatement stmt = new MappedStatement();
 		SqlMap map = new SqlMap();
 		testDao.setSqlMap(map);
 		assertEquals(map, testDao.getSMap());
