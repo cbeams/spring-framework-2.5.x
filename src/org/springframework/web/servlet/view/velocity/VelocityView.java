@@ -58,7 +58,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.9 2003-11-04 23:10:04 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.10 2003-11-06 17:44:35 johnsonr Exp $
  * @see VelocityConfiguration
  * @see VelocityConfigurer
  */
@@ -143,7 +143,7 @@ public class VelocityView extends AbstractView {
 		}
 
 		Map configs = BeanFactoryUtils.beansOfTypeIncludingAncestors(getWebApplicationContext(),
-																																 VelocityConfiguration.class, true, true);
+											VelocityConfiguration.class, true, true);
 		if (configs.size() == 1) {
 			// We need exactly one VelocityConfiguration bean
 			VelocityConfiguration vconfig = (VelocityConfiguration) configs.values().iterator().next();
@@ -264,7 +264,7 @@ public class VelocityView extends AbstractView {
 			}
 		}
 		else {
-			logger.debug("Model is null. Nothing to expose to FastVelocity context in view with name '" + getName() + "'");
+			logger.debug("Model is null. Nothing to expose to Velocity context in view with name '" + getName() + "'");
 		}
 	}
 	
@@ -279,10 +279,16 @@ public class VelocityView extends AbstractView {
 	}
 
 	/**
-	 * Expose helpers unique to each rendring operation. 
+	 * Expose helpers unique to each rendering operation. 
 	 * This is necessary so that different rendering operations can't overwrite each other's formats etc.
+	 * This method can be overridden if desired to add request information to the Velocity context.
+	 * Be sure to call this implementation if you require the date formatter or currency formatter to
+	 * be made available.
+	 * @param vContext Velocity context that will be passed to the Velocity template at merge time
+	 * @param request HTTP request we're processing
+	 * @throws ServletException if there's a fatal error while we're adding information to the context.
 	 */
-	private void exposeHelpers(Context vContext, HttpServletRequest request) throws ServletException {
+	protected void exposeHelpers(Context vContext, HttpServletRequest request) throws ServletException {
 		Locale locale = RequestContextUtils.getLocale(request);
 
 		if (this.exposeDateFormatter) {
@@ -297,12 +303,11 @@ public class VelocityView extends AbstractView {
 			vContext.put(CURRENCY_FORMAT_KEY, nf);
 			logger.debug("Adding currency helper to context");
 		}
-	}
+	}	// exposeHelpers
 	
 	/**
 	 * Based on code from the VelocityServlet.
-	 * Merges the template with the context. Only override this if you really, really,
-	 * really need to. (And don't call us with questions if it breaks :)
+	 * Merges the template with the context.
 	 * @param template template object returned by the handleRequest() method
 	 * @param context context created by the createContext() method
 	 * @param response servlet reponse (use this to get the OutputStream or Writer)
