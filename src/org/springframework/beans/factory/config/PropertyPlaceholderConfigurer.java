@@ -1,4 +1,4 @@
-package org.springframework.context.config;
+package org.springframework.beans.factory.config;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,7 +10,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
 
 /**
@@ -177,24 +176,31 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	 */
 	protected String parseValue(Properties prop, String strVal, String originalPlaceholder) throws BeansException {
 		int startIndex = strVal.indexOf(this.placeholderPrefix);
-		int endIndex = strVal.indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
-		if (startIndex != -1 && endIndex != -1) {
-			String placeholder = strVal.substring(startIndex + this.placeholderPrefix.length(), endIndex);
-      if (originalPlaceholder == null) {
-				originalPlaceholder = placeholder;
-			}
-			else if (placeholder.equals(originalPlaceholder)) {
-        throw new BeanDefinitionStoreException("Circular placeholder reference '" + placeholder +
-																							 "' in property definitions [" + prop + "]");
-			}
-			String propVal = prop.getProperty(placeholder);
-			if (propVal != null) {
-				propVal = parseValue(prop, propVal, originalPlaceholder);
-				logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
-				return strVal.substring(0, startIndex) + propVal + strVal.substring(endIndex+1);
+		while (startIndex != -1) {
+			int endIndex = strVal.indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
+			if (startIndex != -1 && endIndex != -1) {
+				String placeholder = strVal.substring(startIndex + this.placeholderPrefix.length(), endIndex);
+				if (originalPlaceholder == null) {
+					originalPlaceholder = placeholder;
+				}
+				else if (placeholder.equals(originalPlaceholder)) {
+					throw new BeanDefinitionStoreException("Circular placeholder reference '" + placeholder +
+																								 "' in property definitions [" + prop + "]");
+				}
+				String propVal = prop.getProperty(placeholder);
+				if (propVal != null) {
+					propVal = parseValue(prop, propVal, originalPlaceholder);
+					logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
+					strVal = strVal.substring(0, startIndex) + propVal + strVal.substring(endIndex+1);
+					startIndex = strVal.indexOf(this.placeholderPrefix, startIndex + propVal.length());
+				}
+				else {
+					logger.debug("Could not resolve placeholder '" + placeholder + "'");
+					startIndex = strVal.indexOf(this.placeholderPrefix, endIndex);
+				}
 			}
 			else {
-				logger.debug("Could not resolve placeholder '" + placeholder + "'");
+				startIndex = -1;
 			}
 		}
 		return strVal;

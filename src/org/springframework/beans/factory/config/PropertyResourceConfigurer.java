@@ -1,4 +1,4 @@
-package org.springframework.context.config;
+package org.springframework.beans.factory.config;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -7,11 +7,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.Resource;
 
 /**
  * Allows for configuration of individual bean property values from a property resource,
@@ -31,14 +29,13 @@ import org.springframework.core.Ordered;
  * @see PropertyOverrideConfigurer
  * @see PropertyPlaceholderConfigurer
  */
-public abstract class PropertyResourceConfigurer extends ApplicationObjectSupport
-    implements BeanFactoryPostProcessor, Ordered {
+public abstract class PropertyResourceConfigurer implements BeanFactoryPostProcessor, Ordered {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
-	private String location;
+	private Resource location;
 
 	private Properties properties;
 
@@ -55,9 +52,9 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 	/**
 	 * Set the location of the properties file. Allows for both a URL
 	 * and a (file) path, according to the respective ApplicationContext.
-	 * @see org.springframework.context.ApplicationContext#getResourceAsStream
+	 * @see org.springframework.context.ApplicationContext#getResource
 	 */
-	public void setLocation(String location) {
+	public void setLocation(Resource location) {
 		this.location = location;
 	}
 
@@ -82,24 +79,25 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 		Properties props = new Properties();
 
 		if (this.location != null) {
-			logger.info("Loading properties file [" + this.location + "]");
+			logger.info("Loading properties file from " + this.location + "");
 			try {
-				props.load(getApplicationContext().getResourceAsStream(this.location));
+				props.load(this.location.getInputStream());
 			}
 			catch (IOException ex) {
-				String msg = "Could not load properties file from [" + this.location + "]";
+				String msg = "Could not load properties file from " + this.location;
 				if (this.ignoreResourceNotFound) {
 					logger.warn(msg + ": " + ex.getMessage());
 				}
 				else {
-					throw new ApplicationContextException(msg, ex);
+					throw new BeanInitializationException(msg, ex);
 				}
 			}
 		}
 
 		if (this.properties != null) {
-			if (logger.isDebugEnabled())
+			if (logger.isDebugEnabled()) {
 				logger.debug("Applying directly specified properties [" + this.properties + "]");
+			}
 			props.putAll(this.properties);
 		}
 
@@ -115,7 +113,7 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 	 * Apply the given Properties to the bean factory.
 	 * @param beanFactory	the bean factory used by the application context
 	 * @param props the Properties to apply
-	 * @throws BeansException in case of errors
+	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
 	protected abstract void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
 			throws BeansException;

@@ -1,7 +1,6 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * Allows for custom modification of an application context's bean definitions,
@@ -18,8 +17,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  *
  * @author Juergen Hoeller
  * @since 06.07.2003
- * @see org.springframework.beans.factory.config.BeanPostProcessor
- * @see org.springframework.context.config.PropertyResourceConfigurer
+ * @see BeanPostProcessor
+ * @see PropertyResourceConfigurer
  */
 public interface BeanFactoryPostProcessor {
 

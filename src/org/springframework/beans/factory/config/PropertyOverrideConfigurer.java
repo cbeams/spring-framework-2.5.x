@@ -1,4 +1,4 @@
-package org.springframework.context.config;
+package org.springframework.beans.factory.config;
 
 import java.util.Iterator;
 import java.util.Properties;
@@ -6,7 +6,6 @@ import java.util.Properties;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * A property resource configurer that overrides bean property values in an application
