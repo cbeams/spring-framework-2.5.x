@@ -28,7 +28,7 @@ public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new action execution exception.
-	 * @param the message as to why execution failed
+	 * @param message the message as to why execution failed
 	 * @param cause the underlying cause of the exception, thrown by the action
 	 */
 	public ActionExecutionException(String message, Throwable cause) {
