@@ -425,7 +425,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return (FlowSession)executingFlowSessions.peek();
 	}
 
-	//
+	// subclassing hooks
 
 	/**
 	 * Returns the name of the flow execution attribute, a special index to
@@ -457,6 +457,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return FlowConstants.CURRENT_STATE_ID_ATTRIBUTE;
 	}
 
+	// methods implementing FlowModel
+
 	public Map getModel() {
 		Map model = new HashMap(getActiveFlowSession().getModel());
 		// the flow execution itself is available in the model
@@ -467,8 +469,6 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		model.put(getCurrentStateIdAttributeName(), getCurrentStateId());
 		return model;
 	}
-
-	// methods implementing FlowModel
 
 	public Object getAttribute(String attributeName) {
 		if (attributeName.equals(getFlowExecutionAttributeName())) {
@@ -704,6 +704,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			}
 		});
 	}
+	
+	// custom serialization
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.id);
@@ -719,10 +721,6 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		this.executingFlowSessions = (Stack)in.readObject();
 	}
 
-	/**
-	 * Restore this <code>FlowExecution</code> for use after deserialization
-	 * @param flowLocator the flow locator
-	 */
 	public synchronized void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners) {
 		if (this.rootFlow != null) {
 			// nothing to do, we're already hydrated

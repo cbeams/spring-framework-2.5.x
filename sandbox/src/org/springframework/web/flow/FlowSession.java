@@ -18,7 +18,6 @@ package org.springframework.web.flow;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,17 +81,17 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	private FlowSessionStatus status = FlowSessionStatus.CREATED;
 
 	/**
-	 * The session data model ("flow scope");
+	 * The session data model ("flow scope").
 	 */
 	private Map attributes = new HashMap();
 
 	/**
-	 * Set only on deserialization so this object can be fully reconstructed
+	 * Set only on deserialization so this object can be fully reconstructed.
 	 */
 	private String flowId;
 
 	/**
-	 * Set only on deserialization so this object can be fully reconstructed
+	 * Set only on deserialization so this object can be fully reconstructed.
 	 */
 	private String currentStateId;
 
@@ -326,6 +325,8 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	public void endTransaction() {
 		FlowUtils.clearToken(this, getTransactionTokenAttributeName());
 	}
+	
+	// custom serialization
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.flow.getId());
@@ -334,7 +335,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		out.writeObject(this.attributes);
 	}
 
-	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		this.flowId = (String)in.readObject();
 		this.currentStateId = (String)in.readObject();
 		this.status = (FlowSessionStatus)in.readObject();
@@ -342,7 +343,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	}
 
 	/**
-	 * Restore this <code>Flow Session</code> for use after deserialization
+	 * Restore this <code>Flow Session</code> for use after deserialization.
 	 * @param flowLocator the flow locator
 	 */
 	protected void rehydrate(FlowLocator flowLocator) {
