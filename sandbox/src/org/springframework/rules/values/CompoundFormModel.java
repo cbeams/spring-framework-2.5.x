@@ -240,11 +240,11 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         return domainObjectAccessStrategy.getDomainObjectHolder();
     }
 
-    public boolean hasErrors() {
+    public boolean getHasErrors() {
         return Algorithms.instance().areAnyTrue(formModels.values(),
                 new UnaryPredicate() {
                     public boolean test(Object formModel) {
-                        return ((FormModel)formModel).hasErrors();
+                        return ((FormModel)formModel).getHasErrors();
                     }
                 });
     }
@@ -269,6 +269,14 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 });
     }
 
+    public boolean isEnabled() {
+        return true;
+    }
+    
+    public void setEnabled(boolean enabled) {
+        throw new UnsupportedOperationException();
+    }
+
     public boolean getBufferChanges() {
         return bufferChanges;
     }
@@ -277,7 +285,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         FormModel model = getChildFormModel(childModelName);
         Assert.notNull(model, "No child model by name " + childModelName
                 + "exists.");
-        return model.hasErrors();
+        return model.getHasErrors();
     }
 
     public void commit() {

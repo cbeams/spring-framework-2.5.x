@@ -35,12 +35,16 @@ public interface FormModel {
 
     public Map getErrors();
 
-    public boolean hasErrors();
-
-    public boolean isDirty();
+    public boolean getHasErrors();
 
     public boolean getBufferChanges();
 
+    public boolean isDirty();
+
+    public boolean isEnabled();
+    
+    public void setEnabled(boolean enabled);
+    
     public void commit();
 
     public void revert();

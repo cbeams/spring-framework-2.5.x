@@ -29,7 +29,10 @@ import org.springframework.util.Assert;
 /**
  * @author Keith Donald
  */
-public class DefaultFormModel implements MutableFormModel {
+public class DefaultFormModel extends AbstractPropertyChangePublisher implements
+        MutableFormModel {
+    public static final String HAS_ERRORS_PROPERTY = "hasErrors";
+
     protected final Log logger = LogFactory.getLog(getClass());
 
     private MutableAspectAccessStrategy domainObjectAccessStrategy;
@@ -43,6 +46,8 @@ public class DefaultFormModel implements MutableFormModel {
     private boolean bufferChanges = true;
 
     private Set commitListeners;
+
+    private boolean enabled = true;
 
     public DefaultFormModel(Object domainObject) {
         this(new BeanPropertyAccessStrategy(domainObject));
@@ -90,6 +95,39 @@ public class DefaultFormModel implements MutableFormModel {
 
     public void setBufferChangesDefault(boolean bufferChanges) {
         this.bufferChanges = bufferChanges;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (hasChanged(this.enabled, enabled)) {
+            this.enabled = enabled;
+            handleEnabledChange();
+            firePropertyChange("enabled", !this.enabled, enabled);
+        }
+    }
+
+    protected void handleEnabledChange() {
+        if (this.enabled) {
+            validate();
+        }
+        else {
+            clearErrors();
+        }
+    }
+
+    protected Iterator valueModelIterator() {
+        return this.formValueModels.values().iterator();
+    }
+
+    protected void validate() {
+
+    }
+
+    protected void clearErrors() {
+
     }
 
     public void addCommitListener(CommitListener listener) {
@@ -237,7 +275,7 @@ public class DefaultFormModel implements MutableFormModel {
         return valueModel;
     }
 
-    public boolean hasErrors() {
+    public boolean getHasErrors() {
         return false;
     }
 
@@ -296,8 +334,13 @@ public class DefaultFormModel implements MutableFormModel {
             }
             return;
         }
+        if (!enabled) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Form object is not enabled; nothing to commit.");
+            }
+        }
         if (bufferChanges) {
-            if (hasErrors()) { throw new IllegalStateException(
+            if (getHasErrors()) { throw new IllegalStateException(
                     "Form has errors; submit not allowed."); }
             if (preEditCommit()) {
                 commitTrigger.set(Boolean.TRUE);

@@ -74,12 +74,32 @@ public class ValidatingFormModel extends DefaultFormModel implements
         return this;
     }
 
-    public boolean hasErrors() {
+    public boolean getHasErrors() {
         return validationErrors.size() > 0;
     }
 
     public Map getErrors() {
         return Collections.unmodifiableMap(validationErrors);
+    }
+
+    protected void clearErrors() {
+        Iterator it = validationErrors.keySet().iterator();
+        boolean hadErrorsBefore = getHasErrors();
+        while (it.hasNext()) {
+            BeanPropertyExpression exp = (BeanPropertyExpression)it.next();
+            it.remove();
+            fireConstraintSatisfied(exp);
+        }
+        if (hadErrorsBefore) {
+            firePropertyChange(HAS_ERRORS_PROPERTY, true, false);
+        }
+    }
+
+    protected void validate() {
+        for (Iterator i = valueModelIterator(); i.hasNext();) {
+            ValidatingFormValueModel vm = (ValidatingFormValueModel)i.next();
+            vm.validate();
+        }
     }
 
     public int getFormPropertiesWithErrorsCount() {
@@ -210,10 +230,10 @@ public class ValidatingFormModel extends DefaultFormModel implements
                     PropertyResults results = new PropertyResults(
                             setterConstraint.getPropertyName(), value,
                             setterConstraint);
-                    constraintViolated(setterConstraint, this, results);
+                    constraintViolated(setterConstraint, results);
                 }
                 else {
-                    constraintSatisfied(setterConstraint, this);
+                    constraintSatisfied(setterConstraint);
                     // we validate after a set attempt
                     validate();
                 }
@@ -234,10 +254,10 @@ public class ValidatingFormModel extends DefaultFormModel implements
             PropertyResults results = (PropertyResults)collector
                     .collectPropertyResults(validationRule);
             if (results == null) {
-                constraintSatisfied(validationRule, this);
+                constraintSatisfied(validationRule);
             }
             else {
-                constraintViolated(validationRule, this, results);
+                constraintViolated(validationRule, results);
             }
         }
 
@@ -293,17 +313,18 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
     }
 
-    protected void constraintSatisfied(BeanPropertyExpression exp,
-            ValueModel formValueModel) {
+    protected void constraintSatisfied(BeanPropertyExpression exp) {
         if (logger.isDebugEnabled()) {
-            logger
-                    .debug("Value constraint '" + exp
-                            + "' [satisfied] for value model '"
-                            + formValueModel + "']");
+            logger.debug("Value constraint '" + exp
+                    + "' [satisfied] for value model '" + exp.getPropertyName()
+                    + "']");
         }
         if (validationErrors.containsKey(exp)) {
             validationErrors.remove(exp);
             fireConstraintSatisfied(exp);
+            if (!getHasErrors()) {
+                firePropertyChange(HAS_ERRORS_PROPERTY, true, false);
+            }
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Number of errors on form is now "
@@ -321,16 +342,19 @@ public class ValidatingFormModel extends DefaultFormModel implements
     }
 
     protected void constraintViolated(BeanPropertyExpression exp,
-            ValueModel formValueModel, PropertyResults results) {
+            PropertyResults results) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Value constraint '" + exp
-                    + "' [rejected] for value model '" + formValueModel
-                    + "', results='" + results + "']");
+            logger.debug("Value constraint '" + exp + "' [rejected], results='"
+                    + results + "']");
         }
         //@TODO should change publisher should only publish on results changes
         // this means results needs business identity...
+        boolean hadErrorsBefore = getHasErrors();
         validationErrors.put(exp, results);
         fireConstraintViolated(exp, results);
+        if (!hadErrorsBefore) {
+            firePropertyChange(HAS_ERRORS_PROPERTY, false, true);
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Number of errors on form is now "
                     + validationErrors.size() + "; errors="
