@@ -65,7 +65,7 @@
 	<!-- The model mapper maps attributes in a parent flow down to a spawning child subflow
 	     as input.  The mapper may also map output attributes up to the parent flow when the child
 	     subflow ends.  In this case the "id" attribute will be mapped to the "id" attribute,
-	     as the Person.Detail flow expects that a person ID be provided as as input when spawned. -->
+	     as the person.Detail flow expects that a person ID be provided as as input when spawned. -->
 	<bean id="id.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">
 		<property name="inputMappings">
 			<list>
@@ -85,9 +85,7 @@
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource">
-					<value>/WEB-INF/detail-flow.xml</value>
-				</property>
+				<property name="resource"><value>/WEB-INF/detail-flow.xml</value></property>
 			</bean>
 		</property>
 	</bean>
@@ -129,7 +127,7 @@
 	<!-- The model mapper maps attributes in a parent flow down to a spawning child subflow
 	     as input.  The mapper may also map output attributes up to the parent flow when the child
 	     subflow ends.  In this case the "colleagueId" attribute will be mapped to the "id" attribute,
-	     as the Person.Detail flow expects that a person ID be provided as as input when spawned. -->
+	     as the person.Detail flow expects that a person ID be provided as as input when spawned. -->
 	<bean id="colleagueId.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">
 		<property name="inputMappings">
 			<map>
