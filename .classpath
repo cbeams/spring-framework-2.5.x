@@ -67,7 +67,6 @@
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
 	<classpathentry kind="lib" path="lib/rowset/rowset.jar"/>
-	<classpathentry kind="lib" path="lib/cglib/cglib-full-2.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
 	<classpathentry sourcepath="D:/opt/src/jmx-1_2_1-src/src/jmxri" kind="lib" path="lib/jmx/jmxri.jar"/>
@@ -82,7 +81,6 @@
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxremote.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxremote_optional.jar"/>
-	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/fop/fop.jar"/>
 	<classpathentry kind="lib" path="lib/activemq/activemq-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.1.jar"/>
@@ -93,8 +91,10 @@
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-view-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/cayenne/cayenne-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/itext/itext-1.1.4.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.3.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-common-2.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-codec.jar"/>
+	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1-dev.jar"/>
+	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.4.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
