@@ -10,9 +10,11 @@ package org.springframework.jdbc.support;
  * Normally loaded through a BeanFactory
  * implementation. Used by the SQLErrorCodeSQLExceptionTranslator.
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodes.java,v 1.1 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: SQLErrorCodes.java,v 1.2 2003-12-10 02:15:17 trisberg Exp $
  */
 public class SQLErrorCodes {
+
+	private String databaseProductName = null;
 
 	private String[] badSqlGrammarCodes = new String[0];
 
@@ -44,6 +46,20 @@ public class SQLErrorCodes {
 	 */
 	public String[] getDataIntegrityViolationCodes() {
 		return dataIntegrityViolationCodes;
+	}
+
+	/**
+	 * @return Returns the databaseProductName.
+	 */
+	public String getDatabaseProductName() {
+		return databaseProductName;
+	}
+
+	/**
+	 * @param databaseProductName The databaseProductName to set.
+	 */
+	public void setDatabaseProductName(String databaseProductName) {
+		this.databaseProductName = databaseProductName;
 	}
 
 }

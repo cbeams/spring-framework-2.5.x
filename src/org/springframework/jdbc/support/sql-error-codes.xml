@@ -3,8 +3,11 @@
 <beans>
 
 	<!--
-		-	We need to use name attributes to create aliases, as some of
-		-	the names we want are not legal as an XML id attribute.
+		-	If the Database Product Name contains characters that are invalid
+		-   to use in the id attribute (like a space) then we need to 
+		-	add a property named "databaseProductName" that holds this value.
+		-   If this property is present, then it will be used instead of the id for
+		-   looking up the error codes based on the current database.
 		-->
 
   <bean id="DB2" class="org.springframework.jdbc.support.SQLErrorCodes">
@@ -12,12 +15,14 @@
     <property name="dataIntegrityViolationCodes"><value>-803</value></property>
   </bean>
 
-  <bean id="HSQL" name="HSQL Database Engine" class="org.springframework.jdbc.support.SQLErrorCodes">
+  <bean id="HSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="databaseProductName"><value>HSQL Database Engine</value></property>
     <property name="badSqlGrammarCodes"><value>-22,-28</value></property>
     <property name="dataIntegrityViolationCodes"><value>-9</value></property>
   </bean>
 
-  <bean id="MS-SQL" name="Microsoft SQL Server" class="org.springframework.jdbc.support.SQLErrorCodes">
+  <bean id="MS-SQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="databaseProductName"><value>Microsoft SQL Server</value></property>
     <property name="badSqlGrammarCodes"><value>207,208</value></property>
     <property name="dataIntegrityViolationCodes"><value>2627,8114,8115</value></property>
   </bean>

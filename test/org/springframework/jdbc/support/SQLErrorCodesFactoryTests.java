@@ -44,6 +44,15 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertFalse(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "9xx42") >= 0);
 	}
 	
+	private void assertIsHsql(SQLErrorCodes sec) {
+		assertTrue(sec.getBadSqlGrammarCodes().length > 0);
+		assertTrue(sec.getDataIntegrityViolationCodes().length > 0);
+		// This had better be a Bad SQL Grammar code
+		assertTrue(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-22") >= 0);
+		// This had better NOT be
+		assertFalse(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-9") >= 0);
+	}
+
 	private void assertIsDB2(SQLErrorCodes sec) {
 		assertTrue(sec.getBadSqlGrammarCodes().length > 0);
 		assertTrue(sec.getDataIntegrityViolationCodes().length > 0);
@@ -191,6 +200,11 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertIsOracle(sec);
 	}
 	
+	public void testHsqlRecognizedFromMetadata() throws Exception {
+		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("HSQL Database Engine");
+		assertIsHsql(sec);
+	}
+
 	public void testDB2RecognizedFromMetadata() throws Exception {
 		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2");
 		assertIsDB2(sec);
