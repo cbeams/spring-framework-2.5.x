@@ -45,7 +45,7 @@ distribution/website before using any of them in your own applications.
 - required for building the test suite
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3 RC4 (http://www.freemarker.org)
+- FreeMarker 2.3 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -200,12 +200,12 @@ distribution/website before using any of them in your own applications.
 - required at runtime by iBATIS SQL Maps 1.3.1
 
 * jotm/jotm.jar
-- JOTM 1.4.3 (http://jotm.objectweb.org)
+- JOTM 1.5.3 (http://jotm.objectweb.org)
 - required for building the framework
 - required at runtime when using Spring's JotmFactoryBean
 
 * jotm/xapool.jar
-- XAPool 1.3.1 (taken from the JOTM distribution)
+- XAPool 1.3.3 (http://xapool.experlog.com, also included in JOTM)
 - required for building the framework
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
