@@ -176,13 +176,19 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 	}
 
 	public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
-		Map subFlowAttributes = new HashMap();
-		this.inputMapper.map(parentFlowModel, new MapAttributeSetterAdapter(subFlowAttributes));
-		return Collections.unmodifiableMap(subFlowAttributes);
+		if (this.inputMapper != null) {
+			Map subFlowAttributes = new HashMap();
+			this.inputMapper.map(parentFlowModel, new MapAttributeSetterAdapter(subFlowAttributes));
+			return Collections.unmodifiableMap(subFlowAttributes);
+		} else {
+			return Collections.EMPTY_MAP;
+		}
 	}
 
 	public void mapSubFlowOutputAttributes(FlowModel subFlowModel, MutableFlowModel parentFlowModel) {
-		this.outputMapper.map(subFlowModel, parentFlowModel);
+		if (this.outputMapper != null) {
+			this.outputMapper.map(subFlowModel, parentFlowModel);
+		}
 	}
 
 	public static class MapAttributeSetterAdapter implements AttributeSetter {

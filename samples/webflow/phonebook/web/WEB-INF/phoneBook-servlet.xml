@@ -89,7 +89,7 @@
 	</bean>
 
 	<bean id="person.Detail.collegueId.set" class="org.springframework.web.flow.action.SetAction">
-		<property name="mappingMap">
+		<property name="mappingsMap">
 			<map>
 				<entry key="id"><value>colleagueId,java.lang.Long</value></entry>
 			</map>
