@@ -20,8 +20,12 @@
 		class="org.springframework.aop.framework.CountingBeforeAdvice"
 	/>
 	
+	<!--
+		Note that there's normally no reason to create objects of this type
+		in a BeanFactory. If for some strange reason you want to, use Type 3 IoC.
+	-->
 	<bean id="targetSource" class="org.springframework.aop.target.SingletonTargetSource">
-		<property name="target"><ref local="target"/></property>
+		<constructor-arg><ref local="target"/></constructor-arg>
 	</bean>
 
 	<bean id="directTarget"

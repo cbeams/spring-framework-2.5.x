@@ -9,37 +9,25 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopConfigException;
 
 /**
- * Implementation of Interceptor interface that invokes a local target object
- * using reflection. Unlike the simple InvokerInterceptor, this allows the
- * target to be swapped while the application is running.
- *
- * <P>This should always be the last interceptor in the chain.
- * It does not invoke proceed() on the MethodInvocation.
- *
+ * Implementation of TargetSource interface that caches a local
+ * target object, but allows the target to be swapped while the application is running.
+ * If configuring an object of this class in a Spring IoC container, 
+ * use Type 3 (constructor-style) IoC.
  * @author Rod Johnson
- * @version $Id: HotSwappableTargetSource.java,v 1.2 2003-11-30 18:10:53 johnsonr Exp $
+ * @version $Id: HotSwappableTargetSource.java,v 1.3 2003-12-11 10:58:12 johnsonr Exp $
  */
 public class HotSwappableTargetSource implements TargetSource {
 
 	/** Target cached and invoked using reflection */
 	private Object target;
 
-	/**
-	 * JavaBean constructor.
-	 * Set the initialTarget property before use.
-	 */
-	public HotSwappableTargetSource() {
-	}
 
+	/**
+	 * Create a new HotSwappableTargetSource with the initial target
+	 * @param initialTarget initial target
+	 */
 	public HotSwappableTargetSource(Object initialTarget) {
 		this.target = initialTarget;
-	}
-
-	/**
-	 * Set the initial target. Construction time only.
-	 */
-	public void setInitialTarget(Object target) {
-		this.target = target;
 	}
 	
 	public Class getTargetClass() {
@@ -66,12 +54,14 @@ public class HotSwappableTargetSource implements TargetSource {
 	 * Synchronization around something that takes so little time is fine
 	 * @see org.springframework.aop.ProxyInterceptor#getTarget()
 	 */
-	public synchronized Object getTarget() {
+	public final synchronized Object getTarget() {
 		return this.target;
 	}
 	
+	/**
+	 * @see org.springframework.aop.TargetSource#releaseTarget(java.lang.Object)
+	 */
 	public void releaseTarget(Object o) {
-		
 	}
 
 	/**
@@ -88,7 +78,7 @@ public class HotSwappableTargetSource implements TargetSource {
 	/**
 	 * @see org.springframework.aop.TargetSource#isStatic()
 	 */
-	public boolean isStatic() {
+	public final boolean isStatic() {
 		return false;
 	}
 

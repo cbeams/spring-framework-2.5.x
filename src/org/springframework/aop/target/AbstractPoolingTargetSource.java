@@ -13,24 +13,25 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
- * Invoker interceptor that maintains a pool of instances, acquiring and
- * releasing an object from the pool for each method invocation.
- *
- * <p>This implementation is independent of pooling technology.
- *
- * <p>Subclasses must implement the acquireTarget() and releaseTarget() methods
- * to work with their chosen pool. The createTarget() method in this class can
- * be used to create objects to put in the pool.
- *
- * <p>This class implements DisposableBean to force subclasses to implement
+ * Abstract uperclass for pooling TargetSources that maintains a pool of target instances, 
+ * acquiring and releasing a target object from the pool for each method invocation. 
+ * This class is independent of pooling technology.
+ * <p>
+ * Subclasses must implement the getTarget() and releaseTarget() methods
+ * to work with their chosen pool. The newPrototypeInstance() method 
+ * inherited from AbstractPrototypeTargetSource can be used to create objects 
+ * to put in the pool. Subclasses must also implement some of the monitoring methods
+ * from the PoolingConfig interface. This class provides the getPoolingConfigMixin()
+ * method to return an IntroductionAdvisor making these stats available on proxied
+ * objects.
+ * <p>
+ * This class implements DisposableBean to force subclasses to implement
  * a destroy() method to close down their pool.
- * 
- * TODO inheritance is messy
  *
  * @author Rod Johnson
- * @version $Id: AbstractPoolingTargetSource.java,v 1.2 2003-12-02 22:28:10 johnsonr Exp $
+ * @version $Id: AbstractPoolingTargetSource.java,v 1.3 2003-12-11 10:58:12 johnsonr Exp $
  */
-public abstract class AbstractPoolingTargetSource extends PrototypeTargetSource implements PoolingConfig, DisposableBean {
+public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTargetSource implements PoolingConfig, DisposableBean {
 	
 	/** The size of the pool */
 	private int maxSize;
@@ -53,13 +54,6 @@ public abstract class AbstractPoolingTargetSource extends PrototypeTargetSource 
 		return this.maxSize;
 	}
 
-	/**
-	 * Create a new target object that can be added to the pool
-	 * @return a new target
-	 */
-	protected Object createTarget() throws Exception {
-		return super.getTarget();
-	}
 	
 	public final void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		super.setBeanFactory(beanFactory);
@@ -108,8 +102,10 @@ public abstract class AbstractPoolingTargetSource extends PrototypeTargetSource 
 	}
 	
 
-	
-	
+	/**
+	 * @return an IntroductionAdvisor that providing a mixin
+	 * exposing statistics about the pool maintained by this object
+	 */
 	public SimpleIntroductionAdvisor getPoolingConfigMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
 		return new SimpleIntroductionAdvisor(dii, PoolingConfig.class);

@@ -15,12 +15,11 @@
 	</bean>
 	
 	<!-- 
-		Invoker interceptor. Not required: can be added by 
-		default
+		Hot swappable target source. Note the use of Type 3 IoC.
 	-->
 	<bean id="swapper" 
 		class="org.springframework.aop.target.HotSwappableTargetSource">	
-		<property name="initialTarget"><ref local="target1"/></property>
+		<constructor-arg><ref local="target1"/></constructor-arg>
 	</bean>
 	
 	

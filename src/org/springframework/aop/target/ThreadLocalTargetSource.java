@@ -15,25 +15,23 @@ import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
- * Alternative to an object pool. This invoker uses a threading model in which
+ * Alternative to an object pool. This TargetSource uses a threading model in which
  * every thread has its own copy of the target. There's no contention for targets.
  * Target object creation is kept to a minimum on the running server.
  *
  * <p>Application code is written as to a normal pool; callers can't assume they
  * will be dealing with the same instance in invocations in different threads.
- * However, state can be relied on during the operations of a single thread.
+ * However, state can be relied on during the operations of a single thread:
+ * for example, if one caller makes repeated calls on the AOP proxy.
  *
  * <p>Cleanup is performed in the destroy() method from DisposableBean.
  * We can't get at the ThreadLocals there, but we can use a layer of indirection
  * to clear the references they hold.
  *
- * <p><b>This pooling model should be considered alpha. It has not yet been
- * tested in production.</b>
- *
  * @author Rod Johnson
- * @version $Id: ThreadLocalTargetSource.java,v 1.2 2003-12-02 22:28:10 johnsonr Exp $
+ * @version $Id: ThreadLocalTargetSource.java,v 1.3 2003-12-11 10:58:12 johnsonr Exp $
  */
-public class ThreadLocalTargetSource extends PrototypeTargetSource implements ThreadLocalTargetSourceStats, DisposableBean {
+public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource implements ThreadLocalTargetSourceStats, DisposableBean {
 	
 	/**
 	 * ThreadLocal holding the target associated with the current
@@ -69,14 +67,14 @@ public class ThreadLocalTargetSource extends PrototypeTargetSource implements Th
 	 * we don't find one, we create one and bind it to the thread.
 	 * No synchronization is required.
 	 */
-	public Object getTarget() throws Exception {
+	public Object getTarget() {
 		++invocations;
 		Holder targetHolder = (Holder) holders.get();
 		if (targetHolder == null || targetHolder.target == null) {
 			logger.info("No target for apartment prototype '" + getTargetBeanName() + 
 					"' found in thread: creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
 			// Associate target with thread local
-			targetHolder = new Holder(super.getTarget());
+			targetHolder = new Holder(newPrototypeInstance());
 			holders.set(targetHolder);
 			this.holderSet.add(targetHolder);
 		}
@@ -87,8 +85,11 @@ public class ThreadLocalTargetSource extends PrototypeTargetSource implements Th
 		return targetHolder.target;
 	}
 	
+	/**
+	 * @see org.springframework.aop.TargetSource#releaseTarget(java.lang.Object)
+	 */
 	public void releaseTarget(Object o) {
-		
+		// Do nothing
 	}
 
 	/**

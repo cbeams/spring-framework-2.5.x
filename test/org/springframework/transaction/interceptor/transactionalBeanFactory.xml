@@ -67,9 +67,12 @@
 		</property>
 	</bean>
 	
+	<!--
+		The HotSwappableTargetSource is a Type 3 component.
+	-->
 	<bean id="swapper" 
 		class="org.springframework.aop.target.HotSwappableTargetSource">	
-		<property name="initialTarget"><ref local="target"/></property>
+		<constructor-arg><ref local="target"/></constructor-arg>
 	</bean>
 	
 	<bean id="hotSwapped" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">

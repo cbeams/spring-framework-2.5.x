@@ -9,14 +9,14 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DisposableBean;
 
 /**
  * Jakarta Commons pooling implementation extending AbstractPoolingInvokerInterceptor
  * @author Rod Johnson
- * @version $Id: CommonsPoolTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: CommonsPoolTargetSource.java,v 1.2 2003-12-11 10:58:12 johnsonr Exp $
  */
-public class CommonsPoolTargetSource 
-				extends AbstractPoolingTargetSource
+public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 				implements PoolableObjectFactory {
 
 	/**
@@ -92,14 +92,17 @@ public class CommonsPoolTargetSource
 	/**
 	 * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
 	 */
-	public Object makeObject() throws Exception {
-		return createTarget();
+	public Object makeObject() {
+		return newPrototypeInstance();
 	}
 
 	/**
 	 * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
 	 */
 	public void destroyObject(Object o) throws Exception {
+		if (o instanceof DisposableBean) {
+			((DisposableBean) o).destroy();
+		}
 	}
 
 	/**
@@ -113,7 +116,6 @@ public class CommonsPoolTargetSource
 	 * @see org.apache.commons.pool.PoolableObjectFactory#activateObject(java.lang.Object)
 	 */
 	public void activateObject(Object o) throws Exception {
-
 	}
 
 	/**
