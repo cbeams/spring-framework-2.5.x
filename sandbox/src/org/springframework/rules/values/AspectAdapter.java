@@ -17,7 +17,7 @@ package org.springframework.rules.values;
 
 /**
  * Adapts access to a domain model aspect (generally a property) to the value
- * model interface.  The aspect access strategy is pluggable.
+ * model interface. The aspect access strategy is pluggable.
  * 
  * @author Keith Donald
  */
@@ -28,25 +28,21 @@ public class AspectAdapter extends AbstractValueModel {
 
     public AspectAdapter(MutableAspectAccessStrategy aspectAccessStrategy,
             String aspect) {
-        this(null, aspectAccessStrategy, aspect);
-    }
-
-    public AspectAdapter(final ValueModel domainObjectHolder,
-            MutableAspectAccessStrategy aspectAccessStrategy, String aspect) {
-        if (domainObjectHolder != null) {
+        if (aspectAccessStrategy.getDomainObjectHolder() != null) {
             if (logger.isDebugEnabled()) {
                 logger
                         .debug("[Aspect Adapter attaching to mutable domain object holder.]");
             }
-            domainObjectHolder.addValueListener(new ValueListener() {
-                public void valueChanged() {
-                    if (logger.isDebugEnabled()) {
-                        logger
-                                .debug("[Notifying any dependents value may have changed; target object changed]");
-                    }
-                    AspectAdapter.this.fireValueChanged();
-                }
-            });
+            aspectAccessStrategy.getDomainObjectHolder().addValueListener(
+                    new ValueListener() {
+                        public void valueChanged() {
+                            if (logger.isDebugEnabled()) {
+                                logger
+                                        .debug("[Notifying any dependents value may have changed; target object changed]");
+                            }
+                            AspectAdapter.this.fireValueChanged();
+                        }
+                    });
         }
         this.aspectAccessStrategy = aspectAccessStrategy;
         this.aspect = aspect;

@@ -111,5 +111,9 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     public Object getDomainObject() {
         return beanHolder.get();
     }
+    
+    public ValueModel getDomainObjectHolder() {
+        return beanHolder;
+    }
 
 }

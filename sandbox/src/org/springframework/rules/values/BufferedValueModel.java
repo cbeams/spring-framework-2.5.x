@@ -46,8 +46,9 @@ public class BufferedValueModel extends AbstractValueModel implements
                 }
                 if (isChangeBuffered()) {
                     logger.warn("[Losing buffered edit " + get() + "]");
+                    set(NO_VALUE);
                 }
-                set(NO_VALUE);
+                fireValueChanged();
             }
         });
         this.commitTrigger = commitTrigger;
@@ -78,6 +79,7 @@ public class BufferedValueModel extends AbstractValueModel implements
                         + "' to wrapped value model " + wrappedModel + "]");
             }
             wrappedModel.set(bufferedValue);
+            this.bufferedValue = NO_VALUE;
         } else {
             if (logger.isDebugEnabled()) {
                 logger.debug("[No buffered edit to commit; nothing to do...]");

@@ -24,15 +24,11 @@ import org.apache.commons.logging.LogFactory;
 /**
  * @author Keith Donald
  */
-public class DefaultFormModel implements FormModel {
+public class DefaultFormModel implements FormModel, MutableFormModel {
     protected static final Log logger = LogFactory
             .getLog(DefaultFormModel.class);
 
     private MutableAspectAccessStrategy domainObjectAccessStrategy;
-
-    private Object domainObject;
-
-    private ValueModel domainObjectHolder;
 
     private ValueModel commitTrigger;
 
@@ -40,15 +36,12 @@ public class DefaultFormModel implements FormModel {
 
     private boolean bufferChanges = true;
 
-    private boolean hasErrors;
-
     public DefaultFormModel(Object domainObject) {
         this(new BeanPropertyAccessStrategy(domainObject));
     }
 
     public DefaultFormModel(ValueModel domainObjectHolder) {
         this(new BeanPropertyAccessStrategy(domainObjectHolder));
-        this.domainObjectHolder = domainObjectHolder;
     }
 
     public DefaultFormModel(
@@ -96,7 +89,7 @@ public class DefaultFormModel implements FormModel {
     }
 
     public ValueModel add(String domainObjectProperty) {
-        ValueModel formValueModel = new AspectAdapter(domainObjectHolder,
+        ValueModel formValueModel = new AspectAdapter(
                 domainObjectAccessStrategy, domainObjectProperty);
         if (bufferChanges) {
             formValueModel = new BufferedValueModel(formValueModel,
