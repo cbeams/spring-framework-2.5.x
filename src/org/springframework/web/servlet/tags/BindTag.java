@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags;
 import java.beans.PropertyEditor;
 
 import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.PageContext;
 
 import org.springframework.validation.Errors;
 import org.springframework.web.util.ExpressionEvaluationUtils;
@@ -93,7 +94,8 @@ public class BindTag extends HtmlEscapingAwareTag {
 		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", getPath(), pageContext);
 
 		if (!isIgnoreNestedPath()) {
-			String nestedPath = (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME);
+			String nestedPath = (String) this.pageContext.getAttribute(
+					NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 			if (nestedPath != null) {
 				resolvedPath = nestedPath + resolvedPath;
 			}

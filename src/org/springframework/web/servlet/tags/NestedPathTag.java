@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import org.springframework.validation.Errors;
@@ -76,7 +77,7 @@ public class NestedPathTag extends TagSupport {
 
 	public int doStartTag() throws JspException {
 		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", getPath(), pageContext);
-		String nestedPath = (String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME);
+		String nestedPath = (String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		if (nestedPath != null) {
 			this.previousNestedPath = nestedPath;
 			nestedPath = nestedPath + resolvedPath;
@@ -84,7 +85,7 @@ public class NestedPathTag extends TagSupport {
 		else {
 			nestedPath = resolvedPath;
 		}
-		this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, nestedPath);
+		this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, nestedPath, PageContext.REQUEST_SCOPE);
 		return EVAL_BODY_INCLUDE;
 	}
 
