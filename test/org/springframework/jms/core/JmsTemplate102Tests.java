@@ -19,10 +19,12 @@ package org.springframework.jms.core;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueReceiver;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
@@ -606,6 +608,135 @@ public class JmsTemplate102Tests extends TestCase {
 		queueSessionControl.verify();
 	}
 
+	public void testReceiveDefaultDestination() throws Exception {
+		doTestReceive(false, true, false, false);
+	}
+	
+	public void testReceiveDestination() throws Exception {
+		doTestReceive(true, false, false, false);
+	}
+
+	public void testReceiveDestinationWithClientAcknowledge() throws Exception {
+		doTestReceive(true, false, false, true);
+	}
+
+	public void testReceiveStringDestination() throws Exception {
+		doTestReceive(false, false, false, false);
+	}
+
+	public void testReceiveAndConvertDefaultDestination() throws Exception {
+		doTestReceive(false, true, true, false);
+	}
+
+	public void testReceiveAndConvertStringDestination() throws Exception {
+		doTestReceive(false, false, true, false);
+	}
+
+	public void testReceiveAndConvertDestination() throws Exception {
+		doTestReceive(true, false, true, false);
+	}
+	
+	private void doTestReceive(boolean explicitDestination, boolean useDefaultDestination,
+			boolean testConverter, boolean clientAcknowledge) throws Exception {
+
+		JmsTemplate102 sender = new JmsTemplate102();
+		sender.setConnectionFactory(mockQueueConnectionFactory);
+		//Override the default settings for client ack used in the testSetup - createMockForQueues()
+		//Can't use Session.getAcknowledgeMode()
+		queueConnectionControl.reset();
+		if (clientAcknowledge) {
+			sender.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+			mockQueueConnection.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);			
+		} else {
+			sender.setSessionAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
+			mockQueueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+		}
+		queueConnectionControl.setReturnValue(mockQueueSession);
+		setJndiTemplate(sender);
+
+
+		if (useDefaultDestination) {
+			sender.setDefaultDestination(mockQueue);
+		}
+
+		mockQueueConnection.start();
+		queueConnectionControl.setVoidCallable(1);
+		mockQueueConnection.close();
+		queueConnectionControl.setVoidCallable(1);
+
+		MockControl queueReceiverControl = MockControl.createControl(QueueReceiver.class);
+		QueueReceiver mockQueueReceiver = (QueueReceiver) queueReceiverControl.getMock();
+
+		mockQueueSession.createReceiver(mockQueue);
+		queueSessionControl.setReturnValue(mockQueueReceiver);
+
+		mockQueueSession.close();
+		queueSessionControl.setVoidCallable(1);
+
+		MockControl messageControl = MockControl.createControl(TextMessage.class);
+		TextMessage mockMessage = (TextMessage) messageControl.getMock();
+
+		if (testConverter) {
+			mockMessage.getText();
+			messageControl.setReturnValue("Hello World!");
+		}
+		if (clientAcknowledge) {
+			mockMessage.acknowledge();
+			messageControl.setVoidCallable(1);
+		}
+
+		queueSessionControl.replay();
+		queueConnectionControl.replay();
+		messageControl.replay();
+
+		mockQueueReceiver.receive();
+		queueReceiverControl.setReturnValue(mockMessage);
+		mockQueueReceiver.close();
+		queueReceiverControl.setVoidCallable(1);
+		queueReceiverControl.replay();
+
+		Message m = null;
+		String textFromMessage = null;
+		if (useDefaultDestination) {
+			if (testConverter) {
+				textFromMessage = (String) sender.receiveAndConvert();
+			}
+			else {
+				m = sender.receive();
+			}
+		}
+		else {
+			if (explicitDestination) {
+				if (testConverter) {
+					textFromMessage = (String) sender.receiveAndConvert(mockQueue);
+				}
+				else {
+					m = sender.receive(mockQueue);
+				}
+			}
+			else {
+				if (testConverter) {
+					textFromMessage = (String) sender.receiveAndConvert("testQueue");
+				}
+				else {
+					m = sender.receive("testQueue");
+				}
+			}
+		}
+
+		queueConnectionFactoryControl.verify();
+		queueConnectionControl.verify();
+		queueSessionControl.verify();
+		queueReceiverControl.verify();
+		messageControl.verify();
+
+		if (testConverter) {
+			assertEquals("Message Text should be equal", "Hello World!", textFromMessage);
+		}
+		else {
+			assertEquals("Messages should refer to the same object", m, mockMessage);
+		}
+	}
 	private void setJndiTemplate(JmsTemplate sender) {
 		JndiDestinationResolver destMan = new JndiDestinationResolver();
 		destMan.setJndiTemplate(new JndiTemplate() {
