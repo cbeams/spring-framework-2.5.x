@@ -104,7 +104,7 @@ public class ClientContinuationFlowExecutionStorage implements FlowExecutionStor
 	 * <p>
 	 * Subclasses can override this to change the encoding algorithm. This
 	 * class just does a BASE64 encoding of the serialized flow execution.
-	 * @param the flow execution instance
+	 * @param flowExecution the flow execution instance
 	 * @return the encoded string representation
 	 */
 	protected String encode(FlowExecution flowExecution) {

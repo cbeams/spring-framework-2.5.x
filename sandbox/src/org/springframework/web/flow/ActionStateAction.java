@@ -272,7 +272,7 @@ public class ActionStateAction {
 
 	/**
 	 * Does this action state action have the specified property present?
-	 * @param property the property
+	 * @param propertyName the property name
 	 * @return true if present, false if not present
 	 */
 	public boolean containsProperty(String propertyName) {
