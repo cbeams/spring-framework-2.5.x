@@ -8,10 +8,10 @@ package org.springframework.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class can be used to parse other classes containing constant definitions
@@ -26,7 +26,7 @@ import java.util.HashSet;
  * the same names as the constants themselves, and freeing them from
  * maintaining their own mapping.
  *
- * @version $Id: Constants.java,v 1.2 2003-08-18 15:42:59 jhoeller Exp $
+ * @version $Id: Constants.java,v 1.3 2003-12-18 19:07:17 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16-Mar-2003
@@ -34,7 +34,7 @@ import java.util.HashSet;
 public class Constants {
 
 	/** Map from String field name to object value */
-	private Map map = new HashMap();
+	private final Map map = new HashMap();
 
 	/** Class analyzed */
 	private final Class clazz;
@@ -49,16 +49,15 @@ public class Constants {
 		Field[] fields = clazz.getFields();
 		for (int i = 0; i < fields.length; i++) {
 			Field f = fields[i];
-			if (Modifier.isFinal(f.getModifiers())
-				&& Modifier.isStatic(f.getModifiers())
-				&& Modifier.isPublic(f.getModifiers())) {
+			if (Modifier.isFinal(f.getModifiers()) && Modifier.isStatic(f.getModifiers())	&&
+			    Modifier.isPublic(f.getModifiers())) {
 				String name = f.getName();
 				try {
 					Object value = f.get(null);
 					this.map.put(name, value);
 				}
 				catch (IllegalAccessException ex) {
-					// Just leave this field and continue
+					// just leave this field and continue
 				}
 			}
 		}
@@ -108,8 +107,9 @@ public class Constants {
 	public Object asObject(String code) throws ConstantException {
 		code = code.toUpperCase();
 		Object val = this.map.get(code);
-		if (val == null)
+		if (val == null) {
 			throw new ConstantException(this.clazz, code, "not found");
+		}
 		return val;
 	}
 
@@ -131,11 +131,22 @@ public class Constants {
 	}
 
 	/**
+	 * Return all values of the group of constants for the
+	 * given bean property name.
+	 * @param propertyName the name of the bean property
+	 * @return the set of values
+	 * @see #propertyToConstantNamePrefix
+	 */
+	public Set getValuesForProperty(String propertyName) {
+		return getValues(propertyToConstantNamePrefix(propertyName));
+	}
+
+	/**
 	 * Look up the given value within the given group of constants.
 	 * Will return the first match.
 	 * @param value constant value to look up
 	 * @param namePrefix prefix of the constant names to search
-	 * @return the name of the field
+	 * @return the name of the constant field
 	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
@@ -143,10 +154,49 @@ public class Constants {
 		for (Iterator it = this.map.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = (String) entry.getKey();
-			if (key.startsWith(namePrefix) && entry.getValue().equals(value))
+			if (key.startsWith(namePrefix) && entry.getValue().equals(value)) {
 				return key;
+			}
 		}
 		throw new ConstantException(this.clazz, namePrefix, value);
+	}
+
+	/**
+	 * Look up the given value within the group of constants for
+	 * the given bean property name. Will return the first match.
+	 * @param value constant value to look up
+	 * @param propertyName the name of the bean property
+	 * @return the name of the constant field
+	 * @throws ConstantException if the value wasn't found
+	 * @see #propertyToConstantNamePrefix
+	 */
+	public String toCodeForProperty(Object value, String propertyName) throws ConstantException {
+		return toCode(value, propertyToConstantNamePrefix(propertyName));
+	}
+
+	/**
+	 * Convert the given bean property name to a constant name prefix.
+	 * Uses a common naming idiom: turning all lower case characters to
+	 * upper case, and prepending upper case characters with an underscore.
+	 * <p>Example: "imageSize" -> "IMAGE_SIZE".
+	 * @param propertyName the name of the bean property
+	 * @return the corresponding constant name prefix
+	 * @see #getValuesForProperty
+	 * @see #toCodeForProperty
+	 */
+	public String propertyToConstantNamePrefix(String propertyName) {
+	  StringBuffer parsedPrefix = new StringBuffer();
+	  for(int i = 0; i < propertyName.length(); i++) {
+	    char c = propertyName.charAt(i);
+	    if (Character.isUpperCase(c)) {
+	      parsedPrefix.append("_");
+	      parsedPrefix.append(c);
+	    }
+	    else {
+	      parsedPrefix.append(Character.toUpperCase(c));
+	    }
+	  }
+		return parsedPrefix.toString();
 	}
 
 }

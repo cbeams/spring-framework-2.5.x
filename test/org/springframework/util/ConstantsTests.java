@@ -12,13 +12,13 @@ import junit.framework.TestCase;
 /**
  * @author Rod Johnson
  * @since 28-Apr-2003
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ConstantsTests extends TestCase {
 
-	public void testA() {
+	public void testConstants() {
 		Constants c = new Constants(A.class);
-		assertTrue(c.getSize() == 3);
+		assertTrue(c.getSize() == 5);
 		
 		assertEquals(c.asNumber("DOG").intValue(), A.DOG);
 		assertEquals(c.asNumber("dog").intValue(), A.DOG);
@@ -39,6 +39,21 @@ public class ConstantsTests extends TestCase {
 		catch (ConstantException ex) {
 		}
 
+		Set values = c.getValues("");
+		assertEquals(c.getSize(), values.size());
+		assertTrue(values.contains(new Integer(0)));
+		assertTrue(values.contains(new Integer(66)));
+		assertTrue(values.contains(""));
+
+		values = c.getValues("D");
+		assertEquals(1, values.size());
+		assertTrue(values.contains(new Integer(0)));
+
+		values = c.getValuesForProperty("myProperty");
+		assertEquals(2, values.size());
+		assertTrue(values.contains(new Integer(1)));
+		assertTrue(values.contains(new Integer(2)));
+
 		assertEquals(c.toCode(new Integer(0), ""), "DOG");
 		assertEquals(c.toCode(new Integer(0), "D"), "DOG");
 		assertEquals(c.toCode(new Integer(0), "DO"), "DOG");
@@ -50,12 +65,23 @@ public class ConstantsTests extends TestCase {
 		assertEquals(c.toCode("", ""), "S1");
 		assertEquals(c.toCode("", "s"), "S1");
 		assertEquals(c.toCode("", "s1"), "S1");
+		try {
+			c.toCode("bogus", "bogus");
+			fail("Should have thrown ConstantException");
+		}
+		catch (ConstantException ex) {
+			// expected
+		}
 
-		Set values = c.getValues("");
-		assertEquals(values.size(), c.getSize());
-		assertTrue(values.contains(new Integer(0)));
-		assertTrue(values.contains(new Integer(66)));
-		assertTrue(values.contains(""));
+		assertEquals(c.toCodeForProperty(new Integer(1), "myProperty"), "MY_PROPERTY_NO");
+		assertEquals(c.toCodeForProperty(new Integer(2), "myProperty"), "MY_PROPERTY_YES");
+		try {
+			c.toCodeForProperty("bogus", "bogus");
+			fail("Should have thrown ConstantException");
+		}
+		catch (ConstantException ex) {
+			// expected
+		}
 	}
 	
 	
@@ -64,7 +90,10 @@ public class ConstantsTests extends TestCase {
 		public static final int DOG = 0;
 		public static final int CAT = 66;
 		public static final String S1 = "";
-		
+
+		public static final int MY_PROPERTY_NO = 1;
+		public static final int MY_PROPERTY_YES = 2;
+
 		/** ignore these */
 		protected static final int P = -1;
 		protected boolean f;
