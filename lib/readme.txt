@@ -68,7 +68,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.0.2 (http://www.ibatis.com)
 - ibatis-sqlmap-2.jar is required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
@@ -132,7 +132,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's XmlBeanFactory on J2SE 1.3
 
 * jakarta-commons/commons-attributes-*-SNAPSHOT.jar
-- Commons Attributes May 9th snapshot (http://jakarta.apache.org/commons/sandbox/attributes)
+- Commons Attributes July 6th snapshot (http://jakarta.apache.org/commons/sandbox/attributes)
 - required for building the framework
 - required at runtime when using Spring's Commons Attributes support
 
@@ -141,9 +141,9 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore's Struts web tier
 
 * jakarta-commons/commons-collections.jar
-- Commons Collections 2.1 (http://jakarta.apache.org/commons/collections)
-- required for running JPetStore's Struts web tier
-- required for running Petclinic (by Hibernate)
+- Commons Collections 2.1.1 (http://jakarta.apache.org/commons/collections)
+- required for running JPetStore's Struts web tier (by Struts)
+- required for running Petclinic (by Hibernate and OJB)
 
 * jakarta-commons/commons-dbcp.jar
 - Commons DBCP 1.2.1 (http://jakarta.apache.org/commons/dbcp)
@@ -169,7 +169,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore's Struts web tier
 
 * jakarta-commons/commons-logging.jar
-- Commons Logging 1.0.3 (http://jakarta.apache.org/commons/logging)
+- Commons Logging 1.0.4 (http://jakarta.apache.org/commons/logging)
 - required for building the framework
 - required at runtime, as Spring uses it for all logging
 
