@@ -41,6 +41,12 @@ import org.springframework.util.ToStringCreator;
 public abstract class Event implements AttributeAccessor {
 
 	/**
+	 * Returns the underlying client <i>request</i> that triggered this event.
+	 * @return the client source request object, may be null
+	 */
+	public abstract Object getSource();
+	
+	/**
 	 * Returns the event identifier.
 	 * @return The event id
 	 */
@@ -73,11 +79,6 @@ public abstract class Event implements AttributeAccessor {
 	 *         not present in the request
 	 */
 	public abstract Object getParameter(String parameterName);
-	
-	/**
-	 * Returns the underlying client <i>request</i> that triggered this event.
-	 */
-	public abstract Object getRequestEvent();
 	
 	// implementing AttributeAccessor
 

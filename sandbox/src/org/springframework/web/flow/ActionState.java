@@ -461,8 +461,8 @@ public class ActionState extends TransitionableState {
 				return event.getStateId();
 			}
 
-			public Object getRequestEvent() {
-				return event.getRequestEvent();
+			public Object getSource() {
+				return event.getSource();
 			}
 		}
 

@@ -144,7 +144,7 @@ public class LocalEvent extends Event {
 		}
 	}
 	
-	public Object getRequestEvent() {
+	public Object getSource() {
 		return null; //this is an internal event!
 	}
 }

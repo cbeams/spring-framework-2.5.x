@@ -78,7 +78,7 @@ public class HttpServletRequestEvent extends Event {
 		return request.getParameterMap();
 	}
 	
-	public Object getRequestEvent() {
+	public Object getSource() {
 		return request;
 	}
 	
