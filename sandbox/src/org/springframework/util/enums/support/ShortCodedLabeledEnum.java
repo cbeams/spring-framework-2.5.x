@@ -27,10 +27,6 @@ public class ShortCodedLabeledEnum extends AbstractLabeledEnum {
 
 	private Short code;
 
-	protected ShortCodedLabeledEnum() {
-		super();
-	}
-
 	protected ShortCodedLabeledEnum(int code) {
 		this(code, null);
 	}

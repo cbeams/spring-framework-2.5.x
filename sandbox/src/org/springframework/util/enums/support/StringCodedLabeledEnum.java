@@ -30,10 +30,6 @@ public class StringCodedLabeledEnum extends AbstractLabeledEnum {
 
 	private String code;
 
-	protected StringCodedLabeledEnum() {
-		super();
-	}
-
 	protected StringCodedLabeledEnum(String code) {
 		this(code, null);
 	}

@@ -29,10 +29,6 @@ import org.springframework.util.Assert;
 public class LetterCodedLabeledEnum extends AbstractLabeledEnum {
 	private Character code;
 
-	protected LetterCodedLabeledEnum() {
-		super();
-	}
-
 	protected LetterCodedLabeledEnum(char code) {
 		this(code, null);
 	}
