@@ -35,7 +35,7 @@ import javax.jms.Session;
  * {@link AbstractJmsTemplate#setPubSubDomain(boolean) setPubSubDomain}.
  * 
  * 
- * @version $Id: JmsTemplate11.java,v 1.4 2004-07-15 04:08:14 markpollack Exp $
+ * @version $Id: JmsTemplate11.java,v 1.5 2004-07-15 04:36:50 markpollack Exp $
  * @author Mark Pollack
  */
 public class JmsTemplate11 extends AbstractJmsTemplate {
@@ -222,6 +222,21 @@ public class JmsTemplate11 extends AbstractJmsTemplate {
             });
         }
     }
+    
+	public void send(String d, final Object o) {
+		if (this.getJmsConverter() == null) {
+			logger.warn("No JmsConverter. Check configuration of JmsSender");
+			return;
+		} else {
+			send(d, new MessageCreator() {
+				public Message createMessage(Session session)
+					throws JMSException {
+					return getJmsConverter().toMessage(o, session);
+				}
+			});
+		}
+	}
+    
     
     public void send(Destination d, final Object o, final MessagePostProcessor postProcessor) {
         if (this.getJmsConverter() == null) {

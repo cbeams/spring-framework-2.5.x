@@ -146,7 +146,7 @@ public abstract class AbstractJmsTemplate
             //dynamic jms destinations.  
             DefaultJmsAdmin admin = new DefaultJmsAdmin();
             //TODO bad smell....
-            admin.setJmsSender(this);
+            admin.setJmsTemplate(this);
             setJmsAdmin(admin);
         }
     }
