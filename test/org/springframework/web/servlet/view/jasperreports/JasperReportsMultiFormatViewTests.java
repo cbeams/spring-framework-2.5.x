@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsTests{
 
 	protected void extendModel(Map model) {
-		model.put("format", "csv");
+		model.put(getDiscriminatorKey(), "csv");
 	}
 
 	public void testSimpleHtmlRender() throws Exception{
@@ -20,11 +20,15 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsTest
 		Map model = new HashMap();
 		model.put("ReportTitle", "Foo");
 		model.put("dataSource", getData());
-		model.put("format", "html");
+		model.put(getDiscriminatorKey(), "html");
 
 		view.render(model, request, response);
 
 		assertEquals("Invalid content type", "text/html", response.getContentType());
+	}
+
+	protected String getDiscriminatorKey() {
+		return "format";
 	}
 
 	protected AbstractJasperReportsView getViewImplementation() {

@@ -15,13 +15,18 @@ public class JasperReportsMultiFormatViewWithCustomMappingsTests extends JasperR
 
 		Properties props = new Properties();
 		props.setProperty("comma-separated", JasperReportsCsvView.class.getName());
-
+    props.setProperty("html", JasperReportsHtmlView.class.getName());
+		
 		view.setFormatMappings(props);
 		return view;
 	}
 
+	protected String getDiscriminatorKey() {
+		return "fmt";
+	}
+
 	protected void extendModel(Map model) {
-		model.put("fmt", "comma-separated");
+		model.put(getDiscriminatorKey(), "comma-separated");
 	}
 
 }
