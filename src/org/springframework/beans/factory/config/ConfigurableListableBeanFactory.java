@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  * Configuration interface to be implemented by most listable bean factories.
@@ -58,11 +59,9 @@ public interface ConfigurableListableBeanFactory
 	 * be castable to a more specific implementation type, if necessary.
 	 * @param beanName name of the bean
 	 * @return the registered BeanDefinition
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if there is no bean with the given name
-	 * @throws BeansException in case of errors
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 */
-	BeanDefinition getBeanDefinition(String beanName) throws BeansException;
+	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering

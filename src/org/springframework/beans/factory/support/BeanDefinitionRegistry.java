@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -22,13 +22,30 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Interface for registries that hold bean definitions,
- * i.e. RootBeanDefinition and ChildBeanDefinition instances.
+ * for example RootBeanDefinition and ChildBeanDefinition instances.
+ * Typically implemented by bean factories that internally
+ * work with the AbstractBeanDefinition hierarchy.
  *
- * <p>Typically implemented by bean factories that work with
- * the AbstractBeanDefinition hierarchy internally.
+ * <p>This is the only interface in Spring's bean factory packages
+ * that encapsulates <i>registration</i> of bean definitions.
+ * The standard bean factory interfaces only cover access to a
+ * fully configured factory instance.
+ *
+ * <p>Spring's bean definition readers expect to work on an
+ * implementation of this interface. Known implementors are
+ * DefaultListableBeanFactory and GenericApplicationContext,
+ * for example.
  *
  * @author Juergen Hoeller
  * @since 26.11.2003
+ * @see org.springframework.beans.factory.config.BeanDefinition
+ * @see AbstractBeanDefinition
+ * @see RootBeanDefinition
+ * @see ChildBeanDefinition
+ * @see DefaultListableBeanFactory
+ * @see org.springframework.context.support.GenericApplicationContext
+ * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+ * @see PropertiesBeanDefinitionReader
  */
 public interface BeanDefinitionRegistry {
 
@@ -56,11 +73,9 @@ public interface BeanDefinitionRegistry {
 	 * Return the BeanDefinition for the given bean name.
 	 * @param beanName name of the bean to find a definition for
 	 * @return the BeanDefinition for the given name (never null)
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if the bean definition cannot be resolved
-	 * @throws BeansException in case of errors
+	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 */
-	BeanDefinition getBeanDefinition(String beanName) throws BeansException;
+	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Register a new bean definition with this registry.
@@ -79,7 +94,7 @@ public interface BeanDefinitionRegistry {
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param beanName the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
-	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
+	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 */
 	String[] getAliases(String beanName) throws NoSuchBeanDefinitionException;
 
@@ -89,7 +104,7 @@ public interface BeanDefinitionRegistry {
 	 * @param beanName the name of the bean
 	 * @param alias alias that will behave the same as the bean name
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if there is no bean with the given name
+	 * if there is no bean definition with the given name
 	 * @throws BeansException if the alias is already in use
 	 */
 	void registerAlias(String beanName, String alias) throws BeansException;

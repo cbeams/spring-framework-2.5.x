@@ -359,7 +359,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of superclass abstract methods
 	//---------------------------------------------------------------------
 
-	public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
+	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
 			throw new NoSuchBeanDefinitionException(beanName, toString());
