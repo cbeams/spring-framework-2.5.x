@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.support;
 
@@ -191,15 +191,6 @@ public class PagedListHolder implements Serializable {
 	 * Return the number of pages for the current source list.
 	 */
 	public int getPageCount() {
-		return getNrOfPages();
-	}
-
-	/**
-	 * Return the number of pages for the current source list.
-	 * @deprecated in favor of getPageCount
-	 * @see #getPageCount
-	 */
-	public int getNrOfPages() {
 		float nrOfPages = (float) getSource().size() / getPageSize();
 		return (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages);
 	}
@@ -280,7 +271,7 @@ public class PagedListHolder implements Serializable {
 	 * Return the last page to which create a link around the current page.
 	 */
 	public int getLastLinkedPage() {
-		return Math.min(getFirstLinkedPage() + getMaxLinkedPages() -1, this.getNrOfPages() -1);
+		return Math.min(getFirstLinkedPage() + getMaxLinkedPages() -1, this.getPageCount() -1);
 	}
 
 

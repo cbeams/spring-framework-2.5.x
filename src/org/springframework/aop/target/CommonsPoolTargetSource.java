@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.target;
 
@@ -67,22 +67,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		return this.pool.getNumIdle();
 	}
 
-	/**
-	 * @deprecated in favor of getActiveCount
-	 * @see #getActiveCount
-	 */
-	public int getActive() {
-		return this.pool.getNumActive();
-	}
-
-	/**
-	 * @deprecated in favor of getIdleCount
-	 * @see #getIdleCount
-	 */
-	public int getFree() {
-		return this.pool.getNumIdle();
-	}
-	
 	
 	//---------------------------------------------------------------------
 	// Implementation of DisposableBean interface

@@ -38,17 +38,6 @@ import org.springframework.beans.MutablePropertyValues;
 public interface BeanDefinition {
 
 	/**
-	 * Return the class defined for the bean, if any.
-	 * Only returns the class for the particular bean definition -
-	 * does not merge child definitions with parents!
-	 * @deprecated Use BeanFactory's <code>getType</code> method instead,
-	 * which properly resolves child bean definitions and
-	 * asks FactoryBeans for the type of object they create.
-	 * @see org.springframework.beans.factory.BeanFactory#getType
-	 */
-	Class getBeanClass();
-
-	/**
 	 * Return whether this bean is "abstract", i.e. not meant to be instantiated.
 	 */
 	boolean isAbstract();

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.util;
 
@@ -71,14 +71,6 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 	 */
 	public long getUptimeMillis() {
 		return System.currentTimeMillis() - this.initedMillis;
-	}
-
-	/**
-	 * Return the number of milliseconds since this object was loaded.
-	 * @deprecated in favor of {@link #getUptimeMillis getUptimeMillis}
-	 */
-	public long getUptime() {
-		return getUptimeMillis();
 	}
 
 	/**

@@ -149,25 +149,9 @@ public class StopWatch {
 	}
 
 	/**
-	 * Return the time taken by the last task.
-	 * @deprecated in favor of {@link #getLastTaskTimeMillis getLastTaskTimeMillis}
-	 */
-	public long getLastInterval() throws IllegalStateException {
-		return getLastTaskTimeMillis();
-	}
-
-	/**
 	 * Return the total time in milliseconds for all tasks.
 	 */
 	public long getTotalTimeMillis() {
-		return totalTimeMillis;
-	}
-
-	/**
-	 * Return the total time in milliseconds for all tasks.
-	 * @deprecated in favor of {@link #getTotalTimeMillis getTotalTimeMillis}
-	 */
-	public long getTotalTime() {
 		return totalTimeMillis;
 	}
 
@@ -176,14 +160,6 @@ public class StopWatch {
 	 */
 	public double getTotalTimeSeconds() {
 		return totalTimeMillis / 1000.0;
-	}
-
-	/**
-	 * Return the total time in seconds for all tasks.
-	 * @deprecated in favor of {@link #getTotalTimeSeconds getTotalTimeSeconds}
-	 */
-	public double getTotalTimeSecs() {
-		return getTotalTimeSeconds();
 	}
 
 	/**
@@ -293,26 +269,10 @@ public class StopWatch {
 		}
 
 		/**
-		 * Return the time in milliseconds this task took.
-		 * @deprecated in favor of {@link #getTimeMillis getTimeMillis}
-		 */
-		public long getTime() {
-			return timeMillis;
-		}
-
-		/**
 		 * Return the time in seconds this task took.
 		 */
 		public double getTimeSeconds() {
 			return timeMillis / 1000.0;
-		}
-
-		/**
-		 * Return the time in seconds this task took.
-		 * @deprecated in favor of {@link #getTimeSeconds getTimeSeconds}
-		 */
-		public double getTimeSecs() {
-			return getTimeSeconds();
 		}
 	}
 

@@ -22,7 +22,6 @@ import java.net.URL;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.helpers.FileWatchdog;
 import org.apache.log4j.xml.DOMConfigurator;
 
 /**
@@ -48,18 +47,6 @@ public abstract class Log4jConfigurer {
 	/** Pseudo URL prefix for loading from the class path: "classpath:" */
 	public static final String CLASSPATH_URL_PREFIX = "classpath:";
 
-	/**
-	 * Default refresh interval, previously used for initLogging(location).
-	 * @deprecated Either choose no config file refreshing (initLogging with plain
-	 * location) or specify an explicit refresh interval. As of Spring 1.1.3, there
-	 * is no default refresh interval; the default is no config file refreshing now.
-	 * The rationale is to avoid Log4J's watchdog thread (which never terminates)
-	 * unless explicitly required.
-	 * @see #initLogging(String)
-	 * @see #initLogging(String, long)
-	 */
-	public static final long DEFAULT_REFRESH_INTERVAL = FileWatchdog.DEFAULT_DELAY;
-
 	public static final String XML_FILE_EXTENSION = ".xml";
 
 
@@ -71,7 +58,6 @@ public abstract class Log4jConfigurer {
 	 * (e.g. "file:C:/log4j.properties), or a plain absolute path in the file system
 	 * (e.g. "C:/log4j.properties")
 	 * @throws FileNotFoundException if the location specifies an invalid file path
-	 * @see #DEFAULT_REFRESH_INTERVAL
 	 */
 	public static void initLogging(String location) throws FileNotFoundException {
 		URL url = ResourceUtils.getURL(location);

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -88,14 +88,6 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * @deprecated in favor of <code>isProxyTargetClass</code>
-	 * @see #isProxyTargetClass
-	 */
-	public boolean getProxyTargetClass() {
-		return this.proxyTargetClass;
-	}
-
-	/**
 	 * Set whether proxies should perform aggressive optimizations.
 	 * The exact meaning of "aggressive optimizations" will differ
 	 * between proxies, but there is usually some tradeoff. 
@@ -127,14 +119,6 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * @deprecated in favor of <code>isOptimize</code>
-	 * @see #isOptimize
-	 */
-	public boolean getOptimize() {
-		return this.optimize;
-	}
-
-	/**
 	 * Set whether the proxy should be exposed by the AOP framework as a
 	 * ThreadLocal for retrieval via the AopContext class. This is useful
 	 * if an advised object needs to call another advised method on itself.
@@ -150,14 +134,6 @@ public class ProxyConfig implements Serializable {
 	 * each invocation.
 	 */
 	public boolean isExposeProxy() {
-		return this.exposeProxy;
-	}
-
-	/**
-	 * @deprecated in favor of <code>isExposeProxy</code>
-	 * @see #isExposeProxy
-	 */
-	public boolean getExposeProxy() {
 		return this.exposeProxy;
 	}
 
@@ -214,20 +190,12 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * @deprecated in favor of <code>isOpaque</code>
-	 * @see #isOpaque
-	 */
-	public boolean getOpaque() {
-		return opaque;
-	}
-
-	/**
 	 * Copy configuration from the other config object.
 	 * @param other object to copy configuration from
 	 */
 	public void copyFrom(ProxyConfig other) {
 		this.proxyTargetClass = other.proxyTargetClass;
-		this.optimize = other.getOptimize();
+		this.optimize = other.optimize;
 		this.exposeProxy = other.exposeProxy;
 		this.frozen = other.frozen;
 		this.opaque = other.opaque;
@@ -244,4 +212,5 @@ public class ProxyConfig implements Serializable {
 		sb.append("aopProxyFactory=" + this.aopProxyFactory + "; ");
 		return sb.toString();
 	}
+
 }

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy;
 
@@ -62,16 +62,6 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	 * in the bean name.
 	 */
 	public boolean isUsePrefix() {
-		return this.usePrefix;
-	}
-
-	/**
-	 * Return whether to exclude advisors with a certain prefix
-	 * in the bean name.
-	 * @deprecated in favor of <code>isUsePrefix</code>
-	 * @see #isUsePrefix
-	 */
-	public boolean getUsePrefix() {
 		return this.usePrefix;
 	}
 

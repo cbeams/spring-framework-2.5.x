@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -70,22 +70,10 @@ public interface Advised {
 	boolean isExposeProxy();
 
 	/**
-	 * @deprecated in favor of <code>isExposeProxy</code>
-	 * @see #isExposeProxy
-	 */
-	boolean getExposeProxy();
-
-	/**
 	 * Should we proxy the target class as well as any interfaces?
 	 * Can use this to force CGLIB proxying.
 	 */
 	boolean isProxyTargetClass();
-
-	/**
-	 * @deprecated in favor of <code>isProxyTargetClass</code>
-	 * @see #isProxyTargetClass
-	 */
-	boolean getProxyTargetClass();
 
 	/**
 	 * Return the Advisors applying to this proxy.
@@ -108,15 +96,6 @@ public interface Advised {
 	boolean isInterfaceProxied(Class intf);
 	
 	/**
-	 * Add the given AOP Alliance interceptor to the tail of the advice (interceptor) chain.
-	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
-	 * @param interceptor to add to the tail of the chain
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(org.aopalliance.aop.Advice)
-	 */
-	void addInterceptor(Interceptor interceptor) throws AopConfigException;
-	
-	/**
 	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
 	 * This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
 	 * applies, and returned from the getAdvisors() method in this wrapped form.
@@ -127,18 +106,6 @@ public interface Advised {
 	void addAdvice(Advice advice) throws AopConfigException;
 
 	/**
-	 * Add the given AOP Alliance interceptor at the specified position in the
-	 * interceptor chain.
-	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
-	 * @param pos index from 0 (head)
-	 * @param interceptor interceptor to add at the specified position in the
-	 * interceptor chain
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(int, org.aopalliance.aop.Advice)
-	 */
-	void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException;
-	
-	/**
 	 * Add the given AOP Alliance Advice at the specified position in the advice chain.
 	 * @param pos index from 0 (head)
 	 * @param advice advice to add at the specified position in the advice chain
@@ -146,39 +113,6 @@ public interface Advised {
 	void addAdvice(int pos, Advice advice) throws AopConfigException;
 	
 	/**
-	 * Add an AfterReturningAdvice to the tail of the advice chain.
-	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
-	 * @param afterReturningAdvice AfterReturningAdvice to add
-	 * @throws AopConfigException if the advice cannot be added
-	 * (for example, because the proxy configuration is frozen)
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(org.aopalliance.aop.Advice)
-	 */
-	void addAfterReturningAdvice(AfterReturningAdvice afterReturningAdvice) throws AopConfigException;
-	
-	/**
-	 * Add a MethodBeforeAdvice to the tail of the advice chain.
-	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
-	 * @param beforeAdvice MethodBeforeAdvice to add
-	 * @throws AopConfigException if the advice cannot be added
-	 * (for example, because the proxy configuration is frozen)
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(org.aopalliance.aop.Advice)
-	 */
-	void addBeforeAdvice(MethodBeforeAdvice beforeAdvice) throws AopConfigException;
-	
-	/**
-	 * Add a ThrowsAdvice to the tail of the advice chain.
-	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
-	 * @param throwsAdvice ThrowsAdvice to add
-	 * @throws AopConfigException if the advice cannot be added
-	 * (for example, because the proxy configuration is frozen)
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(org.aopalliance.aop.Advice)
-	 */
-	void addThrowsAdvice(ThrowsAdvice throwsAdvice) throws AopConfigException;
-
-	/** 
 	 * Add an Advisor at the end of the advisor chain.
 	 * <p>The Advisor may be an IntroductionAdvisor, in which new interfaces
 	 * will be available when a proxy is next obtained from the relevant factory.

@@ -20,40 +20,32 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jndi.JndiLocatorSupport;
-import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
  
 /**
- * Helper class that provides static methods to obtain connections from
- * JNDI and close connections if necessary. Has support for thread-bound
- * connections, e.g. for use with DataSourceTransactionManager.
+ * Helper class that provides static methods to obtain connections from a
+ * DataSource, and to close connections if necessary. Has support for
+ * Spring-managed connections, e.g. for use with DataSourceTransactionManager.
  *
- * <p>Note: The <code>getDataSourceFromJndi</code> methods are targetted at
- * applications that do not use a Spring BeanFactory. With the latter, it is
- * preferable to preconfigure your beans or even JdbcTemplate instances in the
- * factory: JndiObjectFactoryBean can be used to fetch a DataSource from JNDI
- * and pass the DataSource bean reference to other beans. Switching to another
- * DataSource is just a matter of configuration then: For example, you can
- * replace the definition of the JndiObjectFactoryBean with a local DataSource
- * (like a Commons DBCP BasicDataSource).
+ * <p>Used internally by JdbcTemplate, JDBC operation objects and the JDBC
+ * DataSourceTransactionManager. Can also be used directly in application code.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #getDataSourceFromJndi
- * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see #getConnection
+ * @see #closeConnectionIfNecessary
  * @see DataSourceTransactionManager
+ * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.object.RdbmsOperation
  */
 public abstract class DataSourceUtils {
 
@@ -65,57 +57,6 @@ public abstract class DataSourceUtils {
 
 	private static final Log logger = LogFactory.getLog(DataSourceUtils.class);
 
-
-	/**
-	 * Look up the specified DataSource in JNDI, assuming that the lookup
-	 * occurs in a J2EE container, i.e. adding the prefix "java:comp/env/"
-	 * to the JNDI name if it doesn't already contain it.
-	 * <p>Use getDataSourceFromJndi(jndiName,false) in case of a custom JNDI name.
-	 * @param jndiName jndiName of the DataSource
-	 * @return the DataSource
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
-	 * if the data source cannot be located
-	 * @deprecated in favor of managing a DataSource via dependency injection,
-	 * i.e. using a JndiObjectFactoryBean for a JNDI DataSource and pass a
-	 * bean reference to a setDataSource(DataSource) method or the like
-	 * @see #getDataSourceFromJndi(String, boolean)
-	 * @see org.springframework.jndi.JndiObjectFactoryBean
-	 */
-	public static DataSource getDataSourceFromJndi(String jndiName)
-	    throws CannotGetJdbcConnectionException {
-		return getDataSourceFromJndi(jndiName, true);
-	}
-
-	/**
-	 * Look up the specified DataSource in JNDI, explicitly specifying
-	 * if the lookup occurs in a J2EE container.
-	 * @param jndiName jndiName of the DataSource
-	 * @param resourceRef if the lookup occurs in a J2EE container, i.e. if the prefix
-	 * "java:comp/env/" needs to be added if the JNDI name doesn't already contain it.
-	 * @return the DataSource
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
-	 * if the data source cannot be located
-	 * @deprecated in favor of managing a DataSource via dependency injection,
-	 * i.e. using a JndiObjectFactoryBean for a JNDI DataSource and pass a
-	 * bean reference to a setDataSource(DataSource) method or the like
-	 * @see org.springframework.jndi.JndiObjectFactoryBean
-	 */
-	public static DataSource getDataSourceFromJndi(String jndiName, boolean resourceRef)
-	    throws CannotGetJdbcConnectionException {
-		Assert.hasText(jndiName, "JNDI name must not be empty");
-
-		if (resourceRef && !jndiName.startsWith(JndiLocatorSupport.CONTAINER_PREFIX)) {
-			jndiName = JndiLocatorSupport.CONTAINER_PREFIX + jndiName;
-		}
-		try {
-			// Perform JNDI lookup to obtain resource manager connection factory
-			return (DataSource) new JndiTemplate().lookup(jndiName);
-		}
-		catch (NamingException ex) {
-			throw new CannotGetJdbcConnectionException(
-					"Naming exception looking up JNDI data source [" + jndiName + "]", ex);
-		}
-	}
 
 	/**
 	 * Get a Connection from the given DataSource. Changes any SQL exception into

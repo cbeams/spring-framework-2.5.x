@@ -160,15 +160,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	/**
-	 * Return whether or not we ignore SQLWarnings. Default is true.
-	 * @deprecated in favor of <code>isIgnoreWarnings</code>
-	 * @see #isIgnoreWarnings
-	 */
-	public boolean getIgnoreWarnings() {
-		return ignoreWarnings;
-	}
-
-	/**
 	 * Set the fetch size for this JdbcTemplate. This is important for processing
 	 * large result sets: Setting this higher than the default value will increase
 	 * processing speed at the cost of memory consumption; setting this lower can

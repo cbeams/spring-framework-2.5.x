@@ -228,7 +228,7 @@ public class ConfigurerTests extends TestCase {
 
 		assertEquals(1, nop.getCount());
 		Advised advised = (Advised) tb;
-		assertTrue(advised.getExposeProxy());
+		assertTrue(advised.isExposeProxy());
 		assertEquals(2, advised.getAdvisors().length);
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) bf.getBean(CountingBeforeAdvice.class.getName());
 		assertEquals(1, cba.getCalls());

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.tags;
 
@@ -498,8 +498,7 @@ public class BindTagTests extends AbstractTagTests {
 		bindTag.setPath("name");
 
 		assertTrue("Correct doStartTag return value", bindTag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		org.springframework.web.servlet.tags.BindStatus status =
-				(org.springframework.web.servlet.tags.BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertTrue("Has status variable", status != null);
 		assertEquals("tb.name", status.getPath());
 	}
@@ -520,8 +519,7 @@ public class BindTagTests extends AbstractTagTests {
 		bindTag.setPath("tb2.name");
 
 		assertTrue("Correct doStartTag return value", bindTag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		org.springframework.web.servlet.tags.BindStatus status =
-				(org.springframework.web.servlet.tags.BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertTrue("Has status variable", status != null);
 		assertEquals("tb2.name", status.getPath());
 	}

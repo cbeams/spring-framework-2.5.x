@@ -202,15 +202,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	/**
-	 * @deprecated in favor of BeanWrapperImpl(object, nestedPath, rootObject)
-	 * @see #BeanWrapperImpl(Object, String, Object)
-	 */
-	public BeanWrapperImpl(Object object, String nestedPath) {
-		this();
-		setWrappedInstance(object, nestedPath);
-	}
-
-	/**
 	 * Create new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper.
@@ -246,14 +237,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	public void setWrappedInstance(Object object) {
 		setWrappedInstance(object, "", null);
-	}
-
-	/**
-	 * @deprecated in favor of setWrappedInstance(object, nestedPath, rootObject)
-	 * @see #setWrappedInstance(Object, String, Object)
-	 */
-	public void setWrappedInstance(Object object, String nestedPath) {
-		setWrappedInstance(object, nestedPath, null);
 	}
 
 	/**

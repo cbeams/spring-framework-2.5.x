@@ -233,15 +233,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return this.interfaces.remove(intf);
 	}
 	
-	/**
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(org.aopalliance.aop.Advice)
-	 * @see Advised#addInterceptor(org.aopalliance.intercept.Interceptor)
-	 */
-	public void addInterceptor(Interceptor interceptor) throws AopConfigException {
-		addAdvice(interceptor);
-	}
-
 	public void addAdvice(Advice advice) throws AopConfigException {
 		int pos = (this.advisors != null) ? this.advisors.size() : 0;
 		addAdvice(pos, advice);
@@ -257,15 +248,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return false;
 	}
 
-	/**
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(int, org.aopalliance.aop.Advice)
-	 * @see Advised#addInterceptor(int, org.aopalliance.intercept.Interceptor)
-	 */
-	public void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException {
-		addAdvice(pos, interceptor);
-	}
-	
 	/**
 	 * Cannot add introductions this way unless the advice implements IntroductionInfo.
 	 */
@@ -288,16 +270,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	}
 	
-	
-	/**
-	 * Convenience method to remove an interceptor.
-	 * @deprecated in favor or removeAdvice
-	 * @see #removeAdvice
-	 */
-	public final boolean removeInterceptor(Interceptor interceptor) throws AopConfigException {
-		return removeAdvice(interceptor);
-	}
-	
 	/**
 	 * Remove the Advisor containing the given advice
 	 * @param advice advice to remove
@@ -315,50 +287,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	}
 
-	/**
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(org.aopalliance.aop.Advice)
-	 * @see Advised#addAfterReturningAdvice
-	 */
-	public void addAfterReturningAdvice(AfterReturningAdvice ara) throws AopConfigException {
-		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ara));
-	}
-	
-	/**
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(org.aopalliance.aop.Advice)
-	 * @see Advised#addBeforeAdvice
-	 */
-	public void addBeforeAdvice(MethodBeforeAdvice ba) throws AopConfigException {
-		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ba));
-	}
-	
-	/**
-	 * @deprecated in favor of addAdvice
-	 * @see #addAdvice(org.aopalliance.aop.Advice)
-	 * @see Advised#addThrowsAdvice
-	 */
-	public void addThrowsAdvice(ThrowsAdvice throwsAdvice) throws AopConfigException {
-		addAdvisor(new DefaultPointcutAdvisor(throwsAdvice));
-	}
-	
-	/**
-	 * Return the index (from 0) of the given AOP Alliance interceptor,
-	 * or -1 if no such interceptor is an advice for this proxy.
-	 * The return value of this method can be used to index into
-	 * the Advisors array.
-	 * @param interceptor AOP Alliance interceptor to search for
-	 * @return index from 0 of this interceptor, or -1 if there's
-	 * no such advice.
-	 * @deprecated in favor of indexOf(Advice)
-	 * @see #indexOf(org.aopalliance.aop.Advice)
-	 */
-	public int indexOf(Interceptor interceptor) {
-		// Invoke generic form of this method that's recommended
-		// post 1.0.3
-		return indexOf((Advice) interceptor);
-	}
-	
 	/**
 	 * Return the index (from 0) of the given AOP Alliance Advice,
 	 * or -1 if no such advice is an advice for this proxy.
@@ -495,17 +423,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Is this interceptor included in any advisor?
-	 * @param mi interceptor to check inclusion of
-	 * @return whether this interceptor instance could be run in an invocation
-	 * @deprecated in favor of adviceIncluded
-	 * @see #adviceIncluded
-	 */
-	public final boolean interceptorIncluded(Interceptor mi) {
-		return adviceIncluded(mi);
-	}
-	
-	/**
 	 * Is this advice included in any advisor?
 	 * @param advice advice to check inclusion of
 	 * @return whether this advice instance could be run in an invocation
@@ -523,17 +440,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return false;
 	}
 
-	/**
-	 * Count interceptors of the given class.
-	 * @param interceptorClass class of the interceptor to check
-	 * @return the count of the interceptors of this class or subclasses
-	 * @deprecated in favor of countAdvicesOfType
-	 * @see #countAdvicesOfType
-	 */
-	public final int countInterceptorsOfType(Class interceptorClass) {
-		return countAdvicesOfType(interceptorClass);
-	}
-	
 	/**
 	 * Count advices of the given class
 	 * @param interceptorClass class of the interceptor to check

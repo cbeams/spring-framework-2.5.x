@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.context.support;
 
@@ -60,16 +60,6 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	 * Constructor for bean usage via subclassing.
 	 */
 	public ApplicationObjectSupport() {
-	}
-
-	/**
-	 * Constructor for usage as helper to delegate to.
-	 * @param context ApplicationContext object to be used by this object
-	 * @deprecated Rely on default no-arg constructor instead!
-	 * @see #ApplicationObjectSupport()
-	 */
-	public ApplicationObjectSupport(ApplicationContext context) {
-		this.applicationContext = context;
 	}
 
 	public final void setApplicationContext(ApplicationContext context) throws BeansException {

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.dao;
 
@@ -49,14 +49,6 @@ public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAcce
 	 * This can be overridden in subclasses.
 	 */
 	public boolean wasDataUpdated() {
-		return getDataWasUpdated();
-	}
-
-	/**
-	 * @deprecated in favor of <code>wasDataUpdated</code>
-	 * @see #wasDataUpdated
-	 */
-	public boolean getDataWasUpdated() {
 		return true;
 	}
 

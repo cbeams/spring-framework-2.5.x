@@ -31,6 +31,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -166,8 +167,9 @@ public class Configurer {
 	 * Last definition recordable WAS STATIC
 	 */
 	private Definition instantiate(final Definition def) throws BeansException {
-		Object target = org.springframework.beans.BeanUtils
-				.instantiateClass(def.getBeanDefinition().getBeanClass());
+		// TODO: NEEDS TO USE BeanFactory.getType
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) def.getBeanDefinition();
+		Object target = BeanUtils.instantiateClass(bd.getBeanClass());
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.setProxyTargetClass(true);
 		pf.addAdvice(new DelegatingIntroductionInterceptor(def));

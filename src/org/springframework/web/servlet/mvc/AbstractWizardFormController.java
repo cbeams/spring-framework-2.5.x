@@ -159,15 +159,6 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Return the number of wizard pages.
-	 * @deprecated in favor of getPageCount
-	 * @see #getPageCount
-	 */
-	protected final int getNrOfPages() {
-		return this.pages.length;
-	}
-
-	/**
 	 * Set the name of the page attribute in the model, containing
 	 * an Integer with the current page number.
 	 * <p>This will be necessary for single views rendering multiple view pages.

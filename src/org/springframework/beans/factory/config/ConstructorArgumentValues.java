@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.config;
 
@@ -171,15 +171,6 @@ public class ConstructorArgumentValues {
 	 * Return the number of arguments held in this instance.
 	 */
 	public int getArgumentCount() {
-		return getNrOfArguments();
-	}
-
-	/**
-	 * Return the number of arguments held in this instance.
-	 * @deprecated in favor of getArgumentCount
-	 * @see #getArgumentCount
-	 */
-	public int getNrOfArguments() {
 		return this.indexedArgumentValues.size() + this.genericArgumentValues.size();
 	}
 

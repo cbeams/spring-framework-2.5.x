@@ -22,6 +22,7 @@ import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
 
 import org.springframework.validation.Errors;
+import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**

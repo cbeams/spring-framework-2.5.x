@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.context.support;
 
@@ -135,14 +135,6 @@ public class RequestHandledEvent extends ApplicationEvent {
 	}
 
 	/**
-	 * Return the URL of the request.
-	 * @deprecated in favor of {@link #getRequestUrl getRequestUrl}
-	 */
-	public String getURL() {
-		return requestUrl;
-	}
-
-	/**
 	 * Return the processing time of the request in milliseconds.
 	 */
 	public long getProcessingTimeMillis() {
@@ -150,25 +142,9 @@ public class RequestHandledEvent extends ApplicationEvent {
 	}
 
 	/**
-	 * Return the processing time of the request in milliseconds.
-	 * @deprecated in favor of {@link #getProcessingTimeMillis getProcessingTimeMillis}
-	 */
-	public long getTimeMillis() {
-		return processingTimeMillis;
-	}
-
-	/**
 	 * Return the IP address that the request came from.
 	 */
 	public String getClientAddress() {
-		return clientAddress;
-	}
-
-	/**
-	 * Return the IP address that the request came from.
-	 * @deprecated in favor of {@link #getClientAddress getClientAddress}
-	 */
-	public String getIpAddress() {
 		return clientAddress;
 	}
 
