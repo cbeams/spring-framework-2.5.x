@@ -19,9 +19,12 @@ public class DefaultToStringStyler implements ToStringStyler {
     private ObjectStyler stylerVisitor = new DefaultObjectStyler();
 
     public void styleStart(StringBuffer buffer, Object o) {
-        buffer.append('[').append(ClassUtils.getShortName(o.getClass()));
-        styleIdentityHashCode(buffer, o);
-        if (o.getClass().isArray()) {
+        if (!o.getClass().isArray()) {
+            buffer.append('[').append(ClassUtils.getShortName(o.getClass()));
+            styleIdentityHashCode(buffer, o);
+        } else {
+            buffer.append('[');
+            styleIdentityHashCode(buffer, o);
             buffer.append(' ');
             styleValue(buffer, o);
         }
@@ -37,7 +40,7 @@ public class DefaultToStringStyler implements ToStringStyler {
      */
     private void styleIdentityHashCode(StringBuffer buffer, Object object) {
         buffer.append('@');
-        buffer.append(Integer.toHexString(System.identityHashCode(object)));
+        buffer.append(ObjectUtils.getIdentity(object));
     }
 
     public void styleEnd(StringBuffer buffer, Object o) {

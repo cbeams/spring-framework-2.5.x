@@ -6,6 +6,7 @@ package org.springframework.util;
 
 import java.lang.reflect.Method;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -118,7 +119,7 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
 
     private String styleArray(Object[] array) {
         StringBuffer buffer = new StringBuffer(array.length * 8 + 16);
-        buffer.append("array[");
+        buffer.append("array<" + StringUtils.delete(ClassUtils.getShortName(array.getClass()), ";") + ">[");
         for (int i = 0; i < array.length - 1; i++) {
             buffer.append(style(array[i]));
             buffer.append(',').append(' ');

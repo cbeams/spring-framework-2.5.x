@@ -6,16 +6,18 @@ package org.springframework.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
 public class ToStringBuilderTests extends TestCase {
-    private Object s1, s2, s3;
-    private Map map;
+    private SomeObject s1, s2, s3;
 
     public void testDefaultStyleMap() {
+        final Map map = getMap();
         Object stringy = new Object() {
             public String toString() {
                 return new ToStringBuilder(this)
@@ -23,36 +25,50 @@ public class ToStringBuilderTests extends TestCase {
                     .toString();
             }
         };
+        System.out.println(stringy.toString());
         assertEquals(
             "[ToStringBuilderTests.1@"
-                +  ObjectUtils.getIdentity(stringy) 
+                + ObjectUtils.getIdentity(stringy)
                 + " familyFavoriteSport = map['Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football']]",
             stringy.toString());
     }
 
+    private Map getMap() {
+        Map map = new HashMap();
+        map.put("Keith", "Flag Football");
+        map.put("Keri", "Softball");
+        map.put("Scot", "Fishing");
+        return map;
+    }
+
     public void testDefaultStyleArray() {
-        Object array = new Object[] { s1, s2, s3 };
-        String stringy = new ToStringBuilder(array).toString();
+        SomeObject[] array = new SomeObject[] { s1, s2, s3 };
+        String str = new ToStringBuilder(array).toString();
+        System.out.println(str);
         assertEquals(
-            "[Object;@" + ObjectUtils.getIdentity(array) + " array[A, B, C]]",
-            stringy);
+            "[@" + ObjectUtils.getIdentity(array) + " array<ToStringBuilderTests.SomeObject>[A, B, C]]",
+            str);
     }
 
     public void testPrimitiveArrays() {
         int[] integers = new int[] { 0, 1, 2, 3, 4 };
         String str = new ToStringBuilder(integers).toString();
+        System.out.println(str);
         assertEquals(
-            "[[I@" + ObjectUtils.getIdentity(integers) + " array[0, 1, 2, 3, 4]]",
+            "[@"
+                + ObjectUtils.getIdentity(integers)
+                + " array<Object>[0, 1, 2, 3, 4]]",
             str);
     }
 
-    public void testSet() {
+    public void testList() {
         List list = new ArrayList();
         list.add(s1);
         list.add(s2);
         list.add(s3);
         String str =
             new ToStringBuilder(this).append("myLetters", list).toString();
+        System.out.println(str);
         assertEquals(
             "[ToStringBuilderTests@"
                 + ObjectUtils.getIdentity(this)
@@ -60,27 +76,69 @@ public class ToStringBuilderTests extends TestCase {
             str);
     }
 
+    public void testSet() {
+        Set set = new LinkedHashSet();
+        set.add(s1);
+        set.add(s2);
+        set.add(s3);
+        String str =
+            new ToStringBuilder(this).append("myLetters", set).toString();
+        System.out.println(str);
+        assertEquals(
+            "[ToStringBuilderTests@"
+                + ObjectUtils.getIdentity(this)
+                + " myLetters = set[A, B, C]]",
+            str);
+    }
+
+    public void testClass() {
+        String str =
+            new ToStringBuilder(this)
+                .append("myClass", this.getClass())
+                .toString();
+        System.out.println(str);
+        assertEquals(
+            "[ToStringBuilderTests@"
+                + ObjectUtils.getIdentity(this)
+                + " myClass = ToStringBuilderTests]",
+            str);
+    }
+
+    public void testMethod() throws Exception {
+        String str =
+            new ToStringBuilder(this)
+                .append(
+                    "myMethod",
+                    this.getClass().getMethod("testMethod", null))
+                .toString();
+        System.out.println(str);
+        assertEquals(
+            "[ToStringBuilderTests@"
+                + ObjectUtils.getIdentity(this)
+                + " myMethod = testMethod@ToStringBuilderTests]",
+            str);
+    }
+
     protected void setUp() throws Exception {
-        s1 = new Object() {
+        s1 = new SomeObject() {
             public String toString() {
                 return "A";
             }
         };
-        s2 = new Object() {
+        s2 = new SomeObject() {
             public String toString() {
                 return "B";
             }
         };
-        s3 = new Object() {
+        s3 = new SomeObject() {
             public String toString() {
                 return "C";
             }
         };
-
-        this.map = new HashMap();
-        map.put("Keith", "Flag Football");
-        map.put("Keri", "Softball");
-        map.put("Scot", "Fishing");
+    }
+    
+    public static class SomeObject {
+        
     }
 
 }
