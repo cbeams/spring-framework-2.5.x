@@ -24,17 +24,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.FlowExecutionStack;
-import org.springframework.web.flow.NoSuchFlowExecutionException;
 import org.springframework.web.flow.action.AbstractAction;
-import org.springframework.web.flow.config.FlowServiceLocator;
+import org.springframework.web.flow.mvc.HttpFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
@@ -51,42 +47,8 @@ public class FlowAction extends TemplateAction {
 	public static String ACTION_FORM_ATTRIBUTE = "_bindingActionForm";
 
 	public static final String ACTION_PATH_ATTRIBUTE = "actionPath";
-
-	protected String getFlowIdParameterName() {
-		return FlowConstants.FLOW_ID_PARAMETER;
-	}
-
-	protected String getFlowExecutionIdParameterName() {
-		return FlowConstants.FLOW_EXECUTION_ID_PARAMETER;
-	}
-
-	protected String getCurrentStateIdParameterName() {
-		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
-	}
-
-	protected String getEventIdParameterName() {
-		return FlowConstants.EVENT_ID_PARAMETER;
-	}
-
-	protected String getNotSetEventIdParameterMarker() {
-		return FlowConstants.NOT_SET_EVENT_ID;
-	}
-
-	protected String getFlowExecutionIdAttributeName() {
-		return FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE;
-	}
-
-	protected String getCurrentStateIdAttributeName() {
-		return FlowConstants.CURRENT_STATE_ID_ATTRIBUTE;
-	}
-
-	private String getEventIdRequestAttributeName() {
-		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
-	}
-
-	protected String getFlowExecutionInfoAttributeName() {
-		return FlowExecution.ATTRIBUTE_NAME;
-	}
+	
+	private HttpFlowExecutionManager manager;
 
 	protected String getActionPathAttributeName() {
 		return ACTION_PATH_ATTRIBUTE;
@@ -96,26 +58,13 @@ public class FlowAction extends TemplateAction {
 		return ACTION_FORM_ATTRIBUTE;
 	}
 
-	protected FlowServiceLocator getFlowServiceLocator() {
-		return (FlowServiceLocator)BeanFactoryUtils.beanOfType(getWebApplicationContext(), FlowServiceLocator.class);
-	}
-
 	protected Flow getFlow(ActionMapping mapping) {
-		return getFlow(getFlowId(mapping));
+		return (Flow)getWebApplicationContext().getBean(getFlowId(mapping));
 	}
 
 	private String getFlowId(ActionMapping mapping) {
 		Assert.isInstanceOf(FlowActionMapping.class, mapping);
 		return ((FlowActionMapping)mapping).getFlowId();
-	}
-
-	protected Flow getFlow(String flowId) {
-		if (StringUtils.hasText(flowId)) {
-			return (Flow)getFlowServiceLocator().getFlow(flowId);
-		}
-		else {
-			return null;
-		}
 	}
 
 	/**
@@ -132,6 +81,11 @@ public class FlowAction extends TemplateAction {
 	 */
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
+		synchronized (this) {
+			if (manager==null) {
+				manager=new HttpFlowExecutionManager(logger, getFlow(mapping), getWebApplicationContext(), null);
+			}
+		}
 
 		// struts specific
 		if (form instanceof BindingActionForm) {
@@ -143,115 +97,36 @@ public class FlowAction extends TemplateAction {
 			request.setAttribute(getActionFormAttributeName(), form);
 		}
 		// end struts specific
+		
+		ModelAndView modelAndView=manager.process(request, response, getFlowExecutionInput(request));
 
-		FlowExecution flowExecution;
-		ModelAndView modelAndView;
-
-		if (isNewFlowExecutionRequest(request)) {
-			// start a new flow execution
-			Flow flow = getFlow(mapping);
-			if (flow == null) {
-				// try to extract flow definition to use from request
-				getFlow(getRequiredStringParameter(request, getFlowIdParameterName()));
-			}
-			flowExecution = createFlowExecution(flow);
-			modelAndView = flowExecution.start(getFlowExecutionInput(request), request, response);
-			saveInHttpSession(flowExecution, request);
-		}
-		else {
-			// Client is participating in an existing flow execution,
-			// retrieve information about it
-			flowExecution = getRequiredFlowExecution(getRequiredStringParameter(request,
-					getFlowExecutionIdParameterName()), request);
-
-			// let client tell you what state they are in (if possible)
-			String stateId = getStringParameter(request, getCurrentStateIdParameterName());
-
-			// let client tell you what event was signaled in the current state
-			String eventId = getStringParameter(request, getEventIdParameterName());
-
-			if (eventId == null) {
+		FlowExecution flowExecution=manager.getRequiredFlowExecution(request);
+		if (flowExecution.isActive()) {
+			// struts specific
+			String mappingFlowId = getFlowId(mapping);
+			if (StringUtils.hasText(mappingFlowId)) {
+				String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
+				String actionFormBeanName = actionPathName + "Form";
 				if (logger.isDebugEnabled()) {
-					logger.debug("No '" + getEventIdParameterName()
-							+ "' parameter was found; falling back to request attribute");
+					logger.debug("Setting '" + getActionPathAttributeName() + "' attribute to value '"
+							+ actionPathName + "' in request scope.");
+					logger.debug("Setting action form attribute '" + actionFormBeanName + "' to form '" + form
+							+ "' in request scope.");
 				}
-				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
+				request.setAttribute(getActionPathAttributeName(), actionPathName);
+				request.setAttribute(actionFormBeanName, form);
 			}
-			if (eventId == null) {
-				throw new IllegalArgumentException(
-						"The '"
-								+ getEventIdParameterName()
-								+ "' request parameter (or '"
-								+ getEventIdRequestAttributeName()
-								+ "' request attribute) is required to signal an event in the current state of this executing flow '"
-								+ flowExecution.getCaption() + "' -- programmer error?");
+			if (form instanceof BindingActionForm) {
+				BindingActionForm bindingForm = (BindingActionForm)form;
+				bindingForm.setErrors((Errors)flowExecution.getAttribute(
+						AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class));
+				bindingForm.setHttpServletRequest(request);
+				bindingForm.setModel(flowExecution);
 			}
-			if (eventId.equals(getNotSetEventIdParameterMarker())) {
-				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '"
-						+ getNotSetEventIdParameterMarker()
-						+ "' - this is likely a view (jsp, etc) configuration error - " + "the '"
-						+ getEventIdParameterName()
-						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
-						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
-			}
-			else {
-				// execute the signaled event within the current state
-				modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
-			}
+			// end struts specific
 		}
 
-		if (!flowExecution.isActive()) {
-			// event execution resulted in the entire flow ending, cleanup
-			removeFromHttpSession(flowExecution, request);
-		}
-		else {
-			// We're still in the flow, inject flow model into request
-			if (modelAndView != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("[Placing information about the new current flow state in request scope]");
-					logger.debug("    - " + getFlowExecutionIdAttributeName() + "=" + flowExecution.getId());
-					logger.debug("    - " + getCurrentStateIdAttributeName() + "=" + flowExecution.getCurrentStateId());
-				}
-				request.setAttribute(getFlowExecutionIdAttributeName(), flowExecution.getId());
-				request.setAttribute(getCurrentStateIdAttributeName(), flowExecution.getCurrentStateId());
-				request.setAttribute(getFlowExecutionInfoAttributeName(), flowExecution);
-
-				// struts specific
-				String mappingFlowId = getFlowId(mapping);
-				if (StringUtils.hasText(mappingFlowId)) {
-					String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
-					String actionFormBeanName = actionPathName + "Form";
-					if (logger.isDebugEnabled()) {
-						logger.debug("Setting '" + getActionPathAttributeName() + "' attribute to value '"
-								+ actionPathName + "' in request scope.");
-						logger.debug("Setting action form attribute '" + actionFormBeanName + "' to form '" + form
-								+ "' in request scope.");
-					}
-					request.setAttribute(getActionPathAttributeName(), actionPathName);
-					request.setAttribute(actionFormBeanName, form);
-				}
-				if (form instanceof BindingActionForm) {
-					BindingActionForm bindingForm = (BindingActionForm)form;
-					bindingForm.setErrors((Errors)flowExecution.getAttribute(
-							AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class));
-					bindingForm.setHttpServletRequest(request);
-					bindingForm.setModel(flowExecution);
-				}
-				// end struts specific
-			}
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Returning selected model and view " + modelAndView);
-		}
 		return createForwardFromModelAndView(modelAndView, mapping, request);
-	}
-
-	protected boolean isNewFlowExecutionRequest(HttpServletRequest request) {
-		return getStringParameter(request, getFlowExecutionIdParameterName()) == null;
-	}
-
-	protected FlowExecution createFlowExecution(Flow flow) {
-		return new FlowExecutionStack(flow);
 	}
 
 	protected Map getFlowExecutionInput(HttpServletRequest request) {
@@ -282,29 +157,5 @@ public class FlowAction extends TemplateAction {
 			}
 			return null;
 		}
-	}
-
-	protected FlowExecution getRequiredFlowExecution(String flowExecutionId, HttpServletRequest request)
-			throws NoSuchFlowExecutionException {
-		try {
-			return (FlowExecution)getRequiredSessionAttribute(request, flowExecutionId);
-		}
-		catch (IllegalStateException e) {
-			throw new NoSuchFlowExecutionException(flowExecutionId, e);
-		}
-	}
-
-	protected void saveInHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Saving flow execution '" + flowExecution.getId() + "' in HTTP session");
-		}
-		request.getSession().setAttribute(flowExecution.getId(), flowExecution);
-	}
-
-	private void removeFromHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Removing flow execution '" + flowExecution.getId() + "' from HTTP session");
-		}
-		request.getSession().removeAttribute(flowExecution.getId());
 	}
 }
