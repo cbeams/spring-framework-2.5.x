@@ -32,7 +32,7 @@ import org.springframework.jdbc.support.JdbcAccessor;
  * <p>Not intended to be used directly. See PersistenceBrokerTemplate.
  *
  * @author Juergen Hoeller
- * @since 02.07.2004
+ * @since 1.1
  * @see PersistenceBrokerTemplate
  */
 public class OjbAccessor extends JdbcAccessor {

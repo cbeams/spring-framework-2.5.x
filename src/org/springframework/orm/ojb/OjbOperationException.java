@@ -23,7 +23,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
 /**
  * Generic exception thrown on OJB operation failure without SQLException cause.
  * @author Juergen Hoeller
- * @since 02.07.2004
+ * @since 1.1
  */
 public class OjbOperationException extends UncategorizedDataAccessException {
 

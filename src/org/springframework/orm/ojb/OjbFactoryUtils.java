@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Can also be used directly in application code.
  *
  * @author Juergen Hoeller
- * @since 02.07.2004
+ * @since 1.1
  * @see PersistenceBrokerTemplate
  * @see PersistenceBrokerTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager

@@ -50,7 +50,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * DataSources as connection pools (to be specified in OJB's configuration).
  *
  * @author Juergen Hoeller
- * @since 02.07.2004
+ * @since 1.1
  * @see #setJcdAlias
  * @see #setPbKey
  * @see OjbFactoryUtils#getPersistenceBroker

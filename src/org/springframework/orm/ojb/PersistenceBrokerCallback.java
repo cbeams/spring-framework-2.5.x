@@ -31,7 +31,7 @@ import org.apache.ojb.broker.accesslayer.LookupException;
  * perform some operations on persistent objects.
  *
  * @author Juergen Hoeller
- * @since 02.07.2004
+ * @since 1.1
  * @see PersistenceBrokerTemplate
  */
 public interface PersistenceBrokerCallback {

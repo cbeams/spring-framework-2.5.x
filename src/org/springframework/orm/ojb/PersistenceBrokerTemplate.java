@@ -46,8 +46,10 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * objects, query objects, and org.springframework.dao exceptions.
  *
  * @author Juergen Hoeller
- * @since 02.07.2004
+ * @since 1.1
+ * @see #setPbKey
  * @see PersistenceBrokerCallback
+ * @see PersistenceBrokerTransactionManager
  */
 public class PersistenceBrokerTemplate extends OjbAccessor implements PersistenceBrokerOperations {
 

@@ -33,7 +33,7 @@ import org.springframework.dao.DataAccessException;
  * for details on those methods.
  *
  * @author Juergen Hoeller
- * @since 02.07.2004
+ * @since 1.1
  * @see PersistenceBrokerTemplate
  * @see org.apache.ojb.broker.PersistenceBroker
  */
