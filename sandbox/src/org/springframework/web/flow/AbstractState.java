@@ -121,8 +121,8 @@ public abstract class AbstractState implements Serializable {
 		createToString(creator);
 		return creator.toString();
 	}
-	
+
 	protected void createToString(ToStringCreator creator) {
-		
+
 	}
 }

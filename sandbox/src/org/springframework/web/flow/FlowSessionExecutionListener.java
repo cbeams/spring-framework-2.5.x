@@ -31,7 +31,7 @@ public interface FlowSessionExecutionListener {
 	public void requestProcessed(FlowSessionExecution sessionExecution, HttpServletRequest request);
 
 	public void eventSignaled(FlowSessionExecution sessionExecution, String eventId);
-	
+
 	public void stateTransitioned(FlowSessionExecution sessionExecution, AbstractState previousState,
 			AbstractState newState);
 

@@ -44,9 +44,9 @@ public class Transition implements Serializable {
 		public boolean test(Object o) {
 			return true;
 		}
-		
+
 		public String toString() {
-			return "*"; 
+			return "*";
 		}
 	};
 
@@ -69,7 +69,7 @@ public class Transition implements Serializable {
 			public boolean test(Object eventId) {
 				return id.equals(eventId);
 			}
-			
+
 			public String toString() {
 				return id;
 			}
@@ -79,7 +79,7 @@ public class Transition implements Serializable {
 	public Constraint getEventIdCriteria() {
 		return this.eventIdCriteria;
 	}
-	
+
 	public String getToState() {
 		return toState;
 	}
