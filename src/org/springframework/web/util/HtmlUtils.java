@@ -111,9 +111,9 @@ public abstract class HtmlUtils {
 		if (source != null) {
 			for (int i = 0; i < source.length(); ++i) {
 				char ch = source.charAt(i);
-				String entity = (String)i2e.get(new Integer((int)ch));
+				String entity = (String)i2e.get(new Integer(ch));
 				if (entity == null) {
-					if (((int)ch) > 128)
+					if (ch > 128)
 						buf.append("&#" + ((int)ch) + ";");
 					else
 						buf.append(ch);

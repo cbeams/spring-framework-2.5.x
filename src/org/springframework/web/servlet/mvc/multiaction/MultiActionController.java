@@ -329,7 +329,7 @@ public class MultiActionController extends AbstractController implements LastMod
 		// If we get here, there was no custom handler
 		if (t instanceof Exception) {
 			throw (Exception) t;
-		};
+		}
 		if (t instanceof Error) {
 			throw (Error) t;
 		}

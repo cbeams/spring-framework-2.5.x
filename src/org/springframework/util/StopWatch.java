@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @since May 2, 2001
- * @version $Id: StopWatch.java,v 1.4 2003-12-30 01:18:51 jhoeller Exp $
+ * @version $Id: StopWatch.java,v 1.5 2004-02-25 00:58:12 kdonald Exp $
  */
 public class StopWatch {
 
@@ -153,7 +153,7 @@ public class StopWatch {
 	 * Returns the total time in seconds for all tasks.
 	 */
 	public double getTotalTimeSecs() {
-		return ((double) runningTime) / 1000.0;
+		return runningTime / 1000.0;
 	}
 
 	/**
@@ -275,7 +275,7 @@ public class StopWatch {
 		 * Return the time in seconds this task took.
 		 */
 		public double getTimeSecs() {
-			return ((double) time) / 1000.0;
+			return time / 1000.0;
 		}
 	}
 
