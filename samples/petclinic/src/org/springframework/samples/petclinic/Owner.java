@@ -37,10 +37,6 @@ public class Owner extends Person {
 		return Collections.unmodifiableList(sortedPets);
 	}
 
-	/**
-	 * Add a pet to the List of pets.
-	 * @param pet New pet to be added to the List of pets
-	 */
 	public void addPet(Pet pet) {
 		getPetsInternal().add(pet);
 		pet.setOwner(this);

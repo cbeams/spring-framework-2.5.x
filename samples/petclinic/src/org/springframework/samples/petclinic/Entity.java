@@ -9,18 +9,18 @@ package org.springframework.samples.petclinic;
  */
 public class Entity {
 
-	private long id = -1;
+	private Integer id;
 
-	public void setId(long id) {
-		this.id = id;
+	public void setId(int id) {
+		this.id = new Integer(id);
 	}
 
-	public long getId() {
-		return this.id;
+	public int getId() {
+		return (this.id != null ? this.id.intValue() : -1);
 	}
 
 	public boolean isNew() {
-		return (this.id == -1);
+		return (this.id == null);
 	}
 
 }

@@ -17,19 +17,12 @@ import org.springframework.beans.support.PropertyComparator;
  */
 public class Vet extends Person {
 
-	/** Holds value of property specialties. */
 	private Set specialties;
 
-	/** Setter for property specialties.
-	 * @param specialties New value of property specialties.
-	 */
 	protected void setSpecialtiesInternal(Set specialties) {
 		this.specialties = specialties;
 	}
 
-	/** Getter for property specialties.
-	 * @return Value of property specialties.
-	 */
 	protected Set getSpecialtiesInternal() {
 		if (this.specialties == null) {
 			this.specialties = new HashSet();

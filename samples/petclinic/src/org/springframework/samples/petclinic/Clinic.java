@@ -1,6 +1,6 @@
 package org.springframework.samples.petclinic;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.springframework.dao.DataAccessException;
 
@@ -18,13 +18,13 @@ public interface Clinic {
 	 * Retrieve all <code>Vet</code>s from the datastore.
 	 * @return a <code>List</code> of <code>Vet</code>s.
 	 */
-	public List getVets() throws DataAccessException;
+	public Collection getVets() throws DataAccessException;
 
 	/**
 	 * Retrieve all <code>PetType</code>s from the datastore.
 	 * @return a <code>List</code> of <code>PetType</code>s.
 	 */
-	public List getPetTypes() throws DataAccessException;
+	public Collection getPetTypes() throws DataAccessException;
 
 	/**
 	 * Retrieve <code>Owner</code>s from the datastore by last name,
@@ -32,21 +32,21 @@ public interface Clinic {
 	 * @param lastName Value to search for.
 	 * @return a <code>List</code> of matching <code>Owner</code>s.
 	 */
-	public List findOwners(String lastName) throws DataAccessException;
+	public Collection findOwners(String lastName) throws DataAccessException;
 
 	/**
 	 * Retrieve an <code>Owner</code> from the datastore by id.
 	 * @param id Value to search for.
 	 * @return the <code>Owner</code> if found.
 	 */
-	public Owner loadOwner(long id) throws DataAccessException;
+	public Owner loadOwner(int id) throws DataAccessException;
 
 	/**
 	 * Retrieve a <code>Pet</code> from the datastore by id.
 	 * @param id Value to search for.
 	 * @return the <code>Pet</code> if found.
 	 */
-	public Pet loadPet(long id) throws DataAccessException;
+	public Pet loadPet(int id) throws DataAccessException;
 
 	/**
 	 * Save an <code>Owner</code> to the datastore,

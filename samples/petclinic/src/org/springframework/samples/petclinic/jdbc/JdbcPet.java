@@ -7,26 +7,24 @@ import org.springframework.samples.petclinic.Pet;
  */
 public class JdbcPet extends Pet {
 
-	private long typeId;
+	private int typeId;
 
-	private long ownerId;
+	private int ownerId;
 
-	public void setTypeId(long typeId) {
+	public void setTypeId(int typeId) {
 		this.typeId = typeId;
 	}
 
-	public long getTypeId() {
+	public int getTypeId() {
 		return this.typeId;
 	}
 
-	public void setOwnerId(long ownerId) {
+	public void setOwnerId(int ownerId) {
 		this.ownerId = ownerId;
 	}
 
-	public long getOwnerId() {
+	public int getOwnerId() {
 		return ownerId;
 	}
-
-
 
 }

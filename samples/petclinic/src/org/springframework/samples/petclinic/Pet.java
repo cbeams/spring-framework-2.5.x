@@ -73,10 +73,6 @@ public class Pet extends NamedEntity {
 		}
 	}
 
-	/**
-	 * Method to add a visit to the List of visits.
-	 * @param visit New visit to be added to the List of visits
-	 */
 	public void addVisit(Visit visit) {
 		getVisitsInternal().add(visit);
 		visit.setPet(this);
