@@ -32,8 +32,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
  
 /**
- * Helper class that provides static methods to obtain connections from a
- * DataSource, and to close connections if necessary. Has support for
+ * Helper class that provides static methods to obtain JDBC Connections from
+ * a DataSource, and to close Connections if necessary. Has special support for
  * Spring-managed connections, e.g. for use with DataSourceTransactionManager.
  *
  * <p>Used internally by JdbcTemplate, JDBC operation objects and the JDBC
@@ -131,8 +131,8 @@ public abstract class DataSourceUtils {
 		Connection con = dataSource.getConnection();
 		if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JDBC connection");
-			// use same Connection for further JDBC actions within the transaction
-			// thread object will get removed by synchronization at transaction completion
+			// Use same Connection for further JDBC actions within the transaction.
+			// Thread-bound object will get removed by synchronization at transaction completion.
 			conHolder = new ConnectionHolder(con);
 			TransactionSynchronizationManager.bindResource(dataSource, conHolder);
 			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, dataSource));
@@ -154,8 +154,8 @@ public abstract class DataSourceUtils {
 			throws SQLException {
 		Assert.notNull(con, "No connection specified");
 
-		// apply read-only
-		if (definition.isReadOnly()) {
+		// Set read-only flag.
+		if (definition != null && definition.isReadOnly()) {
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Setting JDBC connection [" + con + "] read-only");
@@ -164,14 +164,14 @@ public abstract class DataSourceUtils {
 			}
 			catch (Exception ex) {
 				// SQLException or UnsupportedOperationException
-				// -> ignore, it's just a hint anyway
+				// -> ignore, it's just a hint anyway.
 				logger.debug("Could not set JDBC connection read-only", ex);
 			}
 		}
 
-		// apply isolation level
+		// Apply specific isolation level, if any.
 		Integer previousIsolationLevel = null;
-		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+		if (definition != null && definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Changing isolation level of JDBC connection [" + con + "] to " +
 						definition.getIsolationLevel());
@@ -193,7 +193,7 @@ public abstract class DataSourceUtils {
 	public static void resetConnectionAfterTransaction(Connection con, Integer previousIsolationLevel) {
 		Assert.notNull(con, "No connection specified");
 		try {
-			// reset transaction isolation to previous value, if changed for the transaction
+			// Reset transaction isolation to previous value, if changed for the transaction.
 			if (previousIsolationLevel != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Resetting isolation level of connection [" + con + "] to " + previousIsolationLevel);
@@ -201,7 +201,7 @@ public abstract class DataSourceUtils {
 				con.setTransactionIsolation(previousIsolationLevel.intValue());
 			}
 
-			// reset read-only
+			// Reset read-only flag.
 			if (con.isReadOnly()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Resetting read-only flag of connection [" + con + "]");
