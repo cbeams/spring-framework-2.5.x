@@ -88,7 +88,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * agreement to reimplement the idea in standard Spring!
  *
  * @author Juergen Hoeller
- * @since 05.04.2004
+ * @since 1.0.1
  * @see #SERVLET_CONTEXT_PREFIX
  * @see ActionSupport
  * @see DispatchActionSupport
@@ -182,8 +182,8 @@ public class ContextLoaderPlugIn implements PlugIn {
 	 * no custom namespace was set: e.g. "test-servlet" for a servlet named "test".
 	 */
 	public String getNamespace() {
-		if (namespace != null) {
-			return namespace;
+		if (this.namespace != null) {
+			return this.namespace;
 		}
 		if (this.actionServlet != null) {
 			return this.actionServlet.getServletName() + DEFAULT_NAMESPACE_SUFFIX;
@@ -215,7 +215,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 		long startTime = System.currentTimeMillis();
 		if (logger.isInfoEnabled()) {
 			logger.info("ContextLoaderPlugIn for Struts ActionServlet '" + actionServlet.getServletName() +
-					"': initialization started");
+					", module '" + moduleConfig.getPrefix() + "': initialization started");
 		}
 
 		this.actionServlet = actionServlet;
@@ -232,37 +232,76 @@ public class ContextLoaderPlugIn implements PlugIn {
 		if (logger.isInfoEnabled()) {
 			long elapsedTime = System.currentTimeMillis() - startTime;
 			logger.info("ContextLoaderPlugIn for Struts ActionServlet '" + actionServlet.getServletName() +
-					"': initialization completed in " + elapsedTime + " ms");
+					"', module '" + moduleConfig.getPrefix() + "': initialization completed in " + elapsedTime + " ms");
 		}
+	}
+
+	/**
+	 * Return the Struts ActionServlet that this PlugIn is associated with.
+	 */
+	public final ActionServlet getActionServlet() {
+		return actionServlet;
+	}
+
+	/**
+	 * Return the name of the ActionServlet that this PlugIn is associated with.
+	 */
+	public final String getServletName() {
+		return this.actionServlet.getServletName();
+	}
+
+	/**
+	 * Return the ServletContext that this PlugIn is associated with.
+	 */
+	public final ServletContext getServletContext() {
+		return this.actionServlet.getServletContext();
+	}
+
+	/**
+	 * Return the Struts ModuleConfig that this PlugIn is associated with.
+	 */
+	public final ModuleConfig getModuleConfig() {
+		return moduleConfig;
+	}
+
+	/**
+	 * Return the prefix of the ModuleConfig that this PlugIn is associated with.
+	 */
+	public final String getModulePrefix() {
+		return this.moduleConfig.getPrefix();
 	}
 
 	/**
 	 * Initialize and publish the WebApplicationContext for the ActionServlet.
 	 * Delegates to createWebApplicationContext for actual creation.
-	 * <p>Can be overridden in subclasses.
+	 * <p>Can be overridden in subclasses. Call <code>getActionServlet</code>
+	 * and/or <code>getModuleConfig</code> to access the Struts configuration
+	 * that this PlugIn is associated with.
 	 * @throws org.springframework.beans.BeansException if the context couldn't be initialized
 	 * @throws IllegalStateException if there is already a context for the Struts ActionServlet
 	 * @see #createWebApplicationContext
+	 * @see #getActionServlet
+	 * @see #getServletName
+	 * @see #getServletContext
+	 * @see #getModuleConfig
+	 * @see #getModulePrefix
 	 */
 	protected WebApplicationContext initWebApplicationContext() throws BeansException, IllegalStateException {
-		String servletName = this.actionServlet.getServletName();
-		this.actionServlet.getServletContext().log(
-				"Initializing WebApplicationContext for Struts ActionServlet '" + servletName + "'");
-		ServletContext servletContext = this.actionServlet.getServletContext();
-		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+		getServletContext().log("Initializing WebApplicationContext for Struts ActionServlet '" +
+				getServletName() + "', module '" + getModulePrefix() + "'");
+		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 
 		WebApplicationContext wac = createWebApplicationContext(parent);
 		if (logger.isInfoEnabled()) {
-			logger.info("Using context class '" + wac.getClass().getName() + "' for servlet '" + servletName + "'");
+			logger.info("Using context class '" + wac.getClass().getName() + "' for servlet '" + getServletName() + "'");
 		}
 
-		// publish the context as a servlet context attribute
-		String modulePrefix = this.moduleConfig.getPrefix();
-		String attrName = SERVLET_CONTEXT_PREFIX + modulePrefix;
-		servletContext.setAttribute(attrName, wac);
+		// Publish the context as a servlet context attribute.
+		String attrName = SERVLET_CONTEXT_PREFIX + getModulePrefix();
+		getServletContext().setAttribute(attrName, wac);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Published WebApplicationContext of Struts ActionServlet '" + servletName +
-					"' for module '" + modulePrefix + "' as ServletContext attribute with name [" + attrName + "]");
+			logger.debug("Published WebApplicationContext of Struts ActionServlet '" + getServletName() +
+					"', module '" + getModulePrefix() + "' as ServletContext attribute with name [" + attrName + "]");
 		}
 		
 		return wac;
@@ -281,43 +320,36 @@ public class ContextLoaderPlugIn implements PlugIn {
 			throws BeansException {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Servlet with name '" + this.actionServlet.getServletName() +
-					"' will try to create custom WebApplicationContext context of class '" +
-					getContextClass().getName() + "'" + ", using parent context [" + parent + "]");
+			logger.debug("ContextLoaderPlugIn for Struts ActionServlet '" + getServletName() +
+					"', module '" + getModulePrefix() + "' will try to create custom WebApplicationContext " +
+					"context of class '" + getContextClass().getName() + "', using parent context [" + parent + "]");
 		}
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(getContextClass())) {
 			throw new ApplicationContextException(
-					"Fatal initialization error in servlet with name '" + this.actionServlet.getServletName() +
-					"': custom WebApplicationContext class [" + getContextClass().getName() +
-					"] is not of type ConfigurableWebApplicationContext");
+					"Fatal initialization error in ContextLoaderPlugIn for Struts ActionServlet '" + getServletName() +
+					"', module '" + getModulePrefix() + "': custom WebApplicationContext class [" +
+					getContextClass().getName() + "] is not of type ConfigurableWebApplicationContext");
 		}
 
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(getContextClass());
 		wac.setParent(parent);
-		wac.setServletContext(this.actionServlet.getServletContext());
+		wac.setServletContext(getServletContext());
 		wac.setNamespace(getNamespace());
-		if (this.contextConfigLocation != null) {
+		if (getContextConfigLocation() != null) {
 			wac.setConfigLocations(
 			    StringUtils.tokenizeToStringArray(
-							this.contextConfigLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
+							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 		wac.addBeanFactoryPostProcessor(
 				new BeanFactoryPostProcessor() {
 					public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-						beanFactory.addBeanPostProcessor(new ActionServletAwareProcessor(actionServlet));
+						beanFactory.addBeanPostProcessor(new ActionServletAwareProcessor(getActionServlet()));
 					}
 				}
 		);
 		wac.refresh();
 		return wac;
-	}
-
-	/**
-	 * Return the ActionServlet that this PlugIn is associated with.
-	 */
-	public final ActionServlet getActionServlet() {
-		return actionServlet;
 	}
 
 	/**
@@ -340,10 +372,10 @@ public class ContextLoaderPlugIn implements PlugIn {
 	 * @see org.springframework.context.ConfigurableApplicationContext#close
 	 */
 	public void destroy() {
-		this.actionServlet.getServletContext().log(
-				"Closing WebApplicationContext of Struts ActionServlet '" + this.actionServlet.getServletName() + "'");
-		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
-			((ConfigurableApplicationContext) this.webApplicationContext).close();
+		getServletContext().log("Closing WebApplicationContext of Struts ActionServlet '" +
+				getServletName() + "', module '" + getModulePrefix() + "'");
+		if (getWebApplicationContext() instanceof ConfigurableApplicationContext) {
+			((ConfigurableApplicationContext) getWebApplicationContext()).close();
 		}
 	}
 
