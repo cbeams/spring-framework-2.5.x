@@ -173,7 +173,7 @@ public class BusinessObject {
   </property>
   <property name="cronExpression">
     <!-- run every morning at 6 am -->
-    <value>0 6 * * 1</value>
+    <value>0 0 6 * * 1</value>
   </property>
 </bean>
 			]]></programlisting>
