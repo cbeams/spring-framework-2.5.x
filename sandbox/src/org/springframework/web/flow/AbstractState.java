@@ -178,14 +178,14 @@ public abstract class AbstractState implements Serializable {
 
 	/**
 	 * Hook method to do any processing as a result of entering this state.
-	 * @param sessionExecutionStack The session execution stack, tracking the
+	 * @param flowExecution The session execution stack, tracking the
 	 *        current active flow session
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected abstract ModelAndView doEnterState(FlowExecutionStack sessionExecutionStack, HttpServletRequest request,
+	protected abstract ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response);
 
 	public String toString() {

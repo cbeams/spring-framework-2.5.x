@@ -240,6 +240,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		this.lastEventId = eventId;
 		this.lastEventTimestamp = new Date().getTime();
 		if (logger.isDebugEnabled()) {
+			logger.debug("Event '" + eventId + "' within state '" + getCurrentStateId() + "' for flow '"
+					+ getActiveFlowId() + "' signaled");
+		}
+		if (logger.isDebugEnabled()) {
 			logger.debug("Set last event id to '" + eventId + "' and updated timestamp to " + this.lastEventTimestamp);
 		}
 		fireEventSignaled(eventId);

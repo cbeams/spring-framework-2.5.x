@@ -57,21 +57,21 @@ public class EndState extends AbstractState {
 		return true;
 	}
 
-	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		FlowSession endingFlowSession = sessionExecution.endActiveSession();
+		FlowSession endingFlowSession = flowExecution.endActiveSession();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Session for flow '" + getFlow().getId() + "' ended, session details = " + endingFlowSession);
 		}
-		if (sessionExecution.isActive()) {
+		if (flowExecution.isActive()) {
 			// session execution is still active, resume in parent
 			if (logger.isDebugEnabled()) {
-				logger.debug("Resuming parent flow '" + sessionExecution.getActiveFlowId() + "' in state '"
-						+ sessionExecution.getCurrentStateId() + "'");
+				logger.debug("Resuming parent flow '" + flowExecution.getActiveFlowId() + "' in state '"
+						+ flowExecution.getCurrentStateId() + "'");
 			}
-			Flow resumingParentFlow = sessionExecution.getActiveFlow();
-			Assert.isInstanceOf(SubFlowState.class, sessionExecution.getCurrentState());
-			SubFlowState resumingState = (SubFlowState)sessionExecution.getCurrentState();
+			Flow resumingParentFlow = flowExecution.getActiveFlow();
+			Assert.isInstanceOf(SubFlowState.class, flowExecution.getCurrentState());
+			SubFlowState resumingState = (SubFlowState)flowExecution.getCurrentState();
 			if (resumingState.getAttributesMapper() != null) {
 				if (logger.isDebugEnabled()) {
 					logger
@@ -79,7 +79,7 @@ public class EndState extends AbstractState {
 									+ "the resuming parent flow will now have access to attributes passed up by the completed subflow");
 				}
 				resumingState.getAttributesMapper().mapToResumingParentFlow(endingFlowSession,
-						sessionExecution.getActiveFlowSession());
+						flowExecution.getActiveFlowSession());
 			}
 			else {
 				if (logger.isDebugEnabled()) {
@@ -91,7 +91,7 @@ public class EndState extends AbstractState {
 			}
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
-			return resumingState.signalEvent(getId(), sessionExecution, request, response);
+			return resumingState.signalEvent(getId(), flowExecution, request, response);
 		}
 		else {
 			// entire flow execution has ended, return ending view if applicable

@@ -81,7 +81,7 @@ public class ActionState extends TransitionableState {
 	 * not the ActionBean instance, the instance is retrieved from the
 	 * <code>FlowServiceLocator</code>
 	 */
-	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		Iterator it = actionIterator();
 		int executionCount = 0;
@@ -90,14 +90,16 @@ public class ActionState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing action bean '" + action + "'");
 			}
-			ActionResult result = action.execute(request, response, sessionExecution);
+			ActionResult result = action.execute(request, response, flowExecution);
 			executionCount++;
-			if (result != null) {
-				return signalEvent(result.getId(), sessionExecution, request, response);
+			Transition transition = getTransition(result);
+			if (transition != null) {
+				flowExecution.setLastEventId(result.getId());
+				return transition.execute(flowExecution, request, response);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Action bean execution #" + executionCount + " resulted in no event - "
+					logger.debug("Action bean execution #" + executionCount + " resulted in no transition - "
 							+ "I will attempt to proceed to the next action in the chain");
 				}
 			}
@@ -114,5 +116,12 @@ public class ActionState extends TransitionableState {
 							+ "-- programmer configuration error; "
 							+ "make sure you add at least one action bean to this state"));
 		}
+	}
+
+	protected Transition getTransition(ActionResult result) {
+		if (result == null) {
+			return null;
+		}
+		return getTransition(result.getId());
 	}
 }

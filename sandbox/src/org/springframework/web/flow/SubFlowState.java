@@ -73,12 +73,12 @@ public class SubFlowState extends TransitionableState {
 		return true;
 	}
 
-	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		Flow subFlow = getSubFlow();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '"
-					+ sessionExecution.getActiveFlowId() + "'");
+					+ flowExecution.getActiveFlowId() + "'");
 		}
 		Map subFlowAttributes;
 		if (getAttributesMapper() != null) {
@@ -86,16 +86,16 @@ public class SubFlowState extends TransitionableState {
 				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
 						+ "down to the spawned subflow for access within the subflow");
 			}
-			subFlowAttributes = getAttributesMapper().createSpawnedSubFlowAttributesMap(sessionExecution);
+			subFlowAttributes = getAttributesMapper().createSpawnedSubFlowAttributesMap(flowExecution);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("No attributes mapper is configured for this subflow state '" + getId()
-						+ "'; as a result, no attributes in the parent flow '" + sessionExecution.getActiveFlowId()
+						+ "'; as a result, no attributes in the parent flow '" + flowExecution.getActiveFlowId()
 						+ "' scope will be passed to the spawned subflow '" + subFlow.getId() + "'");
 			}
 			subFlowAttributes = new HashMap(1);
 		}
-		return sessionExecution.spawn(getSubFlow(), subFlowAttributes, request, response);
+		return flowExecution.spawn(getSubFlow(), subFlowAttributes, request, response);
 	}
 }

@@ -101,10 +101,23 @@ public class Transition implements Serializable {
 		return eventIdCriteria.test(eventId);
 	}
 
-	protected ModelAndView execute(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView execute(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		try {
-			return getTargetState().enter(sessionExecution, request, response);
+			ModelAndView viewDescriptor = getTargetState().enter(flowExecution, request, response);
+			if (logger.isDebugEnabled()) {
+				if (flowExecution.isActive()) {
+					logger
+							.debug("Transition '" + this + "' executed; as a result,  the new state is '"
+									+ flowExecution.getCurrentStateId() + "' in flow '"
+									+ flowExecution.getActiveFlowId() + "'");
+				}
+				else {
+					logger.debug("Transition '" + this + "' executed; as a result, the flow '"
+							+ flowExecution.getRootFlowId() + "' execution has ended");
+				}
+			}
+			return viewDescriptor;
 		}
 		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, e);

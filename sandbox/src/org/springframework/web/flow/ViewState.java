@@ -84,14 +84,14 @@ public class ViewState extends TransitionableState {
 	 * model map needed when the view is rendered, for populating dynamic
 	 * content.
 	 * 
-	 * @param sessionExecutionStack The session execution stack, tracking the
+	 * @param flowExecution The session execution stack, tracking the
 	 *        current active flow session
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
@@ -103,7 +103,7 @@ public class ViewState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning view name '" + viewName + "' to render");
 			}
-			return new ModelAndView(viewName, sessionExecution.getAttributes());
+			return new ModelAndView(viewName, flowExecution.getAttributes());
 		}
 	}
 
