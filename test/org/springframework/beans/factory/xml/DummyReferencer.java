@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.DummyFactory;
 
 /**
  * @author Juergen Hoeller
@@ -27,6 +28,8 @@ public class DummyReferencer {
 	private TestBean testBean1;
 
 	private TestBean testBean2;
+
+	private DummyFactory dummyFactory;
 
 	public TestBean getTestBean1() {
 		return testBean1;
@@ -42,6 +45,14 @@ public class DummyReferencer {
 
 	public void setTestBean2(TestBean testBean2) {
 		this.testBean2 = testBean2;
+	}
+
+	public DummyFactory getDummyFactory() {
+		return dummyFactory;
+	}
+
+	public void setDummyFactory(DummyFactory dummyFactory) {
+		this.dummyFactory = dummyFactory;
 	}
 
 }

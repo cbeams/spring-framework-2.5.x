@@ -32,15 +32,12 @@
 		<property name="spouse"><ref local="rod"/></property>
 	</bean>
 
-	<!--
-		Tests of lifecycle callbacks
-	-->
+	<!-- Test of lifecycle callbacks -->
 	<bean id="mustBeInitialized" class="org.springframework.beans.factory.MustBeInitialized">
 	</bean>
 
 	<bean id="lifecycle" class="org.springframework.beans.factory.LifecycleBean">
 	</bean>
-
 
 	<!-- Factory beans are automatically treated differently -->
 	<bean id="singletonFactory"	class="org.springframework.beans.factory.DummyFactory">
@@ -55,6 +52,7 @@
 	<bean id="factoryReferencer" class="org.springframework.beans.factory.xml.DummyReferencer">
 		<property name="testBean1"><ref bean="singletonFactory"/></property>
 		<property name="testBean2"><ref local="singletonFactory"/></property>
+		<property name="dummyFactory"><ref bean="&amp;singletonFactory"/></property>
 	</bean>
 
 	<!-- Check that the circular reference resolution mechanism doesn't break

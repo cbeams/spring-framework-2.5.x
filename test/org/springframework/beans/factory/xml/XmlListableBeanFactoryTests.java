@@ -91,7 +91,9 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 
 	public void testFactoryReferences() {
 		DummyReferencer ref = (DummyReferencer) getBeanFactory().getBean("factoryReferencer");
+		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		assertTrue(ref.getTestBean1() == ref.getTestBean2());
+		assertTrue(ref.getDummyFactory() == factory);
 	}
 
 	public void testPrototypeReferences() {
