@@ -37,7 +37,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: MySQLMaxValueIncrementer.java,v 1.3 2004-02-27 08:28:37 jhoeller Exp $
+ * @version $Id: MySQLMaxValueIncrementer.java,v 1.4 2004-03-01 07:52:01 jhoeller Exp $
  */
 
 public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
@@ -47,9 +47,6 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 
 	/** The name of the column for this sequence */
 	private String columnName;
-
-	/** The Sql string for updating the sequence value */
-	private String updateSql;
 
 	/** The number of keys buffered in a cache */
 	private int cacheSize = 1;
@@ -113,8 +110,6 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 		if (this.columnName == null) {
 			throw new IllegalArgumentException("columnName is required");
 		}
-		this.updateSql = "update "+ getIncrementerName() + " set " + this.columnName +
-				" = last_insert_id(" + this.columnName + " + " + getCacheSize() + ")";
 	}
 
 
@@ -131,7 +126,8 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 				stmt = con.createStatement();
 				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 				// increment the sequence column
-				stmt.executeUpdate(this.updateSql);
+				stmt.executeUpdate("update "+ getIncrementerName() + " set " + this.columnName +
+													 " = last_insert_id(" + this.columnName + " + " + getCacheSize() + ")");
 				// retrieve the new max of the sequence column
 				ResultSet rs = stmt.executeQuery(VALUE_SQL);
 				try {

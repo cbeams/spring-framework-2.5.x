@@ -35,21 +35,12 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: HsqlMaxValueIncrementer.java,v 1.3 2004-02-27 08:28:37 jhoeller Exp $
+ * @version $Id: HsqlMaxValueIncrementer.java,v 1.4 2004-03-01 07:52:01 jhoeller Exp $
  */
 public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 
 	/** The name of the column for this sequence */
 	private String columnName;
-
-	/** The Sql string for updating the sequence value */
-	private String insertSql;
-
-	/** The Sql string for retrieving the new sequence value */
-	private String valueSql;
-
-	/** The Sql string for removing old sequence values */
-	private String deleteSql;
 
 	/** The number of keys buffered in a cache */
 	private int cacheSize = 1;
@@ -112,9 +103,6 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 		if (this.columnName == null) {
 			throw new IllegalArgumentException("columnName is required");
 		}
-		this.insertSql = "insert into " + getIncrementerName() + " values(null)";
-		this.valueSql = "select max(identity()) from " + getIncrementerName();
-		this.deleteSql = "delete from " + getIncrementerName() + " where " + this.columnName + " < ";
 	}
 
 
@@ -133,8 +121,8 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 				this.valueCache = new long[getCacheSize()];
 				this.nextValueIndex = 0;
 				for (int i = 0; i < getCacheSize(); i++) {
-					stmt.executeUpdate(this.insertSql);
-					ResultSet rs = stmt.executeQuery(this.valueSql);
+					stmt.executeUpdate("insert into " + getIncrementerName() + " values(null)");
+					ResultSet rs = stmt.executeQuery("select max(identity()) from " + getIncrementerName());
 					try {
 						if (!rs.next()) {
 							throw new DataAccessResourceFailureException("identity() failed after executing an update");
@@ -146,7 +134,7 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 					}
 				}
 				long maxValue = this.valueCache[(this.valueCache.length - 1)];
-				stmt.executeUpdate(this.deleteSql + maxValue);
+				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + this.columnName + " < " + maxValue);
 			}
 			catch (SQLException ex) {
 				throw new DataAccessResourceFailureException("Could not obtain identity()", ex);
