@@ -1,9 +1,4 @@
-/*
- * Created on 10-Nov-2003
- *
- * To change the template for this generated file go to
- * Window>Preferences>Java>Code Generation>Code and Comments
- */
+
 package org.springframework.aop.support;
 
 import junit.framework.TestCase;
@@ -16,10 +11,9 @@ import org.springframework.core.HasRootCause;
 import org.springframework.core.NestedCheckedException;
 
 /**
- * @author rod
- *
- * To change the template for this generated type comment go to
- * Window>Preferences>Java>Code Generation>Code and Comments
+ *  
+ * @author Rod Johnson
+ * @version $Id: ClassFiltersTests.java,v 1.2 2004-01-13 09:41:01 johnsonr Exp $
  */
 public class ClassFiltersTests extends TestCase {
 	
