@@ -35,8 +35,7 @@ Package org.springframework.validation
 Package org.springframework.web
 * changed MultiActionController's log level from INFO to DEBUG
 * removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)
-* added ParameterNameMethodNameResolver, a MultiActionController resolver which uses parameter existence to map methods
-* included debug logging for session attributes being added and removed (AbstractFormController and AbstractWizardFormController)
+* enhanced ParameterMethodNameResolver to also be able to resolve methods base purely based on existence of specified parameters
 * included debug logging for session attributes being added and removed (AbstractFormController and AbstractWizardFormController)
 
 Changes in version 1.1.5 (28.2.2005)
