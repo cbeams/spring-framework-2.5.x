@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.object;
 
@@ -34,6 +34,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
+ * @see CallableStatementCreatorFactory
  */
 public abstract class SqlCall extends RdbmsOperation {
 
@@ -126,8 +127,8 @@ public abstract class SqlCall extends RdbmsOperation {
 			}
 			this.callString += ")}";
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Compiled stored procedure. Call string is [" + getCallString() + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Compiled stored procedure. Call string is [" + getCallString() + "]");
 		}
 
 		this.callableStatementFactory = new CallableStatementCreatorFactory(getCallString(), getDeclaredParameters());
