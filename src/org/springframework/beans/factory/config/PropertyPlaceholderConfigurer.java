@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.HashSet;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -195,6 +196,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	}
 
 	protected void parseGenericArgumentValues(Properties props, Set gas) {
+
+		Set itemsToAdd = new HashSet();
+
 		for (Iterator it = gas.iterator(); it.hasNext();) {
 			Object val = it.next();
 
@@ -202,29 +206,27 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 				String strVal = (String) val;
 				String newStrVal = parseValue(props, strVal, null);
 				if (!newStrVal.equals(strVal)) {
-					gas.remove(val);
-					gas.add(newStrVal);
+					it.remove();
+					itemsToAdd.add(newStrVal);
 				}
 			}
-
 			else if (val instanceof RuntimeBeanReference) {
-        RuntimeBeanReference ref = (RuntimeBeanReference) val;
-        String newBeanName = parseValue(props, ref.getBeanName(), null);
+				RuntimeBeanReference ref = (RuntimeBeanReference) val;
+				String newBeanName = parseValue(props, ref.getBeanName(), null);
 				if (!newBeanName.equals(ref.getBeanName())) {
 					RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
-					gas.remove(val);
-					gas.add(newRef);
+					it.remove();
+                    itemsToAdd.add(newRef);
 				}
 			}
-
 			else if (val instanceof List) {
 				parseList(props, (List) val);
 			}
-
 			else if (val instanceof Map) {
 				parseMap(props, (Map) val);
 			}
 		}
+		gas.addAll(itemsToAdd);
 	}
 
 	/**
