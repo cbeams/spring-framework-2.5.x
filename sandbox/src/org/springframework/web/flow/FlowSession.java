@@ -67,7 +67,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	/**
 	 * The session data model ("flow scope");
 	 */
-	private Map attributes = Collections.synchronizedMap(new HashMap());
+	private Map attributes = new HashMap();
 
 	/**
 	 * Create a new flow session.
@@ -172,10 +172,11 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	//methods implementing AttributesAccessor
 
 	/**
-	 * @return Map of all model attributes in this flow session
+	 * @return Map of all model attributes in this flow session; should NOT be
+	 *         modified
 	 */
 	public Map getAttributes() {
-		return Collections.unmodifiableMap(attributes);
+		return attributes;
 	}
 
 	public Object getAttribute(String attributeName) {
