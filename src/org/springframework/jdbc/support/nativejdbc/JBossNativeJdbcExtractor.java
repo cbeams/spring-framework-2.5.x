@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,8 +28,8 @@ import java.sql.Statement;
 import org.jboss.resource.adapter.jdbc.WrappedCallableStatement;
 import org.jboss.resource.adapter.jdbc.WrappedConnection;
 import org.jboss.resource.adapter.jdbc.WrappedPreparedStatement;
-import org.jboss.resource.adapter.jdbc.WrappedResultSet;
 import org.jboss.resource.adapter.jdbc.WrappedStatement;
+import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for the JBoss 3.2
@@ -46,6 +48,8 @@ import org.jboss.resource.adapter.jdbc.WrappedStatement;
  */
 public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
+	private static final String ERROR_OBTAINING_RESULTSET_FROM_WRAPPER = "Error obtaining ResultSet from JBoss WrappedResultSet";
+	
 	public Connection getNativeConnection(Connection con) throws SQLException {
 		if (con instanceof WrappedConnection) {
 			return ((WrappedConnection) con).getUnderlyingConnection();
@@ -74,10 +78,40 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		return cs;
 	}
 	
+//	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
+//		if (rs instanceof WrappedResultSet) {
+//			return ((WrappedResultSet)rs).getUnderlyingResultSet();
+//		}
+//		return rs;
+//	}
+	
+	/**
+	 * We access WrappedResultSet via reflection, since this class only appeared in JBoss 3.2.4
+	 * and we want to ideal work with at least 3.2.2+
+	 */
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
-		if (rs instanceof WrappedResultSet) {
-			return ((WrappedResultSet)rs).getUnderlyingResultSet();
+		
+		if (rs.getClass().getName().equals("org.jboss.resource.adapter.jdbc.WrappedResultSet")) {
+			Method m;
+			try {
+				m = rs.getClass().getMethod("getUnderlyingResultSet", null);
+			}
+			catch (NoSuchMethodException e) {
+				return rs;
+			}
+			try {
+				ResultSet realRs = (ResultSet) m.invoke(rs, null);
+				return realRs;
+			}
+			catch (InvocationTargetException e) {
+				throw new DataAccessResourceFailureException(ERROR_OBTAINING_RESULTSET_FROM_WRAPPER, e.getTargetException());
+			}
+			catch (Exception e) {
+				// should never get here in real use
+				throw new RuntimeException(ERROR_OBTAINING_RESULTSET_FROM_WRAPPER, e);
+			}
 		}
 		return rs;
 	}
+	
 }
