@@ -17,7 +17,10 @@
 package org.springframework.jmx.export;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.management.JMException;
 import javax.management.MBeanException;
@@ -41,8 +44,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
+import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
 import org.springframework.jmx.export.naming.KeyNamingStrategy;
+import org.springframework.jmx.export.naming.ObjectNamingStrategy;
 import org.springframework.jmx.support.JmxUtils;
 
 /**
@@ -58,7 +63,6 @@ import org.springframework.jmx.support.JmxUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @author Marcus Brito
  * @since 1.2
  */
 public class MBeanExporter implements BeanFactoryAware, InitializingBean, DisposableBean {
@@ -81,12 +85,12 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Stores the <code>MBeanInfoAssembler</code> to use for this adapter.
 	 */
-	private org.springframework.jmx.export.assembler.MBeanInfoAssembler assembler = new SimpleReflectiveMBeanInfoAssembler();
+	private MBeanInfoAssembler assembler = new SimpleReflectiveMBeanInfoAssembler();
 
 	/**
 	 * The strategy to use for creating <code>ObjectName</code>s for an object.
 	 */
-	private org.springframework.jmx.export.naming.ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
+	private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
 
 	/**
 	 * Stores the <code>BeanFactory</code> for use in autodetection process.
@@ -96,7 +100,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * The beans that have been registered by this adapter.
 	 */
-	private ObjectName[] registeredBeans;
+	private Set registeredBeans;
 
 
 	/**
@@ -120,7 +124,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Set the implementation of the <code>MBeanInfoAssembler</code> interface
 	 * to use for this instance.
 	 */
-	public void setAssembler(org.springframework.jmx.export.assembler.MBeanInfoAssembler assembler) {
+	public void setAssembler(MBeanInfoAssembler assembler) {
 		this.assembler = assembler;
 	}
 
@@ -128,7 +132,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Set the implementation of the <code>ObjectNamingStrategy</code> interface to
 	 * use for this instance.
 	 */
-	public void setNamingStrategy(org.springframework.jmx.export.naming.ObjectNamingStrategy namingStrategy) {
+	public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
 		this.namingStrategy = namingStrategy;
 	}
 
@@ -141,9 +145,10 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 			this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 		}
 		else {
-			logger.info("Not running in a ConfigurableListableBeanFactory: auto-detection of managed beans is disabled");
+			logger.info("Not running in a ConfigurableListableBeanFactory: autodetection of managed beans is disabled");
 		}
 	}
+
 
 	/**
 	 * Start bean registration automatically when deployed in an
@@ -166,7 +171,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * the implementation of the <code>ObjectNamingStrategy</code> interface being used.
 	 */
 	protected void registerBeans() throws JMException {
-
 		// If no server was provided then try to load one.
 		// This is useful in environment such as
 		// JBoss where there is already an MBeanServer loaded
@@ -185,9 +189,8 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 			logger.info("Autodetecting user-defined JMX MBeans");
 			autodetectMBeans();
 
-			// Allow the metadata assembler a chance to
-			// vote for bean inclusion.
-			if (this.assembler instanceof org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler) {
+			// Allow the metadata assembler a chance to vote for bean inclusion.
+			if (this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
 				autodetectBeans((AutodetectCapableMBeanInfoAssembler) this.assembler);
 			}
 		}
@@ -197,28 +200,31 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 			throw new IllegalArgumentException("Must specify at least one bean for registration");
 		}
 
-		Object[] keys = this.beans.keySet().toArray();
-		this.registeredBeans = new ObjectName[keys.length];
-
+		this.registeredBeans = new HashSet(this.beans.size());
 		try {
-			for (int x = 0; x < keys.length; x++) {
-				String key = (String) keys[x];
-				Object val = this.beans.get(key);
-				ObjectName objectName = registerBean(key, val);
-				this.registeredBeans[x] = objectName;
-				if (logger.isInfoEnabled()) {
-					logger.info("Registered MBean: " + objectName.toString());
-				}
+			for (Iterator it = this.beans.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String key = (String) entry.getKey();
+				Object val = entry.getValue();
+				ObjectName objectName = registerBeanNameOrInstance(key, val);
+				this.registeredBeans.add(objectName);
 			}
 		}
 		catch (InvalidTargetObjectTypeException ex) {
+			// Unregister beans already registered by this exporter.
+			unregisterBeans();
 			// We should never get this!
-			logger.error("An invalid object type was used when specifying a managed resource", ex);
 			throw new JMException("An invalid object type was used when specifying a managed resource. " +
 					"This is a serious error and points to an error in the Spring JMX code. Root cause: " +
 					ex.getMessage());
 		}
+		catch (JMException ex) {
+			// Unregister beans already registered by this exporter.
+			unregisterBeans();
+			throw ex;
+		}
 	}
+
 
 	/**
 	 * Registers an individual bean with the <code>MBeanServer</code>. This method
@@ -241,10 +247,11 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * @see #registerMBean
 	 * @see #registerSimpleBean
 	 */
-	private ObjectName registerBean(String beanKey, Object mapValue)
+	private ObjectName registerBeanNameOrInstance(String beanKey, Object mapValue)
 			throws JMException, InvalidTargetObjectTypeException {
 
 		if (mapValue instanceof String) {
+			// Bean name pointing to a potentially lazy-init bean in the factory.
 			String beanName = (String) mapValue;
 			BeanDefinition beanDefinition = this.beanFactory.getBeanDefinition(beanName);
 			if (beanDefinition.isLazyInit()) {
@@ -256,34 +263,65 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("String value under key [" + beanKey + "] either did not point to " +
-							"a bean or the bean it pointed to was not registered for lazy initialization. " +
-							"Registering bean normally with JMX server.");
+					logger.debug("String value under key [" + beanKey + "] points to a bean that was not " +
+							"registered for lazy initialization. Registering bean normally with JMX server.");
 				}
 				Object bean = this.beanFactory.getBean(beanName);
-				return registerBean(beanKey, bean);
+				return registerBeanInstance(beanKey, bean);
 			}
 		}
 		else {
-			if (JmxUtils.isMBean(mapValue.getClass())) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Located MBean under key [" + beanKey + "] registering with JMX server " +
-							"without Spring intervention.");
-				}
-				return registerMBean(beanKey, mapValue);
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Located bean under key [" + beanKey + "] registering with JMX server.");
-				}
-				return registerSimpleBean(beanKey, mapValue);
-			}
+			// Plain bean instance -> register it directly.
+			return registerBeanInstance(beanKey, mapValue);
 		}
 	}
 
 	/**
-	 * Registers a plain bean directly with the <code>MBeanServer</code>. The
-	 * management interface for the bean is created by the configured
+	 * Registers an existing MBean or an MBean adapter for a plain bean
+	 * with the <code>MBeanServer</code>.
+	 * @param beanKey the key associated with this bean in the beans map
+	 * @param beanInstance the bean to register, either an MBean or a plain bean
+	 * @return the <code>ObjectName</code> under which the bean was registered
+	 * with the <code>MBeanServer</code>.
+	 * @throws JMException an error in the underlying JMX infrastructure
+	 */
+	private ObjectName registerBeanInstance(String beanKey, Object beanInstance)
+			throws JMException, InvalidTargetObjectTypeException {
+
+		if (JmxUtils.isMBean(beanInstance.getClass())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Located MBean under key [" + beanKey + "]: registering with JMX server");
+			}
+			return registerMBean(beanKey, beanInstance);
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Located bean under key [" + beanKey + "] registering with JMX server.");
+			}
+			return registerSimpleBean(beanKey, beanInstance);
+		}
+	}
+
+	/**
+	 * Registers an existing MBean with the <code>MBeanServer</code>.
+	 * @param beanKey the key associated with this bean in the beans map
+	 * @param mbean the bean to register
+	 * @return the <code>ObjectName</code> under which the bean was registered
+	 * with the <code>MBeanServer</code>.
+	 * @throws JMException an error in the underlying JMX infrastructure
+	 */
+	private ObjectName registerMBean(String beanKey, Object mbean) throws JMException {
+		ObjectName objectName = this.namingStrategy.getObjectName(mbean, beanKey);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Registering MBean [" + objectName + "]");
+		}
+		this.server.registerMBean(mbean, objectName);
+		return objectName;
+	}
+
+	/**
+	 * Registers a plain bean as MBean with the <code>MBeanServer</code>.
+	 * The management interface for the bean is created by the configured
 	 * <code>MBeanInfoAssembler</code>.
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @param bean the bean to register
@@ -297,7 +335,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 
 		ObjectName objectName = this.namingStrategy.getObjectName(bean, beanKey);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Registering and assembling MBean: " + objectName);
+			logger.debug("Registering and assembling MBean [" + objectName + "]");
 		}
 
 		ModelMBean mbean = createModelMBean();
@@ -333,7 +371,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		Object proxy = proxyFactory.getProxy();
 		ObjectName objectName = this.namingStrategy.getObjectName(proxy, beanKey);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Registering lazy-init MBean: " + objectName);
+			logger.debug("Registering lazy-init MBean [" + objectName + "]");
 		}
 
 		ModelMBean mbean = createModelMBean();
@@ -345,19 +383,17 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	}
 
 	/**
-	 * Registers an existing MBean with the <code>MBeanServer</code>.
-	 * @param beanKey the key associated with this bean in the beans map
-	 * @param mbean the bean to register
-	 * @return the <code>ObjectName</code> under which the bean was registered
-	 * with the <code>MBeanServer</code>.
-	 * @throws JMException an error in the underlying JMX infrastructure.
-	 * an error in the definition of the MBean resource.
+	 * Create an instance of a class that implements <code>ModelMBean</code>.
+	 * <p>This method is called to obtain a <code>ModelMBean</code> instance to
+	 * use when registering a bean. This method is called once per bean during the
+	 * registration phase and must return a new instance of <code>ModelMBean</code>
+	 * @return a new instance of a class that implements <code>ModelMBean</code>
+	 * @throws MBeanException if creation of the ModelMBean failed
 	 */
-	private ObjectName registerMBean(String beanKey, Object mbean) throws JMException {
-		ObjectName objectName = this.namingStrategy.getObjectName(mbean, beanKey);
-		this.server.registerMBean(mbean, objectName);
-		return objectName;
+	protected ModelMBean createModelMBean() throws MBeanException {
+		return new RequiredModelMBean();
 	}
+
 
 	/**
 	 * Attempts to detect any beans defined in the <code>ApplicationContext</code> that are
@@ -399,10 +435,10 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 			String beanName = beanNames[x];
 			Class type = this.beanFactory.getType(beanName);
 			if (callback.include(beanName, type)) {
-				Object bean = this.beanFactory.getBean(beanName);
-				if (!this.beans.containsValue(bean)) {
-					// not already registered for JMXification
-					this.beans.put(beanName, bean);
+				Object value = this.beanFactory.getBean(beanName);
+				if (!this.beans.containsValue(value)) {
+					// Not already registered for JMX exposure.
+					this.beans.put(beanName, value);
 					if (logger.isInfoEnabled()) {
 						logger.info("Bean with name '" + beanName + "' has been autodetected for JMX exposure");
 					}
@@ -416,27 +452,30 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		}
 	}
 
+
 	/**
-	 * Create an instance of a class that implements <code>ModelMBean</code>.
-	 * <p>This method is called to obtain a <code>ModelMBean</code> instance to
-	 * use when registering a bean. This method is called once per bean during the
-	 * registration phase and must return a new instance of <code>ModelMBean</code>
-	 * @return a new instance of a class that implements <code>ModelMBean</code>
-	 * @throws MBeanException if creation of the ModelMBean failed
+	 * Unregisters all beans that this exported has exposed via JMX
+	 * when the enclosing <code>ApplicationContext</code> is destroyed.
 	 */
-	protected ModelMBean createModelMBean() throws MBeanException {
-		return new RequiredModelMBean();
+	public void destroy() {
+		unregisterBeans();
 	}
 
-
 	/**
-	 * Unregisters all the beans when the enclosing <code>BeanFactory</code> is destroyed.
+	 * Unregisters all beans that this exported has exposed via JMX.
 	 */
-	public void destroy() throws Exception {
-		logger.info("Unregistering all JMX-exposed beans on shutdown");
-		for (int x = 0; x < this.registeredBeans.length; x++) {
-			this.server.unregisterMBean(this.registeredBeans[x]);
+	private void unregisterBeans() {
+		logger.info("Unregistering JMX-exposed beans on shutdown");
+		for (Iterator it = this.registeredBeans.iterator(); it.hasNext();) {
+			ObjectName objectName = (ObjectName) it.next();
+			try {
+				this.server.unregisterMBean(objectName);
+			}
+			catch (JMException ex) {
+				logger.error("Could not unregister MBean [" + objectName + "]", ex);
+			}
 		}
+		this.registeredBeans.clear();
 	}
 
 
