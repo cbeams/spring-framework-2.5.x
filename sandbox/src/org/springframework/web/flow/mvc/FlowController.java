@@ -24,13 +24,15 @@ import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
-import org.springframework.web.flow.support.HttpServletFlowExecutionManager;
+import org.springframework.web.flow.execution.FlowExecutionStorage;
+import org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager;
+import org.springframework.web.flow.execution.HttpSessionFlowExecutionStorage;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
  * Web controller for the Spring MVC framework that handles requests using a web
- * flow. Requests are managed using an {@link HttpServletFlowExecutionManager}.
+ * flow. Requests are managed using an {@link HttpServletRequestFlowExecutionManager}.
  * Consult the JavaDoc of that class for more information on how requests are
  * processed.
  * <p>
@@ -59,12 +61,12 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * </tr>
  * <tr>
  * <td>flowExecutionManager</td>
- * <td>{@link org.springframework.web.flow.support.HttpServletFlowExecutionManager default}</td>
+ * <td>{@link org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager default}</td>
  * <td>Configures the flow execution manager implementation to use.</td>
  * </tr>
  * </table>
  * 
- * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
+ * @see org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager
  * 
  * @author Erwin Vervaet
  * @author Keith Donald
@@ -80,7 +82,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	/**
 	 * A helper for managed HTTP servlet request-based flow executions.
 	 */
-	private HttpServletFlowExecutionManager flowExecutionManager;
+	private HttpServletRequestFlowExecutionManager flowExecutionManager;
 
 	/**
 	 * The listeners of executing flows managed by this controller.
@@ -138,9 +140,9 @@ public class FlowController extends AbstractController implements InitializingBe
 
 	/**
 	 * Returns the flow execution manager used by this controller. Defaults
-	 * to {@link HttpServletFlowExecutionManager}.
+	 * to {@link HttpServletRequestFlowExecutionManager}.
 	 */
-	protected HttpServletFlowExecutionManager getFlowExecutionManager() {
+	protected HttpServletRequestFlowExecutionManager getFlowExecutionManager() {
 		return flowExecutionManager;
 	}
 
@@ -149,7 +151,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * parameterization of custom manager specializations.
 	 * @param manager the flow execution manager.
 	 */
-	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
+	public void setFlowExecutionManager(HttpServletRequestFlowExecutionManager manager) {
 		this.flowExecutionManager = manager;
 	}
 
@@ -164,7 +166,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		// delegate to the flow execution manager to process the request
-		ViewDescriptor viewDescriptor = flowExecutionManager.handleRequest(request, response);
+		ViewDescriptor viewDescriptor = flowExecutionManager.handle(request, response);
 		// convert the view descriptor to a ModelAndView object
 		return createModelAndViewFromViewDescriptor(viewDescriptor);
 	}
@@ -176,9 +178,10 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * return a specialized manager. Alternatively, they can pass in a custom
 	 * flow execution manager by setting the "flowExecutionManager" property.
 	 */
-	protected HttpServletFlowExecutionManager createFlowExecutionManager() {
+	protected HttpServletRequestFlowExecutionManager createFlowExecutionManager() {
+		FlowExecutionStorage storage = new HttpSessionFlowExecutionStorage();
 		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
-		return new HttpServletFlowExecutionManager(flowLocator, getFlow(), getFlowExecutionListeners());
+		return new HttpServletRequestFlowExecutionManager(storage, flowLocator, getFlow(), getFlowExecutionListeners());
 	}
 	
 	/**

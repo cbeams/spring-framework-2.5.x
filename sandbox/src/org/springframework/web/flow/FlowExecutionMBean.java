@@ -27,13 +27,6 @@ package org.springframework.web.flow;
 public interface FlowExecutionMBean {
 
 	/**
-	 * Return the id of this flow execution. This is not a human readable flow
-	 * definition id, but a system generated key.
-	 * @return the unique flow execution id
-	 */
-	public String getId();
-
-	/**
 	 * Returns the timestamp on which this execution was created.
 	 * @return the creation timestamp
 	 */
@@ -60,10 +53,8 @@ public interface FlowExecutionMBean {
 	public boolean isActive();
 
 	/**
-	 * Get the id of the active flow definition. Note that this returns
-	 * the id of a flow (e.g. "registerUser"), not a system generated key
-	 * for a flow execution!
-	 * @return the active flow id
+	 * Get the id of the active flow definition.
+	 * @return the active flow id, e.g. "editContact"
 	 * @throws IllegalStateException this execution is not active
 	 */
 	public String getActiveFlowId() throws IllegalStateException;

@@ -87,7 +87,7 @@ import org.springframework.util.ToStringCreator;
  */
 public class Flow {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(Flow.class);
 
 	/**
 	 * The flow identifier uniquely identifying this flow among all other flows.

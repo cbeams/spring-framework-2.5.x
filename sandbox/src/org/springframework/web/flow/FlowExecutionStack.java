@@ -29,7 +29,6 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 
@@ -56,12 +55,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 
 	private static final long serialVersionUID = 3258688806151469104L;
 
-	protected final Log logger = LogFactory.getLog(FlowExecutionStack.class);
-
-	/**
-	 * The unique, random, machine-generated flow execution identifier.
-	 */
-	private String id;
+	protected static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	/**
 	 * The time at which this object was created.
@@ -116,21 +110,16 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 */
 	public FlowExecutionStack(Flow rootFlow) {
 		Assert.notNull(rootFlow, "The root flow definition is required");
-		this.id = new RandomGuid().toString();
 		this.creationTimestamp = System.currentTimeMillis();
 		this.rootFlow = rootFlow;
 		// add the list of default execution listeners configured for the flow
 		listenerList.add(rootFlow.getFlowExecutionListenerList());
 		if (logger.isDebugEnabled()) {
-			logger.debug("Created new client execution for flow '" + rootFlow.getId() + "' with id '" + getId() + "'");
+			logger.debug("Created new client execution for flow '" + rootFlow.getId() + "'");
 		}
 	}
 
 	// methods implementing FlowExecutionMBean
-
-	public String getId() {
-		return id;
-	}
 
 	public long getCreationTimestamp() {
 		return this.creationTimestamp;
@@ -141,8 +130,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	public String getCaption() {
-		return "[" + FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE + "=" + getId() + ", " + getQualifiedActiveFlowId()
-				+ "]";
+		return "[" + getQualifiedActiveFlowId()	+ "]";
 	}
 
 	/**
@@ -398,7 +386,6 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	// custom serialization
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		out.writeObject(this.id);
 		out.writeObject(this.getRootFlow().getId());
 		out.writeObject(this.lastEventId);
 		out.writeLong(this.lastEventTimestamp);
@@ -406,7 +393,6 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
-		this.id = (String)in.readObject();
 		this.rootFlowId = (String)in.readObject();
 		this.lastEventId = (String)in.readObject();
 		this.lastEventTimestamp = in.readLong();
@@ -442,10 +428,10 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 
 	public String toString() {
 		if (isEmpty()) {
-			return "[Empty FlowExecutionStack '" + getId() + "'; no flows are active]";
+			return "[Empty FlowExecutionStack; no flows are active]";
 		}
 		else {
-			return new ToStringCreator(this).append("id", getId()).append("activeFlowId", getActiveFlowId()).append(
+			return new ToStringCreator(this).append("activeFlowId", getActiveFlowId()).append(
 					"currentStateId", getCurrentStateId()).append("rootFlow", getRootFlow()).append(
 					"executingFlowSessions", executingFlowSessions).toString();
 		}

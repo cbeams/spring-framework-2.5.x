@@ -31,8 +31,10 @@ import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.FormObjectAccessor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
+import org.springframework.web.flow.execution.FlowExecutionStorage;
+import org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager;
+import org.springframework.web.flow.execution.HttpSessionFlowExecutionStorage;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
-import org.springframework.web.flow.support.HttpServletFlowExecutionManager;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
 import org.springframework.web.util.WebUtils;
@@ -45,7 +47,7 @@ import org.springframework.web.util.WebUtils;
  * views that start new flow executions.
  * <p>
  * Requests are managed by and delegated to a
- * {@link HttpServletFlowExecutionManager}, allowing reuse of common front flow
+ * {@link HttpServletRequestFlowExecutionManager}, allowing reuse of common front flow
  * controller logic in other environments. Consult the JavaDoc of that class for
  * more information on how requests are processed.
  * <p>
@@ -108,7 +110,7 @@ import org.springframework.web.util.WebUtils;
  * <code>ActionForm</code> classes found in traditional Struts-based apps.
  * 
  * @see org.springframework.web.flow.struts.FlowActionMapping
- * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
+ * @see org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager
  * @see org.springframework.web.struts.BindingActionForm
  * @see org.springframework.web.struts.BindingRequestProcessor
  * @see org.springframework.web.struts.BindingPlugin
@@ -144,9 +146,9 @@ public class FlowAction extends TemplateAction {
 
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		HttpServletFlowExecutionManager flowExecutionManager = createFlowExecutionManager(mapping);
+		HttpServletRequestFlowExecutionManager flowExecutionManager = createFlowExecutionManager(mapping);
 		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
-		ViewDescriptor viewDescriptor = flowExecutionManager.handleRequest(request, response, actionFormAdapter);
+		ViewDescriptor viewDescriptor = flowExecutionManager.handle(request, response, actionFormAdapter);
 		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
 	}
 
@@ -154,8 +156,9 @@ public class FlowAction extends TemplateAction {
 	 * Creates the default flow execution manager. Subclasses can override this to
 	 * return a specialized manager.
 	 */
-	protected HttpServletFlowExecutionManager createFlowExecutionManager(ActionMapping mapping) {
-		return new HttpServletFlowExecutionManager(flowLocator,	flowLocator.getFlow(getFlowId(mapping)));
+	protected HttpServletRequestFlowExecutionManager createFlowExecutionManager(ActionMapping mapping) {
+		FlowExecutionStorage storage = new HttpSessionFlowExecutionStorage();
+		return new HttpServletRequestFlowExecutionManager(storage, flowLocator, flowLocator.getFlow(getFlowId(mapping)));
 	}
 
 	/**

@@ -141,7 +141,17 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Internal helper method that get a transition for given flow execution request context.
+	 * Returns whether or not this state has a transition that will fire
+	 * for given flow execution request context.
+	 * @param context a flow execution context
+	 */
+	public boolean hasTransitionFor(RequestContext context) {
+		return getTransition(context) != null;
+	}
+
+	/**
+	 * Internal helper method that gets a transition for given flow execution
+	 * request context.
 	 * @param context a flow execution context
 	 * @param return the transition, or null if not found
 	 */
@@ -154,15 +164,6 @@ public abstract class TransitionableState extends State {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Returns whether or not this state has a transition that will fire
-	 * for given flow execution request context.
-	 * @param context a flow execution context
-	 */
-	public boolean hasTransitionFor(RequestContext context) {
-		return getTransition(context) != null;
 	}
 
 	protected void createToString(ToStringCreator creator) {

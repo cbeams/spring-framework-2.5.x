@@ -36,7 +36,7 @@ import org.springframework.util.closure.support.Block;
  */
 public class InternalRequestContext implements StateContext, TransactionSynchronizer {
 
-	protected final Log logger = LogFactory.getLog(FlowExecutionStack.class);
+	protected static final Log logger = LogFactory.getLog(InternalRequestContext.class);
 
 	private Event originatingEvent;
 
@@ -99,19 +99,11 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return getActiveFlowSession().getFlowScope();
 	}
 
-	public Map getModel(boolean includeInfrastructureAttributes) {
+	public Map getModel() {
 		// merge request and flow scope
 		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
 		model.putAll(getFlowScope().getAttributeMap());
 		model.putAll(getRequestScope().getAttributeMap());
-		if (includeInfrastructureAttributes) {
-			// make the flow execution itself available in the model
-			model.put(FlowConstants.FLOW_EXECUTION_ATTRIBUTE, this.flowExecution);
-			// add some convenience values for views that aren't easily
-			// javabean aware
-			model.put(FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE, this.flowExecution.getId());
-			model.put(FlowConstants.CURRENT_STATE_ID_ATTRIBUTE, this.flowExecution.getCurrentStateId());
-		}
 		return model;
 	}
 

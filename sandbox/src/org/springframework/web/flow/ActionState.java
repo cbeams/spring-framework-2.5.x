@@ -326,10 +326,9 @@ public class ActionState extends TransitionableState {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger
-								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-										+ eventIds[executionCount] + "' -- "
-										+ "I will proceed to the next action in the chain");
+						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+								+ eventIds[executionCount] + "' -- "
+								+ "I will proceed to the next action in the chain");
 					}
 				}
 			}
@@ -393,7 +392,8 @@ public class ActionState extends TransitionableState {
 					logger.debug("Executing action '" + this + "'");
 				}
 				return getEvent(action.getTargetAction().execute(context));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new ActionExecutionException(action, e);
 			}
 		}
