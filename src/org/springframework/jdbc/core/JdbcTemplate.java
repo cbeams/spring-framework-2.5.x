@@ -78,7 +78,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.37 2004-03-23 22:48:38 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.38 2004-04-22 07:42:03 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.datasource
@@ -755,7 +755,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 */
 	protected static final class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
 
-		private RowCallbackHandler rch;
+		private final RowCallbackHandler rch;
 
 		public RowCallbackHandlerResultSetExtractor(RowCallbackHandler rch) {
 			this.rch = rch;
@@ -791,12 +791,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				}
 				listOfRows.add(mapOfColValues);
 			}
-			if (listOfRows.size() == 1 && numberOfColumns == 1) {
-				return ((Map) listOfRows.get(0)).get(rsmd.getColumnName(1));
-			}
-			else {
-				return listOfRows;
-			}
+			return listOfRows;
 		}
 	}
 

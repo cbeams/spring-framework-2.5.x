@@ -51,7 +51,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.23 2004-04-01 02:07:02 trisberg Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.24 2004-04-22 07:41:28 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -148,7 +148,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 
 		try {
-			int rowsAffected = template.update(d);
+			template.update(d);
 			fail("Bogus update should throw exception");
 		}
 		catch (UncategorizedDataAccessException ex) {
@@ -374,80 +374,12 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlStatement.verify();
 	}
 
-	//	This really tests the translator: shouldn't the SQL translator have its own tests?
-	//	We just need to check that the translator is invoked and that it's exception is correctly used
-	/*
-	 public void testSQLExceptionIsTranslated() throws Exception {
-
-		 class TestSqlExceptionTranslator implements SQLExceptionTranslator {
-			 private int invoked;
-			 public DataAccessException translate(String task, String sql, SQLException sqlex) {
-				 // Any subclass will do: can't really check all, can we?
-				 // YES, we can: loop throuigh with exception as parameter
-				 System.out.println("Our translator");
-				 ++invoked;
-				 return new BadSqlGrammarException("Exception doing " + task,sql, sqlex);
-			 }
-		 }
-
-		 TestSqlExceptionTranslator trans = new TestSqlExceptionTranslator();
-
-		 String sql = "SELECT"; // doesn't really matter what this is
-
-		 SQLException sex = new SQLException("Any type of SQLException");
-		 //MockConnection con = MockConnectionFactory.preparedStatement(sql, null, new Object[0][0], false, sex, null);
-
-		 MockControl conControl = MockControl.createControl(Connection.class);
-		 Connection con = (Connection) conControl.getMock();
-		 con.prepareStatement(sql);
-
-		 MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		 PreparedStatement ps = (PreparedStatement) psControl.getMock();
-		 ps.executeQuery();
-		 MockSingleRowResultSet rs = new MockSingleRowResultSet();
-		 rs.setExpectedCloseCalls(2);
-		 //rs.setupMetaData()
-
-		 psControl.setReturnValue(rs);
-		 psControl.replay();
-		 conControl.setReturnValue(ps);
-		 con.close();
-		 conControl.replay();
-
-		 MockControl dsControl = MockControl.createControl(DataSource.class);
-		 DataSource ds = (DataSource) dsControl.getMock();
-		 ds.getConnection();
-		 dsControl.setReturnValue(con);
-		 dsControl.replay();
-
-		 JdbcTemplate template = new JdbcTemplate(ds);
-		 template.setExceptionTranslator(trans);
-		 RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-		 try {
-			 template.query(PreparedStatementCreatorFactory.newPreparedStatementCreator(sql), rcch);
-			 fail("Exceptioo should be translated");
-		 }
-		 catch (DataAccessException ex) {
-			 SQLException se2 = (SQLException) ex.getCause();
-			 assertTrue("Found SQL exception", se2 == sex);
-			 //System.out.println("VENDOR CODE IS " + sex.getErrorCode());
-			 //System.out.println("SQLSTATE IS " + sex.getSQLState());
-		 }
-		 dsControl.verify();
-		 conControl.verify();
-	 }
-	 */
-
 	/**
-	 * Test that we see a runtime exception back
+	 * Test that we see a runtime exception come back.
 	 */
 	public void testExceptionComesBack() throws Exception {
 		final String sql = "SELECT ID FROM CUSTMR";
 		final RuntimeException rex = new RuntimeException("What I want to see");
-		Object[][] results = new Object[][] { { new Integer(1)}, {
-				new Integer(2)
-				}
-		};
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
@@ -490,7 +422,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 	}
 
 	/**
-	 * Test update with static SQL
+	 * Test update with static SQL.
 	 */
 	public void testSqlUpdate() throws Exception {
 		final String sql =
@@ -708,8 +640,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 	}
 
 	/**
-	 * Test case where a batch update fails
-	 * @throws Exception
+	 * Test case where a batch update fails.
 	 */
 	public void testBatchUpdateFails() throws Exception {
 		final String sql =
@@ -1117,19 +1048,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		final SQLException sex =
 			new SQLException("I have a known problem", "99999", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
-		Object[][] results = new Object[][] { { new Integer(1)}, {
-				new Integer(2)
-				}
-		};
-
-		MockControl ctrlDatabaseMetaData =
-			MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData =
-			(DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		//mockDatabaseMetaData.getDatabaseProductName();
-		//ctrlDatabaseMetaData.setReturnValue("MySQL");
-		//mockDatabaseMetaData.getDriverVersion();
-		//ctrlDatabaseMetaData.setReturnValue("1.2.3");
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
@@ -1152,7 +1070,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		//mockConnection.getMetaData();
 		//ctrlConnection.setReturnValue(mockDatabaseMetaData);
 
-		ctrlDatabaseMetaData.replay();
 		ctrlResultSet.replay();
 		ctrlStatement.replay();
 		replay();
@@ -1178,7 +1095,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 					+ ex);
 		}
 
-		ctrlDatabaseMetaData.verify();
 		ctrlResultSet.verify();
 		ctrlStatement.verify();
 	}
@@ -1193,10 +1109,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		final SQLException sex =
 			new SQLException("I have a known problem", "07000", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
-		Object[][] results = new Object[][] { { new Integer(1)}, {
-				new Integer(2)
-				}
-		};
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
@@ -1536,6 +1448,194 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlCallable.verify();
 	}
 
+	public void testQueryForList() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
+
+		MockControl ctrlResultSetMetaData;
+		ResultSetMetaData mockResultSetMetaData;
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		Statement mockStatement;
+
+		try {
+			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+			mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+			mockResultSetMetaData.getColumnCount();
+			ctrlResultSetMetaData.setReturnValue(1);
+			mockResultSetMetaData.getColumnName(1);
+			ctrlResultSetMetaData.setReturnValue("age", 2);
+
+			ctrlResultSet = MockControl.createControl(ResultSet.class);
+			mockResultSet = (ResultSet) ctrlResultSet.getMock();
+			mockResultSet.getMetaData();
+			ctrlResultSet.setReturnValue(mockResultSetMetaData);
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(true);
+			mockResultSet.getObject(1);
+			ctrlResultSet.setReturnValue(new Integer(11));
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(true);
+			mockResultSet.getObject(1);
+			ctrlResultSet.setReturnValue(new Integer(12));
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(false);
+			mockResultSet.close();
+			ctrlResultSet.setVoidCallable();
+
+			ctrlStatement = MockControl.createControl(Statement.class);
+			mockStatement = (Statement) ctrlStatement.getMock();
+			mockStatement.executeQuery(sql);
+			ctrlStatement.setReturnValue(mockResultSet);
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+			mockStatement.close();
+			ctrlStatement.setVoidCallable();
+
+			mockConnection.createStatement();
+			ctrlConnection.setReturnValue(mockStatement);
+		}
+		catch (SQLException sex) {
+			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
+		}
+
+		ctrlResultSetMetaData.replay();
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		List li = template.queryForList(sql);
+		assertEquals("All rows returned", 2, li.size());
+		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
+		assertEquals("Second row is Integer", 12, ((Integer)((Map)li.get(1)).get("age")).intValue());
+
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
+	public void testQueryForListWithSingleRowAndColumn() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
+
+		MockControl ctrlResultSetMetaData;
+		ResultSetMetaData mockResultSetMetaData;
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		Statement mockStatement;
+
+		try {
+			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+			mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+			mockResultSetMetaData.getColumnCount();
+			ctrlResultSetMetaData.setReturnValue(1);
+			mockResultSetMetaData.getColumnName(1);
+			ctrlResultSetMetaData.setReturnValue("age", 2);
+
+			ctrlResultSet = MockControl.createControl(ResultSet.class);
+			mockResultSet = (ResultSet) ctrlResultSet.getMock();
+			mockResultSet.getMetaData();
+			ctrlResultSet.setReturnValue(mockResultSetMetaData);
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(true);
+			mockResultSet.getObject(1);
+			ctrlResultSet.setReturnValue(new Integer(11));
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(false);
+			mockResultSet.close();
+			ctrlResultSet.setVoidCallable();
+
+			ctrlStatement = MockControl.createControl(Statement.class);
+			mockStatement = (Statement) ctrlStatement.getMock();
+			mockStatement.executeQuery(sql);
+			ctrlStatement.setReturnValue(mockResultSet);
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+			mockStatement.close();
+			ctrlStatement.setVoidCallable();
+
+			mockConnection.createStatement();
+			ctrlConnection.setReturnValue(mockStatement);
+		}
+		catch (SQLException sex) {
+			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
+		}
+
+		ctrlResultSetMetaData.replay();
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		List li = template.queryForList(sql);
+		assertEquals("All rows returned", 1, li.size());
+		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
+
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
+	public void testQueryForObject() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
+
+		MockControl ctrlResultSetMetaData;
+		ResultSetMetaData mockResultSetMetaData;
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		Statement mockStatement;
+
+		try {
+			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+			mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+			mockResultSetMetaData.getColumnCount();
+			ctrlResultSetMetaData.setReturnValue(1);
+
+			ctrlResultSet = MockControl.createControl(ResultSet.class);
+			mockResultSet = (ResultSet) ctrlResultSet.getMock();
+			mockResultSet.getMetaData();
+			ctrlResultSet.setReturnValue(mockResultSetMetaData);
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(true);
+			mockResultSet.getObject(1);
+			ctrlResultSet.setReturnValue(new Integer(22));
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(false);
+			mockResultSet.close();
+			ctrlResultSet.setVoidCallable();
+
+			ctrlStatement = MockControl.createControl(Statement.class);
+			mockStatement = (Statement) ctrlStatement.getMock();
+			mockStatement.executeQuery(sql);
+			ctrlStatement.setReturnValue(mockResultSet);
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+			mockStatement.close();
+			ctrlStatement.setVoidCallable();
+
+			mockConnection.createStatement();
+			ctrlConnection.setReturnValue(mockStatement);
+		}
+		catch (SQLException sex) {
+			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
+		}
+
+		ctrlResultSetMetaData.replay();
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		Object o = template.queryForObject(sql, Integer.class);
+		assertEquals("Return of an object", "java.lang.Integer", o.getClass().getName());
+
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
 	public void testQueryForInt() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 
@@ -1652,135 +1752,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlStatement.verify();
 	}
 
-	public void testQueryForObject() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 
-		MockControl ctrlResultSetMetaData;
-		ResultSetMetaData mockResultSetMetaData;
-		MockControl ctrlResultSet;
-		ResultSet mockResultSet;
-		MockControl ctrlStatement;
-		Statement mockStatement;
-
-		try {
-			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
-			mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
-			mockResultSetMetaData.getColumnCount();
-			ctrlResultSetMetaData.setReturnValue(1);
-			
-			ctrlResultSet = MockControl.createControl(ResultSet.class);
-			mockResultSet = (ResultSet) ctrlResultSet.getMock();
-			mockResultSet.getMetaData();
-			ctrlResultSet.setReturnValue(mockResultSetMetaData);
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getObject(1);
-			ctrlResultSet.setReturnValue(new Integer(22));
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
-
-			ctrlStatement = MockControl.createControl(Statement.class);
-			mockStatement = (Statement) ctrlStatement.getMock();
-			mockStatement.executeQuery(sql);
-			ctrlStatement.setReturnValue(mockResultSet);
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-			mockStatement.close();
-			ctrlStatement.setVoidCallable();
-
-			mockConnection.createStatement();
-			ctrlConnection.setReturnValue(mockStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
-
-		ctrlResultSetMetaData.replay();
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
-		Object o = template.queryForObject(sql, Integer.class);
-		assertEquals("Return of an object", "java.lang.Integer", o.getClass().getName());
-
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
-	}
-
-	public void testQueryForList() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
-
-		MockControl ctrlResultSetMetaData;
-		ResultSetMetaData mockResultSetMetaData;
-		MockControl ctrlResultSet;
-		ResultSet mockResultSet;
-		MockControl ctrlStatement;
-		Statement mockStatement;
-
-		try {
-			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
-			mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
-			mockResultSetMetaData.getColumnCount();
-			ctrlResultSetMetaData.setReturnValue(1);
-			mockResultSetMetaData.getColumnName(1);
-			ctrlResultSetMetaData.setReturnValue("age");
-			mockResultSetMetaData.getColumnName(1);
-			ctrlResultSetMetaData.setReturnValue("age");
-			
-			ctrlResultSet = MockControl.createControl(ResultSet.class);
-			mockResultSet = (ResultSet) ctrlResultSet.getMock();
-			mockResultSet.getMetaData();
-			ctrlResultSet.setReturnValue(mockResultSetMetaData);
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getObject(1);
-			ctrlResultSet.setReturnValue(new Integer(11));
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getObject(1);
-			ctrlResultSet.setReturnValue(new Integer(12));
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
-
-			ctrlStatement = MockControl.createControl(Statement.class);
-			mockStatement = (Statement) ctrlStatement.getMock();
-			mockStatement.executeQuery(sql);
-			ctrlStatement.setReturnValue(mockResultSet);
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-			mockStatement.close();
-			ctrlStatement.setVoidCallable();
-
-			mockConnection.createStatement();
-			ctrlConnection.setReturnValue(mockStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
-
-		ctrlResultSetMetaData.replay();
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
-		List li = template.queryForList(sql);
-		assertEquals("All rows returned", 2, li.size());
-		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
-		assertEquals("Second row is Integer", 12, ((Integer)((Map)li.get(1)).get("age")).intValue());
-
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
-	}
-
-	
 	private static interface JdbcTemplateCallback {
 
 		void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch);
