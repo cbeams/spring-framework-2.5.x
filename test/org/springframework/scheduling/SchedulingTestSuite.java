@@ -1,17 +1,21 @@
 package org.springframework.scheduling;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import junit.framework.TestCase;
+import org.easymock.MockControl;
 import org.quartz.CronTrigger;
+import org.quartz.Job;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 
@@ -19,7 +23,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.scheduling.quartz.CronTriggerBean;
 import org.springframework.scheduling.quartz.JobDetailBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerBean;
 import org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean;
@@ -33,34 +36,59 @@ import org.springframework.scheduling.timer.TimerFactoryBean;
 public class SchedulingTestSuite extends TestCase {
 
 	public void testTimerFactoryBean() throws Exception {
-		TestTimerTask timerTask0 = new TestTimerTask();
+		final TestTimerTask timerTask0 = new TestTimerTask();
 		TestMethodInvokingTask task1 = new TestMethodInvokingTask();
 		MethodInvokingTimerTaskFactoryBean mittfb = new MethodInvokingTimerTaskFactoryBean();
 		mittfb.setTargetObject(task1);
 		mittfb.setTargetMethod("doSomething");
 		mittfb.afterPropertiesSet();
-		TimerTask timerTask1 = (TimerTask) mittfb.getObject();
+		final TimerTask timerTask1 = (TimerTask) mittfb.getObject();
+
 		ScheduledTimerTask[] tasks = new ScheduledTimerTask[2];
 		tasks[0] = new ScheduledTimerTask(timerTask0, 0, 10, false);
 		tasks[1] = new ScheduledTimerTask(timerTask1, 10, 20, true);
-		TimerFactoryBean timerFactoryBean = new TimerFactoryBean();
+
+		final List success = new ArrayList(3);
+		final Timer timer = new Timer(true) {
+			public void schedule(TimerTask task, long delay, long period) {
+				if (task == timerTask0 && delay == 0 && period == 10) {
+					success.add(Boolean.TRUE);
+				}
+			}
+			public void scheduleAtFixedRate(TimerTask task, long delay, long period) {
+				if (task == timerTask1 && delay == 10 && period == 20) {
+					success.add(Boolean.TRUE);
+				}
+			}
+			public void cancel() {
+				success.add(Boolean.TRUE);
+			}
+		};
+
+		TimerFactoryBean timerFactoryBean = new TimerFactoryBean() {
+			protected Timer createTimer(boolean daemon) {
+				return timer;
+			}
+		};
 		try {
 			timerFactoryBean.setScheduledTimerTasks(tasks);
+			timerFactoryBean.afterPropertiesSet();
 			assertTrue(timerFactoryBean.getObject() instanceof Timer);
-			Thread.sleep(100);
+			timerTask0.run();
+			timerTask1.run();
 		}
 		finally {
 			timerFactoryBean.destroy();
 		}
-		assertTrue(timerTask0.counter > 3);
-		assertTrue(task1.counter > 1);
+
+		assertTrue("Correct Timer invocations", success.size() == 3);
+		assertTrue("TimerTask0 works", timerTask0.counter == 1);
+		assertTrue("TimerTask1 works", task1.counter == 1);
 	}
 
 	public void testSchedulerFactoryBean() throws Exception {
-		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-
 		JobDetailBean jobDetail0 = new JobDetailBean();
-		jobDetail0.setJobClass(TestQuartzJob.class);
+		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setBeanName("myJob0");
 		Map jobData = new HashMap();
 		jobData.put("testBean", new TestBean("tb", 99));
@@ -86,25 +114,39 @@ public class SchedulingTestSuite extends TestCase {
 		trigger1.setRepeatInterval(20);
 		trigger1.afterPropertiesSet();
 
+		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
+		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		scheduler.scheduleJob(jobDetail0, trigger0);
+		schedulerControl.setReturnValue(new Date());
+		scheduler.scheduleJob(jobDetail1, trigger1);
+		schedulerControl.setReturnValue(new Date());
+		scheduler.start();
+		schedulerControl.setVoidCallable();
+		scheduler.shutdown();
+		schedulerControl.setVoidCallable();
+		schedulerControl.replay();
+
+		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
+					throws SchedulerException {
+				return scheduler;
+			}
+		};
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
-		TestQuartzJob.counter = 0;
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
-			Thread.sleep(300);
 		}
 		finally {
 			schedulerFactoryBean.destroy();
 		}
-		assertTrue(TestQuartzJob.counter > 0);
-		assertTrue(task1.counter > 6);
+
+		schedulerControl.verify();
 	}
 
 
 	public void testSchedulerFactoryBeanWithPlainQuartzObjects() throws Exception {
-		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-
 		JobDetail jobDetail0 = new JobDetail();
-		jobDetail0.setJobClass(TestQuartzJob.class);
+		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setName("myJob0");
 		jobDetail0.setGroup(Scheduler.DEFAULT_GROUP);
 		jobDetail0.getJobDataMap().put("testBean", new TestBean("tb", 99));
@@ -133,18 +175,38 @@ public class SchedulingTestSuite extends TestCase {
 		trigger1.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
 		trigger1.setRepeatInterval(20);
 
+		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
+		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		scheduler.addJob(jobDetail0, true);
+		schedulerControl.setVoidCallable();
+		scheduler.addJob(jobDetail1, true);
+		schedulerControl.setVoidCallable();
+		scheduler.scheduleJob(trigger0);
+		schedulerControl.setReturnValue(new Date());
+		scheduler.scheduleJob(trigger1);
+		schedulerControl.setReturnValue(new Date());
+		scheduler.start();
+		schedulerControl.setVoidCallable();
+		scheduler.shutdown();
+		schedulerControl.setVoidCallable();
+		schedulerControl.replay();
+
+		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
+					throws SchedulerException {
+				return scheduler;
+			}
+		};
 		schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0, jobDetail1});
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
-		TestQuartzJob.counter = 0;
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
-			Thread.sleep(200);
 		}
 		finally {
 			schedulerFactoryBean.destroy();
 		}
-		assertTrue(TestQuartzJob.counter > 0);
-		assertTrue(task1.counter > 6);
+
+		schedulerControl.verify();
 	}
 
 
@@ -154,24 +216,6 @@ public class SchedulingTestSuite extends TestCase {
 
 		public void run() {
 			counter++;
-		}
-	}
-
-
-	public static class TestQuartzJob extends QuartzJobBean {
-
-		private static int counter = 0;
-
-		private TestBean testBean;
-
-		public void setTestBean(TestBean testBean) {
-			this.testBean = testBean;
-		}
-
-		protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-			if (this.testBean.getAge() == 99) {
-				counter++;
-			}
 		}
 	}
 
