@@ -82,12 +82,11 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>model gets exposed and view gets rendered. Continue after user has filled
  *      in form</li>
  *  <li>POST request on the controller is received</li>
- *  <li>if <code>sessionForm</code> is not set, {@link #getCommand getCommand()}
- *      is called to retrieve a command class. Otherwise, the controller tries
- *      to find the command object which is already bound in the session. If it cannot
+ *  <li>if <code>sessionForm</code> is not set, {@link #formBackingObject formBackingObject()}
+ *      is called to retrieve a form object. Otherwise, the controller tries to
+ *      find the command object which is already bound in the session. If it cannot
  *      find the object, it'll do a call to {@link #handleInvalidSubmit handleInvalidSubmit}
- *      which - by default - tries to create a new command class and
- *      resubmit the form</li>
+ *      which - by default - tries to create a new form object and resubmit the form</li>
  *  <li>controller tries to put all parameters from the request into the
  *      JavaBeans (command object) and if <code>validateOnBinding</code> is
  *      set, validation will occur</li>
@@ -414,16 +413,17 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Return the form object for the given request.
-	 * In session form mode: Retrieve the form object from the session.
-	 * The form object gets removed from the session, but it will be
-	 * re-added when showing the form for resubmission.
+	 * <p>Calls formBackingObject if not in session form mode. Else, retrieves the
+	 * form object from the session. Note that the form object gets removed from
+	 * the session, but it will be re-added when showing the form for resubmission.
 	 * @param request current HTTP request
 	 * @return object form to bind onto
 	 * @throws Exception in case of invalid state or arguments
+	 * @see #formBackingObject
 	 */
 	protected final Object getCommand(HttpServletRequest request) throws Exception {
 		if (!isSessionForm()) {
-			return super.getCommand(request);
+			return formBackingObject(request);
 		}
 		HttpSession session = request.getSession(false);
 		if (session == null) {

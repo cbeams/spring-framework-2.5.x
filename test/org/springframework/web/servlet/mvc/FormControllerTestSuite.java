@@ -59,7 +59,6 @@ public class FormControllerTestSuite extends TestCase {
 		
 		assertTrue("refDataCount == 1", mc.refDataCount == 1);
 		
-		// Has bean
 		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		int[] numbers = (int[]) mv.getModel().get(mc.NUMBERS_ATT);
 		assertTrue("model is non null", person != null);
@@ -148,6 +147,7 @@ public class FormControllerTestSuite extends TestCase {
 		request.addParameter("age", "" + age);
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
+
 		assertEquals("returned correct view name", successView, mv.getViewName());
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + TestController.BEAN_NAME);
@@ -195,7 +195,6 @@ public class FormControllerTestSuite extends TestCase {
 		assertTrue("returned correct view name: expected '" + successView + "', not '" + mv.getViewName() + "'",
 			mv.getViewName().equals(successView));
 		
-		// Has bean
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
@@ -221,11 +220,10 @@ public class FormControllerTestSuite extends TestCase {
 		assertTrue("returned correct view name: expected '" + formView + "', not '" + mv.getViewName() + "'",
 		mv.getViewName().equals(formView));
 		
-		// Has bean
 		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
-		assertTrue("bean age is default", person.getAge() == new TestBean().getAge());
+		assertTrue("bean age is default", person.getAge() == TestController.DEFAULT_AGE);
 		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("One error", errors.getErrorCount() == 1);
@@ -255,13 +253,12 @@ public class FormControllerTestSuite extends TestCase {
 		assertTrue("returned correct view name: expected '" + formView + "', not '" + mv.getViewName() + "'",
 		mv.getViewName().equals(formView));
 		
-		// Has bean
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		
 		// yes, but it was rejected after binding by the validator
 		assertTrue("bean name bound ok", person.getName().equals(name));
-		assertTrue("bean age is default", person.getAge() == new TestBean().getAge());
+		assertTrue("bean age is default", person.getAge() == TestController.DEFAULT_AGE);
 		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("One error", errors.getErrorCount() == 2);
