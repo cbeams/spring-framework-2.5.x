@@ -66,7 +66,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.22 2004-02-16 20:50:26 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.23 2004-02-16 21:03:05 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -213,7 +213,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 					listOfRows.add(mapOfColValues);
 				}
 				if (listOfRows.size() == 1 && numberOfColumns == 1)
-					returnValue = ((ArrayList) listOfRows.get(0)).get(0);
+					returnValue = ((HashMap) listOfRows.get(0)).get(rsmd.getColumnName(1));
 				else
 					returnValue = listOfRows;
 			}
