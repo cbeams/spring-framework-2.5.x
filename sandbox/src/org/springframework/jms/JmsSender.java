@@ -88,13 +88,11 @@ public interface JmsSender {
 	 * @param timetoLive
 	 * @throws JmsException
 	 */
-	/*
 	public void send(String destinationName,
 					 MessageCreator messageCreator, 
 					 int deliveryMode,
 					 int priority,
-					 int timetoLive) throws JmsException					 
-	*/
+					 int timetoLive) throws JmsException;					 	
 	/*
 	//Send to a specified destination.  useful when replying to the destination
 	// in an incoming message specified in the JMSReplyTo message property or

@@ -29,84 +29,119 @@ import javax.jms.Session;
  */
 public class JmsSender11 extends AbstractJmsSender {
 
-	public void send(String destinationName, MessageCreator messageCreator)
-		throws JmsException {
-		Connection connection = null;
-		try {
-			connection = getConnectionFactory().createConnection();
-			Session session =
-				connection.createSession(
-					isSessionTransacted(),
-					getSessionAcknowledgeMode());
-			Destination dest =
-				(Destination) getJmsAdmin().lookup(
-					destinationName,
-					isEnabledDynamicDestinations(),
-					isPubSubDomain());
-			if (logger.isInfoEnabled()) {
-				logger.info(
-					"Looked up destination with name ["
-						+ destinationName
-						+ "]");
-			}
-			MessageProducer producer = session.createProducer(dest);
+    public void send(
+        String destinationName,
+        MessageCreator messageCreator,
+        int deliveryMode,
+        int priority,
+        int timetoLive)
+        throws JmsException {
+        send(
+            destinationName,
+            messageCreator,
+            false,
+            deliveryMode,
+            priority,
+            timetoLive);
+    }
 
-			Message message = messageCreator.createMessage(session);
-			if (logger.isInfoEnabled()) {
-				logger.info("Message created was [" + message + "]");
-			}
-			producer.send(dest, message);
+    public void send(String destinationName, MessageCreator messageCreator)
+        throws JmsException {
+        send(destinationName, messageCreator, true, 0, 0, 0);
+    }
 
-		} catch (JMSException e) {
-			throw new JmsException(
-				"Could not send message on destinaton name = " + destinationName,
-				e);
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (JMSException e) {
-					logger.warn("Failed to close the connection", e);
-				}
-			}
-		}
+    public void send(String destinationName, JmsSenderCallback callback)
+        throws JmsException {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see org.springframework.jms.JmsSender#send(java.lang.String, org.springframework.jms.JmsSenderCallback)
-	 */
-	public void send(String destinationName, JmsSenderCallback callback)
-		throws JmsException {
-		// TODO Auto-generated method stub
+    public void execute(SessionCallback action) throws JmsException {
+        throw new RuntimeException("not yet impl.");
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see org.springframework.jms.JmsSender#execute(org.springframework.jms.SessionCallback)
-	 */
-	public void execute(SessionCallback action) throws JmsException {
-		throw new RuntimeException("not yet impl.");
-		// TODO Auto-generated method stub
+    public void execute(TopicSessionCallback action) throws JmsException {
+        throw new RuntimeException("not yet impl.");
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see org.springframework.jms.JmsSender#execute(org.springframework.jms.TopicSessionCallback)
-	 */
-	public void execute(TopicSessionCallback action) throws JmsException {
-		throw new RuntimeException("not yet impl.");
-		// TODO Auto-generated method stub
+    public void execute(QueueSessionCallback action) throws JmsException {
+        throw new RuntimeException("not yet impl.");
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see org.springframework.jms.JmsSender#execute(org.springframework.jms.QueueSessionCallback)
-	 */
-	public void execute(QueueSessionCallback action) throws JmsException {
-		throw new RuntimeException("not yet impl.");
-		// TODO Auto-generated method stub
+    /**
+     * Send a message on a destination optionally using values for deliveryMode,
+     * priority, and timetoLive.
+     * @param queueName the queue to send the message to
+     * @param messageCreator the message creator callback used to create a message
+     * @param ignoreQOS if true, send the message using default values of the
+     * deliveryMode, priority, and timetoLive.  Some vendors administration options
+     * let you set these values.
+     * @param deliveryMode the delivery mode to use.
+     * @param priority the priority for this message.
+     * @param timetoLive the message's lifetime, in milliseconds.
+     */
+    private void send(
+        String destinationName,
+        MessageCreator messageCreator,
+        boolean ignoreQOS,
+        int deliveryMode,
+        int priority,
+        int timetoLive) {
 
-	}
+        Connection connection = null;
+        try {
+            connection = getConnectionFactory().createConnection();
+            Session session =
+                connection.createSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
+            Destination dest =
+                (Destination) getJmsAdmin().lookup(
+                    destinationName,
+                    isEnabledDynamicDestinations(),
+                    isPubSubDomain());
+            if (logger.isInfoEnabled()) {
+                logger.info(
+                    "Looked up destination with name ["
+                        + destinationName
+                        + "]");
+            }
+            MessageProducer producer = session.createProducer(dest);
 
+            Message message = messageCreator.createMessage(session);
+            if (logger.isInfoEnabled()) {
+                logger.info("Message created was [" + message + "]");
+            }
+            if (ignoreQOS) {
+                producer.send(dest, message);
+            } else {
+                producer.send(
+                    dest,
+                    message,
+                    deliveryMode,
+                    priority,
+                    timetoLive);
+            }
+
+        } catch (JMSException e) {
+            throw new JmsException(
+                "Could not send message on destinaton name = "
+                    + destinationName,
+                e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    logger.warn("Failed to close the connection", e);
+                }
+            }
+        }
+    }
 }
