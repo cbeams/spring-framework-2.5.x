@@ -44,10 +44,10 @@ public class MultiAction extends AbstractAction {
 	public interface EventHandlerMethodNameResolver {
 
 		/**
-		 * @param eventId
-		 * @return
+		 * @param eventId The event id to resolve
+		 * @return The name of the method that should handle processing
 		 */
-		String getHandlerMethodName(String eventId);
+		public String getHandlerMethodName(String eventId);
 
 	}
 

@@ -200,9 +200,6 @@ public class BindAndValidateAction extends AbstractAction {
 		}
 	}
 
-	/*
-	 *  
-	 */
 	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
 		Object formObject = loadRequiredFormObject(request, model);
@@ -221,11 +218,11 @@ public class BindAndValidateAction extends AbstractAction {
 	 * Get the default action result for this bind and validate action; this
 	 * implementation returns error() if the binder has errors, success()
 	 * otherwise. Subclasses may overrride.
-	 * @param request
-	 * @param model
-	 * @param formObject
-	 * @param errors
-	 * @return
+	 * @param request the http request
+	 * @param model the flow data model
+	 * @param formObject the form object
+	 * @param errors possible binding errors
+	 * @return the action result
 	 */
 	protected String getDefaultActionResult(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
@@ -327,11 +324,11 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
-	 * Bind the parameters of the given request to the given formObject object.
+	 * Bind the parameters of the given request to the form object in the model.
 	 * @param request current HTTP request
-	 * @param formObject the formObject to bind onto
-	 * @return the ServletRequestDataBinder instance for additional custom
-	 *         validation
+	 * @param model the flow data model
+	 * @param binder the binder to use for binding
+	 * @return the action result outcome
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final String bindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
@@ -398,11 +395,10 @@ public class BindAndValidateAction extends AbstractAction {
 	 * session, to put have the editors get this from somewhere else
 	 * </p>
 	 * @param request current HTTP request
-	 * @param binder new binder instance
 	 * @param model the flow model
+	 * @param binder new binder instance
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
-	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
 	 */
 	protected void initBinder(HttpServletRequest request, AttributesAccessor model, ServletRequestDataBinder binder) {
 		if (propertyEditorRegistrar != null) {
@@ -421,13 +417,11 @@ public class BindAndValidateAction extends AbstractAction {
 	 * <p>
 	 * Default implementation delegates to onBind(request, formObject).
 	 * @param request current HTTP request
-	 * @param the flow model
+	 * @param model the flow model
 	 * @param formObject the formObject object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional custom
 	 *        registration of binding errors
-	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
-	 * @see #onBind(HttpServletRequest, Object)
 	 */
 	protected void onBind(HttpServletRequest request, MutableAttributesAccessor model, Object formObject,
 			BindException errors) {
@@ -441,10 +435,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 * <p>
 	 * Default implementation is empty.
 	 * @param request current HTTP request
-	 * @param the flow model
+	 * @param model the flow model
 	 * @param formObject the formObject object to perform further binding on
-	 * @throws Exception in case of invalid state or arguments
-	 * @see #onBind(HttpServletRequest, Object, BindException)
 	 */
 	protected void onBind(HttpServletRequest request, MutableAttributesAccessor model, Object formObject) {
 	}
@@ -470,7 +462,6 @@ public class BindAndValidateAction extends AbstractAction {
 	 *        binding
 	 * @param errors validation errors holder, allowing for additional custom
 	 *        validation
-	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
 	 */
@@ -486,11 +477,11 @@ public class BindAndValidateAction extends AbstractAction {
 	 * Hook called when binding and validation completes successfully;
 	 * subclasses may optionally return a ActionBeanEvent to supercede the
 	 * default result event, which will be success().
-	 * @param request
-	 * @param model
-	 * @param formObject
-	 * @param errors
-	 * @return
+	 * @param request the http request
+	 * @param model the flow data model
+	 * @param formObject the form object
+	 * @param errors the possible binding errors
+	 * @return the action result
 	 */
 	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
@@ -502,10 +493,10 @@ public class BindAndValidateAction extends AbstractAction {
 	 * subclasses may optionally return a ActionBeanEvent to supercede the
 	 * default result event, which will be success().
 	 * 
-	 * @param request
-	 * @param model
-	 * @param formObject
-	 * @return
+	 * @param request the http request
+	 * @param model the flow data model
+	 * @param formObject the form object
+	 * @return the action result
 	 */
 	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject) {

@@ -28,7 +28,6 @@ public class NoSuchActionException extends ServiceLookupException {
 	/**
 	 * Create a new action lookup exception.
 	 * @param serviceId The id of the service that cannot be found
-	 * @param cause The underlying cause of this exception
 	 */
 	public NoSuchActionException(String serviceId) {
 		super(serviceId);

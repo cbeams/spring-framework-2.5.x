@@ -269,7 +269,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	/**
 	 * Gets the form object from the model, using the specified name
 	 * @param model the flow model
-	 * @param formName the name of the form in the model
+	 * @param formObjectName the name of the form in the model
 	 * @param formObjectClass the class of the form object, which will be
 	 *        verified
 	 * @return the form object
@@ -281,7 +281,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	/**
 	 * Gets the form object from the model, using the specified name
 	 * @param model the flow model
-	 * @param formName the name of the form in the model
+	 * @param formObjectName the name of the form in the model
 	 * @return the form object
 	 */
 	protected Object getRequiredFormObject(AttributesAccessor model, String formObjectName) {
@@ -358,13 +358,25 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Pre-action-execution hook, subclasses may override.
+	 * Pre-action-execution hook, subclasses may override. If this method
+	 * returns a non-<code>null</code> value, the <code>doExecuteAction()</code>
+	 * method will <b>not</b> be called and the returned value will be used to select
+	 * a transition to trigger in the calling action state. If this method
+	 * returns <code>null</code>, <code>doExecuteAction()</code> will be
+	 * called to obtain an action result.
 	 * 
-	 * @param request
-	 * @param response
-	 * @param model
-	 * @return
-	 * @throws Exception
+	 * <p>
+	 * This implementation just returns <code>null</code>.
+	 * 
+	 * @param request The http request
+	 * @param response The http response
+	 * @param model The flow data model
+	 * @return The non-<code>null</code> action result, in which case the
+	 *         <code>doExecuteAction()</code> will not be called. Or
+	 *         <code>null</code> if the <code>doExecuteAction()</code> method
+	 *         should be called to obtain the action result.
+	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 *         checked or unchecked
 	 */
 	protected String onPreExecute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
@@ -374,21 +386,28 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	/**
 	 * Template hook method subclasses should override to encapsulate their
 	 * specific action execution logic.
+	 * 
 	 * @param request The http request
 	 * @param response The http response
 	 * @param model The flow data model
 	 * @return The action result
-	 * @throws Exception A unrecoverable exception occured
+	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 *         checked or unchecked
 	 */
 	protected abstract String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception;
 
 	/**
 	 * Post-action execution hook, subclasses may override.
-	 * @param request
-	 * @param response
-	 * @param model
-	 * @throws Exception
+	 * 
+	 * <p>
+	 * This implementation does nothing.
+	 * 
+	 * @param request The http request
+	 * @param response The http response
+	 * @param model The flow data model
+	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 *         checked or unchecked
 	 */
 	protected void onPostExecute(HttpServletRequest request, HttpServletResponse response, AttributesAccessor model)
 			throws Exception {

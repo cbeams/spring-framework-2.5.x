@@ -60,7 +60,7 @@ public interface FlowServiceLocator extends FlowLocator {
 
 	/**
 	 * Lookup a flow attributes mapper of specified implementation class.
-	 * @param flowAttributesMapperId The required implementation class
+	 * @param flowAttributesMapperImplementationClass The required implementation class
 	 * @return The flow attributes mapper
 	 * @throws ServiceLookupException When the flow attributes mapper cannot be
 	 *         found

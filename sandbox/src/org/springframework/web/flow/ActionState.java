@@ -116,7 +116,7 @@ public class ActionState extends TransitionableState {
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param actions The unnamed actions to execute in this state
-	 * @param transitions The sole transition (path) out of this state
+	 * @param transition The sole transition (path) out of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
@@ -146,7 +146,7 @@ public class ActionState extends TransitionableState {
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param actionNames The names of the named actions
 	 * @param actions The named actions to execute in this state
-	 * @param transitions The transitions (paths) out of this state
+	 * @param transition The transitions (paths) out of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */

@@ -107,7 +107,7 @@ public class FlowUtils {
 	 * @param request current HTTP request
 	 * @param requestParameterName name of the request parameter holding the
 	 *        token
-	 * @param reset indicates whether or not the token should be reset after
+	 * @param clear indicates whether or not the token should be reset after
 	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */

@@ -170,8 +170,6 @@ public class HttpFlowExecutionManager {
 	 * Execution will typically result in a state transition.
 	 * @param request the current HTTP request
 	 * @param response the current HTTP response
-	 * @param inputAttributes input data to be passed to the FlowExecution when
-	 *        creating a new FlowExecution
 	 * @return the model and view to render
 	 * @throws Exception in case of errors
 	 */
@@ -348,7 +346,6 @@ public class HttpFlowExecutionManager {
 	 * </ol>
 	 * @param request the current HTTP request
 	 * @param logicalName the <i>logical </i> name of the request parameter
-	 * @param delimiter the delimiter to use
 	 * @return the value of the parameter, or <code>null</code> if the
 	 *         parameter does not exist in given request
 	 */
