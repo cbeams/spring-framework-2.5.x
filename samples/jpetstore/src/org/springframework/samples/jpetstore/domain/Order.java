@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-
 public class Order implements Serializable {
 
   /* Private Fields */
@@ -125,7 +124,6 @@ public class Order implements Serializable {
   /* Public Methods */
 
   public void initOrder(Account account, Cart cart) {
-
     username = account.getUsername();
     orderDate = new Date();
 
@@ -161,7 +159,6 @@ public class Order implements Serializable {
       CartItem cartItem = (CartItem) i.next();
       addLineItem(cartItem);
     }
-
   }
 
   public void addLineItem(CartItem cartItem) {
