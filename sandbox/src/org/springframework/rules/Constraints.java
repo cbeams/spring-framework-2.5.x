@@ -241,7 +241,7 @@ public class Constraints {
     }
 
     /**
-     * Apply an "ny" value constraint to the provided bean property.
+     * Apply an "any" value constraint to the provided bean property.
      * 
      * @param propertyName
      *            The bean property name
