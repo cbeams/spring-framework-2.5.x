@@ -173,12 +173,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected Object doGetTransaction() throws CannotCreateTransactionException, TransactionException {
 		if (SessionFactoryUtils.getThreadObjectManager().hasThreadObject(this.sessionFactory)) {
-			logger.debug("Found thread-bound Session for Hibernate transaction");
+			logger.debug("Found thread-bound session for Hibernate transaction");
 			SessionHolder sessionHolder = (SessionHolder) SessionFactoryUtils.getThreadObjectManager().getThreadObject(this.sessionFactory);
 			return new HibernateTransactionObject(sessionHolder, false);
 		}
 		else {
-			logger.debug("Opening new Session for Hibernate transaction");
+			logger.debug("Opening new session for Hibernate transaction");
 			Session session = SessionFactoryUtils.getSession(this.sessionFactory, this.entityInterceptor);
 			return new HibernateTransactionObject(new SessionHolder(session), true);
 		}
@@ -233,34 +233,70 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			throw new CannotCreateTransactionException("Cannot set transaction isolation", ex);
 		}
 		catch (net.sf.hibernate.TransactionException ex) {
-			throw new CannotCreateTransactionException("Cannot create Hibernate transaction", ex.getCause());
+			throw new CannotCreateTransactionException("Cannot create Hibernate transaction", ex);
 		}
 		catch (HibernateException ex) {
 			throw new CannotCreateTransactionException("Cannot create Hibernate transaction", ex);
 		}
 	}
 
+	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
+		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
+		return txObject.getSessionHolder().isRollbackOnly();
+	}
+
 	protected void doCommit(TransactionStatus status) throws TransactionException {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
-		if (txObject.getSessionHolder().isRollbackOnly()) {
-			// nested Hibernate transaction demanded rollback-only
-			doRollback(status);
-		}
-		else {
-			logger.debug("Committing Hibernate transaction");
+
+		// force a flush to be able to specifically handle flushing failure
+		if (txObject.getSessionHolder().getSession().getFlushMode() != FlushMode.NEVER) {
+			logger.debug("Flushing Hibernate session on transaction commit");
 			try {
-				txObject.getSessionHolder().getTransaction().commit();
-			}
-			catch (net.sf.hibernate.TransactionException ex) {
-				throw new TransactionSystemException("Cannot commit Hibernate transaction", ex.getCause());
+				txObject.getSessionHolder().getSession().flush();
 			}
 			catch (HibernateException ex) {
-				// assumably from an implicit flush
+				rollbackOnException(status, ex);
 				throw SessionFactoryUtils.convertHibernateAccessException(ex);
 			}
-			finally {
-				closeSession(txObject);
+			catch (Error err) {
+				rollbackOnException(status, err);
+				throw err;
 			}
+
+			// workaround to avoid double flushing
+			txObject.getSessionHolder().getSession().setFlushMode(FlushMode.NEVER);
+		}
+
+		// actually commit the transaction
+		logger.debug("Committing Hibernate transaction");
+		try {
+			txObject.getSessionHolder().getTransaction().commit();
+		}
+		catch (net.sf.hibernate.TransactionException ex) {
+			throw new TransactionSystemException("Cannot commit Hibernate transaction", ex);
+		}
+		catch (HibernateException ex) {
+			// shouldn't really happen, as we force a flush before commit
+			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+		}
+		finally {
+			closeSession(txObject);
+		}
+	}
+
+	/**
+	 * Perform a rollback, handling rollback exceptions properly.
+	 * @param status object representing the transaction
+	 * @param ex the thrown application exception or error
+	 * @throws TransactionException in case of a rollback error
+	 */
+	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
+		try {
+			doRollback(status);
+		}
+		catch (TransactionException tex) {
+			logger.error("Application exception overridden by rollback exception", ex);
+			throw tex;
 		}
 	}
 
@@ -271,7 +307,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().getTransaction().rollback();
 		}
 		catch (net.sf.hibernate.TransactionException ex) {
-			throw new TransactionSystemException("Cannot rollback Hibernate transaction", ex.getCause());
+			throw new TransactionSystemException("Cannot rollback Hibernate transaction", ex);
 		}
 		catch (HibernateException ex) {
 			throw new TransactionSystemException("Cannot rollback Hibernate transaction", ex);

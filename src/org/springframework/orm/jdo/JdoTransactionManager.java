@@ -123,23 +123,22 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
+		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
+		return txObject.getPersistenceManagerHolder().isRollbackOnly();
+	}
+
 	protected void doCommit(TransactionStatus status) throws TransactionException {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
-		if (txObject.getPersistenceManagerHolder().isRollbackOnly()) {
-			// nested JDO transaction demanded rollback-only
-			doRollback(status);
+		logger.debug("Committing JDO transaction");
+		try {
+			txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().commit();
 		}
-		else {
-			logger.debug("Committing JDO transaction");
-			try {
-				txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().commit();
-			}
-			catch (JDOException ex) {
-				throw new TransactionSystemException("Cannot commit JDO transaction", ex);
-			}
-			finally {
-				closePersistenceManager(txObject);
-			}
+		catch (JDOException ex) {
+			throw new TransactionSystemException("Cannot commit JDO transaction", ex);
+		}
+		finally {
+			closePersistenceManager(txObject);
 		}
 	}
 

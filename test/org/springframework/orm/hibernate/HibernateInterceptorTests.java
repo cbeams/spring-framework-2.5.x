@@ -30,7 +30,7 @@ public class HibernateInterceptorTests extends TestCase {
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
-			sessionControl.setReturnValue(null, 1);
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 

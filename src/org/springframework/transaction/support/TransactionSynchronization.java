@@ -1,5 +1,7 @@
 package org.springframework.transaction.support;
 
+
+
 /**
  * Interface for callbacks after transaction completion.
  * Supported by AbstractPlatformTransactionManager.
@@ -26,10 +28,21 @@ public interface TransactionSynchronization {
 	int STATUS_UNKNOWN = 2;
 
 	/**
+	 * Invoked before transaction commit.
+	 * Can e.g. flush of transactional sessions to the database.
+	 * @throws RuntimeException in case of errors
+	 */
+	void beforeCommit() throws RuntimeException;
+
+	/**
 	 * Invoked after transaction completion.
 	 * Can e.g. perform proper resource cleanup.
 	 * @param status completion status according to the STATUS_ constants
+	 * @throws RuntimeException in case of errors
+	 * @see #STATUS_COMMITTED
+	 * @see #STATUS_ROLLED_BACK
+	 * @see #STATUS_UNKNOWN
 	 */
-	void afterCompletion(int status);
+	void afterCompletion(int status) throws RuntimeException;
 
 }

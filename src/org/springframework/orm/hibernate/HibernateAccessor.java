@@ -2,6 +2,8 @@ package org.springframework.orm.hibernate;
 
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.SessionFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Constants;
 
@@ -18,6 +20,8 @@ import org.springframework.util.Constants;
  * @see HibernateInterceptor
  */
 public abstract class HibernateAccessor {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * Never flush is a good strategy for read-only units of work.

@@ -1,12 +1,9 @@
 package org.springframework.orm.hibernate;
 
 import net.sf.hibernate.FlushMode;
-
+import net.sf.hibernate.Session;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.CleanupFailureDataAccessException;
 
 /**
  * This interceptor binds a new Hibernate Session to the thread before a method
@@ -65,42 +62,36 @@ import org.springframework.dao.CleanupFailureDataAccessException;
  */
 public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor {
 
-	private final Log logger = LogFactory.getLog(getClass());
-
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-		SessionHolder sessionHolder = null;
-		if (!SessionFactoryUtils.getThreadObjectManager().hasThreadObject(getSessionFactory())) {
-			logger.debug("Using new Session for Hibernate interceptor");
-			sessionHolder = new SessionHolder(SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor()));
-			if (getFlushMode() == FLUSH_NEVER) {
-				sessionHolder.getSession().setFlushMode(FlushMode.NEVER);
-			}
-			SessionFactoryUtils.getThreadObjectManager().bindThreadObject(getSessionFactory(), sessionHolder);
+		boolean existingTransaction = false;
+		Session session = SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor());
+		if (SessionFactoryUtils.isSessionBoundToThread(session, getSessionFactory())) {
+			logger.debug("Found thread-bound session for Hibernate interceptor");
+			existingTransaction = true;
 		}
 		else {
-			logger.debug("Found thread-bound Session for Hibernate interceptor");
+			logger.debug("Using new session for Hibernate interceptor");
+			if (getFlushMode() == FLUSH_NEVER) {
+				session.setFlushMode(FlushMode.NEVER);
+			}
+			SessionFactoryUtils.getThreadObjectManager().bindThreadObject(getSessionFactory(),
+			                                                              new SessionHolder(session));
 		}
 		try {
 			Object retVal = methodInvocation.proceed();
-			if (isFlushNecessary(sessionHolder == null)) {
-				SessionHolder flushHolder = (SessionHolder) SessionFactoryUtils.getThreadObjectManager().getThreadObject(getSessionFactory());
-				flushHolder.getSession().flush();
+			if (isFlushNecessary(existingTransaction)) {
+				logger.debug("Eagerly flushing Hibernate session in HibernateInterceptor");
+				session.flush();
 			}
 			return retVal;
 		}
 		finally {
-			if (sessionHolder != null) {
-				SessionFactoryUtils.getThreadObjectManager().removeThreadObject(getSessionFactory());
-				try {
-					SessionFactoryUtils.closeSessionIfNecessary(sessionHolder.getSession(), getSessionFactory());
-				}
-				catch (CleanupFailureDataAccessException ex) {
-					// just log it, to keep an invocation-related exception
-					logger.error("Cannot close Hibernate Session after method interception", ex);
-				}
+			if (existingTransaction) {
+				logger.debug("Not closing pre-bound Hibernate session after interceptor");
 			}
 			else {
-				logger.debug("Not closing pre-bound Hibernate Session after interceptor");
+				SessionFactoryUtils.getThreadObjectManager().removeThreadObject(getSessionFactory());
+				SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
 			}
 		}
 	}

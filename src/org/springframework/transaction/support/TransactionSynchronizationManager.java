@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.transaction.TransactionException;
+
 /**
  * Manages a list of transactions synchronizations per thread.
  * Must be activated and deactivated by a transaction manager via init and clear.
@@ -60,13 +62,28 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
+	 * Trigger beforeCommit calls for the current thread.
+	 * Called by transaction manager before transaction commit.
+	 * Calls get ignored if transaction synchronization isn't active.
+	 * @see TransactionSynchronization#beforeCommit
+	 */
+	public static void triggerBeforeCommit() throws RuntimeException {
+		if (isActive()) {
+			for (Iterator it = ((List) synchronizations.get()).iterator(); it.hasNext();) {
+				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+				synchronization.beforeCommit();
+			}
+		}
+	}
+
+	/**
 	 * Trigger afterCompletion calls for the current thread.
 	 * Called by transaction manager after transaction commit/rollback.
 	 * Calls get ignored if transaction synchronization isn't active.
 	 * @param status completion status according to TransactionSynchronization constants
-	 * @see org.springframework.transaction.support.TransactionSynchronization
+	 * @see TransactionSynchronization#afterCompletion
 	 */
-	public static void triggerAfterCompletion(int status) {
+	public static void triggerAfterCompletion(int status) throws RuntimeException {
 		if (isActive()) {
 			for (Iterator it = ((List) synchronizations.get()).iterator(); it.hasNext();) {
 				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();

@@ -1,13 +1,14 @@
 package org.springframework.orm.jdo;
 
+import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.CleanupFailureDataAccessException;
 
 /**
  * This interceptor binds a new JDO PersistenceManager to the thread before a method
@@ -77,31 +78,27 @@ public class JdoInterceptor implements MethodInterceptor, InitializingBean {
 	}
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-		PersistenceManagerHolder pmHolder = null;
-		if (!PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(this.persistenceManagerFactory)) {
-			logger.debug("Using new PersistenceManager for JDO interceptor");
-			pmHolder = new PersistenceManagerHolder(PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory, true));
-			PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(this.persistenceManagerFactory, pmHolder);
+		boolean existingTransaction = false;
+		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory, true);
+		if (PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(this.persistenceManagerFactory)) {
+			logger.debug("Found thread-bound PersistenceManager for JDO interceptor");
+			existingTransaction = true;
 		}
 		else {
-			logger.debug("Found thread-bound PersistenceManager for JDO interceptor");
+			logger.debug("Using new PersistenceManager for JDO interceptor");
+			PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(this.persistenceManagerFactory,
+			                                                                         new PersistenceManagerHolder(pm));
 		}
 		try {
 			return methodInvocation.proceed();
 		}
 		finally {
-			if (pmHolder != null) {
-				PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(this.persistenceManagerFactory);
-				try {
-					PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pmHolder.getPersistenceManager(), this.persistenceManagerFactory);
-				}
-				catch (CleanupFailureDataAccessException ex) {
-					// just log it, to keep an invocation-related exception
-					logger.error("Cannot close JDO PersistenceManager after method interception", ex);
-				}
+			if (existingTransaction) {
+				logger.debug("Not closing pre-bound JDO PersistenceManager after interceptor");
 			}
 			else {
-				logger.debug("Not closing pre-bound JDO PersistenceManager after interceptor");
+				PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(this.persistenceManagerFactory);
+				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, this.persistenceManagerFactory);
 			}
 		}
 	}

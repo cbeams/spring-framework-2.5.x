@@ -39,7 +39,7 @@ import org.springframework.transaction.TransactionStatus;
  */
 public class TransactionTemplate extends DefaultTransactionDefinition implements InitializingBean{
 
-	private final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private PlatformTransactionManager transactionManager = null;
 
@@ -98,12 +98,12 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 		}
 		catch (RuntimeException ex) {
 			// transactional code threw application exception -> rollback
-			performRollback(status, ex);
+			rollbackOnException(status, ex);
 			throw ex;
 		}
 		catch (Error err) {
 			// transactional code threw error -> rollback
-			performRollback(status, err);
+			rollbackOnException(status, err);
 			throw err;
 		}
 		this.transactionManager.commit(status);
@@ -116,7 +116,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 	 * @param ex the thrown application exception or error
 	 * @throws TransactionException in case of a rollback error
 	 */
-	private void performRollback(TransactionStatus status, Throwable ex) throws TransactionException {
+	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
 		try {
 			this.transactionManager.rollback(status);
 		}

@@ -136,12 +136,14 @@ public class HibernateTemplate extends HibernateAccessor {
 		Session session = (!this.allowCreate ?
 				SessionFactoryUtils.getSession(getSessionFactory(), false) :
 				SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor()));
-		if (getFlushMode() == FLUSH_NEVER) {
+		boolean existingTransaction = SessionFactoryUtils.isSessionBoundToThread(session, getSessionFactory());
+		if (!existingTransaction && getFlushMode() == FLUSH_NEVER) {
 			session.setFlushMode(FlushMode.NEVER);
 		}
 		try {
 			Object result = action.doInHibernate(session);
-			if (isFlushNecessary(SessionFactoryUtils.isSessionBoundToThread(session, getSessionFactory()))) {
+			if (isFlushNecessary(existingTransaction)) {
+				logger.debug("Eagerly flushing Hibernate session in HibernateTemplate");
 				session.flush();
 			}
 			return result;

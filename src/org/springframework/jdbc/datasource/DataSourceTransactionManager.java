@@ -12,6 +12,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 
 /**
@@ -138,23 +139,22 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 	}
 
+	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
+		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
+		return txObject.getConnectionHolder().isRollbackOnly();
+	}
+
 	protected void doCommit(TransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
-		if (txObject.getConnectionHolder().isRollbackOnly()) {
-			// nested JDBC transaction demanded rollback-only
-			rollback(status);
+		logger.debug("Committing JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
+		try {
+			txObject.getConnectionHolder().getConnection().commit();
 		}
-		else {
-			logger.debug("Committing JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
-			try {
-				txObject.getConnectionHolder().getConnection().commit();
-			}
-			catch (SQLException ex) {
-				throw new UnexpectedRollbackException("Cannot commit", ex);
-			}
-			finally {
-				closeConnection(txObject);
-			}
+		catch (SQLException ex) {
+			throw new UnexpectedRollbackException("Cannot commit", ex);
+		}
+		finally {
+			closeConnection(txObject);
 		}
 	}
 

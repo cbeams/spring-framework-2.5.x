@@ -90,7 +90,7 @@ public abstract class SessionFactoryUtils {
 	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 		if (!threadObjectManager.hasThreadObject(sessionFactory) && !allowCreate) {
-			throw new IllegalStateException("Not allowed to create new Session");
+			throw new IllegalStateException("Not allowed to create new Hibernate session");
 		}
 		return getSession(sessionFactory, null);
 	}
@@ -117,7 +117,16 @@ public abstract class SessionFactoryUtils {
 		}
 		try {
 			logger.debug("Opening Hibernate session");
-			return (entityInterceptor != null ? sessionFactory.openSession(entityInterceptor) : sessionFactory.openSession());
+			Session session = (entityInterceptor != null ?
+			    sessionFactory.openSession(entityInterceptor) : sessionFactory.openSession());
+			if (TransactionSynchronizationManager.isActive()) {
+				logger.debug("Registering transaction synchronization for Hibernate session");
+				// use same Session for further Hibernate actions within the transaction
+				// thread object will get removed by synchronization at transaction completion
+				threadObjectManager.bindThreadObject(sessionFactory, new SessionHolder(session));
+				TransactionSynchronizationManager.register(new SessionSynchronization(session, sessionFactory));
+			}
+			return session;
 		}
 		catch (JDBCException ex) {
 			// SQLException underneath
@@ -189,22 +198,6 @@ public abstract class SessionFactoryUtils {
 		if (session == null || isSessionBoundToThread(session, sessionFactory)) {
 			return;
 		}
-		if (TransactionSynchronizationManager.isActive()) {
-			logger.debug("Registering transaction synchronization for Hibernate session");
-			TransactionSynchronizationManager.register(new SessionSynchronization(session, sessionFactory));
-			// use same Session for further Hibernate actions within the transaction
-			// to save resources (thread object will get remoed by synchronization)
-			threadObjectManager.bindThreadObject(sessionFactory, new SessionHolder(session));
-		}
-		else {
-			doCloseSession(session);
-		}
-	}
-
-	/**
-	 * Actually perform close on the given Session.
-	 */
-	private static void doCloseSession(Session session) throws CleanupFailureDataAccessException {
 		logger.debug("Closing Hibernate session");
 		try {
 			session.close();
@@ -234,9 +227,19 @@ public abstract class SessionFactoryUtils {
 			this.sessionFactory = sessionFactory;
 		}
 
+		public void beforeCommit() {
+			logger.debug("Flushing Hibernate session on transaction synchronization");
+			try {
+				session.flush();
+			}
+			catch (HibernateException ex) {
+				throw convertHibernateAccessException(ex);
+			}
+		}
+
 		public void afterCompletion(int status) {
 			threadObjectManager.removeThreadObject(this.sessionFactory);
-			doCloseSession(this.session);
+			closeSessionIfNecessary(this.session, this.sessionFactory);
 		}
 	}
 
