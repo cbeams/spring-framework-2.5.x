@@ -18,6 +18,7 @@ package org.springframework.enums;
 import java.io.Serializable;
 
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.enums.support.StaticCodedEnumResolver;
 import org.springframework.util.Assert;
 
 /**
@@ -98,6 +99,10 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
         }
     }
 
+    protected static StaticCodedEnumResolver getStaticEnumResolver() {
+        return StaticCodedEnumResolver.instance();
+    }
+    
     public String toString() {
         String enumStr = (label != null ? (getLabel() + " (" + getCode() + ")") : String.valueOf(getCode()));
         return "[" + getType() + "." + enumStr + "]";

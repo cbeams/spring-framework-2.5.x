@@ -19,11 +19,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.enums.CodedEnum;
+import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.Closure;
@@ -121,6 +123,18 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 
     public CodedEnum getEnum(Class type, Object code) {
         return getEnum(type.getName(), code, null);
+    }
+
+    public CodedEnum getRequiredEnum(Class type, Object code) throws ObjectRetrievalFailureException {
+        return getRequiredEnum(type.getName(), code, null);
+    }
+
+    public Set getEnumAsSet(Class type) {
+        return getEnumsAsSet(type.getName(), null);
+    }
+
+    public Map getEnumAsMap(Class type) {
+        return getEnumsAsMap(type.getName(), null);
     }
 
 }

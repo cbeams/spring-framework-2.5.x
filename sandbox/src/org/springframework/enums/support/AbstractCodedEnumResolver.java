@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.enums.CodedEnum;
 import org.springframework.enums.CodedEnumResolver;
+import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 
@@ -38,7 +39,7 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
 
     private Map localeCache = new HashMap();
 
-    protected final Log logger = LogFactory.getLog(getClass());
+    protected transient final Log logger = LogFactory.getLog(getClass());
 
     public Set getEnumsAsSet(String type, Locale locale) {
         return Collections.unmodifiableSet(new TreeSet(getEnumsAsMap(type, locale).values()));
@@ -73,6 +74,14 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
             logger.info("No enum found of type '" + type + "' with '" + code.getClass() + " code " + code + "', returning null.");
         }
         return enum;
+    }
+
+    public CodedEnum getRequiredEnum(String name, Object code, Object object) throws ObjectRetrievalFailureException {
+        CodedEnum codedEnum = getEnum(name, code, null);
+        if (codedEnum == null) {
+            throw new ObjectRetrievalFailureException(name, code);
+        }
+        return codedEnum;
     }
 
     private Map getLocaleEnums(Locale locale) {
