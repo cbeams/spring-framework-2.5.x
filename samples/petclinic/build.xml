@@ -50,6 +50,9 @@
 		<fileset dir="${db.dir}/mysql">
 			<include name="mysql*.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/antlr">
+			<include name="antlr*.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/aopalliance">
 			<include name="aopalliance.jar"/>
 		</fileset>
@@ -76,6 +79,9 @@
 			<include name="commons-lang.jar"/>
 			<include name="commons-pool.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/log4j">
+			<include name="log4j-*.jar"/>
+		</fileset>
 
 		<!--
 			Contains org.springframework.test package.
@@ -83,6 +89,7 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring-mock.jar"/>
 		</fileset>
+
 	</path>
 
 
@@ -153,6 +160,9 @@
 			<fileset dir="${db.dir}/mysql">
 				<include name="mysql*.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/antlr">
+				<include name="antlr*.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/aopalliance">
 				<include name="aopalliance.jar"/>
 			</fileset>
@@ -184,6 +194,9 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/log4j">
+				<include name="log4j-*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/ojb">
 				<include name="db-ojb-*.jar"/>
