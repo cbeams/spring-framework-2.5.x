@@ -166,7 +166,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @return TransactionAttribute configured transaction attribute, or null
 	 * if none was found
 	 */
-	private TransactionAttribute findTransactionAttribute(Collection atts) {
+	protected TransactionAttribute findTransactionAttribute(Collection atts) {
 		if (atts == null) {
 			return null;
 		}
