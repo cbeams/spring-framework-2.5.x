@@ -11,14 +11,18 @@ import java.util.Map;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Interface implemented by JdbcTemplate.
- * Not often used, but a useful option to enhance testability,
- * as it can easily be mocked or stubbed.
- * @see org.springframework.jdbc.core.JdbcTemplate
+ * Interface that specifies a basic set of JDBC operations.
+ * Implemented by JdbcTemplate. Not often used, but a useful option
+ * to enhance testability, as it can easily be mocked or stubbed.
+ *
+ * <p>Alternatively, the standard JDBC infrastructure can be mocked.
+ * However, mocking this interface constitutes significantly less work.
+ *
  * @author Rod Johnson
- * @version $Id: IJdbcTemplate.java,v 1.1 2003-11-20 09:01:42 johnsonr Exp $
+ * @version $Id: JdbcOperations.java,v 1.1 2004-02-07 00:12:39 jhoeller Exp $
+ * @see JdbcTemplate
  */
-public interface IJdbcTemplate {
+public interface JdbcOperations {
 
 	/**
 	 * Execute a query given static SQL.

@@ -67,8 +67,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see HibernateTransactionManager
  * @see LocalSessionFactoryBean
  * @see org.springframework.jndi.JndiObjectFactoryBean
+ * @see net.sf.hibernate.Session
  */
-public class HibernateTemplate extends HibernateAccessor {
+public class HibernateTemplate extends HibernateAccessor implements HibernateOperations {
 
 	private boolean allowCreate = true;
 
@@ -254,7 +255,7 @@ public class HibernateTemplate extends HibernateAccessor {
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#evict(Object)
 	 */
-	public void evict(final Object entity) {
+	public void evict(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.evict(entity);
@@ -757,7 +758,7 @@ public class HibernateTemplate extends HibernateAccessor {
 
 	/**
 	 * Create a Query object for the given Session and the given query string.
-	 * Applies a transaction timeout, if any.
+	 * Applies a transaction timeout, if any. To be used within a HibernateCallback.
 	 * @param session current Hibernate Session
 	 * @param queryString the HQL query string
 	 * @return the Query object
@@ -771,7 +772,7 @@ public class HibernateTemplate extends HibernateAccessor {
 
 	/**
 	 * Create a named Query object for the given Session and the given query name.
-	 * Applies a transaction timeout, if any.
+	 * Applies a transaction timeout, if any. To be used within a HibernateCallback.
 	 * @param session current Hibernate Session
 	 * @param queryName the name of the query in the Hibernate mapping file
 	 * @return the Query object

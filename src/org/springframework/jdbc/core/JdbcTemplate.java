@@ -65,13 +65,13 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.20 2004-01-13 18:01:59 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.21 2004-02-07 00:12:39 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
  * @see org.springframework.jdbc.datasource
  */
-public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, InitializingBean {
+public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, InitializingBean {
 
 	/**
 	 * Constant for use as a parameter to query methods to force use of a PreparedStatement
@@ -258,7 +258,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		try {
 			Connection conToUse = con;
 			if (this.nativeJdbcExtractor != null &&
-			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativePreparedStatements()) {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			ps = psc.createPreparedStatement(conToUse);
@@ -385,7 +385,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		try {
 			Connection conToUse = con;
 			if (this.nativeJdbcExtractor != null &&
-			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativePreparedStatements()) {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			int[] retVals = new int[pscs.length];
@@ -461,7 +461,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		try {
 			Connection conToUse = con;
 			if (this.nativeJdbcExtractor != null &&
-			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativePreparedStatements()) {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			ps = conToUse.prepareStatement(sql);
@@ -491,7 +491,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	}
 
 	/**
-	 * Execute an Sql call using a CallableStatementCreator to provide SQL and any required
+	 * Execute a SQL call using a CallableStatementCreator to provide SQL and any required
 	 * parameters.
 	 * @param csc callback object that provides SQL and any necessary parameters
 	 * @return Map of extracted out parameters
@@ -503,7 +503,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		try {
 			Connection conToUse = con;
 			if (this.nativeJdbcExtractor != null &&
-			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeCallableStatements()) {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			cs = csc.createCallableStatement(conToUse);

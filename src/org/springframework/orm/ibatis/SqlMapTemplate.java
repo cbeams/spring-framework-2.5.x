@@ -25,14 +25,18 @@ import org.springframework.jdbc.support.JdbcAccessor;
  * in the iBATIS SqlMap config file and a callback that implements a data access
  * action on the specified statement.
  *
+ * <p>This class provides numerous convenience methods that mirror MappedStatement's
+ * executeXXX methods. See the MappedStatement javadocs for details on those methods.
+ *
  * @author Juergen Hoeller
  * @since 28.11.2003
  * @see #execute
  * @see #setSqlMap
  * @see #setDataSource
  * @see #setExceptionTranslator
+ * @see com.ibatis.db.sqlmap.MappedStatement
  */
-public class SqlMapTemplate extends JdbcAccessor {
+public class SqlMapTemplate extends JdbcAccessor implements SqlMapOperations {
 
 	private SqlMap sqlMap;
 
