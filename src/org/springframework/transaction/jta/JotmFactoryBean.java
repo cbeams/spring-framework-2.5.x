@@ -23,6 +23,7 @@ import javax.naming.NamingException;
 import org.objectweb.jotm.Current;
 import org.objectweb.jotm.Jotm;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
@@ -43,13 +44,13 @@ import org.springframework.beans.factory.FactoryBean;
  * &nbsp;&nbsp;&lt;property name="userTransaction"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;<br>
  * &lt;/bean&gt;<br>
  * <br>
- * &lt;bean id="innerDataSource" class="org.enhydra.jdbc.standard.StandardXADataSource"&gt;<br>
+ * &lt;bean id="innerDataSource" class="org.enhydra.jdbc.standard.StandardXADataSource" destroy-method="shutdown"&gt;<br>
  * &nbsp;&nbsp;&lt;property name="transactionManager"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;<br>
  * &nbsp;&nbsp;&lt;property name="driverName"&gt;...&lt;/property&gt;<br>
  * &nbsp;&nbsp;&lt;property name="url"&gt;...&lt;/property&gt;<br>
  * &lt;/bean&gt;<br>
  * <br>
- * &lt;bean id="dataSource" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource"&gt;<br>
+ * &lt;bean id="dataSource" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource" destroy-method="shutdown"&gt;<br>
  * &nbsp;&nbsp;&lt;property name="dataSource"&gt;&lt;ref local="innerDataSource"/&gt;&lt;/property&gt;<br>
  * &nbsp;&nbsp;&lt;property name="maxSize"&gt;...&lt;/property&gt;<br>
  * &lt;/bean&gt;
@@ -64,7 +65,9 @@ import org.springframework.beans.factory.FactoryBean;
  * @see JtaTransactionManager#setTransactionManager
  * @see org.objectweb.jotm.Current
  */
-public class JotmFactoryBean implements FactoryBean {
+public class JotmFactoryBean implements FactoryBean, DisposableBean {
+
+	private Jotm jotm;
 
 	private Current jotmCurrent;
 
@@ -76,9 +79,18 @@ public class JotmFactoryBean implements FactoryBean {
 
 		// if none found, create new local JOTM instance
 		if (this.jotmCurrent == null) {
-			new Jotm(true, false);
+			this.jotm = new Jotm(true, false);
 			this.jotmCurrent = Current.getCurrent();
 		}
+	}
+
+	/**
+	 * Return the JOTM instance created by this factory bean, if any.
+	 * Will be null if an already active JOTM instance is used.
+	 * <p>Application code should never need to access this.
+	 */
+	public Jotm getJotm() {
+		return jotm;
 	}
 
 	public Object getObject() {
@@ -91,6 +103,12 @@ public class JotmFactoryBean implements FactoryBean {
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+	public void destroy() {
+		if (this.jotm != null) {
+			this.jotm.stop();
+		}
 	}
 
 }
