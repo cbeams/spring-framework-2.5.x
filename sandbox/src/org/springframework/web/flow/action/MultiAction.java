@@ -31,10 +31,10 @@ import org.springframework.web.flow.RequestContext;
  * subclasses should follow the following signature:
  * 
  * <pre>
- *    public Event executeMethodName(RequestContext context)
+ *    public Event ${executeMethodName}(RequestContext context)
  * </pre>
  * 
- * By default, the "executeMethodName" will be the name of the <b>current state</b>
+ * By default, the ${executeMethodName} will be the name of the <b>current state</b>
  * of the flow, so the follow state definition
  * 
  * <pre>
