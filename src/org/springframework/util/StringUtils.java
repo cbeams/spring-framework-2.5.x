@@ -474,7 +474,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Capitalize a <code>String</code>, changing the first letter to
-	 * upper case as per {@link Character#toLowerCase(char)}.
+	 * upper case as per {@link Character#toUpperCase(char)}.
 	 * No other letters are changed.
 	 * @param str the String to capitalize, may be null
 	 * @return the capitalized String, <code>null</code> if null
