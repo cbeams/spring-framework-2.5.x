@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.54 2004-04-29 22:04:29 luke_t Exp $
+    $Id: build.xml,v 1.55 2004-04-30 10:20:20 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -394,7 +394,6 @@
 				<include name="lib/jotm/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
-				<include name="lib/mockobjects/**"/>
 				<include name="lib/poi/**"/>
 				<include name="lib/quartz/**"/>
 				<include name="lib/regexp/**"/>
