@@ -101,7 +101,7 @@ public class BufferedValueModel extends AbstractValueModel implements
         };
     }
 
-    private void commit() {
+    public void commit() {
         if (isChangeBuffered()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("[Committing buffered value '" + get()

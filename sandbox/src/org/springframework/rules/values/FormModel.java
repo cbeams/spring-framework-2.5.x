@@ -42,9 +42,9 @@ public interface FormModel {
     public boolean isDirty();
 
     public boolean isEnabled();
-    
+
     public void setEnabled(boolean enabled);
-    
+
     public void commit();
 
     public void revert();

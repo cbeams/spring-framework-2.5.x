@@ -88,24 +88,37 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
             valueHolder = new BufferedValueModel(valueHolder);
         }
         if (valueHolder.get() == null) {
+            System.out.println("Is null - instantating...");
             valueHolder.set(BeanUtils
                     .instantiateClass(domainObjectAccessStrategy
                             .getMetaAspectAccessor().getAspectClass(
                                     parentPropertyFormObjectPath)));
+            return createChild(childFormModelName, valueHolder, false);
         }
-        return createChild(childFormModelName, valueHolder);
+        else {
+            System.out.println("Is not null - using...");
+
+            return createChild(childFormModelName, valueHolder, true);
+        }
     }
 
     public MutableFormModel createChild(String childFormModelName,
             ValueModel childFormObjectHolder) {
+        return createChild(childFormModelName, childFormObjectHolder, true);
+    }
+
+    public MutableFormModel createChild(String childFormModelName,
+            ValueModel childFormObjectHolder, boolean enabled) {
         MutableAspectAccessStrategy childObjectAccessStrategy = domainObjectAccessStrategy
                 .newNestedAccessor(childFormObjectHolder);
         ValidatingFormModel childModel = new ValidatingFormModel(
                 childObjectAccessStrategy);
+        childModel.setEnabled(enabled);
         childModel.setBufferChangesDefault(bufferChanges);
         childModel.setRulesSource(rulesSource);
         addChildModel(childFormModelName, childModel);
         return childModel;
+
     }
 
     public NestableFormModel addChildModel(String childFormModelName,
@@ -272,7 +285,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     public boolean isEnabled() {
         return true;
     }
-    
+
     public void setEnabled(boolean enabled) {
         throw new UnsupportedOperationException();
     }

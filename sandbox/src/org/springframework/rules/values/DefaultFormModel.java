@@ -336,8 +336,13 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
         }
         if (!enabled) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Form object is not enabled; nothing to commit.");
+                logger.debug("Form object is not enabled; commiting null value.");
             }
+            getFormObjectHolder().set(null);
+            if (getFormObjectHolder() instanceof BufferedValueModel) {
+                ((BufferedValueModel)getFormObjectHolder()).commit();
+            }
+            return;
         }
         if (bufferChanges) {
             if (getHasErrors()) { throw new IllegalStateException(

@@ -170,7 +170,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
     protected void postProcessNewFormValueModel(String domainObjectProperty,
             ValueModel valueModel) {
         // trigger validation to catch initial form errors
-        if (valueModel instanceof ValidatingFormValueModel) {
+        if (valueModel instanceof ValidatingFormValueModel && isEnabled()) {
             ((ValidatingFormValueModel)valueModel).validate();
         }
     }
