@@ -21,11 +21,13 @@ package org.springframework.jdbc.support;
  * Normally loaded through a BeanFactory
  * implementation. Used by the SQLErrorCodeSQLExceptionTranslator.
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodes.java,v 1.4 2004-03-18 02:46:15 trisberg Exp $
+ * @version $Id: SQLErrorCodes.java,v 1.5 2004-04-13 12:21:46 trisberg Exp $
  */
 public class SQLErrorCodes {
 
 	private String databaseProductName = null;
+
+	private boolean useSqlStateForTranslation = false;
 
 	private String[] badSqlGrammarCodes = new String[0];
 
@@ -117,9 +119,27 @@ public class SQLErrorCodes {
 
 	/**
 	 * @param databaseProductName The databaseProductName to set.
+	 * Set this property this if the database name contains spaces, in which case 
+	 * we can not use the bean id for lookup.  
 	 */
 	public void setDatabaseProductName(String databaseProductName) {
 		this.databaseProductName = databaseProductName;
+	}
+
+	/**
+	 * @return Returns the useStateCodeForTranslation.
+	 */
+	public boolean isUseSqlStateForTranslation() {
+		return useSqlStateForTranslation;
+	}
+
+	/**
+	 * @param useStateCodeForTranslation The useStateCodeForTranslation to set.
+	 * Set this to true for databases that do not provide an error code but that
+	 * does provide SQL State (this includes PostgreSQL).
+	 */
+	public void setUseSqlStateForTranslation(boolean useStateCodeForTranslation) {
+		this.useSqlStateForTranslation = useStateCodeForTranslation;
 	}
 
 }

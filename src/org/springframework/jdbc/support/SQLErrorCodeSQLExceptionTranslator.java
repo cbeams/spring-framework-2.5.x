@@ -48,7 +48,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
  * 
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.4 2004-03-18 02:46:15 trisberg Exp $
+ * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.5 2004-04-13 12:21:47 trisberg Exp $
  * @see org.springframework.jdbc.support.SQLErrorCodesFactory
  */
 public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslator {
@@ -123,8 +123,12 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 			return dex;
 		}
 		
-		// now try error codes
-		String errorCode = Integer.toString(sqlex.getErrorCode());
+		// now try error code
+		String errorCode;
+		if (this.sqlErrorCodes.isUseSqlStateForTranslation())
+			errorCode = sqlex.getSQLState();
+		else
+			errorCode = Integer.toString(sqlex.getErrorCode());
 		if (errorCode != null) {
 			if (Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
