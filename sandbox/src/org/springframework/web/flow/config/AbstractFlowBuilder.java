@@ -50,7 +50,7 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		return flow;
 	}
 
-	public final void initFlow() {
+	public final void init() {
 		this.flow = createFlow();
 	}
 
