@@ -12,7 +12,7 @@ public abstract class SecureBaseAction extends BaseAction {
   public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
     AccountActionForm acctForm = (AccountActionForm) request.getSession().getAttribute("accountForm");
     if (acctForm == null || acctForm.getAccount() == null) {
-      String url = request.getRequestURI();
+      String url = request.getServletPath();
       String query = request.getQueryString();
       if (query != null) {
         request.setAttribute("signonForwardAction", url+"?"+query);
