@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.41 2004-10-05 08:37:53 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.42 2004-10-19 16:42:01 jhoeller Exp $
 -->
 
 
@@ -273,8 +273,10 @@
 	This is an alternative to "autowire constructor".
 	Arguments correspond to either a specific index of the constructor argument
 	list or are supposed to be matched generically by type.
+
 	Note: A single generic argument value will just be used once, rather than
 	potentially matched multiple times (as of Spring 1.1).
+
 	constructor-arg elements are also used in conjunction with the factory-method
 	element to construct beans using static or instance factory methods.
 -->
@@ -287,13 +289,6 @@
 	The constructor-arg tag can have an optional index attribute,
 	to specify the exact index in the constructor argument list. Only needed
 	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
-
-	NOTE: it is highly recommended to use the index attribute, in Spring up
-	to and including 1.1. The constructor matcher is extremely greedy in 
-	matching args without an index, to the point of duplicating supplied args
-	to fill in unspecified constructor args, if they are compatible (i.e. one
-	single String arg will match a constructor with two String args, etc.).
-	The matcher should be less agressive in a future version.
 -->
 <!ATTLIST constructor-arg index CDATA #IMPLIED>
 
