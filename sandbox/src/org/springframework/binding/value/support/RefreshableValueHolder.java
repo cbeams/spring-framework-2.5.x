@@ -15,6 +15,7 @@
  */
 package org.springframework.binding.value.support;
 
+import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.closure.Closure;
 
@@ -30,10 +31,12 @@ public class RefreshableValueHolder extends ValueHolder {
         this(refreshFunction, false);
     }
 
-    public RefreshableValueHolder(Closure refreshFunction,
-            boolean alwaysRefresh) {
-        super((alwaysRefresh ? refreshFunction.call(null) : null));
+    public RefreshableValueHolder(Closure refreshFunction, boolean alwaysRefresh) {
+        super();
+        Assert.notNull(refreshFunction, "The refresh callback cannot be null");
         this.refreshFunction = refreshFunction;
+        this.alwaysRefresh = alwaysRefresh;
+        refresh();
     }
 
     public Object getValue() {
