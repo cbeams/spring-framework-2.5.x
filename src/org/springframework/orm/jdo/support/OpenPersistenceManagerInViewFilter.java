@@ -82,10 +82,6 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 		return persistenceManagerFactoryBeanName;
 	}
 
-	protected String getAlreadyFilteredAttributeName() {
-		return getClass().getName() + "." + this.persistenceManagerFactoryBeanName;
-	}
-
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 																	FilterChain filterChain) throws ServletException, IOException {
 		PersistenceManagerFactory pmf = lookupPersistenceManagerFactory();

@@ -75,7 +75,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * it assumes to be used in combination with middle tier transactions that care for
  * the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
  * filter to flush after completed request processing, override closeSession and
- * invoke flush on the Session before closing it.
+ * invoke flush on the Session before closing it. Note that closeSession will just
+ * be invoked in single session mode!
  *
  * @author Juergen Hoeller
  * @since 06.12.2003
@@ -134,16 +135,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		return singleSession;
 	}
 
-	/**
-	 * This implementation appends the SessionFactory bean name to the class name,
-	 * to be executed one per SessionFactory. Can be overridden in subclasses,
-	 * e.g. when also overriding lookupSessionFactory.
-	 * @see #lookupSessionFactory
-	 */
-	protected String getAlreadyFilteredAttributeName() {
-		return getClass().getName() + "." + this.sessionFactoryBeanName;
-	}
-
 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 																	FilterChain filterChain) throws ServletException, IOException {
@@ -174,7 +165,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	/**
 	 * Look up the SessionFactory that this filter should use.
-	 * The default implementation looks for a bean with the specified name
+	 * <p>The default implementation looks for a bean with the specified name
 	 * in Spring's root application context.
 	 * @return the SessionFactory to use
 	 * @see #getSessionFactoryBeanName
@@ -189,14 +180,16 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	/**
 	 * Get a Session for the SessionFactory that this filter uses.
-	 * The default implementation invokes SessionFactoryUtils.getSession,
-	 * and sets the Session's flushMode to NEVER.
+	 * Note that this just applies in single session mode!
+	 * <p>The default implementation delegates to SessionFactoryUtils'
+	 * getSession method and sets the Session's flushMode to NEVER.
 	 * <p>Can be overridden in subclasses for creating a Session with a custom
 	 * entity interceptor or JDBC exception translator.
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession(SessionFactory, boolean)
+	 * @see net.sf.hibernate.FlushMode#NEVER
 	 */
 	protected Session getSession(SessionFactory sessionFactory)
 			throws DataAccessResourceFailureException {
@@ -207,9 +200,13 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	/**
 	 * Close the given Session.
-	 * The default implementation invokes SessionFactoryUtils.closeSessionIfNecessary.
+	 * Note that this just applies in single session mode!
+	 * <p>The default implementation delegates to SessionFactoryUtils'
+	 * closeSessionIfNecessary method.
 	 * <p>Can be overridden in subclasses, e.g. for flushing the Session before
 	 * closing it. See class-level javadoc for a discussion of flush handling.
+	 * Note that you should also override getSession accordingly, to set
+	 * the flush mode to something else than NEVER.
 	 * @param session the Session used for filtering
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 */
