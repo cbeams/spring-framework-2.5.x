@@ -13,7 +13,7 @@ import org.springframework.aop.Pointcut;
  * Convenient class for regexp method pointcuts that hold an Interceptor, making them
  * an Advisor
  * @author Dmitriy Kopylenko
- * @version $Id: RegexpMethodPointcutAroundAdvisor.java,v 1.1 2003-11-20 00:49:59 dkopylenko Exp $
+ * @version $Id: RegexpMethodPointcutAroundAdvisor.java,v 1.2 2003-11-28 15:01:33 dkopylenko Exp $
  */
 public class RegexpMethodPointcutAroundAdvisor extends RegexpMethodPointcut implements InterceptionAroundAdvisor {
 
@@ -40,7 +40,7 @@ public class RegexpMethodPointcutAroundAdvisor extends RegexpMethodPointcut impl
 	 * @see org.springframework.aop.InterceptionAroundAdvisor#getInterceptor()
 	 */
 	public Interceptor getInterceptor() {
-		return this.getInterceptor();
+		return this.interceptor;
 	}
 
 	/**
