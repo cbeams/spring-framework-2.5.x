@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.ActionBeanEvent;
-import org.springframework.web.flow.EventHandlerMethodNameResolver;
 import org.springframework.web.flow.FlowSessionExecutionInfo;
 import org.springframework.web.flow.FlowUtils;
 import org.springframework.web.flow.MutableAttributesAccessor;
