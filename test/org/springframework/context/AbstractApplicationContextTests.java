@@ -23,7 +23,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 
 	protected TestListener parentListener = new TestListener();
 
-	public AbstractApplicationContextTests() throws Exception {
+	protected void setUp() throws Exception {
 		this.applicationContext = createContext();
 	}
 

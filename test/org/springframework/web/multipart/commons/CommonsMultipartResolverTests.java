@@ -75,9 +75,11 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertEquals(2, parameterNames.size());
 		assertTrue(parameterNames.contains("field3"));
 		assertTrue(parameterNames.contains("field4"));
+		assertEquals("value3", request.getParameter("field3"));
 		List parameterValues = Arrays.asList(request.getParameterValues("field3"));
 		assertEquals(1, parameterValues.size());
 		assertTrue(parameterValues.contains("value3"));
+		assertEquals("value4", request.getParameter("field4"));
 		parameterValues = Arrays.asList(request.getParameterValues("field4"));
 		assertEquals(2, parameterValues.size());
 		assertTrue(parameterValues.contains("value4"));
@@ -231,7 +233,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 	public static class MockCommonsMultipartResolver extends CommonsMultipartResolver {
 
-		protected DiskFileUpload initFileUpload() {
+		protected DiskFileUpload newFileUpload() {
 			return new MockDiskFileUpload();
 		}
 	}
