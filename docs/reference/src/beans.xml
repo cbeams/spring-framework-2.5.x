@@ -915,8 +915,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         container, to return the result of looking up another named bean in
         the container. The lookup will typically be of a non-singleton bean as
         per the scenario described above (although it can also be a
-        singleton). Spring implements this by performing bytecode modification
-        on the client class, using the CGLIB library.</para>
+        singleton). Spring implements this through a dynamically generated subclass overriding the method, using bytecode generation via the CGLIB library.</para>
 
         <para>In the client class containing the method to be injected, the
         method definition must be an abstract (or concrete) definition in this
