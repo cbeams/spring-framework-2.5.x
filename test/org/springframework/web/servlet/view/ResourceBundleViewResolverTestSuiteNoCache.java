@@ -16,10 +16,13 @@
 
 package org.springframework.web.servlet.view;
 
+/**
+ * @author Rod Johnson
+ */
 public class ResourceBundleViewResolverTestSuiteNoCache extends ResourceBundleViewResolverTestSuite {
 	
 	protected boolean getCache() {
 		return false;
 	}
+
 }
- 

@@ -30,6 +30,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
+import org.springframework.beans.factory.BeanIsAbstractException;
 
 /**
  * @author Rod Johnson
@@ -64,6 +65,23 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 	 */
 	protected boolean getCache() {
 		return true;
+	}
+
+	public void testParentsAreAbstract() throws Exception {
+		try {
+			View v = rb.resolveViewName("debugParent", Locale.ENGLISH);
+			fail("Should have thrown BeanIsAbstractException");
+		}
+		catch (BeanIsAbstractException ex) {
+			// expected
+		}
+		try {
+			View v = rb.resolveViewName("testParent", Locale.ENGLISH);
+			fail("Should have thrown BeanIsAbstractException");
+		}
+		catch (BeanIsAbstractException ex) {
+			// expected
+		}
 	}
 
 	public void testDebugViewEnglish() throws Exception {
