@@ -276,7 +276,7 @@ public abstract class BaseCommandController extends AbstractController {
 			throws Exception {
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
-		onBind(request, command);
+		onBind(request, command, binder.getErrors());
 		if (isValidateOnBinding()) {
 			ValidationUtils.invokeValidator(getValidator(), command, binder.getErrors());
 		}
