@@ -22,7 +22,7 @@ import org.springframework.web.flow.ViewState;
 /**
  * @author Keith Donald
  */
-public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuilder {
+public abstract class AbstractFlowBuilder extends FlowConstants implements FlowBuilder {
 
 	protected static final String DOT_SEPARATOR = ".";
 

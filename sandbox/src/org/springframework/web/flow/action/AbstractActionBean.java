@@ -30,6 +30,7 @@ import org.springframework.web.flow.ActionBeanEvent;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.config.BaseFlowBuilder;
+import org.springframework.web.flow.config.FlowConstants;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -77,15 +78,15 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	}
 
 	protected ActionBeanEvent error() {
-		return new ActionBeanEvent(this, BaseFlowBuilder.ERROR);
+		return new ActionBeanEvent(this, FlowConstants.ERROR);
 	}
 
 	protected ActionBeanEvent add() {
-		return new ActionBeanEvent(this, BaseFlowBuilder.ADD);
+		return new ActionBeanEvent(this, FlowConstants.ADD);
 	}
 
 	protected ActionBeanEvent search() {
-		return new ActionBeanEvent(this, BaseFlowBuilder.SEARCH);
+		return new ActionBeanEvent(this, FlowConstants.SEARCH);
 	}
 
 	/**
