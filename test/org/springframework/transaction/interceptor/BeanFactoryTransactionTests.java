@@ -23,7 +23,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.transaction.CountingTxManager;
-import org.springframework.transaction.DummyTxManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -32,7 +31,7 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.12 2003-12-02 16:29:17 johnsonr Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.13 2003-12-02 16:30:33 johnsonr Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
