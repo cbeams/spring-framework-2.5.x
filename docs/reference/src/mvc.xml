@@ -430,8 +430,8 @@
     more.</para>
 
     <para>Spring's basis for the controller architecture is the
-    <literal>org.springframework.mvc.Controller</literal> interface, which is
-    listed below. <programlisting>public interface Controller {
+    <literal>org.springframework.web.servlet.mvc.Controller</literal> interface,
+		which is listed below. <programlisting>public interface Controller {
 
     /**
      * Process the request and return a ModelAndView object which the DispatcherServlet
