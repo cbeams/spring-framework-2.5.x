@@ -116,9 +116,13 @@ public class SchedulingTestSuite extends TestCase {
 
 		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
 		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.scheduleJob(jobDetail0, trigger0);
+		scheduler.addJob(jobDetail0, true);
+		schedulerControl.setVoidCallable();
+		scheduler.scheduleJob(trigger0);
 		schedulerControl.setReturnValue(new Date());
-		scheduler.scheduleJob(jobDetail1, trigger1);
+		scheduler.addJob(jobDetail1, true);
+		schedulerControl.setVoidCallable();
+		scheduler.scheduleJob(trigger1);
 		schedulerControl.setReturnValue(new Date());
 		scheduler.start();
 		schedulerControl.setVoidCallable();
@@ -142,7 +146,6 @@ public class SchedulingTestSuite extends TestCase {
 
 		schedulerControl.verify();
 	}
-
 
 	public void testSchedulerFactoryBeanWithPlainQuartzObjects() throws Exception {
 		JobDetail jobDetail0 = new JobDetail();

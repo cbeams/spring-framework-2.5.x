@@ -2,6 +2,7 @@ package org.springframework.scheduling.quartz;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +42,7 @@ import org.springframework.core.io.Resource;
  * @since 18.02.2004
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
- * @version $Id: SchedulerFactoryBean.java,v 1.6 2004-03-01 12:46:17 jhoeller Exp $
+ * @version $Id: SchedulerFactoryBean.java,v 1.7 2004-03-08 16:56:05 jhoeller Exp $
  */
 public class SchedulerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
@@ -194,6 +195,10 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 				this.scheduler.addJob(jobDetail, true);
 			}
 		}
+		else {
+			// create empty list for easier checks when registering triggers
+			this.jobDetails = new ArrayList();
+		}
 
 		// register Calendars
 		if (this.calendars != null) {
@@ -209,17 +214,15 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 			for (Iterator it = this.triggers.iterator(); it.hasNext();) {
 				Trigger trigger = (Trigger) it.next();
 				// check if the Trigger is aware of an associated JobDetail
-				JobDetail jobDetail = null;
 				if (trigger instanceof JobDetailAwareTrigger) {
-					jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
+					JobDetail jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
+					if (!this.jobDetails.contains(jobDetail)) {
+						// automatically register the JobDetail too
+						this.jobDetails.add(jobDetail);
+						this.scheduler.addJob(jobDetail, true);
+					}
 				}
-				if (jobDetail != null && (this.jobDetails == null || !this.jobDetails.contains(jobDetail))) {
-					// automatically register the JobDetail too
-					this.scheduler.scheduleJob(jobDetail, trigger);
-				}
-				else {
-					this.scheduler.scheduleJob(trigger);
-				}
+				this.scheduler.scheduleJob(trigger);
 			}
 		}
 
