@@ -135,35 +135,31 @@ public class Flow implements FlowEventProcessor, Serializable {
 
     private static final long serialVersionUID = 3258695403305513015L;
 
-    protected static final String ACTION_BEAN_NAME_SUFFIX = "Action";
+    protected static final String CREATE_ACTION_SUFFIX = "create";
 
-    protected static final String CREATE_ACTION_PREFIX = "create";
+    protected static final String ADD_ACTION_SUFFIX = "add";
 
-    protected static final String ADD_ACTION_PREFIX = "add";
+    protected static final String REMOVE_ACTION_SUFFIX = "remove";
 
-    protected static final String REMOVE_ACTION_PREFIX = "remove";
+    protected static final String DELETE_ACTION_SUFFIX = "delete";
 
-    protected static final String DELETE_ACTION_PREFIX = "delete";
+    protected static final String GET_ACTION_SUFFIX = "get";
 
-    protected static final String GET_ACTION_PREFIX = "get";
+    protected static final String POPULATE_FORM_ACTION_SUFFIX = "populate";
 
-    protected static final String POPULATE_FORM_ACTION_PREFIX = "populate";
+    protected static final String VIEW_SUFFIX = "view";
 
-    protected static final String VIEW_PREFIX = "view";
+    protected static final String SUBMIT_ACTION_SUFFIX = "submit";
 
-    protected static final String SUBMIT_ACTION_PREFIX = "submit";
+    protected static final String BIND_AND_VALIDATE_FORM_ACTION_SUFFIX = "bindAndValidate";
 
-    protected static final String BIND_AND_VALIDATE_FORM_ACTION_PREFIX = "bindAndValidate";
+    protected static final String EDIT_SUFFIX = "edit";
 
-    protected static final String EDIT_PREFIX = "edit";
+    protected static final String VALIDATE_ACTION_SUFFIX = "validate";
 
-    protected static final String VALIDATE_ACTION_PREFIX = "validate";
+    protected static final String SEARCH_ACTION_SUFFIX = "search";
 
-    protected static final String SEARCH_ACTION_PREFIX = "search";
-
-    protected static final String SAVE_ACTION_PREFIX = "save";
-
-    protected static final String FORM_SUFFIX = "Form";
+    protected static final String SAVE_ACTION_SUFFIX = "save";
 
     protected static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "AttributesMapper";
 
@@ -277,22 +273,26 @@ public class Flow implements FlowEventProcessor, Serializable {
     public boolean addSubFlow(String subFlowId, String subFlowAttributesMapperId, Transition[] transitions) {
         return add(new SubFlowState(subFlowId, subFlowAttributesMapperId, transitions));
     }
+    
+    public static String buildEditSubflowId(String suffix) {
+        return "edit" + StringUtils.capitalize(suffix);
+    }
 
     public boolean addEditSubFlow(String subFlowIdSuffix, Transition transition) {
-        return addSubFlow(edit(subFlowIdSuffix), transition);
+        return addSubFlow(buildEditSubflowId(subFlowIdSuffix), transition);
     }
 
     public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
             String subFlowDefaultFinishStateId) {
-        return addSubFlow(edit(subFlowIdSuffix), subFlowAttributesMapperId, subFlowDefaultFinishStateId);
+        return addSubFlow(buildEditSubflowId(subFlowIdSuffix), subFlowAttributesMapperId, subFlowDefaultFinishStateId);
     }
 
     public boolean addEditSubFlow(String subFlowIdSuffix, Transition[] transitions) {
-        return addSubFlow(edit(subFlowIdSuffix), transitions);
+        return addSubFlow(buildEditSubflowId(subFlowIdSuffix), transitions);
     }
 
     public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId, Transition[] transitions) {
-        return addSubFlow(edit(subFlowIdSuffix), subFlowAttributesMapperId, transitions);
+        return addSubFlow(buildEditSubflowId(subFlowIdSuffix), subFlowAttributesMapperId, transitions);
     }
 
     public boolean add(StateGroup stateGroup) {
@@ -428,203 +428,203 @@ public class Flow implements FlowEventProcessor, Serializable {
         return new FlowSession(getId(), null, input);
     }
 
-    public ActionState createCreateState(String stateIdSuffix) {
-        return createCreateState(stateIdSuffix, onSuccessView(stateIdSuffix));
+    public ActionState createCreateState(String stateIdPrefix) {
+        return createCreateState(stateIdPrefix, onSuccessView(stateIdPrefix));
     }
 
-    public ActionState createCreateState(String stateIdSuffix, Transition transition) {
-        return createCreateState(stateIdSuffix, new Transition[] { transition });
+    public ActionState createCreateState(String stateIdPrefix, Transition transition) {
+        return createCreateState(stateIdPrefix, new Transition[] { transition });
     }
 
-    public ActionState createCreateState(String stateIdSuffix, Transition[] transitions) {
-        return new ActionState(buildStateId(CREATE_ACTION_PREFIX, stateIdSuffix), transitions);
+    public ActionState createCreateState(String stateIdPrefix, Transition[] transitions) {
+        return new ActionState(buildStateId(CREATE_ACTION_SUFFIX, stateIdPrefix), transitions);
     }
 
-    public ActionState createGetState(String stateIdSuffix) {
-        return createGetState(stateIdSuffix, onSuccessView(stateIdSuffix));
+    public ActionState createGetState(String stateIdPrefix) {
+        return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
     }
 
-    public ActionState createGetState(String stateIdSuffix, Transition transition) {
-        return createGetState(stateIdSuffix, new Transition[] { transition });
+    public ActionState createGetState(String stateIdPrefix, Transition transition) {
+        return createGetState(stateIdPrefix, new Transition[] { transition });
     }
 
-    public ActionState createGetState(String stateIdSuffix, Transition[] transitions) {
-        return new ActionState(buildStateId(GET_ACTION_PREFIX, stateIdSuffix), transitions);
+    public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
+        return new ActionState(buildStateId(GET_ACTION_SUFFIX, stateIdPrefix), transitions);
     }
 
-    public ActionState createPopulateState(String stateIdSuffix) {
-        return createPopulateState(stateIdSuffix, onSuccessView(stateIdSuffix));
+    public ActionState createPopulateState(String stateIdPrefix) {
+        return createPopulateState(stateIdPrefix, onSuccessView(stateIdPrefix));
     }
 
-    public ActionState createPopulateState(String stateIdSuffix, Transition transition) {
-        return createPopulateState(stateIdSuffix, new Transition[] { transition });
+    public ActionState createPopulateState(String stateIdPrefix, Transition transition) {
+        return createPopulateState(stateIdPrefix, new Transition[] { transition });
     }
 
-    public ActionState createPopulateState(String stateIdSuffix, Transition[] transitions) {
-        return new ActionState(populate(stateIdSuffix), transitions);
+    public ActionState createPopulateState(String stateIdPrefix, Transition[] transitions) {
+        return new ActionState(populate(stateIdPrefix), transitions);
     }
 
-    public ViewState createViewState(String stateIdSuffix) {
-        return createViewState(stateIdSuffix, new Transition[] { onBackEnd(), onCancelEnd(),
-                onSubmitBindAndValidate(stateIdSuffix) });
+    public ViewState createViewState(String stateIdPrefix) {
+        return createViewState(stateIdPrefix, new Transition[] { onBackEnd(), onCancelEnd(),
+                onSubmitBindAndValidate(stateIdPrefix) });
     }
 
-    public ViewState createViewState(String stateIdSuffix, String viewName) {
-        return createViewState(stateIdSuffix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
-                onSubmitBindAndValidate(stateIdSuffix) });
+    public ViewState createViewState(String stateIdPrefix, String viewName) {
+        return createViewState(stateIdPrefix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
+                onSubmitBindAndValidate(stateIdPrefix) });
     }
 
-    public ViewState createViewState(String stateIdSuffix, Transition transition) {
-        return new ViewState(view(stateIdSuffix), transition);
+    public ViewState createViewState(String stateIdPrefix, Transition transition) {
+        return new ViewState(view(stateIdPrefix), transition);
     }
 
-    public ViewState createViewState(String stateIdSuffix, String viewName, Transition transition) {
-        return new ViewState(view(stateIdSuffix), viewName, transition);
+    public ViewState createViewState(String stateIdPrefix, String viewName, Transition transition) {
+        return new ViewState(view(stateIdPrefix), viewName, transition);
     }
 
-    public ViewState createViewState(String stateIdSuffix, Transition[] transitions) {
-        return new ViewState(view(stateIdSuffix), transitions);
+    public ViewState createViewState(String stateIdPrefix, Transition[] transitions) {
+        return new ViewState(view(stateIdPrefix), transitions);
     }
 
-    public ViewState createViewState(String stateIdSuffix, String viewName, Transition[] transitions) {
-        return new ViewState(view(stateIdSuffix), viewName, transitions);
+    public ViewState createViewState(String stateIdPrefix, String viewName, Transition[] transitions) {
+        return new ViewState(view(stateIdPrefix), viewName, transitions);
     }
 
-    public ActionState createBindAndValidateState(String stateIdSuffix) {
-        return createBindAndValidateState(stateIdSuffix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdSuffix) });
+    public ActionState createBindAndValidateState(String stateIdPrefix) {
+        return createBindAndValidateState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
+                onErrorView(stateIdPrefix) });
     }
 
-    public ActionState createBindAndValidateState(String stateIdSuffix, Transition transition) {
-        return createBindAndValidateState(stateIdSuffix, new Transition[] { transition });
+    public ActionState createBindAndValidateState(String stateIdPrefix, Transition transition) {
+        return createBindAndValidateState(stateIdPrefix, new Transition[] { transition });
     }
 
-    public ActionState createBindAndValidateState(String stateIdSuffix, Transition[] transitions) {
-        return new ActionState(buildStateId(BIND_AND_VALIDATE_FORM_ACTION_PREFIX, stateIdSuffix), transitions);
+    public ActionState createBindAndValidateState(String stateIdPrefix, Transition[] transitions) {
+        return new ActionState(buildStateId(BIND_AND_VALIDATE_FORM_ACTION_SUFFIX, stateIdPrefix), transitions);
     }
 
-    public ActionState createAddState(String stateIdSuffix) {
-        return createAddState(stateIdSuffix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdSuffix) });
+    public ActionState createAddState(String stateIdPrefix) {
+        return createAddState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
+                onErrorView(stateIdPrefix) });
     }
 
-    public ActionState createAddState(String stateIdSuffix, Transition[] transitions) {
-        return new ActionState(add(stateIdSuffix), transitions);
+    public ActionState createAddState(String stateIdPrefix, Transition[] transitions) {
+        return new ActionState(add(stateIdPrefix), transitions);
     }
 
-    public ActionState createAddState(String stateIdSuffix, String successStateId) {
-        return createAddState(stateIdSuffix, new Transition[] { onSuccess(successStateId), onErrorView(stateIdSuffix) });
+    public ActionState createAddState(String stateIdPrefix, String successStateId) {
+        return createAddState(stateIdPrefix, new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
     }
 
-    public ActionState createAddState(String stateIdSuffix, String addActionBeanName, Transition[] transitions) {
-        ActionState addState = new ActionState(add(stateIdSuffix), addActionBeanName, transitions);
+    public ActionState createAddState(String stateIdPrefix, String addActionBeanName, Transition[] transitions) {
+        ActionState addState = new ActionState(add(stateIdPrefix), addActionBeanName, transitions);
         addState.setUpdateAction(true);
         return addState;
     }
 
-    public ActionState createSaveState(String stateIdSuffix) {
-        return createSaveState(stateIdSuffix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdSuffix) });
+    public ActionState createSaveState(String stateIdPrefix) {
+        return createSaveState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
+                onErrorView(stateIdPrefix) });
     }
 
-    public ActionState createSaveState(String stateIdSuffix, String successStateId) {
-        return createSaveState(stateIdSuffix,
-                new Transition[] { onSuccess(successStateId), onErrorView(stateIdSuffix) });
+    public ActionState createSaveState(String stateIdPrefix, String successStateId) {
+        return createSaveState(stateIdPrefix,
+                new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
     }
 
-    public ActionState createSaveState(String stateIdSuffix, Transition[] transitions) {
-        return new ActionState(save(stateIdSuffix), transitions);
+    public ActionState createSaveState(String stateIdPrefix, Transition[] transitions) {
+        return new ActionState(save(stateIdPrefix), transitions);
     }
 
-    public ActionState createSaveState(String stateIdSuffix, String saveActionBeanName, Transition[] transitions) {
-        ActionState saveState = new ActionState(save(stateIdSuffix), saveActionBeanName, transitions);
+    public ActionState createSaveState(String stateIdPrefix, String saveActionBeanName, Transition[] transitions) {
+        ActionState saveState = new ActionState(save(stateIdPrefix), saveActionBeanName, transitions);
         saveState.setUpdateAction(true);
         return saveState;
     }
 
-    public ActionState createDeleteState(String stateIdSuffix) {
-        return createDeleteState(stateIdSuffix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdSuffix) });
+    public ActionState createDeleteState(String stateIdPrefix) {
+        return createDeleteState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
+                onErrorView(stateIdPrefix) });
     }
 
-    public ActionState createDeleteState(String stateIdSuffix, String successAndErrorStateId) {
-        return createDeleteState(stateIdSuffix, new Transition[] { onSuccess(successAndErrorStateId),
+    public ActionState createDeleteState(String stateIdPrefix, String successAndErrorStateId) {
+        return createDeleteState(stateIdPrefix, new Transition[] { onSuccess(successAndErrorStateId),
                 onErrorView(successAndErrorStateId) });
     }
 
-    public ActionState createDeleteState(String stateIdSuffix, Transition[] transitions) {
-        return new ActionState(delete(stateIdSuffix), transitions);
+    public ActionState createDeleteState(String stateIdPrefix, Transition[] transitions) {
+        return new ActionState(delete(stateIdPrefix), transitions);
     }
 
-    public ActionState createDeleteState(String stateIdSuffix, String deleteActionBeanName, Transition[] transitions) {
-        ActionState saveState = new ActionState(delete(stateIdSuffix), deleteActionBeanName, transitions);
+    public ActionState createDeleteState(String stateIdPrefix, String deleteActionBeanName, Transition[] transitions) {
+        ActionState saveState = new ActionState(delete(stateIdPrefix), deleteActionBeanName, transitions);
         saveState.setUpdateAction(true);
         return saveState;
     }
 
-    public ActionState createValidateState(String stateIdSuffix) {
-        return createValidateState(stateIdSuffix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdSuffix) });
+    public ActionState createValidateState(String stateIdPrefix) {
+        return createValidateState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
+                onErrorView(stateIdPrefix) });
     }
 
-    public ActionState createValidateState(String stateIdSuffix, Transition[] transitions) {
-        return new ActionState(validate(stateIdSuffix), transitions);
+    public ActionState createValidateState(String stateIdPrefix, Transition[] transitions) {
+        return new ActionState(validate(stateIdPrefix), transitions);
     }
 
     protected Transition onSuccess(String successStateId) {
         return OnEvent.success(successStateId);
     }
 
-    protected Transition onSuccessGet(String getActionStateIdSuffix) {
-        return OnEvent.Success.get(getActionStateIdSuffix);
+    protected Transition onSuccessGet(String getActionStateIdPrefix) {
+        return OnEvent.Success.get(getActionStateIdPrefix);
     }
 
-    protected Transition onSuccessPopulate(String populateActionStateIdSuffix) {
-        return OnEvent.Success.populate(populateActionStateIdSuffix);
+    protected Transition onSuccessPopulate(String populateActionStateIdPrefix) {
+        return OnEvent.Success.populate(populateActionStateIdPrefix);
     }
 
-    protected Transition onSuccessView(String viewStateIdSuffix) {
-        return OnEvent.Success.view(viewStateIdSuffix);
+    protected Transition onSuccessView(String viewStateIdPrefix) {
+        return OnEvent.Success.view(viewStateIdPrefix);
     }
 
     protected Transition onSubmit(String submitStateId) {
         return OnEvent.submit(submitStateId);
     }
 
-    protected Transition onSubmitBindAndValidate(String bindAndValidateStateIdSuffix) {
-        return onSubmit(bindAndValidate(bindAndValidateStateIdSuffix));
+    protected Transition onSubmitBindAndValidate(String bindAndValidateStateIdPrefix) {
+        return onSubmit(bindAndValidate(bindAndValidateStateIdPrefix));
     }
 
-    protected Transition onSubmitEdit(String stateIdSuffix) {
-        return onSubmit(edit(stateIdSuffix));
+    protected Transition onSubmitEdit(String stateIdPrefix) {
+        return onSubmit(edit(stateIdPrefix));
     }
 
     protected Transition onSubmitEnd() {
         return onSubmit(EndState.DEFAULT_FINISH_STATE_ID);
     }
 
-    protected Transition onSearchGet(String getSearchResultsActionStateIdSuffix) {
-        return OnEvent.search(get(getSearchResultsActionStateIdSuffix));
+    protected Transition onSearchGet(String getSearchResultsActionStateIdPrefix) {
+        return OnEvent.search(get(getSearchResultsActionStateIdPrefix));
     }
 
-    protected Transition onSuccessEdit(String editSubFlowStateIdSuffix) {
-        return OnEvent.Success.edit(editSubFlowStateIdSuffix);
+    protected Transition onSuccessEdit(String editSubFlowStateIdPrefix) {
+        return OnEvent.Success.edit(editSubFlowStateIdPrefix);
     }
 
     protected Transition onBack(String backStateId) {
         return OnEvent.back(backStateId);
     }
 
-    protected Transition onBackPopulate(String populateActionStateIdSuffix) {
-        return OnEvent.Back.populate(populateActionStateIdSuffix);
+    protected Transition onBackPopulate(String populateActionStateIdPrefix) {
+        return OnEvent.Back.populate(populateActionStateIdPrefix);
     }
 
-    protected Transition onBackView(String viewActionStateIdSuffix) {
-        return OnEvent.Back.view(viewActionStateIdSuffix);
+    protected Transition onBackView(String viewActionStateIdPrefix) {
+        return OnEvent.Back.view(viewActionStateIdPrefix);
     }
 
-    protected Transition onBackEdit(String editSubFlowStateIdSuffix) {
-        return OnEvent.Back.edit(editSubFlowStateIdSuffix);
+    protected Transition onBackEdit(String editSubFlowStateIdPrefix) {
+        return OnEvent.Back.edit(editSubFlowStateIdPrefix);
     }
 
     protected Transition onBackCancel() {
@@ -635,8 +635,8 @@ public class Flow implements FlowEventProcessor, Serializable {
         return OnEvent.Back.end();
     }
 
-    protected Transition onEditEdit(String editSubFlowStateIdSuffix) {
-        return OnEvent.edit(edit(editSubFlowStateIdSuffix));
+    protected Transition onEditEdit(String editSubFlowStateIdPrefix) {
+        return OnEvent.edit(edit(editSubFlowStateIdPrefix));
     }
 
     protected Transition onCancel(String cancelStateId) {
@@ -655,32 +655,32 @@ public class Flow implements FlowEventProcessor, Serializable {
         return OnEvent.Finish.end();
     }
 
-    protected Transition onFinishGet(String getActionStateIdSuffix) {
-        return OnEvent.Finish.get(getActionStateIdSuffix);
+    protected Transition onFinishGet(String getActionStateIdPrefix) {
+        return OnEvent.Finish.get(getActionStateIdPrefix);
     }
 
-    protected Transition onFinishPopulate(String populateActionStateIdSuffix) {
-        return OnEvent.Finish.populate(populateActionStateIdSuffix);
+    protected Transition onFinishPopulate(String populateActionStateIdPrefix) {
+        return OnEvent.Finish.populate(populateActionStateIdPrefix);
     }
 
-    protected Transition onFinishSave(String saveActionStateIdSuffix) {
-        return OnEvent.Finish.save(saveActionStateIdSuffix);
+    protected Transition onFinishSave(String saveActionStateIdPrefix) {
+        return OnEvent.Finish.save(saveActionStateIdPrefix);
     }
 
-    protected Transition onFinishEdit(String editSubFlowStateIdSuffix) {
-        return OnEvent.Finish.edit(editSubFlowStateIdSuffix);
+    protected Transition onFinishEdit(String editSubFlowStateIdPrefix) {
+        return OnEvent.Finish.edit(editSubFlowStateIdPrefix);
     }
 
-    protected Transition onErrorView(String viewStateIdSuffix) {
-        return OnEvent.Error.view(viewStateIdSuffix);
+    protected Transition onErrorView(String viewStateIdPrefix) {
+        return OnEvent.Error.view(viewStateIdPrefix);
     }
 
-    protected Transition onSuccessSave(String saveActionStateIdSuffix) {
-        return OnEvent.Success.save(saveActionStateIdSuffix);
+    protected Transition onSuccessSave(String saveActionStateIdPrefix) {
+        return OnEvent.Success.save(saveActionStateIdPrefix);
     }
 
-    protected Transition onSuccessAdd(String addActionStateIdSuffix) {
-        return OnEvent.Success.add(addActionStateIdSuffix);
+    protected Transition onSuccessAdd(String addActionStateIdPrefix) {
+        return OnEvent.Success.add(addActionStateIdPrefix);
     }
 
     protected Transition onSuccessEnd() {
@@ -699,8 +699,8 @@ public class Flow implements FlowEventProcessor, Serializable {
         return EndState.DEFAULT_FINISH_STATE_ID;
     }
 
-    public static String buildStateId(String prefix, String suffix) {
-        return prefix + StringUtils.capitalize(suffix);
+    public static String buildStateId(String suffix, String prefix) {
+        return prefix + "." + suffix;
     }
 
     public EndState createFinishEndState() {
@@ -739,52 +739,54 @@ public class Flow implements FlowEventProcessor, Serializable {
         return new EndState(EndState.DEFAULT_CANCEL_STATE_ID, cancelViewName);
     }
 
-    public static String create(String createActionStateIdSuffix) {
-        return buildStateId(CREATE_ACTION_PREFIX, createActionStateIdSuffix);
+    public static String create(String createActionStateIdPrefix) {
+        return buildStateId(CREATE_ACTION_SUFFIX, createActionStateIdPrefix);
     }
 
-    public static String get(String getActionStateIdSuffix) {
-        return buildStateId(GET_ACTION_PREFIX, getActionStateIdSuffix);
+    public static String get(String getActionStateIdPrefix) {
+        return buildStateId(GET_ACTION_SUFFIX, getActionStateIdPrefix);
     }
 
-    public static String populate(String populateFormActionStateIdSuffix) {
-        return buildStateId(POPULATE_FORM_ACTION_PREFIX, populateFormActionStateIdSuffix + FORM_SUFFIX);
+    public static String populate(String populateFormActionStateIdPrefix) {
+        return buildStateId(POPULATE_FORM_ACTION_SUFFIX, populateFormActionStateIdPrefix);
     }
 
-    public static String view(String viewActionStateIdSuffix) {
-        return buildStateId(VIEW_PREFIX, viewActionStateIdSuffix);
+    public static String view(String viewActionStateIdPrefix) {
+        return buildStateId(VIEW_SUFFIX, viewActionStateIdPrefix);
     }
 
-    public static String add(String addActionStateIdSuffix) {
-        return buildStateId(ADD_ACTION_PREFIX, addActionStateIdSuffix);
+    public static String add(String addActionStateIdPrefix) {
+        return buildStateId(ADD_ACTION_SUFFIX, addActionStateIdPrefix);
     }
 
-    public static String bindAndValidate(String bindAndValidateStateIdSuffix) {
-        return buildStateId(BIND_AND_VALIDATE_FORM_ACTION_PREFIX, bindAndValidateStateIdSuffix);
+    public static String save(String saveActionStateIdPrefix) {
+        return buildStateId(SAVE_ACTION_SUFFIX, saveActionStateIdPrefix);
+    }
+
+    public static String bindAndValidate(String bindAndValidateStateIdPrefix) {
+        return buildStateId(BIND_AND_VALIDATE_FORM_ACTION_SUFFIX, bindAndValidateStateIdPrefix);
     }
     
-    public static String save(String saveActionStateIdSuffix) {
-        return buildStateId(SAVE_ACTION_PREFIX, saveActionStateIdSuffix);
+    public static String validate(String validateActionStateIdPrefix) {
+        return buildStateId(VALIDATE_ACTION_SUFFIX, validateActionStateIdPrefix);
     }
 
-    public static String validate(String validateActionStateIdSuffix) {
-        return buildStateId(VALIDATE_ACTION_PREFIX, validateActionStateIdSuffix);
+    public static String delete(String deleteActionStateIdPrefix) {
+        return buildStateId(DELETE_ACTION_SUFFIX, deleteActionStateIdPrefix);
     }
 
-    public static String delete(String deleteActionStateIdSuffix) {
-        return buildStateId(DELETE_ACTION_PREFIX, deleteActionStateIdSuffix);
+    public static String edit(String editActionStateIdPrefix) {
+        return buildStateId(EDIT_SUFFIX, editActionStateIdPrefix);
     }
-
-    public static String edit(String editActionStateIdSuffix) {
-        return buildStateId(EDIT_PREFIX, editActionStateIdSuffix);
-    }
-
+    
     public static String attributesMapper(String attributesMapperIdPrefix) {
         return attributesMapperIdPrefix + ATTRIBUTES_MAPPER_ID_SUFFIX;
     }
 
     public static String action(String actionBeanNamePrefix) {
-        return actionBeanNamePrefix + ACTION_BEAN_NAME_SUFFIX;
+        // we no longer append any standard suffix to action names
+        // this method is left in for the time being in case we change our minds
+        return actionBeanNamePrefix;
     }
 
     public static Transition onEvent(String eventName, String newState) {

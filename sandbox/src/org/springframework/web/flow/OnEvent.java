@@ -28,36 +28,36 @@ public class OnEvent {
      * Factory for transitions applicable to the "success" event.
      */
     public static class Success {
-        public static Transition view(String viewStateSuffix) {
-            return success(Flow.buildStateId(Flow.VIEW_PREFIX, viewStateSuffix));
+        public static Transition view(String viewStatePrefix) {
+            return success(Flow.buildStateId(Flow.VIEW_SUFFIX, viewStatePrefix));
         }
 
-        public static Transition get(String getStateSuffix) {
-            return success(Flow.buildStateId(Flow.GET_ACTION_PREFIX, getStateSuffix));
+        public static Transition get(String getStatePrefix) {
+            return success(Flow.buildStateId(Flow.GET_ACTION_SUFFIX, getStatePrefix));
         }
 
-        public static Transition edit(String getStateSuffix) {
-            return success(Flow.buildStateId(Flow.EDIT_PREFIX, getStateSuffix));
+        public static Transition edit(String getStatePrefix) {
+            return success(Flow.buildStateId(Flow.EDIT_SUFFIX, getStatePrefix));
         }
 
-        public static Transition populate(String getStateSuffix) {
-            return success(Flow.buildStateId(Flow.POPULATE_FORM_ACTION_PREFIX, getStateSuffix + Flow.FORM_SUFFIX));
+        public static Transition populate(String getStatePrefix) {
+            return success(Flow.buildStateId(Flow.POPULATE_FORM_ACTION_SUFFIX, getStatePrefix));
         }
 
-        public static Transition add(String addStateSuffix) {
-            return success(Flow.buildStateId(Flow.ADD_ACTION_PREFIX, addStateSuffix));
+        public static Transition add(String addStatePrefix) {
+            return success(Flow.buildStateId(Flow.ADD_ACTION_SUFFIX, addStatePrefix));
         }
 
-        public static Transition remove(String removeStateSuffix) {
-            return success(Flow.buildStateId(Flow.REMOVE_ACTION_PREFIX, removeStateSuffix));
+        public static Transition remove(String removeStatePrefix) {
+            return success(Flow.buildStateId(Flow.REMOVE_ACTION_SUFFIX, removeStatePrefix));
         }
 
-        public static Transition delete(String deleteStateSuffix) {
-            return success(Flow.buildStateId(Flow.DELETE_ACTION_PREFIX, deleteStateSuffix));
+        public static Transition delete(String deleteStatePrefix) {
+            return success(Flow.buildStateId(Flow.DELETE_ACTION_SUFFIX, deleteStatePrefix));
         }
 
-        public static Transition save(String getStateSuffix) {
-            return success(Flow.buildStateId(Flow.SAVE_ACTION_PREFIX, getStateSuffix));
+        public static Transition save(String getStatePrefix) {
+            return success(Flow.buildStateId(Flow.SAVE_ACTION_SUFFIX, getStatePrefix));
         }
 
         public static Transition end() {
@@ -69,8 +69,8 @@ public class OnEvent {
      * Factory for transitions applicable to the "error" event.
      */
     public static class Error {
-        public static Transition view(String viewStateSuffix) {
-            return error(Flow.buildStateId(Flow.VIEW_PREFIX, viewStateSuffix));
+        public static Transition view(String viewStatePrefix) {
+            return error(Flow.buildStateId(Flow.VIEW_SUFFIX, viewStatePrefix));
         }
     }
 
@@ -78,8 +78,8 @@ public class OnEvent {
      * Factory for transitions applicable to the "submit" event.
      */
     public static class Submit {
-        public static Transition bindAndValidate(String stateSuffix) {
-            return submit(Flow.buildStateId(Flow.BIND_AND_VALIDATE_FORM_ACTION_PREFIX, stateSuffix));
+        public static Transition bindAndValidate(String statePrefix) {
+            return submit(Flow.buildStateId(Flow.BIND_AND_VALIDATE_FORM_ACTION_SUFFIX, statePrefix));
         }
 
         public static Transition end() {
@@ -95,16 +95,16 @@ public class OnEvent {
             return back(EndState.DEFAULT_CANCEL_STATE_ID);
         }
 
-        public static Transition populate(String stateSuffix) {
-            return back(Flow.populate(stateSuffix));
+        public static Transition populate(String statePrefix) {
+            return back(Flow.populate(statePrefix));
         }
         
-        public static Transition view(String stateSuffix) {
-            return back(Flow.view(stateSuffix));
+        public static Transition view(String statePrefix) {
+            return back(Flow.view(statePrefix));
         }
 
-        public static Transition edit(String stateSuffix) {
-            return back(Flow.edit(stateSuffix));
+        public static Transition edit(String statePrefix) {
+            return back(Flow.edit(statePrefix));
         }
 
         public static Transition end() {
@@ -126,20 +126,20 @@ public class OnEvent {
      */
     public static class Finish {
         
-        public static Transition get(String stateSuffix) {
-            return finish(Flow.get(stateSuffix));
+        public static Transition get(String statePrefix) {
+            return finish(Flow.get(statePrefix));
         }
         
-        public static Transition populate(String stateSuffix) {
-            return finish(Flow.populate(stateSuffix));
+        public static Transition populate(String statePrefix) {
+            return finish(Flow.populate(statePrefix));
         }
 
-        public static Transition save(String stateSuffix) {
-            return finish(Flow.save(stateSuffix));
+        public static Transition save(String statePrefix) {
+            return finish(Flow.save(statePrefix));
         }
 
-        public static Transition edit(String stateSuffix) {
-            return finish(Flow.edit(stateSuffix));
+        public static Transition edit(String statePrefix) {
+            return finish(Flow.edit(statePrefix));
         }
 
         public static Transition end() {
@@ -203,16 +203,16 @@ public class OnEvent {
         return new Transition("back", backStateId);
     }
 
+    public static Transition back() {
+        return back(EndState.DEFAULT_BACK_STATE_ID);
+    }
+
     public static Transition cancel(String endCancelStateId) {
         return new Transition("cancel", endCancelStateId);
     }
 
     public static Transition finish(String endOkStateId) {
         return new Transition("finish", endOkStateId);
-    }
-
-    public static Transition back() {
-        return back(EndState.DEFAULT_BACK_STATE_ID);
     }
 
     public static Transition cancel() {
@@ -222,5 +222,4 @@ public class OnEvent {
     public static Transition finish() {
         return finish(EndState.DEFAULT_FINISH_STATE_ID);
     }
-
 }

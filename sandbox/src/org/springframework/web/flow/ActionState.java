@@ -30,8 +30,6 @@ import org.springframework.util.Assert;
  */
 public class ActionState extends TransitionableState {
 
-    public static String ACTION_BEAN_NAME_SUFFIX = "Action";
-
     private Set actionBeanNames;
 
     private boolean updateAction;
@@ -67,7 +65,9 @@ public class ActionState extends TransitionableState {
     }
 
     private String appendStandardActionBeanNameSuffix(String stateId) {
-        return stateId + ACTION_BEAN_NAME_SUFFIX;
+        // we no longer append any standard suffix to action names
+        // this method is left in for the time being in case we change our minds
+        return stateId;
     }
 
     public void setBeanNames(String[] beanNames) {
