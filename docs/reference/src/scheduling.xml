@@ -124,12 +124,13 @@ public class BusinessObject {
 			before the first one has finished. To make jobs resulting from the MethodInvokingJobDetailFactoryBEan
 			non-concurrent set the <literal>concurrent</literal> flag to <literal>false</literal>.
 			<programlisting><![CDATA[
-<bean id="methodInvokingJobDetail" 
+<bean id="methodInvokingJobDetail"
   class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
     <property name="targetObject"><ref bean="exampleBusinessObject"/></property>
     <property name="targetMethod"><value>doIt</value></property>
-</bean>			
-			]]></programlisting>	
+    <property name="concurrent"><value>false</value></property>
+</bean>
+			]]></programlisting>
 			<emphasis>Note: By default, jobs will run in a concurrent fashion.</emphasis>
 		</para>
 	</sect2>
