@@ -18,12 +18,12 @@ package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
-import java.util.Map;
 
 /**
- * The central interface of Spring's low-level JavaBeans infrastructure.
- * Typically not directly used by application code but rather implicitly
- * via a BeanFactory or a DataBinder.
+ * The central interface of Spring's low-level JavaBeans infrastructure;
+ * the default implementation is BeanWrapperImpl. Typically not directly
+ * used by application code but rather implicitly via a BeanFactory or
+ * a DataBinder.
  *
  * <p>To be implemented by classes that can manipulate Java beans.
  * Implementing classes have the ability to get and set property values
@@ -42,30 +42,12 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.15 2004-06-03 00:08:26 jhoeller Exp $
+ * @version $Id: BeanWrapper.java,v 1.16 2004-06-11 23:39:18 jhoeller Exp $
+ * @see BeanWrapperImpl
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
-public interface BeanWrapper {
-
-	/**
-	 * Path separator for nested properties.
-	 * Follows normal Java conventions: getFoo().getBar() would be "foo.bar".
-	 */
-	String NESTED_PROPERTY_SEPARATOR = ".";
-
-	/**
-	 * Marker that indicates the start of a property key for an
-	 * indexed or mapped property like "person.addresses[0]".
-	 */
-	String PROPERTY_KEY_PREFIX = "[";
-
-	/**
-	 * Marker that indicates the end of a property key for an
-	 * indexed or mapped property like "person.addresses[0]".
-	 */
-	String PROPERTY_KEY_SUFFIX = "]";
-
+public interface BeanWrapper extends PropertyAccessor {
 
 	/**
 	 * Change the wrapped object. Implementations are required
@@ -87,8 +69,8 @@ public interface BeanWrapper {
 	Class getWrappedClass();
 
 	/**
-	 * Register the given custom property editor for all properties of the
-	 * given type.
+	 * Register the given custom property editor for all properties
+	 * of the given type.
 	 * @param requiredType type of the property
 	 * @param propertyEditor editor to register
 	 */
@@ -97,8 +79,16 @@ public interface BeanWrapper {
 	/**
 	 * Register the given custom property editor for the given type and
 	 * property, or for all properties of the given type.
-	 * @param requiredType type of the property, can be null if a property is
-	 * given but should be specified in any case for consistency checking
+	 * <p>If the property path denotes an array or Collection property,
+	 * the editor will get applied either to the array/Collection itself
+	 * (the PropertyEditor has to create an array or Collection value) or
+	 * to each element (the PropertyEditor has to create the element type),
+	 * depending on the specified required type.
+	 * <p>Note: Only one single registered custom editor per property path
+	 * is supported. In case of a Collection/array, do not register an editor
+	 * for both the Collection/array and each element on the same property.
+	 * @param requiredType type of the property (can be null if a property is
+	 * given but should be specified in any case for consistency checking)
 	 * @param propertyPath path of the property (name or nested path), or
 	 * null if registering an editor for all properties of the given type
 	 * @param propertyEditor editor to register
@@ -107,79 +97,13 @@ public interface BeanWrapper {
 
 	/**
 	 * Find a custom property editor for the given type and property.
-	 * @param requiredType type of the property, can be null if a property is
-	 * given but should be specified in any case for consistency checking
+	 * @param requiredType type of the property (can be null if a property is
+	 * given but should be specified in any case for consistency checking)
 	 * @param propertyPath path of the property (name or nested path), or
 	 * null if looking for an editor for all properties of the given type
 	 * @return the registered editor, or null if none
 	 */
 	PropertyEditor findCustomEditor(Class requiredType, String propertyPath);
-
-
-	/**
-	 * Get the value of a property.
-	 * @param propertyName name of the property to get the value of
-	 * @return the value of the property.
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't readable, or if the property getter throws an exception.
-	 */
-	Object getPropertyValue(String propertyName) throws BeansException;
-
-	/**
-	 * Set a property value. This method is provided for convenience only.
-	 * The setPropertyValue(PropertyValue) method is more powerful.
-	 * @param propertyName name of the property to set value of
-	 * @param value the new value
-	 */
-	void setPropertyValue(String propertyName, Object value) throws BeansException;
-
-	/**
-	 * Update a property value.
-	 * <b>This is the preferred way to update an individual property.</b>
-	 * @param pv object containing new property value
-	 */
-	void setPropertyValue(PropertyValue pv) throws BeansException;
-
-	/**
-	 * Perform a bulk update from a Map.
-	 * <p>Bulk updates from PropertyValues are more powerful: This method is
-	 * provided for convenience. Behaviour will be identical to that of
-	 * the setPropertyValues(PropertyValues) method.
-	 * @param map Map to take properties from. Contains property value objects,
-	 * keyed by property name
-	 */
-	void setPropertyValues(Map map) throws BeansException;
-
-	/**
-	 * The preferred way to perform a bulk update.
-	 * <p>Note that performing a bulk update differs from performing a single update,
-	 * in that an implementation of this class will continue to update properties
-	 * if a <b>recoverable</b> error (such as a vetoed property change or a type mismatch,
-	 * but <b>not</b> an invalid fieldname or the like) is encountered, throwing a
-	 * PropertyAccessExceptionsException containing all the individual errors.
-	 * This exception can be examined later to see all binding errors.
-	 * Properties that were successfully updated stay changed.
-	 * <p>Does not allow unknown fields.
-	 * Equivalent to setPropertyValues(pvs, false, null).
-	 * @param pvs PropertyValues to set on the target object
-	 */
-	void setPropertyValues(PropertyValues pvs) throws BeansException;
-
-	/**
-	 * Perform a bulk update with full control over behavior.
-	 * Note that performing a bulk update differs from performing a single update,
-	 * in that an implementation of this class will continue to update properties
-	 * if a <b>recoverable</b> error (such as a vetoed property change or a type mismatch,
-	 * but <b>not</b> an invalid fieldname or the like) is encountered, throwing a
-	 * PropertyAccessExceptionsException containing all the individual errors.
-	 * This exception can be examined later to see all binding errors.
-	 * Properties that were successfully updated stay changed.
-	 * <p>Does not allow unknown fields.
-	 * @param pvs PropertyValues to set on the target object
-	 * @param ignoreUnknown should we ignore unknown values (not found in the bean)
-	 */
-	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
-	    throws BeansException;
 
 
 	/**
