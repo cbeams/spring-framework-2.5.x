@@ -11,40 +11,57 @@
 
 package org.springframework.web.context.support;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.util.StringUtils;
 
 /**
- * WebApplicationContext implementation that takes configuration from
- * an XML document.
+ * WebApplicationContext implementation that takes configuration from an XML document.
  *
- * <p>Supports various servlet context init parameters for config file
- * lookup. By default, the lookup occurs in the web app's WEB-INF
- * directory, looking for "WEB-INF/applicationContext.xml" for a root
- * context, and "WEB-INF/test-servlet.xml" for a namespaced context
- * with the name "test-servlet" (like for a DispatcherServlet instance
- * with the web.xml servlet name "test").
+ * <p>Supports various servlet context init parameters for config file lookup.
+ * By default, the lookup occurs in the web app's WEB-INF directory, looking for
+ * "WEB-INF/applicationContext.xml" for the root context, and
+ * "WEB-INF/test-servlet.xml" for a namespaced context with the name "test-servlet"
+ * (like for a DispatcherServlet instance with the web.xml servlet name "test").
  *
- * <p>Interprets (file) paths as servlet context resources, i.e. as
- * paths beneath the web application root. Thus, absolute paths, i.e.
- * files outside the web app root, should be accessed via "file:" URLs.
+ * <p>A config location can consist of multiple names of XML files, separated by any
+ * number of commas and spaces, like "applicationContext1.xml, applicationContext2.xml".
+ * For example, a root application context definition can be collected from multiple
+ * XML files by simply setting multiple names as "contextConfigLocation" context-param.
+ * Note that bean definitions in a </i>later</i> XML file will override ones of the
+ * same name in a previous file.
+ *
+ * <p>Interprets (file) paths as servlet context resources, i.e. as paths beneath
+ * the web application root. Thus, absolute paths, i.e. files outside the web app
+ * root, should be accessed via "file:" URLs.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.2 $
  * @see org.springframework.web.context.ContextLoader#initContext
  * @see org.springframework.web.servlet.FrameworkServlet#getNamespace
  */
 public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	implements WebApplicationContext {
+
+	/**
+	 * Any number of these characters are considered delimiters
+	 * between multiple context paths in a config location.
+	 */
+	public static final String CONFIG_LOCATION_DELIMITERS = ",; ";
+
+	/**
+	 * Name of servlet context parameter that can specify the config location
+	 * for the root context, falling back to DEFAULT_CONFIG_LOCATION.
+	 */
+	public static final String CONFIG_LOCATION_PARAM = "contextConfigLocation";
 
 	/**
 	 * Name of servlet context parameter that can specify the config location prefix
@@ -57,12 +74,6 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	 * for namespaced contexts, falling back to DEFAULT_CONFIG_LOCATION_SUFFIX.
 	 */
 	public static final String CONFIG_LOCATION_SUFFIX_PARAM = "contextConfigLocationSuffix";
-
-	/**
-	 * Name of servlet context parameter that can specify the config location
-	 * for the root context, falling back to DEFAULT_CONFIG_LOCATION.
-	 */
-	public static final String CONFIG_LOCATION_PARAM = "contextConfigLocation";
 
 	/** Default prefix for config locations, followed by the namespace */
 	public static final String DEFAULT_CONFIG_LOCATION_PREFIX = "/WEB-INF/";
@@ -82,7 +93,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	private ServletContext servletContext;
 
 	/** Path from which the configuration was loaded */
-	private String configLocation;
+	private String[] configLocations;
 
 
 	/**
@@ -116,8 +127,8 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	 */
 	public void setServletContext(ServletContext servletContext) throws ApplicationContextException, BeansException {
 		this.servletContext = servletContext;
-		this.configLocation = initConfigLocation();
-		logger.info("Using config location '" + this.configLocation + "'");
+		this.configLocations = initConfigLocations();
+		logger.info("Using config location [" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "'");
 		refresh();
 		
 		if (this.namespace == null) {
@@ -135,12 +146,12 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	/**
 	 * Return the URL or path of the configuration.
 	 */
-	protected String getConfigLocation() {
-		return this.configLocation;
+	protected String[] getConfigLocations() {
+		return this.configLocations;
 	}
 
 	/**
-	 * Initialize the config location for the current namespace.
+	 * Initialize the config locations for the current namespace.
 	 * This can be overridden in subclasses for custom config lookup.
 	 * <p>Default implementation returns the namespace with the default prefix
 	 * "WEB-INF/" and suffix ".xml", if a namespace is set. For the root context,
@@ -148,31 +159,29 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	 * "WEB-INF/applicationContext.xml" if no parameter is found.
 	 * @return the URL or path of the configuration
 	 */
-	private String initConfigLocation() {
+	protected String[] initConfigLocations() {
 		if (getNamespace() != null) {
 			String configLocationPrefix = this.servletContext.getInitParameter(CONFIG_LOCATION_PREFIX_PARAM);
 			String prefix = (configLocationPrefix != null) ? configLocationPrefix : DEFAULT_CONFIG_LOCATION_PREFIX;
 			String configLocationSuffix = this.servletContext.getInitParameter(CONFIG_LOCATION_SUFFIX_PARAM);
 			String suffix = (configLocationSuffix != null) ? configLocationSuffix : DEFAULT_CONFIG_LOCATION_SUFFIX;
-			return prefix + getNamespace() + suffix;
+			return new String[] {prefix + getNamespace() + suffix};
 		}
 		else {
 			String configLocation = this.servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
-			return (configLocation != null) ? configLocation : DEFAULT_CONFIG_LOCATION;
+			if (configLocation != null) {
+				return StringUtils.tokenizeToStringArray(configLocation, CONFIG_LOCATION_DELIMITERS, true, true);
+			}
+			else {
+				return new String[] {DEFAULT_CONFIG_LOCATION};
+			}
 		}
 	}
 
-	/**
-	 * Open and return the input stream for the bean factory for this namespace.
-	 * If namespace is null, return the input stream for the default bean factory.
-	 * @exception IOException if the required XML document isn't found
-	 */
-	protected InputStream getInputStreamForBeanFactory() throws IOException {
-		InputStream in = getResourceAsStream(this.configLocation);
-		if (in == null) {
-			throw new FileNotFoundException("Config location not found: " + this.configLocation);
+	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws IOException {
+		for (int i = 0; i < this.configLocations.length; i++) {
+			beanFactory.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
 		}
-		return in;
 	}
 
 	/**
@@ -180,7 +189,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	 * of the web application.
 	 */
 	protected InputStream getResourceByPath(String path) throws IOException {
-		if (path.charAt(0) != '/') {
+		if (path != null && !path.startsWith("/")) {
 			path = "/" + path;
 		}
 		return getServletContext().getResourceAsStream(path);
@@ -201,7 +210,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	 */
 	public String toString() {
 		StringBuffer sb = new StringBuffer(super.toString() + "; ");
-		sb.append("config path='" + this.configLocation + "'; ");
+		sb.append("config locations=[" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "]; ");
 		return sb.toString();
 	}
 

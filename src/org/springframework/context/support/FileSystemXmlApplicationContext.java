@@ -1,9 +1,9 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
@@ -67,8 +67,8 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 		return new FileSystemXmlApplicationContext(locations);
 	}
 
-	protected final InputStream getInputStreamForBeanFactory() throws IOException {
-		return getResourceAsStream(this.configLocation);
+	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws IOException {
+		beanFactory.loadBeanDefinitions(getResourceAsStream(this.configLocation));
 	}
 
 }

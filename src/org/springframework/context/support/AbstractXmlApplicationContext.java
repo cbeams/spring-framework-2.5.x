@@ -6,7 +6,6 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
@@ -19,7 +18,7 @@ import org.springframework.context.ApplicationContextException;
  * drawing their configuration from XML documents containing bean definitions
  * understood by an XMLBeanFactory.
  * @author Rod Johnson
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see org.springframework.beans.factory.xml.XmlBeanFactory
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
@@ -43,13 +42,10 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	
 	protected void refreshBeanFactory() throws ApplicationContextException, BeansException {
 		String identifier = "application context [" + getDisplayName() + "]";
-		InputStream is = null;
 		try {
-			// Supports remote as well as local URLs
-			is = getInputStreamForBeanFactory();
 			this.xmlBeanFactory = new XmlBeanFactory(getParent());
 			this.xmlBeanFactory.setEntityResolver(new ResourceBaseEntityResolver(this));
-			this.xmlBeanFactory.loadBeanDefinitions(is);
+			loadBeanDefinitions(this.xmlBeanFactory);
 			if (logger.isInfoEnabled()) {
 				logger.info("BeanFactory for application context: " + this.xmlBeanFactory);
 			}
@@ -57,30 +53,23 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		catch (IOException ex) {
 			throw new ApplicationContextException("IOException parsing XML document for " + identifier, ex);
 		} 
-		finally {
-			try {
-				if (is != null)
-					is.close();
-			}
-			catch (IOException ex) {
-				throw new ApplicationContextException("IOException closing stream for XML document for " + identifier, ex);
-			}
-		}
 	}
 	
 	/**
-	 * Return the default BeanFactory for this context
+	 * Return the default BeanFactory for this context.
 	 */
-	public final ListableBeanFactoryImpl getBeanFactory() {
+	public ListableBeanFactoryImpl getBeanFactory() {
 		return xmlBeanFactory;
 	}
 
 	/**
-	 * Open and return the input stream for the bean factory for this namespace. 
-	 * If namespace is null, return the input stream for the default bean factory.
+	 * Load the bean definitions for the given XmlBeanFactory.
+	 * <p>The lifecycle of the bean factory is handled by refreshBeanFactory;
+	 * therefore an implemention of this template method is just supposed
+	 * to load and/or register bean definitions.
 	 * @exception IOException if the required XML document isn't found
+	 * @see #refreshBeanFactory
 	 */
-	protected abstract InputStream getInputStreamForBeanFactory() throws IOException;
+	protected abstract void loadBeanDefinitions(XmlBeanFactory beanFactory) throws IOException;
 	
 }
- 
