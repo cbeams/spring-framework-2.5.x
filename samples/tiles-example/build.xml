@@ -31,7 +31,7 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/tiles">
+		<fileset dir="${spring.root}/lib/struts">
 			<include name="struts-1.1.jar"/>
 		</fileset>
 
@@ -90,6 +90,7 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-beanutils.jar"/>
+				<include name="commons-collections.jar"/>
 				<include name="commons-digester.jar"/>
 				<include name="commons-logging.jar"/>
 			</fileset>
@@ -97,11 +98,11 @@
 				<include name="jstl.jar"/>
 				<include name="standard.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/struts">
+				<include name="*.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/tiles">
-				<include name="*.jar"/>
 			</fileset>
 		</copy>
 
