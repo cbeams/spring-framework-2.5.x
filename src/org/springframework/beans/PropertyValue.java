@@ -4,16 +4,15 @@ package org.springframework.beans;
  * Class to hold information and value for an individual property.
  * Using an object here, rather than just storing all properties in a
  * map keyed by property name, allows for more flexibility, and the
- * ability to handle indexed properties etc. if necessary.
+ * ability to handle indexed properties etc in a special way if necessary.
  *
  * <p>Note that the value doesn't need to be the final required type:
- * a BeanWrapper implementation should handle any necessary conversion,
- * as this object doesn't know anything about the objects it will be
- * applied to.
+ * A BeanWrapper implementation should handle any necessary conversion, as
+ * this object doesn't know anything about the objects it will be applied to.
  *
  * @author Rod Johnson
  * @since 13 May 2001
- * @version $Id: PropertyValue.java,v 1.1.1.1 2003-08-14 16:20:17 trisberg Exp $
+ * @version $Id: PropertyValue.java,v 1.2 2004-02-13 08:37:43 jhoeller Exp $
  */
 public class PropertyValue {
 
@@ -26,9 +25,12 @@ public class PropertyValue {
 	/**
 	 * Creates new PropertyValue.
 	 * @param name name of the property
-	 * @param value value of the property (posibly before type conversion)
+	 * @param value value of the property (possibly before type conversion)
 	 */
 	public PropertyValue(String name, Object value) {
+		if (name == null) {
+			throw new IllegalArgumentException("Property name cannot be null");
+		}
 		this.name = name;
 		this.value = value;
 	}
@@ -43,9 +45,10 @@ public class PropertyValue {
 
 	/**
 	 * Return the value of the property.
-	 * @return the value of the property. Type conversion
-	 * will probably not have occurred. It is the responsibility
-	 * of BeanWrapper implementations to perform type conversion.
+	 * <p>Note that type conversion will <i>not</i> have occurred here.
+	 * It is the responsibility of the BeanWrapper implementation to
+	 * perform type conversion.
+	 * @return the value of the property
 	 */
 	public Object getValue() {
 		return value;
@@ -56,11 +59,19 @@ public class PropertyValue {
 	}
 
 	public boolean equals(Object other) {
-		if (!(other instanceof PropertyValue))
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof PropertyValue)) {
 			return false;
-		PropertyValue pvOther = (PropertyValue) other;
-		return this == other ||
-		    (this.name == pvOther.name && this.value == pvOther.value);
+		}
+		PropertyValue otherPv = (PropertyValue) other;
+		return (this.name.equals(otherPv.name) &&
+				((this.value == null && otherPv.value == null) || this.value.equals(otherPv.value)));
+	}
+
+	public int hashCode() {
+		return this.name.hashCode() * 29 + (this.value != null ? this.value.hashCode() : 0);
 	}
 
 }
