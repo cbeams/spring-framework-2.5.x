@@ -21,32 +21,36 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
- * Abstract base class that allows for easy implementation of concrete platform
- * transaction managers like JtaTransactionManager.
+ * Abstract base class that allows for easy implementation of concrete
+ * platform transaction managers like JtaTransactionManager and
+ * HibernateTransactionManager.
  *
  * <p>Provides the following workflow handling:
  * <ul>
  * <li>determines if there is an existing transaction;
  * <li>applies the appropriate propagation behavior;
- * <li>determines programmatic rollback on commit;
+ * <li>suspends and resumes transactions if necessary;
+ * <li>checks the rollback-only flag on commit;
  * <li>applies the appropriate modification on rollback
  * (actual rollback or setting rollback-only);
  * <li>triggers registered synchronization callbacks
  * (if transaction synchronization is active).
  * </ul>
  *
- * <p>Transaction synchronization is a generic mechanism for registering callbacks
- * that get invoked at transaction completion time. This is mainly used internally by
- * the data access support classes for JDBC, Hibernate, and JDO: They register resources
- * that are opened within the transaction for closing at transaction completion time,
- * allowing for reuse of the same Hibernate Session etc within the transaction.
+ * <p>Transaction synchronization is a generic mechanism for registering
+ * callbacks that get invoked at transaction completion time. This is mainly
+ * used internally by the data access support classes for JDBC, Hibernate,
+ * and JDO: They register resources that are opened within the transaction
+ * for closing at transaction completion time, allowing e.g. for reuse of
+ * the same Hibernate Session within the transaction.
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.19 2004-02-04 17:11:07 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.20 2004-02-06 18:07:39 jhoeller Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.orm.hibernate.HibernateTransactionManager
  */
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
 
@@ -462,6 +466,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			doCleanupAfterCompletion(status.getTransaction());
 		}
 		if (status.getSuspendedResources() != null) {
+			if (status.isDebug()) {
+				logger.debug("Resuming suspended transaction");
+			}
 			resume(status.getTransaction(), status.getSuspendedResources());
 		}
 	}
