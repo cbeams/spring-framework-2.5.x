@@ -44,10 +44,12 @@ public class NoSuchFlowExecutionException extends NestedRuntimeException {
 	 */
 	public NoSuchFlowExecutionException(String flowExecutionId, Throwable cause) {
 		super("No executing flow could be found with id '" + flowExecutionId
-				+ "' -- perhaps the flow has ended or expired?", cause);
+				+ "' -- perhaps the flow has ended or expired?  "
+				+ "This could happen if your users are relying on browser history "
+				+ "(typically via the back button) that reference ended flows.", cause);
 		this.flowExecutionId = flowExecutionId;
 	}
-	
+
 	/**
 	 * Returns the id of the flow execution that was not found.
 	 * @return The flow execution id.

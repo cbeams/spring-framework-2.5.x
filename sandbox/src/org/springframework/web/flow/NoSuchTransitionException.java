@@ -55,7 +55,8 @@ public class NoSuchTransitionException extends FlowNavigationException {
 	public NoSuchTransitionException(TransitionableState state, Event event, Throwable cause) {
 		super(state.getFlow(), "No transition found for event '" + event.getId() + "' in state '" + state.getId()
 				+ "' of flow '" + state.getFlow().getId() + "' -- valid transitional criteria are "
-				+ Styler.call(state.getTransitionalCriteria()) + " -- programmer error?", cause);
+				+ Styler.call(state.getTransitionalCriteria())
+				+ " -- likely programmer error, check the transition criteria for this state", cause);
 		this.state = state;
 		this.event = event;
 	}
