@@ -27,16 +27,16 @@ import org.springframework.util.closure.Constraint;
  */
 public class CompoundPropertyConstraint implements PropertyConstraint {
 
-    private CompoundConstraint compoundPredicate;
+    private CompoundConstraint compoundConstraint;
 
     public String getPropertyName() {
-        PropertyConstraint e = (PropertyConstraint)compoundPredicate.iterator()
+        PropertyConstraint e = (PropertyConstraint)compoundConstraint.iterator()
                 .next();
         return e.getPropertyName();
     }
 
     public Constraint getPredicate() {
-        return compoundPredicate;
+        return compoundConstraint;
     }
 
     /**
@@ -44,7 +44,7 @@ public class CompoundPropertyConstraint implements PropertyConstraint {
      * the client will call "add" to add individual predicates.
      */
     public CompoundPropertyConstraint(CompoundConstraint compoundPredicate) {
-        this.compoundPredicate = compoundPredicate;
+        this.compoundConstraint = compoundPredicate;
     }
 
     /**
@@ -56,7 +56,7 @@ public class CompoundPropertyConstraint implements PropertyConstraint {
      * @return A reference to this, to support chaining.
      */
     public CompoundPropertyConstraint add(PropertyConstraint expression) {
-        this.compoundPredicate.add(expression);
+        this.compoundConstraint.add(expression);
         return this;
     }
 
@@ -66,15 +66,15 @@ public class CompoundPropertyConstraint implements PropertyConstraint {
      * @return An iterator
      */
     public Iterator iterator() {
-        return compoundPredicate.iterator();
+        return compoundConstraint.iterator();
     }
 
     public boolean test(Object bean) {
-        return compoundPredicate.test(bean);
+        return compoundConstraint.test(bean);
     }
 
     public String toString() {
-        return compoundPredicate.toString();
+        return compoundConstraint.toString();
     }
 
 }

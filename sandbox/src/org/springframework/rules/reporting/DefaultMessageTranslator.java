@@ -196,7 +196,7 @@ public class DefaultMessageTranslator implements Visitor {
 
 	void visit(Not not) {
 		add("not", null, "not");
-		visitorSupport.invokeVisit(this, not.getPredicate());
+		visitorSupport.invokeVisit(this, not.getConstraint());
 	}
 
 	//@TODO - consider standard visitor here...

@@ -20,14 +20,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A like predicate, supporting "starts with%", "%ends with", and "%contains%".
+ * A like constraint, supporting "starts with%", "%ends with", and "%contains%".
  *
  * @author Keith Donald
  */
 public class Like implements Constraint {
 
 	public static class LikeType extends StringCodedEnum {
-
 		private LikeType(String code) {
 			super(code);
 		}

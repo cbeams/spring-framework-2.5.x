@@ -26,11 +26,12 @@ import org.springframework.rules.constraint.Range;
 import org.springframework.rules.constraint.RelationalOperator;
 import org.springframework.rules.constraint.Required;
 import org.springframework.rules.constraint.StringLengthConstraint;
-import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.rules.factory.Constraints;
+import org.springframework.util.Assert;
 import org.springframework.util.closure.Constraint;
 
 /**
@@ -47,6 +48,7 @@ public class RulesTestSuite extends TestCase {
         Number n3 = new Integer(-15);
         Number n4 = new Integer(26);
         BinaryConstraint p = GreaterThan.instance();
+        Assert.notNull(p);
         assertTrue(p.test(n2, n1));
         assertFalse(p.test(n3, n2));
 

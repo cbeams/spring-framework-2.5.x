@@ -28,6 +28,16 @@ public class StringLength extends AbstractClosure {
     private static final StringLength INSTANCE = new StringLength();
 
     /**
+     * Returns the shared StringLength instance--this is possible as the default
+     * instance is immutable and stateless.
+     * 
+     * @return the shared instance
+     */
+    public static Closure instance() {
+        return INSTANCE;
+    }
+
+    /**
      * Evaluate the string form of the object returning an Integer representing
      * the string length.
      * 
@@ -37,16 +47,6 @@ public class StringLength extends AbstractClosure {
     public Object call(Object value) {
         if (value == null) { return new Integer(0); }
         return new Integer(String.valueOf(value).length());
-    }
-
-    /**
-     * Returns the shared StringLength instance--this is possible as the default
-     * instance is immutable and stateless.
-     * 
-     * @return the shared instance
-     */
-    public static Closure instance() {
-        return INSTANCE;
     }
 
     public String toString() {

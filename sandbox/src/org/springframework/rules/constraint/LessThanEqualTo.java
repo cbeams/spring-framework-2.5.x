@@ -18,6 +18,7 @@ package org.springframework.rules.constraint;
 import java.util.Comparator;
 
 import org.springframework.rules.closure.BinaryConstraint;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Predicate that tests if one comparable object is less than or equal to
@@ -25,10 +26,25 @@ import org.springframework.rules.closure.BinaryConstraint;
  *
  * @author Keith Donald
  */
-public class LessThanEqualTo extends ComparisonBinaryPredicate implements
-		BinaryConstraint {
+public class LessThanEqualTo extends ComparisonBinaryPredicate implements BinaryConstraint {
+	
+	public static LessThanEqualTo INSTANCE = new LessThanEqualTo();
 
-	private static final LessThanEqualTo INSTANCE = new LessThanEqualTo();
+	public static synchronized BinaryConstraint instance() {
+		return INSTANCE;
+	}
+
+	public static void load(LessThanEqualTo instance) {
+		INSTANCE = instance;
+	}
+
+	public static BinaryConstraint instance(Comparator c) {
+		return new LessThanEqualTo(c);
+	}
+
+	public static Constraint value(Object value) {
+		return INSTANCE.bind(instance(), value);
+	}
 
 	public LessThanEqualTo() {
 		super();
@@ -40,14 +56,6 @@ public class LessThanEqualTo extends ComparisonBinaryPredicate implements
 
 	protected boolean testCompareResult(int result) {
 		return result <= 0;
-	}
-
-	public static BinaryConstraint instance() {
-		return INSTANCE;
-	}
-
-	public static BinaryConstraint instance(Comparator c) {
-		return new LessThanEqualTo(c);
 	}
 
 	public String toString() {

@@ -19,98 +19,92 @@ import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A unary predicate adapting a binary predicate that uses a parameterized
+ * A unary constraint adapting a binary constraint that uses a parameterized
  * constant value as the second argument when testing.
  * 
  * @author Keith Donald
  */
 public class ParameterizedBinaryConstraint implements Constraint {
-    private BinaryConstraint predicate;
-    private Object parameter;
+	private BinaryConstraint constraint;
 
-    /**
-     * Creates a ParameterizedBinaryPredicate that binds the provided parameter
-     * constant as the second argument to the predicate during tests.
-     * 
-     * @param predicate
-     *            The binary predicate to adapt as a unary predicate
-     * @param parameter
-     *            The constant parameter value
-     */
-    public ParameterizedBinaryConstraint(BinaryConstraint predicate,
-            Object parameter) {
-        this.predicate = predicate;
-        this.parameter = parameter;
-    }
+	private Object parameter;
 
-    /**
-     * Convenience constructor for <code>short</code> parameters.
-     */
-    public ParameterizedBinaryConstraint(BinaryConstraint predicate,
-            short number) {
-        this(predicate, new Short(number));
-    }
+	/**
+	 * Creates a ParameterizedBinaryPredicate that binds the provided parameter
+	 * constant as the second argument to the constraint during tests.
+	 * 
+	 * @param constraint
+	 *            The binary constraint to adapt as a unary constraint
+	 * @param parameter
+	 *            The constant parameter value
+	 */
+	public ParameterizedBinaryConstraint(BinaryConstraint constraint, Object parameter) {
+		this.constraint = constraint;
+		this.parameter = parameter;
+	}
 
-    /**
-     * Convenience constructor for <code>byte</code> parameters.
-     */
-    public ParameterizedBinaryConstraint(BinaryConstraint predicate,
-            byte b) {
-        this(predicate, new Byte(b));
-    }
+	/**
+	 * Convenience constructor for <code>short</code> parameters.
+	 */
+	public ParameterizedBinaryConstraint(BinaryConstraint constraint, short number) {
+		this(constraint, new Short(number));
+	}
 
-    /**
-     * Convenience constructor for <code>integer</code> parameters.
-     */
-    public ParameterizedBinaryConstraint(BinaryConstraint predicate,
-            int number) {
-        this(predicate, new Integer(number));
-    }
+	/**
+	 * Convenience constructor for <code>byte</code> parameters.
+	 */
+	public ParameterizedBinaryConstraint(BinaryConstraint constraint, byte b) {
+		this(constraint, new Byte(b));
+	}
 
-    /**
-     * Convenience constructor for <code>float</code> parameters.
-     */
-    public ParameterizedBinaryConstraint(BinaryConstraint predicate,
-            float number) {
-        this(predicate, new Float(number));
-    }
+	/**
+	 * Convenience constructor for <code>integer</code> parameters.
+	 */
+	public ParameterizedBinaryConstraint(BinaryConstraint constraint, int number) {
+		this(constraint, new Integer(number));
+	}
 
-    /**
-     * Convenience constructor for <code>double</code> parameters.
-     */
-    public ParameterizedBinaryConstraint(BinaryConstraint predicate,
-            double number) {
-        this(predicate, new Double(number));
-    }
+	/**
+	 * Convenience constructor for <code>float</code> parameters.
+	 */
+	public ParameterizedBinaryConstraint(BinaryConstraint constraint, float number) {
+		this(constraint, new Float(number));
+	}
 
-    /**
-     * Convenience constructor for <code>boolean</code> parameters.
-     */
-    public ParameterizedBinaryConstraint(BinaryConstraint predicate,
-            boolean bool) {
-        this(predicate, (bool ? Boolean.TRUE : Boolean.FALSE));
-    }
-    
-    public Object getParameter() {
-        return parameter;
-    }
-    
-    public BinaryConstraint getPredicate() {
-        return predicate;
-    }
+	/**
+	 * Convenience constructor for <code>double</code> parameters.
+	 */
+	public ParameterizedBinaryConstraint(BinaryConstraint constraint, double number) {
+		this(constraint, new Double(number));
+	}
 
-    /**
-     * Tests the wrapped binary predicate with the variable argument value,
-     * passing in the parameter constant as the second argument.
-     * 
-     * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
-     */
-    public boolean test(Object value) {
-        return predicate.test(value, this.parameter);
-    }
+	/**
+	 * Convenience constructor for <code>boolean</code> parameters.
+	 */
+	public ParameterizedBinaryConstraint(BinaryConstraint constraint, boolean bool) {
+		this(constraint, (bool ? Boolean.TRUE : Boolean.FALSE));
+	}
 
-    public String toString() {
-        return predicate.toString() + " " + getParameter();
-    }
+	public Object getParameter() {
+		return parameter;
+	}
+
+	public BinaryConstraint getPredicate() {
+		return constraint;
+	}
+
+	/**
+	 * Tests the wrapped binary constraint with the variable argument value,
+	 * passing in the parameter constant as the second argument.
+	 * 
+	 * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
+	 */
+	public boolean test(Object value) {
+		return constraint.test(value, this.parameter);
+	}
+
+	public String toString() {
+		return constraint.toString() + " " + getParameter();
+	}
 
 }

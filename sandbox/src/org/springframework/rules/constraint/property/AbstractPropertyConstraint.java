@@ -13,8 +13,7 @@ import org.springframework.util.Assert;
  *
  * @author Keith Donald
  */
-public abstract class AbstractPropertyConstraint implements
-		PropertyConstraint {
+public abstract class AbstractPropertyConstraint implements PropertyConstraint {
 
 	private String propertyName;
 
@@ -30,21 +29,20 @@ public abstract class AbstractPropertyConstraint implements
 	}
 
 	protected void setPropertyName(String propertyName) {
-		Assert.notNull(propertyName, "propertyName is required");
+		Assert.notNull(propertyName, "The propertyName to constrain is required");
 		this.propertyName = propertyName;
 	}
 
 	public boolean test(Object o) {
 		if (o instanceof PropertyAccessStrategy) {
-			return test((PropertyAccessStrategy) o);
+			return test((PropertyAccessStrategy)o);
 		}
 		else {
 			return test(new BeanPropertyAccessStrategy(o));
 		}
 	}
 
-	protected abstract boolean test(
-			PropertyAccessStrategy domainObjectAccessStrategy);
+	protected abstract boolean test(PropertyAccessStrategy domainObjectAccessStrategy);
 
 	public String toString() {
 		return getPropertyName();

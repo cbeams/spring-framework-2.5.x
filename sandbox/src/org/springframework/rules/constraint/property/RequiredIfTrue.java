@@ -31,7 +31,7 @@ public class RequiredIfTrue extends AbstractPropertyConstraint implements
 
 	private String propertyName;
 
-	private Constraint predicate;
+	private Constraint constraint;
 
 	/**
 	 * Tests that the property is present if the provided predicate is
@@ -42,7 +42,7 @@ public class RequiredIfTrue extends AbstractPropertyConstraint implements
 	 */
 	public RequiredIfTrue(String propertyName, Constraint predicate) {
 		super(propertyName);
-		setPredicate(predicate);
+		setConstraint(predicate);
 	}
 
 	protected RequiredIfTrue(String propertyName) {
@@ -50,16 +50,16 @@ public class RequiredIfTrue extends AbstractPropertyConstraint implements
 	}
 
 	public Constraint getPredicate() {
-		return predicate;
+		return constraint;
 	}
 
-	protected void setPredicate(Constraint predicate) {
+	protected void setConstraint(Constraint predicate) {
 		Assert.notNull(predicate, "predicate is required");
-		this.predicate = predicate;
+		this.constraint = predicate;
 	}
 
 	protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
-		if (predicate.test(domainObjectAccessStrategy)) {
+		if (constraint.test(domainObjectAccessStrategy)) {
 			return Required.instance().test(
 					domainObjectAccessStrategy
 					.getPropertyValue(getPropertyName()));
@@ -70,7 +70,7 @@ public class RequiredIfTrue extends AbstractPropertyConstraint implements
 	}
 
 	public String toString() {
-		return "required if (" + predicate + ")";
+		return "required if (" + constraint + ")";
 	}
 
 }

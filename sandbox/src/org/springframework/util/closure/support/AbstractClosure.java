@@ -28,7 +28,7 @@ import org.springframework.util.closure.Closure;
  * 
  * @author Keith Donald
  */
-public abstract class AbstractClosure extends AlgorithmsAccessorSupport
+public abstract class AbstractClosure extends AlgorithmsAccessor
         implements Closure, Serializable {
 
     /**

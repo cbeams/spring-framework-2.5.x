@@ -15,15 +15,16 @@
  */
 package org.springframework.rules.constraint;
 
+import org.springframework.util.Assert;
 import org.springframework.util.closure.Constraint;
 
 /**
- * "Nots" another unary predicate (the inverse) by using composition.
+ * "Nots" another unary constraint (the inverse) by using composition.
  * 
  * @author Keith Donald
  */
 public class Not implements Constraint {
-    private Constraint predicate;
+    private Constraint constraint;
 
     /**
      * Creates a UnaryNot in temporary invalid state - please use only
@@ -36,32 +37,33 @@ public class Not implements Constraint {
     /**
      * Creates a UnaryNot
      * 
-     * @param predicate
-     *            The predicate to negate.
+     * @param constraint
+     *            The constraint to negate.
      */
-    public Not(Constraint predicate) {
-        this.predicate = predicate;
+    public Not(Constraint constraint) {
+    	setConstraint(constraint);
     }
     
-    public Constraint getPredicate() {
-        return predicate;
-    }
-
-    public void setPredicate(Constraint predicate) {
-        this.predicate = predicate;
+    public void setConstraint(Constraint constraint) {
+        this.constraint = constraint;
     }
     
     /**
-     * Negates the boolean result returned by testing the wrapped predicate.
+     * Negates the boolean result returned by testing the wrapped constraint.
      * 
      * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
      */
     public boolean test(Object value) {
-        return !predicate.test(value);
+    	Assert.state(constraint != null, "The constraint is not set");
+        return !constraint.test(value);
     }
     
     public String toString() {
-        return "not(" + getPredicate() + ")";
+        return "not(" + getConstraint() + ")";
+    }
+
+    public Constraint getConstraint() {
+        return constraint;
     }
 
 }

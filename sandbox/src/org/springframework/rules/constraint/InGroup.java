@@ -22,32 +22,32 @@ import java.util.Set;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A predicate that tests if an argument is one of a group.  Similiar to
+ * A constraint that tests if an argument is one of a group.  Similiar to
  * a database's 'in' operator, and more convenient than using a bunch of ORs.
  * 
  * @author  Keith Donald
  */
 public class InGroup implements Constraint {
-    private Set group;
-    
-    public InGroup(Set group) {
-        this.group = new HashSet(group);
-    }
-    
-    public InGroup(Object[] group) {
-        this.group = new HashSet(Arrays.asList(group));
-    }
-    
-    /**
-     * Tests the variable argument value is in this group.
-     * 
-     * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
-     */
-    public boolean test(Object value) {
-        return group.contains(value);
-    }
+	private Set group;
 
-    public String toString() {
-        return "inGroup [" + group + "]";
-    }
+	public InGroup(Set group) {
+		this.group = new HashSet(group);
+	}
+
+	public InGroup(Object[] group) {
+		this.group = new HashSet(Arrays.asList(group));
+	}
+
+	/**
+	 * Tests the variable argument value is in this group.
+	 * 
+	 * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
+	 */
+	public boolean test(Object value) {
+		return group.contains(value);
+	}
+
+	public String toString() {
+		return "inGroup [" + group + "]";
+	}
 }

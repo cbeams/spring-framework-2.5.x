@@ -20,14 +20,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A unary predicate that returns the result of a <code>boolean</code>
+ * A constraint that returns the result of a <code>boolean</code>
  * expression that tests a variable bean property value against a predicate
  * (constraint). For example: <code>pet.age is required</code>
  *
  * @author Keith Donald
  */
-public class PropertyValueConstraint extends AbstractPropertyConstraint
-		implements Constraint {
+public class PropertyValueConstraint extends AbstractPropertyConstraint implements Constraint {
 
 	private Constraint valueConstraint;
 
@@ -39,18 +38,16 @@ public class PropertyValueConstraint extends AbstractPropertyConstraint
 	 * @param valueConstraint
 	 *            The property value constraint (tester).
 	 */
-	public PropertyValueConstraint(String propertyName,
-			Constraint valueConstraint) {
+	public PropertyValueConstraint(String propertyName, Constraint valueConstraint) {
 		super(propertyName);
 		Assert.notNull(valueConstraint, "valueConstraint is required");
-		Assert.isTrue(!(valueConstraint instanceof PropertyConstraint),
-				"valueConstraint needs to be of type " + PropertyConstraint.class.getName());
+		Assert.isTrue(!(valueConstraint instanceof PropertyConstraint), "valueConstraint needs to be of type "
+				+ PropertyConstraint.class.getName());
 		this.valueConstraint = valueConstraint;
 	}
 
 	protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
-		return valueConstraint.test(domainObjectAccessStrategy
-				.getPropertyValue(getPropertyName()));
+		return valueConstraint.test(domainObjectAccessStrategy.getPropertyValue(getPropertyName()));
 	}
 
 	public Constraint getPredicate() {

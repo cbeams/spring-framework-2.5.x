@@ -26,7 +26,7 @@ import org.springframework.util.closure.Constraint;
  * 
  * @author Keith Donald
  */
-public abstract class AlgorithmsAccessorSupport {
+public abstract class AlgorithmsAccessor {
     protected Algorithms getAlgorithms() {
         return Algorithms.instance();
     }

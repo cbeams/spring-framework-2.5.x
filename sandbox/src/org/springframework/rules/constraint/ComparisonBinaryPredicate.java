@@ -17,6 +17,7 @@ package org.springframework.rules.constraint;
 
 import java.util.Comparator;
 
+import org.springframework.util.comparator.ComparableComparator;
 import org.springframework.util.comparator.NullSafeComparator;
 
 /**
@@ -25,8 +26,7 @@ import org.springframework.util.comparator.NullSafeComparator;
  *
  * @author Keith Donald
  */
-public abstract class ComparisonBinaryPredicate extends
-		AbstractBinaryConstraint {
+public abstract class ComparisonBinaryPredicate extends AbstractBinaryConstraint {
 
 	private Comparator comparator;
 
@@ -34,7 +34,7 @@ public abstract class ComparisonBinaryPredicate extends
 	 * Creates a comparing binary predicate which operates on
 	 * <code>Comparable</code> objects.
 	 */
-	public ComparisonBinaryPredicate() {
+	protected ComparisonBinaryPredicate() {
 
 	}
 
@@ -45,8 +45,17 @@ public abstract class ComparisonBinaryPredicate extends
 	 * @param comparator
 	 *            the comparator, may be null
 	 */
-	public ComparisonBinaryPredicate(Comparator comparator) {
-		this.comparator = comparator;
+	protected ComparisonBinaryPredicate(Comparator comparator) {
+		if (!(comparator instanceof NullSafeComparator)) {
+			this.comparator = new NullSafeComparator(comparator);
+		}
+		else {
+			this.comparator = comparator;
+		}
+	}
+
+	protected Comparator getComparator() {
+		return comparator;
 	}
 
 	/**
@@ -61,14 +70,12 @@ public abstract class ComparisonBinaryPredicate extends
 	 * @return true if the comparsion result passes, false otherwise
 	 */
 	public boolean test(Object argument1, Object argument2) {
-		Comparator c;
-		if (comparator != null) {
-			c = new NullSafeComparator(comparator);
+		if (getComparator() != null) {
+			return testCompareResult(getComparator().compare(argument1, argument2));
 		}
 		else {
-			c = NullSafeComparator.instance();
+			return testCompareResult(ComparableComparator.nullSafeInstance().compare(argument1, argument2));
 		}
-		return testCompareResult(c.compare(argument1, argument2));
 	}
 
 	/**

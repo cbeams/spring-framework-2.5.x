@@ -16,7 +16,7 @@
   	  </property>
   	</bean>
 	     
-  	<bean id="rulesSource" class="org.springframework.rules.DefaultRulesSource">
+  	<bean id="rulesSource" class="org.springframework.rules.support.DefaultRulesSource">
   		<property name="rules">
   			<list>
 				<bean class="org.springframework.rules.Rules">
@@ -31,14 +31,14 @@
 	  		 				<entry key="lastName">
 	  		 					<list>
 		  							<ref bean="required"/>
-		  							<bean class="org.springframework.rules.predicates.StringLengthConstraint">
+		  							<bean class="org.springframework.rules.constraint.StringLengthConstraint">
 		  								<constructor-arg index="0">
 		  									<value>10</value>
 		  								</constructor-arg>
 		  							</bean>
-		  							<bean class="org.springframework.rules.predicates.UnaryNot">
+		  							<bean class="org.springframework.rules.constraint.Not">
 		  								<constructor-arg index="0">
-		  									<bean class="org.springframework.rules.predicates.ParameterizedBinaryPredicate">
+		  									<bean class="org.springframework.rules.constraint.ParameterizedBinaryConstraint">
 		  										<constructor-arg index="0">
 		  											<ref bean="equals"/>
 		  										</constructor-arg>
@@ -57,6 +57,6 @@
   		</property>
   	</bean>
   	
-  	<bean id="equals" class="org.springframework.rules.predicates.EqualTo"/>
-  	<bean id="required" class="org.springframework.rules.predicates.Required"/>
+  	<bean id="equals" class="org.springframework.rules.constraint.EqualTo"/>
+  	<bean id="required" class="org.springframework.rules.constraint.Required"/>
 </beans>

@@ -27,7 +27,7 @@ import org.springframework.util.closure.Constraint;
  * 
  * @author Keith Donald
  */
-public final class Range extends AbstractComposingConstraint {
+public final class Range extends AbstractConstraint {
     private Object min;
 
     private Object max;

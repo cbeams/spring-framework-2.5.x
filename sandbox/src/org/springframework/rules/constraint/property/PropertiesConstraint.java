@@ -20,7 +20,7 @@ import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.util.Assert;
 
 /**
- * A unary predicate that returns the result of a <code>boolean</code>
+ * A constraint that returns the result of a <code>boolean</code>
  * expression that tests two variable bean property values. For example,
  * <code>pet.ageAtFirstVisit > pet.currentAge</code>
  *
@@ -43,8 +43,7 @@ public class PropertiesConstraint extends AbstractPropertyConstraint {
 	 * @param otherPropertyName
 	 *            The second property participating in the expression.
 	 */
-	public PropertiesConstraint(String propertyName,
-			BinaryConstraint beanPropertyExpression, String otherPropertyName) {
+	public PropertiesConstraint(String propertyName, BinaryConstraint beanPropertyExpression, String otherPropertyName) {
 		super(propertyName);
 		Assert.notNull(otherPropertyName, "otherPropertyName is required");
 		Assert.notNull(beanPropertyExpression, "beanPropertyExpression is required");
@@ -61,15 +60,12 @@ public class PropertiesConstraint extends AbstractPropertyConstraint {
 	}
 
 	protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
-		return beanPropertyExpression.test(domainObjectAccessStrategy
-				.getPropertyValue(getPropertyName()),
-				domainObjectAccessStrategy
-				.getPropertyValue(getOtherPropertyName()));
+		return beanPropertyExpression.test(domainObjectAccessStrategy.getPropertyValue(getPropertyName()),
+				domainObjectAccessStrategy.getPropertyValue(getOtherPropertyName()));
 	}
 
 	public String toString() {
-		return super.toString() + " " + beanPropertyExpression.toString() + " "
-				+ otherPropertyName;
+		return super.toString() + " " + beanPropertyExpression.toString() + " " + otherPropertyName;
 	}
 
 }

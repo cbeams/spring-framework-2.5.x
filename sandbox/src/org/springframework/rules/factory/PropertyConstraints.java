@@ -18,13 +18,14 @@ package org.springframework.rules.factory;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.support.AlgorithmsAccessor;
 
 /**
- * Helper class for creating bean property constraints.
+ * Helper class for creating and composing constraints for a single domain object property.
  *
  * @author Keith Donald
  */
-public class PropertyConstraints {
+public class PropertyConstraints extends AlgorithmsAccessor {
 
 	private Constraints c = Constraints.instance();
 
@@ -35,7 +36,7 @@ public class PropertyConstraints {
 	}
 
 	public void setPropertyName(String propertyName) {
-		Assert.notNull(propertyName, "propertyName is required");
+		Assert.notNull(propertyName, "The propertyName to create constraints for is required");
 		this.propertyName = propertyName;
 	}
 
@@ -91,8 +92,7 @@ public class PropertyConstraints {
 		return c.inRange(propertyName, min, max);
 	}
 
-	public PropertyConstraint inRangeProperties(String minProperty,
-			String maxProperty) {
+	public PropertyConstraint inRangeProperties(String minProperty, String maxProperty) {
 		return c.inRangeProperties(propertyName, minProperty, maxProperty);
 	}
 

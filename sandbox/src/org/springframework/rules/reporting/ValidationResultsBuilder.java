@@ -56,7 +56,7 @@ public abstract class ValidationResultsBuilder {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Negating predicate [" + predicate + "]");
                 }
-                ((Not)this.top).setPredicate(predicate);
+                ((Not)this.top).setConstraint(predicate);
             } else {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Aggregating nested predicate [" + predicate
@@ -82,7 +82,7 @@ public abstract class ValidationResultsBuilder {
             if (logger.isDebugEnabled()) {
                 logger.debug("Negating constraint [" + constraint + "]");
             }
-            ((Not)this.top).setPredicate(constraint);
+            ((Not)this.top).setConstraint(constraint);
         } else if (this.top == null) {
             constraintViolated(constraint);
         } else {

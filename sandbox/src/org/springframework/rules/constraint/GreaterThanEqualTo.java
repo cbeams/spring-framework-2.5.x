@@ -18,6 +18,7 @@ package org.springframework.rules.constraint;
 import java.util.Comparator;
 
 import org.springframework.rules.closure.BinaryConstraint;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Predicate that tests if one comparable object is greater than or equal to
@@ -28,7 +29,23 @@ import org.springframework.rules.closure.BinaryConstraint;
 public class GreaterThanEqualTo extends ComparisonBinaryPredicate implements
 		BinaryConstraint {
 
-	private static final GreaterThanEqualTo INSTANCE = new GreaterThanEqualTo();
+	public static GreaterThanEqualTo INSTANCE = new GreaterThanEqualTo();
+
+	public static synchronized BinaryConstraint instance() {
+		return INSTANCE;
+	}
+
+	public static void load(GreaterThanEqualTo instance) {
+		INSTANCE = instance;
+	}
+
+	public static BinaryConstraint instance(Comparator c) {
+		return new GreaterThanEqualTo(c);
+	}
+
+	public static Constraint value(Object value) {
+		return INSTANCE.bind(instance(), value);
+	}
 
 	public GreaterThanEqualTo() {
 		super();
@@ -40,14 +57,6 @@ public class GreaterThanEqualTo extends ComparisonBinaryPredicate implements
 
 	protected boolean testCompareResult(int result) {
 		return result >= 0;
-	}
-
-	public static BinaryConstraint instance() {
-		return INSTANCE;
-	}
-
-	public static BinaryConstraint instance(Comparator c) {
-		return new GreaterThanEqualTo(c);
 	}
 
 	public String toString() {

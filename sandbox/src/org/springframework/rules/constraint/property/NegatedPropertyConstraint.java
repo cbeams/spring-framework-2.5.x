@@ -20,17 +20,12 @@ import org.springframework.rules.constraint.Not;
 /**
  * @author Keith Donald
  */
-public class NegatedPropertyConstraint extends Not implements
-		PropertyConstraint {
-
+public class NegatedPropertyConstraint extends Not implements PropertyConstraint {
 	public NegatedPropertyConstraint(PropertyConstraint e) {
 		super(e);
 	}
 
-	/**
-	 * @see org.springframework.rules.constraint.property.PropertyConstraint#getPropertyName()
-	 */
 	public String getPropertyName() {
-		return ((PropertyConstraint) super.getPredicate()).getPropertyName();
+		return ((PropertyConstraint)super.getConstraint()).getPropertyName();
 	}
 }

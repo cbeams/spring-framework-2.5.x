@@ -135,7 +135,7 @@ public class ValidationResultsCollector implements Visitor {
             logger.debug("Starting [not]...");
         }
         Boolean result = (Boolean)visitorSupport.invokeVisit(this, not
-                .getPredicate());
+                .getConstraint());
         if (logger.isDebugEnabled()) {
             logger.debug("Finished [not]...");
         }

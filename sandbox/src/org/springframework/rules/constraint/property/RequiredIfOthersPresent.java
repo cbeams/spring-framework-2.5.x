@@ -67,7 +67,7 @@ public class RequiredIfOthersPresent extends RequiredIfTrue {
 		for (Iterator i = set.iterator(); i.hasNext();) {
 			compoundPredicate.add(new PropertyPresent((String) i.next()));
 		}
-		setPredicate(compoundPredicate);
+		setConstraint(compoundPredicate);
 	}
 
 }

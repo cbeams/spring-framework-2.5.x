@@ -29,7 +29,7 @@ public abstract class RelationalOperator extends Operator {
 	 */
 	public static final RelationalOperator EQUAL_TO = new RelationalOperator(
 			"eq", "=") {
-		public BinaryConstraint getPredicate() {
+		public BinaryConstraint getConstraint() {
 			return EqualTo.instance();
 		}
 	};
@@ -43,7 +43,7 @@ public abstract class RelationalOperator extends Operator {
 			return GREATER_THAN;
 		}
 
-		public BinaryConstraint getPredicate() {
+		public BinaryConstraint getConstraint() {
 			return LessThan.instance();
 		}
 	};
@@ -57,7 +57,7 @@ public abstract class RelationalOperator extends Operator {
 			return GREATER_THAN_EQUAL_TO;
 		}
 
-		public BinaryConstraint getPredicate() {
+		public BinaryConstraint getConstraint() {
 			return LessThanEqualTo.instance();
 		}
 	};
@@ -71,7 +71,7 @@ public abstract class RelationalOperator extends Operator {
 			return LESS_THAN;
 		}
 
-		public BinaryConstraint getPredicate() {
+		public BinaryConstraint getConstraint() {
 			return GreaterThan.instance();
 		}
 	};
@@ -85,7 +85,7 @@ public abstract class RelationalOperator extends Operator {
 			return LESS_THAN_EQUAL_TO;
 		}
 
-		public BinaryConstraint getPredicate() {
+		public BinaryConstraint getConstraint() {
 			return GreaterThanEqualTo.instance();
 		}
 	};
@@ -99,6 +99,6 @@ public abstract class RelationalOperator extends Operator {
 	 *
 	 * @return the associated binary predicate
 	 */
-	public abstract BinaryConstraint getPredicate();
+	public abstract BinaryConstraint getConstraint();
 
 }

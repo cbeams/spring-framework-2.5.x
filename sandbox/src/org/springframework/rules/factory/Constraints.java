@@ -15,14 +15,8 @@
  */
 package org.springframework.rules.factory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
-import org.springframework.binding.MutablePropertyAccessStrategy;
-import org.springframework.binding.support.BeanPropertyAccessStrategy;
 import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
@@ -44,23 +38,25 @@ import org.springframework.rules.constraint.Required;
 import org.springframework.rules.constraint.StringLengthConstraint;
 import org.springframework.rules.constraint.Like.LikeType;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
-import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.NegatedPropertyConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
+import org.springframework.rules.constraint.property.UniquePropertyValueConstraint;
+import org.springframework.util.Assert;
 import org.springframework.util.closure.Closure;
 import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AlgorithmsAccessorSupport;
+import org.springframework.util.closure.support.AlgorithmsAccessor;
 
 /**
  * A factory for easing the construction and composition of predicates.
  *
  * @author Keith Donald
  */
-public class Constraints extends AlgorithmsAccessorSupport {
+public class Constraints extends AlgorithmsAccessor {
 
-	private static final Constraints INSTANCE = new Constraints();
+	private static Constraints INSTANCE = new Constraints();
 
 	public Constraints() {
 
@@ -70,110 +66,115 @@ public class Constraints extends AlgorithmsAccessorSupport {
 		return INSTANCE;
 	}
 
+	public static void load(Constraints sharedInstance) {
+		Assert.notNull(sharedInstance, "The global constraints factory cannot be null");
+		INSTANCE = sharedInstance;
+	}
+
 	/**
 	 * Bind the specified parameter to the second argument of the
-	 * <code>BinaryPredicate</code>. The result is a
-	 * <code>UnaryPredicate</code> which will test a single variable argument
+	 * <code>BinaryConstraint</code>. The result is a
+	 * <code>Constraint</code> which will test a single variable argument
 	 * against the constant parameter.
 	 *
-	 * @param predicate
-	 *            the binary predicate to bind to
+	 * @param constraint
+	 *            the binary constraint to bind to
 	 * @param parameter
 	 *            the parameter value (constant)
-	 * @return The unary predicate
+	 * @return The constraint
 	 */
-	public Constraint bind(BinaryConstraint predicate, Object parameter) {
-		return new ParameterizedBinaryConstraint(predicate, parameter);
+	public Constraint bind(BinaryConstraint constraint, Object parameter) {
+		return new ParameterizedBinaryConstraint(constraint, parameter);
 	}
 
 	/**
 	 * Bind the specified <code>int</code> parameter to the second argument of
-	 * the <code>BinaryPredicate</code>. The result is a
-	 * <code>UnaryPredicate</code> which will test a single variable argument
+	 * the <code>BinaryConstraint</code>. The result is a
+	 * <code>Constraint</code> which will test a single variable argument
 	 * against the constant <code>int</code> parameter.
 	 *
-	 * @param predicate
-	 *            the binary predicate to bind to
+	 * @param constraint
+	 *            the binary constraint to bind to
 	 * @param parameter
 	 *            the <code>int</code> parameter value (constant)
-	 * @return The unary predicate
+	 * @return The constraint
 	 */
-	public Constraint bind(BinaryConstraint predicate, int parameter) {
-		return new ParameterizedBinaryConstraint(predicate, parameter);
+	public Constraint bind(BinaryConstraint constraint, int parameter) {
+		return new ParameterizedBinaryConstraint(constraint, parameter);
 	}
 
 	/**
 	 * Bind the specified <code>float</code> parameter to the second argument
-	 * of the <code>BinaryPredicate</code>. The result is a
-	 * <code>UnaryPredicate</code> which will test a single variable argument
+	 * of the <code>BinaryConstraint</code>. The result is a
+	 * <code>Constraint</code> which will test a single variable argument
 	 * against the constant <code>float</code> parameter.
 	 *
-	 * @param predicate
-	 *            the binary predicate to bind to
+	 * @param constraint
+	 *            the binary constraint to bind to
 	 * @param parameter
 	 *            the <code>float</code> parameter value (constant)
-	 * @return The unary predicate
+	 * @return The constraint
 	 */
-	public Constraint bind(BinaryConstraint predicate, float parameter) {
-		return new ParameterizedBinaryConstraint(predicate, parameter);
+	public Constraint bind(BinaryConstraint constraint, float parameter) {
+		return new ParameterizedBinaryConstraint(constraint, parameter);
 	}
 
 	/**
 	 * Bind the specified <code>double</code> parameter to the second argument
-	 * of the <code>BinaryPredicate</code>. The result is a
-	 * <code>UnaryPredicate</code> which will test a single variable argument
+	 * of the <code>BinaryConstraint</code>. The result is a
+	 * <code>Constraint</code> which will test a single variable argument
 	 * against the constant <code>double</code> parameter.
 	 *
-	 * @param predicate
-	 *            the binary predicate to bind to
+	 * @param constraint
+	 *            the binary constraint to bind to
 	 * @param parameter
 	 *            the <code>double</code> parameter value (constant)
-	 * @return The unary predicate
+	 * @return The constraint
 	 */
-	public Constraint bind(BinaryConstraint predicate, double parameter) {
-		return new ParameterizedBinaryConstraint(predicate, parameter);
+	public Constraint bind(BinaryConstraint constraint, double parameter) {
+		return new ParameterizedBinaryConstraint(constraint, parameter);
 	}
 
 	/**
 	 * Bind the specified <code>boolean</code> parameter to the second
-	 * argument of the <code>BinaryPredicate</code>. The result is a
-	 * <code>UnaryPredicate</code> which will test a single variable argument
+	 * argument of the <code>BinaryConstraint</code>. The result is a
+	 * <code>Constraint</code> which will test a single variable argument
 	 * against the constant <code>boolean</code> parameter.
 	 *
-	 * @param predicate
-	 *            the binary predicate to bind to
+	 * @param constraint
+	 *            the binary constraint to bind to
 	 * @param parameter
 	 *            the <code>boolean</code> parameter value (constant)
-	 * @return The unary predicate
+	 * @return The  constraint
 	 */
-	public Constraint bind(BinaryConstraint predicate, boolean parameter) {
-		return new ParameterizedBinaryConstraint(predicate, parameter);
+	public Constraint bind(BinaryConstraint constraint, boolean parameter) {
+		return new ParameterizedBinaryConstraint(constraint, parameter);
 	}
 
 	/**
-	 * Attaches a predicate that tests the result returned by evaluating the
-	 * specified unary function. This effectively attaches a constraint on the
-	 * function return value.
+	 * Attaches a constraint that tests the result returned by evaluating the
+	 * specified closure. This effectively attaches a constraint on the
+	 * closure return value.
 	 *
-	 * @param function
-	 *            the function
+	 * @param closure
+	 *            the closure
 	 * @param constraint
-	 *            the predicate to test the function result
-	 * @return The testing predicate, which on the call to test(o) first
-	 *         evaluates 'o' using the function and then tests the result.
+	 *            the constraint to test the closure result
+	 * @return The testing constraint, which on the call to test(o) first
+	 *         evaluates 'o' using the closure and then tests the result.
 	 */
-	public Constraint testResultOf(Closure function, Constraint constraint) {
-		return new ClosureResultConstraint(function, constraint);
+	public Constraint testResultOf(Closure closure, Constraint constraint) {
+		return new ClosureResultConstraint(closure, constraint);
 	}
 
 	/**
 	 * AND two predicates.
 	 *
 	 * @param predicate1
-	 *            the first predicate
+	 *            the first constraint
 	 * @param predicate2
-	 *            the second predicate
-	 * @return The compound AND predicate
+	 *            the second constraint
+	 * @return The compound AND constraint
 	 */
 	public Constraint and(Constraint predicate1, Constraint predicate2) {
 		return new And(predicate1, predicate2);
@@ -184,14 +185,14 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *
 	 * @param predicates
 	 *            the predicates
-	 * @return The compound AND predicate
+	 * @return The compound AND constraint
 	 */
 	public Constraint all(Constraint[] predicates) {
 		return new And(predicates);
 	}
 
 	/**
-	 * Returns a new, empty unary conjunction prototype, capable of composing
+	 * Returns a new, empty conjunction prototype, capable of composing
 	 * individual predicates where 'ALL' must test true.
 	 *
 	 * @return the UnaryAnd
@@ -204,44 +205,44 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 * OR two predicates.
 	 *
 	 * @param predicate1
-	 *            the first predicate
+	 *            the first constraint
 	 * @param predicate2
-	 *            the second predicate
-	 * @return The compound OR predicate
+	 *            the second constraint
+	 * @return The compound OR constraint
 	 */
 	public Constraint or(Constraint predicate1, Constraint predicate2) {
 		return new Or(predicate1, predicate2);
 	}
 
 	/**
-	 * Return the disjjunction (any constraint) for all predicates.
+	 * Return the disjunction (any constraint) for all predicates.
 	 *
 	 * @param predicates
 	 *            the predicates
-	 * @return The compound AND predicate
+	 * @return The compound AND constraint
 	 */
 	public Constraint any(Constraint[] predicates) {
 		return new Or(predicates);
 	}
 
 	/**
-	 * Negate the specified predicate.
+	 * Negate the specified constraint.
 	 *
-	 * @param predicate
-	 *            The predicate to negate
-	 * @return The negated predicate.
+	 * @param constraint
+	 *            The constraint to negate
+	 * @return The negated constraint.
 	 */
-	public Constraint not(Constraint predicate) {
-		if (!(predicate instanceof Not)) {
-			return new Not(predicate);
+	public Constraint not(Constraint constraint) {
+		if (!(constraint instanceof Not)) {
+			return new Not(constraint);
 		}
 		else {
-			return ((Not) predicate).getPredicate();
+			return ((Not)constraint).getConstraint();
 		}
 	}
 
 	/**
-	 * Returns a new, empty unary disjunction prototype, capable of composing
+	 * Returns a new, empty disjunction prototype, capable of composing
 	 * individual predicates where 'ANY' must test true.
 	 *
 	 * @return the UnaryAnd
@@ -251,53 +252,53 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	}
 
 	/**
-	 * Returns a 'in' group (or set) predicate.
+	 * Returns a 'in' group (or set) constraint.
 	 *
 	 * @param group
 	 *            the group items
-	 * @return The InGroup predicate
+	 * @return The InGroup constraint
 	 */
 	public Constraint inGroup(Set group) {
 		return new InGroup(group);
 	}
 
 	/**
-	 * Returns a 'in' group (or set) predicate.
+	 * Returns a 'in' group (or set) constraint.
 	 *
 	 * @param group
 	 *            the group items
-	 * @return The InGroup predicate.
+	 * @return The InGroup constraint.
 	 */
 	public Constraint inGroup(Object[] group) {
 		return new InGroup(group);
 	}
 
 	/**
-	 * Returns a 'in' group (or set) predicate appled to the provided property.
+	 * Returns a 'in' group (or set) constraint appled to the provided property.
 	 *
 	 * @param propertyName
 	 *            the property
 	 * @param group
 	 *            the group items
-	 * @return The InGroup predicate.
+	 * @return The InGroup constraint.
 	 */
 	public PropertyConstraint inGroup(String propertyName, Object[] group) {
 		return value(propertyName, new InGroup(group));
 	}
 
 	/**
-	 * Returns a 'like' predicate.
+	 * Returns a 'like' constraint.
 	 *
 	 * @param encodedLikeString
 	 *            the likeString
-	 * @return The Like predicate.
+	 * @return The Like constraint.
 	 */
 	public Constraint like(String encodedLikeString) {
 		return new Like(encodedLikeString);
 	}
 
 	/**
-	 * Return a 'like' predicate applied as a value constraint to the provided
+	 * Return a 'like' constraint applied as a value constraint to the provided
 	 * property.
 	 *
 	 * @param property
@@ -306,17 +307,16 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The like type
 	 * @param value
 	 *            The like string value to match
-	 * @return The Like predicate
+	 * @return The Like constraint
 	 */
-	public PropertyConstraint like(String property, LikeType likeType,
-			String value) {
+	public PropertyConstraint like(String property, LikeType likeType, String value) {
 		return value(property, new Like(likeType, value));
 	}
 
 	/**
-	 * Returns a required predicate.
+	 * Returns a required constraint.
 	 *
-	 * @return The required predicate instance.
+	 * @return The required constraint instance.
 	 */
 	public Constraint required() {
 		return Required.instance();
@@ -325,33 +325,32 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	/**
 	 * Returns a required bean property expression.
 	 *
-	 * @return The required predicate instance.
+	 * @return The required constraint instance.
 	 */
 	public PropertyConstraint required(String property) {
 		return value(property, required());
 	}
 
 	/**
-	 * Returns a maxlength predicate.
+	 * Returns a maxlength constraint.
 	 *
 	 * @param maxLength
 	 *            The maximum length in characters.
-	 * @return The configured maxlength predicate.
+	 * @return The configured maxlength constraint.
 	 */
 	public Constraint maxLength(int maxLength) {
 		return new StringLengthConstraint(maxLength);
 	}
 
 	/**
-	 * Returns a minlength predicate.
+	 * Returns a minlength constraint.
 	 *
 	 * @param minLength
 	 *            The minimum length in characters.
-	 * @return The configured minlength predicate.
+	 * @return The configured minlength constraint.
 	 */
 	public Constraint minLength(int minLength) {
-		return new StringLengthConstraint(
-				RelationalOperator.GREATER_THAN_EQUAL_TO, minLength);
+		return new StringLengthConstraint(RelationalOperator.GREATER_THAN_EQUAL_TO, minLength);
 	}
 
 	/**
@@ -387,10 +386,9 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The targetObject
 	 * @param methodName
 	 *            The method name
-	 * @return The predicate.
+	 * @return The constraint.
 	 */
-	public Constraint method(Object target, String methodName,
-			String constraintType) {
+	public Constraint method(Object target, String methodName, String constraintType) {
 		return new MethodInvokingConstraint(target, methodName, constraintType);
 	}
 
@@ -403,8 +401,7 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            the value constraint
 	 * @return The bean property expression that tests the constraint
 	 */
-	public PropertyConstraint value(String propertyName,
-			Constraint valueConstraint) {
+	public PropertyConstraint value(String propertyName, Constraint valueConstraint) {
 		return new PropertyValueConstraint(propertyName, valueConstraint);
 	}
 
@@ -417,8 +414,7 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The constraints that form a all conjunction
 	 * @return
 	 */
-	public PropertyConstraint all(String propertyName,
-			Constraint[] constraints) {
+	public PropertyConstraint all(String propertyName, Constraint[] constraints) {
 		return value(propertyName, all(constraints));
 	}
 
@@ -431,8 +427,7 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The constraints that form a all disjunction
 	 * @return
 	 */
-	public PropertyConstraint any(String propertyName,
-			Constraint[] constraints) {
+	public PropertyConstraint any(String propertyName, Constraint[] constraints) {
 		return value(propertyName, any(constraints));
 	}
 
@@ -454,11 +449,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param propertyValue
 	 *            The constraint value
-	 * @return The predicate
+	 * @return The constraint
 	 */
 	public PropertyConstraint eq(String propertyName, Object propertyValue) {
-		return new ParameterizedPropertyConstraint(propertyName, EqualTo
-				.instance(), propertyValue);
+		return new ParameterizedPropertyConstraint(propertyName, EqualTo.instance(), propertyValue);
 	}
 
 	/**
@@ -468,11 +462,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param propertyValue
 	 *            The constraint value
-	 * @return The predicate
+	 * @return The constraint
 	 */
 	public PropertyConstraint gt(String propertyName, Object propertyValue) {
-		return new ParameterizedPropertyConstraint(propertyName,
-				GreaterThan.instance(), propertyValue);
+		return new ParameterizedPropertyConstraint(propertyName, GreaterThan.instance(), propertyValue);
 	}
 
 	/**
@@ -482,11 +475,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param propertyValue
 	 *            The constraint value
-	 * @return The predicate
+	 * @return The constraint
 	 */
 	public PropertyConstraint gte(String propertyName, Object propertyValue) {
-		return new ParameterizedPropertyConstraint(propertyName,
-				GreaterThanEqualTo.instance(), propertyValue);
+		return new ParameterizedPropertyConstraint(propertyName, GreaterThanEqualTo.instance(), propertyValue);
 	}
 
 	/**
@@ -496,11 +488,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param propertyValue
 	 *            The constraint value
-	 * @return The predicate
+	 * @return The constraint
 	 */
 	public PropertyConstraint lt(String propertyName, Object propertyValue) {
-		return new ParameterizedPropertyConstraint(propertyName, LessThan
-				.instance(), propertyValue);
+		return new ParameterizedPropertyConstraint(propertyName, LessThan.instance(), propertyValue);
 	}
 
 	/**
@@ -510,11 +501,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param propertyValue
 	 *            The constraint value
-	 * @return The predicate
+	 * @return The constraint
 	 */
 	public PropertyConstraint lte(String propertyName, Object propertyValue) {
-		return new ParameterizedPropertyConstraint(propertyName,
-				LessThanEqualTo.instance(), propertyValue);
+		return new ParameterizedPropertyConstraint(propertyName, LessThanEqualTo.instance(), propertyValue);
 	}
 
 	/**
@@ -524,12 +514,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param otherPropertyName
 	 *            The other property
-	 * @return The predicate
+	 * @return The constraint
 	 */
-	public PropertyConstraint gtProperty(String propertyName,
-			String otherPropertyName) {
-		return new PropertiesConstraint(propertyName, GreaterThan
-				.instance(), otherPropertyName);
+	public PropertyConstraint gtProperty(String propertyName, String otherPropertyName) {
+		return new PropertiesConstraint(propertyName, GreaterThan.instance(), otherPropertyName);
 	}
 
 	/**
@@ -539,12 +527,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param otherPropertyName
 	 *            The other property
-	 * @return The predicate
+	 * @return The constraint
 	 */
-	public PropertyConstraint eqProperty(String propertyName,
-			String otherPropertyName) {
-		return new PropertiesConstraint(propertyName, EqualTo.instance(),
-				otherPropertyName);
+	public PropertyConstraint eqProperty(String propertyName, String otherPropertyName) {
+		return new PropertiesConstraint(propertyName, EqualTo.instance(), otherPropertyName);
 	}
 
 	/**
@@ -554,12 +540,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param otherPropertyName
 	 *            The other property
-	 * @return The predicate
+	 * @return The constraint
 	 */
-	public PropertyConstraint gteProperty(String propertyName,
-			String otherPropertyName) {
-		return new PropertiesConstraint(propertyName, GreaterThanEqualTo
-				.instance(), otherPropertyName);
+	public PropertyConstraint gteProperty(String propertyName, String otherPropertyName) {
+		return new PropertiesConstraint(propertyName, GreaterThanEqualTo.instance(), otherPropertyName);
 	}
 
 	/**
@@ -569,12 +553,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param otherPropertyName
 	 *            The other property
-	 * @return The predicate
+	 * @return The constraint
 	 */
-	public PropertyConstraint ltProperty(String propertyName,
-			String otherPropertyName) {
-		return new PropertiesConstraint(propertyName, LessThan.instance(),
-				otherPropertyName);
+	public PropertyConstraint ltProperty(String propertyName, String otherPropertyName) {
+		return new PropertiesConstraint(propertyName, LessThan.instance(), otherPropertyName);
 	}
 
 	/**
@@ -584,12 +566,10 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            The first property
 	 * @param otherPropertyName
 	 *            The other property
-	 * @return The predicate
+	 * @return The constraint
 	 */
-	public PropertyConstraint lteProperty(String propertyName,
-			String otherPropertyName) {
-		return new PropertiesConstraint(propertyName, LessThanEqualTo
-				.instance(), otherPropertyName);
+	public PropertyConstraint lteProperty(String propertyName, String otherPropertyName) {
+		return new PropertiesConstraint(propertyName, LessThanEqualTo.instance(), otherPropertyName);
 	}
 
 	/**
@@ -601,10 +581,9 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            the low edge of the range
 	 * @param max
 	 *            the high edge of the range
-	 * @return The range predicate constraint
+	 * @return The range constraint constraint
 	 */
-	public PropertyConstraint inRange(String propertyName, Comparable min,
-			Comparable max) {
+	public PropertyConstraint inRange(String propertyName, Comparable min, Comparable max) {
 		Range range = new Range(min, max);
 		return value(propertyName, range);
 	}
@@ -619,72 +598,16 @@ public class Constraints extends AlgorithmsAccessorSupport {
 	 *            the low edge of the range
 	 * @param maxPropertyName
 	 *            the high edge of the range
-	 * @return The range predicate constraint
+	 * @return The range constraint constraint
 	 */
-	public PropertyConstraint inRangeProperties(String propertyName,
-			String minPropertyName, String maxPropertyName) {
-		PropertiesConstraint min = new PropertiesConstraint(
-				propertyName, GreaterThanEqualTo.instance(), minPropertyName);
-		PropertiesConstraint max = new PropertiesConstraint(
-				propertyName, LessThanEqualTo.instance(), maxPropertyName);
+	public PropertyConstraint inRangeProperties(String propertyName, String minPropertyName, String maxPropertyName) {
+		PropertiesConstraint min = new PropertiesConstraint(propertyName, GreaterThanEqualTo.instance(), minPropertyName);
+		PropertiesConstraint max = new PropertiesConstraint(propertyName, LessThanEqualTo.instance(), maxPropertyName);
 		return new CompoundPropertyConstraint(new And(min, max));
 	}
 
 	public PropertyConstraint unique(String propertyName) {
-		return new UniqueValuePropertyConstraint(propertyName);
-	}
-
-	private static class UniqueValuePropertyConstraint implements
-			PropertyConstraint {
-
-		private String propertyName;
-
-		private Map distinctTable;
-
-		public UniqueValuePropertyConstraint(String propertyName) {
-			this.propertyName = propertyName;
-		}
-
-		public String getPropertyName() {
-			return propertyName;
-		}
-
-		public boolean test(Object o) {
-			Collection c = (Collection) o;
-			distinctTable = new HashMap((int) (c.size() * .75));
-			Iterator it = c.iterator();
-			MutablePropertyAccessStrategy accessor = null;
-			while (it.hasNext()) {
-				Object bean = it.next();
-				if (accessor == null) {
-					accessor = createPropertyAccessStrategy(bean);
-				}
-				else {
-					accessor.getDomainObjectHolder().setValue(bean);
-				}
-				Object value = accessor.getPropertyValue(propertyName);
-				Integer hashCode;
-				if (value == null) {
-					hashCode = new Integer(0);
-				}
-				else {
-					hashCode = new Integer(value.hashCode());
-				}
-				if (distinctTable.containsKey(hashCode)) {
-					return false;
-				}
-				else {
-					distinctTable.put(hashCode, value);
-				}
-			}
-			return true;
-		}
-
-		protected MutablePropertyAccessStrategy createPropertyAccessStrategy(
-				Object o) {
-			return new BeanPropertyAccessStrategy(o);
-		}
-
+		return new UniquePropertyValueConstraint(propertyName);
 	}
 
 }

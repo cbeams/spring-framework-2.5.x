@@ -16,18 +16,29 @@
 package org.springframework.rules.constraint;
 
 import org.springframework.rules.closure.BinaryConstraint;
-import org.springframework.rules.factory.Constraints;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.closure.Constraint;
 
 /**
- * Predicate that tests object equality (not identity.)
+ * Constraint that tests object equality (not identity.)
  *
  * @author Keith Donald
  */
-public class EqualTo extends AbstractBinaryConstraint {
+public class EqualTo extends ComparisonBinaryPredicate {
 
-	private static final EqualTo INSTANCE = new EqualTo();
+	public static EqualTo INSTANCE = new EqualTo();
+
+	public static synchronized BinaryConstraint instance() {
+		return INSTANCE;
+	}
+
+	public static void load(EqualTo instance) {
+		INSTANCE = instance;
+	}
+
+	public static Constraint value(Object value) {
+		return INSTANCE.bind(instance(), value);
+	}
 
 	public EqualTo() {
 		super();
@@ -43,15 +54,16 @@ public class EqualTo extends AbstractBinaryConstraint {
 	 * @return true if they are equal, false otherwise
 	 */
 	public boolean test(Object argument1, Object argument2) {
-		return ObjectUtils.nullSafeEquals(argument1, argument2);
+		if (getComparator() == null) {
+			return ObjectUtils.nullSafeEquals(argument1, argument2);
+		}
+		else {
+			return super.test(argument1, argument2);
+		}
 	}
 
-	public static BinaryConstraint instance() {
-		return INSTANCE;
-	}
-
-	public static Constraint value(Object value) {
-		return Constraints.instance().bind(instance(), value);
+	protected boolean testCompareResult(int result) {
+		return result == 0;
 	}
 
 	public String toString() {

@@ -27,6 +27,16 @@ public class Minimum extends AbstractBinaryClosure {
 	private static final Minimum INSTANCE = new Minimum();
 
 	/**
+	 * Returns the shared instance--this is possible as the default functor for
+	 * this class is immutable and stateless.
+	 *
+	 * @return the shared instance
+	 */
+	public static final BinaryClosure instance() {
+		return INSTANCE;
+	}
+
+	/**
 	 * Return the minimum of two Comparable objects.
 	 *
 	 * @param comparable1
@@ -45,16 +55,6 @@ public class Minimum extends AbstractBinaryClosure {
 			return comparable2;
 		}
 		return comparable1;
-	}
-
-	/**
-	 * Returns the shared instance--this is possible as the default functor for
-	 * this class is immutable and stateless.
-	 *
-	 * @return the shared instance
-	 */
-	public static final Minimum instance() {
-		return INSTANCE;
 	}
 
 	public String toString() {

@@ -26,8 +26,7 @@ import org.springframework.util.closure.Constraint;
  * @author Keith Donald
  * @see Required
  */
-public class PropertyPresent extends AbstractPropertyConstraint implements
-		Constraint {
+public class PropertyPresent extends AbstractPropertyConstraint implements Constraint {
 
 	/**
 	 * Constructs a property present predicate for the specified property.
@@ -40,8 +39,7 @@ public class PropertyPresent extends AbstractPropertyConstraint implements
 	}
 
 	protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
-		return Required.instance().test(
-				domainObjectAccessStrategy.getPropertyValue(getPropertyName()));
+		return Required.instance().test(domainObjectAccessStrategy.getPropertyValue(getPropertyName()));
 	}
 
 	public String toString() {

@@ -20,64 +20,53 @@ import java.util.Iterator;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A "and" compound predicate (aka conjunction).
+ * A "and" compound constraint (aka conjunction).
  * 
  * @author Keith Donald
  */
 public class And extends CompoundConstraint {
 
-    /**
-     * Creates a empty UnaryAnd conjunction.
-     */
-    public And() {
-        super();
-    }
+	/**
+	 * Creates a empty And conjunction.
+	 */
+	public And() {
+		super();
+	}
 
-    /**
-     * "Ands" two predicates.
-     * 
-     * @param predicate1
-     *            The first predicate.
-     * @param predicate2
-     *            The second predicate.
-     */
-    public And(Constraint predicate1, Constraint predicate2) {
-        super(predicate1, predicate2);
-    }
+	/**
+	 * "Ands" two constraints.
+	 * 
+	 * @param constraint1
+	 *            The first constraint.
+	 * @param constraint2
+	 *            The second constraint.
+	 */
+	public And(Constraint constraint1, Constraint constraint2) {
+		super(constraint1, constraint2);
+	}
 
-    /**
-     * "Ands" the specified predicates.
-     * 
-     * @param predicates
-     *            The predicates
-     */
-    public And(Constraint[] predicates) {
-        super(predicates);
-    }
+	/**
+	 * "Ands" the specified constraints.
+	 * 
+	 * @param constraints
+	 *            The constraints
+	 */
+	public And(Constraint[] constraints) {
+		super(constraints);
+	}
 
-    /**
-     * Tests if all of the predicates aggregated by this compound predicate
-     * return <code>true</code> when evaulating this argument.
-     * 
-     * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
-     */
-    public boolean test(Object argument) {
-        for (Iterator i = iterator(); i.hasNext();) {
-            if (!((Constraint)i.next()).test(argument)) { return false; }
-        }
-        return true;
-    }
-
-    public String toString() {
-        StringBuffer buf = new StringBuffer("and(");
-        for (Iterator i = iterator(); i.hasNext();) {
-            buf.append(i.next());
-            if (i.hasNext()) {
-                buf.append(", ");
-            }
-        }
-        buf.append(")");
-        return buf.toString();
-    }
-
+	/**
+	 * Tests if all of the constraints aggregated by this compound constraint
+	 * return <code>true</code> when evaulating this argument.
+	 * 
+	 * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
+	 */
+	public boolean test(Object argument) {
+		for (Iterator i = iterator(); i.hasNext();) {
+			if (!((Constraint)i.next()).test(argument)) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

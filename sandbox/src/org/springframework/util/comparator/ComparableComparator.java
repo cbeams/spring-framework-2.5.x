@@ -17,6 +17,8 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
+import org.springframework.util.Assert;
+
 /**
  * Adapter adapting a comparable to the comparator interface.
  * 
@@ -24,20 +26,29 @@ import java.util.Comparator;
  */
 public class ComparableComparator implements Comparator {
 
-    private static final ComparableComparator INSTANCE = new ComparableComparator();
+	private static final ComparableComparator INSTANCE = new ComparableComparator();
 
-    /**
-     * Factory method that returns a shared instance of a ComparableComparator.
-     */
-    public static Comparator instance() {
-        return INSTANCE;
-    }
+	/**
+	 * Factory method that returns a shared instance of a ComparableComparator.
+	 */
+	public static Comparator instance() {
+		return INSTANCE;
+	}
 
-    private ComparableComparator() {
-    }
+	/**
+	 * Factory method that returns a shared null safe instance of a ComparableComparator.
+	 */
+	public static Comparator nullSafeInstance() {
+		return NullSafeComparator.instance();
+	}
 
-    public int compare(Object o1, Object o2) {
-        return ((Comparable)o1).compareTo(o2);
-    }
+	private ComparableComparator() {
+	}
+
+	public int compare(Object o1, Object o2) {
+		Assert.isTrue(o1 instanceof Comparable, "The first object provided is not Comparable");
+		Assert.isTrue(o2 instanceof Comparable, "The second object provided is not Comparable");
+		return ((Comparable)o1).compareTo(o2);
+	}
 
 }

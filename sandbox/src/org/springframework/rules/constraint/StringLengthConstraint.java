@@ -25,7 +25,7 @@ import org.springframework.util.closure.Constraint;
  * 
  * @author Keith Donald
  */
-public class StringLengthConstraint extends AbstractComposingConstraint {
+public class StringLengthConstraint extends AbstractConstraint {
     private Constraint lengthConstraint;
 
     /**
@@ -50,7 +50,7 @@ public class StringLengthConstraint extends AbstractComposingConstraint {
     public StringLengthConstraint(RelationalOperator operator, int length) {
         Assert.notNull(operator, "The relational operator is required");
         Assert.isTrue(length > 0, "length is required");
-        BinaryConstraint comparer = operator.getPredicate();
+        BinaryConstraint comparer = operator.getConstraint();
         Constraint lengthConstraint = bind(comparer, length);
         this.lengthConstraint = testResultOf(StringLength.instance(),
                 lengthConstraint);

@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.support.Algorithms;
 import org.springframework.util.closure.support.Block;
@@ -30,112 +31,115 @@ import org.springframework.util.closure.support.Block;
  * 
  * @author Keith Donald
  */
-public abstract class CompoundConstraint extends AbstractComposingConstraint {
+public abstract class CompoundConstraint extends AbstractConstraint {
 
-    private List constraints = new ArrayList();
+	private List constraints = new ArrayList();
 
-    /**
-     * Constructs a compound predicate with no initial members. It is expected
-     * the client will call "add" to add individual constraints.
-     */
-    public CompoundConstraint() {
+	/**
+	 * Constructs a compound constraint with no initial members. It is expected
+	 * the client will call "add" to add individual constraints.
+	 */
+	public CompoundConstraint() {
 
-    }
+	}
 
-    /**
-     * Creates a CompoundUnaryPredicate composed of two constraints.
-     * 
-     * @param predicate1
-     *            the first predicate
-     * @param predicate2
-     *            the second predicate
-     */
-    public CompoundConstraint(Constraint predicate1, Constraint predicate2) {
-        Assert.isTrue(predicate1 != null && predicate2 != null,
-                "Both constraints are required");
-        constraints.add(predicate1);
-        constraints.add(predicate2);
-    }
+	/**
+	 * Creates a CompoundUnaryPredicate composed of two constraints.
+	 * 
+	 * @param constraint1
+	 *            the first constraint
+	 * @param constraint2
+	 *            the second constraint
+	 */
+	public CompoundConstraint(Constraint constraint1, Constraint constraint2) {
+		Assert.isTrue(constraint1 != null && constraint2 != null, "Both constraints are required");
+		constraints.add(constraint1);
+		constraints.add(constraint2);
+	}
 
-    /**
-     * Creates a CompoundUnaryPredicate composed of the specified constraints.
-     * 
-     * @param constraints
-     *            the aggregated constraints
-     */
-    public CompoundConstraint(Constraint[] constraints) {
-        this.constraints.addAll(Arrays.asList(constraints));
-    }
+	/**
+	 * Creates a CompoundUnaryPredicate composed of the specified constraints.
+	 * 
+	 * @param constraints
+	 *            the aggregated constraints
+	 */
+	public CompoundConstraint(Constraint[] constraints) {
+		this.constraints.addAll(Arrays.asList(constraints));
+	}
 
-    /**
-     * Add the specified predicate to the set of constraints aggregated by this
-     * compound predicate.
-     * 
-     * @param predicate
-     *            the predicate to add
-     * @return A reference to this, to support chaining.
-     */
-    public CompoundConstraint add(Constraint predicate) {
-        this.constraints.add(predicate);
-        return this;
-    }
+	/**
+	 * Add the specified constraint to the set of constraints aggregated by this
+	 * compound constraint.
+	 * 
+	 * @param constraint
+	 *            the constraint to add
+	 * @return A reference to this, to support chaining.
+	 */
+	public CompoundConstraint add(Constraint constraint) {
+		this.constraints.add(constraint);
+		return this;
+	}
 
-    /**
-     * Add the list of constraints to the set of constraints aggregated by this
-     * compound predicate.
-     * 
-     * @param constraints
-     *            the list of constraints to add
-     * @return A reference to this, to support chaining.
-     */
-    public CompoundConstraint addAll(List constraints) {
-        Algorithms.instance().forEach(constraints, new Block() {
-            protected void handle(Object o) {
-                add((Constraint)o);
-            }
-        });
-        return this;
-    }
+	/**
+	 * Add the list of constraints to the set of constraints aggregated by this
+	 * compound constraint.
+	 * 
+	 * @param constraints
+	 *            the list of constraints to add
+	 * @return A reference to this, to support chaining.
+	 */
+	public CompoundConstraint addAll(List constraints) {
+		Algorithms.instance().forEach(constraints, new Block() {
+			protected void handle(Object o) {
+				add((Constraint)o);
+			}
+		});
+		return this;
+	}
 
-    public void remove(Constraint predicate) {
-        constraints.remove(predicate);
-    }
+	public void remove(Constraint constraint) {
+		constraints.remove(constraint);
+	}
 
-    public int indexOf(Constraint child) {
-        return constraints.indexOf(child);
-    }
+	public int indexOf(Constraint child) {
+		return constraints.indexOf(child);
+	}
 
-    public Constraint get(int index) {
-        return (Constraint)constraints.get(index);
-    }
+	public Constraint get(int index) {
+		return (Constraint)constraints.get(index);
+	}
 
-    public void copyInto(CompoundConstraint p) {
-        p.constraints.clear();
-        p.constraints.addAll(constraints);
-    }
+	public void copyInto(CompoundConstraint p) {
+		p.constraints.clear();
+		p.constraints.addAll(constraints);
+	}
 
-    public void set(int index, Constraint predicate) {
-        constraints.set(index, predicate);
-    }
+	public void set(int index, Constraint constraint) {
+		constraints.set(index, constraint);
+	}
 
-    /**
-     * Return an iterator over the aggregated constraints.
-     * 
-     * @return An iterator
-     */
-    public Iterator iterator() {
-        return constraints.iterator();
-    }
+	/**
+	 * Return an iterator over the aggregated constraints.
+	 * 
+	 * @return An iterator
+	 */
+	public Iterator iterator() {
+		return constraints.iterator();
+	}
 
-    /**
-     * Returns the number of constraints aggregated by this compound predicate.
-     * 
-     * @return The size.
-     */
-    public int size() {
-        return constraints.size();
-    }
+	/**
+	 * Returns the number of constraints aggregated by this compound constraint.
+	 * 
+	 * @return The size.
+	 */
+	public int size() {
+		return constraints.size();
+	}
 
-    public abstract boolean test(Object argument);
+	public abstract boolean test(Object argument);
+
+	public String toString() {
+		return new ToStringCreator(this).append("constraints", constraints).toString();
+	}
 
 }
