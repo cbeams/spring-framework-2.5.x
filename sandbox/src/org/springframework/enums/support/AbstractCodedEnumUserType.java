@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.enums.CodedEnum;
 import org.springframework.enums.CodedEnumResolver;
+import org.springframework.enums.LetterCodedEnum;
 import org.springframework.enums.ShortCodedEnum;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -69,7 +70,7 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
         if (ShortCodedEnum.class.isAssignableFrom(returnedClass())) {
             return Hibernate.SHORT;
         }
-        else if (ShortCodedEnum.class.isAssignableFrom(returnedClass())) {
+        else if (LetterCodedEnum.class.isAssignableFrom(returnedClass())) {
             return Hibernate.CHARACTER;
         }
         else {
