@@ -181,27 +181,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         // allow the metadata assembler a chance to
         // vote for bean inclusion
         if (assembler instanceof AutodetectCapableModelMBeanInfoAssembler) {
-            AutodetectCapableModelMBeanInfoAssembler autodetectAssembler = (AutodetectCapableModelMBeanInfoAssembler) assembler;
-
-            String[] beanNames = beanFactory.getBeanDefinitionNames();
-
-            for (int x = 0; x < beanNames.length; x++) {
-                String beanName = beanNames[x];
-                Object bean = beanFactory.getBean(beanName);
-
-                if (!beans.containsValue(bean)) {
-                    // not already registered
-                    // for JMXification
-
-                    if (autodetectAssembler.includeBean(beanName, bean)) {
-                        if (log.isInfoEnabled()) {
-                            log.info("Bean Name: " + beanName
-                                    + " has been autodetected for JMXification");
-                        }
-                        beans.put(beanName, bean);
-                    }
-                }
-            }
+            autodetectBeans();
         }
 
         // check we now have at least one bean
@@ -243,6 +223,34 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
                     "An invalid object type was used when specifying a managed resource. "
                             + "This is a serious error and points to an error in the Spring JMX Code",
                     ex);
+        }
+    }
+
+    /**
+     * Invoked when using an AutodetectCapableModelMBeanInfoAssembler - gives the
+     * assembler the chance to autodetect beans.
+     */
+    private void autodetectBeans() {
+        AutodetectCapableModelMBeanInfoAssembler autodetectAssembler = (AutodetectCapableModelMBeanInfoAssembler) assembler;
+
+        String[] beanNames = beanFactory.getBeanDefinitionNames();
+
+        for (int x = 0; x < beanNames.length; x++) {
+            String beanName = beanNames[x];
+            Object bean = beanFactory.getBean(beanName);
+
+            if (!beans.containsValue(bean)) {
+                // not already registered
+                // for JMXification
+
+                if (autodetectAssembler.includeBean(beanName, bean)) {
+                    if (log.isInfoEnabled()) {
+                        log.info("Bean Name: " + beanName
+                                + " has been autodetected for JMXification");
+                    }
+                    beans.put(beanName, bean);
+                }
+            }
         }
     }
 
