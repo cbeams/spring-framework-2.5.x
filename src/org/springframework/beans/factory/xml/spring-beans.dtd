@@ -504,23 +504,33 @@
 
 <!--
 	A map entry can be an inner bean, ref, value, or collection.
-	The key of the entry is given by the "key" attribute or sub-element.
+	The key of the entry is given by the "key" attribute or child element.
 -->
 <!ELEMENT entry (
   key?,
-	(bean | ref | idref | value | null | list | set | map | props)
+	(bean | ref | idref | value | null | list | set | map | props)?
 )>
 
 <!--
-	Each map element must specify its key as attribute or as sub-element.
+	Each map element must specify its key as attribute or as child element.
 	A key attribute is always a String value.
 -->
 <!ATTLIST entry key CDATA #IMPLIED>
 
 <!--
-  A short-cut alternative to a key element with a "ref bean=" child element.
+  A short-cut alternative to a "key" element with a "ref bean=" child element.
 -->
 <!ATTLIST entry key-ref CDATA #IMPLIED>
+
+<!--
+  A short-cut alternative to a child element "value".
+-->
+<!ATTLIST entry value CDATA #IMPLIED>
+
+<!--
+  A short-cut alternative to a child element "ref bean=".
+-->
+<!ATTLIST entry value-ref CDATA #IMPLIED>
 
 <!--
 	A key element can contain an inner bean, ref, value, or collection.

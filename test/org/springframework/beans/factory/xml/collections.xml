@@ -132,14 +132,14 @@
 	<bean id="literalMap" class="org.springframework.beans.factory.HasMap">	
 		<property name="map">
 			<map>
-				<entry key="foo"><value>bar</value></entry>
-				<entry key="fi"><value>fum</value></entry>
+				<entry key="foo" value="bar"/>
+				<entry key="fi" value="fum"/>
 				<entry key="fa"><null/></entry>
 			</map>
 		</property>
 	</bean>
-	
-	<bean id="mixedMap" class="org.springframework.beans.factory.HasMap">	
+
+	<bean id="mixedMap" class="org.springframework.beans.factory.HasMap">
 		<property name="map">
 			<map>
 				<entry key-ref="fooKey">
@@ -174,8 +174,8 @@
 	<bean id="pMixedMap" class="org.springframework.beans.factory.HasMap" singleton="false">
 		<property name="map">
 			<map>
-				<entry key="foo"><value>bar</value></entry>
-				<entry key="jenny"><ref local="pJenny"/></entry>
+				<entry key="foo" value="bar"/>
+				<entry key="jenny" value-ref="pJenny"/>
 			</map>
 		</property>
 	</bean>

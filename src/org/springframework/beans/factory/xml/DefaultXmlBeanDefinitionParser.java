@@ -143,6 +143,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String KEY_ELEMENT = "key";
 	public static final String KEY_ATTRIBUTE = "key";
 	public static final String KEY_REF_ATTRIBUTE = "key-ref";
+	public static final String VALUE_REF_ATTRIBUTE = "value-ref";
 	public static final String PROPS_ELEMENT = "props";
 	public static final String PROP_ELEMENT = "prop";
 
@@ -705,6 +706,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			// Should only have one value child element: ref, value, list, etc.
 			// Optionally, there might be a key child element.
 			NodeList entrySubNodes = entryEle.getChildNodes();
+
 			Object key = null;
 			Element subElement = null;
 			for (int j = 0; j < entrySubNodes.getLength(); j++) {
@@ -743,11 +745,32 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				key = new RuntimeBeanReference(entryEle.getAttribute(KEY_REF_ATTRIBUTE));
 			}
 
-			if (key == null || subElement == null) {
+			boolean hasValueAttribute = entryEle.hasAttribute(VALUE_ATTRIBUTE);
+			boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
+			if ((hasValueAttribute && hasValueRefAttribute) ||
+					((hasValueAttribute || hasValueRefAttribute)) && subElement != null) {
+				throw new BeanDefinitionStoreException(
+						this.resource, beanName, "<entry> is only allowed to contain either " +
+						"a 'value' attribute OR a 'value-ref' attribute OR a value sub-element");
+			}
+
+			if (key == null || !(hasValueAttribute || hasValueRefAttribute || subElement != null)) {
 				throw new BeanDefinitionStoreException(
 						this.resource, beanName, "<entry> must specify a key and a value");
 			}
-			map.put(key, parsePropertySubElement(subElement, beanName));
+
+			Object value = null;
+			if (hasValueAttribute) {
+				value = entryEle.getAttribute(VALUE_ATTRIBUTE);
+			}
+			else if (hasValueRefAttribute) {
+				value = new RuntimeBeanReference(entryEle.getAttribute(VALUE_REF_ATTRIBUTE));
+			}
+			else if (subElement != null) {
+				value = parsePropertySubElement(subElement, beanName);
+			}
+
+			map.put(key, value);
 		}
 
 		return map;
