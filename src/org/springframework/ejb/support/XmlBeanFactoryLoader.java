@@ -12,6 +12,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -30,8 +31,9 @@ import org.springframework.util.ClassLoaderUtils;
  * of an XML bean factory definition.
  *
  * @author Rod Johnson
+ * @author Colin Sampaleanu
  * @since 20-Jul-2003
- * @version $Id: XmlBeanFactoryLoader.java,v 1.4 2003-11-23 22:57:50 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryLoader.java,v 1.5 2003-12-07 23:23:07 colins Exp $
  */
 public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 	
@@ -66,4 +68,10 @@ public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.beans.factory.support.BeanFactoryLoader#unloadBeanFactory(org.springframework.beans.factory.BeanFactory)
+	 */
+	public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
+		// nothing to do in default implementation
+	}
 }

@@ -16,6 +16,7 @@ import javax.jms.Message;
 import junit.framework.TestCase;
 
 import org.easymock.MockControl;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanFactoryLoader;
 import org.springframework.beans.factory.support.BootstrapException;
@@ -26,7 +27,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
  * to implement ejbCreate() methods.
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: EjbSupportTests.java,v 1.3 2003-11-14 20:14:23 colins Exp $
+ * @version $Id: EjbSupportTests.java,v 1.4 2003-12-07 23:22:45 colins Exp $
  */
 public class EjbSupportTests extends TestCase {
 
@@ -46,6 +47,8 @@ public class EjbSupportTests extends TestCase {
 		BeanFactoryLoader bfl = new BeanFactoryLoader() {
 			public BeanFactory loadBeanFactory() throws BootstrapException {
 				return bf;
+			}
+			public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
 			}
 		};
 		
@@ -111,6 +114,8 @@ public class EjbSupportTests extends TestCase {
 			public BeanFactory loadBeanFactory() throws BootstrapException {
 				return bf;
 			}
+			public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
+			}
 		};
 	
 		AbstractStatelessSessionBean slsb = new AbstractStatelessSessionBean() {
@@ -151,6 +156,8 @@ public class EjbSupportTests extends TestCase {
 			public BeanFactory loadBeanFactory() throws BootstrapException {
 				return bf;
 			}
+			public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
+			}
 		};
 
 		AbstractJmsMessageDrivenBean mdb = new AbstractJmsMessageDrivenBean() {
@@ -179,6 +186,8 @@ public class EjbSupportTests extends TestCase {
 		BeanFactoryLoader bfl = new BeanFactoryLoader() {
 			public BeanFactory loadBeanFactory() throws BootstrapException {
 				throw new BootstrapException("", null);
+			}
+			public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
 			}
 		};
 
