@@ -32,20 +32,21 @@ import org.springframework.util.Styler;
  * until one returns a result event that matches a valid state transition for
  * this state. This is a form of the Chain of Responsibility (CoR) pattern.
  * <p>
- * The results of action execution are used as grounds for a state transition
- * out of this state. Specifically, action execution will continue until a
- * result even triggers a valid state transition or the list of actions is
- * exhausted and an exception is thrown.
+ * The results of action execution are used as contributing criteria for a state
+ * transition out of this state. Specifically, action execution will continue
+ * until a result event triggers a valid state transition in the current request
+ * context, or until the list of actions is exhausted and an exception is
+ * thrown.
  * <p>
  * Each action executed by this action state may be qualified with a set of
  * arbitrary properties. For example, an identifying name and description.
  * <p>
- * By default, the name property is used as a qualifier in determining what
- * transition should be executed for a given action result event. For example,
- * if an action named "myAction" returns a "success" result, a transition for
- * Event "myAction.success" will be searched, and if found, executed. If the
- * action is not named, a transition for the base "success" event will be
- * searched, and if found, executed.
+ * By default, the name property is used as a qualifier for a given action
+ * result event. For example, if an action named <code>myAction</code> returns
+ * a <code>success</code> result, a transition for event
+ * <code>myAction.success</code> will be searched, and if found, executed. If
+ * the action is not named, a transition for the base <code>success</code>
+ * event will be searched, and if found, executed.
  * <p>
  * The name property is also used by the <code>MultiAction</code>
  * implementation to dispatch calls on a target action instance to a particular
@@ -67,7 +68,7 @@ public class ActionState extends TransitionableState {
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
 	 * @param targetAction the raw target action instance to execute in this
-	 *        state
+	 *        state when entered
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -99,7 +100,7 @@ public class ActionState extends TransitionableState {
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
 	 * @param targetAction the raw target action instance to execute in this
-	 *        state
+	 *        state when entered
 	 * @param transitions the transitions out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -114,7 +115,8 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param targetActions the raw actions to execute in this state
+	 * @param action The action and any configuration properties for use within
+	 *        this state
 	 * @param transitions the transitions out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -188,7 +190,7 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Add an unnamed action to the state.
+	 * Add a target action instance to this state.
 	 * @param action the action to add
 	 */
 	protected void addAction(Action action) {
@@ -196,9 +198,8 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Add a named action to the state.
-	 * @param actionName the name of the action
-	 * @param action the action to add
+	 * Add a action instance to this state.
+	 * @param action the state action to add
 	 */
 	protected void addAction(ActionStateAction action) {
 		action.setState(this);
@@ -206,7 +207,7 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Add a collection of unnamed actions to this state.
+	 * Add a collection of target action instances to this state.
 	 * @param actions the actions to add
 	 */
 	protected void addActions(Action[] actions) {
@@ -217,7 +218,6 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Add a collection of named actions to this state.
 	 * @param actionNames the names of the actions
 	 * @param actions the actions to add
 	 */
@@ -229,10 +229,10 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Create a wrapper object for a named action.
+	 * Create the action executor for the provided state action.
 	 * @param actionName the name of the action to wrap
 	 * @param action the action to wrap
-	 * @return the wrapped named action
+	 * @return the action executor
 	 */
 	protected ActionExecutor createActionExecutor(ActionStateAction action) {
 		return new ActionExecutor(action);
@@ -240,9 +240,9 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Returns an iterator that lists the set of actions to execute for this
-	 * state. Both named and unnamed actions will be returned, but all are
-	 * wrapped as {@link ActionState.ActionExecutor} objects.
-	 * @return the NamedAction iterator
+	 * state. Returns a iterator over a collection of
+	 * {@link ActionState.ActionExecutor} objects.
+	 * @return the ActionExecutor iterator
 	 */
 	protected Iterator actionExecutors() {
 		return this.actionExecutors.iterator();
@@ -279,9 +279,9 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Returns this state's action instance associated with this target action
-	 * instance.
-	 * @param targetAction the requesting target object
+	 * Returns this state's action instance associated with the requesting
+	 * target action instance.
+	 * @param targetAction the requesting target action implementation
 	 * @return the action
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
@@ -371,9 +371,7 @@ public class ActionState extends TransitionableState {
 		private ActionStateAction action;
 
 		/**
-		 * Create a new action wrapper.
-		 * @param state the state containing the action
-		 * @param name the name of the action, or null if it's unnamed
+		 * Create a new action executor.
 		 * @param action the action to wrap
 		 */
 		public ActionExecutor(ActionStateAction action) {
@@ -387,7 +385,7 @@ public class ActionState extends TransitionableState {
 
 		/**
 		 * Execute the wrapped action.
-		 * @param context the flow execution context
+		 * @param context the flow request context
 		 * @return result of execution
 		 */
 		protected Event execute(RequestContext context) {

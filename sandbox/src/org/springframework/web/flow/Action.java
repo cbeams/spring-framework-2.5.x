@@ -37,8 +37,8 @@ package org.springframework.web.flow;
  * an independently executing thread on each invocation, so make sure you deal
  * only with local data or internal, thread-safe services.
  * <p>
- * Often feferred to as the "target action" instance when talking about its
- * association with a <code>ActionStateAction</code>.
+ * Instances of this class are often referred to as the "target action" when
+ * talking about its association with a <code>ActionStateAction</code>.
  * 
  * @see org.springframework.web.flow.ActionState
  * @see org.springframework.web.flow.ActionStateAction
