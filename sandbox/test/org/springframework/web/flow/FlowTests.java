@@ -25,7 +25,7 @@ import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.flow.action.AbstractActionBean;
-import org.springframework.web.flow.config.AbstractFlowBuilder;
+import org.springframework.web.flow.config.BaseFlowBuilder;
 import org.springframework.web.flow.config.FlowServiceLocator;
 
 /**
@@ -67,7 +67,7 @@ public class FlowTests extends TestCase {
 		flowDaoMc.replay();
 	}
 
-	private class TestMasterFlowDependencyLookup extends AbstractFlowBuilder {
+	private class TestMasterFlowDependencyLookup extends BaseFlowBuilder {
 		private String PERSONS_LIST = "persons";
 
 		protected String flowId() {
@@ -82,7 +82,7 @@ public class FlowTests extends TestCase {
 		}
 	}
 
-	private class TestFlowDependencyLookup extends AbstractFlowBuilder {
+	private class TestFlowDependencyLookup extends BaseFlowBuilder {
 
 		protected String flowId() {
 			return "test.detailFlow";
@@ -96,7 +96,7 @@ public class FlowTests extends TestCase {
 		}
 	}
 
-	private class TestFlowTypeSafeDependencyLookup extends AbstractFlowBuilder {
+	private class TestFlowTypeSafeDependencyLookup extends BaseFlowBuilder {
 
 		protected String flowId() {
 			return "test.detailFlow";
@@ -110,7 +110,7 @@ public class FlowTests extends TestCase {
 		}
 	};
 
-	private class TestFlowTypeSafeDependencyInjection extends AbstractFlowBuilder {
+	private class TestFlowTypeSafeDependencyInjection extends BaseFlowBuilder {
 
 		private NoOpActionBean noOpAction;
 

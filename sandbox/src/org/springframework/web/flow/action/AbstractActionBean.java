@@ -29,7 +29,7 @@ import org.springframework.web.flow.ActionBean;
 import org.springframework.web.flow.ActionBeanEvent;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
-import org.springframework.web.flow.config.AbstractFlowBuilder;
+import org.springframework.web.flow.config.BaseFlowBuilder;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -73,19 +73,19 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	}
 
 	protected ActionBeanEvent success() {
-		return new ActionBeanEvent(this, AbstractFlowBuilder.SUCCESS);
+		return new ActionBeanEvent(this, BaseFlowBuilder.SUCCESS);
 	}
 
 	protected ActionBeanEvent error() {
-		return new ActionBeanEvent(this, AbstractFlowBuilder.ERROR);
+		return new ActionBeanEvent(this, BaseFlowBuilder.ERROR);
 	}
 
 	protected ActionBeanEvent add() {
-		return new ActionBeanEvent(this, AbstractFlowBuilder.ADD);
+		return new ActionBeanEvent(this, BaseFlowBuilder.ADD);
 	}
 
 	protected ActionBeanEvent search() {
-		return new ActionBeanEvent(this, AbstractFlowBuilder.SEARCH);
+		return new ActionBeanEvent(this, BaseFlowBuilder.SEARCH);
 	}
 
 	/**
