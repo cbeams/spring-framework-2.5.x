@@ -97,7 +97,7 @@
 
 	<bean id="myPlaceholder" class="org.springframework.context.config.PropertyPlaceholderConfigurer">
 		<property name="location">
-			<value>/org/springframework/web/context/WEB-INF/myplaceholder.properties</value>
+			<value>classpath:/org/springframework/web/context/WEB-INF/myplaceholder.properties</value>
 		</property>
 	</bean>
 
