@@ -21,16 +21,16 @@
     </para>
 
     <para>The package <literal>org.springframework.jms.core</literal> provides 
-    the core funtionality for using JMS.  
+    the core functionality for using JMS.  
     It contains JMS template classes 
-    that simplify the use of the JMS by handling the creation and release 
+    that simplifies the use of the JMS by handling the creation and release 
     of resources, much like the <literal>JdbcTemplate</literal> does for JDBC.  
 
     The design principal common to Spring template classes is to
     provide helper methods to perform common operations and for more
     sophisticated usage, delegate the essence of the processing 
     task to user implemented callback interfaces.  The JMS template
-    follows the same design.  The classes offer various convience methods 
+    follows the same design.  The classes offer various convenience methods 
     for the sending of messages, consuming a message synchronously, and 
     exposing the JMS session and message producer to the user.
     </para>
@@ -52,7 +52,7 @@
 
     <para>Finally, the package
     <literal>org.springframework.jms.connection</literal>
-    provides an implemenation of the ConnectionFactory suitable for use
+    provides an implementation of the ConnectionFactory suitable for use
     in standalone applications.  It also contains an implementation
     of Spring's <literal>PlatformTransactionManager</literal>
     for JMS.  This allows for integration of JMS as a transactional
@@ -67,7 +67,7 @@
     and 1.1.  JMS 1.0.2 defined two types of messaging domains, 
     point-to-point (Queues) and publish/subscribe (Topics).
     The 1.0.2 API reflected these two
-    messaging domains by providing a parallel class hierarcy for each domain.
+    messaging domains by providing a parallel class hierarchy for each domain.
     Consequentially, a client application was domain specific in the use of
     the JMS API.  JMS 1.1 introduced the concept of domain unification 
     that minimized both the functional differences and client API 
@@ -79,7 +79,7 @@
 
     <para>The JMS 1.1 specification was released in April 2002 and
     incorporated as part of J2EE 1.4 in November 2003.
-    As a result, most application servers that are currenlty in use 
+    As a result, most application servers that are currently in use 
     are only required to support JMS 1.0.2.
     </para>
   </sect1>
@@ -89,7 +89,7 @@
     Two implementations of the JmsTemplate are provided.  The class
     <literal>JmsTemplate</literal> uses the JMS 1.1 API and the
     subclass <literal>JmsTemplate102</literal> uses the JMS 1.0.2 API.
-    <para>Code that uses the the JmsTemplate only needs to implement callback
+    <para>Code that uses the JmsTemplate only needs to implement callback
     interfaces giving them a clearly defined contract.  The 
     <literal>MessageCreator</literal> callback interface creates a message
     given a Session provided by the calling code in JmsTemplate.
@@ -107,7 +107,7 @@
     default values.  Since there are many send methods in JmsTemplate, 
     the setting of the QOS parameters have been exposed as bean
     properties to avoid duplication in the number 
-    of send methods.  Similarly, the the timeout value for
+    of send methods.  Similarly, the timeout value for
     synchronous receive calls is set using the property
     <literal>setReceiveTimeout</literal>.
     </para>
@@ -118,8 +118,8 @@
     This has the effect that a call to MessageProducer's send method
     <literal>send(Destination destination, Message message)</literal>
     will use QOS different default values than those specified in the
-    JMS specification.   Therefore, in order to to provide consistent
-    managment of QOS values, the JmsTemplate must be specifically
+    JMS specification.   Therefore, in order to provide consistent
+    management of QOS values, the JmsTemplate must be specifically
     enabled to use its own QOS values by setting the boolean property
     <literal>isExplicitQosEnabled</literal> to true.  
     </para>    
@@ -132,7 +132,7 @@
       The <literal>ConnectionFactory</literal> is part of the JMS
       specification and serves as the entry point for working with JMS.
       It is used by the client application as a factory to 
-      create connections with the JMS provider and encapsulaes various 
+      create connections with the JMS provider and encapsulates various 
       configuration parameters, many of which are vendor specific such 
       as SSL configuration options.
       </para>
@@ -182,10 +182,10 @@
       a <literal>Session</literal> from a Connection.
       This is because the JMS API only has only one 
       factory method to create a Session and it requires values for 
-      the transaction and acknolwegement modes.  In a managed environment, 
+      the transaction and acknowledgement modes.  In a managed environment, 
       setting these values in the responsibility of the environments
       transactional infrastructure, so these values are ignored by the 
-      vendors wrapper to the JMS Connection.
+      vendor's wrapper to the JMS Connection.
       When using the <literal>JmsTemplate</literal> in an unmanaged
       environment you can specify these values
       though the use of the properties <literal>SessionTransacted</literal>
@@ -213,7 +213,7 @@
       interface <literal>DestinationResolver</literal>.
       <literal>DynamicDestinationResolver</literal> is the
       default implementation used by <literal>JmsTemplate</literal> and
-      accomodates resolving dynamic destinations.  
+      accommodates resolving dynamic destinations.  
       A <literal>JndiDestinationResolver</literal> is also provided that
       acts as a service locator for destinations contained in JNDI and 
       optionally falls back to the behavior contained in 
@@ -258,7 +258,7 @@
       </para>
 
       <para>You can also configure the JmsTemplate with a default destination
-      via the proprety <literal>DefaultDestination</literal>.  The default
+      via the property <literal>DefaultDestination</literal>.  The default
       destination will be used with send and receive operations that do not 
       refer to a specific destination.
       </para>
@@ -277,7 +277,7 @@
 
     <sect2>
       <title>Sending a message</title>
-      <para>The JmsTemplate contains many convience methods to send a message.
+      <para>The JmsTemplate contains many convenience methods to send a message.
       There are send methods that specify the destination using a 
       <literal>javax.jms.Destination</literal> object and those that
       specify the destination using a string for use in a JNDI lookup.
@@ -326,7 +326,7 @@ public class JmsQueueSender {
       to create a text message from the supplied Session object and the
       JmsTemplate is constructed by passing a reference to a ConnectionFactory
       and a boolean specifying the messaging domain.
-      A zero argument constuctor and a setConnectionFactory/Queue method are 
+      A zero argument constructor and a setConnectionFactory/Queue method are 
       also provided and can be used for constructing the instance using
       a BeanFactory.  The method simpleSend modified to send to a topic 
       instead of a queue is shown below
@@ -351,8 +351,8 @@ public void simpleSend() {
       <para>The method 
       <literal>send(String destinationName, MessageCreator c)</literal>
       lets you send to a message using the string name of the destination.
-      If these names are registed in JNDI, you should set
-      the <literal>DesinationResolver</literal> property of the template
+      If these names are registered in JNDI, you should set
+      the <literal>DestinationResolver</literal> property of the template
       to an instance of <literal>JndiDestinationResolver</literal>.
       </para>
       <para>If you created the JmsTemplate and specified a default 
@@ -368,7 +368,7 @@ public void simpleSend() {
       <literal>receive</literal> methods provide this functionality.
       During a synchronous receive the calling thread blocks until a 
       message becomes available.  This can be a dangerous operation since
-      the calling thread can potentailly be blocked indefinietly.  The
+      the calling thread can potentially be blocked indefinitely.  The
       property <literal>receiveTimeout</literal> specifies how long
       the receiver should wait before giving up waiting for a message.
       </para>
@@ -377,9 +377,9 @@ public void simpleSend() {
 
     <sect2>
       <title>Using Message Converters</title>
-      <para>In order to faciliate the sending 
+      <para>In order to facilitate the sending 
       of domain model objects the <literal>JmsTemplate</literal> 
-      has various send methods that take a Java object as an agrugment 
+      has various send methods that take a Java object as an argument 
       for a message's  data content.  
       The overloaded methods 
       <literal>convertAndSend</literal> and 
@@ -403,11 +403,11 @@ public void simpleSend() {
       <literal>MapMessageConverter</literal> which uses reflection
       to convert between a JavaBean and a MapMessage.  
       Other popular implementations choices you might implement yourself
-      are Converters that an existing XML marashalling packages, such as 
+      are Converters that bust an existing XML marshalling packages, such as 
       JAXB, Castor, XMLBeans, or XStream, to create a TextMessage 
       representing the object.  
       </para>
-      <para>To accomodate the setting of a message's properites, 
+      <para>To accommodate the setting of a message's properties, 
       headers, and body that can not be generically encapsulated inside 
       a converter class, the interface <literal>MessagePostProcessor</literal>
       gives you access to the message after it has been converted, but before
@@ -457,7 +457,7 @@ MapMessage={
         While the send operations cover many common usage scenarios, there
         are cases when you want to perform multiple operations on a
         JMS Session or MessageProducer.  The <literal>SessionCallback</literal>
-        and <literal>ProduerCallback</literal> expose the JMS Session
+        and <literal>ProducerCallback</literal> expose the JMS Session
         and Session/MessageProducer pair respectfully.  The 
         <literal>execute()</literal> methods on JmsTemplate execute these
         callback methods.
