@@ -62,7 +62,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.45 2004-05-18 08:03:18 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.46 2004-06-02 17:11:10 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -350,13 +350,11 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		// Ensure that a test runner like Eclipse, that keeps the same JVM up,
 		// will get fresh static values
 		MixedCollectionBean.resetStaticState();
-
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);
 		MixedCollectionBean jumble = (MixedCollectionBean) xbf.getBean("jumble");
 		assertEquals(1, MixedCollectionBean.nrOfInstances);
-		TestBean dave = (TestBean) xbf.getBean("david");
 		assertTrue("Expected 3 elements, not " + jumble.getJumble().size(),
 				jumble.getJumble().size() == 4);
 		List l = (List) jumble.getJumble();
@@ -858,6 +856,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 
 	public void testConstructorArgResolution() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
+		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
 
 		ConstructorDependenciesBean rod9 = (ConstructorDependenciesBean) xbf.getBean("rod9");
@@ -868,6 +867,14 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 
 		ConstructorDependenciesBean rod11 = (ConstructorDependenciesBean) xbf.getBean("rod11");
 		assertEquals(kerry2, rod11.getSpouse1());
+
+		ConstructorDependenciesBean rod12 = (ConstructorDependenciesBean) xbf.getBean("rod12");
+		assertEquals(kerry1, rod12.getSpouse1());
+		assertNull(rod12.getSpouse2());
+
+		ConstructorDependenciesBean rod13 = (ConstructorDependenciesBean) xbf.getBean("rod13");
+		assertEquals(kerry1, rod13.getSpouse1());
+		assertEquals(kerry2, rod13.getSpouse2());
 	}
 
 	public void testThrowsExceptionOnTooManyArguments() throws Exception {

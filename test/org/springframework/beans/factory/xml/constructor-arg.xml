@@ -15,12 +15,12 @@
 	</bean>
 
 	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
-		autowire="constructor">
+			autowire="constructor">
 		<constructor-arg><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
 	<bean id="rod4" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean"
-		autowire="constructor">
+			autowire="constructor">
 		<constructor-arg>
 			<description>wife</description>
 			<ref bean="kerry2"/>
@@ -71,6 +71,15 @@
 
 	<bean id="rod11" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" singleton="false">
 		<constructor-arg index="0"><ref local="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod12" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg index="0"><ref bean="kerry1"/></constructor-arg>
+	</bean>
+
+	<bean id="rod13" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg index="0"><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg index="1"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
 	<bean id="kerry1" class="org.springframework.beans.TestBean">
