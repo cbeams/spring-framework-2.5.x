@@ -32,11 +32,20 @@ import org.springframework.mail.SimpleMailMessage;
 /**
  * Implementation of the JavaMailSender interface.
  * Can also be used as plain MailSender implementation.
+ *
+ * <p>Allows for defining all settings locally as bean properties.
+ * Alternatively, a pre-configured JavaMail Session can be specified,
+ * possibly pulled from an application server's JNDI environment.
+ *
+ * <p>Non-default properties in this object will always override the settings
+ * in the JavaMail Session. Note that if overriding all values locally, there
+ * is no value in setting a pre-configured Session.
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @see JavaMailSender
  * @see org.springframework.mail.MailSender
- * @version $Id: JavaMailSenderImpl.java,v 1.6 2003-11-06 13:22:42 dkopylenko Exp $
+ * @version $Id: JavaMailSenderImpl.java,v 1.7 2003-11-07 21:39:24 jhoeller Exp $
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
@@ -46,7 +55,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	protected final Session session = Session.getInstance(new Properties());
+	private Session session = Session.getInstance(new Properties());
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -59,6 +68,19 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	private String password;
 
 	/**
+	 * Set the JavaMail Session, possibly pulled from JNDI. Default is an new Session
+	 * without defaults, i.e. completely configured via this object's properties.
+	 * <p>If using a pre-configured Session, non-default properties in this object
+	 * will override the settings in the Session.
+	 */
+	public void setSession(Session session) {
+		if (session == null) {
+			throw new IllegalArgumentException("Cannot work with a null Session");
+		}
+		this.session = session;
+	}
+
+	/**
 	 * Set the mail protocol. Default is SMTP.
 	 */
 	public void setProtocol(String protocol) {
@@ -66,7 +88,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
-	 * Set the mail host, typically an SMTP host.
+	 * Set the mail server host, typically an SMTP host.
 	 */
 	public void setHost(String host) {
 		this.host = host;
@@ -129,7 +151,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				}
 				mimeMessages.add(mimeMessage);
 			}
-			send((MimeMessage[])mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
+			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
 		}
 		catch (MessagingException ex) {
 			throw new MailParseException(ex);
@@ -151,7 +173,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	public void send(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
 		Map failedMessages = new HashMap();
 		try {
-			Transport transport = getTransport();
+			Transport transport = getTransport(this.session);
 			transport.connect(this.host, this.port, this.username, this.password);
 			try {
 				for (int i = 0; i < mimeMessages.length; i++) {
@@ -200,8 +222,8 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		}
 	}
 
-	protected Transport getTransport() throws NoSuchProviderException {
-		return this.session.getTransport(this.protocol);
+	protected Transport getTransport(Session session) throws NoSuchProviderException {
+		return session.getTransport(this.protocol);
 	}
 
 }
