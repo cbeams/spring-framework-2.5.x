@@ -1,6 +1,8 @@
 package org.springframework.transaction.interceptor;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.springframework.aop.framework.AopConfigException;
@@ -8,6 +10,7 @@ import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.DefaultProxyConfig;
 import org.springframework.aop.framework.InvokerInterceptor;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -104,7 +107,7 @@ public class TransactionProxyFactoryBean extends DefaultProxyConfig implements F
 		addInterceptor(transactionInterceptor);
 		addInterceptor(new InvokerInterceptor(this.target));
 		if (this.proxyInterfacesOnly) {
-			setInterfaces(this.target.getClass().getInterfaces());
+			setInterfaces(BeanUtils.getAllInterfaces(this.target));
 		}
 
 		AopProxy proxy = new AopProxy(this);

@@ -12,8 +12,8 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
+import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -24,10 +24,10 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.3 2003-08-21 15:46:08 jhoeller Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.4 2003-08-21 16:33:51 jhoeller Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
-	
+
 	private BeanFactory factory;
 
 	public void setUp() {
@@ -51,7 +51,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 	public void testGetsAreNotTransactionalWithProxyFactory3() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory3");
-		assertTrue("testBean is a full proxy", testBean instanceof TestBean);
+		assertTrue("testBean is a full proxy", testBean instanceof DerivedTestBean);
 		executeGetsAreNotTransactional(testBean);
 	}
 
@@ -62,11 +62,11 @@ public class BeanFactoryTransactionTests extends TestCase {
 		// Expect no methods
 		ptmControl.activate();
 		PlatformTransactionManagerFacade.delegate = ptm;
-		
+
 		assertTrue("Age should not be " + testBean.getAge(), testBean.getAge() == 666);
 		// Check no calls
 		ptmControl.verify();
-		
+
 		// Install facade expecting a call
 		ptmControl = EasyMock.controlFor(PlatformTransactionManager.class);
 		ptm = (PlatformTransactionManager) ptmControl.getMock();
@@ -80,12 +80,12 @@ public class BeanFactoryTransactionTests extends TestCase {
 		ptmControl.setVoidCallable();
 		ptmControl.activate();
 		PlatformTransactionManagerFacade.delegate = ptm;
-		
+
 		// TODO same as old age to avoid ordering effect for now
 		int age = 666;
 		testBean.setAge(age);
 		ptmControl.verify();
-		
+
 		assertTrue(testBean.getAge() == age);
 	}
 

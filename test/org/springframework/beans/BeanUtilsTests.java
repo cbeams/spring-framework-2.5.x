@@ -1,7 +1,9 @@
 package org.springframework.beans;
 
 import java.beans.PropertyVetoException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -13,10 +15,6 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
  * @since 19.05.2003
  */
 public class BeanUtilsTests extends TestCase {
-
-	public BeanUtilsTests(String msg) {
-		super(msg);
-	}
 
 	public void testInstantiateClass() {
 		// give proper class
@@ -39,6 +37,15 @@ public class BeanUtilsTests extends TestCase {
 		catch (FatalBeanException ex) {
 			// expected
 		}
+	}
+
+	public void testGetAllInterfaces() {
+		DerivedTestBean testBean = new DerivedTestBean();
+		List ifcs = Arrays.asList(BeanUtils.getAllInterfaces(testBean));
+		assertTrue("Correct number of interfaces", ifcs.size() == 3);
+		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
+		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
+		assertTrue("Contains IOther", ifcs.contains(IOther.class));
 	}
 
 	public void testCopyProperties() throws Exception {
@@ -79,79 +86,5 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Age still empty", tb2.getAge() == 0);
 		assertTrue("Touchy still empty", tb2.getTouchy() == null);
 	}
-
-	/*
-	public void testSortByPropertyWithList() {
-		TestBean tb1 = new TestBean();
-		tb1.setName("eva");
-		tb1.setAge(25);
-		TestBean tb2 = new TestBean();
-		tb2.setName("juergen");
-		tb2.setAge(99);
-		TestBean tb3 = new TestBean();
-		tb3.setName("Rod");
-		tb3.setAge(32);
-		List tbs = new ArrayList();
-		tbs.add(tb1);
-		tbs.add(tb2);
-		tbs.add(tb3);
-
-		BeanUtils.sortByProperty(tbs, "name", true, false);
-		assertTrue("Correct 1. entry", tbs.get(0) == tb3);
-		assertTrue("Correct 2. entry", tbs.get(1) == tb1);
-		assertTrue("Correct 3. entry", tbs.get(2) == tb2);
-
-		BeanUtils.sortByProperty(tbs, "name", false, false);
-		assertTrue("Correct 1. entry", tbs.get(0) == tb2);
-		assertTrue("Correct 2. entry", tbs.get(1) == tb1);
-		assertTrue("Correct 3. entry", tbs.get(2) == tb3);
-
-		BeanUtils.sortByProperty(tbs, "name", true, true);
-		assertTrue("Correct 1. entry", tbs.get(0) == tb1);
-		assertTrue("Correct 2. entry", tbs.get(1) == tb2);
-		assertTrue("Correct 3. entry", tbs.get(2) == tb3);
-
-		BeanUtils.sortByProperty(tbs, "age", false, false);
-		assertTrue("Correct 1. entry", tbs.get(0) == tb2);
-		assertTrue("Correct 2. entry", tbs.get(1) == tb3);
-		assertTrue("Correct 3. entry", tbs.get(2) == tb1);
-	}
-
-	public void testSortByPropertyWithArray() {
-		TestBean tb1 = new TestBean();
-		tb1.setName("eva");
-		tb1.setAge(25);
-		TestBean tb2 = new TestBean();
-		tb2.setName("juergen");
-		tb2.setAge(99);
-		TestBean tb3 = new TestBean();
-		tb3.setName("Rod");
-		tb3.setAge(32);
-		List tbs = new ArrayList();
-		tbs.add(tb1);
-		tbs.add(tb2);
-		tbs.add(tb3);
-
-		Object[] sorted = BeanUtils.sortByProperty(tbs.toArray(), "name", true, false);
-		assertTrue("Correct 1. entry", sorted[0] == tb3);
-		assertTrue("Correct 2. entry", sorted[1] == tb1);
-		assertTrue("Correct 3. entry", sorted[2] == tb2);
-
-		sorted = BeanUtils.sortByProperty(tbs.toArray(), "name", false, false);
-		assertTrue("Correct 1. entry", sorted[0] == tb2);
-		assertTrue("Correct 2. entry", sorted[1] == tb1);
-		assertTrue("Correct 3. entry", sorted[2] == tb3);
-
-		sorted = BeanUtils.sortByProperty(tbs.toArray(), "name", true, true);
-		assertTrue("Correct 1. entry", sorted[0] == tb1);
-		assertTrue("Correct 2. entry", sorted[1] == tb2);
-		assertTrue("Correct 3. entry", sorted[2] == tb3);
-
-		sorted = BeanUtils.sortByProperty(tbs.toArray(), "age", false, false);
-		assertTrue("Correct 1. entry", sorted[0] == tb2);
-		assertTrue("Correct 2. entry", sorted[1] == tb3);
-		assertTrue("Correct 3. entry", sorted[2] == tb1);
-	}
-	*/
 
 }
