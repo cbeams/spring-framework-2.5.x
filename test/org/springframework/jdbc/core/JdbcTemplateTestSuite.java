@@ -34,7 +34,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.18 2004-03-10 03:50:57 trisberg Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.19 2004-03-10 08:25:43 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -473,15 +473,41 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 	/**
 	 * Test update with static SQL
 	 */
+	public void testSqlUpdate() throws Exception {
+		final String sql =
+			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
+		int rowsAffected = 33;
+
+		MockControl ctrlStatement = MockControl.createControl(Statement.class);
+		Statement mockStatement = (Statement) ctrlStatement.getMock();
+		mockStatement.executeUpdate(sql);
+		ctrlStatement.setReturnValue(rowsAffected);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		int actualRowsAffected = template.update(sql);
+		assertTrue(
+			"Actual rows affected is correct",
+			actualRowsAffected == rowsAffected);
+
+		ctrlStatement.verify();
+	}
+
 	public void testSqlUpdateEncountersSqlException() throws Exception {
 		SQLException sex = new SQLException("bad update");
 		final String sql =
 			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 
-		MockControl ctrlStatement =
-			MockControl.createControl(Statement.class);
-		Statement mockStatement =
-			(Statement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(Statement.class);
+		Statement mockStatement = (Statement) ctrlStatement.getMock();
 		mockStatement.executeUpdate(sql);
 		ctrlStatement.setThrowable(sex);
 		mockStatement.close();
@@ -504,45 +530,13 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlStatement.verify();
 	}
 
-	public void testSqlUpdate() throws Exception {
-		final String sql =
-			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
-		int rowsAffected = 33;
-
-		MockControl ctrlStatement =
-			MockControl.createControl(Statement.class);
-		Statement mockStatement =
-			(Statement) ctrlStatement.getMock();
-		mockStatement.executeUpdate(sql);
-		ctrlStatement.setReturnValue(rowsAffected);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
-		int actualRowsAffected = template.update(sql);
-		assertTrue(
-			"Actual rows affected is correct",
-			actualRowsAffected == rowsAffected);
-
-		ctrlStatement.verify();
-	}
-
 	public void testSqlUpdateWithThreadConnection() throws Exception {
 		final String sql =
 			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		int rowsAffected = 33;
 
-		MockControl ctrlStatement =
-			MockControl.createControl(Statement.class);
-		Statement mockStatement =
-			(Statement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(Statement.class);
+		Statement mockStatement = (Statement) ctrlStatement.getMock();
 		mockStatement.executeUpdate(sql);
 		ctrlStatement.setReturnValue(rowsAffected);
 		mockStatement.close();
@@ -698,8 +692,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		
 		ctrlDataSource.verify();
 	}
-	
-	
+
 	/**
 	 * Verify that afterPropertiesSet invokes exceception translator
 	 * @throws SQLException
@@ -810,7 +803,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlConnection.verify();
 	}
 
-
 	public void testPreparedStatementSetterSucceeds() throws Exception {
 		final String sql = "UPDATE FOO SET NAME=? WHERE ID = 1";
 		final String name = "Gary";
@@ -909,7 +901,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 	/**
 	 * Mock objects allow us to produce warnings at will
 	 */
-
 	public void testFatalWarning() throws Exception {
 		String sql = "SELECT forename from custmr";
 		SQLWarning warnings = new SQLWarning("My warning");
@@ -1131,7 +1122,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		ctrlResultSet.replay();
 		ctrlStatement.replay();
-	
 
 		JdbcTemplate template = new JdbcTemplate();
 		template.setDataSource(mockDataSource);
