@@ -71,7 +71,7 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
-	// Convenience methods for load, save, update, delete
+	// Convenience methods for load, save, update
 	//-------------------------------------------------------------------------
 
 	/**
@@ -214,36 +214,6 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#update(Object)
 	 */
 	void update(Object entity, LockMode lockMode) throws DataAccessException;
-
-	/**
-	 * Delete the given persistent instance.
-	 * @param entity the persistent instance to delete
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#delete(Object)
-	 */
-	void delete(Object entity) throws DataAccessException;
-
-	/**
-	 * Delete the given persistent instance.
-	 * Obtains the specified lock mode if the instance exists, implicitly
-	 * checking whether the corresponding database entry still exists
-	 * (throwing an OptimisticLockingFailureException if not found).
-	 * @param entity the persistent instance to delete
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see HibernateOptimisticLockingFailureException
-	 * @see net.sf.hibernate.Session#delete(Object)
-	 */
-	void delete(Object entity, LockMode lockMode) throws DataAccessException;
-
-	/**
-	 * Delete all given persistent instances.
-	 * This can be combined with any of the find methods to delete by query
-	 * in two lines of code, similar to Session's delete by query methods.
-	 * @param entities the persistent instances to delete
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#delete(String)
-	 */
-	void deleteAll(Collection entities) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -463,5 +433,71 @@ public interface HibernateOperations {
 	 */
 	List findByNamedQueryAndValueBean(String queryName, Object valueBean)
 			throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Convenience delete methods
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Delete the given persistent instance.
+	 * @param entity the persistent instance to delete
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#delete(Object)
+	 */
+	void delete(Object entity) throws DataAccessException;
+
+	/**
+	 * Delete the given persistent instance.
+	 * Obtains the specified lock mode if the instance exists, implicitly
+	 * checking whether the corresponding database entry still exists
+	 * (throwing an OptimisticLockingFailureException if not found).
+	 * @param entity the persistent instance to delete
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see HibernateOptimisticLockingFailureException
+	 * @see net.sf.hibernate.Session#delete(Object)
+	 */
+	void delete(Object entity, LockMode lockMode) throws DataAccessException;
+
+	/**
+	 * Delete all given persistent instances.
+	 * This can be combined with any of the find methods to delete by query
+	 * in two lines of code, similar to Session's delete by query methods.
+	 * @param entities the persistent instances to delete
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#delete(String)
+	 */
+	void deleteAll(Collection entities) throws DataAccessException;
+
+	/**
+	 * Delete all objects returned by the query. Return the number of objects deleted.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @return the number of instances deleted
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#delete(Object)
+	 */
+	int delete(String queryString) throws DataAccessException;
+
+	/**
+	 * Delete all objects returned by the query. Return the number of objects deleted.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param value the value of the parameter
+	 * @param type Hibernate type of the parameter
+	 * @return the number of instances deleted
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#delete(Object)
+	 */
+	int delete(String queryString, Object value, Type type) throws DataAccessException;
+
+	/**
+	 * Delete all objects returned by the query. Return the number of objects deleted.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param values the values of the parameters
+	 * @param types Hibernate types of the parameters
+	 * @return the number of instances deleted
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#delete(Object)
+	 */
+	int delete(String queryString, Object[] values, Type[] types) throws DataAccessException;
 
 }

@@ -172,7 +172,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	//-------------------------------------------------------------------------
-	// Convenience methods for load, save, update, delete
+	// Convenience methods for load, save, update
 	//-------------------------------------------------------------------------
 
 	public Object get(final Class entityClass, final Serializable id) throws DataAccessException {
@@ -284,36 +284,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.update(entity);
 				session.lock(entity, lockMode);
-				return null;
-			}
-		});
-	}
-
-	public void delete(final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				session.delete(entity);
-				return null;
-			}
-		});
-	}
-
-	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
-		execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				session.lock(entity, lockMode);
-				session.delete(entity);
-				return null;
-			}
-		});
-	}
-
-	public void deleteAll(final Collection entities) throws DataAccessException {
-		execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				for (Iterator it = entities.iterator(); it.hasNext();) {
-					session.delete(it.next());
-				}
 				return null;
 			}
 		});
@@ -525,6 +495,70 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				return queryObject.list();
 			}
 		});
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Convenience delete methods
+	//-------------------------------------------------------------------------
+
+	public void delete(final Object entity) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.delete(entity);
+				return null;
+			}
+		});
+	}
+
+	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.lock(entity, lockMode);
+				session.delete(entity);
+				return null;
+			}
+		});
+	}
+
+	public void deleteAll(final Collection entities) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				for (Iterator it = entities.iterator(); it.hasNext();) {
+					session.delete(it.next());
+				}
+				return null;
+			}
+		});
+	}
+
+	public int delete(final String queryString) throws DataAccessException {
+		Integer deleteCount = (Integer) execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return new Integer(session.delete(queryString));
+			}
+		});
+		return deleteCount.intValue();
+	}
+
+	public int delete(final String queryString, final Object value, final Type type)
+			throws DataAccessException {
+		Integer deleteCount = (Integer) execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return new Integer(session.delete(queryString, value, type));
+			}
+		});
+		return deleteCount.intValue();
+	}
+
+	public int delete(final String queryString, final Object[] values, final Type[] types)
+			throws DataAccessException {
+		Integer deleteCount = (Integer) execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return new Integer(session.delete(queryString, values, types));
+			}
+		});
+		return deleteCount.intValue();
 	}
 
 
