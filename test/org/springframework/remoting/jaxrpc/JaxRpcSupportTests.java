@@ -48,28 +48,27 @@ public class JaxRpcSupportTests extends TestCase {
 		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
 		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setNamespaceUri("myNamespace1");
-		factory.setServiceName("myService1");
+		factory.setServiceName("myService2");
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
-		assertEquals(MockServiceFactory.service1, factory.getObject());
+		assertEquals(MockServiceFactory.service2, factory.getObject());
 	}
 
 	public void testLocalJaxRpcServiceFactoryBeanWithoutWsdlAndNamespace() throws Exception {
 		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
-		factory.setServiceName("myService2");
+		factory.setNamespaceUri("myNamespace");
+		factory.setServiceName("myService1");
 		factory.afterPropertiesSet();
-		assertEquals(MockServiceFactory.service2, factory.getObject());
+		assertEquals(MockServiceFactory.service1, factory.getObject());
 	}
 
 	public void testJaxRpcPortProxyFactoryBean() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
-		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setNamespaceUri("myNamespace1");
+		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
-		factory.setPortName("myPort1");
+		factory.setPortName("myPort");
 		factory.setServiceInterface(IRemoteBean.class);
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
@@ -85,10 +84,9 @@ public class JaxRpcSupportTests extends TestCase {
 	public void testJaxRpcPortProxyFactoryBeanWithProperties() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
-		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setNamespaceUri("myNamespace1");
+		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
-		factory.setPortName("myPort1");
+		factory.setPortName("myPort");
 		factory.setUsername("user");
 		factory.setPassword("pw");
 		factory.setEndpointAddress("ea");
@@ -114,10 +112,9 @@ public class JaxRpcSupportTests extends TestCase {
 	public void testJaxRpcPortProxyFactoryBeanWithDynamicCalls() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
 		factory.setServiceFactoryClass(CallMockServiceFactory.class);
-		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setNamespaceUri("myNamespace1");
+		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
-		factory.setPortName("myPort1");
+		factory.setPortName("myPort");
 		factory.setServiceInterface(IBusinessBean.class);
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
@@ -132,10 +129,9 @@ public class JaxRpcSupportTests extends TestCase {
 	public void testJaxRpcPortProxyFactoryBeanWithDynamicCallsAndProperties() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
 		factory.setServiceFactoryClass(CallWithPropertiesMockServiceFactory.class);
-		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setNamespaceUri("myNamespace1");
+		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
-		factory.setPortName("myPort1");
+		factory.setPortName("myPort");
 		factory.setUsername("user");
 		factory.setPassword("pw");
 		factory.setEndpointAddress("ea");
@@ -155,10 +151,9 @@ public class JaxRpcSupportTests extends TestCase {
 	public void testJaxRpcPortProxyFactoryBeanWithRemoteException() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
-		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setNamespaceUri("myNamespace1");
+		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
-		factory.setPortName("myPort1");
+		factory.setPortName("myPort");
 		factory.setServiceInterface(IRemoteBean.class);
 		factory.afterPropertiesSet();
 
@@ -184,10 +179,9 @@ public class JaxRpcSupportTests extends TestCase {
 	public void testJaxRpcPortProxyFactoryBeanWithPortInterface() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
-		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setNamespaceUri("myNamespace1");
+		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
-		factory.setPortName("myPort1");
+		factory.setPortName("myPort");
 		factory.setPortInterface(IRemoteBean.class);
 		factory.setServiceInterface(IBusinessBean.class);
 		factory.afterPropertiesSet();
@@ -202,10 +196,9 @@ public class JaxRpcSupportTests extends TestCase {
 	public void testJaxRpcPortProxyFactoryBeanWithPortInterfaceAndRemoteException() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
-		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setNamespaceUri("myNamespace1");
+		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
-		factory.setPortName("myPort1");
+		factory.setPortName("myPort");
 		factory.setPortInterface(IRemoteBean.class);
 		factory.setServiceInterface(IBusinessBean.class);
 		factory.afterPropertiesSet();
@@ -240,27 +233,27 @@ public class JaxRpcSupportTests extends TestCase {
 		}
 
 		protected void initMocks() throws Exception {
-			service1.getPort(new QName("myNamespace1", "myPort1"), IRemoteBean.class);
+			service1.getPort(new QName("myNamespace", "myPort"), IRemoteBean.class);
 			service1Control.setReturnValue(new RemoteBean());
 		}
 
 		public Service createService(URL url, QName qName) throws ServiceException {
 			try {
-				if (!(new URL("http://myUrl1")).equals(url) || !"myNamespace1".equals(qName.getNamespaceURI()) ||
-						!"myService1".equals(qName.getLocalPart())) {
+				if (!(new URL("http://myUrl1")).equals(url) || !"".equals(qName.getNamespaceURI()) ||
+						!"myService2".equals(qName.getLocalPart())) {
 					throw new ServiceException("not supported");
 				}
 			}
 			catch (MalformedURLException ex) {
 			}
-			return service1;
+			return service2;
 		}
 
 		public Service createService(QName qName) throws ServiceException {
-			if (!"".equals(qName.getNamespaceURI()) || !"myService2".equals(qName.getLocalPart())) {
+			if (!"myNamespace".equals(qName.getNamespaceURI()) || !"myService1".equals(qName.getLocalPart())) {
 				throw new ServiceException("not supported");
 			}
-			return service2;
+			return service1;
 		}
 	}
 
@@ -277,7 +270,7 @@ public class JaxRpcSupportTests extends TestCase {
 		protected void initMocks() throws Exception {
 			call1Control = MockControl.createControl(Call.class);
 			call1 = (Call) call1Control.getMock();
-			service1.createCall(new QName("myNamespace1", "myPort1"), "setName");
+			service1.createCall(new QName("myNamespace", "myPort"), "setName");
 			service1Control.setReturnValue(call1);
 			initCall();
 			call1Control.replay();
