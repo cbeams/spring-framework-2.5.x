@@ -237,7 +237,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  *   
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @author colin sampaleanu
  * 
  * @see org.springframework.context.access.LocatorFactory
@@ -246,7 +246,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 	// --- statics
 
-	private static final String BEANS_REFS_XML_NAME = "bean-refs.xml";
+	public static final String BEANS_REFS_XML_NAME = "bean-refs.xml";
 
 	protected static final Logger _log = Logger
 			.getLogger(SingletonBeanFactoryLocator.class);
