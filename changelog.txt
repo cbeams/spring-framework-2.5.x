@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.2 (31.10.2004)
+Changes in version 1.1.2 (10.11.2004)
 -------------------------------------
 
 General
@@ -18,6 +18,7 @@ Package org.springframework.aop
 * reworked ProxyFactoryBean and AbstractPrototypeBasedTargetSource to leverage BeanFactory's "getType" method
 * moved "invokeJoinpointUsingReflection" method from aop.framework.AopProxyUtils to aop.support.AopUtils
 * JdkDynamicAopProxy handles "hashCode" method locally too, in addition to "equals" (mainly for remoting proxies)
+* factored out AbstractPointcutAdvisor class from DefaultPointcutAdvisor, extended by RegexpMethodPointcutAdvisor now
 * added "perl5" flag to RegexpMethodPointcutAdvisor: on uses ORO (the default), off uses the JDK 1.4 regexp package
 * reworked DebugInterceptor to log to Commons Logging at debug level rather than to the console
 
@@ -39,11 +40,13 @@ Package org.springframework.beans
 * fixed PropertiesBeanDefinitionReader to allow bean names that contain dots
 * deprecated constructing an XmlBeanFactory with InputStream, in favor of using Resource which retains location info
 * DefaultXmlBeanDefinitionParser allows unnamed child bean definitions too (using class or parent as bean name)
+* DefaultXmlBeanDefinitionParser throws an exception in case of multiple "property" definitions for the same name
 * allow "bean*" rather than "bean+" in XML bean definitions, i.e. no bean definitions in a file (just imports)
 
 Package org.springframework.context
 * ConfigurableApplicationContext's "getBeanFactory" method throws an IllegalStateException if context not initialized
 * AbstractApplicationContext automatically registers a context-aware URLEditor now (delegating to the ResourceLoader)
+* AbstractApplicationContext publishes ContextClosedEvent before destroying singleton beans rather than afterwards
 * added GenericApplicationContext class, allowing for arbitrary definition formats (via a single internal BeanFactory)
 * StaticApplicationContext derives from GenericApplicationContext now, reusing the DefaultListableBeanFactory instance
 * (Reloadable)ResourceBundleMessageSource resolves messages without arguments more efficiently (i.e. no MessageFormat)
@@ -72,6 +75,7 @@ Package org.springframework.mail
 Package org.springframework.orm
 * reworked Hibernate/Jdo/PersistenceBrokerTransactionObject into inner classes of HibernateTransactionManager and co
 * added support for pre-bound Sessions (e.g. OpenSessionInViewFilter/Interceptor) with JTA and TransactionManagerLookup
+* Hibernate Session gets cleared on rollback in case of a pre-bound Session (for both Hibernate and JTA transactions)
 * fixed LocalSessionFactoryBean to call "configure" after "setNamingStrategy" (in case of a specified "configLocation")
 * added "load(entity, id)" method to HibernateOperations and HibernateTemplate
 * added "initialize" and "closeIterator" methods to HibernateOperations/Template, following "Hibernate.initialize/close"
@@ -100,6 +104,7 @@ Package org.springframework.web
 * fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
 * DispatcherServlet caches chosen HandlerExecutionChain in "getLastModified", for reuse in "doService"
 * added "defaultStatusCode" property to SimpleMappingExceptionResolver, specifying the HTTP status code for error views
+* added "autowireMode(Name)" and "dependencyCheck" properties (for autowired handlers) to AbstractPathMapHandlerMapping
 * added "createVelocityContext" hook to VelocityView, for using a different impl of Velocity's Context interface
 * added "springMessage"/"springMessageText" macros for Velocity and "message"/"messageText" macros for FreeMarker
 * fixed AbstractExcelView to not hold the HSSFWorkbook instance in an instance variable (avoiding concurrency issues)
