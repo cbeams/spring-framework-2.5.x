@@ -30,6 +30,9 @@ Package org.springframework.ejb
 * factored out "getSessionBeanInstance" and "releaseSessionBeanInstance" methods in SimpleRemoteSlsbInvokerInterceptor
 
 Package org.springframework.jdbc
+* StatementCreatorUtils uses specific PreparedStatement parameter setter methods, as far as possible
+* added auto-conversion of java.util.Calendar to java.sql.Date/Time/Timestamp, for SQL types DATE/TIME/TIMESTAMP
+* added auto-conversion of java.util.Date and java.util.Calendar to java.sql.Date, in case of an unknown SQL type
 * added support for WebSphere 4 to WebSphereNativeJdbcExtractor, auto-detecting WebSphere 5 and 4 now
 
 Package org.springframework.jms
@@ -48,6 +51,7 @@ Package org.springframework.orm
 * added overloaded constructors that take a "persistentClassName" String to ObjectOptimisticLockingFailureException
 * added overloaded constructors that take a "persistentClassName" String to ObjectRetrievalFailureException
 * fixed SessionFactoryUtils' synchronization for JtaTransactionManager with a Hibernate TransactionManagerLookup
+* added "getReportQueryIteratorByQuery" method to OJB PersistenceBrokerOperations and PersistenceBrokerTemplate
 
 Package org.springframework.mail
 * added "createMimeMessage(InputStream)" method to JavaMailSender, building a MimeMessage from raw MIME content
@@ -70,9 +74,10 @@ Package org.springframework.validation
 Package org.springframework.web
 * added special parsing of original filenames to CommonsMultipartFile, detecting both Unix- and Windows-style paths
 * reworked AbstractPathMapHandlerMapping's "getClassesWithPathMapAttributes" to return a Class array rather than names
+* deprecated AbstractWizardFormController's "getNrOfPages" in favor of "getPageCount" (for consistent method naming)
+* fixed MessageTag to write "null" to the JspWriter in case of a null value as message
 * added "allowRequestOverride" and "allowSessionOverride" properties to AbstractTemplateView (off by default)
 * added "buildPdfMetadata" callback to AbstractPdfView, for adding meta fields like author to the iText PDF Document
-* deprecated AbstractWizardFormController's "getNrOfPages" in favor of "getPageCount" (for consistent method naming)
 * added LookupDispatchActionSupport class to Struts support, analogous to ActionSupport but for LookupDispatchActions
 
 
