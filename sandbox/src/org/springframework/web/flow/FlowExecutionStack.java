@@ -711,11 +711,18 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		out.writeObject(executingFlowSessions);
+		out.writeObject(this.id);
+		out.writeObject(this.lastEventId);
+		out.writeLong(this.lastEventTimestamp);
+		out.writeObject(this.executingFlowSessions);
 	}
 
 	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
+		this.id = (String)in.readObject();
+		this.lastEventId = (String)in.readObject();
+		this.lastEventTimestamp = in.readLong();
 		this.executingFlowSessions = (Stack)in.readObject();
+		
 	}
 
 	/**
