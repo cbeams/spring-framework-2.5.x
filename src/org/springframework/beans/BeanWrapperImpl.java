@@ -11,9 +11,11 @@ import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyVetoException;
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,11 +26,13 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.propertyeditors.ClassEditor;
+import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
-import org.springframework.beans.propertyeditors.PropertyValuesEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
+import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,7 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.19 2003-12-10 08:53:42 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.20 2003-12-30 01:23:16 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -89,11 +93,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// register default editors in this class, for restricted environments
 		// where the above threw a SecurityException, and for JDKs that don't
 		// use the thread context class loader for property editor lookup
-		defaultEditors.put(String[].class, new StringArrayPropertyEditor());
-		defaultEditors.put(PropertyValues.class, new PropertyValuesEditor());
-		defaultEditors.put(Properties.class, new PropertiesEditor());
 		defaultEditors.put(Class.class, new ClassEditor());
+		defaultEditors.put(File.class, new FileEditor());
 		defaultEditors.put(Locale.class, new LocaleEditor());
+		defaultEditors.put(Properties.class, new PropertiesEditor());
+		defaultEditors.put(String[].class, new StringArrayPropertyEditor());
+		defaultEditors.put(URL.class, new URLEditor());
 	}
 
 
