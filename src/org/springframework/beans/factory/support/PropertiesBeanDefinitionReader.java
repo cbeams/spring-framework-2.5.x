@@ -24,7 +24,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
  * @since 26.11.2003
  * @see DefaultListableBeanFactory
  */
-public class PropertiesBeanDefinitionReader {
+public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Value of a T/F attribute that represents true.
@@ -76,8 +76,6 @@ public class PropertiesBeanDefinitionReader {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private BeanDefinitionRegistry beanFactory;
-
 	/** Name of default parent bean */
 	private String defaultParentBean;
 
@@ -86,7 +84,7 @@ public class PropertiesBeanDefinitionReader {
 	 * Create new PropertiesBeanDefinitionReader for the given bean factory.
 	 */
 	public PropertiesBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
-		this.beanFactory = beanFactory;
+		super(beanFactory);
 	}
 
 	/**
@@ -189,7 +187,7 @@ public class PropertiesBeanDefinitionReader {
 				if (sepIndx != -1) {
 					String beanName = nameAndProperty.substring(0, sepIndx);
 					logger.debug("Found bean name '" + beanName + "'");
-					if (!this.beanFactory.containsBeanDefinition(beanName)) {
+					if (!getBeanFactory().containsBeanDefinition(beanName)) {
 						// If we haven't already registered it...
 						registerBeanDefinition(beanName, m, prefix + beanName);
 						++beanCount;
@@ -280,19 +278,20 @@ public class PropertiesBeanDefinitionReader {
 			logger.debug(pvs.toString());
 		}
 
-		if (parent == null)
-			parent = defaultParentBean;
+		if (parent == null) {
+			parent = this.defaultParentBean;
+		}
 
 		if (className == null && parent == null)
-			throw new FatalBeanException("Invalid bean definition. Classname or parent must be supplied for bean with name '" +
-			                             beanName + "'", null);
+			throw new FatalBeanException("Invalid bean definition. class or parent must be supplied for bean with name '" +
+			                             beanName + "'");
 
 		try {
 			AbstractBeanDefinition beanDefinition = null;
 			if (className != null) {
 				// Load the class using a special class loader if one is available.
 				// Otherwise rely on the thread context classloader.
-				Class clazz = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+				Class clazz = Class.forName(className, true, getBeanClassLoader());
 				beanDefinition = new RootBeanDefinition(clazz, pvs);
 			}
 			else {
@@ -301,12 +300,11 @@ public class PropertiesBeanDefinitionReader {
 
 			beanDefinition.setSingleton(singleton);
 			beanDefinition.setLazyInit(lazyInit);
-			this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
+			getBeanFactory().registerBeanDefinition(beanName, beanDefinition);
 		}
 		catch (ClassNotFoundException ex) {
 			throw new FatalBeanException("Cannot find class [" + className + "] for bean with name '" + beanName + "'", ex);
 		}
 	}
-
 
 }

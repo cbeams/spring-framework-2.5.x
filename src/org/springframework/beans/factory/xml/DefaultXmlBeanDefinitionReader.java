@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @since 26.11.2003
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
- * @version $Id: DefaultXmlBeanDefinitionReader.java,v 1.3 2003-12-09 11:17:55 johnsonr Exp $
+ * @version $Id: DefaultXmlBeanDefinitionReader.java,v 1.4 2003-12-12 18:47:28 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionReader {
 
@@ -189,9 +189,9 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 			PropertyValues pvs = getPropertyValueSubElements(ele);
 
 			if (className != null) {
-				ClassLoader cl = Thread.currentThread().getContextClassLoader();
+				Class clazz = Class.forName(className, true, getBeanClassLoader());
 				ConstructorArgumentValues cargs = getConstructorArgSubElements(ele);
-				RootBeanDefinition rbd = new RootBeanDefinition(Class.forName(className, true, cl), cargs, pvs);
+				RootBeanDefinition rbd = new RootBeanDefinition(clazz, cargs, pvs);
 
 				if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 					String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);

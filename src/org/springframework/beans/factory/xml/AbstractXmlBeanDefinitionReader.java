@@ -19,6 +19,7 @@ import org.xml.sax.SAXParseException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
@@ -27,11 +28,9 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * @author Juergen Hoeller
  * @since 26.11.2003
  */
-public abstract class AbstractXmlBeanDefinitionReader {
+public abstract class AbstractXmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	private BeanDefinitionRegistry beanFactory;
 
 	private boolean validating = true;
 
@@ -42,11 +41,7 @@ public abstract class AbstractXmlBeanDefinitionReader {
 	 * Create new AbstractXmlBeanDefinitionReader for the given bean factory.
 	 */
 	protected AbstractXmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
-		this.beanFactory = beanFactory;
-	}
-
-	protected BeanDefinitionRegistry getBeanFactory() {
-		return beanFactory;
+		super(beanFactory);
 	}
 
 	/**
