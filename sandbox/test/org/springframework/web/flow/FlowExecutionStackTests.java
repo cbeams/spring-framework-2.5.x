@@ -24,14 +24,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.XmlFlowBuilder;
 import org.springframework.web.flow.config.XmlFlowBuilderTests;
-
-import junit.framework.TestCase;
 
 /**
  * Test case for FlowExecutionStack
@@ -41,18 +41,16 @@ import junit.framework.TestCase;
  * @author Erwin Vervaet
  */
 public class FlowExecutionStackTests extends TestCase {
-	
-	private FlowLocator flowLocator;
-	
-	private FlowExecution flowExecution;
-	
-	protected void setUp() throws Exception {
-		XmlFlowBuilder builder=new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
-		builder.setFlowServiceLocator(new XmlFlowBuilderTests.TestFlowServiceLocator());
-		
-		final Flow flow=new FlowFactoryBean(builder).getFlow();
-		flowLocator=new FlowLocator() {
 
+	private FlowLocator flowLocator;
+
+	private FlowExecution flowExecution;
+
+	protected void setUp() throws Exception {
+		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
+		builder.setFlowServiceLocator(new XmlFlowBuilderTests.TestFlowServiceLocator());
+		final Flow flow = new FlowFactoryBean(builder).getFlow();
+		flowLocator = new FlowLocator() {
 			public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException {
 				if (flow.getClass().equals(flowDefinitionImplementationClass)) {
 					return flow;
@@ -71,37 +69,36 @@ public class FlowExecutionStackTests extends TestCase {
 					throws ServiceLookupException {
 				return getFlow(flowDefinitionId);
 			}
-			
 		};
-		
-		flowExecution=flow.createExecution();
+		flowExecution = flow.createExecution();
 	}
 
 	public void testRehydrate() throws Exception {
-		Map inputData=new HashMap(1);
+		Map inputData = new HashMap(1);
 		inputData.put("name", "value");
 		flowExecution.start(inputData, new MockHttpServletRequest(), new MockHttpServletResponse());
-		
+
 		//serialize the flowExecution
-		ByteArrayOutputStream bout=new ByteArrayOutputStream();
-		ObjectOutputStream oout=new ObjectOutputStream(bout);
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		ObjectOutputStream oout = new ObjectOutputStream(bout);
 		oout.writeObject(flowExecution);
 		oout.flush();
-		
+
 		//deserialize the flowExecution
-		ByteArrayInputStream bin=new ByteArrayInputStream(bout.toByteArray());
-		ObjectInputStream oin=new ObjectInputStream(bin);
-		FlowExecution restoredFlowExecution=(FlowExecution)oin.readObject();
-		
+		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+		ObjectInputStream oin = new ObjectInputStream(bin);
+		FlowExecution restoredFlowExecution = (FlowExecution)oin.readObject();
+
 		assertNotNull(restoredFlowExecution);
-		
+
 		//rehydrate the flow execution
 		restoredFlowExecution.rehydrate(flowLocator, flowExecution.getListenerList().toArray());
-		
+
 		assertEquals(flowExecution.isActive(), restoredFlowExecution.isActive());
 		assertEquals(flowExecution.getActiveFlowId(), restoredFlowExecution.getActiveFlowId());
 		assertEquals(flowExecution.getCurrentStateId(), restoredFlowExecution.getCurrentStateId());
-		assertTrue(entriesCollectionsAreEqual(flowExecution.attributeEntries(), restoredFlowExecution.attributeEntries()));
+		assertTrue(entriesCollectionsAreEqual(flowExecution.attributeEntries(), restoredFlowExecution
+				.attributeEntries()));
 		assertEquals(flowExecution.getId(), restoredFlowExecution.getId());
 		assertEquals(flowExecution.getLastEventId(), restoredFlowExecution.getLastEventId());
 		assertEquals(flowExecution.getLastEventTimestamp(), restoredFlowExecution.getLastEventTimestamp());
@@ -110,20 +107,20 @@ public class FlowExecutionStackTests extends TestCase {
 	}
 
 	/**
-	 * Helper to test if 2 collections of Map.Entry objects contain the same values. 
+	 * Helper to test if 2 collections of Map.Entry objects contain the same
+	 * values.
 	 */
 	private boolean entriesCollectionsAreEqual(Collection collection1, Collection collection2) {
-		if (collection1.size()!=collection2.size()) {
+		if (collection1.size() != collection2.size()) {
 			return false;
 		}
-		for (Iterator it1=collection1.iterator(), it2=collection2.iterator(); it1.hasNext() && it2.hasNext();) {
-			Map.Entry entry1=(Map.Entry)it1.next();
-			Map.Entry entry2=(Map.Entry)it2.next();
+		for (Iterator it1 = collection1.iterator(), it2 = collection2.iterator(); it1.hasNext() && it2.hasNext();) {
+			Map.Entry entry1 = (Map.Entry)it1.next();
+			Map.Entry entry2 = (Map.Entry)it2.next();
 			if (!entry1.equals(entry2)) {
 				return false;
 			}
 		}
 		return true;
 	}
-
 }
