@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -36,6 +38,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.FilterDefinition;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 
 import org.springframework.beans.BeanUtils;
@@ -166,6 +169,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	private Interceptor entityInterceptor;
 
 	private NamingStrategy namingStrategy;
+
+	private Map eventListeners;
+
+	private FilterDefinition[] filterDefinitions;
 
 	private boolean schemaUpdate = false;
 
@@ -394,6 +401,28 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
+	 * Specify the Hibernate event listeners to register, with listener type
+	 * Strings as keys and listener objects as values.
+	 * <p>See the Hibernate documentation for further details on listener types
+	 * and associated listener interfaces.
+	 * @see org.hibernate.cfg.Configuration#setListener(String, Object)
+	 */
+	public void setEventListeners(Map eventListeners) {
+		this.eventListeners = eventListeners;
+	}
+
+	/**
+	 * Specify the Hibernate FilterDefinitions to register for the SessionFactory.
+	 * <p>Typically, the passed-in FilterDefinition objects will have been defined
+	 * as Spring FilterDefinitionFactoryBeans, probably as inner beans within the
+	 * LocalSessionFactoryBean definition.
+	 * @see FilterDefinitionFactoryBean
+	 */
+	public void setFilterDefinitions(FilterDefinition[] filterDefinitions) {
+		this.filterDefinitions = filterDefinitions;
+	}
+
+	/**
 	 * Set whether to execute a schema update after SessionFactory initialization.
 	 * <p>For details on how to make schema update scripts work, see the Hibernate
 	 * documentation, as this class leverages the same schema update script support
@@ -491,6 +520,23 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 								"] does not denote a directory");
 					}
 					config.addDirectory(file);
+				}
+			}
+
+			if (this.eventListeners != null) {
+				// Register specified Hibernate event listeners.
+				for (Iterator it = this.eventListeners.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					String listenerType = (String) entry.getKey();
+					Object listenerObject = entry.getValue();
+					config.setListener(listenerType, listenerObject);
+				}
+			}
+
+			if (this.filterDefinitions != null) {
+				// Register specified Hibernate FilterDefinitions.
+				for (int i = 0; i < this.filterDefinitions.length; i++) {
+					config.addFilterDefinition(this.filterDefinitions[i]);
 				}
 			}
 
