@@ -1,9 +1,3 @@
-/*
- * Created on Sep 16, 2003
- *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 package org.springframework.web.util;
 
 import javax.servlet.jsp.PageContext;
@@ -19,9 +13,7 @@ import junit.framework.TestCase;
 
 /**
  * @author alef
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+
  */
 public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 
@@ -63,6 +55,9 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 		Object o = 
 			ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
 		assertEquals(o, "blie");
+		
+		assertEquals(new String("test"), ExpressionEvaluationUtils.evaluate(
+			"test", "test", Float.class, ctx));
 	}
 
 	public void testEvaluateString() 
@@ -71,10 +66,11 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 		
 		ctx.setAttribute("bla", "blie", PageContext.REQUEST_SCOPE);
 		String expr = "${bla}";
-		
 		Object o = 
 			ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
 		assertEquals(o, "blie");
+		
+		assertEquals("blie", ExpressionEvaluationUtils.evaluateString("test", "blie", ctx));
 	}
 
 	public void testEvaluateInteger() 
@@ -87,6 +83,8 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 		int i = 
 			ExpressionEvaluationUtils.evaluateInteger("test", expr, ctx);
 		assertEquals(i, 1);
+		
+		assertEquals(21, ExpressionEvaluationUtils.evaluateInteger("test", "21", ctx));
 	}
 
 	public void testEvaluateBoolean() 
@@ -99,6 +97,8 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 		boolean b = 
 			ExpressionEvaluationUtils.evaluateBoolean("test", expr, ctx);
 		assertEquals(b, true);
+		
+		assertEquals(true, ExpressionEvaluationUtils.evaluateBoolean("test", "true", ctx));
 	}
 	
 	private MockPageContext getMockPageContext() 

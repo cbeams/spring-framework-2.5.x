@@ -1,8 +1,11 @@
 package org.springframework.web.mock;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -23,6 +26,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public String forwarded;
 	public String included;
 	public String redirected;
+	
+	public List cookies = new ArrayList(); 
 
 	/** Creates new MockHttpServletResponse */
 	public MockHttpServletResponse() {
@@ -43,11 +48,16 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public Locale getLocale() {
 		return locale;
 	}
+	
+	public javax.servlet.http.Cookie[] getCookies() {
+		return (Cookie[]) cookies.toArray(new Cookie[cookies.size()]);
+	}
 
 	public void flushBuffer() throws java.io.IOException {
 	}
 
 	public void addCookie(javax.servlet.http.Cookie cookie) {
+		cookies.add(cookie);
 	}
 
 	public void sendError(int param) throws java.io.IOException {
