@@ -48,6 +48,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
+import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
@@ -59,6 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.27 2004-06-28 11:45:10 johnsonr Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
@@ -105,6 +107,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String TYPE_ATTRIBUTE = "type";
 	public static final String PROPERTY_ELEMENT = "property";
 	public static final String LOOKUP_METHOD_ELEMENT = "lookup-method";
+	
+	public static final String REPLACED_METHOD_ELEMENT = "replaced-method";
+	public static final String REPLACER_ATTRIBUTE = "replacer";
+	public static final String ARG_TYPE_ELEMENT = "arg-type";
+	public static final String ARG_TYPE_MATCH_ATTRIBUTE = "match";
 
 	public static final String REF_ELEMENT = "ref";
 	public static final String IDREF_ELEMENT = "idref";
@@ -316,6 +323,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 
 			getLookupOverrideSubElements(bd.getMethodOverrides(), beanName, ele);
+			getReplacedMethodSubElements(bd.getMethodOverrides(), beanName, ele);
 
 			bd.setResourceDescription(this.resource.getDescription());
 
@@ -388,6 +396,27 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}			
 		}
 	}
+	
+	protected void getReplacedMethodSubElements(MethodOverrides overrides, String beanName, Element beanEle) {
+		NodeList nl = beanEle.getChildNodes();		
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node instanceof Element && REPLACED_METHOD_ELEMENT.equals(node.getNodeName())) {
+				Element replacedMethodEle = (Element) node;
+				String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
+				String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);		
+				ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
+				
+				// Look for arg-type match elements
+				NodeList argTypeNodes = replacedMethodEle.getElementsByTagName(ARG_TYPE_ELEMENT);
+				for (int j = 0; j < argTypeNodes.getLength(); j++) {
+					Element argTypeEle = (Element) argTypeNodes.item(j);
+					replaceOverride.addTypeIdentifier(argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE));
+				}				
+				overrides.addOverride(replaceOverride);
+			}			
+		}
+	}
 
 	/**
 	 * Parse a constructor-arg element.
@@ -412,7 +441,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 			catch (NumberFormatException ex) {
 				throw new BeanDefinitionStoreException(this.resource, beanName,
-																							 "Attribute 'index' of tag 'constructor-arg' must be an integer");
+						"Attribute 'index' of tag 'constructor-arg' must be an integer");
 			}
 		}
 		else {

@@ -14,18 +14,40 @@
 		
 		<lookup-method name="protectedOverrideSingleton" bean="david" />
 		
-		<delegated-method>
-			<method name="replaceMe" args="String" />
-			<ref bean="implementsReplaceMe" />
-		</delegated-method>
-		
 		<!-- Arbitrary method replacer -->
-		<replaced-method>
-			<method name="replaceMe" args="String" />
-			<ref bean="implementsReplaceMe" />
+		<replaced-method name="replaceMe" replacer="reverseReplacer">
+			<arg-type>String</arg-type>
+		</replaced-method>
+		
+		<replaced-method name="replaceMe" replacer="fixedReplacer">
 		</replaced-method>
 		
 	</bean>
+	
+	<bean id="replaceVoidMethod" 
+		class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass">
+		
+		<lookup-method name="getPrototypeDependency" bean="jenny" />
+		
+		<lookup-method name="protectedOverrideSingleton" bean="david" />
+		
+		<!--
+			This method is not overloaded, so we don't need to specify any arg types
+		-->
+		<replaced-method name="doSomething" replacer="doSomethingReplacer">
+		</replaced-method>
+		
+	</bean>
+	
+	
+	<bean id="reverseReplacer" 
+		class="org.springframework.beans.factory.xml.ReverseMethodReplacer" />
+	
+	<bean id="fixedReplacer" 
+		class="org.springframework.beans.factory.xml.FixedMethodReplacer" />
+		
+	<bean id="doSomethingReplacer" 
+		class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$DoSomethingReplacer" />
 	
 	
 	<bean id="jenny" class="org.springframework.beans.TestBean"

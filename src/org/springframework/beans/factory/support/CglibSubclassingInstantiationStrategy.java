@@ -18,6 +18,8 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
@@ -39,7 +41,7 @@ import org.springframework.beans.factory.BeanFactory;
  * However, the core IoC container will still run without CGLIB being available.
  *
  * @author Rod Johnson
- * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.5 2004-06-25 18:00:02 johnsonr Exp $
+ * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.6 2004-06-28 11:41:29 johnsonr Exp $
  */
 public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationStrategy {
 
@@ -54,6 +56,12 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	 * be overridden to provide method lookup.
 	 */
 	private static final int LOOKUP_OVERRIDE = 1;
+	
+	/**
+	 * Index in the CGLIB callback array for a method that should
+	 * be overridden using generic Methodreplacer functionality.
+	 */
+	private static final int METHOD_REPLACER = 2;
 
 
 	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, BeanFactory owner) {
@@ -98,7 +106,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			enhancer.setCallbackFilter(new CallbackFilterImpl());
 			enhancer.setCallbacks(new Callback[] {
 					NoOp.INSTANCE,
-					new LookupOverrideMethodInterceptor()
+					new LookupOverrideMethodInterceptor(),
+					new ReplaceOverrideMethodInterceptor()
 			});
 
 			return (ctor == null) ? 
@@ -142,14 +151,38 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 				return owner.getBean(lo.getBeanName());
 			}			
 		}
+		
+		/**
+		 * CGLIB MethodInterceptor to override methods, replacing them with a call
+		 * to a generic MethodReplacer
+		 */
+		private class ReplaceOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
+
+			public Object intercept(Object o, Method m, Object[] args, MethodProxy mp) throws Throwable {
+				ReplaceOverride lo = (ReplaceOverride) beanDefinition.getMethodOverrides().getOverride(m);
+				// TODO could cache if a singleton for minor performance optimization
+				MethodReplacer mr = (MethodReplacer) owner.getBean(lo.getMethodReplacerBeanName());
+				return mr.reimplement(o, m, args);
+			}
+		}
 
 
 		/**
 		 * CGLIB object to filter method interception behavior.
 		 */
 		private class CallbackFilterImpl extends CglibIdentitySupport implements CallbackFilter {
+			
+			private Set methodNames = new HashSet();
 
 			public int accept(Method method) {
+				
+				if (!methodNames.contains(method.getName())) {
+					methodNames.add(method.getName());
+				}
+				else {
+					beanDefinition.getMethodOverrides().addOverloadedMethodName(method.getName());
+				}
+				
 				MethodOverride methodOverride = beanDefinition.getMethodOverrides().getOverride(method);
 				if (logger.isInfoEnabled()) {
 					logger.info("Override for '" + method.getName() + "' is [" + methodOverride + "]");
@@ -160,8 +193,11 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 				else if (methodOverride instanceof LookupOverride) {
 					return LOOKUP_OVERRIDE;
 				}
+				else if (methodOverride instanceof ReplaceOverride) {
+					return METHOD_REPLACER;
+				}
 				throw new UnsupportedOperationException("Unexpected MethodOverride subclass: " +
-													methodOverride.getClass().getName());
+							methodOverride.getClass().getName());
 			}
 		}
 	}

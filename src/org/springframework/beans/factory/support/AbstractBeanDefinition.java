@@ -34,7 +34,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractBeanDefinition.java,v 1.17 2004-06-25 09:12:44 johnsonr Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.18 2004-06-28 11:39:55 johnsonr Exp $
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -467,9 +467,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 	
 	private void validateMethodOverride(MethodOverride mo, Class beanClass) throws BeanDefinitionValidationException {
-		if (!(mo instanceof LookupOverride)) {
-			throw new BeanDefinitionValidationException("Unknown method override type: " + mo.getClass());
-		}
 		if (!BeanUtils.isAtLeastOneMethodWithName(mo.getMethodName(), beanClass)) {
 			throw new BeanDefinitionValidationException("No method with name '" + mo.getMethodName() + 
 					"' on class " + beanClass.getName() + " specified in lookup override");

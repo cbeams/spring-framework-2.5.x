@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,7 +36,6 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
@@ -56,6 +56,7 @@ import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
@@ -64,7 +65,7 @@ import org.springframework.util.StopWatch;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.52 2004-06-27 14:37:33 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.53 2004-06-28 11:46:03 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -1117,7 +1118,6 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals("David", tb.getName()); 
 		tb = swappedOom.protectedOverrideSingleton();
 		assertEquals("Jenny", tb.getName()); 
-		
 	}
 	
 	private void testLookupOverrideMethodsWithSetterInjection(BeanFactory xbf, String beanName, boolean singleton) {
@@ -1152,6 +1152,63 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		TestBean dave2 = oom.protectedOverrideSingleton();
 		assertEquals("David", dave2.getName());
 		assertSame(dave1, dave2); 
+	}
+	
+	public void testReplaceMethodOverrideWithSetterInjection() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml", getClass()));
+		
+		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethod");
+		
+		// Same contract as for overrides.xml
+		TestBean jenny1 = oom.getPrototypeDependency();
+		assertEquals("Jenny", jenny1.getName()); 
+		TestBean jenny2 = oom.getPrototypeDependency();
+		assertEquals("Jenny", jenny2.getName());
+		assertNotSame(jenny1, jenny2); 
+		
+		// Now try protected method, and singleton
+		TestBean dave1 = oom.protectedOverrideSingleton();
+		assertEquals("David", dave1.getName()); 
+		TestBean dave2 = oom.protectedOverrideSingleton();
+		assertEquals("David", dave2.getName());
+		assertSame(dave1, dave2); 
+		
+		// Check unadvised behaviour
+		String str = "woierowijeiowiej";
+		assertEquals(str, oom.echo(str));
+		
+		// Now test replace
+		String s = "this is not a palindrome";
+		String reverse = new StringBuffer(s).reverse().toString();
+		assertEquals("Should have overridden to reverse, not echo", reverse, oom.replaceMe(s));
+		
+		assertEquals("Should have overridden no-arg overloaded replaceMe method to return fixed value",
+				FixedMethodReplacer.VALUE, oom.replaceMe());
+		
+		OverrideOneMethodSubclass ooms = (OverrideOneMethodSubclass) xbf.getBean("replaceVoidMethod");
+		DoSomethingReplacer dos = (DoSomethingReplacer) xbf.getBean("doSomethingReplacer");
+		assertEquals(null, dos.lastArg);
+		String s1 = "";
+		String s2 = "foo bar black sheep";
+		ooms.doSomething(s1);
+		assertEquals(s1, dos.lastArg);
+		ooms.doSomething(s2);
+		assertEquals(s2, dos.lastArg);
+	}
+	
+	
+	public static class DoSomethingReplacer implements MethodReplacer {
+		public Object lastArg;
+		
+		public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
+			assertEquals(1, args.length);
+			assertEquals("doSomething", m.getName());
+			lastArg = args[0];
+			return null;
+		}
 	}
 	
 	public void testLookupOverrideOneMethodWithConstructorInjection() {

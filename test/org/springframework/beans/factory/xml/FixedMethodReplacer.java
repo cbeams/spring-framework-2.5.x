@@ -1,50 +1,39 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */ 
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.TestBean;
+import java.lang.reflect.Method;
+
+import org.springframework.beans.factory.support.MethodReplacer;
 
 /**
+ * Fixed method replacer for String return types
  * @author Rod Johnson
- * @version $Id: OverrideOneMethod.java,v 1.4 2004-06-28 11:46:03 johnsonr Exp $
+ * @version $Id: FixedMethodReplacer.java,v 1.1 2004-06-28 11:46:03 johnsonr Exp $
  */
-public abstract class OverrideOneMethod {
+public class FixedMethodReplacer implements MethodReplacer {
 	
-	public abstract TestBean getPrototypeDependency();
-	
-	protected abstract TestBean protectedOverrideSingleton();
-	
-	public TestBean invokesOverridenMethodOnSelf() {
-		return getPrototypeDependency();
-	}
-	
-	public String echo(String echo) {
-		return echo;
-	}
-	
-	public String replaceMe(String echo) {
-		return echo;
-	}
-	
+	public static final String VALUE = "fixedMethodReplacer";
+
 	/**
-	 * Overloaded form of replaceMe
+	 * @see org.springframework.beans.factory.support.MethodReplacer#reimplement(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
 	 */
-	public String replaceMe() {
-		return "replaceMe";
+	public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
+		return VALUE;
 	}
 
 }
