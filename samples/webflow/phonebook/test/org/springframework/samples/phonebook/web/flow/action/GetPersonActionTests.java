@@ -25,7 +25,7 @@ import org.springframework.web.flow.Event;
 import org.springframework.web.flow.JUnitAssertSupport;
 import org.springframework.web.flow.StubRequestContext;
 
-public class TestGetPersonAction extends TestCase {
+public class GetPersonActionTests extends TestCase {
 
 	/**
 	 * JUnit support assertion facility
@@ -61,8 +61,8 @@ public class TestGetPersonAction extends TestCase {
 	public void testGetPersonDoesNotExist() throws Exception {
 		MockControl control = MockControl.createControl(PhoneBook.class);
 		PhoneBook phoneBook = (PhoneBook)control.getMock();
-		phoneBook.getPerson(new Long(1));
-		control.setThrowable(new DataRetrievalFailureException("no such person"), 1);
+		phoneBook.getPerson(new Long(2));
+		control.setReturnValue(null, 1);
 		control.replay();
 
 		GetPersonAction action = new GetPersonAction();

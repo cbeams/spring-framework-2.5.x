@@ -43,7 +43,7 @@ public class JUnitAssertSupport extends Assert {
 	 * model.
 	 */
 	public void assertAttributeNotPresent(AttributeSource model, String attributeName) {
-		assertTrue("The model attribute '" + attributeName + "' is present in model but shouldn't be", model
+		assertTrue("The model attribute '" + attributeName + "' is present in model but shouldn't be", !model
 				.containsAttribute(attributeName));
 	}
 
