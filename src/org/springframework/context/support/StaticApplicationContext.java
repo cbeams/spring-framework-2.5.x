@@ -85,11 +85,4 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 		messageSource.addMessage(code, locale, defaultMessage);
 	}
 
-	/**
-	 * Must invoke when finished.
-	 */
-	public void rebuild() throws BeansException {
-		refresh();
-	}
-
 }
