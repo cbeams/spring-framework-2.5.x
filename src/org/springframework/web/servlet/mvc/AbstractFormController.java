@@ -99,10 +99,9 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>Call to {@link #onBindAndValidate onBindAndValidate()} which allows you
  *      to do custom processing after binding and validation (e.g. to manually
  *      bind request parameters, and to validate them outside a Validator).</li>
- *  <li>Call {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
- *      again if there have been any binding and/or validation errors. Else, call to
- *      {@link #processFormSubmission processFormSubmission} to process the valid form
- *      submission. This method has to be implemented in subclasses.</li>
+ *  <li>Call {@link #processFormSubmission(HttpServletRequest, HttpServletResponse,
+ *      Object, BindException) processFormSubmission()} to process the submission, with
+ *      or without binding errors. This method has to be implemented in subclasses.</li>
  * </ol>
  * </p>
  *
@@ -441,8 +440,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Process form submission request. Called by handleRequestInternal in case
-	 * of a form submission.
-	 * <p>Subclasses can override this to provide custom submission handling
+	 * of a form submission, with or without binding errors. Implementations
+	 * need to proceed properly, typically showing a form view in case of
+	 * binding errors respectively performing a submit action else.
+	 * <p>Subclasses can implement this to provide custom submission handling
 	 * like triggering a custom action. They can also provide custom validation
 	 * and call showForm or proceed with the submission accordingly.
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
@@ -454,6 +455,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param errors holder without errors (subclass can add errors if it wants to)
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
+	 * @see #handleRequestInternal
 	 * @see #isFormSubmission
 	 * @see #showForm
 	 * @see org.springframework.validation.Errors
