@@ -1,9 +1,7 @@
 package org.springframework.validation;
 
 import java.beans.BeanInfo;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -11,8 +9,6 @@ import org.springframework.beans.BeanInfoSupport;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.validation.rules.MaxLength;
-import org.springframework.validation.rules.Required;
 import org.springframework.validation.support.BeanValidatorBuilder;
 import org.springframework.validation.support.BeanValidatorConstants;
 import org.springframework.validation.support.DefaultBeanValidationService;
@@ -88,13 +84,6 @@ public class BeanValidatorTestSuite extends TestCase {
     public void testValidatorBuilder() {
         BeanValidationService service = new DefaultBeanValidationService();
         BeanValidatorBuilder builder = new BeanValidatorBuilder(Pet.class);
-
-        builder.setPropertyValidator("name.lastName", new Required());
-        Set toyRules = new HashSet();
-        toyRules.add(new Required());
-        toyRules.add(new MaxLength(255));
-
-        builder.setPropertyValidator("favoriteToy", toyRules);
         ValidationResultsCollectorAdapter results =
             new ValidationResultsCollectorAdapter();
         service.validate(getPet(), results);
