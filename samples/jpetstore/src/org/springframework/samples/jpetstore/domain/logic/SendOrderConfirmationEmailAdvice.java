@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.MethodAfterReturningAdvice;
+import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
@@ -16,9 +16,9 @@ import org.springframework.samples.jpetstore.domain.Order;
 /**
  * AOP advice that sends confirmation email after order has been submitted
  * @author Dmitriy Kopylenko
- * @version $Id: SendOrderConfirmationEmailAdvice.java,v 1.1 2004-03-01 11:18:12 jhoeller Exp $
+ * @version $Id: SendOrderConfirmationEmailAdvice.java,v 1.2 2004-03-19 20:27:43 dkopylenko Exp $
  */
-public class SendOrderConfirmationEmailAdvice implements MethodAfterReturningAdvice, InitializingBean {
+public class SendOrderConfirmationEmailAdvice implements AfterReturningAdvice, InitializingBean {
 
 	private static final String DEFAULT_MAIL_FROM = "jpetstore@springframework.org";
 
