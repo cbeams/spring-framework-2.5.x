@@ -16,7 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.jdo.JDOException;
@@ -24,6 +23,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
@@ -66,29 +66,33 @@ public interface JdoDialect {
 	 * Retrieve the JDBC Connection that the given JDO PersistenceManager uses underneath,
 	 * if accessing a relational database. This method will just get invoked if actually
 	 * needing access to the underlying JDBC Connection, usually within an active JDO
-	 * transaction (for example, by JdoTransactionManager). The returned Connection will
+	 * transaction (for example, by JdoTransactionManager). The returned handle will
 	 * be passed into the <code>releaseJdbcConnection</code> method when not needed anymore.
 	 * <p>This strategy is necessary as JDO 1.0 does not provide a standard way to retrieve
 	 * the underlying JDBC Connection (due to the fact that a JDO implementation might not
 	 * work with a relational database at all).
-	 * <p>Implementations are encouraged to return an unwrapped Connection handle, i.e.
+	 * <p>Implementations are encouraged to return an unwrapped Connection object, i.e.
 	 * the Connection as they got it from the connection pool. This makes it easier for
 	 * application code to get at the underlying native JDBC Connection, like an
 	 * OracleConnection, which is sometimes necessary for LOB handling etc. We assume
 	 * that calling code knows how to properly handle the returned Connection object.
-	 * <p>Spring provides the NativeJdbcExtractor mechanism to retrieve native JDBC
-	 * Connections. The NativeJdbcExtractor interface is typically implemented for
-	 * specific connection pools, so assumes to work on the pool Connection handle
-	 * rather than a JDO-wrapped Connection object (see above paragraph).
+	 * <p>In a simple case where the returned Connection will be auto-closed with the
+	 * PersistenceManager or can be released via the Connection object itself, an
+	 * implementation can return a SimpleConnectionHandle that just contains the
+	 * Connection. If some other object is needed in <code>releaseJdbcConnection</code>,
+	 * an implementation should use a special handle that references that other object.
 	 * @param pm the current JDO PersistenceManager
-	 * @return the JDBC Connection
+	 * @return a handle for the JDBC Connection, to be passed into
+	 * <code>releaseJdbcConnection</code>
 	 * @throws JDOException if thrown by JDO methods
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #releaseJdbcConnection
+	 * @see org.springframework.jdbc.datasource.ConnectionHandle#getConnection
+	 * @see org.springframework.jdbc.datasource.SimpleConnectionHandle
 	 * @see JdoTransactionManager#setDataSource
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
 	 */
-	Connection getJdbcConnection(PersistenceManager pm, boolean readOnly)
+	ConnectionHandle getJdbcConnection(PersistenceManager pm, boolean readOnly)
 			throws JDOException, SQLException;
 
 	/**
@@ -98,13 +102,13 @@ public interface JdoDialect {
 	 * <p>An implementation might simply do nothing, if the Connection returned
 	 * by <code>getJdbcConnection</code> will be implicitly closed when the JDO
 	 * transaction completes respectively when the PersistenceManager is closed.
-	 * @param con the JDBC Connection to release
+	 * @param conHandle the JDBC Connection handle to release
 	 * @param pm the current JDO PersistenceManager
 	 * @throws JDOException if thrown by JDO methods
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #getJdbcConnection
 	 */
-	void releaseJdbcConnection(Connection con, PersistenceManager pm)
+	void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
 			throws JDOException, SQLException;
 
 	/**

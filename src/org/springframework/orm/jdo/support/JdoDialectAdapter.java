@@ -16,7 +16,6 @@
 
 package org.springframework.orm.jdo.support;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.jdo.JDOException;
@@ -25,6 +24,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.orm.jdo.JdoDialect;
 import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -51,7 +51,7 @@ public abstract class JdoDialectAdapter implements JdoDialect {
 		transaction.begin();
 	}
 
-	public Connection getJdbcConnection(PersistenceManager pm, boolean readOnly)
+	public ConnectionHandle getJdbcConnection(PersistenceManager pm, boolean readOnly)
 			throws JDOException, SQLException {
 		throw new JDOUnsupportedOptionException("Cannot retrieve underlying JDBC connection");
 	}
@@ -64,7 +64,7 @@ public abstract class JdoDialectAdapter implements JdoDialect {
 	 * <code>Connection.close</code> here.
 	 * @see java.sql.Connection#close
 	 */
-	public void releaseJdbcConnection(Connection con, PersistenceManager pm)
+	public void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
 			throws JDOException, SQLException {
 	}
 

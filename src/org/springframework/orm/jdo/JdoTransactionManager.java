@@ -16,8 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import java.sql.Connection;
-
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -26,6 +24,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -247,8 +246,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 			// register the JDO PersistenceManager's JDBC Connection for the DataSource, if set
 			if (this.dataSource != null) {
-				Connection con = this.jdoDialect.getJdbcConnection(pm, definition.isReadOnly());
-				ConnectionHolder conHolder = new ConnectionHolder(con);
+				ConnectionHandle conHandle = this.jdoDialect.getJdbcConnection(pm, definition.isReadOnly());
+				ConnectionHolder conHolder = new ConnectionHolder(conHandle);
 				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(definition.getTimeout());
 				}
@@ -355,8 +354,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			ConnectionHolder conHolder =
 					(ConnectionHolder) TransactionSynchronizationManager.unbindResource(this.dataSource);
 			try {
-				this.jdoDialect.releaseJdbcConnection(conHolder.getConnection(),
-																						txObject.getPersistenceManagerHolder().getPersistenceManager());
+				this.jdoDialect.releaseJdbcConnection(conHolder.getConnectionHandle(),
+				                                      txObject.getPersistenceManagerHolder().getPersistenceManager());
 			}
 			catch (Exception ex) {
 				// just log it, to keep a transaction-related exception

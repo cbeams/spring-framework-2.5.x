@@ -41,6 +41,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.jdbc.datasource.SimpleConnectionHandle;
 
 /**
  * @author Juergen Hoeller
@@ -598,6 +600,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		Transaction tx = (Transaction) txControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
+		ConnectionHandle conHandle = new SimpleConnectionHandle(con);
+
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
@@ -607,8 +611,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		dialect.beginTransaction(tx, tt);
 		dialectControl.setVoidCallable(1);
 		dialect.getJdbcConnection(pm, false);
-		dialectControl.setReturnValue(con, 1);
-		dialect.releaseJdbcConnection(con, pm);
+		dialectControl.setReturnValue(conHandle, 1);
+		dialect.releaseJdbcConnection(conHandle, pm);
 		dialectControl.setVoidCallable(1);
 		tx.commit();
 		txControl.setVoidCallable(1);

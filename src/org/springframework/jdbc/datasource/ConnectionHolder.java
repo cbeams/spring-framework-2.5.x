@@ -37,14 +37,22 @@ import org.springframework.transaction.support.ResourceHolderSupport;
  */
 public class ConnectionHolder extends ResourceHolderSupport {
 
-	private final Connection connection;
+	private final ConnectionHandle connectionHandle;
+
+	public ConnectionHolder(ConnectionHandle connectionHandle) {
+		this.connectionHandle = connectionHandle;
+	}
 
 	public ConnectionHolder(Connection connection) {
-		this.connection = connection;
+		this.connectionHandle = new SimpleConnectionHandle(connection);
+	}
+
+	public ConnectionHandle getConnectionHandle() {
+		return connectionHandle;
 	}
 
 	public Connection getConnection() {
-		return connection;
+		return this.connectionHandle.getConnection();
 	}
 
 }
