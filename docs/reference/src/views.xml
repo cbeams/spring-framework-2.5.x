@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.14 2004-03-22 01:44:23 trisberg Exp $-->
+<!--$Id: views.xml,v 1.15 2004-03-29 19:21:39 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -217,15 +217,18 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
     <sect2 id="view-velocity-dependencies">
       <title>Dependencies</title>
 
-      <para>There is one dependency that your web application will need to
+      <para>There are two dependency that your web application will need to
       satisfy before working with Velocity, namely that
-      <literal>velocity-1.x.x.jar</literal> needs to be available. Typically
-      this is included in the <literal>WEB-INF/lib</literal> folder where it
-      is guaranteed to be found by a J2EE server and added to the classpath
-      for your application. It is of course assumed that you already have the
-      spring.jar in your <literal>WEB-INF/lib</literal> folder too! The latest
-      stable velocity jar is supplied with the Spring framework and can be
-      copied from the <literal>/lib/velocity</literal> directory.</para>
+      <literal>velocity-1.x.x.jar</literal> and
+      <literal>commons-collections.jar</literal> need to be available.
+      Typically they are included in the <literal>WEB-INF/lib</literal> folder
+      where it is guaranteed to be found by a J2EE server and added to the
+      classpath for your application. It is of course assumed that you already
+      have the <literal>spring.jar</literal> in your
+      <literal>WEB-INF/lib</literal> folder too! The latest stable velocity
+      jar and commons collections jar are supplied with the Spring framework
+      and can be copied from the <literal>/lib/velocity</literal> or
+      <literal>/lib/jakarta-commons</literal> directories.</para>
     </sect2>
 
     <sect2 id="view-velocity-configuration-dispatcher">
