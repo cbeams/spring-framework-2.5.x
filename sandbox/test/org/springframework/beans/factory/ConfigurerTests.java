@@ -218,9 +218,6 @@ public class ConfigurerTests extends TestCase {
 			System.out.println("----------- refresh ----------------");
 			((AbstractApplicationContext) bdr).refresh();
 		}
-		else {
-			//((DefaultListableBeanFactory) bdr).
-		}
 
 		BeanFactory bf = (BeanFactory) bdr;
 		ITestBean tb = (ITestBean) bf.getBean(beanName);
