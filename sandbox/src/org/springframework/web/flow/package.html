@@ -1,6 +1,73 @@
 <html>
 <body>
+<p>
 Contains core interfaces and classes for executing web flows.
-The central package of the Spring web flow system.
+</p>
+
+<p>
+This is the central package of the Spring web flow system. It
+contains the follow key classes and interfaces of interest to
+users of the web flow system:
+<ul>
+<li>
+{@link org.springframework.web.flow.Action} - The interface implemented
+by actions executed by a web flow in an action state. Ready to use
+implementations and convenience superclasses are provided in
+the {@link org.springframework.web.flow.action} package.
+</li>
+<li>
+{@link org.springframework.web.flow.FlowSession},
+{@link org.springframework.web.flow.FlowExecutionInfo} and
+{@link org.springframework.web.flow.FlowExecution} - These interfaces
+provide access to information about an executing flow. Only those applications
+that use a flow exeuction listener will need to use these interfaces
+directly.
+</li>
+<li>
+{@link org.springframework.web.flow.FlowExecutionListener} - The
+listener interface to be implemented by objects that are interested in
+flow execution lifecycle events. The class
+{@link org.springframework.web.flow.support.FlowExecutionListenerAdapter}
+provides an adapter to ease subclassing.
+</li>
+<li>
+{@link org.springframework.web.flow.FlowModel} and
+{@link org.springframework.web.flow.MutableFlowModel} - An action can interact
+with the flow data model using these interfaces.
+</li>
+<li>
+{@link org.springframework.web.flow.FlowModelMapper} - The interface
+implemented by strategy objects used to map attributes between flow
+models. An out-of-the-box implementation is provided by the class
+{@link org.springframework.web.flow.support.ParameterizableFlowModelMapper}.
+</li>
+</ul>
+</p>
+
+<p>
+This package has several sub packages:
+<ul>
+<li>
+{@link org.springframework.web.flow.action action} - Out-of-the box action implementations
+that address common controller concerns.
+</li>
+<li>
+{@link org.springframework.web.flow.config config} - Contains interfaces and classes for
+building and assembling web flows.
+</li>
+<li>
+{@link org.springframework.web.flow.mvc mvc} - Integration of the Spring web flow system
+into the Spring web MVC framework.
+</li>
+<li>
+{@link org.springframework.web.flow.struts struts} - Integration of the Spring web flow
+system with Struts 1.x.
+</li>
+<li>
+{@link org.springframework.web.flow.support support} - This package contains interfaces and
+classes supporting the Spring web flow system.
+</li>
+</ul>
+</p>
 </body>
 </html>

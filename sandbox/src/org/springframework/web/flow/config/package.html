@@ -1,5 +1,37 @@
 <html>
 <body>
+<p>
 Contains interfaces and classes for building and assembling web flows.
+</p>
+
+<p>
+You construct a web flow using a {@link org.springframework.web.flow.config.FlowBuilder}.
+This package defines the following flow builder implementations:
+<ul>
+<li>
+{@link org.springframework.web.flow.config.AbstractFlowBuilder} - A
+convenience superclass to use when you want to assemble the web flow
+in Java code.
+</li>
+<li>
+{@link org.springframework.web.flow.config.XmlFlowBuilder} - A flow
+builder that reads an XML file containing a web flow definition and
+constructs the flow accordingly.
+</li>
+</ul>
+During flow construction, a flow builder will need to locate a number of
+<i>services</i> required by the web flow: actions, other flows, model
+mappers and so on. To do this, the flow builder will use a
+{@link org.springframework.web.flow.config.FlowServiceLocator}. Most
+Spring applications will use the
+{@link org.springframework.web.flow.config.BeanFactoryFlowServiceLocator},
+which is also the default.
+</p>
+
+<p>
+To actually direct flow construction, you use the
+{@link org.springframework.web.flow.config.FlowFactoryBean}. This is a
+normal Spring factory bean that uses a flow builder to construct a web flow.
+</p>
 </body>
 </html>
