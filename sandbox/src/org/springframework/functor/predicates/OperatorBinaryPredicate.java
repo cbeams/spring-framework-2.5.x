@@ -40,6 +40,6 @@ public abstract class OperatorBinaryPredicate implements BinaryPredicate {
         }
     }
     
-    public abstract boolean evaluateOperatorResult(int result);
+    protected abstract boolean evaluateOperatorResult(int result);
 
 }

@@ -33,7 +33,7 @@ public class LessThan extends OperatorBinaryPredicate implements
         super(comparator);
     }
 
-    public boolean evaluateOperatorResult(int result) {
+    protected boolean evaluateOperatorResult(int result) {
         return result < 0;
     }
 

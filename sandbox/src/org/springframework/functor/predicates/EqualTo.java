@@ -32,7 +32,7 @@ public class EqualTo extends OperatorBinaryPredicate implements BinaryPredicate 
         super(comparator);
     }
 
-    public boolean evaluateOperatorResult(int result) {
+    protected boolean evaluateOperatorResult(int result) {
         return result == 0;
     }
 
