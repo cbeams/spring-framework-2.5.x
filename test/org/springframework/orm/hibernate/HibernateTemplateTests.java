@@ -18,6 +18,8 @@ package org.springframework.orm.hibernate;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -529,6 +531,89 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.update(tb, LockMode.UPGRADE);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testDelete() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
+		session.delete(tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.delete(tb);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testDeleteWithLock() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
+		session.lock(tb, LockMode.UPGRADE);
+		sessionControl.setVoidCallable(1);
+		session.delete(tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.delete(tb, LockMode.UPGRADE);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testDeleteAll() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb1 = new TestBean();
+		TestBean tb2 = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
+		session.delete(tb1);
+		sessionControl.setVoidCallable(1);
+		session.delete(tb2);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+			sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List tbs = new ArrayList();
+		tbs.add(tb1);
+		tbs.add(tb2);
+		ht.deleteAll(tbs);
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -1120,87 +1205,178 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testDelete() throws HibernateException {
+	public void testFindWithCacheable() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
-		TestBean tb = new TestBean();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf);
-		session.delete(tb);
-		sessionControl.setVoidCallable(1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setCacheable(true);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
+		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.delete(tb);
+		ht.setCacheQueries(true);
+		List result = ht.find("some query string");
+		assertTrue("Correct list", result == list);
 		sfControl.verify();
 		sessionControl.verify();
+		queryControl.verify();
 	}
 
-	public void testDeleteWithLock() throws HibernateException {
+	public void testFindByNamedQueryWithCacheable() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
-		TestBean tb = new TestBean();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf);
-		session.lock(tb, LockMode.UPGRADE);
-		sessionControl.setVoidCallable(1);
-		session.delete(tb);
-		sessionControl.setVoidCallable(1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setCacheable(true);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
+		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.delete(tb, LockMode.UPGRADE);
+		ht.setCacheQueries(true);
+		List result = ht.findByNamedQuery("some query name");
+		assertTrue("Correct list", result == list);
 		sfControl.verify();
 		sessionControl.verify();
+		queryControl.verify();
 	}
 
-	public void testDeleteAll() throws HibernateException {
+	public void testIterate() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
-		TestBean tb1 = new TestBean();
-		TestBean tb2 = new TestBean();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		Iterator it = Collections.EMPTY_LIST.iterator();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf);
-		session.delete(tb1);
-		sessionControl.setVoidCallable(1);
-		session.delete(tb2);
-		sessionControl.setVoidCallable(1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.iterate();
+		queryControl.setReturnValue(it, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
-			sessionControl.setReturnValue(null, 1);
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
+		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List tbs = new ArrayList();
-		tbs.add(tb1);
-		tbs.add(tb2);
-		ht.deleteAll(tbs);
+		Iterator result = ht.iterate("some query string");
+		assertTrue("Correct list", result == it);
 		sfControl.verify();
 		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testIterateWithParameterAndType() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		Iterator it = Collections.EMPTY_LIST.iterator();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue", Hibernate.STRING);
+		queryControl.setReturnValue(query, 1);
+		query.iterate();
+		queryControl.setReturnValue(it, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Iterator result = ht.iterate("some query string", "myvalue", Hibernate.STRING);
+		assertTrue("Correct list", result == it);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testIterateWithParametersAndTypes() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		Iterator it = Collections.EMPTY_LIST.iterator();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue1", Hibernate.STRING);
+		queryControl.setReturnValue(query, 1);
+		query.setParameter(1, new Integer(2), Hibernate.INTEGER);
+		queryControl.setReturnValue(query, 1);
+		query.iterate();
+		queryControl.setReturnValue(it, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Iterator result = ht.iterate("some query string",
+		                             new Object[] {"myvalue1", new Integer(2)},
+		                             new Type[] {Hibernate.STRING, Hibernate.INTEGER});
+		assertTrue("Correct list", result == it);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
 	}
 
 	public void testDeleteWithQuery() throws HibernateException {

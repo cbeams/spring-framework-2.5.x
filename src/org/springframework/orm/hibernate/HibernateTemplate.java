@@ -94,6 +94,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	private boolean allowCreate = true;
 
+	private boolean cacheQueries = false;
+
+
 	/**
 	 * Create a new HibernateTemplate instance.
 	 */
@@ -138,6 +141,24 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	public boolean isAllowCreate() {
 		return allowCreate;
+	}
+
+	/**
+	 * Set whether to cache all queries executed by this template.
+	 * If this is true, all Query and Criteria objects created by
+	 * this template will be marked as cacheable.
+	 * @see net.sf.hibernate.Query#setCacheable
+	 * @see net.sf.hibernate.Criteria#setCacheable
+	 */
+	public void setCacheQueries(boolean cacheQueries) {
+		this.cacheQueries = cacheQueries;
+	}
+
+	/**
+	 * Return whether to cache all queries executed by this template.
+	 */
+	public boolean isCacheQueries() {
+		return cacheQueries;
 	}
 
 
@@ -623,6 +644,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	public Query createQuery(Session session, String queryString) throws HibernateException {
 		Query queryObject = session.createQuery(queryString);
+		if (isCacheQueries()) {
+			queryObject.setCacheable(true);
+		}
 		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
 		return queryObject;
 	}
@@ -641,6 +665,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	public Query getNamedQuery(Session session, String queryName) throws HibernateException {
 		Query queryObject = session.getNamedQuery(queryName);
+		if (isCacheQueries()) {
+			queryObject.setCacheable(true);
+		}
 		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
 		return queryObject;
 	}
@@ -659,6 +686,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	public Criteria createCriteria(Session session, Class entityClass) throws HibernateException {
 		Criteria criteria = session.createCriteria(entityClass);
+		if (isCacheQueries()) {
+			criteria.setCacheable(true);
+		}
 		SessionFactoryUtils.applyTransactionTimeout(criteria, getSessionFactory());
 		return criteria;
 	}
