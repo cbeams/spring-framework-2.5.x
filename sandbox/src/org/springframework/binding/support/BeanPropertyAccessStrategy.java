@@ -43,6 +43,7 @@ import org.springframework.binding.value.support.PropertyAdapter;
 import org.springframework.binding.value.support.ValueHolder;
 import org.springframework.enums.CodedEnum;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ToStringBuilder;
 
 public class BeanPropertyAccessStrategy implements
@@ -104,8 +105,12 @@ public class BeanPropertyAccessStrategy implements
     private class DomainObjectChangeHandler implements ValueChangeListener {
         public void valueChanged() {
             if (logger.isDebugEnabled()) {
-                logger.debug("[Backing domain object has changed; new value = "
-                        + beanHolder.getValue());
+                logger.debug("["
+                        + ObjectUtils.getIdentityHexString(this)
+                        + " - Backing domain object of class "
+                        + (beanHolder.getValue() != null ? beanHolder
+                                .getValue().getClass().getName() : "null")
+                        + " has changed; new value = " + beanHolder.getValue());
             }
             updateBeanWrapper(beanHolder.getValue());
         }

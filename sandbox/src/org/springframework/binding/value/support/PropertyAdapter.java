@@ -46,22 +46,26 @@ public class PropertyAdapter extends AbstractValueModel implements
                         + propertyAccessStrategy.getDomainObject() + "]");
             }
             this.domainObjectChangeHandler = new DomainObjectChangeHandler();
-            propertyAccessStrategy.getDomainObjectHolder().addValueChangeListener(
-                    domainObjectChangeHandler);
+            propertyAccessStrategy.getDomainObjectHolder()
+                    .addValueChangeListener(domainObjectChangeHandler);
         }
         this.propertyAccessStrategy = propertyAccessStrategy;
         this.propertyName = propertyName;
     }
 
-    private final class DomainObjectChangeHandler implements ValueChangeListener {
+    private final class DomainObjectChangeHandler implements
+            ValueChangeListener {
         public void valueChanged() {
             if (logger.isDebugEnabled()) {
                 logger
                         .debug("[Notifying any dependents for '"
                                 + PropertyAdapter.this.propertyName
-                                + "' that the value may have changed; target domain object changed, new value="
+                                + "' that the value may have changed; target domain object changed, new object="
                                 + PropertyAdapter.this.propertyAccessStrategy
-                                        .getDomainObject() + "]");
+                                        .getDomainObject()
+                                + ", new property value="
+                                + PropertyAdapter.this.propertyAccessStrategy
+                                        .getPropertyValue(propertyName) + "]");
             }
             fireValueChanged();
         }
