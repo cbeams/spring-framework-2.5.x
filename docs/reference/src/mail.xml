@@ -30,7 +30,7 @@
     for specialized <emphasis>JavaMail</emphasis> features such as MIME
     messages, namely <literal>org.springframework.mail.javamail.JavaMailSender</literal>
     It also provides a callback interface for praparation of JavaMail MIME
-    messages, namely <literal>org.springframework.mail.javamail.MimeMessage</literal></para>
+    messages, namely <literal>org.springframework.mail.javamail.MimeMessagePreparator</literal></para>
 
     <para>MailSender: <programlisting>
 public interface MailSender {
@@ -220,8 +220,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 public class OrderManagerImpl implements OrderManager {
 
 	private JavaMailSender mailSender;
-	private SimpleMailMessage message;
-
+	
 	public void setMailSender(JavaMailSender mailSender) {
 		this.mailSender = mailSender;
 	}
@@ -267,7 +266,7 @@ public class OrderManagerImpl implements OrderManager {
       <title>Pluggable MailSender implementations</title>
 
       <para>Spring comes with two MailSender implementations out of the box -
-      JavaMail implementation and implementation on top of Jason Hunter&#39;s
+      the JavaMail implementation and the implementation on top of Jason Hunter&#39;s
       <emphasis>MailMessage</emphasis> class that&#39;s included in <ulink
       url="http://servlets.com/cos">http://servlets.com/cos</ulink>
       (com.oreilly.servlet). Please refer to JavaDocs for more information.</para>
