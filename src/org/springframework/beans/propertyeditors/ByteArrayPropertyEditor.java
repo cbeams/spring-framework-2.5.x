@@ -33,7 +33,7 @@ public class ByteArrayPropertyEditor extends PropertyEditorSupport {
 
 	public String getAsText() {
 		byte[] value = (byte[]) getValue();
-		return (value != null ? new String(value) : "null");
+		return (value != null ? new String(value) : "");
 	}
 
 }
