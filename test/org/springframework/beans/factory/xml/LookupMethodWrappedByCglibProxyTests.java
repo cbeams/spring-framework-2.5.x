@@ -26,9 +26,6 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  */
 public class LookupMethodWrappedByCglibProxyTests extends AbstractDependencyInjectionSpringContextTests {
 
-	/**
-	 * @see org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations()
-	 */
 	protected String[] getConfigLocations() {
 		return new String[] {"/org/springframework/beans/factory/xml/overloadOverrides.xml"};
 	}
@@ -55,8 +52,7 @@ public class LookupMethodWrappedByCglibProxyTests extends AbstractDependencyInje
 
 	private void assertInterceptorCount(int count) {
 		DebugInterceptor interceptor = getInterceptor();
-		assertEquals("Interceptor count is incorrect", count,
-				interceptor.getCount());
+		assertEquals("Interceptor count is incorrect", count, interceptor.getCount());
 	}
 
 	private void resetInterceptor() {
@@ -65,8 +61,7 @@ public class LookupMethodWrappedByCglibProxyTests extends AbstractDependencyInje
 	}
 
 	private DebugInterceptor getInterceptor() {
-		DebugInterceptor interceptor = (DebugInterceptor) applicationContext.getBean("interceptor");
-		return interceptor;
+		return (DebugInterceptor) applicationContext.getBean("interceptor");
 	}
 
 
