@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Set;
@@ -100,6 +102,12 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
+	/**
+	 * Build a full resource location for the given path,
+	 * prepending the resource base path of this MockServletContext.
+	 * @param path the path as specified
+	 * @return the full resource path
+	 */
 	protected String getResourceLocation(String path) {
 		if (!path.startsWith("/")) {
 			path = "/" + path;
@@ -125,7 +133,21 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public Set getResourcePaths(String path) {
-		throw new UnsupportedOperationException("getResourcePaths");
+		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
+		try {
+			File file = resource.getFile();
+			String[] fileList = file.list();
+			String prefix = (path.endsWith("/") ? path : path + "/");
+			Set resourcePaths = new HashSet(fileList.length);
+			for (int i = 0; i < fileList.length; i++) {
+				resourcePaths.add(prefix + fileList[i]);
+			}
+			return resourcePaths;
+		}
+		catch (IOException ex) {
+			logger.info("Couldn't get resource paths for " + resource, ex);
+			return null;
+		}
 	}
 
 	public URL getResource(String path) throws MalformedURLException {
@@ -134,7 +156,7 @@ public class MockServletContext implements ServletContext {
 			return resource.getURL();
 		}
 		catch (IOException ex) {
-			logger.info("Couldn't get URL for resource " + resource, ex);
+			logger.info("Couldn't get URL for " + resource, ex);
 			return null;
 		}
 	}
@@ -145,7 +167,7 @@ public class MockServletContext implements ServletContext {
 			return resource.getInputStream();
 		}
 		catch (IOException ex) {
-			logger.info("Couldn't open InputStream for resource " + resource, ex);
+			logger.info("Couldn't open InputStream for " + resource, ex);
 			return null;
 		}
 	}
