@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.mail.javamail;
 
@@ -211,8 +211,8 @@ public class MimeMessageHelper {
 	 * Set whether to validate all addresses which get passed to this helper.
 	 * Default is false.
 	 * <p>Note that this is by default just available for JavaMail >= 1.3.
-	 * You can override the default validateAddress method for validation
-	 * on older JavaMail versions or for custom validation.
+	 * You can override the default <code>validateAddress method</code> for
+	 * validation on older JavaMail versions (or for custom validation).
 	 * @see #validateAddress
 	 */
 	public void setValidateAddresses(boolean validateAddresses) {
@@ -560,9 +560,9 @@ public class MimeMessageHelper {
 	 * <code>javax.activation.DataSource</code>.
 	 * <p>Note that the InputStream returned by the DataSource implementation
 	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
-	 * getInputStream() multiple times.
-	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
-	 * readers might not be able to resolve inline references correctly.
+	 * <code>getInputStream()</code> multiple times.
+	 * <p><b>NOTE:</b> Invoke <code>addInline</code> <i>after</i> <code>setText</code>;
+	 * else, mail readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
 	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
@@ -591,8 +591,8 @@ public class MimeMessageHelper {
 	 * <p>The content type will be determined by the name of the given
 	 * content file. Do not use this for temporary files with arbitrary
 	 * filenames (possibly ending in ".tmp" or the like)!
-	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
-	 * readers might not be able to resolve inline references correctly.
+	 * <p><b>NOTE:</b> Invoke <code>addInline</code> <i>after</i> <code>setText</code>;
+	 * else, mail readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
 	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
@@ -613,8 +613,11 @@ public class MimeMessageHelper {
 	 * <p>The content type will be determined by the name of the given
 	 * content file. Do not use this for temporary files with arbitrary
 	 * filenames (possibly ending in ".tmp" or the like)!
-	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
-	 * readers might not be able to resolve inline references correctly.
+	 * <p>Note that the InputStream returned by the Resource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * <code>getInputStream()</code> multiple times.
+	 * <p><b>NOTE:</b> Invoke <code>addInline</code> <i>after</i> <code>setText</code>;
+	 * else, mail readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
 	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
@@ -633,11 +636,14 @@ public class MimeMessageHelper {
 	/**
 	 * Add an inline element to the MimeMessage, taking the content from an
 	 * <code>org.springframework.core.InputStreamResource</code>.
-	 * <p>Note that you can determine the content type for any given filename
+	 * <p>You can determine the content type for any given filename
 	 * via the Activation Framework's FileTypeMap utility:<br>
 	 * <code>FileTypeMap.getDefaultFileTypeMap().getContentType(myFilename)</code>
-	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
-	 * readers might not be able to resolve inline references correctly.
+	 * <p>Note that the InputStream returned by the InputStreamSource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * <code>getInputStream()</code> multiple times.
+	 * <p><b>NOTE:</b> Invoke <code>addInline</code> <i>after</i> <code>setText</code>;
+	 * else, mail readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
 	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
@@ -653,6 +659,11 @@ public class MimeMessageHelper {
 	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
 	    throws MessagingException {
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
+		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
+			throw new IllegalArgumentException(
+					"Passed-in Resource contains an open stream: invalid argument. " +
+					"JavaMail requires an InputStreamSource that creates a fresh stream for every call.");
+		}
 		DataSource dataSource = createDataSource(inputStreamSource, contentType, "inline");
 		addInline(contentId, dataSource);
 	}
@@ -662,7 +673,7 @@ public class MimeMessageHelper {
 	 * <code>javax.activation.DataSource</code>.
 	 * <p>Note that the InputStream returned by the DataSource implementation
 	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
-	 * getInputStream() multiple times.
+	 * <code>getInputStream()</code> multiple times.
 	 * @param attachmentFilename the name of the attachment as it will
 	 * appear in the mail (the content type will be determined by this)
 	 * @param dataSource the <code>javax.activation.DataSource</code> to take
@@ -704,6 +715,9 @@ public class MimeMessageHelper {
 	 * <p>The content type will be determined by the given filename for
 	 * the attachment. Thus, any content source will be fine, including
 	 * temporary files with arbitrary filenames.
+	 * <p>Note that the InputStream returned by the InputStreamSource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * <code>getInputStream()</code> multiple times.
 	 * @param attachmentFilename the name of the attachment as it will
 	 * appear in the mail
 	 * @param inputStreamSource the resource to take the content from
@@ -715,7 +729,13 @@ public class MimeMessageHelper {
 	 */
 	public void addAttachment(String attachmentFilename, InputStreamSource inputStreamSource)
 	    throws MessagingException {
+
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
+		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
+			throw new IllegalArgumentException(
+					"Passed-in Resource contains an open stream: invalid argument. " +
+					"JavaMail requires an InputStreamSource that creates a fresh stream for every call.");
+		}
 		String contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(attachmentFilename);
 		DataSource dataSource = createDataSource(inputStreamSource, contentType, attachmentFilename);
 		addAttachment(attachmentFilename, dataSource);
@@ -730,6 +750,7 @@ public class MimeMessageHelper {
 	 */
 	protected DataSource createDataSource(
 	    final InputStreamSource inputStreamSource, final String contentType, final String name) {
+
 		return new DataSource() {
 			public InputStream getInputStream() throws IOException {
 				return inputStreamSource.getInputStream();
