@@ -106,13 +106,13 @@ public class ActionState extends TransitionableState {
 		}
 		if (executionCount > 0) {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
-					"No valid event was signaled by any of the " + executionCount
+					"No surpported event was signaled by any of the " + executionCount
 							+ " actions that executed in this action state '" + getId() + "' of flow '"
 							+ getFlow().getId() + "' -- programmer error?"));
 		}
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
-					"No action beans were executed, thus I cannot execute any state transition "
+					"No actions were executed, thus I cannot execute any state transition "
 							+ "-- programmer configuration error; "
 							+ "make sure you add at least one action bean to this state"));
 		}
