@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -13,11 +14,11 @@ import javax.activation.FileTypeMap;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
 
 import org.springframework.core.io.InputStreamSource;
 
@@ -25,12 +26,16 @@ import org.springframework.core.io.InputStreamSource;
  * Helper class for easy population of a <code>javax.mail.internet.MimeMessage</code>.
  *
  * <p>Mirrors the simple setters of SimpleMailMessage, directly applying the values
- * to the underlying MimeMessage. Also offers support for typical mail attachments.
- * Advanced settings can still be applied directly to underlying MimeMessage!
+ * to the underlying MimeMessage. Allows to define a character encoding for the
+ * entire message, automatically applied by all methods of this helper.
+ *
+ * <p>Also offers support for typical mail attachments, and for personal names
+ * that accompany mail addresses. Note that advanced settings can still be applied
+ * directly to underlying MimeMessage!
  *
  * <p>Typically used in MimeMessagePreparator implementations or JavaMailSender
- * client code: simply instantiating it as a facade to a MimeMessage, invoking
- * setters on the facade, using the underlying MimeMessage for mail sending.
+ * client code: simply instantiating it as a MimeMessage wrapper, invoking
+ * setters on the wrapper, using the underlying MimeMessage for mail sending.
  * Also used internally by JavaMailSenderImpl.
  *
  * <p>Sample code:
@@ -60,7 +65,10 @@ public class MimeMessageHelper {
 
 	private final MimeMessage mimeMessage;
 
-	private MimeMultipart mimeMultipart = null;
+	private MimeMultipart mimeMultipart;
+
+	private String encoding;
+
 
 	/**
 	 * Create new MimeMessageHelper for the given MimeMessage,
@@ -88,14 +96,67 @@ public class MimeMessageHelper {
 	}
 
 	/**
+	 * Create new MimeMessageHelper for the given MimeMessage,
+	 * assuming a simple text message (no multipart content).
+	 * @param mimeMessage MimeMessage to work on
+	 * @param encoding the character encoding to use for the message
+	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
+	 */
+	public MimeMessageHelper(MimeMessage mimeMessage, String encoding) {
+		this(mimeMessage);
+		this.encoding = encoding;
+	}
+
+	/**
+	 * Create new MimeMessageHelper for the given MimeMessage,
+	 * in multipart mode (supporting attachments) if requested.
+	 * @param mimeMessage MimeMessage to work on
+	 * @param multipart whether to create a multipart message that
+	 * supports attachments
+	 * @param encoding the character encoding to use for the message
+	 */
+	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, String encoding)
+	    throws MessagingException {
+		this(mimeMessage, multipart);
+		this.encoding = encoding;
+	}
+
+	/**
 	 * Return the underlying MimeMessage.
 	 */
 	public MimeMessage getMimeMessage() {
 		return mimeMessage;
 	}
 
+	/**
+	 * Return the character encoding used for this message.
+	 */
+	public String getEncoding() {
+		return encoding;
+	}
+
+
+	public void setFrom(InternetAddress from) throws MessagingException {
+		this.mimeMessage.setFrom(from);
+	}
+
 	public void setFrom(String from) throws MessagingException {
 		this.mimeMessage.setFrom(new InternetAddress(from));
+	}
+
+	public void setFrom(String from, String personal) throws MessagingException, UnsupportedEncodingException {
+		this.mimeMessage.setFrom(this.encoding != null ?
+		                         new InternetAddress(from, personal, this.encoding) :
+		                         new InternetAddress(from, personal));
+	}
+
+
+	public void setTo(InternetAddress to) throws MessagingException {
+		this.mimeMessage.setRecipient(Message.RecipientType.TO, to);
+	}
+
+	public void setTo(InternetAddress[] to) throws MessagingException {
+		this.mimeMessage.setRecipients(Message.RecipientType.TO, to);
 	}
 
 	public void setTo(String to) throws MessagingException {
@@ -103,33 +164,108 @@ public class MimeMessageHelper {
 	}
 
 	public void setTo(String[] to) throws MessagingException {
+		InternetAddress[] addresses = new InternetAddress[to.length];
 		for (int i = 0; i < to.length; i++) {
-			this.mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to[i]));
+			addresses[i] = new InternetAddress(to[i]);
 		}
+		this.mimeMessage.setRecipients(Message.RecipientType.TO, addresses);
+	}
+
+	public void addTo(InternetAddress to) throws MessagingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.TO, to);
+	}
+
+	public void addTo(String to) throws MessagingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+	}
+
+	public void addTo(String to, String personal) throws MessagingException, UnsupportedEncodingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.TO,
+		                              this.encoding != null ?
+		                              new InternetAddress(to, personal, this.encoding) :
+		                              new InternetAddress(to, personal));
+	}
+
+
+	public void setCc(InternetAddress cc) throws MessagingException {
+		this.mimeMessage.setRecipient(Message.RecipientType.CC, cc);
+	}
+
+	public void setCc(InternetAddress[] cc) throws MessagingException {
+		this.mimeMessage.setRecipients(Message.RecipientType.CC, cc);
 	}
 
 	public void setCc(String cc) throws MessagingException {
-		this.mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress(cc));
+		this.mimeMessage.setRecipient(Message.RecipientType.CC, new InternetAddress(cc));
 	}
 
 	public void setCc(String[] cc) throws MessagingException {
+		InternetAddress[] addresses = new InternetAddress[cc.length];
 		for (int i = 0; i < cc.length; i++) {
-			this.mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress(cc[i]));
+			addresses[i] = new InternetAddress(cc[i]);
 		}
+		this.mimeMessage.setRecipients(Message.RecipientType.CC, addresses);
+	}
+
+	public void addCc(InternetAddress cc) throws MessagingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.CC, cc);
+	}
+
+	public void addCc(String cc) throws MessagingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress(cc));
+	}
+
+	public void addCc(String cc, String personal) throws MessagingException, UnsupportedEncodingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.CC,
+		                              this.encoding != null ?
+		                              new InternetAddress(cc, personal, this.encoding) :
+		                              new InternetAddress(cc, personal));
+	}
+
+
+	public void setBcc(InternetAddress bcc) throws MessagingException {
+		this.mimeMessage.setRecipient(Message.RecipientType.BCC, bcc);
+	}
+
+	public void setBcc(InternetAddress[] bcc) throws MessagingException {
+		this.mimeMessage.setRecipients(Message.RecipientType.BCC, bcc);
 	}
 
 	public void setBcc(String bcc) throws MessagingException {
-		this.mimeMessage.addRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));
+		this.mimeMessage.setRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));
 	}
 
 	public void setBcc(String[] bcc) throws MessagingException {
+		InternetAddress[] addresses = new InternetAddress[bcc.length];
 		for (int i = 0; i < bcc.length; i++) {
-			this.mimeMessage.addRecipient(Message.RecipientType.BCC, new InternetAddress(bcc[i]));
+			addresses[i] = new InternetAddress(bcc[i]);
 		}
+		this.mimeMessage.setRecipients(Message.RecipientType.BCC, addresses);
 	}
 
+	public void addBcc(InternetAddress bcc) throws MessagingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.BCC, bcc);
+	}
+
+	public void addBcc(String bcc) throws MessagingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));
+	}
+
+	public void addBcc(String bcc, String personal) throws MessagingException, UnsupportedEncodingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.BCC,
+		                              this.encoding != null ?
+		                              new InternetAddress(bcc, personal, this.encoding) :
+		                              new InternetAddress(bcc, personal));
+	}
+
+
 	public void setSubject(String subject) throws MessagingException {
-		this.mimeMessage.setSubject(subject);
+		if (this.encoding != null) {
+			this.mimeMessage.setSubject(subject, this.encoding);
+		}
+		else {
+			this.mimeMessage.setSubject(subject);
+		}
 	}
 
 	public void setText(String text) throws MessagingException {
@@ -137,20 +273,20 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Sets the given text directly as content in non-multipart mode
+	 * Set the given text directly as content in non-multipart mode
 	 * respectively as default body part in multipart mode.
 	 * @param text text to set
 	 * @param html whether to apply content type "text/html" for an
 	 * HTML mail, using default content type ("text/plain") else
 	 */
 	public void setText(final String text, boolean html) throws MessagingException {
-		Part partToUse = null;
+		MimePart partToUse = null;
 		if (this.mimeMultipart != null) {
-			BodyPart bodyPart = null;
+			MimeBodyPart bodyPart = null;
 			for (int i = 0; i < this.mimeMultipart.getCount(); i++) {
 				BodyPart bp = this.mimeMultipart.getBodyPart(i);
 				if (bp.getFileName() == null) {
-					bodyPart = bp;
+					bodyPart = (MimeBodyPart) bp;
 				}
 			}
 			if (bodyPart == null) {
@@ -163,13 +299,14 @@ public class MimeMessageHelper {
 		else {
 			partToUse = this.mimeMessage;
 		}
+		
 		if (html) {
 			// need to use a javax.activation.DataSource (!) to set a text
 			// with content type "text/html"
 			partToUse.setDataHandler(new DataHandler(
 			    new DataSource() {
 						public InputStream getInputStream() throws IOException {
-							return new ByteArrayInputStream(text.getBytes());
+							return new ByteArrayInputStream(encoding != null ? text.getBytes(encoding) : text.getBytes());
 						}
 						public OutputStream getOutputStream() throws IOException {
 							throw new UnsupportedOperationException("Read-only javax.activation.DataSource");
@@ -184,9 +321,15 @@ public class MimeMessageHelper {
 			));
 		}
 		else {
-			partToUse.setText(text);
+			if (this.encoding != null) {
+				partToUse.setText(text, this.encoding);
+			}
+			else {
+				partToUse.setText(text);
+			}
 		}
 	}
+
 
 	/**
 	 * Add an attachment to the given MimeMessage, taking the content

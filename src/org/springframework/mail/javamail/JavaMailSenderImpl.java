@@ -5,6 +5,7 @@
 
 package org.springframework.mail.javamail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,9 +42,10 @@ import org.springframework.mail.SimpleMailMessage;
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @since 10.09.2003
  * @see JavaMailSender
  * @see org.springframework.mail.MailSender
- * @version $Id: JavaMailSenderImpl.java,v 1.10 2004-03-17 07:44:56 jhoeller Exp $
+ * @version $Id: JavaMailSenderImpl.java,v 1.11 2004-03-17 17:16:47 jhoeller Exp $
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
@@ -128,6 +130,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 
+	//---------------------------------------------------------------------
+	// Implementation of MailSender
+	//---------------------------------------------------------------------
+
 	public void send(SimpleMailMessage simpleMessage) throws MailException {
 		send(new SimpleMailMessage[] { simpleMessage });
 	}
@@ -138,7 +144,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			for (int i = 0; i < simpleMessages.length; i++) {
 				SimpleMailMessage simpleMessage = simpleMessages[i];
 				if (logger.isDebugEnabled()) {
-					logger.debug("Creating MIME message using the following mail properties: " + simpleMessage);
+					logger.debug("Creating new MIME message using the following mail properties: " + simpleMessage);
 				}
 				MimeMessageHelper message = new MimeMessageHelper(createMimeMessage());
 				if (simpleMessage.getFrom() != null) {
@@ -167,6 +173,11 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			throw new MailParseException(ex);
 		}
 	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of JavaMailSender
+	//---------------------------------------------------------------------
 
 	public MimeMessage createMimeMessage() {
 		return new MimeMessage(this.session);
@@ -230,8 +241,16 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		catch (MessagingException ex) {
 			throw new MailParseException(ex);
 		}
+		catch (IOException ex) {
+			throw new MailParseException(ex);
+		}
 	}
 
+
+	/**
+	 * Get a Transport object for the given JavaMail Session.
+	 * Can be overridden in subclasses, e.g. to return a mock Transport object.
+	 */
 	protected Transport getTransport(Session session) throws NoSuchProviderException {
 		return session.getTransport(this.protocol);
 	}
