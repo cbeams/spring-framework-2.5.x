@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import com.ibatis.sqlmap.client.SqlMapClient;
 import com.ibatis.sqlmap.client.SqlMapSession;
 import com.ibatis.sqlmap.client.event.RowHandler;
@@ -24,7 +26,7 @@ import org.springframework.jdbc.support.JdbcAccessor;
  * execution methods. See the SqlMapClient javadocs for details on those methods.
  *
  * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
- * With SQL Maps 1.x, the SqlMap/MappedStatement has to be used.
+ * With SQL Maps 1.x, the SqlMap/MappedStatement API has to be used.
  *
  * @author Juergen Hoeller
  * @since 24.02.2004
@@ -38,10 +40,32 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	private SqlMapClient sqlMapClient;
 
+	/**
+	 * Create a new SqlMapClientTemplate.
+	 */
+	public SqlMapClientTemplate() {
+	}
+
+	/**
+	 * Create a new SqlMapTemplate.
+	 * @param dataSource JDBC DataSource to obtain connections from
+	 * @param sqlMapClient iBATIS SqlMapClient that defines the mapped statements
+	 */
+	public SqlMapClientTemplate(DataSource dataSource, SqlMapClient sqlMapClient) {
+		setDataSource(dataSource);
+		this.sqlMapClient = sqlMapClient;
+	}
+
+	/**
+	 * Set the iBATIS Database Layer SqlMapClient that defines the mapped statements.
+	 */
 	public void setSqlMapClient(SqlMapClient sqlMapClient) {
 		this.sqlMapClient = sqlMapClient;
 	}
 
+	/**
+	 * Return the iBATIS Database Layer SqlMapClient that this template works with.
+	 */
 	public SqlMapClient getSqlMapClient() {
 		return sqlMapClient;
 	}
@@ -59,10 +83,12 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		try {
 			sqlMapSession.setUserConnection(con);
-			return action.doInSqlMapSession(sqlMapSession);
+			Object result = action.doInSqlMapSession(sqlMapSession);
+			sqlMapSession.setUserConnection(null);
+			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("SqlMapTemplate", "(mapped statement)", ex);
+			throw getExceptionTranslator().translate("SqlMapClientTemplate", "(mapped statement)", ex);
 		}
 		finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());

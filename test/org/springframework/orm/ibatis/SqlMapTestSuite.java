@@ -14,8 +14,8 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.orm.ibatis.support.SqlMapDaoSupport;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
+import org.springframework.orm.ibatis.support.SqlMapDaoSupport;
 
 /**
  * @author Juergen Hoeller
@@ -104,6 +104,8 @@ public class SqlMapTestSuite extends TestCase {
 		smc.getSession();
 		smcControl.setReturnValue(sms);
 		sms.setUserConnection(con);
+		smsControl.setVoidCallable();
+		sms.setUserConnection(null);
 		smsControl.setVoidCallable();
 		smsControl.replay();
 		smcControl.replay();
