@@ -9,7 +9,7 @@ import org.springframework.functor.BinaryPredicate;
 import org.springframework.functor.PredicateFactory;
 import org.springframework.functor.UnaryPredicate;
 import org.springframework.functor.functions.StringLengthFunction;
-import org.springframework.functor.predicates.NumberRange;
+import org.springframework.functor.predicates.Range;
 
 public class StringLengthConstraint implements UnaryPredicate {
     private UnaryPredicate predicate;
@@ -23,7 +23,7 @@ public class StringLengthConstraint implements UnaryPredicate {
     }
 
     public StringLengthConstraint(int min, int max) {
-        UnaryPredicate rangeConstraint = new NumberRange(new Integer(min),
+        UnaryPredicate rangeConstraint = new Range(new Integer(min),
                 new Integer(max));
         this.predicate = PredicateFactory.attachResultEvaluator(
                 rangeConstraint, StringLengthFunction.instance());

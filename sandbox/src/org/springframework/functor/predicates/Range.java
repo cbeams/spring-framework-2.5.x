@@ -25,36 +25,20 @@ import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
 
 /**
- * A number range.
+ * A range.
  * 
  * @author Keith Donald
  * @see adapted from jakarta commons-lang's NumberRange
  */
-public final class NumberRange implements Serializable, UnaryPredicate {
+public final class Range implements Serializable, UnaryPredicate {
 
     private UnaryPredicate rangeConstraint;
 
-    /**
-     * Constructs a new, inclusive <code>NumberRange</code> with the provided
-     * minimum and maximum numbers.
-     * <p>
-     * <p>
-     * The arguments may be passed in the order (min, max) or (max, min).
-     * 
-     * @param num1
-     *            first number that defines the range, inclusive
-     * @param num2
-     *            second number that defines the range, inclusive
-     * @throws IllegalArgumentException
-     *             if either number is <code>null</code>
-     * @throws IllegalArgumentException
-     *             if the numbers are of different types
-     */
-    public NumberRange(Number num1, Number num2) {
-        Assert.isTrue(num1 != null && num2 != null);
-        Assert.isTrue(num1.getClass() == num2.getClass());
-        Number maximum = (Number)Maximum.instance().evaluate(num1, num2);
-        Number minimum = (Number)Minimum.instance().evaluate(num1, num2);
+    public Range(Comparable value1, Comparable value2) {
+        Assert.isTrue(value1 != null && value2 != null);
+        Assert.isTrue(value1.getClass() == value2.getClass());
+        Object maximum = Maximum.instance().evaluate(value1, value2);
+        Object minimum = Minimum.instance().evaluate(value1, value2);
         UnaryPredicate min =
             PredicateFactory.bind(
                 GreaterThanEqualTo.instance(),
