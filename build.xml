@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.27 2004-01-05 17:07:31 jhoeller Exp $
+    $Id: build.xml,v 1.28 2004-01-05 18:00:08 colins Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -48,12 +48,6 @@
 		<echo message="alljars  --> create all JAR files"/>
 		<echo message="tests    --> run tests"/>
 		<echo message=""/>
-		<echo message="Note that several targets depend on Commons Attributes attribute compilation."/>
-		<echo message="You will need to copy the following 3 jars to $ANT_HOME/lib:"/>
-		<echo message="1. Commons Attributes compiler Jar"/>
-		<echo message="2. xjavadoc.jar, from XDoclet project"/>
-		<echo message="3. commons-collections.jar from Apache Commons"/>
-		<echo message="All 3 jars are in Spring CVS, and available from the respective projects"/>
 
 	</target>
 
