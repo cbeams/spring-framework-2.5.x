@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import net.sf.hibernate.Criteria;
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.LockMode;
@@ -45,7 +46,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * HibernateInterceptor. The major advantage is its straightforwardness, the
  * major disadvantage that no checked application exceptions can get thrown
  * from within data access code. Respective checks and the actual throwing of
- * such exceptions can often be deferred to after callback execution, though. 
+ * such exceptions can often be deferred to after callback execution, though.
  *
  * <p>Note that even if HibernateTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
@@ -215,9 +216,14 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			}
 		});
 	}
-	
+
 	public List loadAll(final Class entityClass) throws DataAccessException {
-		return find("from " + entityClass.getName());
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Criteria criteria = createCriteria(session, entityClass);
+				return criteria.list();
+			}
+		});
 	}
 
 	public void evict(final Object entity) throws DataAccessException {
@@ -469,15 +475,19 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			}
 		});
 	}
-	
+
 
 	/**
 	 * Create a Query object for the given Session and the given query string.
-	 * Applies a transaction timeout, if any. To be used within a HibernateCallback.
+	 * To be used within a HibernateCallback.
+	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
+	 * the call is equivalent to Session.createQuery.
 	 * @param session current Hibernate Session
 	 * @param queryString the HQL query string
 	 * @return the Query object
-	 * @throws HibernateException if the query could not be created
+	 * @throws HibernateException if the Query could not be created
+	 * @see HibernateCallback#doInHibernate
+	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	public Query createQuery(Session session, String queryString) throws HibernateException {
 		Query queryObject = session.createQuery(queryString);
@@ -487,16 +497,38 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Create a named Query object for the given Session and the given query name.
-	 * Applies a transaction timeout, if any. To be used within a HibernateCallback.
+	 * To be used within a HibernateCallback.
+	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
+	 * the call is equivalent to Session.getNamedQuery.
 	 * @param session current Hibernate Session
 	 * @param queryName the name of the query in the Hibernate mapping file
 	 * @return the Query object
-	 * @throws HibernateException if the query could not be created
+	 * @throws HibernateException if the Query could not be created
+	 * @see HibernateCallback#doInHibernate
+	 * @see net.sf.hibernate.Session#getNamedQuery
 	 */
 	public Query getNamedQuery(Session session, String queryName) throws HibernateException {
 		Query queryObject = session.getNamedQuery(queryName);
 		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
 		return queryObject;
+	}
+
+	/**
+	 * Create a Criteria object for the given Session and the given entity class.
+	 * To be used within a HibernateCallback.
+	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
+	 * the call is equivalent to Session.createCriteria.
+	 * @param session current Hibernate Session
+	 * @param entityClass the entity class to create the Criteria for
+	 * @return the Query object
+	 * @throws HibernateException if the Criteria could not be created
+	 * @see HibernateCallback#doInHibernate
+	 * @see net.sf.hibernate.Session#createCriteria
+	 */
+	public Criteria createCriteria(Session session, Class entityClass) throws HibernateException {
+		Criteria criteria = session.createCriteria(entityClass);
+		SessionFactoryUtils.applyTransactionTimeout(criteria, getSessionFactory());
+		return criteria;
 	}
 
 }
