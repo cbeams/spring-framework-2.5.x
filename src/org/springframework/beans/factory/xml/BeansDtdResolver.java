@@ -28,28 +28,29 @@ public class BeansDtdResolver implements EntityResolver {
 
 	private static final String SEARCH_PACKAGE = "/org/springframework/beans/factory/xml/";
 
-	protected Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
-		logger.debug("Trying to resolve XML entity: publicId=[" + publicId + "], systemId=[" + systemId + "]");
+		logger.debug("Trying to resolve XML entity with public ID [" + publicId +
+								 "] and system ID [" + systemId + "]");
 
 		if (systemId != null && systemId.indexOf(DTD_NAME) > systemId.lastIndexOf("/")) {
 			String dtdFile = systemId.substring(systemId.indexOf(DTD_NAME));
 			// Search for DTD
-			logger.debug("Trying to locate [" + dtdFile + "] under " + SEARCH_PACKAGE);
+			logger.debug("Trying to locate [" + dtdFile + "] under [" + SEARCH_PACKAGE + "]");
 			InputStream is = ClassLoaderUtils.getResourceAsStream(getClass(), SEARCH_PACKAGE + dtdFile);
 			if (is != null) {
-				logger.debug("Found beans DTD [" + systemId + "] is classpath");
+				logger.debug("Found beans DTD [" + systemId + "] in class path");
 				InputSource source = new InputSource(is);
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
 				return source;
 			}
 			else {
-				logger.debug("Could not resolve DTD [" + systemId + "]: not found is classpath");
+				logger.debug("Could not resolve beans DTD [" + systemId + "]: not found in class path");
 			}
 		}
-		// use the default behaviour -> download from website or whereever
+		// use the default behaviour -> download from website or wherever
 		return null;
 	}
 
