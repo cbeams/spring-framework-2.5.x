@@ -16,6 +16,8 @@
 
 package org.springframework.aop.target;
 
+import java.io.Serializable;
+
 import org.springframework.aop.TargetSource;
 
 /**
@@ -24,11 +26,14 @@ import org.springframework.aop.TargetSource;
  *
  * <p>If configuring an object of this class in a Spring IoC container,
  * use constructor injection.
+ * 
+ * <p>This TargetSource is serializable if the target is
+ * at the time of serialization.
  *
  * @author Rod Johnson
- * @version $Id: HotSwappableTargetSource.java,v 1.7 2004-04-01 15:36:02 jhoeller Exp $
+ * @version $Id: HotSwappableTargetSource.java,v 1.8 2004-07-25 13:42:52 johnsonr Exp $
  */
-public class HotSwappableTargetSource implements TargetSource {
+public class HotSwappableTargetSource implements TargetSource, Serializable {
 
 	/** Target cached and invoked using reflection */
 	private Object target;
@@ -64,6 +69,7 @@ public class HotSwappableTargetSource implements TargetSource {
 	 * @see org.springframework.aop.TargetSource#releaseTarget(java.lang.Object)
 	 */
 	public void releaseTarget(Object o) {
+		// No implementation needed
 	}
 
 	/**

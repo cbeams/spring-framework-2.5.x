@@ -18,14 +18,20 @@ package org.springframework.aop.target;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.Person;
+import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
- * @version $Id: HotSwappableTargetSourceTests.java,v 1.5 2004-04-01 15:36:05 jhoeller Exp $
+ * @version $Id: HotSwappableTargetSourceTests.java,v 1.6 2004-07-25 13:42:55 johnsonr Exp $
  */
 public class HotSwappableTargetSourceTests extends TestCase {
 
@@ -121,4 +127,29 @@ public class HotSwappableTargetSourceTests extends TestCase {
 	// how to decide what's valid?
 	
 	
+	public void testSerialization() throws Exception {
+		SerializablePerson sp1 = new SerializablePerson();
+		sp1.setName("Tony");
+		SerializablePerson sp2 = new SerializablePerson();
+		sp1.setName("Gordon");
+		
+		HotSwappableTargetSource hts = new HotSwappableTargetSource(sp1);
+		ProxyFactory pf = new ProxyFactory();
+		pf.addInterface(Person.class);
+		pf.setTargetSource(hts);
+		pf.addAdvisor(new DefaultPointcutAdvisor(new SerializableNopInterceptor()));
+		Person p = (Person) pf.getProxy();
+		
+		assertEquals(sp1.getName(), p.getName());
+		hts.swap(sp2);
+		assertEquals(sp2.getName(), p.getName());
+		
+		p = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		// We need to get a reference to the client-side targetsource
+		hts = (HotSwappableTargetSource) ((Advised) p).getTargetSource();
+		assertEquals(sp2.getName(), p.getName());
+		hts.swap(sp1);
+		assertEquals(sp1.getName(), p.getName());
+		
+	}
 }
