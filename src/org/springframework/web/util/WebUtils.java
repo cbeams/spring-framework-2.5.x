@@ -3,6 +3,7 @@ package org.springframework.web.util;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.File;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -24,10 +25,14 @@ public abstract class WebUtils {
 	 */
 	public static final String WEB_APP_ROOT_KEY_PARAM = "webAppRootKey";
 
-	/**
-	 * Default web app root key: "webapp.root".
-	 */
+	/** Default web app root key: "webapp.root" */
 	public static final String DEFAULT_WEB_APP_ROOT_KEY = "webapp.root";
+
+	/**
+	 * Standard Servlet spec context attribute that specifies a temporary
+	 * directory for the current web application, of type java.io.File
+	 */
+	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
 	/** HTTP header value */
 	public static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
@@ -39,15 +44,13 @@ public abstract class WebUtils {
 	public static final String SUBMIT_IMAGE_SUFFIX = ".x";
 
 	/**
-	 * Sets a system property to the web application root directory.
+	 * Set a system property to the web application root directory.
 	 * The key of the system property can be defined with the
 	 * "webAppRootKey" init parameter at the servlet context level
 	 * (i.e. web.xml), the default key is "webapp.root".
-	 *
 	 * <p>Can be used for toolkits that support substition with
 	 * system properties (i.e. System.getProperty values),
 	 * like Log4J's ${key} syntax within log file locations.
-	 *
 	 * @param servletContext the servlet context of the web application
 	 * @see #WEB_APP_ROOT_KEY_PARAM
 	 * @see #DEFAULT_WEB_APP_ROOT_KEY
@@ -58,9 +61,10 @@ public abstract class WebUtils {
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		String oldValue = System.getProperty(key);
 		if (oldValue != null) {
-			servletContext.log("WARNING: Web app root system property already set: "  + key + " = " + oldValue);
+			servletContext.log("WARNING: Web app root system property already set: " + key + " = " + oldValue);
 			servletContext.log("WARNING: Choose unique webAppRootKey values in your web.xml files!");
-		} else {
+		}
+		else {
 			String root = servletContext.getRealPath("/");
 			System.setProperty(key, root);
 			servletContext.log("Set web app root system property: " + key + " = " + root);
@@ -68,7 +72,17 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Checks the given request for a session attribute of the given name.
+	 * Return the temporary directory for the current web application,
+	 * as provided by the servlet container.
+	 * @param servletContext the servlet context of the web application
+	 * @return the File representing the temporary directory
+	 */
+	public static File getTempDir(ServletContext servletContext) {
+		return (File) servletContext.getAttribute(TEMP_DIR_CONTEXT_ATTRIBUTE);
+	}
+
+	/**
+	 * Check the given request for a session attribute of the given name.
 	 * Returns null if there is no session or if the session has no such attribute.
 	 * Does not create a new session if none has existed before!
 	 * @param request current HTTP request
@@ -81,7 +95,7 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Sets the session attribute with the given name to the given value.
+	 * Set the session attribute with the given name to the given value.
 	 * Removes the session attribute if value is null, if a session existed at all.
 	 * Does not create a new session on remove if none has existed before!
 	 * @param request current HTTP request
@@ -100,7 +114,7 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Retrieves the first cookie with the given name. Note that multiple
+	 * Retrieve the first cookie with the given name. Note that multiple
 	 * cookies can have the same name but different paths or domains.
 	 * @param name cookie name
 	 * @return the first cookie with the given name, or null if none is found
@@ -117,7 +131,7 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Returns the URL of the root of the current application.
+	 * Return the URL of the root of the current application.
 	 * @param request current HTTP request
 	 */
 	public static String getUrlToApplication(HttpServletRequest request) {
@@ -139,7 +153,7 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Returns the path within the web application for the given request.
+	 * Return the path within the web application for the given request.
 	 * @param request current HTTP request
 	 * @return the path within the web application
 	 */
@@ -148,7 +162,7 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Returns the path within the servlet mapping for the given request,
+	 * Return the path within the servlet mapping for the given request,
 	 * i.e. the part of the request's URL beyond the part that called the servlet,
 	 * or "" if the whole URL has been used to identify the servlet.
 	 * <p>E.g.: servlet mapping = "/test/*"; request URI = "/test/a" -> "/a".
@@ -164,9 +178,8 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Returns the mapping lookup path for the given request,
-	 * within the current servlet mapping if applicable,
-	 * else within the web application context.
+	 * Return the mapping lookup path for the given request, within the current
+	 * servlet mapping if applicable, else within the web application context.
 	 * @param request current HTTP request
 	 * @param alwaysUseFullPath if the full path within the context
 	 * should be used in any case
@@ -214,17 +227,19 @@ public abstract class WebUtils {
 		if (base == null)
 			base = "";
 		while (enum != null && enum.hasMoreElements()) {
-            String paramName = (String) enum.nextElement();
+			String paramName = (String) enum.nextElement();
 			if (base == null || "".equals(base) || paramName.startsWith(base)) {
 				String unprefixed = paramName.substring(base.length());
 				String[] values = request.getParameterValues(paramName);
 				if (values == null) {
-                    // do nothing, no values found at all
-                } else if (values.length > 1) {
+					// do nothing, no values found at all
+				}
+				else if (values.length > 1) {
 					params.put(unprefixed, values);
-                } else {
+				}
+				else {
 					params.put(unprefixed, values[0]);
-                }
+				}
 			}
 		}
 		return params;
