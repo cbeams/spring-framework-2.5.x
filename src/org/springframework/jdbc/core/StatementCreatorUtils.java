@@ -19,6 +19,7 @@ package org.springframework.jdbc.core;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -90,11 +91,11 @@ public class StatementCreatorUtils {
 		}
 
 		else {  // inValue != null
-			if (sqlType == Types.VARCHAR) {
-				ps.setString(paramIndex, inValue.toString());
+			if (inValue instanceof SqlTypeValue) {
+				((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType, typeName);
 			}
-			else if (inValue instanceof SqlTypeValue) {
-				((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType);
+			else if (sqlType == Types.VARCHAR) {
+				ps.setString(paramIndex, inValue.toString());
 			}
 			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
 				ps.setObject(paramIndex, inValue);
@@ -102,6 +103,19 @@ public class StatementCreatorUtils {
 			else {
 				ps.setObject(paramIndex, inValue, sqlType);
 			}
+		}
+	}
+
+	/**
+	 * Clean up all resources held by parameter values which were passed to an
+	 * execute method. This is for example important for closing LOB values.
+	 * @param paramValues parameter values supplied. May be null.
+	 * @see DisposableSqlTypeValue#cleanup
+	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup
+	 */
+	public static void cleanupParameters(Object[] paramValues) {
+		if (paramValues != null) {
+			cleanupParameters(Arrays.asList(paramValues));
 		}
 	}
 

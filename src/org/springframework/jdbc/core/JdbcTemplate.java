@@ -84,7 +84,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.49 2004-06-28 07:17:26 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.50 2004-06-28 17:02:14 jhoeller Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -797,7 +797,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 
 		public void cleanupParameters() {
-			StatementCreatorUtils.cleanupParameters(Arrays.asList(this.args));
+			StatementCreatorUtils.cleanupParameters(this.args);
 		}
 	}
 
@@ -830,7 +830,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 
 		public void cleanupParameters() {
-			StatementCreatorUtils.cleanupParameters(Arrays.asList(this.args));
+			StatementCreatorUtils.cleanupParameters(this.args);
 		}
 	}
 

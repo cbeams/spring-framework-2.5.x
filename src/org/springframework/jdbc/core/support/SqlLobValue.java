@@ -179,7 +179,8 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	/**
 	 * Set the specified content via the LobCreator.
 	 */
-	public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType) throws SQLException {
+	public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
+			throws SQLException {
 		if (sqlType == Types.BLOB) {
 			if (this.content instanceof byte[] || this.content == null) {
 				this.lobCreator.setBlobAsBytes(ps, paramIndex, (byte[]) this.content);

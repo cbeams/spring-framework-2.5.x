@@ -38,8 +38,8 @@ import org.springframework.jdbc.core.SqlTypeValue;
  *
  * Map in = new HashMap();
  * in.put("myarray", new AbstractSqlTypeValue() {
- *   public Object createTypeValue(Connection con) throws SQLException {
- *	   oracle.sql.ArrayDescriptor desc = new oracle.sql.ArrayDescriptor("NUMBERS", con);
+ *   public Object createTypeValue(Connection con, int sqlType, String typeName) throws SQLException {
+ *	   oracle.sql.ArrayDescriptor desc = new oracle.sql.ArrayDescriptor(typeName, con);
  *	   return new oracle.sql.ARRAY(desc, con, seats);
  *   }
  * });
@@ -53,8 +53,9 @@ import org.springframework.jdbc.core.SqlTypeValue;
  */
 public abstract class AbstractSqlTypeValue implements SqlTypeValue {
 
-	public final void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType) throws SQLException {
-		Object value = createTypeValue(ps.getConnection());
+	public final void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
+			throws SQLException {
+		Object value = createTypeValue(ps.getConnection(), sqlType, typeName);
 		if (sqlType == TYPE_UNKNOWN) {
 			ps.setObject(paramIndex, value);
 		}
@@ -66,11 +67,13 @@ public abstract class AbstractSqlTypeValue implements SqlTypeValue {
 	/**
 	 * Create the type value to be passed into <code>PreparedStatement.setObject</code>.
 	 * @param con the JDBC Connection, if needed to create any database-specific objects
+	 * @param sqlType SQL type of the parameter we are setting
+	 * @param typeName the type name of the parameter
 	 * @return the type value
 	 * @throws SQLException if a SQLException is encountered setting
 	 * parameter values (that is, there's no need to catch SQLException)
 	 * @see java.sql.PreparedStatement#setObject(int, Object, int)
 	 */
-	protected abstract Object createTypeValue(Connection con) throws SQLException;
+	protected abstract Object createTypeValue(Connection con, int sqlType, String typeName) throws SQLException;
 
 }

@@ -37,8 +37,9 @@ import java.sql.SQLException;
  * 
  * Map in = new HashMap();
  * in.put("myarray", new SqlTypeValue() {
- *   public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType) throws SQLException {
- *	   oracle.sql.ArrayDescriptor desc = new oracle.sql.ArrayDescriptor("NUMBERS", ps.getConnection());
+ *   public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
+ *       throws SQLException {
+ *	   oracle.sql.ArrayDescriptor desc = new oracle.sql.ArrayDescriptor(typeName, ps.getConnection());
  *	   oracle.sql.ARRAY nums = new oracle.sql.ARRAY(desc, ps.getConnection(), seats);
  *	   ps.setObject(paramIndex, nums, sqlType);
  *   }
@@ -71,11 +72,12 @@ public interface SqlTypeValue {
 	 * @param ps the PreparedStatement to work on
 	 * @param paramIndex the index of the parameter for which we need to set the value
 	 * @param sqlType SQL type of the parameter we are setting
+	 * @param typeName the type name of the parameter
 	 * @throws SQLException if a SQLException is encountered setting
 	 * parameter values (that is, there's no need to catch SQLException)
 	 * @see java.sql.Types
 	 * @see java.sql.PreparedStatement#setObject
 	 */
-	void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType) throws SQLException;
+	void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException;
 
 }
