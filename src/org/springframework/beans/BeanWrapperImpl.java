@@ -52,6 +52,8 @@ import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.util.StringUtils;
 
 /**
@@ -144,6 +146,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
 		this.defaultEditors.put(Locale.class, new LocaleEditor());
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());
+		this.defaultEditors.put(Resource[].class, new ResourceArrayPropertyEditor());
 		this.defaultEditors.put(String[].class, new StringArrayPropertyEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 
