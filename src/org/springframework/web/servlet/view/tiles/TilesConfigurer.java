@@ -103,7 +103,9 @@ public class TilesConfigurer extends WebApplicationObjectSupport {
 
 			// initialize the definitions factory
 			DefinitionsFactory factory = TilesUtil.createDefinitionsFactory(getServletContext(), factoryConfig);
-			getApplicationContext().shareObject(TilesUtilImpl.DEFINITIONS_FACTORY, factory);
+			getWebApplicationContext().getServletContext().setAttribute(
+				TilesUtilImpl.DEFINITIONS_FACTORY, factory);
+			
 
 			logger.info("Tiles: initialization done");
 		}

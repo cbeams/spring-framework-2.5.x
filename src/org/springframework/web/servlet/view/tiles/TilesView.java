@@ -47,8 +47,10 @@ public class TilesView extends InternalResourceView {
 	    throws ServletException, IOException {
 
 		try {
-			// get definitions factory
-			DefinitionsFactory factory = (DefinitionsFactory) getApplicationContext().sharedObject(TilesUtilImpl.DEFINITIONS_FACTORY);
+			// get definitions factory			
+			DefinitionsFactory factory = (DefinitionsFactory)
+				getWebApplicationContext().getServletContext().
+				getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
 			if (factory == null) {
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 				                   "Tiles definitions factory not found: TilesConfigurer not defined?");
@@ -76,10 +78,13 @@ public class TilesView extends InternalResourceView {
 
 			// execute controller associated to definition, if any
 			Controller controller = definition.getOrCreateController();
+			System.out.println("Executing controller " + controller);
 			if (controller instanceof ApplicationContextAware) {
+				System.out.println("Setting applcation context " + getApplicationContext());
 				((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
 			}
 			if (controller != null) {
+				System.out.println("Executing controller " + controller + " now");	
 				controller.perform(tileContext, request, response, getServletContext());
 			}
 
