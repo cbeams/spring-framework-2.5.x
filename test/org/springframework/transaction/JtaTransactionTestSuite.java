@@ -39,8 +39,22 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * @author Juergen Hoeller
  * @since 12.05.2003
+ * @version $Id: JtaTransactionTestSuite.java,v 1.20 2004-07-28 14:10:40 johnsonr Exp $
  */
 public class JtaTransactionTestSuite extends TestCase {
+	
+	/**
+	 * Prevent any side-effects due to this test
+	 * modifying ThreadLocals that might affect subsequent
+	 * tests when all tests are run in the same JVM, as
+	 * with Eclipse
+	 * @see junit.framework.TestCase#tearDown()
+	 */
+	protected void tearDown() {
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+	}
 
 	public void testJtaTransactionManagerWithCommit() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
