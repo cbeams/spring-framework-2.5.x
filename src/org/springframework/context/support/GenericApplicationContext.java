@@ -26,10 +26,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * Generic ApplicationContext implementation which does not assume a specific
- * bean definition format. Holds an internal DefaultListableBeanFactory,
- * and implements the BeanDefinitionRegistry interface to allow for applying
- * bean definition readers to it.
+ * Generic ApplicationContext implementation that holds a single internal
+ * DefaultListableBeanFactory instance and does not assume a specific bean
+ * definition format. Implements the BeanDefinitionRegistry interface to
+ * allow for applying any bean definition readers to it.
  *
  * <p>Typical usage is to register a variety of bean definitions via the
  * BeanDefinitionRegistry interface and then call <code>refresh</code> to initialize
@@ -57,7 +57,14 @@ import org.springframework.core.io.ResourceLoader;
  * For the typical case of XML bean definitions, simply use ClassPathXmlApplicationContext
  * or FileSystemXmlApplicationContext, which are easier to set up - but less flexible,
  * as you can just use standard resource locations for XML bean definitions, rather than
- * mixing arbitrary bean definition formats.
+ * mixing arbitrary bean definition formats. The equivalent in a web environment is
+ * XmlWebApplicationContext, implementing the extended WebApplicationContext interface.
+ *
+ * <p>For custom application context implementations that are supposed to read
+ * special bean definition formats in a refreshable manner, consider deriving
+ * from the AbstractRefreshableApplicationContext base class. For a corresponding
+ * base class that pre-implements the extended WebApplicationContext interface,
+ * consider AbstractRefreshableWebApplicationContext.
  *
  * @author Juergen Hoeller
  * @since 1.1.2
@@ -65,8 +72,12 @@ import org.springframework.core.io.ResourceLoader;
  * @see #refresh
  * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
+ * @see AbstractRefreshableApplicationContext
  * @see ClassPathXmlApplicationContext
  * @see FileSystemXmlApplicationContext
+ * @see org.springframework.web.context.WebApplicationContext
+ * @see org.springframework.web.context.support.AbstractRefreshableWebApplicationContext
+ * @see org.springframework.web.context.support.XmlWebApplicationContext
  */
 public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
 
