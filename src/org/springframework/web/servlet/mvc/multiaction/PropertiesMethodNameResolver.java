@@ -41,6 +41,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see java.util.Properties
  * @see org.springframework.util.PathMatcher
  */
 public class PropertiesMethodNameResolver implements MethodNameResolver, InitializingBean {
@@ -62,7 +63,8 @@ public class PropertiesMethodNameResolver implements MethodNameResolver, Initial
 	}
 
 	/**
-	 * Set the mapping properties for this resolver.
+	 * Set URL to method name mappings from a Properties object.
+	 * @param mappings properties with URL as key and method name as value
 	 */
 	public final void setMappings(Properties mappings) {
 		this.mappings = mappings;
@@ -71,6 +73,9 @@ public class PropertiesMethodNameResolver implements MethodNameResolver, Initial
 	public void afterPropertiesSet() {
 		if (this.mappings == null) {
 			throw new IllegalArgumentException("'mappings' property is required");
+		}
+		else if (this.mappings.isEmpty()) {
+			logger.warn("No mappings defined in " + getClass().getName());
 		}
 	}
 

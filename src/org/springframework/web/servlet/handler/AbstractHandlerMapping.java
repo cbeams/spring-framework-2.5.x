@@ -15,8 +15,7 @@ import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * Abstract base class for HandlerMapping implementations.
- * Provides the basic infrastructure and a handler initialization method that
- * cares about LocaleResolver. Supports a default handler.
+ * Supports ordering, a default handler, and handler interceptors.
  * @author Juergen Hoeller
  * @since 07.04.2003
  * @see #getHandlerInternal
@@ -31,11 +30,11 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	private List interceptors;
 
-	public void setOrder(int order) {
+	public final void setOrder(int order) {
 	  this.order = order;
 	}
 
-	public int getOrder() {
+	public final int getOrder() {
 	  return order;
 	}
 
@@ -43,7 +42,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * Set the default handler.
 	 * @param defaultHandler default handler instance, or null if none
 	 */
-	public void setDefaultHandler(Object defaultHandler) {
+	public final void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
 		logger.info("Default mapping is to controller [" + this.defaultHandler + "]");
 	}
@@ -52,16 +51,16 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * Return the default handler.
 	 * @return the default handler instance, or null if none
 	 */
-	public Object getDefaultHandler() {
+	protected final Object getDefaultHandler() {
 		return defaultHandler;
 	}
 
-	public void setInterceptors(List interceptors) {
+	public final void setInterceptors(List interceptors) {
 		this.interceptors = interceptors;
 	}
 
 	/**
-	 * Lookup a handler for the given request, falling back to the default
+	 * Look up a handler for the given request, falling back to the default
 	 * handler if no specific one is found.
 	 * @param request current HTTP request
 	 * @return the looked up handler instance, or the default handler
