@@ -17,6 +17,21 @@
 		</fileset>
 	</path>
 	
+	<target name="usage">
+
+		<echo message=""/>
+		<echo message="${name} build file"/>
+		<echo message="------------------------------------------------------"/>
+		<echo message=""/>
+		<echo message="Among the available targets are:"/>
+		<echo message=""/>
+		<echo message="build    --> build; don't create JARs"/>
+		<echo message="ear  --> create all EAR file"/>
+		<echo message="load  --> run load test"/>
+		<echo message=""/>
+
+	</target>
+	
 	<target name="clean">
 		<delete dir="${target.dir}"/>
 	</target>
@@ -171,6 +186,9 @@
 	
 	<target name="jboss" depends="ear">
 		<copy file="${dist.dir}/${ear}"
+			todir="${jboss.deploy.dir}" />
+			
+		<copy file="${conf.dir}/oracle-ds.xml"
 			todir="${jboss.deploy.dir}" /> 
 	</target>
 	
