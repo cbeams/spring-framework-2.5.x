@@ -582,7 +582,7 @@ url maps to the 'hello.jsp' page, so this should work nicely.</P>
 <FONT COLOR="#800000">    &lt;bean id=&quot;priceIncreaseValidator&quot; class=&quot;bus.PriceIncreaseValidator&quot;/&gt;</FONT>
 <FONT COLOR="#800000">    &lt;bean id=&quot;priceIncreaseForm&quot; class=&quot;web.PriceIncreaseFormController&quot;&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;sessionForm&quot;&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#800000">        &lt;property name=&quot;beanName&quot;&gt;&lt;value&gt;priceIncrease&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#800000">        &lt;property name=&quot;commandName&quot;&gt;&lt;value&gt;priceIncrease&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;commandClass&quot;&gt;&lt;value&gt;bus.PriceIncrease&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;validator&quot;&gt;&lt;ref bean=&quot;priceIncreaseValidator&quot;/&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;formView&quot;&gt;&lt;value&gt;priceincrease&lt;/value&gt;&lt;/property&gt;</FONT>
@@ -659,6 +659,7 @@ new instance of a RedirectView created using the url for the successView.</P>
 
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
