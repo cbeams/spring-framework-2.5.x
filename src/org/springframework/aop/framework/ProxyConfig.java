@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * interceptor to do so.
  *
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.10 2004-04-30 15:39:01 jhoeller Exp $
+ * @version $Id: ProxyConfig.java,v 1.11 2004-05-27 09:14:40 jhoeller Exp $
  */
 public class ProxyConfig {
 	
@@ -62,9 +62,8 @@ public class ProxyConfig {
 	 */
 	private boolean frozen;
 	
-	/** Factory used to create AopProxy's. */
+	/** Factory used to create AopProxy instances */
 	private AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
-
 
 	
 	/**

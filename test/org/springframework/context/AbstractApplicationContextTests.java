@@ -25,7 +25,7 @@ import org.springframework.beans.factory.LifecycleBean;
 
 /**
  * @author Rod Johnson
- * @version $RevisionId$
+ * @author Juergen Hoeller
  */
 public abstract class AbstractApplicationContextTests extends AbstractListableBeanFactoryTests {
 
@@ -142,7 +142,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	}
 
 
-	public class MyEvent extends ApplicationEvent {
+	public static class MyEvent extends ApplicationEvent {
 
 		public MyEvent(Object source) {
 			super(source);

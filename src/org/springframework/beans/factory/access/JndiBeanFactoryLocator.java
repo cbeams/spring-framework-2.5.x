@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  */
 public class JndiBeanFactoryLocator implements BeanFactoryLocator {
@@ -61,7 +61,7 @@ public class JndiBeanFactoryLocator implements BeanFactoryLocator {
 			beanFactoryPath = (String) (new JndiTemplate()).lookup(factoryKey);
 			logger.info("BeanFactoryPath from JNDI is [" + beanFactoryPath + "]");
 			String[] paths = StringUtils.tokenizeToStringArray(beanFactoryPath,
-					BEAN_FACTORY_PATH_DELIMITERS, true, true);
+																												 BEAN_FACTORY_PATH_DELIMITERS, true, true);
 			return createBeanFactory(paths);
 		}
 		catch (NamingException ex) {
@@ -78,13 +78,13 @@ public class JndiBeanFactoryLocator implements BeanFactoryLocator {
 	 * @return the created BeanFactory, wrapped in a BeanFactoryReference
 	 */
 	protected BeanFactoryReference createBeanFactory(String[] resources) throws BeansException {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
 		for (int i = 0; i < resources.length; ++i) {
 			reader.loadBeanDefinitions(new ClassPathResource(resources[i]));
 		}
-		bf.preInstantiateSingletons();
-		return new DefaultBeanFactoryReference(bf);
+		factory.preInstantiateSingletons();
+		return new DefaultBeanFactoryReference(factory);
 	}
 
 }

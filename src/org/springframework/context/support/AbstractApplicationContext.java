@@ -78,7 +78,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -132,7 +132,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Create a new AbstractApplicationContext with the given parent context.
-	 * @param parent parent context
+	 * @param parent the parent context
 	 */
 	public AbstractApplicationContext(ApplicationContext parent) {
 		this.parent = parent;
@@ -144,33 +144,30 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	/**
-	 * Return the parent context, or null if there is no parent,
-	 * and this is the root of the context hierarchy.
-	 * @return the parent context, or null if there is no parent
+	 * Return the parent context, or null if there is no parent
+	 * (that is, this context is the root of the context hierarchy).
 	 */
 	public ApplicationContext getParent() {
 		return parent;
 	}
 
 	/**
-	 * To avoid endless constructor chaining, only concrete classes
-	 * take this in their constructor, and then invoke this method
+	 * Set a friendly name for this context.
+	 * Typically done during initialization of concrete context implementations.
 	 */
 	protected void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
 	/**
-	 * Return a friendly name for context
-	 * @return a display name for the context
+	 * Return a friendly name for this context.
 	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 
 	/**
-	 * Return the timestamp when this context was first loaded
-	 * @return the timestamp (ms) when this context was first loaded
+	 * Return the timestamp (ms) when this context was first loaded.
 	 */
 	public long getStartupDate() {
 		return startupTime;
@@ -178,11 +175,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Publish the given event to all listeners.
-	 * <p>Note: Listeners get initialized after the message source, to be able
-	 * to access it within listener implementations. Thus, message source
+	 * <p>Note: Listeners get initialized after the MessageSource, to be able
+	 * to access it within listener implementations. Thus, MessageSource
 	 * implementation cannot publish events.
-	 * @param event event to publish. The event may be application-specific,
-	 * or a standard framework event.
+	 * @param event event to publish (may be application-specific or a
+	 * standard framework event)
 	 */
 	public void publishEvent(ApplicationEvent event) {
 		if (logger.isDebugEnabled()) {
@@ -217,9 +214,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Load or reload configuration.
-	 * @throws org.springframework.context.ApplicationContextException if the configuration
-	 * was invalid or couldn't be found, or if configuration has already been loaded and
-	 * reloading is forbidden
+	 * @throws org.springframework.context.ApplicationContextException if the
+	 * configuration was invalid or couldn't be found, or if configuration
+	 * has already been loaded and reloading is forbidden
 	 * @throws BeansException if the bean factory could not be initialized
 	 */
 	public void refresh() throws BeansException {
@@ -268,7 +265,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// instantiate singletons this late to allow them to access the message source
 		beanFactory.preInstantiateSingletons();
 
-		// last step: publish respective event
+		// last step: publish corresponding event
 		publishEvent(new ContextRefreshedEvent(this));
 	}
 
@@ -304,7 +301,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Instantiate and invoke all registered BeanPostProcessor beans,
 	 * respecting explicit order if given.
-	 * Must be called before singleton instantiation.
+	 * <p>Must be called before any instantiation of application beans.
 	 */
 	private void registerBeanPostProcessors() throws BeansException {
 		String[] beanNames = getBeanDefinitionNames(BeanPostProcessor.class);
@@ -381,11 +378,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void close() {
 		logger.info("Closing application context [" + getDisplayName() + "]");
 
-		// destroy all cached singletons in this context,
-		// invoking DisposableBean.destroy and/or "destroy-method"
+		// Destroy all cached singletons in this context,
+		// invoking DisposableBean.destroy and/or "destroy-method".
 		getBeanFactory().destroySingletons();
 
-		// publish respective event
+		// publish corresponding event
 		publishEvent(new ContextClosedEvent(this));
 	}
 

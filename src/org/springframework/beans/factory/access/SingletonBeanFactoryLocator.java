@@ -263,7 +263,7 @@ import org.springframework.core.io.UrlResource;
  * </pre>
  *   
  * @author Colin Sampaleanu
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
@@ -387,7 +387,6 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 				bfg = new BeanFactoryGroup();
 				bfg.definition = groupContext;
-				bfg.resourceName = this.resourceName;
 				bfg.refCount = 1;
 				this.bfgInstancesByKey.put(this.resourceName, bfg);
 				this.bfgInstancesByObj.put(groupContext, bfg);
@@ -472,8 +471,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * ApplicationContext, for example).
 	 */
 	protected BeanFactory createDefinition(String[] resources) throws BeansException {
-		DefaultListableBeanFactory fac = new DefaultListableBeanFactory();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(fac);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
 		for (int i = 0; i < resources.length; ++i) {
 			try {
 				reader.loadBeanDefinitions(new UrlResource(resources[i]));
@@ -482,8 +481,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				throw new BeanDefinitionStoreException("Bad URL when loading definition", ex);
 			}
 		}
-		fac.preInstantiateSingletons();
-		return fac;
+		factory.preInstantiateSingletons();
+		return factory;
 	}
 	
     /**
@@ -524,8 +523,6 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	private static class BeanFactoryGroup {
 
 		private BeanFactory definition;
-
-		private String resourceName;
 
 		private int refCount = 0;
 	}
