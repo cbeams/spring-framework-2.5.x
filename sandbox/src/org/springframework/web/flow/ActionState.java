@@ -89,7 +89,7 @@ public class ActionState extends TransitionableState {
 		}
 
 		private ActionBeanHolder(ActionBean actionBean) {
-			Assert.notNull(actionBean, "The action bean is required");
+			Assert.notNull(actionBean, "The action bean instance is required");
 			this.actionBean = actionBean;
 		}
 

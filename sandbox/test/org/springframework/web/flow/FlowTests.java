@@ -59,9 +59,9 @@ public class FlowTests extends TestCase {
 		MockControl flowDaoMc = MockControl.createControl(FlowDao.class);
 		FlowDao dao = (FlowDao)flowDaoMc.getMock();
 		dao.getActionBean(getStateId);
-		flowDaoMc.setReturnValue(new NoOpActionBean(AbstractActionBean.SUCCESS_EVENT_ID));
+		flowDaoMc.setReturnValue(new NoOpActionBean());
 		dao.getActionBean(bindAndValidateStateId);
-		flowDaoMc.setReturnValue(new NoOpActionBean(AbstractActionBean.SUCCESS_EVENT_ID));
+		flowDaoMc.setReturnValue(new NoOpActionBean());
 		flowDaoMc.replay();
 		flow.setFlowDao(dao);
 	}
@@ -104,14 +104,20 @@ public class FlowTests extends TestCase {
 		}
 
 		protected void initFlow() {
-			add(createGetState(PERSON_DETAILS));
+			add(createGetState(PERSON_DETAILS, useActionBean(NoOpActionBean.class)));
 			add(createViewState(PERSON_DETAILS));
-			add(createBindAndValidateState(PERSON_DETAILS));
+			add(createBindAndValidateState(PERSON_DETAILS, useActionBean(NoOpActionBean.class)));
 			add(createFinishEndState());
 		}
 	};
 
 	private class TestFlowTypeSafeDependencyInjection extends Flow {
+
+		private NoOpActionBean noOpAction;
+
+		public void setNoOpAction(NoOpActionBean noOpAction) {
+			this.noOpAction = noOpAction;
+		}
 
 		public TestFlowTypeSafeDependencyInjection() {
 			super("test.detailFlow");
@@ -119,27 +125,20 @@ public class FlowTests extends TestCase {
 		}
 
 		protected void initFlow() {
-			add(createGetState(PERSON_DETAILS));
+			add(createGetState(PERSON_DETAILS, noOpAction));
 			add(createViewState(PERSON_DETAILS));
-			add(createBindAndValidateState(PERSON_DETAILS));
+			add(createBindAndValidateState(PERSON_DETAILS, noOpAction));
 			add(createFinishEndState());
 		}
 	};
 
 	/**
-	 * Does nothing, just returns "success"
+	 * Action bean stub thatr does nothing, just returns "success"
 	 */
-	private final class NoOpActionBean implements ActionBean {
-
-		private String retVal;
-
-		public NoOpActionBean(String retVal) {
-			this.retVal = retVal;
-		}
-
-		public ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
+	private final class NoOpActionBean extends AbstractActionBean {
+		public ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 				MutableAttributesAccessor attributes) throws RuntimeException {
-			return new ActionBeanEvent(this, retVal);
+			return success();
 		}
 	}
 
