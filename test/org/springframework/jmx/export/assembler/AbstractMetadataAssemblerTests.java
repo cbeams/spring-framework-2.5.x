@@ -147,7 +147,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	}
 
 	public void testWithProxy() throws Exception {
-		IJmxTestBean tb = new JmxTestBean();
+		IJmxTestBean tb = createJmxTestBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(tb);
 		pf.addAdvice(new NopInterceptor());
@@ -178,6 +178,10 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 	protected int getExpectedOperationCount() {
 		return 7;
+	}
+
+	protected IJmxTestBean createJmxTestBean() {
+		return new JmxTestBean();
 	}
 
 	protected MBeanInfoAssembler getAssembler() {
