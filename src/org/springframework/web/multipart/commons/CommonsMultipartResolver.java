@@ -48,7 +48,7 @@ import org.springframework.web.util.WebUtils;
  * MultipartResolver implementation for
  * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>.
  *
- * <p>Provides maximumFileSize, maximumInMemorySize, and headerEncoding settings as
+ * <p>Provides maxUploadSize, maxInMemorySize, and defaultEncoding settings as
  * bean properties; see respective DiskFileUpload properties (sizeMax, sizeThreshold,
  * headerEncoding) for details in terms of defaults and accepted values.
  *
