@@ -75,7 +75,7 @@ import org.springframework.core.JdkVersion;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13.02.2004
- * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.30 2004-08-02 15:40:34 jhoeller Exp $
+ * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.31 2004-08-11 10:05:25 johnsonr Exp $
  * @see #findMatchingBeans
  * @see DefaultListableBeanFactory
  */
@@ -141,7 +141,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return autowireConstructor(beanClass.getName(), bd).getWrappedInstance();
 		}
 		else {
-			Object bean = instantiationStrategy.instantiate(bd, this);
+			Object bean = instantiationStrategy.instantiate(bd, null, this);
 			populateBean(bean.getClass().getName(), bd, new BeanWrapperImpl(bean));
 			return bean;
 		}
@@ -249,7 +249,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 			else {
 				// use no-arg constructor
-				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, this);
+				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this);
 				instanceWrapper = new BeanWrapperImpl(beanInstance);
 				initBeanWrapper(instanceWrapper);
 			}
@@ -367,7 +367,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				
 				// If we get here, we found a factory method
-				Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, this, factoryMethod, args);
+				Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this, factoryMethod, args);
 
 				// TODO if we got to here, we could cache the resolved Method in the RootBeanDefinition for
 				// efficiency on future creation, but that would need to be synchronized
@@ -468,7 +468,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			                                "Could not resolve matching constructor");
 		}
 
-		Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, this, constructorToUse, argsToUse);
+		Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this, constructorToUse, argsToUse);
 		bw.setWrappedInstance(beanInstance);
 		if (logger.isInfoEnabled()) {
 			logger.info("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");

@@ -30,16 +30,25 @@ import org.springframework.beans.factory.BeanFactory;
  * Method Injection.
  *
  * @author Rod Johnson
- * @version $Id: InstantiationStrategy.java,v 1.2 2004-06-24 08:45:59 jhoeller Exp $
+ * @version $Id: InstantiationStrategy.java,v 1.3 2004-08-11 10:05:25 johnsonr Exp $
  */
 public interface InstantiationStrategy {
 	
-	Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner);
+	/**
+	 * Return an instance of the bean with the given name in this factory
+	 * @param beanDefinition bean definition
+	 * @param beanName name of the bean when it's created in this context.
+	 * The name can be null if we're autowiring a bean that doesn't
+	 * belong to the factory.
+	 * @param owner owning BeanFactory
+	 * @return a bean instance for this bean definition
+	 */
+	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner);
 	
-	Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
+	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 										 Constructor ctor, Object[] args);
 	
-	Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
+	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 										 Method factoryMethod, Object[] args);
 	
 }

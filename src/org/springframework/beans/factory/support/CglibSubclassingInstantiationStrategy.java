@@ -41,7 +41,7 @@ import org.springframework.beans.factory.BeanFactory;
  * However, the core IoC container will still run without CGLIB being available.
  *
  * @author Rod Johnson
- * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.6 2004-06-28 11:41:29 johnsonr Exp $
+ * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.7 2004-08-11 10:05:25 johnsonr Exp $
  */
 public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationStrategy {
 
@@ -64,12 +64,12 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	private static final int METHOD_REPLACER = 2;
 
 
-	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, BeanFactory owner) {
+	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// must generate CGLIB subclass
 		return new CglibSubclassCreator(beanDefinition, owner).instantiate(null, null);
 	}
 
-	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, BeanFactory owner,
+	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 													Constructor ctor, Object[] args) {
 		return new CglibSubclassCreator(beanDefinition, owner).instantiate(ctor, args);
 	}

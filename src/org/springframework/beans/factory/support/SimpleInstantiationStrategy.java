@@ -34,20 +34,20 @@ import org.springframework.util.StringUtils;
  * to override to add Method Injection  support, for example by overriding methods.
  * 
  * @author Rod Johnson
- * @version $Id: SimpleInstantiationStrategy.java,v 1.3 2004-08-02 13:44:56 johnsonr Exp $
+ * @version $Id: SimpleInstantiationStrategy.java,v 1.4 2004-08-11 10:05:25 johnsonr Exp $
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	
 	protected final Log log = LogFactory.getLog(getClass());
 
-	public Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner) {
+	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// don't override the class with CGLIB if no overrides
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(beanDefinition.getBeanClass());
 		}
 		else {
 			// must generate CGLIB subclass
-			return instantiateWithMethodInjection(beanDefinition, owner);
+			return instantiateWithMethodInjection(beanDefinition, beanName, owner);
 		}
 	}
 	
@@ -57,17 +57,17 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * the Method Injection specified in the given RootBeanDefinition.
 	 * Instantiation should use a no-arg constructor.
 	 */
-	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, BeanFactory owner) {
+	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	public Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
+	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 									Constructor ctor, Object[] args) {
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(ctor, args);
 		}
 		else {
-			return instantiateWithMethodInjection(beanDefinition, owner, ctor, args);
+			return instantiateWithMethodInjection(beanDefinition, beanName, owner, ctor, args);
 		}
 	}
 	
@@ -77,13 +77,13 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * the Method Injection specified in the given RootBeanDefinition.
 	 * Instantiation should use the given constructor and parameters.
 	 */
-	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, BeanFactory owner,
+	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 														Constructor ctor, Object[] args) {
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
 	
-	public Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
+	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 														Method factoryMethod, Object[] args) {
 		Object target = null;
 		if (beanDefinition.getFactoryBeanName() != null) {
