@@ -64,4 +64,41 @@ public abstract class ClassLoaderUtils {
 		return s + showClassLoaderHierarchy(parent, delim, tabText, indent + 1);
 	}
 
+	/**
+	 * Given an	input class	object,	returns	a string which consists	of the class's package
+	 * name	as a pathname, i.e., a leading '/' is added, and all dots ('.')	are	replaced by
+	 * slashes ('/'). A	trailing slash is <b>not</b> added.
+	 * @param clazz	the	input class
+	 * @return a path which	represents the package name, including a leading slash
+	 */
+	public static String classPackageAsResourcePath(Class clazz) {
+		StringBuffer retval	= new StringBuffer("/");
+		if (clazz == null)
+			return retval.toString();
+		StringTokenizer	st = new StringTokenizer(clazz.getPackage().getName(), ".");
+		while (st.hasMoreTokens()) {
+			retval.append(st.nextToken());
+			if (st.hasMoreTokens())
+				retval.append("/");
+		}
+		return retval.toString();
+	}
+  
+  
+	/**
+	 * Returns a path suitable for use with	{@see Class.getResource} build by taking
+	 * the package of the specified	class file,	converting all dots	('.') to slashes
+	 * ('/'), adding a trailing	slash, and concatenating the specified resource	name
+	 * to this.	As such, this function may be used to build	a path suitable	for	loading
+	 * a resource file that	is in the same package as a	class file.
+	 * @param clazz	the	Class whose	package	will be	used as	the	base.
+	 * @param resourceName the resource	name to	append.	A leading slash	is optional.
+	 * @return The built-up	resource path.
+	 */
+	public static String addResourcePathToPackagePath(Class	clazz, String resourceName)	{
+		if (!resourceName.startsWith("/"))
+			return classPackageAsResourcePath(clazz) + "/" + resourceName;
+		else
+			return classPackageAsResourcePath(clazz) + resourceName;
+	} 
 }
