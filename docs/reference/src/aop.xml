@@ -1812,7 +1812,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
 &lt;bean id="poolTargetSource" 
     class="org.springframework.aop.target.CommonsPoolTargetSource"&gt;
-    &lt;property name="targetBeanName"&gt;&lt;value&gt;businessObject&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="targetBeanName"&gt;&lt;value&gt;businessObjectTarget&lt;/value&gt;&lt;/property&gt;
     &lt;property name="maxSize"&gt;&lt;value&gt;25&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
