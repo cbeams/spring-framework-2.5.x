@@ -104,6 +104,17 @@ public abstract class WebUtils {
 		return (File) servletContext.getAttribute(TEMP_DIR_CONTEXT_ATTRIBUTE);
 	}
 
+
+	/**
+	 * Determine the session id of the given request, if any.
+	 * @param request current HTTP request
+	 * @return the session id, or null if none
+	 */
+	public static String getSessionId(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		return (session != null ? session.getId() : null);
+	}
+
 	/**
 	 * Check the given request for a session attribute of the given name.
 	 * Returns null if there is no session or if the session has no such attribute.
@@ -183,6 +194,7 @@ public abstract class WebUtils {
 		}
 		return sessionObject;
 	}
+
 
 	/**
 	 * Retrieve the first cookie with the given name. Note that multiple
