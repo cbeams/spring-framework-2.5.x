@@ -4,7 +4,7 @@
  */
 package org.springframework.transaction.interceptor;
 
-import org.aopalliance.intercept.MethodInvocation;
+import java.lang.reflect.Method;
 
 /**
  * Very simple implementation of TransactionAttributeSource which will always return
@@ -15,7 +15,7 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Colin Sampaleanu
  * @since 15.10.2003
- * @version $Id: MatchAlwaysTransactionAttributeSource.java,v 1.2 2003-10-21 07:43:53 jhoeller Exp $
+ * @version $Id: MatchAlwaysTransactionAttributeSource.java,v 1.3 2003-11-28 11:57:28 johnsonr Exp $
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.support.BeanNameAutoProxyCreator
  */
@@ -43,7 +43,7 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 		_transactionAttribute = (TransactionAttribute) tae.getValue();
 	}
 
-	public TransactionAttribute getTransactionAttribute(MethodInvocation invocation) {
+	public TransactionAttribute getTransactionAttribute(Method m, Class targetClass) {
 		return _transactionAttribute;
 	}
 

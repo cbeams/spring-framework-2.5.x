@@ -5,7 +5,7 @@
  
 package org.springframework.transaction.interceptor;
 
-import org.aopalliance.intercept.MethodInvocation;
+import java.lang.reflect.Method;
 
 /**
  * Interface used by TransactionInterceptor. Implementations know
@@ -13,16 +13,18 @@ import org.aopalliance.intercept.MethodInvocation;
  * metadata attributes at source level, or anywhere else.
  * @author Rod Johnson
  * @since 15-Apr-2003
- * @version $Id: TransactionAttributeSource.java,v 1.1.1.1 2003-08-14 16:20:40 trisberg Exp $
+ * @version $Id: TransactionAttributeSource.java,v 1.2 2003-11-28 11:57:28 johnsonr Exp $
  */
 public interface TransactionAttributeSource {
 
 	/**
 	 * Return the transaction attribute for this method.
 	 * Return null if the method is non-transactional.
-	 * @param invocation method invocation descriptor
+	 * @param m method
+	 * @param targetClass target class. May be null, in which case the declaring
+	 * class of the method must be used.
 	 * @return TransactionAttribute transaction attribute or null.
 	 */
-	TransactionAttribute getTransactionAttribute(MethodInvocation invocation);
+	TransactionAttribute getTransactionAttribute(Method m, Class targetClass);
 
 }

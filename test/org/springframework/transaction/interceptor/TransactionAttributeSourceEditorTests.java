@@ -18,7 +18,7 @@ import org.springframework.transaction.TransactionDefinition;
  * FQN.Method=tx attribute representation
  * @author Rod Johnson
  * @since 26-Apr-2003
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TransactionAttributeSourceEditorTests extends TestCase {
 
@@ -31,14 +31,8 @@ public class TransactionAttributeSourceEditorTests extends TestCase {
 		pe.setAsText(null);
 		TransactionAttributeSource tas = (TransactionAttributeSource) pe.getValue();
 
-		MockControl miControl = MockControl.createControl(MethodInvocation.class);
-		MethodInvocation mi = (MethodInvocation) miControl.getMock();
 		Method m = Object.class.getMethod("hashCode", null);
-		mi.getMethod();
-		miControl.setReturnValue(m);
-		miControl.replay();
-		
-		assertTrue(tas.getTransactionAttribute(mi) == null);
+		assertTrue(tas.getTransactionAttribute(m, null) == null);
 	}
 
 	public void testInvalid() throws Exception {
@@ -104,12 +98,7 @@ public class TransactionAttributeSourceEditorTests extends TestCase {
 	}
 
 	private void checkTransactionProperties(TransactionAttributeSource tas, Method method, int propagationBehavior) {
-		MockControl miControl = MockControl.createControl(MethodInvocation.class);
-		MethodInvocation mi = (MethodInvocation) miControl.getMock();
-		mi.getMethod();
-		miControl.setReturnValue(method);
-		miControl.replay();
-		TransactionAttribute ta = tas.getTransactionAttribute(mi);
+		TransactionAttribute ta = tas.getTransactionAttribute(method, null);
 		if (propagationBehavior >= 0) {
 			assertTrue(ta != null);
 			assertTrue(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_DEFAULT);

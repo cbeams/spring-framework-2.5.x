@@ -28,7 +28,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.8 2003-11-28 10:07:49 johnsonr Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.9 2003-11-28 11:57:28 johnsonr Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -117,7 +117,7 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 
 	public final Object invoke(MethodInvocation invocation) throws Throwable {
 		// If this is null, the method is non-transactional
-		TransactionAttribute transAtt = this.transactionAttributeSource.getTransactionAttribute(invocation);
+		TransactionAttribute transAtt = this.transactionAttributeSource.getTransactionAttribute(invocation.getMethod(), null);
 		TransactionStatus status = null;
 		
 		// Create transaction if necessary

@@ -12,15 +12,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.transaction.TransactionUsageException;
 
 /**
  * Simple implementation of TransactionAttributeSource that
  * allows attributes to be stored per method in a map.
  * @since 24-Apr-2003
- * @version $Id: MethodMapTransactionAttributeSource.java,v 1.4 2003-11-13 11:06:16 jhoeller Exp $
+ * @version $Id: MethodMapTransactionAttributeSource.java,v 1.5 2003-11-28 11:57:28 johnsonr Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #isMatch
@@ -33,8 +31,8 @@ public class MethodMapTransactionAttributeSource extends AbstractTransactionAttr
 	/** Map from Method to name pattern used for registration */
 	private Map nameMap = new HashMap();
 
-	public TransactionAttribute getTransactionAttribute(MethodInvocation invocation) {
-		return (TransactionAttribute) this.methodMap.get(invocation.getMethod());
+	public TransactionAttribute getTransactionAttribute(Method m, Class targetClass) {
+		return (TransactionAttribute) this.methodMap.get(m);
 	}
 
 	/**

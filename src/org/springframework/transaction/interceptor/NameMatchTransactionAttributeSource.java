@@ -1,10 +1,9 @@
 package org.springframework.transaction.interceptor;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Simple implementation of TransactionAttributeSource that
@@ -28,8 +27,8 @@ public class NameMatchTransactionAttributeSource extends AbstractTransactionAttr
 		this.nameMap.put(methodName, attr);
 	}
 
-	public TransactionAttribute getTransactionAttribute(MethodInvocation invocation) {
-		String methodName = invocation.getMethod().getName();
+	public TransactionAttribute getTransactionAttribute(Method m, Class targetClass) {
+		String methodName = m.getName();
 		TransactionAttribute attr = (TransactionAttribute) this.nameMap.get(methodName);
 		if (attr != null) {
 			return attr;

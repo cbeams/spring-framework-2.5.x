@@ -8,12 +8,10 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import org.aopalliance.intercept.MethodInvocation;
-
 /**
  * 
  * @author Rod Johnson
- * @version $Id: MapTransactionAttributeSource.java,v 1.1 2003-11-22 09:59:40 johnsonr Exp $
+ * @version $Id: MapTransactionAttributeSource.java,v 1.2 2003-11-28 11:57:10 johnsonr Exp $
  */
 public class MapTransactionAttributeSource implements TransactionAttributeSource {
 	
@@ -29,8 +27,8 @@ public class MapTransactionAttributeSource implements TransactionAttributeSource
 	/**
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeSource#getTransactionAttribute(org.aopalliance.intercept.MethodInvocation)
 	 */
-	public TransactionAttribute getTransactionAttribute(MethodInvocation invocation) {
-		return (TransactionAttribute) methodMap.get(invocation.getMethod());
+	public TransactionAttribute getTransactionAttribute(Method m, Class clazz) {
+		return (TransactionAttribute) methodMap.get(m);
 	}
 
 }
