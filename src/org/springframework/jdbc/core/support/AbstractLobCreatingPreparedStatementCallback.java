@@ -31,6 +31,23 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * <p>Delegates to the <code>setValues</code> template method for setting values
  * on the PreparedStatement, using a given LobCreator for BLOB/CLOB arguments.
  *
+ * <p>A usage example with JdbcTemplate:
+ *
+ * <pre>
+ * JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
+ * LobHandler lobHandler = new DefaultLobHandler();  // reusable object
+ *
+ * jdbcTemplate.execute(
+ *     "SELECT content FROM imagedb WHERE image_name=?",
+ *     new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+ *       protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+ *         ps.setString(1, name);
+ *         lobCreator.setBlobAsBinaryStream(ps, 2, is, contentLength);
+ *         lobCreator.setClobAsString(ps, 3, description);
+ *       }
+ *     }
+ * );</pre>
+ *
  * @author Juergen Hoeller
  * @since 27.04.2004
  * @see org.springframework.jdbc.support.lob.LobCreator
