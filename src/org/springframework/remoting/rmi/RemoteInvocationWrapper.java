@@ -1,6 +1,7 @@
 package org.springframework.remoting.rmi;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -24,9 +25,10 @@ class RemoteInvocationWrapper extends UnicastRemoteObject implements RemoteInvoc
 		this.wrappedObject = wrappedObject;
 	}
 
-	public Object invokeRemote(String methodName, Class[] paramTypes, Object[] params) throws Exception {
-		Method method = wrappedObject.getClass().getMethod(methodName, paramTypes);
-		return method.invoke(wrappedObject, params);
+	public Object invokeRemote(String methodName, Class[] paramTypes, Object[] params)
+	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		Method method = this.wrappedObject.getClass().getMethod(methodName, paramTypes);
+		return method.invoke(this.wrappedObject, params);
 	}
 
 }
