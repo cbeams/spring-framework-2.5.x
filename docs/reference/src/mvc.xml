@@ -1274,7 +1274,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 	<property name="order"><value>2</value></property>
 	<property name="viewClass">
-		<value>org.springframework.web.servlet.view.JstlView<value>
+		<value>org.springframework.web.servlet.view.JstlView</value>
 	</property>
 	<property name="prefix"><value>/WEB-INF/jsp/</value></property>
 	<property name="suffix"><value>.jsp</value></property>
