@@ -29,6 +29,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
+import org.springframework.web.flow.config.FlowBuilder;
+import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.SessionKeyUtils;
 
@@ -43,9 +45,13 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 
 	protected FlowExecution flowExecution;
 
-	protected void setFlow(Flow flow) {
+	public void setFlow(Flow flow) {
 		Assert.notNull(flow, "Flow is required for this test");
 		this.flow = flow;
+	}
+
+	public void setFlowBuilder(FlowBuilder flowBuilder) {
+		setFlow(new FlowFactoryBean(flowBuilder).getFlow());
 	}
 
 	protected void assertCurrentStateEquals(String expectedCurrentStateId) {
@@ -57,7 +63,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		return flowExecution.getCurrentStateId();
 	}
 
-	protected FlowExecution getFlowSessionExecution() {
+	protected FlowExecution getFlowExecution() {
 		return flowExecution;
 	}
 
@@ -116,7 +122,6 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 	}
 
 	protected ModelAndView signalEvent(String eventId, MockHttpServletRequest request, MockHttpServletResponse response) {
-		return getFlowSessionExecution().signalEvent(eventId, getCurrentStateId(), request, response);
+		return getFlowExecution().signalEvent(eventId, getCurrentStateId(), request, response);
 	}
-
 }
