@@ -15,6 +15,8 @@
  */
 package org.springframework.web.flow;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * Thrown if an unhandled, uncoverable exception is thrown when an action is
  * executed in an action state.
@@ -22,7 +24,16 @@ package org.springframework.web.flow;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class ActionExecutionException extends RuntimeException {
+public class ActionExecutionException extends NestedRuntimeException {
+
+	/**
+	 * Create a new action execution exception.
+	 * @param the message as to why execution failed
+	 * @param cause the underlying cause of the exception, thrown by the action
+	 */
+	public ActionExecutionException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 	/**
 	 * Create a new action execution exception.
