@@ -6,7 +6,7 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: resin3-build.xml,v 1.5 2004-06-07 23:35:19 davison Exp $
+	$Id: resin3-build.xml,v 1.6 2004-06-20 08:43:30 davison Exp $
 -->
 <project name="autobuilds-resin3" basedir="." default="usage">
 
@@ -116,9 +116,7 @@ autobuilds directory for information.
 		<java 
 			classname="com.caucho.server.resin.Resin"
 			output="${reports.dir}/${target.server}_server.log"
-			fork="true"
-			dir="${servers.install.dir}/${appserver.distname}">
-		
+			fork="true">		
 			<jvmarg value="-Dresin.home=${servers.install.dir}/${appserver.distname}" />
       		<jvmarg value="-Djava.util.logging.manager=com.caucho.log.LogManagerImpl" />
       		
