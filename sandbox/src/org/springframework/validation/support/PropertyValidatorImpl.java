@@ -17,6 +17,12 @@ import org.springframework.validation.PropertyValidationRule;
 import org.springframework.validation.PropertyValidator;
 import org.springframework.validation.ValidationResultsCollector;
 
+/**
+ * Default implementation of the PropertyValidator interface, enapsulating
+ * the logic to validate all rules associated with a bean property.
+ *
+ * @author  Keith Donald
+ */
 public class PropertyValidatorImpl implements PropertyValidator {
     private String propertyName;
     private Set validationRules;

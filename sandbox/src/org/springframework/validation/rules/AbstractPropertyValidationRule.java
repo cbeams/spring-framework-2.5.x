@@ -140,7 +140,9 @@ public abstract class AbstractPropertyValidationRule
      * path. The following message codes are tried:
      * 
      * <pre>
-     *  [propertyNamePath] [parentBeanPrefix].[propertyName] [propertyName]
+     *  [propertyNamePath]
+     *  [parentBeanPrefix].[propertyName]
+     *  [propertyName]
      * </pre>
      * 
      * 
@@ -149,7 +151,9 @@ public abstract class AbstractPropertyValidationRule
      * correspond to codes:
      * 
      * <pre>
-     *  pet.name.lastName name.lastName lastName
+     *  pet.name.lastName
+     *  name.lastName
+     *  lastName
      * </pre>
      * 
      * 

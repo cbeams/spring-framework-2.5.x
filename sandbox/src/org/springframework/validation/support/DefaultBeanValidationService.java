@@ -11,6 +11,14 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationResultsCollector;
 
 /**
+ * Default implementation of the declarative BeanValidationService that
+ * iterates over validators defined in a javabean's Bean and
+ * PropertyDescriptors.
+ * 
+ * If a validator source is specified, this implementation will attempt to load
+ * the validators when required if they do not already exist for a particular
+ * javabean type.
+ * 
  * @author Keith Donald
  */
 public class DefaultBeanValidationService implements BeanValidationService {
@@ -18,9 +26,9 @@ public class DefaultBeanValidationService implements BeanValidationService {
     private BeanInfoBeanValidator validator = new BeanInfoBeanValidator();
 
     public DefaultBeanValidationService() {
-        
+
     }
-    
+
     public DefaultBeanValidationService(BeanValidatorSource source) {
         setBeanValidatorSource(source);
     }
@@ -35,8 +43,8 @@ public class DefaultBeanValidationService implements BeanValidationService {
     }
 
     public void validate(Object bean, Errors errors) {
-        ValidationResultsCollector results = new ValidationResultsErrorsCollector(
-                errors);
+        ValidationResultsCollector results =
+            new ValidationResultsErrorsCollector(errors);
         validate(bean, results);
     }
 
@@ -45,19 +53,26 @@ public class DefaultBeanValidationService implements BeanValidationService {
         validator.validateBean(bean, results);
     }
 
-    public void validatePropertyValue(Object bean, String propertyName,
-            Object value, ValidationResultsCollector results) {
+    public void validatePropertyValue(
+        Object bean,
+        String propertyName,
+        Object value,
+        ValidationResultsCollector results) {
         validator.validatePropertyValue(bean, propertyName, value, results);
     }
 
-    public void validatePropertyValues(Object bean, String[] properties,
-            Object[] values, ValidationResultsCollector results) {
+    public void validatePropertyValues(
+        Object bean,
+        String[] properties,
+        Object[] values,
+        ValidationResultsCollector results) {
         validator.validatePropertyValues(bean, properties, values, results);
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("beanInfoBeanValidator",
-                validator).append("validatorSource", beanValidatorSource)
-                .toString();
+        return new ToStringBuilder(this)
+            .append("beanInfoBeanValidator", validator)
+            .append("validatorSource", beanValidatorSource)
+            .toString();
     }
 }
