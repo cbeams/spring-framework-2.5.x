@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.springframework.rules;
+package org.springframework.rules.reporting;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +22,7 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.predicates.CompoundUnaryPredicate;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryNot;

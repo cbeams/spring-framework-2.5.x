@@ -19,8 +19,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import org.springframework.rules.BinaryPredicate;
-import org.springframework.rules.Constraints;
 import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.factory.Constraints;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
 

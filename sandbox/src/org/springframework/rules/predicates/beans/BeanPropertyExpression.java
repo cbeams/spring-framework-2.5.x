@@ -2,7 +2,9 @@
  * The Spring Framework is published under the terms of the Apache Software
  * License.
  */
-package org.springframework.rules;
+package org.springframework.rules.predicates.beans;
+
+import org.springframework.rules.UnaryPredicate;
 
 /**
  * A predicate that constrains a bean property in some way.

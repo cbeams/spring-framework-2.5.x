@@ -15,7 +15,6 @@
  */
 package org.springframework.rules.predicates.beans;
 
-import org.springframework.rules.BeanPropertyExpression;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.util.Assert;

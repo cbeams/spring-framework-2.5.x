@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.rules.predicates.beans.*;
 import org.springframework.util.ToStringBuilder;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.util.ToStringBuilder;
  * for bean validation rules backed by a map.
  * 
  * @author Keith Donald
+ * @TODO move to validation package at some point...
  */
 public class DefaultRulesSource implements RulesSource {
     private static final Log logger = LogFactory

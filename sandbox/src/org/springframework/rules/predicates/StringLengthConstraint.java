@@ -16,9 +16,9 @@
 package org.springframework.rules.predicates;
 
 import org.springframework.rules.BinaryPredicate;
-import org.springframework.rules.Constraints;
 import org.springframework.rules.RelationalOperator;
 import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.factory.Constraints;
 import org.springframework.rules.functions.StringLength;
 import org.springframework.util.Assert;
 

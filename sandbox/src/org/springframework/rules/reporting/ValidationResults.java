@@ -13,9 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules;
+package org.springframework.rules.reporting;
 
 import java.util.Map;
+
+import org.springframework.rules.UnaryPredicate;
 
 /**
  * %single sentence summary caption%.

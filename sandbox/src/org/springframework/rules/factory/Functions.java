@@ -13,8 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules;
+package org.springframework.rules.factory;
 
+import org.springframework.rules.UnaryFunction;
 import org.springframework.rules.functions.UnaryFunctionChain;
 
 /**

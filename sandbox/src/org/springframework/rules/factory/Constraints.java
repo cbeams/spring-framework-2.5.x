@@ -13,8 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules;
+package org.springframework.rules.factory;
 
+import org.springframework.rules.BinaryFunction;
+import org.springframework.rules.BinaryPredicate;
+import org.springframework.rules.RelationalOperator;
+import org.springframework.rules.UnaryFunction;
+import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.predicates.BinaryFunctionResultConstraint;
 import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.EqualTo;
@@ -31,6 +36,7 @@ import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
+import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.beans.NegatedBeanPropertyExpression;
 import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;

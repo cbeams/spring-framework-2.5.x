@@ -15,12 +15,15 @@
  */
 package org.springframework.rules;
 
+import org.springframework.rules.predicates.beans.*;
+
 /**
  * Rules sources provide a mechanism for accessing rules associated with a bean
  * class and specific bean properties. A rules source is effectively a "Rules"
  * data access object.
  * 
  * @author Keith Donald
+ * @TODO move to validation package at some point...
  */
 public interface RulesSource {
 

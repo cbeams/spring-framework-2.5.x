@@ -17,8 +17,8 @@ package org.springframework.rules.predicates;
 
 import java.util.Iterator;
 
-import org.springframework.rules.BeanPropertyExpression;
 import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 
 /**
  * Abstract base class for unary predicates which compose other predicates.

@@ -13,25 +13,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.springframework.rules;
+package org.springframework.rules.reporting;
 
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.rules.Algorithms;
+import org.springframework.rules.Rules;
+import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.UnaryProcedure;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
+import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
-import org
-    .springframework
-    .rules
-    .predicates
-    .beans
-    .ParameterizedBeanPropertyExpression;
+import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 import org.springframework.util.ToStringBuilder;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;

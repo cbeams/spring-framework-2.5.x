@@ -15,7 +15,6 @@
  */
 package org.springframework.rules.predicates.beans;
 
-import org.springframework.rules.BeanPropertyExpression;
 import org.springframework.rules.predicates.UnaryNot;
 
 /**
@@ -28,7 +27,7 @@ public class NegatedBeanPropertyExpression extends UnaryNot implements
     }
     
     /**
-     * @see org.springframework.rules.BeanPropertyExpression#getPropertyName()
+     * @see org.springframework.rules.predicates.beans.BeanPropertyExpression#getPropertyName()
      */
     public String getPropertyName() {
         return ((BeanPropertyExpression)super.getPredicate()).getPropertyName();

@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.CompoundUnaryPredicate;
 import org.springframework.rules.predicates.UnaryAnd;
+import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
@@ -35,6 +36,7 @@ import org.springframework.validation.Validator;
  * A factory for creating rules.
  * 
  * @author Keith Donald
+ * @TODO move to validation package at some point...
  */
 public class Rules implements UnaryPredicate, Validator {
     private static final Log logger = LogFactory.getLog(Rules.class);
@@ -104,7 +106,7 @@ public class Rules implements UnaryPredicate, Validator {
         return (BeanPropertyExpression)propertyRules.get(property);
     }
 
-    Iterator iterator() {
+    public Iterator iterator() {
         return propertyRules.values().iterator();
     }
 
