@@ -93,7 +93,7 @@ public class ActionState extends TransitionableState {
 			}
 			sessionExecutionStack.setAttribute(STATE_ID_ATTRIBUTE, getId());
             ActionBeanEvent event = actionBean.execute(request, response, sessionExecutionStack);
-            sessionExecutionStack.setAttribute(STATE_ID_ATTRIBUTE, null);
+            sessionExecutionStack.removeAttribute(STATE_ID_ATTRIBUTE);
 			if (triggersTransition(event, flow)) {
 				return getTransition(event, flow).execute(flow, sessionExecutionStack, request, response);
 			}
