@@ -56,7 +56,7 @@ import org.springframework.mail.SimpleMailMessage;
  * @since 10.09.2003
  * @see JavaMailSender
  * @see org.springframework.mail.MailSender
- * @version $Id: JavaMailSenderImpl.java,v 1.12 2004-03-18 02:46:14 trisberg Exp $
+ * @version $Id: JavaMailSenderImpl.java,v 1.13 2004-06-05 14:41:03 jhoeller Exp $
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
@@ -161,6 +161,9 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				if (simpleMessage.getFrom() != null) {
 					message.setFrom(simpleMessage.getFrom());
 				}
+				if (simpleMessage.getReplyTo() != null) {
+					message.setReplyTo(simpleMessage.getReplyTo());
+				}
 				if (simpleMessage.getTo() != null) {
 					message.setTo(simpleMessage.getTo());
 				}
@@ -169,6 +172,9 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				}
 				if (simpleMessage.getBcc() != null) {
 					message.setBcc(simpleMessage.getBcc());
+				}
+				if (simpleMessage.getSentDate() != null) {
+					message.setSentDate(simpleMessage.getSentDate());
 				}
 				if (simpleMessage.getSubject() != null) {
 					message.setSubject(simpleMessage.getSubject());

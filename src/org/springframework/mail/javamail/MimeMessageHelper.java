@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -166,6 +167,20 @@ public class MimeMessageHelper {
 		                         new InternetAddress(from, personal));
 	}
 
+	public void setReplyTo(InternetAddress replyTo) throws MessagingException {
+		this.mimeMessage.setReplyTo(new InternetAddress[] {replyTo});
+	}
+
+	public void setReplyTo(String replyTo) throws MessagingException {
+		this.mimeMessage.setReplyTo(new InternetAddress[] {new InternetAddress(replyTo)});
+	}
+
+	public void setReplyTo(String replyTo, String personal) throws MessagingException, UnsupportedEncodingException {
+		InternetAddress replyToAddress = (this.encoding != null) ?
+				new InternetAddress(replyTo, personal, this.encoding) : new InternetAddress(replyTo, personal);
+		this.mimeMessage.setReplyTo(new InternetAddress[] {replyToAddress});
+	}
+
 
 	public void setTo(InternetAddress to) throws MessagingException {
 		this.mimeMessage.setRecipient(Message.RecipientType.TO, to);
@@ -274,6 +289,10 @@ public class MimeMessageHelper {
 		                              new InternetAddress(bcc, personal));
 	}
 
+
+	public void setSentDate(Date sentDate) throws MessagingException {
+		this.mimeMessage.setSentDate(sentDate);
+	}
 
 	public void setSubject(String subject) throws MessagingException {
 		if (this.encoding != null) {
