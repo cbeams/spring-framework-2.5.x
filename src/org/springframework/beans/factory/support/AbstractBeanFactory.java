@@ -66,7 +66,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.37 2003-12-30 01:21:02 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.38 2004-01-08 02:40:35 colins Exp $
  */
 public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
@@ -628,8 +628,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			try {
 				Constructor constructor = constructors[i];
 				if (constructor.getParameterTypes().length < minNrOfArgs) {
-					throw new BeanDefinitionStoreException(minNrOfArgs + " constructor arguments specified but no " +
-																								 "matching constructor found in bean '" + beanName + "'");
+					throw new BeanDefinitionStoreException(minNrOfArgs +
+							" constructor arguments specified but no " +
+							"matching constructor found in bean '" + beanName + "'");
 				}
 				Class[] argTypes = constructor.getParameterTypes();
 				Object[] args = new Object[argTypes.length];
@@ -661,14 +662,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				}
 			}
 			catch (BeansException ex) {
+				logger.debug("Ignoring constructor [" + constructors[i] + "] of bean '" + beanName +
+						"': could not satisfy dependencies. Detail: " + ex.getMessage());
+				
 				if (i == constructors.length - 1 && constructorToUse == null) {
 					// all constructors tried
 					throw ex;
 				}
 				else {
 					// swallow and try next constructor
-					logger.debug("Ignoring constructor [" + constructors[i] + "] of bean '" + beanName +
-					             "': could not satisfy dependencies", ex);
 				}
 			}
 		}
