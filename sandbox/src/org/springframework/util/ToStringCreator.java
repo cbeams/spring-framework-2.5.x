@@ -232,7 +232,7 @@ public class ToStringCreator {
             PropertyDescriptor[] properties, Class propertyType) {
         for (int i = 0; i < properties.length; i++) {
             PropertyDescriptor property = properties[i];
-            if (property.getPropertyType().equals(propertyType)) { return true; }
+            if (propertyType.equals(property.getPropertyType())) { return true; }
         }
         return false;
     }
