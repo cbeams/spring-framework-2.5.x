@@ -23,7 +23,7 @@ import java.util.Map;
  * a call into the flow system via a flow execution. The request context
  * also acts as a "request scope" data model.
  * <p>
- * A flow execution request, and its associated request context, begin
+ * A flow execution request, and its associated request context begin
  * their lifecycle when one of the entry points of a flow execution is
  * invoked ({@link org.springframework.web.flow.FlowExecution#start(Event)}
  * or {@link org.springframework.web.flow.FlowExecution#signalEvent(Event)}).
@@ -31,10 +31,10 @@ import java.util.Map;
  * when invoking actions. The flow execution request and request context
  * end their lifecycle when the call into the flow execution returns. This
  * also implies that the request context is an internal artefact of the
- * flow system: it will not be exposed to client code.
+ * flow system: it will not be exposed to external client code.
  * <p>
  * Note that a <i>request</i> context is in no way linked to an HTTP request!
- * It just uses the familiar request/session naming convention.
+ * It just uses the familiar request naming convention.
  * 
  * @see org.springframework.web.flow.FlowExecution
  * 

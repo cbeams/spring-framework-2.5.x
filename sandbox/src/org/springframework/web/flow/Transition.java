@@ -46,15 +46,15 @@ public class Transition {
 	public static final String WILDCARD_EVENT_ID = "*";
 
 	/**
+	 * The source state that owns this transition.
+	 */
+	private TransitionableState sourceState;
+
+	/**
 	 * The criteria that determine whether or not this transition should
 	 * execute.
 	 */
 	private TransitionCriteria criteria;
-
-	/**
-	 * The source state that owns this transition.
-	 */
-	private TransitionableState sourceState;
 
 	/**
 	 * The target state that this transition should transition to when executed.
