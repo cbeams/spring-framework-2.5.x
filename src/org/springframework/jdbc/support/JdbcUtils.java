@@ -16,20 +16,27 @@
 
 package org.springframework.jdbc.support;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.jdbc.core.DatabaseMetaDataCallbackHandler;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
  * Utility methods for SQL statements.
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.6 2004-03-18 02:46:15 trisberg Exp $
+ * @version $Id: JdbcUtils.java,v 1.7 2004-04-06 21:39:20 trisberg Exp $
  */
 public class JdbcUtils {
 
@@ -64,6 +71,39 @@ public class JdbcUtils {
 			catch (SQLException ex) {
 				logger.warn("Could not close JDBC ResultSet", ex);
 			}
+		}
+	}
+
+	/**
+	 * Extract database meta data.
+	 * This method will never throw an exception - it will always return null, even if the metadata
+	 * or connection calls fail.  Metadata lookups are usually not fatal so check the returned data for nulls.
+	 * @param call back handler that will do the actual work
+	 * @return object containing the extracted information
+	 */
+	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallbackHandler cbh) throws MetaDataAccessException {
+		Connection con = null;
+		try {
+			con = DataSourceUtils.getConnection(dataSource);
+			if (con != null)
+				return cbh.processMetaData(con.getMetaData());
+			else
+				throw new MetaDataAccessException("Error while getting connection");
+		}
+		catch (CannotGetJdbcConnectionException ex) {
+			//throw checked exception - we don't want this to be fatal?
+			throw new MetaDataAccessException("Error while getting connection",ex);
+		}
+		catch (DataAccessException ex) {
+			//throw checked exception - we don't want this to be fatal?
+			throw new MetaDataAccessException("Error while extracting DatabaseMetaData",ex);
+		}
+		catch (SQLException ex) {
+			//throw checked exception - we don't want this to be fatal?
+			throw new MetaDataAccessException("Error while extracting DatabaseMetaData",ex);
+		}
+		finally {
+			DataSourceUtils.closeConnectionIfNecessary(con, dataSource);
 		}
 	}
 

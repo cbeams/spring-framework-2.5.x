@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -27,14 +26,12 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.core.DatabaseMetaDataCallbackHandler;
 
 /**
  * Factory for creating SQLErrorCodes based on the
@@ -47,7 +44,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
- * @version $Id: SQLErrorCodesFactory.java,v 1.9 2004-04-01 02:07:11 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.10 2004-04-06 21:39:20 trisberg Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -162,6 +159,7 @@ public class SQLErrorCodesFactory {
 	 */
 	public SQLErrorCodes getErrorCodes(DataSource ds) {
 		logger.info("Looking up default SQLErrorCodes for DataSource");
+		
         // Lets avoid looking up database product info if we can.
         Integer dataSourceHash = new Integer(ds.hashCode());
         if (dataSourceProductName.containsKey(dataSourceHash)) {
@@ -170,52 +168,43 @@ public class SQLErrorCodesFactory {
             		dataSourceHash + "}. Name is " + dataSourceDbName);
             return getErrorCodes(dataSourceDbName);
         }
+
         // We could not find it - got to look it up.
-		Connection con = null;
-		try {
-			con = DataSourceUtils.getConnection(ds);
-		}
-		catch (DataAccessException ex) {
-			// Log failure and leave connection null
-			logger.warn("Cannot get connection from database to get metadata when trying to create exception translator", ex);	
-		}
-		
-		if (con != null) {
-			// should always be the case outside of test environments
-			try {
-				DatabaseMetaData dbmd = con.getMetaData();
-				if (dbmd != null) {
-					String dbName = dbmd.getDatabaseProductName();
-					String driverVersion = dbmd.getDriverVersion();
-					// special check for DB2
-					if (dbName != null && dbName.startsWith("DB2/")) {
-						dbName = "DB2";
-					}
-					if (dbName != null) {
-						dataSourceProductName.put(new Integer(ds.hashCode()), dbName);
-						logger.info("Database Product Name is " + dbName);
-						logger.info("Driver Version is " + driverVersion);
-						SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
-						if (sec != null) {
-							return sec;
-						}
-						logger.info("Error Codes for " + dbName + " not found");
-					}
+        try {
+	        Map dbmdInfo = (Map) JdbcUtils.extractDatabaseMetaData(ds, new DatabaseMetaDataCallbackHandler() {
+	        	public Object processMetaData(DatabaseMetaData dbmd) throws SQLException {
+	        		Map info = new HashMap(2);
+	        		if (dbmd != null) {
+	        			info.put("DatabaseProductName", dbmd.getDatabaseProductName());
+	        			info.put("DriverVersion", dbmd.getDriverVersion());
+	        		}
+	        		return info;
+	        	}        	
+	        });
+	        if (dbmdInfo != null) {
+				// should always be the case outside of test environments
+				String dbName = (String)dbmdInfo.get("DatabaseProductName");
+				String driverVersion = (String)dbmdInfo.get("DriverVersion");
+				// special check for DB2
+				if (dbName != null && dbName.startsWith("DB2/")) {
+					dbName = "DB2";
 				}
-				else {
-					logger.warn("Null meta data from connection when trying to create exception translator");
+				if (dbName != null) {
+					dataSourceProductName.put(new Integer(ds.hashCode()), dbName);
+					logger.info("Database Product Name is " + dbName);
+					logger.info("Driver Version is " + driverVersion);
+					SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
+					if (sec != null) {
+						return sec;
+					}
+					logger.info("Error Codes for " + dbName + " not found");
 				}
-				// could not find the database among the defined ones
-			}
-			catch (SQLException se) {
-				// this is bad - we probably lost the connection
-				logger.warn("Could not read database meta data for exception translator", se);
-			}
-			finally {
-				DataSourceUtils.closeConnectionIfNecessary(con, ds);
-			}
-		}
-		
+	        }
+        }
+        catch (MetaDataAccessException ex) {
+			logger.warn("Error while getting database metadata", ex);	
+        }
+
 		// fallback is to return an empty ErrorCodes instance
 		return new SQLErrorCodes();
 	}
