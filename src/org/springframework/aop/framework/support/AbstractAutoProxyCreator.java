@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.Interceptor;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,9 +36,11 @@ import org.springframework.core.Ordered;
  * identifying the beans to be proxied via a list of bean names.
  *
  * @author Juergen Hoeller
- * @since 13.10.2003
+ * @author Rod Johnson
+ * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.9 2003-10-25 21:07:17 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
 
@@ -114,6 +117,17 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * @see #getInterceptorsAndPointcutsForBean
 	 */
 	public Object postProcessBean(Object bean, String name, RootBeanDefinition definition) throws BeansException {
+		
+		// Check for special case. We don't want to try to autoproxy a part of the autoproxying
+		// infrastructure, lest we get a stack overflow.
+		if (MethodPointcut.class.isAssignableFrom(bean.getClass()) ||
+				MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
+				AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass()) 
+			) {
+			logger.debug("Did not attempt to autoproxy autoproxy infrastructure class '" + bean.getClass() + "'");
+			return bean;
+		}
+		
 		Object[] specificInterceptors = getInterceptorsAndPointcutsForBean(bean, name, definition);
 		if (specificInterceptors != null) {
 			List allInterceptors = new ArrayList();
