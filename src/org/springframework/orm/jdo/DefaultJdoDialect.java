@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jdo.support;
+package org.springframework.orm.jdo;
 
 import java.sql.SQLException;
 
@@ -25,23 +25,38 @@ import javax.jdo.Transaction;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
-import org.springframework.orm.jdo.JdoDialect;
-import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * Abstract adapter class for the JdoDialect interface.
- * Throws JDOUnsupportedOptionException on every operation method.
+ * Default implementation of the JdoDialect interface.
+ * Used by JdoAccessor and JdoTransactionManager as default.
+ *
+ * <p>Simply begins a standard JDO transaction in <code>beginTransaction</code>.
+ * Returns null on <code>getJdbcConnection</code>.
+ * Throws a JDOUnsupportedOptionException on <code>flush</code>.
  * Delegates to PersistenceManagerFactoryUtils for exception translation.
+ *
+ * <p>This class will be adapted to JDO 2.0 as soon as the latter is available.
+ * JDBC Connection retrieval and flushing will then default to the respective
+ * JDO 2.0 methods. Vendor-specific subclasses will still be necessary for
+ * special transaction semantics and more sophisticated exception translation.
+ *
  * @author Juergen Hoeller
  * @since 12.06.2004
- * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#convertJdoAccessException
- * @see javax.jdo.JDOUnsupportedOptionException
+ * @see JdoAccessor#setJdoDialect
+ * @see JdoTransactionManager#setJdoDialect
  */
-public abstract class JdoDialectAdapter implements JdoDialect {
+public class DefaultJdoDialect implements JdoDialect {
 
+	/**
+	 * This implementation invokes the standard JDO <code>Transaction.begin</code>
+	 * method. Throws an InvalidIsolationLevelException if a non-default isolation
+	 * level is set.
+	 * @see javax.jdo.Transaction#begin
+	 * @see org.springframework.transaction.InvalidIsolationLevelException
+	 */
 	public void beginTransaction(Transaction transaction, TransactionDefinition definition)
 			throws JDOException, SQLException, TransactionException {
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
@@ -51,9 +66,13 @@ public abstract class JdoDialectAdapter implements JdoDialect {
 		transaction.begin();
 	}
 
+	/**
+	 * This implementation returns null, to indicate that JDBC Connection
+	 * retrieval is not supported.
+	 */
 	public ConnectionHandle getJdbcConnection(PersistenceManager pm, boolean readOnly)
 			throws JDOException, SQLException {
-		throw new JDOUnsupportedOptionException("Cannot retrieve underlying JDBC connection");
+		return null;
 	}
 
 	/**
@@ -68,10 +87,18 @@ public abstract class JdoDialectAdapter implements JdoDialect {
 			throws JDOException, SQLException {
 	}
 
+	/**
+	 * This implementation throws a JDOUnsupportedOptionException.
+	 * @see javax.jdo.JDOUnsupportedOptionException
+	 */
 	public void flush(PersistenceManager pm) throws JDOException {
 		throw new JDOUnsupportedOptionException("Cannot eagerly flush persistence manager");
 	}
 
+	/**
+	 * This implementation delegates to PersistenceManagerFactoryUtils.
+	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
+	 */
 	public DataAccessException translateException(JDOException ex) {
 		return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
 	}

@@ -44,7 +44,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @version $Id: JdoTemplateTests.java,v 1.8 2004-06-15 09:30:45 jhoeller Exp $
+ * @version $Id: JdoTemplateTests.java,v 1.9 2004-06-16 09:47:36 jhoeller Exp $
  */
 public class JdoTemplateTests extends TestCase {
 
@@ -496,16 +496,6 @@ public class JdoTemplateTests extends TestCase {
 	}
 
 	public void testTemplateExceptions() {
-		try {
-			JdoTemplate template = createTemplate();
-			template.setFlushEager(true);
-			template.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-
 		try {
 			createTemplate().execute(new JdoCallback() {
 				public Object doInJdo(PersistenceManager pm) {

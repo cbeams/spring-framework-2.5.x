@@ -46,7 +46,7 @@ import org.springframework.dao.DataAccessException;
  * @see JdoTemplate
  * @see JdoInterceptor
  * @see #setFlushEager
- * @version $Id: JdoAccessor.java,v 1.6 2004-06-14 13:31:13 dkopylenko Exp $
+ * @version $Id: JdoAccessor.java,v 1.7 2004-06-16 09:46:51 jhoeller Exp $
  */
 public class JdoAccessor implements InitializingBean {
 
@@ -54,7 +54,7 @@ public class JdoAccessor implements InitializingBean {
 
 	private PersistenceManagerFactory persistenceManagerFactory;
 
-	private JdoDialect jdoDialect;
+	private JdoDialect jdoDialect = new DefaultJdoDialect();
 
 	private boolean flushEager = false;
 
@@ -120,9 +120,6 @@ public class JdoAccessor implements InitializingBean {
 		if (this.persistenceManagerFactory == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory is required");
 		}
-		if (this.flushEager && this.jdoDialect == null) {
-			throw new IllegalArgumentException("Cannot flush eagerly without a jdoDialect setting");
-		}
 	}
 
 
@@ -134,9 +131,6 @@ public class JdoAccessor implements InitializingBean {
 	 */
 	public void flushIfNecessary(PersistenceManager pm, boolean existingTransaction) throws JDOException {
 		if (this.flushEager) {
-			if (this.jdoDialect == null) {
-				throw new IllegalArgumentException("Cannot flush eagerly without a jdoDialect setting");
-			}
 			logger.debug("Eagerly flushing JDO persistence manager");
 			this.jdoDialect.flush(pm);
 		}
@@ -153,12 +147,7 @@ public class JdoAccessor implements InitializingBean {
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
 	public DataAccessException convertJdoAccessException(JDOException ex) {
-		if (getJdoDialect() != null) {
-			return getJdoDialect().translateException(ex);
-		}
-		else {
-			return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
-		}
+		return this.jdoDialect.translateException(ex);
 	}
 
 }

@@ -83,7 +83,7 @@ public interface JdoDialect {
 	 * an implementation should use a special handle that references that other object.
 	 * @param pm the current JDO PersistenceManager
 	 * @return a handle for the JDBC Connection, to be passed into
-	 * <code>releaseJdbcConnection</code>
+	 * <code>releaseJdbcConnection</code>, or null if no JDBC Connection can be retrieved
 	 * @throws JDOException if thrown by JDO methods
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #releaseJdbcConnection

@@ -35,6 +35,8 @@ public class JdoTransactionObject {
 
 	private boolean newPersistenceManagerHolder;
 
+	private boolean jdbcTransactionExposed;
+
 	/**
 	 * Create JdoTransactionObject for new PersistenceManagerHolder.
 	 */
@@ -68,6 +70,14 @@ public class JdoTransactionObject {
 	public boolean hasTransaction() {
 		return (persistenceManagerHolder != null && persistenceManagerHolder.getPersistenceManager() != null &&
 		    persistenceManagerHolder.getPersistenceManager().currentTransaction().isActive());
+	}
+
+	protected void setJdbcTransactionExposed(boolean jdbcTransactionExposed) {
+		this.jdbcTransactionExposed = jdbcTransactionExposed;
+	}
+
+	public boolean isJdbcTransactionExposed() {
+		return jdbcTransactionExposed;
 	}
 
 }

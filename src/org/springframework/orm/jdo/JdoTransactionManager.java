@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.jdo;
 
@@ -27,7 +27,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
@@ -83,7 +82,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	private DataSource dataSource;
 
-	private JdoDialect jdoDialect;
+	private JdoDialect jdoDialect = new DefaultJdoDialect();
 
 
 	/**
@@ -165,26 +164,15 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		if (this.persistenceManagerFactory == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory is required");
 		}
-		if (this.dataSource != null && this.jdoDialect == null) {
-			throw new IllegalArgumentException("A jdoDialect is required to expose JDO transactions as JDBC transactions");
-		}
-		if (this.jdoDialect != null) {
-			// check for DataSource as connection factory
+
+		// check for DataSource as connection factory
+		if (this.dataSource == null) {
 			Object pmfcf = this.persistenceManagerFactory.getConnectionFactory();
 			if (pmfcf instanceof DataSource) {
-				if (this.dataSource == null) {
-					// use the PersistenceManagerFactory's DataSource for exposing transactions to JDBC code
-					logger.info("Using DataSource [" + pmfcf +
-											"] from JDO PersistenceManagerFactory for JdoTransactionManager");
-					this.dataSource = (DataSource) pmfcf;
-				}
-				else if (this.dataSource == pmfcf) {
-					// let the configuration through: it's consistent
-				}
-				else {
-					throw new IllegalArgumentException("Specified dataSource [" + this.dataSource + "] does not match [" +
-																						 pmfcf + "] used by the PersistenceManagerFactory");
-				}
+				// use the PersistenceManagerFactory's DataSource for exposing transactions to JDBC code
+				logger.info("Using DataSource [" + pmfcf +
+										"] from JDO PersistenceManagerFactory for JdoTransactionManager");
+				this.dataSource = (DataSource) pmfcf;
 			}
 		}
 	}
@@ -225,19 +213,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		PersistenceManager pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
 		try {
 
-			// Begin a transaction with the specified transaction semantics,
-			// if a JdoDialect is available.
-			if (this.jdoDialect != null) {
-				this.jdoDialect.beginTransaction(pm.currentTransaction(), definition);
-			}
-			else {
-				// default transaction semantics
-				if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-					throw new InvalidIsolationLevelException("Standard JDO does not support custom isolation levels - " +
-																									 "use a special JdoAdapter for your JDO implementation");
-				}
-				pm.currentTransaction().begin();
-			}
+			// delegate to JdoDialect for actual transaction begin
+			this.jdoDialect.beginTransaction(pm.currentTransaction(), definition);
 
 			// register transaction timeout
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -247,11 +224,24 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			// register the JDO PersistenceManager's JDBC Connection for the DataSource, if set
 			if (this.dataSource != null) {
 				ConnectionHandle conHandle = this.jdoDialect.getJdbcConnection(pm, definition.isReadOnly());
-				ConnectionHolder conHolder = new ConnectionHolder(conHandle);
-				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-					conHolder.setTimeoutInSeconds(definition.getTimeout());
+				if (conHandle != null) {
+					ConnectionHolder conHolder = new ConnectionHolder(conHandle);
+					if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+						conHolder.setTimeoutInSeconds(definition.getTimeout());
+					}
+					if (logger.isDebugEnabled()) {
+						logger.debug("Exposing JDO transaction [" + pm + "] as JDBC transaction [" +
+												 conHolder.getConnection() + "]");
+					}
+					TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
+					txObject.setJdbcTransactionExposed(true);
 				}
-				TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because JdoDialect ["
+												 + this.jdoDialect + "] does not support JDBC connection retrieval");
+					}
+				}
 			}
 
 			// bind the persistence manager holder to the thread
@@ -350,7 +340,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		// remove the JDBC connection holder from the thread, if set
-		if (this.dataSource != null) {
+		if (txObject.isJdbcTransactionExposed()) {
 			ConnectionHolder conHolder =
 					(ConnectionHolder) TransactionSynchronizationManager.unbindResource(this.dataSource);
 			try {
@@ -396,12 +386,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
 	protected DataAccessException convertJdoAccessException(JDOException ex) {
-		if (this.jdoDialect != null) {
-			return this.jdoDialect.translateException(ex);
-		}
-		else {
-			return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
-		}
+		return this.jdoDialect.translateException(ex);
 	}
 
 
