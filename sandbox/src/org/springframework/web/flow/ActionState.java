@@ -38,10 +38,50 @@ public class ActionState extends TransitionableState {
 		super(id);
 	}
 
+	public ActionState(String id, Transition transition) {
+		super(id, transition);
+		setActionBeanName(buildActionBeanNameFromStateId(id));
+	}
+
+	public ActionState(String id, Transition[] transitions) {
+		super(id, transitions);
+		setActionBeanName(buildActionBeanNameFromStateId(id));
+	}
+
+	public ActionState(String id, ActionBean actionBean, Transition transition) {
+		super(id, transition);
+		setActionBean(actionBean);
+	}
+
+	public ActionState(String id, ActionBean actionBean, Transition[] transitions) {
+		super(id, transitions);
+		setActionBean(actionBean);
+	}
+
+	public ActionState(String id, ActionBean[] actionBeans, Transition[] transitions) {
+		super(id, transitions);
+		setActionBeans(actionBeans);
+	}
+
+	public ActionState(String id, String actionBeanName, Transition transition) {
+		super(id, transition);
+		setActionBeanName(actionBeanName);
+	}
+
+	public ActionState(String id, String actionBeanName, Transition[] transitions) {
+		super(id, transitions);
+		setActionBeanName(actionBeanName);
+	}
+
+	public ActionState(String id, String[] actionBeanNames, Transition[] transitions) {
+		super(id, transitions);
+		setActionBeanNames(actionBeanNames);
+	}
+
 	public ActionState(Flow flow, String id) {
 		super(flow, id);
 	}
-	
+
 	public ActionState(Flow flow, String id, Transition transition) {
 		super(flow, id, transition);
 		setActionBeanName(buildActionBeanNameFromStateId(id));
@@ -50,11 +90,6 @@ public class ActionState extends TransitionableState {
 	public ActionState(Flow flow, String id, Transition[] transitions) {
 		super(flow, id, transitions);
 		setActionBeanName(buildActionBeanNameFromStateId(id));
-	}
-
-	protected String buildActionBeanNameFromStateId(String stateId) {
-		// do nothing, subclasses may override
-		return stateId;
 	}
 
 	public ActionState(Flow flow, String id, ActionBean actionBean, Transition transition) {
@@ -85,6 +120,11 @@ public class ActionState extends TransitionableState {
 	public ActionState(Flow flow, String id, String[] actionBeanNames, Transition[] transitions) {
 		super(flow, id, transitions);
 		setActionBeanNames(actionBeanNames);
+	}
+
+	protected String buildActionBeanNameFromStateId(String stateId) {
+		// do nothing, subclasses may override
+		return stateId;
 	}
 
 	private static class ActionBeanHolder {
@@ -179,6 +219,14 @@ public class ActionState extends TransitionableState {
 		return this.actionBeans.remove(new ActionBeanHolder(actionBean));
 	}
 
+	protected ActionBean getActionBean() {
+		return ((ActionBeanHolder)actionBeans.iterator().next()).actionBean;
+	}
+
+	protected String getActionBeanName() {
+		return ((ActionBeanHolder)actionBeans.iterator().next()).actionBeanName;
+	}
+
 	/**
 	 * Hook method implementation that initiates state processing.
 	 * 
@@ -248,12 +296,5 @@ public class ActionState extends TransitionableState {
 				throw new UnsupportedOperationException("Remove not allowed");
 			}
 		};
-	}
-
-	/**
-	 * @return
-	 */
-	protected String getActionBeanName() {
-		return ((ActionBeanHolder)actionBeans.iterator().next()).actionBeanName;
 	}
 }

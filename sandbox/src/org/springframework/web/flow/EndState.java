@@ -30,13 +30,30 @@ public class EndState extends AbstractState {
 
 	private String viewName;
 
+	public EndState(String id) {
+		super(id);
+	}
+
+	public EndState(String id, String viewName) {
+		super(id);
+		setViewName(viewName);
+	}
+
 	public EndState(Flow flow, String id) {
-		this(flow, id, null);
+		super(flow, id);
 	}
 
 	public EndState(Flow flow, String id, String viewName) {
 		super(flow, id);
+		setViewName(viewName);
+	}
+
+	public void setViewName(String viewName) {
 		this.viewName = viewName;
+	}
+
+	protected String getViewName() {
+		return viewName;
 	}
 
 	public boolean isEndState() {
@@ -46,8 +63,8 @@ public class EndState extends AbstractState {
 	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		ViewDescriptor descriptor;
-		if (viewName != null) {
-			descriptor = new ViewDescriptor(viewName, sessionExecution.getAttributes());
+		if (getViewName() != null) {
+			descriptor = new ViewDescriptor(getViewName(), sessionExecution.getAttributes());
 		}
 		else {
 			descriptor = ViewDescriptor.NULL_OBJECT;
