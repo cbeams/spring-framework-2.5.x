@@ -42,7 +42,7 @@ public class HibernateObjectRetrievalFailureException extends ObjectRetrievalFai
 	}
 
 	public HibernateObjectRetrievalFailureException(ObjectDeletedException ex) {
-		super(null, ex.getIdentifier(), ex.getMessage(), ex);
+		super(ex.getPersistentClass(), ex.getIdentifier(), ex.getMessage(), ex);
 	}
 
 	public HibernateObjectRetrievalFailureException(WrongClassException ex) {
