@@ -24,6 +24,7 @@ import java.util.Set;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
@@ -57,17 +58,17 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	 */
 	private final Set targetSet = Collections.synchronizedSet(new HashSet());
 	
-	private int invocations;
+	private int invocationCount;
 	
-	private int hits;
+	private int hitCount;
 	
 	/**
 	 * Implementation of abstract getTarget() method.
 	 * We look for a target held in a ThreadLocal. If we don't find one,
 	 * we create one and bind it to the thread. No synchronization is required.
 	 */
-	public Object getTarget() {
-		++this.invocations;
+	public Object getTarget() throws BeansException {
+		++this.invocationCount;
 		Object target = this.targetInThread.get();
 		if (target == null) {
 			if (logger.isDebugEnabled()) {
@@ -80,15 +81,11 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 			this.targetSet.add(target);
 		}
 		else {
-			++this.hits;
+			++this.hitCount;
 		}
 		return target;
 	}
 	
-	public void releaseTarget(Object target) {
-		// do nothing
-	}
-
 	/**
 	 * Dispose of targets if necessary; clear ThreadLocal.
 	 */
@@ -102,8 +99,10 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 				}
 				catch (Exception ex) {
 					// do nothing
-					logger.warn("Thread-bound target of class [" + target.getClass() +
-					    "] threw exception from destroy() method", ex);
+					if (logger.isWarnEnabled()) {
+						logger.warn("Thread-bound target of class [" + target.getClass() +
+								"] threw exception from destroy() method", ex);
+					}
 				}
 			}
 		}
@@ -114,15 +113,15 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	}
 
 	public int getInvocationCount() {
-		return invocations;
+		return invocationCount;
 	}
 
 	public int getHitCount() {
-		return hits;
+		return hitCount;
 	}
 
 	public int getObjectCount() {
-		return targetSet.size();
+		return this.targetSet.size();
 	}
 
 	/**
@@ -130,7 +129,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	 * @see #getInvocationCount
 	 */
 	public int getInvocations() {
-		return invocations;
+		return invocationCount;
 	}
 
 	/**
@@ -138,7 +137,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	 * @see #getHitCount
 	 */
 	public int getHits() {
-		return hits;
+		return hitCount;
 	}
 
 	/**

@@ -16,6 +16,8 @@
 
 package org.springframework.aop.target;
 
+import org.springframework.beans.BeansException;
+
 /**
  * TargetSource that creates a new instance of the target bean for each request.
  * Can only be used in a bean factory.
@@ -23,12 +25,8 @@ package org.springframework.aop.target;
  */
 public final class PrototypeTargetSource extends AbstractPrototypeBasedTargetSource {
 
-	public Object getTarget() {
+	public Object getTarget() throws BeansException {
 		return newPrototypeInstance();
-	}
-	
-	public void releaseTarget(Object target) {
-		// do nothing
 	}
 
 }
