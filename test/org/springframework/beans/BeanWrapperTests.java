@@ -33,6 +33,7 @@ import java.util.TreeSet;
 import junit.framework.TestCase;
 
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Rod Johnson
@@ -346,7 +347,7 @@ public class BeanWrapperTests extends TestCase {
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 	}
 
-	public void testStringArrayPropertyWithCustomEditor() throws Exception {
+	public void testStringArrayPropertyWithCustomStringEditor() throws Exception {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
@@ -355,7 +356,7 @@ public class BeanWrapperTests extends TestCase {
 			}
 		});
 
-		bw.setPropertyValue("stringArray", new String[]{"4foo", "7fi", "6fi", "5fum"});
+		bw.setPropertyValue("stringArray", new String[] {"4foo", "7fi", "6fi", "5fum"});
 		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
@@ -387,6 +388,23 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+	}
+
+	public void testStringArrayPropertyWithCustomStringArrayEditor() throws Exception {
+		TestBean tb = new TestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
+			public void setValue(Object value) {
+				if (value instanceof String[]) {
+					setValue(StringUtils.arrayToDelimitedString(((String[]) value), "-"));
+				}
+				else {
+					super.setValue(value);
+				}
+			}
+		});
+		bw.setPropertyValue("name", new String[] {"a1", "b2"});
+		assertEquals("a1-b2", tb.getName());
 	}
 
 	public void testIntArrayProperty() {

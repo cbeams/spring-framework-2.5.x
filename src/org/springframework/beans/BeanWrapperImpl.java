@@ -67,15 +67,16 @@ import org.springframework.util.StringUtils;
  * The caller is responsible for loading a target class.
  *
  * <p>Note: Auto-registers default property editors from the
- * org.springframework.beans.propertyeditors package, which apply in addition
- * to the JDK's standard PropertyEditors. Applications can call BeanWrapper's
- * <code>registerCustomEditor</code> method to register an editor for the
- * particular instance (i.e. they're not shared across the application).
+ * <code>org.springframework.beans.propertyeditors</code> package, which apply
+ * in addition to the JDK's standard PropertyEditors. Applications can call
+ * BeanWrapper's <code>registerCustomEditor</code> method to register an editor
+ * for the particular instance (i.e. they're not shared across the application).
  *
  * <p>BeanWrapperImpl will convert collection and array values to the
  * corresponding target collections or arrays, if necessary. Custom property
- * editors that deal with Lists or arrays can be written against a
- * comma-delimited String as String arrays are converted in such a format
+ * editors that deal with collections or arrays can either be written via
+ * PropertyEditor's <code>setValue</code>, or against a comma-delimited String
+ * via <code>setAsText</code>, as String arrays are converted in such a format
  * if the array itself is not assignable.
  *
  * @author Rod Johnson
@@ -83,16 +84,25 @@ import org.springframework.util.StringUtils;
  * @since 15 April 2001
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
+ * @see java.beans.PropertyEditorSupport#setAsText
+ * @see java.beans.PropertyEditorSupport#setValue
  * @see org.springframework.beans.propertyeditors.ByteArrayPropertyEditor
  * @see org.springframework.beans.propertyeditors.ClassEditor
- * @see org.springframework.beans.propertyeditors.FileEditor
- * @see org.springframework.beans.propertyeditors.InputStreamEditor
- * @see org.springframework.beans.propertyeditors.LocaleEditor
- * @see org.springframework.beans.propertyeditors.PropertiesEditor
- * @see org.springframework.beans.propertyeditors.StringArrayPropertyEditor
- * @see org.springframework.beans.propertyeditors.URLEditor
  * @see org.springframework.beans.propertyeditors.CustomBooleanEditor
  * @see org.springframework.beans.propertyeditors.CustomNumberEditor
+ * @see org.springframework.beans.propertyeditors.CustomCollectionEditor
+ * @see org.springframework.beans.propertyeditors.FileEditor
+ * @see org.springframework.beans.propertyeditors.InputStreamEditor
+ * @see org.springframework.jndi.JndiTemplateEditor
+ * @see org.springframework.beans.propertyeditors.LocaleEditor
+ * @see org.springframework.beans.propertyeditors.PropertiesEditor
+ * @see org.springframework.beans.PropertyValuesEditor
+ * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
+ * @see org.springframework.core.io.ResourceEditor
+ * @see org.springframework.beans.propertyeditors.StringArrayPropertyEditor
+ * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
+ * @see org.springframework.transaction.interceptor.TransactionAttributeSourceEditor
+ * @see org.springframework.beans.propertyeditors.URLEditor
  */
 public class BeanWrapperImpl implements BeanWrapper {
 
@@ -916,42 +926,45 @@ public class BeanWrapperImpl implements BeanWrapper {
 							pe = PropertyEditorManager.findEditor(requiredType);
 						}
 					}
-					if (!requiredType.isArray() && convertedValue instanceof String[]) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Converting String array to comma-delimited String [" + convertedValue + "]");
-						}
-						convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
+				}
+
+				if (pe != null && !(convertedValue instanceof String)) {
+					// Not a String -> use PropertyEditor's setValue.
+					// With standard PropertyEditors, this will return the very same object;
+					// we just want to allow special PropertyEditors to override setValue
+					// for type conversion from non-String values to the required type.
+					try {
+						pe.setValue(convertedValue);
+						convertedValue = pe.getValue();
+					}
+					catch (IllegalArgumentException ex) {
+						throw new TypeMismatchException(
+								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
 					}
 				}
 
-				if (pe != null) {
-					if (convertedValue instanceof String) {
-						// Use PropertyEditor's setAsText in case of a String value.
-						if (logger.isDebugEnabled()) {
-							logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
-						}
-						try {
-							pe.setAsText((String) convertedValue);
-							convertedValue = pe.getValue();
-						}
-						catch (IllegalArgumentException ex) {
-							throw new TypeMismatchException(
-									createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
-						}
+				if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[]) {
+					// Convert String array to a comma-separated String.
+					// Only applies if no PropertyEditor converted the String array before.
+					// The CSV String will be passed into a PropertyEditor's setAsText method, if any.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Converting String array to comma-delimited String [" + convertedValue + "]");
 					}
-					else {
-						// Not a String -> use PropertyEditor's setValue.
-						// With standard PropertyEditors, this will return the very same object;
-						// we just want to allow special PropertyEditors to override setValue
-						// for type conversion from non-String values to the required type.
-						try {
-							pe.setValue(convertedValue);
-							convertedValue = pe.getValue();
-						}
-						catch (IllegalArgumentException ex) {
-							throw new TypeMismatchException(
-									createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
-						}
+					convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
+				}
+
+				if (pe != null && convertedValue instanceof String) {
+					// Use PropertyEditor's setAsText in case of a String value.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
+					}
+					try {
+						pe.setAsText((String) convertedValue);
+						convertedValue = pe.getValue();
+					}
+					catch (IllegalArgumentException ex) {
+						throw new TypeMismatchException(
+								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
 					}
 				}
 
