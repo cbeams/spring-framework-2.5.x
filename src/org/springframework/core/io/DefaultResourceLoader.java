@@ -35,9 +35,44 @@ import java.net.URL;
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
+	private final ClassLoader classLoader;
+
+
+	/**
+	 * Create a new DefaultResourceLoader.
+	 * <p>ClassLoader access will happen via the thread context class loader on actual
+	 * access (applying to the thread that does ClassPathResource calls).
+	 */
+	public DefaultResourceLoader() {
+		this(null);
+	}
+
+	/**
+	 * Create a new DefaultResourceLoader.
+	 * @param classLoader the ClassLoader to load classpath resources with,
+	 * or null if using the thread context class loader on actual access
+	 * (applying to the thread that does ClassPathResource calls)
+	 */
+	public DefaultResourceLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
+
+	/**
+	 * Return the ClassLoader to load classpath resources with,
+	 * or null if using the thread context class loader on actual access
+	 * (applying to the thread that does ClassPathResource calls).
+	 * <p>Will get passed to ClassPathResource's constructor for all
+	 * ClassPathResource objects created by this resource loader.
+	 * @see ClassPathResource
+	 */
+	public ClassLoader getClassLoader() {
+		return classLoader;
+	}
+
+
 	public Resource getResource(String location) {
 		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
-			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()));
+			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
 		else {
 			try {
@@ -64,7 +99,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext#getResourceByPath
 	 */
 	protected Resource getResourceByPath(String path) {
-		return new ClassPathResource(path);
+		return new ClassPathResource(path, getClassLoader());
 	}
 
 }

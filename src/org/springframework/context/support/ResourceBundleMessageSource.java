@@ -44,12 +44,15 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 
 	private String[] basenames;
 
+	private ClassLoader classLoader;
+
 	/**
 	 * Cache to hold already generated MessageFormats per message code.
 	 * Note that this Map contains the actual code Map, keyed with the Locale.
 	 * @see #getMessageFormat
 	 */
 	private final Map cachedMessageFormats = new HashMap();
+
 
 	/**
 	 * Set a single basename, following ResourceBundle conventions:
@@ -80,6 +83,16 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 		this.basenames = basenames;
 	}
 
+	/**
+	 * Set the ClassLoader to load resource bundles with,
+	 * or null for using the thread context class loader on actual access
+	 * (applying to the thread that does the "getMessage" call).
+	 */
+	public void setClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
+
+
 	protected final MessageFormat resolveCode(String code, Locale locale) {
 		MessageFormat messageFormat = null;
 		for (int i = 0; messageFormat == null && i < this.basenames.length; i++) {
@@ -98,8 +111,12 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 */
 	protected MessageFormat resolve(String basename, String code, Locale locale) {
 		try {
-			ResourceBundle bundle = ResourceBundle.getBundle(
-					basename, locale, Thread.currentThread().getContextClassLoader());
+			ClassLoader cl = this.classLoader;
+			if (cl == null) {
+				// no class loader specified -> use thread context class loader
+				cl = Thread.currentThread().getContextClassLoader();
+			}
+			ResourceBundle bundle = ResourceBundle.getBundle(basename, locale, cl);
 			try {
 				return getMessageFormat(bundle, code, locale);
 			}
