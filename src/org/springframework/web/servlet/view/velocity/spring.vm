@@ -24,9 +24,7 @@
  *
  * Macro to translate a message code into a message.
  *#
-#macro( springMessage $code )
-	$springMacroRequestContext.getMessage($code)
-#end
+#macro( springMessage $code )$springMacroRequestContext.getMessage($code)#end
 
 #**
  * springMessageText
@@ -34,9 +32,15 @@
  * Macro to translate a message code into a message,
  * using the given default text if no message found.
  *#
-#macro( springMessageText $code $text )
-	$springMacroRequestContext.getMessage($code, $text)
-#end
+#macro( springMessageText $code $text )$springMacroRequestContext.getMessage($code, $text)#end
+
+#**
+ * springUrl
+ *
+ * Takes a relative URL and makes it absolute from the server root by
+ * adding the context root for the web application.
+ *#
+#macro( springUrl $relativeUrl )$springMacroRequestContext.getContextPath()${relativeUrl}#end
 
 #**
  * springBind
@@ -63,12 +67,7 @@
  *   by user config.
  *#
 #macro( springBind $path )
-	#*
-	 * the additional check for springHtmlEscape is required since Velocity 
-	 * variables are not typed and simply checking for true or false will result
-	 * in errors if the variable doesn't exist.
-	 *#
-	#if($springHtmlEscape && ($springHtmlEscape == true || $springHtmlEscape == false))
+	#if("$!springHtmlEscape" != "")
 		#set( $status = $springMacroRequestContext.getBindStatus($path, $springHtmlEscape) )
 	#else
 		#set( $status = $springMacroRequestContext.getBindStatus($path) )
@@ -98,8 +97,7 @@
  *#
 #macro( springFormInput $path $attributes )    
 	#springBind($path)
-	<input type="text" name="${status.expression}" value="$!status.value" ${attributes}
-	#springCloseTag()
+	<input type="text" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
 #end
 
 #**
@@ -260,6 +258,4 @@
  * depending on the value of a 'springXhtmlCompliant' variable in the
  * template context.
  *#
-#macro( springCloseTag )
-	#if($springXhtmlCompliant)/>#else>#end
-#end
+#macro( springCloseTag )#if($springXhtmlCompliant)/>#else>#end #end
