@@ -18,6 +18,7 @@ package org.springframework.jdbc.core;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collection;
@@ -157,10 +158,10 @@ public class StatementCreatorUtils {
 			}
 			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
 				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date || inValue instanceof java.sql.Timestamp || inValue instanceof java.sql.Time)) {
-					ps.setObject(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
+					ps.setObject(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
 				}
 				else if (inValue instanceof java.util.Calendar) {
-					ps.setObject(paramIndex, new java.sql.Date(((java.util.Calendar) inValue).getTime().getTime()));
+					ps.setObject(paramIndex, new java.sql.Timestamp(((java.util.Calendar) inValue).getTime().getTime()));
 				}
 				else {
 					ps.setObject(paramIndex, inValue);
