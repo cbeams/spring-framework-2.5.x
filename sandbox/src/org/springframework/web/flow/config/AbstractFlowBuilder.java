@@ -1089,55 +1089,182 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @return
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>get </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object retrieval logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * <p>
+	 * As the various flavors of this method add an action state intended to
+	 * execute retrieval logic, they also establishes several naming
+	 * conventions and relavent defaults. For example, the usage:
+	 * <p>
+	 * <code>ActionState createState = addGetState("person");</code>
+	 * <p>
+	 * ... builds an action state with the following properties: <table
+	 * border="1">
+	 * <tr>
+	 * <th>Property</th>
+	 * <th>Value</th>
+	 * <th>Notes</th>
+	 * <tr>
+	 * <td>id</td>
+	 * <td>person.get</td>
+	 * <td>The get action qualifier is appended in a hierarchical fashion to
+	 * the 'person' prefix</td>
+	 * <tr>
+	 * <td>action</td>
+	 * <td colspan="2">The <code>Action</code> implementation in the registry
+	 * exported with the id '<code>person.get</code>'</td>
+	 * </table>
+	 * <p>
+	 * In addition, the get action state will be configured with the
+	 * following default state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>person.view</code>)
+	 * </ul>
+	 * <p>
+	 * This assumes, after successfully executing some object retrieval logic
+	 * you will wish to view the results of that retrieval.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetive configuration code for common situations.
+	 * 
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>get</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.get). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @return The action state
 	 */
 	protected ActionState addGetState(String stateIdPrefix) {
 		return addGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param action
-	 * @return
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>get </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object retrieval logic.
+	 * <p>
+	 * By default, the get action state will be configured with the following
+	 * state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${stateIdPrefix}.view</code> state (e.g <code>person.view</code>)
+	 * </ul>
+	 * <p>
+	 * This default assumes, after successfully executing some object retrieval
+	 * logic you will wish to view the results of that retrieval.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetive configuration code for common situations.
+	 * 
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
+	 *        <code>get</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.get). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @param action The action that will execute the retrieval logic.
+	 * @return The action state
 	 */
 	protected ActionState addGetState(String stateIdPrefix, Action action) {
 		return addGetState(stateIdPrefix, action, onSuccessView(stateIdPrefix));
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>get </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object retrieval logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>get</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.get). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @param transition The single supported transition for this state, mapping
+	 *        a path from this state to another state (triggered by an event).
+	 * @return The action state
 	 */
 	protected ActionState addGetState(String stateIdPrefix, Transition transition) {
 		return addGetState(stateIdPrefix, new Transition[] { transition });
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param action
-	 * @param transition
-	 * @return
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>get </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object retrieval logic.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>get</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.get).
+	 * @param action The action that will execute when this state is entered
+	 * @param transition The single supported transition for this state, mapping
+	 *        a path from this state to another state (triggered by an event).
+	 * @return The action state
 	 */
 	protected ActionState addGetState(String stateIdPrefix, Action action, Transition transition) {
 		return addGetState(stateIdPrefix, action, new Transition[] { transition });
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>get </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object retrieval logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>get</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.get). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @param transitions The supported transitions for this state, where each
+	 *        maps a path from this state to another state (triggered by an
+	 *        event).
+	 * @return The action state
 	 */
 	protected ActionState addGetState(String stateIdPrefix, Transition[] transitions) {
 		return addActionState(get(stateIdPrefix), transitions);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param action
-	 * @param transitions
-	 * @return
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>get </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object retrieval logic.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>get</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.get).
+	 * @param action The action that will execute when this state is entered
+	 * @param transitions The supported transitions for this state, where each
+	 *        maps a path from this state to another state (triggered by an
+	 *        event).
+	 * @return The action state
 	 */
 	protected ActionState addGetState(String stateIdPrefix, Action action, Transition[] transitions) {
 		return addActionState(get(stateIdPrefix), action, transitions);
