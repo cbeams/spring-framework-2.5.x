@@ -25,6 +25,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 /**
@@ -136,6 +137,9 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 */
 	public int update(Object[] args) throws DataAccessException {
 		validateParameters(args);
+		if (!this.parameterQueue.isEmpty() && args.equals(this.parameterQueue.getLast())) {
+			throw new InvalidDataAccessApiUsageException("Object array containing the parameters cannot be reused -- you must create a new object arrray for each call to update");
+		}
 		this.parameterQueue.add(args);
 
 		if (this.parameterQueue.size() == this.batchSize) {
