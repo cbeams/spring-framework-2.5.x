@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.bind.ServletRequestDataBinder;
 
 /**
  * @author Juergen Hoeller
@@ -132,8 +133,8 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 		assertEquals("type1", file1.getContentType());
 		assertEquals("type2", file2.getContentType());
-		assertEquals("file1.txt", file1.getOriginalFileName());
-		assertEquals("file2.txt", file2.getOriginalFileName());
+		assertEquals("field1.txt", file1.getOriginalFileName());
+		assertEquals("field2.txt", file2.getOriginalFileName());
 		assertEquals("text1", new String(file1.getBytes()));
 		assertEquals("text2", new String(file2.getBytes()));
 		assertEquals(5, file1.getSize());
@@ -146,6 +147,14 @@ public class CommonsMultipartResolverTests extends TestCase {
 		file2.transferTo(transfer2);
 		assertEquals(transfer1, ((MockFileItem) file1.getFileItem()).writtenFile);
 		assertEquals(transfer2, ((MockFileItem) file2.getFileItem()).writtenFile);
+
+		MultipartTestBean mtb = new MultipartTestBean();
+		assertEquals(null, mtb.getField1());
+		assertEquals(null, mtb.getField2());
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(mtb, "mybean");
+		binder.bind(request);
+		assertEquals(file1, mtb.getField1());
+		assertEquals(new String(file2.getBytes()), new String(mtb.getField2()));
 
 		resolver.cleanupMultipart(request);
 		assertTrue(((MockFileItem) file1.getFileItem()).deleted);
@@ -232,8 +241,8 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 		public List parseRequest(HttpServletRequest request) {
 			List fileItems = new ArrayList();
-			MockFileItem fileItem1 = new MockFileItem("field1", "type1", "file1.txt", "text1");
-			MockFileItem fileItem2 = new MockFileItem("field2", "type2", "C:/file2.txt", "text2");
+			MockFileItem fileItem1 = new MockFileItem("field1", "type1", "field1.txt", "text1");
+			MockFileItem fileItem2 = new MockFileItem("field2", "type2", "C:/field2.txt", "text2");
 			MockFileItem fileItem3 = new MockFileItem("field3", null, null, "value3");
 			MockFileItem fileItem4 = new MockFileItem("field4", null, null, "value4");
 			MockFileItem fileItem5 = new MockFileItem("field4", null, null, "value5");
@@ -330,6 +339,29 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 		public OutputStream getOutputStream() throws IOException {
 			throw new UnsupportedOperationException();
+		}
+	}
+
+
+	public class MultipartTestBean {
+
+		private MultipartFile field1;
+		private byte[] field2;
+
+		public void setField1(MultipartFile field1) {
+			this.field1 = field1;
+		}
+
+		public MultipartFile getField1() {
+			return field1;
+		}
+
+		public void setField2(byte[] field2) {
+			this.field2 = field2;
+		}
+
+		public byte[] getField2() {
+			return field2;
 		}
 	}
 

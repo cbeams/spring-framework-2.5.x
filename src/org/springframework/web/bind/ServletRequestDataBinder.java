@@ -5,16 +5,16 @@
  
 package org.springframework.web.bind;
 
-import java.util.Iterator;
 import java.beans.PropertyDescriptor;
+import java.util.Iterator;
 
 import javax.servlet.ServletRequest;
 
-import org.springframework.validation.DataBinder;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.validation.DataBinder;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
  * Use this class to perform manual data binding from servlet request parameters
@@ -56,8 +56,8 @@ public class ServletRequestDataBinder extends DataBinder {
 			Iterator fileNames = multipartRequest.getFileNames();
 			while (fileNames.hasNext()) {
 				String fileName = (String) fileNames.next();
-				PropertyDescriptor descriptor = getBeanWrapper().getPropertyDescriptor(fileName);
-				if (descriptor != null) {
+				if (getBeanWrapper().isWritableProperty(fileName)) {
+					PropertyDescriptor descriptor = getBeanWrapper().getPropertyDescriptor(fileName);
 					MultipartFile file = multipartRequest.getFile(fileName);
 					if (descriptor.getPropertyType().equals(byte[].class)) {
 						pvs.addPropertyValue(fileName, file.getBytes());
