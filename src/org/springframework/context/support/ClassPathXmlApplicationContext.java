@@ -28,6 +28,12 @@ import org.springframework.context.ApplicationContext;
  * ApplicationContext.getResource. Only supports full classpath resource
  * names that include the package path, like "mypackage/myresource.dat".
  *
+ * <p>The config location defaults can be overridden via setConfigLocations,
+ * respectively via the "contextConfigLocation" parameters of ContextLoader and
+ * FrameworkServlet. Config locations can either denote concrete files like
+ * "/mypackage/context.xml" or Ant-style patterns like "/mypackage/*-context.xml"
+ * (see PathMatcher javadoc for pattern details).
+ *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files. This can be leveraged to
  * deliberately override certain bean definitions via an extra XML file.
@@ -36,7 +42,7 @@ import org.springframework.context.ApplicationContext;
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
- * @version $Id: ClassPathXmlApplicationContext.java,v 1.11 2004-03-18 14:53:36 jhoeller Exp $
+ * @version $Id: ClassPathXmlApplicationContext.java,v 1.12 2004-04-05 07:18:42 jhoeller Exp $
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 

@@ -33,9 +33,13 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  *
  * <p>By default, the configuration will be taken from "/WEB-INF/applicationContext.xml"
  * for the root context, and "/WEB-INF/test-servlet.xml" for a context with the namespace
- * "test-servlet" (like for a DispatcherServlet instance with the web.xml servlet-name "test").
- * These config location defaults can be overridden via setConfigLocations, respectively
- * via the "contextConfigLocation" parameters of ContextLoader and FrameworkServlet.
+ * "test-servlet" (like for a DispatcherServlet instance with the servlet-name "test").
+ *
+ * <p>The config location defaults can be overridden via setConfigLocations,
+ * respectively via the "contextConfigLocation" parameters of ContextLoader and
+ * FrameworkServlet. Config locations can either denote concrete files like
+ * "/WEB-INF/context.xml" or Ant-style patterns like "/WEB-INF/*-context.xml"
+ * (see PathMatcher javadoc for pattern details).
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files. This can be leveraged to
@@ -55,6 +59,7 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * @see #setConfigLocations
  * @see org.springframework.web.context.ContextLoader#initWebApplicationContext
  * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
+ * @see org.springframework.util.PathMatcher#retrieveMatchingFiles
  * @see org.springframework.context.support.AbstractApplicationContext#getResource
  * @see org.springframework.ui.context.ThemeSource
  */

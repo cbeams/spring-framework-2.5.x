@@ -17,6 +17,8 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.core.io.Resource;
 
 /**
  * Convenient abstract superclass for ApplicationContext implementations
@@ -31,7 +34,7 @@ import org.springframework.context.ApplicationContextException;
  * understood by an XmlBeanDefinitionParser.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
@@ -62,7 +65,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 			loadBeanDefinitions(beanDefinitionReader);
 			this.beanFactory = beanFactory;
 			if (logger.isInfoEnabled()) {
-				logger.info("Bean factory for application context '" + getDisplayName() + "': " + beanFactory);
+				logger.info("Bean factory for application context [" + getDisplayName() + "]: " + beanFactory);
 			}
 		}
 		catch (IOException ex) {
@@ -104,15 +107,20 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	 * Load the bean definitions with the given XmlBeanDefinitionReader.
 	 * <p>The lifecycle of the bean factory is handled by refreshBeanFactory;
 	 * therefore this method is just supposed to load and/or register bean definitions.
+	 * <p>Delegates to resolveConfigLocations for converting location strings
+	 * into Resource instances.
 	 * @throws BeansException in case of bean registration errors
 	 * @throws IOException if the required XML document isn't found
 	 * @see #refreshBeanFactory
+	 * @see #getConfigLocations
+	 * @see #resolveConfigLocations
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
-		String[] configLocations = getConfigLocations();
+		List configLocations = resolveConfigLocations(getConfigLocations());
 		if (configLocations != null) {
-			for (int i = 0; i < configLocations.length; i++) {
-				reader.loadBeanDefinitions(getResource(configLocations[i]));
+			for (Iterator it = configLocations.iterator(); it.hasNext();) {
+				Resource resource = (Resource) it.next();
+				reader.loadBeanDefinitions(resource);
 			}
 		}
 	}

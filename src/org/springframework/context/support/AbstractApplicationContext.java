@@ -1,21 +1,23 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.context.support;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,8 +53,10 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.PathMatcher;
 
 /**
  * Partial implementation of ApplicationContext. Doesn't mandate the type
@@ -77,7 +81,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -475,6 +479,46 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.messageSource.getMessage(resolvable, locale);
 	}
 
+
+	//---------------------------------------------------------------------
+	// Miscellaneous methods, to be used by subclasses that need them
+	//---------------------------------------------------------------------
+
+	/**
+	 * Resolve the given config locations into Resource instances.
+	 * <p>Config locations can either be suitable for the getResource method
+	 * (URLs like "file:C:/context.xml", pseudo-URLs like "classpath:/context.xml",
+	 * relative file paths like "/WEB-INF/context.xml"), or Ant-style patterns
+	 * for relative file paths like "/WEB-INF/*-context.xml".
+	 * @param configLocations the location strings
+	 * @return the List of Resource instances
+	 * @throws java.io.IOException if there was an I/O error searching for resources
+	 * @see #getResource
+	 * @see org.springframework.core.io.Resource
+	 * @see org.springframework.util.PathMatcher
+	 */
+	protected List resolveConfigLocations(String[] configLocations) throws IOException {
+		if (configLocations == null) {
+			return null;
+		}
+		List configResources = new ArrayList();
+		for (int i = 0; i < configLocations.length; i++) {
+			if (PathMatcher.isPattern(configLocations[i])) {
+				File rootDir = getResource("/").getFile().getAbsoluteFile();
+				logger.debug("Looking for bean definition files in directory tree [" + rootDir.getPath() + "]");
+				List matchingFiles = PathMatcher.retrieveMatchingFiles(configLocations[i], rootDir);
+				logger.info("Resolved location pattern [" + configLocations[i] + "] to file paths: " + matchingFiles);
+				for (Iterator it = matchingFiles.iterator(); it.hasNext();) {
+					File file = (File) it.next();
+					configResources.add(new FileSystemResource(file));
+				}
+			}
+			else {
+				configResources.add(getResource(configLocations[i]));
+			}
+		}
+		return configResources;
+	}
 
 	/**
 	 * Return information about this context.
