@@ -138,7 +138,7 @@ public class EndState extends AbstractState {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Returning view name '" + viewName + "' to render");
 				}
-				return new ModelAndView(viewName, endingFlowSession.getAttributes());
+				return new ModelAndView(viewName, endingFlowSession.getModel());
 			}
 		}
 	}

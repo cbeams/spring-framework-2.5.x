@@ -172,10 +172,10 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	//methods implementing AttributesAccessor
 
 	/**
-	 * Returns a the attributes stored in this flow session.
+	 * Returns all the attributes stored in this flow session as a model map.
 	 * @return the flow session data model
 	 */
-	public Map getAttributes() {
+	public Map getModel() {
 		return attributes;
 	}
 

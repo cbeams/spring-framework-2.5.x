@@ -421,14 +421,14 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 * @return Map of model attributes for this flow execution.
 	 */
 	public Map getModel() {
-		Map model = new HashMap(getActiveFlowSession().getAttributes());
+		Map model = new HashMap(getActiveFlowSession().getModel());
 		model.put(getFlowExecutionAttributeName(), this);
 		return model;
 	}
 
 	/**
-	 * Returns the name of the flow execution attribute, a index to lookup this
-	 * flow execution.
+	 * Returns the name of the flow execution attribute, a special index to
+	 * lookup this flow execution as an attribute.
 	 * @return This flow execution's name
 	 */
 	protected Object getFlowExecutionAttributeName() {
@@ -524,16 +524,16 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	public void setAttributes(Map attributes) {
-		if (attributes.containsKey(ATTRIBUTE_NAME)) {
-			throw new IllegalArgumentException("Attribute name '" + ATTRIBUTE_NAME
+		if (attributes.containsKey(getFlowExecutionAttributeName())) {
+			throw new IllegalArgumentException("Attribute name '" + getFlowExecutionAttributeName()
 					+ "' is reserved for internal use only");
 		}
 		getActiveFlowSession().setAttributes(attributes);
 	}
 
 	public void removeAttribute(String attributeName) {
-		if (ATTRIBUTE_NAME.equals(attributeName)) {
-			throw new IllegalArgumentException("Attribute name '" + ATTRIBUTE_NAME
+		if (getFlowExecutionAttributeName().equals(attributeName)) {
+			throw new IllegalArgumentException("Attribute name '" + getFlowExecutionAttributeName()
 					+ "' is reserved for internal use only");
 		}
 		getActiveFlowSession().removeAttribute(attributeName);
