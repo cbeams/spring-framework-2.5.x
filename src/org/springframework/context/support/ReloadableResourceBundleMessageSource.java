@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -403,19 +404,33 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
 		try {
 			long fileTimestamp = -1;
+
 			if (this.cacheMillis >= 0) {
 				// last-modified timestamp of file will just be read if caching with timeout
-				// (allowing to use classpath resources if caching forever)
-				fileTimestamp = resource.getFile().lastModified();
-				if (fileTimestamp == 0) {
-					throw new IOException("File [" + resource.getFile().getAbsolutePath() + "] does not exist");
+				File file = null;
+				try {
+					file = resource.getFile();
 				}
-				if (propHolder != null && propHolder.getFileTimestamp() == fileTimestamp) {
+				catch (IOException ex) {
+					// probably a class path resource: cache it forever
 					if (logger.isDebugEnabled()) {
-						logger.debug("Re-caching properties for filename [" + filename + "] - file hasn't been modified");
+						logger.debug(
+								resource + " could not be resolved in the file system - assuming that is hasn't changed", ex);
 					}
-					propHolder.setRefreshTimestamp(refreshTimestamp);
-					return propHolder;
+					file = null;
+				}
+				if (file != null) {
+					fileTimestamp = file.lastModified();
+					if (fileTimestamp == 0) {
+						throw new IOException("File [" + file.getAbsolutePath() + "] does not exist");
+					}
+					if (propHolder != null && propHolder.getFileTimestamp() == fileTimestamp) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Re-caching properties for filename [" + filename + "] - file hasn't been modified");
+						}
+						propHolder.setRefreshTimestamp(refreshTimestamp);
+						return propHolder;
+					}
 				}
 			}
 
