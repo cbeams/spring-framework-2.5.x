@@ -1,37 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <!--
 	Spring XML BeanFactory DTD.
-	Author: Rod Johnson
-	
+	Authors: Rod Johnson, Juergen Hoeller
+
 	This defines a simple and consistent way of creating a namespace
 	of JavaBeans configured by a Spring XmlBeanFactory.
-	
+
 	This document type is used by most Spring functionality, including
 	web application contexts, which are based on BeanFactories.
-	
+
 	Each <bean> element in this document defines a JavaBean.
-	Typically the bean class is specified, along with JavaBean
-	properties.
-	
+	Typically the bean class is specified, along with JavaBean properties.
+
 	References among beans are supported (setting a JavaBean
 	property to refer to another bean in the same factory).
-	
+
 	Bean instances can be "singletons" (shared instances)
 	or "prototypes" (independent instances).
-	
-	There is also support for lists, maps, and 
-	java.util.Properties types.
-	
+
+	There is also support for lists, maps, and java.util.Properties types.
+
 	As the format is simple, a DTD is sufficient, and there's
 	no need for a schema at this point.
-	
-	$Id: spring-beans.dtd,v 1.10 2003-11-09 21:38:37 jhoeller Exp $
+
+  XML documents that conform to this DTD should declare the following doctype:
+	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+	$Id: spring-beans.dtd,v 1.11 2003-11-10 18:03:42 jhoeller Exp $
 -->
 
 <!-- 
 	The document root.
 	At least one bean definition is required.
 -->
-
 <!ELEMENT beans (
         bean+
 )>
@@ -51,15 +53,16 @@
 )>
 
 <!--
-	All beans are identified by an id, to enable reference checking.
-	There are constraints on a valid XML id: if you want to reference
-	your bean in Java code using a name that's illegal as an XML id,
-	use the optional "name" attribute.
+	Beans can be identified by an id, to enable reference checking.
+	There are constraints on a valid XML id: if you want to reference your bean
+	in Java code using a name that's illegal as an XML id, use the optional
+	"name" attribute. If neither given, the bean class name is used as id.
 -->
 <!ATTLIST bean id ID #IMPLIED>
 
 <!--
-	Optional. Can be used to create an alias illegal in an id.
+	Optional. Can be used to create one or more aliases illegal in an id.
+	Multiple aliases can be separated by any number of spaces or commas.
 -->
 <!ATTLIST bean name CDATA #IMPLIED>
 
