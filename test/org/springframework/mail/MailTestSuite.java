@@ -11,7 +11,7 @@ import org.easymock.MockControl;
 
 /**
  * @author Dmitriy Kopylenko
- * @version $Id: MailTestSuite.java,v 1.3 2003-09-19 11:50:40 johnsonr Exp $
+ * @version $Id: MailTestSuite.java,v 1.4 2003-09-22 19:26:09 dkopylenko Exp $
  */
 public class MailTestSuite extends TestCase {
 
@@ -88,7 +88,7 @@ public class MailTestSuite extends TestCase {
 			mt.sendMail(new MailCallback() {
 				public void configure(MailSettings mailSettings) {
 					mailSettings.setMailTo("xxx@yahoo.com");
-					mailSettings.setMailFrom("xxx@org.springframework.com");
+					mailSettings.setMailFrom("xxx@springframework.org");
 					mailSettings.setMailSubject("test");
 					mailSettings.setMailText("test");
 					mailSettings.setMailHost("localhost");
