@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -35,12 +36,17 @@ import org.springframework.core.Ordered;
  */
 public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered, Serializable {
 
+	/** use serialVersionUID from Spring 1.1 for interoperability */
+	private static final long serialVersionUID = 1360502830817661569L;
+
+
 	private int order = Integer.MAX_VALUE;
 
 	private Advice advice;
 	
 	private Set interfaces = new HashSet();
-	
+
+
 	public DefaultIntroductionAdvisor(Advice advice) {
 		if (advice instanceof IntroductionInfo) {
 			init(advice, (IntroductionInfo) advice);
@@ -72,7 +78,8 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 			addInterface(introducedInterfaces[i]);
 		}
 	}
-	
+
+
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -97,6 +104,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
+
 	public boolean matches(Class clazz) {
 		return true;
 	}
@@ -115,8 +123,8 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 			 throw new IllegalArgumentException("Class '" + intf.getName() +
 																					"' is not an interface; cannot be used in an introduction");
 			}
-			
-			if (advice instanceof DynamicIntroductionAdvice && !((DynamicIntroductionAdvice) this.advice).implementsInterface(intf)) {
+			if (this.advice instanceof DynamicIntroductionAdvice &&
+					!((DynamicIntroductionAdvice) this.advice).implementsInterface(intf)) {
 			 throw new IllegalArgumentException("IntroductionAdvice [" + this.advice + "] " +
 					 "does not implement interface '" + intf.getName() + "' specified in introduction advice");
 			}
@@ -124,9 +132,8 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	}
 	
 	public String toString() {
-		return "DefaultIntroductionAdvisor: interfaces=(" +
-			AopUtils.interfacesString(interfaces) + "); " +
-			"introductionInterceptor=" + advice;
+		return "DefaultIntroductionAdvisor: interfaces=[" + AopUtils.interfacesString(this.interfaces) +
+				"]; introductionInterceptor=[" + this.advice + "]";
 	}
 
 }
