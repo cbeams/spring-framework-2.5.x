@@ -32,6 +32,10 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class RemoteInvocationResult implements Serializable {
 
+	/** use serialVersionUID from Spring 1.1 for interoperability */
+	private static final long serialVersionUID = 2138555143707773549L;
+
+
 	private Object value;
 
 	private Throwable exception;

@@ -19,6 +19,7 @@ package org.springframework.remoting.support;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,10 @@ import org.aopalliance.intercept.MethodInvocation;
  * @see RemoteInvocationExecutor
  */
 public class RemoteInvocation implements Serializable {
+
+	/** use serialVersionUID from Spring 1.1 for interoperability */
+	private static final long serialVersionUID = 6876024250231820554L;
+
 
 	private String methodName;
 
@@ -172,6 +177,11 @@ public class RemoteInvocation implements Serializable {
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Method method = targetObject.getClass().getMethod(this.methodName, this.parameterTypes);
 		return method.invoke(targetObject, this.arguments);
+	}
+
+	public String toString() {
+		return "RemoteInvocation: methodName='" + this.methodName + "', parameterTypes=" +
+				Arrays.asList(this.parameterTypes);
 	}
 
 }
