@@ -18,7 +18,7 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +31,7 @@ import org.springframework.core.JdkVersion;
  * Method.hashCode() call. On J2SE 1.3, falls back to using java.util.HashMap.
  *
  * @author Rod Johnson
- * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.7 2004-06-02 17:07:34 jhoeller Exp $
+ * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.8 2004-06-02 20:44:07 jhoeller Exp $
  * @see java.util.IdentityHashMap
  * @see java.util.HashMap
  * @see java.lang.reflect.Method#hashCode
@@ -79,7 +79,7 @@ public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFact
 	private static abstract class IdentityHashMapCreator {
 
 		private static Map createIdentityHashMap() {
-			return new LinkedHashMap();
+			return new IdentityHashMap();
 		}
 	}
 
