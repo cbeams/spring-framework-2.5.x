@@ -25,7 +25,7 @@ import org.springframework.util.ObjectUtils;
  * Serializable implementation of the Person interface.
  * 
  * @author Rod Johnson
- * @version $Id: SerializablePerson.java,v 1.2 2004-07-26 15:36:42 johnsonr Exp $
+ * @version $Id: SerializablePerson.java,v 1.3 2004-07-29 12:02:40 johnsonr Exp $
  */
 public class SerializablePerson implements Person, Serializable {
 	private String name;
@@ -47,7 +47,10 @@ public class SerializablePerson implements Person, Serializable {
 		this.name = name;
 	}
 	
-	public Object echo(Object o) {
+	public Object echo(Object o) throws Throwable {
+		if (o instanceof Throwable) {
+			throw (Throwable) o;
+		}
 		return o;
 	}
 	

@@ -19,14 +19,19 @@ package org.springframework.beans;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: Person.java,v 1.3 2004-07-26 15:36:42 johnsonr Exp $
+ * @version $Id: Person.java,v 1.4 2004-07-29 12:02:40 johnsonr Exp $
  */
 public interface Person {
+	
 	String getName();
 	void setName(String name);
 	int getAge();
 	void setAge(int i);
 	
-	/** Test for non-property method matching */
-	Object echo(Object o);
+	/** 
+	 * Test for non-property method matching.
+	 * If the parameter is a Throwable, it will be thrown rather than 
+	 * returned.
+	 */
+	Object echo(Object o) throws Throwable;
 }

@@ -29,7 +29,7 @@ import org.springframework.util.SerializationTestUtils;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: NameMatchMethodPointcutTests.java,v 1.1 2004-07-26 15:37:28 johnsonr Exp $
+ * @version $Id: NameMatchMethodPointcutTests.java,v 1.2 2004-07-29 12:01:46 johnsonr Exp $
  */
 public class NameMatchMethodPointcutTests extends TestCase {
 	
@@ -65,7 +65,7 @@ public class NameMatchMethodPointcutTests extends TestCase {
 		assertTrue(pc.isMatch("testing", "*ing"));
 	}
 		
-	public void testEmpty() {
+	public void testEmpty() throws Throwable {
 		assertEquals(0, nop.getCount());
 		proxied.getName();
 		proxied.setName("");
@@ -74,7 +74,7 @@ public class NameMatchMethodPointcutTests extends TestCase {
 	}
 	
 	
-	public void testMatchOneMethod() {
+	public void testMatchOneMethod() throws Throwable {
 		pc.addMethodName("echo");
 		pc.addMethodName("set*");
 		assertEquals(0, nop.getCount());
@@ -91,7 +91,7 @@ public class NameMatchMethodPointcutTests extends TestCase {
 		assertEquals(3, nop.getCount());
 	}
 
-	public void testSets() {
+	public void testSets() throws Throwable {
 		pc.setMappedNames(new String[] { "set*", "echo" });
 		assertEquals(0, nop.getCount());
 		proxied.getName();
@@ -101,7 +101,7 @@ public class NameMatchMethodPointcutTests extends TestCase {
 		assertEquals(2, nop.getCount());
 	}
 	
-	public void testSerializable() throws Exception {
+	public void testSerializable() throws Throwable {
 		testSets();
 		// Count is now 2
 		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(proxied);
