@@ -49,6 +49,13 @@ public interface FlowExecutionContext {
 	public boolean isFlowExecutionActive();
 
 	/**
+	 * Returns the current state of the flow execution.
+	 * @return The current state
+	 * @throws IllegalStateException the flow execution is not active
+	 */
+	public State getCurrentState() throws IllegalStateException;
+
+	/**
 	 * Returns the last event signaled within this flow execution context. The
 	 * event may or may not have caused a state transition to happen.
 	 * @return The last signaled event
