@@ -40,7 +40,7 @@ public class BufferedValueModel extends AbstractValueModel implements
             public void valueChanged() {
                 if (logger.isDebugEnabled()) {
                     logger
-                            .debug("[Wrapped model value has changed; updating buffered value to ;"
+                            .debug("[Wrapped model value has changed; new value is '"
                                     + BufferedValueModel.this.wrappedModel
                                             .get() + "']");
                 }

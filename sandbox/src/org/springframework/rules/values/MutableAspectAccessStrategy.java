@@ -24,6 +24,9 @@ public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
     public void removeValueListener(ValueListener o, String aspect);
 
     public void setValue(String aspect, Object value);
-    
+
+    public MutableAspectAccessStrategy newNestedAccessor(
+            ValueModel parentValueHolder);
+
     public ValueModel getDomainObjectHolder();
 }

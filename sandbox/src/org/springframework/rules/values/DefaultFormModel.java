@@ -98,6 +98,10 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
         return false;
     }
 
+    public AspectAccessStrategy getAspectAccessStrategy() {
+        return domainObjectAccessStrategy;
+    }
+    
     public MetaAspectAccessStrategy getMetaAspectAccessor() {
         return domainObjectAccessStrategy.getMetaAspectAccessor();
     }

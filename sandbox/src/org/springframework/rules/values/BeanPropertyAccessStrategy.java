@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.enum.CodedEnum;
 
 /**
@@ -97,7 +98,19 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
      * @see org.springframework.rules.values.MutableAspectAccessStrategy#getValue(java.lang.String)
      */
     public Object getValue(String aspect) {
-        return beanWrapper.getPropertyValue(aspect);
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Accessing aspect '" + aspect + "'...");
+            }
+            return beanWrapper.getPropertyValue(aspect);
+        }
+        catch (NullValueInNestedPathException e) {
+            logger
+                    .info(
+                            "Bean property accessor encountered a null object along property path; returning null",
+                            e);
+            return null;
+        }
     }
 
     /**
@@ -153,6 +166,11 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
 
     public ValueModel getDomainObjectHolder() {
         return beanHolder;
+    }
+
+    public MutableAspectAccessStrategy newNestedAccessor(
+            ValueModel parentValueHolder) {
+        return new BeanPropertyAccessStrategy(parentValueHolder);
     }
 
 }

@@ -31,14 +31,14 @@ public class AspectAdapter extends AbstractValueModel {
         if (aspectAccessStrategy.getDomainObjectHolder() != null) {
             if (logger.isDebugEnabled()) {
                 logger
-                        .debug("[Aspect Adapter attaching to mutable domain object holder.]");
+                        .debug("[Aspect Adapter for aspect '" + aspect + "' attaching to mutable domain object holder.]");
             }
             aspectAccessStrategy.getDomainObjectHolder().addValueListener(
                     new ValueListener() {
                         public void valueChanged() {
                             if (logger.isDebugEnabled()) {
                                 logger
-                                        .debug("[Notifying any dependents value may have changed; target object changed]");
+                                        .debug("[Notifying any dependents the '" + AspectAdapter.this.aspect + "' aspect value may have changed; target object changed]");
                             }
                             AspectAdapter.this.fireValueChanged();
                         }
