@@ -28,6 +28,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.ActionBean;
 import org.springframework.web.flow.ActionBeanEvent;
 import org.springframework.web.flow.AttributesAccessor;
+import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.util.WebUtils;
 
@@ -73,15 +74,19 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	}
 
 	protected ActionBeanEvent success() {
-		return new ActionBeanEvent(this, SUCCESS_EVENT_ID);
+		return new ActionBeanEvent(this, Flow.SUCCESS);
 	}
 
 	protected ActionBeanEvent error() {
-		return new ActionBeanEvent(this, ERROR_EVENT_ID);
+		return new ActionBeanEvent(this, Flow.ERROR);
+	}
+
+	protected ActionBeanEvent add() {
+		return new ActionBeanEvent(this, Flow.ADD);
 	}
 
 	protected ActionBeanEvent search() {
-		return new ActionBeanEvent(this, SEARCH_EVENT_ID);
+		return new ActionBeanEvent(this, Flow.SEARCH);
 	}
 
 	protected String getStringParameter(HttpServletRequest request, String parameterName) {
