@@ -16,6 +16,12 @@ distribution/website before using any of them in your own applications.
 - Apache Axis 1.1 (http://ws.apache.org/axis)
 - required for running JPetStore
 
+* c3p0/c3p0-0.8.5.jar
+- C3P0 0.8.5 connection pool (http://sourceforge.net/projects/c3p0)
+- required for building the framework
+- required at runtime when using Spring's C3P0NativeJdbcExtractor
+- required for running Image Database
+
 * caucho/burlap-2.1.12.jar
 - Burlap 2.1.12 (http://www.caucho.com/burlap)
 - required for building the framework
@@ -88,13 +94,13 @@ distribution/website before using any of them in your own applications.
 - J2EE Connector Architecture 1.5 (http://java.sun.com/j2ee/connector)
 - required at runtime when using Hibernate's JCA Connector
 
-* j2ee/ejb.jar
-- Enterprise JavaBeans API 2.0 (http://java.sun.com/products/ejb)
+* j2ee/ejb-api.jar
+- Enterprise JavaBeans API 2.1 (http://java.sun.com/products/ejb)
 - required for building the framework
 - required at runtime when using Spring's EJB support
 
 * j2ee/jaxrpc.jar
-- JAX-RPC API 1.0 (http://java.sun.com/xml/jaxrpc)
+- JAX-RPC API 1.1 (http://java.sun.com/xml/jaxrpc)
 - required for building the framework
 - required at runtime when using Spring's JAX-RPC support
 
@@ -107,6 +113,11 @@ distribution/website before using any of them in your own applications.
 - Java Message Service API 1.1 (java.sun.com/products/jms)
 - required for building the framework
 - required at runtime when using Spring's AbstractJmsMessageDrivenBean
+
+* j2ee/jsp-api.jar
+- JSP API 2.0 (http://java.sun.com/products/jsp)
+- required for building the framework
+- required at runtime when using Spring's JSP support
 
 * j2ee/jstl.jar
 - JSP Standard Tag Library API 1.0 (http://java.sun.com/products/jstl)
@@ -123,8 +134,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JavaMailSender
 
-* j2ee/servlet.jar
-- Servlet API 2.3, including JSP 1.2 (http://java.sun.com/products/servlet)
+* j2ee/servlet-api.jar
+- Servlet API 2.4 (http://java.sun.com/products/servlet)
 - required for building the framework
 - required at runtime when using Spring's web support
 
@@ -152,7 +163,7 @@ distribution/website before using any of them in your own applications.
 - Commons DBCP 1.2.1 (http://jakarta.apache.org/commons/dbcp)
 - required for building the framework
 - required at runtime when using Spring's CommonsDbcpNativeJdbcExtractor
-- required for running JPetStore and Image Database
+- required for running JPetStore
 
 * jakarta-commons/commons-digester.jar
 - Commons Digester 1.5 (http://jakarta.apache.org/commons/digester)
