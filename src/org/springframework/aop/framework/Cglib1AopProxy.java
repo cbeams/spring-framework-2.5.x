@@ -36,7 +36,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: Cglib1AopProxy.java,v 1.6 2003-12-10 11:23:56 johnsonr Exp $
+ * @version $Id: Cglib1AopProxy.java,v 1.7 2003-12-11 09:02:34 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
 class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
@@ -73,9 +73,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 	public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 	
 		MethodInvocation invocation = null;
-		MethodInvocation oldInvocation = null;
 		Object oldProxy = null;
-		boolean setInvocationContext = false;
 		boolean setProxyContext = false;
 	
 		TargetSource targetSource = advised.targetSource;
@@ -116,8 +114,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 			
 			// Check whether we only have one InvokerInterceptor: that is, no real advice,
 			// but just reflective invocation of the target.
-			// We can only do this if the Advised config object lets us.
-			if (chain.isEmpty() && !advised.exposeInvocation) {
+			if (chain.isEmpty()) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
@@ -127,17 +124,6 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 				// We need to create a method invocation...
 				invocation = new CglibMethodInvocation(proxy, target, targetClass, method, args, 
 							targetClass, chain, methodProxy);
-			
-				if (this.advised.exposeInvocation) {
-					// Make invocation available if necessary.
-					// Save the old value to reset when this method returns
-					// so that we don't blow away any existing state
-					oldInvocation = AopContext.setCurrentInvocation(invocation);
-					// We need to know whether we actually set it, as
-					// this block may not have been reached even if exposeInvocation
-					// is true
-					setInvocationContext = true;
-				}
 				
 				// If we get here, we need to create a MethodInvocation
 				retVal = invocation.proceed();
@@ -158,10 +144,6 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 				targetSource.releaseTarget(target);
 			}
 			
-			if (setInvocationContext) {
-				// Restore old invocation, which may be null
-				AopContext.setCurrentInvocation(oldInvocation);
-			}
 			if (setProxyContext) {
 				// Restore old proxy
 				AopContext.setCurrentProxy(oldProxy);

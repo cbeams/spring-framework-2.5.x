@@ -17,7 +17,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: JdkDynamicProxyTests.java,v 1.1 2003-12-02 14:12:38 johnsonr Exp $
+ * @version $Id: JdkDynamicProxyTests.java,v 1.2 2003-12-11 09:01:26 johnsonr Exp $
  */
 public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
@@ -100,7 +100,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 			};
 		
 			AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
-			pc.setExposeInvocation(true);
+			pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
 			TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 				public Object invoke(MethodInvocation invocation) throws Throwable {
 					// Assert that target matches BEFORE invocation returns

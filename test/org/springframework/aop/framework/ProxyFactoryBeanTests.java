@@ -38,7 +38,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.13 2003-12-08 11:24:20 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.14 2003-12-11 09:01:26 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -203,7 +203,6 @@ public class ProxyFactoryBeanTests extends TestCase {
 
 	public void testCanGetFactoryReferenceAndManipulate() {
 		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test1");
-		assertTrue(config.getExposeInvocation() == false);
 		assertEquals("Have one advisors", 1, config.getAdvisors().length);
 		
 		ITestBean tb = (ITestBean) factory.getBean("test1");

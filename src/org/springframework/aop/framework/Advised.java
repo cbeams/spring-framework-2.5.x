@@ -19,17 +19,10 @@ import org.springframework.aop.Advisor;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.5 2003-11-29 13:36:33 johnsonr Exp $
+ * @version $Id: Advised.java,v 1.6 2003-12-11 09:02:34 johnsonr Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
-	
-	/**
-	 * Get whether the factory should expose the AOP Alliance method invocation as a ThreadLocal
-	 * @return whether the factory should expose the AOP Alliance method invocation as a ThreadLocal
-	 * @see AopContext
-	 */
-	boolean getExposeInvocation();
 	
 	/**
 	 * Get whether the factory should expose the proxy as a ThreadLocal. 

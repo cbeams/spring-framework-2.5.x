@@ -38,7 +38,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.11 2003-12-08 23:17:17 colins Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.12 2003-12-11 09:01:26 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -108,11 +108,11 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			String task = "get invocation on way IN";
 			try {
-				MethodInvocation current = AopContext.currentInvocation();
+				MethodInvocation current = ExposeInvocationInterceptor.currentInvocation();
 				assertEquals(mi, current);
 				Object retval = mi.proceed();
 				task = "get invocation on way OUT";
-				assertEquals(current, AopContext.currentInvocation());
+				assertEquals(current, ExposeInvocationInterceptor.currentInvocation());
 				return retval;
 			}
 			catch (AspectException ex) {
@@ -177,26 +177,25 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		// Permit proxy and invocation checkers to get context from AopContext
 		pf1.setExposeProxy(true);
-		pf1.setExposeInvocation(true);
-		assertTrue(pf1.getExposeInvocation());
 		NopInterceptor di1 = new NopInterceptor();
 		pf1.addInterceptor(0, di1);
 		pf1.addInterceptor(1, new ProxyMatcherInterceptor());
 		pf1.addInterceptor(2, new CheckMethodInvocationIsSameInAndOutInterceptor());
 		pf1.addInterceptor(1, new CheckMethodInvocationViaThreadLocalIsSameInAndOutInterceptor());
+		// Must be first
+		pf1.addInterceptor(0, ExposeInvocationInterceptor.INSTANCE);
 		ITestBean advised1 = (ITestBean) pf1.getProxy();
 		advised1.setAge(age1); // = 1 invocation
 		
 		TestBean target2 = new TestBean();
-		ProxyFactory pf2 = new ProxyFactory(target2);
-		pf2.setExposeInvocation(true);
+		ProxyFactory pf2 = new ProxyFactory(target2);		
 		pf2.setExposeProxy(true);
-		assertTrue(pf2.getExposeInvocation());
 		NopInterceptor di2 = new NopInterceptor();
 		pf2.addInterceptor(0, di2);
 		pf2.addInterceptor(1, new ProxyMatcherInterceptor());
 		pf2.addInterceptor(2, new CheckMethodInvocationIsSameInAndOutInterceptor());
 		pf2.addInterceptor(1, new CheckMethodInvocationViaThreadLocalIsSameInAndOutInterceptor());
+		pf2.addInterceptor(0, ExposeInvocationInterceptor.INSTANCE);
 		//System.err.println(pf2.toProxyConfigString());
 		ITestBean advised2 = (ITestBean) createProxy(pf2);
 		advised2.setAge(age2);
@@ -331,13 +330,15 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				if (!context) {
 					assertNoInvocationContext();
 				} else {
-					assertTrue("have context", AopContext.currentInvocation() != null);
+					assertTrue("have context", ExposeInvocationInterceptor.currentInvocation() != null);
 				}
 				return s;
 			}
 		};
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
-		pc.setExposeInvocation(context);
+		if (context) {
+			pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
+		}
 		pc.addInterceptor(mi);
 		// Keep CGLIB happy
 		if (requiresTarget()) {
@@ -409,7 +410,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			}
 		};
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
-		pc.setExposeInvocation(true);
+		pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
 		pc.addInterceptor(mi);
 		
 		// We don't care about the object
@@ -443,7 +444,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			}
 		};
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
-		pc.setExposeInvocation(true);
+		pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
 		pc.addInterceptor(mi);
 	
 		// We don't care about the object
@@ -498,7 +499,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		final ContextTestBean2 expectedTarget = new ContextTestBean2();
 		
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
-		pc.setExposeInvocation(true);
+		pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				// Assert that target matches BEFORE invocation returns
@@ -528,7 +529,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	 */
 	private void assertNoInvocationContext() {
 		try {
-			AopContext.currentInvocation();
+			ExposeInvocationInterceptor.currentInvocation();
 			fail("Expected no invocation context");
 		} catch (AspectException ex) {
 			// ok
@@ -1016,13 +1017,13 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	protected abstract static class ContextTestBean extends TestBean {
 
 		public String getName() {
-			MethodInvocation invocation = AopContext.currentInvocation();
+			MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
 			assertions(invocation);
 			return super.getName();
 		}
 
 		public void absquatulate() {
-			MethodInvocation invocation = AopContext.currentInvocation();
+			MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
 			assertions(invocation);
 			super.absquatulate();
 		}

@@ -32,7 +32,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.6 2003-12-10 11:23:56 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.7 2003-12-11 09:02:34 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -76,9 +76,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 	
 		MethodInvocation invocation = null;
-		MethodInvocation oldInvocation = null;
 		Object oldProxy = null;
-		boolean setInvocationContext = false;
 		boolean setProxyContext = false;
 	
 		TargetSource targetSource = advised.targetSource;
@@ -119,8 +117,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			
 			// Check whether we have any advice. If we don't, we can fallback on
 			// direct reflective invocation of the target, and avoid creating a MethodInvocation
-			// We can only do this if the AdvisedSupport config object lets us.
-			if (chain.isEmpty() && !advised.exposeInvocation) {
+			if (chain.isEmpty()) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
@@ -131,17 +128,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 				//invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, target, args, chain, advised);
 				
 				invocation = new ReflectiveMethodInvocation(proxy, target, method.getDeclaringClass(), method, args, targetClass, chain);
-			
-				if (this.advised.exposeInvocation) {
-					// Make invocation available if necessary.
-					// Save the old value to reset when this method returns
-					// so that we don't blow away any existing state
-					oldInvocation = AopContext.setCurrentInvocation(invocation);
-					// We need to know whether we actually set it, as
-					// this block may not have been reached even if exposeInvocation
-					// is true
-					setInvocationContext = true;
-				}
 				
 				// Proceed to the joinpoint through the interceptor chain
 				retVal = invocation.proceed();
@@ -162,10 +148,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 				targetSource.releaseTarget(target);
 			}
 			
-			if (setInvocationContext) {
-				// Restore old invocation, which may be null
-				AopContext.setCurrentInvocation(oldInvocation);
-			}
 			if (setProxyContext) {
 				// Restore old proxy
 				AopContext.setCurrentProxy(oldProxy);

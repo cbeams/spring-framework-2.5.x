@@ -9,9 +9,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Convenience superclass for configuration used in creating proxies.
+ * Convenience superclass for configuration used in creating proxies,
+ * to ensure that all proxy creators have consistent properties.
+ * <br>
+ * Note that it is now longer possible to configure subclasses to 
+ * expose the MethodInvocation. Interceptors should normally manage their own
+ * ThreadLocals if they need to make resources available to advised objects.
+ * If it's absolutely necessary to expose the MethodInvocation, use an
+ * interceptor to do so.
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.4 2003-12-10 11:23:56 johnsonr Exp $
+ * @version $Id: ProxyConfig.java,v 1.5 2003-12-11 09:02:34 johnsonr Exp $
  */
 public class ProxyConfig {
 	
@@ -32,12 +39,10 @@ public class ProxyConfig {
 	
 	/**
 	 * Should proxies obtained from this configuration expose
-	 * Invocation for the AopContext class to retrieve for targets?
+	 * the AOP proxy for the AopContext class to retrieve for targets?
 	 * The default is false, as enabling this property may
 	 * impair performance.
 	 */
-	protected boolean exposeInvocation;
-
 	protected boolean exposeProxy;
 
 	
@@ -47,7 +52,6 @@ public class ProxyConfig {
 	public void copyFrom(ProxyConfig other) {
 		this.enableCglibSubclassOptimizations = other.getEnableCglibSubclassOptimizations();
 		this.proxyTargetClass = other.proxyTargetClass;
-		this.exposeInvocation = other.exposeInvocation;
 		this.exposeProxy = other.exposeProxy;
 	}
 
@@ -89,25 +93,18 @@ public class ProxyConfig {
 	}
 
 
-	/**
-	 * Set whether the AopContext class will be usable by target objects.
-	 * @param exposeInvocation The exposeInvocation to set
-	 */
-	public final void setExposeInvocation(boolean exposeInvocation) {
-		this.exposeInvocation = exposeInvocation;
-	}
-
-	/**
-	 * Return whether the AopContext class will be usable by target objects.
-	 */
-	public final boolean getExposeInvocation() {
-		return exposeInvocation;
-	}
-
 	public final boolean getExposeProxy() {
 		return this.exposeProxy;
 	}
 
+	/**
+	 * Set whether the proxy should be exposed by the AOP framework as a ThreadLocal for
+	 * retrieval via the AopContext class. This is useful if an advised object needs
+	 * to call another advised method on itself. (If it uses <code>this</code>, the invocation
+	 * will not be advised).
+	 * @param exposeProxy whether the proxy should be exposed. Default
+	 * is false, for optimal pe3rformance.
+	 */
 	public final void setExposeProxy(boolean exposeProxy) {
 		this.exposeProxy = exposeProxy;
 	}
@@ -115,7 +112,6 @@ public class ProxyConfig {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("exposeProxy=" + exposeProxy + "; ");
-		sb.append("exposeInvocation=" + exposeInvocation + "; ");
 		sb.append("enableCglibSubclassOptimizations=" + enableCglibSubclassOptimizations + "; ");
 		return sb.toString();
 	}

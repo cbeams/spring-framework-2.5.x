@@ -19,7 +19,7 @@ import org.springframework.beans.TestBean;
  * TargetSources or do other things that this proxy can't do.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: OptimizedCglibProxyTests.java,v 1.1 2003-12-01 18:28:09 johnsonr Exp $
+ * @version $Id: OptimizedCglibProxyTests.java,v 1.2 2003-12-11 09:01:26 johnsonr Exp $
  */
 public class OptimizedCglibProxyTests extends CglibProxyTests {
 	
@@ -97,7 +97,7 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 			}
 		};
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
-		pc.setExposeInvocation(true);
+		pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
 		pc.addInterceptor(mi);
 	
 		// We don't care about the object
