@@ -64,7 +64,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  *          such as GET, POST and PUT</td>
  *  </tr>
  *  <tr>
- *      <td>requiresSession</td>
+ *      <td>requireSession</td>
  *      <td>false</td>
  *      <td>whether a session should be required for requests to be able to
  *          be handled by this controller. This ensures, derived controller
