@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+  - Application context for the remote OrderService client.
+	- Defines various OrderService proxies to be called by OrderServiceClient.
+	-->
+<beans>
+
+	<!-- Resolves ${...} placeholders from client.properties -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><value>client.properties</value></property>
+	</bean>
+
+	<!-- Proxy for the Hessian-exported OrderService -->
+	<!-- Hessian is a slim binary HTTP remoting protocol -->
+	<bean id="hessianProxy" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+		<property name="serviceInterface">
+			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
+		</property>
+		<property name="serviceUrl">
+			<value>http://${serverName}:${httpPort}${contextPath}/caucho/OrderService-hessian</value>
+		</property>
+	</bean>
+
+	<!-- Proxy for the Burlap-exported OrderService -->
+	<!-- Burlap is a slim XML-based HTTP remoting protocol -->
+	<bean id="burlapProxy" class="org.springframework.remoting.caucho.BurlapProxyFactoryBean">
+		<property name="serviceInterface">
+			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
+		</property>
+		<property name="serviceUrl">
+			<value>http://${serverName}:${httpPort}${contextPath}/caucho/OrderService-burlap</value>
+		</property>
+	</bean>
+
+	<!-- Proxy for the JAX-RPC/Axis-exported OrderService -->
+	<bean id="jaxRpcProxy" class="org.springframework.samples.jpetstore.service.client.AxisPortProxyFactoryBean">
+		<property name="serviceInterface">
+			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
+		</property>
+		<property name="portInterface">
+			<value>org.springframework.samples.jpetstore.service.RemoteOrderService</value>
+		</property>
+		<property name="serviceFactoryClass">
+			<value>org.apache.axis.client.ServiceFactory</value>
+		</property>
+		<property name="wsdlDocumentUrl">
+			<value>http://${serverName}:${httpPort}${contextPath}/axis/OrderService?wsdl</value>
+		</property>
+		<property name="namespaceUri">
+			<value>http://${serverName}:${httpPort}${contextPath}/axis/OrderService</value>
+		</property>
+		<property name="serviceName">
+			<value>JaxRpcOrderServiceService</value>
+		</property>
+		<property name="portName">
+			<value>OrderService</value>
+		</property>
+	</bean>
+
+	<!-- Proxy for the RMI-exported OrderService -->
+	<!-- Commented out by default to avoid conflicts with EJB containers -->
+	<!--
+	<bean id="rmiProxy" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+		<property name="serviceInterface">
+			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
+		</property>
+		<property name="serviceUrl">
+			<value>rmi://${serverName}:${rmiPort}/order</value>
+		</property>
+	</bean>
+	-->
+
+</beans>
