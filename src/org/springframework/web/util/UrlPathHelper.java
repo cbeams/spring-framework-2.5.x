@@ -26,9 +26,9 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Helper class for URL path matching. Provides support for URL paths
- * in ServletDispatcher includes, and support for URL decoding.
+ * in RequestDispatcher includes, and support for URL decoding.
  *
- * <p>Used by AbstractUrlHandlerMapping, AbstractMethodNameResolver
+ * <p>Used by AbstractUrlHandlerMapping, AbstractUrlMethodNameResolver
  * and RequestContext for path matching and/or URI determination.
  *
  * @author Juergen Hoeller
