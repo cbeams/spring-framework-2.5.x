@@ -18,9 +18,7 @@ package org.springframework.web.flow;
 import java.io.Serializable;
 
 /**
- * Provides management information about the current state of a ongoing flow
- * execution.
- * 
+ * Provides management information about an ongoing flow execution.
  * <p>
  * A typical use case of this interface would be a JMX MBean to monitor flow
  * execution.
@@ -31,8 +29,8 @@ import java.io.Serializable;
 public interface FlowExecutionInfo extends AttributesAccessor, Serializable {
 
 	/**
-	 * Return the id of this flow execution. This is not a human
-	 * readable flow definition ID, but a system generated key.
+	 * Return the id of this flow execution. This is not a human readable flow
+	 * definition ID, but a system generated key.
 	 */
 	public String getId();
 

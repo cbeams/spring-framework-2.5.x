@@ -82,7 +82,7 @@ public abstract class TransitionableState extends AbstractState {
 	}
 
 	/**
-	 * Execute the event identified by <code>eventId</code> in this state.
+	 * Signal an occurence of the event identified by <code>eventId</code> in this state.
 	 * 
 	 * @param eventId The id of the event to execute (e.g 'submit', 'next',
 	 *        'back')

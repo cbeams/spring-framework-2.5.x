@@ -152,7 +152,10 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	}
 
 	/**
-	 * @return
+	 * Returns true if a new form object instance should be created per action
+	 * execution request, false if the form object should be created once and
+	 * then cached in flow-scope afterwards.
+	 * @return true or false
 	 */
 	public boolean isCreateFormObjectPerRequest() {
 		return createFormObjectPerRequest;
@@ -187,7 +190,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	}
 
 	/**
-	 * 
+	 *  
 	 */
 	public void afterPropertiesSet() {
 		if (this.validators != null) {
@@ -200,7 +203,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	}
 
 	/*
-	 * 
+	 *  
 	 */
 	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
@@ -212,23 +215,40 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 			return event;
 		}
 		else {
-			return getDefaultResultEvent(request, model, formObject, binder.getErrors());
+			return getDefaultActionResult(request, model, formObject, binder.getErrors());
 		}
 	}
 
 	/**
+	 * Get the default action result for this bind and validate action; this
+	 * implementation returns error() if the binder has errors, success()
+	 * otherwise. Subclasses may overrride.
 	 * @param request
 	 * @param model
 	 * @param formObject
 	 * @param errors
 	 * @return
 	 */
-	protected ActionResult getDefaultResultEvent(HttpServletRequest request, MutableAttributesAccessor model,
+	protected ActionResult getDefaultActionResult(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
 		return errors.hasErrors() ? error() : success();
 	}
 
-	protected final Object loadRequiredFormObject(HttpServletRequest request, AttributesAccessor model) {
+	/**
+	 * Load the backing form object that should be updated from incoming request
+	 * parameters and validated. Throws an exception if the object could not be
+	 * loaded.
+	 * @param request The http request, allowing access to input
+	 *        parameters/attributes needed to retrieve the form object.
+	 * @param model The flow data model, allowing access to attributes needed to
+	 *        retrieve the form object.
+	 * @return The form object
+	 * @throws IllegalStateException the form object loaded was null
+	 * @throws ObjectRetrievalFailureException the form object could not be
+	 *         loaded
+	 */
+	protected final Object loadRequiredFormObject(HttpServletRequest request, AttributesAccessor model)
+			throws IllegalStateException, ObjectRetrievalFailureException {
 		try {
 			// get the form object
 			Object formObject = loadFormObject(request, model);
@@ -242,10 +262,23 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	}
 
 	/**
-	 * Retrieve a form object for the given request.
-	 * @param request current HTTP request
-	 * @return object formObject to bind onto
-	 * @see #createFormObject
+	 * Load the backing form object that should be updated from incoming request
+	 * input and validated. By default, will attempt to instantiate a new form
+	 * object instance transiently in memory if not already present in the flow
+	 * model (and the crateFormObjectPerRequest parameter is marked as false,
+	 * the default.)
+	 * <p>
+	 * Subclasses should override if they need to load the form object from a
+	 * specific location or resource such as a database or filesystem.
+	 * @param request The http request, allowing access to input
+	 *        parameters/attributes needed to retrieve the form object.
+	 * @param model The flow data model, allowing access to attributes needed to
+	 *        retrieve the form object.
+	 * @return The form object
+	 * @throws ObjectRetrievalFailureException the form object could not be
+	 *         loaded
+	 * @throws ServletRequestBindingException the form object could not be
+	 *         loaded because valid input was not provided in the request
 	 */
 	protected Object loadFormObject(HttpServletRequest request, AttributesAccessor model)
 			throws ObjectRetrievalFailureException, ServletRequestBindingException {
