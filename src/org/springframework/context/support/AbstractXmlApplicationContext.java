@@ -17,15 +17,15 @@ import org.springframework.context.ApplicationContextException;
 /**
  * Convenient abstract superclass for ApplicationContext implementations
  * drawing their configuration from XML documents containing bean definitions
- * understood by DefaultXmlBeanDefinitionParser.
+ * understood by an XmlBeanDefinitionParser.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.8 $
- * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
+ * @version $Revision: 1.9 $
+ * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
 
-	/** BeanFactory for this context */
+	/** Bean factory for this context */
 	private ConfigurableListableBeanFactory beanFactory;
 
 	/**
@@ -42,28 +42,49 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		super(parent);
 	}
 
-	/**
-	 * Return the default BeanFactory for this context.
-	 */
-	public ConfigurableListableBeanFactory getBeanFactory() {
-		return beanFactory;
-	}
-
 	protected void refreshBeanFactory() throws BeansException {
 		try {
-			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(getParent());
-			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-			reader.setEntityResolver(new ResourceEntityResolver(this));
-			loadBeanDefinitions(reader);
+			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+			beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
+			initBeanDefinitionReader(beanDefinitionReader);
+			loadBeanDefinitions(beanDefinitionReader);
 			this.beanFactory = beanFactory;
 			if (logger.isInfoEnabled()) {
-				logger.info("Bean factory for application context: " + beanFactory);
+				logger.info("Bean factory for application context '" + getDisplayName() + "': " + beanFactory);
 			}
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException("I/O error parsing XML document for application context [" +
 			                                      getDisplayName() + "]", ex);
 		} 
+	}
+
+	/**
+	 * Create the bean factory for this context.
+	 * Default implementation creates a DefaultListableBeanFactory with this
+	 * context's parent as parent bean factory. Can be overridden in subclasses.
+	 * @return the bean factory for this context
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
+	 */
+	protected DefaultListableBeanFactory createBeanFactory() {
+		return new DefaultListableBeanFactory(getParent());
+	}
+
+	public ConfigurableListableBeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+
+	/**
+	 * Initialize the bean definition reader used for loading the bean
+	 * definitions of this context. Default implementation is empty.
+	 * <p>Can be overridden in subclasses, e.g. for turning off XML validation
+	 * or using a different XmlBeanDefinitionParser implementation.
+	 * @param beanDefinitionReader the bean definition reader used by this context
+	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setValidating
+	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setParserClass
+	 */
+	protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
 	}
 
 	/**
