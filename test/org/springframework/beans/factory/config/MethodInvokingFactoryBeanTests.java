@@ -22,11 +22,11 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.springframework.util.MethodInvoker;
+
 /**
  * @author Colin Sampaleanu
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBeanTests.java,v 1.1 2003/11/22 00:45:34
- *          colins Exp $
  */
 public class MethodInvokingFactoryBeanTests extends TestCase {
 
@@ -262,6 +262,19 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.afterPropertiesSet();
 	}
 
+	public void testInvokeWithNullArgument() throws Exception {
+		MethodInvoker methodInvoker = new MethodInvoker();
+		methodInvoker.setTargetClass(getClass());
+		methodInvoker.setTargetMethod("nullArgument");
+		methodInvoker.setArguments(new Object[] {null});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
+	}
+
+
+	public static void nullArgument(Object arg) {
+	}
+
 
 	// a test class to work with
 	public static class TestClass1 {
@@ -286,6 +299,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 		public static void supertypes2(Collection c, List l, String s, Integer i) {
 		}
+
 		public static void supertypes2(Collection c, List l, String s, String s2) {
 		}
 	}

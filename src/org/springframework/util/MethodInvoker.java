@@ -161,7 +161,9 @@ public class MethodInvoker {
 		}
 		Class[] types = new Class[this.arguments.length];
 		for (int i = 0; i < this.arguments.length; ++i) {
-			types[i] = this.arguments[i].getClass();
+			if (this.arguments[i] != null) {
+				types[i] = this.arguments[i].getClass();
+			}
 		}
 
 		// try to get the exact method first
