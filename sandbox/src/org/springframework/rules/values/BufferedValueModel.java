@@ -36,7 +36,7 @@ public class BufferedValueModel extends AbstractValueModel implements
 
     private ValueListener committer;
 
-    private boolean committing = false;
+    private boolean committing;
 
     public BufferedValueModel(ValueModel wrappedModel) {
         this(wrappedModel, null);
