@@ -538,10 +538,16 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	}
 
 	public HttpSession getSession(boolean create) {
-		if (this.session == null && create) {
-			this.session = new MockHttpSession(this.servletContext);
-		}
-		return this.session;
+        if (this.session == null) {
+            if (create) {
+                this.session = new MockHttpSession(this.servletContext);
+            }
+        } else {
+            if(((MockHttpSession) session).isInvalid()) {
+                session = null;
+            }
+        }
+        return this.session;
 	}
 
 	public HttpSession getSession() {
