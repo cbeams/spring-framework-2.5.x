@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.151 2004-05-27 17:16:51 jhoeller Exp $
+$Id: changelog.txt,v 1.152 2004-05-29 21:40:55 jhoeller Exp $
 
 
-Changes in version 1.0.2 (28.5.2004)
+Changes in version 1.0.2 (30.5.2004)
 ------------------------------------
 
 Package org.springframework.aop
@@ -15,10 +15,13 @@ Package org.springframework.aop
 Package org.springframework.beans
 * PropertyValue and MutablePropertyValues implement java.io.Serializable
 * added "addPropertyValues(PropertyValues)" and "addPropertyValues(Map)" methods to MutablePropertyValues
-* BeanWrapperImpl applies default PropertyEditors to non-String values too, rather than just custom editors
+* BeanWrapperImpl registers default PropertyEditors per instance and applies them to non-String values too
+* BeanWrapperImpl registers default editors for Boolean and all Number classes (not allowing empty values)
 * fixed BeanWrapperImpl's custom editor detection to avoid potential NPE in case of indexed/mapped properties
+* BeanWrapperImpl properly ignores unknown indexed properties too (if told to ignore unknown properties)
 * ClassEditor properly handles "java.lang.String[]"-style array class names, converting them to array classes
 * fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to properly handle null values in "getAsText"
+* reworked CustomNumberEditor to alternatively work with default "valueOf"/"toString" methods instead of NumberFormat
 * PropertiesEditor supports population of java.util.Properties from a java.util.Map, for example from an XML "map" tag
 * added AbstractFactoryBean class as superclass for FactoryBeans that are capable of both singletons and prototypes
 * reworked List/Map/Set/PropertiesFactoryBean to extend from AbstractFactoryBean
@@ -56,6 +59,7 @@ Package org.springframework.ejb
 * invoke "remove" on EJB proxy after invocation in LocalSlsbInvokerInterceptor and SimpleRemoteSlsbInvokerInterceptor
 
 Package org.springframework.jdbc
+* added UserCredentialsDataSourceAdapter, for transparently appying username and password to target DataSource calls
 * reworked SQLErrorCodesFactory to hold the singleton in a WeakReference, for proper garbage collection
 * fixed a NPE in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have DataSource set
 * added "query(sql, args, resultSetExtractor)"-style methods to JdbcOperations interface and JdbcTemplate class
@@ -81,6 +85,9 @@ Package org.springframework.orm
 * SessionFactoryUtils autodetects JTA TransactionManager with Hibernate JCA Connector too, for Session synchronization
 * changed visibility of HibernateDaoSupport's and JdoDaoSupport's resource factory accessors to public
 * changed visibility of SqlMapDaoSupport's and SqlMapClientDaoSupport's resource factory accessors to public
+* added "dataSource" property to SqlMapClientFactoryBean, as alternative to specifying per-DAO DataSource references
+* added "queryWithRowHandler" method to SqlMapClientOperations/Template, following iBATIS SQL Maps 2.0 RC4
+* added "queryForPaginatedList" method to SqlMapClientOperations/Template, enabled through SqlMapClient DataSource
 
 Package org.springframework.remoting
 * exposed HessianProxyFactory's "overloadEnabled" property in HessianClientInterceptor
@@ -115,6 +122,7 @@ Package org.springframework.util
 * added "cleanPath" and "pathEquals" methods to StringUtils
 
 Package org.springframework.validation
+* added support for "xxx*" field patterns to BindException's "getFieldErrors" and "getFieldError" methods
 * added "getArgumentsForBindingError" method to DataBinder, for missing required fields and for type mismatches
 * default argument for DataBinder binding errors is MessageSourceResolvable with "objectName.field"/ "field" as codes
 
@@ -149,6 +157,7 @@ Package org.springframework.web
 * AbstractWizardFormController optionally supports "_page" request parameter, for proper handling of back button usage
 * added "getNrOfPages" method to AbstractWizardFormController, for determining whether last page has been reached
 * reworked JSP tag implementations to implement the TryCatchFinally interface for eager resource cleanup
+* added support for "person.na*"/"person.address.*"-style field patterns to BindTag's "path" attribute
 * factored out common Struts Action delegation code from DelegationActionProxy to DelegatingActionUtils
 * added DelegatingRequestProcessor and DelegatingTilesRequestProcessor as alternatives to DelegatingActionProxy
 
