@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  * is a simple state holder, a stub implementation.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class StubRequestContext implements RequestContext, TransactionSynchronizer {
 
@@ -48,10 +49,18 @@ public class StubRequestContext implements RequestContext, TransactionSynchroniz
 
 	private boolean inTransaction;
 
+	/**
+	 * Create a new stub request context.
+	 */
 	public StubRequestContext() {
-
 	}
 
+	/**
+	 * Create a new stub request context.
+	 * @param activeFlow the active flow
+	 * @param currentState the current state
+	 * @param originatingEvent the event originating this request context
+	 */
 	public StubRequestContext(Flow activeFlow, State currentState, Event originatingEvent) {
 		setActiveFlow(activeFlow);
 		setCurrentState(currentState);
@@ -60,7 +69,8 @@ public class StubRequestContext implements RequestContext, TransactionSynchroniz
 	}
 
 	/**
-	 * @param rootFlow The rootFlow to set.
+	 * Set the root flow of this request context.
+	 * @param rootFlow the rootFlow to set
 	 */
 	public void setRootFlow(Flow rootFlow) {
 		this.rootFlow = rootFlow;
@@ -70,7 +80,8 @@ public class StubRequestContext implements RequestContext, TransactionSynchroniz
 	}
 
 	/**
-	 * @param activeFlow The activeFlow to set.
+	 * Set the active flow of this request context.
+	 * @param activeFlow the activeFlow to set
 	 */
 	public void setActiveFlow(Flow activeFlow) {
 		this.activeFlow = activeFlow;
@@ -80,22 +91,25 @@ public class StubRequestContext implements RequestContext, TransactionSynchroniz
 	}
 
 	/**
-	 * @param currentState The currentState to set.
+	 * Set the current state of this request context.
+	 * @param currentState the currentState to set
 	 */
 	public void setCurrentState(State currentState) {
-		Assert.state(currentState.getFlow() == this.activeFlow, "The current state must equal the active flow");
+		Assert.state(currentState.getFlow() == this.activeFlow, "The current state must be in the active flow");
 		this.currentState = currentState;
 	}
 
 	/**
-	 * @param lastEvent The lastEvent to set.
+	 * Set the last event that occured in this request context.
+	 * @param lastEvent the lastEvent to set
 	 */
 	public void setLastEvent(Event lastEvent) {
 		this.lastEvent = lastEvent;
 	}
 
 	/**
-	 * @param originatingEvent The originatingEvent to set.
+	 * Set the event originating this request context.
+	 * @param originatingEvent the originatingEvent to set
 	 */
 	public void setOriginatingEvent(Event originatingEvent) {
 		this.originatingEvent = originatingEvent;
