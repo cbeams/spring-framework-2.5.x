@@ -6,9 +6,13 @@ http://www.springframework.org
 Changes in version 1.1.1 (27.9.2004)
 ------------------------------------
 
+Package org.springframework.aop
+* Fixed bug in DelegatingIntroductionAdvisor that caused UndeclaredThrowableException to wrap unchecked exceptions thrown by introduction delegates
+
 Package org.springframework.beans
 * fixed DefaultListableBeanFactory's "getBeansOfType" implementation to correctly ignore abstract FactoryBeans
 * added "import" element for XML bean definitions, to allow for loading further bean definitions from relative paths
+* MutablePropertyValues addPropertyValues() methods now return MutablePropertyValues, to allow adding multiple property values in one statement
 
 Package org.springframework.context
 * factored out the "publishEvent" method into the ApplicationEventPublisher interface, extended by ApplicationContext
@@ -33,6 +37,9 @@ Package org.springframework.jms
 Package org.springframework.mock
 * fixed MockServletContext's "getResource" implementation to correctly determine URL via Resource's "getURL" method
 * added full support for scoped attributes to MockPageContext, properly regarding request/session/application scope
+
+Package org.springframework.test
+* New package included in mock JAR, offering superclasses for tests requiring Spring contexts
 
 Package org.springframework.orm
 * LocalSessionFactoryBean exposes a config-time JTA TransactionManager before mapping resources get registered
