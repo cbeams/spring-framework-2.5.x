@@ -15,13 +15,13 @@ import org.springframework.aop.MethodMatcher;
  * advice that requires dynamic method matching.
  * @author Rod Johnson
  * @see 
- * @version $Id: InterceptorAndDynamicMethodMatcher.java,v 1.1 2003-11-12 20:17:58 johnsonr Exp $
+ * @version $Id: InterceptorAndDynamicMethodMatcher.java,v 1.2 2003-11-13 00:55:52 dkopylenko Exp $
  */
 class InterceptorAndDynamicMethodMatcher {
 	
-	public final MethodMatcher methodMatcher;
+	final MethodMatcher methodMatcher;
 	
-	public final MethodInterceptor interceptor;
+	final MethodInterceptor interceptor;
 	
 	public InterceptorAndDynamicMethodMatcher(MethodInterceptor interceptor, MethodMatcher methodMatcher) {
 		this.interceptor = interceptor;
