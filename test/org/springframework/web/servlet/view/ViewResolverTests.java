@@ -140,6 +140,10 @@ public class ViewResolverTests extends TestCase {
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
 		assertEquals("Correct view class", RedirectView.class, view.getClass());
 		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+
+		view = vr.resolveViewName("forward:myUrl", Locale.getDefault());
+		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct URL", "myUrl", ((InternalResourceView) view).getUrl());
 	}
 
 	private void doTestUrlBasedViewResolverWithPrefixes(UrlBasedViewResolver vr) throws Exception {
@@ -161,6 +165,10 @@ public class ViewResolverTests extends TestCase {
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
 		assertEquals("Correct view class", RedirectView.class, view.getClass());
 		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+
+		view = vr.resolveViewName("forward:myUrl", Locale.getDefault());
+		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct URL", "myUrl", ((InternalResourceView) view).getUrl());
 	}
 
 	public void testInternalResourceViewResolverWithJstl() throws Exception {
