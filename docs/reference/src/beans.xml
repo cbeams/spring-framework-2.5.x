@@ -1313,7 +1313,7 @@ public class AnotherExampleBean implements InitializingBean {
         <literal>destroy-method</literal> attribute. For example, the
         following definition: </emphasis></para>
 
-        <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="destroy"/&gt;
+        <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/&gt;
 
 public class ExampleBean {
     public void cleanup() {
