@@ -61,13 +61,13 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.12 2003-11-04 23:20:29 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.13 2003-11-20 09:01:42 johnsonr Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
  * @see org.springframework.jdbc.datasource
  */
-public class JdbcTemplate implements InitializingBean {
+public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 
 	/**
 	 * Constant for use as a parameter to query methods to force use of a PreparedStatement
