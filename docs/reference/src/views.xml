@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.9 2004-02-27 01:58:08 davison Exp $-->
+<!--$Id: views.xml,v 1.10 2004-02-28 23:25:38 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -872,7 +872,101 @@ public class PDFPage extends AbstractPdfView {
       lower layers, hosted out of one or more Spring Application
       Contexts.</para>
 
-      <para>//TODO Graphic insert</para>
+      <itemizedlist>
+        <listitem>
+          <para><emphasis>User Interface Layer:</emphasis></para>
+
+          <para>- concerned with the user interface </para>
+
+          <para>- contains some application logic </para>
+
+          <para>- provided by Tapestry </para>
+
+          <para>- aside from providing UI via Tapestry, code in this layer
+          does its work via objects which implement interfaces from the
+          Service Layer. The actual objects which implement these service
+          layer interfaces are obtained from a Spring Application
+          Context.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Service Layer:</emphasis></para>
+
+          <para> - application specific 'service'
+          code</para>
+
+          <para> - works with domain objects, and uses the
+          Mapper API to get those domain objects into and out of some sort of
+          repository (database)</para>
+
+          <para> - hosted in one or more Spring
+          contexts</para>
+
+          <para> - code in this layer manipulates objects
+          in the domain model, in an application specific fashion. It does its
+          work via other code in this layer, and via the Mapper API. An object
+          in this layer is given the specific mapper implementations it needs
+          to work with, via the Spring context.</para>
+
+          <para> - since code in this layer is hosted in
+          the Spring context, it may be transactionally wrapped by the Spring
+          context, as opposed to managing its own
+          transactions</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Domain Model:</emphasis></para>
+
+          <para> - domain specific object hierarchy, which
+          deals with data and logic specific to this
+          domain</para>
+
+          <para> - although the domain object hierarchy is
+          built with the idea that it is persisted somehow and makes some
+          general concessions to this (for example, bidirectional
+          relationships), it generally has no knowledge of other layers. As
+          such, it may be tested in isolation, and used with different mapping
+          implementations for production vs.
+          testing.</para>
+
+          <para> - these objects may be standalone, or
+          used in conjunction with a Spring application context to take
+          advantage of some of the benefits of the context, e.g., isolation,
+          inversion of control, different strategy implementations,
+          etc.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Data Source Layer:</emphasis></para>
+
+          <para> - Mapper API (also called Data Access Objects): an API used
+          to persist the domain model to a repository of some sort (generally
+          a DB, but could be the filesystem, memeory, etc.)</para>
+
+          <para> - Mapper API implementations: one or more specific
+          implementations of the Mapper API, for example, a Hibernate-specific
+          mapper, a JDO-specific mapper, JDBC-specific mapper, or a memory
+          mapper.</para>
+
+          <para> - mapper implementations live in one or more Spring
+          Application Contexts. A service layer object is given the mapper
+          objects it needs to work with via the context. </para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Database, filesystem, or other
+          repositories:</emphasis></para>
+
+          <para> - objects in the domain model are stored
+          into one or more repositories via one or more mapper
+          implementations</para>
+
+          <para> - a repository may be very simpe (e.g.
+          filesystem), or may have its own representation of the data from the
+          domain model (i.e. a schema in a db). It does not know about other
+          layers howerver.</para>
+        </listitem>
+      </itemizedlist>
     </sect2>
 
     <sect2 id="view-tapestry-implementation">
