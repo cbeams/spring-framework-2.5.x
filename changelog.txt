@@ -31,6 +31,7 @@ Package org.springframework.ejb
 * factored out "getSessionBeanInstance" and "releaseSessionBeanInstance" methods in SimpleRemoteSlsbInvokerInterceptor
 
 Package org.springframework.jdbc
+* added suppport for SqlReturnType interface which allows us to return custom types from stored procedures
 * StatementCreatorUtils uses specific PreparedStatement parameter setter methods, as far as possible
 * added auto-conversion of java.util.Calendar to java.sql.Date/Time/Timestamp, for SQL types DATE/TIME/TIMESTAMP
 * added auto-conversion of java.util.Date and java.util.Calendar to java.sql.Timestamp, in case of an unknown SQL type

@@ -709,19 +709,25 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			Object param = parameters.get(i);
 			if (param instanceof SqlOutParameter) {
 				SqlOutParameter outParam = (SqlOutParameter) param;
-				Object out = cs.getObject(sqlColIndex);
-				if (out instanceof ResultSet) {
-					if (outParam.isResultSetSupported()) {
-						returnedResults.putAll(processResultSet((ResultSet) out, outParam));
-					}
-					else {
-						logger.warn("ResultSet returned from stored procedure but a corresponding " +
-												"SqlOutParameter with a RowCallbackHandler was not declared");
-						returnedResults.put(outParam.getName(), "ResultSet was returned but not processed.");
-					}
+				if (outParam.isReturnTypeSupported()) {
+					Object out = outParam.getSqlReturnType().getTypeValue(cs, sqlColIndex, outParam.getSqlType(), outParam.getTypeName());
+					returnedResults.put(outParam.getName(), out);
 				}
 				else {
-					returnedResults.put(outParam.getName(), out);
+					Object out = cs.getObject(sqlColIndex);
+					if (out instanceof ResultSet) {
+						if (outParam.isResultSetSupported()) {
+							returnedResults.putAll(processResultSet((ResultSet) out, outParam));
+						}
+						else {
+							logger.warn("ResultSet returned from stored procedure but a corresponding " +
+													"SqlOutParameter with a RowCallbackHandler was not declared");
+							returnedResults.put(outParam.getName(), "ResultSet was returned but not processed.");
+						}
+					}
+					else {
+						returnedResults.put(outParam.getName(), out);
+					}
 				}
 			}
 			if (!(param instanceof SqlReturnResultSet)) {

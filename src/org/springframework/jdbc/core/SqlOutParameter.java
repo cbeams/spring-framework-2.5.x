@@ -29,6 +29,8 @@ package org.springframework.jdbc.core;
  * @author Juergen Hoeller
  */
 public class SqlOutParameter extends ResultSetSupportingSqlParameter {
+	
+	private SqlReturnType sqlReturnType = null;
 
 	/**
 	 * Create a new SqlOutParameter, supplying name and SQL type.
@@ -41,6 +43,11 @@ public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 
 	public SqlOutParameter(String name, int type, String typeName) {
 		super(name, type, typeName);
+	}
+
+	public SqlOutParameter(String name, int type, String typeName, SqlReturnType sqlReturnType) {
+		super(name, type, typeName);
+		this.sqlReturnType = sqlReturnType;
 	}
 
 	public SqlOutParameter(String name, int type, ResultSetExtractor rse) {
@@ -59,4 +66,11 @@ public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 		super(name, type, rm, rowsExpected);
 	}
 
+	public boolean isReturnTypeSupported() {
+		return (this.sqlReturnType != null);
+	}
+
+	public SqlReturnType getSqlReturnType() {
+		return sqlReturnType;
+	}
 }
