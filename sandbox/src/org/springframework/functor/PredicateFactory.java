@@ -15,9 +15,15 @@
  */
 package org.springframework.functor;
 
+import org.springframework.functor.predicates.BeanPropertyExpressionTester;
+import org.springframework.functor.predicates.BinaryFunctionResultTester;
+import org.springframework.functor.predicates.GreaterThan;
+import org.springframework.functor.predicates.GreaterThanEqualTo;
+import org.springframework.functor.predicates.LessThan;
+import org.springframework.functor.predicates.LessThanEqualTo;
 import org.springframework.functor.predicates.ParameterizedBinaryPredicate;
 import org.springframework.functor.predicates.UnaryAnd;
-import org.springframework.functor.predicates.UnaryFunctionTester;
+import org.springframework.functor.predicates.UnaryFunctionResultTester;
 import org.springframework.functor.predicates.UnaryNot;
 import org.springframework.functor.predicates.UnaryOr;
 
@@ -59,7 +65,24 @@ public class PredicateFactory {
     public static UnaryPredicate attachResultTester(
         UnaryPredicate tester,
         UnaryFunction function) {
-        return new UnaryFunctionTester(tester, function);
+        return new UnaryFunctionResultTester(tester, function);
+    }
+
+    /**
+     * Attaches a predicate that tests the result returned by evaluating the
+     * specified binary function.
+     * 
+     * @param tester
+     *            the predicate to test the function result
+     * @param function
+     *            the function
+     * @return The testing predicate, which on the call to test(o) first
+     *         evaluates 'o' using the function and then tests the result.
+     */
+    public static BinaryPredicate attachResultTester(
+        UnaryPredicate tester,
+        BinaryFunction function) {
+        return new BinaryFunctionResultTester(tester, function);
     }
 
     /**
@@ -124,6 +147,78 @@ public class PredicateFactory {
         UnaryPredicate predicate1,
         UnaryPredicate predicate2) {
         return new UnaryOr(predicate1, predicate2);
+    }
+
+    /**
+     * Apply a "greater than" constraint to two properties
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static UnaryPredicate greaterThanProperty(
+        String propertyName,
+        String otherPropertyName) {
+        return new BeanPropertyExpressionTester(
+            propertyName,
+            otherPropertyName,
+            GreaterThan.instance());
+    }
+
+    /**
+     * Apply a "greater than or equal to" constraint to two properties.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static UnaryPredicate greaterThanEqualToProperty(
+        String propertyName,
+        String otherPropertyName) {
+        return new BeanPropertyExpressionTester(
+            propertyName,
+            otherPropertyName,
+            GreaterThanEqualTo.instance());
+    }
+
+    /**
+     * Apply a "less than" constraint to two properties.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static UnaryPredicate lessThanProperty(
+        String propertyName,
+        String otherPropertyName) {
+        return new BeanPropertyExpressionTester(
+            propertyName,
+            otherPropertyName,
+            LessThan.instance());
+    }
+
+    /**
+     * Apply a "less than or equal to" constraint to two properties.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static UnaryPredicate lessThanEqualToProperty(
+        String propertyName,
+        String otherPropertyName) {
+        return new BeanPropertyExpressionTester(
+            propertyName,
+            otherPropertyName,
+            LessThanEqualTo.instance());
     }
 
 }

@@ -17,22 +17,27 @@ package org.springframework.functor.predicates;
 
 import org.springframework.functor.UnaryFunction;
 import org.springframework.functor.UnaryPredicate;
+import org.springframework.util.Assert;
 
 /**
+ * Tests the result returned from evaluating a unary function.
+ * 
  * @author Keith Donald
  */
-public class UnaryFunctionTester implements UnaryPredicate {
-    private UnaryPredicate evaluator;
+public class UnaryFunctionResultTester implements UnaryPredicate {
+    private UnaryPredicate tester;
     private UnaryFunction function;
 
-    public UnaryFunctionTester(UnaryPredicate evaluator,
+    public UnaryFunctionResultTester(UnaryPredicate tester,
             UnaryFunction function) {
-        this.evaluator = evaluator;
+        Assert.notNull(tester);
+        Assert.notNull(function);
+        this.tester = tester;
         this.function = function;
     }
 
     public boolean test(Object value) {
-        return this.evaluator.test(function.evaluate(value));
+        return this.tester.test(function.evaluate(value));
     }
 
 }
