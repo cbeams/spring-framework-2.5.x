@@ -17,14 +17,16 @@
 package org.springframework.beans.factory.script;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.dynamic.DynamicObject;
+import org.springframework.beans.factory.dynamic.ExpirableObject;
 
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: Script.java,v 1.2 2004-08-02 17:01:59 johnsonr Exp $
+ * @version $Id: Script.java,v 1.3 2004-08-04 16:49:48 johnsonr Exp $
  */
-public interface Script {
+public interface Script extends ExpirableObject {
 	
 	/**
 	 * Resource as a String specifying resource location.
@@ -42,8 +44,5 @@ public interface Script {
 	
 	void addInterface(Class intf);
 	
-	boolean isChanged();
-	
-	long getLastReloadTime(); 
 
 }

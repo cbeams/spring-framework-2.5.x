@@ -16,8 +16,10 @@
 
 package org.springframework.beans.factory.groovy;
 
+import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.script.DynamicScript;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -25,14 +27,24 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BeanFactoryTests.java,v 1.4 2004-08-02 17:03:24 johnsonr Exp $
+ * @version $Id: BeanFactoryTests.java,v 1.5 2004-08-04 16:49:48 johnsonr Exp $
  */
 public class BeanFactoryTests extends TestCase {
 	
 	private static final String SIMPLE_XML = "/org/springframework/beans/factory/groovy/simple.xml";
 	
+	private ClassPathXmlApplicationContext ac;
+	
+	protected void setUp() {
+		ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
+	}
+	
+	protected void tearDown() {
+		ac.close();	
+	}
+	
 	public void testBadGroovySyntax() {
-		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
+		
 		try {
 			ac.getBean("bad");
 			fail();
@@ -45,39 +57,56 @@ public class BeanFactoryTests extends TestCase {
 	}
 	
 	public void testSimple() {
-		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
+		
 		Hello hello = (Hello) ac.getBean("simple");
 		assertEquals("hello world", hello.sayHello());
 	}
 	
 	public void testStringProperty() {
-		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
+		
 		Hello hello = (Hello) ac.getBean("property");
+		Advised a = (Advised) hello;
+		System.err.println(a.toProxyConfigString());
 		assertEquals("hello world property", hello.sayHello());
 		System.out.println(((DynamicScript) hello).getResourceString() );
 	}
 	
-	public void testDependencyOnReloadedGroovyBean() throws Exception {
-		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
+	public void testCanCastToGroovyObject() {
+		
+		GroovyObject groovyObj = (GroovyObject) ac.getBean("property");
+		
+	}
+	
+	public void testDependencyOnReloadedGroovyBean() throws Throwable {
+		
 		Hello delegatingHello = (Hello) ac.getBean("dependsOnProperty");
 		assertEquals("hello world property", delegatingHello.sayHello());
 		
 		DynamicScript script = (DynamicScript) ac.getBean("property");
+		
+		//System.out.println("AOP CONFIG=" + ((Advised) script).toProxyConfigString());
+		
 		assertEquals(1, script.getLoads());
 		script.refresh();
 		assertEquals(2, script.getLoads());
+		script.refresh();
+		assertEquals(3, script.getLoads());
 		
-		// Reference still works
+		// Reference still works, and target returns the same object
+		
 		assertEquals("hello world property", delegatingHello.sayHello());
+		
+		assertFalse(script.isModified());
 		
 		// Give reloading a chance
 		// We need to change this file while the test is running :-)
-		Thread.sleep(60 * 1000);
+		//Thread.sleep(30 * 1000);
 		
 		// This assertion only works if the file is changed
 		// and reloaded
-		assertTrue("Reloaded in background thread", 2 < script.getLoads());
+		//assertTrue("Reloaded in background thread", 3 < script.getLoads());
 		
+		//assertEquals("hello world property2", delegatingHello.sayHello());
 	}
 
 }

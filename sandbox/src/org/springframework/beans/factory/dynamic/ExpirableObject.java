@@ -12,27 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */ 
 
-package org.springframework.beans.factory.script;
-
-import org.springframework.beans.factory.dynamic.AbstractPoller;
+package org.springframework.beans.factory.dynamic;
 
 /**
- * Object to run in the background polling for file
- * modifications. Works only if we can get to a File--
- * probably won't work in a Jar.
+ * 
  * @author Rod Johnson
- * @version $Id: AbstractVetoableChangeListener.java,v 1.1.1.1 2003/08/14
- *          16:20:14 trisberg Exp $
+ * @version $Id: ExpirableObject.java,v 1.1 2004-08-04 16:49:47 johnsonr Exp $
  */
-public class ScriptPoller extends AbstractPoller {
+public interface ExpirableObject {
+	
+	int getLoads();
+	
+	long getLastRefreshMillis();
+	
+	boolean isModified();
 
-	public ScriptPoller(DynamicScript script) {
-		super(script);
-	}
-
-	protected boolean isDirty() {
-		return ((DynamicScript) getDynamicObject()).isChanged();
-	}
 }

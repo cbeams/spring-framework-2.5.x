@@ -16,23 +16,22 @@
 
 package org.springframework.beans.factory.dynamic;
 
-import org.springframework.beans.BeansException;
+import java.lang.reflect.Method;
+
+import org.springframework.aop.MethodBeforeAdvice;
 
 /**
- * Interface to be implemented by dynamic objects,
- * that support reloading and optionally polling for
- * updates.
+ * 
  * @author Rod Johnson
- * @version $Id: DynamicObject.java,v 1.2 2004-08-04 16:49:47 johnsonr Exp $
+ * @version $Id: AutoRefreshInterceptor.java,v 1.1 2004-08-04 16:49:47 johnsonr Exp $
  */
-public interface DynamicObject extends ExpirableObject {
-	
-	void refresh() throws BeansException;
-	
-	/** 0 means no expiry */
-	long getExpiry();
+public class AutoRefreshInterceptor implements MethodBeforeAdvice {
 
-	boolean isAutoRefresh();
-	
-	void setAutoRefresh(boolean autoRefresh);
+	/**
+	 * @see org.springframework.aop.MethodBeforeAdvice#before(java.lang.reflect.Method, java.lang.Object[], java.lang.Object)
+	 */
+	public void before(Method m, Object[] args, Object target) throws Throwable {
+		throw new UnsupportedOperationException();
+	}
+
 }

@@ -18,163 +18,101 @@ package org.springframework.beans.factory.dynamic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.DisposableBean;
 
 /**
  * Introduction interceptor that provides DynamicScript
  * implementation for dynamic objects.
- * <br>This class also handles reloads through implementing
- * the BeanFactoryAware and BeanNameAware interfaces, which will
- * cause it to receive callbacks by the BeanFactory.
- * <br>It also kicks of a background poller (ScriptReloader)
- * if the pollIntervalSeconds constructor argument is
- * positive.
+ 
+ * TODO merge with TargetSource? definitely faster,
+ * doesn't need to cast via Advised
+ 
  * @author Rod Johnson
- * @version $Id: DynamicObjectInterceptor.java,v 1.1 2004-08-01 15:42:01 johnsonr Exp $
+ * @version $Id: DynamicObjectInterceptor.java,v 1.2 2004-08-04 16:49:47 johnsonr Exp $
  */
 public class DynamicObjectInterceptor extends DelegatingIntroductionInterceptor
-		implements BeanFactoryAware, BeanNameAware, DisposableBean, DynamicObject {
+		implements DynamicObject {
 	
 	protected final Log log = LogFactory.getLog(getClass());
-
-	/**
-	 * Target used to wrap the Groovy object,
-	 * which we may replace dynamically.
-	 */
-	private HotSwappableTargetSource targetSource;
-	
-	/**
-	 * BeanFactory that owns this Groovy object. We need
-	 * to hold a reference to it so that we can configure
-	 * the Groovy object's properties if the instance changes.
-	 */
-	private BeanFactory owningFactory;
-	
-	private String beanName;
-	
-	
-	private int loads = 1;
-	
-	private int pollIntervalSeconds;
-	
-	private AbstractPoller reloader;
-	
-	private long lastReloadMillis = System.currentTimeMillis();
-	
-	public DynamicObjectInterceptor(HotSwappableTargetSource targetSource, int pollIntervalSeconds) {
-		this.targetSource = targetSource;
-		this.pollIntervalSeconds = pollIntervalSeconds;
-		
-		if (pollIntervalSeconds > 0) {
-			log.info("Will poll for modifications every " + pollIntervalSeconds + " seconds");
-			reloader = createPoller();//this, pollIntervalSeconds);
-		}
-	}
-	
-	public DynamicObjectInterceptor(Object object, int pollIntervalSeconds) {
-		this(new HotSwappableTargetSource(object), pollIntervalSeconds);
-	}
-	
-	/**
-	 * Create a proxy using this advice
-	 * @return
-	 */
-	public Object createProxy() {
-		ProxyFactory pf = new ProxyFactory();
-		
-		// Force the use of CGLIB
-		pf.setProxyTargetClass(true);
-		
-		// Set the HotSwappableTargetSource
-		pf.setTargetSource(this.targetSource);
-		
-		// Add the DynamicScript introduction
-		pf.addAdvisor(new DefaultIntroductionAdvisor(this));
-		
-		Object wrapped = pf.getProxy();		
-		return wrapped;
-	}
-	
-	/**
-	 * No polling if this returns null
-	 * @return
-	 */
-	protected AbstractPoller createPoller() {
-		return null;
-	}
-	
-	public void destroy() {
-		// OR STOP TIMER?
-		if (reloader != null) {
-			reloader.cancel();
-		}
-	}
-	
-	public void setBeanFactory(BeanFactory owningFactory) {
-		this.owningFactory = owningFactory;
-		
-		//if (this.owningFactory.isSingleton(beanName)) {
-		//	throw new RuntimeException("Groovy usage incorrect, '" + beanName + "' can't be a singleton");
-		//}
-	}
-
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-		logger.info("Configuring dynamic reloadable Groovy bean with name '" + beanName + "'");
-		
-		
-	}
-	
-	
 	
 	/**
 	 * @see org.springframework.beans.factory.script.DynamicScript#refresh()
 	 */
 	public void refresh() throws BeansException {
-		//System.out.println(owningFactory);		
-		
-		long startTime = System.currentTimeMillis();
-		
-		// TODO use args?
-		// arg 1 must be given? conflict with parameters!??
-		Object newInstance = owningFactory.getBean(beanName);
-		
-		this.targetSource.swap(newInstance);
-		long et = System.currentTimeMillis() - startTime;
-		
-		logger.info("RELOADED dynamic bean with name '" + beanName + "' in " + et + "ms");
-		
-		++loads;
-		this.lastReloadMillis = System.currentTimeMillis();
+		refreshableTargetSource().refresh();
 	}
+
+	/**
+	 * @return
+	 */
+	protected AbstractRefreshableTargetSource refreshableTargetSource() {
+		TargetSource ts = ((Advised) AopContext.currentProxy()).getTargetSource();
+		if (ts == null) {
+			throw new IllegalStateException("No targetSource set");
+		}
+		if (!(ts instanceof AbstractRefreshableTargetSource)) {
+			throw new IllegalStateException("Not refreshable'");
+		}
+		return (AbstractRefreshableTargetSource) ts;
+	}
+	
+	protected DynamicObject dynamicTargetSource() {
+		TargetSource ts = ((Advised) AopContext.currentProxy()).getTargetSource();
+		if (ts == null) {
+			throw new IllegalStateException("No targetSource set");
+		}
+		if (!(ts instanceof DynamicObject)) {
+			throw new IllegalStateException("Not refreshable'");
+		}
+		return (DynamicObject) ts;
+	}
+
 
 	/**
 	 * @see org.springframework.beans.factory.script.DynamicScript#getLoads()
 	 */
 	public int getLoads() {
-		return loads;
+		return refreshableTargetSource().getLoads();
 	}
 
 	/**
 	 * @see org.springframework.beans.factory.script.DynamicScript#getLastRefreshMillis()
 	 */
 	public long getLastRefreshMillis() {
-		return lastReloadMillis;
+		return refreshableTargetSource().getLastRefreshMillis();
+	}
+
+
+	/**
+	 * Subclasses can override this for efficiency
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#isModified()
+	 */
+	public boolean isModified() {
+		return refreshableTargetSource().isModified();
+	}
+
+
+	/**
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#getExpiry()
+	 */
+	public long getExpiry() {
+		return dynamicTargetSource().getExpiry();
 	}
 
 	/**
-	 * @see org.springframework.beans.factory.dynamic.DynamicObject#getPollIntervalSeconds()
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#isAutoRefresh()
 	 */
-	public int getPollIntervalSeconds() {
-		return pollIntervalSeconds;
+	public boolean isAutoRefresh() {
+		return dynamicTargetSource().isAutoRefresh();
 	}
-
+	/**
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#setAutoRefresh(boolean)
+	 */
+	public void setAutoRefresh(boolean autoRefresh) {
+		dynamicTargetSource().setAutoRefresh(autoRefresh);
+	}
 }

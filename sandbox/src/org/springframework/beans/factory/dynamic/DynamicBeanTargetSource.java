@@ -8,7 +8,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  * TargetSource that can apply to singletons,
  * reloading them on request from a child factory.
  * @author Rod Johnson
- * @version $Id: DynamicBeanTargetSource.java,v 1.1 2004-08-03 12:02:08 johnsonr Exp $
+ * @version $Id: DynamicBeanTargetSource.java,v 1.2 2004-08-04 16:49:47 johnsonr Exp $
  */
 public class DynamicBeanTargetSource extends AbstractRefreshableTargetSource {
 
@@ -16,27 +16,24 @@ public class DynamicBeanTargetSource extends AbstractRefreshableTargetSource {
 	
 	private String beanName;
 
-	public DynamicBeanTargetSource(BeanFactory factory, String beanName) {
-		super(null);
+	public DynamicBeanTargetSource(Object initialTarget, BeanFactory factory, String beanName) {
+		super(initialTarget);
 		this.beanName = beanName;
 		this.childFactory = new DefaultListableBeanFactory(factory);
 		
-		//RootBeanDefinition definition = (RootBeanDefinition) definitionRegistry.getBeanDefinition(beanName);
-		
-		// Create a child bean definition that is a prototype,
-		// but otherwise copies from the parent
 		ChildBeanDefinition definition = new ChildBeanDefinition(beanName, null);
 		
 		definition.setSingleton(false);
 
-		childFactory.registerBeanDefinition(beanName, definition);
+		childFactory.registerBeanDefinition(beanName, definition);	
 	}
+	
 
 	/**
 	 * @see org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource#refreshedTarget()
 	 */
 	protected Object refreshedTarget() {
-		return childFactory.getBean(beanName);
+		Object o = childFactory.getBean(beanName);
+		return o;
 	}
-
 }

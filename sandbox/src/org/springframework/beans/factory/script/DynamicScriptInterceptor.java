@@ -16,76 +16,40 @@
 
 package org.springframework.beans.factory.script;
 
-import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.dynamic.AbstractPoller;
 import org.springframework.beans.factory.dynamic.DynamicObjectInterceptor;
 
 /**
- * Introduction interceptor that provides DynamicScript implementation for all
- * Groovy objects. <br>
- * This class also handles reloads through implementing the BeanFactoryAware and
- * BeanNameAware interfaces, which will cause it to receive callbacks by the
- * BeanFactory. <br>
- * It also kicks of a background poller (ScriptReloader) if the
- * pollIntervalSeconds constructor argument is positive.
+ * Introduction interceptor that provides DynamicScript implementation for all Groovy objects. <br>
  * 
  * @author Rod Johnson
- * @version $Id: DynamicScriptInterceptor.java,v 1.1 2004/07/31 08:54:13
- *          johnsonr Exp $
+ * @version $Id: DynamicScriptInterceptor.java,v 1.3 2004-08-04 16:49:48 johnsonr Exp $
  */
 public class DynamicScriptInterceptor extends DynamicObjectInterceptor implements DynamicScript {
 
 	private Script script;
 
-	private ScriptPoller reloader;
-
-	public DynamicScriptInterceptor(Script script,
-			HotSwappableTargetSource targetSource, int pollIntervalSeconds) {
-		super(targetSource, pollIntervalSeconds);
+	public DynamicScriptInterceptor(Script script) {
 		this.script = script;
 	}
-
-	public DynamicScriptInterceptor(Script script,
-			Object object, int pollIntervalSeconds) {
-		super(object, pollIntervalSeconds);
-		this.script = script;
-	}
-
 	
+	public Script getScript() {
+		return script;
+	}
+
 	public String getResourceString() {
 		return script.getResourceString();
 	}
-	
+
 	public Object createObject() throws BeansException {
 		return script.createObject();
 	}
 
-	/**
-	 * @see org.springframework.beans.factory.dynamic.DynamicObjectInterceptor#createPoller()
-	 */
-	protected AbstractPoller createPoller() {
-		return new ScriptPoller(this);
-	}
 
-	/**
-	 * @see org.springframework.beans.factory.script.Script#isChanged()
-	 */
-	public boolean isChanged() {
-		return script.isChanged();
-	}
-
-	/**
-	 * @see org.springframework.beans.factory.script.Script#getLastReloadTime()
-	 */
-	public long getLastReloadTime() {
-		return script.getLastReloadTime();
-	}
-	
 	public Class[] getInterfaces() {
-		return script.getInterfaces(); 
+		return script.getInterfaces();
 	}
-	
+
 	public void addInterface(Class intf) {
 		throw new UnsupportedOperationException("Not supported on constructed scripts");
 	}

@@ -22,18 +22,43 @@ import org.springframework.aop.target.HotSwappableTargetSource;
  * Superclass for TargetSources that are threadsafe yet
  * support refresh operations.
  * @author Rod Johnson
- * @version $Id: AbstractRefreshableTargetSource.java,v 1.1 2004-08-03 12:00:22 johnsonr Exp $
+ * @version $Id: AbstractRefreshableTargetSource.java,v 1.2 2004-08-04 16:49:47 johnsonr Exp $
  */
-public abstract class AbstractRefreshableTargetSource extends HotSwappableTargetSource {
+public abstract class AbstractRefreshableTargetSource extends HotSwappableTargetSource implements ExpirableObject {
+	
+	private int loads;
+	
+	private long lastRefresh;
 	
 	public AbstractRefreshableTargetSource(Object initialTarget) {
 		super(initialTarget);
+		lastRefresh = System.currentTimeMillis();
+		loads = 1;
 	}
 	
 	public void refresh() {
 		swap(refreshedTarget());
+		++loads;
 	}
 	
 	protected abstract Object refreshedTarget();
 
+	/**
+	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#getLastRefreshMillis()
+	 */
+	public long getLastRefreshMillis() {
+		return lastRefresh;
+	}
+	/**
+	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#getLoads()
+	 */
+	public int getLoads() {
+		return loads;
+	}
+	/**
+	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#isModified()
+	 */
+	public boolean isModified() {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -23,11 +23,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
+ * TODO need just one poller for all scripts
+ * 
  * Helper that regularly polls a resource
  * @author Rod Johnson
- * @version $Id: AbstractPoller.java,v 1.2 2004-08-02 17:03:22 johnsonr Exp $
+ * @version $Id: DynamicObjectPoller.java,v 1.1 2004-08-04 16:49:47 johnsonr Exp $
  */
-public abstract class AbstractPoller extends TimerTask {
+public abstract class DynamicObjectPoller extends TimerTask {
 	
 	// TODO need way of shutting down--put in interceptor, with DisposableBean
 	// impl?
@@ -39,9 +41,9 @@ public abstract class AbstractPoller extends TimerTask {
 
 	private DynamicObject dynamicObject;
 
-	public AbstractPoller(DynamicObject dynamicObject) {
+	public DynamicObjectPoller(DynamicObject dynamicObject) {
 		this.dynamicObject = dynamicObject;
-		this.secs = dynamicObject.getPollIntervalSeconds();
+		//this.secs = dynamicObject.getPollIntervalSeconds();
 		timer = new Timer(true);
 		timer.schedule(this, secs * 1000, secs * 1000);
 	}
@@ -58,8 +60,6 @@ public abstract class AbstractPoller extends TimerTask {
 	 * @see java.util.TimerTask#run()
 	 */
 	public void run() {
-		log.info("------- Polling script");
-
 		if (isDirty()) {
 			dynamicObject.refresh();
 		} 

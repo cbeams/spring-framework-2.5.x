@@ -9,12 +9,12 @@
 	<bean id="groovyScriptFactory"
 		class="org.springframework.beans.factory.groovy.GroovyFactory"
 	>
-		<property name="pollIntervalSeconds"><value>10</value></property>
+		<property name="expirySeconds"><value>20</value></property>
 	</bean>
-	
+	 
 	<bean id="simple"
 		factory-bean="groovyScriptFactory"
-		factory-method="staticObject"
+		factory-method="create"
 	>
 		<constructor-arg index="0"><value>org/springframework/beans/factory/groovy/SimpleHello.groovy</value></constructor-arg>
 	</bean>
@@ -24,9 +24,9 @@
 		fails when getting the bean from the factory
 	-->
 	<bean id="property"
-		singleton="false"
+		singleton="true"
 		factory-bean="groovyScriptFactory"
-		factory-method="dynamicObject"
+		factory-method="create"
 	>
 		<constructor-arg index="0"><value>org/springframework/beans/factory/groovy/PropertyHello.groovy</value></constructor-arg>
 		
@@ -42,7 +42,7 @@
 	
 	<bean id="bad"
 		factory-bean="groovyScriptFactory"
-		factory-method="staticObject"
+		factory-method="create"
 		singleton="false"
 	>
 		<constructor-arg index="0"><value>org/springframework/beans/factory/groovy/Bad.groovy</value></constructor-arg>
