@@ -21,7 +21,7 @@ import org.springframework.rules.predicates.UnaryOr;
  */
 public class ValidationResultsBuilder implements ValidationResults {
     private static final Log logger =
-        LogFactory.getLog(ValidationResultsBuilder.class);    
+        LogFactory.getLog(ValidationResultsBuilder.class);
     private String currentProperty;
     private Map propertyResults = new HashMap();
     private UnaryPredicate top;
@@ -48,6 +48,8 @@ public class ValidationResultsBuilder implements ValidationResults {
      */
     public void setPropertyName(String propertyName) {
         this.currentProperty = propertyName;
+        levels.clear();
+        top = null;
     }
 
     public void pushAnd() {
@@ -64,6 +66,10 @@ public class ValidationResultsBuilder implements ValidationResults {
         UnaryNot not = new UnaryNot();
         add(not);
     }
+    
+    public UnaryPredicate peek() {
+        return (UnaryPredicate)levels.peek();
+    }
 
     private void add(UnaryPredicate predicate) {
         if (top != null) {
@@ -71,12 +77,13 @@ public class ValidationResultsBuilder implements ValidationResults {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Negating predicate [" + predicate + "]");
                 }
-                ((UnaryNot)top).setPredicate(predicate);
+                ((UnaryNot)this.top).setPredicate(predicate);
             } else {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Aggregating nested predicate [" + predicate + "]");
+                    logger.debug(
+                        "Aggregating nested predicate [" + predicate + "]");
                 }
-                ((CompoundUnaryPredicate)top).add(predicate);
+                ((CompoundUnaryPredicate)this.top).add(predicate);
             }
         }
         levels.push(predicate);
@@ -100,22 +107,34 @@ public class ValidationResultsBuilder implements ValidationResults {
         }
     }
 
-    public void pop() {
-        this.top = (UnaryPredicate)levels.peek();
-        levels.pop();
+    public void pop(boolean result) {
+        UnaryPredicate p = (UnaryPredicate)levels.pop();
         if (logger.isDebugEnabled()) {
-            logger.debug("Top popped; stack now has " + levels.size() + " elements");
+            logger.debug(
+                "Top [" + p + "] popped; result was " + result + "; stack now has " + levels.size() + " elements");
         }
         if (levels.isEmpty()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(
-                    "[Done] collecting results for property '"
-                        + getPropertyName()
-                        + "'.  Results are ["
-                        + top
-                        + "]");
+            if (!result) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                        "[Done] collecting results for property '"
+                            + getPropertyName()
+                            + "'.  Results are ["
+                            + top
+                            + "]");
+                }
+                propertyResults.put(getPropertyName(), top);
             }
-            propertyResults.put(getPropertyName(), top);
+            top = null;
+        } else {
+            this.top = (UnaryPredicate)levels.peek();
+            if (result) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                            "Removing compound predicate [" + p + "]; tested true.");
+                }
+                ((CompoundUnaryPredicate)this.top).remove(p);
+            }
         }
     }
 

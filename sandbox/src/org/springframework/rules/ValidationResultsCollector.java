@@ -40,12 +40,16 @@ public class ValidationResultsCollector implements Visitor {
         new ReflectiveVisitorSupport();
     private Object bean;
     private GetProperty getProperty;
-    private boolean negated;
+    private boolean collectAllErrors;
     private ValidationResultsBuilder results = new ValidationResultsBuilder();
 
     public ValidationResultsCollector(Object bean) {
         this.bean = bean;
         this.getProperty = new GetProperty(bean);
+    }
+    
+    public void setCollectAllErrors(boolean collectAllErrors) {
+        this.collectAllErrors = collectAllErrors;
     }
 
     public ValidationResults collectResults(Rules rules) {
@@ -99,6 +103,7 @@ public class ValidationResultsCollector implements Visitor {
 
     private boolean testBeanPropertyExpression(BeanPropertyExpression constraint) {
         boolean result = constraint.test(bean);
+        result = applyAnyNegation(result);
         if (!result) {
             results.push(constraint);
         }
@@ -129,22 +134,29 @@ public class ValidationResultsCollector implements Visitor {
         if (logger.isDebugEnabled()) {
             logger.debug("Starting [and]...");
         }
+        boolean result = true;
         Iterator it = and.iterator();
         while (it.hasNext()) {
-            boolean result =
+            boolean test =
                 ((Boolean)visitorSupport
                     .invokeVisit(ValidationResultsCollector.this, it.next()))
                     .booleanValue();
-            if (!result) {
-                results.pop();
-                return false;
+            if (!test) {
+                if (!collectAllErrors) {
+                    results.pop(false);
+                    return false;
+                } else {
+                    if (result) {
+                        result = false;
+                    }
+                }
             }
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Finished [and]...");
         }
-        results.pop();
-        return true;
+        results.pop(result);
+        return result;
     }
 
     boolean visit(UnaryOr or) {
@@ -159,18 +171,19 @@ public class ValidationResultsCollector implements Visitor {
                     .invokeVisit(ValidationResultsCollector.this, it.next()))
                     .booleanValue();
             if (result) {
+                results.pop(result);
                 return true;
             }
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Finished [or]...");
         }
-        results.pop();
+        results.pop(false);
         return false;
     }
 
     Boolean visit(UnaryNot not) {
-        this.negated = true;
+        results.pushNot();
         if (logger.isDebugEnabled()) {
             logger.debug("Starting [not]...");
         }
@@ -179,7 +192,7 @@ public class ValidationResultsCollector implements Visitor {
         if (logger.isDebugEnabled()) {
             logger.debug("Finished [not]...");
         }
-        this.negated = false;
+        results.pop(result.booleanValue());
         return result;
     }
 
@@ -201,12 +214,15 @@ public class ValidationResultsCollector implements Visitor {
     }
 
     private boolean applyAnyNegation(boolean result) {
+        boolean negated = results.peek() instanceof UnaryNot;
         if (logger.isDebugEnabled()) {
             if (negated) {
                 logger.debug("[negate result]");
+            } else {
+                logger.debug("[no negation]");
             }
         }
-        return this.negated ? !result : result;
+        return negated ? !result : result;
     }
 
 }
