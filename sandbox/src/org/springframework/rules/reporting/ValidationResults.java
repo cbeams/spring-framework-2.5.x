@@ -20,10 +20,8 @@ import java.util.Map;
 import org.springframework.rules.UnaryPredicate;
 
 /**
- * %single sentence summary caption%.
- * 
- * %long description%.
- *
+ * @TODO field error type stuff, errors interface adaption
+ * @TODO number of errors per field...
  * @author  Keith Donald
  */
 public interface ValidationResults {
