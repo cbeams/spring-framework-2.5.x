@@ -53,6 +53,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.util.Assert;
 
 /**
  * Abstract superclass for BeanFactory implementations, implementing the
@@ -402,6 +403,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
+		Assert.notNull(propertyEditor, "PropertyEditor must not be null");
 		this.customEditors.put(requiredType, propertyEditor);
 	}
 
@@ -414,6 +416,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
 		this.beanPostProcessors.add(beanPostProcessor);
 	}
 
@@ -452,6 +455,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
+		Assert.notNull(alias, "Alias must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
 		}
@@ -466,6 +470,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
+		Assert.notNull(singletonObject, "Singleton object must not be null");
 		synchronized (this.singletonCache) {
 			Object oldObject = this.singletonCache.get(beanName);
 			if (oldObject != null) {
@@ -484,6 +489,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param singletonObject the singleton object
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
+		Assert.notNull(singletonObject, "Singleton object must not be null");
 		this.singletonCache.put(beanName, singletonObject);
 	}
 
