@@ -1,11 +1,11 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <HTML>
 <HEAD>
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030827;23384900">
+	<META NAME="CHANGED" CONTENT="20030828;21210400">
 	<STYLE>
 	<!--
 		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
@@ -15,8 +15,8 @@
 	</STYLE>
 </HEAD>
 <BODY LANG="en-US">
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><FONT SIZE=4><B>Developing
-a Spring Framework MVC<SPAN LANG="en-US"> application </SPAN>step-by-step</B></FONT></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B><FONT SIZE=4>Developing
+a Spring Framework MVC application step-by-step</FONT></B></P>
 <P ALIGN=CENTER STYLE="margin-bottom: 0cm">Part 4 – Implementing
 Database Persistence</P>
 <P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Thomas Risberg</B>
@@ -41,14 +41,13 @@ database.</P>
 <DIV ID="Section1" STYLE="background: #e6e6ff">
 	<P STYLE="margin-bottom: 0cm"><B><FONT SIZE=4>NOTE:</FONT></B><I> If
 	you started this project based on the 'spring-framework-0.9'
-	release, then there are a few changes you will have to make.  In the
+	release, then there are a few changes you will have to make. In the
 	'spring-framework-1.0m1' release, we have changed the package names
 	and the name of the the TLD.</I></P>
 	<UL>
-		<LI><P STYLE="margin-bottom: 0cm"><I>We need to replace Spring's<SPAN LANG="en-US">
-		distribution </SPAN>jar file - copy
-		</I>spring-framework-1.0m1/dist/spring.jar<I> to replace
-		</I>war/WEB-INF/lib/spring-full-0.9.jar.</P>
+		<LI><P STYLE="margin-bottom: 0cm"><I>We need to replace Spring's
+		distribution jar file - copy </I>spring-framework-1.0m1/dist/spring.jar<I>
+		to replace </I>war/WEB-INF/lib/spring-full-0.9.jar.</P>
 	</UL>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0cm"><I>We also need to replace the
@@ -76,8 +75,8 @@ database.</P>
 <FONT COLOR="#000000">        war/WEB-INF/jsp/priceincrease.jsp</FONT></PRE>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0cm"><I>Remove i21.tld and
-		spring-full-0.9.jar from the deployment directory for Tomcat.
-		I removed the following files: </I>
+		spring-full-0.9.jar from the deployment directory for Tomcat. I
+		removed the following files: </I>
 		</P>
 	</UL>
 	<PRE><FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/i21.tld</FONT>
@@ -97,11 +96,10 @@ directory. Copy
 spring-framework-1.0m1/samples/petclinic/war/WEB-INF/lib/hsqldb.jar
 to springapp/war/WEB-INF/lib/. I am planning on using HSQL in a
 standalone mode to begin with. That way we don't have to worry about
-starting up a separate database server<SPAN LANG="en-US"> every time
-</SPAN>we use it. The URL we specify for connecting to HSQL controls
-the mode that the database is running in. To be able to run some Ant
-tasks for the database we have to add some database properties to the
-build properties file.</P>
+starting up a separate database server every time we use it. The URL
+we specify for connecting to HSQL controls the mode that the database
+is running in. To be able to run some Ant tasks for the database we
+have to add some database properties to the build properties file.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
 	<TR>
@@ -133,7 +131,7 @@ tomcat.manager.password=tomcat
 </TABLE>
 <P STYLE="margin-bottom: 0cm">Next I add the targets I need to the
 build script. There are targets to create and delete tables and to
-load and delete test data.
+load and delete test data. 
 </P>
 <TABLE WIDTH=807 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=797>
@@ -258,13 +256,13 @@ have included my output below.</P>
 <P STYLE="margin-bottom: 0cm"><BR>
 </P>
 <P STYLE="margin-bottom: 0cm"><B>Step 24 – Create a Data Access
-Object<SPAN LANG="en-US"> implementation </SPAN>for JDBC.</B></P>
+Object (DAO) implementation for JDBC.</B></P>
 <P STYLE="margin-bottom: 0cm">I begin with creating a new
 'springapp/src/db' directory to contain any classes that are used for
-database access.  In this directory I create a new interface called
-'ProductManagerDao.java'.  This will be the interface that defines
-the functionality that the DAO implementation classes will provide –
-we could choose to have more than one implementation.
+database access. In this directory I create a new interface called
+'ProductManagerDao.java'. This will be the interface that defines the
+functionality that the DAO implementation classes will provide – we
+could choose to have more than one implementation. 
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -293,17 +291,17 @@ we could choose to have more than one implementation.
 </TABLE>
 <P STYLE="margin-bottom: 0cm">I'll follow this with a class called
 'ProductManagerDaoJdbc.java' that will be the JDBC implementation of
-this interface.  Spring provides a JDBC abstraction framework that we
-will make use of.  The biggest difference between using straight JDBC
+this interface. Spring provides a JDBC abstraction framework that we
+will make use of. The biggest difference between using straight JDBC
 and Spring's JDBC framework is that you don't have to worry about
-opening and closing the connection or any statements.  It is all
-handled for you.  Another advantage is that you won't have to catch
-any exceptions, unless you want to.  Spring wraps all SQLExceptions
-in it's own unchecked exception hierarchy inheriting from
-DataAccessException.  If you want to you can catch this exception,
-but since most database exceptions are impossible to recover from
-anyway, you might as well just let the exception propagate up to a
-higher level.</P>
+opening and closing the connection or any statements. It is all
+handled for you. Another advantage is that you won't have to catch
+any exceptions, unless you want to. Spring wraps all SQLExceptions in
+it's own unchecked exception hierarchy inheriting from
+DataAccessException. If you want to you can catch this exception, but
+since most database exceptions are impossible to recover from anyway,
+you might as well just let the exception propagate up to a higher
+level.</P>
 <TABLE WIDTH=924 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=914>
 	<TR>
@@ -364,7 +362,7 @@ higher level.</P>
 <FONT COLOR="#000000">        ProductQuery(DataSource ds) {</FONT>
 <FONT COLOR="#000000">            super(ds, &quot;SELECT id, description, price from products&quot;);</FONT>
 <FONT COLOR="#000000">            compile();</FONT>
-<FONT COLOR="#000000">	}</FONT>
+<FONT COLOR="#000000">        }</FONT>
 <FONT COLOR="#000000"> </FONT>
 <FONT COLOR="#000000">        protected Object mapRow(ResultSet rs, int rowNum) throws SQLException {</FONT>
 <FONT COLOR="#000000">            Product prod = new Product();</FONT>
@@ -381,47 +379,206 @@ higher level.</P>
 	</TR>
 </TABLE>
 <P STYLE="margin-bottom: 0cm">Lets go over the two DAO methods in
-this class.  First, <FONT COLOR="#000000">getProductList()</FONT>
-creates a query object that will retrieve all the products.  This
+this class. First, <FONT COLOR="#000000">getProductList()</FONT>
+creates a query object that will retrieve all the products. This
 query is executed and the results are passed back as a list of
-Products.  At the end of the class we can see the definition for this
-query class.  I have implemented it as an inner class since we are
-not going to reference it anywhere else, but I could just as well
-have made it a separate class.  This query class extends
-MappingSqlQuery, which is a central class in Spring's JDBC framework.
- The idea behind this class is that you have to specify a SQL query
-when this class is created, and you are also responsible for
-implementing the mapRow method to map the data from each row into a
-class that represents the entity you are retrieving in your query.
-That's it, that's all you have to provide.  The rest is managed by
-the framework.   In the constructor of the ProductQuery class I pass
-in the data source.  This<SPAN LANG="en-US"> data source </SPAN>will
-be provided in a similar fashion to the way we wired up the business
-objects in Part 2, so we don't have to worry about<SPAN LANG="en-US">
-retrieving </SPAN>a data source in our DAO class.  In the constructor
-I also define the SQL query that we will use to retrieve the
-products.  The mapRow method will be called once for each row
-returned by the query.  It creates a new Product and populates it
-based on the data retrieved from the current row of the resultset.
-You should not call getNext on the resultset, it is all handled by
-the framework.  This is another example of an Inversion of Control
-solution.
+Products. At the end of the class we can see the definition for this
+query class. I have implemented it as an inner class since we are not
+going to reference it anywhere else, but I could just as well have
+made it a separate class. This query class extends MappingSqlQuery,
+which is a central class in Spring's JDBC framework. The idea behind
+this class is that you have to specify a SQL query when this class is
+created, and you are also responsible for implementing the mapRow
+method to map the data from each row into a class that represents the
+entity you are retrieving in your query. That's it, that's all you
+have to provide. The rest is managed by the framework. In the
+constructor of the ProductQuery class I pass in the data source. This
+data source will be provided in a similar fashion to the way we wired
+up the business objects in Part 2, so we don't have to worry about
+retrieving a data source in our DAO class. In the constructor I also
+define the SQL query that we will use to retrieve the products. The
+mapRow method will be called once for each row returned by the query.
+It creates a new Product and populates it based on the data retrieved
+from the current row of the resultset. You should not call getNext on
+the resultset, it is all handled by the framework. This is another
+example of an Inversion of Control solution. 
 </P>
 <P STYLE="margin-bottom: 0cm">The second method increasePrice is
-utilizing an SqlUpdate class.  This class is passed the<SPAN LANG="en-US">
-data source </SPAN>and an SQL update statement with placeholders for
-parameters.  Same syntax as a prepared statement in JDBC.  In fact,
-that is what SqlUpdate creates behind the scenes.  For the
-parameters, we have to give them a name and declare what type they
-are so that the framework can set them before the prepared statement
-is executed.  After all parameters has been declared, we “compile”
-the statement in JDO fashion.  This will signal that we are done
-declaring parameters, and the framework will check to make sure that
-we have a matching declaration for each placeholder in the SQL
-statement.  Next we declare an Object array that will hold the
-parameter values that we are going to pass in to the prepared
-statement.  This array gets passed into the update method of
-SqlUpdate.  The update method does return the count of rows affected.</P>
+utilizing an SqlUpdate class. This class is passed the data source
+and an SQL update statement with placeholders for parameters. Same
+syntax as a prepared statement in JDBC. In fact, that is what
+SqlUpdate creates behind the scenes. For the parameters, we have to
+give them a name and declare what type they are so that the framework
+can set them before the prepared statement is executed. After all
+parameters have been declared, we “compile” the statement in JDO
+fashion. This will signal that we are done declaring parameters, and
+the framework will check to make sure that we have a matching
+declaration for each placeholder in the SQL statement. Next we
+declare an Object array that will hold the parameter values that we
+are going to pass in to the prepared statement. This array gets
+passed into the update method of SqlUpdate. The update method does
+return the count of rows affected.</P>
+<P STYLE="margin-bottom: 0cm">I need to store the value of the
+primary key for each product in the Product class.  This key will be
+used when I persist any changes to the object back to the database. 
+To hold this key I add a private field named 'id' complete with
+setters and getters to Product.java.</P>
+<TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=256*>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#ffcc99">
+			<P><B><FONT SIZE=2><FONT FACE="Nimbus Mono L">springapp/src/bus/Product.java</FONT></FONT></B>
+						</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#ffffcc">
+			<PRE><FONT COLOR="#000000">package bus;</FONT>
+
+<FONT COLOR="#000000">import java.io.Serializable;</FONT>
+
+<FONT COLOR="#000000">public class Product implements Serializable {</FONT>
+
+<FONT COLOR="#800000">    private int id;</FONT>
+<FONT COLOR="#000000">    private String description;</FONT>
+<FONT COLOR="#000000">    private Double price;</FONT>
+
+<FONT COLOR="#800000">    public void setId(int i) {</FONT>
+<FONT COLOR="#800000">        id = i;</FONT>
+<FONT COLOR="#800000">    }</FONT>
+
+<FONT COLOR="#800000">    public int getId() {</FONT>
+<FONT COLOR="#800000">        return id;</FONT>
+<FONT COLOR="#800000">    }</FONT>
+
+<FONT COLOR="#000000">    public void setDescription(String s) {</FONT>
+<FONT COLOR="#000000">        description = s;</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public String getDescription() {</FONT>
+<FONT COLOR="#000000">        return description;</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public void setPrice(Double d) {</FONT>
+<FONT COLOR="#000000">        price = d;</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public Double getPrice() {</FONT>
+<FONT COLOR="#000000">        return price;</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">}</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">Now it is time to test this whole DAO
+setup.  Actually, we probably should have written the tests first,
+but since this is a tutorial style document I think it makes more
+sense to introduce the actual code before the tests.  I decided to
+test with a live database, so I will have to add dependencies for
+clearData and loadData to the junit task in the build.xml.  This will
+ensure that we will have a consistent starting point for our tests.</P>
+<TABLE WIDTH=849 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=839>
+	<TR>
+		<TD WIDTH=839 VALIGN=TOP BGCOLOR="#ffffff">
+			<PRE><FONT COLOR="#000000">    &lt;target name=&quot;junit&quot; depends=&quot;build<FONT COLOR="#800000">,clearData,loadData</FONT>&quot; description=&quot;Run JUnit Tests&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;junit printsummary=&quot;on&quot;</FONT>
+<FONT COLOR="#000000">               fork=&quot;false&quot;</FONT>
+<FONT COLOR="#000000">               haltonfailure=&quot;false&quot;</FONT>
+<FONT COLOR="#000000">               failureproperty=&quot;tests.failed&quot;</FONT>
+<FONT COLOR="#000000">               showoutput=&quot;true&quot;&gt;</FONT>
+<FONT COLOR="#000000">            &lt;classpath refid=&quot;master-classpath&quot;/&gt;</FONT>
+<FONT COLOR="#000000">            &lt;formatter type=&quot;brief&quot; usefile=&quot;false&quot;/&gt;</FONT>
+
+<FONT COLOR="#000000">            &lt;batchtest&gt;</FONT>
+<FONT COLOR="#000000">                &lt;fileset dir=&quot;${build.dir}&quot;&gt;</FONT>
+<FONT COLOR="#000000">                    &lt;include name=&quot;**/Test*.*&quot;/&gt;</FONT>
+<FONT COLOR="#000000">                &lt;/fileset&gt;</FONT>
+<FONT COLOR="#000000">            &lt;/batchtest&gt;</FONT>
+
+<FONT COLOR="#000000">        &lt;/junit&gt;</FONT>
+
+<FONT COLOR="#000000">        &lt;fail if=&quot;tests.failed&quot;&gt;</FONT>
+<FONT COLOR="#000000">        ***********************************************************</FONT>
+<FONT COLOR="#000000">        ***********************************************************</FONT>
+<FONT COLOR="#000000">        ****  One or more tests failed!  Check the output ...  ****</FONT>
+<FONT COLOR="#000000">        ***********************************************************</FONT>
+<FONT COLOR="#000000">        ***********************************************************</FONT>
+<FONT COLOR="#000000">        &lt;/fail&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/target&gt;</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">Next, I add a
+TestProductManagerDaoJdbc.java to our collection of unit tests.  In
+the setup part I create a data source that will be used for testing. 
+</P>
+<TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=256*>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#ffcc99">
+			<P><B><FONT SIZE=2><FONT FACE="Nimbus Mono L">springapp/src/test/TestProductManagerDaoJdbc.java</FONT></FONT></B>
+						</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#ffffcc">
+			<PRE><FONT COLOR="#000000">package tests;</FONT>
+
+<FONT COLOR="#000000">import java.util.List;</FONT>
+<FONT COLOR="#000000">import java.util.ArrayList;</FONT>
+<FONT COLOR="#000000">import junit.framework.TestCase;</FONT>
+<FONT COLOR="#000000">import org.springframework.jdbc.datasource.DriverManagerDataSource;</FONT>
+<FONT COLOR="#000000">import db.ProductManagerDaoJdbc;</FONT>
+<FONT COLOR="#000000">import bus.Product;</FONT>
+
+<FONT COLOR="#000000">public class TestProductManagerDaoJdbc extends TestCase {</FONT>
+
+<FONT COLOR="#000000">    private ProductManagerDaoJdbc pmdao;</FONT>
+
+<FONT COLOR="#000000">    public void setUp() {</FONT>
+<FONT COLOR="#000000">        pmdao = new ProductManagerDaoJdbc();</FONT>
+<FONT COLOR="#000000">        DriverManagerDataSource ds = new DriverManagerDataSource();</FONT>
+<FONT COLOR="#000000">        ds.setDriverClassName(&quot;org.hsqldb.jdbcDriver&quot;);</FONT>
+<FONT COLOR="#000000">        ds.setUrl(&quot;jdbc:hsqldb:db/test&quot;);</FONT>
+<FONT COLOR="#000000">        ds.setUsername(&quot;sa&quot;);</FONT>
+<FONT COLOR="#000000">        ds.setPassword(&quot;&quot;);</FONT>
+<FONT COLOR="#000000">        pmdao.setDataSource(ds);</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public void testGetProductList() {</FONT>
+<FONT COLOR="#000000">        List l = pmdao.getProductList();</FONT>
+<FONT COLOR="#000000">        Product p1 = (Product) l.get(0);</FONT>
+<FONT COLOR="#000000">        assertEquals(&quot;Lamp&quot;, p1.getDescription());</FONT>
+<FONT COLOR="#000000">        Product p2 = (Product) l.get(1);</FONT>
+<FONT COLOR="#000000">        assertEquals(&quot;Table&quot;, p2.getDescription());</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public void testIncreasePrice() {</FONT>
+<FONT COLOR="#000000">        List l1 = pmdao.getProductList();</FONT>
+<FONT COLOR="#000000">        Product p1 = (Product) l1.get(0);</FONT>
+<FONT COLOR="#000000">        assertEquals(new Double(&quot;5.78&quot;), p1.getPrice());</FONT>
+<FONT COLOR="#000000">        pmdao.increasePrice(p1, 10);</FONT>
+<FONT COLOR="#000000">        List l2 = pmdao.getProductList();</FONT>
+<FONT COLOR="#000000">        Product p2 = (Product) l2.get(0);</FONT>
+<FONT COLOR="#000000">        assertEquals(new Double(&quot;6.36&quot;), p2.getPrice());</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">}</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">When we pass the unit tests, we can
+move on and modify the web application to make use of these new
+database persistence capabilities.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><B>Step 24 – Modify web application.</B></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
 <P STYLE="margin-bottom: 0cm"><BR>
 </P>
 <P STYLE="margin-bottom: 0cm">To be continued ...</P>
