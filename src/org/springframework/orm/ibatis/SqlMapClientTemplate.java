@@ -34,6 +34,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that simplifies data access via the SqlMapClient API of the
@@ -132,6 +133,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public Object execute(SqlMapClientCallback action) throws DataAccessException {
+		Assert.notNull(this.sqlMapClient, "No SqlMapClient specified");
 		SqlMapSession session = this.sqlMapClient.openSession();
 		try {
 			Connection con = DataSourceUtils.getConnection(getDataSource());

@@ -38,6 +38,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 /**
  * Helper class featuring methods for JDO PersistenceManager handling,
@@ -113,6 +114,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	public static PersistenceManager getPersistenceManager(
 			PersistenceManagerFactory pmf, boolean allowCreate, boolean allowSynchronization)
 	    throws DataAccessResourceFailureException, IllegalStateException {
+		Assert.notNull(pmf, "No PersistenceManagerFactory specified");
 
 		PersistenceManagerHolder pmHolder =
 				(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
@@ -154,6 +156,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	public static void applyTransactionTimeout(
 			Query query, PersistenceManagerFactory pmf, JdoDialect jdoDialect) throws JDOException {
+		Assert.notNull(query, "No Query object specified");
 		PersistenceManagerHolder pmHolder =
 		    (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
 		if (pmHolder != null && pmHolder.hasTimeout()) {

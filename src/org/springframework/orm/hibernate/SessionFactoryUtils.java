@@ -59,6 +59,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 /**
  * Helper class featuring methods for Hibernate session handling,
@@ -269,6 +270,8 @@ public abstract class SessionFactoryUtils {
 			SQLExceptionTranslator jdbcExceptionTranslator, boolean allowSynchronization, boolean allowCreate)
 			throws DataAccessResourceFailureException, IllegalStateException {
 
+		Assert.notNull(sessionFactory, "No SessionFactory specified");
+
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null) {
 			// pre-bound Hibernate Session
@@ -290,33 +293,9 @@ public abstract class SessionFactoryUtils {
 			}
 			else {
 				// no Spring transaction management active
-				TransactionManager jtaTm = getJtaTransactionManager(sessionFactory, sessionHolder.getAnySession());
-				if (jtaTm != null) {
-					// Check whether JTA transaction management is active ->
-					// fetch pre-bound Session for the current JTA transaction, if any.
-					// (just necessary for JTA transaction suspension, with an individual
-					// Hibernate Session per currently active/suspended transaction)
-					try {
-						int jtaStatus = jtaTm.getStatus();
-						if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
-							// look for transaction-specific Session
-							Session session = sessionHolder.getSession(jtaTm.getTransaction());
-							if (session != null) {
-								return session;
-							}
-						}
-						else {
-							// no transaction active -> simply return default thread-bound Session
-							return sessionHolder.getSession();
-						}
-					}
-					catch (SystemException ex) {
-						throw new DataAccessResourceFailureException("Could not check JTA transaction", ex);
-					}
-				}
-				else {
-					// no JTA TransactionManager -> simply return default thread-bound Session
-					return sessionHolder.getSession();
+				Session session = getJtaSynchronizedSession(sessionHolder, sessionFactory);
+				if (session != null) {
+					return session;
 				}
 			}
 		}
@@ -334,7 +313,6 @@ public abstract class SessionFactoryUtils {
 			if (allowSynchronization) {
 				// Use same Session for further Hibernate actions within the transaction.
 				// Thread object will get removed by synchronization at transaction completion.
-
 				if (TransactionSynchronizationManager.isSynchronizationActive()) {
 					// We're within a Spring-managed transaction, possibly from JtaTransactionManager.
 					logger.debug("Registering Spring transaction synchronization for new Hibernate session");
@@ -344,43 +322,8 @@ public abstract class SessionFactoryUtils {
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, true));
 					TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 				}
-
 				else {
-					// JTA synchronization is only possible with a javax.transaction.TransactionManager.
-					// We'll check the Hibernate SessionFactory: If a TransactionManagerLookup is specified
-					// in Hibernate configuration, it will contain a TransactionManager reference.
-					TransactionManager jtaTm = getJtaTransactionManager(sessionFactory, session);
-					if (jtaTm != null) {
-						try {
-							int jtaStatus = jtaTm.getStatus();
-							if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
-								logger.debug("Registering JTA transaction synchronization for new Hibernate session");
-								javax.transaction.Transaction jtaTx = jtaTm.getTransaction();
-								boolean newHolder = false;
-								// register with existing SessionHolder or create a new one
-								if (sessionHolder == null) {
-									sessionHolder = new SessionHolder(jtaTx, session);
-									sessionHolder.setSynchronizedWithTransaction(true);
-									newHolder = true;
-								}
-								else {
-									sessionHolder.addSession(jtaTx, session);
-								}
-								jtaTx.registerSynchronization(
-										new JtaSessionSynchronization(
-												new SpringSessionSynchronization(
-												    sessionHolder, sessionFactory, jdbcExceptionTranslator, true),
-												jtaTm));
-								if (newHolder) {
-									TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
-								}
-							}
-						}
-						catch (Exception ex) {
-							throw new DataAccessResourceFailureException(
-							    "Could not register synchronization with JTA TransactionManager", ex);
-						}
-					}
+					registerJtaSynchronization(session, sessionFactory, jdbcExceptionTranslator, sessionHolder);
 				}
 			}
 			return session;
@@ -395,6 +338,88 @@ public abstract class SessionFactoryUtils {
 		}
 	}
 
+	/**
+	 * Retrieve a Session from the given SessionHolder, potentially from a
+	 * JTA transaction synchronization.
+	 * @param sessionHolder the SessionHolder to check
+	 * @param sessionFactory the SessionFactory to get the JTA TransactionManager from
+	 * @return the associated Session, if any
+	 */
+	private static Session getJtaSynchronizedSession(SessionHolder sessionHolder, SessionFactory sessionFactory) {
+		TransactionManager jtaTm = getJtaTransactionManager(sessionFactory, sessionHolder.getAnySession());
+		if (jtaTm != null) {
+			// Check whether JTA transaction management is active ->
+			// fetch pre-bound Session for the current JTA transaction, if any.
+			// (just necessary for JTA transaction suspension, with an individual
+			// Hibernate Session per currently active/suspended transaction)
+			try {
+				int jtaStatus = jtaTm.getStatus();
+				if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
+					// look for transaction-specific Session
+					return sessionHolder.getSession(jtaTm.getTransaction());
+				}
+				else {
+					// no transaction active -> simply return default thread-bound Session
+					return sessionHolder.getSession();
+				}
+			}
+			catch (SystemException ex) {
+				throw new DataAccessResourceFailureException("Could not check JTA transaction", ex);
+			}
+		}
+		else {
+			// no JTA TransactionManager -> simply return default thread-bound Session
+			return sessionHolder.getSession();
+		}
+	}
+
+	/**
+	 * Register a JTA synchronization for the given Session, if any.
+	 * @param sessionHolder the existing thread-bound SessionHolder, if any
+	 * @param session the Session to register
+	 * @param sessionFactory the SessionFactory that the Session was created with
+	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
+	 * Session on transaction synchronization (can be null)
+	 */
+	private static void registerJtaSynchronization(Session session, SessionFactory sessionFactory,
+			SQLExceptionTranslator jdbcExceptionTranslator, SessionHolder sessionHolder) {
+
+		// JTA synchronization is only possible with a javax.transaction.TransactionManager.
+		// We'll check the Hibernate SessionFactory: If a TransactionManagerLookup is specified
+		// in Hibernate configuration, it will contain a TransactionManager reference.
+		TransactionManager jtaTm = getJtaTransactionManager(sessionFactory, session);
+		if (jtaTm != null) {
+			try {
+				int jtaStatus = jtaTm.getStatus();
+				if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
+					logger.debug("Registering JTA transaction synchronization for new Hibernate session");
+					javax.transaction.Transaction jtaTx = jtaTm.getTransaction();
+					SessionHolder holderToUse = sessionHolder;
+					// register with existing SessionHolder or create a new one
+					if (holderToUse == null) {
+						holderToUse = new SessionHolder(jtaTx, session);
+						holderToUse.setSynchronizedWithTransaction(true);
+					}
+					else {
+						holderToUse.addSession(jtaTx, session);
+					}
+					jtaTx.registerSynchronization(
+							new JtaSessionSynchronization(
+									new SpringSessionSynchronization(
+											holderToUse, sessionFactory, jdbcExceptionTranslator, true),
+									jtaTm));
+					if (holderToUse != sessionHolder) {
+						TransactionSynchronizationManager.bindResource(sessionFactory, holderToUse);
+					}
+				}
+			}
+			catch (Exception ex) {
+				throw new DataAccessResourceFailureException(
+						"Could not register synchronization with JTA TransactionManager", ex);
+			}
+		}
+	}
+
 
 	/**
 	 * Apply the current transaction timeout, if any, to the given
@@ -403,6 +428,7 @@ public abstract class SessionFactoryUtils {
 	 * @param sessionFactory Hibernate SessionFactory that the Query was created for
 	 */
 	public static void applyTransactionTimeout(Query query, SessionFactory sessionFactory) {
+		Assert.notNull(query, "No Query object specified");
 		SessionHolder sessionHolder =
 		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
@@ -417,6 +443,7 @@ public abstract class SessionFactoryUtils {
 	 * @param sessionFactory Hibernate SessionFactory that the Criteria was created for
 	 */
 	public static void applyTransactionTimeout(Criteria criteria, SessionFactory sessionFactory) {
+		Assert.notNull(criteria, "No Criteria object specified");
 		SessionHolder sessionHolder =
 		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
@@ -479,6 +506,7 @@ public abstract class SessionFactoryUtils {
 	 * @param sessionFactory Hibernate SessionFactory
 	 */
 	public static boolean isDeferredCloseActive(SessionFactory sessionFactory) {
+		Assert.notNull(sessionFactory, "No SessionFactory specified");
 		Map holderMap = (Map) deferredCloseHolder.get();
 		return (holderMap != null && holderMap.containsKey(sessionFactory));
 	}
@@ -496,6 +524,7 @@ public abstract class SessionFactoryUtils {
 	 * @see org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor#setSingleSession
 	 */
 	public static void initDeferredClose(SessionFactory sessionFactory) {
+		Assert.notNull(sessionFactory, "No SessionFactory specified");
 		logger.debug("Initializing deferred close of Hibernate sessions");
 		Map holderMap = (Map) deferredCloseHolder.get();
 		if (holderMap == null) {
@@ -513,6 +542,8 @@ public abstract class SessionFactoryUtils {
 	 * @see #closeSessionIfNecessary
 	 */
 	public static void processDeferredClose(SessionFactory sessionFactory) {
+		Assert.notNull(sessionFactory, "No SessionFactory specified");
+
 		Map holderMap = (Map) deferredCloseHolder.get();
 		if (holderMap == null || !holderMap.containsKey(sessionFactory)) {
 			throw new IllegalStateException("Deferred close not active for SessionFactory [" + sessionFactory + "]");
@@ -524,7 +555,7 @@ public abstract class SessionFactoryUtils {
 			doClose((Session) it.next());
 
 		}
-		
+
 		if (holderMap.isEmpty()) {
 			deferredCloseHolder.set(null);
 		}

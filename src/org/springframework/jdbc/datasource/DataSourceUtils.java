@@ -32,6 +32,7 @@ import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
  
 /**
  * Helper class that provides static methods to obtain connections from
@@ -94,9 +95,8 @@ public abstract class DataSourceUtils {
 	 */
 	public static DataSource getDataSourceFromJndi(String jndiName, boolean resourceRef)
 	    throws CannotGetJdbcConnectionException {
-		if (jndiName == null || "".equals(jndiName)) {
-			throw new IllegalArgumentException("jndiName must not be empty");
-		}
+		Assert.hasText(jndiName, "JNDI name must not be empty");
+
 		if (resourceRef && !jndiName.startsWith(JndiLocatorSupport.CONTAINER_PREFIX)) {
 			jndiName = JndiLocatorSupport.CONTAINER_PREFIX + jndiName;
 		}
@@ -166,6 +166,7 @@ public abstract class DataSourceUtils {
 	 */
 	protected static Connection doGetConnection(DataSource ds, boolean allowSynchronization)
 			throws SQLException {
+		Assert.notNull(ds, "No DataSource specified");
 
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
 		if (conHolder != null) {
@@ -195,6 +196,7 @@ public abstract class DataSourceUtils {
 	 */
 	public static Integer prepareConnectionForTransaction(Connection con, TransactionDefinition definition)
 			throws SQLException {
+		Assert.notNull(con, "No Connection specified");
 
 		// apply read-only
 		if (definition.isReadOnly()) {
@@ -233,6 +235,7 @@ public abstract class DataSourceUtils {
 	 * @see #prepareConnectionForTransaction
 	 */
 	public static void resetConnectionAfterTransaction(Connection con, Integer previousIsolationLevel) {
+		Assert.notNull(con, "No Connection specified");
 		try {
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (previousIsolationLevel != null) {
@@ -262,6 +265,7 @@ public abstract class DataSourceUtils {
 	 * @param ds DataSource that the Connection came from
 	 */
 	public static void applyTransactionTimeout(Statement stmt, DataSource ds) throws SQLException {
+		Assert.notNull(stmt, "No Statement specified");
 		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
 		if (holder != null && holder.hasTimeout()) {
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
