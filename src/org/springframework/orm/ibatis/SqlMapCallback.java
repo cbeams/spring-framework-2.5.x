@@ -7,8 +7,12 @@ import com.ibatis.db.sqlmap.MappedStatement;
 
 /**
  * Callback interface for data access code that works on an iBATIS Database Layer
- * SqlMap. To be used with SqlMapTemplate's execute method,
- * assumably often as anonymous classes within a method implementation.
+ * MappedStatement. To be used with SqlMapTemplate's execute method, assumably
+ * often as anonymous classes within a method implementation.
+ *
+ * <p>NOTE: The SqlMap/MappedStatement API is the one to use with iBATIS SQL Maps 1.x.
+ * The SqlMapClient/SqlMapSession is only available with SQL Maps 2.
+ *
  * @author Juergen Hoeller
  * @since 28.11.2003
  */

@@ -15,6 +15,9 @@ import org.springframework.dao.DataAccessException;
  * <p>Provides SqlMapTemplate's convenience methods that mirror MappedStatement's
  * executeXXX methods. See the MappedStatement javadocs for details on those methods.
  *
+ * <p>NOTE: The SqlMap/MappedStatement API is the one to use with iBATIS SQL Maps 1.x.
+ * The SqlMapClient/SqlMapSession is only available with SQL Maps 2.
+ *
  * @author Juergen Hoeller
  * @since 05.02.2004
  * @see SqlMapTemplate

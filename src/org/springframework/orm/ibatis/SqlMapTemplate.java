@@ -28,6 +28,9 @@ import org.springframework.jdbc.support.JdbcAccessor;
  * <p>This class provides numerous convenience methods that mirror MappedStatement's
  * executeXXX methods. See the MappedStatement javadocs for details on those methods.
  *
+ * <p>NOTE: The SqlMap/MappedStatement API is the one to use with iBATIS SQL Maps 1.x.
+ * The SqlMapClient/SqlMapSession is only available with SQL Maps 2.
+ *
  * @author Juergen Hoeller
  * @since 28.11.2003
  * @see #execute
@@ -68,6 +71,13 @@ public class SqlMapTemplate extends JdbcAccessor implements SqlMapOperations {
 	 */
 	public SqlMap getSqlMap() {
 		return sqlMap;
+	}
+
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+		if (this.sqlMap == null) {
+			throw new IllegalArgumentException("sqlMap is required");
+		}
 	}
 
 
