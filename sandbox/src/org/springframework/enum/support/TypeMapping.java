@@ -13,10 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum;
+package org.springframework.enum.support;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.enum.support.*;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ToStringBuilder;

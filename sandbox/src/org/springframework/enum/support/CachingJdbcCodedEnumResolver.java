@@ -32,7 +32,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.enum.CodedEnum;
 import org.springframework.enum.CodedEnumResolver;
-import org.springframework.enum.TypeMapping;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.util.Assert;
