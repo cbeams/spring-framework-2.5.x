@@ -90,35 +90,40 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	private String resourceDescription;
 
 
+	/**
+	 * Create a new AbstractBeanDefinition with default settings.
+	 */
 	protected AbstractBeanDefinition() {
 		setConstructorArgumentValues(new ConstructorArgumentValues());
 		setPropertyValues(new MutablePropertyValues());
 	}
 
 	/**
-	 * Deep copy constructor.
+	 * Create a new AbstractBeanDefinition as deep copy of the given
+	 * bean definition.
+	 * @param original the original bean definition to copy from
 	 */
-	protected AbstractBeanDefinition(AbstractBeanDefinition other) {
-		this.beanClass = other.beanClass;
+	protected AbstractBeanDefinition(AbstractBeanDefinition original) {
+		this.beanClass = original.beanClass;
 
-		setAbstract(other.isAbstract());
-		setSingleton(other.isSingleton());
-		setLazyInit(other.isLazyInit());
+		setAbstract(original.isAbstract());
+		setSingleton(original.isSingleton());
+		setLazyInit(original.isLazyInit());
 
-		setConstructorArgumentValues(new ConstructorArgumentValues(other.getConstructorArgumentValues()));
-		setPropertyValues(new MutablePropertyValues(other.getPropertyValues()));
-		setMethodOverrides(new MethodOverrides(other.getMethodOverrides()));
+		setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
+		setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
+		setMethodOverrides(new MethodOverrides(original.getMethodOverrides()));
 
-		setInitMethodName(other.getInitMethodName());
-		setDestroyMethodName(other.getDestroyMethodName());
-		setFactoryMethodName(other.getFactoryMethodName());
-		setFactoryBeanName(other.getFactoryBeanName());
+		setInitMethodName(original.getInitMethodName());
+		setDestroyMethodName(original.getDestroyMethodName());
+		setFactoryMethodName(original.getFactoryMethodName());
+		setFactoryBeanName(original.getFactoryBeanName());
 
-		setDependsOn(other.getDependsOn());
-		setAutowireMode(other.getAutowireMode());
-		setDependencyCheck(other.getDependencyCheck());
+		setDependsOn(original.getDependsOn());
+		setAutowireMode(original.getAutowireMode());
+		setDependencyCheck(original.getDependencyCheck());
 
-		setResourceDescription(other.getResourceDescription());
+		setResourceDescription(original.getResourceDescription());
 	}
 
 	/**
@@ -384,10 +389,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Set the autowire code. This determines whether any automagical detection
+	 * Set the autowire mode. This determines whether any automagical detection
 	 * and setting of bean references will happen. Default is AUTOWIRE_NO,
 	 * which means there's no autowire.
-	 * @param autowireMode the autowire to set.
+	 * @param autowireMode the autowire mode to set.
 	 * Must be one of the constants defined in this class.
 	 * @see #AUTOWIRE_NO
 	 * @see #AUTOWIRE_BY_NAME

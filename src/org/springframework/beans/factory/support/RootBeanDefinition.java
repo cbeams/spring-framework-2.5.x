@@ -21,12 +21,13 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /** 
- * Root bean definitions have a class plus optionally constructor argument
- * values and property values. This is the most common type of bean definition.
+ * Root bean definitions are the most common type of bean definition.
+ * They do not derive from a parent bean definition, and usually have a
+ * class plus optionally constructor argument values and property values.
  *
  * <p>Note that root bean definitions do not have to specify a bean class:
- * This can be useful for deriving childs from, each with its own bean class
- * but inheriting common property values and other settings.
+ * This can be useful for deriving childs from such definitions, each with
+ * its own bean class but inheriting common property values and other settings.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -96,29 +97,31 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public RootBeanDefinition(Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		setBeanClass(beanClass);
-		setConstructorArgumentValues(cargs);;
+		setConstructorArgumentValues(cargs);
 		setPropertyValues(pvs);
 	}
 
 	/**
 	 * Create a new RootBeanDefinition for a singleton,
 	 * providing constructor arguments and property values.
-	 * Takes a bean class name to avoid eager loading of the bean class.
+	 * <p>Takes a bean class name to avoid eager loading of the bean class.
 	 * @param beanClassName the name of the class to instantiate
 	 * @param cargs the constructor argument values to apply
 	 * @param pvs the property values to apply
 	 */
 	public RootBeanDefinition(String beanClassName, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		setBeanClassName(beanClassName);
-		setConstructorArgumentValues(cargs);;
+		setConstructorArgumentValues(cargs);
 		setPropertyValues(pvs);
 	}
 
 	/**
-	 * Deep copy constructor.
+	 * Create a new RootBeanDefinition as deep copy of the given
+	 * bean definition.
+	 * @param original the original bean definition to copy from
 	 */
-	public RootBeanDefinition(RootBeanDefinition other) {
-		super(other);
+	public RootBeanDefinition(RootBeanDefinition original) {
+		super(original);
 	}
 
 

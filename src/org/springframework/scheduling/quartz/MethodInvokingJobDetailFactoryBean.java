@@ -52,6 +52,8 @@ import org.springframework.util.MethodInvoker;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @since 18.02.2004
+ * @see #setTargetObject
+ * @see #setTargetMethod
  * @see #setConcurrent
  * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
  */
@@ -110,10 +112,13 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchMethodException {
 		prepare();
 
-		// consider the concurrent flag to choose between stateful and stateless job
-		this.jobDetail = new JobDetail(this.name != null ? this.name : this.beanName,
-		                               this.group,
-		                               this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
+		// Use specific name if given, else fall back to bean name.
+		String name = (this.name != null ? this.name : this.beanName);
+
+		// Consider the concurrent flag to choose between stateful and stateless job.
+		Class jobClass = (this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
+
+		this.jobDetail = new JobDetail(name, this.group, jobClass);
 		this.jobDetail.getJobDataMap().put("methodInvoker", this);
 		this.jobDetail.setVolatility(true);		
 	}
