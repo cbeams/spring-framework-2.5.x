@@ -17,10 +17,11 @@ import org.springframework.context.ApplicationContextException;
 /**
  * Convenient abstract superclass for ApplicationContext implementations
  * drawing their configuration from XML documents containing bean definitions
- * understood by an DefaultXmlBeanDefinitionReader.
+ * understood by DefaultXmlBeanDefinitionParser.
  * @author Rod Johnson
- * @version $Revision: 1.7 $
- * @see org.springframework.beans.factory.xml.XmlBeanFactory
+ * @author Juergen Hoeller
+ * @version $Revision: 1.8 $
+ * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
 
@@ -49,11 +50,10 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	}
 
 	protected void refreshBeanFactory() throws BeansException {
-		String identifier = "application context [" + getDisplayName() + "]";
 		try {
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(getParent());
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-			reader.setEntityResolver(new ResourceBaseEntityResolver(this));
+			reader.setEntityResolver(new ResourceEntityResolver(this));
 			loadBeanDefinitions(reader);
 			this.beanFactory = beanFactory;
 			if (logger.isInfoEnabled()) {
@@ -61,7 +61,8 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 			}
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("I/O error parsing XML document for " + identifier, ex);
+			throw new ApplicationContextException("I/O error parsing XML document for application context [" +
+			                                      getDisplayName() + "]", ex);
 		} 
 	}
 
@@ -74,6 +75,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	 * @throws IOException if the required XML document isn't found
 	 * @see #refreshBeanFactory
 	 */
-	protected abstract void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException;
+	protected abstract void loadBeanDefinitions(XmlBeanDefinitionReader reader)
+	    throws BeansException, IOException;
 	
 }

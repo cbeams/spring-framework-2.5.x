@@ -2,7 +2,6 @@ package org.springframework.context.support;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -31,11 +30,11 @@ import org.springframework.core.io.Resource;
  * @since 31.07.2003
  * @see org.springframework.context.ApplicationContext#getResource
  */
-public class ResourceBaseEntityResolver extends BeansDtdResolver {
+public class ResourceEntityResolver extends BeansDtdResolver {
 
 	private final ApplicationContext applicationContext;
 
-	public ResourceBaseEntityResolver(ApplicationContext applicationContext) {
+	public ResourceEntityResolver(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
