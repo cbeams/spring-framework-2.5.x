@@ -238,8 +238,8 @@ public class ExecuteAStatement {
 
       <para>In addition to the execute methods, there is a large number of
       query methods. Some of these methods are intended to be used for queries
-      that return a single value. Maybe you want a count or a specific value
-      from one row. If that is the case then you can use
+      that return a single value. Maybe you want to retrieve a count or a
+      specific value from one row. If that is the case then you can use
       <literal>queryForInt</literal>,<literal>queryForLong</literal> or
       <literal>queryForObject</literal>. The latter will convert the returned
       JDBC Type to the Java class that is passed in as an argument. If the
@@ -306,26 +306,106 @@ public class ExecuteAQuery {
 
     <sect2 id="jdbc-DataSourceUtils">
       <title>DataSourceUtils</title>
+
+      <para>Helper class that provides static methods to obtain connections
+      from JNDI and close connections if necessary. Has support for
+      thread-bound connections, e.g. for use with
+      DataSourceTransactionManager.</para>
+
+      <para>Note: The getDataSourceFromJndi methods are targetted at
+      applications that do not use a BeanFactory resp. an ApplicationContext.
+      With the latter, it is preferable to preconfigure your beans or even
+      <literal><literal>JdbcTemplate</literal></literal> instances in the
+      factory: <literal>JndiObjectFactoryBean</literal> can be used to fetch a
+      <literal><literal>DataSource</literal></literal> from JNDI and give the
+      <literal><literal>DataSource</literal></literal> bean reference to other
+      beans. Switching to another
+      <literal><literal>DataSource</literal></literal> is just a matter of
+      configuration then: You can even replace the definition of the
+      <literal>FactoryBean</literal> with a non-JNDI
+      <literal><literal>DataSource</literal></literal>! </para>
     </sect2>
 
     <sect2 id="jdbc-SmartDataSource">
       <title>SmartDataSource</title>
+
+      <para>Interface to be implemented by classes that can provide a
+      connection to a relational database. Extends the
+      <literal>javax.sql.DataSource</literal> interface to allow classes using
+      it to query whether or not the connection should be closed after a given
+      operation. This can sometimes be useful for efficiency, if we know that
+      we want to reuse a connection.</para>
     </sect2>
 
     <sect2 id="jdbc-AbstractDataSource">
       <title>AbstractDataSource</title>
+
+      <para>Abstract base class for Spring's <literal>DataSource</literal>
+      implementations, taking care of the "uninteresting" glue. This is the
+      class you would extend if you are writing your own
+      <literal>DataSource</literal> implementation.</para>
     </sect2>
 
     <sect2 id="jdbc-SingleConnectionDataSource">
       <title>SingleConnectionDataSource</title>
+
+      <para>Implementation of <literal>SmartDataSource</literal> that wraps a
+      single connection which is not closed after use. Obviously, this is not
+      multi-threading capable. Note that at shutdown, someone should close the
+      underlying connection via the <literal>close()</literal> method. Client
+      code will never call close on the connection handle if it is
+      SmartDataSource-aware (e.g. uses
+      <literal>DataSourceUtils.closeConnectionIfNecessary</literal>). If
+      client code will call close in the assumption of a pooled connection,
+      like when using persistence tools, set <literal>suppressClose</literal>
+      to true. This will return a close-suppressing proxy instead of the
+      physical connection. Be aware that you will not be able to cast this to
+      a native Oracle Connection or the like anymore. This is primarily a test
+      class. For example, it enables easy testing of code outside an
+      application server, in conjunction with a simple JNDI environment. In
+      contrast to <literal>DriverManagerDataSource</literal>, it reuses the
+      same connection all the time, avoiding excessive creation of physical
+      connections. </para>
     </sect2>
 
     <sect2 id="jdbc-DriverManagerDataSource">
       <title>DriverManagerDataSource</title>
+
+      <para>Implementation of <literal>SmartDataSource</literal> that
+      configures a plain old JDBC Driver via bean properties, and returns a
+      new connection every time. Useful for test or standalone environments
+      outside of a J2EE container, either as a <literal>DataSource</literal>
+      bean in a respective ApplicationContext, or in conjunction with a simple
+      JNDI environment. Pool-assuming <literal>Connection.close()</literal>
+      calls will simply close the connection, so any DataSource-aware
+      persistence code should work. </para>
     </sect2>
 
     <sect2 id="jdbc-DataSourceTransactionManager">
       <title>DataSourceTransactionManager</title>
+
+      <para>PlatformTransactionManager implementation for single JDBC data
+      sources. Binds a JDBC connection from the specified data source to the
+      thread, potentially allowing for one thread connection per data source.
+      Application code is required to retrieve the JDBC connection via
+      <literal>DataSourceUtils.getConnection(DataSource)</literal> instead of
+      J2EE's standard <literal>DataSource.getConnection</literal>. This is
+      recommended anyway, as it throws unchecked
+      <literal>org.springframework.dao</literal> exceptions instead of checked
+      <literal>SQLException</literal>. All framework classes like
+      <literal>JdbcTemplate</literal> use this strategy implicitly. If not
+      used with this transaction manager, the lookup strategy behaves exactly
+      like the common one - it can thus be used in any case. Supports custom
+      isolation levels, and timeouts that get applied as appropriate JDBC
+      statement query timeouts. To support the latter, application code must
+      either use <literal>JdbcTemplate</literal> or call
+      <literal>DataSourceUtils.<literal>applyTransactionTimeout</literal></literal>
+      method for each created statement. This implementation can be used
+      instead of <literal>JtaTransactionManager</literal> in the single
+      resource case, as it does not require the container to support JTA.
+      Switching between both is just a matter of configuration, if you stick
+      to the required connection lookup pattern. Note that JTA does not
+      support custom isolation levels!</para>
     </sect2>
   </sect1>
 
