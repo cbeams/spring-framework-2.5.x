@@ -28,7 +28,6 @@ import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ServiceLookupException;

@@ -177,7 +177,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	/*
 	 * Not supported, actions should really never call this
 	 */
-	public Map getModel() {
+	public Map getModel(boolean includeInfrastructureAttributes) {
 		throw new UnsupportedOperationException();
 	}
 

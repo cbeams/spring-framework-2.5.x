@@ -138,7 +138,7 @@ public class ViewState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning view name '" + viewName + "' to render");
 			}
-			return new ViewDescriptor(viewName, context.getModel());
+			return new ViewDescriptor(viewName, context.getModel(true));
 		}
 	}
 

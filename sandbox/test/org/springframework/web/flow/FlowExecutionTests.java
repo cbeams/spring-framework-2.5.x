@@ -14,6 +14,34 @@ import junit.framework.TestCase;
  */
 public class FlowExecutionTests extends TestCase {
 	
+	public void testInfrastructureAttributePrecense() {
+		AbstractFlowBuilder builder=new AbstractFlowBuilder() {
+			protected String flowId() {
+				return "flow";
+			}
+			
+			public void buildStates() throws FlowBuilderException {
+				addViewState("view", "viewName", on(submit(), "end"));
+				addEndState("end", "endViewName");
+			}
+		};
+		FlowExecution flowExecution=new FlowFactoryBean(builder).getFlow().createExecution();
+		ViewDescriptor vd=flowExecution.start(new SimpleEvent(this, "start"));
+		assertNotNull(vd);
+		assertEquals("viewName", vd.getViewName());
+		assertEquals(flowExecution, vd.getModel().get(FlowConstants.FLOW_EXECUTION_ATTRIBUTE));
+		assertEquals(flowExecution.getId(), vd.getModel().get(FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE));
+		assertEquals(flowExecution.getCurrentStateId(), vd.getModel().get(FlowConstants.CURRENT_STATE_ID_ATTRIBUTE));
+		assertTrue(flowExecution.isActive());
+		vd=flowExecution.signalEvent(new SimpleEvent(this, "submit"));
+		assertNotNull(vd);
+		assertEquals("endViewName", vd.getViewName());
+		assertFalse(vd.getModel().containsKey(FlowConstants.FLOW_EXECUTION_ATTRIBUTE));
+		assertFalse(vd.getModel().containsKey(FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE));
+		assertFalse(vd.getModel().containsKey(FlowConstants.CURRENT_STATE_ID_ATTRIBUTE));
+		assertFalse(flowExecution.isActive());
+	}
+	
 	public void testLoopInFlow() {
 		AbstractFlowBuilder builder=new AbstractFlowBuilder() {
 			protected String flowId() {
@@ -21,7 +49,11 @@ public class FlowExecutionTests extends TestCase {
 			}
 			
 			public void buildStates() throws FlowBuilderException {
-				addViewState("viewState", "viewName", on(submit(), "viewState"));
+				addViewState(
+						"viewState",
+						"viewName",
+						new Transition[] { on(submit(), "viewState"), on(finish(), "endState") });
+				addEndState("endState");
 			}
 		};
 		FlowExecution flowExecution=new FlowFactoryBean(builder).getFlow().createExecution();
@@ -33,6 +65,10 @@ public class FlowExecutionTests extends TestCase {
 			assertNotNull(vd);
 			assertEquals("viewName", vd.getViewName());
 		}
+		assertTrue(flowExecution.isActive());
+		vd=flowExecution.signalEvent(new SimpleEvent(this, "finish"));
+		assertNull(vd);
+		assertFalse(flowExecution.isActive());
 	}
 	
 	public void testLoopInFlowWithSubFlow() {
