@@ -78,7 +78,7 @@ import org.springframework.util.NumberUtils;
  *
  * <p>Because this class is parameterizable by the callback interfaces and
  * the SQLExceptionTranslator interface, it isn't necessary to subclass it.
- * All SQL issued by this class is logged.
+ * All operations performed by this class are logged at debug level.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -345,11 +345,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (number != null ? number.intValue() : 0);
 	}
 
-	/**
-	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
-	 * (allowing for different column name case, typed access, etc)
-	 * @see #queryForRowSet(String)
-	 */
 	public List queryForList(String sql) throws DataAccessException {
 		return (List) query(sql, new ListResultSetExtractor());
 	}
@@ -616,22 +611,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (number != null ? number.intValue() : 0);
 	}
 
-	/**
-	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
-	 * (allowing for different column name case, typed access, etc)
-	 * @see #queryForRowSet(String, Object[])
-	 */
 	public List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		return (List) query(sql,
 				new ArgTypePreparedStatementSetter(args, argTypes),
 				new ListResultSetExtractor());
 	}
 
-	/**
-	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
-	 * (allowing for different column name case, typed access, etc)
-	 * @see #queryForRowSet(String, Object[], int[])
-	 */
 	public List queryForList(String sql, final Object[] args) throws DataAccessException {
 		return (List) query(sql,
 				new ArgPreparedStatementSetter(args),

@@ -101,6 +101,7 @@ public interface JdbcOperations {
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
+	 * @see ResultReader
 	 */
 	List query(String sql, RowCallbackHandler rch) throws DataAccessException;
 
@@ -112,7 +113,7 @@ public interface JdbcOperations {
 	 * with null as PreparedStatementSetter argument.
 	 * @param sql SQL query to execute
 	 * @param rowMapper object that will map one object per row
-	 * @return the result List of mapped objects
+	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
 	 */
@@ -196,8 +197,6 @@ public interface JdbcOperations {
 	 * @param sql SQL query to execute
 	 * @return an ArrayList that contains a HashMap per row
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
-	 * (allowing for different column name case, typed access, etc)
 	 * @see #queryForRowSet(String)
 	 */
 	List queryForList(String sql) throws DataAccessException;
@@ -268,7 +267,8 @@ public interface JdbcOperations {
 			throws DataAccessException;
 
 	/**
-	 * Query using a prepared statement.
+	 * Query using a prepared statement, reading the ResultSet with a
+	 * ResultSetExtractor.
 	 * @param psc object that can create a PreparedStatement given a Connection
 	 * @param rse object that will extract results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
@@ -293,16 +293,15 @@ public interface JdbcOperations {
 			throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a list of
-	 * arguments to bind to the query, reading the ResultSet on a per-row basis
-	 * with a RowCallbackHandler (potentially implementing the ResultReader
-	 * sub-interface that provides a result List).
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, reading the ResultSet with a
+	 * ResultSetExtractor.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @param rse object that will extract results
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
@@ -310,15 +309,14 @@ public interface JdbcOperations {
 	    throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a list of
-	 * arguments to bind to the query, reading the ResultSet on a per-row basis
-	 * with a RowCallbackHandler (potentially implementing the ResultReader
-	 * sub-interface that provides a result List).
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, reading the ResultSet with a
+	 * ResultSetExtractor.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rse object that will extract results
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
 	 */
 	Object query(String sql, Object[] args, ResultSetExtractor rse)
@@ -333,6 +331,7 @@ public interface JdbcOperations {
 	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if there is any problem
+	 * @see ResultReader
 	 */
 	List query(PreparedStatementCreator psc, RowCallbackHandler rch)
 			throws DataAccessException;
@@ -352,6 +351,7 @@ public interface JdbcOperations {
 	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
+	 * @see ResultReader
 	 */
 	List query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch)
 	    throws DataAccessException;
@@ -369,6 +369,7 @@ public interface JdbcOperations {
 	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
+	 * @see ResultReader
 	 * @see java.sql.Types
 	 */
 	List query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
@@ -386,6 +387,7 @@ public interface JdbcOperations {
 	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
+	 * @see ResultReader
 	 */
 	List query(String sql, Object[] args, RowCallbackHandler rch)
 			throws DataAccessException;
@@ -395,7 +397,7 @@ public interface JdbcOperations {
 	 * via a RowMapper.
 	 * @param psc object that can create a PreparedStatement given a Connection
 	 * @param rowMapper object that will map one object per row
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if there is any problem
 	 */
 	List query(PreparedStatementCreator psc, RowMapper rowMapper)
@@ -404,29 +406,29 @@ public interface JdbcOperations {
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
 	 * PreparedStatementSetter implementation that knows how to bind values
-	 * to the query, mapping each row to a Java objec via a RowMapper.
+	 * to the query, mapping each row to a Java object via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param pss object that knows how to set values on the prepared statement.
 	 * If this is null, the SQL will be assumed to contain no bind parameters.
 	 * Even if there are no bind parameters, this object may be used to
 	 * set fetch size and other performance options.
 	 * @param rowMapper object that will map one object per row
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 */
 	List query(String sql, PreparedStatementSetter pss, RowMapper rowMapper)
 	    throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a list of
-	 * arguments to bind to the query, mapping each row to a Java object
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping each row to a Java object
 	 * via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @param rowMapper object that will map one object per row
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
@@ -434,23 +436,23 @@ public interface JdbcOperations {
 	    throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a list of
-	 * arguments to bind to the query, mapping each row to a Java object
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping each row to a Java object
 	 * via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rowMapper object that will map one object per row
-	 * @return the result List of mapped objects
+	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 */
 	List query(String sql, Object[] args, RowMapper rowMapper)
 			throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a list of
-	 * arguments to bind to the query, mapping a single result row to a Java
-	 * object via a RowMapper.
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping a single result row to a
+	 * Java object via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
@@ -466,9 +468,9 @@ public interface JdbcOperations {
 			throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a list of
-	 * arguments to bind to the query, mapping a single result row to a Java
-	 * object via a RowMapper.
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping a single result row to a
+	 * Java object via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
@@ -593,8 +595,6 @@ public interface JdbcOperations {
 	 * (constants from <code>java.sql.Types</code>)
 	 * @return an ArrayList that contains a HashMap per row
 	 * @throws DataAccessException if the query fails
-	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
-	 * (allowing for different column name case, typed access, etc)
 	 * @see #queryForRowSet(String, Object[], int[])
 	 */
 	List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException;
@@ -609,8 +609,6 @@ public interface JdbcOperations {
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return an ArrayList that contains a HashMap per row
 	 * @throws DataAccessException if the query fails
-	 * @deprecated in favor of queryForRowSet, which returns a SqlRowSet object
-	 * (allowing for different column name case, typed access, etc)
 	 * @see #queryForRowSet(String, Object[])
 	 */
 	List queryForList(String sql, Object[] args) throws DataAccessException;
