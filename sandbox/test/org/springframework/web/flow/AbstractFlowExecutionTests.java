@@ -170,30 +170,32 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * Note: signaling an event with cause state transitions to occur in a chain
 	 * UNTIL control is returned to the caller. Control will be returned once a
 	 * view state is entered or an end state is entered and the flow terminates.
-	 * Action states are executed without returning control, as there result
-	 * always triggers another state transition, executed interally. They can
-	 * also be executed in a chain like fashion (e.g action state 1 (result),
-	 * action state 2 (result), action state 3 (result), view state <control
-	 * returns so view can be rendered>).
+	 * Action states are executed without returning control, as their result
+	 * always triggers another state transition, executed interally. Action
+	 * states can also be executed in a chain like fashion (e.g action state 1
+	 * (result), action state 2 (result), action state 3 (result), view state
+	 * <control returns so view can be rendered>).
 	 * <p>
 	 * If you wish to verify expected behaivior on each state transition (and
 	 * not just when the view state triggers return of control back to the
 	 * client), you have a few options:
 	 * <p>
 	 * First, you can always write a standalone unit test for the
-	 * <code>Action</code> implementation. That can be used to verify the
+	 * <code>Action</code> implementation. There you can verify that the
 	 * action executes its core logic and responds to any exceptions it must
-	 * handle. You can also verify there that the action put everything in the
-	 * model or the request it was supposed to (to meet its contract with the
-	 * view it is prepping for display, if it’s a setup action).
+	 * handle. When you do this, you may mock or stub out services the Action
+	 * implementation needs that are expensive to initialize. You can also
+	 * verify there that the action put everything in the model or the request
+	 * it was supposed to (to meet its contract with the view it is prepping for
+	 * display, if it’s a view setup action).
 	 * <p>
 	 * Second, you can attach a FlowExecutionListener to the ongoing flow
-	 * execution within your test code, which receives callbacks on each state
-	 * transition (among other times). To add a listener, call
+	 * execution at any time within your test code, which receives callbacks on
+	 * each state transition (among at other points). To add a listener, call
 	 * <code>getFlowExecution().getListenerList().add(myListener)</code>,
 	 * where myListener is a class that implements the FlowExecutionListener
 	 * interface (It is recommended you extend FlowExecutionListenerAdapter and
-	 * only overriding what you need.
+	 * only override what you need.
 	 * 
 	 * @param eventId The event to signal
 	 * @param request The request
