@@ -20,7 +20,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdbcOperations.java,v 1.4 2004-02-27 08:53:58 jhoeller Exp $
+ * @version $Id: JdbcOperations.java,v 1.5 2004-03-03 10:45:05 jhoeller Exp $
  * @see JdbcTemplate
  */
 public interface JdbcOperations {
@@ -71,6 +71,21 @@ public interface JdbcOperations {
 	 * @see #queryForObject(String, Object[], Class)
 	 */
 	Object queryForObject(String sql, Class requiredType) throws DataAccessException;
+
+	/**
+	 * Execute a query that results in a long value, given static SQL.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
+	 * a static query with a PreparedStatement, use the overloaded queryForLong
+	 * method with null as argument array.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query that results
+	 * in a long value.
+	 * @param sql SQL query to execute
+	 * @return the long value
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForLong(String, Object[])
+	 */
+	long queryForLong(String sql) throws DataAccessException;
 
 	/**
 	 * Execute a query that results in an int value, given static SQL.
@@ -174,6 +189,21 @@ public interface JdbcOperations {
 	 */
 	Object queryForObject(String sql, final Object[] args, Class requiredType)
 	    throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, resulting in a long value.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query that results
+	 * in a long value.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @return the long value
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForLong(String)
+	 */
+	long queryForLong(String sql, final Object[] args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a

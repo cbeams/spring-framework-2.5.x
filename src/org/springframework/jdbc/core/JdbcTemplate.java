@@ -67,7 +67,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.29 2004-03-03 07:07:21 pawlakjp Exp $
+ * @version $Id: JdbcTemplate.java,v 1.30 2004-03-03 10:45:05 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -225,13 +225,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return doWithResultSetFromStaticQuery(sql, new ObjectResultSetExtractor(requiredType));
 	}
 
+	public long queryForLong(String sql) throws DataAccessException {
+		return ((Long) queryForObject(sql, Long.class)).longValue();
+	}
+
 	public int queryForInt(String sql) throws DataAccessException {
 		return ((Integer) queryForObject(sql, Integer.class)).intValue();
 	}
 
-	public long queryForLong(String sql) throws DataAccessException {
-		return ((Long) queryForObject(sql, Long.class)).longValue();
-	}
 
 	//-------------------------------------------------------------------------
 	// Query methods dealing with prepared statements
@@ -369,6 +370,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 					}
 				}),
 				new ObjectResultSetExtractor(requiredType));
+	}
+
+	public long queryForLong(String sql, final Object[] args) throws DataAccessException {
+		return ((Long) queryForObject(sql, args, Long.class)).longValue();
 	}
 
 	public int queryForInt(String sql, final Object[] args) throws DataAccessException {
