@@ -36,7 +36,7 @@ import org.springframework.util.MethodInvoker;
  * {@link #setTargetMethod targetMethod} property to a String representing the static
  * method name, with {@link #setTargetClass targetClass} specifying the Class that
  * the static method is defined on. Alternatively, a target instance method may be
- * specified, by setting the {@link #setTargetObject target} property as the target
+ * specified, by setting the {@link #setTargetObject targetObject} property as the target
  * object, and the {@link #setTargetMethod targetMethod} property as the name of the
  * method to call on that target object. Arguments for the method invocation may be
  * specified by setting the args property.
@@ -70,7 +70,7 @@ import org.springframework.util.MethodInvoker;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBean.java,v 1.7 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: MethodInvokingFactoryBean.java,v 1.8 2004-03-21 15:46:59 colins Exp $
  */
 public class MethodInvokingFactoryBean extends MethodInvoker implements FactoryBean, InitializingBean {
 
