@@ -9,7 +9,13 @@
 	<property name="build.dir" value=".classes"/>
 	<property name="docs.dir" value="${war.dir}/docs"/>
 	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
+	<property name="webclasses.dir" value="${war.dir}/WEB-INF/classes"/>
 	<property name="dist.dir" value="dist"/>
+	
+	<property name="testsrc.dir" value="test"/>
+	<property name="testbuild.dir" value=".testclasses"/>
+	<property name="testreports.dir" value="junit-reports"/>
+	<property name="testhtml.dir" value="${testreports.dir}/html"/>
 
 	<property name="spring.root" value="../.."/>
 
@@ -32,6 +38,27 @@
 		</fileset>
 
 	</path>
+	
+	<path id="test-classpath">
+
+		<fileset dir="${spring.root}/lib/aopalliance">
+			<include name="aopalliance.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="servlet.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-lang.jar"/>
+			<include name="commons-collections.jar"/>
+			<include name="commons-digester.jar"/>
+			<include name="commons-beanutils.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/dist">
+			<include name="spring-mock.jar"/>
+		</fileset>
+
+	</path>
+
 
 
 	<target name="usage">
@@ -136,6 +163,8 @@
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
 			<include name="WEB-INF/*-servlet.xml"/>
+			<include name="WEB-INF/*Context.xml"/>
+				<include name="WEB-INF/*.properties"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<include name="WEB-INF/defs/**"/>
@@ -143,6 +172,43 @@
 			<exclude name="**/.*"/>
 		</war>
 
+	</target>
+	
+	<target name="tests" depends="build">
+
+		<delete dir="${testbuild.dir}"/>
+		<mkdir dir="${testbuild.dir}"/>
+		<delete dir="${testreports.dir}"/>
+		<mkdir dir="${testreports.dir}"/>
+		<delete dir="${testhtml.dir}"/>
+		<mkdir dir="${testhtml.dir}"/>
+
+		<javac srcdir="${testsrc.dir}" destdir="${testbuild.dir}" deprecation="true">
+			<classpath path="${build.dir}"/>
+			<classpath refid="master-classpath"/>
+			<classpath path="${spring.root}/lib/junit/junit.jar"/>
+			<classpath refid="test-classpath"/>
+		</javac>
+
+		<junit printsummary="true" fork="yes">
+			<formatter type="xml"/>
+			<formatter type="plain" usefile="false"/>
+			<test name="org.springframework.samples.tiles.NewsFeedControllerTests" todir="${testreports.dir}"/>
+			<classpath path="${build.dir}"/>
+			<classpath path="${src.dir}"/>
+			<classpath path="${testbuild.dir}"/>
+			<classpath path="${testsrc.dir}"/>
+			<classpath path="${basedir}/"/>
+			<classpath refid="master-classpath"/>
+			<classpath refid="test-classpath"/>
+		</junit>
+
+		<junitreport todir="${testhtml.dir}">
+			<fileset dir="${testreports.dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report format="frames" todir="${testhtml.dir}"/>
+		</junitreport>
 	</target>
 
 

@@ -16,7 +16,8 @@
 
 <p>
 	Besides the templates described above, there's another template called <code>news</code>
-	that automatically imports news from Slashdot, TheServerside or WorldPress. Those
+	that automatically imports news from Slashdot, TheServerside or JavaBlogs (currently the items
+	are NOT cached, so it can take a while before the feeds load). Those
 	templates use the Tiles Controller notion as can be seen in the <code>definitions.xml</code> file
 	By extending <code>ComponentControllerSupport</code>, you can access the application context.
 </p>

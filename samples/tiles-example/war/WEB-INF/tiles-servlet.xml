@@ -8,7 +8,13 @@
 			<value>org.springframework.web.servlet.view.tiles.TilesJstlView</value>
 		</property>
 	</bean>
+	
 
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename"><value>messages</value></property>                                                                           
+    </bean>
+	
 	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer">
 		<property name="definitions">
 			<list>
@@ -21,8 +27,8 @@
 		<property name="feeds">
 			<props>
 				<prop key="theserverside">http://www.theserverside.com/rss/theserverside-1.0.rdf</prop>
-				<prop key="slashdot">http://slashdot.org/slashdot.rss</prop>
-				<prop key="worldpress">http://www.worldpress.org/feeds/worldpresswire.xml</prop>
+				<prop key="slashdot">http://slashdot.org/slashdot.rss</prop>				
+				<prop key="javablogs">http://www.javablogs.com/ViewDaysBlogs.action?view=rss</prop>								
 			</props>
 		</property>
 	</bean>

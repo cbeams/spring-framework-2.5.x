@@ -20,14 +20,14 @@
 
 	<definition name="about" extends="template">
 		<put name="content" value="/WEB-INF/jsp/about.jsp" type="page"/>
-		<put name="newsOne" value="worldpress" type="definition"/>
+		<put name="newsOne" value="javablogs" type="definition"/>
 		<put name="newsTwo" value="slashdot" type="definition"/>
 	</definition>
 
 	<definition name="contact" extends="template">
 		<put name="content" value="/WEB-INF/jsp/contact.jsp" type="page"/>
 		<put name="newsOne" value="theserverside" type="definition"/>
-		<put name="newsTwo" value="worldpress" type="definition"/>
+		<put name="newsTwo" value="javablogs" type="definition"/>
 	</definition>
 
 	<definition name="news" page="/WEB-INF/jsp/news.jsp" controllerClass="org.springframework.samples.tiles.NewsFeedController">
@@ -38,8 +38,8 @@
 		<put name="sourceName" value="theserverside"/>
 	</definition>
 
-	<definition name="worldpress" extends="news">
-		<put name="sourceName" value="worldpress"/>
+	<definition name="javablogs" extends="news">
+		<put name="sourceName" value="javablogs"/>
 	</definition>
 
 	<definition name="slashdot" extends="news">
