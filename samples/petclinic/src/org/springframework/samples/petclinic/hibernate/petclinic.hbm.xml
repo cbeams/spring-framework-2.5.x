@@ -50,7 +50,7 @@
 			<generator class="identity"/>
 		</id>
 		<property name="name" column="name"/>
-		<property name="birthDate" column="birth_date"/>
+		<property name="birthDate" column="birth_date" type="date"/>
 		<many-to-one name="owner" column="owner_id" class="org.springframework.samples.petclinic.Owner"/>
 		<many-to-one name="type" column="type_id" class="org.springframework.samples.petclinic.PetType"/>
 		<set name="visitsInternal" inverse="true">
@@ -70,7 +70,7 @@
 		<id name="id" column="id" type="long" unsaved-value="-1">
 			<generator class="identity"/>
 		</id>
-		<property name="date" column="visit_date"/>
+		<property name="date" column="visit_date" type="date"/>
 		<property name="description" column="description"/>
 		<many-to-one name="pet" column="pet_id" class="org.springframework.samples.petclinic.Pet"/>
 	</class>
