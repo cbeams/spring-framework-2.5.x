@@ -34,6 +34,15 @@ public abstract class WebUtils {
 	 */
 	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
+	/**
+	 * Standard servlet spec request attributes for include URI and paths.
+	 * <p>If included via a RequestDispatcher, the current resource will see the
+	 * original request. Its own URI and paths are exposed as request attributes. 
+	 */
+	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
+	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.context_path";
+	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.servlet_path";
+
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
 
@@ -134,6 +143,7 @@ public abstract class WebUtils {
 
 	/**
 	 * Return the correct request URI for the given request.
+	 * <p>Regards include request URL if called within a RequestDispatcher include.
 	 * <p>The URI that the web container resolves <i>should</i> be correct, but some
 	 * containers like JBoss/Jetty incorrectly include ";" strings like ";jsessionid"
 	 * in the URI. This method cuts off such incorrect appendices.
@@ -141,24 +151,33 @@ public abstract class WebUtils {
 	 * @return the correct request URI
 	 */
 	public static String getRequestUri(HttpServletRequest request) {
-		String uri = request.getRequestURI();
+		String uri = (String) request.getAttribute(INCLUDE_URI_REQUEST_ATTRIBUTE);
+		if (uri == null) {
+			uri = request.getRequestURI();
+		}
 		int semicolonIndex = uri.indexOf(';');
 		return (semicolonIndex != -1 ? uri.substring(0, semicolonIndex) : uri);
 	}
 
 	/**
 	 * Return the path within the web application for the given request.
+	 * <p>Regards include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
 	 * @return the path within the web application
 	 */
 	public static String getPathWithinApplication(HttpServletRequest request) {
-		return getRequestUri(request).substring(request.getContextPath().length());
+		String contextPath = (String) request.getAttribute(INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE);
+		if (contextPath == null) {
+			contextPath = request.getContextPath();
+		}
+		return getRequestUri(request).substring(contextPath.length());
 	}
 
 	/**
 	 * Return the path within the servlet mapping for the given request,
 	 * i.e. the part of the request's URL beyond the part that called the servlet,
 	 * or "" if the whole URL has been used to identify the servlet.
+	 * <p>Regards include request URL if called within a RequestDispatcher include.
 	 * <p>E.g.: servlet mapping = "/test/*"; request URI = "/test/a" -> "/a".
 	 * <p>E.g.: servlet mapping = "/test"; request URI = "/test" -> "".
 	 * <p>E.g.: servlet mapping = "/*.test"; request URI = "/a.test" -> "".
@@ -166,16 +185,23 @@ public abstract class WebUtils {
 	 * @return the path within the servlet mapping, or ""
 	 */
 	public static String getPathWithinServletMapping(HttpServletRequest request) {
-		return getPathWithinApplication(request).substring(request.getServletPath().length());
+		String servletPath = (String) request.getAttribute(INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE);
+		if (servletPath == null) {
+			servletPath = request.getServletPath();
+		}
+		return getPathWithinApplication(request).substring(servletPath.length());
 	}
 
 	/**
 	 * Return the mapping lookup path for the given request, within the current
-	 * servlet mapping if applicable, else within the web application context.
+	 * servlet mapping if applicable, else within the web application.
+	 * <p>Regards include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
 	 * @param alwaysUseFullPath if the full path within the context
 	 * should be used in any case
 	 * @return the lookup path
+	 * @see #getPathWithinApplication
+	 * @see #getPathWithinServletMapping
 	 */
 	public static String getLookupPathForRequest(HttpServletRequest request, boolean alwaysUseFullPath) {
 		// always use full path within current servlet context?
