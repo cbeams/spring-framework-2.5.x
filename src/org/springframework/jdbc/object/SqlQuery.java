@@ -22,7 +22,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.ResultReader;
 
 /**
@@ -38,7 +38,7 @@ import org.springframework.jdbc.core.ResultReader;
  *
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
- * @version $Id: SqlQuery.java,v 1.6 2004-03-18 02:46:13 trisberg Exp $
+ * @version $Id: SqlQuery.java,v 1.7 2004-05-26 10:11:39 jhoeller Exp $
  */
 public abstract class SqlQuery extends SqlOperation {
 
@@ -213,16 +213,11 @@ public abstract class SqlQuery extends SqlOperation {
 	 * considered an error if they return more than one result.
 	 * @return null if not found. Subclasses may choose to treat this
 	 * as an error and throw an exception.
+	 * @see org.springframework.dao.support.DataAccessUtils#uniqueResult
 	 */
 	public Object findObject(Object[] parameters, Map context) throws DataAccessException {
-		List l = execute(parameters, context);
-		if (l.size() == 0) {
-			return null;
-		}
-		if (l.size() > 1) {
-			throw new InvalidDataAccessApiUsageException("Result is not unique. Found " + l.size() + " objects");
-		}
-		return l.get(0);
+		List results = execute(parameters, context);
+		return DataAccessUtils.uniqueResult(results);
 	}
 
 	/**
