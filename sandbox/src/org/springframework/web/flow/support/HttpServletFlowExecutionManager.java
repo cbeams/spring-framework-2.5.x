@@ -84,54 +84,42 @@ public class HttpServletFlowExecutionManager {
 	}
 
 	/**
-	 * Create a new flow execution manager. Since no default flow is specified,
-	 * the id of the flow for which executions will be managed is expected in
-	 * the request parameter "_flowId".
-	 * @param flowLocator the flow locator to use for flow lookup
-	 * @param flowExecutionListeners the set of listeners that should be
-	 *        notified of lifecycle events in the managed flow execution
-	 */
-	public HttpServletFlowExecutionManager(FlowLocator flowLocator, FlowExecutionListener[] flowExecutionListeners) {
-		this.flowLocator = flowLocator;
-		this.flowExecutionListeners = flowExecutionListeners;
-	}
-
-	/**
 	 * Create a new flow execution manager.
-	 * @param flow the default flow for which executions will be managed
 	 * @param flowLocator the flow locator to use for flow lookup of possible
 	 *        other flows specified using the "_flowId" request parameter
-	 */
-	public HttpServletFlowExecutionManager(Flow flow, FlowLocator flowLocator) {
-		this.flow = flow;
-		this.flowLocator = flowLocator;
-	}
-
-	/**
-	 * Create a new flow execution manager.
-	 * @param flowId id of the default flow for which executions will be managed
-	 * @param flowLocator the flow locator to use for flow lookup
-	 */
-	public HttpServletFlowExecutionManager(String flowId, FlowLocator flowLocator) {
-		if (StringUtils.hasText(flowId)) {
-			this.flow = flowLocator.getFlow(flowId);
-		}
-		this.flowLocator = flowLocator;
-	}
-
-	/**
-	 * Create a new flow execution manager.
 	 * @param flow the default flow for which executions will be managed
-	 * @param flowLocator the flow locator to use for lookup of possible other
-	 *        flows specified using the "_flowId" request parameter
-	 * @param flowExecutionListeners the set of listeners that should be
-	 *        notified of lifecycle events in the managed flow execution
 	 */
-	public HttpServletFlowExecutionManager(Flow flow, FlowLocator flowLocator,
-			FlowExecutionListener[] flowExecutionListeners) {
+	public HttpServletFlowExecutionManager(FlowLocator flowLocator, Flow flow) {
 		this.flow = flow;
+	}
+
+	/**
+	 * Create a new flow execution manager.
+	 * @param flowLocator the flow locator to use for flow lookup of possible
+	 *        other flows specified using the "_flowId" request parameter
+	 * @param flow the default flow for which executions will be managed
+	 * @param flowExecutionListeners the listeners to attach to executing flows
+	 */
+	public HttpServletFlowExecutionManager(FlowLocator flowLocator, Flow flow,
+			FlowExecutionListener[] flowExecutionListeners) {
 		this.flowLocator = flowLocator;
+		this.flow = flow;
 		this.flowExecutionListeners = flowExecutionListeners;
+	}
+
+	/**
+	 * Returns the flow whose executions are managed by this manager.
+	 */
+	protected Flow getFlow() {
+		return flow;
+	}
+
+	/**
+	 * Returns the array of flow execution listeners
+	 * @return the flow execution listeners
+	 */
+	protected FlowExecutionListener[] getFlowExecutionListeners() {
+		return this.flowExecutionListeners;
 	}
 
 	/**

@@ -73,23 +73,14 @@ public class FlowController extends AbstractController implements InitializingBe
 	private Flow flow;
 
 	/**
-	 * The list of flow execution listeners to attach to flow executions managed
-	 * by this controller.
-	 */
-	private FlowExecutionListener[] flowExecutionListeners;
-
-	/**
 	 * A helper for managed HTTP servlet request-based flow executions.
 	 */
 	private HttpServletFlowExecutionManager manager;
-	
+
 	/**
-	 * Returns the top level flow started by this controller, or <code>null</code>
-	 * if not set.
+	 * The listeners of executing flows managed by this controller.
 	 */
-	public Flow getFlow() {
-		return flow;
-	}
+	private FlowExecutionListener[] flowExecutionListeners;
 
 	/**
 	 * Set the top level fow started by this controller. This is optional.
@@ -97,21 +88,13 @@ public class FlowController extends AbstractController implements InitializingBe
 	public void setFlow(Flow flow) {
 		this.flow = flow;
 	}
-	
+
 	/**
 	 * Set the flow execution listener that should be notified of flow execution
 	 * lifecycle events.
 	 */
 	public void setFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners = new FlowExecutionListener[] { listener };
-	}
-	
-	/**
-	 * Returns the flow execution listeners that will be notified of flow
-	 * execution lifecycle events.
-	 */
-	public FlowExecutionListener[] getFlowExecutionListeners() {
-		return flowExecutionListeners;
 	}
 
 	/**
@@ -122,11 +105,36 @@ public class FlowController extends AbstractController implements InitializingBe
 		this.flowExecutionListeners = listeners;
 	}
 
+	/**
+	 * Configures the flow execution manager implementation to use, allowing
+	 * parameterization of custom manager specializations.
+	 * @param manager the flow execution manager.
+	 */
+	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
+		this.manager = manager;
+	}
+
 	public void afterPropertiesSet() throws Exception {
 		// web flows need a session!
 		setRequireSession(true);
-		// setup our flow execution manager
-		this.manager = createHttpFlowExecutionManager();
+		if (this.manager == null) {
+			this.manager = createDefaultHttpFlowExecutionManager();
+		}
+	}
+
+	/**
+	 * Returns the top level flow started by this controller, or
+	 * <code>null</code> if not set.
+	 */
+	protected Flow getFlow() {
+		return flow;
+	}
+
+	/**
+	 * @return Returns the listener list
+	 */
+	protected FlowExecutionListener[] getFlowExecutionListeners() {
+		return this.flowExecutionListeners;
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
@@ -136,16 +144,15 @@ public class FlowController extends AbstractController implements InitializingBe
 		ModelAndView mv = new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
 		return mv;
 	}
-	
+
 	// subclassing hooks
 
 	/**
 	 * Create a new HTTP flow execution manager. Subclasses can override this to
 	 * return a specialized manager.
 	 */
-	protected HttpServletFlowExecutionManager createHttpFlowExecutionManager() {
+	protected HttpServletFlowExecutionManager createDefaultHttpFlowExecutionManager() {
 		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
-		return new HttpServletFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners);
+		return new HttpServletFlowExecutionManager(flowLocator, getFlow(), getFlowExecutionListeners());
 	}
-
 }

@@ -21,12 +21,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionServlet;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.FormObjectAccessor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
@@ -60,12 +61,16 @@ import org.springframework.web.util.WebUtils;
  * FlowAction that fronts a single top-level flow:
  * 
  * <pre>
- * &lt;action path=&quot;/userRegistration&quot;
- * 	type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
- * 	name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
- * 	className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
- * 	&lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
- * &lt;/action&gt;
+ * 
+ *  
+ *   &lt;action path=&quot;/userRegistration&quot;
+ *   	type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
+ *   	name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
+ *   	className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
+ *   	&lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
+ *   &lt;/action&gt;
+ *   
+ *  
  * </pre>
  * 
  * This example associates the logical request URL
@@ -89,14 +94,22 @@ import org.springframework.web.util.WebUtils;
  * form population:
  * 
  * <pre>
- * &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
+ * 
+ *  
+ *   &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
+ *   
+ *  
  * </pre>
  * 
  * <li>A <code>BindingPlugin</code> is needed, to plugin an Errors-aware
  * <code>jakarta-commons-beanutils</code> adapter:
  * 
  * <pre>
- * &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
+ * 
+ *  
+ *   &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
+ *   
+ *  
  * </pre>
  * 
  * </ol>
@@ -117,11 +130,21 @@ import org.springframework.web.util.WebUtils;
  */
 public class FlowAction extends TemplateAction {
 
+	private FlowLocator flowLocator;
+
+	public void setServlet(ActionServlet actionServlet) {
+		super.setServlet(actionServlet);
+		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
+	}
+
+	protected FlowLocator getFlowLocator() {
+		return flowLocator;
+	}
+
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
-		HttpServletFlowExecutionManager flowExecutionManager =
-			new HttpServletFlowExecutionManager(getFlowId(mapping), locator);
+		HttpServletFlowExecutionManager flowExecutionManager = new HttpServletFlowExecutionManager(flowLocator,
+				flowLocator.getFlow(getFlowId(mapping)));
 		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
 		ViewDescriptor viewDescriptor = flowExecutionManager.handleRequest(request, response, actionFormAdapter);
 		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
@@ -150,9 +173,8 @@ public class FlowAction extends TemplateAction {
 				if (context.isFlowExecutionActive()) {
 					if (form instanceof BindingActionForm) {
 						BindingActionForm bindingForm = (BindingActionForm)form;
-						bindingForm.setErrors(
-								(Errors)context.getRequestScope().getAttribute(
-										FormObjectAccessor.FORM_OBJECT_ATTRIBUTE_NAME, Errors.class));
+						bindingForm.setErrors((Errors)context.getRequestScope().getAttribute(
+								FormObjectAccessor.FORM_OBJECT_ATTRIBUTE_NAME, Errors.class));
 						bindingForm.setRequest(request);
 					}
 				}
