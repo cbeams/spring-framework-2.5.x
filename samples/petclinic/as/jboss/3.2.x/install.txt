@@ -1,1 +1,0 @@
-The files have to be put in the JBoss deploy directory.
