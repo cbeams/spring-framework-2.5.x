@@ -49,9 +49,9 @@ import org.springframework.web.util.WebUtils;
  * which adapts Spring's data binding infrastructure (based on POJO binding, a
  * standard Errors interface, and property editor type conversion) to the Struts
  * action form model. This gives backend web-tier developers full support for
- * POJO-based binding with minimal hassel, while still providing a consistency
- * to view developers who have a lot of experience with Struts for markup and
- * request dispatch.
+ * POJO-based binding with minimal hassel, while still providing consistency
+ * to view developers who already have a lot of experience with Struts for markup
+ * and request dispatch.
  * <p>
  * Below is an example <code>struts-config.xml</code> configuration for a
  * Flow-action that fronts a single top-level flow:
@@ -113,7 +113,6 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.struts.BindingActionForm
  * @author Keith Donald
  * @author Erwin Vervaet
- *  
  */
 public class FlowAction extends TemplateAction {
 
