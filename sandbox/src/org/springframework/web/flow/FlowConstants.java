@@ -87,7 +87,7 @@ public abstract class FlowConstants {
 	/**
 	 * Event id value indicating that the event has not been set ("@NOT_SET@").
 	 */
-	public static String NOT_SET_EVENT_ID = "@NOT_SET@";
+	public static final String NOT_SET_EVENT_ID = "@NOT_SET@";
 
 	/**
 	 * Clients can send the id (name) of the flow to be started to a controller
