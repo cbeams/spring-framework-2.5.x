@@ -22,8 +22,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Trivial interceptor that can be introduced in a chain to display it.
- *  @author Rod Johnson
- *  @version $Id: NopInterceptor.java,v 1.4 2004-07-25 11:55:21 johnsonr Exp $
+ * @author Rod Johnson
  */
 public class NopInterceptor implements MethodInterceptor {
 	
@@ -34,11 +33,7 @@ public class NopInterceptor implements MethodInterceptor {
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		increment();
-		//System.out.println("Debug interceptor: count=" + count +
-		//	" invocation=[" + invocation + "]");
-		Object rval = invocation.proceed();
-		//System.out.println("Debug interceptor: next returned");
-		return rval;
+		return invocation.proceed();
 	}
 	
 	public int getCount() {
@@ -48,14 +43,15 @@ public class NopInterceptor implements MethodInterceptor {
 	protected void increment() {
 		++count;
 	}
-	
-	
+
 	public boolean equals(Object other) {
-		if (!(other instanceof NopInterceptor))
+		if (!(other instanceof NopInterceptor)) {
 			return false;
-		if (this == other)
+		}
+		if (this == other) {
 			return true;
-		return count == ((NopInterceptor) other).count;
+		}
+		return this.count == ((NopInterceptor) other).count;
 	}
 
 }
