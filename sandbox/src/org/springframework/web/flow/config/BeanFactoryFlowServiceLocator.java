@@ -20,6 +20,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -69,10 +70,22 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	/**
-	 * Returns he bean factory used to lookup services.
+	 * Returns the bean factory used to lookup services.
 	 */
 	protected ListableBeanFactory getListableBeanFactory() {
 		return (ListableBeanFactory)getBeanFactory();
+	}
+
+	/**
+	 * Returns the bean factory used to autowire actions.
+	 */
+	protected AutowireCapableBeanFactory getAutowireCapableBeanFactory() {
+		return (AutowireCapableBeanFactory)getBeanFactory();
+	}
+
+	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
+		return (Action)getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(),
+				false);
 	}
 
 	public Action getAction(String actionId) throws ServiceLookupException {

@@ -33,6 +33,17 @@ import org.springframework.web.flow.ServiceLookupException;
 public interface FlowServiceLocator extends FlowLocator {
 
 	/**
+	 * Request that the registry backed by this locator instantiate the action
+	 * of the specified implementation class, using the given autowire policy.
+	 * Note: not all registries may support this advanced feature (Spring does
+	 * though ;-))
+	 * @param implementationClass The action implementation class
+	 * @param autowire the autowire policy
+	 * @return the instantiated (and possibly autowired) action
+	 */
+	public Action createAction(Class implementationClass, AutowireMode autowireMode);
+
+	/**
 	 * Lookup an action with specified id.
 	 * @param actionId The action id
 	 * @return The action
