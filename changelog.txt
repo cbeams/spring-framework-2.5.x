@@ -69,6 +69,7 @@ Package org.springframework.validation
 Package org.springframework.web
 * removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)
 * AbstractXlstView offers an "errorListener" property and registers a default ErrorListener with the XSLT transformer
+* AbstractXsltView.createDomNode() is deprecated in favor of AbstractXsltView.createXsltSource()
 * ParameterMethodNameResolver can optionally resolve methods based purely based on existence of specified parameters
 * AbstractFormController/AbstractWizardFormController perform debug logging for session attributes being added/removed
 * changed MultiActionController's log level from INFO to DEBUG
