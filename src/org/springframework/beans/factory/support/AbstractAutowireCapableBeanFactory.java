@@ -71,7 +71,7 @@ import org.springframework.core.CollectionFactory;
  * <p>Note that this class does <i>not</i> assume or implement bean definition
  * registry capabilities. See DefaultListableBeanFactory for an implementation
  * of the ListableBeanFactory and BeanDefinitionRegistry interfaces, which
- * represent the API respectively SPI view on such a factory.
+ * represent the API (or SPI) view on such a factory.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -491,6 +491,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 							minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
 							beanName + "' (hint: specify index arguments for simple parameters to avoid type ambiguities)");
 				}
+				if (constructorToUse != null &&
+						constructorToUse.getParameterTypes().length > constructor.getParameterTypes().length) {
+					// Already found greedy constructor that can be satisfied ->
+					// do not look any further, there are only less greedy constructors left.
+					break;
+				}
+
 				Class[] argTypes = constructor.getParameterTypes();
 				Object[] args = createArgumentArray(beanName, mergedBeanDefinition, resolvedValues, bw, argTypes);
 
