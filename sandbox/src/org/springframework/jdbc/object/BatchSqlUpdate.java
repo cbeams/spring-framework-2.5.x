@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public class BatchSqlUpdate extends SqlUpdate {
-    private int batchSize = 100;
+    private int batchSize = 5000;
     private SimplePreparedStatementSetter setter;
     private LinkedList queue = new LinkedList();
 
@@ -52,6 +52,13 @@ public class BatchSqlUpdate extends SqlUpdate {
         super(ds, sql, types, maxRowsAffected);
     }
 
+    /**
+     * Set the batch size - this operation will queue up objects until the batch
+     * size is met, at which it will empty the queue and add the batch.
+     * 
+     * @param batchSize
+     *            The batch size.
+     */
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
     }
