@@ -62,6 +62,22 @@ import org.springframework.web.flow.Flow;
  * Flow flow = new FlowFactoryBean(builder).getFlow();
  * </pre>
  * 
+ * <p>
+ * <b>Exposed configuration properties:</b><br>
+ * <table border="1">
+ *  <tr>
+ *      <td><b>name</b></td>
+ *      <td><b>default</b></td>
+ *      <td><b>description</b></td>
+ *  </tr>
+ *  <tr>
+ *      <td>flowBuilder</td>
+ *      <td><i>null</i></td>
+ *      <td>Set the builder the factory will use to build flows.
+ *      This is a required property.</td>
+ *  </tr>
+ * </table>
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
