@@ -77,7 +77,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	}
 
 	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) {
+			MutableAttributesAccessor model) throws Exception {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		if (prepopulateFromRequest) {

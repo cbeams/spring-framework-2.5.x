@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A action that executes controller, command-like behaivior. Action beans
+ * A action that executes controller, command-like behavior. Actions
  * typically delegate down to the service-layer to perform business operations,
  * and/or prep views with dynamic model data for rendering.
  * 
@@ -29,18 +29,17 @@ import javax.servlet.http.HttpServletResponse;
 public interface Action {
 
 	/**
-	 * Execute this action bean.
+	 * Execute this action.
 	 * 
 	 * @param request The current http request, enabling access to request
 	 *        attributes/parameters if neccessary
 	 * @param response The http response, enabling direct response writing by
-	 *        the action in neccessary
-	 * @param model The data model for the current flow session execution
+	 *        the action if neccessary
+	 * @param model The data model for the current flow session
 	 * @return A logical result outcome, used as grounds for a transition in the
 	 *         current state
-	 * @throws RuntimeException An unrecoverable exception occured because of
-	 *         programmer error
+	 * @throws Exception An unrecoverable exception
 	 */
 	public ActionResult execute(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws RuntimeException;
+			MutableAttributesAccessor model) throws Exception;
 }

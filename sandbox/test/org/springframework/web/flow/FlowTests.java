@@ -135,7 +135,7 @@ public class FlowTests extends TestCase {
 	 */
 	private final class NoOpActionBean extends AbstractAction {
 		public ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-				MutableAttributesAccessor attributes) throws RuntimeException {
+				MutableAttributesAccessor attributes) throws Exception {
 			return success();
 		}
 	}

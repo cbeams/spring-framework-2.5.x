@@ -34,6 +34,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public abstract class AbstractAction implements Action, InitializingBean {
 
@@ -272,37 +273,32 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * 
 	 */
 	public final ActionResult execute(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws RuntimeException {
+			MutableAttributesAccessor model) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Action '" + getClass().getName() + "' beginning execution");
 		}
-		try {
-			ActionResult event = onPreExecute(request, response, model);
-			if (event == null) {
-				event = doExecuteAction(request, response, model);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Action '" + getClass().getName() + "' completed execution; event result is "
-							+ event);
-				}
-				onPostExecute(request, response, model);
-				if (logger.isInfoEnabled()) {
-					if (event == null) {
-						logger
-								.info("Retured action event is [null]; that's ok so long as another action associated "
-										+ "with the currently executing flow state returns a valid event");
-					}
+		ActionResult event = onPreExecute(request, response, model);
+		if (event == null) {
+			event = doExecuteAction(request, response, model);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Action '" + getClass().getName() + "' completed execution; event result is "
+						+ event);
+			}
+			onPostExecute(request, response, model);
+			if (logger.isInfoEnabled()) {
+				if (event == null) {
+					logger
+							.info("Retured action event is [null]; that's ok so long as another action associated "
+									+ "with the currently executing flow state returns a valid event");
 				}
 			}
-			else {
-				if (logger.isInfoEnabled()) {
-					logger.info("Action execution disallowed; event is " + event);
-				}
+		}
+		else {
+			if (logger.isInfoEnabled()) {
+				logger.info("Action execution disallowed; event is " + event);
 			}
-			return event;
 		}
-		catch (ServletRequestBindingException e) {
-			throw new RuntimeException("Unexpected exception occured binding well-known parameters from request", e);
-		}
+		return event;
 	}
 
 	/**
@@ -310,11 +306,10 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param response
 	 * @param model
 	 * @return
-	 * @throws RuntimeException
-	 * @throws ServletRequestBindingException
+	 * @throws Exception
 	 */
 	protected ActionResult onPreExecute(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws RuntimeException, ServletRequestBindingException {
+			MutableAttributesAccessor model) throws Exception {
 		return null;
 	}
 
@@ -323,20 +318,18 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param response
 	 * @param model
 	 * @return
-	 * @throws RuntimeException
-	 * @throws ServletRequestBindingException
+	 * @throws Exception
 	 */
 	protected abstract ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws RuntimeException, ServletRequestBindingException;
+			MutableAttributesAccessor model) throws Exception;
 
 	/**
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @throws RuntimeException
-	 * @throws ServletRequestBindingException
+	 * @throws Exception
 	 */
 	protected void onPostExecute(HttpServletRequest request, HttpServletResponse response, AttributesAccessor model)
-			throws RuntimeException, ServletRequestBindingException {
+			throws Exception {
 	}
 }

@@ -203,7 +203,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	 * 
 	 */
 	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws ObjectRetrievalFailureException, IllegalStateException {
+			MutableAttributesAccessor model) throws Exception {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		ActionResult event = bindAndValidate(request, model, binder);

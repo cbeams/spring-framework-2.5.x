@@ -41,7 +41,7 @@ public class XmlFlowBuilderTest extends TestCase {
 				if ("action1".equals(actionId) || "action2".equals(actionId)) {
 					return new Action() {
 						public ActionResult execute(HttpServletRequest request,	HttpServletResponse response,
-								MutableAttributesAccessor model) throws RuntimeException {
+								MutableAttributesAccessor model) throws Exception {
 							return new ActionResult("testOk");
 						}
 					};

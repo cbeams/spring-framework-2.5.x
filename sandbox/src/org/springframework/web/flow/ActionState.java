@@ -90,7 +90,15 @@ public class ActionState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing action bean '" + action + "'");
 			}
-			ActionResult result = action.execute(request, response, flowExecution);
+			
+			ActionResult result;
+			try {
+				result = action.execute(request, response, flowExecution);
+			}
+			catch (Exception e) {
+				throw new RuntimeException("Action execution resulted in an unrecoverable exception", e);
+			}
+			
 			executionCount++;
 			Transition transition = getTransition(result);
 			if (transition != null) {
@@ -99,7 +107,7 @@ public class ActionState extends TransitionableState {
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Action bean execution #" + executionCount + " resulted in no transition - "
+					logger.debug("Action execution #" + executionCount + " resulted in no transition - "
 							+ "I will attempt to proceed to the next action in the chain");
 				}
 			}
