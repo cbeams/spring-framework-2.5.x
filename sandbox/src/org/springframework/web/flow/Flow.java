@@ -473,17 +473,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
 	}
 
-	/**
-	 * @param subFlow
-	 * @param attributesMapper
-	 * @param subFlowDefaultFinishStateId
-	 * @return
-	 */
-	public boolean addSubFlowState(Flow subFlow, FlowAttributesMapper attributesMapper,
-			String subFlowDefaultFinishStateId) {
-		return addSubFlowState(subFlow, attributesMapper, new Transition[] { onBack(subFlowDefaultFinishStateId),
-				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
-	}
 
 	/**
 	 * @param id
