@@ -45,7 +45,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("age", "${age}");
 		pvs.addPropertyValue("name", "name${var}${");
-		pvs.addPropertyValue("touchy", "${user.dir}");
+		pvs.addPropertyValue("touchy", "${os.name}");
 		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb1", TestBean.class, pvs);
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
@@ -79,19 +79,19 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(2, tb2.getSomeMap().size());
 		assertEquals(tb2, tb2.getSomeMap().get("key1"));
 		assertEquals("98name", tb2.getSomeMap().get("key2"));
-		assertEquals(System.getProperty("user.dir"), tb1.getTouchy());
+		assertEquals(System.getProperty("os.name"), tb1.getTouchy());
 	}
 
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyOnly() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("touchy", "${user.dir}");
+		pvs.addPropertyValue("touchy", "${os.name}");
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		ac.refresh();
 		TestBean tb = (TestBean) ac.getBean("tb");
-		assertEquals(System.getProperty("user.dir"), tb.getTouchy());
+		assertEquals(System.getProperty("os.name"), tb.getTouchy());
 	}
 
 	public void testPropertyPlaceholderConfigurerWithUnresolvableSystemProperty() {
