@@ -18,8 +18,10 @@ package org.springframework.web.flow;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.ProcessTemplate;
@@ -149,7 +152,7 @@ public class Flow implements FlowExecutionFactory, Serializable {
 
 	private StartStateMarker startState;
 
-	private StateGroups stateGroups = new StateGroups(this);
+	private Set states = new LinkedHashSet(6);
 
 	private transient EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(
 			FlowExecutionListener.class);
@@ -243,37 +246,41 @@ public class Flow implements FlowExecutionFactory, Serializable {
 	}
 
 	protected void add(AbstractState state) {
-		addAll(getDefaultStateGroupId(), new AbstractState[] { state });
-	}
+		if (containsInstance(state)) {
+			return;
+		}
+		if (containsState(state.getId())) {
+			throw new IllegalStateException(
+					"This flow '"
+							+ getId()
+							+ "' already contains a state with id '"
+							+ id
+							+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
+							+ DefaultObjectStyler.call(getStateIds()));
+		}
+		state.setFlow(this);
 
-	protected void addAll(AbstractState[] states) {
-		addAll(getDefaultStateGroupId(), states);
-	}
-
-	protected void add(String groupId, AbstractState state) {
-		addAll(groupId, new AbstractState[] { state });
-	}
-
-	protected void addAll(String groupId, AbstractState[] states) {
 		boolean firstAdd;
-		if (this.stateGroups.isEmpty()) {
+		if (states.isEmpty()) {
 			firstAdd = true;
 		}
 		else {
 			firstAdd = true;
 		}
-		this.stateGroups.addAll(groupId, states);
+		this.states.add(state);
 		if (firstAdd) {
-			setStartState((TransitionableState)this.stateGroups.statesIterator().next());
+			setStartState((TransitionableState)statesIterator().next());
 		}
 	}
 
-	protected String getDefaultStateGroupId() {
-		return StateGroups.DEFAULT_GROUP_ID;
+	protected void addAll(AbstractState[] states) {
+		for (int i = 0; i < states.length; i++) {
+			add(states[i]);
+		}
 	}
 
 	public Iterator statesIterator() {
-		return this.stateGroups.statesIterator();
+		return this.statesIterator();
 	}
 
 	/**
@@ -381,10 +388,6 @@ public class Flow implements FlowExecutionFactory, Serializable {
 		return getStartStateMarker().getStartState();
 	}
 
-	public Iterator stateGroupIterator() {
-		return stateGroups.iterator();
-	}
-
 	public String[] getStateIds() {
 		Iterator it = statesIterator();
 		List stateIds = new ArrayList();
@@ -445,6 +448,6 @@ public class Flow implements FlowExecutionFactory, Serializable {
 
 	public String toString() {
 		return new ToStringCreator(this).append("id", id).append("startState", startState)
-				.append("states", stateGroups).toString();
+				.append("states", this.states).toString();
 	}
 }
