@@ -174,10 +174,10 @@ public class BindTestSuite extends AbstractTagTest {
 		assertTrue("Correct errorCode", "code1".equals(status.getErrorCode()));
 		assertTrue("Correct errorCode", "code1".equals(status.getErrorCodes()[0]));
 		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[1]));
-		assertTrue("Correct errorMessage", "message &amp; 1".equals(status.getErrorMessage()));
-		assertTrue("Correct errorMessage", "message &amp; 1".equals(status.getErrorMessages()[0]));
+		assertTrue("Correct errorMessage", "message &#38; 1".equals(status.getErrorMessage()));
+		assertTrue("Correct errorMessage", "message &#38; 1".equals(status.getErrorMessages()[0]));
 		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
-		assertTrue("Correct errorMessagesAsString", "message &amp; 1 - message2".equals(status.getErrorMessagesAsString(" - ")));
+		assertTrue("Correct errorMessagesAsString", "message &#38; 1 - message2".equals(status.getErrorMessagesAsString(" - ")));
 
 		tag = new BindTag();
 		tag.setPageContext(pc);

@@ -47,7 +47,7 @@ public class MessageTestSuite extends AbstractTagTest {
 		tag.setCode("${myattr}");
 		tag.setHtmlEscape("true");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "Canadian &amp; test message".equals(message.toString()));
+		assertTrue("Correct message", "Canadian &#38; test message".equals(message.toString()));
 	}
 
 	public void testMessageTagWithCodeAndText1() throws JspException {
@@ -93,7 +93,7 @@ public class MessageTestSuite extends AbstractTagTest {
 		tag.setText("test & text");
 		tag.setHtmlEscape("true");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "test &amp; text".equals(message.toString()));
+		assertTrue("Correct message", "test &#38; text".equals(message.toString()));
 	}
 	
 	public void testMessageWithVarAndScope() throws JspException {

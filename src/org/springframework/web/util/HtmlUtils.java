@@ -1,161 +1,334 @@
 package org.springframework.web.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Utility class for HTML escaping and unescaping.
- * Based on code from com.purpletech.util.Utils, written by Alex Chaffee.
+ * Utility class for HTML escaping.
+ * Escapes based on the W3C HTML 4.01 recommendation.
  *
  * <p>Reference:
- * <a href="http://hotwired.lycos.com/webmonkey/reference/special_characters/">
- * http://hotwired.lycos.com/webmonkey/reference/special_characters/
+ * <a href="http://www.w3.org/TR/html4/charset.html">
+ * http://www.w3.org/TR/html4/charset.html
  * </a>
  *
+ * @author Chris Wilson
  * @author Juergen Hoeller
  * @since 01.03.2003
  */
 public abstract class HtmlUtils {
 
-	private static Object[][] entities = {
-		{"#39", new Integer(39)}, // ' - apostrophe
-		{"quot", new Integer(34)}, // " - double-quote
-		{"amp", new Integer(38)}, // & - ampersand
-		{"lt", new Integer(60)}, // < - less-than
-		{"gt", new Integer(62)}, // > - greater-than
-		{"nbsp", new Integer(160)}, // non-breaking space
-		{"copy", new Integer(169)}, // © - copyright
-		{"reg", new Integer(174)}, // ® - registered trademark
-		{"Agrave", new Integer(192)}, // À - uppercase A, grave accent
-		{"Aacute", new Integer(193)}, // Á - uppercase A, acute accent
-		{"Acirc", new Integer(194)}, // Â - uppercase A, circumflex accent
-		{"Atilde", new Integer(195)}, // Ã - uppercase A, tilde
-		{"Auml", new Integer(196)}, // Ä - uppercase A, umlaut
-		{"Aring", new Integer(197)}, // Å - uppercase A, ring
-		{"AElig", new Integer(198)}, // Æ - uppercase AE
-		{"Ccedil", new Integer(199)}, // Ç - uppercase C, cedilla
-		{"Egrave", new Integer(200)}, // È - uppercase E, grave accent
-		{"Eacute", new Integer(201)}, // É - uppercase E, acute accent
-		{"Ecirc", new Integer(202)}, // Ê - uppercase E, circumflex accent
-		{"Euml", new Integer(203)}, // Ë - uppercase E, umlaut
-		{"Igrave", new Integer(204)}, // Ì - uppercase I, grave accent
-		{"Iacute", new Integer(205)}, // Í - uppercase I, acute accent
-		{"Icirc", new Integer(206)}, // Î - uppercase I, circumflex accent
-		{"Iuml", new Integer(207)}, // Ï - uppercase I, umlaut
-		{"ETH", new Integer(208)}, // Ð - uppercase Eth, Icelandic
-		{"Ntilde", new Integer(209)}, // Ñ - uppercase N, tilde
-		{"Ograve", new Integer(210)}, // Ò - uppercase O, grave accent
-		{"Oacute", new Integer(211)}, // Ó - uppercase O, acute accent
-		{"Ocirc", new Integer(212)}, // Ô - uppercase O, circumflex accent
-		{"Otilde", new Integer(213)}, // Õ - uppercase O, tilde
-		{"Ouml", new Integer(214)}, // Ö - uppercase O, umlaut
-		{"Oslash", new Integer(216)}, // Ø - uppercase O, slash
-		{"Ugrave", new Integer(217)}, // Ù - uppercase U, grave accent
-		{"Uacute", new Integer(218)}, // Ú - uppercase U, acute accent
-		{"Ucirc", new Integer(219)}, // Û - uppercase U, circumflex accent
-		{"Uuml", new Integer(220)}, // Ü - uppercase U, umlaut
-		{"Yacute", new Integer(221)}, // Ý - uppercase Y, acute accent
-		{"THORN", new Integer(222)}, // Þ - uppercase THORN, Icelandic
-		{"szlig", new Integer(223)}, // ß - lowercase sharps, German
-		{"agrave", new Integer(224)}, // à - lowercase a, grave accent
-		{"aacute", new Integer(225)}, // á - lowercase a, acute accent
-		{"acirc", new Integer(226)}, // â - lowercase a, circumflex accent
-		{"atilde", new Integer(227)}, // ã - lowercase a, tilde
-		{"auml", new Integer(228)}, // ä - lowercase a, umlaut
-		{"aring", new Integer(229)}, // å - lowercase a, ring
-		{"aelig", new Integer(230)}, // æ - lowercase ae
-		{"ccedil", new Integer(231)}, // ç - lowercase c, cedilla
-		{"egrave", new Integer(232)}, // è - lowercase e, grave accent
-		{"eacute", new Integer(233)}, // é - lowercase e, acute accent
-		{"ecirc", new Integer(234)}, // ê - lowercase e, circumflex accent
-		{"euml", new Integer(235)}, // ë - lowercase e, umlaut
-		{"igrave", new Integer(236)}, // ì - lowercase i, grave accent
-		{"iacute", new Integer(237)}, // í - lowercase i, acute accent
-		{"icirc", new Integer(238)}, // î - lowercase i, circumflex accent
-		{"iuml", new Integer(239)}, // ï - lowercase i, umlaut
-		{"eth", new Integer(240)}, // ð - lowercase eth, Icelandic
-		{"ntilde", new Integer(241)}, // ñ - lowercase n, tilde
-		{"ograve", new Integer(242)}, // ò - lowercase o, grave accent
-		{"oacute", new Integer(243)}, // ó - lowercase o, acute accent
-		{"ocirc", new Integer(244)}, // ô - lowercase o, circumflex accent
-		{"otilde", new Integer(245)}, // õ - lowercase o, tilde
-		{"ouml", new Integer(246)}, // ö - lowercase o, umlaut
-		{"oslash", new Integer(248)}, // ø - lowercase o, slash
-		{"ugrave", new Integer(249)}, // ù - lowercase u, grave accent
-		{"uacute", new Integer(250)}, // ú - lowercase u, acute accent
-		{"ucirc", new Integer(251)}, // û - lowercase u, circumflex accent
-		{"uuml", new Integer(252)}, // ü - lowercase u, umlaut
-		{"yacute", new Integer(253)}, // ý - lowercase y, acute accent
-		{"thorn", new Integer(254)}, // þ - lowercase thorn, Icelandic
-		{"yuml", new Integer(255)}, // ÿ - lowercase y, umlaut
-		{"euro", new Integer(8364)}, // Euro symbol
-	};
+	private static final String REFERENCE_START = "&#";
 
-	private static Map e2i = new HashMap();
-	private static Map i2e = new HashMap();
-
-	static {
-		for (int i = 0; i < entities.length; ++i) {
-			e2i.put(entities[i][0], entities[i][1]);
-			i2e.put(entities[i][1], entities[i][0]);
+	/**
+	 * Turn special characters into HTML character references.
+	 * Handles complete character set defined in HTML 4.01 recommendation.
+	 * <p>Escapes all special characters to their corresponding numerial reference
+	 * in the decimal format: &#<i>Decimal</i>;
+	 * <p>Reference:
+	 * <a href="http://www.w3.org/TR/html4/sgml/entities.html">
+	 * http://www.w3.org/TR/html4/sgml/entities.html
+	 * </a>
+	 */
+	public static String htmlEscape(String s) {
+		if (s == null) {
+			return null;
 		}
+		StringBuffer escaped = new StringBuffer(s.length());
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			// handle non special ASCII chars first since they will be most common
+			if ((c >= 0 && c <= 33)
+			    || (c >= 35 && c <= 37)
+			    || (c >= 39 && c <= 59)
+			    || (c == 61)
+			    || (c >= 63 && c <= 159)) {
+				escaped.append(c);
+				continue;
+			}
+
+			// handle special chars
+			if (c == 34) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 38) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 60) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 62) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 160 && c <= 255) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 338 && c <= 339) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 352 && c <= 353) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 376) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 402) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 710) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 732) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 913 && c <= 929) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 931 && c <= 937) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 945 && c <= 969) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 977 && c <= 978) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 982) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8194 && c <= 8195) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8201) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8204 && c <= 8207) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8211 && c <= 8212) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8216 && c <= 8218) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8220 && c <= 8222) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8224 && c <= 8226) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8230) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8240) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8242 && c <= 8243) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8249 && c <= 8250) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8254) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8260) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8364) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8465) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8472) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8476) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8482) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8501) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8592 && c <= 8596) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8629) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8656 && c <= 8660) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8704) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8706 && c <= 8707) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8709) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8711 && c <= 8713) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8715) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8719) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8721 && c <= 8722) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8727) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8730) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8733 && c <= 8734) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8736) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8743 && c <= 8747) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8756) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8764) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8773) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8776) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8800 && c <= 8801) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8804 && c <= 8805) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8834 && c <= 8836) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8838 && c <= 8839) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8853) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8855) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8869) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 8901) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 8968 && c <= 8971) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c >= 9001 && c <= 9002) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 9674) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 9824) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+			if (c == 9827) {
+				writeDecimalReference(c, escaped);
+				continue;
+			}
+
+			// all other chars
+			escaped.append(c);
+		}
+		return escaped.toString();
 	}
 
 	/**
-	 * Turns funky characters into HTML entity equivalents.<p>
-	 * E.g. <tt>"bread" & "butter"</tt> => <tt>&amp;quot;bread&amp;quot; &amp;amp; &amp;quot;butter&amp;quot;</tt>
-	 * <p>Update: supports nearly all HTML entities, including funky accents. See the source code for more detail.
-	 **/
-	public static String htmlEscape(String source) {
-		StringBuffer buf = new StringBuffer();
-		if (source != null) {
-			for (int i = 0; i < source.length(); ++i) {
-				char ch = source.charAt(i);
-				String entity = (String)i2e.get(new Integer(ch));
-				if (entity == null) {
-					if (ch > 128)
-						buf.append("&#" + ((int)ch) + ";");
-					else
-						buf.append(ch);
-				} else {
-					buf.append("&" + entity + ";");
-				}
-			}
-		}
-		return buf.toString();
+	 * Write the given character as decimal reference.
+	 * @param c the character to write
+	 * @param buf the buffer to write into
+	 */
+	private static void writeDecimalReference(char c, StringBuffer buf) {
+		buf.append(REFERENCE_START);
+		buf.append((int) c);
+		buf.append(';');
 	}
 
-	/**
-	 * Reverses htmlEscape.
-	 **/
-	public static String htmlUnescape(String source) {
-		StringBuffer buf = new StringBuffer();
-		if (source != null) {
-			for (int i = 0; i < source.length(); ++i) {
-				char ch = source.charAt(i);
-				if (ch == '&') {
-					int semi = source.indexOf(';', i + 1);
-					if (semi == -1) {
-						buf.append(ch);
-						continue;
-					}
-					String entity = source.substring(i + 1, semi); //semi-1);
-					Integer iso = null;
-					if (entity.charAt(0) == '#')
-						iso = new Integer(entity.substring(1));
-					else
-						iso = (Integer)e2i.get(entity);
-					if (iso == null) {
-						buf.append("&" + entity + ";");
-					} else {
-						buf.append((char)(iso.intValue()));
-						i = semi;
-					}
-				} else {
-					buf.append(ch);
-				}
-			}
-		}
-		return buf.toString();
-	}
 }
