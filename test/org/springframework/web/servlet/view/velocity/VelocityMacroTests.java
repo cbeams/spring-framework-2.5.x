@@ -30,6 +30,7 @@ import org.apache.velocity.context.Context;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
@@ -40,7 +41,7 @@ import org.springframework.web.servlet.view.velocity.VelocityViewTests.TestVeloc
 /**
  * @author Darren Davison
  * @since 18.06.2004
- * @version $Id: VelocityMacroTests.java,v 1.1 2004-07-23 08:38:55 jhoeller Exp $
+ * @version $Id: VelocityMacroTests.java,v 1.2 2004-07-26 06:29:44 jhoeller Exp $
  */
 public class VelocityMacroTests extends TestCase {
 
@@ -55,6 +56,7 @@ public class VelocityMacroTests extends TestCase {
 
 	public void setUp() throws Exception {
 		wac = new StaticWebApplicationContext();
+		wac.setServletContext(new MockServletContext());
 
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
