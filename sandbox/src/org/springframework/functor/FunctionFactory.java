@@ -15,7 +15,7 @@
  */
 package org.springframework.functor;
 
-import org.springframework.functor.functions.UnaryFunctionChain;
+import org.springframework.functor.functions.ChainedUnaryFunction;
 
 /**
  * A factory for easing the construction and composition of functions.
@@ -31,11 +31,11 @@ public class FunctionFactory {
 
     public static UnaryFunction chain(UnaryFunction firstFunction,
             UnaryFunction secondFunction) {
-        return new UnaryFunctionChain(firstFunction, secondFunction);
+        return new ChainedUnaryFunction(firstFunction, secondFunction);
     }
 
     public static UnaryFunction chain(UnaryFunction[] functionsToChain) {
-        return new UnaryFunctionChain(functionsToChain);
+        return new ChainedUnaryFunction(functionsToChain);
     }
 
 }
