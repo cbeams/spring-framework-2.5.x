@@ -236,7 +236,7 @@
 
         <para>Spring provides several convenient pointcut implementations.
         Some can be used out of the box, others are intended to be subclassed
-        in application-specific pointcuts. </para>
+        in application-specific pointcuts.</para>
 
         <sect4>
           <title>Static pointcuts</title>
@@ -247,6 +247,14 @@
             <title>Regexp</title>
 
             <para>ererer</para>
+          </sect5>
+
+          <sect5>
+            <title>Attribute-driven pointcuts</title>
+
+            <para>An important type of static pointcut is a
+            <emphasis>metadata-driven</emphasis> pointcut. This uses the
+            values of metadata attributes--typically, source-level metadata.</para>
           </sect5>
         </sect4>
 
@@ -274,12 +282,28 @@
       </sect3>
     </sect2>
 
+    <sect2>
+      <title>Advice lifecycles</title>
+
+      <para>Spring advices can be shared across all advised objects, or</para>
+
+      <para>This corresponds to per-class or per-instance advice.</para>
+
+      <para>Per-class advice is used most often. It is appropriate for generic
+      advice such as transaction advisors. These do not depend on the state of
+      the proxied object or add new state; merely act on the method and
+      arguments.</para>
+
+      <para>Per-instance advice is appropriate for introductions, to support
+      mixins. In this case, the advice adds state to the proxied object.</para>
+    </sect2>
+
     <sect2 id="aop-introduction-advice-types">
       <title>Advice types in Spring</title>
 
       <para>Spring provides several advice types out of the box, and is
       extensible to support arbitrary advice types. Let&#39;s look at the
-      standard advice types.</para>
+      basic concepts and standard advice types.</para>
 
       <sect3>
         <title>Interception around advice</title>
@@ -334,15 +358,35 @@
         <title>Before advice</title>
 
         <para>A simpler advice type is a before advice. This does not need a
-        MethodInvocation object as </para>
+        MethodInvocation object as</para>
 
         <para>The main advantage of a before advice is that there is no need
         to invoke the proceed() method, and therefore no possibility of
         inadvertently failing to proceed down the interceptor chain.</para>
 
-        <para>An example of a before advice in Spring.</para>
+        <para>interface</para>
 
-        <para>er</para>
+        <programlisting>public interface MethodBeforeAdvice extends BeforeAdvice {
+
+    void before(Method m, Object[] args, Object target) throws Throwable;
+}</programlisting>
+
+        <para>Note the the return type is void. Before advice can insert
+        custom behaviour before the joinpoint executes, but cannot change the
+        return value. If it throws an exception ********</para>
+
+        <para>An example of a before advice in Spring:</para>
+
+        <programlisting>public class CountingBeforeAdvice implements MethodBeforeAdvice {
+    private int count;
+    public void before(Method m, Object[] args, Object target) throws Throwable {
+        ++count;
+    }
+
+    public int getCount() { 
+        return count; 
+    }
+}</programlisting>
 
         <para>er</para>
 
@@ -440,6 +484,22 @@
         <para>Spring treats introduction advice as a special kind of
         interception around advice.</para>
 
+        <para>After returning</para>
+
+        <programlisting>public interface IntroductionInterceptor extends MethodInterceptor {
+
+    boolean implementsInterface(Class intf);
+}</programlisting>
+
+        <para>The invoke() method inherited from the AOP Alliance
+        MethodInterceptor interface must implement the introduction.</para>
+
+        <para>Show example</para>
+
+        <para>Delegating II</para>
+
+        <para>Advice lifecycle</para>
+
         <para>Introduction advice cannot be used with any pointcut, as it
         applies only at class, rather than method, level. You can only use
         introduction advice with the InterceptionIntroductionAdvisor, which
@@ -455,7 +515,7 @@
 }</programlisting>
 
         <para>There is no MethodMatcher, and hence no Pointcut, associated
-        with introduction advice. Only class filtering is logical. </para>
+        with introduction advice. Only class filtering is logical.</para>
 
         <para>The getInterfaces() method returns the interfaces introduced by
         this advisor. Note that this MAY DIFFER</para>
@@ -591,31 +651,29 @@ boolean getProxyTargetClass();</programlisting>
     <para>The addAdvisor() methods can be used to add any Advisor. Often this
     will be of type InterceptionAroundAdvisor, but it can be generic.</para>
 
-    <para>When constructing AOP proxies, the
-    org.springframework.aop.framework.AdvisedSupport class, which implements
-    Advised, can be used to offer additional methods, to add before advice
-    etc.</para>
+    <para>When constructing AOP proxies, the <literal>org.springframework.aop.framework.AdvisedSupport
+    </literal>class, which implements Advised, can be used to offer additional
+    methods, to add before advice etc. This class is the superclass of both
+    ProxyFactory and ProxyFactoryBean.</para>
   </sect1>
 
   <sect1 id="aop-autoproxy">
     <title>Using the &#34;autoproxy&#34; facility</title>
 
-    <sect2 id="aop-autoproxy-1">
-      <title>Using the &#34;autoproxy&#34; facility</title>
+    <para>So far we&#39;ve considered explicit creation of AOP proxies using a
+    ProxyFactoryBean or similar factory bean.</para>
 
-      <para>So far we&#39;ve considered explicit creation of AOP proxies using
-      a ProxyFactoryBean or similar factory bean.</para>
+    <para>Spring also allows us to use &#34;autoproxy&#34; bean definitions,
+    which can automatically proxy selected bean definitions.</para>
 
-      <para>Spring also allows us to use &#34;autoproxy&#34; bean definitions,
-      which can automatically proxy selected bean definitions.</para>
-
-      <para>This is built on Spring bean postProcessor infrastructure (REF).</para>
-    </sect2>
+    <para>This is built on Spring bean postProcessor infrastructure (REF).</para>
 
     <sect2 id="aop-autoproxy-choices">
       <title>Autoproxy bean definitions</title>
 
       <para>Talk about bean name etc.</para>
+
+      <para>BeanNameAutoProxyCreator</para>
     </sect2>
 
     <sect2 id="aop-autoproxy-metadata">
