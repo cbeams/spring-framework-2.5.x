@@ -1,10 +1,13 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.108 2004-03-17 09:16:21 jhoeller Exp $
+$Id: changelog.txt,v 1.109 2004-03-17 19:25:33 jhoeller Exp $
 
 
 Changes in version 1.0 final (20.3.2003)
 ----------------------------------------
+
+Package org.springframework.aop
+* fixed too eager initialization of common interceptors in AbstractAutoProxyCreator, potentially causing circular refs
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl's custom editor detection for indexed and mapped properties
@@ -14,6 +17,7 @@ Package org.springframework.beans
 * fixed type difference weight algorithm in AbstractAutowireCapableBeanFactory to ignore non-matching arguments
 * added "ignoreUnresolvablePlaceholders" property to PropertyPlaceholderConfigurer
 * reworked PropertiesFactoryBean to work with PropertiesPersister strategy
+* trim the text value of a <prop> tag to avoid unwanted whitespace caused by typical XML formatting
 
 Package org.springframework.context
 * added "postProcessBeanFactory" hook to AbstractApplicationContext
@@ -46,6 +50,11 @@ Package org.springframework.jdbc
 Package org.springframework.jndi
 * added "jndiEnvironment" property to AbstractJndiLocator, for simplified configuration of JNDI environment settings
 * renamed ContextCallback interface to JndiCallback
+
+Package org.springframework.mail
+* added character encoding support to MimeMessageHelper, allowing to specify an encoding for the entire message
+* added overloaded "setTo"/"setCc"/"setBcc" methods to MimeMessageHelper, with InternetAddress arguments
+* added "addTo"/"addCc"/"addBcc" methods to MimeMessageHelper, supporting automatic encoding of personal names
 
 Package org.springframework.orm
 * reworked LocalSessionFactoryBean's schema support, providing "drop/create/updateDatabaseSchema" methods
@@ -82,9 +91,16 @@ Package org.springframework.web
 * updated HtmlUtils to more efficient implementation by Chris Wilson
 * added "getRequiredSessionAttribute" method to WebUtils
 * changed WebUtils' "getOrCreateSessionAttribute" signature from HttpServletRequest to HttpSession
-* added "bindEmptyMultipartFiles" setting to ServletRequestDataBinder
+* added "defaultEncoding" property and "determineEncoding" method to UrlPathHelper
+* reworked CommonsMultipartResolver's "headerEncoding" property into "defaultEncoding"
+* added "determineEncoding" method to CommonsMultipartResolver, checking the request encoding with fallback to default
+* reworked CosMultipartResolver's "headerEncoding" property into "defaultEncoding"
+* added "determineEncoding" method to CosMultipartResolver, checking the request encoding with fallback to default
 * added ServletContextAware interface for application beans, to be detected by web application contexts
 * reworked CommonsMultipartResolver and CosMultipartResolver to implement ServletContextAware
+* added CharacterEncodingFilter, for specifying a character set for requests (typically not sent by current browsers)
+* added "bindEmptyMultipartFiles" setting to ServletRequestDataBinder
+* added "onBind" callback to BaseCommandController, for customized processing after binding but before validation
 * added "setView" and "setViewName" mutators to ModelAndView, to allow for post-processing in a HandlerInterceptor
 * fixed AbstractCachingViewResolver's caching to use appropriate synchronization
 * added "contextRelative" flag to RedirectView, to automatically prepend the context path to a given URL
