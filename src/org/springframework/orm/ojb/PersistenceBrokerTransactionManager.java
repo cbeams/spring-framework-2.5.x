@@ -30,6 +30,7 @@ import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
@@ -175,13 +176,20 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) transaction;
+		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
+			throw new IllegalTransactionStateException(
+					"Pre-bound JDBC connection found - PersistenceBrokerTransactionManager does not support " +
+					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
+					"It is recommended to use a single PersistenceBrokerTransactionManager for all transactions " +
+					"on a single DataSource, no matter whether PersistenceBroker or JDBC access.");
+		}
 
 		PersistenceBroker pb = getPersistenceBroker();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Opened new persistence broker [" + pb + "] for OJB transaction");
 		}
 
+		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) transaction;
 		txObject.setPersistenceBrokerHolder(new PersistenceBrokerHolder(pb));
 
 		try {
@@ -191,7 +199,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 
 			pb.beginTransaction();
 
-			// register the OJB PersistenceBroker's JDBC Connection for the DataSource, if set
+			// Register the OJB PersistenceBroker's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
 				ConnectionHolder conHolder = new ConnectionHolder(con);
 				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -228,8 +236,8 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		if (TransactionSynchronizationManager.hasResource(getPbKey())) {
-			// from non-transactional code running in active transaction synchronization
-			// -> can be safely removed, will be closed on transaction completion
+			// From non-transactional code running in active transaction synchronization
+			// -> can be safely removed, will be closed on transaction completion.
 			TransactionSynchronizationManager.unbindResource(getPbKey());
 		}
 		TransactionSynchronizationManager.bindResource(getPbKey(), resourcesHolder.getPersistenceBrokerHolder());
@@ -242,7 +250,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Committing OJB transaction on persistence broker [" +
-									 txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "]");
+					txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "]");
 		}
 		try {
 			txObject.getPersistenceBrokerHolder().getPersistenceBroker().commitTransaction();
@@ -257,7 +265,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Rolling back OJB transaction on persistence broker [" +
-									 txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "]");
+					txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "]");
 		}
 		txObject.getPersistenceBrokerHolder().getPersistenceBroker().abortTransaction();
 	}
@@ -266,19 +274,19 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Setting OJB transaction on persistence broker [" +
-									 txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "] rollback-only");
+					txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "] rollback-only");
 		}
-		txObject.getPersistenceBrokerHolder().setRollbackOnly();
+		txObject.setRollbackOnly();
 	}
 
 	protected void doCleanupAfterCompletion(Object transaction) {
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) transaction;
 
-		// remove the persistence broker from the thread
+		// Remove the persistence broker holder from the thread.
 		TransactionSynchronizationManager.unbindResource(getPbKey());
 		txObject.getPersistenceBrokerHolder().clear();
 
-		// remove the JDBC connection holder from the thread, if set
+		// Remove the JDBC connection holder from the thread, if set.
 		if (getDataSource() != null) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
@@ -312,16 +320,24 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 
 		private PersistenceBrokerHolder persistenceBrokerHolder;
 
-		private void setPersistenceBrokerHolder(PersistenceBrokerHolder persistenceBrokerHolder) {
+		public void setPersistenceBrokerHolder(PersistenceBrokerHolder persistenceBrokerHolder) {
 			this.persistenceBrokerHolder = persistenceBrokerHolder;
 		}
 
-		private PersistenceBrokerHolder getPersistenceBrokerHolder() {
+		public PersistenceBrokerHolder getPersistenceBrokerHolder() {
 			return persistenceBrokerHolder;
 		}
 
+		public void setRollbackOnly() {
+			getPersistenceBrokerHolder().setRollbackOnly();
+			if (getConnectionHolder() != null) {
+				getConnectionHolder().setRollbackOnly();
+			}
+		}
+
 		public boolean isRollbackOnly() {
-			return getPersistenceBrokerHolder().isRollbackOnly();
+			return getPersistenceBrokerHolder().isRollbackOnly() ||
+					(getConnectionHolder() != null && getConnectionHolder().isRollbackOnly());
 		}
 	}
 

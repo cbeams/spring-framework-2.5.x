@@ -39,6 +39,7 @@ import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
@@ -317,14 +318,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			throw new IllegalArgumentException("beanFactory is required for entityInterceptorBeanName");
 		}
 
-		// initialize the JDBC exception translator
+		// Initialize the JDBC exception translator.
 		getJdbcExceptionTranslator();
 
-		// check for SessionFactory's DataSource
+		// Check for SessionFactory's DataSource.
 		if (this.autodetectDataSource && getDataSource() == null) {
 			DataSource sfds = SessionFactoryUtils.getDataSource(getSessionFactory());
 			if (sfds != null) {
-				// use the SessionFactory's DataSource for exposing transactions to JDBC code
+				// Use the SessionFactory's DataSource for exposing transactions to JDBC code.
 				if (logger.isInfoEnabled()) {
 					logger.info("Using DataSource [" + sfds +
 							"] of Hibernate SessionFactory for HibernateTransactionManager");
@@ -362,8 +363,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
+		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
+			throw new IllegalTransactionStateException(
+					"Pre-bound JDBC connection found - HibernateTransactionManager does not support " +
+					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
+					"It is recommended to use a single HibernateTransactionManager for all transactions " +
+					"on a single DataSource, no matter whether Hibernate or JDBC access.");
+		}
 
+		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 		if (txObject.getSessionHolder() == null) {
 			Session session = SessionFactoryUtils.getSession(
 					getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator(), false);
@@ -382,12 +390,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
 
 			if (definition.isReadOnly() && txObject.isNewSessionHolder()) {
-				// just set to NEVER in case of a new Session for this transaction
+				// Just set to NEVER in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.NEVER);
 			}
 
 			if (!definition.isReadOnly() && !txObject.isNewSessionHolder()) {
-				// we need AUTO or COMMIT for a non-read-only transaction
+				// We need AUTO or COMMIT for a non-read-only transaction.
 				FlushMode flushMode = session.getFlushMode();
 				if (FlushMode.NEVER.equals(flushMode)) {
 					session.setFlushMode(FlushMode.AUTO);
@@ -395,15 +403,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 			}
 
-			// add the Hibernate transaction to the session holder
+			// Add the Hibernate transaction to the session holder.
 			txObject.getSessionHolder().setTransaction(session.beginTransaction());
 
-			// register transaction timeout
+			// Register transaction timeout.
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 				txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
 
-			// register the Hibernate Session's JDBC Connection for the DataSource, if set
+			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
 				ConnectionHolder conHolder = new ConnectionHolder(con);
 				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -417,7 +425,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				txObject.setConnectionHolder(conHolder);
 			}
 
-			// bind the session holder to the thread
+			// Bind the session holder to the thread.
 			if (txObject.isNewSessionHolder()) {
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), txObject.getSessionHolder());
 			}
@@ -444,8 +452,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
-			// from non-transactional code running in active transaction synchronization
-			// -> can be safely removed, will be closed on transaction completion
+			// From non-transactional code running in active transaction synchronization
+			// -> can be safely removed, will be closed on transaction completion.
 			TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		}
 		TransactionSynchronizationManager.bindResource(getSessionFactory(), resourcesHolder.getSessionHolder());
@@ -490,11 +498,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			throw new TransactionSystemException("Could not roll back Hibernate transaction", ex);
 		}
 		catch (JDBCException ex) {
-			// shouldn't really happen, as a rollback doesn't cause a flush
+			// Shouldn't really happen, as a rollback doesn't cause a flush.
 			throw convertJdbcAccessException(ex.getSQLException());
 		}
 		catch (HibernateException ex) {
-			// shouldn't really happen, as a rollback doesn't cause a flush
+			// Shouldn't really happen, as a rollback doesn't cause a flush.
 			throw convertHibernateAccessException(ex);
 		}
 		finally {
@@ -512,18 +520,18 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			logger.debug("Setting Hibernate transaction on session [" +
 					txObject.getSessionHolder().getSession() + "] rollback-only");
 		}
-		txObject.getSessionHolder().setRollbackOnly();
+		txObject.setRollbackOnly();
 	}
 
 	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
-		// remove the session holder from the thread
+		// Remove the session holder from the thread.
 		if (txObject.isNewSessionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		}
 
-		// remove the JDBC connection holder from the thread, if set
+		// Remove the JDBC connection holder from the thread, if set.
 		if (getDataSource() != null) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
@@ -597,25 +605,33 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		private boolean newSessionHolder;
 
-		private void setSessionHolder(SessionHolder sessionHolder, boolean newSessionHolder) {
+		public void setSessionHolder(SessionHolder sessionHolder, boolean newSessionHolder) {
 			this.sessionHolder = sessionHolder;
 			this.newSessionHolder = newSessionHolder;
 		}
 
-		private SessionHolder getSessionHolder() {
+		public SessionHolder getSessionHolder() {
 			return sessionHolder;
 		}
 
-		private boolean isNewSessionHolder() {
+		public boolean isNewSessionHolder() {
 			return newSessionHolder;
 		}
 
-		private boolean hasTransaction() {
+		public boolean hasTransaction() {
 			return (this.sessionHolder != null && this.sessionHolder.getTransaction() != null);
 		}
 
+		public void setRollbackOnly() {
+			getSessionHolder().setRollbackOnly();
+			if (getConnectionHolder() != null) {
+				getConnectionHolder().setRollbackOnly();
+			}
+		}
+
 		public boolean isRollbackOnly() {
-			return getSessionHolder().isRollbackOnly();
+			return getSessionHolder().isRollbackOnly() ||
+					(getConnectionHolder() != null && getConnectionHolder().isRollbackOnly());
 		}
 	}
 
