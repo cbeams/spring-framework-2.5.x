@@ -37,7 +37,7 @@
     use the ApplicationContext</emphasis>, since it offers all the features of
     the BeanFactory and adds on to it in terms of features, while also
     allowing a more declarative approach to use of some functionality, which
-    is generally desireable. The main usage scenario when you might prefer to
+    is generally desirable. The main usage scenario when you might prefer to
     use the BeanFactory is when memory usage is the greatest concern (such as
     in an applet where every last kilobyte counts), and you don't need all the
     features of the ApplicationContext.</para>
@@ -98,7 +98,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       later, the following sections will concentrate on describing the
       configuration of BeanFactories.</para>
 
-      <para>A BeanFactory configuration consists of, at it's most basic level,
+      <para>A BeanFactory configuration consists of, at its most basic level,
       definitions of one or more beans that the BeanFactory must manage. In an
       XmlBeanFactory, these are configured as one or more
       <literal>bean</literal> elements inside a top-level
@@ -244,7 +244,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
     <sect2 id="beans-factory-class">
       <title>The bean class</title>
 
-      <para>The <literal>class</literal> attribute is mandatory is and is used
+      <para>The <literal>class</literal> attribute is mandatory and is used
       for one of two purposes. In the much more common case where the
       BeanFactory itself directly creates the bean by calling its constructor
       (equivalent to Java code calling <emphasis>new</emphasis>), the class
@@ -285,7 +285,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       class="examples.ExampleBeanTwo"/&gt; </programlisting></para>
 
         <para>The mechanism for supplying (optional) arguments to the
-        constructor, or setting properties of the object instance after is has
+        constructor, or setting properties of the object instance after it has
         been constructed, will be described shortly.</para>
       </sect3>
 
@@ -349,7 +349,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
 
       <para>Beans are defined to be deployed in one of two modes: singleton or
       non-singleton. (The latter is also called a prototype, although the term
-      is used loosely as as it doesn't quite fit). When a bean is a singleton,
+      is used loosely as it doesn't quite fit). When a bean is a singleton,
       only one <emphasis>shared</emphasis> instance of the bean will be
       managed and all requests for beans with an id or ids matching that bean
       definition will result in that one specific bean instance being
@@ -411,7 +411,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       we will not elaborate too much on the advantages of Dependency
       Injection, it becomes evident upon usage that code gets much cleaner and
       reaching a higher grade of decoupling is much easier when beans do not
-      look up their dependencies, but are provided them, and additionally do
+      look up their dependencies, but are provided with them, and additionally do
       not even know where the dependencies are located and of what actual type
       they are.</para>
 
@@ -449,7 +449,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         </itemizedlist></para>
 
       <para>The <classname>BeanFactory</classname> supports both of these
-      variants for injecting dependencies into beans its manages. (It in fact
+      variants for injecting dependencies into beans it manages. (It in fact
       also supports injecting setter-based dependencies after some
       dependencies have already been supplied via the constructor approach.)
       The configuration for the dependencies comes in the form of a
@@ -506,9 +506,9 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
             information about PropertyEditors and how to manually add custom
             ones, can be found in <xref
             linkend="beans-beanfactory-customeditors" />). When a bean
-            property is a java Class, Spring allows you to specify the value
+            property is a Java Class type, Spring allows you to specify the value
             for that property as a string value which is the name of the
-            class, and the <literal>ClassEditor</literal> PropertyEditor which
+            class, and the <literal>ClassEditor</literal> PropertyEditor, which
             is built-in, will take care of converting that class name to an
             actual Class instance.</para>
           </listitem>
@@ -711,7 +711,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         &lt;!-- results in a setPeople(java.util.Properties) call --&gt;
         &lt;property name="people"&gt;
             &lt;props&gt;
-                &lt;prop key="HaaryPotter"&gt;The magic property&lt;/prop&gt;
+                &lt;prop key="HarryPotter"&gt;The magic property&lt;/prop&gt;
                 &lt;prop key="JerrySeinfeld"&gt;The funny property&lt;/prop&gt;
             &lt;/props&gt;
         &lt;/property&gt;
@@ -750,7 +750,8 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       <para>A <literal>bean</literal> element inside the
       <literal>property</literal> element is used to define a bean value
       inline, instead of referring to a bean defined elsewhere in the
-      BeanFactory. The inline bean definition does not have any
+      BeanFactory. The inline bean definition does not need to have any
+      id defined.
       <programlisting>&lt;bean id="outer" class="..."&gt;
     &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
     &lt;property name="target"&gt;
@@ -802,7 +803,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       already been initialized by the container) before the property is set.
       All references are ultimately just a reference to another object, but
       there are 3 variations on how the id/name of the other object may be
-      specified, which determines how scoping anf validation is
+      specified, which determines how scoping and validation is
       handled.</para>
 
       <para>Specifying the target bean by using the <literal>bean</literal>
@@ -810,7 +811,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       and will allow creating a reference to any bean in the same
       BeanFactory/ApplicationContext (whether or not in the same XML file), or
       parent BeanFactory/ApplicationContext. The value of the
-      <literal>bean</literal> attribute may be ther same as either the
+      <literal>bean</literal> attribute may be the same as either the
       <literal>id</literal> attribute of the target bean, or one of the values
       in the <literal>name</literal> attribute of the target
       bean.<programlisting>    &lt;ref bean="someBean"/&gt;</programlisting></para>
@@ -853,7 +854,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       A. The container will only create the singleton bean A once, and thus
       only get the opportunity to set its properties once. There is no
       opportunity for the container to provide bean A with a new instance of
-      bean B every time one is needed..</para>
+      bean B every time one is needed.</para>
 
       <para>One solution to this problem is to forgo some inversion of
       control. Bean A can be aware of the container (as described <link
@@ -1046,9 +1047,9 @@ public class ReplacementComputeValue implements MethodReplacer {
                 <entry>no</entry>
 
                 <entry>No autowiring at all. Bean references must be defined
-                via a <literal>ref</literal> element. This is the default
-                value and changing this is discouraged for larger deployments,
-                since explicitely specifying collaborators gives greater
+                via a <literal>ref</literal> element. This is the default,
+                and changing this is discouraged for larger deployments,
+                since explicitly specifying collaborators gives greater
                 control and clarity. To some extent, it is a form of
                 documentation about the structure of a system.</entry>
               </row>
@@ -1230,7 +1231,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para><emphasis>Note: generally, the use of the
         <literal>InitializingBean</literal> marker interface can be avoided
-        (and is discouraged since it unecessarilly couples the code to
+        (and is discouraged since it unecessarily couples the code to
         Spring). A bean definition provides support for a generic
         initialization method to be specified. In the case of the
         XmlBeanFactory, this is done via the <literal>init-method</literal>
@@ -1269,13 +1270,13 @@ public class AnotherExampleBean implements InitializingBean {
 
         <para><emphasis>Note: generally, the use of the
         <literal>DisposableBean</literal> marker interface can be avoided (and
-        is discouraged since it unecessarilly couples the code to Spring). A
+        is discouraged since it unecessarily couples the code to Spring). A
         bean definition provides support for a generic destroy method to be
         specified. In the case of the XmlBeanFactory, this is done via the
         <literal>destroy-method</literal> attribute. For example, the
         following definition: </emphasis></para>
 
-        <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/&gt;
+        <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="destroy"/&gt;
 
 public class ExampleBean {
     public void cleanup() {
@@ -1299,7 +1300,7 @@ public class AnotherExampleBean implements DisposableBean {
         Any lifecycle aspects past that point have to be handled by the
         client. The lifecycle of a bean in the BeanFactory is further
         described in <xref
-        linkend="beans-factory-lifecycle" /></emphasis></para>
+        linkend="beans-factory-lifecycle" /></emphasis>.</para>
       </sect3>
     </sect2>
 
@@ -1329,9 +1330,9 @@ public class AnotherExampleBean implements DisposableBean {
         them programmatically, through the
         <literal>org.springframework.beans.factory.BeanFactory</literal>
         interface, or by casting the reference to a known subclass of this
-        which exposes additional functionality. Primarilly this would consist
+        which exposes additional functionality. Primarily this would consist
         of programmatic retrieval of other beans. While there are cases when
-        this capability is useful, it shold generally be avoided, since it
+        this capability is useful, it should generally be avoided, since it
         couples the code to Spring, and does not follow the Inversion of
         Control style, where collaborators are provided to beans as
         properties.</para>
@@ -1583,7 +1584,7 @@ bf.addBeanPostProcessor(pp);
     custom editors (as also mentioned in <xref
     linkend="beans-beans-conversion" />).</para>
 
-    <para>In a BeanFactory, the processo of applying a
+    <para>In a BeanFactory, the process of applying a
     BeanFactoryPostProcessor is manual, and will be similar to this:</para>
 
     <para><programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
@@ -2076,7 +2077,7 @@ public class BlackListNotifier implement ApplicationListener {
       <title><literal>ApplicationContextAware</literal> marker
       interface</title>
 
-      <para>All marker interfaces availalble with BeanFactories still work.
+      <para>All marker interfaces available with BeanFactories still work.
       The ApplicationContext does add one extra marker interface which beans
       may implement,
       <literal>org.springframework.context.ApplicationContextAware</literal>.
@@ -2271,8 +2272,8 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     <literal>ContextLoaderListener</literal> and the
     <literal>ContextLoaderServlet</literal>. They both have the same
     functionality but differ in that the listener cannot be used in Servlet
-    2.2 compatible containers. Since the Servlet 2.4 specification, listener
-    are required to initialize after startup of a webapplication. A lot of 2.3
+    2.2 compatible containers. Since the Servlet 2.4 specification, listeners
+    are required to initialize after startup of a web application. A lot of 2.3
     compatible containers already implement this feature. It is up to you as
     to which one you use, but all things being equal you should probably
     prefer <literal>ContextLoaderListener</literal>; for more information on
@@ -2342,7 +2343,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     All the ApplicationContext variants may be constructed from multiple
     definition files in this fashion. However, if there are multiple sibling
     web-apps at the top of the hierarchy, it is problematic to create an
-    ApplicationContext for each web-app which conssists of mostly identical
+    ApplicationContext for each web-app which consists of mostly identical
     bean definitions from lower layers, as there may be issues due to
     increased memory usage, issues with creating mutliple copies of beans
     which take a long time to initialize (i.e. a Hibernate SessionFactory),

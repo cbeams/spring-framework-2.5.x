@@ -228,7 +228,7 @@
 		</para>
 		
 		<para>
-			Spring also provide an access layer and abstraction layer for Enterprise JavaBeans,
+			Spring also provides an access layer and abstraction layer for Enterprise JavaBeans,
 			enabling you to reuse your existing POJOs and wrap them in Stateless Session Beans,
 			for use in scalable failsafe webapplications, that might need declarative security.
 		</para>
