@@ -9,7 +9,7 @@
 	This script should normally be managed from a shell script or 
 	batch file (supplied).
 	
-	$Id: build.xml,v 1.4 2004-01-05 00:29:25 davison Exp $
+	$Id: build.xml,v 1.5 2004-01-06 00:31:52 davison Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
@@ -27,6 +27,8 @@
 	<property name="bin.dir" value="${target.root.dir}/classes" />
 	<property name="reports.dir" value="${target.root.dir}/reports" />
 	<property name="dev.mail.list" value="springframework-developer@lists.sourceforge.net" />
+	<property name="autobuilds.mail.from" value="autobuilds@springframework.org"/>
+	<property name="autobuilds.mail.failure.subject" value="Spring Autobuilds Failure Report"/>
 	
 	<!-- build.properties is local per user -->
 	<property file="build.properties"/>
@@ -88,6 +90,13 @@
 	<property name="autobuilds.jdbc.url" value="jdbc:hsqldb:hsql://localhost:9001"/>
 	<property name="autobuilds.jdbc.username" value="sa"/>
 	<property name="autobuilds.jdbc.password" value=""/>
+	
+	<!--
+		mail properties for sending failure/success summaries.
+	-->
+	<property name="autobuilds.mail.sendto" value="${dev.mail.list}"/>
+	<property name="autobuilds.mail.host" value=""/>
+	
 	
 	<!--
 	**************************************************************************
@@ -316,11 +325,6 @@ realclean       --> delete ALL build products and sandbox.
 		<echo message="#  ----------------------------------------------------------------" />
 		<echo message="#  Starting unit tests for ${target.app}" />
 		<echo message="#  ----------------------------------------------------------------" />
-		<!--
-		<spring-runtests 
-			application="${target.app}" 
-			port="${autobuilds.server.http.port}"/>
-		-->
 		<junit 
 			failureproperty="junit.failure"
 			printsummary="true"
@@ -375,10 +379,11 @@ realclean       --> delete ALL build products and sandbox.
 	-->
 	<target name="testchecks" if="junit.failure">
 		<mail 
-			from="autobuilds@springframework.org"
-			tolist="darren@davison.uk.net"
-			mailhost="bacall.davison.uk.net"
-			subject="Spring Autobuilds Failure Report"
+			from="${autobuilds.mail.from}"
+			tolist="${autobuilds.mail.sendto}"
+			mailhost="${autobuilds.mail.host}"
+			subject="${autobuilds.mail.failure.subject}"
+			message="Please see attached reports"
 		>
 			<fileset dir="${reports.dir}">
 				<include name="**/${autobuilds.unittest.outfile}*"/>
