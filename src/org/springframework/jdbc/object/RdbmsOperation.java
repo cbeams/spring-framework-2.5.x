@@ -5,15 +5,19 @@
 
 package org.springframework.jdbc.object;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlReturnResultSet;
 
 /**
  * Root of the JDBC object hierarchy, as described in Chapter 9 of
@@ -34,7 +38,7 @@ import org.springframework.jdbc.core.SqlParameter;
  * The appropriate execute or update method can then be invoked.
  *
  * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.3 2003-08-28 17:26:36 jhoeller Exp $
+ * @version $Id: RdbmsOperation.java,v 1.4 2003-09-17 01:14:49 trisberg Exp $
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
  */
@@ -158,19 +162,68 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Validate the parameters passed to an execute method based on declared parameters.
-	 * Subclasses should invoke this method before every execute() or update() method.
+	 * Subclasses should invoke this method before every executeQuery() or update() method.
 	 * @param parameters parameters supplied. May be null.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
 	protected final void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
-		if (!compiled)
-			throw new InvalidDataAccessApiUsageException("SQL operation must be compiled before execution");
+		if (!compiled) {
+			logger.info("SQL operation not compiled before execution -- invoking compile");
+			compile();
+			//throw new InvalidDataAccessApiUsageException("SQL operation must be compiled before execution");
+		}
 
+		int declaredInParameters = 0;
 		if (parameters != null) {
+			for (int i = 0; i < parameters.length; i++) {
+				if (!(parameters[i] instanceof SqlOutParameter))
+					declaredInParameters++;
+			}
 			if (declaredParameters == null)
 				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none was declared");
-			if (parameters.length != declaredParameters.size())
-				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but none was declared in class " + getClass().getName());
+			if (parameters.length < declaredInParameters)
+				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " + declaredInParameters + " in parameters were declared in class " + getClass().getName());
+			if (parameters.length > declaredParameters.size())
+				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " + declaredParameters.size() + " parameters were declared in class " + getClass().getName());
+		}
+		else {
+			// No parameters were supplied
+			if (!declaredParameters.isEmpty())
+				throw new InvalidDataAccessApiUsageException(declaredParameters.size() + " parameters must be supplied");
+		}
+	}
+
+	/**
+	 * Validate the parameters passed to an execute method based on declared parameters.
+	 * Subclasses should invoke this method before every execute() method.
+	 * @param parameters parameters supplied. May be null.
+	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
+	 */
+	protected final void validateParameters(Map parameters) throws InvalidDataAccessApiUsageException {
+		if (!compiled) {
+			logger.info("SQL operation not compiled before execution -- invoking compile");
+			compile();
+			//throw new InvalidDataAccessApiUsageException("SQL operation must be compiled before execution");
+		}
+
+		int declaredInParameters = 0;
+		if (declaredParameters != null) {
+			Iterator iter = declaredParameters.iterator();
+			while (iter.hasNext()) {
+				Object p = iter.next();
+				if (!(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet))
+					declaredInParameters++;
+			}
+		}
+
+		if (parameters != null) {
+
+			if (declaredParameters == null)
+				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none was declared");
+			if (parameters.size() < declaredInParameters)
+				throw new InvalidDataAccessApiUsageException(parameters.size() + " parameters were supplied, but " + declaredInParameters + " in parameters were declared in class " + getClass().getName());
+			if (parameters.size() > declaredParameters.size())
+				throw new InvalidDataAccessApiUsageException(parameters.size() + " parameters were supplied, but " + declaredParameters.size() + " parameters were declared in class " + getClass().getName());
 		}
 		else {
 			// No parameters were supplied

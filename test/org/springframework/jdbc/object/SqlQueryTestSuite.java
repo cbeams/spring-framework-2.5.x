@@ -164,7 +164,7 @@ public class SqlQueryTestSuite extends TestCase {
 		}
 	}
 
-	public void testUncompiledQuery() {
+/*	public void testUncompiledQuery() {
 		MappingSqlQuery query = new MappingSqlQuery() {
 			protected Object mapRow(ResultSet rs, int rownum)
 				throws SQLException {
@@ -181,7 +181,7 @@ public class SqlQueryTestSuite extends TestCase {
 			// OK
 		}
 	}
-
+*/
 	public void testStringQueryWithResults() throws Exception {
 		Object[][] forenames = { { "Alpha" }, {
 				"Beta" }, {

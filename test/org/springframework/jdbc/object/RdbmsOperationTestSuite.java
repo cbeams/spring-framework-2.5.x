@@ -62,7 +62,7 @@ public class RdbmsOperationTestSuite extends TestCase {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
 		try {
-			operation.validateParameters(null);
+			operation.validateParameters((Object[]) null);
 			fail("Shouldn't validate without enough parameters"); 
 		} catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK

@@ -5,12 +5,16 @@
 
 package org.springframework.jdbc.core;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -56,7 +60,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.5 2003-08-26 17:30:52 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.6 2003-09-17 01:15:09 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -518,6 +522,126 @@ public class JdbcTemplate implements InitializingBean {
 		finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
+	}
+
+	/**
+	 * Execute an Sql call using a CallableStatementCreator to provide SQL and any required
+	 * parameters
+	 * @param csc helper: callback object that provides SQL and any necessary parameters
+	 * @return Map of extracted out parameters
+	 * @throws DataAccessException if there is any problem issuing the update
+	 */
+	public Map execute(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
+		Connection con = null;
+		CallableStatement cs = null;
+		try {
+			con = DataSourceUtils.getConnection(this.dataSource);
+			cs = csc.createCallableStatement(con);
+			if(logger.isInfoEnabled())
+				logger.info("Executing call using CallableStatement: [" + cs + "]");
+			boolean retval = cs.execute();
+			if (logger.isInfoEnabled())
+				logger.info("JDBCTemplate: execute returned " + retval);
+			if (retval)
+				extractReturnedResultSets(cs, declaredParameters);
+			Map retMap = extractOutputParameters(cs, declaredParameters);
+			cs.close();
+			return retMap;
+		}
+		catch (SQLException ex) {
+			if (cs != null) {
+				try {
+					cs.close();
+				}
+				catch (SQLException ignore) {}
+			}
+			throw getExceptionTranslator().translate("JdbcTemplate.execute()", cs.toString(), ex);
+		}
+		finally {
+			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+		}
+	}
+
+	/**
+	 * Extract output parameters from the completed stored procedure.
+	 * @param call JDBC wrapper for the stored procedure
+	 * @param list Parameter list for the stored procedure
+	 * @return parameters to the stored procedure
+	 */
+	private Map extractOutputParameters(CallableStatement cs, List parameters) throws SQLException {
+		Map outParams = new HashMap();
+		int sqlColIndx = 1;
+		for (int i = 0; i < parameters.size(); i++) {
+			SqlParameter p = (SqlParameter) parameters.get(i);
+			if (p instanceof SqlOutParameter) {
+				Object out = null;
+				out = cs.getObject(sqlColIndx);
+				if (out instanceof ResultSet) {
+					// We can't pass back a resultset since the connection will be closed - we must process it
+					try {
+						if (((SqlOutParameter) p).isResultSetSupported()) {
+							new RowCallbackHandlerResultSetExtractor(((SqlOutParameter) p).getRowCallbackHandler()).extractData((ResultSet)out);
+							logger.info("JDBCTemplate: ResultSet returned from stored procedure was processed");
+							outParams.put(p.getName(), "ResultSet processed.");
+						}
+						else {
+							logger.warn("JDBCTemplate: ResultSet returned from stored procedure but a corresponding SqlOutParameter with a RowCallbackHandler was not declared");
+							outParams.put(p.getName(), "ResultSet was returned but not processed.");
+						}
+					}
+					catch (SQLException se) {
+						throw se;
+					}
+					finally {
+						try {
+							((ResultSet) out).close();
+						}
+						catch (SQLException ignore) {}
+					}
+				}
+				else {
+					outParams.put(p.getName(), out);
+				}
+			}
+			if (!(p instanceof SqlReturnResultSet)) {
+				sqlColIndx++;
+			}
+		}
+		return outParams;
+	}
+
+	/**
+	 * Extract returned resultsets from the completed stored procedure.
+	 * @param call JDBC wrapper for the stored procedure
+	 * @param list Parameter list for the stored procedure
+	 */
+	private void extractReturnedResultSets(CallableStatement cs, List parameters) throws SQLException {
+		int rsIndx = 0;
+		do {
+			SqlParameter p = null;
+			if (parameters != null && parameters.size() > rsIndx)
+				p = (SqlParameter) parameters.get(rsIndx);
+			if (p != null && p instanceof SqlReturnResultSet) {
+				ResultSet rs = null;
+				rs = cs.getResultSet();
+				try {
+					new RowCallbackHandlerResultSetExtractor(((SqlReturnResultSet) p).getRowCallbackHandler()).extractData(rs);
+				}
+				catch (SQLException se) {
+					throw se;
+				}
+				finally {
+					try {
+						rs.close();
+					}
+					catch (SQLException ignore) {}
+				}
+			}
+			else {
+				logger.warn("JDBCTemplate: ResultSet returned from stored procedure but a corresponding SqlReturnResultSet parameter was not declared");
+			}
+			rsIndx++;
+		} while (cs.getMoreResults());
 	}
 
 	/**
