@@ -15,10 +15,8 @@
 	<classpathentry kind="src" path="benchmark/cmt/src"/>
 	<classpathentry kind="src" path="benchmark/cmt/test"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/ejb.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/jms.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/jta.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/servlet.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/jdbc2_0-stdext.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
@@ -97,5 +95,7 @@
 	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/aspectwerkz/aspectwerkz-2.0.RC3-snapshot.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/ejb-api.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/servlet-api.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
