@@ -15,7 +15,6 @@ import javax.jms.Message;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanFactoryLoader;
@@ -27,7 +26,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
  * to implement ejbCreate() methods.
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: EjbSupportTests.java,v 1.1.1.1 2003-08-14 16:21:09 trisberg Exp $
+ * @version $Id: EjbSupportTests.java,v 1.2 2003-09-19 11:50:39 johnsonr Exp $
  */
 public class EjbSupportTests extends TestCase {
 
@@ -39,9 +38,9 @@ public class EjbSupportTests extends TestCase {
 	}
 	
 	public void testSfsb() throws CreateException {
-		MockControl mc = EasyMock.controlFor(SessionContext.class);
+		MockControl mc = MockControl.createControl(SessionContext.class);
 		SessionContext sc = (SessionContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 		
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLoader bfl = new BeanFactoryLoader() {
@@ -78,9 +77,9 @@ public class EjbSupportTests extends TestCase {
 	 *
 	 */
 	public void testHelpfulNamingLookupMessage() {
-		MockControl mc = EasyMock.controlFor(SessionContext.class);
+		MockControl mc = MockControl.createControl(SessionContext.class);
 		SessionContext sc = (SessionContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 	
 		// Leave with default XmlBeanFactoryLoader
 	
@@ -103,9 +102,9 @@ public class EjbSupportTests extends TestCase {
 	}
 	
 	public void testSlsb() throws Exception {
-		MockControl mc = EasyMock.controlFor(SessionContext.class);
+		MockControl mc = MockControl.createControl(SessionContext.class);
 		SessionContext sc = (SessionContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 		
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLoader bfl = new BeanFactoryLoader() {
@@ -143,9 +142,9 @@ public class EjbSupportTests extends TestCase {
 
 
 	public void testJmsMdb() throws Exception {
-		MockControl mc = EasyMock.controlFor(MessageDrivenContext.class);
+		MockControl mc = MockControl.createControl(MessageDrivenContext.class);
 		MessageDrivenContext sc = (MessageDrivenContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 	
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLoader bfl = new BeanFactoryLoader() {
@@ -172,9 +171,9 @@ public class EjbSupportTests extends TestCase {
 	}
 	
 	public void testCannotLoadBeanFactory() throws Exception {
-		MockControl mc = EasyMock.controlFor(SessionContext.class);
+		MockControl mc = MockControl.createControl(SessionContext.class);
 		SessionContext sc = (SessionContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 	
 		final BeanFactory bf = new StaticListableBeanFactory();
 		BeanFactoryLoader bfl = new BeanFactoryLoader() {

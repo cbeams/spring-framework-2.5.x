@@ -10,7 +10,6 @@ import java.lang.reflect.Method;
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.AttributeRegistry;
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.ITestBean;
@@ -28,7 +27,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * testing the helper implementation.
  * @author Rod Johnson
  * @since 16-Mar-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TransactionInterceptorTests extends TestCase {
 
@@ -45,17 +44,17 @@ public class TransactionInterceptorTests extends TestCase {
 
 		//TransactionAttribute txatt =
 
-		MockControl arControl = EasyMock.controlFor(AttributeRegistry.class);
+		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
 		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
 		r.getAttributes(ITestBean.class.getMethod("getName", null));
 		arControl.setReturnValue(null);
-		arControl.activate();
+		arControl.replay();
 
-		MockControl ptxControl = EasyMock.controlFor(PlatformTransactionManager.class);
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
 		// expect no calls
-		ptxControl.activate();
+		ptxControl.replay();
 
 		TestBean tb = new TestBean();
 		TransactionInterceptor ti = new TransactionInterceptor();
@@ -83,21 +82,21 @@ public class TransactionInterceptorTests extends TestCase {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = ITestBean.class.getMethod("getName", null);
-		MockControl arControl = EasyMock.controlFor(AttributeRegistry.class);
+		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
 		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
 		r.getAttributes(m);
 		arControl.setReturnValue(new Object[] { txatt }, 1);
-		arControl.activate();
+		arControl.replay();
 
 		TransactionStatus status = new TransactionStatus(null, false);
-		MockControl ptxControl = EasyMock.controlFor(PlatformTransactionManager.class);
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 		// Expect a transaction
 		ptm.getTransaction(txatt);
 		ptxControl.setReturnValue(status, 1);
 		ptm.commit(status);
 		ptxControl.setVoidCallable(1);
-		ptxControl.activate();
+		ptxControl.replay();
 
 		TestBean tb = new TestBean();
 		TransactionInterceptor ti = new TransactionInterceptor();
@@ -124,21 +123,21 @@ public class TransactionInterceptorTests extends TestCase {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = ITestBean.class.getMethod("getName", null);
-		MockControl arControl = EasyMock.controlFor(AttributeRegistry.class);
+		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
 		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
 		r.getAttributes(m);
 		arControl.setReturnValue(new Object[] { txatt}, 1);
-		arControl.activate();
+		arControl.replay();
 
 		TransactionStatus status = new TransactionStatus(null, false);
-		MockControl ptxControl = EasyMock.controlFor(PlatformTransactionManager.class);
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
 		ptm.getTransaction(txatt);
 		ptxControl.setReturnValue(status, 1);
 		ptm.commit(status);
 		ptxControl.setVoidCallable(1);
-		ptxControl.activate();
+		ptxControl.replay();
 
 		final String name = "jenny";
 		TestBean tb = new TestBean() {
@@ -216,14 +215,14 @@ public class TransactionInterceptorTests extends TestCase {
 		};
 
 		Method m = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
-		MockControl arControl = EasyMock.controlFor(AttributeRegistry.class);
+		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
 		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
 		r.getAttributes(m);
 		arControl.setReturnValue(new Object[] { txatt }, 1);
-		arControl.activate();
+		arControl.replay();
 
 		TransactionStatus status = new TransactionStatus(null, false);
-		MockControl ptxControl = EasyMock.controlFor(PlatformTransactionManager.class);
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 		// Gets additional call(s) from TransactionControl
 
@@ -243,7 +242,7 @@ public class TransactionInterceptorTests extends TestCase {
 		else {
 			ptxControl.setVoidCallable(1);
 		}
-		ptxControl.activate();
+		ptxControl.replay();
 
 		TestBean tb = new TestBean();
 		TransactionInterceptor ti = new TransactionInterceptor();
@@ -280,19 +279,19 @@ public class TransactionInterceptorTests extends TestCase {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = ITestBean.class.getMethod("getName", null);
-		MockControl arControl = EasyMock.controlFor(AttributeRegistry.class);
+		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
 		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
 		r.getAttributes(m);
 		arControl.setReturnValue(new Object[] { txatt }, 1);
-		arControl.activate();
+		arControl.replay();
 
-		MockControl ptxControl = EasyMock.controlFor(PlatformTransactionManager.class);
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 		// Expect a transaction
 		ptm.getTransaction(txatt);
 		CannotCreateTransactionException ex = new CannotCreateTransactionException("foobar", null);
 		ptxControl.setThrowable(ex);
-		ptxControl.activate();
+		ptxControl.replay();
 
 		TestBean tb = new TestBean() {
 			public String getName() {
@@ -331,16 +330,16 @@ public class TransactionInterceptorTests extends TestCase {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = ITestBean.class.getMethod("setName", new Class[] { String.class} );
-		MockControl arControl = EasyMock.controlFor(AttributeRegistry.class);
+		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
 		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
 		r.getAttributes(m);
 		arControl.setReturnValue(new Object[] { txatt }, 1);
 		Method m2 = ITestBean.class.getMethod("getName", null);
 		r.getAttributes(m2);
 		arControl.setReturnValue(null);
-		arControl.activate();
+		arControl.replay();
 
-		MockControl ptxControl = EasyMock.controlFor(PlatformTransactionManager.class);
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
 		TransactionStatus status = new TransactionStatus(null, false);
@@ -349,7 +348,7 @@ public class TransactionInterceptorTests extends TestCase {
 		UnexpectedRollbackException ex = new UnexpectedRollbackException("foobar", null);
 		ptm.commit(status);
 		ptxControl.setThrowable(ex);
-		ptxControl.activate();
+		ptxControl.replay();
 
 		TestBean tb = new TestBean();
 		TransactionInterceptor ti = new TransactionInterceptor();

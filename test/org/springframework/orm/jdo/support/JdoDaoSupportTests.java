@@ -7,7 +7,6 @@ import javax.jdo.PersistenceManagerFactory;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
 /**
@@ -17,9 +16,9 @@ import org.easymock.MockControl;
 public class JdoDaoSupportTests extends TestCase {
 
 	public void testJdoDaoSupport() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		pmfControl.activate();
+		pmfControl.replay();
 		final List test = new ArrayList();
 		JdoDaoSupport dao = new JdoDaoSupport() {
 			protected void initDao() {

@@ -9,12 +9,13 @@ import javax.ejb.EJBException;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
+
 import org.springframework.transaction.TransactionDefinition;
 
 /**
  * Tests to check conversion from String to TransactionAttribute
  * @since 26-Apr-2003
- * @version $Id: TransactionAttributeEditorTests.java,v 1.2 2003-08-18 16:23:43 jhoeller Exp $
+ * @version $Id: TransactionAttributeEditorTests.java,v 1.3 2003-09-19 11:50:38 johnsonr Exp $
  * @author Rod Johnson
  */
 public class TransactionAttributeEditorTests extends TestCase {

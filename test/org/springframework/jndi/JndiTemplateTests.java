@@ -10,14 +10,13 @@ import javax.naming.NamingException;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
 /**
  * 
  * @author Rod Johnson
  * @since 08-Jul-2003
- * @version $Id: JndiTemplateTests.java,v 1.1.1.1 2003-08-14 16:21:15 trisberg Exp $
+ * @version $Id: JndiTemplateTests.java,v 1.2 2003-09-19 11:50:39 johnsonr Exp $
  */
 public class JndiTemplateTests extends TestCase {
 
@@ -32,13 +31,13 @@ public class JndiTemplateTests extends TestCase {
 	public void testBind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		MockControl mc = EasyMock.controlFor(Context.class);
+		MockControl mc = MockControl.createControl(Context.class);
 		final Context mock = (Context) mc.getMock();
 		mock.bind(name, o);
 		mc.setVoidCallable(1);
 		mock.close();
 		mc.setVoidCallable(1);
-		mc.activate();
+		mc.replay();
 		
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() throws NamingException {
@@ -52,13 +51,13 @@ public class JndiTemplateTests extends TestCase {
 	
 	public void testUnbind() throws Exception {
 		String name = "something";
-		MockControl mc = EasyMock.controlFor(Context.class);
+		MockControl mc = MockControl.createControl(Context.class);
 		final Context mock = (Context) mc.getMock();
 		mock.unbind(name);
 		mc.setVoidCallable(1);
 		mock.close();
 		mc.setVoidCallable(1);
-		mc.activate();
+		mc.replay();
 	
 		JndiTemplate jt = new JndiTemplate() {
 			protected Context createInitialContext() throws NamingException {

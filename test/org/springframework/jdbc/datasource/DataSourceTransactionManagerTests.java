@@ -7,9 +7,8 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-import org.easymock.EasyMock;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -27,7 +26,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class DataSourceTransactionManagerTests extends TestCase {
 
 	public void testDataSourceTransactionManagerWithCommit() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
@@ -40,12 +39,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		con.close();
 		conControl.setVoidCallable(1);
 
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -64,7 +63,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testDataSourceTransactionManagerWithRollback() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
@@ -77,12 +76,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		con.close();
 		conControl.setVoidCallable(1);
 
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -109,14 +108,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testDataSourceTransactionManagerWithRollbackOnly() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds) {
 			protected boolean isExistingTransaction(Object transaction) {
@@ -147,7 +146,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testDataSourceTransactionManagerWithExistingTransaction() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
@@ -160,12 +159,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		con.close();
 		conControl.setVoidCallable(1);
 
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -189,9 +188,9 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testDataSourceTransactionManagerWithIsolation() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
@@ -211,8 +210,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -228,11 +227,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testDataSourceTransactionManagerWithTimeout() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
-		MockControl psControl = EasyMock.controlFor(PreparedStatement.class);
+		MockControl psControl = MockControl.createControl(PreparedStatement.class);
 		PreparedStatement ps = (PreparedStatement) psControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
@@ -250,9 +249,9 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		con.close();
 		conControl.setVoidCallable(1);
-		conControl.activate();
-		dsControl.activate();
-		psControl.activate();
+		conControl.replay();
+		dsControl.replay();
+		psControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -276,16 +275,16 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testDataSourceTransactionManagerWithExceptionOnBegin() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
 		con.setAutoCommit(false);
 		conControl.setThrowable(new SQLException("Cannot begin"));
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -305,9 +304,9 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testDataSourceTransactionManagerWithExceptionOnCommit() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
@@ -321,8 +320,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		con.close();
 		conControl.setVoidCallable(1);
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -342,9 +341,9 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testDataSourceTransactionManagerWithExceptionOnRollback() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
@@ -358,8 +357,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		con.close();
 		conControl.setVoidCallable(1);
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);

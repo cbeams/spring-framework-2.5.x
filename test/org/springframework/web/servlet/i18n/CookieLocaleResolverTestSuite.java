@@ -5,11 +5,11 @@ import java.util.Locale;
 
 import javax.servlet.http.Cookie;
 
+import junit.framework.TestCase;
+
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockServletContext;
-
-import junit.framework.TestCase;
 
 /**
  * @author alef

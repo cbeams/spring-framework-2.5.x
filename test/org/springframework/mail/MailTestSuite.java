@@ -5,21 +5,20 @@
 
 package org.springframework.mail;
 
-import org.easymock.EasyMock;
-import org.easymock.MockControl;
-
 import junit.framework.TestCase;
+
+import org.easymock.MockControl;
 
 /**
  * @author Dmitriy Kopylenko
- * @version $Id: MailTestSuite.java,v 1.2 2003-09-10 19:33:02 dkopylenko Exp $
+ * @version $Id: MailTestSuite.java,v 1.3 2003-09-19 11:50:40 johnsonr Exp $
  */
 public class MailTestSuite extends TestCase {
 
 	public void testBeanProperties() throws Exception {
-		MockControl msControl = EasyMock.niceControlFor(MailSender.class);
+		MockControl msControl = MockControl.createNiceControl(MailSender.class);
 		MailSender ms = (MailSender)msControl.getMock();
-		msControl.activate();
+		msControl.replay();
 
 		MailTemplate mt = new MailTemplate(ms);
 		assertTrue("mailSender ok", mt.getMailSender() == ms);
@@ -41,9 +40,9 @@ public class MailTestSuite extends TestCase {
 
 	public void testMissconfiguredMailSettings() throws Exception {
 		MailTemplate mt = new MailTemplate();
-		MockControl msControl = EasyMock.niceControlFor(MailSender.class);
+		MockControl msControl = MockControl.createNiceControl(MailSender.class);
 		MailSender ms = (MailSender)msControl.getMock();
-		msControl.activate();
+		msControl.replay();
 		mt.setMailSender(ms);
 		try {
 			mt.sendMail(new MailCallback() {
@@ -61,9 +60,9 @@ public class MailTestSuite extends TestCase {
 
 	public void testNullMailSettings() throws Exception {
 		MailTemplate mt = new MailTemplate();
-		MockControl msControl = EasyMock.niceControlFor(MailSender.class);
+		MockControl msControl = MockControl.createNiceControl(MailSender.class);
 		MailSender ms = (MailSender)msControl.getMock();
-		msControl.activate();
+		msControl.replay();
 		mt.setMailSender(ms);
 		mt.setMailSettings(null);
 		try {
@@ -80,9 +79,9 @@ public class MailTestSuite extends TestCase {
 
 	public void testConfiguredMailSettings() throws Exception {
 		MailTemplate mt = new MailTemplate();
-		MockControl msControl = EasyMock.niceControlFor(MailSender.class);
+		MockControl msControl = MockControl.createNiceControl(MailSender.class);
 		MailSender ms = (MailSender)msControl.getMock();
-		msControl.activate();
+		msControl.replay();
 		mt.setMailSender(ms);
 
 		try {

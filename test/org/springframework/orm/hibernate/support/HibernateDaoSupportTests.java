@@ -6,7 +6,6 @@ import java.util.List;
 import junit.framework.TestCase;
 import net.sf.hibernate.SessionFactory;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
 /**
@@ -16,9 +15,9 @@ import org.easymock.MockControl;
 public class HibernateDaoSupportTests extends TestCase {
 
 	public void testHibernateDaoSupport() {
-		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		sfControl.activate();
+		sfControl.replay();
 		final List test = new ArrayList();
 		HibernateDaoSupport dao = new HibernateDaoSupport() {
 			protected void initDao() {

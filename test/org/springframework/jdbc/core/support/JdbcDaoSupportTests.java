@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
 /**
@@ -19,9 +18,9 @@ import org.easymock.MockControl;
 public class JdbcDaoSupportTests extends TestCase {
 
 	public void testJdbcDaoSupport() throws SQLException {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
+		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
@@ -29,8 +28,8 @@ public class JdbcDaoSupportTests extends TestCase {
 		conControl.setReturnValue(null, 1);
 		con.close();
 		conControl.setVoidCallable(1);
-		conControl.activate();
-		dsControl.activate();
+		conControl.replay();
+		dsControl.replay();
 		final List test = new ArrayList();
 		JdbcDaoSupport dao = new JdbcDaoSupport() {
 			protected void initDao() {

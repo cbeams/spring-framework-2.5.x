@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.context.WebApplicationContext;
@@ -33,9 +32,9 @@ public class InternalResourceViewTests extends TestCase {
 	 * Test that if the url property isn't supplied, view initialization fails.
 	 */
 	public void testRejectsNullUrl() throws Exception {
-		MockControl mc = EasyMock.controlFor(WebApplicationContext.class);
+		MockControl mc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 	
 		InternalResourceView v = new InternalResourceView();
 		try {
@@ -52,13 +51,13 @@ public class InternalResourceViewTests extends TestCase {
 		model.put("foo", "bar");
 		model.put("I", obj);
 		
-		MockControl mc = EasyMock.controlFor(WebApplicationContext.class);
+		MockControl mc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 		
 		String url = "forward-to";
 		
-		MockControl reqControl = EasyMock.controlFor(HttpServletRequest.class);
+		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
 		Set keys = model.keySet();
 		for (Iterator iter = keys.iterator(); iter.hasNext();) {
@@ -69,7 +68,7 @@ public class InternalResourceViewTests extends TestCase {
 		
 		request.getRequestDispatcher(url);
 		reqControl.setReturnValue(new MockRequestDispatcher(url));
-		reqControl.activate();
+		reqControl.replay();
 		
 		// unused
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -94,9 +93,9 @@ public class InternalResourceViewTests extends TestCase {
 		HashMap model = new HashMap();
 		model.put("foo", "bar");
 			
-		MockControl mc = EasyMock.controlFor(WebApplicationContext.class);
+		MockControl mc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 			
 		String url = "forward-to";
 			

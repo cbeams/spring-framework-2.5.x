@@ -9,7 +9,6 @@ import javax.naming.NamingException;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.aop.attributes.MapAttributeRegistry;
 import org.springframework.aop.framework.ProxyFactory;

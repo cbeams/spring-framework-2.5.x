@@ -11,7 +11,6 @@ import javax.naming.NamingException;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.aop.attributes.MapAttributeRegistry;
 import org.springframework.aop.framework.ProxyFactory;
@@ -42,9 +41,9 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 	 * @throws java.lang.Exception
 	 */
 	public void testPerformsLookup() throws Exception {
-		MockControl ejbControl = EasyMock.controlFor(RemoteInterface.class);
+		MockControl ejbControl = MockControl.createControl(RemoteInterface.class);
 		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
-		ejbControl.activate();
+		ejbControl.replay();
 		
 		final String jndiName= "foobar";
 		MockControl contextControl = contextControl(jndiName, ejb);
@@ -81,11 +80,11 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 	
 	public void testInvokesMethodOnEjbInstance() throws Exception {
 		Object retVal = new Object();
-		MockControl ejbControl = EasyMock.controlFor(RemoteInterface.class);
+		MockControl ejbControl = MockControl.createControl(RemoteInterface.class);
 		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
 		ejb.targetMethod();
 		ejbControl.setReturnValue(retVal, 1);
-		ejbControl.activate();
+		ejbControl.replay();
 	
 		final String jndiName= "foobar";
 		MockControl contextControl = contextControl(jndiName, ejb);
@@ -104,11 +103,11 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 	}
 	
 	private void testException(Exception expected) throws Exception {
-		MockControl ejbControl = EasyMock.controlFor(RemoteInterface.class);
+		MockControl ejbControl = MockControl.createControl(RemoteInterface.class);
 		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
 		ejb.targetMethod();
 		ejbControl.setThrowable(expected);
-		ejbControl.activate();
+		ejbControl.replay();
 
 		final String jndiName= "foobar";
 		MockControl contextControl = contextControl(jndiName, ejb);
@@ -142,20 +141,20 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 	
 	
 	protected MockControl contextControl(final String jndiName, final RemoteInterface ejbInstance) throws Exception {
-		MockControl homeControl = EasyMock.controlFor(SlsbHome.class);
+		MockControl homeControl = MockControl.createControl(SlsbHome.class);
 		final SlsbHome mockHome = (SlsbHome) homeControl.getMock();
 		mockHome.create();
 		homeControl.setReturnValue(ejbInstance, 1);
-		homeControl.activate();
+		homeControl.replay();
 		
-		MockControl ctxControl = EasyMock.controlFor(Context.class);
+		MockControl ctxControl = MockControl.createControl(Context.class);
 		final Context mockCtx = (Context) ctxControl.getMock();
 		
 		mockCtx.lookup("java:comp/env/" + jndiName);
 		ctxControl.setReturnValue(mockHome);
 		mockCtx.close();
 		ctxControl.setVoidCallable();
-		ctxControl.activate();
+		ctxControl.replay();
 		return ctxControl;
 	}
 		

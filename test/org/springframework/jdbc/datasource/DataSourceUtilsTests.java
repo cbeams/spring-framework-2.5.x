@@ -10,14 +10,13 @@ import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
 /**
  * 
  * @author Rod Johnson
  * @since 10-May-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DataSourceUtilsTests extends TestCase {
 
@@ -35,12 +34,12 @@ public class DataSourceUtilsTests extends TestCase {
 	 * @throws SQLException
 	 */
 	public void testGetCloseSuppressingConnectionProxy() throws SQLException {
-		MockControl mc = EasyMock.controlFor(Connection.class);
+		MockControl mc = MockControl.createControl(Connection.class);
 		Connection mockCon = (Connection) mc.getMock();
 		// Test a normal method
 		mockCon.isClosed();
 		mc.setReturnValue(false, 1);
-		mc.activate();
+		mc.replay();
 		
 		
 		Connection noclose = DataSourceUtils.getCloseSuppressingConnectionProxy(mockCon);

@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
 /**
@@ -23,7 +22,7 @@ import org.easymock.MockControl;
  * Uses mock objects.
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: RedirectViewTests.java,v 1.1.1.1 2003-08-14 16:21:29 trisberg Exp $
+ * @version $Id: RedirectViewTests.java,v 1.2 2003-09-19 11:50:39 johnsonr Exp $
  */
 public class RedirectViewTests extends TestCase {
 
@@ -53,17 +52,17 @@ public class RedirectViewTests extends TestCase {
 		TestRedirectView rv = new TestRedirectView();
 		rv.setUrl(url);
 		
-		MockControl rc = EasyMock.controlFor(HttpServletRequest.class);
+		MockControl rc = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) rc.getMock();
-		rc.activate();
+		rc.replay();
 		
-		MockControl mc = EasyMock.controlFor(HttpServletResponse.class);
+		MockControl mc = MockControl.createControl(HttpServletResponse.class);
 		HttpServletResponse resp = (HttpServletResponse) mc.getMock();
 		resp.encodeRedirectURL(expectedUrlForEncoding);
 		mc.setReturnValue(expectedUrlForEncoding);
 		resp.sendRedirect(expectedUrlForEncoding);
 		mc.setVoidCallable(1);
-		mc.activate();
+		mc.replay();
 		
 		rv.render(m, request, resp);
 		assertTrue(rv.valid);
@@ -114,13 +113,13 @@ public class RedirectViewTests extends TestCase {
 	public void testNoUrlSet() throws Exception {
 		RedirectView rv = new RedirectView();
 		
-		MockControl rc = EasyMock.controlFor(HttpServletRequest.class);
+		MockControl rc = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) rc.getMock();
-		rc.activate();
+		rc.replay();
 	
-		MockControl mc = EasyMock.controlFor(HttpServletResponse.class);
+		MockControl mc = MockControl.createControl(HttpServletResponse.class);
 		HttpServletResponse resp = (HttpServletResponse) mc.getMock();
-		mc.activate();
+		mc.replay();
 	
 		try {
 			rv.render(new HashMap(), request, resp);

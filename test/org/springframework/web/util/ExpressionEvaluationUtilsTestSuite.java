@@ -2,14 +2,14 @@ package org.springframework.web.util;
 
 import javax.servlet.jsp.PageContext;
 
+import junit.framework.TestCase;
+
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockPageContext;
 import org.springframework.web.mock.MockServlet;
 import org.springframework.web.mock.MockServletConfig;
 import org.springframework.web.mock.MockServletContext;
-
-import junit.framework.TestCase;
 
 /**
  * @author alef

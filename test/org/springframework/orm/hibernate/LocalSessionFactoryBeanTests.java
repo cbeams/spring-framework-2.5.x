@@ -10,7 +10,6 @@ import net.sf.hibernate.cfg.Configuration;
 import net.sf.hibernate.cfg.Environment;
 import net.sf.hibernate.connection.UserSuppliedConnectionProvider;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -82,11 +81,11 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	}
 
 	public void testLocalSessionFactoryBeanWithCustomSessionFactory() throws HibernateException {
-		MockControl factoryControl = EasyMock.controlFor(SessionFactory.class);
+		MockControl factoryControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sessionFactory = (SessionFactory) factoryControl.getMock();
 		sessionFactory.close();
 		factoryControl.setVoidCallable(1);
-		factoryControl.activate();
+		factoryControl.replay();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sessionFactory;
@@ -112,9 +111,9 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		};
 		sfb.setMappingResources(new String[0]);
 		sfb.setDataSource(new DriverManagerDataSource());
-		MockControl interceptorControl = EasyMock.controlFor(Interceptor.class);
+		MockControl interceptorControl = MockControl.createControl(Interceptor.class);
 		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
-		interceptorControl.activate();
+		interceptorControl.replay();
 		sfb.setEntityInterceptor(entityInterceptor);
 		try {
 			sfb.afterPropertiesSet();

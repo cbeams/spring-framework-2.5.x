@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.context.WebApplicationContext;
@@ -37,9 +36,9 @@ public class BaseViewTests extends TestCase {
 	}
 
 	public void testRenderWithoutStaticAttributes() throws Exception {
-		MockControl mc = EasyMock.controlFor(WebApplicationContext.class);
+		MockControl mc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
 		TestView tv = new TestView(request, response, wac);
@@ -65,9 +64,9 @@ public class BaseViewTests extends TestCase {
 	 * Test attribute passing, NOT csv parsing
 	 */
 	public void testRenderWithStaticAttributesNoCollision() throws Exception {
-		MockControl mc = EasyMock.controlFor(WebApplicationContext.class);
+		MockControl mc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
 		TestView tv = new TestView(request, response, wac);
@@ -93,9 +92,9 @@ public class BaseViewTests extends TestCase {
 	}
 	
 	public void testDynamicModelOverridesStaticAttributesIfCollision() throws Exception {
-		MockControl mc = EasyMock.controlFor(WebApplicationContext.class);
+		MockControl mc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
-		mc.activate();
+		mc.replay();
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
 		TestView tv = new TestView(request, response, wac);

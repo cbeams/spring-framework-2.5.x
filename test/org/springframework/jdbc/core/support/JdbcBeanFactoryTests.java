@@ -5,7 +5,6 @@ import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.beans.TestBean;
 import org.springframework.jdbc.core.MockConnectionFactory;

@@ -15,7 +15,6 @@ import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.beans.IOther;
@@ -26,7 +25,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AopProxyTests extends TestCase {
 
@@ -60,7 +59,7 @@ public class AopProxyTests extends TestCase {
 	public void testInterceptorIsInvoked() throws Throwable {
 		// Test return value
 		int age = 25;
-		MockControl miControl = EasyMock.controlFor(MethodInterceptor.class);
+		MockControl miControl = MockControl.createControl(MethodInterceptor.class);
 		MethodInterceptor mi = (MethodInterceptor) miControl.getMock();
 
 		ProxyConfig pc = new DefaultProxyConfig(new Class[] { ITestBean.class }, false, null);
@@ -76,7 +75,7 @@ public class AopProxyTests extends TestCase {
 		//miControl.setReturnValue(new Integer(age));
 		// Have disabled strong argument checking
 		miControl.setDefaultReturnValue(new Integer(age));
-		miControl.activate();
+		miControl.replay();
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		assertTrue("correct return value", tb.getAge() == age);
