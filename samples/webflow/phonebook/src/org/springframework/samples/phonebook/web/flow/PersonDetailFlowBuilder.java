@@ -58,11 +58,11 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 		addActionState("getPerson", action(GetPersonAction.class, AutowireMode.BY_TYPE), on(success(), "viewDetails"));
 
 		// view the person details
-		addViewState("viewDetails", "person.Details.view", new Transition[] { on(back(), "finish"),
+		addViewState("viewDetails", "person.Detail.view", new Transition[] { on(back(), "finish"),
 				on(select(), "setCollegueId") });
 
 		// set the selected colleague (chosen from the person's colleague list)
-		EventParameterMapperAction setAction = new EventParameterMapperAction(new Mapping("id", "collegueId",
+		EventParameterMapperAction setAction = new EventParameterMapperAction(new Mapping("id", "colleagueId",
 				getConversionExecutor(Long.class)));
 		setAction.setTargetScope(ScopeType.FLOW);
 		addActionState("setCollegueId", setAction, on(success(), "person.Detail"));
