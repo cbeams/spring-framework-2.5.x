@@ -6,15 +6,9 @@
 	<!--
 		Just included for the count: not to mean anything in particular
 	-->
-	<bean id="something" class="org.springframework.aop.support.DefaultInterceptionAroundAdvisor">
+	<bean id="something" class="org.springframework.aop.support.DefaultInterceptionAroundAdvisor"/>
 
-	</bean>
-
-
-	<bean id="demoController"
-		 class="org.springframework.web.servlet.mvc.DemoController">
-
-	</bean>
+	<bean id="indexedBean" class="org.springframework.beans.IndexedTestBean"/>
 
 	<!-- Overridden by next factory -->
 	<bean id="test" class="org.springframework.beans.TestBean">
@@ -29,4 +23,3 @@
 	</bean>
 
 </beans>
-
