@@ -16,6 +16,7 @@
 package org.springframework.enum;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
@@ -29,6 +30,15 @@ public abstract class AbstractCodedEnum implements CodedEnum,
         MessageSourceResolvable, Serializable, Comparable {
     private Comparable code;
     private String label;
+    
+    public static final Comparator LABEL_ORDER = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            AbstractCodedEnum e1 = (AbstractCodedEnum)o1;
+            AbstractCodedEnum e2 = (AbstractCodedEnum)o2;
+            return String.CASE_INSENSITIVE_ORDER.compare(e1.getLabel(), e2
+                    .getLabel());
+        }
+    };
 
     protected AbstractCodedEnum(Comparable code) {
         this(code, null);
