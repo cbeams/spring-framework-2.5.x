@@ -10,6 +10,7 @@
 
 	<property name="war.dir" value="war"/>
 	<property name="src.dir" value="src"/>
+	<property name="client.dir" value="client"/>
 	<property name="build.dir" value=".classes"/>
 	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
 	<property name="dist.dir" value="dist"/>
@@ -126,7 +127,7 @@
 
 		<mkdir dir="${weblib.dir}"/>
 
-		<jar jarfile="${weblib.dir}/petstore.jar" compress="true" basedir="${build.dir}"/>
+		<jar jarfile="${weblib.dir}/jpetstore.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
 			<fileset dir="${spring.root}/lib/aop-alliance">
@@ -148,6 +149,7 @@
 				<include name="ibatis-db.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
+				<include name="jaxrpc.jar"/>
 				<include name="jstl.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
@@ -175,6 +177,8 @@
 				<include name="spring.jar"/>
 			</fileset>
 		</copy>
+
+		<copy file="${weblib.dir}/jpetstore.jar" tofile="${client.dir}/jpetstore.jar"/>
 
 	</target>
 
