@@ -30,6 +30,7 @@ import org.springframework.util.closure.ProcessTemplate;
  * @author Keith Donald
  */
 public class Algorithms {
+	
 	/**
 	 * The shared instance.
 	 */
@@ -89,9 +90,12 @@ public class Algorithms {
 	}
 
 	/**
-	 * @param it
-	 * @param constraint
-	 * @return
+	 * Returns true if all elements in the given collection meet the specified
+	 * predicate condition.
+	 * 
+	 * @param it the iterator
+	 * @param constraint the constraint
+	 * @return true if all true, false otherwise
 	 */
 	public boolean allTrue(Iterator it, Constraint constraint) {
 		return new IteratorProcessTemplate(it).allTrue(constraint);
@@ -113,7 +117,7 @@ public class Algorithms {
 	 * Find the first element in the collection matching the specified
 	 * constraint.
 	 * 
-	 * @param collection the collection
+	 * @param it the iterator
 	 * @param constraint the predicate
 	 * @return The first object match, or null if no match
 	 */
@@ -137,8 +141,8 @@ public class Algorithms {
 	 * Find all the elements in the collection that match the specified
 	 * constraint.
 	 * 
-	 * @param collection
-	 * @param constraint
+	 * @param it the iterator
+	 * @param constraint the constraint
 	 * @return The objects that match, or a empty collection if none match
 	 */
 	public Collection findAll(Iterator it, Constraint constraint) {
@@ -155,8 +159,8 @@ public class Algorithms {
 	/**
 	 * Execute the provided closure for each element in the collection.
 	 * 
-	 * @param collection
-	 * @param closure
+	 * @param collection the collection
+	 * @param closure the callback
 	 */
 	public void forEach(Collection collection, Closure closure) {
 		forEach(collection.iterator(), closure);
@@ -165,8 +169,8 @@ public class Algorithms {
 	/**
 	 * Execute the provided closure for each element in the collection.
 	 * 
-	 * @param collection
-	 * @param closure
+	 * @param it the iterator
+	 * @param closure the callback
 	 */
 	public void forEach(Iterator it, Closure closure) {
 		new IteratorProcessTemplate(it).run(closure);

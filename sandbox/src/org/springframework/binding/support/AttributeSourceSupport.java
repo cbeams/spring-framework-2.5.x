@@ -38,7 +38,7 @@ public abstract class AttributeSourceSupport implements MutableAttributeSource, 
 
 	/**
 	 * @param attributeName
-	 * @return
+	 * @return the attribute
 	 * @throws IllegalStateException
 	 */
 	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
@@ -57,7 +57,7 @@ public abstract class AttributeSourceSupport implements MutableAttributeSource, 
 	/**
 	 * @param attributeName
 	 * @param clazz
-	 * @return
+	 * @return the attribute
 	 * @throws IllegalStateException
 	 */
 	public Object getRequiredAttribute(String attributeName, Class clazz) throws IllegalStateException {
@@ -69,7 +69,8 @@ public abstract class AttributeSourceSupport implements MutableAttributeSource, 
 	}
 
 	/**
-	 * @param attributes
+	 * Set the set of attributes.
+	 * @param attributes the attributes
 	 */
 	public void setAttributes(Map attributes) {
 		Iterator it = attributes.entrySet().iterator();
@@ -81,54 +82,61 @@ public abstract class AttributeSourceSupport implements MutableAttributeSource, 
 	}
 
 	/**
-	 * @param attributeName
-	 * @param requiredType
-	 * @throws IllegalStateException
+	 * Assert the the attribute is present in this source.
+	 * @param attributeName the attribute name
+	 * @param requiredType the expected type
+	 * @throws IllegalStateException if not present
 	 */
 	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException {
 		getRequiredAttribute(attributeName, requiredType);
 	}
 
 	/**
-	 * @param attributeName
-	 * @throws IllegalStateException
+	 * Assert the the attribute is present in this source.
+	 * @param attributeName the attribute name
+	 * @throws IllegalStateException if not present
 	 */
 	public void assertAttributePresent(String attributeName) throws IllegalStateException {
 		getRequiredAttribute(attributeName);
 	}
 
 	/**
-	 * @return
+	 * Returns the names of attributes in this source
+	 * @return a collection of attribute names
 	 */
 	public Set attributeNames() {
 		return Collections.unmodifiableSet(getAttributeMap().keySet());
 	}
 
 	/**
-	 * @return
+	 * Returns the collection of attribute values
+	 * @return a collection of attribute values
 	 */
 	public Collection attributeValues() {
 		return Collections.unmodifiableCollection(getAttributeMap().values());
 	}
 
 	/**
-	 * @return
+	 * Returns a collection of attribute name=value pairs
+	 * @return the attribute entries
 	 */
 	public Set attributeEntries() {
 		return Collections.unmodifiableSet(getAttributeMap().entrySet());
 	}
 
 	/**
-	 * @return
+	 * Returns a template for iterating over elements in this source.
+	 * @return the template
 	 */
 	public ProcessTemplate iteratorTemplate() {
 		return new IteratorProcessTemplate(attributeEntries().iterator());
 	}
 
 	/**
-	 * @return
+	 * Returns the underlying attribute map
+	 * @return the attribute map
 	 */
-	public abstract Map getAttributeMap();
+	protected abstract Map getAttributeMap();
 
 	// map operations
 
