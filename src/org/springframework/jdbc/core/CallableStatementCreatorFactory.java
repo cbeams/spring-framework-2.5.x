@@ -203,7 +203,7 @@ public class CallableStatementCreatorFactory {
 							cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType());
 						}
 						if (inValue != null) {
-							cs.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
+							StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
 						}
 					}
 				}
