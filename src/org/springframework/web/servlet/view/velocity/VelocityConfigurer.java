@@ -6,7 +6,9 @@
 package org.springframework.web.servlet.view.velocity;
 
 import org.springframework.ui.velocity.VelocityEngineFactory;
+import org.springframework.ui.velocity.VelocityInitializationException;
 import org.springframework.web.util.WebUtils;
+import org.springframework.context.ApplicationContextException;
 
 /**
  * JavaBean to configure Velocity for web usage, via the "configLocation" and/or
@@ -36,7 +38,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityConfigurer.java,v 1.5 2003-10-22 15:19:13 jhoeller Exp $
+ * @version $Id: VelocityConfigurer.java,v 1.6 2003-11-09 21:33:47 jhoeller Exp $
  * @see #setConfigLocation
  * @see #setVelocityProperties
  * @see #setAppRootMarker
@@ -54,6 +56,10 @@ public class VelocityConfigurer extends VelocityEngineFactory implements Velocit
 
 	protected String getDefaultConfigLocation() {
 		return DEFAULT_CONFIG_LOCATION;
+	}
+
+	protected void initApplicationContext() throws VelocityInitializationException {
+		initVelocityEngine();
 	}
 
 }

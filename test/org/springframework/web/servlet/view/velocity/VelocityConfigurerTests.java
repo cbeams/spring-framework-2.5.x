@@ -3,29 +3,92 @@ package org.springframework.web.servlet.view.velocity;
 
 import java.io.IOException;
 import java.io.StringBufferInputStream;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 
+import junit.framework.TestCase;
 import org.apache.velocity.app.VelocityEngine;
 import org.easymock.MockControl;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.web.context.WebApplicationContext;
 
-import junit.framework.TestCase;
+import org.springframework.context.ApplicationContext;
+import org.springframework.ui.velocity.VelocityEngineFactoryBean;
+import org.springframework.ui.velocity.VelocityInitializationException;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class VelocityConfigurerTests extends TestCase {
 
-	/**
-	 * Constructor for VelocityConfigurerTests.
-	 * @param arg0
-	 */
-	public VelocityConfigurerTests(String arg0) {
-		super(arg0);
+	public void testVelocityEngineFactoryBeanWithoutApplicationContext() {
+		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
+		Properties props = new Properties();
+		props.setProperty("myprop", "${app.root}/mydir");
+		vefb.setVelocityProperties(props);
+		vefb.setAppRootMarker("${app.root}");
+		assertTrue(vefb.getObject() instanceof VelocityEngine);
+		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		assertEquals("${app.root}/mydir", ve.getProperty("myprop"));
 	}
-	
+
+	public void testVelocityEngineFactoryBeanWithConfigLocationWithoutApplicationContext() {
+		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
+		vefb.setConfigLocation("myprops.properties");
+		Properties props = new Properties();
+		props.setProperty("myprop", "${app.root}/mydir");
+		vefb.setVelocityProperties(props);
+		vefb.setAppRootMarker("${app.root}");
+		try {
+			vefb.getObject();
+			fail("Should have thrown VelocityInitializationException");
+		}
+		catch (VelocityInitializationException ex) {
+			// expected
+		}
+	}
+
+	public void testVelocityEngineFactoryBeanWithApplicationContext() {
+		MockControl acControl = MockControl.createControl(ApplicationContext.class);
+		ApplicationContext ac = (ApplicationContext) acControl.getMock();
+		ac.getResourceBasePath();
+		acControl.setReturnValue("mybase");
+		acControl.replay();
+
+		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
+		Properties props = new Properties();
+		props.setProperty("myprop", "${app.root}/mydir");
+		vefb.setVelocityProperties(props);
+		vefb.setAppRootMarker("${app.root}");
+		vefb.setApplicationContext(ac);
+		assertTrue(vefb.getObject() instanceof VelocityEngine);
+		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		assertEquals("mybase/mydir", ve.getProperty("myprop"));
+
+		acControl.verify();
+	}
+
+	public void testVelocityConfigurer() {
+		MockControl acControl = MockControl.createControl(ApplicationContext.class);
+		ApplicationContext ac = (ApplicationContext) acControl.getMock();
+		ac.getResourceBasePath();
+		acControl.setReturnValue("mybase");
+		acControl.replay();
+
+		VelocityConfigurer vc = new VelocityConfigurer();
+		Properties props = new Properties();
+		props.setProperty("myprop", "${app.root}/mydir");
+		vc.setVelocityProperties(props);
+		vc.setAppRootMarker("${app.root}");
+		vc.setApplicationContext(ac);
+		assertTrue(vc.getVelocityEngine() instanceof VelocityEngine);
+		VelocityEngine ve = vc.getVelocityEngine();
+		assertEquals("mybase/mydir", ve.getProperty("myprop"));
+
+		acControl.verify();
+	}
+
 	public void testDefaultVelocityPropertiesLocationNotFound() throws Exception {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
@@ -37,9 +100,8 @@ public class VelocityConfigurerTests extends TestCase {
 			vc.setApplicationContext(wac);
 			fail();
 		}
-		catch (ApplicationContextException ex) {
-			ex.printStackTrace();
-			//assertTrue(ex.getMessage().indexOf("velocity.properties") != -1);
+		catch (VelocityInitializationException ex) {
+			// expected
 		}
 		wmc.verify();
 	}
@@ -125,7 +187,7 @@ public class VelocityConfigurerTests extends TestCase {
 			vc.setApplicationContext(wac);
 			fail();
 		}
-		catch (ApplicationContextException ace) {
+		catch (VelocityInitializationException ace) {
 			assertTrue(ace.getRootCause() == ex);
 		}
 

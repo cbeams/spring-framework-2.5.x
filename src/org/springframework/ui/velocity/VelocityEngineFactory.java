@@ -14,7 +14,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
 
-import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.util.StringUtils;
 
@@ -23,18 +22,19 @@ import org.springframework.util.StringUtils;
  * Typically, you will either use VelocityEngineFactoryBean for preparing a
  * VelocityEngine as bean reference, or VelocityConfigurer for web views.
  *
- * <p>The optional "configLocation" property sets the configLocation within the WAR
- * of the Velocity properties file. By default it will be sought in the WEB-INF
- * directory, under the name "velocity.properties".
+ * <p>The optional "configLocation" property sets the location of the Velocity
+ * properties file, within the current application. The factory needs to run in
+ * an application context to be able to load such a context resource.
  *
  * <p>Velocity properties can be overridden via "velocityProperties", or even
  * completely specified locally, avoiding the need for an external properties file.
+ * This is the only way available when not running in an application context.
  *
  * <p>When using Velocity's FileResourceLoader, the "appRootMarker" mechanism can
  * be used to refer to the application context resource base within a Velocity
  * property value. Set the "appRootMarker" bean property to a placeholder like
- * "${app.root}" that gets replaced by the resource base path in the Velocity
- * property values before getting passed to Velocity.
+ * "${app.root}" that gets replaced with the application context's resource base
+ * path in the Velocity property values before getting passed to Velocity.
  *
  * <p>Example Velocity properties that leverage the "appRootMarker" mechanism:
  * <p><code>
@@ -110,61 +110,76 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 	}
 
 	/**
-	 * Initializes the Velocity runtime.
+	 * Prepare the VelocityEngine instance.
+	 * @throws VelocityInitializationException on Velocity initialization failure
 	 */
-	protected void initApplicationContext() throws ApplicationContextException {
-
+	public void initVelocityEngine() throws VelocityInitializationException {
 		this.velocityEngine = newVelocityEngine();
+		Properties props = new Properties();
 
-		try {
-			Properties props = new Properties();
-			// try default config location as fallback
-			String actualLocation = this.configLocation;
-			if (this.configLocation == null && this.velocityProperties == null) {
-				actualLocation = getDefaultConfigLocation();
+		// try default config location as fallback
+		String actualLocation = this.configLocation;
+		if (this.configLocation == null && this.velocityProperties == null) {
+			actualLocation = getDefaultConfigLocation();
+		}
+		// load config file if set
+		if (actualLocation != null) {
+			if (getApplicationContext() == null) {
+				throw new VelocityInitializationException("Need to run in application context to load external config file");
 			}
-			// load config file if set
-			if (actualLocation != null) {
-				logger.info("Loading Velocity config from [" + actualLocation + "]");
+			logger.info("Loading Velocity config from [" + actualLocation + "]");
+			try {
 				InputStream is = getApplicationContext().getResourceAsStream(actualLocation);
 				if (is == null) {
-					throw new ApplicationContextException("Velocity properties file not found within WAR at [" + actualLocation + "]");
+					throw new VelocityInitializationException("Velocity properties file not found at [" + actualLocation + "]");
 				}
 				props.load(is);
 			}
-			// merge local properties if set
-			if (this.velocityProperties != null) {
-				props.putAll(this.velocityProperties);
+			catch (IOException ex) {
+				throw new VelocityInitializationException("Error loading Velocity config from [" + this.configLocation + "]", ex);
 			}
-			// determine the root directory of the web app
-			String resourceBase = getApplicationContext().getResourceBasePath();
-			if (resourceBase == null) {
-				logger.warn("Cannot replace marker [" + this.appRootMarker + "] with resource base because the WAR file is not expanded");
-			}
+		}
 
-			// Set properties
-			for (Iterator it = props.keySet().iterator(); it.hasNext();) {
-				String key = (String) it.next();
-				String value = props.getProperty(key);
-				if (resourceBase != null) {
-					value = StringUtils.replace(value, this.appRootMarker, resourceBase);
+		// merge local properties if set
+		if (this.velocityProperties != null) {
+			props.putAll(this.velocityProperties);
+		}
+
+		// determine the root directory of the application
+		String resourceBase = null;
+		if (this.appRootMarker != null) {
+			if (getApplicationContext() != null) {
+				resourceBase = getApplicationContext().getResourceBasePath();
+				if (resourceBase == null) {
+					logger.warn("Cannot replace marker [" + this.appRootMarker + "] with resource base - no base directory available");
 				}
-				this.velocityEngine.setProperty(key, value);
 			}
-			// log via Commons Logging?
-			if (this.overrideLogging) {
-				this.velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
+			else {
+				logger.warn("Cannot replace marker [" + this.appRootMarker + "] with resource base - no application context available");
 			}
-			// perform initialization
+		}
+
+		// set properties
+		for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+			String key = (String) it.next();
+			String value = props.getProperty(key);
+			if (this.appRootMarker != null && resourceBase != null) {
+				value = StringUtils.replace(value, this.appRootMarker, resourceBase);
+			}
+			this.velocityEngine.setProperty(key, value);
+		}
+
+		// log via Commons Logging?
+		if (this.overrideLogging) {
+			this.velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
+		}
+
+		// perform initialization
+		try {
 			this.velocityEngine.init();
 		}
-		catch (IOException ex) {
-			throw new ApplicationContextException("Error loading Velocity config from [" + this.configLocation + "]", ex);
-		}
 		catch (Exception ex) {
-			throw new ApplicationContextException(
-				"Error initializing Velocity from properties file [" + this.configLocation + "]",
-				ex);
+			throw new VelocityInitializationException("Could not initialize Velocity engine", ex);
 		}
 	}
 
@@ -185,11 +200,14 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 		return new VelocityEngine();
 	}
 
-
 	/**
-	 * Return the prepared VelocityEngine after initialization.
+	 * Return the prepared VelocityEngine instance.
+	 * @throws VelocityInitializationException on Velocity initialization failure
 	 */
-	public VelocityEngine getVelocityEngine() {
+	public synchronized VelocityEngine getVelocityEngine() throws VelocityInitializationException {
+		if (this.velocityEngine == null) {
+			initVelocityEngine();
+		}
 		return velocityEngine;
 	}
 
