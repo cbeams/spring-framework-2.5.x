@@ -26,7 +26,7 @@ public class MaxLength extends AbstractPropertyValidationRule {
         }
     }
 
-    public Object[] getErrorArguments() {
+    protected Object[] getErrorArguments() {
         return new Object[] { new Integer(length) };
     }
 

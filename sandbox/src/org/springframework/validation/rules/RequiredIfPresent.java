@@ -33,7 +33,7 @@ public class RequiredIfPresent extends AbstractPropertyValidationRule {
         }
     }
 
-    public Object[] getErrorArguments() {
+    protected Object[] getErrorArguments() {
         return new Object[] {
              buildPropertyMessageSourceResolvable(otherPropertyName)};
     }
