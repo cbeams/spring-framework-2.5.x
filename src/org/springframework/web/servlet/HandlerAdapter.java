@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet;
 
@@ -39,16 +39,18 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Rod Johnson
  * @see org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter
+ * @see org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter
+ * @see org.springframework.web.servlet.handler.SimpleServletHandlerAdapter
  */
 public interface HandlerAdapter {
 	
 	/**
 	 * Given a handler instance, return whether or not this HandlerAdapter can
-	 * support it. Usually HandlerAdapters will base the decision on the handler
-	 * type. HandlerAdapters will normally support only one handler type.
-	 * <p>A typical implementation:<br><br>
-	 * <code>
-	 * return handler != null && MyHandler.class.isAssignableFrom(handler.getClass());
+	 * support it. Typical HandlerAdapters will base the decision on the handler
+	 * type. HandlerAdapters will usually only support one handler type each.
+	 * <p>A typical implementation:
+	 * <p><code>
+	 * return (handler instanceof MyHandler);
 	 * </code>
 	 * @param handler handler object to check
 	 * @return whether or not this object can use the given handler
@@ -61,9 +63,8 @@ public interface HandlerAdapter {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler handler to use. This object must have previously been passed
-	 * to the supports() method of this interface, which must have returned true.
-	 * Implementations that generate output themselves (and return null
-	 * from this method) may encounter IOExceptions.
+	 * to the <code>supports</code> method of this interface, which must have
+	 * returned true.
 	 * @throws Exception in case of errors
 	 * @return ModelAndView object with the name of the view and the required
 	 * model data, or null if the request has been handled directly
