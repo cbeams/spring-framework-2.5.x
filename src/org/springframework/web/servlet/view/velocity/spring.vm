@@ -101,6 +101,39 @@
 #end
 
 #**
+ * springFormPasswordInput
+ *
+ * Display a form input field of type 'password' and bind it to an attribute
+ * of a command or bean.  No value will ever be specified for this field regardless
+ * of whether one exists or not.  For hopefully obvious reasons!
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *        or CSS styles or size
+ *
+ *#
+#macro( springFormPasswordInput $path $attributes )    
+	#springBind($path)
+	<input type="password" name="${status.expression}" value="" ${attributes}#springCloseTag()
+#end
+
+#**
+ * springFormHiddenInput
+ *
+ * Generate a form input field of type 'hidden' and bind it to an attribute
+ * of a command or bean.
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *        or CSS styles or size
+ *
+ *#
+#macro( springFormHiddenInput $path $attributes )    
+	#springBind($path)
+	<input type="hidden" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
+#end
+
+#**
  * formTextArea
  *
  * display a text area and bind it to an attribute

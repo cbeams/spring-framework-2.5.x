@@ -45,3 +45,18 @@ FORM7
 FORM8
 <@spring.formCheckboxes "command.name", nameOptionMap, " ", ""/>
 -->
+
+FORM9
+<@spring.formPasswordInput "command.name", ""/>
+
+FORM10
+<@spring.formHiddenInput "command.name", ""/>
+
+FORM11
+<@spring.formInput "command.name", "", "text"/>
+
+FORM12
+<@spring.formInput "command.name", "", "hidden"/>
+
+FORM13
+<@spring.formInput "command.name", "", "password"/>

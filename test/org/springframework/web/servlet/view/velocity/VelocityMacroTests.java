@@ -166,8 +166,10 @@ public class VelocityMacroTests extends TestCase {
 			    if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" >", tokens[i+1]);
 			    if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" class=\"myCssClass\">", tokens[i+1]);
 			    if (tokens[i].equals("FORM3")) assertEquals("<textarea name=\"name\" >Darren</textarea>", tokens[i+1]);
-			    if (tokens[i].equals("FORM4")) assertEquals("<textarea name=\"name\" rows=10 cols=30>Darren</textarea>", tokens[i+1]);
+			    if (tokens[i].equals("FORM4")) assertEquals("<textarea name=\"name\" rows=10 cols=30>Darren</textarea>", tokens[i+1]);                
 			    //TODO verify remaining output (fix whitespace)
+                if (tokens[i].equals("FORM9")) assertEquals("<input type=\"password\" name=\"name\" value=\"\" >", tokens[i+1]);
+                if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" name=\"name\" value=\"Darren\" >", tokens[i+1]);
 		    }
 	    } catch (Exception e) {
 	        fail();

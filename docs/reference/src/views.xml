@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.30 2005-01-25 11:45:00 davison Exp $-->
+<!--$Id: views.xml,v 1.31 2005-01-31 16:31:53 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -576,7 +576,30 @@ recommend sticking to 'spring' --&gt;
                 <entry><literal>#springFormInput($path
                 $attributes)</literal></entry>
 
-                <entry><literal>&lt;@spring.formInput path,
+                <entry><literal>&lt;@spring.formInput path, attributes,
+                fieldType/&gt;</literal></entry>
+              </row>
+
+              <row>
+                <entry><emphasis role="bold">formHiddenInput *</emphasis>
+                (hidden input field for submitting non-user input)</entry>
+
+                <entry><literal>#springFormHiddenInput($path
+                $attributes)</literal></entry>
+
+                <entry><literal>&lt;@spring.formHiddenInput path,
+                attributes/&gt;</literal></entry>
+              </row>
+
+              <row>
+                <entry><emphasis role="bold">formPasswordInput</emphasis> *
+                (standard input field for gathering passwords. Note that no
+                value will ever be populated in fields of this type)</entry>
+
+                <entry><literal>#springFormPasswordInput($path
+                $attributes)</literal></entry>
+
+                <entry><literal>&lt;@spring.formPasswordInput path,
                 attributes/&gt;</literal></entry>
               </row>
 
@@ -652,6 +675,12 @@ recommend sticking to 'spring' --&gt;
             </tbody>
           </tgroup>
         </table>
+
+        <para>* In FTL (FreeMarker), these two macros are not actually
+        required as you can use the normal <literal>formInput</literal> macro,
+        specifying '<literal>hidden</literal>' or
+        '<literal>password</literal>' as the value for the
+        <literal>fieldType</literal> parameter.</para>
 
         <para>The parameters to any of the above macros have consistent
         meanings:</para>

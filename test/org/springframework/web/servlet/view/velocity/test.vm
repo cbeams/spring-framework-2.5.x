@@ -41,5 +41,12 @@ FORM7
 FORM8
 #springFormCheckboxes("command.name" $nameOptionMap " " "")
 
+FORM9
+#springFormPasswordInput("command.name" "")
+
+FORM10
+#springFormHiddenInput("command.name" "")
+
+
 ERRORS
 #springShowErrors(" " "")
