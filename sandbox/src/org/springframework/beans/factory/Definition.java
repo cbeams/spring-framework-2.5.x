@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
@@ -35,15 +34,29 @@ public interface Definition {
     
     Definition noAutowire();
     
+    Definition autowireByType();
+    
+    Definition autowireByName();
+    
+    Definition autowireConstructor();
+    
     Definition prop(String name, Object value);
     
     //Definition carg(String name, Object value); --REF?
+    
+    Definition carg(Object o);
     
     Definition ref(String name, String bean);
     
     Definition factoryMethod(String factoryMethod);
     
     Definition factoryBean(String factoryBean, String factoryMethod);
+
+	/**
+	 * @param string
+	 * @return
+	 */
+	Definition destroyMethodName(String string);
     
     // hotswap
     

@@ -22,25 +22,27 @@ import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -73,16 +75,21 @@ public class Configurer {
     }
     
     // TODO resource!?
-    public void properties(String location) {
-        PropertyResourceConfigurer pc = (PropertyResourceConfigurer) add(PropertyPlaceholderConfigurer.class).
+    public PropertyResourceConfigurer properties(String location) {
+        return (PropertyResourceConfigurer) add(PropertyPlaceholderConfigurer.class).
         	prop("location", location);
     }
     
-    public void properties(Class clazz, String name) {
-        String location = clazz.getName() + "." + name;
-        location = StringUtils.replace(location, ".", "/");
-        PropertyPlaceholderConfigurer pc = (PropertyPlaceholderConfigurer) add(PropertyPlaceholderConfigurer.class).
-        	prop("location", location);
+    public PropertyResourceConfigurer properties(Class clazz, String name) {
+        String location = StringUtils.replace(clazz.getPackage().getName(), ".", "/") + "/" + name;
+        return (PropertyResourceConfigurer) add(PropertyOverrideConfigurer.class).
+        	prop("location", "classpath:" + location);
+    }
+    
+    public void xml(Class clazz, String name) {
+        String location = StringUtils.replace(clazz.getPackage().getName(), ".", "/") + "/" + name;
+        XmlBeanDefinitionReader xdr = new XmlBeanDefinitionReader(bdi);
+        xdr.loadBeanDefinitions(new ClassPathResource(location));
     }
 
     public int getDefaultAutowireMode() {
@@ -109,7 +116,8 @@ public class Configurer {
     // add and autowire (allows custom create)
 
     public Definition add(Class clazz) {
-        // TODO counts?
+        // TODO counts to ensure unique naming?
+    	// TODO what about autowiring?
         return add(clazz.getName(), clazz);
     }
 
@@ -118,6 +126,23 @@ public class Configurer {
                 defaultAutowireMode);
         return add(def);
     }
+    
+    public Definition addFactoryBean(String name, String factoryBean, String factoryMethod) {
+        DefinitionImpl def = new DefinitionImpl(name, factoryBean, factoryMethod,
+                defaultAutowireMode);
+        
+        // TODO allow instantiation!?
+        //return add(def);
+        bdi.registerBeanDefinition(def.getBeanName(), def.getBeanDefinition());
+        return def;
+    }
+    
+//    public Definition add(String name, String parent) {
+//        DefinitionImpl def = new DefinitionImpl(name, clazz,
+//                defaultAutowireMode);
+//        return add(def);
+//    }
+    
 
     public Definition add(Definition def) {
         bdi.registerBeanDefinition(def.getBeanName(), def.getBeanDefinition());
@@ -147,7 +172,7 @@ public class Configurer {
         pf.addAdvice(new DelegatingIntroductionInterceptor(def));
 
         pf.addAdvisor(new DefaultPointcutAdvisor(Pointcuts.SETTERS,
-                new RecordingInterceptor(def)));
+                new RecordingBeforeAdvice(def)));
 
         // ProxyFactoryBeans get a special interceptor to capture
         // the names of interceptors added by addAdvisor
@@ -161,14 +186,16 @@ public class Configurer {
                 }, new InterceptorNameCaptureInterceptor(def)));
 
         // Other methods aren't config methods
-        pf.addAdvice(new MethodInterceptor() {
-            public Object invoke(MethodInvocation mi) throws Throwable {
-                throw new UnsupportedOperationException(mi.getMethod()
-                        .getName()
-                        + " is not a setter or other config method: "
-                        + "disallowing at config time");
-            }
-        });
+        //, but can probably permit them anyway with 
+        // before advice rather than around advice
+//        pf.addAdvice(new MethodInterceptor() {
+//            public Object invoke(MethodInvocation mi) throws Throwable {
+//                throw new UnsupportedOperationException(mi.getMethod()
+//                        .getName()
+//                        + " is not a setter or other config method: "
+//                        + "disallowing at config time");
+//            }
+//        });
 
         //System.err.println(pf.toProxyConfigString());
         Definition proxy = (Definition) pf.getProxy();
@@ -176,22 +203,25 @@ public class Configurer {
     }
 
     /**
-     * Interceptor for setter methods that saves the values to the backing
+     * Advice for setter methods that saves the values to the backing
      * BeanDefinition. Supports references to other beans in the factory, as
      * well as simple types.
-     */
-    private static class RecordingInterceptor implements MethodInterceptor {
+    */
+    private static class RecordingBeforeAdvice implements MethodBeforeAdvice {
         private final Definition def;
 
-        private RecordingInterceptor(Definition def) {
+        private RecordingBeforeAdvice(Definition def) {
             this.def = def;
         }
-
-        public Object invoke(MethodInvocation mi) throws Throwable {
-            String propName = mi.getMethod().getName().substring(3);
+        
+        /**
+		 * @see org.springframework.aop.MethodBeforeAdvice#before(java.lang.reflect.Method, java.lang.Object[], java.lang.Object)
+		 */
+		public void before(Method m, Object[] args, Object target) throws Throwable {
+            String propName = m.getName().substring(3);
             propName = propName.substring(0, 1).toLowerCase()
                     + propName.substring(1);
-            Object value = mi.getArguments()[0];
+            Object value = args[0];
             if (value instanceof Definition) {
                 String refName = ((Definition) value).getBeanName();
                 System.err.println("Recorded reference to name " + refName);
@@ -202,7 +232,7 @@ public class Configurer {
             PropertyValue pv = new PropertyValue(propName, value);
             def.getBeanDefinition().getPropertyValues().addPropertyValue(pv);
             System.out.println("Added " + pv);
-            return null;
+
         }
     }
 

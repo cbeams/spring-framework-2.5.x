@@ -27,7 +27,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * 
  * @author Rod Johnson
  */
-class DefinitionImpl implements Definition {
+public class DefinitionImpl implements Definition {
 
     private String name;
 
@@ -39,6 +39,14 @@ class DefinitionImpl implements Definition {
         this.name = name;
         definition = new RootBeanDefinition(clazz, autowireMode);
     }
+    
+    public DefinitionImpl(String name, String factoryBean, String factoryMethod, int autowireMode) {
+        this.name = name;
+        definition = new RootBeanDefinition(null, autowireMode);
+        factoryBean(factoryBean, factoryMethod);
+    }
+    
+    //public DefinitionImpl(
 
     /**
      * @see org.springframework.beans.factory.Definition#getBeanDefinition()
@@ -54,6 +62,12 @@ class DefinitionImpl implements Definition {
      */
     public String getBeanName() {
         return name;
+    }
+    
+    
+    public Definition destroyMethodName(String methodName) {
+    	definition.setDestroyMethodName(methodName);
+    	return this;
     }
     
     public Definition factoryMethod(String factoryMethod) {
@@ -91,6 +105,11 @@ class DefinitionImpl implements Definition {
         return this;
     }
     
+    public Definition carg(Object val) {
+    	definition.getConstructorArgumentValues().addGenericArgumentValue(val);
+    	return this;
+    }
+    
     /**
      * @see org.springframework.beans.factory.Definition#noAutowire()
      */
@@ -98,4 +117,19 @@ class DefinitionImpl implements Definition {
        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_NO);
        return this;
     }
+    
+    public Definition autowireByName() {
+        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
+        return this;
+     }
+    
+    public Definition autowireByType() {
+        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+        return this;
+     }
+    
+    public Definition autowireConstructor() {
+        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+        return this;
+     }
 }
