@@ -232,7 +232,7 @@
       surrounding object at all, it just needs to provide a Hibernate
       <classname>SessionFactory</classname>. It can get the latter from
       anywhere, but preferably as bean reference from a Spring application
-      context - via a simple <property>setSessionFactory</property> bean
+      context - via a simple <method>setSessionFactory</method> bean
       property setter. The following snippets show a DAO definition in a
       Spring application context, referencing the above defined
       <classname>SessionFactory,</classname> and an example for a DAO method
@@ -287,9 +287,9 @@
       methods that can replace such one line callback implementations.
       Furthermore, Spring provides a convenient
       <classname>HibernateDaoSupport</classname> base class that provides a
-      <property>setSessionFactory</property> method for receiving a
-      SessionFactory, and <property>getSessionFactory</property> and
-      <property>getHibernateTemplate</property> for use by subclasses. In
+      <method>setSessionFactory</method> method for receiving a
+      SessionFactory, and <method>getSessionFactory</method> and
+      <method>getHibernateTemplate</method> for use by subclasses. In
       combination, this allows for very simple DAO implementations for typical
       requirements:</para>
 

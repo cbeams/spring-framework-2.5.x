@@ -285,23 +285,24 @@
       returned.</para>
 
       <para>The non-singleton, prototype mode of a bean deployment results in
-      <emphasis>creation of a new bean instance</emphasis> every time a
+      the <emphasis>creation of a new bean instance</emphasis> every time a
       request for that specific bean is done. This is ideal for situation
       where for example each user needs an independent user object or
       something similar.</para>
 
       <para>Beans are deployed in singleton mode by default, unless you
-      specify otherwise. Keep in mind that by changing the type to prototype,
-      each request for a bean will result in a newly created bean and this
-      might not be what you actually want. So only change the mode to
-      prototype when absolutely necessary.</para>
+      specify otherwise. Keep in mind that by changing the type to
+      non-singleton (prototype), each request for a bean will result in a
+      newly created bean and this might not be what you actually want. So only
+      change the mode to prototype when absolutely necessary.</para>
 
       <para>In the example below, two beans are declared of which one is
       defined as a singleton, and the other one as a non-singleton
       (prototype). <literal>exampleBean</literal> is created each and every
       time a client asks the BeanFactory for this bean, while
-      <literal>yetAnotherExample</literal> is only created one, a reference is
-      returned each time a request for this bean is done. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean" singleton="false"/&gt;
+      <literal>yetAnotherExample</literal> is only created once; a reference
+      to the exact same instance is returned on each request for this
+      bean.<programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean" singleton="false"/&gt;
 &lt;bean name="yetAnotherExample" class="examples.ExampleBeanTwo" singleton="true"/&gt;</programlisting></para>
     </sect2>
   </sect1>
@@ -319,14 +320,15 @@
       only through constructor arguments or properties. Then, it is the job of
       the container to actually <emphasis>inject</emphasis> those dependencies
       when it creates the bean. This is fundamentally the inverse (hence the
-      name) of the bean instantiating or locating its dependencies on its own
-      (perhaps using something like the <emphasis>Service Locator</emphasis>
-      pattern). While we will not elaborate too much on the advantages of
-      Dependency Injection, it might be obvious that code gets much cleaner
-      and reaching a higher grade of decoupling is much easier when beans do
-      not look up their dependencies, but are provided them, and also do not
-      even know where the actual dependencies are located and of what actual
-      type they are.</para>
+      name Inversion of Control) of the bean instantiating or locating its
+      dependencies on its own (using direct construction of classes, or
+      something like the <emphasis>Service Locator</emphasis> pattern). While
+      we will not elaborate too much on the advantages of Dependency
+      Injection, it becomes evident upon usage that code gets much cleaner and
+      reaching a higher grade of decoupling is much easier when beans do not
+      look up their dependencies, but are provided them, and additionally do
+      not even know where the dependencies are located and of what actual type
+      they are.</para>
 
       <para>The BeanFactory is capable of <emphasis>injecting</emphasis>
       dependencies into beans its manages. It does this either when
@@ -335,24 +337,63 @@
       constructor, setting bean properties which represent the dependencies.
       The configuration for the dependencies comes in the form of a
       <literal>BeanDefinition</literal>, which is used together with
-      <literal>PropertyEditors</literal> to know how to convert properties in
-      one format to another. We'll explain that further along using some
-      examples of beans defined in the XML format. For now it might be handy
-      to know that BeanDefinitions, collaborators and properties are specified
-      using <literal>PropertyValue</literal>-objects.</para>
+      <literal>PropertyEditors</literal> to know how to convert properties
+      from one format to another. The actual values being passed around are
+      done in the form of <literal>PropertyValue</literal> objects. However,
+      most users of Spring will not be dealing with these classes directly
+      (i.e. programatically), but rather with an XML definition file which
+      will be converted internally into instances of these classes, and used
+      to load an entire BeanFactory or ApplicationContext.</para>
 
-      <para>The resolving of the dependencies is a little too complex to go in
-      depth here, but the basic procedure is as follows: <orderedlist
-          spacing="compact">
+      <para>The resolution of dependencies is a little too complex to go into
+      in depth here, but the basic procedure is as follows: IN PROGRESS
+      WORK!<orderedlist spacing="compact">
           <listitem>
-            <para>Checking what the type of the property is (this can be a
-            primitive-like type - like int or String, a Collection - i.e. Map
-            or List, a Class or any other type Spring supports by default. It
-            can also be a collaborator). Collaborators are other beans the
-            BeanFactory must capable of resolving, in order words, other
-            beans, also defined in the same BeanFactory (or, in case you're
-            using the ApplicationContext, possibly in another application
-            context)</para>
+            <para>The BeanFactory is created and initialized with a
+            configuration which describes all the beans. Most Spring users use
+            a BeanFactory or ApplicationContext variant which supports XML
+            format configuration files.</para>
+
+            <para>XXXXXXREMOVE Checking what the type of the property is (this
+            can be a primitive or built-in type, such asn an int or String, a
+            Collection - i.e. Map or List, a Class or any other type Spring
+            supports by default. It can also be a collaborator). Collaborators
+            are other beans the BeanFactory must capable of resolving, in
+            order words, other beans, also defined in the same BeanFactory
+            (or, in case you're using the ApplicationContext, possibly in
+            another application context).</para>
+          </listitem>
+
+          <listitem>
+            <para>Each bean has dependencies expressed in the form of
+            properties or constructor arguments, which must be provided to it,
+            <emphasis>when the bean is actually created</emphasis>.</para>
+          </listitem>
+
+          <listitem>
+            <para>Each property or constructor-arg is either an actual
+            definition of the value to set, or a reference to another bean in
+            the BeanFactory.</para>
+          </listitem>
+
+          <listitem>
+            <para>Each property or constructor argument which is a value must
+            be able to be converted from whatever format it was specified in,
+            to the actual type of that property or constructor argument. By
+            default Spring can convert a value supplied in string format to
+            all built-in types, such as <literal>int</literal>,
+            <literal>Long</literal>, <literal>String</literal>,
+            <literal>boolean</literal>, etc. Additionally, Spring uses
+            JavaBeans <classname>PropertyEditor</classname> definitions to be
+            able to convert string values to other, arbitrary types. (You can
+            provide the BeanFactory with your own
+            <literal>PropertyEditor</literal> definitions to be able to
+            convert your own custom types). Additionally, when talking about
+            the XML based BeanFactory variants, these have built-in support
+            for defining Lists, Maps, Sets, and Properties collection
+            types.</para>
+
+            <para></para>
           </listitem>
 
           <listitem>
@@ -440,7 +481,7 @@
       bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
       &lt;constructor-arg&gt;&lt;ref
       bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
-      &lt;constructor-arg&gt;<value>1</value>&lt;/constructor-arg&gt;
+      &lt;constructor-arg&gt;&lt;value&gt;<value>1&lt;/value&gt;</value>&lt;/constructor-arg&gt;
       &lt;/bean&gt; &lt;bean id="anotherExampleBean"
       class="examples.AnotherBean"/&gt; &lt;bean id="yetAnotherBean"
       class="examples.YetAnotherBean"/&gt;</programlisting> <programlisting>public class ExampleBean {
@@ -497,12 +538,13 @@
       <title>Autowiring collaborators</title>
 
       <para>Spring has autowire capabilities, which means it's possible to
-      automatically let Spring resolve collaborators (other beans) for you
-      bean by inspecting the BeanFactory. The autowiring functionality has
-      four modes. Autowiring is specified <emphasis>per</emphasis> bean and
-      can thus be enabled for a couple of beans, while other beans won't be
-      autowired. When using autowiring, there might be no need for specifying
-      properties or constructor arguments<footnote>
+      automatically let Spring resolve collaborators (other beans) for your
+      bean by inspecting the BeanFactory/ApplicationContext. The autowiring
+      functionality has four modes. Autowiring is specified
+      <emphasis>per</emphasis> bean and can thus be enabled for some beans,
+      while other beans won't be autowired. Using autowiring, it is possible
+      to reduce or eliminate the need to specify properties or constructor
+      arguments<footnote>
           <para>See <xref linkend="beans-factory-collaborators" /></para>
         </footnote> <table frame="all">
           <title>Autowiring modes</title>
@@ -1225,7 +1267,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
     <sect2 id="context-functionality-events">
       <title>Propagating events</title>
 
-      <para>Eventhandling in the ApplicationContext is provided through the
+      <para>Event handling in the ApplicationContext is provided through the
       <literal>ApplicationEvent</literal> class and
       <literal>ApplicationListener</literal> interface. When implementing the
       <literal>ApplicationListener</literal> in one of your beans, everytime
@@ -1540,7 +1582,7 @@ public class DependsOnExoticType {
   &lt;property name="targetMethod"&gt;&lt;value&gt;getProperty&lt;/value&gt;&lt;/property&gt;
   &lt;property name="arguments"&gt;
     &lt;list&gt;
-      &lt;value&gt;|java.version|&lt;/value&gt;
+      &lt;value&gt;java.version&lt;/value&gt;
     &lt;/list&gt;
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
@@ -1550,19 +1592,19 @@ public class DependsOnExoticType {
     <emphasis>singleton</emphasis> fashion. The first request by the container
     for the factory to produce an object will cause the specified method
     invocation, whose return value will cached and returned for the current
-    and subsequent requests. An internal <property>singleton</property>
-    property of the factory may be set to false, to cause it to invoke the
-    target method each time it is asked for an object.</para>
+    and subsequent requests. An internal <method>singleton</method> property
+    of the factory may be set to false, to cause it to invoke the target
+    method each time it is asked for an object.</para>
 
-    <para>A static target method may be specified by setting
-    <property>targetMethod</property> property to a String representing the
-    static method name, with <property>targetClass</property> specifying the
-    Class that the static method is defined on. Alternatively, a target
-    instance method may be specified, by setting the
-    <property>targetObject</property> property as the target object, and the
-    <property>targetMethod</property> property as the name of the method to
-    call on that target object. Arguments for the method invocation may be
-    specified by setting the <property>args</property> property.</para>
+    <para>A static target method may be specified by setting the
+    <method>targetMethod</method> property to a String representing the static
+    method name, with <method>targetClass</method> specifying the Class that
+    the static method is defined on. Alternatively, a target instance method
+    may be specified, by setting the <method>targetObject</method> property as
+    the target object, and the <method>targetMethod</method> property as the
+    name of the method to call on that target object. Arguments for the method
+    invocation may be specified by setting the <method>args</method>
+    property.</para>
   </sect1>
 
   <sect1 id="context-create">
