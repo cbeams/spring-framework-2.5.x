@@ -14,7 +14,14 @@ package org.springframework.jms;
  */
 public interface JmsSender {
 	
-    
+    /**
+     * Send a message to a JMS destination.  The callback gives access to
+     * the JMS session and MessageProducer in order to do more complex
+     * send operations, 
+     * @param destinationName
+     * @param callback
+     * @throws JmsException
+     */
     public void send(String destinationName, JmsSenderCallback callback) throws JmsException;
 
 	/**
@@ -25,11 +32,12 @@ public interface JmsSender {
 	 * @throws JmsException converted checked JMSException to unchecked.
 	 */
 	public void send(final String destinationName,
-					  final MessageCreator messageCreator) throws JmsException;
+					 final MessageCreator messageCreator) throws JmsException;
 	
 	/*
 	//Send to a specified destination.  useful when replying to the destination
-	// in an incoming message specified in the JMSReplyTo message property.
+	// in an incoming message specified in the JMSReplyTo message property or
+	// sending to a destination created at runtime.
 	public void send(Destination d, MessageCreator messageCreator) {
 	}
 	
