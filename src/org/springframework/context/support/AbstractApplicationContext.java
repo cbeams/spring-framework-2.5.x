@@ -444,6 +444,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().isSingleton(name);
 	}
 
+	public Class getType(String name) throws NoSuchBeanDefinitionException {
+		return getBeanFactory().getType(name);
+	}
+
 	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
 		return getBeanFactory().getAliases(name);
 	}
@@ -467,6 +471,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public boolean containsBeanDefinition(String name) {
 		return getBeanFactory().containsBeanDefinition(name);
+	}
+
+	public Map getBeansOfType(Class type) throws BeansException {
+		return getBeanFactory().getBeansOfType(type);
 	}
 
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
