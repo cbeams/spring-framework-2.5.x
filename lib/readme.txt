@@ -172,6 +172,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
+* jakarta-commons/commons-lang.jar
+- Commons Lang 2.0 (http://jakarta.apache.org/commons/lang)
+- required for building the framework (by OJB)
+- required at runtime when using Spring's OJB support (by OJB)
+
 * jakarta-commons/commons-logging.jar
 - Commons Logging 1.0.4 (http://jakarta.apache.org/commons/logging)
 - required for building the framework
