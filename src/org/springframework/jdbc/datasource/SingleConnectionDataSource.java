@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation of SmartDataSource that wraps a single connection which is not
@@ -13,20 +15,19 @@ import org.springframework.beans.factory.DisposableBean;
  * close() method. Client code will never call close on the connection handle if it
  * is SmartDataSource-aware (e.g. uses DataSourceUtils.closeConnectionIfNecessary).
  *
- * <p>If client code will call close in the assumption of a pooled connection, like
- * when using persistence toolkits, set suppressClose to true. This will return a
+ * <p>If client code will call close in the assumption of a pooled connection,
+ * like when using persistence tools, set suppressClose to true. This will return a
  * close-suppressing proxy instead of the physical connection. Be aware that you will
- * not be able to cast this to an OracleConnection anymore, for example.
+ * not be able to cast this to a native OracleConnection or the like anymore.
  *
  * <p>This is primarily a test class. For example, it enables easy testing of code
- * outside of an application server, in conjunction with a simple JNDI environment.
+ * outside an application server, in conjunction with a simple JNDI environment.
  * In contrast to DriverManagerDataSource, it reuses the same connection all the time,
  * avoiding excessive creation of physical connections.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceUtils#closeConnectionIfNecessary
- * @see org.springframework.jndi.support.SimpleNamingContextBuilder
  */
 public class SingleConnectionDataSource extends DriverManagerDataSource implements DisposableBean {
 
@@ -48,7 +49,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * proxy or the physical connection.
 	 */
 	public SingleConnectionDataSource(String driverClassName, String url, String username, String password,
-	                                  boolean suppressClose) throws ClassNotFoundException {
+	                                  boolean suppressClose) throws CannotGetJdbcConnectionException {
 		super(driverClassName, url, username, password);
 		this.suppressClose = suppressClose;
 	}
@@ -120,7 +121,9 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 			                       "Check that user code checks shouldClose() before closing connections, " +
 			                       "or set suppressClose to true");
 		}
-		logger.debug("Returning single connection: " + this.connection);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Returning single connection: " + this.connection);
+		}
 		return this.connection;
 	}
 
@@ -129,7 +132,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * Returns the single connection if given the same username and password, though.
 	 */
 	public Connection getConnection(String username, String password) throws SQLException {
-		if (username != null && password != null && username.equals(getUsername()) && password.equals(getPassword())) {
+		if (StringUtils.nullSafeEquals(username, getUsername()) &&
+				StringUtils.nullSafeEquals(password, getPassword())) {
 			return getConnection();
 		}
 		else {

@@ -29,6 +29,15 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 	/**
 	 * Constructor for CannotGetJdbcConnectionException.
 	 * @param msg message
+	 * @param ex ClassNotFoundException root cause
+	 */
+	public CannotGetJdbcConnectionException(String msg, ClassNotFoundException ex) {
+		super(msg, ex);
+	}
+
+	/**
+	 * Constructor for CannotGetJdbcConnectionException.
+	 * @param msg message
 	 * @param ex NamingException root cause
 	 */
 	public CannotGetJdbcConnectionException(String msg, NamingException ex) {

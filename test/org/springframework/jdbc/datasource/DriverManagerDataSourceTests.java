@@ -11,9 +11,11 @@ import java.sql.SQLException;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+
 /**
 * @author Rod Johnson
-* @version $Id: DriverManagerDataSourceTests.java,v 1.6 2004-02-26 14:27:53 jhoeller Exp $
+* @version $Id: DriverManagerDataSourceTests.java,v 1.7 2004-03-01 09:15:12 jhoeller Exp $
 */
 public class DriverManagerDataSourceTests extends TestCase {
 
@@ -67,9 +69,9 @@ public class DriverManagerDataSourceTests extends TestCase {
 		ds.setUsername(uname);
 		try {
 			ds.setDriverClassName(bogusClassname);
-			fail("Should have thrown ClassNotFoundException");
+			fail("Should have thrown CannotGetJdbcConnectionException");
 		}
-		catch (ClassNotFoundException ex) {
+		catch (CannotGetJdbcConnectionException ex) {
 			// OK
 		}
 	}
