@@ -85,7 +85,7 @@ public abstract class SessionFactoryUtils {
 	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 		if (!TransactionSynchronizationManager.hasResource(sessionFactory) && !allowCreate) {
-			throw new IllegalStateException("No Hibernate Session found bound to thread, and not allowed to create new one. Check config.");
+			throw new IllegalStateException("No Hibernate Session found bound to thread, and not configured to allow creation of new one here.");
 		}
 		return getSession(sessionFactory, null, null, true);
 	}
