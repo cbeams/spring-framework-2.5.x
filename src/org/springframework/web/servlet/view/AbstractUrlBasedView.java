@@ -45,9 +45,15 @@ public abstract class AbstractUrlBasedView extends AbstractView {
 	 * Overridden lifecycle method to check that 'url' property is set.
 	 */
 	protected void initApplicationContext() {
-		if (this.url == null) {
+		if (getUrl() == null) {
 			throw new IllegalArgumentException("url is required");
 		}
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer(super.toString());
+		sb.append("; URL [").append(getUrl()).append("]");
+		return sb.toString();
 	}
 
 }

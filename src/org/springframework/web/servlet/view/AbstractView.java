@@ -272,4 +272,16 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	protected abstract void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer(getClass().getName());
+		if (getBeanName() != null) {
+			sb.append(": name '").append(getBeanName()).append("'");
+		}
+		else {
+			sb.append(": unnamed");
+		}
+		return sb.toString();
+	}
+
 }
