@@ -17,6 +17,7 @@ import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.interceptor.DebugInterceptor;
+import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -32,7 +33,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.2 2003-10-25 18:46:21 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.3 2003-11-04 13:41:57 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -73,6 +74,47 @@ public class ProxyFactoryBeanTests extends TestCase {
 		ITestBean test2_1 = (ITestBean) factory.getBean("prototype");
 		assertTrue("Prototype instances !=", test2 != test2_1);
 		assertTrue("Prototype instances equal", test2.equals(test2_1));
+	}
+	
+	
+	/**
+	 * Uses its own bean factory XML for clarity
+	 * @param beanName name of the ProxyFactoryBean definition that should
+	 * be a prototype
+	 */
+	private void testPrototypeInstancesAreIndependent(String beanName) {
+		// Initial count value set in bean factory XML 
+		int INITIAL_COUNT = 10;
+		
+		InputStream is = getClass().getResourceAsStream("prototypeTests.xml");
+		BeanFactory bf = new XmlBeanFactory(is);
+		
+		// Check it works without AOP
+		SideEffectBean raw = (SideEffectBean) bf.getBean("prototypeTarget");
+		assertEquals(INITIAL_COUNT, raw.getCount() );
+		raw.doWork();
+		assertEquals(INITIAL_COUNT+1, raw.getCount() );
+		raw = (SideEffectBean) bf.getBean("prototypeTarget");
+		assertEquals(INITIAL_COUNT, raw.getCount() );
+		
+		// Now try with advised instances
+		SideEffectBean prototype2FirstInstance = (SideEffectBean) bf.getBean(beanName);
+		assertEquals(INITIAL_COUNT, prototype2FirstInstance.getCount() );
+		prototype2FirstInstance.doWork();
+		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount() );
+
+		SideEffectBean prototype2SecondInstance = (SideEffectBean) bf.getBean(beanName);
+		assertEquals(INITIAL_COUNT, prototype2SecondInstance.getCount() );
+		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount() );
+
+	}
+	
+	public void testPrototypeInstancesAreIndependentWithInvokerInterceptor() {
+		testPrototypeInstancesAreIndependent("prototype");
+	}
+	
+	public void testPrototypeInstancesAreIndependentWithTargetName() {
+		testPrototypeInstancesAreIndependent("prototype2");
 	}
 	
 	/**
@@ -116,10 +158,78 @@ public class ProxyFactoryBeanTests extends TestCase {
 	}
 	
 	/**
-	 * Do against prototype
-	 *
+	 * Should see effect immediately on behaviour,
+	 * later on interfaces if reconfigureSingleton() is invoked
 	 */
-	public void testCanAddAndRemoveAspectInterfaces() {
+	public void testCanAddAndRemoveAspectInterfacesOnSingleton() {
+		try {
+			TimeStamped ts = (TimeStamped) factory.getBean("test1");
+			fail("Shouldn't implement TimeStamped before manipulation");
+		}
+		catch (ClassCastException ex) {
+		}
+	
+		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test1");
+		long time = 666L;
+		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor();
+		ti.setTime(time);
+		
+		// add to front of queue
+		int oldCount = config.getMethodPointcuts().size();
+		config.addInterceptor(0, ti);
+		
+		// Must call this to update the singleton
+		config.reconfigureSingleton();
+		
+		assertTrue(config.getMethodPointcuts().size() == oldCount + 1);
+	
+		TimeStamped ts = (TimeStamped) factory.getBean("test1");
+		assertTrue(ts.getTimeStamp() == time);
+	
+		// Can remove
+		config.removeInterceptor(ti);
+		config.reconfigureSingleton();
+		assertTrue(config.getMethodPointcuts().size() == oldCount);
+	
+		try {
+			// Existing reference will fail
+			ts.getTimeStamp();
+			fail("Existing object won't implement this interface any more");
+		}
+		catch (RuntimeException ex) {
+		}
+
+	
+		try {
+			ts = (TimeStamped) factory.getBean("test1");
+			fail("Should no longer implement TimeStamped");
+		}
+		catch (ClassCastException ex) {
+		}
+	
+		// Now check non-effect of removing interceptor that isn't there
+		config.removeInterceptor(new DebugInterceptor());
+		config.reconfigureSingleton();
+		assertTrue(config.getMethodPointcuts().size() == oldCount);
+	
+		ITestBean it = (ITestBean) ts;
+		DebugInterceptor debugInterceptor = new DebugInterceptor();
+		config.addInterceptor(0, debugInterceptor);
+		it.getSpouse();
+		assertEquals(1, debugInterceptor.getCount());
+		config.removeInterceptor(debugInterceptor);
+		it.getSpouse();
+		// not invoked again
+		assertTrue(debugInterceptor.getCount() == 1);
+	}
+	
+	
+	/**
+	 * Try adding and removing interfaces and interceptors on prototype.
+	 * Changes will only affect future references obtained from the factory.
+	 * Each instance will be independent.
+	 */
+	public void testCanAddAndRemoveAspectInterfacesOnPrototype() {
 		try {
 			TimeStamped ts = (TimeStamped) factory.getBean("test2");
 			fail("Shouldn't implement TimeStamped before manipulation");
@@ -137,19 +247,14 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue(config.getMethodPointcuts().size() == oldCount + 1);
 		
 		TimeStamped ts = (TimeStamped) factory.getBean("test2");
-		assertTrue(ts.getTimeStamp() == time);
+		assertEquals(time, ts.getTimeStamp());
 		
 		// Can remove
 		config.removeInterceptor(ti);
 		assertTrue(config.getMethodPointcuts().size() == oldCount);
 		
-		try {
-			// Existing reference will fail
-			ts.getTimeStamp();
-			fail("Existing object won't implement this interface any more");
-		}
-		catch (RuntimeException ex) {
-		}
+		// Check no change on existing object reference
+		assertTrue(ts.getTimeStamp() == time);
 		
 		try {
 			ts = (TimeStamped) factory.getBean("test2");
@@ -166,11 +271,36 @@ public class ProxyFactoryBeanTests extends TestCase {
 		DebugInterceptor debugInterceptor = new DebugInterceptor();
 		config.addInterceptor(0, debugInterceptor);
 		it.getSpouse();
-		assertTrue(debugInterceptor.getCount() == 1);
+		// Won't affect existing reference
+		assertTrue(debugInterceptor.getCount() == 0);
+		it = (ITestBean) factory.getBean("test2");
+		it.getSpouse();
+		assertEquals(1, debugInterceptor.getCount());
 		config.removeInterceptor(debugInterceptor);
 		it.getSpouse();
-		// not invoked again
-		assertTrue(debugInterceptor.getCount() == 1);
+		
+		// Still invoked wiht old reference
+		assertEquals(2, debugInterceptor.getCount());
+		
+		// not invoked with new object
+		it = (ITestBean) factory.getBean("test2");
+		it.getSpouse();
+		assertEquals(2, debugInterceptor.getCount());
+		
+		// Our own timestamped reference should still work
+		assertEquals(time, ts.getTimeStamp());
+	}
+	
+	
+	public void testCantReconfigureSingletonOnPrototypeFactoryBean() {
+		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test2");
+		try {
+			config.reconfigureSingleton();
+			fail();
+		}
+		catch (AopConfigException ex) {
+			// Ok
+		}
 	}
 	
 	

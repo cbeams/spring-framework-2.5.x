@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+	Tests for independent prototype behaviour.
+-->
+
+<beans>
+
+	<!-- Simple target -->
+	<bean id="test" class="org.springframework.aop.interceptor.SideEffectBean">	
+		<property name="count"><value>10</value></property>
+	</bean>
+	
+	
+	<bean id="prototypeTarget" class="org.springframework.aop.interceptor.SideEffectBean" 
+		singleton="false">	
+		<property name="count"><value>10</value></property>
+	</bean>
+	
+	<!-- 
+		Invoker interceptor. Not required: can be added by 
+		default
+	-->
+	<bean id="invokerInterceptor" class="org.springframework.aop.framework.InvokerInterceptor">	
+		<property name="target"><ref local="test"/></property>
+	</bean>
+	
+	<bean id="invokerInterceptor2"
+		class="org.springframework.aop.framework.InvokerInterceptor" singleton="false"
+	>
+		<property name="target"><ref local="prototypeTarget"/></property>
+	</bean>
+	
+	
+	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor">
+	</bean>
+	
+	<bean id="singleton" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		<property name="interceptorNames"><value>debugInterceptor,invokerInterceptor</value></property>		
+		
+	</bean>
+	
+
+	<bean id="prototype"
+		class="org.springframework.aop.framework.ProxyFactoryBean"> 
+		<property name="interceptorNames"><value>debugInterceptor,invokerInterceptor2</value></property>
+		<property name="singleton"><value>false</value></property>
+	</bean>
+	
+	<!-- Automatically created InvokerInterceptor -->
+	<bean id="prototype2"
+		class="org.springframework.aop.framework.ProxyFactoryBean"> 
+		<property name="interceptorNames"><value>debugInterceptor,prototypeTarget</value></property>
+		<property name="singleton"><value>false</value></property>
+
+	</bean>
+	
+
+</beans>		
+	
+	
