@@ -137,7 +137,7 @@ public class JdoTemplate implements InitializingBean {
 			return action.doInJdo(pm);
 		}
 		catch (JDOException ex) {
-			throw PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+			throw convertJdoAccessException(ex);
 		}
 		catch (RuntimeException ex) {
 			// callback code threw application exception
@@ -146,6 +146,16 @@ public class JdoTemplate implements InitializingBean {
 		finally {
 			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, this.persistenceManagerFactory);
 		}
+	}
+
+	/**
+	 * Convert the given JDOException to an appropriate exception from
+	 * the org.springframework.dao hierarchy.
+	 * @param ex JDOException that occured
+	 * @return the corresponding DataAccessException instance
+	 */
+	protected DataAccessException convertJdoAccessException(JDOException ex) {
+		return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
 	}
 
 }

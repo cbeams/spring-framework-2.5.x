@@ -7,7 +7,6 @@ import java.util.List;
 
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
-import net.sf.hibernate.ObjectNotFoundException;
 import net.sf.hibernate.Query;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
@@ -148,10 +147,10 @@ public class HibernateTemplate extends HibernateAccessor {
 			return result;
 		}
 		catch (HibernateException ex) {
-			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+			throw convertHibernateAccessException(ex);
 		}
 		catch (SQLException ex) {
-			throw new HibernateJdbcException("Exception on direct JDBC access", ex);
+			throw convertJdbcAccessException(ex);
 		}
 		catch (RuntimeException ex) {
 			// callback code threw application exception
@@ -163,28 +162,43 @@ public class HibernateTemplate extends HibernateAccessor {
 	}
 
 	/**
-	 * Return the persistent instance of the given entity class with the
-	 * given identifier. Note that this method returns null if not found,
-	 * in contrast to Session.load itself.
+	 * Convert the given HibernateException to an appropriate exception from
+	 * the org.springframework.dao hierarchy. Can be overridden in subclasses.
+	 * @param ex HibernateException that occured
+	 * @return the corresponding DataAccessException instance
+	 */
+	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
+		return SessionFactoryUtils.convertHibernateAccessException(ex);
+	}
+
+	/**
+	 * Convert the given SQLException to an appropriate exception from the
+	 * org.springframework.dao hierarchy. Can be overridden in subclasses.
+	 * <p>Note that SQLException can just occur here when callback code
+	 * performs direct JDBC access via Session.connection().
+	 * @param ex SQLException that occured
+	 * @return the corresponding DataAccessException instance
+	 */
+	protected DataAccessException convertJdbcAccessException(SQLException ex) {
+		return new HibernateJdbcException(ex);
+	}
+
+	/**
+	 * Return the persistent instance of the given entity class
+	 * with the given identifier.
 	 * <p>This is a convenience method for single step actions,
 	 * mirroring Session.load.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
-	 * @return the persistent instance, or null if not found
+	 * @return the persistent instance
+	 * @throws HibernateObjectRetrievalFailureException if the instance could not be found
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#load(Class,Serializable)
 	 */
 	public Object load(final Class entityClass, final Serializable id) throws DataAccessException {
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				try {
-					return session.load(entityClass, id);
-				}
-				catch (ObjectNotFoundException ex) {
-					// Session.load throws this exception if not found
-					// -> the contract of this template method is to return null
-					return null;
-				}
+				return session.load(entityClass, id);
 			}
 		});
 	}

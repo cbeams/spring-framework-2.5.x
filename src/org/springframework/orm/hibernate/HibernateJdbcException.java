@@ -8,26 +8,21 @@ import org.springframework.dao.UncategorizedDataAccessException;
 
 /**
  * Hibernate-specific subclass of DataAccessException, for JDBC exceptions
- * that Hibernate rethrew. Used by HibernateTemplate.
- *
- * <p>Part of the general strategy to allow for using Hibernate within
- * application service implementations that just feature DataAccessException
- * in their interfaces. Clients of these services do not need to be aware of
- * the particular data access strategy used by the service implementations.
- *
+ * that Hibernate rethrew. Used by SessionFactoryUtils and HibernateTemplate.
  * @author Juergen Hoeller
  * @since 02.05.2003
- * @see HibernateTemplate
- * @see org.springframework.dao
+ * @see SessionFactoryUtils#convertHibernateAccessException
+ * @see HibernateTemplate#convertHibernateAccessException
+ * @see org.springframework.dao.DataAccessException
  */
 public class HibernateJdbcException extends UncategorizedDataAccessException {
 
-	public HibernateJdbcException(String s, JDBCException ex) {
-		super(s, ex.getSQLException());
+	public HibernateJdbcException(JDBCException ex) {
+		super("JDBC exception on Hibernate data access: " + ex.getMessage(), ex.getSQLException());
 	}
 
-	public HibernateJdbcException(String s, SQLException ex) {
-		super(s, ex);
+	public HibernateJdbcException(SQLException ex) {
+		super("Exception on direct JDBC access: " + ex.getMessage(), ex);
 	}
 
 }

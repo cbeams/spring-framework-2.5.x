@@ -1,17 +1,23 @@
 package org.springframework.orm.hibernate;
 
 import java.util.Properties;
+import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.SessionFactory;
+import net.sf.hibernate.Session;
+import net.sf.hibernate.tool.hbm2ddl.DatabaseMetadata;
+import net.sf.hibernate.dialect.Dialect;
 import net.sf.hibernate.cfg.Configuration;
 import net.sf.hibernate.cfg.Environment;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -53,6 +59,9 @@ import org.springframework.beans.factory.InitializingBean;
  * transactional JVM-level caching with local SessionFactory setup too -
  * without any configuration hassle like container-specific setup.
  *
+ * <p>Note: This class requires Hibernate 2.0.1; we recommend to use the
+ * newest release in the 2.0.x series.
+ *
  * @author Juergen Hoeller
  * @since 05.05.2003
  * @see HibernateTemplate#setSessionFactory
@@ -72,6 +81,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	private DataSource dataSource;
 
 	private Interceptor entityInterceptor;
+
+	private boolean schemaUpdate = false;
 
 	private SessionFactory sessionFactory;
 
@@ -136,6 +147,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		this.entityInterceptor = entityInterceptor;
 	}
 
+	public void setSchemaUpdate(boolean schemaUpdate) {
+		this.schemaUpdate = schemaUpdate;
+	}
+
 	/**
 	 * Initialize the SessionFactory for the given or the default location.
 	 * @throws IllegalArgumentException in case of illegal property values
@@ -186,6 +201,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		// build SessionFactory instance
 		logger.info("Building new Hibernate SessionFactory for LocalSessionFactoryBean [" + this + "]");
 		this.sessionFactory = newSessionFactory(config);
+
+		// execute schema update if requested
+		if (this.schemaUpdate) {
+			executeSchemaUpdate(config);
+		}
 	}
 
 	/**
@@ -218,6 +238,43 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 */
 	protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 		return config.buildSessionFactory();
+	}
+
+	/**
+	 * Execute a schema update via 
+	 * @param config
+	 * @throws HibernateException
+	 */
+	protected void executeSchemaUpdate(final Configuration config) throws HibernateException {
+		final Dialect dialect = Dialect.getDialect(config.getProperties());
+		HibernateTemplate template = new HibernateTemplate(this.sessionFactory);
+		template.execute(
+			new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException, SQLException {
+					Connection conn = session.connection();
+					DatabaseMetadata metadata = new DatabaseMetadata(conn, dialect);
+					String[] sql = config.generateSchemaUpdateScript(dialect, metadata);
+					Statement stmt = conn.createStatement();
+					try {
+						for (int i = 0; i < sql.length; i++) {
+							logger.info("Adding [" + sql[i] + "] to schema update batch");
+							stmt.addBatch(sql[i]);
+						}
+						logger.info("Executing schema update batch");
+						stmt.executeBatch();
+					}
+					finally {
+						try {
+							stmt.close();
+						}
+						catch (SQLException ex) {
+							logger.error("Statement.close threw exception", ex);
+						}
+					}
+					return null;
+				}
+			}
+		);
 	}
 
 	/**

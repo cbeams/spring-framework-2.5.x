@@ -1,5 +1,6 @@
 package org.springframework.orm.hibernate;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,13 +19,12 @@ import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.StaleObjectStateException;
 import net.sf.hibernate.TransientObjectException;
+import net.sf.hibernate.WrongClassException;
 import net.sf.hibernate.type.Type;
-
 import org.easymock.MockControl;
+
 import org.springframework.beans.TestBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.dao.OptimisticLockingFailureException;
 
 /**
  * @author Juergen Hoeller
@@ -226,18 +226,21 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
-		session.load(TestBean.class, "");
+		session.load(TestBean.class, "id");
 		sessionControl.setThrowable(new ObjectNotFoundException("msg", "id", TestBean.class));
-		session.flush();
-		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		Object result = ht.load(TestBean.class, "");
-		assertTrue("Correct result", result == null);
+		try {
+			ht.load(TestBean.class, "id");
+			fail("Should have thrown HibernateObjectRetrievalFailureException");
+		}
+		catch (HibernateObjectRetrievalFailureException ex) {
+			// expected
+		}
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -783,47 +786,60 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testExceptions() {
+	public void testExceptions() throws HibernateException {
+		final SQLException sqlex = new SQLException();
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new JDBCException(null);
+					throw new JDBCException(sqlex);
 				}
 			});
+			fail("Should have thrown HibernateJdbcException");
 		}
 		catch (HibernateJdbcException ex) {
 			// expected
-		}
-		catch (Exception ex) {
-			fail("Should have thrown HibernateJdbcException");
+			assertEquals(sqlex, ex.getRootCause());
 		}
 
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new QueryException("");
+					throw new WrongClassException("msg", "id", TestBean.class);
 				}
 			});
+			fail("Should have thrown HibernateObjectRetrievalFailureException");
 		}
-		catch (InvalidDataAccessResourceUsageException ex) {
+		catch (HibernateObjectRetrievalFailureException ex) {
 			// expected
+			assertEquals(TestBean.class, ex.getPersistentClass());
+			assertEquals("id", ex.getIdentifier());
 		}
-		catch (Exception ex) {
+
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException {
+					throw new StaleObjectStateException(TestBean.class, "id");
+				}
+			});
+			fail("Should have thrown HibernateOptimisticLockingFailureException");
+		}
+		catch (HibernateOptimisticLockingFailureException ex) {
+			// expected
+			assertEquals(TestBean.class, ex.getPersistentClass());
+			assertEquals("id", ex.getIdentifier());
+		}
+
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException {
+					throw new QueryException("msg", sqlex);
+				}
+			});
 			fail("Should have thrown InvalidDataAccessResourceUsageException");
 		}
-
-		try {
-			createTemplate().execute(new HibernateCallback() {
-				public Object doInHibernate(Session session) throws HibernateException {
-					throw new StaleObjectStateException(TestBean.class, "");
-				}
-			});
-		}
-		catch (OptimisticLockingFailureException ex) {
+		catch (HibernateQueryException ex) {
 			// expected
-		}
-		catch (Exception ex) {
-			fail("Should have thrown OptimisticLockingFailureException");
+			assertEquals(sqlex, ex.getRootCause());
 		}
 
 		try {
@@ -832,12 +848,10 @@ public class HibernateTemplateTests extends TestCase {
 					throw new PersistentObjectException("");
 				}
 			});
+			fail("Should have thrown InvalidDataAccessApiUsageException");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
 			// expected
-		}
-		catch (Exception ex) {
-			fail("Should have thrown InvalidDataAccessApiUsageException");
 		}
 
 		try {
@@ -846,12 +860,10 @@ public class HibernateTemplateTests extends TestCase {
 					throw new TransientObjectException("");
 				}
 			});
+			fail("Should have thrown InvalidDataAccessApiUsageException");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
 			// expected
-		}
-		catch (Exception ex) {
-			fail("Should have thrown InvalidDataAccessApiUsageException");
 		}
 
 		try {
@@ -860,26 +872,24 @@ public class HibernateTemplateTests extends TestCase {
 					throw new ObjectDeletedException("", "");
 				}
 			});
+			fail("Should have thrown InvalidDataAccessApiUsageException");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
 			// expected
 		}
-		catch (Exception ex) {
-			fail("Should have thrown InvalidDataAccessApiUsageException");
-		}
 
+		final HibernateException hex = new HibernateException("msg");
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new HibernateException("");
+					throw hex;
 				}
 			});
+			fail("Should have thrown HibernateSystemException");
 		}
 		catch (HibernateSystemException ex) {
 			// expected
-		}
-		catch (Exception ex) {
-			fail("Should have thrown HibernateSystemException");
+			assertEquals(hex, ex.getRootCause());
 		}
 	}
 

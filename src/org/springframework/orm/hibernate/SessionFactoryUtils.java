@@ -4,22 +4,22 @@ import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.ObjectDeletedException;
+import net.sf.hibernate.ObjectNotFoundException;
 import net.sf.hibernate.PersistentObjectException;
+import net.sf.hibernate.Query;
 import net.sf.hibernate.QueryException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.StaleObjectStateException;
 import net.sf.hibernate.TransientObjectException;
-import net.sf.hibernate.Query;
-
+import net.sf.hibernate.WrongClassException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ThreadObjectManager;
@@ -121,10 +121,10 @@ public abstract class SessionFactoryUtils {
 		}
 		catch (JDBCException ex) {
 			// SQLException underneath
-			throw new DataAccessResourceFailureException("Cannot not open Hibernate session", ex.getSQLException());
+			throw new DataAccessResourceFailureException("Cannot open Hibernate session", ex.getSQLException());
 		}
 		catch (HibernateException ex) {
-			throw new DataAccessResourceFailureException("Cannot not open Hibernate session", ex);
+			throw new DataAccessResourceFailureException("Cannot open Hibernate session", ex);
 		}
 	}
 
@@ -149,26 +149,32 @@ public abstract class SessionFactoryUtils {
 	 */
 	public static DataAccessException convertHibernateAccessException(HibernateException ex) {
 		if (ex instanceof JDBCException) {
-			// SQLException during Hibernate code used by the application
-			return new HibernateJdbcException("Exception on Hibernate data access", (JDBCException) ex);
+			// SQLException during Hibernate access
+			return new HibernateJdbcException((JDBCException) ex);
 		}
-		if (ex instanceof QueryException) {
-			return new InvalidDataAccessResourceUsageException("Invalid Hibernate query", ex);
+		if (ex instanceof ObjectNotFoundException) {
+			return new HibernateObjectRetrievalFailureException((ObjectNotFoundException) ex);
+		}
+		if (ex instanceof WrongClassException) {
+			return new HibernateObjectRetrievalFailureException((WrongClassException) ex);
 		}
 		if (ex instanceof StaleObjectStateException) {
-			return new OptimisticLockingFailureException("Version check failed", ex);
+			return new HibernateOptimisticLockingFailureException((StaleObjectStateException) ex);
+		}
+		if (ex instanceof QueryException) {
+			return new HibernateQueryException((QueryException) ex);
 		}
 		if (ex instanceof PersistentObjectException) {
-			return new InvalidDataAccessApiUsageException("Invalid object state", ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage());
 		}
 		if (ex instanceof TransientObjectException) {
-			return new InvalidDataAccessApiUsageException("Invalid object state", ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage());
 		}
 		if (ex instanceof ObjectDeletedException) {
-			return new InvalidDataAccessApiUsageException("Invalid object state", ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage());
 		}
 		// fallback
-		return new HibernateSystemException("Exception on Hibernate data access", ex);
+		return new HibernateSystemException(ex);
 	}
 
 	/**

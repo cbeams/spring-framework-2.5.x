@@ -5,6 +5,7 @@ import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.JDODataStoreException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,17 +92,20 @@ public abstract class PersistenceManagerFactoryUtils {
 	}
 
 	/**
-	 * Convert the given JDOException to an appropriate exception from
-	 * the org.springframework.dao hierarchy.
+	 * Convert the given JDOException to an appropriate exception from the
+	 * org.springframework.dao hierarchy.
+	 * <p>Unfortunately, JDO's JDOUserException covers a lot of distinct causes
+	 * like unparsable query, optimistic locking failure, etc. Thus, we are not able
+	 * to convert to Spring's DataAccessException hierarchy in a fine-granular way.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
 	 */
 	public static DataAccessException convertJdoAccessException(JDOException ex) {
 		if (ex instanceof JDOUserException || ex instanceof JDOFatalUserException) {
-			return new JdoUsageException("Invalid JDO usage", ex);
+			return new JdoUsageException(ex);
 		}
 		// fallback
-		return new JdoSystemException("Exception in JDO access code", ex);
+		return new JdoSystemException(ex);
 	}
 
 	/**
