@@ -1,30 +1,41 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-$Id: changelog.txt,v 1.27 2003-10-08 14:37:56 jhoeller Exp $
+$Id: changelog.txt,v 1.28 2003-10-10 14:31:03 jhoeller Exp $
 
 Changes in version 1.0 M2 (XX.10.2003)
 --------------------------------------
 * added optional dependency checking for bean factories, ensuring that all bean properties have been set before use
 * added non-default "autowire" functionality so that bean factories can optionally configure dependencies automatically
 * added PropertyValuesProviderFactoryBean instead of having getPropertyValues() in the FactoryBean interface
+* added BeanPostProcessor interface and support for it in AbstractBeanFactory and AbstractApplicationContext
+* reworked AbstractBeanFactory's circular reference detection into eager singleton caching
+* reworked XmlBeanFactory's alias handling to allow for multiple aliases in the "name" attribute of the bean tag
 * reworked AopUtils and AOP ProxyFactory configuration options
-* removed "shared object" support in ApplicationContext as part of API simplification
 * restructured org.springframework.context.support package into support, event, and config packages
+* removed "shared object" support in ApplicationContext as part of API simplification
+* reworked AbstractXmlApplicationContext's "getInputStreamForBeanFactory" into "loadBeanDefinitions(BeanFactory)"
+* added support for multiple basenames in a ResourceBundleMessageSource, getting checked sequentially
 * reworked PropertyResourceConfigurer into PropertyOverrideConfigurer and PropertyPlaceholderConfigurer
-* introduced generic mail infrastructure in org.springframework.mail package
-* introduced specific JavaMail support in org.springframework.mail.javamail package
-* added support for returning result sets from a stored procedure
+* introduced generic mail infrastructure in org.springframework.mail package, around the MailSender interface
+* introduced JavaMailSender and JavaMailSenderImpl in org.springframework.mail.javamail package
+* introduced CosMailSenderImpl in org.springframework.mail.cos, using the MailMessage class from Jason Hunter's COS
 * added preInterceptors/postInterceptors support to TransactionProxyFactoryBean
+* added support for returning result sets from a stored procedure
+* allow HibernateCallback to throw SQLException on direct JDBC access
 * reworked Hessian/Burlap/RMI remoting proxies into interceptors with proxy factory bean subclasses
 * reworked (Authorizable)RemoteProxyFactoryBean into (Authorizable)RemoteProxySupport
 * introduced generic multipart handling aka file upload in org.springframework.web.multipart
 * introduced multipart implementation for Jakarta Commons FileUpload
 * introduced multipart implementation for Jason Hunter's COS (com.oreilly.servlet)
+* added support for multiple file paths in XmlWebApplicationContext's "contextConfigLocation" context-param
 * added support for automatic multipart resolution to DispatcherServlet
 * fixed context/servlet path detection in WebUtils and AbstractUrlHandlerMapping
 * moved LastModified interface to org.springframework.web.servlet.mvc
 * reworked DispatcherServlet's revalidation support to leverage HttpServlet.getLastModified
+* added "synchronizeOnSession" support to AbstractController, available to all command and form controllers
+* renamed AbstractFormController's "processSubmit" method to "processFormSubmission"
+* added overloaded "getInitialPage(request,command)" method to AbstractWizardFormController
 * added spring:transform tag, providing support for transforming reference data
 * Velocity support in web framework uses VelocityEngine now to allow for different Velocity configs in same web app
 * fixed TilesView content type handling
