@@ -26,7 +26,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
  * to implement ejbCreate() methods.
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: EjbSupportTests.java,v 1.2 2003-09-19 11:50:39 johnsonr Exp $
+ * @version $Id: EjbSupportTests.java,v 1.3 2003-11-14 20:14:23 colins Exp $
  */
 public class EjbSupportTests extends TestCase {
 
@@ -154,7 +154,7 @@ public class EjbSupportTests extends TestCase {
 		};
 
 		AbstractJmsMessageDrivenBean mdb = new AbstractJmsMessageDrivenBean() {
-			protected void onEjbCreate() throws CreateException {
+			protected void onEjbCreate() {
 				assertTrue(getBeanFactory() == bf);
 				assertTrue(logger != null);
 			}
