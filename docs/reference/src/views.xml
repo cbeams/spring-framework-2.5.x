@@ -301,7 +301,7 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 		</sect2>
 
 		<sect2 id="view-velocity-templates">
-			<title>Create templates and test</title>
+			<title>Creating the Velocity templates</title>
 
 			<para>
 
@@ -634,6 +634,24 @@ public class HomePage extends AbstractXsltView {
 ]]></programlisting>
 
 			</para>
+			
+			<sect3 id="view-xslt-formathelper">
+			
+				<title>Formatting dates and currency</title>
+				
+				<para>
+
+					Unlike JSTL and Velocity, XSLT has relatively poor support
+					for locale based currency and date formatting.  In
+					recognition of the fact, Spring provides a helper class
+					that you can use from within your
+					<literal>createDomNode()</literal> methods to get such
+					support.  See the javadocs for
+					<literal>org.springframework.web.servlet.view.xslt.FormatHelper</literal>
+
+				</para>	
+				
+			</sect3>
 		</sect2>
 
 		<sect2 id="view-xslt-viewdefinitions">
@@ -821,6 +839,44 @@ ProjectRoot
 
 
 		<sect2 id="view-tiles-summary">
+
+			<title>Summary</title> 
+
+            <para>
+
+			    summarize files / libs involved
+			
+			</para>
+
+		</sect2>
+
+
+	</sect1>
+
+
+    <sect1 id="view-document">
+		<title>Document views (PDF/Excel)</title>
+
+		<para>
+
+			intro
+
+		</para>
+		
+		<sect2 id="view-document-config">
+
+			<title>Configuration</title> 
+
+            <para>
+
+			    config
+
+			</para>
+			
+		</sect2>
+
+
+		<sect2 id="view-document-summary">
 
 			<title>Summary</title> 
 
