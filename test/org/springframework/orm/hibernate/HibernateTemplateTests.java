@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
+import net.sf.hibernate.Criteria;
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.Hibernate;
 import net.sf.hibernate.HibernateException;
@@ -264,6 +265,7 @@ public class HibernateTemplateTests extends TestCase {
 
 	public void testLoad() throws HibernateException {
 		TestBean tb = new TestBean();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -310,6 +312,7 @@ public class HibernateTemplateTests extends TestCase {
 
 	public void testLoadWithLockMode() throws HibernateException {
 		TestBean tb = new TestBean();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -326,6 +329,72 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Object result = ht.load(TestBean.class, "", LockMode.UPGRADE);
 		assertTrue("Correct result", result == tb);
+	}
+
+	public void testLoadWithObject() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.load(tb, "");
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.load(tb, "");
+	}
+
+	public void testLoadAll() throws HibernateException {
+		MockControl criteriaControl = MockControl.createControl(Criteria.class);
+		Criteria criteria = (Criteria) criteriaControl.getMock();
+		List list = new ArrayList();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createCriteria(TestBean.class);
+		sessionControl.setReturnValue(criteria, 1);
+		criteria.list();
+		criteriaControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		criteriaControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.loadAll(TestBean.class);
+		assertTrue("Correct result", result == list);
+
+		criteriaControl.verify();
+	}
+
+	public void testRefresh() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.refresh(tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.refresh(tb);
 	}
 
 	public void testContains() throws HibernateException {

@@ -268,6 +268,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
+	public void load(final Object entity, final Serializable id) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.load(entity, id);
+				return null;
+			}
+		});
+	}
+
 	public void refresh(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {

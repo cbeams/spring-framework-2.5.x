@@ -138,6 +138,17 @@ public interface HibernateOperations {
 	List loadAll(Class entityClass) throws DataAccessException;
 
 	/**
+	 * Load the persistent instance with the given identifier
+	 * into the given object, throwing an exception if not found.
+	 * @param entity the object (of the target class) to load into
+	 * @param id an identifier of the persistent instance
+	 * @throws HibernateObjectRetrievalFailureException if the instance could not be found
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#load(Object, java.io.Serializable)
+	 */
+	void load(Object entity, Serializable id) throws DataAccessException;
+
+	/**
 	 * Re-read the state of the given persistent instance.
 	 * @param entity the persistent instance to re-read
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
