@@ -1033,6 +1033,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return resolved;
 	}
 
+	/**
+	 * Register a dependent bean for the given bean,
+	 * to be destroyed before the given bean is destroyed.
+	 * @param beanName the name of the bean
+	 * @param dependentBeanName the name of the dependent bean
+	 */
 	protected final void registerDependentBean(String beanName, String dependentBeanName) {
 		synchronized (this.dependentBeanMap) {
 			List dependencies = (List) this.dependentBeanMap.get(beanName);
@@ -1097,6 +1103,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
+
 	public void destroySingletons() {
 		super.destroySingletons();
 
@@ -1110,16 +1117,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
-	private void destroyDisposableInnerBean(String innerBeanName) {
-		Object innerBeanInstance = this.disposableInnerBeans.remove(innerBeanName);
-		if (innerBeanInstance != null) {
-			destroyBean(innerBeanName, innerBeanInstance);
-		}
-	}
-
 	protected void destroyBean(String beanName, Object bean) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieving depending beans for bean '" + beanName + "'");
+			logger.debug("Retrieving dependent beans for bean '" + beanName + "'");
 		}
 		List dependencies = (List) this.dependentBeanMap.remove(beanName);
 		if (dependencies != null) {
@@ -1170,6 +1170,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// ignore, from manually registered singleton
+		}
+	}
+
+	/**
+	 * Destroy the given inner bean. Delegates to destroyBean if a corresponding
+	 * disposable inner bean instance is found.
+	 * @param innerBeanName name of the inner bean
+	 * @see #destroyBean
+	 */
+	private void destroyDisposableInnerBean(String innerBeanName) {
+		Object innerBeanInstance = this.disposableInnerBeans.remove(innerBeanName);
+		if (innerBeanInstance != null) {
+			destroyBean(innerBeanName, innerBeanInstance);
 		}
 	}
 

@@ -422,7 +422,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName name of the bean
 	 * @see #destroyBean
 	 */
-	protected void destroySingleton(String beanName) {
+	protected final void destroySingleton(String beanName) {
 		Object singletonInstance = this.singletonCache.remove(beanName);
 		if (singletonInstance != null) {
 			destroyBean(beanName, singletonInstance);

@@ -80,7 +80,8 @@ public class TilesView extends InternalResourceView {
 		super.initApplicationContext();
 
 		// get definitions factory
-		this.definitionsFactory = (DefinitionsFactory) getServletContext().getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
+		this.definitionsFactory =
+				(DefinitionsFactory) getServletContext().getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
 		if (this.definitionsFactory == null) {
 			throw new ApplicationContextException("Tiles definitions factory not found: TilesConfigurer not defined?");
 		}
@@ -90,7 +91,8 @@ public class TilesView extends InternalResourceView {
 	 * Prepare for rendering the Tiles definition: Execute the associated
 	 * component controller if any, and determine the request dispatcher path.
 	 */
-	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 
 		// get component definition
 		ComponentDefinition definition = getComponentDefinition(this.definitionsFactory, request);
@@ -113,8 +115,8 @@ public class TilesView extends InternalResourceView {
 		// determine the path of the definition
 		String path = getDispatcherPath(definition, request);
 		if (path == null) {
-			throw new ServletException("Could not determine a path for Tiles definition '" +
-			                           definition.getName() + "'");
+			throw new ServletException(
+					"Could not determine a path for Tiles definition '" + definition.getName() + "'");
 		}
 
 		return path;

@@ -261,11 +261,11 @@ public class VelocityView extends AbstractTemplateView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
-	 * <p>Called by renderMergedTemplateModel. The default implementations is empty.
+	 * <p>Called by renderMergedTemplateModel. The default implementation is empty.
 	 * This method can be overridden to add custom helpers to the model.
-	 * @param model The model that will be passed to the template at merge time
+	 * @param model the model that will be passed to the template at merge time
 	 * @param request current HTTP request
-	 * @throws Exception if there's a fatal error while we're adding information to the context
+	 * @throws Exception if there's a fatal error while we're adding model attributes
 	 * @see #renderMergedTemplateModel
 	 */
 	protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
@@ -278,7 +278,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * This method can be overridden to add custom helpers to the Velocity context.
 	 * @param velocityContext Velocity context that will be passed to the template at merge time
 	 * @param request current HTTP request
-	 * @throws Exception if there's a fatal error while we're adding information to the context
+	 * @throws Exception if there's a fatal error while we're adding model attributes
 	 * @deprecated in favor of exposeHelpers(Map, HttpServletRequest)
 	 * @see #exposeHelpers(Map, HttpServletRequest)
 	 */
@@ -293,7 +293,8 @@ public class VelocityView extends AbstractTemplateView {
 	 * @param response servlet response (use this to get the OutputStream or Writer)
 	 * @see org.apache.velocity.Template#merge
 	 */
-	protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
+	protected void mergeTemplate(Template template, Context context, HttpServletResponse response)
+			throws Exception {
 		template.merge(context, response.getWriter());
 	}
 
