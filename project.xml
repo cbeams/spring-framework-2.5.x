@@ -220,7 +220,10 @@
          <id>mail</id>
          <jar>mail.jar</jar>
       </dependency>
-
+      <dependency>
+         <id>activation</id>
+         <jar>activation.jar</jar>
+      </dependency>
       <dependency>
          <id>ant</id>
          <version>1.5.3-1</version>
@@ -310,6 +313,10 @@
       <dependency>
          <id>itext</id>
          <version>0.99</version>
+      </dependency>
+       <dependency>
+         <id>jdom</id>
+         <version>b9</version>
       </dependency>
       <dependency>
          <id>jstl</id>
