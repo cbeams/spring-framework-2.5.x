@@ -14,8 +14,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.PropertyValidationRule;
 
 /**
- * Convenience super class for PropertyValidationRules. Generally, all rules
- * should have to implement is the <code>validate</code> method.
+ * Convenience super class for PropertyValidationRules. Rules are only
+ * required to implement the <code>validate</code> method.
  * 
  * @author Keith Donald
  */
