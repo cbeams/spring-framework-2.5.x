@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSessionContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @since 1.0.2
  */
 public class MockHttpSession implements HttpSession {
 

@@ -28,7 +28,7 @@ import javax.servlet.ServletInputStream;
  * necessary for testing application controllers.
  *
  * @author Juergen Hoeller
- * @since 27.04.2004
+ * @since 1.0.2
  * @see org.springframework.mock.web.MockHttpServletRequest
  */
 public class DelegatingServletInputStream extends ServletInputStream {

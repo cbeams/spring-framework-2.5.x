@@ -47,6 +47,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
 

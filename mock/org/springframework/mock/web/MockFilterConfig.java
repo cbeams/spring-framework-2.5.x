@@ -29,6 +29,7 @@ import javax.servlet.ServletContext;
  * necessary for testing application controllers.
  *
  * @author Juergen Hoeller
+ * @since 1.0.2
  */
 public class MockFilterConfig implements FilterConfig {
 

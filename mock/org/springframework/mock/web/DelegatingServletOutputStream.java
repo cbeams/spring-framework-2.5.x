@@ -28,7 +28,7 @@ import javax.servlet.ServletOutputStream;
  * directly used for testing application controllers.
  *
  * @author Juergen Hoeller
- * @since 27.04.2004
+ * @since 1.0.2
  * @see MockHttpServletResponse
  */
 public class DelegatingServletOutputStream extends ServletOutputStream {
