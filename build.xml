@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.49 2004-04-09 20:40:07 jhoeller Exp $
+    $Id: build.xml,v 1.50 2004-04-16 22:50:08 kdonald Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -758,8 +758,11 @@
 			<fileset dir="${sandbox.test.dir}">
 				<include name="**/*.properties"/>
 			</fileset>
+			<fileset dir="${sandbox.test.dir}">
+				<include name="**/*.xml"/>
+			</fileset>
 		</copy>
-
+		
 	</target>
 
 
