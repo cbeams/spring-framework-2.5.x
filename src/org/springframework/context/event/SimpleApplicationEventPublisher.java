@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationEvent;
  * Simple {@link ApplicationEventPublisher}that uses ApplicationContext to publish events.
  * 
  * @author Dmitriy Kopylenko
- * @since 1.2
+ * @since 1.1.1
  * @see org.springframework.context.ApplicationContext
  */
 public class SimpleApplicationEventPublisher implements ApplicationEventPublisher, ApplicationContextAware {

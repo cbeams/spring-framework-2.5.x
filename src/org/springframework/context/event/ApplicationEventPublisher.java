@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationEvent;
  * An alternative way to publish an ApplicationEvent declaratively is to use <code>EventPublicationInterceptor</code>
  * 
  * @author Dmitriy Kopylenko
- * @since 1.2
+ * @since 1.1.1
  * @see org.springframework.context.event.EventPublicationInterceptor
  * @see org.springframework.context.ApplicationEvent
  */
