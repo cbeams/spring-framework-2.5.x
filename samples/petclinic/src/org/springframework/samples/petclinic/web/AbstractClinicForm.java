@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
  *
  * @author Ken Krebs
  */
-abstract public class AbstractClinicForm extends SimpleFormController {
+public abstract class AbstractClinicForm extends SimpleFormController {
 
 	private Clinic clinic;
 
@@ -48,7 +48,7 @@ abstract public class AbstractClinicForm extends SimpleFormController {
 
 	/**
 	 * Method disallows duplicate form submission.
-	 * Typically used to prevent duplicate insertion of <code>Entity</code>s
+	 * Typically used to prevent duplicate insertion of entities
 	 * into the datastore. Shows a new form with an error message.
 	 */
 	protected ModelAndView disallowDuplicateFormSubmission(HttpServletRequest request, HttpServletResponse response)

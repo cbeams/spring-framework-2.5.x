@@ -16,13 +16,13 @@ public interface Clinic {
 
 	/**
 	 * Retrieve all <code>Vet</code>s from the datastore.
-	 * @return a <code>List</code> of <code>Vet</code>s.
+	 * @return a <code>Collection</code> of <code>Vet</code>s.
 	 */
 	public Collection getVets() throws DataAccessException;
 
 	/**
 	 * Retrieve all <code>PetType</code>s from the datastore.
-	 * @return a <code>List</code> of <code>PetType</code>s.
+	 * @return a <code>Collection</code> of <code>PetType</code>s.
 	 */
 	public Collection getPetTypes() throws DataAccessException;
 
@@ -30,7 +30,7 @@ public interface Clinic {
 	 * Retrieve <code>Owner</code>s from the datastore by last name,
 	 * returning all owners whose last name <i>starts</i> with the given name.
 	 * @param lastName Value to search for.
-	 * @return a <code>List</code> of matching <code>Owner</code>s.
+	 * @return a <code>Collection</code> of matching <code>Owner</code>s.
 	 */
 	public Collection findOwners(String lastName) throws DataAccessException;
 
@@ -70,6 +70,6 @@ public interface Clinic {
 	 * @param visit to add.
 	 * @see Entity#isNew
 	 */
-	public void storeVisit(Visit visit);
+	public void storeVisit(Visit visit) throws DataAccessException;
 
 }

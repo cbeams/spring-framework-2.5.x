@@ -11,9 +11,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
@@ -36,42 +33,22 @@ import org.springframework.samples.petclinic.util.EntityUtils;
  * @author Ken Krebs
  * @author Juergen Hoeller
  */
-abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clinic {
+public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clinic {
 
-	/** Logger for this class and subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	/** Holds all vets Query Object. */
 	private VetsQuery vetsQuery;
-
-	/** Holds specialties Query Object. */
 	private SpecialtiesQuery specialtiesQuery;
-
-	/** Holds vet specialties Query Object. */
 	private VetSpecialtiesQuery vetSpecialtiesQuery;
-
 	private OwnersByNameQuery ownersByNameQuery;
-
 	private OwnerQuery ownerQuery;
-
 	private OwnerInsert ownerInsert;
-
 	private OwnerUpdate ownerUpdate;
-
 	private PetsByOwnerQuery petsByOwnerQuery;
-
 	private PetQuery petQuery;
-
 	private PetInsert petInsert;
-
 	private PetUpdate petUpdate;
-
 	private PetTypesQuery petTypesQuery;
-
 	private VisitsQuery visitsQuery;
-
 	private VisitInsert visitInsert;
-
 
 	protected void initDao() {
 		this.vetsQuery = new VetsQuery(getDataSource());
@@ -234,7 +211,14 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-	protected void retrieveIdentity(final Entity entity) {
+	/**
+	 * Retrieve and set the identity for the given entity,
+	 * assuming that the last executed insert affected that entity
+	 * and generated an auto-increment value for it.
+	 * @param entity the entity object to retrieved the id for
+	 * @see #getIdentityQuery
+	 */
+	protected void retrieveIdentity(Entity entity) {
 		entity.setId(getJdbcTemplate().queryForInt(getIdentityQuery()));
 	}
 
