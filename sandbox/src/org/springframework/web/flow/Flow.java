@@ -16,7 +16,9 @@
 package org.springframework.web.flow;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -682,6 +684,15 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	public Iterator stateGroupIterator() {
 		return stateGroups.iterator();
+	}
+
+	public String[] getStateIds() {
+		Iterator it = statesIterator();
+		List stateIds = new ArrayList();
+		while (it.hasNext()) {
+			stateIds.add(((AbstractState)it.next()).getId());
+		}
+		return (String[])stateIds.toArray(new String[0]);
 	}
 
 	/*
@@ -2039,4 +2050,5 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return new ToStringCreator(this).append("id", id).append("startState", startState)
 				.append("states", stateGroups).toString();
 	}
+
 }

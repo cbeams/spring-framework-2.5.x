@@ -90,7 +90,7 @@ public abstract class AbstractState implements Serializable {
 	 */
 	protected void setFlow(Flow flow) {
 		Assert.notNull(flow, "The owning flow is required");
-		if (!flow.containsState(this.id)) {
+		if (flow.containsState(this.id)) {
 			throw new IllegalStateException(
 					"This flow '"
 							+ flow.getId()
