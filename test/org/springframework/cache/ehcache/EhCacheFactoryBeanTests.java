@@ -37,7 +37,7 @@ public class EhCacheFactoryBeanTests extends TestCase {
         cacheFb.setCacheName("myCache");
         try {
             cacheFb.afterPropertiesSet();
-            fail("Missing on of the required properties - should have thrown IllegalStateException");
+            fail("Missing one of the required properties - should have thrown IllegalStateException");
         }
         catch (IllegalStateException ex) {
             //Expected
