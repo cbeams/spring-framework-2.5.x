@@ -20,7 +20,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface 
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.7 2003-11-14 08:51:30 johnsonr Exp $
+ * @version $Id: MethodInvocationImpl.java,v 1.8 2003-11-14 09:20:18 johnsonr Exp $
  */
 public class MethodInvocationImpl implements MethodInvocation {
 	
@@ -103,6 +103,7 @@ public class MethodInvocationImpl implements MethodInvocation {
 		this.method = null;
 		this.arguments = null;
 		this.interceptorsAndDynamicMethodMatchers = null;
+		this.resources = null;
 	}
 	
 	
