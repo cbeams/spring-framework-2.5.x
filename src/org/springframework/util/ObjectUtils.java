@@ -84,7 +84,7 @@ public abstract class ObjectUtils {
 	}
 
     /**
-     * Convert a primitive array to an object array of wrapper objects.
+     * Convert a primitive array to an object array of primitive wrapper objects.
      * @param primitiveArray the primitive array
      * @return The object array.
      * @throws IllegalArgumentException if the parameter is not a primitive array.
