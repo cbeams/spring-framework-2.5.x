@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.interceptor;
 
@@ -37,10 +37,10 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ConcurrencyThrottleInterceptor implements MethodInterceptor, Serializable {
 
-	/**
-	 * Static to avoid serializing the logger
-	 */
+	/** Static to avoid serializing the logger */
 	protected static final Log logger = LogFactory.getLog(ConcurrencyThrottleInterceptor.class);
+
+	private transient final Object monitor = new Object();
 
 	private int concurrencyLimit = 1;
 
@@ -56,14 +56,14 @@ public class ConcurrencyThrottleInterceptor implements MethodInterceptor, Serial
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		boolean debug = logger.isDebugEnabled();
-		synchronized (this) {
+		synchronized (this.monitor) {
 			while (this.concurrencyCount >= this.concurrencyLimit) {
 				if (debug) {
 					logger.debug("Concurrency count " + this.concurrencyCount +
-											 " has reached limit " + this.concurrencyLimit + " - blocking");
+							" has reached limit " + this.concurrencyLimit + " - blocking");
 				}
 				try {
-					wait();
+					this.monitor.wait();
 				}
 				catch (InterruptedException ex) {
 				}
@@ -77,12 +77,12 @@ public class ConcurrencyThrottleInterceptor implements MethodInterceptor, Serial
 			return methodInvocation.proceed();
 		}
 		finally {
-			synchronized (this) {
+			synchronized (this.monitor) {
 				this.concurrencyCount--;
 				if (debug) {
 					logger.debug("Returning from method at concurrency count " + this.concurrencyCount);
 				}
-				notify();
+				this.monitor.notify();
 			}
 		}
 	}
