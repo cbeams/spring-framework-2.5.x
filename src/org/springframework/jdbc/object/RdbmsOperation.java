@@ -10,18 +10,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.QueryExecutor;
+import org.springframework.jdbc.core.SQLExceptionTranslator;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
 
 /**
  * Root of the JDBC object hierarchy, as described in Chapter 9 of
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">
+ * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">
  * Expert One-On-One J2EE Design and Development</a> by Rod Johnson (Wrox, 2002).
  *
  * <p>An "RDBMS operation" is a multithreaded, reusable object representing
@@ -38,7 +42,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  * The appropriate execute or update method can then be invoked.
  *
  * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.4 2003-09-17 01:14:49 trisberg Exp $
+ * @version $Id: RdbmsOperation.java,v 1.5 2003-11-03 17:03:42 johnsonr Exp $
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
  */
@@ -51,13 +55,62 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/** SQL statement */
 	private String sql;
+	
+	/** Lower-level class used to execute SQL */
+	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
+	
 	/**
 	 * Has this operation been compiled? Compilation means at
 	 * least checking that a DataSource and sql have been provided,
 	 * but subclasses may also implement their own custom validation.
 	 */
 	private boolean compiled;
+	
+	
+	/**
+	 * Return the JdbcTemplate object used by this object.
+	 */
+	protected final JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+	
+	/**
+	 * An alternative to the more commonly used setDataSource() when you want to
+	 * use the same JdbcTemplate in multiple RdbmsOperations. This is appropriate if the
+	 * JdbcTemplate has special configuration such as a SQLExceptionTranslator that should
+	 * apply to multiple RdbmsOperation objects.
+	 * @param jdbcTemplate
+	 */
+	public final void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+	
+	public final void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate.setDataSource(dataSource);
+	}
+
+	/**
+	 * Set the exception translator used in this class.
+	 */
+	public final void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
+		this.jdbcTemplate.setExceptionTranslator(exceptionTranslator);
+	}
+
+	/**
+	 * Set a custom QueryExecutor implementation.
+	 */
+	public final void setQueryExecutor(QueryExecutor queryExecutor) {
+		this.jdbcTemplate.setQueryExecutor(queryExecutor);
+	}
+
+	/**
+	 * Set whether or not we want to ignore SQLWarnings.
+	 * Default is true.
+	 */
+	public final void setIgnoreWarnings(boolean ignoreWarnings) {
+		this.jdbcTemplate.setIgnoreWarnings(ignoreWarnings);
+	}
 
 	/**
 	 * Add anonymous parameters, specifying only their SQL types
@@ -144,6 +197,14 @@ public abstract class RdbmsOperation implements InitializingBean {
 			if (this.sql == null)
 				throw new InvalidDataAccessApiUsageException("Sql must be set in class " + getClass().getName());
 			// Invoke subclass compile
+			
+			try {
+				this.jdbcTemplate.afterPropertiesSet();
+			}
+			catch (IllegalArgumentException ex) {
+				throw new InvalidDataAccessApiUsageException(ex.getMessage());
+			}	
+		
 			compileInternal();
 			this.compiled = true;
 			logger.info("RdbmsOperation with SQL [" + getSql() + "] compiled");

@@ -1,18 +1,40 @@
 package org.springframework.jdbc.object;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.easymock.MockControl;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.*;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.core.BadSqlGrammarException;
+import org.springframework.jdbc.core.CallableStatementCreator;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.SQLExceptionTranslator;
+import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
+/**
+ * Tests for StoredProcedure class
+ * @author Thomas Risberg
+ * @author Trevor Cook
+ * @author Rod Johnson
+ * @version $Id: StoredProcedureTestSuite.java,v 1.7 2003-11-03 17:07:45 johnsonr Exp $
+ */
 public class StoredProcedureTestSuite extends JdbcTestCase {
 
 	private MockControl ctrlCallable;
@@ -37,8 +59,9 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 	 */
 	protected void tearDown() throws Exception {
 		super.tearDown();
-
-		ctrlCallable.verify();
+		if (shouldVerify()) {
+			ctrlCallable.verify();
+		}
 	}
 
 	/**
@@ -133,6 +156,93 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 				mockDataSource);
 		}
 	}
+
+		
+	/**
+	 * Confirm no connection was used to get metadata.
+	 * Does not use superclass replay mechanism.
+	 * @throws Exception
+	 */
+	public void testStoredProcedureConfiguredViaJdbcTemplateWithCustomExceptionTranslator() throws Exception {					
+		mockCallable.setObject(1, new Integer(11), Types.INTEGER);
+		ctrlCallable.setVoidCallable(1);
+		mockCallable.registerOutParameter(2, Types.INTEGER);
+		ctrlCallable.setVoidCallable(1);
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false, 1);
+		mockCallable.getObject(2);
+		ctrlCallable.setReturnValue(new Integer(5), 1);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable(1);
+		// Must call this here as we're not using setUp()/tearDown() mechanism
+		ctrlCallable.replay();
+
+		ctrlConnection = MockControl.createControl(Connection.class);
+		mockConnection = (Connection) ctrlConnection.getMock();
+		mockConnection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable, 1);
+		mockConnection.close();
+		ctrlConnection.setVoidCallable(1);
+		ctrlConnection.replay();
+		
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		DataSource localDs = (DataSource) dsControl.getMock();
+		localDs.getConnection();
+		dsControl.setReturnValue(mockConnection, 1);
+		dsControl.replay();
+
+		class TestJdbcTemplate extends JdbcTemplate {
+			int calls;
+			public Map execute(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
+				calls++;
+				return super.execute(csc, declaredParameters);
+			}
+
+		}
+		TestJdbcTemplate t = new TestJdbcTemplate();
+		t.setDataSource(localDs);
+		// Will fail without the following, because we're not able to get a connection from the
+		// DataSource here if we need to to create an ExceptionTranslator
+		t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
+		
+		assertEquals(sp.execute(11), 5);
+		assertEquals(1, t.calls);
+		
+		dsControl.verify();
+		ctrlCallable.verify();
+		ctrlConnection.verify();
+	}
+	
+	/**
+	 * Confirm our JdbcTemplate is used
+	 * @throws Exception
+	 */
+	public void testStoredProcedureConfiguredViaJdbcTemplate() throws Exception {
+		mockCallable.setObject(1, new Integer(1106), Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.registerOutParameter(2, Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getObject(2);
+		ctrlCallable.setReturnValue(new Integer(4));
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();	
+		JdbcTemplate t = new JdbcTemplate();
+		t.setDataSource(mockDataSource);
+		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
+	
+		assertEquals(sp.execute(1106), 4);
+	}
+	
+	
+	
 
 	public void testNullArg() throws Exception {
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
@@ -249,6 +359,25 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		assertEquals("Foo", res.get(0));
 		assertEquals("Bar", res.get(1));
 		
+	}
+	
+	private class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
+		public static final String SQL = "configured_via_jt";
+		public StoredProcedureConfiguredViaJdbcTemplate(JdbcTemplate t) {
+			setJdbcTemplate(t);
+			setSql(SQL);
+			declareParameter(new SqlParameter("intIn", Types.INTEGER));
+			declareParameter(new SqlOutParameter("intOut", Types.INTEGER));
+			compile();
+		}
+
+		public int execute(int intIn) {
+			Map in = new HashMap();
+			in.put("intIn", new Integer(intIn));
+			Map out = execute(in);
+			Number intOut = (Number) out.get("intOut");
+			return intOut.intValue();
+		}
 	}
 
 	private class AddInvoice extends StoredProcedure {

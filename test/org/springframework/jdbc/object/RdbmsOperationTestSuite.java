@@ -15,6 +15,8 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.support.CommonsDbcpQueryExecutor;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import com.mockobjects.sql.MockDataSource;
+
 /**
  * @author Trevor D. Cook
  */
@@ -33,6 +35,7 @@ public class RdbmsOperationTestSuite extends TestCase {
 
 	public void testSetTypeAfterCompile() {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
+		operation.setDataSource(new MockDataSource());
 		operation.setSql("select * from mytable");
 		operation.compile();
 		try {
@@ -46,6 +49,7 @@ public class RdbmsOperationTestSuite extends TestCase {
 
 	public void testDeclareParameterAfterCompile() {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
+		operation.setDataSource(new MockDataSource());
 		operation.setSql("select * from mytable");
 		operation.compile();
 		try {
@@ -68,6 +72,22 @@ public class RdbmsOperationTestSuite extends TestCase {
 			// OK
 		}
 	}
+	
+	
+	public void testOperationConfiguredViaJdbcTemplateMustGetDataSource() throws Exception {
+		JdbcTemplate t = new JdbcTemplate();
+		try {
+			TestRdbmsOperation operation = new TestRdbmsOperation();
+			operation.setSql("foo");
+			operation.compile();
+			fail("Can't compile without providing a DataSource for the JdbcTemplate");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// Check for helpful error message. Omit leading character
+			// so as not to be fussy about case
+			assertTrue(ex.getMessage().indexOf("ataSource") != -1);
+		}
+	}
 
 	public void testTooManyParameters() {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
@@ -82,6 +102,7 @@ public class RdbmsOperationTestSuite extends TestCase {
 
 	public void testCompileTwice() {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
+		operation.setDataSource(new MockDataSource());
 		operation.setSql("select * from mytable");
 		operation.setTypes(null);
 		operation.compile();

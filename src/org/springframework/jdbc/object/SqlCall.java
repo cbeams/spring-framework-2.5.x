@@ -8,14 +8,8 @@ package org.springframework.jdbc.object;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
-import org.springframework.jdbc.core.SQLExceptionTranslator;
-import org.springframework.jdbc.core.QueryExecutor;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
 
@@ -28,11 +22,9 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
+ * @version $Id: SqlCall.java,v 1.2 2003-11-03 17:03:42 johnsonr Exp $
  */
 public abstract class SqlCall extends RdbmsOperation {
-
-	/** Lower-level class used to execute SQL */
-	private final JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
 	/**
 	 * Object enabling us to create CallableStatementCreators
@@ -54,38 +46,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 */
 	private String callString;
 
-	public final void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate.setDataSource(dataSource);
-	}
 
-	/**
-	 * Set the exception translator used in this class.
-	 */
-	public final void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
-		this.jdbcTemplate.setExceptionTranslator(exceptionTranslator);
-	}
-
-	/**
-	 * Set a custom QueryExecutor implementation.
-	 */
-	public final void setQueryExecutor(QueryExecutor queryExecutor) {
-		this.jdbcTemplate.setQueryExecutor(queryExecutor);
-	}
-
-	/**
-	 * Set whether or not we want to ignore SQLWarnings.
-	 * Default is true.
-	 */
-	public final void setIgnoreWarnings(boolean ignoreWarnings) {
-		this.jdbcTemplate.setIgnoreWarnings(ignoreWarnings);
-	}
-
-	/**
-	 * Return the JdbcTemplate object used by this object.
-	 */
-	protected final JdbcTemplate getJdbcTemplate() {
-		return jdbcTemplate;
-	}
 
 	/**
 	 * Set the flag used to indicate that this call is for a function
@@ -126,12 +87,6 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * @see RdbmsOperation#compileInternal()
 	 */
 	protected final void compileInternal() {
-		try {
-			this.jdbcTemplate.afterPropertiesSet();
-		}
-		catch (IllegalArgumentException ex) {
-			throw new InvalidDataAccessApiUsageException(ex.getMessage());
-		}
 
 		List parameters = getDeclaredParameters();
 		int firstParameter = 0;
