@@ -1,9 +1,9 @@
 package org.springframework.aop.framework.support;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.aopalliance.intercept.Interceptor;
 import org.apache.commons.logging.Log;
@@ -20,6 +20,7 @@ import org.springframework.core.Ordered;
 /**
  * BeanPostProcessor implementation that wraps a group of beans with AOP proxies
  * that delegate to the given interceptors before invoking the bean itself.
+ * Also supports additional specific interceptors per bean instance.
  *
  * <p>This is particularly useful if there's a large number of beans that need
  * to get wrapped with similar proxies, i.e. delegating to the same interceptors.
@@ -115,8 +116,9 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 				}
 			}
 			if (logger.isInfoEnabled()) {
-				logger.info("Creating implicit proxy for bean '" +  name + "' with " + this.interceptors +
-										"common interceptors and " + specificInterceptors.length + " specific interceptors");
+				int nrOfCommonInterceptors = this.interceptors != null ? this.interceptors.length : 0;
+				logger.info("Creating implicit proxy for bean '" +  name + "' with " + nrOfCommonInterceptors +
+										" common interceptors and " + specificInterceptors.length + " specific interceptors");
 			}
 			ProxyFactory proxyFactory = new ProxyFactory();
 			for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
@@ -147,10 +149,12 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * @param definition the definition that the bean was created with
 	 * @return an array of additional interceptors for the particular bean;
 	 * or an empty array if no additional interceptors but just the common ones;
-	 * or null if no proxy at all, not even the common ones.
+	 * or null if no proxy at all, not even with the common interceptors.
 	 * See constants DO_NOT_PROXY and PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS.
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see #postProcessBean
+	 * @see #DO_NOT_PROXY
+	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
 	protected abstract Object[] getInterceptorsAndPointcutsForBean(Object bean, String name,
 	                                                               RootBeanDefinition definition)
