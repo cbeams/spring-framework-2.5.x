@@ -26,8 +26,12 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.ResultReader;
 
 /**
- * Reusable threadsafe object to represent a SQL query. Subclasses must
- * implement the <code>newResultReader</code> method to provide an object
+ * Reusable object to represent a SQL query. Like all RdbsOperation
+ * objects, SqlQuery objects are threadsafe after their initialization is
+ * complete. That is, after they are constructed and configured via their
+ * setter methods, they can be used safely from multiple threads.
+ * <p>
+ * Subclasses must implement the <code>newResultReader</code> method to provide an object
  * that can save the results of iterating over the ResultSet.
  *
  * <p>This class provides a number of public <code>execute</code> methods that are
