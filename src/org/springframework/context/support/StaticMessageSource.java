@@ -9,7 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Simple implementation of NestingMessageSource that allows messages
+ * Simple implementation of HierarchicalMessageSource that allows messages
  * to be held in a Java object, and added programmatically.
  * This class now supports internationalization.
  *
@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  */
-public class StaticMessageSource extends AbstractNestingMessageSource {
+public class StaticMessageSource extends AbstractMessageSource {
 
 	private final Log logger = LogFactory.getLog(getClass());
 

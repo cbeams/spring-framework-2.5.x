@@ -81,11 +81,11 @@ public class StaticMessageSourceTestSuite
 	}
 
 	/**
-	 * We really are testing the AbstractNestingMessageSource class here.
+	 * We really are testing the AbstractMessageSource class here.
 	 * The underlying implementation uses a hashMap to cache messageFormats
 	 * once a message has been asked for.  This test is an attempt to
 	 * make sure the cache is being used properly.
-	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
+	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 */
 	public void testGetMessageWithMessageAlreadyLookedFor()
 	    throws Exception {

@@ -80,7 +80,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	}
 
 	/**
-	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
+	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 * NOTE: Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
 	 */
 	public void testGetMessageWithDefaultPassedInAndFoundInMsgCatalog() {
@@ -92,7 +92,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	}
 
 	/**
-	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
+	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 * NOTE: Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
 	 */
 	public void testGetMessageWithDefaultPassedInAndNotFoundInMsgCatalog() {
@@ -107,7 +107,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	 * once a message has been asked for.  This test is an attempt to
 	 * make sure the cache is being used properly.
 	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
-	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
+	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 */
 	public void testGetMessageWithMessageAlreadyLookedFor() throws Exception {
 		Object[] arguments = {
@@ -137,7 +137,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	}
 
 	/**
-	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
+	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
 	 * Example taken from the javadocs for the java.text.MessageFormat class
 	 */
@@ -175,7 +175,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	}
 
 	/**
-	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
+	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
 	 */
 	public void testGetMessageWithNoDefaultPassedInAndNotFoundInMsgCatalog() {
@@ -197,7 +197,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	}
 
 	/**
-	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
+	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/themeXXX.properties" files.
 	 */
 	public void testGetMessageWithDefaultPassedInAndFoundInThemeCatalog() {
@@ -213,7 +213,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	}
 
 	/**
-	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
+	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/themeXXX.properties" files.
 	 */
 	public void testGetMessageWithDefaultPassedInAndNotFoundInThemeCatalog() {

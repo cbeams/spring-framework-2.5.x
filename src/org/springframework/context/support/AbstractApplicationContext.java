@@ -29,11 +29,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.NestingMessageSource;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ApplicationEventMulticasterImpl;
 import org.springframework.context.event.ContextClosedEvent;
@@ -60,7 +60,7 @@ import org.springframework.core.io.UrlResource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -317,9 +317,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME);
 			// set parent message source if applicable,
 			// and if the message source is defined in this context, not in a parent
-			if (this.parent != null && (this.messageSource instanceof NestingMessageSource) &&
+			if (this.parent != null && (this.messageSource instanceof HierarchicalMessageSource) &&
 			    Arrays.asList(getBeanDefinitionNames()).contains(MESSAGE_SOURCE_BEAN_NAME)) {
-				((NestingMessageSource) this.messageSource).setParent(this.parent);
+				((HierarchicalMessageSource) this.messageSource).setParentMessageSource(this.parent);
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {

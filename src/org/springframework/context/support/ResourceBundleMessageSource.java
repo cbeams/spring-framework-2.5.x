@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * @see ReloadableResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
-public class ResourceBundleMessageSource extends AbstractNestingMessageSource {
+public class ResourceBundleMessageSource extends AbstractMessageSource {
 
 	private String[] basenames;
 

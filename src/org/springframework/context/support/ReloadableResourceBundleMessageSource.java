@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
  * @see ResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
-public class ReloadableResourceBundleMessageSource extends AbstractNestingMessageSource
+public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
     implements ApplicationContextAware {
 
 	public static final String PROPERTIES_SUFFIX = ".properties";
@@ -289,6 +289,17 @@ public class ReloadableResourceBundleMessageSource extends AbstractNestingMessag
 	 */
 	public synchronized void clearCache() {
 		this.cachedProperties.clear();
+	}
+
+	/**
+	 * Clear the resource bundle caches of this MessageSource and all its ancestors.
+	 * @see #clearCache
+	 */
+	public void clearCacheIncludingAncestors() {
+		clearCache();
+		if (getParentMessageSource() instanceof ReloadableResourceBundleMessageSource) {
+			((ReloadableResourceBundleMessageSource) getParentMessageSource()).clearCacheIncludingAncestors();
+		}
 	}
 
 	public String toString() {

@@ -11,13 +11,13 @@ import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.NestingMessageSource;
 import org.springframework.context.NoSuchMessageException;
 
 /**
- * Abstract implementation of NestingMessageSource interface,
+ * Abstract implementation of HierarchicalMessageSource interface,
  * making it easy to implement a custom MessageSource.
  * Subclasses must implement the abstract resolve method.
  *
@@ -28,17 +28,20 @@ import org.springframework.context.NoSuchMessageException;
  * @author Juergen Hoeller
  * @see #resolve
  */
-public abstract class AbstractNestingMessageSource implements NestingMessageSource {
+public abstract class AbstractMessageSource implements HierarchicalMessageSource {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Parent MessageSource */
-	private MessageSource parent;
+	private MessageSource parentMessageSource;
 
 	private boolean useCodeAsDefaultMessage = false;
 
-	public final void setParent(MessageSource parent) {
-		this.parent = parent;
+	public final void setParentMessageSource(MessageSource parent) {
+		this.parentMessageSource = parent;
+	}
+
+	public final MessageSource getParentMessageSource() {
+		return parentMessageSource;
 	}
 
 	/**
@@ -112,8 +115,8 @@ public abstract class AbstractNestingMessageSource implements NestingMessageSour
 			return messageFormat.format(args);
 		}
 		else {
-			if (this.parent != null) {
-				return this.parent.getMessage(code, args, locale);
+			if (this.parentMessageSource != null) {
+				return this.parentMessageSource.getMessage(code, args, locale);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
