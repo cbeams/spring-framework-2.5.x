@@ -28,7 +28,7 @@
 	<path id="attribute-compiler-classpath">
 
 		<fileset dir="${spring.root}/lib/jakarta-commons">
-			<include name="commons-attributes-compiler-SNAPSHOT.jar"/>
+			<include name="commons-attributes-compiler-*.jar"/>
 			<include name="commons-collections.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/xdoclet">
