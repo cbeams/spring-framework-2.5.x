@@ -3,6 +3,41 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.1.4 (5.1.2005)
+-----------------------------------
+
+Package org.springframework.beans
+* added "getResourceDescription" and "getBeanName" accessors to BeanCreationException and BeanDefinitionStoreException
+* fixed AbstractAutowireCapableBeanFactory to avoid potential NPE in case of chained factory-methods with factory-bean
+* added "factoryBean" argument to InstantiationStrategy's "instantiate" method for a factory method (required for above)
+* added "ignoreInvalidKeys" bean property to PropertyOverrideConfigurer, allowing to just log invalid keys as warning
+
+Package org.springframework.jdbc
+* added overloaded "queryForList"/"queryForObject"/"queryForLong"/"queryForInt" methods with arg types to JdbcTemplate
+
+Package org.springframework.jms
+* added "messageIdEnabled" and "messageTimestampEnabled" properties to JmsTemplate, to disable id/timestamp on producer
+* added "pubSubNoLocal" property to JmsTemplate, leading to the NoLocal flag being specified on MessageConsumer creation
+* added "receiveSelected" and "receivedSelectedAndConvert" methods to JmsTemplate, accepting JMS message selectors
+* fixed JmsTemplate's "...AndConvert" methods to return null as converted message if no JMS message received
+
+Package org.springframework.orm
+* fixed NPE in HibernateTemplate's "iterate(queryString,value)" and "iterate(queryString,values)" methods
+
+Package org.springframework.mock
+* changed "addParameter" methods in MockHttpServletRequest to check for existing values, adding given values to the list
+
+Package org.springframework.scheduling
+* TimerFactoryBean accepts SchedulerTimerTasks with "period" <= 0 now, scheduling them for one-time execution
+* added "schedulerListeners", "(global)JobListeners", "(global)TriggerListeners" bean properties to SchedulerFactoryBean
+* added "jobListenerNames"/"triggerListenerNames" property to JobDetailBean, CronTriggerBean, SimpleTriggerBean (resp.)
+
+Package org.springframework.web
+* fixed DispatcherServlet to copy attribute names before iterating over them to restore original values after include
+* added overloaded "getFormSessionAttributeName" method with HttpServletRequest argument to AbstractFormController
+* added overloaded "getPageSessionAttributeName" method with HttpServletRequest argument to AbstractWizardFormController
+
+
 Changes in version 1.1.3 (12.12.2004)
 -------------------------------------
 
