@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.beans.factory.access;
 
 import java.io.IOException;
@@ -237,7 +237,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  *   
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @author colin sampaleanu
  * 
  * @see org.springframework.context.access.LocatorFactory
@@ -252,8 +252,6 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			.getLogger(SingletonBeanFactoryLocator.class);
 
 	// the keyed singleton instances
-	private static SingletonBeanFactoryLocator _noSelectorInstance;
-
 	private static HashMap instances = new HashMap();
 
 	// --- attributes
@@ -274,12 +272,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * @throws FatalBeanException
 	 */
 	public static BeanFactoryLocator getInstance() throws FatalBeanException {
-
-		synchronized (instances) {
-			if (_noSelectorInstance == null)
-				_noSelectorInstance = new SingletonBeanFactoryLocator();
-			return _noSelectorInstance;
-		}
+		return getInstance(BEANS_REFS_XML_NAME);
 	}
 
 	/**
@@ -297,6 +290,9 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			throws FatalBeanException {
 
 		synchronized (instances) {
+			_log.debug("SingletonBeanFactoryLocator.getInstance(): SingletonBeanFactoryLocator.class="
+				+ SingletonBeanFactoryLocator.class + ", hash= " + SingletonBeanFactoryLocator.class.hashCode());
+			_log.debug("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" + instances.hashCode() + ", instances=" + instances);
 			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
 			if (bfl == null) {
 				bfl = new SingletonBeanFactoryLocator(selector);
@@ -447,11 +443,9 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * @param resources
 	 * @return
 	 */
-	protected BeanFactory createDefinition(String[] resources) throws FatalBeanException {
-//		FileSystemXmlApplicationContext groupContext = new FileSystemXmlApplicationContext(
-//				resources);
-//		return groupContext;
-		
+	protected BeanFactory createDefinition(String[] resources)
+			throws FatalBeanException {
+
 		DefaultListableBeanFactory fac = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(fac);
 		for (int i = 0; i < resources.length; ++i) {
@@ -463,7 +457,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			}
 		}
 		fac.preInstantiateSingletons();
-		
+
 		return fac;
 	}
 
