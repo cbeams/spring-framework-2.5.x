@@ -1,12 +1,13 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.134 2004-04-28 18:40:41 jhoeller Exp $
+$Id: changelog.txt,v 1.135 2004-04-29 09:57:20 jhoeller Exp $
 
 
 Changes in version 1.0.2 (16.5.2003)
 ------------------------------------
 
 Package org.springframework.beans
+* PropertyValue and MutablePropertyValues implement java.io.Serializable
 * fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to properly handle null values in "getAsText"
 * added AbstractFactoryBean class as superclass for FactoryBeans that are capable of both singletons and prototypes
 * reworked List/Map/Set/PropertiesFactoryBean to extend from AbstractFactoryBean
@@ -15,6 +16,10 @@ Package org.springframework.beans
 Package org.springframework.context
 * added ResourceMapFactoryBean class to context.support, for resolving properties into a Map with Resource values
 * fixed AbstractMessageSource's parent checks to correctly respect the child's "useCodeAsDefaultMessage" setting
+* AbstractApplicationContext uses ResourceEditor with ResourceLoader argument rather than former ContextResourceEditor
+
+Package org.springframework.core
+* reworked ResourceEditor to take ResourceLoader argument in overloaded constructor
 
 Package org.springframework.jdbc
 * fixed a NPE in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have DataSource set
@@ -40,10 +45,17 @@ Package org.springframework.util
 * added "copy(String, Writer)" and "copyToString(Reader)" methods to FileCopyUtils
 
 Package org.springframework.web
+* reworked FilterConfigPropertyValues into inner class of GenericFilterBean
+* added implicit registration of ResourceEditor with ServletContextResourceLoader to GenericFilterBean
+* added "initBeanWrapper" callback to GenericFilterBean, to allow for registering custom editors
+* added implicit registration of ResourceEditor with ServletContextResourceLoader to HttpServletBean
+* added "initBeanWrapper" callback to HttpServletBean, to allow for registering custom editors
 * refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
 * deprecated BaseCommandController's "onBind(request, command)" method in favor of "onBind(request, command, errors)"
 * deprecated SimpleFormController's "onSubmit(command)" method in favor of "onSubmit(command, errors)"
 * reworked JSP tag implementations to implement the TryCatchFinally interface for eager resource cleanup
+* factored out common code from DelegationActionProxy to DelegatingActionUtils
+* added DelegatingRequestProcessor and DelegatingTilesRequestProcessor as alternatives to DelegatingActionProxy
 
 
 Changes in version 1.0.1 (22.4.2003)
