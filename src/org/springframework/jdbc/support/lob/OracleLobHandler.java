@@ -1,6 +1,7 @@
 package org.springframework.jdbc.support.lob;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -166,6 +167,11 @@ public class OracleLobHandler implements LobHandler {
 	}
 
 
+	/**
+	 * LobCreator implementation for Oracle databases.
+	 * Creates Oracle-style temporary BLOBs and CLOBs that it frees on close.
+	 * @see #close
+	 */
 	protected class OracleLobCreator implements LobCreator {
 
 		private final List createdLobs = new ArrayList();
@@ -175,11 +181,22 @@ public class OracleLobHandler implements LobHandler {
 			Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
 				public void populateLob(Object lob) throws Exception {
 					Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", new Class[0]);
-					((OutputStream) methodToInvoke.invoke(lob, null)).write(content);
+					OutputStream out = (OutputStream) methodToInvoke.invoke(lob, null);
+					try {
+						out.write(content);
+						out.flush();
+					}
+					finally {
+						try {
+							out.close();
+						}
+						catch (IOException ignore) {
+						}
+					}
 				}
 			});
 			ps.setBlob(parameterIndex, blob);
-			logger.debug("Set bytes for BLOB with length " + content.length);
+			logger.debug("Set bytes for BLOB with length " + blob.length());
 		}
 
 		public void setBlobAsBinaryStream(PreparedStatement ps, int parameterIndex,
@@ -192,7 +209,7 @@ public class OracleLobHandler implements LobHandler {
 				}
 			});
 			ps.setBlob(parameterIndex, blob);
-			logger.debug("Set binary stream for BLOB with length " + contentLength);
+			logger.debug("Set binary stream for BLOB with length " + blob.length());
 		}
 
 		public void setClobAsString(PreparedStatement ps, int parameterIndex, final String content)
@@ -206,7 +223,7 @@ public class OracleLobHandler implements LobHandler {
 				}
 			});
 			ps.setClob(parameterIndex, clob);
-			logger.debug("Set string for CLOB with length " + content.length());
+			logger.debug("Set string for CLOB with length " + clob.length());
 		}
 
 		public void setClobAsAsciiStream(PreparedStatement ps, int parameterIndex,
@@ -219,7 +236,7 @@ public class OracleLobHandler implements LobHandler {
 				}
 			});
 			ps.setClob(parameterIndex, clob);
-			logger.debug("Set ASCII stream for CLOB with length " + contentLength);
+			logger.debug("Set ASCII stream for CLOB with length " + clob.length());
 		}
 
 		public void setClobAsCharacterStream(PreparedStatement ps, int parameterIndex,
@@ -232,7 +249,7 @@ public class OracleLobHandler implements LobHandler {
 				}
 			});
 			ps.setClob(parameterIndex, clob);
-			logger.debug("Set character stream for CLOB with length " + contentLength);
+			logger.debug("Set character stream for CLOB with length " + clob.length());
 		}
 
 
