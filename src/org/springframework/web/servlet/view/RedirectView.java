@@ -26,34 +26,33 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * <p>View that redirects to an absolute, context relative, or current
- * request relative URL, exposing all model attributes as HTTP query
- * parameters.</p>
+ * <p>View that redirects to an absolute, context relative, or current request
+ * relative URL, exposing all model attributes as HTTP query parameters.
  *
- * <p>A URL for this view is supposed to be a HTTP redirect URL,
- * i.e. suitable for HttpServletResponse's sendRedirect method, which
- * is what actually does the redirect if the HTTP 1.0 flag is on, or via
- * sending back an HTTP 303 code, if the HTTP 1.0 compatibility flag is
- * off.</p>
+ * <p>A URL for this view is supposed to be a HTTP redirect URL, .e.
+ * suitable for HttpServletResponse's <code>sendRedirect</code> method, which
+ * is what actually does the redirect if the HTTP 1.0 flag is on, or via sending
+ * back an HTTP 303 code - if the HTTP 1.0 compatibility flag is off.
  * 
- * <p>Note that while the default value for the contextRelative flag is
- * off, you will probably want to almost always set it to true. With
- * the flag off, urls starting with / are considered relative to the
- * servlet container root, while with the flag on, they are considered
- * relative to the web app context root. Since most web apps will never
- * know or care what their context path actually is, they are much
- * better off setting this flag to true, and submitting paths which are
- * to be considered relative to the context root.
+ * <p>Note that while the default value for the "contextRelative" flag is off,
+ * you will probably want to almost always set it to true. With the flag off,
+ * URLs starting with "/" are considered relative to the web server root, while
+ * with the flag on, they are considered relative to the web application root.
+ * Since most web apps will never know or care what their context path actually
+ * is, they are much better off setting this flag to true, and submitting paths
+ * which are to be considered relative to the web application root.
  * 
- * Note that in a Servlets 2.2 environment, which is only compliant to
- * the limits of the spec, this class will probably fail when feeding in
- * URLs which are not fully absolute, or relative to the current request
- * (no leading /), as these are the only two URL types that sendRedirect
- * supports in a 2.2 environment. 
+ * <p>Note that in a Servlet 2.2 environment, i.e. a servlet container which
+ * is only compliant to the limits of this spec, this class will probably fail
+ * when feeding in URLs which are not fully absolute, or relative to the current
+ * request (no leading "/"), as these are the only two types of URL that
+ * <code>sendRedirect</code> supports in a Servlet 2.2 environment.
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
+ * @see #setContextRelative
+ * @see #setHttp10Compatible
  * @see javax.servlet.http.HttpServletResponse#sendRedirect
  */
 public class RedirectView extends AbstractUrlBasedView {
@@ -75,7 +74,10 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Create a new RedirectView with the given URL.
+	 * <p>The given URL will be considered as relative to the web server,
+	 * not as relative to the current ServletContext.
 	 * @param url the URL to redirect to
+	 * @see RedirectView(String, boolean)
 	 */
 	public RedirectView(String url) {
 		setUrl(url);
@@ -109,8 +111,9 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * Set whether to interpret a given URL that starts with a slash ("/")
 	 * as relative to the current ServletContext, i.e. as relative to the
 	 * web application root.
-	 * <p>Default is false: The URL will be intepreted as absolute, i.e.
-	 * taken as-is. If true, the context path will be prepended to the URL.
+	 * <p>Default is false: A URL that starts with a slash will be interpreted
+	 * as absolute, i.e. taken as-is. If true, the context path will be
+	 * prepended to the URL in such a case.
 	 * @see javax.servlet.http.HttpServletRequest#getContextPath
 	 */
 	public void setContextRelative(boolean contextRelative) {
@@ -119,8 +122,8 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Set whether to stay compatible with HTTP 1.0 clients.
-	 * <p>In the default implementation, this will enforce HTTP status code
-	 * 302 in any case, i.e. delegate to HttpServletResponse.sendRedirect.
+	 * <p>In the default implementation, this will enforce HTTP status code 302
+	 * in any case, i.e. delegate to <code>HttpServletResponse.sendRedirect</code>.
 	 * Turning this off will send HTTP status code 303, which is the correct
 	 * code for HTTP 1.1 clients, but not understood by HTTP 1.0 clients.
 	 * <p>Many HTTP 1.1 clients treat 302 just like 303, not making any
