@@ -19,6 +19,7 @@ package org.springframework.orm.ibatis;
 import java.util.List;
 import java.util.Map;
 
+import com.ibatis.common.util.PaginatedList;
 import com.ibatis.sqlmap.client.event.RowHandler;
 
 import org.springframework.dao.DataAccessException;
@@ -51,7 +52,16 @@ public interface SqlMapClientOperations {
 	List queryForList(String statementName, Object parameterObject, int skipResults,
 										int maxResults) throws DataAccessException;
 
+	void queryWithRowHandler(String statementName, Object parameterObject, RowHandler rowHandler)
+		throws DataAccessException;
+
+	/**
+	 * @deprecated
+	 */
 	List queryForList(String statementName, Object parameterObject, RowHandler rowHandler)
+			throws DataAccessException;
+
+	PaginatedList queryForPaginatedList(String statementName, Object parameterObject, int pageSize)
 			throws DataAccessException;
 
 	Map queryForMap(String statementName, Object parameterObject, String keyProperty)

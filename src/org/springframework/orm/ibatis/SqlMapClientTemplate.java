@@ -23,12 +23,15 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.ibatis.common.util.PaginatedList;
 import com.ibatis.sqlmap.client.SqlMapClient;
 import com.ibatis.sqlmap.client.SqlMapExecutor;
 import com.ibatis.sqlmap.client.SqlMapSession;
 import com.ibatis.sqlmap.client.event.RowHandler;
+import com.ibatis.sqlmap.engine.impl.ExtendedSqlMapClient;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 
@@ -43,6 +46,10 @@ import org.springframework.jdbc.support.JdbcAccessor;
  * methods that mirror SqlMapSession's execution methods. See the SqlMapClient
  * javadocs for details on those methods.
  *
+ * <p>Needs a SqlMapClient to work on, passed in via the "sqlMapClient" property.
+ * Can additionally be configured with a DataSource for fetching Connections,
+ * although this is not necessary if a DataSource is specified for the SqlMapClient.
+ *
  * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
  * With SQL Maps 1.x, the SqlMap/MappedStatement API has to be used.
  *
@@ -52,7 +59,9 @@ import org.springframework.jdbc.support.JdbcAccessor;
  * @see #setSqlMapClient
  * @see #setDataSource
  * @see #setExceptionTranslator
- * @see com.ibatis.sqlmap.client.SqlMapSession
+ * @see SqlMapClientFactoryBean#setDataSource
+ * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource
+ * @see com.ibatis.sqlmap.client.SqlMapExecutor
  */
 public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOperations {
 
@@ -89,10 +98,17 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	}
 
 	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
 		if (this.sqlMapClient == null) {
 			throw new IllegalArgumentException("sqlMapClient is required");
 		}
+
+		// if no DataSource specified, use SqlMapClient's DataSource
+		if (getDataSource() == null) {
+			setDataSource(this.sqlMapClient.getDataSource());
+		}
+
+		// call this last, to guarantee available DataSource
+		super.afterPropertiesSet();
 	}
 
 
@@ -182,11 +198,38 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
+	public void queryWithRowHandler(final String statementName, final Object parameterObject,
+																	final RowHandler rowHandler) {
+		execute(new SqlMapClientCallback() {
+			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+				executor.queryWithRowHandler(statementName, parameterObject, rowHandler);
+				return null;
+			}
+		});
+	}
+
 	public List queryForList(final String statementName, final Object parameterObject,
 													 final RowHandler rowHandler) throws DataAccessException {
 		return executeWithListResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForList(statementName, parameterObject, rowHandler);
+			}
+		});
+	}
+
+	public PaginatedList queryForPaginatedList(final String statementName, final Object parameterObject,
+																		final int pageSize) throws DataAccessException {
+
+		// throw exception if lazy loading will not work
+		if (this.sqlMapClient instanceof ExtendedSqlMapClient &&
+				((ExtendedSqlMapClient) this.sqlMapClient).getDelegate().getTxManager() == null) {
+			throw new InvalidDataAccessApiUsageException("SqlMapClient needs to have DataSource to allow for lazy loading" +
+																									 " - specify SqlMapClientFactoryBean's 'dataSource' property");
+		}
+
+		return (PaginatedList) execute(new SqlMapClientCallback() {
+			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+				return executor.queryForPaginatedList(statementName, parameterObject, pageSize);
 			}
 		});
 	}
