@@ -183,10 +183,28 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		});
 	}
 
+	public void evictAll() throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.evictAll();
+				return null;
+			}
+		});
+	}
+
 	public void refresh(final Object entity) throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.refresh(entity);
+				return null;
+			}
+		});
+	}
+
+	public void refreshAll() throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.refreshAll();
 				return null;
 			}
 		});

@@ -44,7 +44,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @version $Id: JdoTemplateTests.java,v 1.10 2004-06-17 09:46:30 jhoeller Exp $
+ * @version $Id: JdoTemplateTests.java,v 1.11 2004-06-21 20:36:26 jhoeller Exp $
  */
 public class JdoTemplateTests extends TestCase {
 
@@ -225,6 +225,29 @@ public class JdoTemplateTests extends TestCase {
 		pmControl.verify();
 	}
 
+	public void testEvictAll() {
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
+		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
+		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.evictAll();
+		pmControl.setVoidCallable();
+		pm.close();
+		pmControl.setVoidCallable();
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		jt.evictAll();
+		pmfControl.verify();
+		pmControl.verify();
+	}
+
 	public void testRefresh() {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
@@ -244,6 +267,29 @@ public class JdoTemplateTests extends TestCase {
 
 		JdoTemplate jt = new JdoTemplate(pmf);
 		jt.refresh("0");
+		pmfControl.verify();
+		pmControl.verify();
+	}
+
+	public void testRefreshAll() {
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
+		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
+		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.refreshAll();
+		pmControl.setVoidCallable();
+		pm.close();
+		pmControl.setVoidCallable();
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		jt.refreshAll();
 		pmfControl.verify();
 		pmControl.verify();
 	}

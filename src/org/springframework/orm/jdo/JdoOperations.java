@@ -107,12 +107,26 @@ public interface JdoOperations {
 	void evict(Object entity) throws DataAccessException;
 
 	/**
+	 * Remove all objects from the PersistenceManager cache.
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see javax.jdo.PersistenceManager#evictAll
+	 */
+	void evictAll() throws DataAccessException;
+
+	/**
 	 * Re-read the state of the given persistent instance.
 	 * @param entity the persistent instance to re-read
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#refresh
 	 */
 	void refresh(Object entity) throws DataAccessException;
+
+	/**
+	 * Re-read the state of all persistent instances.
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see javax.jdo.PersistenceManager#refreshAll
+	 */
+	void refreshAll() throws DataAccessException;
 
 	/**
 	 * Make the given transient instance persistent.
