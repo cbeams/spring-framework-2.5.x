@@ -5,19 +5,11 @@
 
 <sql-map-config>
 
-  <settings
-    maxExecute="0"
-    maxExecutePerConnection="0"
-		statementCacheSize="175"
-    cacheModelsEnabled="true"
-    useBeansMetaClasses="false"
-  />
-
-  <sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Account.xml"/>
-  <sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Category.xml"/>
+	<sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Account.xml"/>
+	<sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Category.xml"/>
 	<sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Product.xml"/>
-  <sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Item.xml"/>
-  <sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Order.xml"/>
+	<sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Item.xml"/>
+	<sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Order.xml"/>
 	<sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/LineItem.xml"/>
 	<sql-map resource="org/springframework/samples/jpetstore/dao/ibatis/maps/Sequence.xml"/>
 
