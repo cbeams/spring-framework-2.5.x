@@ -6,14 +6,14 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 
 public class LBIInit {
 	
 	/** Create beans necessary to run tests
 	 */
-	public static void createTestBeans(ListableBeanFactoryImpl lbf) throws BeansException {
+	public static void createTestBeans(DefaultListableBeanFactory lbf) throws BeansException {
 		Map m = new HashMap();
 		// Rod is a singleton
 		m.put("rod.class", "org.springframework.beans.TestBean");

@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.MutablePropertyValues;
@@ -18,12 +18,12 @@ import org.springframework.beans.ITestBean;
  */
 public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTests {
 
-	private ListableBeanFactoryImpl parent;
+	private DefaultListableBeanFactory parent;
 
 	private XmlBeanFactory factory;
 
 	protected void setUp() {
-		parent = new ListableBeanFactoryImpl();
+		parent = new DefaultListableBeanFactory();
 		Map m = new HashMap();
 		m.put("name", "Albert");
 		parent.registerBeanDefinition("father",

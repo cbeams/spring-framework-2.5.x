@@ -6,7 +6,7 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 
@@ -14,11 +14,11 @@ import org.springframework.jdbc.core.RowCallbackHandler;
  * ListableBeanFactory implementation that reads values from a database
  * table. Expects columns for bean name, property name and value
  * as string. Formats for each are identical to the properties format
- * recognized by ListableBeanFactoryImpl.
+ * recognized by DefaultListableBeanFactory.
  * @author Rod Johnson
- * @version $Id: JdbcBeanFactory.java,v 1.3 2003-11-04 23:12:49 jhoeller Exp $
+ * @version $Id: JdbcBeanFactory.java,v 1.4 2003-11-22 17:20:28 jhoeller Exp $
  */
-public class JdbcBeanFactory extends ListableBeanFactoryImpl {
+public class JdbcBeanFactory extends DefaultListableBeanFactory {
 	
 	private JdbcTemplate jdbcTemplate;
 

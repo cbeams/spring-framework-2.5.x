@@ -240,7 +240,7 @@ public class StaticMessageSourceTestSuite
 		                      new MutablePropertyValues());
 
 
-		LBIInit.createTestBeans(sac.getListableBeanFactoryImpl());
+		LBIInit.createTestBeans(sac.getListableBeanFactory());
 		sac.rebuild();
 
 		StaticMessageSource staticMsgSrc = (StaticMessageSource) sac.getBean(

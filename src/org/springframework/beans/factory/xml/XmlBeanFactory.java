@@ -42,7 +42,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.ConstructorArgumentValues;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -50,7 +50,7 @@ import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.util.StringUtils;
 
 /**
- * Extension of ListableBeanFactoryImpl that reads bean definitions in an XML
+ * Extension of DefaultListableBeanFactory that reads bean definitions in an XML
  * document using DOM. The structure, element and attribute names of the
  * required XML document are hard-coded in this class.
  * (Of course a transform could be run if necessary to produce this format.)
@@ -58,16 +58,16 @@ import org.springframework.util.StringUtils;
  * <p>"beans" doesn't need to be the root element of the XML document:
  * This class will parse all bean definition elements in the XML file.
  *
- * <p>This class registers each bean definition with the ListableBeanFactoryImpl
+ * <p>This class registers each bean definition with the DefaultListableBeanFactory
  * superclass, and relies on the latter's implementation of the BeanFactory
  * interface. It supports singletons, prototypes and references to either of
  * these kinds of bean.
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.18 2003-11-11 08:18:25 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.19 2003-11-22 17:20:29 jhoeller Exp $
  */
-public class XmlBeanFactory extends ListableBeanFactoryImpl {
+public class XmlBeanFactory extends DefaultListableBeanFactory {
 
 	public static final String BEAN_NAME_DELIMITERS = ",; ";
 

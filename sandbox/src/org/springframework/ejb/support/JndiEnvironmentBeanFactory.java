@@ -14,18 +14,19 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
  * BeanFactory implementation populated by JNDI environment
  * variables available to an object running in a J2EE application server.
  * Such a bean factory might be used to parameterize EJBs.
- * <br>Only environment entries with names beginning with "beans."
- * are included.
+ *
+ * <p>Only environment entries with names beginning with "beans." are included.
+ *
  * @author Rod Johnson
- * @version $Id: JndiEnvironmentBeanFactory.java,v 1.1 2003-11-22 09:05:45 johnsonr Exp $
+ * @version $Id: JndiEnvironmentBeanFactory.java,v 1.2 2003-11-22 17:22:29 jhoeller Exp $
  */
-public class JndiEnvironmentBeanFactory extends ListableBeanFactoryImpl {
+public class JndiEnvironmentBeanFactory extends DefaultListableBeanFactory {
 	
 	/** Syntax is beans.name.class=Y */
 	public static final String BEANS_PREFIX = "beans.";
@@ -37,8 +38,7 @@ public class JndiEnvironmentBeanFactory extends ListableBeanFactoryImpl {
 	 * Creates new JNDIBeanFactory
 	 * @param root likely to be "java:comp/env"
 	 */
-    public JndiEnvironmentBeanFactory(String root) throws BeansException {
-		
+	public JndiEnvironmentBeanFactory(String root) throws BeansException {
 		// We'll take everything from the NamingContext and dump it in a
 		// Properties object, so that the superclass can efficiently manipulate it
 		// after we've closed the context.
@@ -77,6 +77,6 @@ public class JndiEnvironmentBeanFactory extends ListableBeanFactoryImpl {
 				// IGNORE OR THROW RTE?
 			}
 		}
-    }	// constructor
+	}
 	
-}	// class JndiBeanFactory
+}

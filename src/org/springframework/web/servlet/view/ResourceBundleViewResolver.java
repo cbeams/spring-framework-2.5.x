@@ -3,7 +3,6 @@
  * of the Apache Software License.
  */
 
-
 package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
@@ -17,7 +16,7 @@ import javax.servlet.ServletException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.web.servlet.View;
 
 /**
@@ -120,7 +119,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 		}
 
 		ResourceBundle bundle = ResourceBundle.getBundle(this.basename, locale, Thread.currentThread().getContextClassLoader());
-		ListableBeanFactoryImpl lbf = new ListableBeanFactoryImpl(getApplicationContext());
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(getApplicationContext());
 		lbf.setDefaultParentBean(this.defaultParentView);
 		lbf.registerBeanDefinitions(bundle);
 		if (isCache()) {

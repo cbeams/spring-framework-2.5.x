@@ -5,7 +5,7 @@ import java.util.Locale;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -17,7 +17,7 @@ import org.springframework.context.ApplicationContext;
  */
 public class StaticApplicationContext extends AbstractApplicationContext {
 
-	private ListableBeanFactoryImpl beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 
 	/**
 	 * Create new StaticApplicationContext.
@@ -34,7 +34,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 		super(parent);
 
 		// create bean factory with parent
-		this.beanFactory = new ListableBeanFactoryImpl(parent);
+		this.beanFactory = new DefaultListableBeanFactory(parent);
 
 		// Register the message source bean
 		registerSingleton(MESSAGE_SOURCE_BEAN_NAME, StaticMessageSource.class, null);
@@ -43,7 +43,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	/**
 	 * Return the underlying bean factory of this context.
 	 */
-	public ListableBeanFactoryImpl getListableBeanFactoryImpl() {
+	public DefaultListableBeanFactory getListableBeanFactory() {
 		return beanFactory;
 	}
 
