@@ -47,17 +47,17 @@ import org.springframework.web.flow.ViewState;
  *   }
  *   
  *   public void buildStates() {
- *       addGetState(PERSON_DETAILS));
- *       addViewState(PERSON_DETAILS));
- *       addBindAndValidateState(PERSON_DETAILS));
- *       addDefaultEndState());
+ *       addGetState(PERSON_DETAILS);
+ *       addViewState(PERSON_DETAILS);
+ *       addBindAndValidateState(PERSON_DETAILS);
+ *       addDefaultEndState();
  *   }
  * </pre>
  * 
  * What this java-based FlowBuilder implementation does is add 4 states to a
  * flow identified as "personDetails". These include a "get"
  * <code>ActionState</code> (the start state), a <code>ViewState</code>
- * state, a "bind and validate" <code>ActionState</code>, and a end marker
+ * state, a "bind and validate" <code>ActionState</code>, and an end marker
  * state (<code>EndState</code>).
  * 
  * The first state, an action state, will be assigned the indentifier
@@ -88,7 +88,7 @@ import org.springframework.web.flow.ViewState;
  * by the default ID 'personDetails.bindAndValidate'. This means when a 'submit'
  * event is signaled by the view (for example, on a submit button click), the
  * bindAndValidate action state will be entered and the '
- * <code>personDetails.bindAndValidate</code>'<code>Action</code>
+ * <code>personDetails.bindAndValidate</code>' <code>Action</code>
  * implementation will be executed.
  * </ol>
  * 
@@ -106,35 +106,48 @@ import org.springframework.web.flow.ViewState;
  * end state will be transitioned to and the flow will terminate.
  * <li>A "error" transition back to the form view. This means if the
  * <code>Action</code> returns a "error" event, the 'personDetails.view' view
- * state will be transitioned to and the flow will terminate.
+ * state will be transitioned back to.
  * </ol>
  * 
- * The fourth and last state, a end state, will be indentified with the default
+ * The fourth and last state, an end state, will be indentified with the default
  * end state ID 'finish'. This end state is a marker that signals the end of the
  * flow. When entered, the flow session terminates, and if this flow is acting
  * as a root flow in the current flow execution, any flow-allocated resources
  * will be cleaned up. An end state can optionally be configured with a logical
  * view name to forward to when entered. It will also trigger a state transition
  * in a resuming parent flow if this flow was participating as a spawned
- * 'subflow' within a suspended parent flow.
+ * 'sub flow' within a suspended parent flow.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
-	 * The default <code>MODEL_MAPPER_ID_SUFFIX</code>.
+	 * The default model mapper ID suffix ("modelMapper").
 	 */
 	public static final String MODEL_MAPPER_ID_SUFFIX = "modelMapper";
 
+	/**
+	 * Constructor for use in subclasses.
+	 */
 	protected AbstractFlowBuilder() {
 		super();
 	}
 
+	/**
+	 * Constructor for use in subclasses.
+	 * @param flowServiceLocator strategy to use for service lookup
+	 */
 	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator) {
 		super(flowServiceLocator);
 	}
 
+	/**
+	 * Constructor for use in subclasses.
+	 * @param flowServiceLocator strategy to use for service lookup
+	 * @param flowCreator strategy to use for flow instantiation
+	 */
 	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator, FlowCreator flowCreator) {
 		super(flowServiceLocator, flowCreator);
 	}
@@ -147,7 +160,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Returns the id (name) of the flow built by this builder. Subclasses
 	 * should override to return the unique flowId.
-	 * 
 	 * @return The unique flow id.
 	 */
 	protected abstract String flowId();
@@ -2085,26 +2097,14 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return onEvent(getErrorEventId(), stateIdPrefix);
 	}
 
-	/**
-	 * @param actionName
-	 * @param stateIdPrefix
-	 * @return
-	 */
 	protected Transition onError(String actionName, String stateIdPrefix) {
 		return onEvent(actionName, getErrorEventId(), stateIdPrefix);
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getErrorEventId() {
 		return FlowConstants.ERROR;
 	}
 
-	/**
-	 * @param viewStateIdPrefix
-	 * @return
-	 */
 	protected Transition onErrorView(String stateIdPrefix) {
 		return onError(view(stateIdPrefix));
 	}
@@ -2165,11 +2165,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return buildStateId(stateIdPrefix, FlowConstants.SEARCH);
 	}
 
-	/**
-	 * @param stateIdPrefix
-	 * @param stateIdSuffix
-	 * @return
-	 */
 	protected String buildStateId(String stateIdPrefix, String stateIdSuffix) {
 		if (stateIdPrefix.endsWith(stateIdSuffix)) {
 			return stateIdPrefix;
@@ -2179,30 +2174,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		}
 	}
 
-	/**
-	 * @param prefix
-	 * @param suffix
-	 * @return
-	 */
-	protected String join(String prefix, String suffix) {
-		return prefix + getQualifierDelimiter() + suffix;
-	}
-
-	protected String qualify(String suffix) {
-		return join(flowId(), suffix);
-	}
-
-	/**
-	 * @return
-	 */
-	protected String getQualifierDelimiter() {
-		return DOT_SEPARATOR;
-	}
-
-	/**
-	 * @param modelMapperIdPrefix
-	 * @return
-	 */
 	protected String modelMapper(String modelMapperIdPrefix) {
 		Assert.notNull(modelMapperIdPrefix, "The model mapper id prefix is required");
 		if (!modelMapperIdPrefix.endsWith(MODEL_MAPPER_ID_SUFFIX)) {
@@ -2213,10 +2184,30 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		}
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getDefaultFlowModelMapperId() {
 		return modelMapper(getFlow().getId());
 	}
+
+	/**
+	 * Qualify given suffix with the flow id.
+	 */
+	protected String qualify(String suffix) {
+		return join(flowId(), suffix);
+	}
+
+	/**
+	 * Join given prefix and suffix, separating them with a delimiter.
+	 */
+	protected String join(String prefix, String suffix) {
+		return prefix + getQualifierDelimiter() + suffix;
+	}
+
+	/**
+	 * Returns the delimitor used to seperate identifier parts. E.g. 
+	 * flow id and state id ("personDetails.get"). Detaults to a dot (".").
+	 */
+	protected String getQualifierDelimiter() {
+		return DOT_SEPARATOR;
+	}
+
 }

@@ -23,8 +23,9 @@ import org.springframework.web.flow.Flow;
 /**
  * Factory bean that acts as a director for assembling flows, delegating to a
  * <code>FlowBuilder</code> builder to construct the Flow. This is the core
- * top level class for assembling a <code>Flow</code> from top-level
- * configuration information.
+ * top level class for assembling a <code>Flow</code> from configuration
+ * information.
+ * 
  * <p>
  * As an example, a Spring-managed FlowFactoryBean definition might look like
  * this:
@@ -38,7 +39,7 @@ import org.springframework.web.flow.Flow;
  * </pre>
  * 
  * The above definition is configured with a specific, java-based FlowBuilder
- * implementation. A XmlFlowBuilder could instead be used, for example:
+ * implementation. An XmlFlowBuilder could instead be used, for example:
  * 
  * <pre>
  * &ltbean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean"&gt;
@@ -85,14 +86,14 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * @return The builder the factory uses to build flows.
+	 * Returns the builder the factory uses to build flows.
 	 */
 	protected FlowBuilder getFlowBuilder() {
 		return this.flowBuilder;
 	}
 
 	/**
-	 * @param flowBuilder The builder the factory will use to build flows.
+	 * Set the builder the factory will use to build flows.
 	 */
 	public void setFlowBuilder(FlowBuilder flowBuilder) {
 		this.flowBuilder = flowBuilder;
@@ -107,6 +108,8 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	 * implementation?
 	 * @param builderImplementationClass The builder implementation
 	 * @return true if yes, false otherwise
+	 * @throws IllegalArgumentException If specified class is not a
+	 *         <code>FlowBuilder</code> implementation
 	 */
 	public boolean buildsWith(Class builderImplementationClass) throws IllegalArgumentException {
 		if (builderImplementationClass == null) {
@@ -125,7 +128,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * @return The flow built by this factory.
+	 * Returns the flow built by this factory.
 	 */
 	public synchronized Flow getFlow() {
 		if (this.flow == null) {

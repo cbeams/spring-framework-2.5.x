@@ -22,19 +22,23 @@ import org.springframework.web.flow.Flow;
  * instance may be <code>Flow</code>, in the default case, or a custom
  * extension.
  * 
+ * <p>
  * This interface is useful when you require specific <code>Flow</code>
- * specialization that are shared between different <code>FlowBuilder</code>
+ * specializations that are shared between different <code>FlowBuilder</code>
  * implementations.
  * 
+ * @see org.springframework.web.flow.Flow
+ * @see org.springframework.web.flow.config.FlowBuilder
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface FlowCreator {
 
 	/**
-	 * Factory method that create the <code>Flow</code> instance with the
+	 * Factory method that creates the <code>Flow</code> instance with the
 	 * specified id.
 	 * @param id The flow identifier
-	 * @return The <code>Flow</code> (or a custom specialization of Flow)
+	 * @return The <code>Flow</code> (or a custom specialization of <code>Flow</code>)
 	 */
 	public Flow createFlow(String id);
 }

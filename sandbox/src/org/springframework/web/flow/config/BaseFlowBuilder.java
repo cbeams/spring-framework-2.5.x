@@ -51,7 +51,6 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	 * Default constructor
 	 */
 	protected BaseFlowBuilder() {
-
 	}
 
 	/**
@@ -96,7 +95,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	}
 
 	/**
-	 * @return The flow creation strategy to use.
+	 * Returns the flow creation strategy to use.
 	 */
 	protected FlowCreator getFlowCreator() {
 		return flowCreator;
@@ -110,7 +109,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	}
 
 	/**
-	 * @return The flow service location strategy in use.
+	 * Returns the flow service location strategy in use.
 	 */
 	protected FlowServiceLocator getFlowServiceLocator() {
 		return flowServiceLocator;

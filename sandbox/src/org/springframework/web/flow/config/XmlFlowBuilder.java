@@ -53,11 +53,11 @@ import org.xml.sax.SAXParseException;
  * 
  * <p>
  * Consult the web flow DTD for more information on the XML definition format.
+ * An object of this class is normally configured in the Spring application
+ * context.
  * 
  * <p>
- * An object of this class is normally configured in the Spring application
- * context.<br>
- * <b>Exposed configuration properties</b><br>
+ * <b>Exposed configuration properties:</b><br>
  * <table border="1">
  *  <tr>
  *      <td><b>name</b></td>
@@ -67,7 +67,8 @@ import org.xml.sax.SAXParseException;
  *  <tr>
  *      <td>resource</td>
  *      <td><i>null</i></td>
- *      <td>Specifies the resource from which the flow definition is loaded.</td>
+ *      <td>Specifies the resource from which the flow definition is loaded.
+ *      This is a required property.</td>
  *  </tr>
  *  <tr>
  *      <td>validating</td>
@@ -76,12 +77,12 @@ import org.xml.sax.SAXParseException;
  *  </tr>
  *  <tr>
  *      <td>entityResolver</td>
- *      <td><i>FlowDtdResolver</i></td>
+ *      <td><i>{@link FlowDtdResolver}</i></td>
  *      <td>Set a SAX entity resolver to be used for parsing.</td>
  *  </tr>
  *  <tr>
  *      <td>flowServiceLocator</td>
- *      <td><i>BeanFactoryFlowServiceLocator</i></td>
+ *      <td><i>{@link BeanFactoryFlowServiceLocator}</i></td>
  *      <td>Set the flow service location strategy to use.</td>
  *  </tr>
  *  <tr>
@@ -92,7 +93,7 @@ import org.xml.sax.SAXParseException;
  *  </tr>
  *  <tr>
  *      <td>flowCreator</td>
- *      <td><i>DefaultFlowCreator</i></td>
+ *      <td><i>{@link BaseFlowBuilder.DefaultFlowCreator}</i></td>
  *      <td>Set the flow creation strategy to use.</td>
  *  </tr>
  * </table>

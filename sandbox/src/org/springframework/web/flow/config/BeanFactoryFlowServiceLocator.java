@@ -55,7 +55,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	/**
-	 * @return The bean factory used to lookup services.
+	 * Returns the bean factory used to lookup services.
 	 */
 	protected BeanFactory getBeanFactory() {
 		if (this.beanFactory == null) {
@@ -66,7 +66,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	/**
-	 * @return The bean factory used to lookup services.
+	 * Returns he bean factory used to lookup services.
 	 */
 	protected ListableBeanFactory getListableBeanFactory() {
 		return (ListableBeanFactory)getBeanFactory();

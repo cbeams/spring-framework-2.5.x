@@ -41,7 +41,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * the "requireSession" attribute defined by the AbstractController to true.
  *
  * <p>
- * <b>Exposed configuration properties</b><br>
+ * <b>Exposed configuration properties:</b><br>
  * <table border="1">
  *  <tr>
  *      <td><b>name</b></td>

@@ -28,6 +28,8 @@ import org.springframework.web.flow.Flow;
  * Flow builders are executed by the FlowFactoryBean, which acts as an assembler
  * (director). This is the classic GoF Builder pattern.
  * 
+ * @see org.springframework.web.flow.config.AbstractFlowBuilder
+ * @see org.springframework.web.flow.config.XmlFlowBuilder
  * @see org.springframework.web.flow.config.FlowFactoryBean
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -57,7 +59,11 @@ public interface FlowBuilder {
 
 	/**
 	 * Get the fully constructed and configured Flow object - called by the
-	 * builder's assembler (director) after assembly.
+	 * builder's assembler (director) after assembly. Note that this method
+	 * will return the same Flow object as that returned from the
+	 * <code>init()</code> method. However, when this method is called by the
+	 * assembler, flow construction will have completed and the returned
+	 * flow is ready for use. 
 	 */
 	public Flow getResult();
 
