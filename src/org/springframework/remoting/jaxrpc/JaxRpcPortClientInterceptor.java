@@ -82,7 +82,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	private QName portQName;
 
-	private Remote portProxy;
+	private Remote portStub;
 
 
 	/**
@@ -211,7 +211,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 
 	/**
-	 * Create and initialize the JAX-RPC proxy for the specified port.
+	 * Create and initialize the JAX-RPC stub for the specified port.
 	 */
 	public void afterPropertiesSet() throws ServiceException {
 		if (this.portName == null) {
@@ -257,8 +257,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			}
 		}
 
-		this.portProxy = remoteObj;
-		postProcessPortProxy(this.portProxy);
+		postProcessPortStub(stub);
+		this.portStub = remoteObj;
 	}
 
 	/**
@@ -271,23 +271,23 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
-	 * Post-process the given JAX-RPC port proxy. Called by afterPropertiesSet.
-	 * @param portProxy the current JAX-RPC port proxy
+	 * Post-process the given JAX-RPC port stub. Called by afterPropertiesSet.
+	 * @param portStub the current JAX-RPC port stub
 	 */
-	protected void postProcessPortProxy(Remote portProxy) {
+	protected void postProcessPortStub(Stub portStub) {
 	}
 
 	/**
-	 * Return the underlying JAX-RPC port proxy that this interceptor delegates to.
+	 * Return the underlying JAX-RPC port stub that this interceptor delegates to.
 	 */
-	public Remote getPortProxy() {
-		return portProxy;
+	protected Remote getPortStub() {
+		return portStub;
 	}
 
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		// traditional RMI proxy invocation
-		return RmiClientInterceptorUtils.invoke(invocation, this.portProxy, this.portQName.toString());
+		// traditional RMI stub invocation
+		return RmiClientInterceptorUtils.invoke(invocation, getPortStub(), this.portQName.toString());
 	}
 
 }
