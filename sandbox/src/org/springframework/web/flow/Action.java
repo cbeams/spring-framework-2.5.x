@@ -32,7 +32,6 @@ package org.springframework.web.flow;
  * caller-specific state in a unsafe manner. The Action execute method runs in
  * an independently executing thread on each invocation, so make sure you deal
  * only with local data or internal, thread-safe services.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  * @see org.springframework.web.flow.ActionState

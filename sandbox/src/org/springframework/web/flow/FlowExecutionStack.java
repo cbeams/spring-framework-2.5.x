@@ -114,8 +114,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		}
 	}
 
-	// methods implementing FlowExecutionInfo
-
+	// methods implementing FlowExecutionMBean
 	public String getId() {
 		return id;
 	}
@@ -249,7 +248,6 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	// methods implementing FlowExecution
-
 	public FlowExecutionListenerList getListenerList() {
 		return listenerList;
 	}
@@ -323,7 +321,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	// flow session management helpers
-
+	
 	/**
 	 * Activate given flow session in this flow execution stack. This will push
 	 * the flow session onto the stack and mark it as the active flow session.

@@ -32,7 +32,6 @@ import org.springframework.util.ToStringCreator;
  * the processing that should occur when this state is entered, acting on its
  * configuration information. The ability to plugin custom state types that
  * execute different behaivior polymorphically is the classic GoF State pattern.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */

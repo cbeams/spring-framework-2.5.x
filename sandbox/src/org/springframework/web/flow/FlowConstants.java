@@ -248,5 +248,4 @@ public abstract class FlowConstants {
 	 * The <code>SELECT</code> event identifier.
 	 */
 	public static final String SELECT = "select";
-
 }

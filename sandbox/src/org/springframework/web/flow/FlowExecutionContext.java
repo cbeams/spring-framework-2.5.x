@@ -17,8 +17,6 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
-import org.springframework.binding.AttributeSetter;
-
 /**
  * A context for a currently executing flow.
  * @author Keith Donald
