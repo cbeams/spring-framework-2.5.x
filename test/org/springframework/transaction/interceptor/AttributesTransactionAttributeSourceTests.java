@@ -19,7 +19,7 @@ import org.springframework.metadata.support.MapAttributes;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AttributesTransactionAttributeSourceTests.java,v 1.2 2003-12-17 09:54:16 johnsonr Exp $
+ * @version $Id: AttributesTransactionAttributeSourceTests.java,v 1.3 2004-02-01 13:25:49 johnsonr Exp $
  */
 public class AttributesTransactionAttributeSourceTests extends TestCase {
 
@@ -45,6 +45,8 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 		
 		mar.register(method, new Object[0]);
 		assertNull(atas.getTransactionAttribute(method, null));
+		// Try again in case of caching
+		assertNull(atas.getTransactionAttribute(method, null));
 	}
 	
 	public void testSingleTransactionAttribute() throws Exception {
@@ -57,6 +59,8 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 		AttributesTransactionAttributeSource atas = new AttributesTransactionAttributeSource(ma);
 		TransactionAttribute actual = atas.getTransactionAttribute(method, method.getDeclaringClass());
 		assertEquals(txAtt, actual);
+		// Check that the same attribute comes back if we ask twice
+		assertSame(txAtt, atas.getTransactionAttribute(method, method.getDeclaringClass()));
 	}
 	
 	
@@ -70,6 +74,7 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 		ma.register(method, new Object[] { new Object(), "", txAtt, "er" });
 		TransactionAttribute actual = atas.getTransactionAttribute(method, method.getDeclaringClass());
 		assertEquals(txAtt, actual);
+		assertSame(txAtt, atas.getTransactionAttribute(method, method.getDeclaringClass()));
 	}
 	
 	/**
@@ -135,6 +140,8 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 		assertEquals(txAtt, actual);
 		assertTrue(txAtt.rollbackOn(new Exception()));
 		assertFalse(txAtt.rollbackOn(new ServletException()));
+		
+		assertSame(txAtt, atas.getTransactionAttribute(method, method.getDeclaringClass()));
 	}
 	
 	/**

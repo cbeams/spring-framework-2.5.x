@@ -7,6 +7,7 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,15 +25,34 @@ import org.springframework.metadata.Attributes;
  * associated with the target method.
  * Any transaction attribute associated with the target method completely
  * overrides a class transaction attribute.
+ * <br>
+ * This implementation caches attributes by method after they are first used.
+ * If it's ever desirable to allow dynamic changing of transaction attributes
+ * (unlikely) caching could be made configurable. Caching is desirable because
+ * of the cost of evaluating rollback rules.
  * @author Rod Johnson
  * @see org.springframework.metadata.Attributes
- * @version $Id: AttributesTransactionAttributeSource.java,v 1.4 2004-01-01 23:50:02 jhoeller Exp $
+ * @version $Id: AttributesTransactionAttributeSource.java,v 1.5 2004-02-01 13:25:58 johnsonr Exp $
  */
 public class AttributesTransactionAttributeSource implements TransactionAttributeSource {
 	
 	protected final Log logger = LogFactory.getLog(getClass());
 	
+	/**
+	 * Canonical value held in cache to indicate no transaction attribute was
+	 * found for this method, and we don't need to look again
+	 */
+	private final static Object NULL_TX_ATTRIBUTE = new Object();
+	
+	/**
+	 * Underlying Attributes implementation we're using
+	 */
 	private final Attributes attributes;
+	
+	/**
+	 * Cache of TransactionAttributes, keyed by Method and target class
+	 */
+	private HashMap cache = new HashMap();
 
 	public AttributesTransactionAttributeSource(Attributes attributes) {
 		this.attributes = attributes;
@@ -47,9 +67,43 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 	 * @return TransactionAttribute for this method, or null if the method is non-transactional
 	 */
 	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
-		
-		// TODO cache return value
-		
+		// First, see if we have a cached value
+		Object cacheKey = cacheKey(method, targetClass);
+		Object cached = cache.get(cacheKey);
+		if (cached != null) {
+			// Value will either be canonical value indicating there is no transaction attribute,
+			// or an actual transaction attribute
+			if (cached == NULL_TX_ATTRIBUTE) {
+				return null;
+			}
+			else {
+				return (TransactionAttribute) cached;
+			}
+		}
+		else {
+			// We need to work it out
+			TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
+			// Put it in the cache
+			if (txAtt == null) {
+				cache.put(cacheKey, NULL_TX_ATTRIBUTE);
+			}
+			else {
+				cache.put(cacheKey, txAtt);
+			}
+			return txAtt;
+		}
+	}
+	
+	private Object cacheKey(Method method, Class targetClass) {
+		// Class may be null, method can't
+		return targetClass + "" + System.identityHashCode(method);
+	}
+	
+	/**
+	 * Same return as getTransactionAttribute method, but doesn't cache the result.
+	 * getTransactionAttribute is a caching decorator for this method.
+	 */
+	protected TransactionAttribute computeTransactionAttribute(Method method, Class targetClass) {
 		// The method may be on an interface, but we need attributes from the target class.
 		// The AopUtils class provides a convenience method for this. If the target class
 		// is null, the method will be unchanged.
@@ -75,6 +129,7 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 		}
 		return null;
 	}
+
 
 	/**
 	 * Return the transaction attribute, given this set of attributes
