@@ -91,7 +91,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * @see ConnectionProxy#getTargetConnection
 	 */
 	public Connection getConnection() throws SQLException {
-		Connection con = DataSourceUtils.doGetConnection(getTargetDataSource(), true);
+		Connection con = DataSourceUtils.doGetConnection(getTargetDataSource());
 		return getTransactionAwareConnectionProxy(con, getTargetDataSource());
 	}
 

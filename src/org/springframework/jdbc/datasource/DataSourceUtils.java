@@ -107,7 +107,23 @@ public abstract class DataSourceUtils {
 	/**
 	 * Actually get a JDBC Connection for the given DataSource.
 	 * Same as getConnection, but throwing the original SQLException.
+	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
+	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
+	 * if transaction synchronization is active (e.g. if in a JTA transaction).
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
+	 * @param dataSource DataSource to get Connection from
+	 * @return a JDBC Connection from this DataSource
+	 * @throws SQLException if thrown by JDBC methods
+	 * @see #getConnection(DataSource)
+	 * @see TransactionAwareDataSourceProxy
+	 */
+	public static Connection doGetConnection(DataSource dataSource) throws SQLException {
+		return doGetConnection(dataSource, true);
+	}
+
+	/**
+	 * Actually get a JDBC Connection for the given DataSource.
+	 * Same as getConnection, but throwing the original SQLException.
 	 * @param dataSource DataSource to get Connection from
 	 * @param allowSynchronization if a new JDBC Connection is supposed to be
 	 * registered with transaction synchronization (if synchronization is active).
@@ -115,9 +131,8 @@ public abstract class DataSourceUtils {
 	 * @return a JDBC Connection from this DataSource
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #getConnection(DataSource, boolean)
-	 * @see TransactionAwareDataSourceProxy
 	 */
-	protected static Connection doGetConnection(DataSource dataSource, boolean allowSynchronization)
+	public static Connection doGetConnection(DataSource dataSource, boolean allowSynchronization)
 			throws SQLException {
 		Assert.notNull(dataSource, "No DataSource specified");
 
@@ -257,7 +272,7 @@ public abstract class DataSourceUtils {
 	 * @see #closeConnectionIfNecessary
 	 * @see TransactionAwareDataSourceProxy
 	 */
-	protected static void doCloseConnectionIfNecessary(Connection con, DataSource dataSource) throws SQLException {
+	public static void doCloseConnectionIfNecessary(Connection con, DataSource dataSource) throws SQLException {
 		if (con == null) {
 			return;
 		}
