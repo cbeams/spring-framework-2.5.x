@@ -41,29 +41,6 @@ public class ToStringBuilder {
         this.styler.styleStart(buffer, object);
     }
 
-    private void printSeparator() {
-        if (field) {
-            styler.styleFieldSeparator(buffer);
-        } else {
-            field = true;
-        }
-    }
-
-    /**
-     * Append a field value.
-     * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
-     * @return this, to support call-chaining.
-     */
-    public ToStringBuilder append(String fieldName, Object value) {
-        printSeparator();
-        styler.styleField(buffer, fieldName, value);
-        return this;
-    }
-
     /**
      * Append a byte field value.
      * 
@@ -156,6 +133,29 @@ public class ToStringBuilder {
     }
 
     /**
+     * Append a field value.
+     * 
+     * @param fieldName
+     *            The name of the field, usually the member variable name.
+     * @param value
+     *            The field value.
+     * @return this, to support call-chaining.
+     */
+    public ToStringBuilder append(String fieldName, Object value) {
+        printSeparator();
+        styler.styleField(buffer, fieldName, value);
+        return this;
+    }
+
+    private void printSeparator() {
+        if (field) {
+            styler.styleFieldSeparator(buffer);
+        } else {
+            field = true;
+        }
+    }
+    
+    /**
      * Return the string built by this builder.
      * 
      * @see java.lang.Object#toString()
@@ -164,5 +164,6 @@ public class ToStringBuilder {
         styler.styleEnd(buffer, object);
         return buffer.toString();
     }
+    
 
 }

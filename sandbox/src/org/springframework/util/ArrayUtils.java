@@ -52,7 +52,8 @@ public class ArrayUtils {
     /**
      * Convert a primitive array to an object array of wrapper objects.
      * 
-     * @param primitiveArray The primitive array
+     * @param primitiveArray
+     *            The primitive array
      * @return The object array.
      */
     public static Object[] toObjectArrayFromPrimitive(Object primitiveArray) {
@@ -61,9 +62,13 @@ public class ArrayUtils {
             return null;
         }
         // if not an array or elements not primitive, illegal argument...
-        Class cls = primitiveArray.getClass();
-        Assert.isTrue(cls.isArray());
-        Assert.isTrue(cls.getComponentType().isPrimitive());
+        Class clazz = primitiveArray.getClass();
+        Assert.isTrue(
+            clazz.isArray(),
+            "The specified parameter is not an array.");
+        Assert.isTrue(
+            clazz.getComponentType().isPrimitive(),
+            "The specified parameter is not a primitive array.");
 
         // get array length and create Object output array
         int length = Array.getLength(primitiveArray);
