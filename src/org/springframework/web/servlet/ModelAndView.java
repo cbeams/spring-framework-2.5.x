@@ -104,13 +104,13 @@ public class ModelAndView {
 
 	/**
 	 * Add an object to the model.
-	 * @param name name of the object to add to the model
-	 * @param object object to add to the model. May not be null.
+	 * @param modelName name of the object to add to the model
+	 * @param modelObject object to add to the model. May not be null.
 	 * @return this object, convenient to allow usages like
 	 * return modelAndView.addObject("foo", bar);
 	 */
-	public ModelAndView addObject(String name, Object object) {
-		this.model.put(name, object);
+	public ModelAndView addObject(String modelName, Object modelObject) {
+		this.model.put(modelName, modelObject);
 		return this;
 	}
 
