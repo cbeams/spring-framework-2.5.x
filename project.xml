@@ -501,6 +501,7 @@
                <directory>${pom.build.unitTestSourceDirectory}</directory>
                <includes>
                   <include>**/*.xml</include>
+                  <include>**/*.xls</include>
                   <include>**/*.properties</include>
                </includes>
             </resource>
