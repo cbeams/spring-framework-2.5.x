@@ -57,12 +57,6 @@ public interface SqlMapClientOperations {
 	void queryWithRowHandler(String statementName, Object parameterObject, RowHandler rowHandler)
 			throws DataAccessException;
 
-	/**
-	 * @deprecated
-	 */
-	List queryForList(String statementName, Object parameterObject, RowHandler rowHandler)
-			throws DataAccessException;
-
 	PaginatedList queryForPaginatedList(String statementName, Object parameterObject, int pageSize)
 			throws DataAccessException;
 

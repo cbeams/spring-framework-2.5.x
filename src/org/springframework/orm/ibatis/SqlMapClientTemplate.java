@@ -142,7 +142,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 				return action.doInSqlMapClient(session);
 			}
 			catch (SQLException ex) {
-				throw getExceptionTranslator().translate("SqlMapClientTemplate", "(mapped statement)", ex);
+				throw getExceptionTranslator().translate("SqlMapClient operation", null, ex);
 			}
 			finally {
 				DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
@@ -221,16 +221,6 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				executor.queryWithRowHandler(statementName, parameterObject, rowHandler);
 				return null;
-			}
-		});
-	}
-
-	public List queryForList(
-			final String statementName, final Object parameterObject, final RowHandler rowHandler)
-			throws DataAccessException {
-		return executeWithListResult(new SqlMapClientCallback() {
-			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
-				return executor.queryForList(statementName, parameterObject, rowHandler);
 			}
 		});
 	}
