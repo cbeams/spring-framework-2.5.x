@@ -16,49 +16,43 @@
 
 package org.springframework.transaction.support;
 
+import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
-import org.jmock.Mock;
-import org.jmock.cglib.MockObjectTestCase;
-import org.springframework.jndi.JndiTemplate;
+import junit.framework.TestCase;
+import org.easymock.MockControl;
+
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.SerializationTestUtils;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: JtaTransactionManagerSerializationTests.java,v 1.1 2004-07-27 09:18:42 johnsonr Exp $
+ * @version $Id: JtaTransactionManagerSerializationTests.java,v 1.2 2004-07-27 10:21:41 jhoeller Exp $
  */
-public class JtaTransactionManagerSerializationTests extends MockObjectTestCase {
+public class JtaTransactionManagerSerializationTests extends TestCase {
 
 	public void testSerializable() throws Exception {
+		MockControl utMock = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utMock.getMock();
+		MockControl ut2Mock = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut2 = (UserTransaction) ut2Mock.getMock();
+		MockControl tmMock = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmMock.getMock();
+
 		JtaTransactionManager jtam = new JtaTransactionManager();
-		
-		Mock utMock = new Mock(UserTransaction.class);
-		UserTransaction ut = (UserTransaction) utMock.proxy();
-		
-		Mock jtMock = mock(JndiTemplate.class, "m");
-		String userTransactionName = "java:comp/UserTransaction";
-		jtMock.expects(once()).method("lookup").with(same(userTransactionName)).will(returnValue(ut));
-		
-		
-		JndiTemplate mockJt = (JndiTemplate) jtMock.proxy();
-		jtam.setJndiTemplate(mockJt);
-		
-		// Make it do lookup
+		jtam.setUserTransaction(ut);
+		jtam.setTransactionManager(tm);
 		jtam.afterPropertiesSet();
-		
+
 		SimpleNamingContextBuilder jndiEnv = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
-		jndiEnv.bind(userTransactionName, ut);
-		
+		jndiEnv.bind(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut2);
 		JtaTransactionManager jtam2 = (JtaTransactionManager) SerializationTestUtils.serializeAndDeserialize(jtam);
 		
-		// Should do client-side lookup
-		
+		// should do client-side lookup
 		assertNotNull("Logger must survive serialization", jtam2.logger);
-		assertNotNull("UserTransaction looked up on client", jtam2.getUserTransaction());
+		assertTrue("UserTransaction looked up on client", jtam2.getUserTransaction() == ut2);
 		assertNull("TransactionManager didn't survive", jtam2.getTransactionManager());
-		jtMock.verify();
 	}
+
 }
