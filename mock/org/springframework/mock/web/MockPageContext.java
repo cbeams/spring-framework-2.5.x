@@ -256,11 +256,11 @@ public class MockPageContext extends PageContext {
 	}
 
 	public ExpressionEvaluator getExpressionEvaluator() {
-		throw new UnsupportedOperationException("getExpressionEvaluator");
+		return new MockExpressionEvaluator(this);
 	}
 
 	public VariableResolver getVariableResolver() {
-		throw new UnsupportedOperationException("getVariableResolver");
+		return null;
 	}
 
 	public HttpSession getSession() {
