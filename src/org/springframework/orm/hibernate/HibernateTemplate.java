@@ -18,8 +18,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Helper class that simplifies Hibernate data access code, and converts
- * checked HibernateExceptions into unchecked HibernateJdbc/SystemExceptions,
+ * checked HibernateExceptions into unchecked DataAccessExceptions,
  * compatible to the org.springframework.dao exception hierarchy.
+ * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
  *
  * <p>Typically used to implement data access or business logic services that
  * use Hibernate within their implementation but are Hibernate-agnostic in
@@ -127,7 +128,7 @@ public class HibernateTemplate extends HibernateAccessor {
 	 * Use an appropriate transaction manager like HibernateTransactionManager.
 	 * Generally, callback code must not touch any Session lifecycle methods,
 	 * like close, disconnect, or reconnect, to let the template do its work.
-	 * @param action action object that specifies the Hibernate action
+	 * @param action callback object that specifies the Hibernate action
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see HibernateTransactionManager

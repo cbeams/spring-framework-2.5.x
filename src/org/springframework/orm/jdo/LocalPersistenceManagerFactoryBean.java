@@ -14,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.util.ClassLoaderUtils;
 
 /**
@@ -34,8 +33,8 @@ import org.springframework.util.ClassLoaderUtils;
  *
  * <p>This PersistenceManager handling strategy is most appropriate for
  * applications that solely use JDO for data access. In this case,
- * JdoTransactionManager is required for transaction demarcation, as
- * JTA support isn't possible if JDO isn't installed as JCA connector.
+ * JdoTransactionManager is much more convenient than setting up your
+ * JDO implementation for JTA transactions (which might involve JCA).
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
@@ -90,7 +89,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 			String resourceLocation = this.configLocation;
 			InputStream in = ClassLoaderUtils.getResourceAsStream(resourceLocation);
 			if (in == null) {
-				throw new DataAccessResourceFailureException("Cannot open config location: " + resourceLocation);
+				throw new IOException("Cannot open config location: " + resourceLocation);
 			}
 			prop.load(in);
 		}

@@ -205,7 +205,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
 		if (this.jdbcExceptionTranslator != null) {
-			return this.jdbcExceptionTranslator.translate("HibernateTemplate", null, ex);
+			return this.jdbcExceptionTranslator.translate("HibernateAccessor", null, ex);
 		}
 		else {
 			return new HibernateJdbcException(ex);
