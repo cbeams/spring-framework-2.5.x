@@ -84,8 +84,6 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * ("beanName.propName.propName").
  * </p>
  * 
- * TODO: this guy needs a unit test!
- * 
  * @author Erwin Vervaet
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -166,8 +164,8 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	 * Only <strong>one </strong> of setOutputMappings or setOutputMappingsMap
 	 * must be called.
 	 */
-	public void setOutputMappingsMap(Map fromMappings) {
-		this.outputMappings = new HashMap(fromMappings);
+	public void setOutputMappingsMap(Map outputMappings) {
+		this.outputMappings = new HashMap(outputMappings);
 	}
 
 	// internal worker function
@@ -373,6 +371,5 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		public void clearTransactionToken() {
 			throw new UnsupportedOperationException();
 		}
-
 	}
 }
