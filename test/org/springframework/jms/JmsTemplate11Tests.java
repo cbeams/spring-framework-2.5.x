@@ -31,6 +31,12 @@ import junit.framework.TestCase;
 
 import org.easymock.MockControl;
 
+import org.springframework.jms.core.DefaultJmsAdmin;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.JmsTemplate11;
+import org.springframework.jms.core.MessageCreator;
+import org.springframework.jms.core.ProducerCallback;
+import org.springframework.jms.core.SessionCallback;
 import org.springframework.jndi.JndiTemplate;
 
 /**
