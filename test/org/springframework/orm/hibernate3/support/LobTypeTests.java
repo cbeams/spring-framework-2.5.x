@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,6 @@ public class LobTypeTests extends TestCase {
 	private LobCreator lobCreator = (LobCreator) lobCreatorControl.getMock();
 
 	protected void setUp() throws SQLException {
-		rs.findColumn("column");
-		rsControl.setReturnValue(1);
-
 		lobHandler.getLobCreator();
 		lobHandlerControl.setReturnValue(lobCreator);
 		lobCreator.close();
@@ -74,7 +71,7 @@ public class LobTypeTests extends TestCase {
 	}
 
 	public void testClobStringType() throws Exception {
-		lobHandler.getClobAsString(rs, 1);
+		lobHandler.getClobAsString(rs, "column");
 		lobHandlerControl.setReturnValue("content");
 		lobCreator.setClobAsString(ps, 1, "content");
 		lobCreatorControl.setVoidCallable(1);
@@ -119,7 +116,7 @@ public class LobTypeTests extends TestCase {
 		sfControl.replay();
 		sessionControl.replay();
 
-		lobHandler.getClobAsString(rs, 1);
+		lobHandler.getClobAsString(rs, "column");
 		lobHandlerControl.setReturnValue("content");
 		lobCreator.setClobAsString(ps, 1, "content");
 		lobCreatorControl.setVoidCallable(1);
@@ -157,7 +154,7 @@ public class LobTypeTests extends TestCase {
 	}
 
 	public void testClobStringTypeWithFlushOnCommit() throws Exception {
-		lobHandler.getClobAsString(rs, 1);
+		lobHandler.getClobAsString(rs, "column");
 		lobHandlerControl.setReturnValue("content");
 		lobCreator.setClobAsString(ps, 1, "content");
 		lobCreatorControl.setVoidCallable(1);
@@ -195,7 +192,7 @@ public class LobTypeTests extends TestCase {
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 1);
 
-		lobHandler.getClobAsString(rs, 1);
+		lobHandler.getClobAsString(rs, "column");
 		lobHandlerControl.setReturnValue("content");
 		lobCreator.setClobAsString(ps, 1, "content");
 		lobCreatorControl.setVoidCallable(1);
@@ -223,7 +220,7 @@ public class LobTypeTests extends TestCase {
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 1);
 
-		lobHandler.getClobAsString(rs, 1);
+		lobHandler.getClobAsString(rs, "column");
 		lobHandlerControl.setReturnValue("content");
 		lobCreator.setClobAsString(ps, 1, "content");
 		lobCreatorControl.setVoidCallable(1);
@@ -243,7 +240,7 @@ public class LobTypeTests extends TestCase {
 
 	public void testBlobByteArrayType() throws Exception {
 		byte[] content = "content".getBytes();
-		lobHandler.getBlobAsBytes(rs, 1);
+		lobHandler.getBlobAsBytes(rs, "column");
 		lobHandlerControl.setReturnValue(content);
 		lobCreator.setBlobAsBytes(ps, 1, content);
 		lobCreatorControl.setVoidCallable(1);
@@ -283,7 +280,7 @@ public class LobTypeTests extends TestCase {
 		tmControl.setReturnValue(transaction, 1);
 
 		byte[] content = "content".getBytes();
-		lobHandler.getBlobAsBytes(rs, 1);
+		lobHandler.getBlobAsBytes(rs, "column");
 		lobHandlerControl.setReturnValue(content);
 		lobCreator.setBlobAsBytes(ps, 1, content);
 		lobCreatorControl.setVoidCallable(1);
@@ -312,7 +309,7 @@ public class LobTypeTests extends TestCase {
 		tmControl.setReturnValue(transaction, 1);
 
 		byte[] content = "content".getBytes();
-		lobHandler.getBlobAsBytes(rs, 1);
+		lobHandler.getBlobAsBytes(rs, "column");
 		lobHandlerControl.setReturnValue(content);
 		lobCreator.setBlobAsBytes(ps, 1, content);
 		lobCreatorControl.setVoidCallable(1);
@@ -336,7 +333,7 @@ public class LobTypeTests extends TestCase {
 		oos.writeObject("content");
 		oos.close();
 
-		lobHandler.getBlobAsBinaryStream(rs, 1);
+		lobHandler.getBlobAsBinaryStream(rs, "column");
 		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
 		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
 		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
@@ -372,7 +369,7 @@ public class LobTypeTests extends TestCase {
 	}
 
 	public void testBlobSerializableTypeWithNull() throws Exception {
-		lobHandler.getBlobAsBinaryStream(rs, 1);
+		lobHandler.getBlobAsBinaryStream(rs, "column");
 		lobHandlerControl.setReturnValue(null);
 		lobCreator.setBlobAsBytes(ps, 1, null);
 
@@ -407,7 +404,7 @@ public class LobTypeTests extends TestCase {
 		oos.writeObject("content");
 		oos.close();
 
-		lobHandler.getBlobAsBinaryStream(rs, 1);
+		lobHandler.getBlobAsBinaryStream(rs, "column");
 		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
 		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
 		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
@@ -452,7 +449,7 @@ public class LobTypeTests extends TestCase {
 		oos.writeObject("content");
 		oos.close();
 
-		lobHandler.getBlobAsBinaryStream(rs, 1);
+		lobHandler.getBlobAsBinaryStream(rs, "column");
 		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
 		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
 		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
