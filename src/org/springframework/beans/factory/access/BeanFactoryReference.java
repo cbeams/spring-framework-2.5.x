@@ -21,14 +21,18 @@ import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Class used to track a reference to a BeanFactory obtained through
- * a BeanFactoryLocator.
+ * a BeanFactoryLocator. It is safe to call {@link #release()} multiple
+ * times, but {@link #getFactory()} must not be called after calling
+ * release, or an InvalidStateException will be thrown.
+ * 
  * @author Colin Sampaleanu
  * @see BeanFactoryLocator
  */
 public interface BeanFactoryReference {
   
   /**
-   * Returns the BeanFactory instance held by this reference
+   * Returns the BeanFactory instance held by this reference.
+   * @throws IllegalStateException if invoked after release() has been called
    */
   BeanFactory getFactory();
   
@@ -40,10 +44,10 @@ public interface BeanFactoryReference {
    * case of a 'closeable' BeanFactory or derived class (such as ApplicationContext)
    * may 'close' it, or may 'close' it once no more references remain.</p>
    * <p>In an EJB usage scenario this would normally be called from ejbRemove and
-   * ejbPassivate.
+   * ejbPassivate.</p>
+   * <p>This is safe to call multiple times</p>
    * @throws FatalBeanException if the BeanFactory cannot be released
    * @see org.springframework.beans.factory.access.BeanFactoryLocator
    */
   void release() throws FatalBeanException;
-
 }
