@@ -21,6 +21,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.Assert;
+import org.springframework.web.bind.RequestUtils;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Event;
 
 /**
@@ -33,7 +35,7 @@ public class HttpServletRequestEvent extends Event {
 	 * The event timestamp.
 	 */
 	private long timestamp = new Date().getTime();
-	
+
 	/**
 	 * The wrapped http servlet request.
 	 */
@@ -57,9 +59,16 @@ public class HttpServletRequestEvent extends Event {
 	}
 
 	public String getId() {
-		return request.getParameter("_eventId");
+		try {
+			return RequestUtils.getRequiredStringParameter(request, "_eventId");
+		}
+		catch (ServletRequestBindingException e) {
+			IllegalArgumentException iae = new IllegalArgumentException("The event id is not present in the request");
+			iae.initCause(e);
+			throw iae;
+		}
 	}
-	
+
 	public long getTimestamp() {
 		return timestamp;
 	}
