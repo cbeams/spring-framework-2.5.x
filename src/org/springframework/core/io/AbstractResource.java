@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.core.io;
 
@@ -34,8 +34,6 @@ import java.net.URL;
  * @since 28.12.2003
  */
 public abstract class AbstractResource implements Resource {
-
-	protected static final String URL_PROTOCOL_FILE = "file";
 
 	/**
 	 * This implementation checks whether a File can be opened,

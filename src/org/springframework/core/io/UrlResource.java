@@ -12,17 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.core.io;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLDecoder;
+
+import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Resource implementation for java.net.URL locators.
@@ -34,8 +35,6 @@ import java.net.URLDecoder;
  */
 public class UrlResource extends AbstractResource {
 
-	public static final String PROTOCOL_FILE = "file";
-
 	private final URL url;
 
 	/**
@@ -43,6 +42,7 @@ public class UrlResource extends AbstractResource {
 	 * @param url a URL
 	 */
 	public UrlResource(URL url) {
+		Assert.notNull(url, "url is required");
 		this.url = url;
 	}
 
@@ -51,6 +51,7 @@ public class UrlResource extends AbstractResource {
 	 * @param path a URL path
 	 */
 	public UrlResource(String path) throws MalformedURLException {
+		Assert.notNull(path, "path is required");
 		this.url = new URL(path);
 	}
 
@@ -63,13 +64,7 @@ public class UrlResource extends AbstractResource {
 	}
 
 	public File getFile() throws IOException {
-		if (PROTOCOL_FILE.equals(this.url.getProtocol())) {
-			return new File(URLDecoder.decode(this.url.getFile()));
-		}
-		else {
-			throw new FileNotFoundException(
-					getDescription() + " cannot be resolved to absolute file path - no 'file:' protocol");
-		}
+		return ResourceUtils.getFile(this.url, getDescription());
 	}
 
 	public Resource createRelative(String relativePath) throws MalformedURLException {

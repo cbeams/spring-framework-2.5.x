@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,8 +44,9 @@ public class FileSystemResource extends AbstractResource {
 	 * @param file a File handle
 	 */
 	public FileSystemResource(File file) {
+		Assert.notNull(file, "file is required");
 		this.file = file;
-		this.path = file.getPath();
+		this.path = StringUtils.cleanPath(file.getPath());
 	}
 
 	/**
@@ -51,6 +54,7 @@ public class FileSystemResource extends AbstractResource {
 	 * @param path a file path
 	 */
 	public FileSystemResource(String path) {
+		Assert.notNull(path, "path is required");
 		this.file = new File(path);
 		this.path = path;
 	}
@@ -64,7 +68,7 @@ public class FileSystemResource extends AbstractResource {
 	}
 
 	public URL getURL() throws IOException {
-		return new URL(URL_PROTOCOL_FILE + ":" + this.file.getAbsolutePath());
+		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":" + this.file.getAbsolutePath());
 	}
 
 	public File getFile() {
