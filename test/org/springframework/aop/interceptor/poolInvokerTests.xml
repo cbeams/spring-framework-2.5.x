@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	
+	
+	<bean id="prototypeTest" class="org.springframework.aop.interceptor.SideEffectBean" 
+		singleton="false">	
+		<property name="count"><value>10</value></property>
+	</bean>
+	
+	<bean id="poolingInvokerInterceptor" class="org.springframework.aop.interceptor.CommonsPoolingInvokerInterceptor">	
+		<property name="targetBeanName"><value>prototypeTest</value></property>
+		<property name="poolSize"><value>25</value></property>
+	</bean>
+	
+	
+	<!--
+		This will create a bean for each thread ("apartment")
+	-->
+	<bean id="pooled" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		<property name="interceptorNames"><value>poolingInvokerInterceptor</value></property>
+		
+	</bean>
+
+</beans>		
+	
+	
