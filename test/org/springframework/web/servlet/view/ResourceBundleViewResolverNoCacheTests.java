@@ -19,7 +19,7 @@ package org.springframework.web.servlet.view;
 /**
  * @author Rod Johnson
  */
-public class ResourceBundleViewResolverTestSuiteNoCache extends ResourceBundleViewResolverTestSuite {
+public class ResourceBundleViewResolverNoCacheTests extends ResourceBundleViewResolverTests {
 	
 	protected boolean getCache() {
 		return false;

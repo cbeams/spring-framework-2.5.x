@@ -35,8 +35,29 @@ import org.springframework.core.io.Resource;
 
 /**
  * Bean definition reader for a simple properties format.
- * Provides bean definition registration methods for Map/Properties and
+ *
+ * <p>Provides bean definition registration methods for Map/Properties and
  * ResourceBundle. Typically applied to a DefaultListableBeanFactory.
+ *
+ * <p><b>Example:</b>
+ *
+ * <pre>
+ * employee.class=MyClass         // bean is of class MyClass
+ * employee.(abstract)=true       // this bean can't be instantiated directly
+ * employee.group=Insurance       // real property
+ * employee.usesDialUp=false      // real property (potentially overridden)
+ *
+ * salesrep.parent=employee       // derives from "employee" bean definition
+ * salesrep.(lazy-init)=true      // lazily initialize this singleton bean
+ * salesrep.manager(ref)=tony     // reference to another bean
+ * salesrep.department=Sales      // real property
+ *
+ * techie.parent=employee         // derives from "employee" bean definition
+ * techie.(singleton)=false       // bean is a prototype (not a shared instance)
+ * techie.manager(ref)=jeff       // reference to another bean
+ * techie.department=Engineering  // real property
+ * techie.usesDialUp=true         // real property (overriding parent value)</pre>
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 26.11.2003
@@ -62,6 +83,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String CLASS_KEY = "class";
 
 	/**
+	 * Reserved "property" to indicate the parent of a child bean definition.
+	 */
+	public static final String PARENT_KEY = "parent";
+
+	/**
 	 * Special string added to distinguish owner.(abstract)=true
 	 * Default is false.
 	 */
@@ -78,11 +104,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Default is false.
 	 */
 	public static final String LAZY_INIT_KEY = "(lazy-init)";
-
-	/**
-	 * Reserved "property" to indicate the parent of a child bean definition.
-	 */
-	public static final String PARENT_KEY = "parent";
 
 	/**
 	 * Property suffix for references to other beans in the current
@@ -214,21 +235,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @param map Map name -> property (String or Object). Property values
 	 * will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be strings. Class keys must be Strings.
-	 * <code>
-	 * employee.class=MyClass              // special property
-	 * //employee.abstract=true              // this prototype can't be instantiated directly
-	 * employee.group=Insurance Services   // real property
-	 * employee.usesDialUp=false           // default unless overriden
-	 *
-	 * employee.manager(ref)=tony		   // reference to another prototype defined in the same file
-	 *									   // cyclic and unresolved references will be detected
-	 * salesrep.parent=employee
-	 * salesrep.department=Sales and Marketing
-	 *
-	 * techie.parent=employee
-	 * techie.department=Software Engineering
-	 * techie.usesDialUp=true              // overridden property
-	 * </code>
 	 * @param prefix The match or filter within the keys in the map: e.g. 'beans.'
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
@@ -250,22 +256,24 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(Map, String)
 	 */
-	public int registerBeanDefinitions(Map map, String prefix, String resourceDescription) throws BeansException {
+	public int registerBeanDefinitions(Map map, String prefix, String resourceDescription)
+			throws BeansException {
+
 		if (prefix == null) {
 			prefix = "";
 		}
 		int beanCount = 0;
 
 		Set keys = map.keySet();
-		Iterator itr = keys.iterator();
-		while (itr.hasNext()) {
-			String key = (String) itr.next();
+		Iterator it = keys.iterator();
+		while (it.hasNext()) {
+			String key = (String) it.next();
 			if (key.startsWith(prefix)) {
-				// Key is of form prefix<name>.property
+				// key is of form prefix<name>.property
 				String nameAndProperty = key.substring(prefix.length());
-				int sepIndx = nameAndProperty.indexOf(SEPARATOR);
-				if (sepIndx != -1) {
-					String beanName = nameAndProperty.substring(0, sepIndx);
+				int sepIdx = nameAndProperty.lastIndexOf(SEPARATOR);
+				if (sepIdx != -1) {
+					String beanName = nameAndProperty.substring(0, sepIdx);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Found bean name '" + beanName + "'");
 					}
@@ -276,14 +284,14 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					}
 				}
 				else {
-					// Ignore it: it wasn't a valid bean name and property,
-					// although it did start with the required prefix
+					// Ignore it: It wasn't a valid bean name and property,
+					// although it did start with the required prefix.
 					if (logger.isDebugEnabled()) {
 						logger.debug("Invalid bean name and property [" + nameAndProperty + "]");
 					}
 				}
-			}	// if the key started with the prefix we're looking for
-		}	// while there are more keys
+			}
+		}
 
 		return beanCount;
 	}
@@ -308,10 +316,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		boolean lazyInit = false;
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		Set keys = map.keySet();
-		Iterator itr = keys.iterator();
-		while (itr.hasNext()) {
-			String key = (String) itr.next();
+		Iterator it = map.keySet().iterator();
+		while (it.hasNext()) {
+			String key = (String) it.next();
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
 				if (property.equals(CLASS_KEY)) {
@@ -368,7 +375,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(pvs.toString());
+			logger.debug("Registering bean definition for bean name '" + beanName + "' with " + pvs);
 		}
 
 		// Just use default parent if we're not dealing with the parent itself,
@@ -388,11 +395,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		}
 		catch (ClassNotFoundException ex) {
 			throw new BeanDefinitionStoreException(resourceDescription, beanName,
-			                                       "Bean class [" + className + "] not found", ex);
+					"Bean class [" + className + "] not found", ex);
 		}
 		catch (NoClassDefFoundError err) {
 			throw new BeanDefinitionStoreException(resourceDescription, beanName,
-			                                       "Class that bean class [" + className + "] depends on not found", err);
+					"Class that bean class [" + className + "] depends on not found", err);
 		}
 	}
 

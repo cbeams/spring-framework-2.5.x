@@ -25,18 +25,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
-import org.springframework.beans.factory.BeanIsAbstractException;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class ResourceBundleViewResolverTestSuite extends TestCase {
+public class ResourceBundleViewResolverTests extends TestCase {
 
 	/** Comes from this package */
 	private static String PROPS_FILE = "org.springframework.web.servlet.view.testviews";
@@ -45,7 +45,7 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 	
 	private StaticWebApplicationContext wac;
 	
-	public ResourceBundleViewResolverTestSuite() {
+	public ResourceBundleViewResolverTests() {
 		rb = new ResourceBundleViewResolver();
 		rb.setBasename(PROPS_FILE);
 		rb.setCache(getCache());
@@ -69,7 +69,7 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 
 	public void testParentsAreAbstract() throws Exception {
 		try {
-			View v = rb.resolveViewName("debugParent", Locale.ENGLISH);
+			View v = rb.resolveViewName("debug.Parent", Locale.ENGLISH);
 			fail("Should have thrown BeanIsAbstractException");
 		}
 		catch (BeanIsAbstractException ex) {
@@ -95,10 +95,7 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 		assertTrue("attribute foo = bar, not '" + m.get("foo") + "'", m.get("foo").equals("bar"));
 		assertTrue("attribute postcode = SE10 9JY", m.get("postcode").equals("SE10 9JY"));
 
-		// Test default content type
 		assertTrue("Correct default content type", jv.getContentType().equals("text/html; charset=ISO-8859-1"));
-		
-		// Test default content type
 		assertTrue("WebAppContext was set on view", jv.getApplicationContext() != null);
 		assertTrue("WebAppContext was sticky", jv.getApplicationContext().equals(wac));
 	}
