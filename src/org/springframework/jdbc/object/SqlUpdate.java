@@ -24,6 +24,7 @@ import org.springframework.jdbc.core.JdbcUpdateAffectedIncorrectNumberOfRowsExce
  *
  * @author Rod Johnson
  * @author Isabelle Muszynski
+ * @version $Id: SqlUpdate.java,v 1.2 2003-11-03 17:02:18 johnsonr Exp $
  */
 public class SqlUpdate extends SqlOperation {
 
