@@ -42,13 +42,13 @@ import org.springframework.web.util.SessionKeyUtils;
  * structure to manage flow sessions.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class FlowExecutionStack implements FlowExecution, Serializable {
+	
 	private static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	private String id;
-
-	private FlowSession NO_SESSION = new FlowSession();
 
 	private Flow rootFlow;
 
@@ -79,8 +79,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		assertActive();
 		if (stateId == null) {
 			if (logger.isInfoEnabled()) {
-				logger
-						.info("Current state id was not provided in request to signal event '"
+				logger.info("Current state id was not provided in request to signal event '"
 								+ eventId
 								+ "' in flow "
 								+ getCaption()
@@ -374,14 +373,16 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return endingSession;
 	}
 
+	// lifecycle event publishers
+
 	protected ProcessTemplate getListenerIterator() {
-		return getRootFlow().getFlowExecutionListenerIteratorTemplate();
+		return getActiveFlow().getFlowExecutionListenerIteratorTemplate();
 	}
 
 	protected int getListenerCount() {
-		return getRootFlow().getFlowExecutionListenerCount();
+		return getActiveFlow().getFlowExecutionListenerCount();
 	}
-
+	
 	protected void fireStarted() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow session execution started event to " + getListenerCount() + " listener(s)");
@@ -392,8 +393,6 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			}
 		});
 	}
-
-	// lifecycle event publishers
 
 	protected void fireRequestSubmitted(final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
@@ -441,7 +440,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireSubFlowSpawned() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution started event to " + getListenerCount() + " listener(s)");
+			logger.debug("Publishing sub flow session execution started event to " + getListenerCount() + " listener(s)");
 		}
 		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
