@@ -2592,6 +2592,18 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
+	 * <li>on an occurence of the '<code>error</code>' event, transition to
+	 * the end state with the id '<code>error</code>'.
+	 * </ul>
+	 * @return The transition (e.g error->error)
+	 */
+	protected Transition onErrorEnd() {
+		return onError(getErrorEndStateId());
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
 	 * <li>on an occurence of the '<code>submit</code>' event, transition
 	 * to the state with the id <code>${stateId}</code>
 	 * </ul>

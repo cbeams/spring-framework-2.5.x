@@ -31,10 +31,11 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 	public void buildStates() throws FlowBuilderException {
 		addGetState(flowId());
 		String setCollegueId = qualify(set("collegueId"));
-		addViewState(flowId(), new Transition[] { onBack("finish"), onSelect(setCollegueId) });
+		addViewState(flowId(), new Transition[] { onBackFinish(), onSelect(setCollegueId) });
 		addActionState(setCollegueId, onSuccess("collegue.Detail"));
 		addSubFlowState("collegue.Detail", PersonDetailFlowBuilder.class, useModelMapper("collegueId"),
-				new Transition[] { onFinishGet(flowId()), onError("error") });
-		addEndState("finish");
+				new Transition[] { onFinishGet(flowId()), onErrorEnd() });
+		addFinishEndState();
+		addErrorEndState();
 	}
 }
