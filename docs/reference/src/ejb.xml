@@ -180,15 +180,11 @@ public void setMyComponent(MyComponent myComponent) {
       remotely. This is because the remote interface methods must declare that
       they throw <literal>RemoteException</literal>, and client code must deal
       with this, while the local interface methods don't. Client code
-      wrCCitten for local EJBs which needs to be moved to remote EJBs
+      written for local EJBs which needs to be moved to remote EJBs
       typically has to be modified to add handling for the remote exceptions,
       and client code written for remote EJBs which needs to be moved to local
       EJBs, can either stay the same but do a lot of unnecessary handling of
-      remote excep<programlisting>private MyComponent myComponent;
-
-public void setMyComponent(MyComponent myComponent) {
-    this.myComponent = myComponent;
-}</programlisting>tions, or needs to be modified to remove that code. With the
+      remote exceptions, or needs to be modified to remove that code. With the
       Spring remote EJB proxy, you can instead not declare any thrown
       <literal>RemoteException</literal> in your Business Method Interface and
       implementing EJB code, have a remote interface which is identical except
