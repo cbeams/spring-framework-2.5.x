@@ -76,7 +76,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0.9 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.0.9b (http://www.ibatis.com)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
@@ -221,12 +221,12 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JDO support
 
 * jotm/jotm.jar
-- JOTM 1.5.3 (http://jotm.objectweb.org)
+- JOTM 2.0.3 (http://jotm.objectweb.org)
 - required for building the framework
 - required at runtime when using Spring's JotmFactoryBean
 
 * jotm/xapool.jar
-- XAPool 1.3.3 (http://xapool.experlog.com, also included in JOTM)
+- XAPool 1.4.2 (http://xapool.experlog.com, also included in JOTM)
 - required for building the framework
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
@@ -260,7 +260,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's AbstractExcelView
 
 * quartz/quartz.jar
-- Quartz 1.4.3 (http://www.opensymphony.org/quartz)
+- Quartz 1.4.4 (http://www.opensymphony.org/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
