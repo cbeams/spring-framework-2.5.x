@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 
@@ -19,7 +19,12 @@
 		<constructor-arg><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
-	<bean id="rod4" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean">
+	<bean id="rod4" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean"
+		autowire="constructor">
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod5" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean">
 		<constructor-arg index="1"><ref bean="kerry1"/></constructor-arg>
 		<constructor-arg index="3"><value>99</value></constructor-arg>
 		<constructor-arg><ref bean="other"/></constructor-arg>
@@ -27,15 +32,33 @@
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
+	<bean id="rod6" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean">
+		<constructor-arg index="1"><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg><ref bean="other"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod7" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean" singleton="false">
+		<constructor-arg index="1"><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg><ref bean="other"/></constructor-arg>
+		<constructor-arg><ref bean="other"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod8" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean" singleton="false">
+		<constructor-arg index="2"><ref bean="other"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
 	<bean id="kerry1" class="org.springframework.beans.TestBean">
 		<property name="name">
-			<value>Kerry</value>
+			<value>Kerry1</value>
 		</property>
 	</bean>
 
 	<bean id="kerry2" class="org.springframework.beans.TestBean">
 		<property name="name">
-			<value>Kerry</value>
+			<value>Kerry2</value>
 		</property>
 	</bean>
 

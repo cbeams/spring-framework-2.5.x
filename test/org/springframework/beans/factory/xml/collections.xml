@@ -72,6 +72,10 @@
 		<property name="name"><value>aliased</value></property>
 	</bean>
 
+	<bean class="org.springframework.beans.TestBean">
+		<property name="name"><value>noname</value></property>
+	</bean>
+
 	<bean id="emptyMap" class="org.springframework.beans.factory.HasMap">
 		<property name="map">
 			<map>

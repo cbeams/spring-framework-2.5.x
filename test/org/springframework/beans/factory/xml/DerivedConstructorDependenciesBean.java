@@ -10,6 +10,18 @@ import org.springframework.beans.factory.LifecycleBean;
  */
 public class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
 
+	public DerivedConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, LifecycleBean other) {
+		super(spouse1, spouse2, other);
+	}
+
+	public DerivedConstructorDependenciesBean(TestBean spouse1, Object spouse2, LifecycleBean other) {
+		super(spouse1, null, other);
+	}
+
+	public DerivedConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, LifecycleBean other, int age, int otherAge) {
+		super(spouse1, spouse2, other);
+	}
+
 	public DerivedConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, LifecycleBean other, int age, String name) {
 		super(spouse1, spouse2, other);
 		setAge(age);

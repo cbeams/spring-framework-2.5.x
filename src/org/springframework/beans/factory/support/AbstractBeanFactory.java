@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Arrays;
+import java.util.Comparator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.15 2003-11-09 21:38:37 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.16 2003-11-10 18:06:48 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -287,7 +288,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 				if (beanInstance == null) {
 					throw new FactoryBeanCircularReferenceException(
-					    "Factory bean '" + name + "' returned null object -- " +
+					    "Factory bean '" + name + "' returned null object - " +
 					    "possible cause: not fully initialized due to circular bean reference");
 				}
 
@@ -370,29 +371,26 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @return BeanWrapper for the new instance
 	 */
 	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mergedBeanDefinition) {
-		Constructor[] constructors = mergedBeanDefinition.getBeanClass().getConstructors();
-		if (constructors.length != 1) {
-			throw new FatalBeanException("Need unique constructor in class [" + mergedBeanDefinition.getBeanClass() +
-																	 "] of bean with name '" + beanName + "'");
-		}
-		Constructor constructor = constructors[0];
-		Class[] argTypes = constructor.getParameterTypes();
-
-		ConstructorArgumentValues argValues = mergedBeanDefinition.getConstructorArgumentValues();
+		ConstructorArgumentValues cargs = mergedBeanDefinition.getConstructorArgumentValues();
 		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
-		if (argValues != null) {
-			for (Iterator it = argValues.getIndexedArgumentValues().entrySet().iterator(); it.hasNext();) {
+
+		int minNrOfArgs = 0;
+		if (cargs != null) {
+			minNrOfArgs = cargs.getNrOfArguments();
+			for (Iterator it = cargs.getIndexedArgumentValues().entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				int index = ((Integer) entry.getKey()).intValue();
-				if (index >= argTypes.length) {
-					throw new BeanDefinitionStoreException("Invalid index " + index +
-																								 ": number of constructor arguments is " + argTypes.length);
+				if (index < 0) {
+					throw new BeanDefinitionStoreException("Invalid constructor argument index: " + index);
+				}
+				if (index > minNrOfArgs) {
+					minNrOfArgs = index + 1;
 				}
 				String argName = "constructor argument with index " + index;
 				Object resolvedValue = resolveValueIfNecessary(beanName, argName, entry.getValue());
 				resolvedValues.addIndexedArgumentValue(index, resolvedValue);
 			}
-			for (Iterator it = argValues.getGenericArgumentValues().iterator(); it.hasNext();) {
+			for (Iterator it = cargs.getGenericArgumentValues().iterator(); it.hasNext();) {
 				Object value = it.next();
 				String argName = "constructor argument";
 				Object resolvedValue = resolveValueIfNecessary(beanName, argName, value);
@@ -400,30 +398,109 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			}
 		}
 
-		BeanWrapperImpl bw = new BeanWrapperImpl();
-		Object[] args = new Object[argTypes.length];
-		for (int i = 0; i < argTypes.length; i++) {
-			args[i] = resolvedValues.getArgumentValue(i, argTypes[i]);
-			if (args[i] != null) {
-				args[i] = bw.doTypeConversionIfNecessary(null, null, args[i], argTypes[i]);
+		Constructor[] constructors = mergedBeanDefinition.getBeanClass().getConstructors();
+		if (constructors.length == 0) {
+			throw new FatalBeanException("No public constructor in class [" + mergedBeanDefinition.getBeanClass() +
+																	 "] of bean with name '" + beanName + "'");
+		}
+		Arrays.sort(constructors, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				int c1pl = ((Constructor) o1).getParameterTypes().length;
+				int c2pl = ((Constructor) o2).getParameterTypes().length;
+				return (new Integer(c1pl)).compareTo(new Integer(c2pl)) * -1;
 			}
-			else {
-				if (mergedBeanDefinition.getAutowire() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
-					throw new UnsatisfiedDependencyException(beanName, i, argTypes[i]);
+		});
+
+		BeanWrapperImpl bw = new BeanWrapperImpl();
+		Constructor constructorToUse = null;
+		Object[] argsToUse = null;
+		int minTypeDiffWeight = Integer.MAX_VALUE;
+		for (int i = 0; i < constructors.length; i++) {
+			try {
+				Constructor constructor = constructors[i];
+				if (constructor.getParameterTypes().length < minNrOfArgs) {
+					throw new BeanDefinitionStoreException(minNrOfArgs + " constructor arguments specified but just constructor with " +
+					                                       constructor.getParameterTypes().length + " arguments found in bean '" + beanName + "'");
 				}
-				Map matchingBeans = findMatchingBeans(argTypes[i]);
-				if (matchingBeans.size() != 1) {
-					throw new UnsatisfiedDependencyException(beanName, i, argTypes[i],
-							"There are " + matchingBeans.size() + " beans of type [" + argTypes[i] + "] for autowiring constructor. " +
-							"There should have been 1 to be able to autowire constructor of bean '" + beanName + "'.");
+				Class[] argTypes = constructor.getParameterTypes();
+				Object[] args = new Object[argTypes.length];
+				for (int j = 0; j < argTypes.length; j++) {
+					args[j] = resolvedValues.getArgumentValue(j, argTypes[j]);
+					if (args[j] != null) {
+						args[j] = bw.doTypeConversionIfNecessary(null, null, args[j], argTypes[j]);
+					}
+					else {
+						if (mergedBeanDefinition.getAutowire() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+							throw new UnsatisfiedDependencyException(beanName, j, argTypes[j]);
+						}
+						Map matchingBeans = findMatchingBeans(argTypes[j]);
+						if (matchingBeans.size() != 1) {
+							throw new UnsatisfiedDependencyException(beanName, j, argTypes[j],
+									"There are " + matchingBeans.size() + " beans of type [" + argTypes[j] + "] for autowiring constructor. " +
+									"There should have been 1 to be able to autowire constructor of bean '" + beanName + "'.");
+						}
+						args[j] = matchingBeans.values().iterator().next();
+						logger.info("Autowiring by type from bean name '" + beanName +
+												"' via constructor to bean named '" + matchingBeans.keySet().iterator().next() + "'");
+					}
 				}
-				args[i] = matchingBeans.values().iterator().next();
-				logger.info("Autowiring by type from bean name '" + beanName +
-										"' via constructor to bean named '" + matchingBeans.keySet().iterator().next() + "'");
+				int typeDiffWeight = getTypeDifferenceWeight(argTypes, args);
+				if (typeDiffWeight < minTypeDiffWeight) {
+					constructorToUse = constructor;
+					argsToUse = args;
+					minTypeDiffWeight = typeDiffWeight;
+				}
+			}
+			catch (BeansException ex) {
+				if (i == constructors.length - 1 && constructorToUse == null) {
+					// all constructors tried
+					throw ex;
+				}
+				else {
+					// swallow and try next constructor
+					logger.debug("Ignoring constructor [" + constructors[i] + "] of bean '" + beanName +
+					             "': could not satisfy dependencies", ex);
+				}
 			}
 		}
-		bw.setWrappedInstance(BeanUtils.instantiateClass(constructor, args));
+
+		bw.setWrappedInstance(BeanUtils.instantiateClass(constructorToUse, argsToUse));
+		logger.info("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
 		return bw;
+	}
+
+	/**
+	 * Determine a weight that represents the class hierarchy difference between types and
+	 * arguments. A direct match, i.e. type Integer -> arg of class Integer, does not increase
+	 * the result - all direct matches means weight 0. A match between type Object and arg of
+	 * class Integer would increase the weight by 2, due to the superclass 2 steps up in the
+	 * hierarchy (i.e. Object) being the last one that still matches the required type Object.
+	 * Type Number and class Integer would increase the weight by 1 accordingly, due to the
+	 * superclass 1 step up the hierarchy (i.e. Number) still matching the required type Number.
+	 * Therefore, with an arg of type Integer, a constructor (Integer) would be preferred to a
+	 * constructor (Number) which would in turn be preferred to a constructor (Object).
+	 * All argument weights get accumulated.
+	 * @param argTypes the argument types to match
+	 * @param args the arguments to match
+	 * @return the accumulated weight for all arguments
+	 */
+	private int getTypeDifferenceWeight(Class[] argTypes, Object[] args) {
+		int result = 0;
+		for (int i = 0; i < argTypes.length; i++) {
+			if (argTypes[i].isInstance(args[i])) {
+				Class superClass = args[i].getClass().getSuperclass();
+				while (superClass != null) {
+					if (argTypes[i].isAssignableFrom(superClass)) {
+						result++;
+						superClass = superClass.getSuperclass();
+					}
+					else {
+						superClass = null;
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -440,9 +517,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			Object bean = getBean(propertyName);
 			if (bean != null) {
 				mergedBeanDefinition.addPropertyValue(new PropertyValue(propertyName, bean));
+				logger.info("Added autowiring by name from bean name '" + beanName +
+					"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
 			}
-			logger.info("Added autowiring by name from bean name '" + beanName +
-				"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
 		}
 	}
 

@@ -91,6 +91,13 @@ public class ConstructorArgumentValues {
 	}
 
 	/**
+	 * Return the number of arguments held in this instance.
+	 */
+	public int getNrOfArguments() {
+		return this.indexedArgumentValues.size() + this.genericArgumentValues.size();
+	}
+
+	/**
 	 * Return if this holder does not contain any argument values,
 	 * neither indexed ones nor generic ones.
 	 */

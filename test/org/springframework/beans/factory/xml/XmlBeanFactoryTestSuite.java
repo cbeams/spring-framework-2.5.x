@@ -29,7 +29,7 @@ import org.springframework.beans.factory.LifecycleBean;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.13 2003-11-09 21:38:37 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.14 2003-11-10 18:06:48 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -239,8 +239,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	/**
-	 * Test that properties with name as well as id creating
-	 * an alias up front.
+	 * Test that properties with name as well as id creating an alias up front.
 	 */
 	public void testAutoAliasing() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
@@ -281,6 +280,9 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(beanNames.contains("aliasWithoutId1"));
 		assertFalse(beanNames.contains("aliasWithoutId2"));
 		assertFalse(beanNames.contains("aliasWithoutId3"));
+
+		TestBean tb4 = (TestBean) xbf.getBean(TestBean.class.getName());
+		assertEquals("noname", tb4.getName());
 	}
 
 	public void testEmptyMap() throws Exception {
@@ -608,10 +610,12 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod1");
-		TestBean kerry = (TestBean) xbf.getBean("kerry1");
+		TestBean kerry = (TestBean) xbf.getBean("kerry2");
 		// Should have been autowired
 		assertEquals(kerry, rod.getSpouse1());
 		assertEquals(kerry, rod.getSpouse2());
+		assertEquals(0, rod.getAge());
+		assertEquals(null, rod.getName());
 	}
 
 	public void testSatisfiedIndexedConstructorArg() throws Exception {
@@ -623,32 +627,90 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		// Should have been autowired
 		assertEquals(kerry2, rod.getSpouse1());
 		assertEquals(kerry1, rod.getSpouse2());
+		assertEquals(0, rod.getAge());
+		assertEquals(null, rod.getName());
 	}
 
 	public void testSatisfiedConstructorArgWithAutowire() throws Exception {
 		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod3");
-		TestBean kerry = (TestBean) xbf.getBean("kerry1");
+		TestBean kerry = (TestBean) xbf.getBean("kerry2");
 		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
 		// Should have been autowired
 		assertEquals(kerry, rod.getSpouse1());
 		assertEquals(kerry, rod.getSpouse2());
 		assertEquals(other, rod.getOther());
+		assertEquals(0, rod.getAge());
+		assertEquals(null, rod.getName());
 	}
 
-	public void testSatisfiedConstructorArgWithSimpleValues() throws Exception {
+	public void testSatisfiedConstructorArgWithAutowireAndMultipleConstructors() throws Exception {
 		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod4");
-		TestBean kerry = (TestBean) xbf.getBean("kerry1");
+		TestBean kerry = (TestBean) xbf.getBean("kerry2");
 		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
 		// Should have been autowired
 		assertEquals(kerry, rod.getSpouse1());
 		assertEquals(kerry, rod.getSpouse2());
 		assertEquals(other, rod.getOther());
+		assertEquals(0, rod.getAge());
+		assertEquals(null, rod.getName());
+	}
+
+	public void testSatisfiedConstructorArgWithSimpleValuesAndGreedyConstructor() throws Exception {
+		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod5");
+		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
+		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
+		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
+		// Should have been autowired
+		assertEquals(kerry2, rod.getSpouse1());
+		assertEquals(kerry1, rod.getSpouse2());
+		assertEquals(other, rod.getOther());
 		assertEquals(99, rod.getAge());
 		assertEquals("myname", rod.getName());
+	}
+
+	public void testSatisfiedConstructorArgWithSimpleValuesAndHumbleConstructor() throws Exception {
+		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod6");
+		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
+		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
+		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
+		// Should have been autowired
+		assertEquals(kerry2, rod.getSpouse1());
+		assertEquals(kerry1, rod.getSpouse2());
+		assertEquals(other, rod.getOther());
+		assertEquals(0, rod.getAge());
+		assertEquals(null, rod.getName());
+	}
+
+	public void testThrowsExceptionOnTooManyArguments() throws Exception {
+		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		try {
+			ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod7");
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// expected
+		}
+	}
+
+	public void testThrowsExceptionOnAmbiguousResolution() throws Exception {
+		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		try {
+			ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod8");
+			fail("Should have thrown UnsatisfiedDependencyException");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// expected
+		}
 	}
 
 
