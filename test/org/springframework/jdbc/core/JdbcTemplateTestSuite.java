@@ -51,7 +51,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.22 2004-03-23 22:49:51 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.23 2004-04-01 02:07:02 trisberg Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -671,17 +671,17 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.getDriverVersion();
-		ctrlDatabaseMetaData.setReturnValue("1.2.3");
+		//mockDatabaseMetaData.getDatabaseProductName();
+		//ctrlDatabaseMetaData.setReturnValue("MySQL");
+		//mockDatabaseMetaData.getDriverVersion();
+		//ctrlDatabaseMetaData.setReturnValue("1.2.3");
 		mockDatabaseMetaData.supportsBatchUpdates();
 		ctrlDatabaseMetaData.setReturnValue(false);
 
 		mockConnection.prepareStatement(sql);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
 		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 1);
 
 		ctrlPreparedStatement.replay();
 		ctrlDatabaseMetaData.replay();
@@ -738,17 +738,17 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.getDriverVersion();
-		ctrlDatabaseMetaData.setReturnValue("1.2.3");
+		//mockDatabaseMetaData.getDatabaseProductName();
+		//ctrlDatabaseMetaData.setReturnValue("MySQL");
+		//mockDatabaseMetaData.getDriverVersion();
+		//ctrlDatabaseMetaData.setReturnValue("1.2.3");
 		mockDatabaseMetaData.supportsBatchUpdates();
 		ctrlDatabaseMetaData.setReturnValue(true);
 
 		mockConnection.prepareStatement(sql);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
 		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 1);
 
 		ctrlPreparedStatement.replay();
 		ctrlDatabaseMetaData.replay();
@@ -786,8 +786,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlDataSource = MockControl.createControl(DataSource.class);
 		mockDataSource = (DataSource) ctrlDataSource.getMock();
 		mockDataSource.getConnection();
-		// Expect two calls: make get Metadata fail also
-		ctrlDataSource.setThrowable(sex, 2);
+		// Expect two calls (one call after caching data product name): make get Metadata fail also
+		ctrlDataSource.setThrowable(sex, 1);
 		ctrlDataSource.replay();
 
 		try {
@@ -815,19 +815,19 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		ctrlConnection = MockControl.createControl(Connection.class);
 		mockConnection = (Connection) ctrlConnection.getMock();
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(null, 1);
-		mockConnection.close();
-		ctrlConnection.setVoidCallable(1);
+		//mockConnection.getMetaData();
+		//ctrlConnection.setReturnValue(null, 1);
+		//mockConnection.close();
+		//ctrlConnection.setVoidCallable(1);
 		ctrlConnection.replay();
 		
 		// Change behaviour in setUp() because we only expect one call to getConnection():
 		// none is necessary to get metadata for exception translator
 		ctrlDataSource = MockControl.createControl(DataSource.class);
 		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		// Upfront call for metadata
-		ctrlDataSource.setReturnValue(mockConnection, 1);
+		// Upfront call for metadata - no longer the case
+		//mockDataSource.getConnection();
+		//ctrlDataSource.setReturnValue(mockConnection, 1);
 		// One call for operation
 		mockDataSource.getConnection();
 		ctrlDataSource.setThrowable(sex, 1);
@@ -870,19 +870,19 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		ctrlConnection = MockControl.createControl(Connection.class);
 		mockConnection = (Connection) ctrlConnection.getMock();
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(null, 1);
-		mockConnection.close();
-		ctrlConnection.setVoidCallable(1);
+		//mockConnection.getMetaData();
+		//ctrlConnection.setReturnValue(null, 1);
+		//mockConnection.close();
+		//ctrlConnection.setVoidCallable(1);
 		ctrlConnection.replay();
 	
 		// Change behaviour in setUp() because we only expect one call to getConnection():
 		// none is necessary to get metadata for exception translator
 		ctrlDataSource = MockControl.createControl(DataSource.class);
 		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		// Upfront call for metadata
-		ctrlDataSource.setReturnValue(mockConnection, 1);
+		// Upfront call for metadata - no longer the case
+		//mockDataSource.getConnection();
+		//ctrlDataSource.setReturnValue(mockConnection, 1);
 		// One call for operation
 		mockDataSource.getConnection();
 		ctrlDataSource.setThrowable(sex, 1);
@@ -1126,10 +1126,10 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData mockDatabaseMetaData =
 			(DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.getDriverVersion();
-		ctrlDatabaseMetaData.setReturnValue("1.2.3");
+		//mockDatabaseMetaData.getDatabaseProductName();
+		//ctrlDatabaseMetaData.setReturnValue("MySQL");
+		//mockDatabaseMetaData.getDriverVersion();
+		//ctrlDatabaseMetaData.setReturnValue("1.2.3");
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
@@ -1149,8 +1149,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		mockConnection.createStatement();
 		ctrlConnection.setReturnValue(mockStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData);
+		//mockConnection.getMetaData();
+		//ctrlConnection.setReturnValue(mockDatabaseMetaData);
 
 		ctrlDatabaseMetaData.replay();
 		ctrlResultSet.replay();

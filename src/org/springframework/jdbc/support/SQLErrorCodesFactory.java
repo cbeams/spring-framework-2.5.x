@@ -47,7 +47,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
- * @version $Id: SQLErrorCodesFactory.java,v 1.8 2004-03-18 02:46:15 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.9 2004-04-01 02:07:11 trisberg Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -86,6 +86,11 @@ public class SQLErrorCodesFactory {
 	* Create a Map to hold error codes for all databases defined in the config file.
 	*/
 	private Map rdbmsErrorCodes;
+
+	/**
+	* Create a Map to hold database product name retreived from database metadata.
+	*/
+	private Map dataSourceProductName = new HashMap(10);
 
 	/**
 	 * Not public to enforce Singleton design pattern.
@@ -157,6 +162,15 @@ public class SQLErrorCodesFactory {
 	 */
 	public SQLErrorCodes getErrorCodes(DataSource ds) {
 		logger.info("Looking up default SQLErrorCodes for DataSource");
+        // Lets avoid looking up database product info if we can.
+        Integer dataSourceHash = new Integer(ds.hashCode());
+        if (dataSourceProductName.containsKey(dataSourceHash)) {
+            String dataSourceDbName = (String)dataSourceProductName.get(dataSourceHash);
+            logger.info("Database product name found in cache {" + 
+            		dataSourceHash + "}. Name is " + dataSourceDbName);
+            return getErrorCodes(dataSourceDbName);
+        }
+        // We could not find it - got to look it up.
 		Connection con = null;
 		try {
 			con = DataSourceUtils.getConnection(ds);
@@ -178,6 +192,7 @@ public class SQLErrorCodesFactory {
 						dbName = "DB2";
 					}
 					if (dbName != null) {
+						dataSourceProductName.put(new Integer(ds.hashCode()), dbName);
 						logger.info("Database Product Name is " + dbName);
 						logger.info("Driver Version is " + driverVersion);
 						SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);

@@ -24,10 +24,11 @@ import java.util.Arrays;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.AbstractDataSource;
 
 /**
  * Tests for SQLErrorCode loading.
@@ -182,7 +183,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertEquals(0, sec.getBadSqlGrammarCodes().length);
 		assertEquals(0, sec.getDataIntegrityViolationCodes().length);
 	}
-	
+
 	private SQLErrorCodes getErrorCodesFromDataSourceWithGivenMetadata(String productName) throws Exception {
 		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
@@ -200,21 +201,46 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		ctrlConnection.setVoidCallable();
 		ctrlConnection.replay();
 
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		ctrlDataSource.setDefaultReturnValue(mockConnection);
-		ctrlDataSource.replay();
+		/* 
+		 * We can't use an EasyMock mock object here since we cache product name based on data source hashCode 
+		 * and EasyMock always seem to return the same hashCode regardles when/where/how it is created.  
+		 * This messes up the meta data calls - calling classes don't think they have to call since they 
+		 * erroneously think it is the same data source.
+		 */ 
+		//MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
+		//DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
+		//mockDataSource.getConnection();
+		//ctrlDataSource.setDefaultReturnValue(mockConnection);
+		//ctrlDataSource.replay();
+		DataSource mockDataSource = new SpringMockDataSource(productName, mockConnection);
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(mockDataSource);
 
 		mdControl.verify();
 		ctrlConnection.verify();
-		ctrlDataSource.verify();
+		//ctrlDataSource.verify();
 		
 		return sec;
 	}
 	
+	/* 
+	 * Stand in for the EasyMock mock object - see comment above 
+	 */ 
+	private class SpringMockDataSource extends AbstractDataSource {
+		String productName;
+		Connection conn;
+		private SpringMockDataSource(String productName, Connection conn) {
+			this.productName = productName;
+			this.conn = conn;
+		}
+		public Connection getConnection() {
+			return conn;
+		}
+		public Connection getConnection(String u, String p) {
+			return null;
+		}
+	}
+
 	public void testOracleRecognizedFromMetadata() throws Exception {
 		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("Oracle");
 		assertIsOracle(sec);
