@@ -20,7 +20,6 @@ import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
@@ -197,7 +196,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
-	protected Object doGetTransaction() throws CannotCreateTransactionException, TransactionException {
+	protected Object doGetTransaction() {
 		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
 			logger.debug("Found thread-bound session for Hibernate transaction");
 			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(this.sessionFactory);
@@ -208,11 +207,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
-	protected boolean isExistingTransaction(Object transaction) throws TransactionException {
+	protected boolean isExistingTransaction(Object transaction) {
 		return ((HibernateTransactionObject) transaction).hasTransaction();
 	}
 
-	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
+	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 		if (txObject.getSessionHolder() == null) {
 			logger.debug("Opening new session for Hibernate transaction");
@@ -277,11 +276,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
-	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
+	protected boolean isRollbackOnly(Object transaction) {
 		return ((HibernateTransactionObject) transaction).getSessionHolder().isRollbackOnly();
 	}
 
-	protected void doCommit(TransactionStatus status) throws TransactionException {
+	protected void doCommit(TransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		logger.debug("Committing Hibernate transaction");
 		try {
@@ -301,7 +300,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
-	protected void doRollback(TransactionStatus status) throws TransactionException {
+	protected void doRollback(TransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		logger.debug("Rolling back Hibernate transaction");
 		try {
@@ -320,7 +319,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
-	protected void doSetRollbackOnly(TransactionStatus status) throws TransactionException {
+	protected void doSetRollbackOnly(TransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		logger.debug("Setting Hibernate transaction rollback-only");
 		txObject.getSessionHolder().setRollbackOnly();

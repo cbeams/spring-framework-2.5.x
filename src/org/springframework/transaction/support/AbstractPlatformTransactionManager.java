@@ -7,6 +7,7 @@ package org.springframework.transaction.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -27,12 +28,12 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * <li>applies the appropriate modification on rollback
  * (actual rollback or setting rollback-only);
  * <li>triggers registered synchronization callbacks
- * (if transactionSynchronization is active).
+ * (if transaction synchronization is active).
  * </ul>
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.9 2003-11-20 16:33:41 johnsonr Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.10 2003-11-21 16:04:47 jhoeller Exp $
  */
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
 
@@ -258,8 +259,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Return a current transaction object, i.e. a JTA UserTransaction.
 	 * @return the current transaction object
-	 * @throws CannotCreateTransactionException if transaction support is
-	 * not available (e.g. no JTA UserTransaction retrievable from JNDI)
+	 * @throws org.springframework.transaction.CannotCreateTransactionException
+	 * if transaction support is not available (e.g. no JTA UserTransaction retrievable from JNDI)
 	 * @throws TransactionException in case of lookup or system errors
 	 */
 	protected abstract Object doGetTransaction() throws TransactionException;

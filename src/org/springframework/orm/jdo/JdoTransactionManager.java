@@ -13,7 +13,6 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
@@ -125,7 +124,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected Object doGetTransaction() throws CannotCreateTransactionException, TransactionException {
+	protected Object doGetTransaction() {
 		if (TransactionSynchronizationManager.hasResource(this.persistenceManagerFactory)) {
 			logger.debug("Found thread-bound persistence manager for JDO transaction");
 			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(this.persistenceManagerFactory);
@@ -136,11 +135,11 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected boolean isExistingTransaction(Object transaction) throws TransactionException {
+	protected boolean isExistingTransaction(Object transaction) {
 		return ((JdoTransactionObject) transaction).hasTransaction();
 	}
 
-	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
+	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationException("JdoTransactionManager does not support custom isolation levels");
 		}
@@ -180,11 +179,11 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
+	protected boolean isRollbackOnly(Object transaction) {
 		return ((JdoTransactionObject) transaction).getPersistenceManagerHolder().isRollbackOnly();
 	}
 
-	protected void doCommit(TransactionStatus status) throws TransactionException {
+	protected void doCommit(TransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		logger.debug("Committing JDO transaction");
 		try {
@@ -200,7 +199,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected void doRollback(TransactionStatus status) throws TransactionException {
+	protected void doRollback(TransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		logger.debug("Rolling back JDO transaction");
 		try {
@@ -211,7 +210,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected void doSetRollbackOnly(TransactionStatus status) throws TransactionException {
+	protected void doSetRollbackOnly(TransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		logger.debug("Setting JDO transaction rollback-only");
 		txObject.getPersistenceManagerHolder().setRollbackOnly();
