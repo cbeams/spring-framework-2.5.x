@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 import org.springframework.util.Assert;
@@ -28,7 +27,7 @@ import org.springframework.util.closure.ProcessTemplate;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class FlowExecutionListenerList implements Serializable {
+public class FlowExecutionListenerList {
 
 	/**
 	 * The list of listeners that should receive event callbacks during managed
@@ -139,5 +138,17 @@ public class FlowExecutionListenerList implements Serializable {
 	 */
 	public boolean isEmpty() {
 		return flowExecutionListeners.isEmpty();
+	}
+	
+	/**
+	 * Returns the listeners in this list as an array.
+	 */
+	public FlowExecutionListener[] toArray() {
+		FlowExecutionListener[] res=new FlowExecutionListener[size()];
+		int i=0;
+		for (Iterator it=iterator(); it.hasNext();) {
+			res[i++]=(FlowExecutionListener)it.next();
+		}
+		return res;
 	}
 }
