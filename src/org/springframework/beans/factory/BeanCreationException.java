@@ -25,26 +25,61 @@ import org.springframework.beans.FatalBeanException;
  */
 public class BeanCreationException extends FatalBeanException {
 
+	/**
+	 * Create a new BeanCreationException.
+	 * @param msg the detail message
+	 */
 	public BeanCreationException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Create a new BeanCreationException.
+	 * @param msg the detail message
+	 * @param ex the root cause
+	 */
 	public BeanCreationException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
 
+	/**
+	 * Create a new BeanCreationException.
+	 * @param beanName the name of the bean requested
+	 * @param msg the detail message
+	 */
 	public BeanCreationException(String beanName, String msg) {
 		this(beanName, msg, (Throwable) null);
 	}
 
+	/**
+	 * Create a new BeanCreationException.
+	 * @param beanName the name of the bean requested
+	 * @param msg the detail message
+	 * @param ex the root cause
+	 */
 	public BeanCreationException(String beanName, String msg, Throwable ex) {
 		super("Error creating bean with name '" + beanName + "': " + msg, ex);
 	}
 
+	/**
+	 * Create a new BeanCreationException.
+	 * @param resourceDescription description of the resource
+	 * that the bean definition came from
+	 * @param beanName the name of the bean requested
+	 * @param msg the detail message
+	 */
 	public BeanCreationException(String resourceDescription, String beanName, String msg) {
 		this(resourceDescription, beanName, msg, null);
 	}
 
+	/**
+	 * Create a new BeanCreationException.
+	 * @param resourceDescription description of the resource
+	 * that the bean definition came from
+	 * @param beanName the name of the bean requested
+	 * @param msg the detail message
+	 * @param ex the root cause
+	 */
 	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable ex) {
 		super("Error creating bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, ex);
 	}

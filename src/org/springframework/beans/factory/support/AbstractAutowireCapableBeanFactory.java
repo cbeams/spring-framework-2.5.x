@@ -87,7 +87,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
-	/** Dependency types to ignore on dependency check and autowire */
+	/**
+	 * Dependency types to ignore on dependency check and autowire, as Set of
+	 * Class objects. By default, only the BeanFactory interface is ignored.
+	 */
 	private final Set ignoreDependencyTypes = new HashSet();
 
 
@@ -121,8 +124,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Ignore the given dependency type for autowiring.
 	 * <p>This will typically be used by application contexts to register
 	 * dependencies that are resolved in other ways, like BeanFactory through
-	 * BeanFactoryAware (which bean factories are supposed to provide by default),
-	 * or ApplicationContext through ApplicationContextAware.
+	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
+	 * <p>By default, just the BeanFactory interface is ignored.
+	 * For further types to ignore, invoke this method for each type.
+	 * @see org.springframework.beans.factory.BeanFactory
+	 * @see org.springframework.beans.factory.BeanFactoryAware
+	 * @see org.springframework.context.ApplicationContext
+	 * @see org.springframework.context.ApplicationContextAware
 	 */
 	public void ignoreDependencyType(Class type) {
 		this.ignoreDependencyTypes.add(type);
@@ -804,7 +812,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return;
 		}
 
-		// create a deep copy, resolving any references for values
+		// Create a deep copy, resolving any references for values.
 		MutablePropertyValues deepCopy = new MutablePropertyValues();
 		PropertyValue[] pvArray = pvs.getPropertyValues();
 		for (int i = 0; i < pvArray.length; i++) {
@@ -814,7 +822,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			deepCopy.addPropertyValue(pvArray[i].getName(), resolvedValue);
 		}
 
-		// set our (possibly massaged) deep copy
+		// Set our (possibly massaged) deep copy.
 		try {
 			// Synchronize if custom editors are registered.
 			// Necessary because PropertyEditors are not thread-safe.
@@ -828,7 +836,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 		catch (BeansException ex) {
-			// improve the message by showing the context
+			// Improve the message by showing the context.
 			throw new BeanCreationException(
 					mergedBeanDefinition.getResourceDescription(), beanName, "Error setting property values", ex);
 		}

@@ -31,6 +31,11 @@ package org.springframework.beans.factory;
  */
 public class FactoryBeanCircularReferenceException extends BeanCreationException {
 
+	/**
+	 * Create a new FactoryBeanCircularReferenceException.
+	 * @param beanName the name of the bean requested
+	 * @param msg the detail message
+	 */
 	public FactoryBeanCircularReferenceException(String beanName, String msg) {
 		super(beanName, msg);
 	}

@@ -192,7 +192,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		Object sharedInstance = this.singletonCache.get(beanName);
 		if (sharedInstance != null) {
 			if (sharedInstance == CURRENTLY_IN_CREATION) {
-				throw new BeanCurrentlyInCreationException(beanName, "Requested bean is already currently in creation");
+				throw new BeanCurrentlyInCreationException(beanName);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
@@ -283,6 +283,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			boolean singleton = true;
 
 			Object beanInstance = this.singletonCache.get(beanName);
+			if (beanInstance == CURRENTLY_IN_CREATION) {
+				throw new BeanCurrentlyInCreationException(beanName);
+			}
 			if (beanInstance != null) {
 				beanClass = beanInstance.getClass();
 				singleton = true;
@@ -317,8 +320,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		try {
 			Class beanClass = null;
 
-			// check manually registered singletons
+			// Check manually registered singletons.
 			Object beanInstance = this.singletonCache.get(beanName);
+			if (beanInstance == CURRENTLY_IN_CREATION) {
+				throw new BeanCurrentlyInCreationException(beanName);
+			}
 			if (beanInstance != null) {
 				beanClass = beanInstance.getClass();
 			}
@@ -508,6 +514,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		String beanName = transformedBeanName(name);
 		try {
 			Object beanInstance = this.singletonCache.get(beanName);
+			if (beanInstance == CURRENTLY_IN_CREATION) {
+				throw new BeanCurrentlyInCreationException(beanName);
+			}
 			if (beanInstance != null) {
 				return (beanInstance instanceof FactoryBean);
 			}

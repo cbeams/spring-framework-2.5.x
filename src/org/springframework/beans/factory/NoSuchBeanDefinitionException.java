@@ -32,7 +32,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	private Class beanType;
 
 	/**
-	 * Create new <code>NoSuchBeanDefinitionException</code>.
+	 * Create a new NoSuchBeanDefinitionException.
 	 * @param name the name of the missing bean
 	 * @param message further, detailed message describing the problem
 	 */
@@ -42,7 +42,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	}
 
 	/**
-	 * Create new <code>NoSuchBeanDefinitionException</code>.
+	 * Create a new NoSuchBeanDefinitionException.
 	 * @param type required type of bean
 	 * @param message further, detailed message describing the problem
 	 */

@@ -34,7 +34,7 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	private final Class actualType;
 
 	/**
-	 * Create a new <code>BeanNotOfRequiredTypeException</code>.
+	 * Create a new BeanNotOfRequiredTypeException.
 	 * @param beanName the name of the bean requested
 	 * @param requiredType the required type
 	 * @param actualType the actual type returned, which did not match
