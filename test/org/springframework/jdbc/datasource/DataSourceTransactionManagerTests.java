@@ -564,8 +564,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setVoidCallable(1);
 		con.prepareStatement("some SQL statement");
 		conControl.setReturnValue(ps, 1);
-		if (timeout >= 2) {
-			ps.setQueryTimeout(timeout - 2);
+		if (timeout > 1) {
+			ps.setQueryTimeout(timeout - 1);
 			psControl.setVoidCallable(1);
 			con.commit();
 		}
@@ -593,7 +593,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					try {
-						Thread.sleep(2000);
+						Thread.sleep(1500);
 					}
 					catch (InterruptedException ex) {
 					}
@@ -607,12 +607,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 					}
 				}
 			});
-			if (timeout < 2) {
+			if (timeout <= 1) {
 				fail("Should have thrown TransactionTimedOutException");
 			}
 		}
 		catch (TransactionTimedOutException ex) {
-			if (timeout < 2) {
+			if (timeout <= 1) {
 				// expected
 			}
 			else {
