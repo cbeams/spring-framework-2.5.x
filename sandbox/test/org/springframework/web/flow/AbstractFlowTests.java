@@ -31,6 +31,7 @@ import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
+import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.SessionKeyUtils;
 
@@ -43,15 +44,29 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 
 	private Flow flow;
 
-	protected FlowExecution flowExecution;
+	private FlowExecution flowExecution;
 
-	public void setFlow(Flow flow) {
+	private FlowServiceLocator flowServiceLocator;
+
+	protected void setFlow(Flow flow) {
 		Assert.notNull(flow, "Flow is required for this test");
 		this.flow = flow;
 	}
 
-	public void setFlowBuilder(FlowBuilder flowBuilder) {
+	protected Flow getFlow() {
+		return flow;
+	}
+
+	protected void setFlowBuilder(FlowBuilder flowBuilder) {
 		setFlow(new FlowFactoryBean(flowBuilder).getFlow());
+	}
+
+	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
+		this.flowServiceLocator = flowServiceLocator;
+	}
+
+	protected FlowServiceLocator getFlowServiceLocator() {
+		return flowServiceLocator;
 	}
 
 	protected void assertCurrentStateEquals(String expectedCurrentStateId) {
@@ -102,10 +117,6 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 
 	protected String generateUniqueFlowSessionId(FlowExecutionStack stack) {
 		return SessionKeyUtils.generateMD5SessionKey(String.valueOf(stack.hashCode()), true);
-	}
-
-	protected Flow getFlow() {
-		return flow;
 	}
 
 	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
