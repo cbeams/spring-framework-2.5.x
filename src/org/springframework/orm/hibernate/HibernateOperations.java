@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import net.sf.hibernate.LockMode;
@@ -30,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  * Implemented by HibernateTemplate. Not often used, but a useful option
  * to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Provides HibernateTemplate's convenience methods that mirror
+ * <p>Provides HibernateTemplate's data access methods that mirror
  * various Session methods.
  *
  * @author Juergen Hoeller
@@ -52,7 +53,7 @@ public interface HibernateOperations {
 	 * like close, disconnect, or reconnect, to let the template do its work.
 	 * @param action callback object that specifies the Hibernate action
 	 * @return a result object returned by the action, or null
-	 * @throws DataAccessException in case of Hibernate errors
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateTransactionManager
 	 * @see org.springframework.dao
 	 * @see org.springframework.transaction
@@ -61,17 +62,17 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute the specified action assuming that the result object is a List.
-	 * <p>This is a convenience method for executing Hibernate find calls
-	 * within an action.
+	 * This is a convenience method for executing Hibernate find calls or
+	 * queries within an action.
 	 * @param action action object that specifies the Hibernate action
 	 * @return a result object returned by the action, or null
-	 * @throws DataAccessException in case of Hibernate errors
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	List executeFind(HibernateCallback action) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
-	// Convenience methods for load, save, update
+	// Convenience methods for load, save, update, delete
 	//-------------------------------------------------------------------------
 
 	/**
@@ -91,6 +92,7 @@ public interface HibernateOperations {
 	 * Obtains the specified lock mode if the instance exists.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
+	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance, or null if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#get(Class, java.io.Serializable, net.sf.hibernate.LockMode)
@@ -116,6 +118,7 @@ public interface HibernateOperations {
 	 * Obtains the specified lock mode if the instance exists.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
+	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance
 	 * @throws HibernateObjectRetrievalFailureException if the instance could not be found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -136,9 +139,9 @@ public interface HibernateOperations {
 
 	/**
 	 * Remove the given object from the Session cache.
-	 * @param entity the persistent instance to lock
+	 * @param entity the persistent instance to evict
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#evict(Object)
+	 * @see net.sf.hibernate.Session#evict
 	 */
 	void evict(Object entity) throws DataAccessException;
 
@@ -147,6 +150,7 @@ public interface HibernateOperations {
 	 * checking whether the corresponding database entry still exists
 	 * (throwing an OptimisticLockingFailureException if not found).
 	 * @param entity the persistent instance to lock
+	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateOptimisticLockingFailureException
 	 * @see net.sf.hibernate.Session#lock(Object, net.sf.hibernate.LockMode)
@@ -154,8 +158,26 @@ public interface HibernateOperations {
 	void lock(Object entity, LockMode lockMode) throws DataAccessException;
 
 	/**
-	 * Save the given persistent instance.
-	 * @param entity the persistent instance to save
+	 * Re-read the state of the given persistent instance.
+	 * @param entity the persistent instance to re-read
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#refresh(Object)
+	 */
+	void refresh(final Object entity) throws DataAccessException;
+
+	/**
+	 * Re-read the state of the given persistent instance.
+	 * Obtains the specified lock mode for the instance.
+	 * @param entity the persistent instance to re-read
+	 * @param lockMode the lock mode to obtain
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#refresh(Object, net.sf.hibernate.LockMode)
+	 */
+	void refresh(final Object entity, LockMode lockMode) throws DataAccessException;
+
+	/**
+	 * Persist the given transient instance.
+	 * @param entity the transient instance to persist
 	 * @return the generated identifier
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#save(Object)
@@ -163,8 +185,8 @@ public interface HibernateOperations {
 	Serializable save(Object entity) throws DataAccessException;
 
 	/**
-	 * Save the given persistent instance with the given identifier.
-	 * @param entity the persistent instance to save
+	 * Persist the given transient instance with the given identifier.
+	 * @param entity the transient instance to persist
 	 * @param id the identifier to assign
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#save(Object, java.io.Serializable)
@@ -205,15 +227,47 @@ public interface HibernateOperations {
 
 	/**
 	 * Update the given persistent instance.
-	 * Obtains the specified lock mode if the instance exists, implicitly
+	 * <p>Obtains the specified lock mode if the instance exists, implicitly
 	 * checking whether the corresponding database entry still exists
 	 * (throwing an OptimisticLockingFailureException if not found).
 	 * @param entity the persistent instance to update
+	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateOptimisticLockingFailureException
 	 * @see net.sf.hibernate.Session#update(Object)
 	 */
 	void update(Object entity, LockMode lockMode) throws DataAccessException;
+
+	/**
+	 * Delete the given persistent instance.
+	 * @param entity the persistent instance to delete
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#delete(Object)
+	 */
+	void delete(Object entity) throws DataAccessException;
+
+	/**
+	 * Delete the given persistent instance.
+	 * <p>Obtains the specified lock mode if the instance exists, implicitly
+	 * checking whether the corresponding database entry still exists
+	 * (throwing an OptimisticLockingFailureException if not found).
+	 * @param entity the persistent instance to delete
+	 * @param lockMode the lock mode to obtain
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see HibernateOptimisticLockingFailureException
+	 * @see net.sf.hibernate.Session#delete(Object)
+	 */
+	void delete(Object entity, LockMode lockMode) throws DataAccessException;
+
+	/**
+	 * Delete all given persistent instances.
+	 * <p>This can be combined with any of the find methods to delete by query
+	 * in two lines of code, similar to Session's delete by query methods.
+	 * @param entities the persistent instances to delete
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#delete(String)
+	 */
+	void deleteAll(Collection entities) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -237,7 +291,7 @@ public interface HibernateOperations {
 	 * @param value the value of the parameter
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	List find(String queryString, Object value) throws DataAccessException;
@@ -250,7 +304,7 @@ public interface HibernateOperations {
 	 * @param type Hibernate type of the parameter
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	List find(String queryString, Object value, Type type) throws DataAccessException;
@@ -262,7 +316,7 @@ public interface HibernateOperations {
 	 * @param values the values of the parameters
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	List find(String queryString, Object[] values) throws DataAccessException;
@@ -275,7 +329,7 @@ public interface HibernateOperations {
 	 * @param types Hibernate types of the parameters
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	List find(String queryString, Object[] values, Type[] types) throws DataAccessException;
@@ -287,9 +341,8 @@ public interface HibernateOperations {
 	 * @param valueBean the values of the parameters
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
-	 * @see net.sf.hibernate.Session#createQuery
 	 * @see net.sf.hibernate.Query#setProperties
+	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	List findByValueBean(String queryString, Object valueBean) throws DataAccessException;
 
@@ -311,7 +364,7 @@ public interface HibernateOperations {
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
 	List findByNamedQuery(String queryName, Object value) throws DataAccessException;
@@ -324,7 +377,7 @@ public interface HibernateOperations {
 	 * @param type Hibernate type of the parameter
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
 	List findByNamedQuery(String queryName, Object value, Type type) throws DataAccessException;
@@ -337,7 +390,7 @@ public interface HibernateOperations {
 	 * @param values the values of the parameters
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
 	List findByNamedQuery(String queryName, Object[] values) throws DataAccessException;
@@ -351,7 +404,7 @@ public interface HibernateOperations {
 	 * @param types Hibernate types of the parameters
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
 	List findByNamedQuery(String queryName, Object[] values, Type[] types)
@@ -366,7 +419,7 @@ public interface HibernateOperations {
 	* @param value the value of the parameter
 	* @return a List containing 0 or more persistent instances
 	* @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	* @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	* @see net.sf.hibernate.Session#getNamedQuery(String)
 	*/
 	List findByNamedQuery(String queryName, String paramName, Object value)
@@ -382,7 +435,7 @@ public interface HibernateOperations {
 	* @param type Hibernate type of the parameter
 	* @return a List containing 0 or more persistent instances
 	* @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	* @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	* @see net.sf.hibernate.Session#getNamedQuery(String)
 	*/
 	List findByNamedQuery(String queryName, String paramName, Object value, Type type)
@@ -397,7 +450,7 @@ public interface HibernateOperations {
 	* @param values the values of the parameters
 	* @return a List containing 0 or more persistent instances
 	* @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	* @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	* @see net.sf.hibernate.Session#getNamedQuery(String)
 	*/
 	List findByNamedQuery(String queryName, String[] paramNames, Object[] values)
@@ -413,7 +466,7 @@ public interface HibernateOperations {
 	* @param types Hibernate types of the parameters
 	* @return a List containing 0 or more persistent instances
 	* @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	* @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	* @see net.sf.hibernate.Session#getNamedQuery(String)
 	*/
 	List findByNamedQuery(String queryName, String[] paramNames, Object[] values, Type[] types)
@@ -427,54 +480,60 @@ public interface HibernateOperations {
 	 * @param valueBean the values of the parameters
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
-	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 * @see net.sf.hibernate.Query#setProperties
+	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
 	List findByNamedQueryAndValueBean(String queryName, Object valueBean)
 			throws DataAccessException;
 
-
-	//-------------------------------------------------------------------------
-	// Convenience delete methods
-	//-------------------------------------------------------------------------
+	/**
+	 * Execute a query for persistent instances.
+	 * <p>Returns the results as Iterator. Entities returned are initialized
+	 * on demand. See Hibernate docs for details.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @return a List containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#iterate(String)
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	Iterator iterate(String queryString) throws DataAccessException;
 
 	/**
-	 * Delete the given persistent instance.
-	 * @param entity the persistent instance to delete
+	 * Execute a query for persistent instances, binding one value
+	 * to a "?" parameter of the given type in the query string.
+	 * <p>Returns the results as Iterator. Entities returned are initialized
+	 * on demand. See Hibernate docs for details.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param value the value of the parameter
+	 * @param type Hibernate type of the parameter
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#delete(Object)
+	 * @see net.sf.hibernate.Session#iterate(String, Object, net.sf.hibernate.type.Type)
+	 * @see net.sf.hibernate.Session#createQuery
 	 */
-	void delete(Object entity) throws DataAccessException;
+	Iterator iterate(String queryString, Object value, Type type) throws DataAccessException;
 
 	/**
-	 * Delete the given persistent instance.
-	 * Obtains the specified lock mode if the instance exists, implicitly
-	 * checking whether the corresponding database entry still exists
-	 * (throwing an OptimisticLockingFailureException if not found).
-	 * @param entity the persistent instance to delete
+	 * Execute a query for persistent instances, binding a number of
+	 * values to "?" parameters of the given types in the query string.
+	 * <p>Returns the results as Iterator. Entities returned are initialized
+	 * on demand. See Hibernate docs for details.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param values the values of the parameters
+	 * @param types Hibernate types of the parameters
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see HibernateOptimisticLockingFailureException
-	 * @see net.sf.hibernate.Session#delete(Object)
+	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
+	 * @see net.sf.hibernate.Session#createQuery
 	 */
-	void delete(Object entity, LockMode lockMode) throws DataAccessException;
-
-	/**
-	 * Delete all given persistent instances.
-	 * This can be combined with any of the find methods to delete by query
-	 * in two lines of code, similar to Session's delete by query methods.
-	 * @param entities the persistent instances to delete
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#delete(String)
-	 */
-	void deleteAll(Collection entities) throws DataAccessException;
+	Iterator iterate(String queryString, Object[] values, Type[] types) throws DataAccessException;
 
 	/**
 	 * Delete all objects returned by the query. Return the number of objects deleted.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @return the number of instances deleted
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#delete(Object)
+	 * @see net.sf.hibernate.Session#delete(String)
 	 */
 	int delete(String queryString) throws DataAccessException;
 
@@ -485,7 +544,7 @@ public interface HibernateOperations {
 	 * @param type Hibernate type of the parameter
 	 * @return the number of instances deleted
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#delete(Object)
+	 * @see net.sf.hibernate.Session#delete(String, Object, net.sf.hibernate.type.Type)
 	 */
 	int delete(String queryString, Object value, Type type) throws DataAccessException;
 
@@ -496,7 +555,7 @@ public interface HibernateOperations {
 	 * @param types Hibernate types of the parameters
 	 * @return the number of instances deleted
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#delete(Object)
+	 * @see net.sf.hibernate.Session#delete(String, Object[], net.sf.hibernate.type.Type[])
 	 */
 	int delete(String queryString, Object[] values, Type[] types) throws DataAccessException;
 

@@ -172,7 +172,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	//-------------------------------------------------------------------------
-	// Convenience methods for load, save, update
+	// Convenience methods for load, save, update, delete
 	//-------------------------------------------------------------------------
 
 	public Object get(final Class entityClass, final Serializable id) throws DataAccessException {
@@ -236,6 +236,24 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
+	public void refresh(final Object entity) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.refresh(entity);
+				return null;
+			}
+		});
+	}
+
+	public void refresh(final Object entity, final LockMode lockMode) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.refresh(entity, lockMode);
+				return null;
+			}
+		});
+	}
+
 	public Serializable save(final Object entity) throws DataAccessException {
 		return (Serializable) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
@@ -289,6 +307,36 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
+	public void delete(final Object entity) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.delete(entity);
+				return null;
+			}
+		});
+	}
+
+	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.lock(entity, lockMode);
+				session.delete(entity);
+				return null;
+			}
+		});
+	}
+
+	public void deleteAll(final Collection entities) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				for (Iterator it = entities.iterator(); it.hasNext();) {
+					session.delete(it.next());
+				}
+				return null;
+			}
+		});
+	}
+
 
 	//-------------------------------------------------------------------------
 	// Convenience finder methods
@@ -329,8 +377,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = createQuery(session, queryString);
 				for (int i = 0; i < values.length; i++) {
-					Object value = values[i];
-					queryObject.setParameter(i, value);
+					queryObject.setParameter(i, values[i]);
 				}
 				return queryObject.list();
 			}
@@ -346,8 +393,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = createQuery(session, queryString);
 				for (int i = 0; i < values.length; i++) {
-					Object value = values[i];
-					queryObject.setParameter(i, value, types[i]);
+					queryObject.setParameter(i, values[i], types[i]);
 				}
 				return queryObject.list();
 			}
@@ -402,8 +448,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				for (int i = 0; i < values.length; i++) {
-					Object value = values[i];
-					queryObject.setParameter(i, value);
+					queryObject.setParameter(i, values[i]);
 				}
 				return queryObject.list();
 			}
@@ -419,8 +464,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				for (int i = 0; i < values.length; i++) {
-					Object value = values[i];
-					queryObject.setParameter(i, value, types[i]);
+					queryObject.setParameter(i, values[i], types[i]);
 				}
 				return queryObject.list();
 			}
@@ -458,8 +502,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				for (int i = 0; i < values.length; i++) {
-					Object value = values[i];
-					queryObject.setParameter(paramNames[i], value);
+					queryObject.setParameter(paramNames[i], values[i]);
 				}
 				return queryObject.list();
 			}
@@ -478,8 +521,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = getNamedQuery(session, queryName);
 				for (int i = 0; i < values.length; i++) {
-					Object value = values[i];
-					queryObject.setParameter(paramNames[i], value, types[i]);
+					queryObject.setParameter(paramNames[i], values[i], types[i]);
 				}
 				return queryObject.list();
 			}
@@ -497,37 +539,38 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-
-	//-------------------------------------------------------------------------
-	// Convenience delete methods
-	//-------------------------------------------------------------------------
-
-	public void delete(final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
+	public Iterator iterate(final String queryString) throws DataAccessException {
+		return (Iterator) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				session.delete(entity);
-				return null;
+				Query queryObject = createQuery(session, queryString);
+				return queryObject.iterate();
 			}
 		});
 	}
 
-	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
-		execute(new HibernateCallback() {
+	public Iterator iterate(final String queryString, final Object value, final Type type)
+			throws DataAccessException {
+		return (Iterator) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				session.lock(entity, lockMode);
-				session.delete(entity);
-				return null;
+				Query queryObject = createQuery(session, queryString);
+				queryObject.setParameter(0, value, type);
+				return queryObject.iterate();
 			}
 		});
 	}
 
-	public void deleteAll(final Collection entities) throws DataAccessException {
-		execute(new HibernateCallback() {
+	public Iterator iterate(final String queryString, final Object[] values, final Type[] types)
+			throws DataAccessException {
+		if (values.length != types.length) {
+			throw new IllegalArgumentException("Length of values array must match length of types array");
+		}
+		return (Iterator) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				for (Iterator it = entities.iterator(); it.hasNext();) {
-					session.delete(it.next());
+				Query queryObject = createQuery(session, queryString);
+				for (int i = 0; i < values.length; i++) {
+					queryObject.setParameter(i, values[i], types[i]);
 				}
-				return null;
+				return queryObject.iterate();
 			}
 		});
 	}
