@@ -115,7 +115,8 @@
             <fileset dir="${basedir}/${doc.ref.dir}/lib">
                <include name="**/*.jar"/>
             </fileset> 
-         </classpath>      
+         </classpath>
+         <sysproperty key="java.awt.headless" value="true"/> 
          <!-- classpath refid="maven.dependency.classpath"/ -->
          <arg value="-o"/>
          <arg value="${basedir}/${doc.ref.dir}/pdf/index.fop"/>
@@ -128,7 +129,8 @@
             <fileset dir="${basedir}/${doc.ref.dir}/lib">
                <include name="**/*.jar"/>
             </fileset> 
-         </classpath>      
+         </classpath>
+         <sysproperty key="java.awt.headless" value="true"/>
          <!-- classpath refid="maven.dependency.classpath"/ -->
          <arg value="${basedir}/${doc.ref.dir}/pdf/index.fop"/>
          <arg value="${basedir}/${doc.ref.dir}/pdf/spring-reference.pdf"/>
