@@ -241,8 +241,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Gets the form object from the model, using the name
-	 * {@link #LOCAL_FORM_OBJECT_NAME}.
+	 * Gets the form object from the model, using the well-known attribute name
+	 * {@link #FORM_OBJECT_ATTRIBUTE}.
 	 * 
 	 * @param model the flow model
 	 * @throws IllegalStateException if the form object is not found in the
@@ -261,7 +261,19 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 *         model
 	 */
 	protected Errors getFormErrors(FlowModel model) throws IllegalStateException {
-		return getRequiredFormErrors(model, FORM_OBJECT_ERRORS_ATTRIBUTE);
+		return getRequiredFormErrors(model, null);
+	}
+
+	/**
+	 * Gets the form object from the model, using the specified name.
+	 * @param model the flow model
+	 * @param formObjectName the name of the form in the model
+	 * @return the form object
+	 * @throws IllegalStateException if the form object is not found in the
+	 *         model
+	 */
+	protected Object getRequiredFormObject(FlowModel model, String formObjectName) throws IllegalStateException {
+		return model.getRequiredAttribute(formObjectName);
 	}
 
 	/**
@@ -280,28 +292,23 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Gets the form object from the model, using the specified name.
-	 * @param model the flow model
-	 * @param formObjectName the name of the form in the model
-	 * @return the form object
-	 * @throws IllegalStateException if the form object is not found in the
-	 *         model
-	 */
-	protected Object getRequiredFormObject(FlowModel model, String formObjectName) throws IllegalStateException {
-		return model.getRequiredAttribute(formObjectName);
-	}
-
-	/**
 	 * Gets the form object <code>Errors</code> tracker from the model, using
 	 * the specified name.
 	 * @param model The flow model
-	 * @param formObjectErrorsName The name of the form object errors
+	 * @param formObjectName The name of the form object, may be
+	 *        <code>null</code> at which the value of the
+	 *        {@link FORM_OBJECT_ERRORS_ATTRIBUTE} attribute is returned
 	 * @return The form object errors instance
 	 * @throws IllegalStateException if the Errors instance is not found in the
 	 *         model
 	 */
-	protected Errors getRequiredFormErrors(FlowModel model, String formObjectErrorsName) throws IllegalStateException {
-		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectErrorsName, Errors.class);
+	protected Errors getRequiredFormErrors(FlowModel model, String formObjectName) throws IllegalStateException {
+		if (!StringUtils.hasText(formObjectName)) {
+			return (Errors)model.getRequiredAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE, Errors.class);
+		}
+		else {
+			return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName, Errors.class);
+		}
 	}
 
 	/**
