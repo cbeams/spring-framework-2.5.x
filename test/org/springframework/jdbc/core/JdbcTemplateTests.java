@@ -51,7 +51,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
  */
-public class JdbcTemplateTestSuite extends AbstractJdbcTests {
+public class JdbcTemplateTests extends AbstractJdbcTests {
 
 	public void testBeanProperties() throws Exception {
 		replay();
@@ -398,7 +398,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.query(sql, new RowCallbackHandler() {
-				public void processRow(java.sql.ResultSet rs)
+				public void processRow(ResultSet rs)
 					throws java.sql.SQLException {
 					throw rex;
 				}
@@ -526,8 +526,6 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.getDriverVersion();
-		ctrlDatabaseMetaData.setReturnValue("1.2.3");
 		mockDatabaseMetaData.supportsBatchUpdates();
 		ctrlDatabaseMetaData.setReturnValue(true);
 
@@ -630,8 +628,6 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.getDriverVersion();
-		ctrlDatabaseMetaData.setReturnValue("1.2.3");
 		mockDatabaseMetaData.supportsBatchUpdates();
 		ctrlDatabaseMetaData.setReturnValue(true);
 
@@ -947,7 +943,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		t.setIgnoreWarnings(false);
 		try {
 			t.query(sql, new RowCallbackHandler() {
-				public void processRow(java.sql.ResultSet rs)
+				public void processRow(ResultSet rs)
 					throws java.sql.SQLException {
 					rs.getByte(1);
 				}
@@ -998,7 +994,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		template.setIgnoreWarnings(true);
 		template.query(sql, new RowCallbackHandler() {
-			public void processRow(java.sql.ResultSet rs)
+			public void processRow(ResultSet rs)
 				throws java.sql.SQLException {
 				rs.getByte(1);
 			}
@@ -1033,8 +1029,6 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.getDriverVersion();
-		ctrlDatabaseMetaData.setReturnValue("1.2.3");
 
 		mockConnection.createStatement();
 		ctrlConnection.setReturnValue(mockStatement);
@@ -1049,7 +1043,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.query(sql, new RowCallbackHandler() {
-				public void processRow(java.sql.ResultSet rs) throws SQLException {
+				public void processRow(ResultSet rs) throws SQLException {
 					throw sex;
 				}
 			});
@@ -1120,7 +1114,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		template.afterPropertiesSet();
 		try {
 			template.query(sql, new RowCallbackHandler() {
-				public void processRow(java.sql.ResultSet rs)
+				public void processRow(ResultSet rs)
 					throws SQLException {
 					throw sex;
 				}
