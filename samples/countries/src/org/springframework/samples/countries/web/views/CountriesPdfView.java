@@ -24,64 +24,61 @@ import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.support.RefreshablePagedListHolder;
 import org.springframework.beans.support.SortDefinition;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.samples.countries.appli.ICountry;
+import org.springframework.samples.countries.web.CountriesFilter;
 import org.springframework.web.servlet.view.document.AbstractPdfView;
 
 /**
- * This view demonstrates how to send a Pdf file with the Spring Framework
- * using the lowagie's iText library.
+ * This view demonstrates how to send a PDF file with the Spring Framework
+ * using the iText PDF library.
  *
  * @author Jean-Pierre Pawlak
  */
 public class CountriesPdfView extends AbstractPdfView {
 
-	/**
-	 * @see org.springframework.web.servlet.view.document.AbstractPdfView#buildPdfDocument(java.util.Map, com.lowagie.text.Document, com.lowagie.text.pdf.PdfWriter, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
+	private static final Font HEADLINE_FONT = new Font( Font.HELVETICA, 18, Font.BOLD, Color.blue );
+	private static final Font HEADING_FONT = new Font( Font.HELVETICA, 12, Font.ITALIC, Color.black );
+	private static final Font HEADING_DATA_FONT = new Font( Font.HELVETICA, 12, Font.ITALIC, Color.blue );
+	private static final Font DATA_HEAD_FONT = new Font( Font.HELVETICA, 10, Font.ITALIC, Color.black );
+	private static final Font TEXT_FONT = new Font( Font.TIMES_ROMAN, 8, Font.NORMAL, Color.black );
+	private static final Font BOLD_FONT = new Font( Font.TIMES_ROMAN, 8, Font.BOLD, Color.black );
+	private static final int MARGIN = 32;
 
-	//~ Static fields/initializers ---------------------------------------------
+	protected void buildPdfMetadata(Map model, Document document, HttpServletRequest request) {
+		document.addTitle("Countries List");
+		document.addCreator("SPRING-Countries");
+	}
 
-	private static final Font    HEADLINE_FONT = new Font( Font.HELVETICA, 18, Font.BOLD, Color.blue );
-	private static final Font    HEADING_FONT = new Font( Font.HELVETICA, 12, Font.ITALIC, Color.black );
-	private static final Font    HEADING_DATA_FONT = new Font( Font.HELVETICA, 12, Font.ITALIC, Color.blue );
-	private static final Font    DATA_HEAD_FONT = new Font( Font.HELVETICA, 10, Font.ITALIC, Color.black );
-	private static final Font    TEXT_FONT = new Font( Font.TIMES_ROMAN, 8, Font.NORMAL, Color.black );
-	private static final Font    BOLD_FONT = new Font( Font.TIMES_ROMAN, 8, Font.BOLD, Color.black );
-	private static final int     MARGIN = 32;
+	protected void buildPdfDocument(Map model, Document document,	PdfWriter writer,
+			HttpServletRequest request, HttpServletResponse response)
+			throws DocumentException, NoSuchMessageException {
 
-	protected void buildPdfDocument(Map model, Document pdfDoc,	PdfWriter writer,	HttpServletRequest request,
-																	HttpServletResponse response)	throws DocumentException, NoSuchMessageException {
-
-		// We search the data to insert
-		RefreshablePagedListHolder pgHolder = ( RefreshablePagedListHolder ) model.get( "countries" );
+		// We search the data to insert.
+		RefreshablePagedListHolder pgHolder = (RefreshablePagedListHolder) model.get("countries");
 		Locale loc = pgHolder.getLocale();
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, loc);
 
-		// We prepare some data
-		SortDefinition  sort = pgHolder.getSort();
-		BeanWrapper bw = new BeanWrapperImpl( pgHolder.getFilter() );
-		String filterName = (String)bw.getPropertyValue("name");
-		String filterCode = (String)bw.getPropertyValue("code");
+		// We prepare some data.
+		SortDefinition sort = pgHolder.getSort();
+		CountriesFilter filter = (CountriesFilter) pgHolder.getFilter();
 
-		// We create and add the event handler
+		// We create and add the event handler.
 		// So we can well paging, ensuring that only entire cells are printed
 		// at end of pages (the latter is useless in this example as records
 		// keep in one row, but in your own developpment it's not always the case).
 		MyPageEvents events = new MyPageEvents(getMessageSourceAccessor(), loc);
-		writer.setPageEvent( events );
-		events.onOpenDocument( writer, pdfDoc );
+		writer.setPageEvent(events);
+		events.onOpenDocument(writer, document);
 		
 		String title = getMessageSourceAccessor().getMessage("app.name", loc);
-		pdfDoc.add( new Paragraph(title, HEADLINE_FONT));
-		pdfDoc.add( new Paragraph(" "));
-		pdfDoc.add( new Paragraph(" "));
-		pdfDoc.add( new Paragraph(" "));
+		document.add(new Paragraph(title, HEADLINE_FONT));
+		document.add(new Paragraph(" "));
+		document.add(new Paragraph(" "));
+		document.add(new Paragraph(" "));
 	
 		// We create a table for used criteria and extracting information
 		PdfPTable table = new PdfPTable(2);
@@ -124,26 +121,28 @@ public class CountriesPdfView extends AbstractPdfView {
 
 		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "sort.asc", loc), HEADING_FONT));
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage(new Boolean(sort.isAscending()).toString(), loc), HEADING_DATA_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage(new Boolean(sort.isAscending()).toString(), loc),
+				HEADING_DATA_FONT));
 		table.addCell(cell);
 
 		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "sort.igncase", loc), HEADING_FONT));
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage(new Boolean(sort.isIgnoreCase()).toString(), loc), HEADING_DATA_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage(new Boolean(sort.isIgnoreCase()).toString(), loc),
+				HEADING_DATA_FONT));
 		table.addCell(cell);
 
 		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "filter.name", loc), HEADING_FONT));
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(null == filterName ? "" : filterName, HEADING_DATA_FONT));
+		cell = new PdfPCell(new Phrase(null == filter.getName() ? "" : filter.getName(), HEADING_DATA_FONT));
 		table.addCell(cell);
 
 		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "filter.code", loc), HEADING_FONT));
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(null == filterCode ? "" : filterCode, HEADING_DATA_FONT));
+		cell = new PdfPCell(new Phrase(null == filter.getCode() ? "" : filter.getCode(), HEADING_DATA_FONT));
 		table.addCell(cell);
 
-		pdfDoc.add(table);
-		pdfDoc.newPage();
+		document.add(table);
+		document.newPage();
 
 		// We can go now on the countries list
 		table = new PdfPTable(2);
@@ -184,7 +183,7 @@ public class CountriesPdfView extends AbstractPdfView {
 			table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_LEFT);
 			table.addCell(new Phrase(country.getName(), TEXT_FONT));
 		}
-		pdfDoc.add(table);
+		document.add(table);
 	}
 
 
@@ -249,4 +248,5 @@ public class CountriesPdfView extends AbstractPdfView {
 			template.endText();
 		}
 	}
+
 }

@@ -14,12 +14,11 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.support.RefreshablePagedListHolder;
 import org.springframework.beans.support.SortDefinition;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.samples.countries.appli.ICountry;
+import org.springframework.samples.countries.web.CountriesFilter;
 import org.springframework.web.servlet.view.document.AbstractExcelView;
 
 /**
@@ -37,19 +36,16 @@ import org.springframework.web.servlet.view.document.AbstractExcelView;
  */
 public class CountriesExcelView extends AbstractExcelView {
 
-	protected void buildExcelDocument(Map model, HSSFWorkbook wb, HttpServletRequest request,
-	                                  HttpServletResponse response) throws NoSuchMessageException {
+	protected void buildExcelDocument(
+			Map model, HSSFWorkbook wb, HttpServletRequest request, HttpServletResponse response)
+			throws NoSuchMessageException {
 
-		HSSFSheet sheet;
-		HSSFCell cell;
-		int row = 0;
-
-		// We search the data to insert
+		// We search the data to insert.
 		RefreshablePagedListHolder pgHolder = (RefreshablePagedListHolder) model.get("countries");
 		Locale loc = pgHolder.getLocale();
 
-		// As we use a from scratch document, we create a new sheet
-		sheet = wb.createSheet("SPRING-Countries");
+		// As we use a from scratch document, we create a new sheet.
+		HSSFSheet sheet = wb.createSheet("SPRING-Countries");
 		// If we will use the first sheet from an existing document, replace by this:
 		// sheet = wb.getSheetAt(0);
 
@@ -93,9 +89,9 @@ public class CountriesExcelView extends AbstractExcelView {
 
 		// We prepare some data
 		SortDefinition sort = pgHolder.getSort();
-		BeanWrapper bw = new BeanWrapperImpl(pgHolder.getFilter());
-		String filterName = (String) bw.getPropertyValue("name");
-		String filterCode = (String) bw.getPropertyValue("code");
+		CountriesFilter filter = (CountriesFilter) pgHolder.getFilter();
+
+		int row = 0;
 
 		// We put some information about the user request on the sheet
 		// getCell is a useful add-on provided by the AbstractExcelView
@@ -126,12 +122,12 @@ public class CountriesExcelView extends AbstractExcelView {
 		row++;
 
 		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("filter.name", loc));
-		getCell(sheet, row, 1).setCellValue(filterName);
+		getCell(sheet, row, 1).setCellValue(filter.getName());
 		getCell(sheet, row, 1).setCellStyle(csp);
 		row++;
 
 		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("filter.code", loc));
-		getCell(sheet, row, 1).setCellValue(filterCode);
+		getCell(sheet, row, 1).setCellValue(filter.getCode());
 		getCell(sheet, row, 1).setCellStyle(csp);
 		// row += 3;
 
@@ -141,7 +137,7 @@ public class CountriesExcelView extends AbstractExcelView {
 		row = 0;
 
 		// We put now the headers of the list on the sheet
-		cell = getCell(sheet, row, 0);
+		HSSFCell cell = getCell(sheet, row, 0);
 		cell.setCellStyle(cs);
 		cell.setCellValue(getMessageSourceAccessor().getMessage("code", loc));
 		cell = getCell(sheet, row, 1);
