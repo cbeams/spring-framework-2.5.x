@@ -32,8 +32,8 @@ import org.springframework.util.StringUtils;
  * them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
- * <code>binder.registerCustomEditor</code> calls in an implementation of
- * BaseCommandController's <code>initBinder</code> method.
+ * <code>binder.registerCustomEditor</code> calls in an implementation
+ * of BaseCommandController's <code>initBinder</code> method.
  *
  * @author Juergen Hoeller
  * @since 28.04.2003
@@ -50,7 +50,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	/**
 	 * Create a new CustomDateEditor instance, using the given DateFormat
 	 * for parsing and rendering.
-	 * <p>The allowEmpty parameter states if an empty String should
+	 * <p>The "allowEmpty" parameter states if an empty String should
 	 * be allowed for parsing, i.e. get interpreted as null value.
 	 * Otherwise, an IllegalArgumentException gets thrown in that case.
 	 * @param dateFormat DateFormat to use for parsing and rendering

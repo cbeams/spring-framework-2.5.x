@@ -23,14 +23,14 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 
 /**
- * Tag subclass used to hold managed Map values, which may
- * include runtime bean references.
+ * Tag collection class used to hold managed Map values,
+ * which may include runtime bean references.
  *
  * <p>Wraps a target Map, which will be a linked map if possible
  * (that is, if running on JDK 1.4 or if Commons Collections 3.x is available).
  *
  * @author Juergen Hoeller
- * @since 27-May-2003
+ * @since 27.05.2003
  * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
  */
 public class ManagedMap implements Map {

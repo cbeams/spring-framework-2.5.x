@@ -34,8 +34,8 @@ import org.springframework.util.StringUtils;
  * them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
- * binder.registerCustomEditor calls in an implementation of
- * BaseCommandController's initBinder method.
+ * <code>binder.registerCustomEditor</code> calls in an implementation
+ * of BaseCommandController's <code>initBinder</code> method.
  *
  * @author Juergen Hoeller
  * @since 06.06.2003
@@ -55,7 +55,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * Create a new CustomNumberEditor instance, using the default
 	 * <code>valueOf</code> methods for parsing and <code>toString</code>
 	 * methods for rendering.
-	 * <p>The allowEmpty parameter states if an empty String should
+	 * <p>The "allowEmpty" parameter states if an empty String should
 	 * be allowed for parsing, i.e. get interpreted as null value.
 	 * Else, an IllegalArgumentException gets thrown in that case.
 	 * @param numberClass Number subclass to generate
@@ -99,6 +99,9 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 		this.allowEmpty = allowEmpty;
 	}
 
+	/**
+	 * Parse the Number from the given text, using the specified NumberFormat.
+	 */
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			setValue(null);
