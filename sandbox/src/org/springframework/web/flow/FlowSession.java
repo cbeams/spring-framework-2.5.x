@@ -34,8 +34,10 @@ import org.springframework.util.closure.Constraint;
  * A single client session instance for a flow participating in a FlowExecution.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class FlowSession implements MutableAttributesAccessor, Serializable {
+	
 	private static final Log logger = LogFactory.getLog(FlowSession.class);
 
 	private Flow flow;
@@ -54,11 +56,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 	}
 
-	protected FlowSession() {
-		this(new Flow(""), null);
-	}
-
-	public String getFlowId() {
+ 	public String getFlowId() {
 		return getFlow().getId();
 	}
 
@@ -84,6 +82,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	protected void setCurrentState(AbstractState newState) {
 		Assert.notNull(newState, "The newState is required");
+		Assert.isTrue(this.flow==newState.getFlow(), "The newState belongs to the flow associated with this flow session");
 		if (this.currentState != null) {
 			if (this.currentState.equals(newState)) {
 				throw new IllegalArgumentException("The current state is already set to '" + newState
