@@ -23,8 +23,8 @@ import junit.framework.TestCase;
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeSetter;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.util.StringUtils;
 import org.springframework.web.flow.support.LocalEvent;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Tests that each of the Flow state types execute as expected when entered.
@@ -38,7 +38,6 @@ public class StateTests extends TestCase {
 				"success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 		assertNull(view);
 		assertEquals("success", flowExecution.getEventId());
@@ -59,6 +58,7 @@ public class StateTests extends TestCase {
 		assertEquals("success", flowExecution.getEventId());
 		Action[] actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
+			System.out.println(i);
 			assertEquals(1, ((ExecutionCounterAction)actions[i]).getExecutionCount());
 		}
 	}
@@ -71,7 +71,6 @@ public class StateTests extends TestCase {
 				new Transition("success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		try {
 			ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 			fail("Should not have matched to another state transition");
@@ -80,7 +79,7 @@ public class StateTests extends TestCase {
 			// expected
 		}
 	}
-
+	
 	public void testActionStateActionChainNamedActions() {
 		Flow flow = new Flow("myFlow");
 		ActionState state = new ActionState(flow, "actionState", new String[] { null, null, "action3", "action4" },
@@ -89,7 +88,6 @@ public class StateTests extends TestCase {
 						"action4.success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 		assertNull(view);
 		assertEquals("action4.success", flowExecution.getEventId());
@@ -106,7 +104,6 @@ public class StateTests extends TestCase {
 		assertTrue(!state.isMarker());
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 		assertEquals("viewState", flowExecution.getCurrentStateId());
 		assertNotNull(view);
@@ -134,7 +131,6 @@ public class StateTests extends TestCase {
 		SubFlowState state = new SubFlowState(flow, "subFlowState", subFlow, new Transition("finish", "finish"));
 		new EndState(flow, "finish", "myParentFlowEndingViewName");
 		FlowExecution flowExecution = flow.createExecution();
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
 		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
@@ -182,7 +178,7 @@ public class StateTests extends TestCase {
 	}
 
 	public static class ExecutionCounterAction implements Action {
-		private String result = "success";
+		private Event result = new LocalEvent("success");
 
 		private int executionCount;
 
@@ -191,7 +187,11 @@ public class StateTests extends TestCase {
 		}
 
 		public ExecutionCounterAction(String result) {
-			this.result = result;
+			if (StringUtils.hasText(result)) {
+				this.result = new LocalEvent(result);
+			} else {
+				this.result = null;
+			}
 		}
 
 		public int getExecutionCount() {
@@ -199,8 +199,9 @@ public class StateTests extends TestCase {
 		}
 
 		public Event execute(FlowExecutionContext context) throws Exception {
+			System.out.println("executed with result " + result);
 			executionCount++;
-			return new LocalEvent(result);
+			return result;
 		}
 	}
 }

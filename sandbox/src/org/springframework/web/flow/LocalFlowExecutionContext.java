@@ -5,8 +5,6 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeSetter;
@@ -216,9 +214,7 @@ public class LocalFlowExecutionContext implements StateContext {
 
 	public Map getModel() {
 		Map model = this.flowExecutionStack.getModel();
-		if (this.requestAttributes != null) {
-			model.putAll(requestAttributes.getAttributeMap());
-		}
+		model.putAll(requestAttributes.getAttributeMap());
 		return model;
 	}
 

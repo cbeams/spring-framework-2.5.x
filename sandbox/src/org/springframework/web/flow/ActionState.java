@@ -284,15 +284,20 @@ public class ActionState extends TransitionableState {
 			NamedAction namedAction = (NamedAction)it.next();
 			Event event = namedAction.execute(context);
 			executionCount++;
-			eventIds[executionCount - 1] = event.getId();
-			if (transitionForOccurenceOf(event, context)) {
-				return signalEvent(event, context);
+			if (event != null) {
+				eventIds[executionCount - 1] = event.getId();
+				if (transitionForOccurenceOf(event, context)) {
+					return signalEvent(event, context);
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+								+ eventIds[executionCount - 1] + "' - " + "I will proceed to the next action in the chain");
+					}
+				}
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-							+ eventIds[executionCount - 1] + "' - " + "I will proceed to the next action in the chain");
-				}
+				eventIds[executionCount - 1] = null;
 			}
 		}
 		if (executionCount > 0) {
@@ -394,8 +399,9 @@ public class ActionState extends TransitionableState {
 				return null;
 			}
 			if (isNamed()) {
-				//TODO wrap in another event with an appended id
-				//return new WrappingEvent(name + "." + resultEvent.getId(), resultEvent);
+				// TODO wrap in another event with an appended id
+				// return new WrappingEvent(name + "." + resultEvent.getId(),
+				// resultEvent);
 				return resultEvent;
 			}
 			else {
