@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.56 2003-12-05 13:06:51 johnsonr Exp $
+$Id: changelog.txt,v 1.57 2003-12-05 17:16:46 jhoeller Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -8,16 +8,32 @@ Changes in version 1.0 M4 (XX.12.2003)
 * (AOP) Introduced before advice, in addition to interception around advice.
 * InvokerInterceptor and ProxyInterceptor interface replaced by TargetSource interface.
 * dissolved event propagation support in BeanWrapper and DataBinder
-* added "autowireExistingBean" method to BeanFactory interface
+* introduced AutowireCapableBeanFactory interface, allowing for autowiring of externally managed bean instances
+* dissolved PropertyValuesProviderFactoryBean interface and AbstractFactoryBean convenience base class
 * fixed ManagedList and ManagedMap resolution for prototypes in AbstractBeanFactory
 * fixed potential multithreading issue on nested prototype resolution in AbstractBeanFactory
 * dependent beans (with corresponding "depends-on") are destroyed first in AbstractBeanFactory's "destroySingletons"
+* consider arrays of primitive wrappers as "simple" properties in the sense of dependency-check="simple"
 * factored out bean definition format reading logic into Properties/Xml/JdbcBeanDefinitionReader
 * dissolved bean definition reading methods in DefaultListableBeanFactory, reduced them in XmlBeanFactory
-* allow for "list" and "map" as sub-element of "list" in XML bean definitions
 * added "preInstantiateSingletons" method to ConfigurableListableBeanFactory interface
+* allow for "list" and "map" as sub-element of "list" in XML bean definitions
+* added "default-lazy-init" attribute for XML bean definitions
+* added two "beanOfType" convenience methods to BeanFactoryUtils
+* introduced ProxyConfig base class for ProxyFactoryBean etc, specifying common AOP proxy settings
+* ApplicationContext interface extends AutowireCapableBeanFactory
 * fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons"
 * added support for pseudo URL prefix "classpath:" in AbstractApplicationContext's "getResourceAsStream"
+* dissolved TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
+* moved JDBC-specific DataAccessException subclasses from jdbc.core to root jdbc package
+* moved SQLExceptionTranslator interface plus implementations from package jdbc.core to jdbc.support
+* moved DataFieldMaxValueIncrementer interface plus implementations from jdbc.core.support to jdbc.support.incrementer
+* reworked QueryExecutor interface into NativeJdbcExtractor in package jdbc.support
+* reworked CommonsDbcpQueryExecutor implementation into CommonsDbcpNativeJdbcExtractor in package jdbc.support
+* added SimpleNativeJdbcExtractor for any pools that just wrap Connections but not Statements/ResultSets
+* introduced BlobCreator interface plus DefaultBlobCreator implementation in package jdbc.support.lob
+* added OracleBlobCreator implementation for the peculiar requirements of Oracle's JDBC driver
+* dissolved setExceptionTranslator on RdbmsOperation, set an appropriately configured JdbcTemplate instead
 * introduced support for iBATIS Database Layer, in the org.springframework.orm.ibatis package
 * added "getOrCreateSessionAttribute" helper method to WebUtils, for on-demand state objects in a web tier
 * DispatcherServlet's default exception handling lets RuntimeExceptions straight through
