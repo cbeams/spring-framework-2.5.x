@@ -1,10 +1,10 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.125 2004-04-07 14:33:36 trisberg Exp $
+$Id: changelog.txt,v 1.126 2004-04-09 20:41:25 jhoeller Exp $
 
 
-Changes in version 1.0.1 (7.4.2003)
------------------------------------
+Changes in version 1.0.1 (11.4.2003)
+------------------------------------
 
 Package org.springframework.aop
 * refined usage of AopConfigException, to avoid cyclic dependencies between org.springframework.aop subpackages
@@ -15,9 +15,11 @@ Package org.springframework.beans
 * BeanWrapperImpl allows registration of custom editors for array/List/Map properties
 * BeanWrapperImpl allows registration of custom editors for specific elements of array/List/Map properties
 * added InputStreamEditor to standard PropertyEditors, for creating java.io.InputStream instances from String locations
+* added ByteArrayPropertyEditor to standard PropertyEditors, for turning Strings into their byte representations
+* added DestructionAwareBeanPostProcessor subinterface, adding a before-destruction callback
 * AbstractBeanFactory overrides parent bean if child name equals parent name (rather than causing a stack overflow)
 * AbstractAutowireCapableBeanFactory throws more expressive exceptions if a custom init-method failed
-* AbstractAutowireCapableBeanFactory throws an exception if a BeanPostProcessor returns null as bean instance 
+* AbstractAutowireCapableBeanFactory throws an exception if a BeanPostProcessor returns null as bean instance
 
 Package org.springframework.core
 * added check whether cause is "this" to NestedRuntime/CheckedException, to avoid stack overflow in obscure scenarios
@@ -29,6 +31,8 @@ Package org.springframework.context
 * AbstractMessageSource returns default message if passed-in message code is null
 * AbstractMessageSource just falls back to message code as message if no default message given
 * AbstractMessageSource's "getMessageInternal" method returns null instead of throwing NoSuchMessageException
+* added "resolveConfigLocations" method to AbstractApplicationContext, resolving file patterns via PathMatcher
+* AbstractXmlApplicationContext resolves its config locations via "resolveConfigLocations" to allow for file patterns
 * EventPublicationInterceptor implements ApplicationContextAware rather than extending ApplicationObjectSupport
 
 Package org.springframework.jdbc.object
@@ -39,7 +43,10 @@ Package org.springframework.jdbc.support
 * added an extractDatabaseMetaData method to JdbcUtils.  This change also adds an interface named DatabaseMetaDataCallBackHandler that must be used for this method
 
 Package org.springframework.orm
-* fixed Hibernate Session unbinding in case of JtaTransactionManager and flush failure im beforeCommit synchronization
+* fixed Hibernate Session unbinding in case of JtaTransactionManager with flush failure im beforeCommit synchronization
+* added support for transaction-scoped Sessions with plain JTA or EJB CMT, without JtaTransactionManager being involved
+* added explicit auto-commit handling to LocalSessionFactoryBean's "executeSchemaScript" method
+* SqlMapClientTemplate closes the SqlMapSession even if JDBC Connection retrieval or closing failed
 
 Package org.springframework.remoting
 * refined exceptions thrown by RmiClientInterceptor's "createRmiProxy" and RmiProxyFactoryBean's "afterPropertiesSet"
@@ -48,12 +55,16 @@ Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager's handling of beforeCompletion callbacks in case of beforeCommit failures
 * added WebSphere 5.1 check to WebSphereTransactionManagerFactoryBean (covering versions 5.1, 5.0 and 4 now)
 
+Package org.springframework.util
+* added "retrieveMatchingFiles" method to PathMatcher, retrieving matching files from a directory tree
+* added "isPattern" method to PathMatcher, checking whether a given string has to be matched via the "match" method
+
 Package org.springframework.validation
+* fixed bug where DataBinder would choke on null values of required fields, resulting in an NPE
 * factored out message code resolution into MessageCodesResolver strategy, with DefaultMessageCodesResolver impl
 * DefaultMessageCodesResolver generates codes for specific elements and the whole collection in case of array/List/Map
 * DefaultMessageCodesResolver generates code for the type of a field, e.g. "typeMismatch.java.lang.String"
 * DefaultMessageCodesResolver generates code for the object name in case of an ObjectError, e.g. "myError.myForm"
-* fixed bug where DataBinder would choke on null values of required fields, resulting in an NPE
 
 Package org.springframework.web
 * added MaxUploadSizeExceededException to multipart package, as a specific subclass of MultipartException
@@ -61,6 +72,10 @@ Package org.springframework.web
 * apply HandlerExceptionResolvers also if multipart resolution of handler mapping failed (passing in null as handler)
 * added "messageCodesResolver" property to BaseCommandController, available to all command and form controllers
 * added overloaded "onBind" method with an additional BindException parameter to BaseCommandController
+* added overloaded "onSubmit" method with just command and BindException parameters to SimpleFormController
+* added "getThemeMessage" methods to RequestContext, for easy access to theme-specific messages in non-JSP views
+* added Struts ActionSupport and DispatchActionSupport base classes, for easy access to a Spring context from Actions
+* added Struts ContextLoaderPlugIn and DelegatingActionProxy, superseding Don Brown's Spring Struts Plugin
 
 
 Changes in version 1.0 final (24.3.2003)
