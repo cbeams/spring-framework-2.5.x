@@ -10,6 +10,8 @@ import java.lang.reflect.InvocationTargetException;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.MethodInvocationImpl;
 import org.springframework.aop.framework.ProxyInterceptor;
 
@@ -23,9 +25,12 @@ import org.springframework.aop.framework.ProxyInterceptor;
  * from on a simple object reference, obtained from a pool or
  * held in a ThreadLocal. 
  * @author Rod Johnson
- * @version $Id: AbstractReflectionInvokerInterceptor.java,v 1.1 2003-09-04 18:10:37 johnsonr Exp $
+ * @version $Id: AbstractReflectionInvokerInterceptor.java,v 1.2 2003-10-07 09:35:58 johnsonr Exp $
  */
 public abstract class AbstractReflectionInvokerInterceptor implements MethodInterceptor, ProxyInterceptor {
+	
+	/** Commons logging logger */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * Subclasses must implement this method to return the
