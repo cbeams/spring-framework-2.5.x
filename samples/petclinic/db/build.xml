@@ -2,7 +2,7 @@
 
 <project name="setupDB" basedir="." default="all">
 
-  <target name="dropHSQLTables" if="useJBossHSQL">
+  <target name="dropHSQLTables">
 		<echo message="DROP TABLES USING: ${db.driver} ${db.url}"/>
 
     <sql driver="${db.driver}"
@@ -12,8 +12,8 @@
          onerror="continue">  
 
 			<classpath>
-				<fileset dir="../lib">
-					<include name="*.jar"/>
+				<fileset dir="../../../lib">
+					<include name="hsqldb/hsqldb.jar"/>
 				</fileset>
 			</classpath>
 
@@ -29,7 +29,7 @@
   </target>
 
 
-  <target name="createHSQLTables" if="useJBossHSQL">
+  <target name="createHSQLTables">
 		<echo message="CREATE TABLES USING: ${db.driver} ${db.url}"/>
 
     <sql driver="${db.driver}"
@@ -39,8 +39,8 @@
          onerror="continue">  
 
 			<classpath>
-				<fileset dir="../lib">
-					<include name="*.jar"/>
+				<fileset dir="../../../lib">
+					<include name="hsqldb/hsqldb.jar"/>
 				</fileset>
 			</classpath>
 
@@ -113,8 +113,8 @@
          password="${db.pw}">  
 
 			<classpath>
-				<fileset dir="../lib">
-					<include name="*.jar"/>
+				<fileset dir="../../../lib">
+					<include name="hsqldb/hsqldb.jar"/>
 				</fileset>
 			</classpath>
 
@@ -139,8 +139,8 @@
          password="${db.pw}"  >
 
 			<classpath>
-				<fileset dir="../lib">
-					<include name="*.jar"/>
+				<fileset dir="../../../lib">
+					<include name="hsqldb/hsqldb.jar"/>
 				</fileset>
 			</classpath>
 
@@ -201,6 +201,6 @@
     </sql> 
   </target>
     
-  <target name="all" depends="dropHSQLTables,createHSQLTables,emptyTables,populateTables" />
+  <target name="all" depends="dropHSQLTables,createHSQLTables,emptyTables,populateTables"/>
     
 </project>
