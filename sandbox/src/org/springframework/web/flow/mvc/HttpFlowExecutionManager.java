@@ -16,6 +16,7 @@
 package org.springframework.web.flow.mvc;
 
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,8 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.RequestUtils;
-import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecution;
@@ -95,19 +94,24 @@ public class HttpFlowExecutionManager {
 	protected String getFlowIdParameterName() {
 		return FlowConstants.FLOW_ID_PARAMETER;
 	}
+	
+	protected String getParameterValueSeparator() {
+		return FlowConstants.DOT_SEPARATOR;
+	}
 
 	/**
-	 * The main entry point into managed http-based flow executions. Looks for a
-	 * flow execution ID in the request. If none exists, it creates one. If one
+	 * The main entry point into managed HTTP-based flow executions. Looks for a
+	 * flow execution id in the request. If none exists, it creates one. If one
 	 * exists, it looks in the user's session to find the current FlowExecution.
-	 * The request should also contain the current state ID and event ID. These
-	 * String values can be passed to the FlowExecution to execute the action.
+	 * The request should also contain the current state id and event id. These
+	 * String values will be passed to the FlowExecution to execute the action.
 	 * Execution will typically result in a state transition.
-	 * @param request
-	 * @param response
-	 * @param inputData
-	 * @return the model and view to render.
-	 * @throws Exception
+	 * @param request the current HTTP request
+	 * @param response the current HTTP response
+	 * @param inputData input data to be passed to the FlowExecution when creating
+	 *        a new FlowExecution
+	 * @return the model and view to render
+	 * @throws Exception in case of errors
 	 */
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response, Map inputData)
 			throws Exception {
@@ -124,15 +128,15 @@ public class HttpFlowExecutionManager {
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
-			// Client is participating in an existing flow execution,
+			// client is participating in an existing flow execution,
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(request);
 
 			// let client tell you what state they are in (if possible)
-			String stateId = RequestUtils.getStringParameter(request, getCurrentStateIdParameterName(), null);
+			String stateId = getRequestParameter(request, getCurrentStateIdParameterName(), getParameterValueSeparator()); 
 
 			// let client tell you what event was signaled in the current state
-			String eventId = RequestUtils.getStringParameter(request, getEventIdParameterName(), null);
+			String eventId = getRequestParameter(request, getEventIdParameterName(), getParameterValueSeparator()); 
 
 			if (eventId == null) {
 				if (logger.isDebugEnabled()) {
@@ -153,7 +157,7 @@ public class HttpFlowExecutionManager {
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
 				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '"
 						+ getNotSetEventIdParameterMarker()
-						+ "' - this is likely a view (jsp, etc) configuration error - " + "the '"
+						+ "' - this is likely a view (jsp, etc) configuration error - the '"
 						+ getEventIdParameterName()
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
 						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
@@ -168,16 +172,18 @@ public class HttpFlowExecutionManager {
 			removeFromHttpSession(flowExecution, request);
 		}
 		else {
-			// We're still in the flow, inject flow model into request
+			// we're still in the flow, inject flow state into model
 			if (modelAndView != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("[Placing information about the new current flow state in request scope]");
+					logger.debug("[Placing information about the new current flow state in the model]");
 					logger.debug("    - " + getFlowExecutionIdAttributeName() + "=" + flowExecution.getId());
 					logger.debug("    - " + getCurrentStateIdAttributeName() + "=" + flowExecution.getCurrentStateId());
 				}
-				request.setAttribute(getFlowExecutionIdAttributeName(), flowExecution.getId());
-				request.setAttribute(getCurrentStateIdAttributeName(), flowExecution.getCurrentStateId());
-				request.setAttribute(getFlowExecutionAttributeName(), flowExecution);
+				modelAndView.addObject(getFlowExecutionIdAttributeName(), flowExecution.getId());
+				modelAndView.addObject(getCurrentStateIdAttributeName(), flowExecution.getCurrentStateId());
+				
+				// also make the flow execution itself available in the model
+				modelAndView.addObject(getFlowExecutionAttributeName(), flowExecution);
 			}
 		}
 
@@ -189,11 +195,10 @@ public class HttpFlowExecutionManager {
 
 	/**
 	 * Obtain a flow to use from given request.
-	 * @throws ServletRequestBindingException When no flow id was bound to the
-	 *         request
 	 */
-	public Flow createFlow(HttpServletRequest request) throws ServletRequestBindingException {
-		return (Flow)beanFactory.getBean(RequestUtils.getRequiredStringParameter(request, getFlowIdParameterName()));
+	public Flow createFlow(HttpServletRequest request) {
+		return (Flow)beanFactory.getBean(getRequestParameter(request, getFlowIdParameterName(),
+				getParameterValueSeparator()));
 	}
 
 	/**
@@ -217,7 +222,7 @@ public class HttpFlowExecutionManager {
 	 * @return true or false
 	 */
 	public boolean isNewFlowExecutionRequest(HttpServletRequest request) {
-		return RequestUtils.getStringParameter(request, getFlowExecutionIdParameterName(), null) == null;
+		return getRequestParameter(request, getFlowExecutionIdParameterName(), getParameterValueSeparator()) == null;
 	}
 
 	/**
@@ -232,20 +237,13 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * Get the flow execution with given unique id from the HTTP session
-	 * associated with given request.
-	 * @throws NoSuchFlowExecutionException If there is no flow execution with
-	 *         specified id in the HTTP session associated with given request.
+	 * Get an existing flow execution from the HTTP session associated with given request.
+	 * @throws NoSuchFlowExecutionException If there is no flow execution in the
+	 *         HTTP session associated with given request.
 	 */
 	public FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException {
-		String flowExecutionId;
-		try {
-			flowExecutionId = RequestUtils.getRequiredStringParameter(request, getFlowExecutionIdParameterName());
-		}
-		catch (ServletRequestBindingException e) {
-			//this should not happen
-			throw new NoSuchFlowExecutionException(null, e);
-		}
+		String flowExecutionId = getRequestParameter(request, getFlowExecutionIdParameterName(),
+				getParameterValueSeparator());
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(request, flowExecutionId);
 		}
@@ -264,4 +262,57 @@ public class HttpFlowExecutionManager {
 		}
 		request.getSession(false).removeAttribute(flowExecution.getId());
 	}
+	
+	/**
+	 * Obtain a named parameter from an HTTP servlet request. This method will try
+	 * to obtain a parameter value using the following algorithm:
+	 * <ol>
+	 * <li>Try to get the parameter value from the request using just the given
+	 * <i>logical</i> name. This handles request parameters of the form
+	 * <tt>logicalName=value</tt>.
+	 * For normal request parameters, e.g. submitted using a hidden HTML form field,
+	 * this will return the requested value.</li>
+	 * <li>Try to obtain the parameter value from the parameter name, where the
+	 * parameter name in the request is of the form <tt>logicalName_value=xyz</tt>
+	 * with "_" the being the specified delimiter. This deals with
+	 * parameter values submitted using an HTML form submit button.</li>
+	 * <li>If the value obtained in the previous step has a ".x" or ".y" suffix,
+	 * remove that. This handles cases where the value was submitted using an
+	 * HTML form image button. In this case the parameter in the request
+	 * would actually be of the form <tt>logicalName_value.x=123</tt>.</li>
+	 * </ol>
+	 * 
+	 * @param request the current HTTP request
+	 * @param logicalName the <i>logical</i> name of the request parameter 
+	 * @param delimiter the delimiter to use
+	 * @return the value of the parameter, or <code>null</code> if the parameter
+	 *         does not exist in given request
+	 */
+	public String getRequestParameter(HttpServletRequest request, String logicalName, String delimiter) {
+		//first try to get it as a normal name=value parameter
+		String value=request.getParameter(logicalName);
+		if (value!=null) return value;
+		
+		//if no value yet, try to get it as a name_value=xyz parameter
+		String prefix=logicalName + delimiter;
+		
+		Enumeration paramNames=request.getParameterNames();
+		while (paramNames.hasMoreElements()) {
+			String paramName=(String)paramNames.nextElement();
+			if (paramName.startsWith(prefix)) {
+				value=paramName.substring(prefix.length());
+				
+				//support images buttons, which would submit parameters as name_value.x=123
+				if (value.endsWith(".x") || value.endsWith(".y")) {
+					value=value.substring(0, value.length()-2);
+				}
+				
+				return value;
+			}
+		}
+		
+		//we couldn't find the parameter value
+		return null;
+	}
+
 }
