@@ -27,6 +27,12 @@ public class MutableSortDefinition implements SortDefinition {
 		this.ascending = source.isAscending();
 	}
 
+	public MutableSortDefinition(String property, boolean ignoreCase, boolean ascending) {
+		this.property = property;
+		this.ignoreCase = ignoreCase;
+		this.ascending = ascending;
+	}
+
 	public MutableSortDefinition(boolean toggleAscendingOnSameProperty) {
 		this.toggleAscendingOnProperty = toggleAscendingOnSameProperty;
 	}
