@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -54,6 +55,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 
 		params.clear();
 		params.setProperty("name", "myname");
+		params.setProperty(AbstractWizardFormController.PARAM_PAGE, "0");
 		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1", "value");
 		performRequest(wizard, session, params, 1, "myname", 0, "currentPage");
 		// name set -> now allowed to go to 1
@@ -82,6 +84,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 
 		params.clear();
 		params.setProperty("age", "32");
+		params.setProperty(AbstractWizardFormController.PARAM_PAGE, "1");
 		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "0", "value");
 		performRequest(wizard, session, params, 0, "myname", 32, "currentPage");
 		// age set -> now allowed to go to 0
@@ -221,6 +224,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 			}
 		}
 		request.setSession(session);
+		request.setAttribute("target", new Integer(target));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = wizard.handleRequest(request, response);
 		if (target >= 0) {
@@ -254,6 +258,11 @@ public class WizardFormControllerTestSuite extends TestCase {
 		public TestWizardController(Class commandClass, String beanName) {
 			setCommandClass(commandClass);
 			setCommandName(beanName);
+		}
+
+		protected Map referenceData(HttpServletRequest request, int page) throws Exception {
+			assertEquals(request.getAttribute("target"), new Integer(page));
+			return super.referenceData(request, page);
 		}
 
 		protected void validatePage(Object command, Errors errors, int page) {

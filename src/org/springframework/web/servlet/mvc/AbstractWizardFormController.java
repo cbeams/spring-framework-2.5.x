@@ -50,6 +50,11 @@ import org.springframework.web.util.WebUtils;
  * (e.g. "_target1"). The action parameters are recognized when triggered by
  * image buttons too (via "_finish.x", "_abort.x", or "_target1.x").
  *
+ * <p>The current page number will be stored in the session. It can also be
+ * specified as request parameter PARAM_PAGE, to properly handle usage of
+ * the back button in a browser: In this case, a submission always contains
+ * the correct page number, even if the user submitted from an old view.
+ *
  * <p>The page can only be changed if it validates correctly, except if a
  * "dirty back" or "dirty forward" is allowed. At finish, all pages get
  * validated again to guarantee a consistent state. Note that a validator's
@@ -88,6 +93,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	public static final String PARAM_TARGET = "_target";
 
+	/**
+	 * Parameter specifying the current page as value. Not necessary on
+	 * form pages, but allows to properly handle usage of the back button.
+	 * @see #setPageAttribute
+	 */
+	public static final String PARAM_PAGE = "_page";
+
 
 	private String[] pages;
 
@@ -123,9 +135,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Set the name of the page attribute in the model, containing
-	 * an Integer with the current page number. This will be necessary
-	 * for single views rendering multiple view pages.
+	 * an Integer with the current page number.
+	 * <p>This will be necessary for single views rendering multiple view pages.
+	 * It also allows for specifying the optional "_page" parameter.
 	 * @param pageAttribute name of the page attribute
+	 * @see #PARAM_PAGE
 	 */
 	public final void setPageAttribute(String pageAttribute) {
 		this.pageAttribute = pageAttribute;
@@ -250,8 +264,10 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	    throws Exception {
 		if (page >= 0 && page < this.pages.length) {
 			logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
-			// set page session attribute for tracking
-			request.getSession().setAttribute(getPageSessionAttributeName(), new Integer(page));
+			// set page session attribute, expose overriding request attribute
+			Integer pageInteger = new Integer(page);
+			request.getSession().setAttribute(getPageSessionAttributeName(), pageInteger);
+			request.setAttribute(getPageSessionAttributeName(), pageInteger);
 			// set page request attribute for evaluation by views
 			Map controlModel = new HashMap();
 			if (this.pageAttribute != null) {
@@ -320,7 +336,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected final ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response,
 	                                                   Object command, BindException errors) throws Exception {
 		int currentPage = getCurrentPage(request);
+		// remove page session attribute, provide copy as request attribute
 		request.getSession().removeAttribute(getPageSessionAttributeName());
+		request.setAttribute(getPageSessionAttributeName(), new Integer(currentPage));
 
 		// cancel?
 		if (isCancel(request)) {
@@ -355,24 +373,28 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Return the current page number. Used by processFormSubmission.
 	 * <p>The default implementation checks the page session attribute.
-	 * Subclasses can override this for customized target page determination.
+	 * Subclasses can override this for customized page determination.
 	 * @see #processFormSubmission
 	 * @see #getPageSessionAttributeName
 	 */
 	protected int getCurrentPage(HttpServletRequest request) {
-		// check for copied attribute in the request first
+		// checking for overriding attribute in request
 		Integer pageAttr = (Integer) request.getAttribute(getPageSessionAttributeName());
-		if (pageAttr == null) {
-			// no copied attribute in request, checking original attribute in session
-			pageAttr = (Integer) request.getSession().getAttribute(getPageSessionAttributeName());
-			if (pageAttr == null) {
-				throw new IllegalStateException("Page attribute [" + getPageSessionAttributeName() +
-																				"] neither found in request nor in session");
-			}
-			// copy the attribute to the request for further availability in any case
-			request.setAttribute(getPageSessionAttributeName(), pageAttr);
+		if (pageAttr != null) {
+			return pageAttr.intValue();
 		}
-		return pageAttr.intValue();
+		// check for explicit request parameter
+		String pageParam = request.getParameter(PARAM_PAGE);
+		if (pageParam != null) {
+			return Integer.parseInt(pageParam);
+		}
+		// check for original attribute in session
+		pageAttr = (Integer) request.getSession().getAttribute(getPageSessionAttributeName());
+		if (pageAttr != null) {
+			return pageAttr.intValue();
+		}
+		throw new IllegalStateException("Page attribute [" + getPageSessionAttributeName() +
+																		"] neither found in session nor in request");
 	}
 
 	/**
