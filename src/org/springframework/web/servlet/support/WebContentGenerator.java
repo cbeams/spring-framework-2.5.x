@@ -12,7 +12,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Convenient superclass for any kind of web content generator,
- * like AbstractController and WebContentInterceptor.
+ * like AbstractController and WebContentInterceptor. Can also be
+ * used for custom handlers that have their own HandlerAdapter.
  *
  * <p>Supports HTTP cache control options. The usage of corresponding
  * HTTP headers can be determined via the "useExpiresHeader" and
@@ -22,6 +23,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * @author Juergen Hoeller
  * @see #setUseExpiresHeader
  * @see #setUseCacheControlHeader
+ * @see org.springframework.web.servlet.mvc.AbstractController
+ * @see org.springframework.web.servlet.mvc.WebContentInterceptor
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
@@ -51,7 +54,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/**
-	 * Create a new Controller supporting GET and POST methods.
+	 * Create a new WebContentGenerator supporting GET and POST methods.
 	 */
 	public WebContentGenerator() {
 		this.supportedMethods = new HashSet();
@@ -99,10 +102,11 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * If 0 disable caching, default is no caching header generation.
-	 * Only if this is set to 0 (no cache) or a positive value (cache for this many
-	 * seconds) will this class generate cache headers.
-	 * They can be overwritten by subclasses anyway, before content is generated.
+	 * Cache content for the given number of seconds. Default is -1,
+	 * indicating no generation of cache-related headers.
+	 * <p>Only if this is set to 0 (no cache) or a positive value (cache for
+	 * this many seconds) will this class generate cache headers.
+	 * <p>The headers can be overwritten by subclasses, before content is generated.
 	 */
 	public final void setCacheSeconds(int seconds) {
 		this.cacheSeconds = seconds;

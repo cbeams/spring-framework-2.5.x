@@ -28,8 +28,9 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.17 2004-02-04 17:10:13 jhoeller Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.18 2004-02-27 16:40:14 jhoeller Exp $
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
  * @see org.springframework.transaction.PlatformTransactionManager
@@ -89,9 +90,12 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	}
 
 	/**
-	 * Set the transaction attribute source which is used to
-	 * find transaction attributes. The default implementation looks
-	 * at the metadata attributes associated with the current invocation.
+	 * Set the transaction attribute source which is used to find transaction
+	 * attributes. If specifying a String property value, a PropertyEditor
+	 * will create a MethodMapTransactionAttributeSource from the value.
+	 * @see TransactionAttributeSourceEditor
+	 * @see MethodMapTransactionAttributeSource
+	 * @see NameMatchTransactionAttributeSource
 	 */
 	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
 		this.transactionAttributeSource = transactionAttributeSource;

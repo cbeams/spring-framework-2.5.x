@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
 import org.springframework.remoting.support.RemoteInvocation;
 
 /**
- * Interface for RmiInvocationWrapper instances on the server,
+ * Interface for RMI invocation handlers instances on the server,
  * wrapping exported services. A client uses a stub implementing
  * this interface to access such a service.
  *
@@ -15,14 +15,13 @@ import org.springframework.remoting.support.RemoteInvocation;
  *
  * @author Juergen Hoeller
  * @since 14.05.2003
- * @see RmiInvocationWrapper
  */
 public interface RmiInvocationHandler extends Remote {
 
 	/**
-	 * Invoke the given method with the given parameters on the actual object.
+	 * Apply the given invocation to the target object.
 	 * Called by RmiClientInterceptor.
-	 * @param invocation object that encapsulates invocation parametres
+	 * @param invocation object that encapsulates invocation parameters
 	 * @return the object returned from the invoked method, if any
 	 * @throws RemoteException in case of communication errors
 	 * @throws NoSuchMethodException if the method name could not be resolved

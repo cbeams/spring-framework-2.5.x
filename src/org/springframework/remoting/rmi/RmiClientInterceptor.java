@@ -124,7 +124,7 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 	 * @throws NoSuchMethodException if the method name could not be resolved
 	 * @throws IllegalAccessException if the method could not be accessed
 	 * @throws InvocationTargetException if the method invocation resulted in an exception
-	 * @see org.springframework.remoting.support.RemoteInvocation(org.aopalliance.intercept.MethodInvocation)
+	 * @see org.springframework.remoting.support.RemoteInvocation
 	 */
 	protected Object invoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
 	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {

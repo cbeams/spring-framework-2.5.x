@@ -25,6 +25,9 @@ import org.springframework.beans.propertyeditors.PropertiesEditor;
  * <p>For example:<br>
  * <code>com.mycompany.mycode.MyClass.myMethod=PROPAGATION_MANDATORY,ISOLATION_DEFAULT</code>
  *
+ * <p><b>NOTE:</b> The specified class must be the one where the methods are
+ * defined; in case of implementing an interface, the interface class name.
+ *
  * <p>Note: Will register all overloaded methods for a given name.
  * Does not support explicit registration of certain overloaded methods.
  * Supports "xxx*" mappings, e.g. "notify*" for "notify" and "notifyAll".
@@ -32,7 +35,7 @@ import org.springframework.beans.propertyeditors.PropertiesEditor;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 26-Apr-2003
- * @version $Id: TransactionAttributeSourceEditor.java,v 1.2 2003-08-21 15:45:50 jhoeller Exp $
+ * @version $Id: TransactionAttributeSourceEditor.java,v 1.3 2004-02-27 16:40:14 jhoeller Exp $
  * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
  */
 public class TransactionAttributeSourceEditor extends PropertyEditorSupport {

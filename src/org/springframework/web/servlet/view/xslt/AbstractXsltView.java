@@ -7,7 +7,6 @@ package org.springframework.web.servlet.view.xslt;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * @author Rod Johnson
  * @author Darren Davison
- * @version $Id: AbstractXsltView.java,v 1.8 2004-02-27 01:23:20 davison Exp $
+ * @version $Id: AbstractXsltView.java,v 1.9 2004-02-27 16:40:15 jhoeller Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
@@ -224,9 +223,8 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Return a <code>Map</code> of parameters to be applied to the stylesheet.  Subclasses
 	 * can override the default implementation (which simply returns null) in order to
 	 * apply one or more parameters to the transformation process.
-	 * 
 	 * @return a Map of parameters to apply to the transformation process
-	 * @see javax.xml.transform.Transformer#setParameter(java.lang.String, java.lang.String)
+	 * @see javax.xml.transform.Transformer#setParameter
 	 */
 	protected Map getParameters() {
 		return null;

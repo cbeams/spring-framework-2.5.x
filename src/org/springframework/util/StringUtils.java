@@ -25,7 +25,7 @@ import java.util.TreeSet;
  *
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.5 2004-02-22 21:52:30 jhoeller Exp $
+ * @version $Id: StringUtils.java,v 1.6 2004-02-27 16:40:14 jhoeller Exp $
  */
 public abstract class StringUtils {
 
@@ -127,21 +127,23 @@ public abstract class StringUtils {
 	/**
 	 * Take a String which is a delimited list and convert it to a String array
 	 * @param s String
-	 * @param delimiter delimiter. This will not be returned
+	 * @param delimiter delimiter. This will not be returned.
 	 * @return an array of the tokens in the list
 	 */
 	public static String[] delimitedListToStringArray(String s, String delimiter) {
-		if (s == null)
+		if (s == null) {
 			return new String[0];
-		if (delimiter == null)
+		}
+		if (delimiter == null) {
 			return new String[]{s};
+		}
 
 		List l = new LinkedList();
 		int pos = 0;
-		int delpos = 0;
-		while ((delpos = s.indexOf(delimiter, pos)) != -1) {
-			l.add(s.substring(pos, delpos));
-			pos = delpos + delimiter.length();
+		int delPos = 0;
+		while ((delPos = s.indexOf(delimiter, pos)) != -1) {
+			l.add(s.substring(pos, delPos));
+			pos = delPos + delimiter.length();
 		}
 		if (pos <= s.length()) {
 			// add rest of String

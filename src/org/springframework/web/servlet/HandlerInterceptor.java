@@ -58,9 +58,9 @@ public interface HandlerInterceptor {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
-	 * @return <codoe>true</code> if the execution chain should proceed with the 
-	 * next interceptor respectively the handler itself, else DispatcherServlet assumes
-	 * that this interceptor has already dealed with the response itself
+	 * @return <code>true</code> if the execution chain should proceed with the
+	 * next interceptor respectively the handler itself. Else, DispatcherServlet
+	 * assumes that this interceptor has already dealt with the response itself.
 	 * @throws Exception in case of errors
 	 */
 	boolean preHandle(HttpServletRequest request, HttpServletResponse response,

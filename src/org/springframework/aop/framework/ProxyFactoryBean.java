@@ -32,17 +32,16 @@ import org.springframework.core.OrderComparator;
 /**
  * FactoryBean implementation for use to source AOP proxies from a Spring BeanFactory.
  *
- * <p>Interceptors and Advisors are identified by a list of bean names in the current bean factory.
- * These beans should be of type Interceptor or an Advisor subtype
- * (presently InterceptionAroundAdvisor or InterceptionIntroductionAdvisor). 
- * The last entry in
- * the list can be the name of any bean in the factory. If it's neither an Interceptor
- * or a MethodPointcut, a new InvokerInterceptor is added to wrap it.
+ * <p>Interceptors and Advisors are identified by a list of bean names in the current
+ * bean factory. These beans should be of type Interceptor or an Advisor subtype
+ * (presently InterceptionAroundAdvisor or InterceptionIntroductionAdvisor). The last
+ * entry in the list can be the name of any bean in the factory. If it's neither an
+ * Interceptor nor a MethodPointcut, a new InvokerInterceptor is added to wrap it.
  *
- * <p>Global interceptors and advisors can be added at the factory level. The specified ones are
- * expanded in an interceptor list where an "xxx*" entry is included in the list,
- * matching the given prefix with the bean names (e.g. "global*" would match both
- * "globalBean1" and "globalBean2", "*" all defined interceptors). The matching
+ * <p>Global interceptors and advisors can be added at the factory level. The specified
+ * ones are expanded in an interceptor list where an "xxx*" entry is included in the
+ * list, matching the given prefix with the bean names (e.g. "global*" would match
+ * both "globalBean1" and "globalBean2", "*" all defined interceptors). The matching
  * interceptors get applied according to their returned order value, if they
  * implement the Ordered interface. An interceptor name list may not conclude
  * with a global "xxx*" pattern, as global interceptors cannot invoke targets.
@@ -51,26 +50,25 @@ import org.springframework.core.OrderComparator;
  * actual target class if not. Note that the latter will only work if the target class
  * does not have final methods, as a dynamic subclass will be created at runtime.
  *
- * <p>It's possible to cast a proxy obtained from this factory to Advisor,
- * or to obtain the ProxyFactoryBean reference and programmatically
- * manipulate it. This won't work for existing prototype references, which are independent. However,
- * it will work for prototypes subsequently obtained from the factory. Changes to interception
- * will work immediately on singletons (including existing references). However, to change
- * interfaces or target it's necessary to obtain a new instance from
- * the factory. This means that singleton instances obtained from the factory do not
- * have the same object identity. However, they do have the same interceptors and target, and
- * changing any reference will change all objects.
+ * <p>It's possible to cast a proxy obtained from this factory to Advisor, or to
+ * obtain the ProxyFactoryBean reference and programmatically manipulate it.
+ * This won't work for existing prototype references, which are independent. However,
+ * it will work for prototypes subsequently obtained from the factory. Changes to
+ * interception will work immediately on singletons (including existing references).
+ * However, to change interfaces or target it's necessary to obtain a new instance
+ * from the factory. This means that singleton instances obtained from the factory
+ * do not have the same object identity. However, they do have the same interceptors
+ * and target, and changing any reference will change all objects.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.20 2004-02-11 17:18:16 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.21 2004-02-27 16:40:12 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
- * @see org.springframework.aop.InterceptionAroundAdvisor
- * @see org.springframework.aop.InterceptionIntroductionAdvisor
  */
-public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, BeanFactoryAware, AdvisedSupportListener {
+public class ProxyFactoryBean extends AdvisedSupport
+    implements FactoryBean, BeanFactoryAware, AdvisedSupportListener {
 
 	/**
 	 * This suffix in a value in an interceptor list indicates to expand globals.
@@ -122,6 +120,19 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 		this.interceptorNames = interceptorNames;
 	}
 
+	/**
+	 * Set the value of the singleton property. Governs whether this factory
+	 * should always return the same proxy instance (which implies the same target)
+	 * or whether it should return a new prototype instance, which implies that
+	 * the target and interceptors may be new instances also, if they are obtained
+	 * from prototype bean definitions.
+	 * This allows for fine control of independence/uniqueness in the object graph.
+	 * @param singleton
+	 */
+	public void setSingleton(boolean singleton) {
+		this.singleton = singleton;
+	}
+
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 		logger.debug("Set BeanFactory. Will configure interceptor beans...");
@@ -136,6 +147,55 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 		}
 	}
 
+
+	/**
+	 * Return a proxy. Invoked when clients obtain beans
+	 * from this factory bean. Create an instance of the AOP proxy to be returned by this factory.
+	 * The instance will be cached for a singleton, and create on each call to
+	 * getObject() for a proxy.
+	 * @return Object a fresh AOP proxy reflecting the current
+	 * state of this factory
+	 * @see org.springframework.beans.factory.FactoryBean#getObject()
+	 */
+	public Object getObject() throws BeansException {
+		return (this.singleton) ?
+			getSingletonInstance() :
+			newPrototypeInstance();
+	}
+
+	public Class getObjectType() {
+		return getTargetSource().getTargetClass();
+	}
+
+	public boolean isSingleton() {
+		return this.singleton;
+	}
+
+
+	private Object getSingletonInstance() {
+		if (this.singletonInstance == null) {
+			// This object can configure the proxy directly if it's
+			// being used as a singleton
+			this.singletonInstance = createAopProxy().getProxy();
+		}
+		return this.singletonInstance;
+	}
+
+	private Object newPrototypeInstance() {
+		refreshAdvisorChain();
+		refreshTarget();
+		// In the case of a prototype, we need to give the proxy
+		// an independent instance of the configuration
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
+		}
+		AdvisedSupport copy = new AdvisedSupport();
+		copy.copyConfigurationFrom(this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Copy has config: " + copy);
+		}
+		return copy.createAopProxy().getProxy();
+	}
 
 	/**
 	 * Create the advisor (interceptor) chain. The advisors that
@@ -285,7 +345,7 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	}
 
 	/**
-	 * Return Advisor or TargetSource
+	 * Return Advisor or TargetSource.
 	 */
 	private Object namedBeanToAdvisorOrTargetSource(Object next) {
 		try {
@@ -301,77 +361,10 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 				// It's not a pointcut or interceptor.
 				// It's a bean that needs an invoker around it.
 				return new SingletonTargetSource(next);
-				//throw new AopConfigException("Illegal type: bean '" + name + "' must be of type MethodPointcut or Interceptor");
 			}
 		}
 	}
 
-	/**
-	 * Return a proxy. Invoked when clients obtain beans
-	 * from this factory bean. Create an instance of the AOP proxy to be returned by this factory.
-	 * The instance will be cached for a singleton, and create on each call to
-	 * getObject() for a proxy.
-	 * @return Object a fresh AOP proxy reflecting the current
-	 * state of this factory
-	 * @see org.springframework.beans.factory.FactoryBean#getObject()
-	 */
-	public Object getObject() throws BeansException {
-		return (this.singleton) ?
-			getSingletonInstance() :
-			newPrototypeInstance();
-	}
-	
-	
-	private Object getSingletonInstance() {
-		if (singletonInstance == null) {
-			// This object can configure the proxy directly if it's
-			// being used as a singleton
-			singletonInstance = createAopProxy().getProxy();
-		}
-		return singletonInstance;
-	}
-	
-	private Object newPrototypeInstance() {
-		refreshAdvisorChain();
-		refreshTarget();
-		// In the case of a prototype, we need to give the proxy
-		// an independent instance of the configuration
-		if (logger.isDebugEnabled())
-			logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
-		AdvisedSupport copy = new AdvisedSupport();
-		copy.copyConfigurationFrom(this);
-		if (logger.isDebugEnabled())
-			logger.debug("Copy has config: " + copy);
-		return copy.createAopProxy().getProxy();
-	}
-
-
-	/**
-	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
-	 */
-	public Class getObjectType() {
-		return getTargetSource().getTargetClass();
-	}
-
-	/**
-	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
-	 */
-	public boolean isSingleton() {
-		return this.singleton;
-	}
-
-	/**
-	 * Set the value of the singleton property. Governs whether this factory
-	 * should always return the same proxy instance (which implies the same target)
-	 * or whether it should return a new prototype instance, which implies that
-	 * the target and interceptors may be new instances also, if they are obtained
-	 * from prototype bean definitions.
-	 * This allows for fine control of independence/uniqueness in the object graph.
-	 * @param singleton
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
 
 	/**
 	 * @see org.springframework.aop.framework.AdvisedSupportListener#activated(org.springframework.aop.framework.AdvisedSupport)

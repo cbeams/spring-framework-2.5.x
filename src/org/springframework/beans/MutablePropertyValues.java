@@ -15,13 +15,13 @@ import org.springframework.util.StringUtils;
  * to support deep copy and construction from a Map.
  * @author Rod Johnson
  * @since 13 May 2001
- * @version $Id: MutablePropertyValues.java,v 1.4 2004-02-27 13:05:45 jhoeller Exp $
+ * @version $Id: MutablePropertyValues.java,v 1.5 2004-02-27 16:40:12 jhoeller Exp $
  */
 public class MutablePropertyValues implements PropertyValues {
-	
+
 	/** List of PropertyValue objects */
 	private List propertyValuesList;
-	
+
 	/**
 	 * Creates a new empty MutablePropertyValues object.
 	 * Property values can be added with the addPropertyValue methods.
@@ -31,8 +31,8 @@ public class MutablePropertyValues implements PropertyValues {
 	public MutablePropertyValues() {
 		this.propertyValuesList = new ArrayList(10);
 	}
-	
-	/** 
+
+	/**
 	 * Deep copy constructor. Guarantees PropertyValue references
 	 * are independent, although it can't deep copy objects currently
 	 * referenced by individual PropertyValue objects
@@ -47,8 +47,8 @@ public class MutablePropertyValues implements PropertyValues {
 			}
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Construct a new PropertyValues object from a Map.
 	 * @param map Map with property values keyed by property name,
 	 * which must be a String
@@ -56,13 +56,13 @@ public class MutablePropertyValues implements PropertyValues {
 	public MutablePropertyValues(Map map) {
 		Set keys = map.keySet();
 		this.propertyValuesList = new ArrayList(keys.size());
-		Iterator itr = keys.iterator(); 
+		Iterator itr = keys.iterator();
 		while (itr.hasNext()) {
 			String key = (String) itr.next();
 			addPropertyValue(new PropertyValue(key, map.get(key)));
 		}
 	}
-	
+
 	/**
 	 * Add a PropertyValue object, replacing any existing one
 	 * for the respective property.
@@ -90,10 +90,20 @@ public class MutablePropertyValues implements PropertyValues {
 		addPropertyValue(new PropertyValue(propertyName, propertyValue));
 	}
 
+	/**
+	 * Remove the given PropertyValue, if contained.
+	 * @param pv the PropertyValue to remove
+	 */
 	public void removePropertyValue(PropertyValue pv) {
 		this.propertyValuesList.remove(pv);
 	}
 
+	/**
+	 * Overloaded version of removePropertyValue that takes
+	 * a property name.
+	 * @param propertyName name of the property
+	 * @see #removePropertyValue(PropertyValue)
+	 */
 	public void removePropertyValue(String propertyName) {
 		removePropertyValue(getPropertyValue(propertyName));
 	}
@@ -109,7 +119,7 @@ public class MutablePropertyValues implements PropertyValues {
 	public PropertyValue[] getPropertyValues() {
 		return (PropertyValue[]) this.propertyValuesList.toArray(new PropertyValue[0]);
 	}
-	
+
 	public PropertyValue getPropertyValue(String propertyName) {
 		for (int i = 0; i < this.propertyValuesList.size(); i++) {
 			PropertyValue pv = (PropertyValue) this.propertyValuesList.get(i);
@@ -119,7 +129,7 @@ public class MutablePropertyValues implements PropertyValues {
 		}
 		return null;
 	}
-	
+
 	public boolean contains(String propertyName) {
 		return getPropertyValue(propertyName) != null;
 	}
@@ -128,7 +138,7 @@ public class MutablePropertyValues implements PropertyValues {
 		MutablePropertyValues changes = new MutablePropertyValues();
 		if (old == this)
 			return changes;
-			
+
 		// For each property value in the new set
 		for (int i = 0; i < this.propertyValuesList.size(); i++) {
 			PropertyValue newPv = (PropertyValue) this.propertyValuesList.get(i);

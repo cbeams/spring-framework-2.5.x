@@ -82,13 +82,13 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 			throw new IllegalArgumentException("Either configLocation (e.g. '/kodo.properties') or jdoProperties must be set");
 		}
 
-		Properties prop = new Properties();
+		Properties props = new Properties();
 
 		if (this.configLocation != null) {
 			// load JDO properties from given location
 			InputStream is = this.configLocation.getInputStream();
 			try {
-				prop.load(is);
+				props.load(is);
 			}
 			finally {
 				is.close();
@@ -97,11 +97,11 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 		if (this.jdoProperties != null) {
 			// add given JDO properties
-			prop.putAll(this.jdoProperties);
+			props.putAll(this.jdoProperties);
 		}
 
 		// build factory instance
-		this.persistenceManagerFactory = newPersistenceManagerFactory(prop);
+		this.persistenceManagerFactory = newPersistenceManagerFactory(props);
 	}
 
 	/**

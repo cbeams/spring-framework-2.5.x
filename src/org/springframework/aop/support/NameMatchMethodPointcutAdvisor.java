@@ -12,10 +12,9 @@ import org.springframework.aop.PointcutAdvisor;
  * Convenient class for name-match method pointcuts that hold an Interceptor,
  * making them an Advisor.
  * @author Juergen Hoeller
- * @version $Id: NameMatchMethodPointcutAdvisor.java,v 1.1 2004-02-22 09:48:24 johnsonr Exp $
+ * @version $Id: NameMatchMethodPointcutAdvisor.java,v 1.2 2004-02-27 16:40:12 jhoeller Exp $
  */
-public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut
-    implements PointcutAdvisor {
+public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut implements PointcutAdvisor {
 
 	private Object advice;
 
@@ -25,28 +24,21 @@ public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut
 	public NameMatchMethodPointcutAdvisor(Object advice) {
 		this.advice = advice;
 	}
-	
 
-	public boolean isPerInstance() {
-		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
+	public void setAdvice(Object object) {
+		advice = object;
+	}
+
+	public Object getAdvice() {
+		return advice;
 	}
 
 	public Pointcut getPointcut() {
 		return this;
 	}
 
-	/**
-	 * @return
-	 */
-	public Object getAdvice() {
-		return advice;
-	}
-
-	/**
-	 * @param object
-	 */
-	public void setAdvice(Object object) {
-		advice = object;
+	public boolean isPerInstance() {
+		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
 	}
 
 }
