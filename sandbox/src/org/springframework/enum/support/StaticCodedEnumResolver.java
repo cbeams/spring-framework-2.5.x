@@ -51,7 +51,8 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
         public void forEachRun(UnaryProcedure procedure) {
             Field[] fields = clazz.getFields();
             for (int i = 0; i < fields.length; i++) {
-                procedure.run(fields[i]);
+                Field field = fields[i];
+                procedure.run(field);
             }
         }
     }
@@ -71,7 +72,8 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
         new FieldGenerator(clazz).forEachRun(new UnaryProcedure() {
             public void run(Object o) {
                 Field f = (Field)o;
-                if (Modifier.isStatic(f.getModifiers())) {
+                if (Modifier.isStatic(f.getModifiers())
+                        && Modifier.isPublic(f.getModifiers())) {
                     if (CodedEnum.class.isAssignableFrom(f.getType())) {
                         try {
                             Object value = f.get(null);
