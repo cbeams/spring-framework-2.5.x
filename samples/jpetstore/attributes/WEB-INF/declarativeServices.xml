@@ -6,13 +6,12 @@
 
 	<description>
 		Generic autoproxy definitions enabling declarative transaction management, 
-		based on Commons Attributes attributes.
-		A child context must define a single PlatformTransactionManager for autoproxying
-		to work.
+		based on Commons Attributes attributes. The application context must define
+		a single PlatformTransactionManager for autoproxying to work.
 		
-		This file is generic, and not specific to the Pet Store. You can use it unchanged as the
-		base application context file in your own applications to get attribute-driven
-		declarative transaction management.
+		This file is generic, and not specific to JPetStore. You can use it unchanged
+		as an application context definition file for your own applications to get
+		attribute-driven declarative transaction management.
 		
 		The power of this approach is more apparent when you have many transactional
 		business objects, not just one as in this simple application.
@@ -27,8 +26,7 @@
 	<bean id="autoproxy" 
 		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">	
 	</bean>
-	
-	
+
 	<bean id="transactionAttributeSource"
 		class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"
 		autowire="constructor">

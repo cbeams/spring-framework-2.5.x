@@ -4,101 +4,16 @@
 <beans>
 
 	<description>
-		This file illustrates reliance on declarative transaction management provided
-		by the autoproxy definitions in declarateServices.xml.
+		This file illustrates reliance on declarative transaction management
+		provided by the autoproxy definitions in declarateServices.xml.
 		There's no need to use a TransactionFactoryProxyBean: any bean with
 		source-level transaction attributes will automatically benefit from
 		declarative transaction management.
 		
-		This file must define a bean of type PlatformTransactionManager (the transactionManager
-		bean below) for this to work.
+		The application context must define a bean of type PlatformTransactionManager
+		for this to work (see dataAccessContext-local/jta.xml).
 	</description>
 
-	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
-	
-
-	<!-- 
-		Local HSQL DataSource that works in any environment. 
-		Uses Apache Commons DBCP for pooling.
-	-->
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
-		<property name="driverClassName"><value>org.hsqldb.jdbcDriver</value></property>
-		<property name="url"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
-		<property name="username"><value>sa</value></property>
-		<property name="password"><value></value></property>
-		
-		<property name="defaultAutoCommit"><value>false</value></property>
-		<property name="poolPreparedStatements"><value>true</value></property>
-	</bean>
-
-	<!-- JNDI DataSource for J2EE environments -->
-	<!-- either for a combined database, or for the item reference database -->
-	<!--
-	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	  	<property name="jndiName"><value>jdbc/myds1</value></property>
-	</bean>
-	-->
-
-	<!-- additional JNDI DataSource for J2EE environments -->
-	<!-- for the order database in the distributed case, to be referenced from "orderDao" below -->
-	<!--
-	<bean id="orderDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	  	<property name="jndiName"><value>jdbc/myds2</value></property>
-	</bean>
-	-->
-
-	<!-- Transaction manager for a single JDBC DataSource (alternative to JTA) -->
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource"><ref local="dataSource"/></property>
-	</bean>
-
-	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
-	<!-- optional for a combined database, necessary for distributed databases -->
-	<!--
-	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
-	-->
-
-	<!-- SqlMap setup for iBATIS Database Layer -->
-	<bean id="sqlMap" class="org.springframework.orm.ibatis.SqlMapFactoryBean">
-		<property name="configLocation"><value>sql-map-config.xml</value></property>
-	</bean>
-
-	<!-- ========================= DAO DEFINITIONS: IBATIS IMPLEMENTATIONS ========================= -->
-
-	<bean id="sequenceDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapSequenceDao">
-		<property name="dataSource"><ref local="dataSource"/></property>
-		<property name="sqlMap"><ref local="sqlMap"/></property>
-	</bean>
-
-	<bean id="accountDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao">
-		<property name="dataSource"><ref local="dataSource"/></property>
-		<property name="sqlMap"><ref local="sqlMap"/></property>
-	</bean>
-
-	<bean id="categoryDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapCategoryDao">
-		<property name="dataSource"><ref local="dataSource"/></property>
-		<property name="sqlMap"><ref local="sqlMap"/></property>
-	</bean>
-
-	<bean id="productDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapProductDao">
-		<property name="dataSource"><ref local="dataSource"/></property>
-		<property name="sqlMap"><ref local="sqlMap"/></property>
-	</bean>
-
-	<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapItemDao">
-		<property name="dataSource"><ref local="dataSource"/></property>
-		<property name="sqlMap"><ref local="sqlMap"/></property>
-	</bean>
-
-	<!-- can either reference a combined database, or the order database in the distributed case -->
-	<bean id="orderDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapOrderDao">
-		<property name="dataSource"><ref local="dataSource"/></property>
-		<!--
-		<property name="dataSource"><ref local="orderDataSource"/></property>
-		-->
-		<property name="sqlMap"><ref local="sqlMap"/></property>
-		<property name="sequenceDao"><ref local="sequenceDao"/></property>
-	</bean>
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
@@ -116,12 +31,26 @@
 		bean definition will apply transaction advice automatically.
 	-->
 	<bean id="petStore" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
-		<property name="accountDao"><ref local="accountDao"/></property>
-		<property name="categoryDao"><ref local="categoryDao"/></property>
-		<property name="productDao"><ref local="productDao"/></property>
-		<property name="itemDao"><ref local="itemDao"/></property>
-		<property name="orderDao"><ref local="orderDao"/></property>
+		<property name="accountDao"><ref bean="accountDao"/></property>
+		<property name="categoryDao"><ref bean="categoryDao"/></property>
+		<property name="productDao"><ref bean="productDao"/></property>
+		<property name="itemDao"><ref bean="itemDao"/></property>
+		<property name="orderDao"><ref bean="orderDao"/></property>
 	</bean>
 
+
+	<!-- ========================= REMOTE EXPORTER DEFINITIONS ========================= -->
+
+	<!-- RMI exporter for the JPetStore OrderService -->
+	<!-- Commented out by default to avoid conflicts with EJB containers -->
+	<!--
+	<bean id="order-rmi" class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<property name="service"><ref bean="petStore"/></property>
+		<property name="serviceInterface">
+			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
+		</property>
+		<property name="serviceName"><value>order</value></property>
+	</bean>
+	-->
 
 </beans>
