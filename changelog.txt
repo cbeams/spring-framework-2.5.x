@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in version 1.1.3 (8.12.2004)
 ------------------------------------
 
+Package org.springframework.aop
+* fixed bug in Cglib2AopProxy. See SPR-529.
+
 Package org.springframework.beans
 * BeanWrapperImpl automatically registers a default ResourceArrayPropertyEditor
 * fixed reported bean class in BeanWrapperImpl to always point to the root class at the top of the path
@@ -19,6 +22,7 @@ Package org.springframework.beans
 * reworked DefaultListableBeanFactory's "getBeansOfType" to return FactoryBean instances when passed a FactoryBean type
 * reworked StaticListableBeanFactory's "getBeansOfType" to return FactoryBean instances when passed a FactoryBean type
 * moved "loadBeanDefinitions(Resource[])" method from XmlBeanDefinitionReader up to AbstractBeanDefinitionReader
+* added getPropertyDescriptors() to BeanUtils.
 
 Package org.springframework.context
 * ApplicationContext interface extends ResourcePatternResolver, offering "Resource[] getResources(locationPattern)" now
