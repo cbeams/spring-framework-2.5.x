@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.32 2004-03-19 07:40:13 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.33 2004-03-19 16:09:16 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -725,33 +725,33 @@ public class BeanWrapperImpl implements BeanWrapper {
 	protected Object doTypeConversionIfNecessary(String propertyName, String propertyDescriptor,
 																							 Object oldValue, Object newValue,
 																							 Class requiredType) throws BeansException {
-
-		if (requiredType.isArray()) {
-			// convert individual elements to array elements
-			Class componentType = requiredType.getComponentType();
-			if (newValue instanceof List) {
-				List list = (List) newValue;
-				Object result = Array.newInstance(componentType, list.size());
-				for (int i = 0; i < list.size(); i++) {
-					Object value = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
-																										 null, list.get(i), componentType);
-					Array.set(result, i, value);
-				}
-				return result;
-			}
-			else if (newValue instanceof Object[]) {
-				Object[] array = (Object[]) newValue;
-				Object result = Array.newInstance(componentType, array.length);
-				for (int i = 0; i < array.length; i++) {
-					Object value = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
-																										 null, array[i], componentType);
-					Array.set(result, i, value);
-				}
-				return result;
-			}
-		}
-
 		if (newValue != null) {
+
+			if (requiredType.isArray()) {
+				// convert individual elements to array elements
+				Class componentType = requiredType.getComponentType();
+				if (newValue instanceof List) {
+					List list = (List) newValue;
+					Object result = Array.newInstance(componentType, list.size());
+					for (int i = 0; i < list.size(); i++) {
+						Object value = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
+																											 null, list.get(i), componentType);
+						Array.set(result, i, value);
+					}
+					return result;
+				}
+				else if (newValue instanceof Object[]) {
+					Object[] array = (Object[]) newValue;
+					Object result = Array.newInstance(componentType, array.length);
+					for (int i = 0; i < array.length; i++) {
+						Object value = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
+																											 null, array[i], componentType);
+						Array.set(result, i, value);
+					}
+					return result;
+				}
+			}
+
 			// custom editor for this type?
 			PropertyEditor pe = findCustomEditor(requiredType, propertyName);
 
@@ -808,6 +808,15 @@ public class BeanWrapperImpl implements BeanWrapper {
 																						requiredType, ex);
 					}
 				}
+			}
+
+			if (requiredType.isArray() && !newValue.getClass().isArray()) {
+				Class componentType = requiredType.getComponentType();
+				Object result = Array.newInstance(componentType, 1) ;
+				Object val = doTypeConversionIfNecessary(propertyName, propertyName + "[" + 0 + "]",
+																								 null, newValue, componentType);
+				Array.set(result, 0, val) ;
+				return result;
 			}
 		}
 

@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: BeanWrapperTestSuite.java,v 1.16 2004-03-19 07:40:59 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.17 2004-03-19 16:09:10 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -204,15 +204,43 @@ public class BeanWrapperTestSuite extends TestCase {
 	public void testStringArrayProperty() throws Exception {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
-		bw.setPropertyValue("stringArray", "foo,fi,fi,fum");
 
-		assertTrue("stringArray was set", pt.sa != null);
-		assertTrue("stringArray length = 4", pt.sa.length == 4);
-		assertTrue("correct values", pt.sa[0].equals("foo") && pt.sa[1].equals("fi") && pt.sa[2].equals("fi") && pt.sa[3].equals("fum"));
+		bw.setPropertyValue("stringArray", "foo,fi,fi,fum");
+		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
+		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
+		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+
+		bw.setPropertyValue("stringArray", new String[] {"foo", "fi", "fi", "fum"});
+		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
+		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
+		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 
 		bw.setPropertyValue("stringArray", "one");
-		assertTrue("stringArray length = 1", pt.sa.length == 1);
-		assertTrue("stringArray elt is ok", pt.sa[0].equals("one"));
+		assertTrue("stringArray length = 1", pt.stringArray.length == 1);
+		assertTrue("stringArray elt is ok", pt.stringArray[0].equals("one"));
+	}
+
+	public void testIntArrayProperty() {
+		PropsTest pt = new PropsTest();
+		BeanWrapper bw = new BeanWrapperImpl(pt);
+
+		bw.setPropertyValue("intArray", new int[] {4, 5, 2, 3});
+		assertTrue("intArray length = 4", pt.intArray.length == 4);
+		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
+		                             pt.intArray[2] == 2 && pt.intArray[3] == 3);
+
+		bw.setPropertyValue("intArray", new String[] {"4", "5", "2", "3"});
+		assertTrue("intArray length = 4", pt.intArray.length == 4);
+		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
+		                             pt.intArray[2] == 2 && pt.intArray[3] == 3);
+
+		bw.setPropertyValue("intArray", new Integer(1));
+		assertTrue("intArray length = 4", pt.intArray.length == 1);
+		assertTrue("correct values", pt.intArray[0] == 1);
+
+		bw.setPropertyValue("intArray", new String[] {"1"});
+		assertTrue("intArray length = 4", pt.intArray.length == 1);
+		assertTrue("correct values", pt.intArray[0] == 1);
 	}
 
 	public void testIndividualAllValid() {
@@ -293,16 +321,13 @@ public class BeanWrapperTestSuite extends TestCase {
 
 	public void testSetPropertyValuesIgnoresInvalidNestedOnRequest() {
 		ITestBean rod = new TestBean();
-
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "rod"));
 		pvs.addPropertyValue(new PropertyValue("graceful.rubbish", "tony"));
 		pvs.addPropertyValue(new PropertyValue("more.garbage", new Object()));
 		BeanWrapper bw = new BeanWrapperImpl(rod);
 		bw.setPropertyValues(pvs, true);
-
 		assertTrue("Set valid and ignored invalid", rod.getName().equals("rod"));
-
 		try {
 			// Don't ignore: should fail
 			bw.setPropertyValues(pvs, false);
@@ -857,7 +882,9 @@ public class BeanWrapperTestSuite extends TestCase {
 
 		private String name;
 
-		private String[] sa;
+		private String[] stringArray;
+
+		private int[] intArray;
 
 		public void setProperties(Properties p) {
 			props = p;
@@ -868,7 +895,11 @@ public class BeanWrapperTestSuite extends TestCase {
 		}
 
 		public void setStringArray(String[] sa) {
-			this.sa = sa;
+			this.stringArray = sa;
+		}
+
+		public void setIntArray(int[] intArray) {
+			this.intArray = intArray;
 		}
 	}
 
