@@ -32,26 +32,26 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-public class PopulateFormAction extends BindAndValidateAction {
+public class FormSetupAction extends BindAndValidateAction {
 
-	private static final String NOT_MAPPED_MARKER_VALUE = "!NOT MAPPED!";
+	private static final String NOT_MAPPED_PLACEHOLDER_VALUE = "!NOT MAPPED!";
 
-	private static final String NOT_MAPPED_COLLECTION_MARKER_PARAMETER_NAME = "_notMappedItems";
+	private static final String NOT_MAPPED_COLLECTION_PLACEHOLDER_PARAMETER_NAME = "_notMappedItems";
 
-	private static final String NOT_MAPPED_MARKER_PARAMETER_NAME = "_notMapped";
+	private static final String NOT_MAPPED_PLACEHOLDER_PARAMETER_NAME = "_notMapped";
 
-	private boolean prepopulateFromRequestParameters;
+	private boolean prepopulateFromRequest;
 
-	public void setPrepopulateFromRequest(boolean prepopulate) {
-		this.prepopulateFromRequestParameters = prepopulate;
+	public void setPrepopulateFromRequest(boolean prepopulateFromRequest) {
+		this.prepopulateFromRequest = prepopulateFromRequest;
 	}
 
-	protected static class PopulateFormReferenceDataException extends RuntimeException {
-		public PopulateFormReferenceDataException(String message, Throwable cause) {
+	protected static class ReferenceDataSetupException extends RuntimeException {
+		public ReferenceDataSetupException(String message, Throwable cause) {
 			super(message, cause);
 		}
 
-		public PopulateFormReferenceDataException(Exception cause) {
+		public ReferenceDataSetupException(Exception cause) {
 			super(cause);
 		}
 
@@ -61,11 +61,11 @@ public class PopulateFormAction extends BindAndValidateAction {
 			}
 			else {
 				if (getCause() instanceof ServletRequestBindingException) {
-					return "Unable to populate form reference data due to request parameter binding error - programmer error "
+					return "Unable to set form reference data due to request parameter binding error - programmer error "
 							+ "likely in submitting view code or request access code; see cause for more details.";
 				}
 				else {
-					return "Unable to populate form reference data";
+					return "Unable to set supporting reference data during form setup";
 				}
 			}
 		}
@@ -75,32 +75,32 @@ public class PopulateFormAction extends BindAndValidateAction {
 			MutableAttributesAccessor model) {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
-		if (prepopulateFromRequestParameters) {
+		if (prepopulateFromRequest) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Prepopulating backing form object from request parameters");
 			}
 			binder.bind(request);
 		}
 		exportErrors(binder.getErrors(), model);
-		exportViewMarkers(request, model);
+		exportViewPlaceholders(request, model);
 		try {
-			populateFormReferenceData(request, model);
+			setReferenceData(request, model);
 		}
 		catch (ServletRequestBindingException e) {
-			throw new PopulateFormReferenceDataException(e);
+			throw new ReferenceDataSetupException(e);
 		}
 		return binder.getErrors().hasErrors() ? error() : success();
 	}
 
-	protected void exportViewMarkers(HttpServletRequest request, MutableAttributesAccessor model) {
+	protected void exportViewPlaceholders(HttpServletRequest request, MutableAttributesAccessor model) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exporting view markers/placeholders to notify business-tier developers of "
 					+ "form fields that are missing, not mapped to backing objects, or need clarification");
 			// placeholders indicating attributes on forms that have not been
 			// mapped to dynamic fields on backing objects - for use during
 			// development only
-			model.setAttribute(NOT_MAPPED_MARKER_PARAMETER_NAME, NOT_MAPPED_MARKER_VALUE);
-			model.setAttribute(NOT_MAPPED_COLLECTION_MARKER_PARAMETER_NAME, createNotMappedEnumSet());
+			model.setAttribute(NOT_MAPPED_PLACEHOLDER_PARAMETER_NAME, NOT_MAPPED_PLACEHOLDER_VALUE);
+			model.setAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_PARAMETER_NAME, createNotMappedEnumSet());
 		}
 	}
 
@@ -114,18 +114,18 @@ public class PopulateFormAction extends BindAndValidateAction {
 
 	private static final class NotMappedEnum extends ShortCodedEnum {
 		public NotMappedEnum(int code) {
-			super(code, NOT_MAPPED_MARKER_VALUE);
+			super(code, NOT_MAPPED_PLACEHOLDER_VALUE);
 		}
 	}
 
 	/**
-	 * Template method to be implemented by subclasses
+	 * Template method to be implemented by subclasses to set any reference data
+	 * needed to support this form.
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 */
-	protected void populateFormReferenceData(HttpServletRequest request, MutableAttributesAccessor model)
-			throws PopulateFormReferenceDataException, ServletRequestBindingException {
+	protected void setReferenceData(HttpServletRequest request, MutableAttributesAccessor model)
+			throws ReferenceDataSetupException, ServletRequestBindingException {
 
 	}
-
 }
