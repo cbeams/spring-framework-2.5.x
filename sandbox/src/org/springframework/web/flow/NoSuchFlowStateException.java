@@ -20,6 +20,7 @@ import org.springframework.util.Styler;
 /**
  * Thrown when a state could not be found in a flow on lookup by
  * <code>stateId</code>.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -29,8 +30,8 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 
 	/**
 	 * Create a new flow state navigation exception.
-	 * @param flow The containing flow
-	 * @param stateId The state id that cannot be found
+	 * @param flow the containing flow
+	 * @param stateId the state id that cannot be found
 	 */
 	public NoSuchFlowStateException(Flow flow, String stateId) {
 		super(flow);
@@ -39,9 +40,9 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 
 	/**
 	 * Create a new flow state navigation exception.
-	 * @param flow The containing flow
-	 * @param stateId The state id that cannot be found
-	 * @param cause The underlying cause of this exception
+	 * @param flow the containing flow
+	 * @param stateId the state id that cannot be found
+	 * @param cause the underlying cause of this exception
 	 */
 	public NoSuchFlowStateException(Flow flow, String stateId, Throwable cause) {
 		super(flow, cause);

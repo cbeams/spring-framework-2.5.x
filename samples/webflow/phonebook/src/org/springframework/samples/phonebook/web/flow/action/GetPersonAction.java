@@ -18,7 +18,7 @@ package org.springframework.samples.phonebook.web.flow.action;
 import org.springframework.samples.phonebook.domain.Person;
 import org.springframework.samples.phonebook.domain.PhoneBook;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.action.AbstractAction;
 
 public class GetPersonAction extends AbstractAction {
@@ -29,7 +29,7 @@ public class GetPersonAction extends AbstractAction {
 		this.phoneBook = phoneBook;
 	}
 
-	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+	protected Event doExecuteAction(RequestContext context) throws Exception {
 		Long id = (Long)context.getFlowScope().getRequiredAttribute("id", Long.class);
 		Person person = phoneBook.getPerson(id);
 		if (person != null) {

@@ -32,7 +32,7 @@ import org.springframework.web.flow.config.XmlFlowBuilder;
 import org.springframework.web.flow.config.XmlFlowBuilderTests;
 
 /**
- * Test case for FlowExecutionStack
+ * Test case for FlowExecutionStack.
  * 
  * @see org.springframework.web.flow.FlowExecutionStack
  * 
@@ -90,8 +90,9 @@ public class FlowExecutionStackTests extends TestCase {
 
 		assertEquals(flowExecution.isActive(), restoredFlowExecution.isActive());
 		if (flowExecution.isActive()) {
-			assertTrue(entriesCollectionsAreEqual(flowExecution.getActiveFlowSession().flowScope().attributeEntries(),
-					restoredFlowExecution.getActiveFlowSession().flowScope().attributeEntries()));
+			assertTrue(entriesCollectionsAreEqual(
+					flowExecution.getActiveFlowSession().getFlowScope().getAttributeMap().entrySet(),
+					restoredFlowExecution.getActiveFlowSession().getFlowScope().getAttributeMap().entrySet()));
 			assertEquals(flowExecution.getCurrentStateId(), restoredFlowExecution.getCurrentStateId());
 			assertEquals(flowExecution.getActiveFlowId(), restoredFlowExecution.getActiveFlowId());
 			assertSame(flowExecution.getRootFlow(), restoredFlowExecution.getRootFlow());
@@ -107,7 +108,7 @@ public class FlowExecutionStackTests extends TestCase {
 		Map inputData = new HashMap(1);
 		inputData.put("name", "value");
 		// start the flow execution
-		flowExecution.start(new LocalEvent(this, "start", inputData));
+		flowExecution.start(new InternalEvent(this, "start", inputData));
 		runFlowExecutionRehydrationTest();
 	}
 

@@ -28,14 +28,17 @@ import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.FlowExecutionContext;
-import org.springframework.web.flow.LocalEvent;
+import org.springframework.web.flow.FlowConstants;
+import org.springframework.web.flow.NoSuchFlowDefinitionException;
+import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.InternalEvent;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
 
 /**
  * Test java based flow builder logic.
+ * 
  * @author Keith Donald
  * @author Rod Johnson
  * @author Colin Sampaleanu
@@ -60,16 +63,16 @@ public class AbstractFlowBuilderTests extends TestCase {
 					return new FlowFactoryBean(builder).getFlow();
 				}
 				else {
-					throw new UnsupportedOperationException();
+					throw new NoSuchFlowDefinitionException(flowDefinitionId);
 				}
 			}
 
 			public FlowAttributeMapper getFlowAttributeMapper(String id) throws ServiceLookupException {
-				if (id.equals("personId.modelMapper")) {
+				if (id.equals("personId.attributeMapper")) {
 					return new PersonIdMapper();
 				}
 				else {
-					throw new UnsupportedOperationException();
+					throw new NoSuchFlowAttributeMapperException(id);
 				}
 			}
 		});
@@ -213,11 +216,11 @@ public class AbstractFlowBuilderTests extends TestCase {
 	};
 
 	/**
-	 * Action bean stub that does nothing, just returns a "success" result
+	 * Action bean stub that does nothing, just returns a "success" result.
 	 */
 	public static final class NoOpAction implements Action {
-		public Event execute(FlowExecutionContext context) throws Exception {
-			return new LocalEvent(this, "success");
+		public Event execute(RequestContext context) throws Exception {
+			return new InternalEvent(this, FlowConstants.SUCCESS);
 		}
 	}
 }

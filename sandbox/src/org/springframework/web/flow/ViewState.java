@@ -29,8 +29,9 @@ import org.springframework.util.ToStringCreator;
  * name to a physical resource template (like a jsp file.)
  * <p>
  * A view state can also be a <i>marker</i> state with no associated view. In
- * this case it just returns control back to the HTTP client. Marker states are
+ * this case it just returns control back to the client. Marker states are
  * useful for situations where an action has already generated the response.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -43,10 +44,10 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new marker view state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ViewState(Flow flow, String id, Transition transition) throws IllegalArgumentException {
@@ -55,10 +56,10 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new marker view state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ViewState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
@@ -67,11 +68,11 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new view state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param viewName The logical name of the view to render
-	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the logical name of the view to render
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ViewState(Flow flow, String id, String viewName, Transition transition) throws IllegalArgumentException {
@@ -81,11 +82,11 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new view state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param viewName The logical name of the view to render
-	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the logical name of the view to render
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) throws IllegalArgumentException {
@@ -116,16 +117,15 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Specialization of State's <code>doEnterState</code> template
-	 * method that executes behaivior specific to this state type in polymorphic
+	 * method that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
-	 * Returns a view descriptor pointing requesting front controllers to a
-	 * logical view resource to be displayed. The descriptor also contains a
-	 * model map needed when the view is rendered, for populating dynamic
-	 * content.
-	 * @param context The state execution context
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the event execution.
+	 * Returns a view descriptor pointing callers to a logical view resource to
+	 * be displayed. The descriptor also contains a model map needed when the
+	 * view is rendered, for populating dynamic content.
+	 * @param context the state execution context
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the state execution
 	 */
 	protected ViewDescriptor doEnterState(StateContext context) {
 		if (isMarker()) {

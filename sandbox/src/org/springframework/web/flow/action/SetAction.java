@@ -19,7 +19,7 @@ import org.springframework.binding.AttributeMapper;
 import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 
 /**
  * Maps parameters in an event to attributes <i>set</i> into flow scope.
@@ -75,7 +75,7 @@ public class SetAction extends AbstractAction {
 		this.eventParameterMapper = mapper;
 	}
 
-	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+	protected Event doExecuteAction(RequestContext context) throws Exception {
 		if (eventParameterMapper != null) {
 			this.eventParameterMapper.map(context.getLastEvent(), context.getFlowScope());
 		}

@@ -49,7 +49,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	private FlowExecution flowExecution;
 
 	/**
-	 * The flow service locator; providing access to lookup and retrieve
+	 * The flow service locator; providing means to lookup and retrieve
 	 * configured flows. Used to resolve the Flow to be tested by
 	 * <code>id</code>.
 	 */
@@ -75,7 +75,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * Get the singleton flow definition whose execution is being tested.
 	 * @return the singleton flow definition
 	 * @throws NoSuchFlowDefinitionExeception if the flow identified by flowId()
-	 *         could not be resolved (if this.flow was null)
+	 *         could not be resolved (if <code>this.flow</code> was null)
 	 */
 	protected Flow getFlow() throws NoSuchFlowDefinitionException {
 		if (this.flow == null) {
@@ -96,7 +96,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * Subclasses should override to return the <code>flowId</code> whose
 	 * execution should be tested.
-	 * @return The flow id, whose execution is to be tested.
+	 * @return the flow id, whose execution is to be tested.
 	 */
 	protected abstract String flowId();
 
@@ -112,7 +112,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * Set the flow definition to be tested to the Flow built by the specified
 	 * builder.
-	 * @param flowBuilder The flow builder.
+	 * @param flowBuilder the flow builder
 	 */
 	protected void setFlowBuilder(FlowBuilder flowBuilder) {
 		setFlow(new FlowFactoryBean(flowBuilder).getFlow());
@@ -120,20 +120,17 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 
 	/**
 	 * Start a new flow execution for the flow definition that is being tested.
-	 * Uses a mock http request and response object.
 	 * @param input any input attribtes to pass to the flow execution
 	 * @return the model and view returned as a result of starting the flow
 	 *         (returned when the first view state is entered)
 	 */
 	protected ViewDescriptor startFlow(Map input) {
-		return startFlow(new LocalEvent(this, "start", input));
+		return startFlow(new InternalEvent(this, "start", input));
 	}
 
 	/**
 	 * Start a new flow execution for the flow definition that is being tested.
-	 * @param request the http request, typically a mock http request
-	 * @param response the http response, typically a mock http response
-	 * @param input any input attribtes to pass to the flow execution
+	 * @param event the starting event
 	 * @return the model and view returned as a result of starting the flow
 	 *         (returned when the first view state is entered)
 	 */
@@ -173,7 +170,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * action executes its core logic and responds to any exceptions it must
 	 * handle. When you do this, you may mock or stub out services the Action
 	 * implementation needs that are expensive to initialize. You can also
-	 * verify there that the action puts everything in the model or the request
+	 * verify there that the action puts everything in the flow or request scope
 	 * it was supposed to (to meet its contract with the view it is prepping for
 	 * display, if it's a view setup action).
 	 * <p>
@@ -186,9 +183,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * {@link org.springframework.web.flow.support.FlowExecutionListenerAdapter}
 	 * and only override what you need.
 	 * 
-	 * @param eventId The event to signal
-	 * @param request The request
-	 * @param response The response
+	 * @param event the event to signal
 	 * @return the model and view, returned once control is returned to the
 	 *         client (occurs when the flow enters a view state, or an end
 	 *         state)
@@ -202,7 +197,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @return the flow execution
 	 * @throws IllegalStateException the execution has not been started
 	 */
-	protected FlowExecution getFlowExecution() {
+	protected FlowExecution getFlowExecution() throws IllegalStateException {
 		if (flowExecution == null) {
 			throw new IllegalStateException("The flow execution has not been started; call startFlow first");
 		}
@@ -211,7 +206,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 
 	/**
 	 * Assert that the active flow session is for the flow with the provided id.
-	 * @param expectedActiveFlowId The flow id that should have a session active
+	 * @param expectedActiveFlowId the flow id that should have a session active
 	 *        in the tested flow execution.
 	 */
 	protected void assertActiveFlowEquals(String expectedActiveFlowId) {
@@ -222,7 +217,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * Assert that the current state of the flow execution equals the provided
 	 * state id.
-	 * @param expectedCurrentStateId The expected current state.
+	 * @param expectedCurrentStateId the expected current state.
 	 */
 	protected void assertCurrentStateEquals(String expectedCurrentStateId) {
 		assertEquals("The current state '" + getCurrentStateId() + "' does not equal the expected state '"
@@ -232,7 +227,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * Assert that the last supported event that occured in the flow execution
 	 * equals the provided event.
-	 * @param expectedLastEventId the expected event.
+	 * @param expectedEventId the expected event.
 	 */
 	protected void assertEventEquals(String expectedEventId) {
 		assertEquals("The last event '" + getEventId() + "' does not equal the expected event '" + expectedEventId
@@ -242,7 +237,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * Returns the active flow in the flow execution being tested; specifically,
 	 * a flow is active if it has a session active in the flow execution.
-	 * @return The active flow id.
+	 * @return the active flow id.
 	 */
 	protected String getActiveFlowId() {
 		return flowExecution.getActiveFlowId();

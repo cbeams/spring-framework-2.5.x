@@ -21,6 +21,9 @@ package org.springframework.web.flow;
  * <p>
  * An 'observer' that is very aspect like, allowing you to insert 'cross
  * cutting' behavior at well-defined points within a flow execution lifecycle.
+ * 
+ * @see org.springframework.web.flow.FlowExecution
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -28,58 +31,58 @@ public interface FlowExecutionListener {
 
 	/**
 	 * Called when a new flow execution was started.
-	 * @param context Source of the event
+	 * @param context source of the event
 	 */
-	public void started(FlowExecutionContext context);
+	public void started(RequestContext context);
 
 	/**
-	 * Called when a new client HTTP request is submitted to manipulate this
+	 * Called when a new client request is submitted to manipulate this
 	 * flow execution.
 	 * @param context the source of the event
-	 * @param request The request that was submitted
+	 * @param triggeringEvent the event encapsulating the client request
 	 */
-	public void requestSubmitted(FlowExecutionContext context, Event triggeringEvent);
+	public void requestSubmitted(RequestContext context, Event triggeringEvent);
 
 	/**
-	 * Called when a new client HTTP request is processed.
+	 * Called when a client request has completed processing.
 	 * @param context the source of the event
-	 * @param request The request that was processed
+	 * @param triggeringEvent the event encapsulating the client request
 	 */
-	public void requestProcessed(FlowExecutionContext context, Event triggeringEvent);
+	public void requestProcessed(RequestContext context, Event triggeringEvent);
 
 	/**
 	 * Called when an event is signaled in a state, but prior to a state
 	 * transition.
 	 * @param context the source of the event
-	 * @param event The event that was signaled
+	 * @param event the event that was signaled
 	 */
-	public void eventSignaled(FlowExecutionContext context, Event event);
+	public void eventSignaled(RequestContext context, Event event);
 
 	/**
 	 * Called when a state transitions, after the transition occurs.
 	 * @param context the source of the event
-	 * @param previousState <i>From </i> state of the transition
-	 * @param newState <i>To </i> state of the transition
+	 * @param previousState <i>from</i> state of the transition
+	 * @param newState <i>to</i> state of the transition
 	 */
-	public void stateTransitioned(FlowExecutionContext context, State previousState, State newState);
+	public void stateTransitioned(RequestContext context, State previousState, State newState);
 
 	/**
 	 * Called when a sub flow is spawned.
 	 * @param context the source of the event
 	 */
-	public void subFlowSpawned(FlowExecutionContext context);
+	public void subFlowSpawned(RequestContext context);
 
 	/**
-	 * Called when a sub flow is ended.
+	 * Called when a sub flow has ended.
 	 * @param context the source of the event
-	 * @param endedSession Ending sub flow session
+	 * @param endedSession ending sub flow session
 	 */
-	public void subFlowEnded(FlowExecutionContext context, FlowSession endedSession);
+	public void subFlowEnded(RequestContext context, FlowSession endedSession);
 
 	/**
 	 * Called when the flow execution terminates.
 	 * @param context the source of the event
-	 * @param endedRootFlowSession Ending root flow session
+	 * @param endedRootFlowSession ending root flow session
 	 */
-	public void ended(FlowExecutionContext context, FlowSession endedRootFlowSession);
+	public void ended(RequestContext context, FlowSession endedRootFlowSession);
 }

@@ -16,18 +16,27 @@
 package org.springframework.web.flow;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-import org.springframework.binding.support.AttributeSetterSupport;
+import org.springframework.binding.AttributeSetter;
+import org.springframework.util.Assert;
+import org.springframework.util.Styler;
 
 /**
  * Holder for data placed in a specific scope, for example "request scope" or
  * "flow scope".
+ * 
+ * @see org.springframework.web.flow.ScopeType
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
-public class Scope extends AttributeSetterSupport implements Serializable {
+public class Scope implements AttributeSetter, Map, Serializable {
 
 	/**
 	 * The scope type; e.g FLOW or REQUEST. 
@@ -35,22 +44,20 @@ public class Scope extends AttributeSetterSupport implements Serializable {
 	private ScopeType scopeType;
 
 	/**
-	 * Create a scope attribute container for the specified scope type
-	 * @param scopeType the scope type.
-	 */
-	public Scope(ScopeType scopeType) {
-		this.scopeType = scopeType;
-	}
-
-	/**
 	 * The data holder map.
 	 */
 	private Map attributes = new HashMap();
 
-	protected String getMapName() {
-		return scopeType.getLabel() + " scope";
+	/**
+	 * Create a scope attribute container for the specified scope type.
+	 * @param scopeType the scope type
+	 */
+	public Scope(ScopeType scopeType) {
+		this.scopeType = scopeType;
 	}
 	
+	// implementing AttributeAccessor
+
 	public boolean containsAttribute(String attributeName) {
 		return this.attributes.containsKey(attributeName);
 	}
@@ -59,36 +66,140 @@ public class Scope extends AttributeSetterSupport implements Serializable {
 		return this.attributes.get(attributeName);
 	}
 
+	/**
+	 * Get an attribute value and make sure it is of the required type.
+	 * @param attributeName name of the attribute to get
+	 * @param requiredType the required type of the attribute value
+	 * @return the attribute value, or null if not found
+	 * @throws IllegalStateException when the value is not of the required
+	 *         type
+	 */
+	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException {
+		Object value = getAttribute(attributeName);
+		if (requiredType != null && value != null) {
+			Assert.isInstanceOf(requiredType, value);
+		}
+		return value;
+	}
+
+	/**
+	 * Get the value of a required attribute.
+	 * @param attributeName name of the attribute to get
+	 * @return the attribute value
+	 * @throws IllegalStateException when the attribute is not found
+	 */
+	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
+		Object value = getAttribute(attributeName);
+		if (value == null) {
+			throw new IllegalStateException("Required attribute '" + attributeName
+					+ "' is not present in " + this + "; attributes present are = " + Styler.call(getAttributeMap()));
+		}
+		return value;
+	}
+	
+	/**
+	 * Get the value of a required attribute and make sure it is of
+	 * the required type.
+	 * @param attributeName name of the attribute to get
+	 * @param requiredType the required type of the attribute value
+	 * @return the attribute value
+	 * @throws IllegalStateException when the attribute is not found or
+	 *         not of the required type
+	 */
+	public Object getRequiredAttribute(String attributeName, Class requiredType) throws IllegalStateException {
+		Object value = getRequiredAttribute(attributeName);
+		if (requiredType != null) {
+			Assert.isInstanceOf(requiredType, value);
+		}
+		return value;
+	}
+	
+	/**
+	 * Returns the contents of this scope as a map.
+	 */
 	public Map getAttributeMap() {
 		return Collections.unmodifiableMap(this.attributes);
 	}
+	
+	// implementing AttributeSetter
 
 	public Object setAttribute(String attributeName, Object attributeValue) {
 		return this.attributes.put(attributeName, attributeValue);
 	}
 
+	/**
+	 * Set all given attributes in this scope.
+	 */
+	public void setAttributes(Map attributes) {
+		Iterator it = attributes.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry)it.next();
+			Assert.isInstanceOf(String.class, entry.getKey());
+			setAttribute((String)entry.getKey(), entry.getValue());
+		}
+	}
+	
+	/**
+	 * Remove an attribute from this scope.
+	 * @param attributeName the name of the attribute to remove
+     * @return previous value associated with specified attribute name,
+     *         or <tt>null</tt> if there was no mapping for the name
+	 */
 	public Object removeAttribute(String attributeName) {
 		return this.attributes.remove(attributeName);
 	}
 
-	// map operations
+	// implementing Map
+	
 	public int size() {
 		return this.attributes.size();
-	}
-
-	public void clear() {
-		this.attributes.clear();
-	}
-
-	public boolean containsValue(Object value) {
-		return this.attributes.containsValue(value);
 	}
 
 	public boolean isEmpty() {
 		return this.attributes.isEmpty();
 	}
+	
+	public boolean containsKey(Object key) {
+		return this.attributes.containsKey(key);
+	}
+
+	public boolean containsValue(Object value) {
+		return this.attributes.containsValue(value);
+	}
+	
+	public Object get(Object key) {
+		return this.attributes.get(key);
+	}
+	
+	public Object put(Object key, Object value) {
+		return this.attributes.put(key, value);
+	}
 
 	public Object remove(Object key) {
 		return removeAttribute(String.valueOf(key));
+	}
+	
+	public void putAll(Map t) {
+		this.attributes.putAll(t);
+	}
+
+	public void clear() {
+		this.attributes.clear();
+	}
+	
+	public Set keySet() {
+		return this.attributes.keySet();
+	}
+	
+	public Collection values() {
+		return this.attributes.values();
+	}
+	
+	public Set entrySet() {
+		return this.attributes.entrySet();
+	}
+
+	public String toString() {
+		return scopeType.getLabel() + " scope";
 	}
 }

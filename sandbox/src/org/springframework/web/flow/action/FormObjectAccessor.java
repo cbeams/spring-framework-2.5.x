@@ -17,7 +17,7 @@ package org.springframework.web.flow.action;
 
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ScopeType;
 
 /**
@@ -39,13 +39,13 @@ public class FormObjectAccessor {
 	 */
 	public static final String FORM_OBJECT_ERRORS_ATTRIBUTE_NAME = "formObjectErrors";
 
-	private FlowExecutionContext context;
+	private RequestContext context;
 
 	/**
 	 * Creates a form object accessor that wraps the given context.
 	 * @param context the flow execution context.
 	 */
-	public FormObjectAccessor(FlowExecutionContext context) {
+	public FormObjectAccessor(RequestContext context) {
 		this.context = context;
 	}
 

@@ -29,11 +29,15 @@ import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.FlowExecutionContext;
-import org.springframework.web.flow.LocalEvent;
+import org.springframework.web.flow.FlowExecutionStack;
+import org.springframework.web.flow.InternalRequestContext;
+import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.InternalEvent;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.SubFlowState;
+import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
 
 /**
@@ -46,11 +50,18 @@ import org.springframework.web.flow.ViewState;
 public class XmlFlowBuilderTests extends TestCase {
 
 	private Flow flow;
+	private StateContext context;
 
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
 		builder.setFlowServiceLocator(new TestFlowServiceLocator());
 		flow = new FlowFactoryBean(builder).getFlow();
+		
+		context=new InternalRequestContext(createEvent("test"), (FlowExecutionStack)flow.createExecution());
+	}
+	
+	private Event createEvent(String id) {
+		return new InternalEvent(this, id);
 	}
 
 	public void testBuildResult() {
@@ -65,30 +76,34 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(null, actionState1.getActionName(actionState1.getActions()[0]));
 		assertEquals("action2Name", actionState1.getActionName(actionState1.getActions()[1]));
 		assertEquals(2, actionState1.getTransitions().length);
-		// assertNotNull(actionState1.getTransition("event1"));
-		// assertEquals("viewState1",
-		// actionState1.getTransition("event1").getTargetStateId());
-		// assertNotNull(actionState1.getTransition("action2Name.event2"));
-		// assertEquals("viewState2",
-		// actionState1.getTransition("action2Name.event2").getTargetStateId());
+		context.setLastEvent(createEvent("event1"));
+		assertTrue(actionState1.hasTransitionFor(context));
+		Transition transition = actionState1.getTransition(context);
+		assertEquals("viewState1", transition.getTargetStateId());
+		context.setLastEvent(createEvent("action2Name.event2"));
+		assertTrue(actionState1.hasTransitionFor(context));
+		transition = actionState1.getTransition(context);
+		assertEquals("viewState2", transition.getTargetStateId());
 
 		ViewState viewState1 = (ViewState)flow.getState("viewState1");
 		assertNotNull(viewState1);
 		assertFalse(viewState1.isMarker());
 		assertEquals("view1", viewState1.getViewName());
 		assertEquals(1, viewState1.getTransitions().length);
-		// assertNotNull(viewState1.getTransition("event1"));
-		// assertEquals("subFlowState1",
-		// viewState1.getTransition("event1").getTargetStateId());
+		context.setLastEvent(createEvent("event1"));
+		assertTrue(viewState1.hasTransitionFor(context));
+		transition = viewState1.getTransition(context);
+		assertEquals("subFlowState1", transition.getTargetStateId());
 
 		ViewState viewState2 = (ViewState)flow.getState("viewState2");
 		assertNotNull(viewState2);
 		assertTrue(viewState2.isMarker());
 		assertNull(viewState2.getViewName());
 		assertEquals(1, viewState2.getTransitions().length);
-		// assertNotNull(viewState2.getTransition("event2"));
-		// assertEquals("subFlowState2",
-		// viewState2.getTransition("event2").getTargetStateId());
+		context.setLastEvent(createEvent("event2"));
+		assertTrue(viewState2.hasTransitionFor(context));
+		transition = viewState2.getTransition(context);
+		assertEquals("subFlowState2", transition.getTargetStateId());
 
 		SubFlowState subFlowState1 = (SubFlowState)flow.getState("subFlowState1");
 		assertNotNull(subFlowState1);
@@ -96,9 +111,10 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals("subFlow1", subFlowState1.getSubFlow().getId());
 		assertNotNull(subFlowState1.getFlowAttributeMapper());
 		assertEquals(1, subFlowState1.getTransitions().length);
-		// assertNotNull(subFlowState1.getTransition("event1"));
-		// assertEquals("endState1",
-		// subFlowState1.getTransition("event1").getTargetStateId());
+		context.setLastEvent(createEvent("event1"));
+		assertTrue(subFlowState1.hasTransitionFor(context));
+		transition = subFlowState1.getTransition(context);
+		assertEquals("endState1", transition.getTargetStateId());
 
 		SubFlowState subFlowState2 = (SubFlowState)flow.getState("subFlowState2");
 		assertNotNull(subFlowState2);
@@ -106,9 +122,10 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals("subFlow2", subFlowState2.getSubFlow().getId());
 		assertNull(subFlowState2.getFlowAttributeMapper());
 		assertEquals(1, subFlowState2.getTransitions().length);
-		// assertNotNull(subFlowState2.getTransition("event2"));
-		// assertEquals("endState2",
-		// subFlowState2.getTransition("event2").getTargetStateId());
+		context.setLastEvent(createEvent("event2"));
+		assertTrue(subFlowState2.hasTransitionFor(context));
+		transition = subFlowState2.getTransition(context);
+		assertEquals("endState2", transition.getTargetStateId());
 
 		EndState endState1 = (EndState)flow.getState("endState1");
 		assertNotNull(endState1);
@@ -139,8 +156,8 @@ public class XmlFlowBuilderTests extends TestCase {
 		public Action getAction(String actionId) throws ServiceLookupException {
 			if ("action1".equals(actionId) || "action2".equals(actionId)) {
 				return new Action() {
-					public Event execute(FlowExecutionContext context) throws Exception {
-						return new LocalEvent(this, "event1");
+					public Event execute(RequestContext context) throws Exception {
+						return new InternalEvent(this, "event1");
 					}
 				};
 			}
@@ -171,8 +188,8 @@ public class XmlFlowBuilderTests extends TestCase {
 	};
 
 	public static class TestAction implements Action {
-		public Event execute(FlowExecutionContext context) throws Exception {
-			return new LocalEvent(this, "success");
+		public Event execute(RequestContext context) throws Exception {
+			return new InternalEvent(this, "success");
 		}
 	}
 }

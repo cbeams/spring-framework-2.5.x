@@ -24,7 +24,7 @@ import org.apache.struts.action.ActionMapping;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
@@ -146,7 +146,7 @@ public class FlowAction extends TemplateAction {
 	 */
 	protected FlowExecutionListener createActionFormAdapter(final HttpServletRequest request, final ActionForm form) {
 		return new FlowExecutionListenerAdapter() {
-			public void requestProcessed(FlowExecutionContext context, Event triggeringEvent) {
+			public void requestProcessed(RequestContext context, Event triggeringEvent) {
 				if (context.isFlowExecutionActive()) {
 					if (form instanceof BindingActionForm) {
 						BindingActionForm bindingForm = (BindingActionForm)form;

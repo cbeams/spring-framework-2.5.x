@@ -21,7 +21,8 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
- * Simple helper adapter for flow service locator interface.  For testing.
+ * Simple helper adapter for the flow service locator interface. For testing.
+ * 
  * @author Keith Donald
  */
 public class FlowServiceLocatorAdapter implements FlowServiceLocator {

@@ -22,7 +22,7 @@ import org.springframework.binding.AttributeAccessor;
 import org.springframework.util.ToStringCreator;
 
 /**
- * Signals the occurence of a <i>request</i> that is relevant to the web flow
+ * Signals the occurence of an <i>event</i> that is relevant to the web flow
  * system. Each event has a string id. An event may optionally contain
  * information about the state in which it occured. Events may have parameters.
  * Events are immutable.
@@ -42,16 +42,17 @@ import org.springframework.util.ToStringCreator;
 public abstract class Event extends EventObject implements AttributeAccessor {
 
 	/**
-	 * Constructs a new event with the specified source
-	 * @param source the source
+	 * Constructs a new event with the specified source.
+	 * @param source the source of the event
 	 */
-	public Event(Object source) {
+	protected Event(Object source) {
 		super(source);
 	}
 
 	/**
-	 * Returns the event identifier.
-	 * @return The event id
+	 * Returns the event identifier, or <code>null</code> if not
+	 * available (e.g. for an event starting a flow).
+	 * @return the event id
 	 */
 	public abstract String getId();
 
@@ -68,20 +69,20 @@ public abstract class Event extends EventObject implements AttributeAccessor {
 	public abstract String getStateId();
 
 	/**
+	 * Returns a parameter value given a parameter name, or <code>null</code>
+	 * if the parameter was not found.
+	 * @param parameterName the name of the parameter
+	 * @return the parameter value, or <code>null</code> if the parameter is
+	 *         not present in the event
+	 */
+	public abstract Object getParameter(String parameterName);
+
+	/**
 	 * Returns an unmodifiable parameter map storing parameters associated with
 	 * this event.
 	 * @return the parameters of the event
 	 */
 	public abstract Map getParameters();
-
-	/**
-	 * Returns a parameter value given a parameter name, or <code>null</code>
-	 * if no parameter was found.
-	 * @param parameterName the name of the parameter
-	 * @return the parameter value, or <code>null</code> if the parameter is
-	 *         not present in the request
-	 */
-	public abstract Object getParameter(String parameterName);
 
 	// implementing AttributeAccessor
 

@@ -20,6 +20,7 @@ package org.springframework.web.flow;
  * navigation exception signals a problem while navigating inside
  * a web flow, e.g. when the target state of a transition cannot
  * be found.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -32,7 +33,7 @@ public abstract class FlowNavigationException extends RuntimeException {
 
 	/**
 	 * Create a new navigation exception.
-	 * @param flow The flow in which the navigation exception occured
+	 * @param flow the flow in which the navigation exception occured
 	 */
 	public FlowNavigationException(Flow flow) {
 		super();
@@ -41,8 +42,8 @@ public abstract class FlowNavigationException extends RuntimeException {
 
 	/**
 	 * Create a new navigation exception.
-	 * @param flow The flow in which the navigation exception occured
-	 * @param message A descriptive message
+	 * @param flow the flow in which the navigation exception occured
+	 * @param message a descriptive message
 	 */
 	public FlowNavigationException(Flow flow, String message) {
 		super(message);
@@ -51,9 +52,9 @@ public abstract class FlowNavigationException extends RuntimeException {
 
 	/**
 	 * Create a new navigation exception.
-	 * @param flow The flow in which the navigation exception occured
-	 * @param message A descriptive message
-	 * @param cause The underlying cause of the exception
+	 * @param flow the flow in which the navigation exception occured
+	 * @param message a descriptive message
+	 * @param cause the underlying cause of the exception
 	 */
 	public FlowNavigationException(Flow flow, String message, Throwable cause) {
 		super(message, cause);
@@ -62,8 +63,8 @@ public abstract class FlowNavigationException extends RuntimeException {
 
 	/**
 	 * Create a new navigation exception.
-	 * @param flow The flow in which the navigation exception occured
-	 * @param cause The underlying cause of the exception
+	 * @param flow the flow in which the navigation exception occured
+	 * @param cause the underlying cause of the exception
 	 */
 	public FlowNavigationException(Flow flow, Throwable cause) {
 		super(cause);

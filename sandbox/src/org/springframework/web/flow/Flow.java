@@ -35,7 +35,7 @@ import org.springframework.util.ToStringCreator;
  * the definition (configuration information) of a logical page flow within a
  * web application. A logical page flow typically fulfills a business process
  * with a clear lifecycle that takes place over a series of steps (modeled as
- * states.)
+ * states).
  * <p>
  * Note: A flow is not a welcome page, a menu, or an index page, or even a
  * simple form page: don't use flows for those cases, use simple
@@ -51,26 +51,24 @@ import org.springframework.util.ToStringCreator;
  * action, spawning a sub flow, or terminating the flow.
  * <p>
  * Each state has one or more transitions that are used to move to another
- * state. A transition is triggered by the occurence of a supported event within
- * a execution context. An event is a string identifier signalling the occurence
- * of something: e.g "submit", "back", "success", "error".
+ * state. A transition is typically triggered by the occurence of a supported event
+ * within an execution context. An event is a identifier signalling the
+ * occurence of something: e.g "submit", "back", "success", "error".
  * <p>
  * Each Flow has exactly one start state. A start state is simply a marker for
  * the state FlowExecutions (client instances of this flow) should start in.
  * <p>
  * Instances of this class are typically built by a FlowBuilder implementation,
- * but may also be subclassed. This class, and the rest of the web.flow system,
+ * but may also be subclassed. This class, and the rest of the web flow system,
  * has been purposefully designed with minimal dependencies on other parts of
  * Spring, and are easily usable in a standalone fashion (as well as in the
- * context of other frameworks like Struts, WebWork, Tapestry, JSF, or Beehive,
+ * context of other frameworks like Struts, WebWork, Tapestry, JSF or Beehive,
  * for example).
  * <p>
  * A flow object also acts as a factory for <code>FlowExecution</code>s
  * executing the flow as the top-level flow. See the {@link #createExecution()}
  * method for more information.
- * @author Keith Donald
- * @author Colin Sampaleanu
- * @author Erwin Vervaet
+ * 
  * @see org.springframework.web.flow.ActionState
  * @see org.springframework.web.flow.ViewState
  * @see org.springframework.web.flow.SubFlowState
@@ -80,6 +78,10 @@ import org.springframework.util.ToStringCreator;
  * @see org.springframework.web.flow.config.FlowBuilder
  * @see org.springframework.web.flow.config.AbstractFlowBuilder
  * @see org.springframework.web.flow.config.XmlFlowBuilder
+ * 
+ * @author Keith Donald
+ * @author Colin Sampaleanu
+ * @author Erwin Vervaet
  */
 public class Flow {
 
@@ -108,7 +110,7 @@ public class Flow {
 	/**
 	 * Construct a new flow definition with the given id. The id should be
 	 * unique among all flows.
-	 * @param id The flow identifier.
+	 * @param id the flow identifier.
 	 */
 	public Flow(String id) {
 		setId(id);
@@ -130,7 +132,7 @@ public class Flow {
 	}
 
 	/**
-	 * Returns the <i>default </i> set of flow execution listeners for all
+	 * Returns the <i>default</i> set of flow execution listeners for all
 	 * executions created for this flow. The set returned is a mutable list
 	 * object.
 	 * <p>
@@ -139,7 +141,7 @@ public class Flow {
 	 * flow itself! You can use this when you want certain listeners to always
 	 * be notified when a flow execution is created for this flow, irrespective
 	 * of the client that is driving the execution.
-	 * @return The set of flow execution listeners
+	 * @return the set of flow execution listeners
 	 */
 	public FlowExecutionListenerList getFlowExecutionListenerList() {
 		return this.flowExecutionListenerList;
@@ -149,10 +151,10 @@ public class Flow {
 	 * Add the state definition to this flow definition. Marked protected, as
 	 * this method is to be called by the (privileged) state definition classes
 	 * themselves during state construction as part of a FlowBuilder invocation.
-	 * @param state The state, if already added nothing happens, if another
+	 * @param state the state, if already added nothing happens, if another
 	 *        instance is added with the same id, an exception is thrown
 	 * @throws IllegalArgumentException when the state cannot be added to the
-	 *         flow; specifically, if another state shares the same ID as the
+	 *         flow; specifically, if another state shares the same id as the
 	 *         one provided
 	 */
 	protected void add(State state) throws IllegalArgumentException {
@@ -183,7 +185,7 @@ public class Flow {
 
 	/**
 	 * Returns the number of states managed by this flow.
-	 * @return The state count.
+	 * @return the state count.
 	 */
 	public int getStateCount() {
 		return this.states.size();
@@ -192,7 +194,7 @@ public class Flow {
 	/**
 	 * Returns an ordered iterator over the state definitions of this flow. The
 	 * order is determined by the order in which the states were added.
-	 * @return The states iterator
+	 * @return the states iterator
 	 */
 	public Iterator statesIterator() {
 		return this.states.iterator();
@@ -202,19 +204,19 @@ public class Flow {
 	 * Set the start state for this flow to the state with the provided
 	 * <code>stateId</code>; a state must exist by the provided
 	 * <code>stateId</code> and it must be transitionable.
-	 * @param stateId The new start state
-	 * @throws NoSuchFlowStateException No state exists with the id you provided
+	 * @param stateId the id of the new start state
+	 * @throws IllegalStateException when the specified start state is not transitionable
+	 * @throws NoSuchFlowStateException when no state exists with the id you provided
 	 */
-	public void setStartState(String stateId) throws NoSuchFlowStateException {
+	public void setStartState(String stateId) throws IllegalStateException, NoSuchFlowStateException {
 		setStartState(getRequiredTransitionableState(stateId));
 	}
 
 	/**
 	 * Set the start state for this flow to the state provided; any
 	 * transitionable state may be the start state.
-	 * @param state The new start state
-	 * @throws NoSuchFlowStateException The state has not been added to this
-	 *         flow
+	 * @param state the new start state
+	 * @throws NoSuchFlowStateException the state has not been added to this flow
 	 */
 	public void setStartState(TransitionableState state) throws NoSuchFlowStateException {
 		assertValidState(state);
@@ -227,13 +229,13 @@ public class Flow {
 	/**
 	 * Return the start state, throwing an exception if it has not yet been
 	 * marked.
-	 * @return The start state
-	 * @throws IllegalStateException No start state has been marked.
+	 * @return the start state
+	 * @throws IllegalStateException when no start state has been marked
 	 */
 	public TransitionableState getStartState() throws IllegalStateException {
 		if (startState == null) {
 			throw new IllegalStateException(
-					"No start state has been set for this Flow; flow builder configuration error?");
+					"No start state has been set for this Flow -- flow builder configuration error?");
 		}
 		return startState;
 	}
@@ -243,15 +245,17 @@ public class Flow {
 	 * it's not.
 	 */
 	private void assertValidState(State state) throws NoSuchFlowStateException {
-		getRequiredState(state.getId());
+		if (!containsStateInstance(state)) {
+			throw new NoSuchFlowStateException(this, state.getId());
+		}
 	}
 
 	/**
 	 * Return the state with the provided id, throwing a exception if no state
 	 * exists with that id.
 	 * @param stateId the state id
-	 * @return The state with that id
-	 * @throws NoSuchFlowStateException No state exists with that id.
+	 * @return the state with that id
+	 * @throws NoSuchFlowStateException when no state exists with that id
 	 */
 	public State getRequiredState(String stateId) throws NoSuchFlowStateException {
 		State state = getState(stateId);
@@ -264,8 +268,8 @@ public class Flow {
 	/**
 	 * Return the state with the provided id, returning <code>null</code> if
 	 * no state exists with that id.
-	 * @param stateId The state id
-	 * @return The state with that id, or null if none exists.
+	 * @param stateId the state id
+	 * @return the state with that id, or null if none exists.
 	 */
 	public State getState(String stateId) {
 		if (!StringUtils.hasText(stateId)) {
@@ -309,12 +313,12 @@ public class Flow {
 	/**
 	 * Return the <code>TransitionableState</code> with given <id>stateId
 	 * </id>, throwing an exception if not found.
-	 * @param stateId Id of the state to look up
-	 * @return The transitionableState
-	 * @throws NoSuchFlowStateException No transitionable state exists by this
-	 *         id
+	 * @param stateId id of the state to look up
+	 * @return the transitionable state
+	 * @throws IllegalStateException when the identified state is not transitionable
+	 * @throws NoSuchFlowStateException when no transitionable state exists by this id
 	 */
-	public TransitionableState getRequiredTransitionableState(String stateId) throws NoSuchFlowStateException {
+	public TransitionableState getRequiredTransitionableState(String stateId) throws IllegalStateException, NoSuchFlowStateException {
 		State state = getRequiredState(stateId);
 		Assert.state(state.isTransitionable(), "This state '" + stateId + "' of flow '" + getId()
 				+ "' must be transitionable");
@@ -325,7 +329,7 @@ public class Flow {
 	 * Convenience accessor that returns an ordered array of the String
 	 * <code>ids</code> for the state definitions associated with this flow
 	 * definition.
-	 * @return The state ids
+	 * @return the state ids
 	 */
 	public String[] getStateIds() {
 		Iterator it = statesIterator();
@@ -341,9 +345,8 @@ public class Flow {
 	 * for this flow on every invocation. Typically called by controller clients
 	 * that need to manage a new flow execution; might also be called by flow
 	 * execution test code.
-	 * @return A new flow execution, used by the caller to manage a single
-	 *         client instance of an executing flow (typically managed in the
-	 *         http session.)
+	 * @return a new flow execution, used by the caller to manage a single
+	 *         client instance of an executing flow
 	 */
 	public FlowExecution createExecution() {
 		return new FlowExecutionStack(this);

@@ -30,7 +30,7 @@ import org.springframework.util.ToStringCreator;
  * A single client session instance for a <code>Flow</code> participating in a
  * <code>FlowExecution</code>. Also acts as a "flow-scope" data model.
  * <p>
- * The stack of executing flow sessions (managed within
+ * The stack of executing flow sessions (managed within a
  * <code>FlowExecutionStack</code>) represents the complete state of an
  * ongoing flow execution.
  * <p>
@@ -41,10 +41,15 @@ import org.springframework.util.ToStringCreator;
  * session, it will become {@link FlowSessionStatus#SUSPENDED} until the sub
  * flow returns (ends). When the flow session is ended by the flow execution,
  * its status becomes {@link FlowSessionStatus#ENDED}, ending its lifecycle.
- * @author Keith Donald
- * @author Erwin Vervaet
+ * <p>
+ * Note that a flow <i>session</i> is in no way linked to an HTTP session! It
+ * just uses the familiar request/session naming convention.
+ * 
  * @see org.springframework.web.flow.FlowExecution
  * @see org.springframework.web.flow.FlowExecutionStack
+ * 
+ * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class FlowSession implements Serializable {
 
@@ -53,7 +58,7 @@ public class FlowSession implements Serializable {
 	protected static final Log logger = LogFactory.getLog(FlowSession.class);
 
 	/**
-	 * The flow definition (a singleton)
+	 * The flow definition (a singleton).
 	 */
 	private transient Flow flow;
 
@@ -84,7 +89,7 @@ public class FlowSession implements Serializable {
 
 	/**
 	 * Create a new flow session.
-	 * @param flow The flow associated with this session
+	 * @param flow the flow associated with this session
 	 */
 	public FlowSession(Flow flow) {
 		this(flow, null);
@@ -92,8 +97,8 @@ public class FlowSession implements Serializable {
 
 	/**
 	 * Create a new flow session.
-	 * @param flow The flow associated with this flow session
-	 * @param input The input parameters used to populate the flow session
+	 * @param flow the flow associated with this flow session
+	 * @param input the input parameters used to populate the flow session
 	 */
 	public FlowSession(Flow flow, Map input) {
 		Assert.notNull(flow, "The flow is required");
@@ -119,7 +124,7 @@ public class FlowSession implements Serializable {
 
 	/**
 	 * Set the status of this flow session.
-	 * @param status The new status to set
+	 * @param status the new status to set
 	 */
 	public void setStatus(FlowSessionStatus status) {
 		Assert.notNull(status);
@@ -127,7 +132,7 @@ public class FlowSession implements Serializable {
 	}
 
 	/**
-	 * Returns the state that is currently active in this flow session
+	 * Returns the state that is currently active in this flow session.
 	 */
 	public State getCurrentState() {
 		return currentState;
@@ -135,7 +140,7 @@ public class FlowSession implements Serializable {
 
 	/**
 	 * Set the current state of this flow session.
-	 * @param newState The state that is currently active in this flow session
+	 * @param newState the state that is currently active in this flow session
 	 */
 	protected void setCurrentState(State newState) {
 		Assert.notNull(newState, "The newState is required");
@@ -144,35 +149,25 @@ public class FlowSession implements Serializable {
 		if (this.currentState != null) {
 			if (this.currentState.equals(newState)) {
 				throw new IllegalArgumentException("The current state is already set to '" + newState
-						+ "' - this should not happen!");
+						+ "' -- this should not happen!");
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger
-					.debug("Setting current state of this '" + getFlow().getId() + "' flow session to '" + newState
-							+ "'");
+			logger.debug("Setting current state of this '" + getFlow().getId() + "' flow session to '" + newState + "'");
 		}
 		this.currentState = newState;
 	}
 
 	/**
 	 * Return the data model providing access to data in "flow scope".
-	 * @return The flow scope
+	 * @return the flow scope
 	 */
-	public Scope flowScope() {
+	public Scope getFlowScope() {
 		return this.attributes;
 	}
 
-	/**
-	 * Returns a model map of flow-scoped attributes suitable for exposing to
-	 * views for rendering purposes.
-	 * @return
-	 */
-	public Map getModel() {
-		return this.attributes.getAttributeMap();
-	}
-
 	// custom serialization
+	
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.flow.getId());
 		out.writeObject(this.currentState.getId());
@@ -194,16 +189,14 @@ public class FlowSession implements Serializable {
 	protected void rehydrate(FlowLocator flowLocator) {
 		// implementation note: we cannot integrate this code into the
 		// readObject() method since we need the flow locator!
-		Assert.state(this.flow == null, "The flow is already set - already restored");
-		Assert.state(this.currentState == null, "The current state is already set - already restored");
-		Assert
-				.notNull(flowId,
-						"The flow id was not set during deserialization: cannot restore--was this flow session deserialized properly?");
+		Assert.state(this.flow == null, "The flow is already set -- already restored");
+		Assert.state(this.currentState == null, "The current state is already set -- already restored");
+		Assert.notNull(flowId,
+				"The flow id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
 		this.flow = flowLocator.getFlow(this.flowId);
 		this.flowId = null;
-		Assert
-				.notNull(currentStateId,
-						"The current state id was not set during deserialization: cannot restore--was this flow session deserialized properly?");
+		Assert.notNull(currentStateId,
+				"The current state id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
 		this.currentState = this.flow.getRequiredState(this.currentStateId);
 		this.currentStateId = null;
 	}

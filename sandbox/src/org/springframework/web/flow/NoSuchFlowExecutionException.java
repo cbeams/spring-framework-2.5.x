@@ -19,6 +19,7 @@ package org.springframework.web.flow;
  * Thrown when no flow execution exists by the specified
  * <code>flowExecutionId</code>. This might occur if the flow execution timed
  * out, but a client view still references it.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -27,9 +28,17 @@ public class NoSuchFlowExecutionException extends RuntimeException {
 	private String flowExecutionId;
 
 	/**
-	 * Create a new flow execution exception.
-	 * @param flowExecutionId Id of the flow execution that cannot be found
-	 * @param cause The underlying cause of this exception
+	 * Create a new flow execution lookup exception.
+	 * @param flowExecutionId id of the flow execution that cannot be found
+	 */
+	public NoSuchFlowExecutionException(String flowExecutionId) {
+		this.flowExecutionId = flowExecutionId;
+	}
+
+	/**
+	 * Create a new flow execution lookup exception.
+	 * @param flowExecutionId id of the flow execution that cannot be found
+	 * @param cause the underlying cause of this exception
 	 */
 	public NoSuchFlowExecutionException(String flowExecutionId, Throwable cause) {
 		super(cause);
@@ -37,6 +46,6 @@ public class NoSuchFlowExecutionException extends RuntimeException {
 	}
 
 	public String getMessage() {
-		return "No executing flow could be found with id '" + flowExecutionId + "' - perhaps the flow has ended?";
+		return "No executing flow could be found with id '" + flowExecutionId + "' -- perhaps the flow has ended?";
 	}
 }

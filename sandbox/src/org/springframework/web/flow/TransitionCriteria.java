@@ -15,6 +15,25 @@
  */
 package org.springframework.web.flow;
 
+/**
+ * Interface for strategy objects encapsulating criteria that determine
+ * whether or not a transition should execute given a flow execution
+ * request context.
+ * 
+ * @see org.springframework.web.flow.Transition
+ * @see org.springframework.web.flow.RequestContext
+ * 
+ * @author Keith Donald
+ * @author Erwin Vervaet
+ */
 public interface TransitionCriteria {
-	public boolean test(FlowExecutionContext context);
+	
+	/**
+	 * Check if the transition should execute based on the given flow
+	 * execution request context.
+	 * @param context the flow execution request context
+	 * @return true if the transition should fire, false otherwise
+	 */
+	public boolean test(RequestContext context);
+	
 }

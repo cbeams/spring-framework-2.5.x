@@ -25,12 +25,14 @@ import org.springframework.util.ToStringCreator;
 
 /**
  * Abstract superclass for states that have one or more transitions. State
- * transitions are triggered by events, specifically, when an occurence of a
- * supported event in this state is signaled.
+ * transitions are typically triggered by events.
+ * 
+ * @see org.springframework.web.flow.Transition
+ * @see org.springframework.web.flow.TransitionCriteria
+ * @see org.springframework.web.flow.Flow
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
- * @see org.springframework.web.flow.Transition
- * @see org.springframework.web.flow.Flow
  */
 public abstract class TransitionableState extends State {
 
@@ -41,10 +43,10 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Create a new transitionable state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public TransitionableState(Flow flow, String id, Transition transition) throws IllegalArgumentException {
@@ -54,10 +56,10 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Create a new transitionable state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public TransitionableState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
@@ -67,7 +69,7 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Add a transition to this state.
-	 * @param transition The transition to add
+	 * @param transition the transition to add
 	 */
 	protected void add(Transition transition) {
 		transition.setSourceState(this);
@@ -76,32 +78,12 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Add given list of transitions to this state.
-	 * @param transitions The transitions to add
+	 * @param transitions the transitions to add
 	 */
 	protected void addAll(Transition[] transitions) {
 		for (int i = 0; i < transitions.length; i++) {
 			add(transitions[i]);
 		}
-	}
-
-	/**
-	 * Signal an occurence of the specified event in this state, triggering the
-	 * execution of an appropriate state transition.
-	 * @param event The event that occured in this state (e.g 'submit', 'next',
-	 *        'back')
-	 * @param context A flow execution context
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the event execution.
-	 * @throws EventNotSupportedException if the eventId does not map to a valid
-	 *         transition for this state
-	 * @throws CannotExecuteStateTransitionException if a state transition could
-	 *         not be executed.
-	 */
-	protected ViewDescriptor executeTransitionOnEvent(Event event, StateContext context)
-			throws EventNotSupportedException, CannotExecuteStateTransitionException {
-		context.setLastEvent(event);
-		Transition transition = getRequiredTransition(context);
-		return transition.execute(context);
 	}
 
 	/**
@@ -119,8 +101,9 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Returns a collection of the supported transitional criteria (Constraint
-	 * objects) used to match events with transitions in this state.
+	 * Returns a collection of the supported transitional criteria
+	 * ({@link TransitionCriteria} objects) used to fire transitions
+	 * in this state.
 	 * @return the collection of transitional conditions
 	 */
 	public Collection getTransitionalCriteria() {
@@ -136,29 +119,25 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Get a transition in this state for given id. Throws and exception when
-	 * the event is not supported by this state, e.g. when there is no
-	 * corresponding transition.
-	 * @throws EventNotSupportedException When the event is not supported by
-	 *         this state
+	 * Get a transition in this state for given flow execution request context.
+	 * Throws and exception when when there is no corresponding transition.
+	 * @throws NoSuchTransitionException when the transition cannot be found
 	 */
-	protected Transition getRequiredTransition(FlowExecutionContext context) throws EventNotSupportedException {
+	protected Transition getRequiredTransition(RequestContext context) throws NoSuchTransitionException {
 		Transition transition = getTransition(context);
 		if (transition != null) {
 			return transition;
 		}
 		else {
-			throw new EventNotSupportedException(this, context.getLastEvent());
+			throw new NoSuchTransitionException(this, context.getLastEvent());
 		}
 	}
 
 	/**
-	 * Get a transition for given event id.
-	 * @param eventId The event id of the transition to look up
-	 * @return The transition associated with the event, or null if there is no
-	 *         such transition in this state
+	 * Get a transition for given flow execution request context.
+	 * @param context a flow execution context
 	 */
-	public Transition getTransition(FlowExecutionContext context) {
+	public Transition getTransition(RequestContext context) {
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
@@ -168,17 +147,29 @@ public abstract class TransitionableState extends State {
 		}
 		return null;
 	}
+	
+	/**
+	 * Returns whether or not this state has a transition that will fire
+	 * for given flow execution request context.
+	 * @param context a flow execution context
+	 */
+	public boolean hasTransitionFor(StateContext context) {
+		return getTransition(context) != null;
+	}
 
 	/**
-	 * Check if given event id is supported by this state. In other words, check
-	 * if this state has a transition that executes on an occurence of the given
-	 * eventId.
-	 * @param eventId the event id to check
-	 * @return true or false
+	 * Execute the transition that fires for given flow execution request context.
+	 * @param context a flow execution context
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the transition execution
+	 * @throws NoSuchTransitionException when no transition can be found
+	 * @throws CannotExecuteStateTransitionException if a state transition could
+	 *         not be executed
 	 */
-	public boolean isTransitionForOccurrenceOf(Event event, StateContext context) {
-		context.setLastEvent(event);
-		return getTransition(context) != null;
+	public ViewDescriptor executeTransition(StateContext context)
+			throws NoSuchTransitionException, CannotExecuteStateTransitionException {
+		Transition transition = getRequiredTransition(context);
+		return transition.execute(context);
 	}
 
 	protected void createToString(ToStringCreator creator) {

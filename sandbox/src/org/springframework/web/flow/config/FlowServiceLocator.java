@@ -39,7 +39,7 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * Note: not all registries may support this advanced feature (Spring does
 	 * though ;-)).
 	 * @param implementationClass the action implementation class
-	 * @param autowire the autowire policy
+	 * @param autowireMode the autowire policy
 	 * @return the instantiated (and possibly autowired) action
 	 * @throws ServiceLookupException when the action cannot be created
 	 */

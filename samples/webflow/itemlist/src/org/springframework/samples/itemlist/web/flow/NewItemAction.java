@@ -16,12 +16,12 @@
 package org.springframework.samples.itemlist.web.flow;
 
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.action.AbstractAction;
 
 public class NewItemAction extends AbstractAction {
 
-	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+	protected Event doExecuteAction(RequestContext context) throws Exception {
 		// begin transactional processing
 		context.getTransactionSynchronizer().beginTransaction();
 		return success();

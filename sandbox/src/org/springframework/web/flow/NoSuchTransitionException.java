@@ -18,16 +18,18 @@ package org.springframework.web.flow;
 import org.springframework.util.Styler;
 
 /**
- * Thrown when the event signaled does not map to a valid transition in the
- * current state. That is, there is no "handler" transition for the given event
- * in the current state.
+ * Throw when no transition can be found in a state that fires for
+ * a certain flow execution request context. Typically this is because
+ * there is no "handler" transition for the last event that occured
+ * in the request context.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class EventNotSupportedException extends FlowNavigationException {
+public class NoSuchTransitionException extends FlowNavigationException {
 
 	/**
-	 * The state this exception was thrown.
+	 * The state this exception was thrown in.
 	 */
 	private TransitionableState state;
 
@@ -38,10 +40,10 @@ public class EventNotSupportedException extends FlowNavigationException {
 
 	/**
 	 * Create a new unsupported event exception.
-	 * @param state State that does not support the event
-	 * @param eventId Unsupported event
+	 * @param state state that does not support the event
+	 * @param event unsupported event
 	 */
-	public EventNotSupportedException(TransitionableState state, Event event) {
+	public NoSuchTransitionException(TransitionableState state, Event event) {
 		super(state.getFlow());
 		this.state = state;
 		this.event = event;
@@ -49,11 +51,11 @@ public class EventNotSupportedException extends FlowNavigationException {
 
 	/**
 	 * Create a new unsupported event exception.
-	 * @param state State that does not support the event
-	 * @param eventId Unsupported event
-	 * @param cause Underlying cause of this exception
+	 * @param state state that does not support the event
+	 * @param event unsupported event
+	 * @param cause underlying cause of this exception
 	 */
-	public EventNotSupportedException(TransitionableState state, Event event, Throwable cause) {
+	public NoSuchTransitionException(TransitionableState state, Event event, Throwable cause) {
 		super(state.getFlow(), cause);
 		this.state = state;
 		this.event = event;
@@ -61,7 +63,7 @@ public class EventNotSupportedException extends FlowNavigationException {
 
 	public String getMessage() {
 		return "No transition found for event '" + event.getId() + "' in state '" + state.getId() + "' of flow '"
-				+ getFlow().getId() + "' -- valid transitional event criteria are "
+				+ getFlow().getId() + "' -- valid transitional criteria are "
 				+ Styler.call(state.getTransitionalCriteria()) + " -- programmer error?";
 	}
 }

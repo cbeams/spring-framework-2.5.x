@@ -23,6 +23,9 @@ import org.springframework.util.closure.ProcessTemplate;
 
 /**
  * A strongly typed listener list class for FlowExecutionListeners.
+ * 
+ * @see org.springframework.web.flow.FlowExecutionListener
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -36,7 +39,8 @@ public class FlowExecutionListenerList {
 
 	/**
 	 * Add a listener.
-	 * @param listener The listener to add
+	 * @param listener the listener to add
+	 * @return true if the underlying listener list changed, false otherwise
 	 */
 	public boolean add(FlowExecutionListener listener) {
 		return this.flowExecutionListeners.add(listener);
@@ -44,7 +48,8 @@ public class FlowExecutionListenerList {
 
 	/**
 	 * Add a set of listeners.
-	 * @param listeners The listeners to add
+	 * @param listeners the listeners to add
+	 * @return true if the underlying listener list changed, false otherwise
 	 */
 	public boolean add(FlowExecutionListener[] listeners) {
 		return this.flowExecutionListeners.addAll(listeners);
@@ -52,7 +57,8 @@ public class FlowExecutionListenerList {
 
 	/**
 	 * Add a list of listeners.
-	 * @param flowExecutionListenerList The listeners to add
+	 * @param flowExecutionListenerList the listeners to add
+	 * @return true if the underlying listener list changed, false otherwise
 	 */
 	public boolean add(FlowExecutionListenerList flowExecutionListenerList) {
 		if (flowExecutionListenerList == null) {
@@ -86,7 +92,7 @@ public class FlowExecutionListenerList {
 	/**
 	 * Is at least one instance of the provided FlowExecutionListener
 	 * implementation present in the listener list?
-	 * @param listenerImplementationClass The flow execution listener
+	 * @param listenerImplementationClass the flow execution listener
 	 *        implementation, must be an implementation of FlowExecutionListener
 	 * @return true if present, false otherwise
 	 */
@@ -99,7 +105,7 @@ public class FlowExecutionListenerList {
 	/**
 	 * Is the provid FlowExecutionListener instance present in the listener
 	 * list?
-	 * @param listener The execution listener
+	 * @param listener the execution listener
 	 * @return true if present, false otherwise.
 	 */
 	public boolean isAdded(FlowExecutionListener listener) {
@@ -117,7 +123,7 @@ public class FlowExecutionListenerList {
 	 * Return a process template that knows how to iterate over the list of flow
 	 * execution listeners and dispatch each listener to a handler callback for
 	 * processing.
-	 * @return The iterator process template.
+	 * @return the iterator process template.
 	 */
 	public ProcessTemplate iteratorTemplate() {
 		return flowExecutionListeners.iteratorTemplate();
@@ -125,7 +131,7 @@ public class FlowExecutionListenerList {
 
 	/**
 	 * Returns the number of execution listeners in this list.
-	 * @return The flow execution listener count
+	 * @return the flow execution listener count
 	 */
 	public int size() {
 		return flowExecutionListeners.getListenerCount();

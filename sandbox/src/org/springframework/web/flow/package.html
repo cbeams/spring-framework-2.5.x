@@ -6,22 +6,12 @@ Contains core interfaces and classes for executing web flows.
 
 <p>
 This is the central package of the Spring web flow system. It
-contains the follow key classes and interfaces of interest to
-users of the web flow system:
+contains the following key classes and interfaces of interest to
+most users of the web flow system:
 <ul>
 <li>
-{@link org.springframework.web.flow.Action} - The interface implemented
-by actions executed by a web flow in an action state. Ready to use
-implementations and convenience superclasses are provided in
-the {@link org.springframework.web.flow.action} package.
-</li>
-<li>
-{@link org.springframework.web.flow.FlowSession},
-{@link org.springframework.web.flow.FlowExecutionInfo} and
-{@link org.springframework.web.flow.FlowExecution} - These interfaces
-provide access to information about an executing flow. Only those applications
-that use a flow exeuction listener will need to use these interfaces
-directly.
+{@link org.springframework.web.flow.FlowExecution} - The central interface
+used by a client of the web flow system to drive flow execution.
 </li>
 <li>
 {@link org.springframework.web.flow.FlowExecutionListener} - The
@@ -31,15 +21,20 @@ flow execution lifecycle events. The class
 provides an adapter to ease subclassing.
 </li>
 <li>
-{@link org.springframework.web.flow.FlowModel} and
-{@link org.springframework.web.flow.MutableFlowModel} - An action can interact
-with the flow data model using these interfaces.
+{@link org.springframework.web.flow.Action} - The interface implemented
+by actions executed by a web flow in an action state. Ready to use
+implementations and convenience superclasses are provided in
+the {@link org.springframework.web.flow.action} package.
 </li>
 <li>
-{@link org.springframework.web.flow.FlowModelMapper} - The interface
+{@link org.springframework.web.flow.RequestContext} - Actions gain access
+to contextual information for a flow execution request using this interface.
+</li>
+<li>
+{@link org.springframework.web.flow.FlowAttributeMapper} - The interface
 implemented by strategy objects used to map attributes between flow
-models. An out-of-the-box implementation is provided by the class
-{@link org.springframework.web.flow.support.ParameterizableFlowModelMapper}.
+scopes. An out-of-the-box implementation is provided by the class
+{@link org.springframework.web.flow.support.ParameterizableFlowAttributeMapper}.
 </li>
 </ul>
 </p>
@@ -52,7 +47,7 @@ This package has several sub packages:
 that address common controller concerns.
 </li>
 <li>
-{@link org.springframework.web.flow.config config} - Contains interfaces and classes for
+<a href="config/package-summary.html">config</a> - Contains interfaces and classes for
 building and assembling web flows.
 </li>
 <li>

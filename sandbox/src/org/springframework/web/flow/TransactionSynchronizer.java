@@ -16,37 +16,40 @@
 package org.springframework.web.flow;
 
 /**
- * Interface to demarcate an application transaction for a flow session using a
- * token-based mechanism.
+ * Interface to demarcate an application transaction for a flow execution.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface TransactionSynchronizer {
 
 	/**
-	 * Is the active flow session participating in a transaction?
-	 * @param clear indicates whether or not the transaction should end after
+	 * Is the caller participating in the application transaction currently
+	 * active in the flow execution.
+	 * @param end indicates whether or not the transaction should end after
 	 *        checking it
-	 * @return True if it is participating in the active transaction, false
+	 * @return true if it is participating in the active transaction, false
 	 *         otherwise
 	 */
-	public boolean inTransaction(boolean clear);
+	public boolean inTransaction(boolean end);
 
 	/**
-	 * Assert that the active flow session is participating in a transaction.
-	 * @param clear indicates whether or not the transaction should end after
+	 * Assert that there is an active application transaction in the flow
+	 * execution and that the caller is participating in it.
+	 * @param end indicates whether or not the transaction should end after
 	 *        checking it
-	 * @throws IllegalStateException The flow execution is not participating in
-	 *         a active transaction
+	 * @throws IllegalStateException there is no active transaction in the
+	 *         flow execution
 	 */
-	public void assertInTransaction(boolean clear) throws IllegalStateException;
+	public void assertInTransaction(boolean end) throws IllegalStateException;
 
 	/**
-	 * Start a new transaction on the active flow session.
+	 * Start a new transaction in the flow execution.
 	 */
 	public void beginTransaction();
 
 	/**
-	 * End the active transaction on the active flow session.
+	 * End the active transaction in the flow execution.
 	 */
 	public void endTransaction();
 

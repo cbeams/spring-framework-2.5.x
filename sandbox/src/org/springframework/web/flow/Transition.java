@@ -23,14 +23,17 @@ import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 
 /**
- * A transition takes a flow execution from one state to another when executed.
+ * A transition takes a flow from one state to another when executed.
  * A transition is associated with exactly one source
  * <code>TransitionableState</code> managed by exactly one <code>Flow</code>
  * definition.
- * @author Keith Donald
- * @author Erwin Vervaet
+ * 
  * @see org.springframework.web.flow.TransitionableState
  * @see org.springframework.web.flow.Flow
+ * @see org.springframework.web.flow.TransitionCriteria
+ * 
+ * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class Transition {
 
@@ -43,8 +46,8 @@ public class Transition {
 	public static final String WILDCARD_EVENT_ID = "*";
 
 	/**
-	 * The criteria that determines whether or not this transition handles a
-	 * given <code>Event</code>.
+	 * The criteria that determine whether or not this transition should
+	 * execute.
 	 */
 	private TransitionCriteria criteria;
 
@@ -60,15 +63,15 @@ public class Transition {
 
 	/**
 	 * The state id for the target state; needed to lazily resolve the target
-	 * state once on first execution (after configuration.)
+	 * state once on first execution (after configuration).
 	 */
 	private String targetStateId;
 
 	/**
 	 * Create a new transition.
-	 * @param eventId Id of the event on which this transition should be
+	 * @param eventId id of the event on which this transition should be
 	 *        executed, or "*" if it should execute on any event
-	 * @param targetStateId The id of the state to transition to when this
+	 * @param targetStateId the id of the state to transition to when this
 	 *        transition is executed
 	 */
 	public Transition(String eventId, String targetStateId) {
@@ -79,13 +82,26 @@ public class Transition {
 	}
 
 	/**
+	 * Create a new transition.
+	 * @param criteria strategy object used to determine if this transition
+	 *        should be executed given contextual information
+	 * @param targetStateId the id of the state to transition to when this
+	 *        transition is executed
+	 */
+	public Transition(TransitionCriteria criteria, String targetStateId) {
+		Assert.notNull(criteria, "The transition criteria property is required");
+		Assert.notNull(targetStateId, "The targetStateId property is required");
+		this.criteria = criteria;
+		this.targetStateId = targetStateId;
+	}
+
+	/**
 	 * Create a default constraint implementation that will match true on events
 	 * with the provided event id.
 	 * <p>
 	 * If the given event id is "*", a wildcard event criteria object will be
 	 * returned that matches any event. Otherwise you get a criteria object that
 	 * matches given event id exactly.
-	 * @param the default event condition
 	 */
 	protected TransitionCriteria createDefaultTransitionCriteria(String eventId) {
 		if (WILDCARD_EVENT_ID.equals(eventId)) {
@@ -99,28 +115,13 @@ public class Transition {
 	}
 
 	/**
-	 * Create a new transition.
-	 * @param criteria Strategy object used to determine if this transition
-	 *        should be executed given contextual information
-	 * @param targetStateId The id of the state to transition to when this
-	 *        transition is executed
-	 */
-	public Transition(TransitionCriteria criteria, String targetStateId) {
-		Assert.notNull(criteria, "The transition criteria property is required");
-		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.criteria = criteria;
-		this.targetStateId = targetStateId;
-	}
-
-	/**
 	 * Returns the owning source (<i>from</i>) state of this transition.
 	 * @return the source state
-	 * @throws IllegalStateException, if the source state has not been set.
+	 * @throws IllegalStateException if the source state has not been set
 	 */
-	protected TransitionableState getSourceState() {
-		Assert
-				.state(sourceState != null,
-						"The source state is not yet been set--this transition must be added to exactly one owning state definition!");
+	protected TransitionableState getSourceState() throws IllegalStateException {
+		Assert.state(sourceState != null,
+			"The source state is not yet been set -- this transition must be added to exactly one owning state definition!");
 		return sourceState;
 	}
 
@@ -142,7 +143,7 @@ public class Transition {
 	/**
 	 * Returns the target (<i>to</i>) state of this transition.
 	 * @return the target state
-	 * @throws NoSuchFlowStateException When the target state cannot be found
+	 * @throws NoSuchFlowStateException when the target state cannot be found
 	 */
 	protected State getTargetState() throws NoSuchFlowStateException {
 		synchronized (this) {
@@ -159,7 +160,7 @@ public class Transition {
 
 	/**
 	 * Returns the strategy used to determine if this transition should execute
-	 * given a execution context.
+	 * given an execution context.
 	 * @return the constraint
 	 */
 	public TransitionCriteria getCriteria() {
@@ -168,20 +169,20 @@ public class Transition {
 
 	/**
 	 * Checks if this transition should be executed given the state of the
-	 * provided flow execution context.
-	 * @param context the flow execution context
+	 * provided flow execution request context.
+	 * @param context the flow execution request context
 	 * @return true if this transition should execute, false otherwise
 	 */
-	public boolean shouldExecute(FlowExecutionContext context) {
+	public boolean shouldExecute(RequestContext context) {
 		return this.criteria.test(context);
 	}
 
 	/**
 	 * Execute this transition.
-	 * @param context The flow execution context
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the transition execution.
-	 * @throws CannotExecuteStateTransitionException thrown when this transition
+	 * @param context the flow execution request context
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the transition execution
+	 * @throws CannotExecuteStateTransitionException when this transition
 	 *         cannot be executed
 	 */
 	protected ViewDescriptor execute(StateContext context) throws CannotExecuteStateTransitionException {
@@ -189,10 +190,9 @@ public class Transition {
 			ViewDescriptor viewDescriptor = getTargetState().enter(context);
 			if (logger.isDebugEnabled()) {
 				if (context.isFlowExecutionActive()) {
-					logger
-							.debug("Transition '" + this + "' executed; as a result, the new state is '"
-									+ context.getCurrentState().getId() + "' in flow '"
-									+ context.getActiveFlow().getId() + "'");
+					logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
+							+ context.getCurrentState().getId() + "' in flow '"
+							+ context.getActiveFlow().getId() + "'");
 				}
 				else {
 					logger.debug("Transition '" + this + "' executed; as a result, the flow '"
@@ -210,7 +210,7 @@ public class Transition {
 	 * Event matching criteria that matches on any event.
 	 */
 	public static final TransitionCriteria WILDCARD_TRANSITION_CRITERIA = new TransitionCriteria() {
-		public boolean test(FlowExecutionContext context) {
+		public boolean test(RequestContext context) {
 			return true;
 		}
 
@@ -220,19 +220,19 @@ public class Transition {
 	};
 
 	/**
-	 * Simple, default transition criteria that matches on a eventId and nothing
+	 * Simple, default transition criteria that matches on an eventId and nothing
 	 * else. Specifically, if the last event that occured has id ${eventId},
 	 * this criteria will return true.
-	 * @author Keith Donald
 	 */
 	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
+		
 		private String eventId;
 
 		public EventIdTransitionCriteria(String eventId) {
 			this.eventId = eventId;
 		}
 
-		public boolean test(FlowExecutionContext context) {
+		public boolean test(RequestContext context) {
 			return context.getLastEvent().getId().equals(eventId);
 		}
 

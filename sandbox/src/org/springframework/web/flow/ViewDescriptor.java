@@ -18,36 +18,30 @@ package org.springframework.web.flow;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.web.servlet.HandlerInterceptor;
-
 /**
  * Holder for a logical view name and the dynamic model data neccessary to
  * render it. It is expected that a client map this logical view descriptor to a
  * physical view template for rendering.
  * <p>
- * For readers familiar with Spring MVC, this class is very similiar to its
+ * For readers familiar with Spring MVC, this class is very similiar to the
  * <code>ModelAndView</code> construct. This class is provided to prevent a
- * web.flow dependency on Spring MVC.
+ * web flow dependency on Spring MVC.
+ * 
  * @author Keith Donald
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Erwin Vervaet
  */
 public class ViewDescriptor {
 
-	/**
-	 * View name if we hold a view name that will be resolved by the
-	 * DispatcherServlet via a ViewResolver
-	 */
 	private String viewName;
 
-	/** Model */
 	private Map model;
 
 	/**
 	 * Convenient constructor when there is no model data to expose. Can also be
 	 * used in conjunction with <code>addObject</code>.
-	 * @param viewName name of the View to render, to be resolved by the
-	 *        DispatcherServlet
+	 * @param viewName name of the view to render
 	 * @see #addObject
 	 */
 	public ViewDescriptor(String viewName) {
@@ -56,8 +50,7 @@ public class ViewDescriptor {
 
 	/**
 	 * Creates new ViewDescriptor given a view name and a model.
-	 * @param viewName name of the View to render, to be resolved by the
-	 *        DispatcherServlet
+	 * @param viewName name of the View to render
 	 * @param model Map of model names (Strings) to model objects (Objects).
 	 *        Model entries may not be null, but the model Map may be null if
 	 *        there is no model data.
@@ -69,8 +62,7 @@ public class ViewDescriptor {
 
 	/**
 	 * Convenient constructor to take a single model object.
-	 * @param viewName name of the View to render, to be resolved by the
-	 *        DispatcherServlet
+	 * @param viewName name of the View to render
 	 * @param modelName name of the single entry in the model
 	 * @param modelObject the single model object
 	 */
@@ -80,28 +72,18 @@ public class ViewDescriptor {
 	}
 
 	/**
-	 * Set a view name for this ViewDescriptor, to be resolved by the
-	 * DispatcherServlet via a ViewResolver. Will override any pre-existing view
-	 * name or View.
+	 * Set a view name for this ViewDescriptor. Will override any pre-existing view
+	 * name.
 	 */
 	public void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
 	/**
-	 * Return the view name to be resolved by the DispatcherServlet via a
-	 * ViewResolver, or null if we are using a View object.
+	 * Return the view name.
 	 */
 	public String getViewName() {
 		return viewName;
-	}
-
-	/**
-	 * Return the model map. May return null. Called by DispatcherServlet for
-	 * evaluation of the model.
-	 */
-	protected Map getModelInternal() {
-		return this.model;
 	}
 
 	/**
@@ -141,11 +123,7 @@ public class ViewDescriptor {
 	/**
 	 * Clear the state of this ViewDescriptor object. The object will be empty
 	 * afterwards.
-	 * <p>
-	 * Can be used to suppress rendering of a given ViewDescriptor object in the
-	 * <code>postHandle</code> method of a HandlerInterceptor.
 	 * @see #isEmpty
-	 * @see HandlerInterceptor#postHandle
 	 */
 	public void clear() {
 		this.viewName = null;

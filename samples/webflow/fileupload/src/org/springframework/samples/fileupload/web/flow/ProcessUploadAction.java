@@ -16,7 +16,6 @@
 package org.springframework.samples.fileupload.web.flow;
 
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.TransactionSynchronizer;
 import org.springframework.web.flow.action.BindAndValidateAction;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;

@@ -186,7 +186,22 @@ public class HttpServletFlowExecutionManager {
 				flowExecution.getListenerList().add(executionListener);
 			}
 			// signal the event within the current state
-			viewDescriptor = flowExecution.signalEvent(createEvent(request));
+			Event event=createEvent(request);
+			Assert.hasText(event.getId(), "The '"
+					+ getEventIdParameterName()
+					+ "' request parameter (or '"
+					+ getEventIdRequestAttributeName()
+					+ "' request attribute) is present in the request -- programmer error?");
+			// see if the eventId was set to a static marker placeholder because
+			// of a view configuration error
+			if (event.getId().equals(getNotSetEventIdParameterMarker())) {
+				throw new IllegalArgumentException("The eventId in the request was the 'not set' marker '"
+						+ getNotSetEventIdParameterMarker()
+						+ "' -- this is likely a view (jsp, etc) configuration error -- the '"
+						+ getEventIdParameterName()
+						+ "' parameter must be set to a valid event");
+			}
+			viewDescriptor = flowExecution.signalEvent(event);
 		}
 		if (!flowExecution.isActive()) {
 			// event execution resulted in the entire flow ending, cleanup
@@ -226,7 +241,9 @@ public class HttpServletFlowExecutionManager {
 	 * Create a flow event wrapping given request.
 	 */
 	protected Event createEvent(HttpServletRequest request) {
-		return new HttpServletRequestEvent(request);
+		return new HttpServletRequestEvent(request,
+				getEventIdParameterName(), getEventIdRequestAttributeName(),
+				getCurrentStateIdParameterName(), getParameterValueDelimiter());
 	}
 
 	/**
@@ -263,6 +280,58 @@ public class HttpServletFlowExecutionManager {
 	 */
 	protected String getFlowExecutionIdParameterName() {
 		return FlowConstants.FLOW_EXECUTION_ID_PARAMETER;
+	}
+
+	/**
+	 * Returns the name of the event id parameter in the request ("_eventId").
+	 */
+	protected String getEventIdParameterName() {
+		return FlowConstants.EVENT_ID_PARAMETER;
+	}
+	
+	/**
+	 * Returns the name of the event id attribute in the request
+	 * ("_mapped_eventId").
+	 * <p>
+	 * This is useful when working with image buttons and javscript
+	 * restrictions. For example, an intercepting servlet filter can process a
+	 * image button with a name in the format "_pname__eventId_pvalue_submit"
+	 * and set the proper "mapped' eventId attribute in the request.
+	 */
+	protected String getEventIdRequestAttributeName() {
+		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
+	}
+	
+	/**
+	 * Returns the marker value indicating that the event id parameter was not
+	 * set properly in the request because of view configuration error
+	 * ({@link FlowConstants#NOT_SET_EVENT_ID}).
+	 * <p>
+	 * This is useful when a view relies on an dynamic means to set the eventId
+	 * request parameter, for example, using javascript. This approach assumes
+	 * the "not set" marker value will be a static default (a kind of fallback,
+	 * submitted if the eventId does not get set to the proper dynamic value
+	 * onClick, for example, if javascript was disabled).
+	 */
+	protected String getNotSetEventIdParameterMarker() {
+		return FlowConstants.NOT_SET_EVENT_ID;
+	}
+
+	/**
+	 * Returns the name of the current state id parameter in the request
+	 * ("_currentStateId").
+	 */
+	protected String getCurrentStateIdParameterName() {
+		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
+	}
+	
+	/**
+	 * Returns the default delimiter used to separate a request parameter name
+	 * and value when both are embedded in the name of the request parameter
+	 * (e.g. when using an HTML submit button).
+	 */
+	protected String getParameterValueDelimiter() {
+		return "_";
 	}
 
 	/**

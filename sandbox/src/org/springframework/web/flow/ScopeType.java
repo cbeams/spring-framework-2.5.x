@@ -18,14 +18,28 @@ package org.springframework.web.flow;
 import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 
 /**
- * Supported scope types for the web.flow system.
+ * Supported scope types for the web flow system.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class ScopeType extends ShortCodedLabeledEnum {
+
+	/**
+	 * Constant indicating request scope. The request scope is local to
+	 * a request being executed by a flow execution.
+	 */
 	public static final ScopeType REQUEST = new ScopeType(0, "request");
 
+	/**
+	 * Constant indicating flow scope. The flow scope is shared by all
+	 * artifacts of a flow: actions, view, states, ...
+	 */
 	public static final ScopeType FLOW = new ScopeType(1, "flow");
 
+	/**
+	 * Private constructor because this is a typesafe enum!
+	 */
 	private ScopeType(int code, String label) {
 		super(code, label);
 	}

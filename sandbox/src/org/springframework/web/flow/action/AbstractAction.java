@@ -23,8 +23,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowConstants;
-import org.springframework.web.flow.FlowExecutionContext;
-import org.springframework.web.flow.LocalEvent;
+import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.InternalEvent;
 
 /**
  * Base action implementation that provides a number of helper methods generally
@@ -60,14 +60,14 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * Returns the default error event ("error").
 	 */
 	protected Event error() {
-		return new LocalEvent(this, FlowConstants.ERROR);
+		return new InternalEvent(this, FlowConstants.ERROR);
 	}
 
 	/**
 	 * Returns the default success event ("success").
 	 */
 	protected Event success() {
-		return new LocalEvent(this, FlowConstants.SUCCESS);
+		return new InternalEvent(this, FlowConstants.SUCCESS);
 	}
 
 	/**
@@ -91,16 +91,16 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return the action result event
 	 */
 	protected Event result(String resultId) {
-		return new LocalEvent(this, resultId);
+		return new InternalEvent(this, resultId);
 	}
 
 	protected Event result(String resultId, Map parameters) {
-		return new LocalEvent(this, resultId, parameters);
+		return new InternalEvent(this, resultId, parameters);
 	}
 
 	// action pre and post execution logic
 
-	public final Event execute(FlowExecutionContext context) throws Exception {
+	public final Event execute(RequestContext context) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Action '" + getClass().getName() + "' beginning execution");
 		}
@@ -146,7 +146,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
-	protected Event onPreExecute(FlowExecutionContext context) throws Exception {
+	protected Event onPreExecute(RequestContext context) throws Exception {
 		return null;
 	}
 
@@ -160,7 +160,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
-	protected abstract Event doExecuteAction(FlowExecutionContext context) throws Exception;
+	protected abstract Event doExecuteAction(RequestContext context) throws Exception;
 
 	/**
 	 * Post-action execution hook, subclasses may override.
@@ -172,6 +172,6 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
-	protected void onPostExecute(FlowExecutionContext context) throws Exception {
+	protected void onPostExecute(RequestContext context) throws Exception {
 	}
 }

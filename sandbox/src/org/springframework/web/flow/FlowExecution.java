@@ -16,7 +16,9 @@
 package org.springframework.web.flow;
 
 /**
- * Central client facade service interface for the flow system.
+ * Central interface used by clients to interact with the flow system
+ * and an ongoing flow execution.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -24,42 +26,41 @@ public interface FlowExecution extends FlowExecutionMBean {
 
 	/**
 	 * Returns a mutable list of listeners attached to this flow execution.
-	 * @return The flow execution listener list
+	 * @return the flow execution listener list
 	 */
 	public FlowExecutionListenerList getListenerList();
 
 	/**
 	 * Start this flow execution, transitioning it to the start state and
-	 * returning the starting model and view descriptor. Typically called by the
-	 * FlowController, but also in test code.
-	 * @param event The event that occured that triggered flow execution
+	 * returning the starting model and view descriptor. Typically called by a
+	 * flow controller, but also in test code.
+	 * @param startingEvent the event that occured that triggered flow execution
 	 *        creation
-	 * @return The starting view descriptor, which returns control to the client
-	 *         and requests that a view be rendered with model data.
+	 * @return the starting view descriptor, which returns control to the client
+	 *         and requests that a view be rendered with model data
 	 * @throws IllegalStateException if this execution has already been started,
 	 *         or no state is marked as the start state.
 	 */
 	public ViewDescriptor start(Event startingEvent) throws IllegalStateException;
 
 	/**
-	 * Signal an occurence of the specified event in the (optionally) provided
-	 * state of this flow execution.
-	 * @param event The event that occured within the current state of this flow
+	 * Signal an occurence of the specified event in this flow execution.
+	 * @param event the event that occured within the current state of this flow
 	 *        execution.
-	 * @return The next model and view descriptor to display for this flow
-	 *         execution. This returns control to the client and requests that a
-	 *         view be rendered with model data.
-	 * @throws EventNotSupportedException if the signaled event does not map to
-	 *         any state transitions in the state.
+	 * @return the next model and view descriptor to display for this flow
+	 *         execution, this returns control to the client and requests that a
+	 *         view be rendered with model data
+	 * @throws NoSuchTransitionException if the signaled event does not map to
+	 *         any state transitions in the current state
 	 * @throws IllegalStateException if the flow execution is not active and
-	 *         thus is no longer processing events.
+	 *         thus is no longer (or not yet) processing events
 	 */
-	public ViewDescriptor signalEvent(Event event) throws EventNotSupportedException, IllegalStateException;
+	public ViewDescriptor signalEvent(Event event) throws NoSuchTransitionException, IllegalStateException;
 
 	/**
 	 * Called by a client to restore this flow execution's state after
 	 * deserialization.
-	 * @param flowLocator the locator capable of supporting rehydration.
+	 * @param flowLocator the locator capable of supporting rehydration
 	 * @param listeners the set of listeners that should be notified of
 	 *        lifecycle events in this flow execution
 	 */

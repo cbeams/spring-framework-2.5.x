@@ -30,9 +30,10 @@ import org.springframework.util.StringUtils;
  * Note: if no <code>viewName</code> property is specified <b>and</b> this
  * EndState terminates the entire flow execution, it is expected that some
  * action has already written the response (or else a blank response will
- * result.) On the other hand, if no <code>viewName</code> is specified <b>and</b>
+ * result). On the other hand, if no <code>viewName</code> is specified <b>and</b>
  * this EndState reliniquishes control back to a parent flow, view rendering
- * responsibility is falls on the parent flow.
+ * responsibility falls on the parent flow.
+ * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
@@ -47,9 +48,9 @@ public class EndState extends State {
 
 	/**
 	 * Create a new end state with no associated view.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public EndState(Flow flow, String id) throws IllegalArgumentException {
@@ -58,11 +59,11 @@ public class EndState extends State {
 
 	/**
 	 * Create a new end state with specified associated view.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param viewName The name of the view that should be rendered if this end
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the name of the view that should be rendered if this end
 	 *        state terminates flow execution
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public EndState(Flow flow, String id, String viewName) throws IllegalArgumentException {
@@ -82,7 +83,7 @@ public class EndState extends State {
 	/**
 	 * Returns the name of the view that will be rendered if this end state
 	 * terminates flow execution, or null if there is no associated view.
-	 * @returns the logical view name
+	 * @return the logical view name
 	 */
 	public String getViewName() {
 		return viewName;
@@ -98,64 +99,73 @@ public class EndState extends State {
 
 	/**
 	 * Specialization of State's <code>doEnterState</code> template method
-	 * that executes behaivior specific to this state type in polymorphic
+	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
 	 * This implementation pops the top (active) flow session off the execution
 	 * stack, ending it, and resumes control in the spawning parent flow (if
-	 * neccessary.) If the ended session is the root flow, a ViewDescriptor is
-	 * returned (when viewName is not null, else null is returned.)
-	 * @param context The state execution context
+	 * neccessary). If the ended session is the root flow, a ViewDescriptor is
+	 * returned (when viewName is not null, else null is returned).
+	 * @param context the state execution context
 	 * @return ViewDescriptor a view descriptor signaling that control should be
-	 *         returned to the client and a view rendered.
+	 *         returned to the client and a view rendered
 	 */
 	protected ViewDescriptor doEnterState(StateContext context) {
-		FlowSession endingFlowSession = context.endActiveFlowSession();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Session for flow '" + getFlow().getId() + "' ended, session details = " + endingFlowSession);
-		}
-		if (context.isFlowExecutionActive()) {
-			// session execution is still active, resume in parent
-			if (logger.isDebugEnabled()) {
-				logger.debug("Resuming parent flow '" + context.getActiveFlow().getId() + "' in state '"
-						+ context.getCurrentState().getId() + "'");
-			}
-			Assert.isInstanceOf(FlowAttributeMapper.class, context.getCurrentState());
-			FlowAttributeMapper resumingState = (FlowAttributeMapper)context.getCurrentState();
-			resumingState.mapSubFlowOutputAttributes(endingFlowSession.flowScope(), context.getActiveFlowSession()
-					.flowScope());
-			// treat this end state id as a transitional event in the
-			// resuming state, this is so cool!
-			Assert.isInstanceOf(TransitionableState.class, resumingState);
-			return ((TransitionableState)resumingState).executeTransitionOnEvent(createEndingSubFlowResultEvent(),
-					context);
-		}
-		else {
-			// entire flow execution has ended, return ending view if applicable
+		if (context.isRootFlowActive()) {
+			// entire flow execution is ending, return ending view if applicable
 			if (logger.isDebugEnabled()) {
 				logger.debug("Session execution for root flow '" + getFlow().getId() + "' has ended");
 			}
+			ViewDescriptor viewDescriptor;
 			if (isMarker()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Returning a view descriptor null object; no view to render");
 				}
-				return null;
+				viewDescriptor = null;
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Returning view name '" + viewName + "' to render");
+					logger.debug("Returning view descriptor '" + viewName + "' to render");
 				}
-				return new ViewDescriptor(viewName, endingFlowSession.getModel());
+				viewDescriptor = new ViewDescriptor(viewName, context.getModel());
 			}
+			
+			// actually end the subflow
+			// note that we do this at the here to make sure we can call context.getModel()
+			// above without any problems
+			context.endActiveFlowSession();
+			
+			return viewDescriptor;
+		}
+		else {
+			// there is a parent flow that will resume, so map attributes from the
+			// ending sub flow up to the resuming parent flow
+			FlowSession parentFlowSession = context.getParentFlowSession();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Resuming parent flow '" + parentFlowSession.getFlow() + "' in state '"
+						+ parentFlowSession.getCurrentState() + "'");
+			}
+			Assert.isInstanceOf(FlowAttributeMapper.class, parentFlowSession.getCurrentState());
+			FlowAttributeMapper resumingState = (FlowAttributeMapper)parentFlowSession.getCurrentState();
+			resumingState.mapSubFlowOutputAttributes(
+					context.getActiveFlowSession().getFlowScope(), parentFlowSession.getFlowScope());
+			Assert.isInstanceOf(TransitionableState.class, resumingState);
+			
+			// actually end the subflow
+			context.endActiveFlowSession();
+			
+			// treat this end state id as a transitional event in the
+			// resuming state, this is so cool!
+			context.setLastEvent(createEndingSubFlowResultEvent());
+			return ((TransitionableState)resumingState).executeTransition(context);
 		}
 	}
-
+	
 	/**
-	 * Factory method to create a local sub flow ending result event with no
-	 * paramtereters. Subclasses may override.
-	 * @return
+	 * Factory method to create a internal sub flow ending result event with no
+	 * parameters. Subclasses may override.
 	 */
 	protected Event createEndingSubFlowResultEvent() {
-		return new LocalEvent(this, getId());
+		return new InternalEvent(this, getId());
 	}
 }

@@ -19,46 +19,52 @@ import java.util.Map;
 
 /**
  * Mutable control interface for states to use to manipulate the state of an
- * ongoing flow execution. Invoked internally by the various state types when
+ * ongoing flow execution request. Used internally by the various state types when
  * they are entered.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
-public interface StateContext extends FlowExecutionContext {
+public interface StateContext extends RequestContext {
 
 	/**
-	 * Update the current state of the ongoing flow execution managed in this
-	 * context.
-	 * @param state The new current state
+	 * Update the current state of the ongoing flow execution.
+	 * @param state the new current state
 	 */
 	public void setCurrentState(State state) throws IllegalStateException;
 
 	/**
-	 * Update the last event that occured in the ongoing flow execution managed
-	 * in this context
-	 * @param lastEvent The last event that occured
+	 * Update the last event that occured in the ongoing flow execution.
+	 * @param lastEvent the last event that occured
 	 */
 	public void setLastEvent(Event lastEvent);
-
+	
 	/**
-	 * Return the active flow session, the local client instance of a single
-	 * flow, the one at the top of the execution stack.
-	 * @return The active flow session
+	 * Get the flow session currently active in the flow execution.
+	 * @throws IllegalStateException when the flow execution is not active
 	 */
 	public FlowSession getActiveFlowSession() throws IllegalStateException;
+	
+	/**
+	 * Get the flow session of the parent flow of the flow currently
+	 * active in the flow execution.
+	 * @throws IllegalStateException when the flow execution is not active
+	 */
+	public FlowSession getParentFlowSession() throws IllegalStateException;
 
 	/**
 	 * End the active flow session.
-	 * @return The ended session.
+	 * @return the ended session
 	 */
 	public FlowSession endActiveFlowSession() throws IllegalStateException;
 
 	/**
-	 * Spawn a session for the provided flow definition as a subflow, activating
+	 * Spawn the provided flow definition as a subflow, activating
 	 * it and parameterizing it with the provided sub flow input.
-	 * @param subFlow The subflow
+	 * @param subFlow the subflow
 	 * @param subFlowInput the subflow input attributes
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the event execution.
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the spawned subflow
 	 */
 	public ViewDescriptor spawn(Flow subFlow, Map subFlowInput);
 }

@@ -3672,6 +3672,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state id ("customerDetails.get"). Detaults to a dot (".").
 	 */
 	protected String getQualifierDelimiter() {
-		return DOT_SEPARATOR;
+		return SEPARATOR;
 	}
 }

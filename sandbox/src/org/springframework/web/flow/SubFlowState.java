@@ -28,9 +28,11 @@ import org.springframework.util.Assert;
  * A sub flow state has the ability to map data between the parent and sub flow.
  * See the {@link FlowAttributeMapper} interface definition for info on how to
  * do this.
+ * 
+ * @see org.springframework.web.flow.FlowAttributeMapper
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
- * @see org.springframework.web.flow.FlowAttributeMapper
  */
 public class SubFlowState extends TransitionableState implements FlowAttributeMapper {
 
@@ -41,17 +43,17 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 
 	/**
 	 * The attribute mapper that should map attributes from the parent flow down
-	 * to the spawned subflow.
+	 * to the spawned subflow and visa versa.
 	 */
 	private FlowAttributeMapper flowAttributeMapper;
 
 	/**
 	 * Create a new sub flow state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param subFlow The sub flow to spawn
-	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param subFlow the sub flow to spawn
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public SubFlowState(Flow flow, String id, Flow subFlow, Transition transition) throws IllegalArgumentException {
@@ -60,11 +62,11 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 
 	/**
 	 * Create a new sub flow state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param subFlow The sub flow to spawn
-	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param subFlow the sub flow to spawn
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public SubFlowState(Flow flow, String id, Flow subFlow, Transition[] transitions) throws IllegalArgumentException {
@@ -73,12 +75,12 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 
 	/**
 	 * Create a new sub flow state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param subFlow The sub flow to spawn
-	 * @param attributeMapper The attribute mapper to use
-	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param subFlow the sub flow to spawn
+	 * @param attributeMapper the attribute mapper to use
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper attributeMapper, Transition transition)
@@ -88,12 +90,12 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 
 	/**
 	 * Create a new sub flow state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param subFlow The sub flow to spawn
-	 * @param attributeMapper The attribute mapper to use
-	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param subFlow the sub flow to spawn
+	 * @param attributeMapper the attribute mapper to use
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper attributeMapper,
@@ -105,7 +107,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 
 	/**
 	 * Set the sub flow that will be spawned by this state.
-	 * @param subFlow The sub flow to spawn
+	 * @param subFlow the sub flow to spawn
 	 */
 	protected void setSubFlow(Flow subFlow) {
 		Assert.notNull(subFlow, "A sub flow state must have a sub flow");
@@ -161,31 +163,28 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger
-						.debug("No attribute mapper configured for this sub flow state '"
-								+ getId()
-								+ "'; as a result, no attributes in the parent flow scope will be passed to the spawned sub flow '"
-								+ subFlow.getId() + "'");
+				logger.debug("No attribute mapper configured for this sub flow state '"
+						+ getId()
+						+ "' -- as a result, no attributes in the parent flow scope will be passed to the spawned sub flow '"
+						+ subFlow.getId() + "'");
 			}
-			return new HashMap(1);
+			return new HashMap();
 		}
 	}
 
 	public void mapSubFlowOutputAttributes(AttributeAccessor subFlowAttributes, AttributeSetter parentFlowAttributes) {
 		if (getFlowAttributeMapper() != null) {
 			if (logger.isDebugEnabled()) {
-				logger
-						.debug("Messaging the configured attribute mapper to map sub flow attributes back up to the resuming parent flow - "
-								+ "the resuming parent flow will now have access to attributes passed up by the completed sub flow");
+				logger.debug("Messaging the configured attribute mapper to map sub flow attributes back up to the resuming parent flow -- "
+						+ "the resuming parent flow will now have access to attributes passed up by the completed sub flow");
 			}
 			this.flowAttributeMapper.mapSubFlowOutputAttributes(subFlowAttributes, parentFlowAttributes);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger
-						.debug("No attribute mapper is configured for the resuming state '"
-								+ getId()
-								+ "' - note: as a result, no attributes in the ending sub flow scope will be passed to the resuming parent flow");
+				logger.debug("No attribute mapper is configured for the resuming state '"
+						+ getId()
+						+ "' -- note: as a result, no attributes in the ending sub flow scope will be passed to the resuming parent flow");
 			}
 		}
 	}

@@ -16,7 +16,8 @@
 package org.springframework.web.flow;
 
 /**
- * Constants used by the Spring web.flow system.
+ * Constants used by the Spring web flow system.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -34,9 +35,15 @@ public abstract class FlowConstants {
 	/**
 	 * Separator (".").
 	 */
-	public static final String DOT_SEPARATOR = ".";
+	public static final String SEPARATOR = ".";
 
 	// controller constants
+	
+	/**
+	 * The flow execution itself will be exposed to the view in a model
+	 * attribute with this name ("flowExecution").
+	 */
+	public static final String FLOW_EXECUTION_ATTRIBUTE = "flowExecution";
 
 	/**
 	 * The id of the flow execution will be exposed to the view in a model
@@ -70,9 +77,9 @@ public abstract class FlowConstants {
 
 	/**
 	 * The event to signaled can also be sent to a controller using a request
-	 * attribute set by an intercepting filter, with the name
+	 * attribute set by an intercepting filter, with this name
 	 * ("_mapped_eventId"). Use this when you can't use the EVENT_ID_PARAMETER
-	 * to pass in the event--for example, when using image buttons with
+	 * to pass in the event -- for example, when using image buttons with
 	 * javascript restrictions.
 	 */
 	public static final String EVENT_ID_REQUEST_ATTRIBUTE = "_mapped_eventId";

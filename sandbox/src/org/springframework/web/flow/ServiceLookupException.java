@@ -18,7 +18,10 @@ package org.springframework.web.flow;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract superclass of all flow service lookup exceptions.
+ * Abstract superclass of all flow service lookup exceptions. A service
+ * lookup exception is thrown when a service artifact required by a flow
+ * cannot be obtained, either at flow configuration time or at runtime.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -30,7 +33,7 @@ public abstract class ServiceLookupException extends RuntimeException {
 
 	/**
 	 * Create a new service lookup exception.
-	 * @param serviceId The id of the service that cannot be found
+	 * @param serviceId the id of the service that cannot be found
 	 */
 	public ServiceLookupException(String serviceId) {
 		super();
@@ -39,8 +42,8 @@ public abstract class ServiceLookupException extends RuntimeException {
 
 	/**
 	 * Create a new service lookup exception.
-	 * @param serviceId The id of the service that cannot be found
-	 * @param cause The underlying cause of this exception
+	 * @param serviceId the id of the service that cannot be found
+	 * @param cause the underlying cause of this exception
 	 */
 	public ServiceLookupException(String serviceId, Throwable cause) {
 		super(cause);
@@ -49,9 +52,9 @@ public abstract class ServiceLookupException extends RuntimeException {
 
 	/**
 	 * Create a new service lookup exception.
-	 * @param serviceId The id of the service that cannot be found
-	 * @param message Descriptive message
-	 * @param cause The underlying cause of this exception
+	 * @param serviceId the id of the service that cannot be found
+	 * @param message descriptive message
+	 * @param cause the underlying cause of this exception
 	 */
 	public ServiceLookupException(String serviceId, String message, Throwable cause) {
 		super(message, cause);
@@ -60,7 +63,7 @@ public abstract class ServiceLookupException extends RuntimeException {
 
 	/**
 	 * Create a new service lookup exception.
-	 * @param serviceImplementationClass The required implementation class of
+	 * @param serviceImplementationClass the required implementation class of
 	 *        the service that cannot be found
 	 */
 	public ServiceLookupException(Class serviceImplementationClass) {
@@ -70,9 +73,9 @@ public abstract class ServiceLookupException extends RuntimeException {
 
 	/**
 	 * Create a new service lookup exception.
-	 * @param serviceImplementationClass The required implementation class of
+	 * @param serviceImplementationClass the required implementation class of
 	 *        the service that cannot be found
-	 * @param cause The underlying cause of this exception
+	 * @param cause the underlying cause of this exception
 	 */
 	public ServiceLookupException(Class serviceImplementationClass, Throwable cause) {
 		super(cause);
@@ -81,10 +84,10 @@ public abstract class ServiceLookupException extends RuntimeException {
 
 	/**
 	 * Create a new service lookup exception.
-	 * @param serviceImplementationClass The required implementation class of
+	 * @param serviceImplementationClass the required implementation class of
 	 *        the service that cannot be found
-	 * @param message Descriptive message
-	 * @param cause The underlying cause of this exception
+	 * @param message descriptive message
+	 * @param cause the underlying cause of this exception
 	 */
 	public ServiceLookupException(Class serviceImplementationClass, String message, Throwable cause) {
 		super(message, cause);

@@ -38,8 +38,9 @@ import org.springframework.util.Styler;
  * transition should be executed for a given action result event. For example,
  * if an action named "myAction" returns a "success" result, a transition for
  * Event "myAction.success" will be searched, and if found, executed. If the
- * action is not named, a transition for the base "success" Event will be
+ * action is not named, a transition for the base "success" event will be
  * searched, and if found, executed.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -52,11 +53,11 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a new action state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param action The unnamed action to execute in this state
-	 * @param transition The sole transition (path) out of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param action the unnamed action to execute in this state
+	 * @param transition the sole transition (path) out of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ActionState(Flow flow, String id, Action action, Transition transition) throws IllegalArgumentException {
@@ -66,12 +67,12 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a new action state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param actionName The name of the named action
-	 * @param action The named action to execute in this state
-	 * @param transition The sole transition (path) out of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param actionName the name of the named action
+	 * @param action the named action to execute in this state
+	 * @param transition the sole transition (path) out of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ActionState(Flow flow, String id, String actionName, Action action, Transition transition)
@@ -82,11 +83,11 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a new action state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param action The unnamed action to execute in this state
-	 * @param transitions The transitions out of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param action the unnamed action to execute in this state
+	 * @param transitions the transitions out of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ActionState(Flow flow, String id, Action action, Transition[] transitions) throws IllegalArgumentException {
@@ -96,12 +97,12 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a new action state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param actionName The name of the named action
-	 * @param action The named action to execute in this state
-	 * @param transitions The transitions out of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param actionName the name of the named action
+	 * @param action the named action to execute in this state
+	 * @param transitions the transitions out of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ActionState(Flow flow, String id, String actionName, Action action, Transition[] transitions)
@@ -112,11 +113,11 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a new action state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param actions The unnamed actions to execute in this state
-	 * @param transition The sole transition (path) out of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param actions the unnamed actions to execute in this state
+	 * @param transition the sole transition (path) out of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ActionState(Flow flow, String id, Action[] actions, Transition transition) throws IllegalArgumentException {
@@ -126,11 +127,11 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a new action state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param actions The unnamed actions to execute in this state
-	 * @param transitions The transitions (paths) out of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param actions the unnamed actions to execute in this state
+	 * @param transitions the transitions (paths) out of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ActionState(Flow flow, String id, Action[] actions, Transition[] transitions)
@@ -141,12 +142,12 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a new action state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param actionNames The names of the named actions
-	 * @param actions The named actions to execute in this state
-	 * @param transition The transitions (paths) out of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param actionNames the names of the named actions
+	 * @param actions the named actions to execute in this state
+	 * @param transition the transitions (paths) out of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ActionState(Flow flow, String id, String[] actionNames, Action[] actions, Transition transition)
@@ -157,12 +158,12 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a new action state.
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
-	 * @param actionNames The names of the named actions
-	 * @param actions The named actions to execute in this state
-	 * @param transitions The transitions (paths) out of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param actionNames the names of the named actions
+	 * @param actions the named actions to execute in this state
+	 * @param transitions the transitions (paths) out of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
 	public ActionState(Flow flow, String id, String[] actionNames, Action[] actions, Transition[] transitions)
@@ -215,9 +216,9 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Create a wrapper object for a named action.
-	 * @param actionName The name of the action to wrap
-	 * @param action The action to wrap
-	 * @return The wrapped named action
+	 * @param actionName the name of the action to wrap
+	 * @param action the action to wrap
+	 * @return the wrapped named action
 	 */
 	protected NamedAction createNamedAction(String actionName, Action action) {
 		return new NamedAction(this, actionName, action);
@@ -252,7 +253,7 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Returns the list of actions executed by this action state.
-	 * @return The action list, as a typed array
+	 * @return the action list, as a typed array
 	 */
 	public Action[] getActions() {
 		Action[] actions = new Action[namedActions.size()];
@@ -266,8 +267,8 @@ public class ActionState extends TransitionableState {
 	/**
 	 * Returns the logical name associated with an action instance executed by
 	 * this action state.
-	 * @param action The action for which the name should be looked up
-	 * @return The name of given action or <code>null</code> if the action
+	 * @param action the action for which the name should be looked up
+	 * @return the name of given action or <code>null</code> if the action
 	 *         does not have a name
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
@@ -285,17 +286,17 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Specialization of State's <code>doEnterState</code> template
-	 * method that executes behaivior specific to this state type in polymorphic
+	 * method that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
 	 * This implementation iterates over each configured <code>Action</code>
 	 * instance and executes it. Execution continues until a <code>Action</code>
 	 * returns a result event that matches a state transition, or the list of
 	 * all actions is exhausted.
-	 * @param context The state execution context
+	 * @param context the state execution context
 	 * @return ViewDescriptor a view descriptor signaling that control should be
-	 *         returned to the client and a view rendered.
-	 * @throws CannotExecuteStateTransitionException no action execution
+	 *         returned to the client and a view rendered
+	 * @throws CannotExecuteStateTransitionException when no action execution
 	 *         resulted in a outcome event that could be mapped to a valid state
 	 *         transition
 	 */
@@ -306,38 +307,39 @@ public class ActionState extends TransitionableState {
 		while (it.hasNext()) {
 			NamedAction namedAction = (NamedAction)it.next();
 			Event event = namedAction.execute(context);
-			executionCount++;
 			if (event != null) {
-				eventIds[executionCount - 1] = event.getId();
-				if (isTransitionForOccurrenceOf(event, context)) {
-					return executeTransitionOnEvent(event, context);
+				eventIds[executionCount] = event.getId();
+				context.setLastEvent(event);
+				if (hasTransitionFor(context)) {
+					return executeTransition(context);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-								+ eventIds[executionCount - 1] + "' - "
+								+ eventIds[executionCount] + "' -- "
 								+ "I will proceed to the next action in the chain");
 					}
 				}
 			}
 			else {
-				eventIds[executionCount - 1] = null;
+				eventIds[executionCount] = null;
 			}
+			executionCount++;
 		}
 		if (executionCount > 0) {
 			throw new CannotExecuteStateTransitionException(this, "No transition was matched to the event(s) "
 					+ "signaled by the " + executionCount + " action(s) that executed in this action state '" + getId()
 					+ "' of flow '" + getFlow().getId()
 					+ "'; transitions must be defined to handle action result outcomes -- "
-					+ "possible flow configuration error?  Note: the eventIds signaled were: '" + Styler.call(eventIds)
+					+ "possible flow configuration error? Note: the eventIds signaled were: '" + Styler.call(eventIds)
 					+ "', while the supported set of transitional criteria for this action state is '"
 					+ Styler.call(getTransitionalCriteria()) + "'");
 		}
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
 					"No actions were executed, thus I cannot execute any state transition "
-							+ "-- programmer configuration error; "
-							+ "make sure you add at least one action to this state"));
+					+ "-- programmer configuration error; "
+					+ "make sure you add at least one action to this state"));
 		}
 	}
 
@@ -346,6 +348,7 @@ public class ActionState extends TransitionableState {
 	 * null if its an unnamed action).
 	 * <p>
 	 * For internal use by the ActionState.
+	 * 
 	 * @author Keith Donald
 	 * @author Erwin Vervaet
 	 */
@@ -361,9 +364,9 @@ public class ActionState extends TransitionableState {
 
 		/**
 		 * Create a new action wrapper.
-		 * @param actionState The state containing the action
-		 * @param name The name of the action, or null if it's unnamed
-		 * @param action The action to wrap
+		 * @param actionState the state containing the action
+		 * @param name the name of the action, or null if it's unnamed
+		 * @param action the action to wrap
 		 */
 		public NamedAction(ActionState actionState, String name, Action action) {
 			Assert.notNull(actionState, "The owning action state is required");
@@ -374,32 +377,32 @@ public class ActionState extends TransitionableState {
 		}
 
 		/**
-		 * @return the name of the wrapped action, or null when it's unnamed.
+		 * Returns the name of the wrapped action, or null when it's unnamed.
 		 */
 		protected String getName() {
 			return name;
 		}
 
 		/**
-		 * @return the wrapped action.
+		 * Returns the wrapped action.
 		 */
 		protected Action getAction() {
 			return action;
 		}
 
 		/**
-		 * @return true when the wrapped action is named, false otherwise.
+		 * Returns true when the wrapped action is named, false otherwise.
 		 */
 		public boolean isNamed() {
 			return StringUtils.hasText(name);
 		}
 
 		/**
-		 * Execute the wrapped action
+		 * Execute the wrapped action.
 		 * @param context the flow execution context
 		 * @return result of execution
 		 */
-		protected Event execute(FlowExecutionContext context) {
+		protected Event execute(RequestContext context) {
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
@@ -431,7 +434,11 @@ public class ActionState extends TransitionableState {
 			}
 		}
 
+		/**
+		 * Wrapper to wrap an event as an event signaled by a named action. 
+		 */
 		private static class ActionNameQualifiedEvent extends Event {
+			
 			private String actionName;
 
 			private Event resultEvent;
@@ -443,11 +450,15 @@ public class ActionState extends TransitionableState {
 			}
 
 			public String getId() {
-				return actionName + "." + resultEvent.getId();
+				return actionName + FlowConstants.SEPARATOR + resultEvent.getId();
 			}
 
 			public long getTimestamp() {
 				return resultEvent.getTimestamp();
+			}
+
+			public String getStateId() {
+				return resultEvent.getStateId();
 			}
 			
 			public Object getParameter(String parameterName) {
@@ -456,10 +467,6 @@ public class ActionState extends TransitionableState {
 
 			public Map getParameters() {
 				return resultEvent.getParameters();
-			}
-
-			public String getStateId() {
-				return resultEvent.getStateId();
 			}
 		}
 

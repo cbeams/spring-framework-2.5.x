@@ -23,15 +23,15 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * An implementation of the <code>Event</code> base class for signaling events
- * from an internal, local source within a flow artifact such as an
+ * An implementation of the <code>Event</code> base class for signaling
+ * events from an internal source within a flow artifact such as an
  * <code>Action</code> or <code>State</code> definition. This is the
  * simplest <code>Event</code> implementation.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class LocalEvent extends Event {
+public class InternalEvent extends Event {
 
 	/**
 	 * The event identifier.
@@ -54,42 +54,43 @@ public class LocalEvent extends Event {
 	private Map parameters;
 
 	/**
-	 * Create a local event with the specified <code>id</code>.
+	 * Create an internal event with the specified <code>id</code>.
 	 * @param source the source of the event
 	 * @param id the event identifier
 	 */
-	public LocalEvent(Object source, String id) {
+	public InternalEvent(Object source, String id) {
 		super(source);
 		setId(id);
 	}
 
 	/**
-	 * Create a local event with the specified <code>id</code> occuring in the
+	 * Create an internal event with the specified <code>id</code> occuring in the
 	 * state with the specified <code>stateId</code>.
 	 * @param source the source of the event
 	 * @param id the event identifier
 	 * @param stateId the state in which this event occured
 	 */
-	public LocalEvent(Object source, String id, String stateId) {
+	public InternalEvent(Object source, String id, String stateId) {
 		super(source);
 		setId(id);
 		this.stateId = stateId;
 	}
 
 	/**
-	 * Create a local event with the specified <code>id</code> and the
+	 * Create an internal event with the specified <code>id</code> and the
 	 * provided contextual parameters.
+	 * @param source the source of the event
 	 * @param id the event identifier
 	 * @param parameters the event parameters
 	 */
-	public LocalEvent(Object source, String id, Map parameters) {
+	public InternalEvent(Object source, String id, Map parameters) {
 		super(source);
 		setId(id);
 		setParameters(parameters);
 	}
 
 	/**
-	 * Create a local event with the specified <code>id</code> occuring in the
+	 * Create an internal event with the specified <code>id</code> occuring in the
 	 * state with the specified <code>stateId</code> and the provided
 	 * contextual parameters.
 	 * @param source the source of the event
@@ -97,7 +98,7 @@ public class LocalEvent extends Event {
 	 * @param stateId the state in which this event occured
 	 * @param parameters contextual parameters
 	 */
-	public LocalEvent(Object source, String id, String stateId, Map parameters) {
+	public InternalEvent(Object source, String id, String stateId, Map parameters) {
 		super(source);
 		setId(id);
 		this.stateId = stateId;
@@ -107,7 +108,7 @@ public class LocalEvent extends Event {
 	/**
 	 * Set the event identifier.
 	 */
-	private void setId(String id) {
+	protected void setId(String id) {
 		Assert.hasText(id, "The event id is required");
 		this.id = id;
 	}
@@ -115,7 +116,7 @@ public class LocalEvent extends Event {
 	/**
 	 * Set the contextual parameters.
 	 */
-	private void setParameters(Map parameters) {
+	protected void setParameters(Map parameters) {
 		if (parameters != null) {
 			this.parameters = new HashMap(parameters);
 		}

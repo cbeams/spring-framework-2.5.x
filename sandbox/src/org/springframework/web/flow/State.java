@@ -28,15 +28,22 @@ import org.springframework.util.ToStringCreator;
  * Subclasses of this class capture all the configuration information needed for
  * a specific type of state.
  * <p>
- * Subclasses should override the <code>doEnterState</code> method to execute
+ * Subclasses should implement the <code>doEnterState</code> method to execute
  * the processing that should occur when this state is entered, acting on its
  * configuration information. The ability to plugin custom state types that
- * execute different behaivior polymorphically is the classic GoF State pattern.
+ * execute different behaviour polymorphically is the classic GoF state pattern.
  * <p>
  * Why is this class abstract and not an interface? A specific design choice. An
  * state does not define a generic contract or role, it is expected that
  * specializations of this base class be "States" and not part of some other
  * inheritence hierarchy.
+ * 
+ * @see org.springframework.web.flow.TransitionableState
+ * @see org.springframework.web.flow.ActionState
+ * @see org.springframework.web.flow.ViewState
+ * @see org.springframework.web.flow.SubFlowState
+ * @see org.springframework.web.flow.EndState
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -58,13 +65,12 @@ public abstract class State {
 	 * Creates a state for the provided <code>flow</code> identified by the
 	 * provided <code>id</code>. The id must be locally unique to the owning
 	 * flow. The flow state will be automatically added to the flow.
-	 * 
-	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow)
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
 	 * @throws IllegalArgumentException if this state cannot be added to the
 	 *         flow
 	 */
-	public State(Flow flow, String id) throws IllegalArgumentException {
+	protected State(Flow flow, String id) throws IllegalArgumentException {
 		setId(id);
 		setFlow(flow);
 		flow.add(this);
@@ -72,7 +78,7 @@ public abstract class State {
 
 	/**
 	 * Returns the state identifier, unique to the owning flow.
-	 * @return The state identifier.
+	 * @return the state identifier.
 	 */
 	public String getId() {
 		return id;
@@ -80,7 +86,7 @@ public abstract class State {
 
 	/**
 	 * Set the state identifier, unique to the owning flow.
-	 * @param id The state identifier.
+	 * @param id the state identifier.
 	 */
 	private void setId(String id) {
 		Assert.hasText(id, "The state must have a valid identifier");
@@ -114,13 +120,11 @@ public abstract class State {
 	}
 
 	/**
-	 * Requesting entering of this state in the provided flow execution.
-	 * @param context The flow execution stack, tracking a ongoing flow
+	 * Enter this state in the provided flow execution request.
+	 * @param context the flow execution request, tracking an ongoing flow
 	 *        execution (client instance of a flow)
-	 * @param request The client http request
-	 * @param response The server http response
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the event execution.
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the state processing
 	 */
 	protected final ViewDescriptor enter(StateContext context) {
 		if (logger.isDebugEnabled()) {
@@ -132,12 +136,10 @@ public abstract class State {
 
 	/**
 	 * Hook method to do any processing as a result of entering this state.
-	 * @param context The session execution stack, tracking the current active
-	 *        flow session
-	 * @param request The client http request
-	 * @param response The server http response
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the event execution.
+	 * @param context the flow execution request, tracking an ongoing flow
+	 *        execution (client instance of a flow)
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the state processing
 	 */
 	protected abstract ViewDescriptor doEnterState(StateContext context);
 
@@ -148,9 +150,9 @@ public abstract class State {
 	}
 
 	/**
-	 * Subclasses may override this hook method to stringfy their internal
+	 * Subclasses may override this hook method to stringify their internal
 	 * state. This default implementation does nothing.
-	 * @param creator The toString creator, to stringify properties.
+	 * @param creator the toString creator, to stringify properties.
 	 */
 	protected void createToString(ToStringCreator creator) {
 	}

@@ -28,7 +28,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ScopeType;
 
 /**
@@ -245,7 +245,7 @@ public class BindAndValidateAction extends AbstractAction {
 		}
 	}
 
-	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+	protected Event doExecuteAction(RequestContext context) throws Exception {
 		Object formObject = loadRequiredFormObject(context);
 		DataBinder binder = createBinder(context, formObject);
 		Event result = bindAndValidate(context, binder);
@@ -268,7 +268,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param errors possible binding errors
 	 * @return the action result
 	 */
-	protected Event getDefaultActionResult(FlowExecutionContext context, Object formObject, BindException errors) {
+	protected Event getDefaultActionResult(RequestContext context, Object formObject, BindException errors) {
 		return errors.hasErrors() ? error() : success();
 	}
 
@@ -285,7 +285,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 *         loaded
 	 * @throws IllegalStateException the form object loaded was null
 	 */
-	protected Object loadRequiredFormObject(FlowExecutionContext context) throws FormObjectRetrievalFailureException,
+	protected Object loadRequiredFormObject(RequestContext context) throws FormObjectRetrievalFailureException,
 			IllegalStateException {
 		try {
 			// get the form object
@@ -318,7 +318,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @throws ServletRequestBindingException the form object could not be
 	 *         loaded because valid input was not provided in the request
 	 */
-	protected Object loadFormObject(FlowExecutionContext context) throws FormObjectRetrievalFailureException,
+	protected Object loadFormObject(RequestContext context) throws FormObjectRetrievalFailureException,
 			ServletRequestBindingException {
 		if (getFormObjectScope() == ScopeType.FLOW && context.getFlowScope().containsAttribute(getFormObjectName())) {
 			Object formObject = context.getFlowScope().getAttribute(getFormObjectName(), getFormObjectClass());
@@ -358,7 +358,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @throws IllegalAccessException if the class or its constructor is not
 	 *         accessible
 	 */
-	protected Object createFormObject(FlowExecutionContext context) throws InstantiationException,
+	protected Object createFormObject(RequestContext context) throws InstantiationException,
 			IllegalAccessException {
 		if (this.formObjectClass == null) {
 			throw new IllegalStateException("Cannot create formObject without formObjectClass being set - "
@@ -384,7 +384,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @return the new binder instance
 	 * @see #initBinder
 	 */
-	protected DataBinder createBinder(FlowExecutionContext context, Object formObject) {
+	protected DataBinder createBinder(RequestContext context, Object formObject) {
 		DataBinder binder = new DataBinder(formObject, getFormObjectName());
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
@@ -415,7 +415,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 */
-	protected void initBinder(FlowExecutionContext context, DataBinder binder) {
+	protected void initBinder(RequestContext context, DataBinder binder) {
 		if (propertyEditorRegistrar != null) {
 			propertyEditorRegistrar.registerCustomEditors(binder);
 		}
@@ -433,7 +433,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param binder the binder to use for binding
 	 * @return the action result outcome
 	 */
-	protected Event bindAndValidate(FlowExecutionContext context, DataBinder binder) {
+	protected Event bindAndValidate(RequestContext context, DataBinder binder) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
 					+ "', details='" + binder.getTarget() + "'");
@@ -463,7 +463,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 *        registration of binding errors
 	 * @see #bindAndValidate
 	 */
-	protected void onBind(FlowExecutionContext context, Object formObject, BindException errors) {
+	protected void onBind(RequestContext context, Object formObject, BindException errors) {
 		onBind(context, formObject);
 	}
 
@@ -477,7 +477,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param model the flow model
 	 * @param formObject the formObject object to perform further binding on
 	 */
-	protected void onBind(FlowExecutionContext context, Object formObject) {
+	protected void onBind(RequestContext context, Object formObject) {
 	}
 
 	/**
@@ -486,7 +486,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param request current HTTP request
 	 * @return whether to suppress validation for the given request
 	 */
-	protected boolean suppressValidation(FlowExecutionContext context) {
+	protected boolean suppressValidation(RequestContext context) {
 		return false;
 	}
 
@@ -507,7 +507,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
 	 */
-	protected Event onBindAndValidate(FlowExecutionContext context, Object formObject, BindException errors) {
+	protected Event onBindAndValidate(RequestContext context, Object formObject, BindException errors) {
 		if (!errors.hasErrors()) {
 			return onBindAndValidateSuccess(context, formObject, errors);
 		}
@@ -524,7 +524,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param errors the possible binding errors
 	 * @return the action result
 	 */
-	protected Event onBindAndValidateSuccess(FlowExecutionContext context, Object formObject, BindException errors) {
+	protected Event onBindAndValidateSuccess(RequestContext context, Object formObject, BindException errors) {
 		return onBindAndValidateSuccess(context, formObject);
 	}
 
@@ -539,7 +539,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param formObject the form object
 	 * @return the action result
 	 */
-	protected Event onBindAndValidateSuccess(FlowExecutionContext context, Object formObject) {
+	protected Event onBindAndValidateSuccess(RequestContext context, Object formObject) {
 		return null;
 	}
 }

@@ -16,27 +16,29 @@
 package org.springframework.web.flow;
 
 /**
- * Service locator interface for retrieving a flow by ID. Needed at execution
+ * Service locator interface for retrieving a flow by id. Needed at execution
  * time to load a configured flow instance from a registry. The default registry
- * is typically the spring application context.
+ * is typically the Spring application context.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface FlowLocator {
 
 	/**
 	 * Lookup a flow with specified id.
-	 * @param flowDefinitionId The flow id
-	 * @return The flow
-	 * @throws ServiceLookupException When the flow cannot be found
+	 * @param flowDefinitionId the flow id
+	 * @return the flow
+	 * @throws ServiceLookupException when the flow cannot be found
 	 */
 	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException;
 
 	/**
 	 * Lookup a flow build by specified type of flow builder.
 	 * @param flowDefinitionId the flow id
-	 * @param requiredFlowBuilderImplementationClass The required builder type
+	 * @param requiredFlowBuilderImplementationClass the required builder type
 	 * @return the flow
-	 * @throws ServiceLookupException When the flow cannot be found
+	 * @throws ServiceLookupException when the flow cannot be found
 	 */
 	public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
 			throws ServiceLookupException;
@@ -45,10 +47,10 @@ public interface FlowLocator {
 	 * Lookup a flow of specified implementation class; there must exactly one
 	 * flow implementation of the specified implementation in the registry this
 	 * locator queries.
-	 * @param flowDefinitionImplementationClass The required implementation
-	 *        class.
-	 * @return The flow
-	 * @throws ServiceLookupException When the flow cannot be found, or more
+	 * @param flowDefinitionImplementationClass the required implementation
+	 *        class
+	 * @return the flow
+	 * @throws ServiceLookupException when the flow cannot be found, or more
 	 *         than one flow of the specified type exists
 	 */
 	public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException;

@@ -26,7 +26,7 @@ import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 
 /**
  * A base superclass for actions that contain form view setup logic. Extends
@@ -69,7 +69,7 @@ public class SetupFormAction extends BindAndValidateAction {
 		return true;
 	}
 
-	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+	protected Event doExecuteAction(RequestContext context) throws Exception {
 		Object formObject = loadRequiredFormObject(context);
 		DataBinder binder = createBinder(context, formObject);
 		if (prepopulateFromEvent) {
@@ -95,7 +95,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * @param request The request
 	 * @param model The model
 	 */
-	protected void exposeViewPlaceholders(FlowExecutionContext context) {
+	protected void exposeViewPlaceholders(RequestContext context) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exposing view markers/placeholders to notify business-tier developers of "
 					+ "form fields that are missing, not mapped to backing objects, or need clarification");
@@ -136,7 +136,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 */
-	protected void setupReferenceData(FlowExecutionContext context) throws ReferenceDataSetupException,
+	protected void setupReferenceData(RequestContext context) throws ReferenceDataSetupException,
 			ServletRequestBindingException {
 	}
 

@@ -19,7 +19,7 @@ import ognl.Ognl;
 import ognl.OgnlException;
 
 import org.springframework.util.Assert;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
@@ -46,7 +46,7 @@ public class OgnlTransitionCriteria implements TransitionCriteria {
 		this.expressionString = expressionString;
 	}
 
-	public boolean test(FlowExecutionContext context) {
+	public boolean test(RequestContext context) {
 		try {
 			//TODO: should this use "Ognl.parseExpression(this.expressionString)"?
 			//and can we cache the parsed expression? i.e. is it thread-safe?

@@ -19,14 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.action.AbstractAction;
 
 public class AddItemAction extends AbstractAction {
 
-	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+	protected Event doExecuteAction(RequestContext context) throws Exception {
 		// check to ensure the incoming request is within the active transaction
-		// note that we're also ending the transaction using reset==true
+		// note that we're also ending the transaction using end==true
 		if (!context.getTransactionSynchronizer().inTransaction(true)) {
 			// the transaction was not valid so cannot continue normal
 			// processing
