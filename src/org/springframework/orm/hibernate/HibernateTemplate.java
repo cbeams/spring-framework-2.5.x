@@ -243,6 +243,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
+	public boolean contains(final Object entity) throws DataAccessException {
+		Boolean result = (Boolean) execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return new Boolean(session.contains(entity));
+			}
+		});
+		return result.booleanValue();
+	}
+
 	public void evict(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
@@ -357,6 +366,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				for (Iterator it = entities.iterator(); it.hasNext();) {
 					session.delete(it.next());
 				}
+				return null;
+			}
+		});
+	}
+
+	public void clear() throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) {
+				session.clear();
 				return null;
 			}
 		});

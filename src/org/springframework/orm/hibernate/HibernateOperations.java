@@ -132,10 +132,19 @@ public interface HibernateOperations {
 	 * Note: Use queries or criteria for retrieving a specific subset. 
 	 * @param entityClass a persistent class
 	 * @return a List containing 0 or more persistent instances
-	 * @throws DataAccessException if there is a Hibernate error
+	 * @throws org.springframework.dao.DataAccessException if there is a Hibernate error
 	 * @see net.sf.hibernate.Session#createCriteria
 	 */
 	List loadAll(Class entityClass) throws DataAccessException;
+
+	/**
+	 * Check whether the given object is in the Session cache.
+	 * @param entity the persistence instance to check
+	 * @return whether the given object is in the Session cache
+	 * @throws org.springframework.dao.DataAccessException if there is a Hibernate error
+	 * @see net.sf.hibernate.Session#contains
+	 */
+	boolean contains(Object entity) throws DataAccessException;
 
 	/**
 	 * Remove the given object from the Session cache.
@@ -268,6 +277,14 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#delete(String)
 	 */
 	void deleteAll(Collection entities) throws DataAccessException;
+
+	/**
+	 * Remove all objects from the Session cache, and cancel all pending saves,
+	 * updates and deletes.
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#clear
+	 */
+	void clear() throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------

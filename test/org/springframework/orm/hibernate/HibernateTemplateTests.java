@@ -62,7 +62,7 @@ public class HibernateTemplateTests extends TestCase {
 			sf.openSession();
 			sfControl.setReturnValue(session, 1);
 			session.getSessionFactory();
-			sessionControl.setReturnValue(sf);
+			sessionControl.setReturnValue(sf, 1);
 			session.flush();
 			sessionControl.setVoidCallable(1);
 			session.close();
@@ -97,7 +97,7 @@ public class HibernateTemplateTests extends TestCase {
 			sf.openSession();
 			sfControl.setReturnValue(session, 1);
 			session.getSessionFactory();
-			sessionControl.setReturnValue(sf);
+			sessionControl.setReturnValue(sf, 1);
 			session.setFlushMode(FlushMode.NEVER);
 			sessionControl.setVoidCallable(1);
 			session.close();
@@ -200,7 +200,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession(entityInterceptor);
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -231,7 +231,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.get(TestBean.class, "");
 		sessionControl.setReturnValue(tb, 1);
 		session.flush();
@@ -257,7 +257,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.get(TestBean.class, "", LockMode.UPGRADE_NOWAIT);
 		sessionControl.setReturnValue(tb, 1);
 		session.flush();
@@ -283,7 +283,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.load(TestBean.class, "");
 		sessionControl.setReturnValue(tb, 1);
 		session.flush();
@@ -308,7 +308,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.load(TestBean.class, "id");
 		ObjectNotFoundException onfex = new ObjectNotFoundException("id", TestBean.class);
 		sessionControl.setThrowable(onfex);
@@ -341,7 +341,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.load(TestBean.class, "", LockMode.UPGRADE);
 		sessionControl.setReturnValue(tb, 1);
 		session.flush();
@@ -358,6 +358,31 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testContains() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.contains(tb);
+		sessionControl.setReturnValue(true, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		assertTrue(ht.contains(tb));
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testEvict() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
@@ -367,7 +392,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.evict(tb);
 		sessionControl.setVoidCallable(1);
 		session.flush();
@@ -392,7 +417,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.lock(tb, LockMode.WRITE);
 		sessionControl.setVoidCallable(1);
 		session.flush();
@@ -417,7 +442,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.save(tb);
 		sessionControl.setReturnValue(new Integer(0), 1);
 		session.flush();
@@ -442,7 +467,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.save(tb, "id");
 		sessionControl.setVoidCallable(1);
 		session.flush();
@@ -467,7 +492,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.saveOrUpdate(tb);
 		sessionControl.setVoidCallable(1);
 		session.flush();
@@ -492,7 +517,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.update(tb);
 		sessionControl.setVoidCallable(1);
 		session.flush();
@@ -517,7 +542,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.update(tb);
 		sessionControl.setVoidCallable(1);
 		session.lock(tb, LockMode.UPGRADE);
@@ -544,7 +569,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.delete(tb);
 		sessionControl.setVoidCallable(1);
 		session.flush();
@@ -569,7 +594,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.lock(tb, LockMode.UPGRADE);
 		sessionControl.setVoidCallable(1);
 		session.delete(tb);
@@ -597,7 +622,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.delete(tb1);
 		sessionControl.setVoidCallable(1);
 		session.delete(tb2);
@@ -618,6 +643,30 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testClear() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.clear();
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.clear();
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testFind() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
@@ -629,7 +678,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.list();
@@ -661,7 +710,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue");
@@ -695,7 +744,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue", Hibernate.STRING);
@@ -729,7 +778,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue1");
@@ -765,7 +814,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue1", Hibernate.STRING);
@@ -817,7 +866,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setProperties(tb);
@@ -851,7 +900,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.list();
@@ -883,7 +932,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue");
@@ -917,7 +966,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue", Hibernate.STRING);
@@ -951,7 +1000,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue1");
@@ -987,7 +1036,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue1", Hibernate.STRING);
@@ -1038,7 +1087,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter("myparam", "myvalue");
@@ -1072,7 +1121,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter("myparam", "myvalue", Hibernate.STRING);
@@ -1106,7 +1155,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter("myparam1", "myvalue1");
@@ -1142,7 +1191,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter("myparam1", "myvalue1", Hibernate.STRING);
@@ -1182,7 +1231,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setProperties(tb);
@@ -1216,7 +1265,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setCacheable(true);
@@ -1251,7 +1300,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.getNamedQuery("some query name");
 		sessionControl.setReturnValue(query, 1);
 		query.setCacheable(true);
@@ -1286,7 +1335,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.iterate();
@@ -1318,7 +1367,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue", Hibernate.STRING);
@@ -1352,7 +1401,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setParameter(0, "myvalue1", Hibernate.STRING);
@@ -1387,7 +1436,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.delete("from example.Example");
 		sessionControl.setReturnValue(2);
 		session.flush();
@@ -1411,7 +1460,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.delete("from example.Example", "test", Hibernate.STRING);
 		sessionControl.setReturnValue(2);
 		session.flush();
@@ -1437,7 +1486,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.delete("from example.Example", values, types);
 		sessionControl.setReturnValue(2);
 		session.flush();
@@ -1575,7 +1624,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session);
 		session.getSessionFactory();
-		sessionControl.setReturnValue(sf);
+		sessionControl.setReturnValue(sf, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
