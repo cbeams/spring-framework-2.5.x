@@ -19,14 +19,28 @@ import org.springframework.context.NoSuchMessageException;
  */
 public class MessageSourceAccessor {
 
-	private MessageSource messageSource;
+	private final MessageSource messageSource;
+
+	private final Locale defaultLocale;
 
 	/**
-	 * Create a new MessageSourceAccessor.
+	 * Create a new MessageSourceAccessor, using the system Locale
+	 * as default Locale.
 	 * @param messageSource the MessageSource to wrap
 	 */
 	public MessageSourceAccessor(MessageSource messageSource) {
 		this.messageSource = messageSource;
+		this.defaultLocale = Locale.getDefault();
+	}
+
+	/**
+	 * Create a new MessageSourceAccessor, using the given default locale.
+	 * @param messageSource the MessageSource to wrap
+	 * @param defaultLocale the default locale to use for message access
+	 */
+	public MessageSourceAccessor(MessageSource messageSource, Locale defaultLocale) {
+		this.messageSource = messageSource;
+		this.defaultLocale = defaultLocale;
 	}
 
 	/**
@@ -36,7 +50,7 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage) {
-		return this.messageSource.getMessage(code, null, defaultMessage, Locale.getDefault());
+		return this.messageSource.getMessage(code, null, defaultMessage, this.defaultLocale);
 	}
 
 	/**
@@ -58,7 +72,7 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 */
 	public String getMessage(String code, Object[] args, String defaultMessage) {
-		return this.messageSource.getMessage(code, args, defaultMessage, Locale.getDefault());
+		return this.messageSource.getMessage(code, args, defaultMessage, this.defaultLocale);
 	}
 
 	/**
@@ -80,7 +94,7 @@ public class MessageSourceAccessor {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code) throws NoSuchMessageException {
-		return this.messageSource.getMessage(code, null, Locale.getDefault());
+		return this.messageSource.getMessage(code, null, this.defaultLocale);
 	}
 
 	/**
@@ -102,7 +116,7 @@ public class MessageSourceAccessor {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
-		return this.messageSource.getMessage(code, args, Locale.getDefault());
+		return this.messageSource.getMessage(code, args, this.defaultLocale);
 	}
 
 	/**
@@ -125,7 +139,7 @@ public class MessageSourceAccessor {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
-		return this.messageSource.getMessage(resolvable, Locale.getDefault());
+		return this.messageSource.getMessage(resolvable, this.defaultLocale);
 	}
 
 	/**
