@@ -17,7 +17,7 @@ import org.springframework.web.flow.FlowExecutionListener;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class BaseFlowBuilder implements FlowBuilder {
+public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuilder {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
