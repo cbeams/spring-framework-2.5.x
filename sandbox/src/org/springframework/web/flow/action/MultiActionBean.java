@@ -34,6 +34,19 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  */
 public class MultiActionBean extends AbstractActionBean {
 
+	/**
+	 * @author Keith Donald
+	 */
+	public interface EventHandlerMethodNameResolver {
+
+		/**
+		 * @param eventId
+		 * @return
+		 */
+		String getHandlerMethodName(String eventId);
+
+	}
+
 	private EventHandlerMethodNameResolver methodNameResolver = new DefaultEventHandlerMethodNameResolver();
 
 	private static class DefaultEventHandlerMethodNameResolver implements EventHandlerMethodNameResolver {
