@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030827;23324800">
+	<META NAME="CHANGED" CONTENT="20030828;22302900">
 	<STYLE>
 	<!--
 		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
@@ -501,16 +501,16 @@ next step.</P>
 &lt;beans&gt;
     &lt;bean id=&quot;springappController&quot; class=&quot;web.SpringappController&quot;<FONT COLOR="#800000">&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;productManager&quot;&gt;</FONT>
-<FONT COLOR="#800000">            &lt;ref external=&quot;prodMan&quot;/&gt;</FONT>
+<FONT COLOR="#800000">            &lt;ref bean=&quot;prodMan&quot;/&gt;</FONT>
 <FONT COLOR="#800000">        &lt;/property&gt;</FONT>
 <FONT COLOR="#800000">    &lt;/bean&gt;</FONT>
 
 <FONT COLOR="#800000">    &lt;bean id=&quot;prodMan&quot; class=&quot;bus.ProductManager&quot;&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;products&quot;&gt;</FONT>
 <FONT COLOR="#800000">            &lt;list&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref external=&quot;product1&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref external=&quot;product2&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref external=&quot;product3&quot;/&gt;</FONT>
+<FONT COLOR="#800000">                &lt;ref bean=&quot;product1&quot;/&gt;</FONT>
+<FONT COLOR="#800000">                &lt;ref bean=&quot;product2&quot;/&gt;</FONT>
+<FONT COLOR="#800000">                &lt;ref bean=&quot;product3&quot;/&gt;</FONT>
 <FONT COLOR="#800000">            &lt;/list&gt;</FONT>
 <FONT COLOR="#800000">        &lt;/property&gt;</FONT>
 <FONT COLOR="#800000">    &lt;/bean&gt;</FONT>

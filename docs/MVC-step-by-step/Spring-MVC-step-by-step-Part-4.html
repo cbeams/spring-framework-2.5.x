@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030828;21210400">
+	<META NAME="CHANGED" CONTENT="20030828;22544400">
 	<STYLE>
 	<!--
 		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
@@ -15,8 +15,8 @@
 	</STYLE>
 </HEAD>
 <BODY LANG="en-US">
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B><FONT SIZE=4>Developing
-a Spring Framework MVC application step-by-step</FONT></B></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><FONT SIZE=4><B>Developing
+a Spring Framework MVC application step-by-step</B></FONT></P>
 <P ALIGN=CENTER STYLE="margin-bottom: 0cm">Part 4 – Implementing
 Database Persistence</P>
 <P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Thomas Risberg</B>
@@ -84,6 +84,8 @@ database.</P>
 	<FONT COLOR="#000000">After all these changes, deploy and test the
 	application.</FONT></P>
 </DIV>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
 <P STYLE="margin-bottom: 0cm"><B>Step 23 – Add Ant tasks to create
 and load test data</B></P>
 <P STYLE="margin-bottom: 0cm">Before we can start developing the
@@ -419,8 +421,8 @@ are going to pass in to the prepared statement. This array gets
 passed into the update method of SqlUpdate. The update method does
 return the count of rows affected.</P>
 <P STYLE="margin-bottom: 0cm">I need to store the value of the
-primary key for each product in the Product class.  This key will be
-used when I persist any changes to the object back to the database. 
+primary key for each product in the Product class. This key will be
+used when I persist any changes to the object back to the database.
 To hold this key I add a private field named 'id' complete with
 setters and getters to Product.java.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -472,12 +474,12 @@ setters and getters to Product.java.</P>
 	</TR>
 </TABLE>
 <P STYLE="margin-bottom: 0cm">Now it is time to test this whole DAO
-setup.  Actually, we probably should have written the tests first,
-but since this is a tutorial style document I think it makes more
-sense to introduce the actual code before the tests.  I decided to
-test with a live database, so I will have to add dependencies for
-clearData and loadData to the junit task in the build.xml.  This will
-ensure that we will have a consistent starting point for our tests.</P>
+setup. Actually, we probably should have written the tests first, but
+since this is a tutorial style document I think it makes more sense
+to introduce the actual code before the tests. I decided to test with
+a live database, so I will have to add dependencies for clearData and
+loadData to the junit task in the build.xml. This will ensure that we
+will have a consistent starting point for our tests.</P>
 <TABLE WIDTH=849 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=839>
 	<TR>
@@ -511,7 +513,7 @@ ensure that we will have a consistent starting point for our tests.</P>
 	</TR>
 </TABLE>
 <P STYLE="margin-bottom: 0cm">Next, I add a
-TestProductManagerDaoJdbc.java to our collection of unit tests.  In
+TestProductManagerDaoJdbc.java to our collection of unit tests. In
 the setup part I create a data source that will be used for testing. 
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -574,14 +576,205 @@ move on and modify the web application to make use of these new
 database persistence capabilities.</P>
 <P STYLE="margin-bottom: 0cm"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 24 – Modify web application.</B></P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0cm"><B>Step 24 – Modify web application
+to use database persistence.</B></P>
+<P STYLE="margin-bottom: 0cm">If we structured our application
+properly, we should only have to change the business classes to take
+advantage of the database       persistence.  The view and controller
+classes should not have to be modified, since they should be unaware
+of any implementation details of the business classes.  So let's add
+the persistence to the ProductManager class.  I add a reference to a
+ProductManagerDao interface plus a setter method for this reference. 
+Which implementation that we actually use should be irrelevant to the
+ProductManager class, and we will set this through a configuration
+option.</P>
+<TABLE WIDTH=907 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=897>
+	<TR>
+		<TD WIDTH=897 VALIGN=TOP BGCOLOR="#ffcc99">
+			<P><FONT FACE="Nimbus Mono L"><FONT SIZE=2><B>springapp/src/bus/ProductManager.java</B></FONT></FONT></P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=897 VALIGN=TOP BGCOLOR="#ffffcc">
+			<PRE><FONT COLOR="#000000">package bus;</FONT>
+
+<FONT COLOR="#000000">import java.io.Serializable;</FONT>
+<FONT COLOR="#000000">import java.util.ListIterator;</FONT>
+<FONT COLOR="#000000">import java.util.List;</FONT>
+<FONT COLOR="#800000">import db.ProductManagerDao;</FONT>
+
+<FONT COLOR="#000000">public class ProductManager implements Serializable {</FONT>
+
+<FONT COLOR="#800000">    private ProductManagerDao pmd;</FONT>
+<FONT COLOR="#000000">    private List products;</FONT>
+
+<FONT COLOR="#800000">    public void setProductManagerDao(ProductManagerDao pmd) {</FONT>
+<FONT COLOR="#800000">        this.pmd = pmd;</FONT>
+<FONT COLOR="#800000">    }</FONT>
+
+<FONT COLOR="#000000">    public void setProducts(List p) {</FONT>
+<FONT COLOR="#000000">        products = p;</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public List getProducts() {</FONT>
+<FONT COLOR="#800000">        products = pmd.getProductList();</FONT>
+<FONT COLOR="#000000">        return products;</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public void increasePrice(int pct) {</FONT>
+<FONT COLOR="#000000">        ListIterator li = products.listIterator();</FONT>
+<FONT COLOR="#000000">        while (li.hasNext()) {</FONT>
+<FONT COLOR="#000000">            Product p = (Product) li.next();</FONT>
+<FONT COLOR="#800000">            <STRIKE>double newPrice = p.getPrice().doubleValue() * (100 + pct)/100;</STRIKE></FONT>
+<FONT COLOR="#800000">            <STRIKE>p.setPrice(new Double(newPrice));</STRIKE></FONT>
+<FONT COLOR="#800000">            pmd.increasePrice(p, pct);</FONT>
+<FONT COLOR="#000000">        }</FONT>
+<FONT COLOR="#000000">        </FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">}</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">We will no longer rely on the product
+list that we have in memory.  Every time getProducts is called, we
+will go out and query the database.  The increasePrice method will
+now delegate to the DAO to increase the price and the new price will
+be reflected the next time we call the getProducts method.</P>
+<P STYLE="margin-bottom: 0cm">Next we need to modify the
+configuration file for the web application – springapp-servlet.xml.</P>
+<TABLE WIDTH=955 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=945>
+	<TR>
+		<TD WIDTH=945 VALIGN=TOP BGCOLOR="#ffcc99">
+			<P><B><FONT SIZE=2><FONT FACE="Nimbus Mono L">springapp/war/WEB-INF/springapp-servlet.xml</FONT></FONT></B>
+						</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=945 VALIGN=TOP BGCOLOR="#ffffcc">
+			<PRE>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE beans PUBLIC &quot;-//SPRING//DTD BEAN//EN&quot; 
+ &quot;http://www.springframework.org/dtd/spring-beans.dtd&quot;&gt;
+
+<FONT COLOR="#000000">&lt;!--</FONT>
+<FONT COLOR="#000000">  - Application context definition for &quot;springapp&quot; DispatcherServlet.</FONT>
+<FONT COLOR="#000000">  --&gt;</FONT>
+
+<FONT COLOR="#000000">&lt;beans&gt;</FONT>
+
+<FONT COLOR="#000000">    &lt;!--  Controller for the initial &quot;Hello&quot; page --&gt;</FONT>
+<FONT COLOR="#000000">    &lt;bean id=&quot;springappController&quot; class=&quot;web.SpringappController&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;productManager&quot;&gt;</FONT>
+<FONT COLOR="#000000">            &lt;ref external=&quot;prodMan&quot;/&gt;</FONT>
+<FONT COLOR="#000000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+
+<FONT COLOR="#000000">    &lt;!--  Validator and Form Controller for the &quot;Price Increase&quot; page --&gt;</FONT>
+<FONT COLOR="#000000">    &lt;bean id=&quot;priceIncreaseValidator&quot; class=&quot;bus.PriceIncreaseValidator&quot;/&gt;</FONT>
+<FONT COLOR="#000000">    &lt;bean id=&quot;priceIncreaseForm&quot; class=&quot;web.PriceIncreaseFormController&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;sessionForm&quot;&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;beanName&quot;&gt;&lt;value&gt;priceIncrease&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;commandClass&quot;&gt;&lt;value&gt;bus.PriceIncrease&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;validator&quot;&gt;&lt;ref bean=&quot;priceIncreaseValidator&quot;/&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;formView&quot;&gt;&lt;value&gt;priceincrease&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;successView&quot;&gt;&lt;value&gt;hello&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;productManager&quot;&gt;</FONT>
+<FONT COLOR="#000000">            &lt;ref external=&quot;prodMan&quot;/&gt;</FONT>
+<FONT COLOR="#000000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+
+<FONT COLOR="#800000">    &lt;bean id=&quot;dataSource&quot; class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;&gt;</FONT>
+<FONT COLOR="#800000">      &lt;property name=&quot;driverClassName&quot;&gt;&lt;value&gt;org.hsqldb.jdbcDriver&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#800000">      &lt;property name=&quot;url&quot;&gt;</FONT>
+<FONT COLOR="#800000">        &lt;value&gt;jdbc:hsqldb:/home/trisberg/workspace/springapp2/db/test&lt;/value&gt;</FONT>
+<FONT COLOR="#800000">      &lt;/property&gt;</FONT>
+<FONT COLOR="#800000">      &lt;property name=&quot;username&quot;&gt;&lt;value&gt;sa&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#800000">      &lt;property name=&quot;password&quot;&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#800000">    &lt;/bean&gt;</FONT>
+
+<FONT COLOR="#800000">    &lt;bean id=&quot;prodManDao&quot; class=&quot;db.ProductManagerDaoJdbc&quot;&gt;</FONT>
+<FONT COLOR="#800000">        &lt;property name=&quot;dataSource&quot;&gt;</FONT>
+<FONT COLOR="#800000">            &lt;ref bean=&quot;dataSource&quot;/&gt;</FONT>
+<FONT COLOR="#800000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#800000">    &lt;/bean&gt;</FONT>
+
+    &lt;bean id=&quot;prodMan&quot; class=&quot;bus.ProductManager&quot;&gt;
+<FONT COLOR="#800000">        &lt;property name=&quot;productManagerDao&quot;&gt;</FONT>
+<FONT COLOR="#800000">            &lt;ref bean=&quot;prodManDao&quot;/&gt;</FONT>
+<FONT COLOR="#800000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#800000">        <STRIKE>&lt;property name=&quot;products&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000">            <STRIKE>&lt;list&gt;</STRIKE></FONT>
+<FONT COLOR="#800000">                <STRIKE>&lt;ref bean=&quot;product1&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000">                <STRIKE>&lt;ref bean=&quot;product2&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000">                <STRIKE>&lt;ref bean=&quot;product3&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000">            <STRIKE>&lt;/list&gt;</STRIKE></FONT>
+<FONT COLOR="#800000">        <STRIKE>&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+<FONT COLOR="#800000">    </FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN><STRIKE>&lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN><STRIKE>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Lamp&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN><STRIKE>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;5.75&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN><STRIKE>&lt;/bean&gt;</STRIKE></FONT>
+<FONT COLOR="#800000">        </FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN><STRIKE>&lt;bean id=&quot;product2&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN><STRIKE>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Table&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN><STRIKE>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;75.25&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN><STRIKE>&lt;/bean&gt;</STRIKE></FONT>
+
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN><STRIKE>&lt;bean id=&quot;product3&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN><STRIKE>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Chair&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN><STRIKE>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;22.79&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN><STRIKE>&lt;/bean&gt;</STRIKE></FONT>
+
+<FONT COLOR="#000000">    &lt;bean id=&quot;messageSource&quot; class=&quot;org.springframework.context.support.ResourceBundleMessageSource&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;basename&quot;&gt;&lt;value&gt;messages&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+
+<FONT COLOR="#000000">    &lt;bean id=&quot;urlMapping&quot; class=&quot;org.springframework.web.servlet.handler.SimpleUrlHandlerMapping&quot;&gt; </FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;mappings&quot;&gt;</FONT>
+<FONT COLOR="#000000">            &lt;props&gt;</FONT>
+<FONT COLOR="#000000">                &lt;prop key=&quot;/hello.htm&quot;&gt;springappController&lt;/prop&gt;</FONT>
+<FONT COLOR="#000000">                &lt;prop key=&quot;/priceincrease.htm&quot;&gt;priceIncreaseForm&lt;/prop&gt;</FONT>
+<FONT COLOR="#000000">            &lt;/props&gt;</FONT>
+<FONT COLOR="#000000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+
+<FONT COLOR="#000000">    &lt;bean id=&quot;viewResolver&quot; class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;viewClass&quot;&gt;</FONT>
+<FONT COLOR="#000000">           &lt;value&gt;org.springframework.web.servlet.view.JstlView&lt;/value&gt;</FONT>
+<FONT COLOR="#000000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;prefix&quot;&gt;&lt;value&gt;/WEB-INF/jsp/&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;suffix&quot;&gt;&lt;value&gt;.jsp&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+&lt;/beans&gt;</PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">I remove the population of a set of
+products that were passed in to the ProductManager.  I replace this
+by adding beans for a DataSource and a ProductManagerDaoJdbc
+implementation.  The URL provided for the datasource includes the
+full path for the database location
+(/home/trisberg/workspace/springapp2/db/test).  You will <SPAN LANG="en-US">of
+course have to adjust this to match your setup. </SPAN>
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
-</P>
-<P STYLE="margin-bottom: 0cm"><BR>
-</P>
-<P STYLE="margin-bottom: 0cm">To be continued ...</P>
+<P STYLE="margin-bottom: 0cm">Now we can build and deploy the
+modified application.  Run 'ant undeploy deploy' to clean out any of
+the old classes and replace them with the new ones.  Then fire up
+Tomcat and pull up the application.  The only difference you should
+see is the decimals<SPAN LANG="en-US"> </SPAN>limited to two
+positions due to the column being declared that way in the database. 
+Also, you should see any<SPAN LANG="en-US"> price increases </SPAN>remaining
+in effect even after you cycle the application server.</P>
+<P STYLE="margin-bottom: 0cm">There are still a few things I would
+like to improve upon.  To begin with, we are not using a connection
+pool which is a must for any serious web application deployment.  We
+are also using HSQL in  a standalone mode, which is limiting us to
+one connection at a time.  This of course will not scale.  I'll leave
+these improvements up to you for now – I might add them in an
+additional part to this document in the future.</P>
 <P STYLE="margin-bottom: 0cm"><BR>
 </P>
 <P STYLE="margin-bottom: 0cm"><BR>
