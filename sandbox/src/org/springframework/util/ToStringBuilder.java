@@ -11,7 +11,7 @@ package org.springframework.util;
  * @author Keith Donald, adapted from jakarta-commons-lang ToStringBuilder.
  */
 public class ToStringBuilder {
-    private static final ToStringStyler DEFAULT_STYLER = new SpringToStringStyler();
+    private static final ToStringStyler DEFAULT_STYLER = new DefaultToStringStyler();
     private boolean field;
     private StringBuffer buffer = new StringBuffer(512);
     private ToStringStyler styler;

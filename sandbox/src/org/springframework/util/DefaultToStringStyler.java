@@ -14,9 +14,9 @@ package org.springframework.util;
  * 
  * @author Keith Donald
  */
-public class SpringToStringStyler implements ToStringStyler {
+public class DefaultToStringStyler implements ToStringStyler {
 
-    private SpringValueStyler stylerVisitor = new SpringValueStyler();
+    private ObjectStyler stylerVisitor = new DefaultObjectStyler();
 
     public void styleStart(StringBuffer buffer, Object o) {
         buffer.append('[').append(ClassUtils.getShortName(o.getClass()));
@@ -53,7 +53,7 @@ public class SpringToStringStyler implements ToStringStyler {
     }
 
     public void styleValue(StringBuffer buffer, Object value) {
-        buffer.append(stylerVisitor.styleValue(value));
+        buffer.append(stylerVisitor.style(value));
     }
 
     public void styleFieldStart(StringBuffer buffer, String fieldName) {

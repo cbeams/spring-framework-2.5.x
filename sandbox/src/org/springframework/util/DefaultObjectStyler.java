@@ -18,47 +18,47 @@ import org.springframework.util.visitor.Visitor;
  * 
  * @author Keith Donald
  */
-public class SpringValueStyler implements Visitor {
+public class DefaultObjectStyler implements Visitor, ObjectStyler {
     private ReflectiveVisitorSupport visitorSupport =
         new ReflectiveVisitorSupport();
 
     /**
-     * Styles the string form of this value using the reflective visitor
+     * Styles the string form of this object using the reflective visitor
      * pattern. The reflective help removes the need to define a vistable class
      * for each type of styled valued.
      * 
-     * @param value
-     *            The value to be styled.
+     * @param o
+     *            The object to be styled.
      * @return The styled string.
      */
-    public String styleValue(Object value) {
-        return (String)visitorSupport.invokeVisit(this, value);
+    public String style(Object o) {
+        return (String)visitorSupport.invokeVisit(this, o);
     }
 
-    public String visitString(String value) {
+    public String visit(String value) {
         return ('\'' + value + '\'');
     }
 
-    public String visitNumber(Number value) {
+    public String visit(Number value) {
         return String.valueOf(value);
     }
 
-    public String visitClass(Class clazz) {
+    public String visit(Class clazz) {
         return ClassUtils.getShortName(clazz);
     }
 
-    public String visitMethod(Method method) {
+    public String visit(Method method) {
         return method.getName()
             + "@"
             + ClassUtils.getShortName(method.getDeclaringClass());
     }
 
-    public String visitMap(Map value) {
+    public String visit(Map value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
         buffer.append("<map = { ");
         for (Iterator i = value.entrySet().iterator(); i.hasNext();) {
             Map.Entry entry = (Map.Entry)i.next();
-            buffer.append(styleValue(entry));
+            buffer.append(style(entry));
             if (i.hasNext()) {
                 buffer.append(',').append(' ');
             }
@@ -70,15 +70,15 @@ public class SpringValueStyler implements Visitor {
         return buffer.toString();
     }
 
-    public String visitMapEntry(Map.Entry value) {
+    public String visit(Map.Entry value) {
         return value.getKey() + " -> " + value.getValue();
     }
 
-    public String visitSet(Set value) {
+    public String visit(Set value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
         buffer.append("<set = { ");
         for (Iterator i = value.iterator(); i.hasNext();) {
-            buffer.append(styleValue(i.next()));
+            buffer.append(style(i.next()));
             if (i.hasNext()) {
                 buffer.append(',').append(' ');
             }
@@ -90,11 +90,11 @@ public class SpringValueStyler implements Visitor {
         return buffer.toString();
     }
 
-    public String visitList(List value) {
+    public String visit(List value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
         buffer.append("<list = { ");
         for (Iterator i = value.iterator(); i.hasNext();) {
-            buffer.append(styleValue(i.next()));
+            buffer.append(style(i.next()));
             if (i.hasNext()) {
                 buffer.append(',').append(' ');
             }
@@ -106,7 +106,7 @@ public class SpringValueStyler implements Visitor {
         return buffer.toString();
     }
 
-    public String visitObject(Object value) {
+    public String visit(Object value) {
         if (value.getClass().isArray()) {
             return styleArray(getObjectArray(value));
         } else {
@@ -122,11 +122,11 @@ public class SpringValueStyler implements Visitor {
         StringBuffer buffer = new StringBuffer(array.length * 8 + 16);
         buffer.append("<array = { ");
         for (int i = 0; i < array.length - 1; i++) {
-            buffer.append(styleValue(array[i]));
+            buffer.append(style(array[i]));
             buffer.append(',').append(' ');
         }
         if (array.length > 0) {
-            buffer.append(styleValue(array[array.length - 1]));
+            buffer.append(style(array[array.length - 1]));
         } else {
             buffer.append("<none>");
         }
