@@ -120,7 +120,7 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
+		req = new MockHttpServletRequest("GET", "/Myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/mypath");
 		hec = hm.getHandler(req);
