@@ -22,6 +22,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.NameMatchMethodPointcutAdvisor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContextException;
@@ -137,10 +138,8 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		CglibTestBean bean = new CglibTestBean();
 		bean.setName("Rob Harrop");
 
-		mockTargetSource.setTarget(bean);
-
 		AdvisedSupport as = new AdvisedSupport(new Class[]{});
-		as.setTargetSource(mockTargetSource);
+		as.setTarget(bean);
 		as.addAdvice(new NopInterceptor());
 		AopProxy aop = new Cglib2AopProxy(as);
 
@@ -148,6 +147,23 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 		assertEquals("The name property has been overwritten by the constructor",
 				"Rob Harrop", proxy.getName());
+	}
+
+	public void testUnadvisedProxyCreationWithCallDuringConstructor() throws Exception {
+		CglibTestBean target = new CglibTestBean();
+		target.setName("Rob Harrop");
+
+		AdvisedSupport pc = new AdvisedSupport(new Class[]{});
+		pc.setFrozen(true);
+		pc.setTarget(target);
+
+		Cglib2AopProxy aop = new Cglib2AopProxy(pc);
+
+		CglibTestBean proxy = (CglibTestBean) aop.getProxy();
+
+		assertNotNull("Proxy should not be null", proxy);
+		assertEquals("Constructor overrode the value of name", "Rob Harrop", proxy.getName());
+
 	}
 
 	public void testMultipleProxies() {
@@ -193,19 +209,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		proxy = (NoArgCtorTestBean) aop.getProxy();
 
 		assertNotNull("Proxy should be null", proxy);
-	}
-
-	public void testUnadvisedProxyCreationWithCallDuringConstructor() throws Exception {
-		CglibTestBean target = new CglibTestBean();
-		AdvisedSupport pc = new AdvisedSupport(new Class[]{});
-		mockTargetSource.setTarget(target);
-		pc.setTargetSource(mockTargetSource);
-
-		Cglib2AopProxy aop = new Cglib2AopProxy(pc);
-		CglibTestBean proxy = (CglibTestBean) aop.getProxy();
-
-		assertNotNull("Proxy should not be null", proxy);
-
 	}
 
 	// TODO: fails with a ClassFormatError
