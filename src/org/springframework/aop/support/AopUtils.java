@@ -136,12 +136,14 @@ public abstract class AopUtils {
 	 */
 	public static Class[] toInterfaceArray(String[] interfaceNames)
 	    throws IllegalArgumentException, ClassNotFoundException {
+
 		Class interfaces[] = new Class[interfaceNames.length];
 		for (int i = 0; i < interfaceNames.length; i++) {
-			interfaces[i] = Class.forName(interfaceNames[i], true, Thread.currentThread().getContextClassLoader());
-			// Check it's an interface
-			if (!interfaces[i].isInterface())
+			interfaces[i] = Class.forName(interfaceNames[i].trim(), true, Thread.currentThread().getContextClassLoader());
+			// Check it's an interface.
+			if (!interfaces[i].isInterface()) {
 				throw new IllegalArgumentException("Can proxy only interfaces: [" + interfaces[i].getName() + "] is a class");
+			}
 		}
 		return interfaces;
 	}

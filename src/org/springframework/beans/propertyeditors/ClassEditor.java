@@ -19,6 +19,7 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Editor for java.lang.Class, to directly feed a Class property
@@ -37,11 +38,16 @@ import org.springframework.util.ClassUtils;
 public class ClassEditor extends PropertyEditorSupport {
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		try {
-			setValue(ClassUtils.forName(text));
+		if (StringUtils.hasText(text)) {
+			try {
+				setValue(ClassUtils.forName(text.trim()));
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalArgumentException("Invalid class name: " + ex.getMessage());
+			}
 		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException("Invalid class name: " + ex.getMessage());
+		else {
+			setValue(null);
 		}
 	}
 
