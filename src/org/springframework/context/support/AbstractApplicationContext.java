@@ -66,7 +66,7 @@ import org.springframework.core.OrderComparator;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -466,6 +466,11 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		return getBeanFactory().getAliases(name);
 	}
 
+	public void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck)
+			throws BeansException {
+		getBeanFactory().autowireExistingBean(existingBean, autowireMode, dependencyCheck);
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ListableBeanFactory
@@ -487,9 +492,15 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		return getBeanFactory().getBeansOfType(type, includePrototypes, includeFactoryBeans);
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of HierarchicalBeanFactory
+	//---------------------------------------------------------------------
+
 	public BeanFactory getParentBeanFactory() {
 		return getParent();
 	}
+
 
 	/** Show information about this context */
 	public String toString() {

@@ -151,18 +151,18 @@ public class BeanFactoryBootstrapTests extends TestCase {
 			m.put("s", new String());
 		}
 		
-		public Object getBean(String name) throws BeansException {
+		public Object getBean(String name) {
 			Object bean = m.get(name);
 			if (bean == null)
 				throw new NoSuchBeanDefinitionException(name, "no message");
 			return bean;
 		}
 
-		public Object getBean(String name, Class requiredType) throws BeansException {
+		public Object getBean(String name, Class requiredType) {
 			return getBean(name);
 		}
 
-		public boolean containsBean(String name) throws BeansException {
+		public boolean containsBean(String name) {
 			return m.containsKey(name);
 		}
 
@@ -170,11 +170,12 @@ public class BeanFactoryBootstrapTests extends TestCase {
 			return true;
 		}
 
-		/**
-		 * @see org.springframework.beans.factory.BeanFactory#getAliases(java.lang.String)
-		 */
-		public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
+		public String[] getAliases(String name) {
 			throw new UnsupportedOperationException("getAliases");
+		}
+
+		public void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck) {
+			throw new UnsupportedOperationException("autowireExistingBean");
 		}
 	}
 

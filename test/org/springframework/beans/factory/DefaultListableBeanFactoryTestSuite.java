@@ -368,7 +368,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
 		lbf.registerBeanDefinition("spouse", bd);
 		DependenciesBean existingBean = new DependenciesBean();
-		lbf.autowireByName(existingBean, true);
+		lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_NAME, true);
 		TestBean test = (TestBean) lbf.getBean("spouse");
 		assertEquals(existingBean.getSpouse(), test);
 	}
@@ -379,7 +379,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		lbf.registerBeanDefinition("spous", bd);
 		DependenciesBean existingBean = new DependenciesBean();
 		try {
-			lbf.autowireByName(existingBean, true);
+			lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_NAME, true);
 			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException ex) {
@@ -392,7 +392,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
 		lbf.registerBeanDefinition("spous", bd);
 		DependenciesBean existingBean = new DependenciesBean();
-		lbf.autowireByName(existingBean, false);
+		lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_NAME, false);
 		assertNull(existingBean.getSpouse());
 	}
 
@@ -401,7 +401,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
 		lbf.registerBeanDefinition("test", bd);
 		DependenciesBean existingBean = new DependenciesBean();
-		lbf.autowireByType(existingBean, true);
+		lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_TYPE, true);
 		TestBean test = (TestBean) lbf.getBean("test");
 		assertEquals(existingBean.getSpouse(), test);
 	}
@@ -410,7 +410,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		DependenciesBean existingBean = new DependenciesBean();
 		try {
-			lbf.autowireByType(existingBean, true);
+			lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_TYPE, true);
 			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException ex) {
@@ -421,8 +421,19 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 	public void testAutowireExistingBeanByTypeWithNoDependencyCheck() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		DependenciesBean existingBean = new DependenciesBean();
-		lbf.autowireByType(existingBean, false);
+		lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_TYPE, false);
 		assertNull(existingBean.getSpouse());
+	}
+
+	public void testInvalidAutowireMode() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		try {
+			lbf.autowireExistingBean(new TestBean(), 0, false);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 }

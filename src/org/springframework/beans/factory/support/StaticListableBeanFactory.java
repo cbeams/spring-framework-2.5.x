@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * Static factory that allows to register existing singleton instances programmatically.
  * @author Rod Johnson
  * @since 06-Jan-03
- * @version $Id: StaticListableBeanFactory.java,v 1.4 2003-11-21 09:52:46 jhoeller Exp $
+ * @version $Id: StaticListableBeanFactory.java,v 1.5 2003-11-28 21:09:22 jhoeller Exp $
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
@@ -44,8 +44,9 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	
 	public Object getBean(String name, Class requiredType) throws BeansException {
 		Object bean = getBean(name);
-		if (!requiredType.isAssignableFrom(bean.getClass()))
+		if (!requiredType.isAssignableFrom(bean.getClass())) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean);
+		}
 		return bean;
 	}
 
@@ -66,6 +67,10 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	public String[] getAliases(String name) {
 		return null;
+	}
+
+	public void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck) {
+		throw new UnsupportedOperationException("StaticListableBeanFactory does not support autowiring");
 	}
 
 	public int getBeanDefinitionCount() {

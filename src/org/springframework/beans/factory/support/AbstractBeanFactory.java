@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.27 2003-11-28 16:51:09 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.28 2003-11-28 21:09:22 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -303,6 +303,19 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 	}
 
+	public void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck)
+			throws BeansException {
+		if (autowireMode != AUTOWIRE_BY_NAME && autowireMode != AUTOWIRE_BY_TYPE) {
+			throw new IllegalArgumentException("Just constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE allowed");
+		}
+		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), null);
+		bd.setAutowire(autowireMode);
+		if (dependencyCheck) {
+			bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
+		}
+		configureBean("(existing bean)", bd, new BeanWrapperImpl(existingBean));
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ConfigurableBeanFactory interface
@@ -430,42 +443,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	}
 
 	/**
-	 * Autowire the given existing bean instance by name.
-	 * Also invokes lifecycle methods and applies BeanPostProcessors.
-	 * Not used internally, just available for outside callers.
-	 * @param existingBean the existing bean instance
-	 * @param dependencyCheck whether to perform a dependency check for object
-	 * @return the wired bean instance, potentially wrapped by a proxy
-	 * @throws BeansException if wiring or configuring failed
-	 */
-	public Object autowireByName(Object existingBean, boolean dependencyCheck) throws BeansException {
-		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), null);
-		bd.setAutowire(RootBeanDefinition.AUTOWIRE_BY_NAME);
-		if (dependencyCheck) {
-			bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
-		}
-		return configureBean("(existing bean)", bd, new BeanWrapperImpl(existingBean));
-	}
-
-	/**
-	 * Autowire the given existing bean instance by type.
-	 * Also invokes lifecycle methods and applies BeanPostProcessors.
-	 * Not used internally, just available for outside callers.
-	 * @param existingBean the existing bean instance
-	 * @param dependencyCheck whether to perform a dependency check for object
-	 * @return the wired bean instance, potentially wrapped by a proxy
-	 * @throws BeansException if wiring or configuring failed
-	 */
-	public Object autowireByType(Object existingBean, boolean dependencyCheck) throws BeansException {
-		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), null);
-		bd.setAutowire(RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		if (dependencyCheck) {
-			bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
-		}
-		return configureBean("(existing bean)", bd, new BeanWrapperImpl(existingBean));
-	}
-
-	/**
 	 * Get the object for the given shared bean, either the bean
 	 * instance itself or its created object in case of a FactoryBean.
 	 * @param name name that may include factory dereference prefix
@@ -547,7 +524,25 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		else {
 			instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
 		}
-		return configureBean(beanName, mergedBeanDefinition, instanceWrapper);
+
+		Object bean = instanceWrapper.getWrappedInstance();
+
+		// Eagerly cache singletons to be able to resolve circular references
+		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+		if (mergedBeanDefinition.isSingleton()) {
+			this.singletonCache.put(beanName, bean);
+		}
+
+		configureBean(beanName, mergedBeanDefinition, instanceWrapper);
+		callLifecycleMethodsIfNecessary(bean, beanName, mergedBeanDefinition, instanceWrapper);
+
+		bean = applyBeanPostProcessors(bean, beanName);
+		// re-cache the instance even if already eagerly cached in createBean,
+		// as it could have been wrapped by a BeanPostProcessor
+		if (mergedBeanDefinition.isSingleton()) {
+			this.singletonCache.put(beanName, bean);
+		}
+		return bean;
 	}
 
 	/**
@@ -695,24 +690,11 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 	/**
 	 * Configure the bean instance in the given BeanWrapper.
-	 * Also invokes lifecycle methods and applies BeanPostProcessors.
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @param bw BeanWrapper with bean instance
-	 * @return a new instance of the bean, possibly proxied
 	 */
-	protected Object configureBean(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
-		Object bean = bw.getWrappedInstance();
-
-		// eagerly cache singletons to be able to resolve circular references
-		// even when triggered by lifecycle interfaces like BeanFactoryAware
-		if (mergedBeanDefinition.isSingleton()
-				// We need this check because getBean on dependencies above may have materialized this bean
-				&& null == singletonCache.get(beanName)
-				) {
-			registerSingleton(beanName, bean);
-		}
-
+	protected void configureBean(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
 		// add property values based on autowire by name if it's applied
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
 			autowireByName(beanName, mergedBeanDefinition, bw);
@@ -725,15 +707,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 		dependencyCheck(beanName, mergedBeanDefinition, bw);
 		applyPropertyValues(beanName, bw, mergedBeanDefinition.getPropertyValues());
-		callLifecycleMethodsIfNecessary(bean, beanName, mergedBeanDefinition, bw);
-
-		bean = applyBeanPostProcessors(bean, beanName);
-		// re-cache the instance even if already eagerly cached in createBean,
-		// as it could have been wrapped by a BeanPostProcessor
-		if (mergedBeanDefinition.isSingleton()) {
-			this.singletonCache.put(beanName, bean);
-		}
-		return bean;
 	}
 
 	/**
