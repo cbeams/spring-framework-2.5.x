@@ -1,0 +1,438 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20030630;21474000">
+	<META NAME="CHANGED" CONTENT="20030827;23384900">
+	<STYLE>
+	<!--
+		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
+		TD P { margin-bottom: 0.21cm }
+		P { margin-bottom: 0.21cm }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US">
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><FONT SIZE=4><B>Developing
+a Spring Framework MVC<SPAN LANG="en-US"> application </SPAN>step-by-step</B></FONT></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm">Part 4 – Implementing
+Database Persistence</P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Thomas Risberg</B>
+<BR>August, 2003</P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">This is Part 4 of a step-by-step
+account of how to develop a web application from scratch using the
+Spring Framework. In Part 1 (Steps 1 – 12) we configured the
+environment and set up a basic application that we will build upon.
+Part 2 (Steps 13-18) improved the application in several ways. Part 3
+(Steps 19-22) Added some unit tests to the application and we also
+added a Form for performing a price increase. In Part 4 it is time to
+deal with database persistence. We saw in the earlier parts how we
+loaded some business objects using bean definitions in a
+configuration file. It is obvious that this would never work in real
+life – whenever we re-start the server we are back to the original
+prices. We need to add code to actually persist these changes to a
+database.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<DIV ID="Section1" STYLE="background: #e6e6ff">
+	<P STYLE="margin-bottom: 0cm"><B><FONT SIZE=4>NOTE:</FONT></B><I> If
+	you started this project based on the 'spring-framework-0.9'
+	release, then there are a few changes you will have to make.  In the
+	'spring-framework-1.0m1' release, we have changed the package names
+	and the name of the the TLD.</I></P>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm"><I>We need to replace Spring's<SPAN LANG="en-US">
+		distribution </SPAN>jar file - copy
+		</I>spring-framework-1.0m1/dist/spring-full-1.0.jar<I> to replace
+		</I>war/WEB-INF/lib/spring-framework-0.9.jar.</P>
+	</UL>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm"><I>We also need to replace the
+		TLD file - copy
+		</I>spring-framework-1.0m1/samples/petclinic/war/WEB-INF/spring.tld<I>
+		to replace </I>springapp/war/WEB-INF/i21.tld.</P>
+	</UL>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm"><I>Do a global change from
+		'com.interface21' to 'org.springframework' in the following files</I>:</P>
+	</UL>
+	<PRE><FONT COLOR="#000000">        src/bus/PriceIncreaseValidator.java</FONT>
+<FONT COLOR="#000000">        src/web/SpringappController.java</FONT>
+<FONT COLOR="#000000">        src/web/PriceIncreaseFormController.java</FONT>
+<FONT COLOR="#000000">        src/tests/WEB-INF/springapp-servlet.xml</FONT>
+<FONT COLOR="#000000">        src/tests/TestSpringappController.java</FONT>
+<FONT COLOR="#000000">        war/WEB-INF/web.xml</FONT>
+<FONT COLOR="#000000">        war/WEB-INF/springapp-servlet.xml</FONT></PRE>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm"><I>Do a global change from 'i21'
+		to 'spring' in the following files: </I>
+		</P>
+	</UL>
+	<PRE STYLE="font-style: normal"><FONT COLOR="#000000">        war/WEB-INF/web.xml</FONT>
+<FONT COLOR="#000000">        war/WEB-INF/jsp/priceincrease.jsp</FONT></PRE>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm"><I>Remove i21.tld and
+		spring-framework-0.9.jar from the deployment directory for Tomcat.
+		I removed the following files: </I>
+		</P>
+	</UL>
+	<PRE><FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/i21.tld</FONT>
+<FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/lib/spring-framework-0.9.jar</FONT></PRE><P STYLE="margin-bottom: 0cm; font-style: normal">
+	<FONT COLOR="#000000">After all these changes, deploy and test the
+	application.</FONT></P>
+</DIV>
+<P STYLE="margin-bottom: 0cm"><B>Step 23 – Add Ant tasks to create
+and load test data</B></P>
+<P STYLE="margin-bottom: 0cm">Before we can start developing the
+persistence code, we should create the database tables that we need
+for our development and testing. We also need a database. I am
+planning on using HSQL, which is a good open source database written
+in Java. This database is distributed with Spring's Petclinic sample
+application, so we can just copy the jar file to the web apps lib
+directory. Copy
+spring-framework-1.0m1/samples/petclinic/war/WEB-INF/lib/hsqldb.jar
+to springapp/war/WEB-INF/lib/. I am planning on using HSQL in a
+standalone mode to begin with. That way we don't have to worry about
+starting up a separate database server<SPAN LANG="en-US"> every time
+</SPAN>we use it. The URL we specify for connecting to HSQL controls
+the mode that the database is running in. To be able to run some Ant
+tasks for the database we have to add some database properties to the
+build properties file.</P>
+<TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=256*>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#ffcc99">
+			<P><B><FONT SIZE=2><FONT FACE="Nimbus Mono L">springapp/build.properties</FONT></FONT></B>
+						</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#ffffcc">
+			<PRE># Ant properties for building the springapp
+
+deploy.path=/home/trisberg/jakarta-tomcat-4.1.24/webapps
+#deploy.path=c:/Tomcat 4.1/webapps
+#deploy.path=c:/bea/user_projects/domains/mydomain/applications
+
+tomcat.home=/home/trisberg/jakarta-tomcat-4.1.24
+#tomcat.home= c:/Tomcat 4.1
+tomcat.manager.url=http://localhost:8080/manager
+tomcat.manager.username=admin
+tomcat.manager.password=tomcat
+
+<FONT COLOR="#800000">db.driver=org.hsqldb.jdbcDriver</FONT>
+<FONT COLOR="#800000">db.url=jdbc:hsqldb:db/test</FONT>
+<FONT COLOR="#800000">db.user=sa</FONT>
+<FONT COLOR="#800000">db.pw=</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">Next I add the targets I need to the
+build script. There are targets to create and delete tables and to
+load and delete test data. 
+</P>
+<TABLE WIDTH=807 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=797>
+	<TR>
+		<TD WIDTH=797 VALIGN=TOP BGCOLOR="#ffffff">
+			<PRE><FONT COLOR="#800000">    &lt;target name=&quot;createTables&quot;&gt;</FONT>
+<FONT COLOR="#800000">        &lt;echo message=&quot;CREATE TABLES USING: ${db.driver} ${db.url}&quot;/&gt;</FONT>
+<FONT COLOR="#800000">        &lt;sql driver=&quot;${db.driver}&quot;</FONT>
+<FONT COLOR="#800000">             url=&quot;${db.url}&quot;</FONT>
+<FONT COLOR="#800000">             userid=&quot;${db.user}&quot;</FONT>
+<FONT COLOR="#800000">             password=&quot;${db.pw}&quot;</FONT>
+<FONT COLOR="#800000">             onerror=&quot;continue&quot;&gt;  </FONT>
+<FONT COLOR="#800000">            &lt;classpath refid=&quot;master-classpath&quot;/&gt;</FONT>
+
+<FONT COLOR="#800000">        CREATE TABLE products (</FONT>
+<FONT COLOR="#800000">          id INT(4) NOT NULL PRIMARY KEY,</FONT>
+<FONT COLOR="#800000">          description varchar(255),</FONT>
+<FONT COLOR="#800000">          price decimal(15,2)</FONT>
+<FONT COLOR="#800000">        );</FONT>
+<FONT COLOR="#800000">        CREATE INDEX products_description ON products(description);</FONT>
+
+<FONT COLOR="#800000">        &lt;/sql&gt; </FONT>
+<FONT COLOR="#800000">    &lt;/target&gt;</FONT>
+
+<FONT COLOR="#800000">    &lt;target name=&quot;dropTables&quot;&gt;</FONT>
+<FONT COLOR="#800000">        &lt;echo message=&quot;DROP TABLES USING: ${db.driver} ${db.url}&quot;/&gt;</FONT>
+<FONT COLOR="#800000">        &lt;sql driver=&quot;${db.driver}&quot;</FONT>
+<FONT COLOR="#800000">             url=&quot;${db.url}&quot;</FONT>
+<FONT COLOR="#800000">             userid=&quot;${db.user}&quot;</FONT>
+<FONT COLOR="#800000">             password=&quot;${db.pw}&quot;</FONT>
+<FONT COLOR="#800000">             onerror=&quot;continue&quot;&gt;  </FONT>
+<FONT COLOR="#800000">            &lt;classpath refid=&quot;master-classpath&quot;/&gt;</FONT>
+
+<FONT COLOR="#800000">        DROP TABLE products;</FONT>
+
+<FONT COLOR="#800000">        &lt;/sql&gt; </FONT>
+<FONT COLOR="#800000">    &lt;/target&gt;</FONT>
+
+<FONT COLOR="#800000">    &lt;target name=&quot;loadData&quot;&gt;</FONT>
+<FONT COLOR="#800000">        &lt;echo message=&quot;LOAD DATA USING: ${db.driver} ${db.url}&quot;/&gt;</FONT>
+<FONT COLOR="#800000">        &lt;sql driver=&quot;${db.driver}&quot;</FONT>
+<FONT COLOR="#800000">             url=&quot;${db.url}&quot;</FONT>
+<FONT COLOR="#800000">             userid=&quot;${db.user}&quot;</FONT>
+<FONT COLOR="#800000">             password=&quot;${db.pw}&quot;</FONT>
+<FONT COLOR="#800000">             onerror=&quot;continue&quot;&gt;  </FONT>
+<FONT COLOR="#800000">            &lt;classpath refid=&quot;master-classpath&quot;/&gt;</FONT>
+
+<FONT COLOR="#800000">        INSERT INTO products (id, description, price) values(1, 'Lamp', 5.78);</FONT>
+<FONT COLOR="#800000">        INSERT INTO products (id, description, price) values(2, 'Table', 75.29);</FONT>
+<FONT COLOR="#800000">        INSERT INTO products (id, description, price) values(3, 'Chair', 22.81);</FONT>
+
+<FONT COLOR="#800000">        &lt;/sql&gt; </FONT>
+<FONT COLOR="#800000">    &lt;/target&gt;</FONT>
+
+<FONT COLOR="#800000">    &lt;target name=&quot;printData&quot;&gt;</FONT>
+<FONT COLOR="#800000">        &lt;echo message=&quot;PRINT DATA USING: ${db.driver} ${db.url}&quot;/&gt;</FONT>
+<FONT COLOR="#800000">        &lt;sql driver=&quot;${db.driver}&quot;</FONT>
+<FONT COLOR="#800000">             url=&quot;${db.url}&quot;</FONT>
+<FONT COLOR="#800000">             userid=&quot;${db.user}&quot;</FONT>
+<FONT COLOR="#800000">             password=&quot;${db.pw}&quot;</FONT>
+<FONT COLOR="#800000">             onerror=&quot;continue&quot;</FONT>
+<FONT COLOR="#800000">             print=&quot;true&quot;&gt;  </FONT>
+<FONT COLOR="#800000">            &lt;classpath refid=&quot;master-classpath&quot;/&gt;</FONT>
+
+<FONT COLOR="#800000">        SELECT * FROM products;</FONT>
+
+<FONT COLOR="#800000">        &lt;/sql&gt; </FONT>
+<FONT COLOR="#800000">    &lt;/target&gt;</FONT>
+
+<FONT COLOR="#800000">    &lt;target name=&quot;clearData&quot;&gt;</FONT>
+<FONT COLOR="#800000">        &lt;echo message=&quot;CLEAR DATA USING: ${db.driver} ${db.url}&quot;/&gt;</FONT>
+<FONT COLOR="#800000">        &lt;sql driver=&quot;${db.driver}&quot;</FONT>
+<FONT COLOR="#800000">             url=&quot;${db.url}&quot;</FONT>
+<FONT COLOR="#800000">             userid=&quot;${db.user}&quot;</FONT>
+<FONT COLOR="#800000">             password=&quot;${db.pw}&quot;</FONT>
+<FONT COLOR="#800000">             onerror=&quot;continue&quot;&gt;  </FONT>
+<FONT COLOR="#800000">            &lt;classpath refid=&quot;master-classpath&quot;/&gt;</FONT>
+
+<FONT COLOR="#800000">        DELETE FROM products;</FONT>
+
+<FONT COLOR="#800000">        &lt;/sql&gt; </FONT>
+<FONT COLOR="#800000">    &lt;/target&gt;</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">Now I execute some of these tasks to
+set up the test database. This will create a db folder under the
+springapp directory. Run 'ant createTables loadData printData' – I
+have included my output below.</P>
+<TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=256*>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#e6e6ff">
+			<PRE><FONT COLOR="#280099">[trisberg@localhost springapp]$ ant createTables loadData printData</FONT>
+<FONT COLOR="#280099">Buildfile: build.xml</FONT>
+<FONT COLOR="#280099"> </FONT>
+<FONT COLOR="#280099">createTables:</FONT>
+<FONT COLOR="#280099">     [echo] CREATE TABLES USING: org.hsqldb.jdbcDriver jdbc:hsqldb:db/test</FONT>
+<FONT COLOR="#280099">      [sql] Executing commands</FONT>
+<FONT COLOR="#280099">      [sql] 2 of 2 SQL statements executed successfully</FONT>
+<FONT COLOR="#280099"> </FONT>
+<FONT COLOR="#280099">loadData:</FONT>
+<FONT COLOR="#280099">     [echo] LOAD DATA USING: org.hsqldb.jdbcDriver jdbc:hsqldb:db/test</FONT>
+<FONT COLOR="#280099">      [sql] Executing commands</FONT>
+<FONT COLOR="#280099">      [sql] 3 of 3 SQL statements executed successfully</FONT>
+<FONT COLOR="#280099"> </FONT>
+<FONT COLOR="#280099">printData:</FONT>
+<FONT COLOR="#280099">     [echo] PRINT DATA USING: org.hsqldb.jdbcDriver jdbc:hsqldb:db/test</FONT>
+<FONT COLOR="#280099">      [sql] Executing commands</FONT>
+<FONT COLOR="#280099">      [sql] ID,DESCRIPTION,PRICE</FONT>
+<FONT COLOR="#280099">      [sql] 1,Lamp,5.78</FONT>
+<FONT COLOR="#280099">      [sql] 2,Table,75.29</FONT>
+<FONT COLOR="#280099">      [sql] 3,Chair,22.81</FONT>
+<FONT COLOR="#280099"> </FONT>
+<FONT COLOR="#280099">      [sql] 1 of 1 SQL statements executed successfully</FONT>
+<FONT COLOR="#280099"> </FONT>
+<FONT COLOR="#280099">BUILD SUCCESSFUL</FONT>
+<FONT COLOR="#280099">Total time: 2 seconds</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><B>Step 24 – Create a Data Access
+Object<SPAN LANG="en-US"> implementation </SPAN>for JDBC.</B></P>
+<P STYLE="margin-bottom: 0cm">I begin with creating a new
+'springapp/src/db' directory to contain any classes that are used for
+database access.  In this directory I create a new interface called
+'ProductManagerDao.java'.  This will be the interface that defines
+the functionality that the DAO implementation classes will provide –
+we could choose to have more than one implementation. 
+</P>
+<TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=256*>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#ffcc99">
+			<P><B><FONT SIZE=2><FONT FACE="Nimbus Mono L">springapp/src/db/ProductManagerDao.java</FONT></FONT></B>
+						</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=100% VALIGN=TOP BGCOLOR="#ffffcc">
+			<PRE><FONT COLOR="#000000">package db;</FONT>
+
+<FONT COLOR="#000000">import bus.Product;</FONT>
+<FONT COLOR="#000000">import java.util.List;</FONT>
+
+<FONT COLOR="#000000">public interface ProductManagerDao {</FONT>
+
+<FONT COLOR="#000000">    public List getProductList();</FONT>
+
+<FONT COLOR="#000000">    public void increasePrice(Product prod, int pct);</FONT>
+
+<FONT COLOR="#000000">}</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">I'll follow this with a class called
+'ProductManagerDaoJdbc.java' that will be the JDBC implementation of
+this interface.  Spring provides a JDBC abstraction framework that we
+will make use of.  The biggest difference between using straight JDBC
+and Spring's JDBC framework is that you don't have to worry about
+opening and closing the connection or any statements.  It is all
+handled for you.  Another advantage is that you won't have to catch
+any exceptions, unless you want to.  Spring wraps all SQLExceptions
+in it's own unchecked exception hierarchy inheriting from
+DataAccessException.  If you want to you can catch this exception,
+but since most database exceptions are impossible to recover from
+anyway, you might as well just let the exception propagate up to a
+higher level.</P>
+<TABLE WIDTH=924 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=914>
+	<TR>
+		<TD WIDTH=914 VALIGN=TOP BGCOLOR="#ffcc99">
+			<P><B><FONT SIZE=2><FONT FACE="Nimbus Mono L">springapp/src/db/ProductManagerDaoJdbc.java</FONT></FONT></B>
+						</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=914 VALIGN=TOP BGCOLOR="#ffffcc">
+			<PRE><FONT COLOR="#000000">package db;</FONT>
+
+<FONT COLOR="#000000">import bus.Product;</FONT>
+<FONT COLOR="#000000">import java.util.List;</FONT>
+<FONT COLOR="#000000">import java.sql.ResultSet;</FONT>
+<FONT COLOR="#000000">import java.sql.SQLException;</FONT>
+<FONT COLOR="#000000">import java.sql.Types;</FONT>
+<FONT COLOR="#000000">import javax.sql.DataSource;</FONT>
+<FONT COLOR="#000000">import org.apache.commons.logging.Log;</FONT>
+<FONT COLOR="#000000">import org.apache.commons.logging.LogFactory;</FONT>
+<FONT COLOR="#000000">import org.springframework.jdbc.object.MappingSqlQuery;</FONT>
+<FONT COLOR="#000000">import org.springframework.jdbc.object.SqlUpdate;</FONT>
+<FONT COLOR="#000000">import org.springframework.jdbc.core.SqlParameter;</FONT>
+
+<FONT COLOR="#000000">public class ProductManagerDaoJdbc implements ProductManagerDao {</FONT>
+
+<FONT COLOR="#000000">    /** Logger for this class and subclasses */</FONT>
+<FONT COLOR="#000000">    protected final Log logger = LogFactory.getLog(getClass());</FONT>
+
+<FONT COLOR="#000000">    private DataSource ds;</FONT>
+
+<FONT COLOR="#000000">    public List getProductList() {</FONT>
+<FONT COLOR="#000000">        logger.info(&quot;Getting products!&quot;);</FONT>
+<FONT COLOR="#000000">        ProductQuery pq = new ProductQuery(ds);</FONT>
+<FONT COLOR="#000000">        return pq.execute();</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public void increasePrice(Product prod, int pct) {</FONT>
+<FONT COLOR="#000000">        logger.info(&quot;Increasing price by &quot; + pct + &quot;%&quot;);</FONT>
+<FONT COLOR="#000000">        SqlUpdate su = </FONT>
+<FONT COLOR="#000000">            new SqlUpdate(ds, &quot;update products set price = price * (100 + ?) / 100 where id = ?&quot;);</FONT>
+<FONT COLOR="#000000">        su.declareParameter(new SqlParameter(&quot;increase&quot;, Types.INTEGER));</FONT>
+<FONT COLOR="#000000">        su.declareParameter(new SqlParameter(&quot;ID&quot;, Types.INTEGER));</FONT>
+<FONT COLOR="#000000">        su.compile();</FONT>
+<FONT COLOR="#000000">        Object[] oa = new Object[2];</FONT>
+<FONT COLOR="#000000">        oa[0] = new Integer(pct);</FONT>
+<FONT COLOR="#000000">        oa[1] = new Integer(prod.getId());</FONT>
+<FONT COLOR="#000000">        int count = su.update(oa);</FONT>
+<FONT COLOR="#000000">        logger.info(&quot;Rows affected: &quot; + count);</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    public void setDataSource(DataSource ds) {</FONT>
+<FONT COLOR="#000000">        this.ds = ds;</FONT>
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">    class ProductQuery extends MappingSqlQuery {</FONT>
+
+<FONT COLOR="#000000">        ProductQuery(DataSource ds) {</FONT>
+<FONT COLOR="#000000">            super(ds, &quot;SELECT id, description, price from products&quot;);</FONT>
+<FONT COLOR="#000000">            compile();</FONT>
+<FONT COLOR="#000000">	}</FONT>
+<FONT COLOR="#000000"> </FONT>
+<FONT COLOR="#000000">        protected Object mapRow(ResultSet rs, int rowNum) throws SQLException {</FONT>
+<FONT COLOR="#000000">            Product prod = new Product();</FONT>
+<FONT COLOR="#000000">            prod.setId(rs.getInt(&quot;id&quot;));</FONT>
+<FONT COLOR="#000000">            prod.setDescription(rs.getString(&quot;description&quot;));</FONT>
+<FONT COLOR="#000000">            prod.setPrice(new Double(rs.getDouble(&quot;price&quot;)));</FONT>
+<FONT COLOR="#000000">            return prod;</FONT>
+<FONT COLOR="#000000">        }</FONT>
+
+<FONT COLOR="#000000">    }</FONT>
+
+<FONT COLOR="#000000">}</FONT></PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">Lets go over the two DAO methods in
+this class.  First, <FONT COLOR="#000000">getProductList()</FONT>
+creates a query object that will retrieve all the products.  This
+query is executed and the results are passed back as a list of
+Products.  At the end of the class we can see the definition for this
+query class.  I have implemented it as an inner class since we are
+not going to reference it anywhere else, but I could just as well
+have made it a separate class.  This query class extends
+MappingSqlQuery, which is a central class in Spring's JDBC framework.
+ The idea behind this class is that you have to specify a SQL query
+when this class is created, and you are also responsible for
+implementing the mapRow method to map the data from each row into a
+class that represents the entity you are retrieving in your query. 
+That's it, that's all you have to provide.  The rest is managed by
+the framework.   In the constructor of the ProductQuery class I pass
+in the data source.  This<SPAN LANG="en-US"> data source </SPAN>will
+be provided in a similar fashion to the way we wired up the business
+objects in Part 2, so we don't have to worry about<SPAN LANG="en-US">
+retrieving </SPAN>a data source in our DAO class.  In the constructor
+I also define the SQL query that we will use to retrieve the
+products.  The mapRow method will be called once for each row
+returned by the query.  It creates a new Product and populates it
+based on the data retrieved from the current row of the resultset. 
+You should not call getNext on the resultset, it is all handled by
+the framework.  This is another example of an Inversion of Control
+solution.  
+</P>
+<P STYLE="margin-bottom: 0cm">The second method increasePrice is
+utilizing an SqlUpdate class.  This class is passed the<SPAN LANG="en-US">
+data source </SPAN>and an SQL update statement with placeholders for
+parameters.  Same syntax as a prepared statement in JDBC.  In fact,
+that is what SqlUpdate creates behind the scenes.  For the
+parameters, we have to give them a name and declare what type they
+are so that the framework can set them before the prepared statement
+is executed.  After all parameters has been declared, we “compile”
+the statement in JDO fashion.  This will signal that we are done
+declaring parameters, and the framework will check to make sure that
+we have a matching declaration for each placeholder in the SQL
+statement.  Next we declare an Object array that will hold the
+parameter values that we are going to pass in to the prepared
+statement.  This array gets passed into the update method of
+SqlUpdate.  The update method does return the count of rows affected.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">To be continued ...</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Copyright &copy; 2003, Thomas Risberg</P>
+</BODY>
+</HTML>

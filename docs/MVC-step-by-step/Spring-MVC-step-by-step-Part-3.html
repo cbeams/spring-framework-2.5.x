@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030825;22192800">
+	<META NAME="CHANGED" CONTENT="20030827;23350500">
 	<STYLE>
 	<!--
 		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
@@ -15,8 +15,8 @@
 	</STYLE>
 </HEAD>
 <BODY LANG="en-US">
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><FONT SIZE=4><B>Developing
-a Spring Framework MVC applicaton step-by-step</B></FONT></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B><FONT SIZE=4>Developing
+a Spring Framework MVC applicaton step-by-step</FONT></B></P>
 <P ALIGN=CENTER STYLE="margin-bottom: 0cm">Part 3 – Adding Unit
 Tests and a Form to the Application</P>
 <P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Thomas Risberg</B>
@@ -278,10 +278,10 @@ are very easy to test.
 </P>
 <P STYLE="margin-bottom: 0cm"><B>Step 22 – Adding a form</B></P>
 <P STYLE="margin-bottom: 0cm">To provide an interface in the web
-application, I add a form<SPAN LANG="en-US"> that </SPAN>will allow
-the user to enter a percentage value. This form uses a tag library
-named “spring” that is provided with the Spring Framework. We
-have to copy this file from the Spring distribution
+application, I add a form that will allow the user to enter a
+percentage value. This form uses a tag library named “spring”
+that is provided with the Spring Framework. We have to copy this file
+from the Spring distribution
 spring-framework-1.0m1/samples/petclinic/war/WEB-INF/spring.tld to
 the springapp/war/WEB-INF directory. Now we must also add a &lt;taglib&gt;
 entry to web.xml.</P>
@@ -419,11 +419,10 @@ public class PriceIncrease {
 </TABLE>
 <P STYLE="margin-bottom: 0cm">This is a very simple JavaBean class,
 and in our case there is a single property with a getter and setter.
-The validator class gets<SPAN LANG="en-US"> control </SPAN>after the
-user presses submit. The values entered in the form will be set on
-the command object by the framework. The method validate is called
-and the command object and an object to hold any errors are passed
-in.</P>
+The validator class gets control after the user presses submit. The
+values entered in the form will be set on the command object by the
+framework. The method validate is called and the command object and
+an object to hold any errors are passed in.</P>
 <TABLE WIDTH=875 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=865>
 	<TR>
@@ -736,7 +735,8 @@ like with errors displayed.</P>
 <P STYLE="margin-bottom: 0cm"><BR>
 </P>
 <P STYLE="margin-bottom: 0cm"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
-</P>
+<A HREF="Spring-MVC-step-by-step-Part-4.html" TARGET="_self">Part 4 –
+Implementing Database Persistence</A></P>
 <P STYLE="margin-bottom: 0cm"><BR>
 </P>
 <P STYLE="margin-bottom: 0cm">Copyright &copy; 2003, Thomas Risberg</P>

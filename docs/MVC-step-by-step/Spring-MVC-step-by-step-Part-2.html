@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030825;22143400">
+	<META NAME="CHANGED" CONTENT="20030827;23324800">
 	<STYLE>
 	<!--
 		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
@@ -30,8 +30,7 @@ environment and set up a basic application that we will build upon.</P>
 <P STYLE="margin-bottom: 0cm; font-weight: medium">This is what we
 have to start with.</P>
 <OL>
-	<LI><P STYLE="margin-bottom: 0cm">An<SPAN LANG="en-US"> introduction
-	</SPAN>page <B>index.jsp</B>.</P>
+	<LI><P STYLE="margin-bottom: 0cm">An introduction page <B>index.jsp</B>.</P>
 	<LI><P STYLE="margin-bottom: 0cm; font-weight: medium">A
 	DispatcherServlet with a corresponding <B>springapp-servlet.xml</B>
 	configuration file.</P>
@@ -49,17 +48,17 @@ Library (JSTL) so I will start by copying the JSTL files we need to
 our WEB-INF/lib directory. Copy jstl.jar and standard.jar from the
 spring-framework-1.0m1/lib/jstl directory to the
 springapp/war/WEB-INF/lib directory. I am also creating a “header”
-file that will be<SPAN LANG="en-US"> included </SPAN>in every JSP
-page that I'm going to write. This will make development easier and I
-will be sure that I have the same definitions in all JSPs. I am going
-to put all JSPs in a directory named jsp under the WEB-INF directory.
-This will ensure that only the controller has access to the views -
-it is not possible to get to these pages by entering them directly as
-a URL in the browser. This strategy might not work in all application
-servers and if this is the case with the one you are using, just move
-the jsp directory up a level. You would then use springapp/war/jsp as
-the directory<SPAN LANG="en-US"> instead </SPAN>of
-springapp/war/WEB-INF/jsp in all the code examples that will follow.</P>
+file that will be included in every JSP page that I'm going to write.
+This will make development easier and I will be sure that I have the
+same definitions in all JSPs. I am going to put all JSPs in a
+directory named jsp under the WEB-INF directory. This will ensure
+that only the controller has access to the views - it is not possible
+to get to these pages by entering them directly as a URL in the
+browser. This strategy might not work in all application servers and
+if this is the case with the one you are using, just move the jsp
+directory up a level. You would then use springapp/war/jsp as the
+directory instead of springapp/war/WEB-INF/jsp in all the code
+examples that will follow.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
 	<TR>
@@ -77,10 +76,10 @@ springapp/war/WEB-INF/jsp in all the code examples that will follow.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Now we can change index.jsp to use this<SPAN LANG="en-US">
-include </SPAN>and since we are using JSTL we can use the
-&lt;c:redirect&gt; tag for redirecting to our Controller. This ties
-the index.jsp into our application framework.</P>
+<P STYLE="margin-bottom: 0cm">Now we can change index.jsp to use this
+include and since we are using JSTL we can use the &lt;c:redirect&gt;
+tag for redirecting to our Controller. This ties the index.jsp into
+our application framework.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
 	<TR>
@@ -134,8 +133,7 @@ tag.
 <P STYLE="margin-bottom: 0cm">For SpringappController.java there are
 a few changes we need to make. Change the view to
 WEB-INF/jsp/hello.jsp since we moved the file to this new location.
-Also add a string<SPAN LANG="en-US"> containing </SPAN>the current
-data and time as the model. 
+Also add a string containing the current data and time as the model. 
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -178,27 +176,26 @@ public class SpringappController implements Controller {
 <P STYLE="margin-bottom: 0cm">Now we are ready to try this after we
 build and deploy this new code. We enter
 <A HREF="http://localhost:8080/springapp">http://localhost:8080/springapp</A>
-in a browser and that should pull<SPAN LANG="en-US"> up </SPAN>index.jsp,
-which should redirect to hello.htm, which in turn gets us to the
-controller that sends the data and time to the view.</P>
+in a browser and that should pull up index.jsp, which should redirect
+to hello.htm, which in turn gets us to the controller that sends the
+data and time to the view.</P>
 <P STYLE="margin-bottom: 0cm"><IMG SRC="Spring-MVC-step-by-step-Part-2_html_1969edd8.png" NAME="Graphic1" ALIGN=LEFT WIDTH=780 HEIGHT=540 BORDER=0><BR CLEAR=LEFT><BR>
 </P>
 <P STYLE="margin-bottom: 0cm"><B>Step 15 – Decouple the view and
 the controller</B></P>
 <P STYLE="margin-bottom: 0cm">Right now the controller specifies the
-full path of the view, which creates an<SPAN LANG="en-US">
-unnecessary </SPAN>dependency between the controller and the view.
-Ideally we would like to map to the view using a logical name,
-allowing us to switch the view without having to change the
-controller. You can set this mapping in a properties file if you like
-using a ResourceBundleViewResolver and a SimpleUrlHandlerMapping
-class. If your mapping needs are simple it is easier to just set a
-prefix and a suffix on the InternalResourceViewResolver. The latter
-approach is the one that I will implement now, so I modify the
-springapp-servlet.xml and include this viewResolver entry. I have
-elected to use a JstlView which will enable us to use JSTL in
-combination with message resource bundles and it will also support
-internationalization.</P>
+full path of the view, which creates an unnecessary dependency
+between the controller and the view. Ideally we would like to map to
+the view using a logical name, allowing us to switch the view without
+having to change the controller. You can set this mapping in a
+properties file if you like using a ResourceBundleViewResolver and a
+SimpleUrlHandlerMapping class. If your mapping needs are simple it is
+easier to just set a prefix and a suffix on the
+InternalResourceViewResolver. The latter approach is the one that I
+will implement now, so I modify the springapp-servlet.xml and include
+this viewResolver entry. I have elected to use a JstlView which will
+enable us to use JSTL in combination with message resource bundles
+and it will also support internationalization.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
 	<TR>
@@ -237,7 +234,7 @@ internationalization.</P>
 	</TR>
 </TABLE>
 <P STYLE="margin-bottom: 0cm">So now I can remove the prefix and
-suffix from the view name in the<SPAN LANG="en-US"> controller. </SPAN>
+suffix from the view name in the controller. 
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -292,13 +289,12 @@ packages for the Java source – web and bus. If this was an
 application for a real company I would name the packages something
 like com.mycompany.web and com.mycompany.bus, but since this is just
 a demo application I will keep the package names real short. The
-Product class is implemented as a JavaBean –<SPAN LANG="en-US"> it
-</SPAN>has the default constructor (automatically provided if we
-don't specify any constructors) and getters and setters for the two
-instance variables description and price. I also make it
-Serializable, not necessary for our application, but could come in
-handy later on if we have to pass this class between different
-application layers.</P>
+Product class is implemented as a JavaBean – it has the default
+constructor (automatically provided if we don't specify any
+constructors) and getters and setters for the two instance variables
+description and price. I also make it Serializable, not necessary for
+our application, but could come in handy later on if we have to pass
+this class between different application layers.</P>
 <TABLE WIDTH=876 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=866>
 	<TR>
@@ -380,7 +376,7 @@ reference.</P>
 	<COL WIDTH=866>
 	<TR>
 		<TD WIDTH=866 VALIGN=TOP BGCOLOR="#ffcc99">
-			<P><FONT FACE="Nimbus Mono L"><FONT SIZE=2><B>springapp/src/SpringappController.java</B></FONT></FONT></P>
+			<P><FONT FACE="Nimbus Mono L"><FONT SIZE=2><B>springapp/src/web/SpringappController.java</B></FONT></FONT></P>
 		</TD>
 	</TR>
 	<TR>
@@ -562,9 +558,9 @@ next step.</P>
 <P STYLE="margin-bottom: 0cm"><B>Step 19 – Add the message bundle
 and a 'clean' target to build.xml</B></P>
 <P STYLE="margin-bottom: 0cm">I create a 'messages.properties' file
-in the war/WEB-INF/classes directory. This properties<SPAN LANG="en-US">
-bundle </SPAN>so far has three entries matching the keys specified in
-the &lt;fmt:message&gt; tags that we added to the hello.jsp.</P>
+in the war/WEB-INF/classes directory. This properties bundle so far
+has three entries matching the keys specified in the &lt;fmt:message&gt;
+tags that we added to the hello.jsp.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
 	<TR>
