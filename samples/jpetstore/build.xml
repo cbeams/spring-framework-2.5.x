@@ -138,6 +138,10 @@
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
+		    <fileset dir="${spring.root}/lib/log4j">
+				<include name="log4j-1.2.8.jar"/>
+			</fileset>
+		    
 		</copy>
 
 		<copy file="${weblib.dir}/${name}.jar" tofile="${client.dir}/${name}.jar"/>
@@ -171,6 +175,8 @@
 			<include name="WEB-INF/*.properties"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
+		    <include name="WEB-INF/classes/**"/>
+		    <include name="WEB-INF/log/**"/>
 			<exclude name="**/.*"/>
 		</war>
 

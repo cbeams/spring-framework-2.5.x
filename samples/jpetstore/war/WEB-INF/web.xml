@@ -8,6 +8,20 @@
 	<display-name>Spring JPetStore</display-name>
 
 	<description>Spring JPetStore sample application</description>
+	
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>petstore.root</param-value>
+	</context-param>
+
+	<!--
+	  - Location of the Log4J config file, for initialization and refresh checks.
+	  - Applied by Log4jConfigListener.
+	  -->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>/WEB-INF/classes/log4j.xml</param-value>
+	</context-param>
 
 	<!--
 	  - Location of the XML file that defines the root application context.
@@ -28,6 +42,10 @@
 		-->
 	</context-param>
 
+	<!-- <listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener> -->
+	
 	<!--
 	  - Loads the root application context of this web app at startup,
 	  - by default from "/WEB-INF/applicationContext.xml".
@@ -41,6 +59,8 @@
 	  - This means that its beans are automatically available in these child contexts,
 	  - both for getBean(name) calls and (external) bean references.
     -->
+	
+	
 	<servlet>
 		<servlet-name>context</servlet-name>
 		<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
