@@ -330,7 +330,7 @@ public class ActionState extends TransitionableState {
 					+ "' of flow '" + getFlow().getId()
 					+ "'; transitions must be defined to handle action result outcomes -- "
 					+ "possible flow configuration error?  Note: the eventIds signaled were: '" + Styler.call(eventIds)
-					+ "', while the supported set of eventId criteria for this action state is '"
+					+ "', while the supported set of transitional criteria for this action state is '"
 					+ Styler.call(getTransitionalCriteria()) + "'");
 		}
 		else {

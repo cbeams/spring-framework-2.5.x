@@ -45,7 +45,7 @@ public abstract class AttributeSetterSupport implements AttributeSetter, Map {
 		Object value = getAttribute(attributeName);
 		if (value == null) {
 			throw new IllegalStateException("Required attribute '" + attributeName
-					+ "' is not present in this '" + getMapName() + "'; attributes present are = " + Styler.call(getAttributeMap()));
+					+ "' is not present in this " + getMapName() + "; attributes present are = " + Styler.call(getAttributeMap()));
 		}
 		return value;
 	}
