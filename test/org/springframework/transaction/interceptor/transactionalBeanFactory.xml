@@ -2,11 +2,17 @@
 <!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+	
+	<bean id="targetDependency"
+		class="org.springframework.beans.TestBean">
+		<property name="name"><value>dependency</value></property>
+	</bean>
 
 	<!-- Simple target -->
 	<bean id="target" class="org.springframework.beans.DerivedTestBean">	
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
+		<property name="spouse"><ref local="targetDependency"/></property>
 	</bean>
 	
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
@@ -37,8 +43,24 @@
 	</bean>
 	
 
-	<bean id="proxyFactory2" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="proxyFactory2DynamicProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="mockMan"/></property>
+		<property name="target"><ref local="target"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="s*">PROPAGATION_MANDATORY</prop>
+				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
+				<prop key="set*">PROPAGATION_SUPPORTS</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!--
+		Same as ProxyFactory2 but forces the use of CGLIB
+	-->
+	<bean id="proxyFactory2Cglib" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="mockMan"/></property>
+		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="target"><ref local="target"/></property>
 		<property name="transactionAttributes">
 			<props>

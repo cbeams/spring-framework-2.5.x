@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.DerivedTestBean;
@@ -61,9 +62,15 @@ public class BeanFactoryTransactionTests extends TestCase {
 		executeGetsAreNotTransactional(testBean);
 	}
 
-	public void testGetsAreNotTransactionalWithProxyFactory2() throws NoSuchMethodException {
-		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2");
+	public void testGetsAreNotTransactionalWithProxyFactory2DynamicProxy() throws NoSuchMethodException {
+		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2DynamicProxy");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
+		executeGetsAreNotTransactional(testBean);
+	}
+	
+	public void testGetsAreNotTransactionalWithProxyFactory2Cglib() throws NoSuchMethodException {
+		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Cglib");
+		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(testBean));
 		executeGetsAreNotTransactional(testBean);
 	}
 
