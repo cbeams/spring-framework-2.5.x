@@ -17,26 +17,26 @@ public interface FormatterLocator {
 	 * @param encodedFormat the format
 	 * @return the formatter
 	 */
-	public DateFormatter getDateFormatter(String encodedFormat);
+	public Formatter getDateFormatter(String encodedFormat);
 
 	/**
 	 * Returns the default date format for the current locale
 	 * @return the date formatter
 	 */
-	public DateFormatter getDateFormatter();
+	public Formatter getDateFormatter();
 
 	/**
 	 * Returns the date format with the specified style for the current locale.
 	 * @param style the style
 	 * @return the formatter
 	 */
-	public DateFormatter getDateFormatter(Style style);
+	public Formatter getDateFormatter(Style style);
 
 	/**
 	 * Returns the default date/time format for the current locale
 	 * @return the date/time formatter
 	 */
-	public DateFormatter getDateTimeFormatter();
+	public Formatter getDateTimeFormatter();
 
 	/**
 	 * Returns the date format with the specified styles for the current locale.
@@ -44,37 +44,37 @@ public interface FormatterLocator {
 	 * @param timeStyle the time style
 	 * @return the formatter
 	 */
-	public DateFormatter getDateTimeFormatter(Style dateStyle, Style timeStyle);
+	public Formatter getDateTimeFormatter(Style dateStyle, Style timeStyle);
 
 	/**
 	 * Returns the default time format for the current locale
 	 * @return the time formatter
 	 */
-	public DateFormatter getTimeFormatter();
+	public Formatter getTimeFormatter();
 
 	/**
 	 * Returns the time format with the specified style for the current locale.
 	 * @param style the style
 	 * @return the formatter
 	 */
-	public DateFormatter getTimeFormatter(Style style);
+	public Formatter getTimeFormatter(Style style);
 
 	/**
 	 * Returns a number formatter for the specified class.
 	 * @param numberClass the number class
 	 * @return the number formatter
 	 */
-	public NumberFormatter getNumberFormatter(Class numberClass);
+	public Formatter getNumberFormatter(Class numberClass);
 
 	/**
 	 * Returns a percent number formatter
 	 * @return the percent formatter
 	 */
-	public NumberFormatter getPercentFormatter();
+	public Formatter getPercentFormatter();
 
 	/**
 	 * Returns a currency number formatter
 	 * @return the currency formatter
 	 */
-	public NumberFormatter getCurrencyFormatter();
+	public Formatter getCurrencyFormatter();
 }
