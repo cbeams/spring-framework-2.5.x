@@ -30,8 +30,6 @@ import java.lang.reflect.Array;
  */
 public abstract class ObjectUtils {
 
-    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
-
 	/**
 	 * Determine if the given objects are equal, returning true if both are null
 	 * respectively false if only one is null.
@@ -92,7 +90,7 @@ public abstract class ObjectUtils {
      * @throws IllegalArgumentException if the parameter is not a primitive array.
      */
     public static Object[] toObjectArray(Object primitiveArray) {
-        if (primitiveArray == null) { return EMPTY_OBJECT_ARRAY; }
+        if (primitiveArray == null) { return new Object[0]; }
         Class clazz = primitiveArray.getClass();
         Assert.isTrue(clazz.isArray(),
                 "The specified parameter is not an array--it must be a primitive array.");
