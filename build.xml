@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.67 2004-07-16 21:09:47 colins Exp $
+    $Id: build.xml,v 1.68 2004-07-21 05:57:30 davison Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -129,6 +129,8 @@
 			<fileset dir="${src.dir}">
 				<include name="**/*.xml"/>
 				<include name="**/*.dtd"/>
+				<include name="**/*.vm"/>
+				<include name="**/*.ftl"/>
 			</fileset>
 		</copy>
 
