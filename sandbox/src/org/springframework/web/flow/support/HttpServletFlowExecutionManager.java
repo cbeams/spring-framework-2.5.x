@@ -39,7 +39,8 @@ import org.springframework.web.util.WebUtils;
  * execution. This class provides numerous methods that can be extended in
  * subclasses to fine-tune the execution algorithm.
  * <p>
- * The {@link #handleRequest(HttpServletRequest, HttpServletResponse, FlowExecutionListener) handleRequest}
+ * The
+ * {@link #handleRequest(HttpServletRequest, HttpServletResponse, FlowExecutionListener) handleRequest}
  * method implements the following algorithm:
  * <ol>
  * <li>Look for a flow execution id in the request (in a parameter named
@@ -47,9 +48,9 @@ import org.springframework.web.util.WebUtils;
  * <li>If a flow execution id is not found, a new flow execution will be
  * created. The top-level flow for which the execution is created is determined
  * by first looking for a flow id specified in the request using the "_flowId"
- * request parameter. If this parameter is present, the specified flow will be used,
- * after lookup using a flow locator. If no "_flowId" parameter is present, the
- * default top-level flow configured for this manager is used.</li>
+ * request parameter. If this parameter is present, the specified flow will be
+ * used, after lookup using a flow locator. If no "_flowId" parameter is
+ * present, the default top-level flow configured for this manager is used.</li>
  * <li>If a flow execution id is found, the corresponding flow execution is
  * obtained from the HTTP session.</li>
  * <li>If a new flow execution was created in the previous steps, it will be
@@ -134,8 +135,8 @@ public class HttpServletFlowExecutionManager {
 	}
 
 	/**
-	 * Returns the flow locator to use for lookup of flows specified using
-	 * the "_flowId" request parameter
+	 * Returns the flow locator to use for lookup of flows specified using the
+	 * "_flowId" request parameter
 	 */
 	protected FlowLocator getFlowLocator() {
 		return flowLocator;
@@ -158,8 +159,8 @@ public class HttpServletFlowExecutionManager {
 	 * The main entry point into managed HTTP-based flow executions.
 	 * @param request the current HTTP request
 	 * @param response the current HTTP response
-	 * @param executionListener a listener interested in flow execution lifecycle
-	 *        events that happen <i>while handling this request</i>
+	 * @param executionListener a listener interested in flow execution
+	 *        lifecycle events that happen <i>while handling this request</i>
 	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
 	 */
@@ -180,16 +181,15 @@ public class HttpServletFlowExecutionManager {
 			// client is participating in an existing flow execution,
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(request);
-			// rehydrate the execution if neccessary (if it had been serialized out)
+			// rehydrate the execution if neccessary (if it had been serialized
+			// out)
 			flowExecution.rehydrate(getFlowLocator(), flowExecutionListeners);
 			if (executionListener != null) {
 				flowExecution.getListenerList().add(executionListener);
 			}
 			// signal the event within the current state
-			Event event=createEvent(request);
-			Assert.hasText(event.getId(), "The '"
-					+ getEventIdParameterName()
-					+ "' request parameter (or '"
+			Event event = createEvent(request);
+			Assert.hasText(event.getId(), "The '" + getEventIdParameterName() + "' request parameter (or '"
 					+ getEventIdRequestAttributeName()
 					+ "' request attribute) is present in the request -- programmer error?");
 			// see if the eventId was set to a static marker placeholder because
@@ -198,8 +198,7 @@ public class HttpServletFlowExecutionManager {
 				throw new IllegalArgumentException("The eventId in the request was the 'not set' marker '"
 						+ getNotSetEventIdParameterMarker()
 						+ "' -- this is likely a view (jsp, etc) configuration error -- the '"
-						+ getEventIdParameterName()
-						+ "' parameter must be set to a valid event");
+						+ getEventIdParameterName() + "' parameter must be set to a valid event");
 			}
 			viewDescriptor = flowExecution.signalEvent(event);
 		}
@@ -217,7 +216,7 @@ public class HttpServletFlowExecutionManager {
 	}
 
 	// subclassing hooks
-	
+
 	/**
 	 * Obtain a flow to use from given request. If there is a flow id parameter
 	 * specified in the request, the flow with that id will be returend after
@@ -236,14 +235,13 @@ public class HttpServletFlowExecutionManager {
 			return this.flowLocator.getFlow(flowId);
 		}
 	}
-	
+
 	/**
 	 * Create a flow event wrapping given request.
 	 */
 	protected Event createEvent(HttpServletRequest request) {
-		return new HttpServletRequestEvent(request,
-				getEventIdParameterName(), getEventIdRequestAttributeName(),
-				getCurrentStateIdParameterName(), getParameterValueDelimiter());
+		return new HttpServletRequestEvent(request, getEventIdParameterName(), getEventIdRequestAttributeName(),
+				getCurrentStateIdParameterName(), getParameterNameValueDelimiter());
 	}
 
 	/**
@@ -288,7 +286,7 @@ public class HttpServletFlowExecutionManager {
 	protected String getEventIdParameterName() {
 		return FlowConstants.EVENT_ID_PARAMETER;
 	}
-	
+
 	/**
 	 * Returns the name of the event id attribute in the request
 	 * ("_mapped_eventId").
@@ -301,11 +299,10 @@ public class HttpServletFlowExecutionManager {
 	protected String getEventIdRequestAttributeName() {
 		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
 	}
-	
+
 	/**
 	 * Returns the marker value indicating that the event id parameter was not
-	 * set properly in the request because of view configuration error
-	 * ({@link FlowConstants#NOT_SET_EVENT_ID}).
+	 * set properly in the request because of view configuration error ({@link FlowConstants#NOT_SET_EVENT_ID}).
 	 * <p>
 	 * This is useful when a view relies on an dynamic means to set the eventId
 	 * request parameter, for example, using javascript. This approach assumes
@@ -324,13 +321,13 @@ public class HttpServletFlowExecutionManager {
 	protected String getCurrentStateIdParameterName() {
 		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
 	}
-	
+
 	/**
 	 * Returns the default delimiter used to separate a request parameter name
 	 * and value when both are embedded in the name of the request parameter
 	 * (e.g. when using an HTML submit button).
 	 */
-	protected String getParameterValueDelimiter() {
+	protected String getParameterNameValueDelimiter() {
 		return "_";
 	}
 

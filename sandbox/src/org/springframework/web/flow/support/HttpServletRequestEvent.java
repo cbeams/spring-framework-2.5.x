@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowConstants;
 
 /**
  * A flow event that orginated from an incoming HTTP servlet request.
@@ -36,24 +37,47 @@ public class HttpServletRequestEvent extends Event {
 	 * The event timestamp.
 	 */
 	private long timestamp = new Date().getTime();
-	
+
+	/**
+	 * The name of the event id request parameter.
+	 */
 	private String eventIdParameterName;
+
+	/**
+	 * The name of the event id request attribute, if parameters are not used.
+	 */
 	private String eventIdAttributeName;
+
+	/**
+	 * The name of the current state id parameter.
+	 */
 	private String currentStateIdParameterName;
-	private String parameterValueDelimiter;
+
+	/**
+	 * The parameter name/value delimiter, for parsing when the parameter name
+	 * and value is encoded within one parameter value.
+	 */
+	private String parameterNameValueDelimiter;
+
+	public HttpServletRequestEvent(HttpServletRequest request) {
+		super(request);
+		this.eventIdParameterName = FlowConstants.EVENT_ID_PARAMETER;
+		this.eventIdAttributeName = FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
+		this.currentStateIdParameterName = FlowConstants.CURRENT_STATE_ID_PARAMETER;
+		this.parameterNameValueDelimiter = "_";
+	}
 
 	/**
 	 * Construct a flow event for the specified servlet request.
 	 * @param request the HTTP servlet request
 	 */
-	public HttpServletRequestEvent(HttpServletRequest request,
-			String eventIdParameterName, String eventIdAttributeName,
-			String currentStateIdParameterName, String parameterValueDelimiter) {
+	public HttpServletRequestEvent(HttpServletRequest request, String eventIdParameterName,
+			String eventIdAttributeName, String currentStateIdParameterName, String parameterValueDelimiter) {
 		super(request);
 		this.eventIdParameterName = eventIdParameterName;
 		this.eventIdAttributeName = eventIdAttributeName;
 		this.currentStateIdParameterName = currentStateIdParameterName;
-		this.parameterValueDelimiter = parameterValueDelimiter;
+		this.parameterNameValueDelimiter = parameterValueDelimiter;
 	}
 
 	/**
@@ -62,7 +86,17 @@ public class HttpServletRequestEvent extends Event {
 	public HttpServletRequest getRequest() {
 		return (HttpServletRequest)getSource();
 	}
-	
+
+	public String getId() {
+		String eventId = searchForRequestParameter(getRequest(), eventIdParameterName, parameterNameValueDelimiter);
+		if (!StringUtils.hasText(eventId)) {
+			// see if the eventId is set as a request attribute (put there by a
+			// servlet filter)
+			eventId = (String)getRequest().getAttribute(eventIdAttributeName);
+		}
+		return eventId;
+	}
+
 	/**
 	 * Obtain a named parameter from an HTTP servlet request. This method will
 	 * try to obtain a parameter value using the following algorithm:
@@ -114,16 +148,6 @@ public class HttpServletRequestEvent extends Event {
 		return null;
 	}
 
-	public String getId() {
-		String eventId =
-			searchForRequestParameter(getRequest(), eventIdParameterName, parameterValueDelimiter);
-		if (!StringUtils.hasText(eventId)) {
-			// see if the eventId is set as a request attribute (put there by a servlet filter)
-			eventId = (String)getRequest().getAttribute(eventIdAttributeName);
-		}
-		return eventId;
-	}
-
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -139,5 +163,4 @@ public class HttpServletRequestEvent extends Event {
 	public Map getParameters() {
 		return getRequest().getParameterMap();
 	}
-
 }
