@@ -22,6 +22,8 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryLocation;
+import org.springframework.beans.factory.support.FileBeanDefinitionRegistryLocation;
 
 /**
  * Bean definition reader for Spring's default XML bean definition format.
@@ -39,6 +41,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see #setParserClass
+ * @version $Id: XmlBeanDefinitionReader.java,v 1.2 2003-12-19 15:49:58 johnsonr Exp $
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -95,7 +98,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public void loadBeanDefinitions(String fileName) throws BeansException {
 		try {
 			logger.info("Loading XmlBeanFactory from file [" + fileName + "]");
-			loadBeanDefinitions(new FileInputStream(fileName));
+			loadBeanDefinitions(new FileInputStream(fileName), new FileBeanDefinitionRegistryLocation(fileName));
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("Can't open file [" + fileName + "]", ex);
@@ -106,7 +109,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Load definitions from the given input stream and close it.
 	 * @param is InputStream containing XML
 	 */
-	public void loadBeanDefinitions(InputStream is) throws BeansException {
+	public void loadBeanDefinitions(InputStream is, BeanDefinitionRegistryLocation location) throws BeansException {
 		if (is == null)
 			throw new BeanDefinitionStoreException("InputStream cannot be null: expected an XML file", null);
 
@@ -119,19 +122,19 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			db.setErrorHandler(new BeansErrorHandler());
 			db.setEntityResolver(this.entityResolver != null ? this.entityResolver : new BeansDtdResolver());
 			Document doc = db.parse(is);
-			loadBeanDefinitions(doc);
+			loadBeanDefinitions(doc, location);
 		}
 		catch (ParserConfigurationException ex) {
-			throw new BeanDefinitionStoreException("ParserConfiguration exception parsing XML", ex);
+			throw new BeanDefinitionStoreException("ParserConfiguration exception parsing XML from " + location, ex);
 		}
 		catch (SAXParseException ex) {
-			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document is invalid", ex);
+			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document from " + location + " is invalid", ex);
 		}
 		catch (SAXException ex) {
-			throw new BeanDefinitionStoreException("XML document is invalid", ex);
+			throw new BeanDefinitionStoreException("XML document from " + location + " is invalid", ex);
 		}
 		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("IOException parsing XML document", ex);
+			throw new BeanDefinitionStoreException("IOException parsing XML document from " + location, ex);
 		}
 		finally {
 			try {
@@ -139,7 +142,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					is.close();
 			}
 			catch (IOException ex) {
-				throw new FatalBeanException("IOException closing stream for XML document", ex);
+				throw new FatalBeanException("IOException closing stream for XML document from " + location, ex);
 			}
 		}
 	}
@@ -149,9 +152,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * All calls go through this.
 	 * @param doc the DOM document
 	 */
-	public void loadBeanDefinitions(Document doc) throws BeansException {
+	public void loadBeanDefinitions(Document doc, BeanDefinitionRegistryLocation location) throws BeansException {
 		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
-		parser.loadBeanDefinitions(getBeanFactory(), getBeanClassLoader(), doc);
+		parser.loadBeanDefinitions(getBeanFactory(), getBeanClassLoader(), doc, location);
 	}
 
 

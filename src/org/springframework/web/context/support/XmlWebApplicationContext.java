@@ -113,7 +113,8 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
 		for (int i = 0; i < this.configLocations.length; i++) {
-			reader.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
+			reader.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]), 
+					new WarResourceBeanDefinitionRegistryLocation(this.servletContext, this.configLocations[i]));
 		}
 	}
 

@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.67 2003-12-19 12:32:39 jhoeller Exp $
+$Id: changelog.txt,v 1.68 2003-12-19 15:53:35 johnsonr Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -16,6 +16,7 @@ Package org.springframework.aop
 * added aop.framework.adapter package to allow for new Advisor/advice types without changing the basic AOP framework
 
 Package org.springframework.beans
+* added BeanDefinitionRegistryLocation: this parameter must be provided to construct an XmlBeanFactory, and enables more specific error messages on parse failures
 * removed event propagation support in BeanWrapper
 * added FileEditor to standard PropertyEditors, for creating java.io.File instances from String representations
 * added URLEditor to standard PropertyEditors, for creating java.net.URL instances from String representations

@@ -11,12 +11,13 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ThreadLocalTargetSourceTests.java,v 1.2 2003-12-14 16:43:41 johnsonr Exp $
+ * @version $Id: ThreadLocalTargetSourceTests.java,v 1.3 2003-12-19 15:49:58 johnsonr Exp $
  */
 public class ThreadLocalTargetSourceTests extends TestCase {
 
@@ -35,7 +36,7 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 	protected void setUp() throws Exception {
 		// Load from classpath, NOT a file path
 		InputStream is = getClass().getResourceAsStream("threadLocalTests.xml");
-		this.beanFactory = new XmlBeanFactory(is);
+		this.beanFactory = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("threadLocalTests.xml"));
 	}
 	
 	/**

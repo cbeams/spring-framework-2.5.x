@@ -27,12 +27,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.25 2003-12-18 18:56:49 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.26 2003-12-19 15:49:59 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 	
@@ -41,7 +42,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is);
+		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("collections.xml"));
 		TestBean validEmpty = (TestBean) xbf.getBean("validEmptyWithDescription");
 		assertEquals(0, validEmpty.getAge());
 	}
@@ -52,7 +53,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is);
+		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("reftypes.xml"));
 		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean emma = (TestBean) xbf.getBean("emma");
 		TestBean georgia = (TestBean) xbf.getBean("georgia");
@@ -71,7 +72,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is);
+		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("reftypes.xml"));
 		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
@@ -87,7 +88,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is);
+		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("reftypes.xml"));
 		TestBean hasInnerBeans = (TestBean) xbf.getBean("hasInnerBeans");
 		assertEquals(5, hasInnerBeans.getAge());
 		assertNotNull(hasInnerBeans.getSpouse());
@@ -109,7 +110,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream pis = getClass().getResourceAsStream("parent.xml");
 		XmlBeanFactory parent = new XmlBeanFactory(pis);
 		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent);
+		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
 		TestBean inherits = (TestBean) child.getBean("inheritsFromParentFactory");
 		// Name property value is overriden
 		assertTrue(inherits.getName().equals("override"));
@@ -123,7 +124,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream pis = getClass().getResourceAsStream("parent.xml");
 		XmlBeanFactory parent = new XmlBeanFactory(pis);
 		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent);
+		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
 		TestBean inherits = (TestBean) child.getBean("prototypeInheritsFromParentFactoryPrototype");
 		// Name property value is overriden
 		assertTrue(inherits.getName().equals("prototype-override"));
@@ -141,7 +142,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream pis = getClass().getResourceAsStream("parent.xml");
 		XmlBeanFactory parent = new XmlBeanFactory(pis);
 		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent);
+		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
 		TestBean inherits = (TestBean) child.getBean("protoypeInheritsFromParentFactorySingleton");
 		// Name property value is overriden
 		assertTrue(inherits.getName().equals("prototypeOverridesInheritedSingleton"));
@@ -173,7 +174,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream pis = getClass().getResourceAsStream("parent.xml");
 		XmlBeanFactory parent = new XmlBeanFactory(pis);
 		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent);
+		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
 		try {
 			TestBean inherits = (TestBean) child.getBean("bogusParent");
 			fail();
@@ -195,7 +196,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream pis = getClass().getResourceAsStream("parent.xml");
 		XmlBeanFactory parent = new XmlBeanFactory(pis);
 		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent);
+		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
 		TestBean inherits = (TestBean) child.getBean("singletonInheritsFromParentFactoryPrototype");
 		// Name property value is overriden
 		assertTrue(inherits.getName().equals("prototype-override"));
@@ -210,7 +211,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is);
+		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("reftypes.xml"));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		TestBean david = (TestBean) xbf.getBean("david");
 		TestBean ego = (TestBean) xbf.getBean("ego");

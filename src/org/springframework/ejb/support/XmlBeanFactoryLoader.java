@@ -18,6 +18,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.BeanFactoryLoader;
 import org.springframework.beans.factory.support.BootstrapException;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.util.ClassLoaderUtils;
@@ -33,7 +34,7 @@ import org.springframework.util.ClassLoaderUtils;
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @since 20-Jul-2003
- * @version $Id: XmlBeanFactoryLoader.java,v 1.5 2003-12-07 23:23:07 colins Exp $
+ * @version $Id: XmlBeanFactoryLoader.java,v 1.6 2003-12-19 15:49:59 johnsonr Exp $
  */
 public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 	
@@ -55,7 +56,8 @@ public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 			if (is == null) {
 				throw new BootstrapException("Cannot load bean factory path '" + beanFactoryPath + "'", null);
 			}
-			ListableBeanFactory beanFactory = new XmlBeanFactory(is);
+			ListableBeanFactory beanFactory = new XmlBeanFactory(is, 
+					new ClasspathBeanDefinitionRegistryLocation(beanFactoryPath));
 			logger.info("Loaded BeanFactory [" + beanFactory + "]");
 			return beanFactory;
 		}

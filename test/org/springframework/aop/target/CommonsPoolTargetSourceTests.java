@@ -10,6 +10,7 @@ import java.io.InputStream;
 import junit.framework.TestCase;
 
 import org.springframework.aop.interceptor.SideEffectBean;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 /**
@@ -17,7 +18,7 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
  * TODO need to make these tests stronger: it's hard to
  * make too many assumptions about a pool
  * @author Rod Johnson
- * @version $Id: CommonsPoolTargetSourceTests.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: CommonsPoolTargetSourceTests.java,v 1.2 2003-12-19 15:49:58 johnsonr Exp $
  */
 public class CommonsPoolTargetSourceTests extends TestCase {
 
@@ -36,7 +37,7 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 	protected void setUp() throws Exception {
 		// Load from classpath, NOT a file path
 		InputStream is = getClass().getResourceAsStream("commonsPoolTests.xml");
-		this.beanFactory = new XmlBeanFactory(is);
+		this.beanFactory = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("commonsPoolTests.xml"));
 	}
 	
 	/**

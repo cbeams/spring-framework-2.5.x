@@ -3,6 +3,7 @@ package org.springframework.context.support;
 import java.io.IOException;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.support.FileBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 
@@ -58,7 +59,8 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
 		if (this.configLocations != null) {
 			for (int i = 0; i < this.configLocations.length; i++) {
-				reader.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
+				reader.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]),
+						new FileBeanDefinitionRegistryLocation(this.configLocations[i]));
 			}
 		}
 	}

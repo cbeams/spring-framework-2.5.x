@@ -23,7 +23,7 @@ import org.springframework.web.servlet.HandlerAdapter;
  *
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtilsTests.java,v 1.7 2003-11-28 16:54:04 jhoeller Exp $
+ * @version $Id: BeanFactoryUtilsTests.java,v 1.8 2003-12-19 15:49:59 johnsonr Exp $
  */
 public class BeanFactoryUtilsTests extends TestCase {
 
@@ -32,9 +32,9 @@ public class BeanFactoryUtilsTests extends TestCase {
 	protected void setUp() {
 		// Interesting hierarchical factory to test counts
 		// Slow to read so we cache it
-		XmlBeanFactory grandParent = new XmlBeanFactory(getClass().getResourceAsStream("root.xml"));
-		XmlBeanFactory parent = new XmlBeanFactory(getClass().getResourceAsStream("middle.xml"), grandParent);
-		XmlBeanFactory child = new XmlBeanFactory(getClass().getResourceAsStream("leaf.xml"), parent);
+		XmlBeanFactory grandParent = new XmlBeanFactory(getClass().getResourceAsStream("root.xml"), new ClasspathBeanDefinitionRegistryLocation("root.xml"));
+		XmlBeanFactory parent = new XmlBeanFactory(getClass().getResourceAsStream("middle.xml"), grandParent, new ClasspathBeanDefinitionRegistryLocation("middle.xml"));
+		XmlBeanFactory child = new XmlBeanFactory(getClass().getResourceAsStream("leaf.xml"), parent, new ClasspathBeanDefinitionRegistryLocation("leaf.xml"));
 		this.listableFactory = child;
 	}
 

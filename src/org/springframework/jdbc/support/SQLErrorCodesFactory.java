@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -36,7 +37,7 @@ import org.springframework.util.ClassLoaderUtils;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
-   @version $Id: SQLErrorCodesFactory.java,v 1.3 2003-12-10 02:19:13 trisberg Exp $
+   @version $Id: SQLErrorCodesFactory.java,v 1.4 2003-12-19 15:49:45 johnsonr Exp $
  */
 public class SQLErrorCodesFactory {
 
@@ -83,14 +84,16 @@ public class SQLErrorCodesFactory {
 	 */
 	protected SQLErrorCodesFactory() {
 		try {
-			InputStream is = loadInputStream(SQL_ERROR_CODE_OVERRIDE_PATH);
+			String path = SQL_ERROR_CODE_OVERRIDE_PATH;
+			InputStream is = loadInputStream(path);
 			if (is == null) {
-				is = loadInputStream(SQL_ERROR_CODE_DEFAULT_PATH);
+				path = SQL_ERROR_CODE_DEFAULT_PATH;
+				is = loadInputStream(path);
 				if (is == null) {
 					throw new BeanDefinitionStoreException("Unable to locate file [" + SQL_ERROR_CODE_DEFAULT_PATH +"]",null);
 				}
 			}
-			ListableBeanFactory bf = new XmlBeanFactory(is);
+			ListableBeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation(path));
 			String[] rdbmsNames = bf.getBeanDefinitionNames(org.springframework.jdbc.support.SQLErrorCodes.class);
 			rdbmsErrorCodes = new HashMap(rdbmsNames.length);
 

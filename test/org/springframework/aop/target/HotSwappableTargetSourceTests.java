@@ -11,12 +11,13 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.interceptor.SideEffectBean;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: HotSwappableTargetSourceTests.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: HotSwappableTargetSourceTests.java,v 1.2 2003-12-19 15:49:58 johnsonr Exp $
  */
 public class HotSwappableTargetSourceTests extends TestCase {
 
@@ -35,7 +36,7 @@ public class HotSwappableTargetSourceTests extends TestCase {
 	protected void setUp() throws Exception {
 		// Load from classpath, NOT a file path
 		InputStream is = getClass().getResourceAsStream("hotSwapTests.xml");
-		this.beanFactory = new XmlBeanFactory(is);
+		this.beanFactory = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("hotSwapTests.xml"));
 	}
 	
 	/**

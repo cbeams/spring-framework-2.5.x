@@ -13,6 +13,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.support.ApplicationContextResourceBeanDefinitionRegistryLocation;
 import org.springframework.web.servlet.View;
 
 /**
@@ -83,7 +84,8 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 		}
 		try {
 			InputStream is = getApplicationContext().getResourceAsStream(this.location);
-			BeanFactory xbf = new XmlBeanFactory(is, getApplicationContext());
+			BeanFactory xbf = new XmlBeanFactory(is, getApplicationContext(), 
+					new ApplicationContextResourceBeanDefinitionRegistryLocation(this.location));
 			if (isCache()) {
 				this.cachedFactory = xbf;
 			}

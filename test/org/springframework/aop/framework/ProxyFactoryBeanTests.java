@@ -31,6 +31,7 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.TimeStamped;
@@ -41,7 +42,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.16 2003-12-11 14:52:29 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.17 2003-12-19 15:49:59 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -72,7 +73,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 	public void testGetObjectTypeWithDirectTarget() {
 		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is);
+		BeanFactory bf = new XmlBeanFactory(is, null);
 		
 		// We have a counting before advice here
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) bf.getBean("countingBeforeAdvice");
@@ -88,7 +89,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 	public void testGetObjectTypeWithTargetViaTargetSource() {
 		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is);
+		BeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("proxyFactoryTargetSourceTests.xml"));
 
 		ITestBean tb = (ITestBean) bf.getBean("viaTargetSource");
 		assertTrue(tb.getName().equals("Adam"));
@@ -98,7 +99,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 	public void testGetObjectTypeWithNoTargetOrTargetSource() {
 		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is);
+		BeanFactory bf = new XmlBeanFactory(is, null);
 
 		ITestBean tb = (ITestBean) bf.getBean("noTarget");
 		try {
@@ -158,7 +159,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		int INITIAL_COUNT = 10;
 		
 		InputStream is = getClass().getResourceAsStream("prototypeTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is);
+		BeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("prototypeTests"));
 		
 		// Check it works without AOP
 		SideEffectBean raw = (SideEffectBean) bf.getBean("prototypeTarget");
