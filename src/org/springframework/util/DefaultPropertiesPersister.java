@@ -69,7 +69,7 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 			if (line == null) {
 				return;
 			}
-			line = StringUtils.trimFrontWhitespace(line);
+			line = StringUtils.trimLeadingWhitespace(line);
 			if (line.length() > 0) {
 				char firstChar = line.charAt(0);
 				if (firstChar != '#' && firstChar != '!') {
@@ -77,7 +77,7 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 						String nextLine = in.readLine();
 						line = line.substring(0, line.length() - 1);
 						if (nextLine != null) {
-							line += StringUtils.trimFrontWhitespace(nextLine);
+							line += StringUtils.trimLeadingWhitespace(nextLine);
 						}
 					}
 					int separatorIndex = line.indexOf("=");
@@ -86,8 +86,8 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 					}
 					String key = (separatorIndex != -1 ? line.substring(0, separatorIndex) : line);
 					String value = (separatorIndex != -1) ? line.substring(separatorIndex + 1) : "";
-					key = StringUtils.trimRearWhitespace(key);
-					value = StringUtils.trimFrontWhitespace(value);
+					key = StringUtils.trimTrailingWhitespace(key);
+					value = StringUtils.trimLeadingWhitespace(value);
 					props.put(unescape(key), unescape(value));
 				}
 			}

@@ -100,12 +100,12 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim whitespace from the front of the given String.
+	 * Trim leading whitespace from the given String.
 	 * @param str the String to check
 	 * @return the trimmed String
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimFrontWhitespace(String str) {
+	public static String trimLeadingWhitespace(String str) {
 		StringBuffer buf = new StringBuffer(str);
 		while (Character.isWhitespace(buf.charAt(0))) {
 			buf.deleteCharAt(0);
@@ -114,12 +114,12 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim whitespace from the rear of the given String.
+	 * Trim trailing whitespace from the given String.
 	 * @param str the String to check
 	 * @return the trimmed String
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimRearWhitespace(String str) {
+	public static String trimTrailingWhitespace(String str) {
 		StringBuffer buf = new StringBuffer(str);
 		while (Character.isWhitespace(buf.charAt(buf.length() - 1))) {
 			buf.deleteCharAt(buf.length() - 1);
