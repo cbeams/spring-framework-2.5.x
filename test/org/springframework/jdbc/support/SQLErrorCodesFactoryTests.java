@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,9 +158,9 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
-		assertEquals(1, sf.getErrorCodes("Oracle").getCustomTranslations().size());
+		assertEquals(1, sf.getErrorCodes("Oracle").getCustomTranslations().length);
 		CustomSQLErrorCodesTranslation translation =
-				(CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations().get(0);
+				(CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations()[0];
 		assertEquals(CustomErrorCodeException.class, translation.getExceptionClass());
 		assertEquals(1, translation.getErrorCodes().length);
 	}

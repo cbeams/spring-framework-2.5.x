@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.support;
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import javax.sql.DataSource;
 
@@ -29,9 +28,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * Implementation of SQLExceptionTranslator that uses specific vendor codes.
@@ -174,10 +175,10 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 			if (errorCode != null) {
 
 				// Look for defined custom translations first.
-				if (!this.sqlErrorCodes.getCustomTranslations().isEmpty()) {
-					Iterator customIter = this.sqlErrorCodes.getCustomTranslations().iterator();
-					while (customIter.hasNext()) {
-						CustomSQLErrorCodesTranslation customTranslation = (CustomSQLErrorCodesTranslation) customIter.next();
+				CustomSQLErrorCodesTranslation[] customTranslations = this.sqlErrorCodes.getCustomTranslations();
+				if (customTranslations != null) {
+					for (int i = 0; i < customTranslations.length; i++) {
+						CustomSQLErrorCodesTranslation customTranslation = customTranslations[i];
 						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0) {
 							if (customTranslation.getExceptionClass() != null) {
 								DataAccessException customException = createCustomException(
@@ -195,6 +196,14 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 				if (Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
 					return new BadSqlGrammarException(task, sql, sqlEx);
+				}
+				else if (Arrays.binarySearch(this.sqlErrorCodes.getInvalidResultSetAccessCodes(), errorCode) >= 0) {
+					logTranslation(task, sql, sqlEx, false);
+					return new InvalidResultSetAccessException(task, sql, sqlEx);
+				}
+				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes(), errorCode) >= 0) {
+					logTranslation(task, sql, sqlEx, false);
+					return new DataAccessResourceFailureException(task + ": " + sqlEx.getMessage(), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataIntegrityViolationCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package org.springframework.jdbc.support;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.springframework.util.StringUtils;
 
 /**
  * JavaBean for holding JDBC error codes for a particular database.
- * Normally loaded through a BeanFactory implementation.
- * Used by the SQLErrorCodeSQLExceptionTranslator.
+ * Instances of this class are normally loaded through a bean factory.
+ *
+ * <p>Used by Spring's SQLErrorCodeSQLExceptionTranslator.
+ * The file "sql-error-codes.xml" in this package contains default
+ * SQLErrorCodes instances for various databases.
+ *
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @see SQLErrorCodeSQLExceptionTranslator
  * @see SQLErrorCodesFactory
+ * @see SQLErrorCodeSQLExceptionTranslator
  */
 public class SQLErrorCodes {
 
@@ -38,6 +39,10 @@ public class SQLErrorCodes {
 
 	private String[] badSqlGrammarCodes = new String[0];
 
+	private String[] invalidResultSetAccessCodes = new String[0];
+
+	private String[] dataAccessResourceFailureCodes = new String[0];
+
 	private String[] dataIntegrityViolationCodes = new String[0];
 	
 	private String[] cannotAcquireLockCodes = new String[0];
@@ -46,7 +51,7 @@ public class SQLErrorCodes {
 
 	private String[] cannotSerializeTransactionCodes = new String[0];
 
-	private List customTranslations = new LinkedList();
+	private CustomSQLErrorCodesTranslation[] customTranslations;
 
 
 	/**
@@ -95,6 +100,22 @@ public class SQLErrorCodes {
 		return badSqlGrammarCodes;
 	}
 
+	public void setInvalidResultSetAccessCodes(String[] invalidResultSetAccessCodes) {
+		this.invalidResultSetAccessCodes = invalidResultSetAccessCodes;
+	}
+
+	public String[] getInvalidResultSetAccessCodes() {
+		return invalidResultSetAccessCodes;
+	}
+
+	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
+		this.dataAccessResourceFailureCodes = dataAccessResourceFailureCodes;
+	}
+
+	public String[] getDataAccessResourceFailureCodes() {
+		return dataAccessResourceFailureCodes;
+	}
+
 	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
 		this.dataIntegrityViolationCodes = StringUtils.sortStringArray(dataIntegrityViolationCodes);
 	}
@@ -127,20 +148,11 @@ public class SQLErrorCodes {
 		return cannotSerializeTransactionCodes;
 	}
 
-
-	/**
-	 * @param customTranslations List of CustomSQLErrorCodesTranslation objects
-	 * @see CustomSQLErrorCodesTranslation
-	 */
-	public void setCustomTranslations(List customTranslations) {
+	public void setCustomTranslations(CustomSQLErrorCodesTranslation[] customTranslations) {
 		this.customTranslations = customTranslations;
 	}
 
-	/**
-	 * @return List of CustomSQLErrorCodesTranslation objects
-	 * @see CustomSQLErrorCodesTranslation
-	 */
-	public List getCustomTranslations() {
+	public CustomSQLErrorCodesTranslation[] getCustomTranslations() {
 		return customTranslations;
 	}
 
