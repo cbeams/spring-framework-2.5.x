@@ -12,6 +12,9 @@ import org.springframework.core.NestedRuntimeException;
  * @author Juergen Hoeller
  * @since 19.03.2004
  * @see org.quartz.JobExecutionException
+ * @deprecated The Timer's main loop will simply stop if a TimerTask
+ * throws an exception. Therefore it's advisable to not throw an exception
+ * from a TimerTask, except when intending to stop the entire Timer.
  */
 public class TimerTaskExecutionException extends NestedRuntimeException {
 

@@ -77,10 +77,10 @@ public class MethodInvokingTimerTaskFactoryBean extends MethodInvoker
 		/**
 		 * Create a new MethodInvokingTimerTask with the MethodInvoker to use.
 		 */
-		public MethodInvokingTimerTask(MethodInvoker methodInvoker) {
+		private MethodInvokingTimerTask(MethodInvoker methodInvoker) {
 			this.methodInvoker = methodInvoker;
-			this.errorMessage = "Could not invoke method '" + this.methodInvoker.getTargetMethod() +
-					"' on target object [" + this.methodInvoker.getTargetObject() + "]";
+			this.errorMessage = "Invocation of method '" + this.methodInvoker.getTargetMethod() +
+					"' on target object [" + this.methodInvoker.getTargetObject() + "] failed";
 
 		}
 
@@ -92,12 +92,12 @@ public class MethodInvokingTimerTaskFactoryBean extends MethodInvoker
 				this.methodInvoker.invoke();
 			}
 			catch (InvocationTargetException ex) {
-				logger.warn(this.errorMessage + ": " + ex.getTargetException().getMessage());
-				throw new TimerTaskExecutionException(this.errorMessage, ex.getTargetException());
+				logger.error(this.errorMessage, ex);
+				// Do not throw exception, else the main loop of the Timer will stop!
 			}
-			catch (Exception ex) {
-				logger.warn(this.errorMessage + ": " + ex.getMessage());
-				throw new TimerTaskExecutionException(this.errorMessage, ex);
+			catch (Throwable ex) {
+				logger.error(this.errorMessage, ex);
+				// Do not throw exception, else the main loop of the Timer will stop!
 			}
 		}
 	}
