@@ -23,6 +23,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import org.springframework.web.util.ExpressionEvaluationUtils;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
@@ -37,7 +38,7 @@ import org.springframework.web.util.TagUtils;
  * @since 20.09.2003
  * @see BindTag
  */
-public class TransformTag extends RequestContextAwareTag {
+public class TransformTag extends HtmlEscapingAwareTag {
 
 	/** the value to transform using the appropriate property editor */
 	private String value;
@@ -47,6 +48,7 @@ public class TransformTag extends RequestContextAwareTag {
 
 	/** the scope of the variable the result will be put in */
 	private String scope = TagUtils.SCOPE_PAGE;
+
 
 	/**
 	 * Set the value to finally transform using the appropriate
@@ -77,6 +79,7 @@ public class TransformTag extends RequestContextAwareTag {
 		this.scope = scope;
 	}
 
+
 	protected final int doStartTagInternal() throws JspException {
 		Object resolvedValue = ExpressionEvaluationUtils.evaluate("value", this.value, Object.class, pageContext);
 		if (resolvedValue != null) {
@@ -98,6 +101,7 @@ public class TransformTag extends RequestContextAwareTag {
 				// else, just do a toString
 				result = resolvedValue.toString();
 			}
+			result = isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result;
 			String resolvedVar = ExpressionEvaluationUtils.evaluateString("var", this.var, pageContext);
 			if (resolvedVar != null) {
 				String resolvedScope = ExpressionEvaluationUtils.evaluateString("scope", this.scope, pageContext);

@@ -80,6 +80,35 @@ public class TransformTestSuite extends AbstractTagTests {
 		assertEquals(pc.getAttribute("theString"), "name");
 	}
 
+	public void testTransformTagWithHtmlEscape() throws JspException {
+		// first set up the pagecontext and the bean
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		CustomDateEditor l = new CustomDateEditor(df, true);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+
+		// try another time, this time using Strings
+		BindTag bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.name");
+		bind.doStartTag();
+
+		TransformTag transform = new TransformTag();
+		transform.setPageContext(pc);
+		pc.setAttribute("string", "na<me");
+		transform.setValue("${string}");
+		transform.setParent(bind);
+		transform.setVar("theString");
+		transform.setHtmlEscape("true");
+		transform.doStartTag();
+
+		assertNotNull(pc.getAttribute("theString"));
+		assertEquals(pc.getAttribute("theString"), "na&#60;me");
+	}
+
 	public void testTransformTagOutsideBindTag() throws JspException {
 		// first set up the pagecontext and the bean
 		PageContext pc = createPageContext();
@@ -121,7 +150,7 @@ public class TransformTestSuite extends AbstractTagTests {
 	}
 
 	public void testTransformTagNonExistingValue() throws JspException {
-		//		first set up the pagecontext and the bean
+		// first set up the pagecontext and the bean
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
