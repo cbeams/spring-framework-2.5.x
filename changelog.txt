@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.170 2004-06-23 18:34:09 jhoeller Exp $
+$Id: changelog.txt,v 1.171 2004-06-24 08:50:20 jhoeller Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -23,8 +23,12 @@ Package org.springframework.beans
 * fixed MethodInvokingFactoryBean's singleton initialization to properly allow for circular reference detection
 * fixed PropertyPlaceholderConfigurer's circular reference detection to allow repeated placeholder in single value
 * PropertyPlaceholderConfigurer and PropertiesFactoryBean respect the defaults of a given Properties instance
-* added "parent" option to "ref" tag in spring-beans.dtd, allowing to explicitly reference a bean in the parent factory
 * AbstractAutowireCapableBeanFactory's "autowireConstructor" regards all constructors, just preferring public ones
+* introduced InstantiationStrategy interface, with SimpleInstantiationStrategy and CglibSubclassingInstantiationStrategy
+* added support for static factory methods to RootBeanDefinition and AbstractAutowireCapableBeanFactory
+* added support for abstract lookup methods to AbstractBeanDefinition and AbstractAutowireCapableBeanFactory
+* added "factory-method" attribute and "lookup-method" element to "bean" tag in spring-beans.dtd
+* added "parent" option to "ref" tag in spring-beans.dtd, allowing to explicitly reference a bean in the parent factory
 
 Package org.springframework.context
 * reworked ApplicationEventMulticaster to have a "multicastEvent" method rather than derive from ApplicationListener
