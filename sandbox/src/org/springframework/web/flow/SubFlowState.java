@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class SubFlowState extends TransitionableState {
+public class SubFlowState extends TransitionableState implements FlowAttributesMapper {
 
 	private Flow subFlow;
 
@@ -84,22 +84,47 @@ public class SubFlowState extends TransitionableState {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '"
 					+ flowExecution.getActiveFlowId() + "'");
 		}
-		Map subFlowAttributes;
+		Map subFlowAttributes = createSpawnedSubFlowAttributesMap(flowExecution);
+		return flowExecution.spawn(getSubFlow(), subFlowAttributes, request, response);
+	}
+
+	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowModel) {
 		if (getFlowAttributesMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
 						+ "down to the spawned subflow for access within the subflow");
 			}
-			subFlowAttributes = getFlowAttributesMapper().createSpawnedSubFlowAttributesMap(flowExecution);
+			return this.flowAttributesMapper.createSpawnedSubFlowAttributesMap(parentFlowModel);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No attributes mapper is configured for this subflow state '" + getId()
-						+ "'; as a result, no attributes in the parent flow '" + flowExecution.getActiveFlowId()
-						+ "' scope will be passed to the spawned subflow '" + subFlow.getId() + "'");
+				logger
+						.debug("No attributes mapper configured for this subflow state '"
+								+ getId()
+								+ "'; as a result, no attributes in the parent flow scope will be passed to the spawned subflow '"
+								+ subFlow.getId() + "'");
 			}
-			subFlowAttributes = new HashMap(1);
+			return Collections.EMPTY_MAP;
 		}
-		return flowExecution.spawn(getSubFlow(), subFlowAttributes, request, response);
+	}
+
+	public void mapToResumingParentFlow(AttributesAccessor endingSubFlowModel,
+			MutableAttributesAccessor resumingParentFlowModel) {
+		if (getFlowAttributesMapper() != null) {
+			if (logger.isDebugEnabled()) {
+				logger
+						.debug("Messaging the configured attributes mapper to map subflow attributes back up to the resuming parent flow - "
+								+ "the resuming parent flow will now have access to attributes passed up by the completed subflow");
+			}
+			this.flowAttributesMapper.mapToResumingParentFlow(endingSubFlowModel, resumingParentFlowModel);
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger
+						.debug("No attributes mapper is configured for the resuming state '"
+								+ getId()
+								+ "' - note: as a result, no attributes in the ending subflow scope will be passed to the resuming parent flow");
+			}
+		}
 	}
 }

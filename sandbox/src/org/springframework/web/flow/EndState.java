@@ -49,7 +49,7 @@ public class EndState extends AbstractState {
 	protected String getViewName() {
 		return viewName;
 	}
-	
+
 	public boolean isMarker() {
 		return !StringUtils.hasText(viewName);
 	}
@@ -70,28 +70,12 @@ public class EndState extends AbstractState {
 				logger.debug("Resuming parent flow '" + flowExecution.getActiveFlowId() + "' in state '"
 						+ flowExecution.getCurrentStateId() + "'");
 			}
-			Flow resumingParentFlow = flowExecution.getActiveFlow();
-			Assert.isInstanceOf(SubFlowState.class, flowExecution.getCurrentState());
-			SubFlowState resumingState = (SubFlowState)flowExecution.getCurrentState();
-			if (resumingState.getFlowAttributesMapper() != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Messaging the configured attributes mapper to map subflow attributes back up to the resuming parent flow - "
-							+ "the resuming parent flow will now have access to attributes passed up by the completed subflow");
-				}
-				resumingState.getFlowAttributesMapper().mapToResumingParentFlow(endingFlowSession,
-						flowExecution.getActiveFlowSession());
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("No attributes mapper is configured for the resuming state '" + getId()
-							+ "' - note: as a result, no attributes in the ending subflow '"
-							+ endingFlowSession.getFlowId() + "' scope will be passed to the resuming parent flow '"
-							+ resumingParentFlow.getId() + "'");
-				}
-			}
+			Assert.isInstanceOf(FlowAttributesMapper.class, flowExecution.getCurrentState());
+			FlowAttributesMapper resumingState = (FlowAttributesMapper)flowExecution.getCurrentState();
+			resumingState.mapToResumingParentFlow(endingFlowSession, flowExecution.getActiveFlowSession());
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
-			return resumingState.signalEvent(getId(), flowExecution, request, response);
+			return ((TransitionableState)resumingState).signalEvent(getId(), flowExecution, request, response);
 		}
 		else {
 			// entire flow execution has ended, return ending view if applicable
