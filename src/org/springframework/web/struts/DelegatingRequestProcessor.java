@@ -91,7 +91,7 @@ import org.springframework.web.context.WebApplicationContext;
  * delegating to DelegatingActionUtils just like it.
  *
  * @author Juergen Hoeller
- * @since 26.04.2004
+ * @since 1.0.2
  * @see #determineActionBeanName
  * @see DelegatingTilesRequestProcessor
  * @see DelegatingActionProxy
@@ -119,9 +119,8 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 	 * @see DelegatingActionUtils#getRequiredWebApplicationContext
 	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
-	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet,
-																														ModuleConfig moduleConfig)
-			throws IllegalStateException {
+	protected WebApplicationContext initWebApplicationContext(
+			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
 		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 
@@ -132,8 +131,12 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 		return webApplicationContext;
 	}
 
-	protected Action processActionCreate(HttpServletRequest request, HttpServletResponse response,
-																			 ActionMapping mapping) throws IOException {
+	/**
+	 * Override the base class method to return the delegate action.
+	 * @see #getDelegateAction
+	 */
+	protected Action processActionCreate(
+			HttpServletRequest request, HttpServletResponse response, ActionMapping mapping) throws IOException {
 		try {
 			return getDelegateAction(mapping);
 		}

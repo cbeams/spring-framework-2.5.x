@@ -35,7 +35,7 @@ import org.springframework.web.context.WebApplicationContext;
  * functionality is a utility class like this one.
  *
  * @author Juergen Hoeller
- * @since 26.04.2004
+ * @since 1.0.2
  * @see DelegatingActionProxy
  * @see DelegatingRequestProcessor
  * @see DelegatingTilesRequestProcessor
@@ -57,16 +57,16 @@ public abstract class DelegatingActionUtils {
 	 */
 	public static WebApplicationContext getRequiredWebApplicationContext(
 			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
-		// try module-specific attribute
+		// Try module-specific attribute.
 		String modulePrefix = moduleConfig.getPrefix();
 		String attrName = ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + modulePrefix;
 		WebApplicationContext wac = (WebApplicationContext) actionServlet.getServletContext().getAttribute(attrName);
-		// if not found, try attribute for default module
+		// If not found, try attribute for default module.
 		if (wac == null && !"".equals(modulePrefix)) {
 			attrName = ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX;
 			wac = (WebApplicationContext) actionServlet.getServletContext().getAttribute(attrName);
 		}
-		// if no context found, throw an exception
+		// If no context found, throw an exception.
 		if (wac == null) {
 			throw new IllegalStateException(
 					"Could not find ContextLoaderPlugIn's WebApplicationContext as ServletContext attribute [" +

@@ -32,8 +32,9 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
  * Applications do not need to use this class directly.
  *
  * @author Juergen Hoeller
- * @since 05.04.2004
+ * @since 1.0.1
  * @see ContextLoaderPlugIn
+ * @see org.apache.struts.action.Action#setServlet
  */
 public class ActionServletAwareProcessor implements DestructionAwareBeanPostProcessor {
 

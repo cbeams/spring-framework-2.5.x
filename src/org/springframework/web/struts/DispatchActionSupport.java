@@ -49,7 +49,7 @@ import org.springframework.web.util.WebUtils;
  * {@link DelegatingRequestProcessor DelegatingRequestProcessor}.
  *
  * @author Juergen Hoeller
- * @since 06.04.2004
+ * @since 1.0.1
  * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
  * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
  * @see org.springframework.web.context.ContextLoaderListener

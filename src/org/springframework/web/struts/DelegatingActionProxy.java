@@ -85,7 +85,7 @@ import org.springframework.web.context.WebApplicationContext;
  * agreement to reimplement the idea in standard Spring!
  *
  * @author Juergen Hoeller
- * @since 05.04.2004
+ * @since 1.0.1
  * @see #determineActionBeanName
  * @see DelegatingRequestProcessor
  * @see DelegatingTilesRequestProcessor
@@ -98,8 +98,9 @@ public class DelegatingActionProxy extends Action {
 	 * Pass the execute call on to the Spring-managed delegate Action.
 	 * @see #getDelegateAction
 	 */
-	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-															 HttpServletResponse response) throws Exception {
+	public ActionForward execute(
+			ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 		Action delegateAction = getDelegateAction(mapping);
 		return delegateAction.execute(mapping, form, request, response);
 	}
@@ -130,9 +131,8 @@ public class DelegatingActionProxy extends Action {
 	 * @see DelegatingActionUtils#getRequiredWebApplicationContext
 	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
-	protected WebApplicationContext getWebApplicationContext(ActionServlet actionServlet,
-																													 ModuleConfig moduleConfig)
-			throws IllegalStateException {
+	protected WebApplicationContext getWebApplicationContext(
+			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
 		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 
