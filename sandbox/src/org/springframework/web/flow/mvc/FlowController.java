@@ -33,30 +33,33 @@ import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
  * Web controller for the Spring MVC framework that handles requests using a web
- * flow. Requests are managed using an {@link HttpFlowExecutionManager}. Consult
- * the JavaDoc of that class for more information on how requests are processed.
+ * flow. Requests are managed using an {@link HttpFlowExecutionManager}.
+ * Consult the JavaDoc of that class for more information on how requests are
+ * processed.
  * <p>
- * This controller requires sessions to keep track of flow state. So it will force
- * the "requireSession" attribute defined by the AbstractController to true.
+ * This controller requires sessions to keep track of flow state. So it will
+ * force the "requireSession" attribute defined by the AbstractController to
+ * true.
  * <p>
- * <b>Exposed configuration properties:</b><br>
+ * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
- *  <tr>
- *      <td><b>name</b></td>
- *      <td><b>default</b></td>
- *      <td><b>description</b></td>
- *  </tr>
- *  <tr>
- *      <td>flow</td>
- *      <td><i>null</i></td>
- *      <td>Set the top level fow started by this controller. This is optional.</td>
- *  </tr>
- *  <tr>
- *      <td>flowExecutionListener(s)</td>
- *      <td><i>null</i></td>
- *      <td>Set the flow execution listener(s) that should be notified of flow
- *      execution lifecycle events.</td>
- *  </tr>
+ * <tr>
+ * <td><b>name </b></td>
+ * <td><b>default </b></td>
+ * <td><b>description </b></td>
+ * </tr>
+ * <tr>
+ * <td>flow</td>
+ * <td><i>null </i></td>
+ * <td>Set the top level fow started by this controller. This is optional.
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>flowExecutionListener(s)</td>
+ * <td><i>null </i></td>
+ * <td>Set the flow execution listener(s) that should be notified of flow
+ * execution lifecycle events.</td>
+ * </tr>
  * </table>
  * 
  * @see org.springframework.web.flow.support.HttpFlowExecutionManager
@@ -102,18 +105,18 @@ public class FlowController extends AbstractController implements InitializingBe
 		this.manager = createHttpFlowExecutionManager();
 	}
 
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		//delegate to the flow execution manager to process the request
-		return manager.handleRequest(request, response);
-	}
-	
 	/**
-	 * Create a new HTTP flow execution manager. Subclasses can override
-	 * this to return a specialed manager.
+	 * Create a new HTTP flow execution manager. Subclasses can override this to
+	 * return a specialed manager.
 	 */
 	protected HttpFlowExecutionManager createHttpFlowExecutionManager() {
 		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
 		return new HttpFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners);
+	}
+
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		//delegate to the flow execution manager to process the request
+		return manager.handleRequest(request, response);
 	}
 }
