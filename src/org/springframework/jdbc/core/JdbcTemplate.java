@@ -67,7 +67,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.28 2004-02-27 08:53:58 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.29 2004-03-03 07:07:21 pawlakjp Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -229,6 +229,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return ((Integer) queryForObject(sql, Integer.class)).intValue();
 	}
 
+	public long queryForLong(String sql) throws DataAccessException {
+		return ((Long) queryForObject(sql, Long.class)).longValue();
+	}
 
 	//-------------------------------------------------------------------------
 	// Query methods dealing with prepared statements
