@@ -78,7 +78,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.35 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.36 2004-03-23 22:19:51 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.datasource
@@ -236,11 +236,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public long queryForLong(String sql) throws DataAccessException {
-		return ((Number) queryForObject(sql, Number.class)).longValue();
+		Number value = (Number) queryForObject(sql, Number.class);
+		if (value != null)
+			return value.longValue();
+		else
+			return 0;
 	}
 
 	public int queryForInt(String sql) throws DataAccessException {
-		return ((Number) queryForObject(sql, Number.class)).intValue();
+		Number value = (Number) queryForObject(sql, Number.class);
+		if (value != null)
+			return value.intValue();
+		else
+			return 0;
 	}
 
 	public int update(final String sql) throws DataAccessException {
@@ -418,11 +426,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public long queryForLong(String sql, final Object[] args) throws DataAccessException {
-		return ((Number) queryForObject(sql, args, Number.class)).longValue();
+		Number value =(Number) queryForObject(sql, args, Number.class);
+		if (value != null)
+			return value.longValue();
+		else
+			return 0;
 	}
 
 	public int queryForInt(String sql, final Object[] args) throws DataAccessException {
-		return ((Number) queryForObject(sql, args, Number.class)).intValue();
+		Number value = (Number) queryForObject(sql, args, Number.class);
+		if (value != null)
+			return value.intValue();
+		else
+			return 0;
 	}
 
 	protected int update(PreparedStatementCreator psc, final PreparedStatementSetter pss) throws DataAccessException {
@@ -821,7 +837,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (rs.next()) {
 				throw new InvalidDataAccessApiUsageException("Expected single row, not more than one");
 			}
-			if (this.requiredType != null && !this.requiredType.isInstance(result)) {
+			if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
+			//if (this.requiredType != null && !this.requiredType.isInstance(result)) {
 				throw new InvalidDataAccessApiUsageException("Result object (db-type=\"" + rsmd.getColumnTypeName(1) +
 																										 "\" value=\"" + result + "\") is of type [" +
 																										 rsmd.getColumnClassName(1) + "] and not of required type [" +
