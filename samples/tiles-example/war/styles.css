@@ -1,0 +1,35 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+	font-size: 20px;
+	font-weight: bold;
+}
+
+h2 {
+	font-size: 17px;
+}
+
+.menu {	
+	border-bottom: 1px solid black;
+}
+
+h3 {
+	font-size: 13px;
+	letter-spacing: +2px;
+	padding-bottom: 0px;
+	margin-bottom: 0px;
+}
+
+.news {
+	padding-top: 0px;
+	margin-top: 0px;
+	font-size: 10px;
+}
+
+a, a:hover, a:link, a:active, a:visited {
+	color: #aa0000;
+}
+
+

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass"><value>org.springframework.web.servlet.view.tiles.TilesJstlView</value></property>
+	</bean>
+	
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer">
+	    <property name="definitions">
+		    <list>
+		 	   <value>/WEB-INF/defs/definitions.xml</value>
+		    </list>
+	    </property>
+	</bean>
+	
+    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <props>
+                <prop key="/*.html">viewController</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <bean id="viewController" class="tiles.FileNameViewController"/>
+    
+	<bean id="feedConfigurator" class="tiles.NewsFeedConfigurator">
+		<property name="feeds">
+			<props>
+				<prop key="theserverside">http://www.theserverside.com/rss/theserverside-1.0.rdf</prop>
+				<prop key="slashdot">http://slashdot.org/slashdot.rss</prop>
+				<prop key="worldpress">http://www.worldpress.org/feeds/worldpresswire.xml</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>
