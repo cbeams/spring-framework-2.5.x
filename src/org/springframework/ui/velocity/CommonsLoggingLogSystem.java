@@ -18,6 +18,7 @@ package org.springframework.ui.velocity;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.log.LogSystem;
 
@@ -30,13 +31,13 @@ import org.apache.velocity.runtime.log.LogSystem;
  */
 public class CommonsLoggingLogSystem implements LogSystem {
 
-	private Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(VelocityEngine.class);
 
 	public void init(RuntimeServices runtimeServices) {
 	}
 
-	public void logVelocityMessage(int i, String msg) {
-		switch (i) {
+	public void logVelocityMessage(int type, String msg) {
+		switch (type) {
 			case ERROR_ID:
 				logger.error(msg);
 				break;
