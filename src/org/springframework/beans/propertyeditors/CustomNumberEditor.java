@@ -71,7 +71,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	}
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (this.allowEmpty && text.trim().equals("")) {
+		if (this.allowEmpty && (text == null || "".equals(text.trim()))) {
 			setValue(null);
 		}
 		else {

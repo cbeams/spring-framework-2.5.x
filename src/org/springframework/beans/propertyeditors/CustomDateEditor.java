@@ -63,7 +63,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * Parse the Date from the given text, using the specified DateFormat.
 	 */
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (this.allowEmpty && text.trim().equals("")) {
+		if (this.allowEmpty && (text == null || "".equals(text.trim()))) {
 			// treat empty String as null value
 			setValue(null);
 		}
