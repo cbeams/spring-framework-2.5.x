@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -243,11 +244,13 @@ public class ActionState extends TransitionableState {
 			HttpServletResponse response) {
 		Iterator it = namedActionIterator();
 		int executionCount = 0;
+		String[] eventIds = new String[namedActions.size()];
 		while (it.hasNext()) {
 			NamedAction namedAction = (NamedAction)it.next();
 			ActionResult result = namedAction.execute(request, response, flowExecution);
 			executionCount++;
 			String eventId = namedAction.getEventId(result);
+			eventIds[executionCount - 1] = eventId;
 			Transition transition = getTransition(eventId);
 			if (transition != null) {
 				flowExecution.setLastEventId(eventId);
@@ -261,10 +264,12 @@ public class ActionState extends TransitionableState {
 			}
 		}
 		if (executionCount > 0) {
-			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
-					"No supported event was signaled by any of the " + executionCount
-							+ " actions that executed in this action state '" + getId() + "' of flow '"
-							+ getFlow().getId() + "' -- programmer error?"));
+			throw new CannotExecuteStateTransitionException(this,
+					"No transition was matched to any of the result events " + DefaultObjectStyler.call(eventIds)
+							+ " returned by the " + executionCount + " action(s) that executed in this action state '"
+							+ getId() + "' of flow '" + getFlow().getId()
+							+ "'; a transition must be defined to handle possible action result outcomes -- "
+							+ "possible flow configuration error?");
 		}
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(

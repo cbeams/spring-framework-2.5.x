@@ -36,6 +36,16 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 		super(state.getFlow(), cause);
 		this.stateIdTransitioningFrom = state.getId();
 	}
+	
+	/**
+	 * Creates a new state transition exception.
+	 * @param state The source state
+	 * @param message The message of what went wrong.
+	 */
+	public CannotExecuteStateTransitionException(AbstractState state, String message) {
+		super(state.getFlow(), message);
+		this.stateIdTransitioningFrom = state.getId();
+	}
 
 	/**
 	 * Create a new state transition exception.
@@ -48,14 +58,18 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	}
 
 	public String getMessage() {
-		if (transition != null) {
-			return "Could not execute transition from state '" + transition.getSourceState().getId() + "' to state '"
-					+ transition.getTargetStateId() + "' in flow '" + getFlow().getId() + "'";
+		if (super.getMessage() != null) {
+			return super.getMessage();
 		}
 		else {
-			return "Could not execute a transition from state '" + stateIdTransitioningFrom
-					+ "' to another state in flow '" + getFlow().getId() + "'";
+			if (transition != null) {
+				return "Could not execute transition from state '" + transition.getSourceState().getId()
+						+ "' to state '" + transition.getTargetStateId() + "' in flow '" + getFlow().getId() + "'";
+			}
+			else {
+				return "Could not execute a transition from state '" + stateIdTransitioningFrom
+						+ "' to another state in flow '" + getFlow().getId() + "'";
+			}
 		}
 	}
-
 }
