@@ -20,12 +20,12 @@ package org.springframework.aop.framework.adapter;
  * Exception thrown when an attempt is made to use an unsupported
  * Advisor or Advice type.
  * @author Rod Johnson
- * @version $Id: UnknownAdviceTypeException.java,v 1.5 2004-04-01 15:35:47 jhoeller Exp $
+ * @version $Id: UnknownAdviceTypeException.java,v 1.6 2004-06-09 16:33:35 jhoeller Exp $
  */
 public class UnknownAdviceTypeException extends IllegalArgumentException {
 	
 	public UnknownAdviceTypeException(Object advice) {
-		super("No adapter for Advice of class '" + advice.getClass().getName() + "'");
+		super("No adapter for Advice " + (advice != null ? "of class [" + advice.getClass().getName() + "]" : "[null]"));
 	}
 
 }
