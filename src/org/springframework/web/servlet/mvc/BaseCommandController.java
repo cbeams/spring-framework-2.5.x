@@ -352,10 +352,10 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @param request current HTTP request
 	 * @param command command object to perform further binding on
 	 * @throws Exception in case of invalid state or arguments
-	 * @see #bindAndValidate
+	 * @deprecated in favor of onBind(request, command, errors)
+	 * @see #onBind(HttpServletRequest, Object, BindException)
 	 */
-	protected void onBind(HttpServletRequest request, Object command)
-			throws Exception {
+	protected void onBind(HttpServletRequest request, Object command) throws Exception {
 	}
 
 	/**
