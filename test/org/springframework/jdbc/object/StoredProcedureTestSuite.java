@@ -89,8 +89,6 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		mockCallable.registerOutParameter(3, Types.INTEGER);
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
-		ctrlCallable.setReturnValue(true);
-		mockCallable.getMoreResults();
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Integer(4));
@@ -113,8 +111,6 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		mockCallable.registerOutParameter(3, Types.INTEGER);
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
-		ctrlCallable.setReturnValue(true);
-		mockCallable.getMoreResults();
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Integer(4));
@@ -147,8 +143,6 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		mockCallable.setNull(1, Types.VARCHAR);
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
-		ctrlCallable.setReturnValue(true);
-		mockCallable.getMoreResults();
 		ctrlCallable.setReturnValue(false);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
@@ -218,9 +212,12 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-
 		mockResultSet.getString(2);
-		ctrlResultSet.setReturnValue("Bubba");
+		ctrlResultSet.setReturnValue("Foo");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString(2);
+		ctrlResultSet.setReturnValue("Bar");
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -244,9 +241,14 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 
 		StoredProcedureWithResultSet sproc =
 			new StoredProcedureWithResultSet(mockDataSource);
-		sproc.execute();
+		List res = sproc.execute();
 
 		ctrlResultSet.verify();
+		
+		assertEquals(2, res.size());
+		assertEquals("Foo", res.get(0));
+		assertEquals("Bar", res.get(1));
+		
 	}
 
 	private class AddInvoice extends StoredProcedure {
