@@ -101,26 +101,31 @@ public abstract class JmsUtils {
 			return new JmsSecurityException((JMSSecurityException) ex);
 		}
 
-		// All other exceptions in our Jms runtime exception hierarchy have the
-		// same unqualified names as their javax.jms counterparts, so just
-		// construct the converted exception dynamically based on name.
-		String shortName = ClassUtils.getShortName(ex.getClass().getName());
+		if (JMSException.class.equals(ex.getClass().getSuperclass())) {
+			// All other exceptions in our Jms runtime exception hierarchy have the
+			// same unqualified names as their javax.jms counterparts, so just
+			// construct the converted exception dynamically based on name.
+			String shortName = ClassUtils.getShortName(ex.getClass().getName());
 
-		// all JmsException subclasses are in the same package:
-		String longName = JmsException.class.getPackage().getName() + "." + shortName;
+			// all JmsException subclasses are in the same package:
+			String longName = JmsException.class.getPackage().getName() + "." + shortName;
 
-		try {
-			Class clazz = Class.forName(longName);
-			Constructor ctor = clazz.getConstructor(new Class[] {ex.getClass()});
-			Object counterpart = ctor.newInstance(new Object[]{ex});
-			return (JmsException) counterpart;
-		}
-		catch (Throwable ex2) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Couldn't resolve JmsException class [" + longName + "]", ex2);
+			try {
+				Class clazz = Class.forName(longName);
+				Constructor ctor = clazz.getConstructor(new Class[] {ex.getClass()});
+				Object counterpart = ctor.newInstance(new Object[]{ex});
+				return (JmsException) counterpart;
 			}
-			return new UncategorizedJmsException(ex);
+			catch (Throwable ex2) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Couldn't resolve JmsException class [" + longName + "]", ex2);
+				}
+				return new UncategorizedJmsException(ex);
+			}
 		}
+
+		// fallback: uncategorized
+		return new UncategorizedJmsException(ex);
 	}
 
 }
