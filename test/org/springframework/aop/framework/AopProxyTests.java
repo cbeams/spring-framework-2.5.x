@@ -29,7 +29,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Revision: 1.5 $
+ * @version $Id: AopProxyTests.java,v 1.6 2003-11-12 09:24:22 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 
@@ -589,7 +589,7 @@ public class AopProxyTests extends TestCase {
 		/**
 		 * @see org.springframework.aop.framework.DynamicMethodPointcut#applies(java.lang.reflect.Method, java.lang.Object[], org.aopalliance.AttributeRegistry)
 		 */
-		public boolean matches(Method m, Class targetClass, Object[] args) {//, AttributeRegistry attributeRegistry) {
+		public boolean matches(Method m, Class targetClass, Object[] args) {
 			boolean run = m.getName().indexOf(pattern) != -1;
 			if (run) ++count;
 			return run;
@@ -601,7 +601,7 @@ public class AopProxyTests extends TestCase {
 			super(mi, pattern);
 		}
 		
-		public boolean matches(Method m, Class clazz) {//, AttributeRegistry attributeRegistry) {
+		public boolean matches(Method m, Class clazz) {
 			return m.getName().startsWith("set");
 		}
 	}

@@ -37,7 +37,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.6 2003-11-11 18:31:53 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.7 2003-11-12 09:24:22 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -487,6 +487,13 @@ public class ProxyFactoryBeanTests extends TestCase {
 		 */
 		public Class[] getInterfaces() {
 			return new Class[] { AddedGlobalInterface.class };
+		}
+
+		/**
+		 * @see org.springframework.aop.Advice#isPerInstance()
+		 */
+		public boolean isPerInstance() {
+			return false;
 		}
 		
 	}
