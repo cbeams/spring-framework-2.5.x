@@ -33,8 +33,10 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
+import org.springframework.aop.framework.adapter.UnknownAdviceTypeException;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SerializableNopInterceptor;
@@ -794,14 +796,37 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(16, t.getAge());
 		assertEquals(2, cba.getCalls());
 	}
+		
+	public void testAdviceImplementsIntroductionInfo() throws Throwable {
+		TestBean tb = new TestBean();
+		String name = "tony";
+		tb.setName(name);
+		ProxyFactory pc = new ProxyFactory(tb);
+		NopInterceptor di = new NopInterceptor();
+		pc.addAdvice(di);
+		final long ts = 37;
+		pc.addAdvice(new DelegatingIntroductionInterceptor(new TimeStamped() {
+			/**
+			 * @see org.springframework.aop.framework.TimeStamped#getTimeStamp()
+			 */
+			public long getTimeStamp() {
+				return ts;
+			}
+		}));
+		
+		ITestBean proxied = (ITestBean) createProxy(pc);
+		assertEquals(name, proxied.getName());
+		TimeStamped intro = (TimeStamped) proxied;
+		assertEquals(ts, intro.getTimeStamp());
+	}
 	
 	
-	public void testCannotAddIntroductionInterceptorExceptInIntroductionAdvice() throws Throwable {
+	public void testCannotAddDynamicIntroductionAdviceExceptInIntroductionAdvice() throws Throwable {
 		TestBean target = new TestBean();
 		target.setAge(21);
 		ProxyFactory pc = new ProxyFactory(target);
 		try {
-			pc.addAdvice(0, new TimestampIntroductionInterceptor());
+			pc.addAdvice(new DummyIntroductionAdviceImpl());
 			fail("Shouldn't be able to add introduction interceptor except via introduction advice");
 		}
 		catch (AopConfigException ex) {
@@ -810,6 +835,34 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		ITestBean proxied = (ITestBean) createProxy(pc);
 		assertEquals(target.getAge(), proxied.getAge());
+	}
+	
+	public void testRejectsBogusDynamicIntroductionAdviceWithNoAdapter() throws Throwable {
+		TestBean target = new TestBean();
+		target.setAge(21);
+		ProxyFactory pc = new ProxyFactory(target);
+		pc.addAdvisor(new DefaultIntroductionAdvisor(new DummyIntroductionAdviceImpl(), Comparable.class));
+		try {
+			// TODO May fail on either call: may want to tighten up definition
+			ITestBean proxied = (ITestBean) createProxy(pc);
+			proxied.getName();
+			fail("Bogus introduction");
+		}
+		catch (Exception ex) {
+			// TODO used to catch UnknownAdviceTypeException, but
+			// with CGLIB some errors are in proxy creation and are wrapped
+			// in aspect exception. Error message is still fine.
+			//assertTrue(ex.getMessage().indexOf("ntroduction") > -1);
+		}
+	}
+	
+	private class DummyIntroductionAdviceImpl implements DynamicIntroductionAdvice {
+		/**
+		 * @see org.springframework.aop.DynamicIntroductionAdvice#implementsInterface(java.lang.Class)
+		 */
+		public boolean implementsInterface(Class intf) {
+			return true;
+		}
 	}
 	
 	/**
