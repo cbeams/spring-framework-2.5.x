@@ -53,19 +53,19 @@ public class JndiEnvironmentBeanDefinitionReader {
 		try {
 			initCtx = new InitialContext();
 			// Parameterize
-			NamingEnumeration enum = initCtx.listBindings(root);
+			NamingEnumeration bindings = initCtx.listBindings(root);
 			
 			// Orion 1.5.2 doesn't seem to regard anything under a /
 			// as a true subcontext, so we need to search all bindings
 			// Not all that fast, but it doesn't matter				
-			while (enum.hasMore()) {
-				Binding binding = (Binding) enum.next();								
+			while (bindings.hasMore()) {
+				Binding binding = (Binding) bindings.next();
 				logger.debug("Name: " + binding.getName( ));
 				logger.debug("Type: " + binding.getClassName( ));
 				logger.debug("Value: " + binding.getObject());								
 				m.put(binding.getName(), binding.getObject());
 			}
-			enum.close();
+			bindings.close();
 
 			PropertiesBeanDefinitionReader propReader = new PropertiesBeanDefinitionReader(beanFactory);
 			propReader.registerBeanDefinitions(m, BEANS_PREFIX);

@@ -25,6 +25,7 @@ import javax.portlet.PortletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -48,11 +49,10 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
  * @see #addRequiredProperty
- * @see #initServletBean
+ * @see #initPortletBean
  */
 public abstract class PortletBean extends GenericPortlet {
 
-	
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** 
@@ -122,9 +122,9 @@ public abstract class PortletBean extends GenericPortlet {
 			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet(requiredProperties) : null;
 
-			Enumeration enum = config.getInitParameterNames();
-			while (enum.hasMoreElements()) {
-				String property = (String) enum.nextElement();
+			Enumeration paramNames = config.getInitParameterNames();
+			while (paramNames.hasMoreElements()) {
+				String property = (String) paramNames.nextElement();
 				Object value = config.getInitParameter(property);
 				addPropertyValue(new PropertyValue(property, value));
 				if (missingProps != null) {
@@ -134,10 +134,12 @@ public abstract class PortletBean extends GenericPortlet {
 
 			// fail if we are still missing properties
 			if (missingProps != null && missingProps.size() > 0) {
-				throw new PortletException("Initialization from PortletConfig for portlet '" + config.getPortletName() +
-																	 "' failed; the following required properties were missing: " +
-																	 StringUtils.collectionToDelimitedString(missingProps, ", "));
+				throw new PortletException(
+						"Initialization from PortletConfig for portlet '" + config.getPortletName() +
+						"' failed; the following required properties were missing: " +
+						StringUtils.collectionToDelimitedString(missingProps, ", "));
 			}
 		}
 	}
+
 }

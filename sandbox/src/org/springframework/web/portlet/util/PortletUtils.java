@@ -35,13 +35,6 @@ import javax.portlet.PortletSession;
 public abstract class PortletUtils {
 
 	/**
-	 * Default character encoding to use when request.getCharacterEncoding
-	 * returns null, according to the Portlet spec.
-	 * @see RenderRequest#getCharacterEncoding
-	 */
-	public static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";
-
-	/**
 	 * Standard Servlet spec context attribute that specifies a temporary
 	 * directory for the current web application, of type java.io.File
 	 */
@@ -50,7 +43,6 @@ public abstract class PortletUtils {
 	
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
-
 
 
 	/**
@@ -155,13 +147,13 @@ public abstract class PortletUtils {
 	 * containing either a String or a String[] as values
 	 */
 	public static Map getParametersStartingWith(PortletRequest request, String base) {
-		Enumeration enum = request.getParameterNames();
+		Enumeration paramNames = request.getParameterNames();
 		Map params = new HashMap();
 		if (base == null) {
 			base = "";
 		}
-		while (enum != null && enum.hasMoreElements()) {
-			String paramName = (String) enum.nextElement();
+		while (paramNames != null && paramNames.hasMoreElements()) {
+			String paramName = (String) paramNames.nextElement();
 			if (base == null || "".equals(base) || paramName.startsWith(base)) {
 				String unprefixed = paramName.substring(base.length());
 				String[] values = request.getParameterValues(paramName);
