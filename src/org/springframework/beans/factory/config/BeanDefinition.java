@@ -38,6 +38,11 @@ import org.springframework.beans.MutablePropertyValues;
 public interface BeanDefinition {
 
 	/**
+	 * Return the class defined for the bean, if any.
+	 */
+	Class getBeanClass();
+
+	/**
 	 * Return the PropertyValues to be applied to a new instance of the bean.
 	 */
 	MutablePropertyValues getPropertyValues();
