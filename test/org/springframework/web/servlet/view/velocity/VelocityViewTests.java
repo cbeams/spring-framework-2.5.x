@@ -21,6 +21,7 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.NumberTool;
 import org.easymock.MockControl;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -32,7 +33,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.12 2004-02-07 00:18:25 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.13 2004-02-23 10:32:49 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -150,10 +151,8 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	/**
-	 * 
 	 * @param mergeTemplateFailureException may be null in which case mergeTemplate override will succeed.
 	 * If it's non null it will be checked
-	 * @throws Exception
 	 */
 	private void testValidTemplateName(final Exception mergeTemplateFailureException) throws Exception {
 		Map model = new HashMap();
@@ -254,9 +253,11 @@ public class VelocityViewTests extends TestCase {
 				assertTrue(context.get("dateTool") instanceof DateTool);
 				DateTool dateTool = (DateTool) context.get("dateTool");
 				assertTrue(dateTool.getLocale().equals(Locale.CANADA));
+				assertTrue(context.get("numberTool") instanceof NumberTool);
+				NumberTool numberTool = (NumberTool) context.get("numberTool");
+				assertTrue(numberTool.getLocale().equals(Locale.CANADA));
 				assertTrue(response == expectedResponse);
 			}
-
 			protected void exposeHelpers(Context vContext, HttpServletRequest request) throws Exception {
 				vContext.put("myHelper", "myValue");
 			}
@@ -264,6 +265,7 @@ public class VelocityViewTests extends TestCase {
 		vv.setUrl(templateName);
 		vv.setApplicationContext(wac);
 		vv.setDateToolAttribute("dateTool");
+		vv.setNumberToolAttribute("numberTool");
 		vv.render(new HashMap(), req, expectedResponse);
 
 		wmc.verify();

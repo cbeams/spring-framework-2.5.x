@@ -23,6 +23,7 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.io.VelocityWriter;
 import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.NumberTool;
 import org.apache.velocity.util.SimplePool;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -38,11 +39,14 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  *
  * <p>Exposes the following JavaBean properties:
  * <ul>
- * <li><b>url</b>: location of the Velocity template to be wrapped,
+ * <li><b>url</b>: the location of the Velocity template to be wrapped,
  * relative to the Velocity resource loader path (see VelocityConfigurer).
- * <li><b>dateToolAttribute</b> (optional, default=null): set the name of the
+ * <li><b>dateToolAttribute</b> (optional, default=null): the name of the
  * DateTool helper object to expose in the Velocity context of this view,
- * or null if not needed. DateTool is from Velocity Tools.
+ * or null if not needed. DateTool is part of Velocity Tools 1.0.
+ * <li><b>numberToolAttribute</b> (optional, default=null): the name of the
+ * NumberTool helper object to expose in the Velocity context of this view,
+ * or null if not needed. NumberTool is part of Velocity Tools 1.1.
  * <li><b>cacheTemplate</b> (optional, default=false): whether or not the Velocity
  * template should be cached. It should normally be true in production, but setting
  * this to false enables us to modify Velocity templates without restarting the
@@ -56,7 +60,8 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.19 2004-02-07 00:18:32 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: VelocityView.java,v 1.20 2004-02-23 10:32:36 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  */
@@ -68,6 +73,8 @@ public class VelocityView extends AbstractUrlBasedView {
 
 
 	private String dateToolAttribute;
+
+	private String numberToolAttribute;
 
 	private boolean cacheTemplate;
 
@@ -85,11 +92,21 @@ public class VelocityView extends AbstractUrlBasedView {
 
 
 	/**
-	 * Set the name of the DateHool helper object to expose in the Velocity context
-	 * of this view, or null if not needed. DateTool is from Velocity Tools.
+	 * Set the name of the DateTool helper object to expose in the Velocity context
+	 * of this view, or null if not needed. DateTool is from Velocity Tools 1.0.
+	 * @see org.apache.velocity.tools.generic.DateTool
 	 */
 	public void setDateToolAttribute(String dateToolAttribute) {
 		this.dateToolAttribute = dateToolAttribute;
+	}
+
+	/**
+	 * Set the name of the NumberTool helper object to expose in the Velocity context
+	 * of this view, or null if not needed. NumberTool is from Velocity Tools 1.1.
+	 * @see org.apache.velocity.tools.generic.NumberTool
+	 */
+	public void setNumberToolAttribute(String numberToolAttribute) {
+		this.numberToolAttribute = numberToolAttribute;
 	}
 
 	/**
@@ -187,9 +204,14 @@ public class VelocityView extends AbstractUrlBasedView {
 		exposeModelAsContextAttributes(model, velocityContext);
 		exposeHelpers(velocityContext, request);
 
-		// expose DateTool?
-		if (this.dateToolAttribute != null) {
-			velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(request));
+		if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
+			Locale locale = RequestContextUtils.getLocale(request);
+			if (this.dateToolAttribute != null) {
+				velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(locale));
+			}
+			if (this.numberToolAttribute != null) {
+				velocityContext.put(this.numberToolAttribute, new LocaleAwareNumberTool(locale));
+			}
 		}
 
 		mergeTemplate(this.velocityTemplate, velocityContext, response);
@@ -287,14 +309,33 @@ public class VelocityView extends AbstractUrlBasedView {
 	 */
 	private static class LocaleAwareDateTool extends DateTool {
 
-		private HttpServletRequest request;
+		private Locale locale;
 
-		private LocaleAwareDateTool(HttpServletRequest request) {
-			this.request = request;
+		private LocaleAwareDateTool(Locale locale) {
+			this.locale = locale;
 		}
 
 		public Locale getLocale() {
-			return RequestContextUtils.getLocale(this.request);
+			return this.locale;
+		}
+	}
+
+
+	/**
+	 * Subclass of NumberTool from Velocity tools,
+	 * using the RequestContext Locale instead of the default Locale.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 */
+	private static class LocaleAwareNumberTool extends NumberTool {
+
+		private Locale locale;
+
+		private LocaleAwareNumberTool(Locale locale) {
+			this.locale = locale;
+		}
+
+		public Locale getLocale() {
+			return this.locale;
 		}
 	}
 
