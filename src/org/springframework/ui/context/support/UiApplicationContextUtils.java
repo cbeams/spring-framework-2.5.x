@@ -44,23 +44,28 @@ public abstract class UiApplicationContextUtils {
 	private static final Log logger = LogFactory.getLog(UiApplicationContextUtils.class);
 
 	/**
-	 * Initialize the theme source for the given application context.
-	 * @param applicationContext current application context
+	 * Initialize the ThemeSource for the given application context,
+	 * auto-detecting a bean with the name "themeSource". If no such
+	 * bean is found, a default (empty) ThemeSource will be used.
+	 * @param context current application context
 	 * @return the initialized theme source (will never be null)
+	 * @see #THEME_SOURCE_BEAN_NAME
 	 */
-	public static ThemeSource initThemeSource(ApplicationContext applicationContext) {
+	public static ThemeSource initThemeSource(ApplicationContext context) {
 		ThemeSource themeSource;
 		try {
-			themeSource = (ThemeSource) applicationContext.getBean(THEME_SOURCE_BEAN_NAME);
+			themeSource = (ThemeSource) context.getBean(THEME_SOURCE_BEAN_NAME);
 			// set parent theme source if applicable,
 			// and if the theme source is defined in this context, not in a parent
-			if (applicationContext.getParent() instanceof ThemeSource && themeSource instanceof HierarchicalThemeSource &&
-				Arrays.asList(applicationContext.getBeanDefinitionNames()).contains(THEME_SOURCE_BEAN_NAME)) {
-				((HierarchicalThemeSource) themeSource).setParentThemeSource((ThemeSource) applicationContext.getParent());
+			if (context.getParent() instanceof ThemeSource &&
+					themeSource instanceof HierarchicalThemeSource &&
+					Arrays.asList(context.getBeanDefinitionNames()).contains(THEME_SOURCE_BEAN_NAME)) {
+				((HierarchicalThemeSource) themeSource).setParentThemeSource((ThemeSource) context.getParent());
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No ThemeSource found for [" + applicationContext.getDisplayName() + "]: using ResourceBundleThemeSource");
+			logger.info("No ThemeSource found for [" + context.getDisplayName() +
+									"]: using ResourceBundleThemeSource");
 			themeSource = new ResourceBundleThemeSource();
 		}
 		return themeSource;

@@ -28,6 +28,14 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
 /**
  * Static WebApplicationContext implementation for testing.
  * Not for use in production applications.
+ *
+ * <p>In addition to the special beans detected by AbstractApplicationContext,
+ * this class detects a ThemeSource bean in the context, with the name
+ * "themeSource".
+ *
+ * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @see org.springframework.ui.context.ThemeSource
  */
 public class StaticWebApplicationContext extends StaticApplicationContext
 		implements ConfigurableWebApplicationContext {
@@ -36,7 +44,6 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 
 	private String namespace;
 
-	/** the ThemeSource for this ApplicationContext */
 	private ThemeSource themeSource;
 
 	public void setServletContext(ServletContext servletContext) {
