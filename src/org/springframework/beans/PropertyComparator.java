@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * PropertyComparator performs a comparison of two beans,
  * using the specified bean property via a BeanWrapper.
@@ -15,6 +18,8 @@ import java.util.Map;
  * @since 19.05.2003
  */
 public class PropertyComparator implements Comparator {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private SortDefinition sortDefinition;
 
@@ -35,14 +40,17 @@ public class PropertyComparator implements Comparator {
 		try {
 			if (v1 != null) {
 				result = ((Comparable) v1).compareTo(v2);
-			} else {
+			}
+			else {
 				if (v2 != null) {
 					result = - ((Comparable) v2).compareTo(v1);
 				} else {
 					return 0;
 				}
 			}
-		} catch (NullPointerException e) {
+		}
+		catch (RuntimeException ex) {
+			logger.warn("Could not sort objects [" + o1 + "] and [" + o2 + "]", ex);
 			return 0;
 		}
 		return (this.sortDefinition.isAscending() ? result : -result);
