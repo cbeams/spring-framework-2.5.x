@@ -40,7 +40,7 @@ import org.springframework.web.servlet.View;
  * "/WEB-INF/jsp/test.jsp"
  *
  * <p>As a special feature, redirect URLs can be specified via the "redirect:"
- * prefix. E.g.: "redirect:/myAction.do" will trigger a redirect to the given
+ * prefix. E.g.: "redirect:myAction.do" will trigger a redirect to the given
  * URL, rather than resolution as standard view name.
  *
  * <p>Note: This class does not support localized resolution, i.e. resolving
@@ -74,7 +74,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	private String requestContextAttribute;
 
-	private boolean redirectContextRelative = false;
+	private boolean redirectContextRelative = true;
 
 	private boolean redirectHttp10Compatible = true;
 
@@ -140,10 +140,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 * Set whether to interpret a given redirect URL that starts with a
 	 * slash ("/") as relative to the current ServletContext, i.e. as
 	 * relative to the web application root.
-	 * <p>Default is false: The redirect URL will be intepreted as absolute, i.e.
-	 * taken as-is. If true, the context path will be prepended to the URL.
+	 * <p>Default is true: A redirect URL that starts with a slash will be
+	 * interpreted as relative to the web application root, i.e. the context
+	 * path will be prepended to the URL.
 	 * <p><b>Redirect URLs can be specified via the "redirect:" prefix.</b>
-	 * E.g.: "redirect:/myAction.do"
+	 * E.g.: "redirect:myAction.do"
 	 * @see RedirectView#setContextRelative
 	 * @see #REDIRECT_URL_PREFIX
 	 */
@@ -153,15 +154,15 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	/**
 	 * Set whether redirects should stay compatible with HTTP 1.0 clients.
-	 * <p>In the default implementation, this will enforce HTTP status code
-	 * 302 in any case, i.e. delegate to HttpServletResponse.sendRedirect.
+	 * <p>In the default implementation, this will enforce HTTP status code 302
+	 * in any case, i.e. delegate to <code>HttpServletResponse.sendRedirect</code>.
 	 * Turning this off will send HTTP status code 303, which is the correct
 	 * code for HTTP 1.1 clients, but not understood by HTTP 1.0 clients.
 	 * <p>Many HTTP 1.1 clients treat 302 just like 303, not making any
 	 * difference. However, some clients depend on 303 when redirecting
 	 * after a POST request; turn this flag off in such a scenario.
 	 * <p><b>Redirect URLs can be specified via the "redirect:" prefix.</b>
-	 * E.g.: "redirect:/myAction.do"
+	 * E.g.: "redirect:myAction.do"
 	 * @see RedirectView#setHttp10Compatible
 	 * @see #REDIRECT_URL_PREFIX
 	 */
