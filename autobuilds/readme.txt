@@ -2,38 +2,52 @@
  * autobuilds
  *
  * Automated server configuration and deployment & testing of
- * Spring sample applications
+ * Spring web application(s)
  *
  * @author Darren Davison
  * @since Dec 2003
- * @version $Id: readme.txt,v 1.4 2004-01-05 00:29:03 davison Exp $
+ * @version $Id: readme.txt,v 1.5 2004-01-08 01:33:32 davison Exp $
  */
 
 
 Overview
 ------------------------------------------------------------------------------
 The autobuilds root is a collection of code, scripts and config files.
-Together, they automate builds of the Spring codebase and of the sample Spring
-applications, which can then be deployed onto application servers.  The
-application servers (which can be downloaded from a network location via http
-if needed) are correctly configured after extraction to the target directory.
+Together, they automate builds of the Spring codebase and of the specially
+prepared Spring applications.  The applications are built in such a way that
+they exercise the maximum amount of Spring functionality (for example using
+Velocity, XSLT, JSP, Re-direct and PDF views all within the same app).  This
+functionality is then tested via the extensive HttpUnit tests available which
+effectively remote-control the running application and verify the HTTP
+responses and HTML (where appropriate) returned from various URL's.  Although
+the applications are contrived to use as much Spring functionality as
+possible, they are nevertheless fully functioning applications that can be
+deployed onto any suitably configured application server should you so wish.
 
-Once the deployed applications are running on the application server,
+The autobuilds module intends to add support for the largest number of servers
+feasible so that the application(s) can be deployed and tested on all of them
+via scheduled daily scripts.  Each day, an update of the Spring code can be
+taken from CVS (automatically by the code) and thus each daily run will test
+the latest Spring functionality in a real application, on real application
+servers.  An alternative usage may be ad-hoc builds/tests run by developers to
+verify that locally amended code in the main /src tree doesn't break the 
+sample application before they commit.
+
+Autobuilds can download application servers via http if needed, controlled by
+build properties and will always extract and configure them from scratch in a
+sandboxed environment.
+
+Once the deployed applications are running on the application server, the
 automated tests are conducted on them before the servers are shutdown and
-removed.  Results of the whole process are logged and date-stamped for future
-reference.
-
-Ad-hoc builds/tests can be run to verify locally uncommitted code in the main
-tree doesn't break the existing sample applications before committing it, or
-alternatively, a machine may be set to automatically run one or more
-autobuilds each day after performing a CVS update beforehand.  This results in
-additional confidence (hopefully) in the nightly CVS snapshots.
+removed.  Results of the whole process - build logs, application logs, server
+logs and test reports - are date-stamped and held in the reports directory for
+future reference.
 
 This document refers to all paths as relative to the top level directory of
 the Spring project as checked out from CVS.  Thus a path shown as
 '/autobuilds/conf' refers to the absolute path
-'/projects/spring/autobuilds/conf' if you have checked the Spring code out to
-'/projects/spring'.
+'/home/projects/spring/autobuilds/conf' if you have checked the Spring code
+out to '/home/projects/spring'.
 
 
 
@@ -47,11 +61,25 @@ build.properties, so take a look at this file for info on the local property
 types.
 
 To get running quickly, just ensure your build.properties contains at least
-the property 'tarballs.dir', which is the absolute location that your
-application server downloads are stored at (and will be downloaded to if
-required).  If you already have gzipped tarballs of your preferred server you
-can move or copy the file to this location and upate the version information
-in build.properties accordingly.
+the following properties (copy/paste/amend as necessary):
+
+
+# ----------- start required build.properties -----------
+
+# the absolute location that your server tarballs live in (or will
+# be downloaded to as required).  If you already have gzipped tarballs 
+# of your preferred server you can move or copy the file to this location 
+# and upate the version information in build.properties accordingly.
+tarballs.dir=c:/downloads
+
+# your email address and host if you want to receive failure reports by mail.
+# eventually, all reports will be forwarded to a tracking application
+# (built with Spring of course!) on the web.
+autobuilds.mail.sendto=you@your.domain
+autobuilds.mail.host=your.smtp.server
+
+# ------------ end required build.properties ------------
+
 
 Note that when setting the compressed tarball names, only use the tar.gz /
 .tgz versions of files since the build script expects gzip compression.  This
@@ -73,7 +101,7 @@ script with;
 autobuild sampleApp targetServer
 
 For example;
-./autobuild petclinic tomcat5
+./autobuild jpetstore tomcat5
 
 The autobuild script will check that the application and server specified seem
 genuine before embarking on the build.  The application name must be the name
@@ -89,26 +117,29 @@ server type that autobuilds supports.  Currently configs are available for:
 
 Scripts for jboss3 and (hopefully) wls8 will be available very shortly.
 
-It may not always be possible to deploy all sample apps on all servers of
-course.  If the app were to use EJB's for example, it would obviously have to
-be deployed on a server with an EJB container.
+The normal sample apps are no longer used for autobuilds as they serve a
+slightly different purpose.  Presently the only two available apps are:
 
-The build products are all stored under /target/autobuilds - including the
-server installations and log files.  The script logs all of its output to a
-file whose name is in the format [appname]_[servername]_build_yyyy-mm-dd.log -
+  1) buildtest - the simplest possible web app which is used to verify that 
+     the autobuilds scripts and server configs are working.
+
+  2) jpetstore - a modified version of the JPetStore sample application 
+     which acts as the real test app for Spring functionality.
+
+The sandbox is under /target/autobuilds - here, all the server installations,
+compiled java classes and the log files are found.  The script logs all of its
+output to a file whose name is in the format;
+
+[appname]_[servername]_build_yyyy-mm-dd.log
+
 for example, the autobuild above conducted on the 17th Dec 2003 would create a
 log file called
-/target/autobuilds/reports/petclinic_tomcat5_build_2003-12-17.log.  All of the
-build process including the result of the unit tests on the running
-application is recorded in here.
 
-If you're running an autobuild manually, it may be useful to tail the build
-log in another window so you can see the unit test results as they happen.  On
-linux/unix this can be done with:
+/target/autobuilds/reports/jpetstore_tomcat5_build_2003-12-17.log.
 
-  tail -f /path/to/build.log
-
-  (if you know a win32 equivalent, please let me know)
+All of the build process output is recorded in here.  The HttpUnit test reports
+would be written to jpetstore_tomcat5_unittests_2003-12-17.xml in the
+same directory.
 
 Additional logs are generated for the output from the application server
 itself (i.e. tomcat5_server.log), the application running on the application
@@ -123,7 +154,7 @@ command line:
     the /src directory from CVS.  Ensure your local build.properties file
     contains an entry 'cvs.rsh=ssh' if you are a Spring developer since the
     autobuild will use this method to pull the update.  If the property is
-    missing, anonymous access will be used.  This option is more useful for
+    missing, CVS update will be ignored.  This option is more useful for
     machines that do daily build testing on the latest CVS snapshots than
     developers doing adhoc quick build/tests.
 
@@ -132,9 +163,9 @@ command line:
     tests have been performed.  Only use this option for adhoc, interactive
     builds if you want to be able to fire the application up in a browser and
     look at it after tests have run.  This option will keep alive the
-    application server and the HSQL server (if used) until you manually stop
-    the build process with a 'Ctrl-C' at the prompt in the command window which
-    will then shutdown the server(s).  Access the application at the URL
+    application server and the HSQL server (if used) until you continue the
+    build process by pressing 'Enter' at the prompt in the command window 
+    which will then shutdown the server(s).  Access the application at the URL
     http://localhost:13084/appname
 
 Any options other than those documented will not be understood and may be
@@ -143,23 +174,24 @@ immediately.
 
 Some examples:
 
-    ./autobuild -u petclinic tomcat4 
-    will update Spring code from CVS prior to building and deploying petclinic
+    ./autobuild -u buildtest tomcat4 
+    will update Spring code from CVS prior to building and deploying buildtest
     on Tomcat 4.1.x
 
-    ./autobuild -k countries resin2 
-    will build countries, deploy it to resin 2.1.x and keep it running so that
-    you may access it with your web browser
+    ./autobuild -k jpetstore resin2 
+    will build jpetstore, deploy it to resin 2.1.x and keep it running 
+    so that you may access it afterwards with your web browser
 
     ./autobuild jpetstore -k -u tomcat5
-    should also work fine (CVS update and keep Tomcat 5 running after deploying 
-    jpetstore)
+    should also work fine (CVS update and keep Tomcat 5 running after 
+    deploying jpetstore)
 
-    ./autobuild -q petclinic tomcat5
-    will give an error "don't know about server petclinic" because the -q is 
-    treated as the application name and petclinic as the server name
+    ./autobuild -q jpetstore tomcat5
+    will give an error "don't know about server jpetstore" because the 
+    -q is treated as the application name and jpetstore as the server
+    name
 
-    ./autobuild -x tomcat5 petclinic
+    ./autobuild -x tomcat5 jpetstore
     will error "Can't find application -x" because -x is treated as the 
     application name and tomcat5 as the server name
 
@@ -199,7 +231,8 @@ example, the file structure under the tomcat5 directory consists of
 target installation.  Configuration files should be created and tested with
 the various Spring sample applications and be managed by CVS.  HTTP servers
 should be configured to run on the same port as the existing apps, defined by
-the build property autobuilds.server.port (currently this is 13084).
+the build property autobuilds.server.port (currently this is 13084 for no 
+particular reason).
 
 
 
@@ -214,8 +247,8 @@ dependencies..
 2)  the build.xml must have a 'dist' target which builds the deployment
     units and places them in a directory called 'dist' found in the root.
 
-3)  the 'dist' build process uses spring.jar from the spring-root/dist 
-    directory
+3)  the 'dist' build process copies spring.jar from the spring-root/dist 
+    directory to wherever the sample app needs it (WEB-INF/lib for example)
 
 4)  if the sample app uses an HSQL db, the following three files must
     be present in the db/hsqldb directory from the app root:
@@ -224,9 +257,7 @@ dependencies..
     [ii]  appname.properties
     [iii] appname.data
 
-    see SpringStore for examples of this.
-    
-5)  a file called .autobuilds must exist in the root of the sample app
+    see jpetstore for examples of this.
 
 
 Having satisfied these dependencies, application support can be added to the
@@ -247,14 +278,9 @@ AllTests classes for more information.
 
 Miscellaneous notes
 ------------------------------------------------------------------------------
-The autobuilds system defines a couple of custom ant tasks for convenience:
+The autobuilds system defines a custom ant task for convenience:
 
-1)  AppTestLauncher is a trivial launch program for the junit/httpunit tests
-    performed on the sample application.  It avoids all the tedious mucking
-    about with ant's optional.jar file which must be built with correct
-    dependencies and must match whatever version of ant is being used.
-
-2)  HsqlShutdown will cleanly close a running HSQL server instance by 
+1)  HsqlShutdown will cleanly close a running HSQL server instance by 
     sending the SHUTDOWN command through a Statement.execute() method.  The 
     command requires a host and port to be specified as task attributes, and
     optionally can take a 'compact' (boolean) attribute to have this 
@@ -273,20 +299,18 @@ or if you'd like to see something moved up this list.
 
 Items near the top are likely to be imminent.
 
- - jboss3 / wls8 server builds added
- - make anonymous cvs work
+ - expand httpunit tests for jpetstore
+ - change views in jpetstore to include some xslt, Velocity and pdf.
+ - make hsql driver load on tomcat servers
+ - jboss3 / wls8 / websphere5 server builds added
+ - support for plugging in different database implementations 
+ - create remote webapp / socket listener to accept standard-format reports 
+   from autobuilds and aggregate stats as html pages with links to the raw 
+   build files.
  - http downloads implemented
- - email options for build logs;
-   - configurable address/server
-   - one or all logs, or just a unit test summary
-   - conditional mail based on build failure / test success/failure
  - allow d/load of .zip tarballs for 'doze
  - handle exceptions / build failures that leave the server(s) running
  - lookup hsql using apps from an external props file to avoid amending 
    build.xml for new apps
- - use gui testrunner as an option (build.props)?
- - create remote webapp / socket listener to accept standard-format reports 
-   from autobuilds and aggregate stats as html pages with links to the raw 
-   build files.
-
-
+ - use gui testrunner as an option (build.props / based on -k option)?
+- make anonymous cvs work
