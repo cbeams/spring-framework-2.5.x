@@ -191,6 +191,26 @@ public class PagedListHolder {
 	}
 
 	/**
+	 * Switch to previous page.
+	 * Will stay on first page if already on first page.
+	 */
+	public void previousPage() {
+		if (!isFirstPage()) {
+			this.page--;
+		}
+	}
+
+	/**
+	 * Switch to next page.
+	 * Will stay on last page if already on last page.
+	 */
+	public void nextPage() {
+		if (!isLastPage()) {
+			this.page++;
+		}
+	}
+
+	/**
 	 * Return the total number of elements in the source list.
 	 */
 	public int getNrOfElements() {

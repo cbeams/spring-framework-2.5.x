@@ -122,6 +122,19 @@ public class PagedListHolderTests extends TestCase {
 		holder.resort();
 		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb1);
 		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb3);
+
+		holder.nextPage();
+		assertEquals(1, holder.getPage());
+		holder.previousPage();
+		assertEquals(0, holder.getPage());
+		holder.nextPage();
+		assertEquals(1, holder.getPage());
+		holder.nextPage();
+		assertEquals(1, holder.getPage());
+		holder.previousPage();
+		assertEquals(0, holder.getPage());
+		holder.previousPage();
+		assertEquals(0, holder.getPage());
 	}
 
 	public void testRefreshablePagedListHolder() {
