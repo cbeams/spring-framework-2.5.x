@@ -10,12 +10,11 @@
    <!-- a short but descriptive name for the project -->
    <name>Spring Framework</name>
 
-   <!-- The version of the project under development, e.g.
-        1.1, 1.2, 2.0-dev -->
-   <currentVersion>1.1-dev</currentVersion>
+   <!-- The version of the project under development, e.g. 1.1, 1.2, 2.0-dev -->
+   <currentVersion>1.1.1</currentVersion>
 
    <organization>
-      <name>Spring Framework Inc. :-)</name>
+      <name>Spring Framework Project</name>
       <url>http://www.springframework.org</url>
       <logo>http://www.springframework.org/buttons/spring_large.png</logo>
    </organization>
@@ -25,7 +24,7 @@
    <logo></logo>
    <!-- a short description of what the project does -->
    <shortDescription>
-      J2EE application framework based on the book "Expert One-on-One J2EE Design and Development" by Rod Johnson.
+      Java/J2EE application framework, based on the book "Expert One-on-One J2EE Design and Development" by Rod Johnson.
    </shortDescription>
 
    <!-- the project home page -->
@@ -39,7 +38,7 @@
         the connection element has the form:
         scm:<system>:<system specific connection string> -->
    <repository>
-<!--      <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/springframework:spring</connection> -->
+			<!-- <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/springframework:spring</connection> -->
       <developerConnection>scm:cvs:ext:${maven.username}@cvs.sourceforge.net:/cvsroot/springframework:spring</developerConnection>
       <url>http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/springframework/spring/</url>
    </repository>
@@ -55,12 +54,13 @@
          <archive>http://sourceforge.net/mailarchive/forum.php?forum_id=30287</archive>
       </mailingList>
    </mailingLists>
+
    <!-- who the developers are for the project -->
    <developers>
       <developer>
          <name>Rod Johnson</name>
          <id>johnsonr</id>
-         <email>rod.johnson at interface21.com</email>
+         <email>rod at interface21.com</email>
          <organization>Interface21</organization>
          <roles>
             <role>Project Admin</role>
@@ -68,11 +68,29 @@
          </roles>
       </developer>
       <developer>
-         <name>Jurgen Hoeller</name>
+         <name>Juergen Hoeller</name>
          <id>jhoeller</id>
-         <email>jhoeller at users.sourceforge.net</email>
+         <email>juergen at interface21.com</email>
+         <organization>Interface21</organization>
          <roles>
             <role>Project Admin</role>
+            <role>Developer</role>
+         </roles>
+      </developer>
+	    <developer>
+	       <name>Thomas Risberg</name>
+	       <id>trisberg</id>
+	       <email>trisberg at users.sourceforge.net</email>
+	       <roles>
+	          <role>Developer</role>
+	       </roles>
+	    </developer>
+      <developer>
+         <name>Colin Sampaleanu</name>
+         <id>colins</id>
+         <email>colin at interface21.com</email>
+         <organization>Interface21</organization>
+         <roles>
             <role>Developer</role>
          </roles>
       </developer>
@@ -85,25 +103,10 @@
          </roles>
       </developer>
       <developer>
-         <name>Yann Caroff</name>
-         <id>caroffy</id>
-         <email>caroffy at users.sourceforge.net</email>
-         <roles>
-            <role>Developer</role>
-         </roles>
-      </developer>
-      <developer>
-         <name>Trevor D. Cook</name>
-         <id>beanie42</id>
-         <email>beanie42 at users.sourceforge.net</email>
-         <roles>
-            <role>Developer</role>
-         </roles>
-      </developer>
-      <developer>
-         <name>Tony Falabella</name>
-         <id>tony_falabella</id>
-         <email>tony_falabella at users.sourceforge.net</email>
+         <name>Keith Donald</name>
+         <id>kdonald</id>
+         <email>keith at interface21.com</email>
+         <organization>Interface21</organization>
          <roles>
             <role>Developer</role>
          </roles>
@@ -112,55 +115,6 @@
          <name>Dmitriy Kopylenko</name>
          <id>dkopylenko</id>
          <email>dkopylenko at users.sourceforge.net</email>
-         <roles>
-            <role>Developer</role>
-         </roles>
-      </developer>
-      <developer>
-         <name>Ken Krebs</name>
-         <id>kktec</id>
-         <email>kktec at users.sourceforge.net</email>
-         <roles>
-            <role>Developer</role>
-         </roles>
-      </developer>
-      <developer>
-         <name>Isabelle Muszynski</name>
-         <id>isabellem</id>
-         <email>isabellem at users.sourceforge.net</email>
-         <roles>
-            <role>Developer</role>
-         </roles>
-      </developer>
-      <developer>
-         <name>Jean-Pierre Pawlak</name>
-         <id>pawlakjp</id>
-         <email>pawlakjp at users.sourceforge.net</email>
-         <roles>
-            <role>Developer</role>
-         </roles>
-      </developer>
-      <developer>
-         <name>Thomas Risberg</name>
-         <id>trisberg</id>
-         <email>trisberg at users.sourceforge.net</email>
-         <roles>
-            <role>Developer</role>
-         </roles>
-      </developer>
-      <developer>
-         <name>Luke Taylor</name>
-         <id>luke_t</id>
-         <email>luke_t at users.sourceforge.net</email>
-         <organization>Monkey Machine</organization>
-         <roles>
-            <role>Developer</role>
-         </roles>
-      </developer>
-      <developer>
-         <name>Colin Sampaleanu</name>
-         <id>colins</id>
-         <email>colinml1 at exis.com</email>
          <roles>
             <role>Developer</role>
          </roles>
@@ -177,6 +131,47 @@
          <name>Mark Pollack</name>
          <id>markpollack</id>
          <email>markpollack at users.sourceforge.net</email>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
+      <developer>
+         <name>Rob Harrop</name>
+         <id>robharrop</id>
+         <email>robharrop at users.sourceforge.net</email>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
+      <developer>
+         <name>Trevor D. Cook</name>
+         <id>beanie42</id>
+         <email>beanie42 at users.sourceforge.net</email>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
+      <developer>
+         <name>Ken Krebs</name>
+         <id>kktec</id>
+         <email>kktec at users.sourceforge.net</email>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
+      <developer>
+         <name>Jean-Pierre Pawlak</name>
+         <id>pawlakjp</id>
+         <email>pawlakjp at users.sourceforge.net</email>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
+      <developer>
+         <name>Luke Taylor</name>
+         <id>luke_t</id>
+         <email>luke_t at users.sourceforge.net</email>
+         <organization>Monkey Machine</organization>
          <roles>
             <role>Developer</role>
          </roles>
@@ -226,44 +221,12 @@
       </dependency>
       <dependency>
          <id>ant</id>
-         <version>1.6</version>
+         <version>1.6.2</version>
       </dependency>
       <dependency>
          <id>junit</id>
          <version>3.8.1</version>
       </dependency>
-<!--
-      <dependency>
-         <groupId>avalon-framework</groupId>
-         <artifactId>avalon-framework</artifactId>
-         <version>4.1.5</version>
-      </dependency>
-      <dependency>
-         <groupId>batik</groupId>
-         <artifactId>batik-util</artifactId>
-         <version>1.5</version>
-      </dependency>
-      <dependency>
-         <groupId>batik</groupId>
-         <artifactId>batik-svg-dom</artifactId>
-         <version>1.5</version>
-      </dependency>
-      <dependency>
-         <groupId>batik</groupId>
-         <artifactId>batik-bridge</artifactId>
-         <version>1.5</version>
-      </dependency>
-      <dependency>
-         <groupId>batik</groupId>
-         <artifactId>batik-gvt</artifactId>
-         <version>1.5</version>
-      </dependency>
-      <dependency>
-         <groupId>batik</groupId>
-         <artifactId>batik-awt-util</artifactId>
-         <version>1.5</version>
-      </dependency>
--->
       <dependency>
          <id>cos</id>
          <version>1.0</version>
@@ -305,11 +268,11 @@
       </dependency>
       <dependency>
          <id>commons-collections</id>
-         <version>2.1</version>
+         <version>3.1</version>
       </dependency>
       <dependency>
          <id>commons-dbcp</id>
-         <version>1.1</version>
+         <version>1.2</version>
       </dependency>
       <dependency>
          <id>commons-fileupload</id>
@@ -326,11 +289,11 @@
       </dependency>
       <dependency>
          <id>commons-pool</id>
-         <version>1.1</version>
+         <version>1.2</version>
       </dependency>
       <dependency>
          <id>easymock</id>
-         <version>1.0</version>
+         <version>1.1</version>
       </dependency>
       <dependency>
          <groupId>fop</groupId>
@@ -340,40 +303,35 @@
       <dependency>
          <groupId>freemarker</groupId>
          <artifactId>freemarker</artifactId>
-         <version>2.3rc1</version>
+         <version>2.3</version>
       </dependency>
       <dependency>
          <id>hibernate</id>
-         <version>2.0.3</version>
+         <version>2.1.6</version>
       </dependency>
       <dependency>
          <id>hessian</id>
-         <version>3.0.1</version>
+         <version>2.1.7</version>
       </dependency>
       <dependency>
          <groupId>ibatis</groupId>
          <artifactId>ibatis-common</artifactId>
-         <version>1.2.9b</version>
+         <version>1.3.1</version>
       </dependency>
       <dependency>
          <groupId>ibatis</groupId>
          <artifactId>ibatis-sqlmap</artifactId>
-         <version>1.2.9b</version>
+         <version>1.3.1</version>
       </dependency>
       <dependency>
          <groupId>ibatis</groupId>
          <artifactId>ibatis-sqlmap-2</artifactId>
-         <version>2.0</version>
+         <version>2.0.6</version>
       </dependency>
       <dependency>
          <id>itext</id>
          <version>1.02b</version>
       </dependency>
-      <!--dependency>
-         <groupId>jboss</groupId>
-         <artifactId>jboss-common-jdbc-wrapper</artifactId>
-         <version>3.2.1</version>
-      </dependency-->
        <dependency>
          <id>jdom</id>
          <version>b9</version>
@@ -381,12 +339,12 @@
        <dependency>
          <groupId>jotm</groupId>
          <artifactId>jotm</artifactId>
-         <version>1.4.3</version>
+         <version>1.5.3</version>
       </dependency>
        <dependency>
          <groupId>jotm</groupId>
          <artifactId>xapool</artifactId>
-         <version>1.4.3</version>
+         <version>1.5.3</version>
       </dependency>
       <dependency>
          <id>jsf</id>
@@ -401,28 +359,13 @@
          <version>1.2.8</version>
       </dependency>
       <dependency>
-         <groupId>mockobjects</groupId>
-         <artifactId>mockobjects-core</artifactId>
-         <version>0.07</version>
-      </dependency>
-      <dependency>
-         <groupId>mockobjects</groupId>
-         <artifactId>mockobjects-jdk1.4</artifactId>
-         <version>0.07</version>
-      </dependency>
-      <dependency>
-         <groupId>mockobjects</groupId>
-         <artifactId>mockobjects-j1.4-j2ee1.3</artifactId>
-         <version>0.07</version>
-      </dependency>
-      <dependency>
          <groupId>ojb</groupId>
          <artifactId>db-ojb</artifactId>
-         <version>1.0.0</version>
+         <version>1.0.1</version>
       </dependency>
       <dependency>
          <id>oro</id>
-         <version>2.0.7</version>
+         <version>2.0.8</version>
       </dependency>
       <dependency>
          <groupId>pdfbox</groupId>
@@ -431,20 +374,8 @@
       </dependency>
       <dependency>
          <id>quartz</id>
-         <version>1.2.3</version>
+         <version>1.4.2</version>
       </dependency>
-<!--
-      <dependency>
-         <groupId>saxon</groupId>
-         <artifactId>saxon</artifactId>
-         <version>6.5.3</version>
-      </dependency>
-      <dependency>
-         <groupId>saxon</groupId>
-         <artifactId>saxon-dbxsl-extensions</artifactId>
-         <version>20040115</version>
-      </dependency>
--->
       <dependency>
          <id>struts</id>
          <version>1.1</version>
@@ -452,7 +383,7 @@
       <dependency>
          <groupId>taglibs</groupId>
          <artifactId>standard</artifactId>
-         <version>1.0.2</version>
+         <version>1.0.6</version>
       </dependency>
       <dependency>
          <id>velocity</id>
@@ -549,5 +480,5 @@
       <report>maven-simian-plugin</report>
       <report>maven-jdepend-plugin</report>
    </reports>
-</project>
 
+</project>
