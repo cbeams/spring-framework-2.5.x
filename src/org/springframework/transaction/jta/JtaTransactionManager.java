@@ -118,6 +118,12 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * In case of JotmFactoryBean, the same JTA object implements UserTransaction too:
  * Therefore, passing the object to the "userTransaction" property is sufficient.
  *
+ * <p>It is also possible to specify a JTA TransactionManager only, either through
+ * the corresponding constructor or through the "transactionManager" property.
+ * In the latter case, the "userTransactionName" property needs to be set to null,
+ * to avoid a "java:comp/UserTransaction" JNDI lookup and thus enforcing to build
+ * a UserTransaction handle for the given JTA TransactionManager.
+ *
  * <p><b>Note: Support for the JTA TransactionManager interface is not required by J2EE.
  * Almost all J2EE servers expose it, but do so as extension to J2EE. There might be some
  * issues with compatibility, despite the TransactionManager interface being part of JTA.</b>
@@ -218,6 +224,19 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		afterPropertiesSet();
 	}
 
+	/**
+	 * Create a new JtaTransactionManager instance.
+	 * @param transactionManager the JTA TransactionManager to use as direct reference
+	 */
+	public JtaTransactionManager(TransactionManager transactionManager) {
+		this();
+		this.transactionManager = transactionManager;
+		// Do not attempt UserTransaction lookup: use given TransactionManager
+		// to get a UserTransaction handle.
+		this.userTransactionName = null;
+		afterPropertiesSet();
+	}
+
 
 	/**
 	 * Set the JndiTemplate to use for JNDI lookups.
@@ -313,8 +332,15 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			if (this.userTransactionName != null) {
 				this.userTransaction = lookupUserTransaction(this.userTransactionName);
 			}
+			else if (this.transactionManager instanceof UserTransaction) {
+				this.userTransaction = (UserTransaction) this.transactionManager;
+			}
+			else if (this.transactionManager != null) {
+				this.userTransaction = new UserTransactionAdapter(this.transactionManager);
+			}
 			else {
-				throw new IllegalArgumentException("Either userTransaction or userTransactionName must be set");
+				throw new IllegalArgumentException(
+						"Either userTransaction or userTransactionName or transactionManager must be set");
 			}
 		}
 		if (this.transactionManager == null) {
@@ -328,7 +354,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 				this.transactionManager = (TransactionManager) this.userTransaction;
 			}
 			else {
-				logger.info("No JTA TransactionManager specified - transaction suspension not available");
+				logger.info("No JTA TransactionManager specified: transaction suspension not available");
 			}
 		}
 	}
@@ -346,12 +372,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected UserTransaction lookupUserTransaction(String userTransactionName)
 			throws TransactionSystemException {
 		try {
-			Object jndiObj = getJndiTemplate().lookup(userTransactionName);
-			if (!(jndiObj instanceof UserTransaction)) {
-				throw new TransactionSystemException("Object [" + jndiObj + "] available at JNDI location [" +
-						userTransactionName + "] does not implement javax.transaction.UserTransaction");
-			}
-			UserTransaction ut = (UserTransaction) jndiObj;
+			UserTransaction ut = (UserTransaction)
+					getJndiTemplate().lookup(userTransactionName, UserTransaction.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using JTA UserTransaction [" + ut + "] from JNDI location [" + userTransactionName + "]");
 			}
@@ -376,13 +398,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected TransactionManager lookupTransactionManager(String transactionManagerName)
 			throws TransactionSystemException {
 		try {
-			Object jndiObj = getJndiTemplate().lookup(transactionManagerName);
-			if (!(jndiObj instanceof TransactionManager)) {
-				throw new TransactionSystemException(
-						"Object [" + jndiObj + "] available at JNDI location [" +
-						transactionManagerName + "] does not implement javax.transaction.TransactionManager");
-			}
-			TransactionManager tm = (TransactionManager) jndiObj;
+			TransactionManager tm = (TransactionManager)
+					getJndiTemplate().lookup(transactionManagerName, TransactionManager.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using JTA TransactionManager [" + tm + "] from JNDI location [" +
 						transactionManagerName + "]");
@@ -400,7 +417,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * This implementation returns a JtaTransactionObject instance for the
 	 * JTA UserTransaction.
 	 * <p>Note that JtaTransactionManager doesn't need a transaction object,
-	 * as it will access the JTA UserTransaction respectively TransactionManager
+	 * as it will access the JTA UserTransaction and/or TransactionManager
 	 * singletons that it holds directly. Therefore, any transaction object
 	 * that's useful for status and identification purposes will do.
 	 */
@@ -466,6 +483,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	protected void applyIsolationLevel(int isolationLevel)
 	    throws InvalidIsolationLevelException, SystemException {
+
 		if (isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException(
 			    "JtaTransactionManager does not support custom isolation levels");
@@ -525,6 +543,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	protected void doJtaResume(Transaction suspendedTransaction)
 	    throws InvalidTransactionException, SystemException {
+
 		getTransactionManager().resume(suspendedTransaction);
 	}
 

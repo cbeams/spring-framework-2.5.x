@@ -526,6 +526,37 @@ public class JtaTransactionManagerTests extends TestCase {
 		tmControl.verify();
 	}
 
+	public void testJtaTransactionManagerWithPropagationRequiresNewAndAdapter() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		tm.suspend();
+		tmControl.setReturnValue(tx, 1);
+		tm.begin();
+		tmControl.setVoidCallable(1);
+		tm.commit();
+		tmControl.setVoidCallable(1);
+		tm.resume(tx);
+		tmControl.setVoidCallable(1);
+		tmControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(tm);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+			}
+		});
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		tmControl.verify();
+	}
+
 	public void testJtaTransactionManagerWithPropagationRequiresNewAndSuspensionNotSupported() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
