@@ -163,9 +163,29 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	// Implementation of superclass abstract methods
 	//---------------------------------------------------------------------
 
-	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
+	/**
+	 * Delegates to full createBean version with allowEagerCaching=true.
+	 * @see #createBean(String, RootBeanDefinition, boolean).
+	 */
+	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition)
+	    throws BeansException {
+		return createBean(beanName, mergedBeanDefinition, true);
+	}
+
+	/**
+	 * Create a bean instance for the given bean definition.
+	 * @param beanName name of the bean
+	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @param allowEagerCaching whether eager caching of singletons is allowed
+	 * (typically true for normal beans, but false for inner beans)
+	 * @return a new instance of the bean
+	 * @throws BeansException in case of errors
+	 */
+	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition,
+	                            boolean allowEagerCaching) throws BeansException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mergedBeanDefinition + "]");
+			logger.debug("Creating instance of bean '" + beanName +
+			             "' with merged definition [" + mergedBeanDefinition + "]");
 		}
 
 		if (mergedBeanDefinition.getDependsOn() != null) {
@@ -188,7 +208,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
-		if (mergedBeanDefinition.isSingleton()) {
+		if (allowEagerCaching && mergedBeanDefinition.isSingleton()) {
 			addSingleton(beanName, bean);
 		}
 
@@ -224,7 +244,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * "autowire constructor" (with constructor arguments by type) behaviour.
+	 * "autowire constructor" (with constructor arguments by type) behavior.
 	 * Also applied if explicit constructor argument values are specified,
 	 * matching all remaining arguments with beans from the bean factory.
 	 * <p>This corresponds to constructor injection: In this mode, a Spring
@@ -607,19 +627,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// We must check each PropertyValue to see whether it
 		// requires a runtime reference to another bean to be resolved.
 		// If it does, we'll attempt to instantiate the bean and set the reference.
-		if (value instanceof AbstractBeanDefinition) {
+		if (value instanceof BeanDefinitionHolder) {
+			// Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
+			BeanDefinitionHolder bdHolder = (BeanDefinitionHolder) value;
+			return resolveInnerBeanDefinition(beanName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+		}
+		else if (value instanceof BeanDefinition) {
+			// Resolve plain BeanDefinition, without contained name: use dummy name.
 			BeanDefinition bd = (BeanDefinition) value;
-			if (bd instanceof AbstractBeanDefinition) {
-				// an inner bean should never be cached as singleton
-				((AbstractBeanDefinition) bd).setSingleton(false);
-			}
-			String innerBeanName = "(inner bean for property '" + beanName + "." + argName + "')";
-			Object bean = createBean(innerBeanName, getMergedBeanDefinition(innerBeanName, bd));
-			if (bean instanceof DisposableBean) {
-				// keep reference to inner bean, to be able to destroy it on factory shutdown
-				this.disposableInnerBeans.add(bean);
-			}
-			return getObjectForSharedInstance(innerBeanName, bean);
+			return resolveInnerBeanDefinition(beanName, "(inner bean)", bd);
 		}
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
@@ -645,6 +661,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// no need to resolve value
 			return value;
 		}
+	}
+
+	/**
+	 * Resolve an inner bean definition.
+	 */
+	protected Object resolveInnerBeanDefinition(String beanName, String innerBeanName, BeanDefinition bd)
+	    throws BeansException {
+		RootBeanDefinition mbd = getMergedBeanDefinition(innerBeanName, bd);
+		Object bean = createBean(innerBeanName, mbd, false);
+		if (bean instanceof DisposableBean) {
+			// keep reference to inner bean, to be able to destroy it on factory shutdown
+			this.disposableInnerBeans.add(bean);
+		}
+		return getObjectForSharedInstance(innerBeanName, bean);
 	}
 
 	/**

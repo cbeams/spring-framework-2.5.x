@@ -62,7 +62,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.43 2004-04-26 22:05:50 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.44 2004-04-29 13:53:36 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -124,6 +124,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(2, friends.size());
 		DerivedTestBean inner2 = (DerivedTestBean) friends.get(0);
 		assertEquals("inner2", inner2.getName());
+		assertEquals("innerBean", inner2.getBeanName());
+		assertFalse(xbf.containsBean("innerBean"));
 		assertEquals(7, inner2.getAge());
 		TestBean innerFactory = (TestBean) friends.get(1);
 		assertEquals(DummyFactory.SINGLETON_NAME, innerFactory.getName());

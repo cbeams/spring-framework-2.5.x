@@ -18,15 +18,26 @@ package org.springframework.beans;
 
 import java.io.Serializable;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
  * @author Juergen Hoeller
  * @since 21.08.2003
  */
-public class DerivedTestBean extends TestBean implements Serializable, DisposableBean {
+public class DerivedTestBean extends TestBean implements Serializable, BeanNameAware, DisposableBean {
+
+	private String beanName;
 
 	private boolean destroyed;
+
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	public String getBeanName() {
+		return beanName;
+	}
 
 	public void destroy() {
 		this.destroyed = true;

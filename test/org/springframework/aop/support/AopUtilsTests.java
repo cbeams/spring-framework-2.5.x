@@ -41,7 +41,7 @@ public class AopUtilsTests extends TestCase {
 	public void testGetAllInterfaces() {
 		DerivedTestBean testBean = new DerivedTestBean();
 		List ifcs = Arrays.asList(AopUtils.getAllInterfaces(testBean));
-		assertEquals("Correct number of interfaces", 6, ifcs.size());
+		assertEquals("Correct number of interfaces", 7, ifcs.size());
 		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
 		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
 		assertTrue("Contains IOther", ifcs.contains(IOther.class));

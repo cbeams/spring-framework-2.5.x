@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -36,9 +35,11 @@ import org.w3c.dom.Text;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
@@ -149,7 +150,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			Node node = nl.item(i);
 			if (node instanceof Element && BEAN_ELEMENT.equals(node.getNodeName())) {
 				beanDefinitionCounter++;
-				loadBeanDefinition((Element) node);
+				registerBeanDefinition((Element) node);
 			}
 		}
 		logger.debug("Found " + beanDefinitionCounter + " <" + BEAN_ELEMENT + "> elements defining beans");
@@ -177,13 +178,28 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 
 	/**
-	 * Parse an element definition: We know this is a BEAN element.
-	 * Bean elements specify their canonical name as id attribute
-	 * and their aliases as a delimited name attribute.
-	 * If no id specified, use the first name in the name attribute as
-	 * canonical name, registering all others as aliases.
+	 * Parse a "bean" element and register it with the bean factory.
 	 */
-	protected void loadBeanDefinition(Element ele) {
+	protected void registerBeanDefinition(Element ele) {
+		BeanDefinitionHolder bdHolder = parseBeanDefinition(ele);
+		logger.debug("Registering bean definition with id '" + bdHolder.getBeanName() + "'");
+		this.beanFactory.registerBeanDefinition(bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+		if (bdHolder.getAliases() != null) {
+			for (int i = 0; i < bdHolder.getAliases().length; i++) {
+				this.beanFactory.registerAlias(bdHolder.getBeanName(), bdHolder.getAliases()[i]);
+			}
+		}
+	}
+
+	/**
+	 * Parse a standard bean definition into a BeanDefinitionHolder,
+	 * including bean name and aliases.
+	 * <p>Bean elements specify their canonical name as "id" attribute
+	 * and their aliases as a delimited "name" attribute.
+	 * <p>If no "id" specified, uses the first name in the "name" attribute
+	 * as canonical name, registering all others as aliases.
+	 */
+	protected BeanDefinitionHolder parseBeanDefinition(Element ele) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 		List aliases = new ArrayList();
@@ -197,30 +213,27 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			logger.debug("No XML 'id' specified - using '" + id + "' as ID and " + aliases + " as aliases");
 		}
 
-		AbstractBeanDefinition beanDefinition = parseBeanDefinition(ele, id);
+		BeanDefinition beanDefinition = parseBeanDefinition(ele, id);
 
 		if (id == null || "".equals(id)) {
 			if (beanDefinition instanceof RootBeanDefinition) {
 				id = ((RootBeanDefinition) beanDefinition).getBeanClassName();
 				logger.debug("Neither XML 'id' nor 'name' specified - using bean class name [" + id + "] as ID");
 			}
-			else {
+			else if (beanDefinition instanceof ChildBeanDefinition) {
 				throw new BeanDefinitionStoreException(this.resource, "",
 																							 "Child bean definition has neither 'id' nor 'name'");
 			}
 		}
 
-		logger.debug("Registering bean definition with id '" + id + "'");
-		this.beanFactory.registerBeanDefinition(id, beanDefinition);
-		for (Iterator it = aliases.iterator(); it.hasNext();) {
-			this.beanFactory.registerAlias(id, (String) it.next());
-		}
+		String[] aliasesArray = (String[]) aliases.toArray(new String[aliases.size()]);
+		return new BeanDefinitionHolder(beanDefinition, id, aliasesArray);
 	}
 
 	/**
-	 * Parse a standard bean definition.
+	 * Parse the BeanDefinition itself, without regard to name or aliases.
 	 */
-	protected AbstractBeanDefinition parseBeanDefinition(Element ele, String beanName) {
+	protected BeanDefinition parseBeanDefinition(Element ele, String beanName) {
 		String className = null;
 		try {
 			if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
@@ -420,7 +433,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected Object parsePropertySubelement(Element ele, String beanName) {
 		if (ele.getTagName().equals(BEAN_ELEMENT)) {
-			return parseBeanDefinition(ele, "(inner bean definition)");
+			return parseBeanDefinition(ele);
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// a generic reference to any name of any bean
