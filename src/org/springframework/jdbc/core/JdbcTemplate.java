@@ -277,15 +277,24 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (List) query(sql, new ListResultSetExtractor());
 	}
 
+    /* superclass has JavaDoc! leave this as normal comment
+     * @see org.springframework.jdbc.core.JdbcOperations#queryForObject(java.lang.String, java.lang.Class)
+     */
 	public Object queryForObject(String sql, Class requiredType) throws DataAccessException {
 		return query(sql, new ObjectResultSetExtractor(requiredType));
 	}
 
+    /* superclass has JavaDoc! leave this as normal comment
+     * @see org.springframework.jdbc.core.JdbcOperations#queryForLong(java.lang.String)
+     */
 	public long queryForLong(String sql) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, Number.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+    /* superclass has JavaDoc! leave this as normal comment
+     * @see org.springframework.jdbc.core.JdbcOperations#queryForInt(java.lang.String)
+     */
 	public int queryForInt(String sql) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, Number.class);
 		return (number != null ? number.intValue() : 0);

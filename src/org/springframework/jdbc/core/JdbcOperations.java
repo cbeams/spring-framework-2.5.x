@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
@@ -127,6 +128,8 @@ public interface JdbcOperations {
 	 * @param sql SQL query to execute
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or null in case of SQL NULL
+	 * @throws IncorrectResultSizeDataAccessException if the query does not return
+	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForObject(String, Object[], Class)
 	 */
@@ -142,6 +145,8 @@ public interface JdbcOperations {
 	 * in a long value.
 	 * @param sql SQL query to execute
 	 * @return the long value, or 0 in case of SQL NULL
+	 * @throws IncorrectResultSizeDataAccessException if the query does not return
+	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForLong(String, Object[])
 	 */
@@ -157,6 +162,8 @@ public interface JdbcOperations {
 	 * in an int value.
 	 * @param sql SQL query to execute
 	 * @return the int value, or 0 in case of SQL NULL
+	 * @throws IncorrectResultSizeDataAccessException if the query does not return
+	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForInt(String, Object[])
 	 */
