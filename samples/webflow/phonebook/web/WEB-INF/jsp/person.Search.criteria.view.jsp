@@ -9,16 +9,24 @@
 	<HEAD>
 	</HEAD>
 	<BODY>
-		<DIV align="left">Search Criteria</DIV>
-		<HR>
-		<spring:hasBindErrors name="query">
-			<FONT color="red">Please provide valid query criteria!</FONT>
-		</spring:hasBindErrors>
 		<DIV align="left">
 			<FORM name="searchForm" action="search.htm">
 				<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 				<TABLE>
+					<TR>
+						<TD>
+							<DIV align="left">Search Criteria</DIV>
+						</TD>
+					</TR>
+					<TR>
+						<TD COLSPAN="2"><HR></TD>
+					</TR>
+					<spring:hasBindErrors name="query">
+						<TR>
+							<TD COLSPAN="2"><FONT color="red">Please provide valid query criteria!</FONT></TD>
+						</TR>
+					</spring:hasBindErrors>
 					<TR>
 						<TD>First Name</TD>
 						<TD><INPUT type="text" name="firstName" value="<jsp:getProperty name="query" property="firstName"/>"></TD>
@@ -27,12 +35,18 @@
 						<TD>Last Name</TD>
 						<TD><INPUT type="text" name="lastName" value="<jsp:getProperty name="query" property="lastName"/>"></TD>
 					</TR>
+					<TR>
+						<TD COLSPAN="2"><HR></TD>
+					</TR>
+					<TR>
+  					    <TD COLSPAN="2">
+						    <DIV align="right">
+							    <INPUT type="button" onclick="javascript:document.searchForm.submit()" value="Search">
+						    </DIV>
+						</TD>
+					</TR>
 				</TABLE>
 			</FORM>
-		</DIV>
-		<HR>
-		<DIV align="right">
-			<INPUT type="button" onclick="javascript:document.searchForm.submit()" value="Search">
 		</DIV>
 	</BODY>
 </HTML>

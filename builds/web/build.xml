@@ -102,6 +102,11 @@
 			<fileset dir="${target.war.dir}" includes="**/*.html" />
 			<fileset dir="${target.war.dir}" includes="**/*.css" />
 		</copy>
+		<available file="${target.war.dir}/images" property="images.exists" />
+		<antcall target="deploy.webcontent.images" />
+	</target>
+
+	<target name="deploy.webcontent.images" if="images.exists">
 		<copy todir="${webapps.deploy.dir}/${project.name}/images">
 			<fileset dir="${target.war.dir}/images" includes="**/*" />
 		</copy>
