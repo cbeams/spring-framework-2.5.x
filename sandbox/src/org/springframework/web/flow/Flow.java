@@ -191,7 +191,7 @@ public class Flow implements FlowEventProcessor, Serializable {
     /**
      * The <code>RESET</code> action state/event identifier.
      */
-    public static final String RESET = "resume";
+    public static final String RESET = "reset";
     /**
      * The <code>RESUME</code> action state/event identifier.
      */
