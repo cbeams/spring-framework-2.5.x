@@ -130,6 +130,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	public synchronized Flow getFlow() {
 		if (this.flow == null) {
 			//already set the flow handle to avoid infinite loops!
+			//e.g where Flow A spawns Flow B, which spawns Flow A again...
 			this.flow = this.flowBuilder.init();
 			this.flowBuilder.buildStates();
 			this.flowBuilder.buildExecutionListeners();
