@@ -19,10 +19,10 @@ package org.springframework.beans.factory.script;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.cglib.asm.Type;
 import net.sf.cglib.core.Signature;
 import net.sf.cglib.proxy.InterfaceMaker;
 
-import org.objectweb.asm.Type;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -38,15 +38,16 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- *  This superclass has the following responsibilities:
- * <ol>
- * 	<li>Provide create() methods that can be used as factory methods to create scripts.
- *  <li>Act as an auto proxy creator to automatically proxy these beans, making the
+ * This superclass has the following responsibilities:
+ * <ul>
+ * <li>Provide create() methods that can be used as factory methods to create scripts.
+ * <li>Act as an auto proxy creator to automatically proxy these beans, making the
  * resulting proxies implement the DynamicScript interface.
- * </ol>
- * <p>
- * Use: Define a concrete subclass as a bean in a context. Invoke create() methods via factory-bean/factory-method
- * bean definitions in the same context.
+ * </ul>
+ *
+ * <p>Use: Define a concrete subclass as a bean in a context. Invoke create() methods
+ * via factory-bean/factory-method bean definitions in the same context.
+ *
  * @author Rod Johnson
  * @since 1.2
  */
@@ -128,11 +129,6 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	 * For private usage. This class adds the beanName argument (which is only known at runtime
 	 * in a container) by modified the bean definition.
 	 * All other create() methods delegate to this method.
-	 * @param className
-	 * @param interfaceNames
-	 * @param bd
-	 * @return
-	 * @throws BeansException
 	 */
 	public Object create(String className, String[] interfaceNames, String beanName) throws BeansException {
 		Script script = configuredScript(className, interfaceNames);
@@ -181,9 +177,6 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	 * Create a script object without specifying any interfaces.
 	 * Only usable by subclasses that don't require a configuration interface and,
 	 * like Groovy, can define a full Java class.
-	 * @param className
-	 * @return
-	 * @throws BeansException
 	 */
 	public Object create(String className) throws BeansException {
 		if (requiresConfigInterface()) {
@@ -218,9 +211,7 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 
 
 	/**
-	 * Find out what script this object was created from, if we created it
-	 * @param o
-	 * @return
+	 * Find out what script this object was created from, if we created it.
 	 */
 	protected Script lookupScript(Object o) {
 		return (Script) createBeanToScriptMap.get(o);
@@ -230,8 +221,6 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	 * Will already have the TargetSource and introduction
 	 * advisor in place. We need to add to the ProxyFactory
 	 * all interfaces implemented by the script.
-	 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object,
-	 *      java.lang.String)
 	 */
 	protected void customizeProxyFactory(Object bean, ProxyFactory pf) {
 		if (pf.getTargetSource() instanceof DynamicScriptTargetSource) {
@@ -247,16 +236,12 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	}
 	
 
-	/**
-	 * @see org.springframework.beans.factory.dynamic.AbstractDynamicObjectConverter#createRefreshableTargetSource(java.lang.Object, org.springframework.beans.factory.config.ConfigurableListableBeanFactory, java.lang.String)
-	 */
-	protected AbstractRefreshableTargetSource createRefreshableTargetSource(Object bean,
-			ConfigurableListableBeanFactory beanFactory, String beanName) {
-		// If we created this bean, create a refreshable TargetSource
-		// for it
+	protected AbstractRefreshableTargetSource createRefreshableTargetSource(
+			Object bean, ConfigurableListableBeanFactory beanFactory, String beanName) {
+		// If we created this bean, create a refreshable TargetSource for it.
 		Script script = lookupScript(bean);
 		if (script == null) {
-			// This bean was not created by this object: leave it alone
+			// This bean was not created by this object: leave it alone.
 			return null;
 		}
 		return new DynamicScriptTargetSource(beanFactory, beanName, script);
@@ -290,7 +275,7 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	 * Subclasses should implement this to indicate whether they require
 	 * a configuration interface to be constructed. The configuration interface
 	 * will include all necessary setters.
-	 * @return
 	 */
 	protected abstract boolean requiresConfigInterface();
+
 }
