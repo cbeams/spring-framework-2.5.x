@@ -73,9 +73,6 @@ Package org.springframework.web
 * added EscapeBodyTag class aka "spring:escapeBody", allowing to HTML- and/or JavaScript-escape enclosed body content
 * added JavaScriptUtils class to util package, containing generic code for JavaScript escaping
 
-Package org.springframework.cache
-* added suppport for EHCache by introducing EhCacheManagerFactoryBean and EhCacheFactoryBean
-
 
 Changes in version 1.1 final (5.9.2004)
 ---------------------------------------
