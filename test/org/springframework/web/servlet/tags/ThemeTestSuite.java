@@ -18,11 +18,16 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-
 import com.mockobjects.servlet.MockPageContext;
+
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * @author Juergen Hoeller
@@ -41,7 +46,20 @@ public class ThemeTestSuite extends AbstractTagTest {
 		tag.setPageContext(pc);
 		tag.setCode("themetest");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Correct message", "theme test message".equals(message.toString()));
+		assertEquals("theme test message", message.toString());
+	}
+
+	public void testRequestContext() throws ServletException {
+		MockPageContext pc = createPageContext();
+		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest());
+		assertEquals("theme test message", rc.getThemeMessage("themetest"));
+		assertEquals("theme test message", rc.getThemeMessage("themetest", (String[]) null));
+		assertEquals("theme test message", rc.getThemeMessage("themetest", "default"));
+		assertEquals("theme test message", rc.getThemeMessage("themetest", null, "default"));
+		assertEquals("default", rc.getThemeMessage("themetesta", "default"));
+		assertEquals("default", rc.getThemeMessage("themetesta", null, "default"));
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"themetest"}, null);
+		assertEquals("theme test message", rc.getThemeMessage(resolvable));
 	}
 
 }

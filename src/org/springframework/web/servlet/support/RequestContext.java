@@ -64,6 +64,7 @@ public class RequestContext {
 
 	private Map errorsMap;
 
+
 	/**
 	 * Create a new RequestContext for the given request,
 	 * using the request attributes for Errors retrieval.
@@ -131,11 +132,12 @@ public class RequestContext {
 	}
 
 	/**
-	 * Default HTML escaping?
+	 * Is default HTML escaping active?
 	 */
 	public boolean isDefaultHtmlEscape() {
 		return defaultHtmlEscape;
 	}
+
 
 	/**
 	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
@@ -175,7 +177,7 @@ public class RequestContext {
 	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
 	 * @param code code of the message
 	 * @return the message
-	 * @throws NoSuchMessageException if not found
+	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code) throws NoSuchMessageException {
 		return getMessage(code, null, this.defaultHtmlEscape);
@@ -186,7 +188,7 @@ public class RequestContext {
 	 * @param code code of the message
 	 * @param args arguments for the message, or null if none
 	 * @return the message
-	 * @throws NoSuchMessageException if not found
+	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
 		return getMessage(code, args, this.defaultHtmlEscape);
@@ -198,7 +200,7 @@ public class RequestContext {
 	 * @param args arguments for the message, or null if none
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
-	 * @throws NoSuchMessageException if not found
+	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, Object[] args, boolean htmlEscape) throws NoSuchMessageException {
 		String msg = this.webApplicationContext.getMessage(code, args, this.locale);
@@ -210,7 +212,7 @@ public class RequestContext {
 	 * using the defaultHtmlEscape setting.
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
-	 * @throws NoSuchMessageException if not found
+	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
 		return getMessage(resolvable, this.defaultHtmlEscape);
@@ -221,12 +223,76 @@ public class RequestContext {
 	 * @param resolvable the MessageSourceResolvable
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
-	 * @throws NoSuchMessageException if not found
+	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(MessageSourceResolvable resolvable, boolean htmlEscape) throws NoSuchMessageException {
 		String msg = this.webApplicationContext.getMessage(resolvable, this.locale);
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
+
+
+	/**
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically
+	 * denote theme-specific resource paths and not client-visible messages.
+	 * @param code code of the message
+	 * @param defaultMessage String to return if the lookup fails
+	 * @return the message
+	 */
+	public String getThemeMessage(String code, String defaultMessage) {
+		return this.theme.getMessageSource().getMessage(code, null, defaultMessage, this.locale);
+	}
+
+	/**
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically
+	 * denote theme-specific resource paths and not client-visible messages.
+	 * @param code code of the message
+	 * @param args arguments for the message, or null if none
+	 * @param defaultMessage String to return if the lookup fails
+	 * @return the message
+	 */
+	public String getThemeMessage(String code, String[] args, String defaultMessage) {
+		return this.theme.getMessageSource().getMessage(code, args, defaultMessage, this.locale);
+	}
+
+	/**
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically
+	 * denote theme-specific resource paths and not client-visible messages.
+	 * @param code code of the message
+	 * @return the message
+	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 */
+	public String getThemeMessage(String code) throws NoSuchMessageException {
+		return this.theme.getMessageSource().getMessage(code, null, this.locale);
+	}
+
+	/**
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically
+	 * denote theme-specific resource paths and not client-visible messages.
+	 * @param code code of the message
+	 * @param args arguments for the message, or null if none
+	 * @return the message
+	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 */
+	public String getThemeMessage(String code, String[] args) throws NoSuchMessageException {
+		return this.theme.getMessageSource().getMessage(code, args, this.locale);
+	}
+
+	/**
+	 * Retrieve the given MessageSourceResolvable in the current theme.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically
+	 * denote theme-specific resource paths and not client-visible messages.
+	 * @param resolvable the MessageSourceResolvable
+	 * @return the message
+	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 */
+	public String getThemeMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
+		return this.theme.getMessageSource().getMessage(resolvable, this.locale);
+	}
+
 
 	/**
 	 * Retrieve the Errors instance for the given bind object,
