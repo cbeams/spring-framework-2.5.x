@@ -102,4 +102,5 @@
 	<bean id="metadataAssembler" class="org.springframework.jmx.assemblers.metadata.MetadataModelMBeanInfoAssembler">
 	
 	</bean>
+
 </beans>

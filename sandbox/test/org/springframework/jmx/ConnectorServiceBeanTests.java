@@ -35,7 +35,7 @@ public class ConnectorServiceBeanTests extends AbstractJmxTests {
 
 	public void testStartupWithSuppliedServer() throws Exception {
 		ConnectorServiceBean bean = new ConnectorServiceBean();
-		bean.setMBeanServer(server);
+		bean.setServer(server);
 		bean.start();
 
 		checkServerConnection(bean, server);
