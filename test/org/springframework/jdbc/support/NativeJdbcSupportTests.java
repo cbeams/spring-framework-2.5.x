@@ -23,28 +23,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.mockobjects.sql.MockConnection;
+import com.mockobjects.sql.MockPreparedStatement;
+import com.mockobjects.sql.MockStatement;
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor;
 import org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
 
-import com.mockobjects.sql.MockConnection;
-import com.mockobjects.sql.MockPreparedStatement;
-import com.mockobjects.sql.MockStatement;
-
 /**
  * @author Andre Biryukov
- * @version $Id: NativeJdbcSupportTests.java,v 1.2 2004-03-18 03:01:15 trisberg Exp $
+ * @version $Id: NativeJdbcSupportTests.java,v 1.3 2004-03-18 09:16:30 jhoeller Exp $
  */
 public class NativeJdbcSupportTests extends TestCase {
 
 	public void testSimpleNativeJdbcExtractor() throws SQLException {
 		SimpleNativeJdbcExtractor extractor = new SimpleNativeJdbcExtractor();
-		extractor.setNativeConnectionNecessaryForNativeStatements(true);
-		assertTrue(extractor.isNativeConnectionNecessaryForNativeStatements());
 
 		MockConnection mockConnection = new MockConnection();
 		MockStatement mockStatement = new MockStatement();
@@ -107,4 +104,5 @@ public class NativeJdbcSupportTests extends TestCase {
 		ResultSet mockResultSet = mockCallableStmt.getResultSet();
 		assertEquals(mockResultSet, extractor.getNativeResultSet(mockResultSet));
 	}
+
 }
