@@ -131,8 +131,7 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 	 */
 	public void setUploadTempDir(Resource uploadTempDir) throws IOException {
 		if (!uploadTempDir.exists() && !uploadTempDir.getFile().mkdirs()) {
-			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir +
-																				 "] could not be created");
+			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir + "] could not be created");
 		}
 		this.uploadTempDir = uploadTempDir.getFile();
 	}
@@ -164,8 +163,8 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 					String fileName = (String) fileNames.nextElement();
 					File file = multipartRequest.getFile(fileName);
 					logger.debug("Found multipart file '" + fileName + "' of size " + (file != null ? file.length() : 0) +
-											 " bytes with original file name [" + multipartRequest.getOriginalFileName(fileName) +
-											 "], " + (file != null ? "stored at [" + file.getAbsolutePath() + "]" : "empty"));
+					    " bytes with original filename [" + multipartRequest.getOriginalFileName(fileName) +
+					    "], " + (file != null ? "stored at [" + file.getAbsolutePath() + "]" : "empty"));
 				}
 			}
 			return new CosMultipartHttpServletRequest(request, multipartRequest);
@@ -223,22 +222,22 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 				if (file.exists()) {
 					if (file.delete()) {
 						if (logger.isDebugEnabled()) {
-						logger.debug("Cleaned up multipart file '" + fileName + "' with original file name [" +
-												 multipartRequest.getOriginalFileName(fileName) +
-												 "], stored at [" + file.getAbsolutePath() + "]");
+						logger.debug("Cleaned up multipart file '" + fileName + "' with original filename [" +
+						    multipartRequest.getOriginalFileName(fileName) + "], stored at [" +
+						    file.getAbsolutePath() + "]");
 						}
 					}
 					else {
-						logger.warn("Could not delete multipart file '" + fileName + "' with original file name [" +
-						            multipartRequest.getOriginalFileName(fileName) +
-						            "], stored at [" + file.getAbsolutePath() + "]");
+						logger.warn("Could not delete multipart file '" + fileName + "' with original filename [" +
+						    multipartRequest.getOriginalFileName(fileName) + "], stored at [" +
+						    file.getAbsolutePath() + "]");
 					}
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Multipart file '" + fileName + "' with original file name [" +
-												 multipartRequest.getOriginalFileName(fileName) +
-												 "] has already been moved - no cleanup necessary");
+						logger.debug("Multipart file '" + fileName + "' with original filename [" +
+						    multipartRequest.getOriginalFileName(fileName) +
+						    "] has already been moved - no cleanup necessary");
 					}
 				}
 			}

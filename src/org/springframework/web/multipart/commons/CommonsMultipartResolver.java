@@ -162,8 +162,7 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 	 */
 	public void setUploadTempDir(Resource uploadTempDir) throws IOException {
 		if (!uploadTempDir.exists() && !uploadTempDir.getFile().mkdirs()) {
-			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir +
-																				 "] could not be created");
+			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir + "] could not be created");
 		}
 		this.uploadTempDir = uploadTempDir.getFile();
 		this.fileUpload.setRepositoryPath(uploadTempDir.getFile().getAbsolutePath());
@@ -207,7 +206,7 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 					}
 					catch (UnsupportedEncodingException ex) {
 						logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
-						            "] with encoding '" + enc + "': using platform default");
+						    "' with encoding '" + enc + "': using platform default");
 						value = fileItem.getString();
 					}
 					String[] curParam = (String[]) parameters.get(fileItem.getFieldName());
@@ -227,8 +226,8 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 					multipartFiles.put(file.getName(), file);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Found multipart file [" + file.getName() + "] of size " + file.getSize() +
-						             " bytes with original file name [" + file.getOriginalFilename() +
-						             "], stored " + file.getStorageDescription());
+						    " bytes with original filename [" + file.getOriginalFilename() + "], stored " +
+						    file.getStorageDescription());
 					}
 				}
 			}
@@ -265,8 +264,8 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 		for (Iterator i = multipartFiles.keySet().iterator(); i.hasNext();) {
 			String name = (String) i.next();
 			CommonsMultipartFile file = (CommonsMultipartFile) multipartFiles.get(name);
-			logger.debug("Cleaning up multipart file [" + file.getName() + "] with original file name [" +
-			             file.getOriginalFilename() + "], stored " + file.getStorageDescription());
+			logger.debug("Cleaning up multipart file [" + file.getName() + "] with original filename [" +
+			    file.getOriginalFilename() + "], stored " + file.getStorageDescription());
 			file.getFileItem().delete();
 		}
 	}
