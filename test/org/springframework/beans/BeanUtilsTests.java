@@ -94,11 +94,43 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Touchy still empty", tb2.getTouchy() == null);
 	}
 
+	public void testCopyPropertiesWithIgnoredNonExistingProperty() {
+		NameAndSpecialProperty source = new NameAndSpecialProperty();
+		source.setName("name");
+		TestBean target = new TestBean();
+		BeanUtils.copyProperties(source, target, new String[] {"specialProperty"});
+		assertEquals(target.getName(), "name");
+	}
+
 	public void testGetPropertyDescriptors() throws Exception {
 		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
 		assertNotNull("Descriptors should not be null", descriptors);
 		assertTrue("Invalid number of descriptors returned", Arrays.equals(actual, descriptors));
+	}
+
+
+	private static class NameAndSpecialProperty {
+
+		private String name;
+
+		private int specialProperty;
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setSpecialProperty(int specialProperty) {
+			this.specialProperty = specialProperty;
+		}
+
+		public int getSpecialProperty() {
+			return specialProperty;
+		}
 	}
 
 }

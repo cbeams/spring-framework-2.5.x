@@ -303,10 +303,11 @@ public abstract class BeanUtils {
 		for (int i = 0; i < sourceBw.getPropertyDescriptors().length; i++) {
 			PropertyDescriptor sourceDesc = sourceBw.getPropertyDescriptors()[i];
 			String name = sourceDesc.getName();
-			PropertyDescriptor targetDesc = targetBw.getPropertyDescriptor(name);
-			if (targetDesc.getWriteMethod() != null && targetDesc.getReadMethod() != null &&
-					(ignoreProperties == null || (!ignoreList.contains(name)))) {
-				values.addPropertyValue(new PropertyValue(name, sourceBw.getPropertyValue(name)));
+			if (ignoreProperties == null || (!ignoreList.contains(name))) {
+				PropertyDescriptor targetDesc = targetBw.getPropertyDescriptor(name);
+				if (targetDesc.getWriteMethod() != null && targetDesc.getReadMethod() != null) {
+					values.addPropertyValue(new PropertyValue(name, sourceBw.getPropertyValue(name)));
+				}
 			}
 		}
 		targetBw.setPropertyValues(values);
