@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
@@ -77,7 +76,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.32 2004-08-05 13:25:23 dkopylenko Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.33 2004-08-05 13:26:44 dkopylenko Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
