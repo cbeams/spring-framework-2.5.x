@@ -21,7 +21,7 @@ public class DefaultColumnExtractor implements ColumnExtractor {
 	 * @param rs ResultSet to extract the column value from
 	 * @return the value of the specified column in the ResultSet as an instance of the
 	 * required type
-	 * @throws SQLException if there is any problem getting this column value
+	 * @throws java.sql.SQLException if there is any problem getting this column value
 	 */
 	public Object extractColumn(String columnName, Class requiredType, ResultSet rs) throws SQLException {
 		return extractColumn(columnName, -1, requiredType, rs);
@@ -36,7 +36,7 @@ public class DefaultColumnExtractor implements ColumnExtractor {
 	 * @param rs ResultSet to extract the column value from
 	 * @return the value of the specified column in the ResultSet as an instance of the
 	 * required type
-	 * @throws SQLException if there is any problem getting this column value. Implementations
+	 * @throws java.sql.SQLException if there is any problem getting this column value. Implementations
 	 * of this interface do not need to worry about handling such exceptions; they can
 	 * assume they will only be called by code that correctly cleans up after any SQLExceptions
 	 */

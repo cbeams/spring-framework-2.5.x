@@ -26,20 +26,16 @@ import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.datasource.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.13 2004-02-16 21:34:05 trisberg Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.14 2004-02-17 17:21:58 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
-
-	public JdbcTemplateTestSuite(String name) {
-		super(name);
-	}
 
 	public void testBeanProperties() throws Exception {
 		replay();
@@ -60,7 +56,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		try {
 			t.query(sql, new RowCountCallbackHandler());
 			fail("Should have objected to bind variables");
-		} catch (InvalidDataAccessApiUsageException ex) {
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
 			// Ok 
 		}
 	}
@@ -133,7 +130,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		try {
 			int rowsAffected = template.update(d);
 			fail("Bogus update should throw exception");
-		} catch (UncategorizedDataAccessException ex) {
+		}
+		catch (UncategorizedDataAccessException ex) {
 			// pass
 			assertTrue(
 				"Correct exception",
@@ -145,22 +143,66 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlPreparedStatement.verify();
 	}
 
-	public void testStrings() throws Exception {
+	public void testStringsWithStaticSql() throws Exception {
+		doTestStrings(new JdbcTemplateCallback() {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+				template.query(sql, rch);
+			}
+		}, false, null);
+	}
+
+	public void testStringsWithEmptyPreparedStatementSetter() throws Exception {
+		doTestStrings(new JdbcTemplateCallback() {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+				template.query(sql, (PreparedStatementSetter) null, rch);
+			}
+		}, true, null);
+	}
+
+	public void testStringsWithPreparedStatementSetter() throws Exception {
+		final Integer argument = new Integer(99);
+		doTestStrings(new JdbcTemplateCallback() {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+				template.query(sql, new PreparedStatementSetter() {
+					public void setValues(PreparedStatement ps) throws SQLException {
+						ps.setObject(1, argument);
+					}
+				}, rch);
+			}
+		}, true, argument);
+	}
+
+	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
+		doTestStrings(new JdbcTemplateCallback() {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+				template.query(sql, (Object[]) null, rch);
+			}
+		}, true, null);
+	}
+
+	public void testStringsWithPreparedStatementArgs() throws Exception {
+		final Integer argument = new Integer(99);
+		doTestStrings(new JdbcTemplateCallback() {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+				template.query(sql, new Object[] {argument}, rch);
+			}
+		}, true, argument);
+	}
+
+	protected void doTestStrings(JdbcTemplateCallback jdbcTemplateCallback,
+	                             boolean usePreparedStatement, Object argument) throws Exception {
 		String sql = "SELECT FORENAME FROM CUSTMR";
 		String[] results = { "rod", "gary", " portia" };
 
 		class StringHandler implements RowCallbackHandler {
 			private List l = new LinkedList();
-
 			public void processRow(ResultSet rs) throws SQLException {
 				l.add(rs.getString(1));
 			}
-
 			public String[] getStrings() {
 				return (String[]) l.toArray(new String[l.size()]);
 			}
 		}
-		StringHandler sh = new StringHandler();
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
@@ -185,93 +227,47 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			MockControl.createControl(PreparedStatement.class);
 		PreparedStatement mockStatement =
 			(PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
+		if (argument != null) {
+			mockStatement.setObject(1, argument);
+		}
+		if (usePreparedStatement) {
+			mockStatement.executeQuery();
+		}
+		else {
+			mockStatement.executeQuery(sql);
+		}
 		ctrlStatement.setReturnValue(mockResultSet);
 		mockStatement.getWarnings();
 		ctrlStatement.setReturnValue(null);
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
-		mockConnection.createStatement();
+		if (usePreparedStatement) {
+			mockConnection.prepareStatement(sql);
+		}
+		else {
+			mockConnection.createStatement();
+		}
 		ctrlConnection.setReturnValue(mockStatement);
 
 		ctrlResultSet.replay();
 		ctrlStatement.replay();
 		replay();
 
+		StringHandler sh = new StringHandler();
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		template.query(sql, sh);
+		jdbcTemplateCallback.doInJdbcTemplate(template, sql, sh);
 
 		// Match
 		String[] forenames = sh.getStrings();
 		assertTrue("same length", forenames.length == results.length);
 		for (int i = 0; i < forenames.length; i++) {
-			assertTrue(
-				"Row " + i + " matches",
-				forenames[i].equals(results[i]));
+			assertTrue("Row " + i + " matches", forenames[i].equals(results[i]));
 		}
 
 		ctrlResultSet.verify();
 		ctrlStatement.verify();
 	}
-
-	/*	
-		// REFACTOR!?
-		public void testStringsWithPreparedStatement() throws Exception {
-			class StringHandler implements RowCallbackHandler {
-				private List l = new LinkedList();
-	
-				public void processRow(ResultSet rs) throws SQLException {
-					l.add(rs.getString(1));
-				}
-	
-				public String[] getStrings() {
-					return (String[]) l.toArray(new String[l.size()]);
-				}
-			}
-			StringHandler sh = new StringHandler();
-		
-			final String sql  = "SELECT FORENAME FROM CUSTMR WHERE ID>?";
-			String[][] results = {
-				{ "rod" },
-				{ "gary" },
-				{" portia" }
-			};
-		
-			final MockConnection con = MockConnectionFactory.preparedStatement(sql, new Integer[] { new Integer(1) }, results, true);
-			con.setExpectedCloseCalls(2);
-		
-			MockControl dsControl = MockControl.createControl(DataSource.class);
-			DataSource ds = (DataSource) dsControl.getMock();
-			ds.getConnection();
-			dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
-			dsControl.replay();
-		
-			JdbcTemplate template = new JdbcTemplate(ds);
-		
-			PreparedStatementCreator psc = new PreparedStatementCreator() {
-				public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
-					assertTrue("Conn is correct", conn == con);
-					PreparedStatement ps = conn.prepareStatement(sql);
-				
-					// FIX!>
-					ps.setInt(1, 1);
-					return ps;
-				}
-			};
-		
-			template.query(psc, sh);
-		
-			// Match
-			String[] forenames = sh.getStrings();
-			assertTrue("same length", forenames.length == results.length);
-			for (int i = 0; i < forenames.length; i++) {
-				assertTrue("Row " + i + " matches", forenames[i].equals(results[i][0]));
-			}
-		
-			dsControl.verify();
-		}
-	*/
 
 	public void testLeaveConnOpenOnRequest() throws Exception {
 		String sql = "SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3";
@@ -361,66 +357,66 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 	//	This really tests the translator: shouldn't the SQL translator have its own tests?
 	//	We just need to check that the translator is invoked and that it's exception is correctly used
 	/*
-		 public void testSQLExceptionIsTranslated() throws Exception {
-			
-			 class TestSqlExceptionTranslator implements SQLExceptionTranslator {
-				 private int invoked;
-				 public DataAccessException translate(String task, String sql, SQLException sqlex) {
-					 // Any subclass will do: can't really check all, can we?
-					 // YES, we can: loop throuigh with exception as parameter
-					 System.out.println("Our translator");
-					 ++invoked;
-					 return new BadSqlGrammarException("Exception doing " + task,sql, sqlex);
-				 }
+	 public void testSQLExceptionIsTranslated() throws Exception {
+
+		 class TestSqlExceptionTranslator implements SQLExceptionTranslator {
+			 private int invoked;
+			 public DataAccessException translate(String task, String sql, SQLException sqlex) {
+				 // Any subclass will do: can't really check all, can we?
+				 // YES, we can: loop throuigh with exception as parameter
+				 System.out.println("Our translator");
+				 ++invoked;
+				 return new BadSqlGrammarException("Exception doing " + task,sql, sqlex);
 			 }
-			
-			 TestSqlExceptionTranslator trans = new TestSqlExceptionTranslator();
-			
-			 String sql = "SELECT"; // doesn't really matter what this is
-			
-			 SQLException sex = new SQLException("Any type of SQLException");
-			 //MockConnection con = MockConnectionFactory.preparedStatement(sql, null, new Object[0][0], false, sex, null);
-			
-			 MockControl conControl = MockControl.createControl(Connection.class);
-			 Connection con = (Connection) conControl.getMock();
-			 con.prepareStatement(sql);
-			
-			 MockControl psControl = MockControl.createControl(PreparedStatement.class);
-			 PreparedStatement ps = (PreparedStatement) psControl.getMock();
-			 ps.executeQuery();
-			 MockSingleRowResultSet rs = new MockSingleRowResultSet();
-			 rs.setExpectedCloseCalls(2);
-			 //rs.setupMetaData()
-			
-			 psControl.setReturnValue(rs);
-			 psControl.replay();
-			 conControl.setReturnValue(ps);
-			 con.close();
-			 conControl.replay();
-	
-			 MockControl dsControl = MockControl.createControl(DataSource.class);
-			 DataSource ds = (DataSource) dsControl.getMock();
-			 ds.getConnection();
-			 dsControl.setReturnValue(con);
-			 dsControl.replay();
-	
-			 JdbcTemplate template = new JdbcTemplate(ds);
-			 template.setExceptionTranslator(trans);
-			 RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			 try {
-				 template.query(PreparedStatementCreatorFactory.newPreparedStatementCreator(sql), rcch);
-				 fail("Exceptioo should be translated");
-			 }
-			 catch (DataAccessException ex) {
-				 SQLException se2 = (SQLException) ex.getCause();
-				 assertTrue("Found SQL exception", se2 == sex);
-				 //System.out.println("VENDOR CODE IS " + sex.getErrorCode());
-				 //System.out.println("SQLSTATE IS " + sex.getSQLState());
-			 }
-			 dsControl.verify();
-			 conControl.verify();
 		 }
-		 */
+
+		 TestSqlExceptionTranslator trans = new TestSqlExceptionTranslator();
+
+		 String sql = "SELECT"; // doesn't really matter what this is
+
+		 SQLException sex = new SQLException("Any type of SQLException");
+		 //MockConnection con = MockConnectionFactory.preparedStatement(sql, null, new Object[0][0], false, sex, null);
+
+		 MockControl conControl = MockControl.createControl(Connection.class);
+		 Connection con = (Connection) conControl.getMock();
+		 con.prepareStatement(sql);
+
+		 MockControl psControl = MockControl.createControl(PreparedStatement.class);
+		 PreparedStatement ps = (PreparedStatement) psControl.getMock();
+		 ps.executeQuery();
+		 MockSingleRowResultSet rs = new MockSingleRowResultSet();
+		 rs.setExpectedCloseCalls(2);
+		 //rs.setupMetaData()
+
+		 psControl.setReturnValue(rs);
+		 psControl.replay();
+		 conControl.setReturnValue(ps);
+		 con.close();
+		 conControl.replay();
+
+		 MockControl dsControl = MockControl.createControl(DataSource.class);
+		 DataSource ds = (DataSource) dsControl.getMock();
+		 ds.getConnection();
+		 dsControl.setReturnValue(con);
+		 dsControl.replay();
+
+		 JdbcTemplate template = new JdbcTemplate(ds);
+		 template.setExceptionTranslator(trans);
+		 RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+		 try {
+			 template.query(PreparedStatementCreatorFactory.newPreparedStatementCreator(sql), rcch);
+			 fail("Exceptioo should be translated");
+		 }
+		 catch (DataAccessException ex) {
+			 SQLException se2 = (SQLException) ex.getCause();
+			 assertTrue("Found SQL exception", se2 == sex);
+			 //System.out.println("VENDOR CODE IS " + sex.getErrorCode());
+			 //System.out.println("SQLSTATE IS " + sex.getSQLState());
+		 }
+		 dsControl.verify();
+		 conControl.verify();
+	 }
+	 */
 
 	/**
 	 * Test that we see a runtime exception back
@@ -467,7 +463,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 				}
 			});
 			fail("Should have thrown exception");
-		} catch (RuntimeException ex) {
+		}
+		catch (RuntimeException ex) {
 			assertTrue("Wanted same exception back, not " + ex, ex == rex);
 		}
 	}
@@ -498,7 +495,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.update(sql);
-		} catch (DataAccessException ex) {
+		}
+		catch (DataAccessException ex) {
 			assertTrue("root cause is correct", ex.getCause() == sex);
 		}
 
@@ -664,7 +662,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			JdbcTemplate template = new JdbcTemplate(mockDataSource);
 			template.batchUpdate(sql, setter);
 			fail("Should have failed because of SQLException in bulk update");
-		} catch (DataAccessException ex) {
+		}
+		catch (DataAccessException ex) {
 			assertTrue("Root cause is SQLException", ex.getCause() == sex);
 		}
 
@@ -811,28 +810,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 	}
 
 
-	public void testPreparedStatementSetterQueryWithNullArg()
-		throws Exception {
-		final String sql = "SELECT * FROM FOO WHERE ID > 1";
-
-		replay();
-
-		class MockJdbcTemplate extends JdbcTemplate {
-			private boolean valid = false;
-			public MockJdbcTemplate(DataSource ds) {
-				super(ds);
-			}
-			// Override this so we don't need to get connection
-			public void query(String sql, RowCallbackHandler rch) {
-				valid = true;
-			}
-		}
-
-		MockJdbcTemplate mockTemplate = new MockJdbcTemplate(mockDataSource);
-		mockTemplate.query(sql, null, null);
-		assertTrue("invoked no arg query", mockTemplate.valid);
-	}
-
 	public void testPreparedStatementSetterSucceeds() throws Exception {
 		final String sql = "UPDATE FOO SET NAME=? WHERE ID = 1";
 		final String name = "Gary";
@@ -899,7 +876,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		try {
 			new JdbcTemplate(mockDataSource).update(sql, pss);
 			fail("Should have failed with SQLException");
-		} catch (DataAccessException ex) {
+		}
+		catch (DataAccessException ex) {
 			assertTrue("root cause was preserved", ex.getCause() == sex);
 		}
 
@@ -920,7 +898,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
 				rcch);
 			fail("Should throw exception on failure to close");
-		} catch (CleanupFailureDataAccessException ex) {
+		}
+		catch (CleanupFailureDataAccessException ex) {
 			// pass
 			assertTrue("Check root cause", ex.getCause() == sex);
 		}
@@ -969,7 +948,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 				}
 			});
 			fail("Should have thrown exception on warning");
-		} catch (SQLWarningException ex) {
+		}
+		catch (SQLWarningException ex) {
 			// Pass
 			assertTrue(
 				"Root cause of warning was correct",
@@ -1079,11 +1059,13 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 				}
 			});
 			fail("Should have thrown exception");
-		} catch (BadSqlGrammarException ex) {
+		}
+		catch (BadSqlGrammarException ex) {
 			assertTrue(
 				"Wanted same exception back, not " + ex,
 				sex == ex.getCause());
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			fail(
 				"Should have thrown BadSqlGrammarException exception, not "
 					+ ex);
@@ -1163,7 +1145,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 				}
 			});
 			fail("Should have thrown exception");
-		} catch (BadSqlGrammarException ex) {
+		}
+		catch (BadSqlGrammarException ex) {
 			assertTrue(
 				"Wanted same exception back, not " + ex,
 				sex == ex.getCause());
@@ -1263,8 +1246,9 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		});
 
 		template.doWithResultSetFromStaticQuery("my query",	new ResultSetExtractor() {
-			public void extractData(ResultSet rs2) throws SQLException {
+			public Object extractData(ResultSet rs2) throws SQLException {
 				assertEquals(mockResultSet, rs2);
+				return null;
 			}
 		});
 
@@ -1273,8 +1257,9 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 				return mockPreparedStatement;
 			}
 		}, new ResultSetExtractor() {
-			public void extractData(ResultSet rs2) throws SQLException {
+			public Object extractData(ResultSet rs2) throws SQLException {
 				assertEquals(mockResultSet, rs2);
+				return null;
 			}
 		});
 
@@ -1347,7 +1332,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		try {
 			template.doWithResultSetFromStaticQuery("my query",	new ResultSetExtractor() {
-				public void extractData(ResultSet rs) throws SQLException {
+				public Object extractData(ResultSet rs) throws SQLException {
 					throw new InvalidDataAccessApiUsageException("");
 				}
 			});
@@ -1363,7 +1348,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 					return con.prepareStatement("my query");
 				}
 			}, new ResultSetExtractor() {
-				public void extractData(ResultSet rs2) throws SQLException {
+				public Object extractData(ResultSet rs2) throws SQLException {
 					throw new InvalidDataAccessApiUsageException("");
 				}
 			});
@@ -1406,7 +1391,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			mockConnection.prepareCall("my query");
 			ctrlConnection.setReturnValue(mockCallable);
 
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -1430,7 +1416,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 					return conn.prepareCall("my query");
 				}
 			}, params);
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// ok
 		}
 
@@ -1439,7 +1426,15 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlCallable.verify();
 	}
 
-	class Dispatcher implements PreparedStatementCreator {
+
+	private static interface JdbcTemplateCallback {
+
+		void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch);
+	}
+
+
+	private static class Dispatcher implements PreparedStatementCreator {
+
 		private int id;
 		private String sql;
 
@@ -1447,6 +1442,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			this.id = id;
 			this.sql = sql;
 		}
+
 		public PreparedStatement createPreparedStatement(Connection conn)
 			throws SQLException {
 			PreparedStatement ps = conn.prepareStatement(sql);

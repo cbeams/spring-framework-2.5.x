@@ -6,25 +6,26 @@
 package org.springframework.jdbc.core;
 
 /**
- * Subclass of SqlParameter to represent a returned resultset from a stored procedure call.
- * Must declare a RowCallbackHandler to handle any returned rows.
+ * Subclass of SqlParameter to represent a returned resultset from a
+ * stored procedure call.
+ *
+ * <p>Must declare a RowCallbackHandler to handle any returned rows.
  * No additional properties: instanceof will be used to check
  * for such types.
- * Output parameters--like all stored procedure parameters--
+ *
+ * <p>Output parameters - like all stored procedure parameters -
  * must have names.
+ *
  * @author Thomas Risberg
- **/
+ */
 public class SqlReturnResultSet extends SqlParameter {
 
-	/**
-	 * Create a new OutputParameter, supplying name and SQL type
-	 * @param name name of the parameter, as used in input and
-	 * output maps
-	 * @param RowCallbackHandler.
-	 */
 	private RowCallbackHandler rowCallbackHandler;
+
 	private RowMapper rowMapper = null;
+
 	private int rowsExpected = 0;
+
 	private boolean rowMapperSupported = false;
 
 	public SqlReturnResultSet(String name, RowCallbackHandler rch) {
@@ -43,11 +44,12 @@ public class SqlReturnResultSet extends SqlParameter {
 		this(name, rm, 0);
 	}
 		
-	/**
-	 * @return Returns the rowCallbackHandler.
-	 */
 	public RowCallbackHandler getRowCallbackHandler() {
 		return rowCallbackHandler;
+	}
+
+	public boolean isRowMapperSupported() {
+		return rowMapperSupported;
 	}
 	
 	/**
@@ -56,13 +58,6 @@ public class SqlReturnResultSet extends SqlParameter {
 	 */
 	protected final ResultReader newResultReader() {
 		return new ResultReaderStoredProcImpl(rowsExpected, rowMapper);
-	}
-
-	/**
-	 * @return Returns the isRowMapperSupported.
-	 */
-	public boolean isRowMapperSupported() {
-		return rowMapperSupported;
 	}
 
 }

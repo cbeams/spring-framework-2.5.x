@@ -16,7 +16,7 @@ import org.easymock.MockControl;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.JdbcTestCase;
-import org.springframework.jdbc.core.JdbcHelper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 
 public class SqlQueryTestSuite extends JdbcTestCase {
@@ -42,37 +42,20 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 	private MockControl ctrlResultSet;
 	private ResultSet mockResultSet;
 
-	public SqlQueryTestSuite(String name) {
-		super(name);
-	}
-
-	/**
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-
-		ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
+		ctrlPreparedStatement =	MockControl.createControl(PreparedStatement.class);
+		mockPreparedStatement =	(PreparedStatement) ctrlPreparedStatement.getMock();
 		ctrlResultSet = MockControl.createControl(ResultSet.class);
 		mockResultSet = (ResultSet) ctrlResultSet.getMock();
 	}
 
-	/**
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	protected void tearDown() throws Exception {
 		super.tearDown();
-
 		ctrlPreparedStatement.verify();
 		ctrlResultSet.verify();
 	}
 
-	/**
-	 * @see org.springframework.jdbc.object.JdbcTestCase#replay()
-	 */
 	protected void replay() {
 		super.replay();
 		ctrlPreparedStatement.replay();
@@ -99,7 +82,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 
 			mockConnection.prepareStatement(SELECT_ID);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -152,10 +136,12 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		try {
 			List list = query.execute();
 			fail("Shouldn't succeed in running query without enough params");
-		} catch (InvalidDataAccessApiUsageException ex) {
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
 			// OK
 		}
 	}
+
 	public void testBindVariableCountWrong() {
 		replay();
 
@@ -175,7 +161,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		try {
 			query.compile();
 			fail("Shouldn't succeed in compiling query with bind var mismatch");
-		} catch (InvalidDataAccessApiUsageException ex) {
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
 			// OK
 		}
 	}
@@ -227,10 +214,6 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 					(ResultSetMetaData) ctrlCountResultSetMetaData[i].getMock();
 				mockCountResultSetMetaData[i].getColumnCount();
 				ctrlCountResultSetMetaData[i].setReturnValue(1);
-				mockCountResultSetMetaData[i].getColumnType(1);
-				ctrlCountResultSetMetaData[i].setReturnValue(Types.INTEGER);
-				mockCountResultSetMetaData[i].getColumnName(1);
-				ctrlCountResultSetMetaData[i].setReturnValue("Count");
 
 				ctrlCountResultSet[i] =
 					MockControl.createControl(ResultSet.class);
@@ -241,8 +224,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 					mockCountResultSetMetaData[i]);
 				mockCountResultSet[i].next();
 				ctrlCountResultSet[i].setReturnValue(true);
-				mockCountResultSet[i].getInt(1);
-				ctrlCountResultSet[i].setReturnValue(1);
+				mockCountResultSet[i].getObject(1);
+				ctrlCountResultSet[i].setReturnValue(new Integer(1));
 				mockCountResultSet[i].next();
 				ctrlCountResultSet[i].setReturnValue(false);
 				mockCountResultSet[i].close();
@@ -271,13 +254,12 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 				ctrlCountPreparedStatement[i].replay();
 			}
 
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
 		replay();
-
-		JdbcHelper helper = new JdbcHelper(mockDataSource);
 
 		StringQuery query = new StringQuery(mockDataSource, SELECT_FORENAME);
 		query.setRowsExpected(3);
@@ -287,13 +269,15 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		assertTrue(
 			"Found expected number of results",
 			query.getRowsExpected() == 3);
+
+		JdbcTemplate helper = new JdbcTemplate(mockDataSource);
 		for (int i = 0; i < results.length; i++) {
 			// BREAKS ON ' in name
 			int dbCount =
-				helper.runSQLFunction(
+				helper.queryForInt(
 					"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='"
 						+ results[i]
-						+ "'");
+						+ "'", null);
 			assertTrue("found in db", dbCount == 1);
 		}
 
@@ -320,7 +304,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 
 			mockConnection.prepareStatement(SELECT_FORENAME_EMPTY);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -346,7 +331,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 				};
 				mockPreparedStatement[0].setExpectedExecuteCalls(1);
 				mockPreparedStatement[0].setExpectedCloseCalls(1);
-		
+
 				mockResultSet =
 					new MockResultSet[] {
 						SpringMockJdbcFactory
@@ -354,7 +339,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 					}, COLUMN_NAMES, mockPreparedStatement[0])
 					};
 				mockResultSet[0].setExpectedNextCalls(2);
-		
+
 				SqlQuery query = new MappingSqlQuery() {
 					protected Object mapRow(ResultSet rs, int rownum)
 						throws SQLException {
@@ -368,7 +353,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 				query.setSql(SELECT_ID_FORENAME_WHERE);
 				query.declareParameter(new SqlParameter(Types.NUMERIC));
 				query.compile();
-		
+
 				List list = query.execute(1);
 				assertTrue("List is non null", list != null);
 				assertTrue("Found 1 result", list.size() == 1);
@@ -377,11 +362,12 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 				assertTrue(
 					"Customer forename was assigned correctly",
 					cust.getForename().equals("rod"));
-		
+
 				try {
 					list = query.execute();
 					fail("Shouldn't have executed without arguments");
-				} catch (InvalidDataAccessApiUsageException ex) {
+				}
+				catch (InvalidDataAccessApiUsageException ex) {
 					// ok
 				}
 		*/
@@ -413,7 +399,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 
 			mockConnection.prepareStatement(SELECT_ID_WHERE);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -441,7 +428,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			}
 		};
 		CustomerQuery query = new CustomerQuery(mockDataSource);
-		Customer cust = (Customer) query.findCustomer(1, 1);
+		Customer cust = query.findCustomer(1, 1);
 
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue(
@@ -473,7 +460,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 
 			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -500,7 +488,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			}
 		};
 		CustomerQuery query = new CustomerQuery(mockDataSource);
-		Customer cust = (Customer) query.findCustomer("rod");
+		Customer cust = query.findCustomer("rod");
 
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue(
@@ -564,7 +552,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			mockConnection.prepareStatement(SELECT_ID_WHERE);
 			ctrlConnection.setReturnValue(mockPreparedStatement2);
 
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -598,11 +587,11 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		};
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 
-		Customer cust1 = (Customer) query.findCustomer(1, "rod");
+		Customer cust1 = query.findCustomer(1, "rod");
 		assertTrue("Found customer", cust1 != null);
 		assertTrue("Customer id was assigned correctly", cust1.id == 1);
 
-		Customer cust2 = (Customer) query.findCustomer(1, "Roger");
+		Customer cust2 = query.findCustomer(1, "Roger");
 		assertTrue("No customer found", cust2 == null);
 	}
 
@@ -636,7 +625,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 
 			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -664,9 +654,10 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		};
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		try {
-			Customer cust = (Customer) query.findCustomer("rod");
+			Customer cust = query.findCustomer("rod");
 			fail("Should fail if more than one row found");
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
 		}
 	}
@@ -703,7 +694,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 
 			mockConnection.prepareStatement(SELECT_ID_WHERE);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -766,7 +758,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 
 			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -822,7 +815,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 
 			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -848,7 +842,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			}
 		};
 		CustomerQuery query = new CustomerQuery(mockDataSource);
-		Customer cust = (Customer) query.findCustomer(1);
+		Customer cust = query.findCustomer(1);
 
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue(
@@ -912,7 +906,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			ctrlConnection.setReturnValue(mockPreparedStatement);
 			
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 

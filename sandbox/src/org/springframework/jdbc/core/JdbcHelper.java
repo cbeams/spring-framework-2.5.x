@@ -29,7 +29,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  *
  * @author Rod Johnson
  * @since May 30, 2001
- * @version $Id: JdbcHelper.java,v 1.3 2003-08-26 17:21:52 jhoeller Exp $
+ * @version $Id: JdbcHelper.java,v 1.1 2004-02-17 17:21:24 jhoeller Exp $
  */
 public class JdbcHelper {
 
@@ -61,7 +61,7 @@ public class JdbcHelper {
 	 * @param sql SQL function, such as SELECT MAX(USER_ID) FROM USERS.
 	 * Must return only one row.
 	 * @param requiredType the class we need to extract the function result as.
-	 * @throws DataAccessException if there is a problem executing the function
+	 * @throws org.springframework.dao.DataAccessException if there is a problem executing the function
 	 */
 	public Object runSQLFunction(final String sql, final Class requiredType) throws DataAccessException {
 		return runSQLFunction(sql, requiredType, null, null);
@@ -85,7 +85,7 @@ public class JdbcHelper {
 	 * @param sql SQL function, such as SELECT MAX(USER_ID) FROM USERS.
 	 * Must return only one row.
 	 * @param params prepared statement parameters
-	 * @throws DataAccessException if there is a problem executing the function
+	 * @throws org.springframework.dao.DataAccessException if there is a problem executing the function
 	 */
 	public int[] getIDs(final String sql, final Object[] params) throws DataAccessException {
 		Object[] os = getIDs(sql, Integer.class, params);
@@ -101,7 +101,7 @@ public class JdbcHelper {
 	 * Must return only one row.
 	 * @param requiredType the class we need to extract the results as
 	 * @param params prepared statement parameters
-	 * @throws DataAccessException if there is a problem executing the function
+	 * @throws org.springframework.dao.DataAccessException if there is a problem executing the function
 	 */
 	public Object[] getIDs(final String sql, final Class requiredType, final Object[] params) throws DataAccessException {
 

@@ -19,39 +19,80 @@ import org.springframework.dao.DataAccessException;
  * However, mocking this interface constitutes significantly less work.
  *
  * @author Rod Johnson
- * @version $Id: JdbcOperations.java,v 1.1 2004-02-07 00:12:39 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: JdbcOperations.java,v 1.2 2004-02-17 17:21:25 jhoeller Exp $
  * @see JdbcTemplate
  */
 public interface JdbcOperations {
+
+	//-------------------------------------------------------------------------
+	// Query methods dealing with static SQL
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Execute a query given static SQL.
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
 	 * a static query with a PreparedStatement, use the overloaded query method
-	 * with the PREPARE_STATEMENT constant as PreparedStatementSetter argument.
-	 * <p>In most cases the query() method should be preferred to the parallel
-	 * doWithResultSetXXXX() method. The doWithResultSetXXXX() methods are
-	 * included to allow full control over the extraction of data from ResultSets
-	 * and to facilitate integration with third-party software.
+	 * with null as PreparedStatementSetter argument.
 	 * @param sql SQL query to execute
 	 * @param callbackHandler object that will extract results
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
 	 */
 	void query(String sql, RowCallbackHandler callbackHandler) throws DataAccessException;
-	
+
 	/**
-	 * Execute a query given static SQL.
-	 * Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded query method
-	 * with a NOP PreparedStatement setter as a parameter.
+	 * Execute a query for a result list, given static SQL.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
+	 * a static query with a PreparedStatement, use the overloaded queryForList
+	 * method with null as argument array.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The results will be mapped to an ArrayList (one entry for each row) of
+	 * HashMaps (one entry for each column using the column name as the key).
 	 * @param sql SQL query to execute
-	 * @param rse object that will extract all rows of results
-	 * @throws DataAccessException if there is any problem executing
-	 * the query
+	 * @return an ArrayList that contains a HashMap per row
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForList(String, Object[])
 	 */
-	void doWithResultSetFromStaticQuery(String sql, ResultSetExtractor rse) throws DataAccessException;
-	
+	List queryForList(String sql) throws DataAccessException;
+
+	/**
+	 * Execute a query for a result object, given static SQL.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
+	 * a static query with a PreparedStatement, use the overloaded queryForObject
+	 * method with null as argument array.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query; the returned
+	 * result will be directly mapped to the corresponding object type.
+	 * @param sql SQL query to execute
+	 * @param requiredType the type that the result object is expected to match
+	 * @return the result object of the required type
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForObject(String, Object[], Class)
+	 */
+	Object queryForObject(String sql, Class requiredType) throws DataAccessException;
+
+	/**
+	 * Execute a query that results in an int value, given static SQL.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
+	 * a static query with a PreparedStatement, use the overloaded queryForInt
+	 * method with null as argument array.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query that results
+	 * in an int value.
+	 * @param sql SQL query to execute
+	 * @return the int value
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForInt(String, Object[])
+	 */
+	int queryForInt(String sql) throws DataAccessException;
+
+
+
+	//-------------------------------------------------------------------------
+	// Query methods dealing with prepared statements
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Query using a prepared statement.
 	 * @param psc Callback handler that can create a PreparedStatement
@@ -61,16 +102,6 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem
 	 */
 	void query(PreparedStatementCreator psc, RowCallbackHandler callbackHandler) throws DataAccessException;
-	
-	/**
-	 * Query using a prepared statement. Most other query methods use
-	 * this method.
-	 * @param psc Callback handler that can create a PreparedStatement
-	 * given a Connection
-	 * @param rse object that will extract results.
-	 * @throws DataAccessException if there is any problem
-	 */
-	void doWithResultSetFromPreparedQuery(PreparedStatementCreator psc, ResultSetExtractor rse) throws DataAccessException;
 	
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -84,8 +115,88 @@ public interface JdbcOperations {
 	 * @param callbackHandler object that will extract results
 	 * @throws DataAccessException if the query fails
 	 */
-	void query(final String sql, final PreparedStatementSetter pss, RowCallbackHandler callbackHandler) throws DataAccessException;
+	void query(String sql, PreparedStatementSetter pss, RowCallbackHandler callbackHandler)
+	    throws DataAccessException;
 	
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * @param argTypes SQL types of the arguments
+	 * (constants from java.sql.Types)
+	 * @param callbackHandler object that will extract results
+	 * @throws DataAccessException if the query fails
+	 * @see java.sql.Types
+	 */
+	void query(String sql, final Object[] args, final int[] argTypes, RowCallbackHandler callbackHandler)
+	    throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @param callbackHandler object that will extract results
+	 * @throws DataAccessException if the query fails
+	 */
+	void query(String sql, final Object[] args, RowCallbackHandler callbackHandler)
+	    throws DataAccessException;
+
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result list.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The results will be mapped to an ArrayList (one entry for each row) of
+	 * HashMaps (one entry for each column using the column name as the key).
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @return an ArrayList that contains a HashMap per row
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForList(String)
+	 */
+	List queryForList(String sql, final Object[] args) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result object.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query; the returned
+	 * result will be directly mapped to the corresponding object type.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @param requiredType the type that the result object is expected to match
+	 * @return the result object of the required type
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForObject(String, Class)
+	 */
+	Object queryForObject(String sql, final Object[] args, Class requiredType)
+	    throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, resulting in an int value.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query that results
+	 * in an int value.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @return the int value
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForInt(String)
+	 */
+	int queryForInt(String sql, final Object[] args) throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Update methods
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Issue a single SQL update.
 	 * @param sql static SQL to execute
@@ -95,16 +206,17 @@ public interface JdbcOperations {
 	int update(final String sql) throws DataAccessException;
 	
 	/**
-	 * Issue an update using a PreparedStatementCreator to provide SQL and any required
-	 * parameters
-	 * @param psc helper: callback object that provides SQL and any necessary parameters
+	 * Issue an update using a PreparedStatementCreator to provide SQL and any
+	 * required parameters.
+	 * @param psc callback object that provides SQL and any necessary parameters
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int update(PreparedStatementCreator psc) throws DataAccessException;
+
 	/**
-	 * Issue multiple updates using multiple PreparedStatementCreators to provide SQL
-	 * and any required parameters.
+	 * Issue multiple updates using multiple PreparedStatementCreators to provide
+	 * SQL and any required parameters.
 	 * @param pscs array of callback objects that provide SQL and any necessary parameters
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
@@ -113,33 +225,59 @@ public interface JdbcOperations {
 	
 	/**
 	 * Issue an update using a PreparedStatementSetter to set bind parameters,
-	 * with given SQL. Simpler than using a PreparedStatementCreator
-	 * as this method will create the PreparedStatement: the
-	 * PreparedStatementSetter has only to set parameters.
+	 * with given SQL. Simpler than using a PreparedStatementCreator as this
+	 * method will create the PreparedStatement: The PreparedStatementSetter
+	 * just needs to set parameters.
 	 * @param sql SQL, containing bind parameters
 	 * @param pss helper that sets bind parameters. If this is null
-	 * we run an update with static SQL
+	 * we run an update with static SQL.
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int update(final String sql, final PreparedStatementSetter pss) throws DataAccessException;
 	
 	/**
-	 * Issue multiple updates using JDBC 2.0 batch updates and PreparedStatementSetters to
-	 * set values on a PreparedStatement created by this method
+	 * Issue an update via a prepared statement, binding the given arguments.
+	 * @param sql SQL, containing bind parameters
+	 * @param args arguments to bind to the query
+	 * @param argTypes SQL types of the arguments
+	 * (constants from java.sql.Types)
+	 * @return the number of rows affected
+	 * @throws DataAccessException if there is any problem issuing the update
+	 */
+	int update(String sql, final Object[] args, final int[] argTypes) throws DataAccessException;
+
+	/**
+	 * Issue an update via a prepared statement, binding the given arguments.
+	 * @param sql SQL, containing bind parameters
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @return the number of rows affected
+	 * @throws DataAccessException if there is any problem issuing the update
+	 */
+	int update(String sql, final Object[] args) throws DataAccessException;
+
+	/**
+	 * Issue multiple updates using JDBC 2.0 batch updates and PreparedStatementSetters
+	 * to set values on a PreparedStatement created by this method
 	 * @param sql defining PreparedStatement that will be reused.
 	 * All statements in the batch will use the same SQL.
-	 * @param setter object to set parameters on the
+	 * @param pss object to set parameters on the
 	 * PreparedStatement created by this method
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int[] batchUpdate(String sql, BatchPreparedStatementSetter setter) throws DataAccessException;
-	
+	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Methods dealing with callable statements
+	//-------------------------------------------------------------------------
+
 	/**
-	 * Execute an Sql call using a CallableStatementCreator to provide SQL and any required
-	 * parameters
-	 * @param csc helper: callback object that provides SQL and any necessary parameters
+	 * Execute a SQL call using a CallableStatementCreator to provide SQL and any required
+	 * parameters.
+	 * @param csc callback object that provides SQL and any necessary parameters
 	 * @return Map of extracted out parameters
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */

@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -66,27 +67,13 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.23 2004-02-16 21:03:05 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.24 2004-02-17 17:21:25 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
  * @see org.springframework.jdbc.datasource
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, InitializingBean {
-
-	/**
-	 * Constant for use as a parameter to query methods to force use of a PreparedStatement
-	 * rather than a Statement, even when there are no bind parameters.
-	 * For example, query(sql, JdbcTemplate.PREPARE_STATEMENT, callbackHandler)
-	 * will force the use of a JDBC PreparedStatement even if the SQL
-	 * passed in has no bind parameters.
-	 */
-	public static final PreparedStatementSetter PREPARE_STATEMENT =
-	    new PreparedStatementSetter() {
-		    public void setValues(PreparedStatement ps) throws SQLException {
-			    // do nothing
-		    }
-	    };
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -126,7 +113,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	public void setNativeJdbcExtractor(NativeJdbcExtractor extractor) {
 		this.nativeJdbcExtractor = extractor;
 	}
-	
+
 	/**
 	 * Return the current NativeJdbcExtractor implementation.
 	 */
@@ -152,120 +139,20 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 
 	//-------------------------------------------------------------------------
-	// Public methods
+	// Query methods dealing with static SQL
 	//-------------------------------------------------------------------------
-
-	/**
-	 * Execute a statement given static SQL.
-	 * Uses a JDBC Statement, not a PreparedStatement. This method is useful for 
-	 * running static sql with a known outcome.  The results will be mapped to either 
-	 * an ArrayList (one entry for each row) of HashMaps (one entry for each column using the 
-	 * column name as the key) or in the case of a single row/single column query the returned 
-	 * result will be directly mapped to the corresponding object type.  
-	 * Update statements will return an Integer containing the update count. 
-	 * @param sql SQL statement to execute
-	 * @return the results from the statement execution
-	 * @throws DataAccessException if there is any problem executing
-	 * the statement
-	 */
-	public Object runSqlStatement(String sql) throws DataAccessException {
-		Object returnValue = null;
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL may not be null");
-		}
-		if (containsBindVariables(sql)) {
-			throw new InvalidDataAccessApiUsageException(
-				"Cannot execute [" + sql + "] as a static statement: it contains bind variables");
-		}
-		Connection con = DataSourceUtils.getConnection(getDataSource());
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Executing static SQL statement [" + sql + "] using a java.sql.Statement");
-			}
-			Connection conToUse = con;
-			if (this.nativeJdbcExtractor != null &&
-				this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
-				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
-			}
-			stmt = conToUse.createStatement();
-			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-			Statement stmtToUse = stmt;
-			if (this.nativeJdbcExtractor != null) {
-				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
-			}
-			// execute and process based on whether a resultset was returned or not
-			if (stmtToUse.execute(sql)) {
-				rs = stmtToUse.executeQuery(sql);
-				ResultSet rsToUse = rs;
-				if (this.nativeJdbcExtractor != null) {
-					rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
-				}
-				ResultSetMetaData rsmd = rs.getMetaData();
-				int numberOfColumns = rsmd.getColumnCount();
-				ArrayList listOfRows = new ArrayList();
-				while (rsToUse.next()) {
-					HashMap mapOfColValues = new HashMap(numberOfColumns);
-					for (int i = 1; i <= numberOfColumns; i++) {
-						mapOfColValues.put(rsmd.getColumnName(i), rsToUse.getObject(i));
-					}
-					listOfRows.add(mapOfColValues);
-				}
-				if (listOfRows.size() == 1 && numberOfColumns == 1)
-					returnValue = ((HashMap) listOfRows.get(0)).get(rsmd.getColumnName(1));
-				else
-					returnValue = listOfRows;
-			}
-			else {
-				returnValue = new Integer(stmt.getUpdateCount());
-			}
-			SQLWarning warning = stmt.getWarnings();
-			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
-		}
-		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("JdbcTemplate.query(sql)", sql, ex);
-		}
-		finally {
-			if (rs != null)
-				JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeStatement(stmt);
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
-		}
-		return returnValue;
-	}
 
 	/**
 	 * Execute a query given static SQL.
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
 	 * a static query with a PreparedStatement, use the overloaded query method
-	 * with the PREPARE_STATEMENT constant as PreparedStatementSetter argument.
-	 * <p>In most cases the query() method should be preferred to the parallel
-	 * doWithResultSetXXXX() method. The doWithResultSetXXXX() methods are
-	 * included to allow full control over the extraction of data from ResultSets
-	 * and to facilitate integration with third-party software.
-	 * @param sql SQL query to execute
-	 * @param callbackHandler object that will extract results
-	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
-	 * @see #PREPARE_STATEMENT
-	 */
-	public void query(String sql, RowCallbackHandler callbackHandler) throws DataAccessException {
-		doWithResultSetFromStaticQuery(sql,
-		    new RowCallbackHandlerResultSetExtractor(callbackHandler));
-	}
-
-	/**
-	 * Execute a query given static SQL.
-	 * Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded query method
 	 * with a NOP PreparedStatement setter as a parameter.
 	 * @param sql SQL query to execute
 	 * @param rse object that will extract all rows of results
-	 * @throws DataAccessException if there is any problem executing
-	 * the query
+	 * @return an arbitrary result object, as returned by the ResultSetExtractor
+	 * @throws DataAccessException if there is any problem executing the query
 	 */
-	public void doWithResultSetFromStaticQuery(String sql, ResultSetExtractor rse) throws DataAccessException {
+	public Object doWithResultSetFromStaticQuery(String sql, ResultSetExtractor rse) throws DataAccessException {
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
 		}
@@ -296,12 +183,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (this.nativeJdbcExtractor != null) {
 				rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
 			}
-			rse.extractData(rsToUse);
+			Object result = rse.extractData(rsToUse);
 			SQLWarning warning = stmt.getWarnings();
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
+			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("JdbcTemplate.query(sql)", sql, ex);
+			throw getExceptionTranslator().translate("JdbcTemplate.query", sql, ex);
 		}
 		finally {
 			JdbcUtils.closeResultSet(rs);
@@ -311,27 +199,50 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	/**
-	 * Query using a prepared statement.
-	 * @param psc Callback handler that can create a PreparedStatement
-	 * given a Connection
-	 * @param callbackHandler object that will extract results,
-	 * one row at a time
-	 * @throws DataAccessException if there is any problem
+	 * Execute a query given static SQL.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
+	 * a static query with a PreparedStatement, use the overloaded query method
+	 * with null as PreparedStatementSetter argument.
+	 * <p>In most cases the query methods should be preferred to the parallel
+	 * doWithResultSetXXXX() method. The doWithResultSetXXXX() methods are
+	 * included to allow full control over the extraction of data from ResultSets
+	 * and to facilitate integration with third-party software.
+	 * @param sql SQL query to execute
+	 * @param callbackHandler object that will extract results
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
 	 */
-	public void query(PreparedStatementCreator psc, RowCallbackHandler callbackHandler)
-	    throws DataAccessException {
-		doWithResultSetFromPreparedQuery(psc,
+	public void query(String sql, RowCallbackHandler callbackHandler) throws DataAccessException {
+		doWithResultSetFromStaticQuery(sql,
 		    new RowCallbackHandlerResultSetExtractor(callbackHandler));
 	}
+
+	public List queryForList(String sql) throws DataAccessException {
+		return (List) doWithResultSetFromStaticQuery(sql, new ListResultSetExtractor());
+	}
+
+	public Object queryForObject(String sql, Class requiredType) throws DataAccessException {
+		return doWithResultSetFromStaticQuery(sql, new ObjectResultSetExtractor(requiredType));
+	}
+
+	public int queryForInt(String sql) throws DataAccessException {
+		return ((Integer) queryForObject(sql, Integer.class)).intValue();
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Query methods dealing with prepared statements
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Query using a prepared statement. Most other query methods use this method.
 	 * @param psc Callback handler that can create a PreparedStatement given a
 	 * Connection
 	 * @param rse object that will extract results.
+	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	public void doWithResultSetFromPreparedQuery(PreparedStatementCreator psc, ResultSetExtractor rse)
+	public Object doWithResultSetFromPreparedQuery(PreparedStatementCreator psc, ResultSetExtractor rse)
 	    throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
@@ -355,9 +266,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (this.nativeJdbcExtractor != null) {
 				rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
 			}
-			rse.extractData(rsToUse);
+			Object result = rse.extractData(rsToUse);
 			SQLWarning warning = ps.getWarnings();
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
+			return result;
 		}
 		catch (SQLException ex) {
 			throw getExceptionTranslator().translate(
@@ -372,59 +284,99 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * PreparedStatementSetter implementation that knows how to bind values
-	 * to the query.
-	 * @param sql SQL to execute
-	 * @param pss object that knows how to set values on the prepared statement.
-	 * If this is null, the SQL will be assumed to contain no bind parameters.
-	 * Even if there are no bind parameters, this object may be used to
-	 * set fetch size and other performance options.
-	 * @param callbackHandler object that will extract results
-	 * @throws DataAccessException if the query fails
+	 * Query using a prepared statement.
+	 * <p>In most cases the query methods should be preferred to the parallel
+	 * doWithResultSetXXXX() method. The doWithResultSetXXXX() methods are
+	 * included to allow full control over the extraction of data from ResultSets
+	 * and to facilitate integration with third-party software.
+	 * @param psc Callback handler that can create a PreparedStatement
+	 * given a Connection
+	 * @param callbackHandler object that will extract results,
+	 * one row at a time
+	 * @throws DataAccessException if there is any problem
 	 */
-	public void query(final String sql, final PreparedStatementSetter pss, RowCallbackHandler callbackHandler)
+	public void query(PreparedStatementCreator psc, RowCallbackHandler callbackHandler)
+	    throws DataAccessException {
+		doWithResultSetFromPreparedQuery(psc,
+		    new RowCallbackHandlerResultSetExtractor(callbackHandler));
+	}
+
+	public void query(String sql, PreparedStatementSetter pss, RowCallbackHandler callbackHandler)
 	    throws DataAccessException {
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
 		}
-		if (pss == null) {
-			// Check there are no bind parameters, in which case pss could not be null
-			if (containsBindVariables(sql))
-				throw new InvalidDataAccessApiUsageException(
-				    "SQL [" + sql + "] requires at least one bind variable, but PreparedStatementSetter parameter was null");
-			query(sql, callbackHandler);
+		query(new PreparedStatementSetterPreparedStatementCreator(sql, pss), callbackHandler);
+	}
+
+	public void query(String sql, final Object[] args, final int[] argTypes, RowCallbackHandler callbackHandler)
+	    throws DataAccessException {
+		if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
+		    (args != null && args.length != argTypes.length)) {
+			throw new InvalidDataAccessApiUsageException("args and argTypes parameters must match");
 		}
-		else {
-			// Wrap it in a new PreparedStatementCreator
-			query(new PreparedStatementCreator() {
-				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-					PreparedStatement ps = con.prepareStatement(sql);
-					DataSourceUtils.applyTransactionTimeout(ps, getDataSource());
-					PreparedStatement psToUse = ps;
-					if (nativeJdbcExtractor != null) {
-						psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
+		query(sql, new PreparedStatementSetter() {
+			public void setValues(PreparedStatement ps) throws SQLException {
+				if (args != null) {
+					for (int i = 0; i < args.length; i++) {
+						ps.setObject(i + 1, args[i], argTypes[i]);
 					}
-					pss.setValues(psToUse);
-					return psToUse;
 				}
-			}, callbackHandler);
-		}
+			}
+		}, callbackHandler);
 	}
 
-	/**
-	 * Return whether the given SQL String contains bind variables
-	 */
-	private boolean containsBindVariables(String sql) {
-		return sql.indexOf("?") != -1;
+	public void query(String sql, final Object[] args, RowCallbackHandler callbackHandler)
+	    throws DataAccessException {
+		query(sql, new PreparedStatementSetter() {
+			public void setValues(PreparedStatement ps) throws SQLException {
+				if (args != null) {
+					for (int i = 0; i < args.length; i++) {
+						ps.setObject(i + 1, args[i]);
+					}
+				}
+			}
+		}, callbackHandler);
 	}
 
-	/**
-	 * Issue a single SQL update.
-	 * @param sql static SQL to execute
-	 * @return the number of rows affected
-	 * @throws DataAccessException if there is any problem.
-	 */
+	public List queryForList(String sql, final Object[] args) throws DataAccessException {
+		return (List) doWithResultSetFromPreparedQuery(
+		    new PreparedStatementSetterPreparedStatementCreator(sql, new PreparedStatementSetter() {
+					public void setValues(PreparedStatement ps) throws SQLException {
+						if (args != null) {
+							for (int i = 0; i < args.length; i++) {
+								ps.setObject(i + 1, args[i]);
+							}
+						}
+					}
+				}),
+		    new ListResultSetExtractor());
+	}
+
+	public Object queryForObject(String sql, final Object[] args, Class requiredType)
+	    throws DataAccessException {
+		return doWithResultSetFromPreparedQuery(
+		    new PreparedStatementSetterPreparedStatementCreator(sql, new PreparedStatementSetter() {
+					public void setValues(PreparedStatement ps) throws SQLException {
+						if (args != null) {
+							for (int i = 0; i < args.length; i++) {
+								ps.setObject(i + 1, args[i]);
+							}
+						}
+					}
+				}),
+		    new ObjectResultSetExtractor(requiredType));
+	}
+
+	public int queryForInt(String sql, final Object[] args) throws DataAccessException {
+		return ((Integer) queryForObject(sql, args, Integer.class)).intValue();
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Update methods
+	//-------------------------------------------------------------------------
+
 	public int update(final String sql) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Running SQL update [" + sql + "]");
@@ -441,24 +393,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		});
 	}
 
-	/**
-	 * Issue an update using a PreparedStatementCreator to provide SQL and any
-	 * required parameters.
-	 * @param psc callback object that provides SQL and any necessary parameters
-	 * @return the number of rows affected
-	 * @throws DataAccessException if there is any problem issuing the update
-	 */
 	public int update(PreparedStatementCreator psc) throws DataAccessException {
 		return update(new PreparedStatementCreator[]{psc})[0];
 	}
 
-	/**
-	 * Issue multiple updates using multiple PreparedStatementCreators to provide
-	 * SQL and any required parameters.
-	 * @param pscs array of callback objects that provide SQL and any necessary parameters
-	 * @return an array of the number of rows affected by each statement
-	 * @throws DataAccessException if there is any problem issuing the update
-	 */
 	public int[] update(PreparedStatementCreator[] pscs) throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
@@ -497,21 +435,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 	}
 
-	/**
-	 * Issue an update using a PreparedStatementSetter to set bind parameters,
-	 * with given SQL. Simpler than using a PreparedStatementCreator as this
-	 * method will create the PreparedStatement: The PreparedStatementSetter
-	 * just needs to set parameters.
-	 * @param sql SQL, containing bind parameters
-	 * @param pss helper that sets bind parameters. If this is null
-	 * we run an update with static SQL.
-	 * @return the number of rows affected
-	 * @throws DataAccessException if there is any problem issuing the update
-	 */
 	public int update(final String sql, final PreparedStatementSetter pss) throws DataAccessException {
-		if (pss == null) {
-			return update(sql);
-		}
 		return update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 				PreparedStatement ps = con.prepareStatement(sql);
@@ -520,22 +444,38 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				if (nativeJdbcExtractor != null) {
 					psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
 				}
-				pss.setValues(psToUse);
+				if (pss != null) {
+					pss.setValues(psToUse);
+				}
 				return ps;
 			}
 		});
 	}
 
-	/**
-	 * Issue multiple updates using JDBC 2.0 batch updates and PreparedStatementSetters to
-	 * set values on a PreparedStatement created by this method
-	 * @param sql defining PreparedStatement that will be reused.
-	 * All statements in the batch will use the same SQL.
-	 * @param pss object to set parameters on the
-	 * PreparedStatement created by this method
-	 * @return an array of the number of rows affected by each statement
-	 * @throws DataAccessException if there is any problem issuing the update
-	 */
+	public int update(String sql, final Object[] args, final int[] argTypes) throws DataAccessException {
+		return update(sql, new PreparedStatementSetter() {
+			public void setValues(PreparedStatement ps) throws SQLException {
+				if (args != null) {
+					for (int i = 0; i < args.length; i++) {
+						ps.setObject(i, args[i], argTypes[i]);
+					}
+				}
+			}
+		});
+	}
+
+	public int update(String sql, final Object[] args) throws DataAccessException {
+		return update(sql, new PreparedStatementSetter() {
+			public void setValues(PreparedStatement ps) throws SQLException {
+				if (args != null) {
+					for (int i = 0; i < args.length; i++) {
+						ps.setObject(i, args[i]);
+					}
+				}
+			}
+		});
+	}
+
 	public int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
@@ -571,13 +511,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 	}
 
-	/**
-	 * Execute a SQL call using a CallableStatementCreator to provide SQL and any required
-	 * parameters.
-	 * @param csc callback object that provides SQL and any necessary parameters
-	 * @return Map of extracted out parameters
-	 * @throws DataAccessException if there is any problem issuing the update
-	 */
+
+	//-------------------------------------------------------------------------
+	// Methods dealing with callable statements
+	//-------------------------------------------------------------------------
+
 	public Map execute(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		CallableStatement cs = null;
@@ -637,10 +575,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 					try {
 						if (((SqlOutParameter) p).isResultSetSupported()) {
 							ResultSetExtractor rse = null;
-							if (((SqlOutParameter) p).isRowMapperSupported())
+							if (((SqlOutParameter) p).isRowMapperSupported()) {
 								rse = new RowCallbackHandlerResultSetExtractor(((SqlOutParameter) p).newResultReader());
-							else
+							}
+							else {
 								rse = new RowCallbackHandlerResultSetExtractor(((SqlOutParameter) p).getRowCallbackHandler());
+							}
 							rse.extractData((ResultSet) out);
 							logger.debug("ResultSet returned from stored procedure was processed");
 							if (((SqlOutParameter) p).isRowMapperSupported()) {
@@ -718,8 +658,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			}
 			rsIndx++;
 		} while (cs.getMoreResults());
-		
+
 		return returnedResults;
+	}
+
+
+	/**
+	 * Return whether the given SQL String contains bind variables
+	 */
+	private boolean containsBindVariables(String sql) {
+		return sql.indexOf("?") != -1;
 	}
 
 	/**
@@ -741,10 +689,47 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 
 	/**
+	 * Adapter to enable use of a PreparedStatementSetter inside a
+	 * PreparedStatementCreator.
+	 */
+	private final class PreparedStatementSetterPreparedStatementCreator implements PreparedStatementCreator {
+
+		private final String sql;
+
+		private final PreparedStatementSetter pss;
+
+		/**
+		 * Constructor a new PreparedStatementCreator that uses the given SQL
+		 * and the given PreparedStatementSetter to prepare the statement.
+		 * @param sql SQL to execute
+		 * @param pss object that knows how to set values on the prepared statement
+		 */
+		private PreparedStatementSetterPreparedStatementCreator(String sql, PreparedStatementSetter pss) {
+			this.sql = sql;
+			this.pss = pss;
+		}
+
+		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+			PreparedStatement ps = con.prepareStatement(this.sql);
+			DataSourceUtils.applyTransactionTimeout(ps, getDataSource());
+			PreparedStatement psToUse = ps;
+			if (nativeJdbcExtractor != null) {
+				psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
+			}
+			if (this.pss != null) {
+				this.pss.setValues(psToUse);
+			}
+			return psToUse;
+		}
+	}
+
+
+	/**
 	 * Adapter to enable use of a RowCallbackHandler inside a
-	 * ResultSetExtractor. Uses a  regular ResultSet, so we have
-	 * to be careful when using it, so we don't use it for navigating
-	 * since this could lead to unpreditable consequences.
+	 * ResultSetExtractor.
+	 * <p>Uses a regular ResultSet, so we have to be careful when using it:
+	 * We don't use it for navigating since this could lead to unpredictable
+	 * consequences.
 	 */
 	private static final class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
 
@@ -763,10 +748,71 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			return callbackHandler;
 		}
 
-		public void extractData(ResultSet rs) throws SQLException {
+		public Object extractData(ResultSet rs) throws SQLException {
 			while (rs.next()) {
 				this.callbackHandler.processRow(rs);
 			}
+			return null;
+		}
+	}
+
+
+	/**
+	 * ResultSetExtractor implementation that returns an ArrayList of HashMaps.
+	 */
+	private static final class ListResultSetExtractor implements ResultSetExtractor {
+
+		public Object extractData(ResultSet rs) throws SQLException {
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int numberOfColumns = rsmd.getColumnCount();
+			List listOfRows = new ArrayList();
+			while (rs.next()) {
+				Map mapOfColValues = new HashMap(numberOfColumns);
+				for (int i = 1; i <= numberOfColumns; i++) {
+					mapOfColValues.put(rsmd.getColumnName(i), rs.getObject(i));
+				}
+				listOfRows.add(mapOfColValues);
+			}
+			if (listOfRows.size() == 1 && numberOfColumns == 1) {
+				return ((Map) listOfRows.get(0)).get(rsmd.getColumnName(1));
+			}
+			else {
+				return listOfRows;
+			}
+		}
+	}
+
+
+	/**
+	 * ResultSetExtractor implementation that returns single result object.
+	 */
+	private static final class ObjectResultSetExtractor implements ResultSetExtractor {
+
+		private final Class requiredType;
+
+		private ObjectResultSetExtractor(Class requiredType) {
+			this.requiredType = requiredType;
+		}
+
+		public Object extractData(ResultSet rs) throws SQLException {
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int nrOfColumns = rsmd.getColumnCount();
+			if (nrOfColumns != 1) {
+				throw new InvalidDataAccessApiUsageException("Expected single column, but received " +
+																										 nrOfColumns + " columns");
+			}
+			if (!rs.next()) {
+				throw new InvalidDataAccessApiUsageException("Expected single row, not empty ResultSet");
+			}
+			Object result = rs.getObject(1);
+			if (rs.next()) {
+				throw new InvalidDataAccessApiUsageException("Expected single row, not more than one");
+			}
+			if (this.requiredType != null && !this.requiredType.isInstance(result)) {
+				throw new InvalidDataAccessApiUsageException("Result object [" + result + "] is not of required type [" +
+				                                             this.requiredType.getName() + "]");
+			}
+			return result;
 		}
 	}
 

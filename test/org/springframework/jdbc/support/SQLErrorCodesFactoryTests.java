@@ -172,6 +172,8 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
 		md.getDatabaseProductName();
 		mdControl.setReturnValue(productName);
+		md.getDriverVersion();
+		mdControl.setReturnValue("version");
 		mdControl.replay();
 		
 		MockControl ctrlConnection = MockControl.createControl(Connection.class);

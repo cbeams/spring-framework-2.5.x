@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,17 +17,15 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.5 2003-12-15 13:37:50 trisberg Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.6 2004-02-17 17:21:25 jhoeller Exp $
  */
-public class PreparedStatementCreatorFactory { 
-
-	/**
-	 * List of SqlParameter objects. May not be null.
-	 */
-	private List declaredParameters = new LinkedList();
+public class PreparedStatementCreatorFactory {
 
 	/** The Sql, which won't change when the parameters change. */
 	private String sql;
+
+	/** List of SqlParameter objects. May not be null. */
+	private List declaredParameters = new LinkedList();
 
 	/**
 	 * Boolean to indicate whether the prepared statement created is capable
@@ -39,7 +38,7 @@ public class PreparedStatementCreatorFactory {
 	 * via the addParameter() method or have no parameters
 	 */
 	public PreparedStatementCreatorFactory(String sql) {
-		this(sql, new LinkedList());
+		this.sql = sql;
 	}
 
 	/**
@@ -57,7 +56,8 @@ public class PreparedStatementCreatorFactory {
 	 * @param declaredParameters list of SqlParameter objects
 	 */
 	public PreparedStatementCreatorFactory(String sql, List declaredParameters) {
-		this(sql, declaredParameters, false);
+		this.sql = sql;
+		this.declaredParameters = declaredParameters;
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param params parameter array. May be null.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
-		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : new LinkedList());
+		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param params List of parameters. May be null.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(List params) {
-		return new PreparedStatementCreatorImpl(params != null ? params : new LinkedList());
+		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
 	}
 
 
@@ -122,8 +122,9 @@ public class PreparedStatementCreatorFactory {
 		 */
 		private PreparedStatementCreatorImpl(List params) {
 			this.parameters = params;
-			if (parameters.size() != declaredParameters.size())
-				throw new InvalidDataAccessApiUsageException("SQL='" + sql + "': given " + parameters.size() + " parameter but expected " + declaredParameters.size());
+			if (this.parameters.size() != declaredParameters.size())
+				throw new InvalidDataAccessApiUsageException("SQL='" + sql + "': given " + this. parameters.size() +
+				                                             " parameter but expected " + declaredParameters.size());
 		}
 		
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -136,10 +137,10 @@ public class PreparedStatementCreatorFactory {
 			}
 
 			// Set arguments: does nothing if there are no parameters
-			for (int i = 0; i < parameters.size(); i++) {
-				SqlParameter declaredParameter = (SqlParameter) PreparedStatementCreatorFactory.this.declaredParameters.get(i);
+			for (int i = 0; i < this.parameters.size(); i++) {
+				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
 				// We need SQL type to be able to set null
-				if (parameters.get(i) == null) {
+				if (this.parameters.get(i) == null) {
 					ps.setNull(i + 1, declaredParameter.getSqlType());
 				}
 				else {
@@ -148,13 +149,13 @@ public class PreparedStatementCreatorFactory {
 					// PARAMETERIZE THIS TO A TYPE MAP INTERFACE?
 					switch (declaredParameter.getSqlType()) {
 						case Types.VARCHAR : 
-							ps.setString(i + 1, (String) parameters.get(i));
+							ps.setString(i + 1, (String) this.parameters.get(i));
 							break;
 						//case Types. : 
 						//	ps.setString(i + 1, (String) parameters.get(i));
 						//	break;
 						default : 
-							ps.setObject(i + 1, parameters.get(i), declaredParameter.getSqlType());
+							ps.setObject(i + 1, this.parameters.get(i), declaredParameter.getSqlType());
 							break;
 					}
 				}
@@ -163,13 +164,16 @@ public class PreparedStatementCreatorFactory {
 		}
 
 		public String toString() {
-			StringBuffer sbuf = new StringBuffer("PreparedStatementCreatorFactory.PreparedStatementCreatorImpl: sql={" + sql + "}: params={");
-			for (int i = 0; i < parameters.size(); i++) {
-				if (i > 0)
-					sbuf.append(",");
-				sbuf.append(parameters.get(i));
+			StringBuffer buf = new StringBuffer("PreparedStatementCreatorFactory.PreparedStatementCreatorImpl: sql=[");
+			buf.append(sql);
+			buf.append("]: params=[");
+			for (int i = 0; i < this.parameters.size(); i++) {
+				if (i > 0) {
+					buf.append(',');
+				}
+				buf.append(this.parameters.get(i));
 			}
-			return sbuf.toString() + "}";
+			return buf.toString() + "]";
 		}
 	}
 

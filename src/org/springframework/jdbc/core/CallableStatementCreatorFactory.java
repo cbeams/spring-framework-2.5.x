@@ -24,20 +24,18 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  */
 public class CallableStatementCreatorFactory { 
 
-	/**
-	 * List of SqlParameter objects. May not be null.
-	 */
-	private List declaredParameters = new LinkedList();
-
 	/** The Sql call string, which won't change when the parameters change. */
-	private String callString;
+	private final String callString;
+
+	/** List of SqlParameter objects. May not be null. */
+	private List declaredParameters = new LinkedList();
 
 	/**
 	 * Create a new factory. Will need to add parameters
 	 * via the addParameter() method or have no parameters.
 	 */
 	public CallableStatementCreatorFactory(String callString) {
-		this(callString, new LinkedList());
+		this.callString = callString;
 	}
 
 	/**
