@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.45 2004-03-23 14:22:32 jhoeller Exp $
+    $Id: build.xml,v 1.46 2004-03-24 22:06:15 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -325,6 +325,7 @@
 		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
 			<zipfileset refid="main" prefix="${release.path}"/>
 			<zipfileset dir="." prefix="${release.path}">
+				<include name="lib/*.txt"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/axis/**"/>
 				<include name="lib/aopalliance/**"/>
@@ -334,8 +335,8 @@
 				<include name="lib/dom4j/**"/>
 				<include name="lib/easymock/**"/>
 				<include name="lib/freemarker/**"/>
-				<include name="lib/hsqldb/**"/>
 				<include name="lib/hibernate/**"/>
+				<include name="lib/hsqldb/**"/>
 				<include name="lib/ibatis/**"/>
 				<include name="lib/itext/**"/>
 				<include name="lib/jakarta-commons/**"/>
