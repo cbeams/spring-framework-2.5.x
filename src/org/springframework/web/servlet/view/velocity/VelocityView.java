@@ -10,7 +10,6 @@ import java.io.OutputStreamWriter;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +26,7 @@ import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.util.SimplePool;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.support.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -57,14 +56,15 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.17 2003-12-15 08:33:57 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.18 2004-02-04 17:34:32 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  */
 public class VelocityView extends AbstractUrlBasedView {
 
-	/** Default size for the Velocity writer pool */
 	public static final int DEFAULT_WRITER_POOL_SIZE = 40;
+
+	public static final int OUTPUT_BUFFER_SIZE = 4096;
 
 
 	private String dateToolAttribute;
@@ -183,16 +183,16 @@ public class VelocityView extends AbstractUrlBasedView {
 		}
 
 		response.setContentType(getContentType());
-		Context vContext = new VelocityContext();
-		exposeModelAsContextAttributes(model, vContext);
-		exposeHelpers(vContext, request);
+		Context velocityContext = new VelocityContext();
+		exposeModelAsContextAttributes(model, velocityContext);
+		exposeHelpers(velocityContext, request);
 
 		// expose DateTool?
 		if (this.dateToolAttribute != null) {
-			vContext.put(this.dateToolAttribute, new LocaleAwareDateTool(request));
+			velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(request));
 		}
 
-		mergeTemplate(this.velocityTemplate, vContext, response);
+		mergeTemplate(this.velocityTemplate, velocityContext, response);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Merged with Velocity template '" + getUrl() + "' in VelocityView '" + getName() + "'");
 		}
@@ -202,21 +202,20 @@ public class VelocityView extends AbstractUrlBasedView {
 	 * Expose the models in the given map as Velocity context attributes.
 	 * Names will be taken from the map.
 	 * @param model Map of model data to expose
-	 * @param vContext VelocityContext to add data to
+	 * @param velocityContext VelocityContext to add data to
 	 */
-	private void exposeModelAsContextAttributes(Map model, Context vContext) {
+	private void exposeModelAsContextAttributes(Map model, Context velocityContext) {
 		if (model != null) {
-			Set keys = model.keySet();
-			Iterator itr = keys.iterator();
+			Iterator itr = model.keySet().iterator();
 			while (itr.hasNext()) {
 				String modelName = (String) itr.next();
-				Object val = model.get(modelName);
+				Object modelObject = model.get(modelName);
 				modelName = transformModelNameIfNecessary(modelName);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Added model attribute with name '" + modelName + "' and value [" + val +
+					logger.debug("Added model attribute with name '" + modelName + "' and value [" + modelObject +
 											 "] to Velocity context in view '" + getName() + "'");
 				}
-				vContext.put(modelName, val);
+				velocityContext.put(modelName, modelObject);
 			}
 		}
 		else {
@@ -238,12 +237,12 @@ public class VelocityView extends AbstractUrlBasedView {
 	 * different rendering operations can't overwrite each other's formats etc.
 	 * <p>Called by renderMergedOutputModel. The default implementations is empty.
 	 * This method can be overridden to add custom helpers to the Velocity context.
-	 * @param vContext Velocity context that will be passed to the template at merge time
-	 * @param request HTTP request we're processing
+	 * @param velocityContext Velocity context that will be passed to the template at merge time
+	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding information to the context
 	 * @see #renderMergedOutputModel
 	 */
-	protected void exposeHelpers(Context vContext, HttpServletRequest request) throws Exception {
+	protected void exposeHelpers(Context velocityContext, HttpServletRequest request) throws Exception {
 	}
 
 	/**
@@ -259,7 +258,7 @@ public class VelocityView extends AbstractUrlBasedView {
 		try {
 			vw = (VelocityWriter) this.writerPool.get();
 			if (vw == null) {
-				vw = new VelocityWriter(new OutputStreamWriter(output, this.encoding), 4 * 1024, true);
+				vw = new VelocityWriter(new OutputStreamWriter(output, this.encoding), OUTPUT_BUFFER_SIZE, true);
 			}
 			else {
 				vw.recycle(new OutputStreamWriter(output, this.encoding));
