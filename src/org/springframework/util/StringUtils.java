@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -487,6 +488,22 @@ public abstract class StringUtils {
 	 */
 	public static boolean pathEquals(String path1, String path2) {
 		return cleanPath(path1).equals(cleanPath(path2));
+	}
+
+	/**
+	 * Parse the given locale string into a <code>java.util.Locale</code>.
+	 * This is the inverse operation of Locale's <code>toString</code>.
+	 * @param localeString the locale string, following
+	 * <code>java.util.Locale</code>'s toString format ("en", "en_UK", etc).
+	 * Also accepts spaces as separators, as alternative to underscores.
+	 * @return a corresponding Locale instance
+	 */
+	public static Locale parseLocaleString(String localeString) {
+		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
+		String language = parts.length > 0 ? parts[0] : "";
+		String country = parts.length > 1 ? parts[1] : "";
+		String variant = parts.length > 2 ? parts[2] : "";
+		return (language.length() > 0 ? new Locale(language, country, variant) : null);
 	}
 
 }
