@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.79 2004-01-14 17:39:56 jhoeller Exp $
+$Id: changelog.txt,v 1.80 2004-01-20 11:33:16 jhoeller Exp $
 
 
 Changes in version 1.0 RC1 (xx.01.2003)
@@ -17,12 +17,17 @@ Package org.springframework.beans
 * moved PagedListHolder classes from util package to beans.support, to remove cyclic package dependency
 * reworked BeanPostProcessor interface into postProcessBeforeInitialization and postProcessAfterInitialization
 * revised order of BeanFactory lifecycle methods, now invoking setBeanFactory etc before afterPropertiesSet
+* added BeanCreationException, thrown on any error during bean creation (property setting, lifecycle methods)
 * added "autodetect" autowire mode that chooses either "constructor" or "byType" through introspection of the class
 * reworked AutowireCapableBeanFactory's "autowire" and "autowireConstructor" into a generic "autowire" method
 * moved AutowireCapableBeanFactory interface to package beans.factory.config
-* load "spring-beans.dtd" via classloader of BeansDtdResolver instead of thread context classloader
-* fixed "constructor-arg" detection in DefaultXmlBeanDefinitionParser to not interfere with inner bean definitions
+* added "getAliases" method to BeanDefinitionRegistry interface (same as in BeanFactory)
+* redesigned RootBeanDefinition and DefaultXmlBeanDefinitionParser to alternatively work with plain class names
+* load "spring-beans.dtd" via class loader of BeansDtdResolver instead of thread context class loader
+* removed deprecated "ref external" support from XML bean definition format (use "ref bean" instead)
+* added new "idref" tag to XML bean definition format, for referencing a bean ID as string (allowing for validation)
 * added support for "autodetect" autowire mode to XML bean definition format
+* fixed "constructor-arg" detection in DefaultXmlBeanDefinitionParser to not interfere with inner bean definitions
 
 Package org.springframework.context
 * ApplicationContext interface does not extend AutowireCapableBeanFactory anymore (use ConfigurableApplicationContext)
@@ -33,17 +38,27 @@ Package org.springframework.orm
 Package org.springframework.samples
 * introduced Image Database sample application, illustrating LobHandler and HTTP multipart file uploads
 
+Package org.springframework.transaction
+* refactored TransactionStatus into minimal interface, with DefaultTransactionStatus as default implementation
+
 Package org.springframework.validation
 * apply custom editor on Errors.getFieldValue to manually rejected field values too
 
 Package org.springframework.web
-* fixed check for existing webAppRootProperty in WebUtils to allow for same value on web app redeployment
+* fixed check for existing "webAppRootProperty" in WebUtils to allow for same value on web app redeployment
+* moved TagUtils helper class from package web.servlet.tags to web.util, renamed scope constants
+* moved ServletContextResource from package web.util to web.context.support
 * removed Servlet 2.3 "getServletContextName" call from ServletContextResource, for Servlet 2.2 compatibility
 * fixed ServletContextResource's "exists" check (to allow for relative directory paths e.g. in VelocityEngineFactory)
-* invoke HandlerInterceptor.afterCompletion even if a later HandlerInterceptor aborts processing
+* added "getAlreadyFilteredAttributeName" method to OncePerRequestFilter, for custom identification of the filter
+* renamed MultipartFile's "getOriginalFileName" method to "getOriginalFilename"
 * allow for existing multipart request in DispatcherServlet even if MultipartResolver configured (for forwards)
-* moved TagUtils helper class from package web.servlet.tags to web.util, renamed scope constants
-* SimpleFormController's default onSubmit forwards to success view with full Errors model instead of just command
+* invoke HandlerInterceptor.afterCompletion even if a later HandlerInterceptor aborts processing
+* refactored URL path matching into UrlPathHelper, used by AbstractUrlHandlerMapping and AbstractMethodNameResolver
+* added "urlDecode" property to UrlPathHelper, for URL-decoding request URI and context path (if required)
+* renamed FileNameViewController to UrlFilenameViewController
+* removed deprecated "beanName" property from AbstractCommandController (use "commandName" instead)
+* SimpleFormController's default "onSubmit" forwards to success view with full Errors model instead of just command
 * turned AbstractWizardFormController's "getCurrentPage" method non-final, to be overridden if determined by request
 * re-evaluate EL expressions on each tag rendering instead of on tag instance initialization in all Spring tags
 
