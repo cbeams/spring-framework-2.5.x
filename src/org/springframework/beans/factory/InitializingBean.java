@@ -15,9 +15,8 @@ package org.springframework.beans.factory;
  * method will be invoked before BeanFactoryAware's <code>setBeanFactory</code>. 
  * 
  * @author Rod Johnson
- * @version $Revision: 1.2 $
- * 
- * @see org.springframework.beans.factory.BeanFactoryAware; 
+ * @version $Revision: 1.3 $
+ * @see org.springframework.beans.factory.BeanFactoryAware 
  */
 public interface InitializingBean {
 	
