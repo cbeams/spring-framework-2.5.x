@@ -1,3 +1,18 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.springframework.web.servlet.view.jasperreports;
 
@@ -6,18 +21,17 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.context.support.StaticApplicationContext;
 
 /**
- * @author robh
+ * @author Rob Harrop
  */
 public class ExporterParameterTests extends AbstractJasperReportsTests {
 
@@ -39,7 +53,8 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 			}
 		};
 
-		setViewProperties(view, params);
+		setViewProperties(view);
+		view.setExporterParameters(params);
 		view.initApplicationContext();
 		view.render(getModel(), new MockHttpServletRequest(), new MockHttpServletResponse());
 
@@ -50,13 +65,14 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		params.put("foo.net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
-		setViewProperties(view, params);
+		setViewProperties(view);
 
 		try {
-			view.initApplicationContext();
-			fail();
-		} catch(IllegalArgumentException ex) {
-        // good
+			view.setExporterParameters(params);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
 		}
 	}
 
@@ -65,13 +81,14 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI_FOO", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
-		setViewProperties(view, params);
+		setViewProperties(view);
 
 		try {
-			view.initApplicationContext();
-			fail();
-		} catch(IllegalArgumentException ex) {
-        // good
+			view.setExporterParameters(params);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
 		}
 	}
 
@@ -80,19 +97,20 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		params.put("java.lang.Boolean.TRUE", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
-		setViewProperties(view, params);
+		setViewProperties(view);
 
 		try {
-			view.initApplicationContext();
-			fail();
-		} catch(IllegalArgumentException ex) {
-        // good
+			view.setExporterParameters(params);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
 		}
 	}
 
-	private void setViewProperties(AbstractJasperReportsView view, Map params) {
+	private void setViewProperties(AbstractJasperReportsView view) {
 		view.setUrl("org/springframework/ui/jasperreports/DataSourceReport.jasper");
 		view.setApplicationContext(new StaticApplicationContext());
-		view.setExporterParameters(params);
 	}
+
 }

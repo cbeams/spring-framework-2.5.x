@@ -49,25 +49,25 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * Base class for all JasperReports views. Applies on-the-fly compilation
  * of report designs as required and coordinates the rendering process.
  * The resource path of the main report needs to be specified as <code>url</code>.
- * <p/>
- * This class is responsible for getting report data from the model that has
+ *
+ * <p>This class is responsible for getting report data from the model that has
  * been provided to the view. The default implementation checks for a model object
  * under the specified <code>reportDataKey</code> first, then falls back to looking
  * for a value of type <code>JRDataSource</code>, <code>java.util.Collection</code>,
  * object array (in that order).
- * <p/>
- * Provides support for sub-reports through the <code>subReportUrls</code> and
+ *
+ * <p>Provides support for sub-reports through the <code>subReportUrls</code> and
  * <code>subReportDataKeys</code> properties.
- * <p/>
- * When using sub-reports, the master report should be configured using the
+ *
+ * <p>When using sub-reports, the master report should be configured using the
  * <code>url</code> property and the sub-reports files should be configured using
  * the <code>subReportUrls</code> property. Each entry in the <code>subReportUrls</code>
  * Map corresponds to an individual sub-report. The key of an entry must match up
  * to a sub-report parameter in your report file of type
  * <code>net.sf.jasperreports.engine.JasperReport</code>,
  * and the value of an entry must be the URL for the sub-report file.
- * <p/>
- * For sub-reports that require an instance of <code>JRDataSource</code>, that is,
+ *
+ * <p>For sub-reports that require an instance of <code>JRDataSource</code>, that is,
  * they don't have a hard-coded query for data retrieval, you can include the
  * appropriate data in your model as would with the data source for the parent report.
  * However, you must provide a List of parameter names that need to be converted to
@@ -75,14 +75,14 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * <code>subReportDataKeys</code> property. When using <code>JRDataSource</code>
  * instances for sub-reports, you <i>must</i> specify a value for the
  * <code>reportDataKey</code> property, indicating the data to use for the main report.
- * <p/>
- * Allows for exporter parameters to be configured declatively using the
+ *
+ * <p>Allows for exporter parameters to be configured declatively using the
  * <code>exporterParameters</code> property. This is a <code>Map</code> typed
  * property where the key of an entry corresponds to the fully-qualified name
  * of the static field for the <code>JRExporterParameter</code> and the value
  * of an entry is the value you want to assign to the exporter parameter.
- * <p/>
- * Response headers can be controlled via the <code>headers</code> property. Spring
+ *
+ * <p>Response headers can be controlled via the <code>headers</code> property. Spring
  * will attempt to set the correct value for the <code>Content-Diposition</code> header
  * so that reports render correctly in Internet Explorer. However, you can override this
  * setting through the <code>headers</code> property.
@@ -144,18 +144,9 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	private Properties headers;
 
 	/**
-	 * Stores the <code>String</code> keyed exporter parameters
-	 * passed in by the user. The converted versions of these parameters
-	 * are stored in <code>convertedExporterParameters</code>.
+	 * Stores the <code>String</code> keyed exporter parameters passed in by the user.
 	 */
 	private Map exporterParameters;
-
-	/**
-	 * Store the converted exporter parameters. Conversion involves
-	 * changing the key from an instance of <code>String</code> to an
-	 * instance of <code>JRExporterParameter</code>.
-	 */
-	private Map convertedExporterParameters;
 
 	/**
 	 * Set the name of the model attribute that represents the report data.
@@ -168,7 +159,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * for use as plain report parameter, rather than as report data to extract fields
 	 * from, you need to specify the key for the actual report data to use, to avoid
 	 * mis-detection of report data by type.
-	 *
 	 * @see #convertReportData
 	 * @see net.sf.jasperreports.engine.JRDataSource
 	 * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
@@ -182,7 +172,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Specify resource paths which must be loaded as instances of
 	 * <code>JasperReport</code> and passed to the JasperReports engine for
 	 * rendering as sub-reports, under the same keys as in this mapping.
-	 *
 	 * @param subReports mapping between model keys and resource paths
 	 * (Spring resource locations)
 	 * @see #setUrl
@@ -205,7 +194,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * <p>If you specify a list of sub-report data keys, it is required to also
 	 * specify a <code>reportDataKey</code> for the main report, to avoid confusion
 	 * between the data source objects for the various reports involved.
-	 *
 	 * @param subReportDataKeys list of names for sub-report data source objects
 	 * @see #setReportDataKey
 	 * @see #convertReportData
@@ -219,7 +207,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 	/**
 	 * Specify the set of headers that are included in each of response.
-	 *
 	 * @param headers the headers to write to each response.
 	 */
 	public void setHeaders(Properties headers) {
@@ -227,15 +214,31 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Sets the exporter parameters that should be used when rendering a view. The key
-	 * of this <code>Map</code> is the fully qualified field name of the <code>JRExporterParameter</code> instance
-	 * and the value is the value you wish to assign to the parameter.
-	 *
-	 * @param parameters the exporter parameters with <code>String</code> keys.
+	 * Set the exporter parameters that should be used when rendering a view.
+	 * @param parameters <code>Map</code> with the fully qualified field name of the
+	 * <code>JRExporterParameter</code> instance as key
+	 * (e.g. "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI")
+	 * and the value you wish to assign to the parameter as value
 	 */
 	public void setExporterParameters(Map parameters) {
-		this.exporterParameters = parameters;
+		this.exporterParameters = new HashMap(parameters.size());
+		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String fieldName = (String) entry.getKey();
+			JRExporterParameter parameter = convertToExporterParameter(fieldName);
+			this.exporterParameters.put(parameter, entry.getValue());
+		}
 	}
+
+	/**
+	 * Return the exporter parameters configured by the user.
+	 * @return a <code>Map</code> containing the exporter parameters with instances
+	 * of <code>JRExporterParameter</code> as the key.
+	 */
+	protected Map getExporterParameters() {
+		return exporterParameters;
+	}
+
 
 	/**
 	 * Checks to see that a valid report file URL is supplied in the
@@ -262,46 +265,31 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 		}
 
-		convertExporterParameters();
-
 		if (this.headers == null) {
 			this.headers = new Properties();
 		}
-
 		if (!this.headers.containsKey(HEADER_CONTENT_DISPOSITION)) {
 			this.headers.setProperty(HEADER_CONTENT_DISPOSITION, CONTENT_DISPOSITION_INLINE);
 		}
-
-		initJasperView();
 	}
 
 	/**
-	 * Converts the exporter parameters configured by the user with <code>String</code> keys
-	 * into exporter parameters with <code>JRExporterParameter</code> keys as required by
-	 * JasperReports.
+	 * Convert the given fully qualified field name to a corresponding
+	 * JRExporterParameter instance.
+	 * @param fqFieldName the fully qualified field name, consisting
+	 * of the class name followed by a dot followed by the field name
+	 * (e.g. "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI")
+	 * @return the corresponding JRExporterParameter instance
 	 */
-	private void convertExporterParameters() {
-		if (exporterParameters != null) {
-			convertedExporterParameters = new HashMap();
-
-			for (Iterator itr = exporterParameters.keySet().iterator(); itr.hasNext();) {
-				String key = (String) itr.next();
-				Object param = exporterParameters.get(key);
-
-				convertedExporterParameters.put(convertToExporterParameter(key), param);
-			}
-		}
-	}
-
-	private JRExporterParameter convertToExporterParameter(String key) {
-		int index = key.lastIndexOf('.');
-		if (index == -1 || index == key.length()) {
-			throw new IllegalArgumentException("Parameter name [" + key + "] is not a valid static field. " +
+	protected JRExporterParameter convertToExporterParameter(String fqFieldName) {
+		int index = fqFieldName.lastIndexOf('.');
+		if (index == -1 || index == fqFieldName.length()) {
+			throw new IllegalArgumentException("Parameter name [" + fqFieldName + "] is not a valid static field. " +
 					"The parameter name must map to a static field such as " +
 					"net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI");
 		}
-		String className = key.substring(0, index);
-		String fieldName = key.substring(index + 1);
+		String className = fqFieldName.substring(0, index);
+		String fieldName = fqFieldName.substring(index + 1);
 
 		try {
 			Class cls = ClassUtils.forName(className);
@@ -312,41 +300,34 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 					return (JRExporterParameter) field.get(null);
 				}
 				catch (IllegalAccessException ex) {
-					throw new IllegalArgumentException("Unable to access field [" + fieldName + "] of class [" + className + "]." +
+					throw new IllegalArgumentException(
+							"Unable to access field [" + fieldName + "] of class [" + className + "]." +
 							" Check that it is static and accessible.");
 				}
 			}
 			else {
-				throw new IllegalArgumentException("Field [" + fieldName + "] on class [" + className + "] is not " +
-						"assignable from JRExporterParameter - check the type of this field.");
+				throw new IllegalArgumentException("Field [" + fieldName + "] on class [" + className +
+						"] is not assignable from JRExporterParameter - check the type of this field.");
 			}
 		}
 		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException("Class [" + className + "] in key [" + key + "] could not be found.");
+			throw new IllegalArgumentException(
+					"Class [" + className + "] in key [" + fqFieldName + "] could not be found.");
 		}
 		catch (NoSuchFieldException ex) {
-			throw new IllegalArgumentException("Field [" + fieldName + "] in key [" + key + "] could not be " +
-					"found on class [" + className + "].");
+			throw new IllegalArgumentException("Field [" + fieldName + "] in key [" + fqFieldName +
+					"] could not be found on class [" + className + "].");
 		}
-	}
-
-	/**
-	 * Called after this class is initialized to allow sub-classes a chance to
-	 * perform any additional initialization steps.
-	 */
-	protected void initJasperView() throws ApplicationContextException {
-		;
 	}
 
 	/**
 	 * Loads a <code>JasperReport</code> from the specified <code>Resource</code>. If
 	 * the <code>Resource</code> points to an uncompiled report design file then the
 	 * report file is compiled dynamically and loaded into memory.
-	 *
-	 * @param resource the <code>Resource</code> containing the report definition or design.
-	 * @return a <code>JasperReport</code> instance.
+	 * @param resource the <code>Resource</code> containing the report definition or design
+	 * @return a <code>JasperReport</code> instance
 	 */
-	private JasperReport loadReport(Resource resource) {
+	private JasperReport loadReport(Resource resource) throws ApplicationContextException {
 		try {
 			String fileName = resource.getFilename();
 			if (fileName.endsWith(".jasper")) {
@@ -380,7 +361,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Return the JasperReports compiler to use for compiling a ".jrxml"
 	 * file into a a report class. Default is <code>JRBshCompiler</code>,
 	 * which requires BeanShell on the class path.
-	 *
 	 * @see net.sf.jasperreports.engine.design.JRCompiler
 	 * @see net.sf.jasperreports.engine.design.JRBshCompiler
 	 */
@@ -392,7 +372,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Finds the report data to use for rendering the report and then invokes the
 	 * <code>renderReport</code> method that should be implemented by the subclass.
-	 *
 	 * @param model the model map, as passed in for view rendering. Must contain
 	 * a report data value that can be converted to a <code>JRDataSource</code>,
 	 * acccording to the <code>getReportData</code> method.
@@ -438,7 +417,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * specified "reportDataKey" first, then falls back to looking for a value
 	 * of type <code>JRDataSource</code>, <code>java.util.Collection</code>,
 	 * object array (in that order).
-	 *
 	 * @param model the model map, as passed in for view rendering
 	 * @return the <code>JRDataSource</code>
 	 * @throws IllegalArgumentException if no JRDataSource found
@@ -468,7 +446,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * A <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
 	 * is detected. The latter are converted to <code>JRBeanCollectionDataSource</code>
 	 * or <code>JRBeanArrayDataSource</code>, respectively.
-	 *
 	 * @param value the report data value to convert
 	 * @return the JRDataSource
 	 * @throws IllegalArgumentException if the value could not be converted
@@ -487,7 +464,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * <code>convertReportData</code> method is actually able to convert.
 	 * <p>Default value types are: <code>JRDataSource</code>,
 	 * <code>java.util.Collection</code>, object array.
-	 *
 	 * @return the value types in prioritized order
 	 * @see #convertReportData
 	 */
@@ -498,7 +474,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Allows sub-classes to get access to the <code>JasperReport</code> instance
 	 * loaded by Spring.
-	 *
 	 * @return an instance of <code>JasperReport</code>.
 	 */
 	protected JasperReport getReport() {
@@ -506,27 +481,15 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Allows sub-classes to access the exporter parameters configured by the
-	 * user.
-	 *
-	 * @return a <code>Map</code> containing the exporter parameters with instances of
-	 *         <code>JRExporterParameter</code> as the key.
+	 * Subclasses should implement this method to perform the actual rendering process.
+	 * @param report the <code>JasperReport</code> to render
+	 * @param parameters the map containing report parameters
+	 * @param dataSource the <code>JRDataSource</code> containing the report data
+	 * @param response the HTTP response the report should be rendered to
+	 * @throws Exception if rendering failed
 	 */
-	protected Map getExporterParameters() {
-		return convertedExporterParameters;
-	}
-
-	/**
-	 * Sub-classes should implement this method to actually render a <code>JasperReport</code>
-	 * to the <code>HttpServletResponse</code>.
-	 *
-	 * @param report the <code>JasperReport</code>
-	 * @param model
-	 * @param dataSource
-	 * @param response
-	 */
-	protected abstract void renderReport(JasperReport report, Map model, JRDataSource dataSource,
-			HttpServletResponse response) throws Exception;
-
+	protected abstract void renderReport(
+			JasperReport report, Map parameters, JRDataSource dataSource, HttpServletResponse response)
+			throws Exception;
 
 }
