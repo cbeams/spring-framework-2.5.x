@@ -52,7 +52,7 @@ public class DispatchMethodInvoker {
 	/**
 	 * The description of the signature.
 	 */
-	private String signatureCaption = "not specified";
+	private String signatureCaption = "[not specified]";
 
 	/**
 	 * The resolved method cache.
@@ -64,7 +64,7 @@ public class DispatchMethodInvoker {
 				return getTarget().getClass().getMethod(methodName, parameterTypes);
 			} catch (NoSuchMethodException e) {
 				throw new MethodLookupException("Unable to resolve " + getTypeCaption() + " method with name '"
-						+ methodName + "and signature '" + getSignatureCaption() + "'; make sure the method name is correct "
+						+ methodName + "' and signature '" + getSignatureCaption() + "'; make sure the method name is correct "
 						+ "and such a public method is defined on targetClass " + getTarget().getClass().getName(), e);
 			}
 		}
