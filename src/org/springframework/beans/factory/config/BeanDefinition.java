@@ -29,7 +29,7 @@ import org.springframework.beans.MutablePropertyValues;
  *
  * @author Juergen Hoeller
  * @since 19.03.2004
- * @see ConfigurableBeanFactory#getBeanDefinition
+ * @see ConfigurableListableBeanFactory#getBeanDefinition
  * @see BeanFactoryPostProcessor
  * @see PropertyPlaceholderConfigurer
  * @see org.springframework.beans.factory.support.RootBeanDefinition
@@ -43,12 +43,31 @@ public interface BeanDefinition {
 	Class getBeanClass();
 
 	/**
+	 * Return whether this bean is "abstract", i.e. not meant to be instantiated.
+	 */
+	boolean isAbstract();
+
+	/**
+	 * Return whether this a <b>Singleton</b>, with a single, shared instance
+	 * returned on all calls.
+	 */
+	boolean isSingleton();
+
+	/**
+	 * Return whether this bean should be lazily initialized, i.e. not
+	 * eagerly instantiated on startup. Only applicable to a singleton bean.
+	 */
+	boolean isLazyInit();
+
+	/**
 	 * Return the PropertyValues to be applied to a new instance of the bean.
+	 * Can be modified during bean factory post-processing.
 	 */
 	MutablePropertyValues getPropertyValues();
 
 	/**
 	 * Return the constructor argument values for this bean.
+	 * Can be modified during bean factory post-processing.
 	 */
 	ConstructorArgumentValues getConstructorArgumentValues();
 
