@@ -98,7 +98,7 @@ public class FlowAction extends TemplateAction {
 		}
 		// end struts specific
 		
-		ModelAndView modelAndView=manager.process(request, response, getFlowExecutionInput(request));
+		ModelAndView modelAndView=manager.handleRequest(request, response, getFlowExecutionInput(request));
 
 		FlowExecution flowExecution=manager.getRequiredFlowExecution(request);
 		if (flowExecution.isActive()) {

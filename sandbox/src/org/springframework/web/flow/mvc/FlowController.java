@@ -79,7 +79,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		//just let our flow execution manager process the request
-		return manager.process(request, response, getFlowExecutionInput(request));
+		return manager.handleRequest(request, response, getFlowExecutionInput(request));
 	}
 
 	/**

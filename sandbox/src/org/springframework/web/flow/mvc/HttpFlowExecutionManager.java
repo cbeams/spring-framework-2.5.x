@@ -96,7 +96,20 @@ public class HttpFlowExecutionManager {
 		return FlowConstants.FLOW_ID_PARAMETER;
 	}
 
-	public ModelAndView process(HttpServletRequest request, HttpServletResponse response, Map inputData)
+	/**
+	 * The main entry point into managed http-based flow executions. Looks for a
+	 * flow execution ID in the request. If none exists, it creates one. If one
+	 * exists, it looks in the user's session to find the current FlowExecution.
+	 * The request should also contain the current state ID and event ID. These
+	 * String values can be passed to the FlowExecution to execute the action.
+	 * Execution will typically result in a state transition.
+	 * @param request
+	 * @param response
+	 * @param inputData
+	 * @return the model and view to render.
+	 * @throws Exception
+	 */
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response, Map inputData)
 			throws Exception {
 		FlowExecution flowExecution;
 		ModelAndView modelAndView;
