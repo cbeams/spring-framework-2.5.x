@@ -1,5 +1,7 @@
 package org.springframework.samples.imagedb;
 
+import org.springframework.util.Assert;
+
 /**
  * Simple data holder for image descriptions.
  * @author Juergen Hoeller
@@ -14,8 +16,9 @@ public class ImageDescriptor {
 	private final String description;
 
 	protected ImageDescriptor(String name, String description) {
+		Assert.notNull(name, "No image name specified");
 		this.name = name;
-		this.description = description;
+		this.description = (description != null ? description : "");
 	}
 
 	public String getName() {

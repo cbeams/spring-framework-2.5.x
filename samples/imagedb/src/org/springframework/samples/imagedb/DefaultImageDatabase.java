@@ -66,7 +66,10 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 						    "Image with name '" + name + "' not found in database", 1, 0);
 					}
 					public void streamData(ResultSet rs) throws SQLException, IOException {
-						FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), contentStream);
+						InputStream is = lobHandler.getBlobAsBinaryStream(rs, 1);
+						if (is != null) {
+							FileCopyUtils.copy(is, contentStream);
+						}
 					}
 				}
 		);
