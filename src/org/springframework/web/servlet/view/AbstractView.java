@@ -42,7 +42,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.11 2004-06-28 17:08:16 jhoeller Exp $
+ * @version $Id: AbstractView.java,v 1.12 2004-07-02 00:40:06 davison Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View, BeanNameAware {
@@ -107,6 +107,13 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		this.requestContextAttribute = requestContextAttribute;
 	}
 
+    /**
+     * @return Returns the requestContextAttribute if defined
+     */
+    public String getRequestContextAttribute() {
+        return requestContextAttribute;
+    }
+    
 	/**
 	 * Set static attributes as a CSV string.
 	 * Format is: attname0={value1},attname1={value1}

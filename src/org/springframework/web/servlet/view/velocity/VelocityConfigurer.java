@@ -23,6 +23,8 @@ import org.apache.velocity.exception.VelocityException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.ui.velocity.SpringResourceLoader;
 import org.springframework.ui.velocity.VelocityEngineFactory;
 
 /**
@@ -41,7 +43,8 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
  * It is not meant to be referenced by application components but just internally
  * by VelocityView. Implements VelocityConfig to be found by VelocityView without
  * depending on the bean name the configurer. Each DispatcherServlet can define its
- * own VelocityConfigurer if desired.
+ * own VelocityConfigurer if desired.  The Spring VM (web and form macro library)
+ * will be added to the configured VelocityEngine by this class.
  *
  * <p>Note that you can also refer to a preconfigured VelocityEngine instance, for
  * example one set up by VelocityEngineFactoryBean, via the "velocityEngine" property.
@@ -49,7 +52,8 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityConfigurer.java,v 1.14 2004-04-22 07:58:27 jhoeller Exp $
+ * @author Darren Davison
+ * @version $Id: VelocityConfigurer.java,v 1.15 2004-07-02 00:40:04 davison Exp $
  * @see #setConfigLocation
  * @see #setVelocityProperties
  * @see #setResourceLoaderPath
@@ -60,8 +64,37 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
 public class VelocityConfigurer extends VelocityEngineFactory
 		implements VelocityConfig, InitializingBean, ResourceLoaderAware {
 
-	private VelocityEngine velocityEngine;
+    /** the resource location path for form macro libraries */
+    public static final String SPRING_FORM_MACRO_PATH = "classpath:org/springframework/web/servlet/view/velocity/";
 
+    /** the name of the default form macro library for Spring's Velocity web support */
+    public static final String SPRING_FORM_MACRO_LIBRARY = "spring.vm";
+    
+	private VelocityEngine velocityEngine;
+    
+    /**
+     * Provides a SpringResourceLoader in addition to any default or user defined loader
+     * in order to load the spring Velocity macros from the classpath.
+     * 
+     * @see org.springframework.ui.velocity.VelocityEngineFactory#postProcessVelocityEngine
+     * @see org.springframework.ui.velocity.SpringResourceLoader
+     */
+    protected void postProcessVelocityEngine(VelocityEngine velocityEngine)
+            throws IOException, VelocityException {
+        
+        velocityEngine.addProperty(VelocityEngine.RESOURCE_LOADER, 
+                SpringResourceLoader.NAME);
+		velocityEngine.setProperty(SpringResourceLoader.SPRING_RESOURCE_LOADER_CLASS, 
+		        SpringResourceLoader.class.getName());
+		velocityEngine.setApplicationAttribute(SpringResourceLoader.SPRING_RESOURCE_LOADER, 
+		        new DefaultResourceLoader());
+		velocityEngine.setApplicationAttribute(SpringResourceLoader.SPRING_RESOURCE_LOADER_PATH, 
+		        SPRING_FORM_MACRO_PATH);
+		velocityEngine.addProperty(VelocityEngine.VM_LIBRARY, 
+		        SPRING_FORM_MACRO_LIBRARY);		
+		logger.info("SpringResourceLoader added to configured VelocityEngine");
+    }
+    
 	/**
 	 * Set a preconfigured VelocityEngine to use for the Velocity web config, e.g.
 	 * a shared one for web and email usage, set up via VelocityEngineFactoryBean.

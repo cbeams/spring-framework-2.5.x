@@ -186,6 +186,7 @@ public class VelocityEngineFactory {
 		if (this.resourceLoaderPath != null) {
 			try {
 				Resource path = this.resourceLoader.getResource(this.resourceLoaderPath);
+				velocityEngine.setProperty(VelocityEngine.RESOURCE_LOADER, "file");
 				velocityEngine.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH,
 																	 path.getFile().getAbsolutePath());
 			}

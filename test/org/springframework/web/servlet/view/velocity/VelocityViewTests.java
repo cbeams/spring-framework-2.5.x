@@ -44,7 +44,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.17 2004-04-30 09:03:08 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.18 2004-07-02 00:40:07 davison Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -294,7 +294,7 @@ public class VelocityViewTests extends TestCase {
 
 
 	//	Damn thing is a class so we can't mock it
-	private class TestVelocityEngine extends VelocityEngine {
+	static class TestVelocityEngine extends VelocityEngine {
 		private Template t;
 		private String expectedName;
 

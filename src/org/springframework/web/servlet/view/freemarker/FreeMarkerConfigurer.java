@@ -18,12 +18,16 @@ package org.springframework.web.servlet.view.freemarker;
 
 import java.io.IOException;
 
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
+import org.springframework.ui.freemarker.SpringTemplateLoader;
 
 /**
  * JavaBean to configure FreeMarker for web usage, via the "configLocation"
@@ -52,7 +56,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
  *
  * @author Darren Davison
  * @since 3/3/2004
- * @version $Id: FreeMarkerConfigurer.java,v 1.2 2004-04-22 07:58:26 jhoeller Exp $
+ * @version $Id: FreeMarkerConfigurer.java,v 1.3 2004-07-02 00:40:01 davison Exp $
  * @see #setConfigLocation
  * @see #setFreemarkerSettings
  * @see #setTemplateLoaderPath
@@ -62,9 +66,33 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
  */
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware {
+    
+    private Configuration configuration;
 
-	private Configuration configuration;
-
+	
+    /**
+     * Post processes the config to ensure that the Spring macro library can be resolved
+     * and imported by application templates.  A SpringTemplateLoader is added to the
+     * Configuration if one was not already the default loader.
+     * 
+     * @see org.springframework.ui.freemarker.FreeMarkerConfigurationFactory#postProcessConfiguration
+     * @see org.springframework.ui.freemarker.SpringTemplateLoader
+     */
+    protected void postProcessConfiguration(Configuration config)
+            throws IOException, TemplateException {
+        
+        TemplateLoader loader = config.getTemplateLoader();
+        
+        if (!(loader instanceof SpringTemplateLoader)) {
+            // add one for classpath resolution of macro files
+            SpringTemplateLoader springLoader = new SpringTemplateLoader(
+                    new DefaultResourceLoader(), "");
+            TemplateLoader[] loaders = new TemplateLoader[] {loader, springLoader};
+            MultiTemplateLoader multiLoader = new MultiTemplateLoader(loaders);
+            config.setTemplateLoader(multiLoader);
+        }
+    }
+    
 	/**
 	 * Set a preconfigured Configuration to use for the FreeMarker web config, e.g. a
 	 * shared one for web and email usage, set up via FreeMarkerConfigurationFactoryBean.

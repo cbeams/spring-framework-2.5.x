@@ -30,7 +30,6 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -70,7 +69,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityView.java,v 1.27 2004-05-21 19:33:40 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.28 2004-07-02 00:40:03 davison Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  * @see #setUrl
@@ -81,19 +80,14 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  */
 public class VelocityView extends AbstractTemplateView {
 
-	public static final int DEFAULT_WRITER_POOL_SIZE = 40;
-
-	public static final int OUTPUT_BUFFER_SIZE = 4096;
-
-
-	private String encoding = null;
+    private String encoding = null;
 
 	private String velocityFormatterAttribute;
 
 	private String dateToolAttribute;
 
 	private String numberToolAttribute;
-
+	
 	private boolean cacheTemplate;
 
 	private VelocityEngine velocityEngine;
@@ -145,8 +139,8 @@ public class VelocityView extends AbstractTemplateView {
 	public void setNumberToolAttribute(String numberToolAttribute) {
 		this.numberToolAttribute = numberToolAttribute;
 	}
-
-	/**
+	
+    /**
 	 * Set whether the Velocity template should be cached. Default is false.
 	 * It should normally be true in production, but setting this to false enables us to
 	 * modify Velocity templates without restarting the application (similar to JSPs).
@@ -191,8 +185,8 @@ public class VelocityView extends AbstractTemplateView {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new ApplicationContextException("Must define a single VelocityConfig bean in this web application " +
-																							"context (may be inherited): VelocityConfigurer is the usual implementation. " +
-																							"This bean may be given any name.", ex);
+					"context (may be inherited): VelocityConfigurer is the usual implementation. " +
+					"This bean may be given any name.", ex);
 			}
 		}
 
@@ -202,7 +196,7 @@ public class VelocityView extends AbstractTemplateView {
 		}
 		catch (ResourceNotFoundException ex) {
 			throw new ApplicationContextException("Cannot find Velocity template for URL [" + getUrl() +
-																						"]: Did you specify the correct resource loader path?", ex);
+				"]: Did you specify the correct resource loader path?", ex);
 		}
 		catch (Exception ex) {
 			throw new ApplicationContextException("Cannot load Velocity template for URL [" + getUrl() + "]", ex);
@@ -215,7 +209,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * is needed.
 	 */
 	protected void renderMergedTemplateModel(Map model, HttpServletRequest request,
-																					 HttpServletResponse response) throws Exception {
+												HttpServletResponse response) throws Exception {
 
 		// We already hold a reference to the template, but we might want to load it
 		// if not caching. As Velocity itself caches templates, so our ability to
@@ -244,7 +238,7 @@ public class VelocityView extends AbstractTemplateView {
 				velocityContext.put(this.numberToolAttribute, new LocaleAwareNumberTool(locale));
 			}
 		}
-
+		
 		mergeTemplate(template, velocityContext, response);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Merged with Velocity template '" + getUrl() + "' in VelocityView '" + getBeanName() + "'");
@@ -264,12 +258,12 @@ public class VelocityView extends AbstractTemplateView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
-	 * <p>Called by renderMergedOutputModel. The default implementations is empty.
+	 * <p>Called by renderMergedTemplateModel. The default implementations is empty.
 	 * This method can be overridden to add custom helpers to the Velocity context.
 	 * @param velocityContext Velocity context that will be passed to the template at merge time
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding information to the context
-	 * @see #renderMergedOutputModel
+	 * @see #renderMergedTemplateModel
 	 */
 	protected void exposeHelpers(Context velocityContext, HttpServletRequest request) throws Exception {
 	}

@@ -64,6 +64,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 	}
 
 	public Object findTemplateSource(String name) throws IOException {
+	    logger.debug("Searching for resource with name [" + name + "]");
 		Resource resource = this.resourceLoader.getResource(this.templateLoaderPath + name);
 		return (resource.exists() ? resource : null);
 	}

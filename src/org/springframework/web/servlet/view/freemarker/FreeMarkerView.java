@@ -23,16 +23,16 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 /**
  * View using the FreeMarker template engine.
@@ -54,7 +54,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 3/3/2004
- * @version $Id: FreeMarkerView.java,v 1.3 2004-05-21 19:33:40 jhoeller Exp $
+ * @version $Id: FreeMarkerView.java,v 1.4 2004-07-02 00:40:02 davison Exp $
  * @see #setUrl
  * @see #setEncoding
  * @see #setConfiguration
@@ -121,8 +121,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new ApplicationContextException("Must define a single FreeMarkerConfig bean in this web application " +
-																							"context (may be inherited): FreeMarkerConfigurer is the usual implementation. " +
-																							"This bean may be given any name.", ex);
+				        	"context (may be inherited): FreeMarkerConfigurer is the usual implementation. " +
+							"This bean may be given any name.", ex);
 			}
 		}
 
@@ -142,8 +142,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * is needed.
 	 */
 	protected void renderMergedTemplateModel(Map model, HttpServletRequest request,
-																					 HttpServletResponse response)
-			throws IOException, TemplateException {
+												HttpServletResponse response) throws Exception {
 	   
 		// grab the locale-specific version of the template
 		Template template = getTemplate(RequestContextUtils.getLocale(request));
@@ -152,6 +151,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 									 "] with model [" + model + "] ");
 		}
 		response.setContentType(getContentType());
+		exposeHelpers(model, request);
 		processTemplate(template, model, response);
 	}
 
@@ -164,6 +164,19 @@ public class FreeMarkerView extends AbstractTemplateView {
 	protected Template getTemplate(Locale locale) throws IOException {
 		return (this.encoding != null ? this.configuration.getTemplate(getUrl(), locale, this.encoding) :
 				this.configuration.getTemplate(getUrl(), locale));
+	}
+
+	/**
+	 * Expose helpers unique to each rendering operation. This is necessary so that
+	 * different rendering operations can't overwrite each other's formats etc.
+	 * <p>Called by renderMergedTemplateModel. The default implementations is empty.
+	 * This method can be overridden to add custom helpers to the model.
+	 * @param model The model that will be passed to the template at merge time
+	 * @param request current HTTP request
+	 * @throws Exception if there's a fatal error while we're adding information to the context
+	 * @see #renderMergedTemplateModel
+	 */
+	protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
 	}
 
 	/**
