@@ -92,8 +92,6 @@ import org.springframework.util.NumberUtils;
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, InitializingBean {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
 	/** Custom NativeJdbcExtractor */
 	private NativeJdbcExtractor nativeJdbcExtractor;
 
@@ -101,10 +99,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	private boolean ignoreWarnings = true;
 
 	/**
-	 * If this variable is set to a non-zero value it will be used for setting the fetchSize on
-	 * statements used for query processing.
+	 * If this variable is set to a non-zero value, it will be used for setting the
+	 * fetchSize on statements used for query processing.
 	 */
 	private int fetchSize = 0;
+
+	private int maxRows = 0;
 
 
 	/**
@@ -170,8 +170,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	/**
 	 * Set the fetch size for this JdbcTemplate. This is important for processing
-	 * large ResultSets. Setting this higher than the default value will increase
-	 * processing speed at the cost of memory consumption.
+	 * large result sets: Setting this higher than the default value will increase
+	 * processing speed at the cost of memory consumption; setting this lower can
+	 * avoid transferring row data that will never be read by the application.
 	 * <p>Default is 0, indicating to use the driver's default.
 	 */
 	public void setFetchSize(int fetchSize) {
@@ -179,10 +180,35 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	/**
-	 * Return the current fetch size specified for this JdbcTemplate.
+	 * Return the fetch size specified for this JdbcTemplate.
 	 */
 	public int getFetchSize() {
 		return fetchSize;
+	}
+
+	/**
+	 * Set the maximum number of rows for this JdbcTemplate. This is important
+	 * for processing subsets of large result sets, avoiding to read and hold
+	 * the entire result set in the database or in the JDBC driver.
+	 * <p>Default is 0, indicating to use the driver's default.
+	 */
+	public void setMaxRows(int maxRows) {
+		this.maxRows = maxRows;
+	}
+
+	/**
+	 * Return the maximum number of rows specified for this JdbcTemplate.
+	 */
+	public int getMaxRows() {
+		return maxRows;
+	}
+
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+
+		if (getFetchSize() > getMaxRows()) {
+			throw new IllegalArgumentException("fetchSize must not be higher than maxRows");
+		}
 	}
 
 
@@ -275,6 +301,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 					if (getFetchSize() > 0) {
 						stmt.setFetchSize(getFetchSize());
 					}
+					if (getMaxRows() > 0) {
+						stmt.setMaxRows(getMaxRows());
+					}
 					rs = stmt.executeQuery(sql);
 					ResultSet rsToUse = rs;
 					if (nativeJdbcExtractor != null) {
@@ -345,6 +374,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	public Object execute(PreparedStatementCreator psc, PreparedStatementCallback action)
 			throws DataAccessException {
+
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
 		try {
@@ -396,6 +426,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	protected Object query(
 			PreparedStatementCreator psc, final PreparedStatementSetter pss, final ResultSetExtractor rse)
 			throws DataAccessException {
+
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(psc);
 			logger.debug("Executing SQL query" + (sql != null ? " [" + sql  + "]" : ""));
@@ -404,11 +435,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				ResultSet rs = null;
 				try {
-					if (pss != null) {
-						pss.setValues(ps);
-					}
 					if (getFetchSize() > 0) {
 						ps.setFetchSize(getFetchSize());
+					}
+					if (getMaxRows() > 0) {
+						ps.setMaxRows(getMaxRows());
+					}
+					if (pss != null) {
+						pss.setValues(ps);
 					}
 					rs = ps.executeQuery();
 					ResultSet rsToUse = rs;
@@ -661,6 +695,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	public Object execute(CallableStatementCreator csc, CallableStatementCallback action)
 			throws DataAccessException {
+
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(csc);
 			logger.debug("Calling stored procedure" + (sql != null ? " [" + sql  + "]" : ""));
@@ -697,8 +732,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 	}
 
-	public Object execute(final String callString, CallableStatementCallback action)
-			throws DataAccessException {
+	public Object execute(final String callString, CallableStatementCallback action) throws DataAccessException {
 		return execute(new SimpleCallableStatementCreator(callString), action);
 	}
 
@@ -729,6 +763,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 */
 	protected Map extractReturnedResultSets(CallableStatement cs, List parameters, int updateCount)
 			throws SQLException {
+
 		Map returnedResults = new HashMap();
 		int rsIndex = 0;
 		boolean moreResults;
