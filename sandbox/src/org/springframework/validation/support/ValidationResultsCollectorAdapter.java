@@ -19,10 +19,10 @@ import org.springframework.validation.ValidationResultsCollector;
 /**
  * @author Keith Donald
  */
-public class ValidationResultsCollectorAdapter
-    implements ValidationResultsCollector {
-    protected Log logger =
-        LogFactory.getLog(ValidationResultsCollectorAdapter.class);
+public class ValidationResultsCollectorAdapter implements
+        ValidationResultsCollector {
+    protected Log logger = LogFactory
+            .getLog(ValidationResultsCollectorAdapter.class);
     private Stack nestedPath = new Stack();
 
     protected String getFullNestedPath() {
@@ -52,13 +52,11 @@ public class ValidationResultsCollectorAdapter
             logger.debug("Bean validator '" + bean + "' starting...");
         }
         nestedPath.push(getObjectName(bean));
-        System.out.println(toString());
-        
     }
 
     protected String getObjectName(Object bean) {
-        return StringUtils.uncapitalize(
-            ClassUtils.getShortName(bean.getClass()));
+        return StringUtils.uncapitalize(ClassUtils
+                .getShortName(bean.getClass()));
     }
 
     public void beanValidationCompleted(Object bean) {
@@ -66,44 +64,31 @@ public class ValidationResultsCollectorAdapter
             logger.debug("Bean validator '" + bean + "' completed.");
         }
         nestedPath.pop();
-        System.out.println(toString());
-        
     }
 
-    public void propertyValidationStarted(
-        PropertyValidator validator,
-        Object bean,
-        Object value) {
+    public void propertyValidationStarted(PropertyValidator validator,
+            Object bean, Object value) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Property validator '" + validator + "' starting...");
+            logger.debug("Property validator '" + validator.getPropertyName()
+                    + "' starting...");
         }
         nestedPath.push(validator.getPropertyName());
-        System.out.println(toString());
     }
 
-    public void propertyValidationCompleted(
-        PropertyValidator validator,
-        Object bean,
-        Object value) {
+    public void propertyValidationCompleted(PropertyValidator validator,
+            Object bean, Object value) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Property validator '" + validator + "' completed.");
+            logger.debug("Property validator '" + validator.getPropertyName()
+                    + "' completed.");
         }
         nestedPath.pop();
-        System.out.println(toString());
-        
     }
 
-    public void validationErrorOccured(
-        PropertyValidator validator,
-        PropertyValidationRule rule,
-        Object bean,
-        Object value) {
+    public void validationErrorOccured(PropertyValidator validator,
+            PropertyValidationRule rule, Object bean, Object value) {
         if (logger.isDebugEnabled()) {
-            logger.debug(
-                "Property validator '"
-                    + validator.getPropertyName()
-                    + "' reported error, caused by rule violation '"
-                    + rule);
+            logger.debug("Property validator '" + validator.getPropertyName()
+                    + "' reported error, caused by rule violation '" + rule);
         }
     }
 
@@ -112,8 +97,7 @@ public class ValidationResultsCollectorAdapter
     }
 
     public String toString() {
-        return new ToStringBuilder(this)
-            .append("nestedPath", nestedPath)
-            .toString();
+        return new ToStringBuilder(this).append("nestedPath", nestedPath)
+                .toString();
     }
 }

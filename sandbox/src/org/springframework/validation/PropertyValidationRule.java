@@ -29,9 +29,9 @@ public interface PropertyValidationRule {
 
     /**
      * Creates a typing hint for the specified property. This assumes the
-     * provided property is subject to this validation rule. A typing hint
-     * provides assistance to the user when editing a field about what a single
-     * validation rule is for a property.
+     * property is subject to this validation rule. A typing hint provides
+     * assistance to the user when editing a field about how the validation
+     * rule constrains input.
      * 
      * @param propertyNamePath
      *            The property name path, could be qualified by object name,
@@ -42,7 +42,7 @@ public interface PropertyValidationRule {
 
     /**
      * Creates a validation error message for the specified property. This
-     * assumes validation failure was caused by this property validation rule.
+     * assumes validation failure was caused by this validation rule.
      * 
      * @param propertyNamePath
      *            The property name path, could be qualified by object name,

@@ -29,8 +29,6 @@ public interface PropertyValidator {
     /**
      * Returns the name of the validated property.
      * 
-     * TODO - is this needed since PropertyDescriptor has this?
-     * 
      * @return The property name.
      */
     public String getPropertyName();
@@ -55,7 +53,7 @@ public interface PropertyValidator {
      * Validates the proposed property value change.
      * 
      * @param bean the validated bean.
-     * @param value the property value.
+     * @param value the proposed property value.
      * @param results the validation results collector.
      */
     public void validatePropertyValue(

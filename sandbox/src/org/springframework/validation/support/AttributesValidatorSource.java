@@ -27,8 +27,8 @@ import org.springframework.validation.PropertyValidationRule;
  * @author Keith Donald
  */
 public class AttributesValidatorSource implements BeanValidatorSource {
-    private static final Log logger =
-        LogFactory.getLog(AttributesValidatorSource.class);
+    private static final Log logger = LogFactory
+            .getLog(AttributesValidatorSource.class);
     private Attributes attributeResolver = new CommonsAttributes();
 
     public AttributesValidatorSource() {
@@ -50,35 +50,29 @@ public class AttributesValidatorSource implements BeanValidatorSource {
             PropertyDescriptor property = properties[i];
             Method readMethod = property.getReadMethod();
             if (readMethod != null) {
-                Collection validationRules =
-                    getPropertyValidationRules(readMethod);
+                Collection validationRules = getPropertyValidationRules(readMethod);
                 if (validationRules.size() > 0) {
-                    PropertyValidatorImpl propValidator =
-                        new PropertyValidatorImpl(property.getName());
-                    propValidator.addAll(
-                        (PropertyValidationRule[])validationRules.toArray(
-                            new PropertyValidationRule[0]));
+                    PropertyValidatorImpl propValidator = new PropertyValidatorImpl(
+                            property.getName());
+                    propValidator
+                            .addAll((PropertyValidationRule[])validationRules
+                                    .toArray(new PropertyValidationRule[0]));
                     if (logger.isDebugEnabled()) {
-                        logger.debug(
-                            "Found property validator via attributes '"
-                                + propValidator
-                                + "'");
+                        logger
+                                .debug("Found property validator via attributes '"
+                                        + propValidator + "'");
                     }
-                    property.setValue(
-                        BeanInfoBeanValidator.IS_VALIDATED,
-                        Boolean.TRUE);
-                    property.setValue(
-                        BeanInfoBeanValidator.VALIDATOR,
-                        propValidator);
+                    property.setValue(BeanValidatorConstants.VALIDATED_PROPERTY,
+                            Boolean.TRUE);
+                    property.setValue(BeanValidatorConstants.VALIDATOR_PROPERTY,
+                            propValidator);
                     if (!validated) {
                         validated = true;
                     }
                 } else {
                     if (logger.isDebugEnabled()) {
-                        logger.debug(
-                            "No validation rules found on method '"
-                                + readMethod
-                                + "'");
+                        logger.debug("No validation rules found on method '"
+                                + readMethod + "'");
                     }
                 }
                 setValidated(beanInfo, validated);
@@ -93,12 +87,10 @@ public class AttributesValidatorSource implements BeanValidatorSource {
     private void setValidated(BeanInfo beanInfo, boolean validated) {
         if (validated) {
             beanInfo.getBeanDescriptor().setValue(
-                BeanInfoBeanValidator.IS_VALIDATED,
-                Boolean.TRUE);
+                    BeanValidatorConstants.VALIDATED_PROPERTY, Boolean.TRUE);
         } else {
             beanInfo.getBeanDescriptor().setValue(
-                BeanInfoBeanValidator.IS_VALIDATED,
-                Boolean.FALSE);
+                    BeanValidatorConstants.VALIDATED_PROPERTY, Boolean.FALSE);
         }
     }
 

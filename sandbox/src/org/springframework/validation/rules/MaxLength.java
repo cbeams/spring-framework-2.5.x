@@ -6,12 +6,11 @@ package org.springframework.validation.rules;
 
 import org.springframework.util.Assert;
 
-public class MaxLength
-    extends AbstractPropertyValidationRule {
+public class MaxLength extends AbstractPropertyValidationRule {
     private int length;
 
     public MaxLength(int length) {
-        Assert.isInRange(length, 1, 255);
+        Assert.isTrue(length > 0);
         this.length = length;
     }
 

@@ -12,14 +12,14 @@ import org.springframework.validation.BeanValidationService;
  */
 public class ValidationServiceSingletonLocator {
     private static BeanValidationService instance;
-    
+
     private ValidationServiceSingletonLocator() {
-        
+
     }
 
     public static BeanValidationService getInstance() {
         Assert.notNull(instance,
-                "The singleton validator registry has not been loaded.");
+                "The singleton validator service has not been loaded.");
         return instance;
     }
 

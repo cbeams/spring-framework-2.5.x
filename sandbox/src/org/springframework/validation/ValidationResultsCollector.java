@@ -7,7 +7,7 @@ package org.springframework.validation;
 /**
  * Collector interface used to track validation progress and report any error
  * results.  The order of the callbacks is as follows:
- * <code>
+ * <pre>
  *  validationService.validate(bean, results);
  *  results.beanValidationStarted(bean);
  *  results.propertyValidationStarted(property);
@@ -15,7 +15,7 @@ package org.springframework.validation;
  *  results.validationErrorOccured(property, rule);
  *  ... repeat for all properties ...
  *  results.beanValidationEnded(bean);
- * </code>
+ * </pre>
  * @author Keith Donald
  */
 public interface ValidationResultsCollector {

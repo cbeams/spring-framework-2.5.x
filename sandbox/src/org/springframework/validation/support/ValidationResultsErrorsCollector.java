@@ -12,8 +12,8 @@ import org.springframework.validation.Errors;
 /**
  * @author Keith Donald
  */
-public class ValidationResultsErrorsCollector
-    extends ValidationResultsCollectorAdapter {
+public class ValidationResultsErrorsCollector extends
+        ValidationResultsCollectorAdapter {
     private Errors errors;
 
     public ValidationResultsErrorsCollector() {
@@ -35,11 +35,8 @@ public class ValidationResultsErrorsCollector
         }
     }
 
-    public void validationErrorOccured(
-        PropertyValidator validator,
-        PropertyValidationRule rule,
-        Object bean,
-        Object value) {
+    public void validationErrorOccured(PropertyValidator validator,
+            PropertyValidationRule rule, Object bean, Object value) {
         super.validationErrorOccured(validator, rule, bean, value);
         System.out.println(getFullNestedPath());
         rule.invokeRejectValue(errors, getNestedPath());

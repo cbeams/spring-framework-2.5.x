@@ -14,34 +14,31 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.PropertyValidationRule;
 
 /**
- * Convenience super class for PropertyValidationRules. Rules are only
- * required to implement the <code>validate</code> method.
+ * Convenience super class for PropertyValidationRules. Rules are only required
+ * to implement the <code>validate</code> method.
  * 
  * @author Keith Donald
  */
-public abstract class AbstractPropertyValidationRule
-    implements PropertyValidationRule {
+public abstract class AbstractPropertyValidationRule implements
+        PropertyValidationRule {
     private String TYPING_HINT_PREFIX = "typingHints.";
     private String ERROR_PREFIX = "errors.";
 
     public MessageSourceResolvable createTypingHint(String propertyNamePath) {
         return new DefaultMessageSourceResolvable(
-            new String[] { getTypingHintCode()},
-            getTypingHintArguments());
+                new String[] { getTypingHintCode() }, getTypingHintArguments());
     }
 
     public MessageSourceResolvable createErrorMessage(String propertyNamePath) {
         return new DefaultMessageSourceResolvable(
-            new String[] { getErrorCode()},
-            getErrorArguments(propertyNamePath));
+                new String[] { getErrorCode() },
+                getErrorArguments(propertyNamePath));
     }
 
     public void invokeRejectValue(Errors errors, String nestedPath) {
-        errors.rejectValue(
-            nestedPath,
-            getErrorCode(),
-            getErrorArguments(errors.getObjectName() + '.' + nestedPath),
-            null);
+        errors.rejectValue(nestedPath, getErrorCode(), getErrorArguments(errors
+                .getObjectName()
+                + '.' + nestedPath), null);
     }
 
     public abstract boolean validate(Object context, Object value);
@@ -112,45 +109,45 @@ public abstract class AbstractPropertyValidationRule
 
     /**
      * Builds a resolvable property name message from a provided property name
-     * path.  The following message codes are tried:
-     * <code>
-     * [objectPrefix].[propertyName]
-     * [propertyName]
-     * </code>
+     * path. The following message codes are tried:
+     * 
+     * <pre>
+     *  [objectPrefix].[propertyName]
+     *  [propertyName]
+     * </pre>
      * 
      * For example: name.lastName would correspond to codes:
-     * <code>
-     * name.lastName
-     * lastName
-     * </code>
      * 
-     * @TODO good enough??
+     * <pre>
+     *  name.lastName
+     *  lastName
+     * </pre>
+     * 
      * @return The resolvable property name message.
      */
-    protected MessageSourceResolvable buildPropertyMessageSourceResolvable(String propertyNamePath) {
+    protected MessageSourceResolvable buildPropertyMessageSourceResolvable(
+            String propertyNamePath) {
         int index = propertyNamePath.lastIndexOf('.');
         String[] propertyCodes;
+        String propertyName;
         if (index == -1) {
-            propertyCodes = new String[] { propertyNamePath };
+            propertyName = propertyNamePath;
+            propertyCodes = new String[] { propertyName };
         } else {
-            propertyCodes =
-                new String[] {
-                    propertyNamePath,
-                    propertyNamePath.substring(index + 1)};
+            propertyName = propertyNamePath.substring(index + 1);
+            propertyCodes = new String[] { propertyNamePath, propertyName };
         }
-        DefaultMessageSourceResolvable resolvable =
-            new DefaultMessageSourceResolvable(propertyCodes, null, null);
+        DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
+                propertyCodes, null, null);
         return resolvable;
     }
 
     public String toString() {
-        return new ToStringBuilder(this)
-            .append("type", getType())
-            .append("errorCode", getErrorCode())
-            .append("errorArguments", getErrorArguments())
-            .append("typingHintCode", getTypingHintCode())
-            .append("typingHintArguments", getTypingHintArguments())
-            .toString();
+        return new ToStringBuilder(this).append("type", getType()).append(
+                "errorCode", getErrorCode()).append("errorArguments",
+                getErrorArguments()).append("typingHintCode",
+                getTypingHintCode()).append("typingHintArguments",
+                getTypingHintArguments()).toString();
     }
 
 }

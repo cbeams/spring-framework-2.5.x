@@ -9,6 +9,8 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -21,8 +23,8 @@ import org.springframework.validation.ValidationResultsCollector;
  * @author Keith Donald
  */
 public class BeanInfoBeanValidator {
-    public static final String IS_VALIDATED = "isValidated";
-    public static final String VALIDATOR = "validator";
+    private static final Log logger = LogFactory
+            .getLog(BeanInfoBeanValidator.class);
 
     private BeanValidatorSource beanValidatorSource;
 
@@ -38,20 +40,18 @@ public class BeanInfoBeanValidator {
         }
     }
 
-    public void validatePropertyValue(
-        Object bean,
-        String propertyName,
-        Object value,
-        ValidationResultsCollector results) {
+    public void validatePropertyValue(Object bean, String propertyName,
+            Object value, ValidationResultsCollector results) {
         PropertyValidator validator = getPropertyValidator(bean, propertyName);
+        if (validator == null) {
+            logger.warn("No property validator found for property '"
+                    + propertyName + "'");
+        }
         validator.validatePropertyValue(bean, value, results);
     }
 
-    public void validatePropertyValues(
-        Object bean,
-        String[] properties,
-        Object[] values,
-        ValidationResultsCollector results) {
+    public void validatePropertyValues(Object bean, String[] properties,
+            Object[] values, ValidationResultsCollector results) {
         for (int i = 0; i < properties.length; i++) {
             validatePropertyValue(bean, properties[i], values[i], results);
         }
@@ -66,20 +66,17 @@ public class BeanInfoBeanValidator {
         }
     }
 
-    private PropertyValidator getPropertyValidator(
-        Object bean,
-        String propertyName) {
+    private PropertyValidator getPropertyValidator(Object bean,
+            String propertyName) {
         BeanWrapper wrapper = new BeanWrapperImpl(bean);
-        PropertyDescriptor descriptor =
-            wrapper.getPropertyDescriptor(propertyName);
-        return (PropertyValidator)descriptor.getValue(VALIDATOR);
+        PropertyDescriptor descriptor = wrapper
+                .getPropertyDescriptor(propertyName);
+        return (PropertyValidator)descriptor
+                .getValue(BeanValidatorConstants.VALIDATOR_PROPERTY);
     }
 
-    private void processBeanInfoValidators(
-        Class beanClass,
-        Object bean,
-        ValidationResultsCollector results)
-        throws IntrospectionException {
+    private void processBeanInfoValidators(Class beanClass, Object bean,
+            ValidationResultsCollector results) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
         if (!validated(beanInfo)) {
             return;
@@ -89,33 +86,32 @@ public class BeanInfoBeanValidator {
         for (int i = 0; i < properties.length; i++) {
             PropertyDescriptor property = properties[i];
             if (BeanUtils.isSimpleProperty(property.getPropertyType())) {
-                PropertyValidator validator =
-                    (PropertyValidator)property.getValue(VALIDATOR);
+                PropertyValidator validator = (PropertyValidator)property
+                        .getValue(BeanValidatorConstants.VALIDATOR_PROPERTY);
                 if (validator != null) {
                     validator.validateCurrentPropertyValue(bean, results);
                 }
             } else {
                 BeanWrapper wrapper = new BeanWrapperImpl(bean);
-                processBeanInfoValidators(
-                    property.getPropertyType(),
-                    wrapper.getPropertyValue(property.getName()),
-                    results);
+                processBeanInfoValidators(property.getPropertyType(), wrapper
+                        .getPropertyValue(property.getName()), results);
             }
         }
         results.beanValidationCompleted(bean);
     }
 
     private boolean validated(BeanInfo beanInfo) {
-        Boolean isValidated =
-            (Boolean)beanInfo.getBeanDescriptor().getValue(IS_VALIDATED);
+        Boolean isValidated = (Boolean)beanInfo.getBeanDescriptor().getValue(
+                BeanValidatorConstants.VALIDATED_PROPERTY);
         if (isValidated == null) {
             if (beanValidatorSource != null) {
-                beanValidatorSource.loadValidators(
-                    beanInfo.getBeanDescriptor().getBeanClass());
-                isValidated =
-                    (Boolean)beanInfo.getBeanDescriptor().getValue(
-                        IS_VALIDATED);
-                Assert.notNull(isValidated);
+                beanValidatorSource.loadValidators(beanInfo.getBeanDescriptor()
+                        .getBeanClass());
+                isValidated = (Boolean)beanInfo.getBeanDescriptor().getValue(
+                        BeanValidatorConstants.VALIDATED_PROPERTY);
+                Assert
+                        .notNull(isValidated,
+                                "The validator source did not update the beanInfo's isValidated property.");
             } else {
                 return false;
             }
