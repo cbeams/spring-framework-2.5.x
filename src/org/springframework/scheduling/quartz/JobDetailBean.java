@@ -23,6 +23,8 @@ import org.quartz.Scheduler;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * Convenience subclass of Quartz' JobDetail class that eases bean-style
@@ -39,9 +41,13 @@ import org.springframework.beans.factory.InitializingBean;
  * @see org.springframework.beans.factory.BeanNameAware
  * @see org.quartz.Scheduler#DEFAULT_GROUP
  */
-public class JobDetailBean extends JobDetail implements BeanNameAware, InitializingBean {
+public class JobDetailBean extends JobDetail implements BeanNameAware, ApplicationContextAware, InitializingBean {
 
 	private String beanName;
+
+	private ApplicationContext applicationContext;
+
+	private String applicationContextJobDataKey;
 
 	public void setJobDataAsMap(Map jobDataAsMap) {
 		getJobDataMap().putAll(jobDataAsMap);
@@ -51,12 +57,39 @@ public class JobDetailBean extends JobDetail implements BeanNameAware, Initializ
 		this.beanName = beanName;
 	}
 
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	/**
+	 * Set the key of an ApplicationContext reference to expose in the JobDataMap,
+	 * for example "applicationContext". Default is none.
+	 * Only applicable when running in a Spring ApplicationContext.
+	 * <p>In case of a QuartzJobBean, the reference will be applied to the Job
+	 * instance as bean property. An "applicationContext" attribute will correspond
+	 * to a "setApplicationContext" method in that scenario.
+	 * <p>Note that BeanFactory callback interfaces like ApplicationContextAware
+	 * are not automatically applied to Quartz Job instances, because Quartz
+	 * itself is reponsible for the lifecycle of its Jobs.
+	 * @see org.springframework.context.ApplicationContext
+	 */
+	public void setApplicationContextJobDataKey(String applicationContextJobDataKey) {
+		this.applicationContextJobDataKey = applicationContextJobDataKey;
+	}
+
 	public void afterPropertiesSet() {
 		if (getName() == null) {
 			setName(this.beanName);
 		}
 		if (getGroup() == null) {
 			setGroup(Scheduler.DEFAULT_GROUP);
+		}
+		if (this.applicationContextJobDataKey != null) {
+			if (this.applicationContext == null) {
+				throw new IllegalStateException("JobDetailBean needs to be set up in an ApplicationContext " +
+																				"to be able to handle an 'applicationContextJobDataKey'");
+			}
+			getJobDataMap().put(this.applicationContextJobDataKey, this.applicationContext);
 		}
 	}
 

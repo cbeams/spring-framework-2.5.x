@@ -36,6 +36,7 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 
 import org.springframework.beans.TestBean;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.scheduling.quartz.CronTriggerBean;
 import org.springframework.scheduling.quartz.JobDetailBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
@@ -103,13 +104,16 @@ public class SchedulingTestSuite extends TestCase {
 	}
 
 	public void testSchedulerFactoryBean() throws Exception {
+		TestBean tb = new TestBean("tb", 99);
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setBeanName("myJob0");
 		Map jobData = new HashMap();
-		jobData.put("testBean", new TestBean("tb", 99));
+		jobData.put("testBean", tb);
 		jobDetail0.setJobDataAsMap(jobData);
 		jobDetail0.afterPropertiesSet();
+		assertEquals(tb, jobDetail0.getJobDataMap().get("testBean"));
+
 		CronTriggerBean trigger0 = new CronTriggerBean();
 		trigger0.setBeanName("myTrigger0");
 		trigger0.setJobDetail(jobDetail0);
@@ -123,6 +127,7 @@ public class SchedulingTestSuite extends TestCase {
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
 		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
 		trigger1.setJobDetail(jobDetail1);
@@ -164,11 +169,14 @@ public class SchedulingTestSuite extends TestCase {
 	}
 
 	public void testSchedulerFactoryBeanWithPlainQuartzObjects() throws Exception {
+		TestBean tb = new TestBean("tb", 99);
 		JobDetail jobDetail0 = new JobDetail();
 		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setName("myJob0");
 		jobDetail0.setGroup(Scheduler.DEFAULT_GROUP);
-		jobDetail0.getJobDataMap().put("testBean", new TestBean("tb", 99));
+		jobDetail0.getJobDataMap().put("testBean", tb);
+		assertEquals(tb, jobDetail0.getJobDataMap().get("testBean"));
+
 		CronTrigger trigger0 = new CronTrigger();
 		trigger0.setName("myTrigger0");
 		trigger0.setGroup(Scheduler.DEFAULT_GROUP);
@@ -185,6 +193,7 @@ public class SchedulingTestSuite extends TestCase {
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
 		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+
 		SimpleTrigger trigger1 = new SimpleTrigger();
 		trigger1.setName("myTrigger1");
 		trigger1.setGroup(Scheduler.DEFAULT_GROUP);
@@ -226,6 +235,24 @@ public class SchedulingTestSuite extends TestCase {
 		}
 
 		schedulerControl.verify();
+	}
+
+	public void testJobDetailBeanWithApplicationContext() throws Exception {
+		TestBean tb = new TestBean("tb", 99);
+		StaticApplicationContext ac = new StaticApplicationContext();
+
+		JobDetailBean jobDetail0 = new JobDetailBean();
+		jobDetail0.setJobClass(Job.class);
+		jobDetail0.setBeanName("myJob0");
+		Map jobData = new HashMap();
+		jobData.put("testBean", tb);
+		jobDetail0.setJobDataAsMap(jobData);
+		jobDetail0.setApplicationContext(ac);
+		jobDetail0.setApplicationContextJobDataKey("appCtx");
+		jobDetail0.afterPropertiesSet();
+
+		assertEquals(tb, jobDetail0.getJobDataMap().get("testBean"));
+		assertEquals(ac, jobDetail0.getJobDataMap().get("appCtx"));
 	}
 
 
