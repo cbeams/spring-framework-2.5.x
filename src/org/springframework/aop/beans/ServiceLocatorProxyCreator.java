@@ -44,13 +44,9 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * creates a proxy which implements that interface.</p>
  * <p>On invocation of the no-arg factory method, or the String-arg factory method with an 
  * id of null, if exactly one bean in the factory matches the return type of the 'get' method,
- * that is returned, otherwise an exception is thrown. On invocation of the String-arg factory
- * method with a non-null argument, the proxy returns the result of a beanfactory.getBean(id)
- * call.</p>
- * 
- * If an id is specified, and no bean matches the specified id, or the id is
- * null and there is not exactly one bean matching the return type of the factory
- * interface 'get' method being called, a NoSuchBeanDefinitionException is thrown.
+ * that is returned, otherwise a NoSuchBeanDefinitionException is thrown. On invocation of the
+ * String-arg factory method with a non-null argument, the proxy returns the result of a
+ * beanfactory.getBean(id)call.</p>
  * 
  * @author Colin Sampaleanu
  */
@@ -110,7 +106,7 @@ public class ServiceLocatorProxyCreator implements FactoryBean, InitializingBean
 					Class factoryReturnType = interfaceMethod.getReturnType();
 
 					String beanName = null;
-					if (mi.getArguments().length == 1)
+					if (mi.getArguments() != null)
 						beanName = (String) mi.getArguments()[0];
 
 					if (beanName != null)
