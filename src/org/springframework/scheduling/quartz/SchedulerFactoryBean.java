@@ -17,6 +17,8 @@
 package org.springframework.scheduling.quartz;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -469,7 +471,7 @@ public class SchedulerFactoryBean
 				for (Iterator it = this.calendars.keySet().iterator(); it.hasNext();) {
 					String calendarName = (String) it.next();
 					Calendar calendar = (Calendar) this.calendars.get(calendarName);
-					this.scheduler.addCalendar(calendarName, calendar, true);
+					addCalendarToScheduler(calendarName, calendar);
 				}
 			}
 
@@ -528,6 +530,44 @@ public class SchedulerFactoryBean
 		}
 		else {
 			return false;
+		}
+	}
+
+	/**
+	 * Add the given calendar to the Scheduler, checking for the
+	 * corresponding Quartz 1.4 respectively Quartz 1.3 method
+	 * (which differ in 1.4's additional "updateTriggers" flag).
+	 * @param calendarName the name of the calendar
+	 * @param calendar the Calendar object
+	 * @see org.quartz.Scheduler#addCalendar
+	 */
+	private void addCalendarToScheduler(String calendarName, Calendar calendar) throws Exception {
+		try {
+			try {
+				// try Quartz 1.4 (with "updateTriggers" flag)
+				Method addCalendarMethod = this.scheduler.getClass().getMethod(
+						"addCalendar", new Class[] {String.class, Calendar.class, boolean.class, boolean.class});
+				addCalendarMethod.invoke(
+						this.scheduler, new Object[] {calendarName, calendar, Boolean.TRUE, Boolean.TRUE});
+			}
+			catch (NoSuchMethodException ex) {
+				// try Quartz 1.3 (without "updateTriggers" flag)
+				Method addCalendarMethod = this.scheduler.getClass().getMethod(
+						"addCalendar", new Class[] {String.class, Calendar.class, boolean.class});
+				addCalendarMethod.invoke(
+						this.scheduler, new Object[] {calendarName, calendar, Boolean.TRUE});
+			}
+		}
+		catch (InvocationTargetException ex) {
+			if (ex.getTargetException() instanceof Exception) {
+				throw (Exception) ex.getTargetException();
+			}
+			else if (ex.getTargetException() instanceof Error) {
+				throw (Error) ex.getTargetException();
+			}
+			else {
+				throw ex;
+			}
 		}
 	}
 
