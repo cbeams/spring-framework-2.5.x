@@ -29,7 +29,6 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * Base class for dynamic TargetSources that can create new prototype bean
@@ -95,13 +94,10 @@ public abstract class AbstractPrototypeBasedTargetSource
 		}
 
 		// determine type of the target bean
-		if (beanFactory instanceof ConfigurableListableBeanFactory) {
-			this.targetClass =
-			    ((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(this.targetBeanName).getBeanClass();
-		}
-		else {
+		this.targetClass = this.owningBeanFactory.getType(this.targetBeanName);
+		if (this.targetClass == null) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Getting bean with name '" + this.targetBeanName + "' to find class");
+				logger.info("Getting bean with name '" + this.targetBeanName + "' to determine type");
 			}
 			this.targetClass = this.owningBeanFactory.getBean(this.targetBeanName).getClass();
 		}

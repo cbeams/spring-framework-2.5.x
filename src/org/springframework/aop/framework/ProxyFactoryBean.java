@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -38,7 +39,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.OrderComparator;
 
 /**
@@ -326,16 +326,11 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * @return true if it's an Advisor or Advice
 	 */
 	private boolean isNamedBeanAnAdvisorOrAdvice(String beanName) {
-		if (beanFactory instanceof BeanDefinitionRegistry) {
-			BeanDefinitionRegistry bdr = (BeanDefinitionRegistry) this.beanFactory;
-			Class namedBeanClass = bdr.getBeanDefinition(beanName).getBeanClass();
-			if (FactoryBean.class.isAssignableFrom(namedBeanClass)) {
-				// if it's a FactoryBean, we want to look at what it creates, not the factory class
-				namedBeanClass = beanFactory.getBean(beanName).getClass();
-			}
+		Class namedBeanClass = this.beanFactory.getType(beanName);
+		if (namedBeanClass != null) {
 			return Advisor.class.isAssignableFrom(namedBeanClass) || Advice.class.isAssignableFrom(namedBeanClass);
 		}
-		// Treat it as an Advisor if we can't tell
+		// Treat it as an Advisor if we can't tell.
 		return true;
 	}
 
