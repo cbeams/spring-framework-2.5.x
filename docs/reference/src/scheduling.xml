@@ -20,7 +20,7 @@
   		Quartz uses <literal>Triggers</literal>, <literal>Jobs</literal> and 
   		<literal>JobDetail</literal> ro realize scheduling of all kinds of jobs.
   		For the basic concepts behind Quartz, have a look at 
-  		<ulink url="http://www.quartzscheduler.org"/>. For convenience purposes
+  		<ulink url="http://www.opensymphony.com/quartz"/>. For convenience purposes,
   		Spring offers a couple of classes that simplify usage of Quartz within
   		Spring-based applications.
   	</para>
