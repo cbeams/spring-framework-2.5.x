@@ -1,39 +1,39 @@
 package org.springframework.beans;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * Combined exception, composed of individual binding exceptions.
+ * Combined exception, composed of individual binding propertyAccessExceptions.
  * An object of this class is created at the beginning of the binding
  * process, and errors added to it as necessary.
  *
  * <p>The binding process continues when it encounters application-level
- * exceptions, applying those changes that can be applied and storing
+ * propertyAccessExceptions, applying those changes that can be applied and storing
  * rejected changes in an object of this class.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 18 April 2001
- * @version $Id: PropertyAccessExceptionsException.java,v 1.3 2004-02-24 01:23:11 dkopylenko Exp $
+ * @version $Id: PropertyAccessExceptionsException.java,v 1.4 2004-03-03 18:34:49 jhoeller Exp $
  */
 public class PropertyAccessExceptionsException extends BeansException {
 
-	/** List of ErrorCodedPropertyVetoException objects */
-	private List exceptions = new ArrayList();
-
 	/** BeanWrapper wrapping the target object for binding */
-	private BeanWrapper beanWrapper;
+	private final BeanWrapper beanWrapper;
+
+	/** List of PropertyAccessException objects */
+	private final PropertyAccessException[] propertyAccessExceptions;
 
 	/**
 	 * Create new empty PropertyAccessExceptionsException.
 	 * We'll add errors to it as we attempt to bind properties.
 	 */
-	PropertyAccessExceptionsException(BeanWrapper beanWrapper) {
+	protected PropertyAccessExceptionsException(BeanWrapper beanWrapper,
+	                                            PropertyAccessException[] propertyAccessExceptions) {
 		super("");
 		this.beanWrapper = beanWrapper;
+		this.propertyAccessExceptions = propertyAccessExceptions;
 	}
 
 	/**
@@ -54,23 +54,23 @@ public class PropertyAccessExceptionsException extends BeansException {
 	 * If this returns 0, no errors were encountered during binding.
 	 */
 	public int getExceptionCount() {
-		return this.exceptions.size();
+		return this.propertyAccessExceptions.length;
 	}
 
 	/**
-	 * Return an array of the exceptions stored in this object.
+	 * Return an array of the propertyAccessExceptions stored in this object.
 	 * Will return the empty array (not null) if there were no errors.
 	 */
 	public PropertyAccessException[] getPropertyAccessExceptions() {
-		return (PropertyAccessException[]) this.exceptions.toArray(new PropertyAccessException[this.exceptions.size()]);
+		return this.propertyAccessExceptions;
 	}
 
 	/**
 	 * Return the exception for this field, or null if there isn't one.
 	 */
 	public PropertyAccessException getPropertyAccessException(String propertyName) {
-		for (Iterator it = this.exceptions.iterator(); it.hasNext();) {
-			PropertyAccessException pae = (PropertyAccessException) it.next();
+		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
+			PropertyAccessException pae = this.propertyAccessExceptions[i];
 			if (propertyName.equals(pae.getPropertyChangeEvent().getPropertyName())) {
 				return pae;
 			}
@@ -78,23 +78,36 @@ public class PropertyAccessExceptionsException extends BeansException {
 		return null;
 	}
 
-	/* package */
-	void addPropertyAccessException(PropertyAccessException ex) {
-		this.exceptions.add(ex);
+	public String getMessage() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(this.toString());
+		sb.append("; nested propertyAccessExceptions are: ");
+		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
+			PropertyAccessException pae = this.propertyAccessExceptions[i];
+			sb.append("[");
+			sb.append(pae.getClass().getName());
+			sb.append(": ");
+			sb.append(pae.getMessage());
+			sb.append(']');
+			if (i < this.propertyAccessExceptions.length - 1) {
+				sb.append(", ");
+			}
+		}
+		return sb.toString();
 	}
 
 	public void printStackTrace(PrintStream ps) {
 		ps.println(this);
-		for (Iterator it = this.exceptions.iterator(); it.hasNext();) {
-			PropertyAccessException pae = (PropertyAccessException) it.next();
+		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
+			PropertyAccessException pae = this.propertyAccessExceptions[i];
 			pae.printStackTrace(ps);
 		}
 	}
 
 	public void printStackTrace(PrintWriter pw) {
 		pw.println(this);
-		for (Iterator it = this.exceptions.iterator(); it.hasNext();) {
-			PropertyAccessException pae = (PropertyAccessException) it.next();
+		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
+			PropertyAccessException pae = this.propertyAccessExceptions[i];
 			pae.printStackTrace(pw);
 		}
 	}
