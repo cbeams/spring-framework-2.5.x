@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.33 2003-12-12 16:33:10 johnsonr Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.34 2003-12-13 00:35:09 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -780,7 +780,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		String[] propertyNames = unsatisfiedObjectProperties(mergedBeanDefinition, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];
-			// Look for a matching type
+			// look for a matching type
 			Class requiredType = bw.getPropertyDescriptor(propertyName).getPropertyType();
 			Map matchingBeans = findMatchingBeans(requiredType);
 			if (matchingBeans.size() == 1) {
@@ -807,17 +807,17 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 	protected Object applyBeanPostProcessors(Object existingBean, String name) throws BeansException {
 		if (existingBean instanceof BeanNameAware) {
-			logger.debug("Invoking setBeanName() on BeanNameAware existingBean with name '" + name + "'");
+			logger.debug("Invoking setBeanName() on BeanNameAware bean with name '" + name + "'");
 			((BeanNameAware) existingBean).setBeanName(name);
 		}
 
 		if (existingBean instanceof BeanFactoryAware) {
-			logger.debug("Invoking setBeanFactory() on BeanFactoryAware existingBean with name '" + name + "'");
+			logger.debug("Invoking setBeanFactory() on BeanFactoryAware bean with name '" + name + "'");
 			((BeanFactoryAware) existingBean).setBeanFactory(this);
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors on existingBean with name '" + name + "'");
+			logger.debug("Invoking BeanPostProcessors on bean with name '" + name + "'");
 		}
 		Object result = existingBean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
@@ -897,18 +897,18 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		PropertyValue[] pvals = deepCopy.getPropertyValues();
 
 		for (int i = 0; i < pvals.length; i++) {
-			String argName = "property '" + pvals[i].getName() + "'";
-			PropertyValue pv = new PropertyValue(pvals[i].getName(), resolveValueIfNecessary(beanName, argName, pvals[i].getValue()));
-			// Update mutable copy
+			Object value = resolveValueIfNecessary(beanName, pvals[i].getName(), pvals[i].getValue());
+			PropertyValue pv = new PropertyValue(pvals[i].getName(), value);
+			// update mutable copy
 			deepCopy.setPropertyValueAt(pv, i);
 		}
 
-		// Set our (possibly massaged) deepCopy
+		// set our (possibly massaged) deepCopy
 		try {
 			bw.setPropertyValues(deepCopy);
 		}
 		catch (FatalBeanException ex) {
-			// Improve the message by showing the context
+			// improve the message by showing the context
 			throw new FatalBeanException("Error setting property on bean '" + beanName + "'", ex);
 		}
 	}
@@ -936,18 +936,18 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		else if (value instanceof ManagedList) {
 			// Convert from managed list. This is a special container that
 			// may contain runtime bean references.
-			// May need to resolve references
+			// May need to resolve references.
 			return resolveManagedList(beanName, argName, (ManagedList) value);
 		}
 		else if (value instanceof ManagedMap) {
 			// Convert from managed map. This is a special container that
 			// may contain runtime bean references as values.
-			// May need to resolve references
+			// May need to resolve references.
 			ManagedMap mm = (ManagedMap) value;
 			return resolveManagedMap(beanName, argName, mm);
 		}
 		else {
-			// No need to resolve value
+			// no need to resolve value
 			return value;
 		}
 	}
@@ -957,16 +957,13 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 */
 	private Object resolveReference(String beanName, String argName, RuntimeBeanReference ref) throws BeansException {
 		try {
-			// Try to resolve bean reference
-			logger.debug("Resolving reference from '" + argName + "' in bean '" +
+			logger.debug("Resolving reference from property '" + argName + "' in bean '" +
 			             beanName + "' to bean '" + ref.getBeanName() + "'");
-			Object bean = getBean(ref.getBeanName());
-			// Create a new PropertyValue object holding the bean reference
-			return bean;
+			return getBean(ref.getBeanName());
 		}
 		catch (BeansException ex) {
 			throw new FatalBeanException("Can't resolve reference to bean '" + ref.getBeanName() +
-																	 "' while setting '" + argName + "' on bean '" + beanName + "'", ex);
+																	 "' while setting property '" + argName + "' on bean '" + beanName + "'", ex);
 		}
 	}
 
@@ -1021,7 +1018,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		if (rbd.getInitMethodName() != null) {
 			logger.debug("Calling custom init method '" + rbd.getInitMethodName() + "' on bean with name '" + name + "'");
 			bw.invoke(rbd.getInitMethodName(), null);
-			// Can throw MethodInvocationException
+			// can throw MethodInvocationException
 		}
 	}
 
