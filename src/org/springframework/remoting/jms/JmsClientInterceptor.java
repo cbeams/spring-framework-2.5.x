@@ -20,6 +20,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.httpinvoker.HttpInvokerClientConfiguration;
 import org.springframework.remoting.support.RemoteInvocation;
@@ -43,7 +44,7 @@ import javax.jms.QueueSession;
  * @see org.springframework.remoting.jms.JmsProxyFactoryBean
  */
 public class JmsClientInterceptor extends RemoteInvocationBasedAccessor
-        implements MethodInterceptor, InitializingBean {
+        implements MethodInterceptor, InitializingBean, DisposableBean {
 
     private QueueRequestor queueRequestor;
     private QueueSession session;
@@ -73,6 +74,13 @@ public class JmsClientInterceptor extends RemoteInvocationBasedAccessor
             throw new IllegalArgumentException("queue is required");
         }
         queueRequestor = new QueueRequestor(session, queue);
+    }
+
+    public void destroy() throws Exception {
+        queueRequestor.close();
+
+        // TODO note we're assuming we own the session and so we close it
+        session.close();
     }
 
     public QueueSession getSession() {
