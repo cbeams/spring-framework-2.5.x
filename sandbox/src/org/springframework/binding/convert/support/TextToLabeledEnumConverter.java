@@ -15,9 +15,6 @@
  */
 package org.springframework.binding.convert.support;
 
-import org.springframework.util.enums.LabeledEnumResolver;
-import org.springframework.util.enums.support.StaticLabeledEnumResolver;
-
 /**
  * Base class for a converter that converts textual representations of
  * <coded>CodedEnum</code> instances to a specific instance of <code>
@@ -25,12 +22,6 @@ import org.springframework.util.enums.support.StaticLabeledEnumResolver;
  * @author Keith Donal
  */
 public abstract class TextToLabeledEnumConverter extends AbstractFormattingConverter {
-
-	private LabeledEnumResolver enumResolver = StaticLabeledEnumResolver.instance();
-
-	public void setEnumResolver(LabeledEnumResolver enumResolver) {
-		this.enumResolver = enumResolver;
-	}
 
 	public Class[] getSourceClasses() {
 		return new Class[] { String.class };
