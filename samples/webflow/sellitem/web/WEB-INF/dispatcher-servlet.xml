@@ -22,16 +22,16 @@
 			<bean class="org.springframework.web.flow.config.BeanFactoryFlowServiceLocator"/>
 		</property>
 		<property name="flowExecutionStorage">
-			<bean class="org.springframework.web.flow.execution.http.HttpSessionContinuationFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage"/>
 		</property>
 		<!-- 
 		<property name="flowExecutionStorage">
-			<bean class="org.springframework.web.flow.execution.http.HttpSessionFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionFlowExecutionStorage"/>
 		</property>
 		-->
 		<!-- 
 		<property name="flowExecutionStorage">
-			<bean class="org.springframework.web.flow.execution.http.ClientSideContinuationFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.ClientSideContinuationFlowExecutionStorage"/>
 		</property>
 		-->
 	</bean>

@@ -41,6 +41,7 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager {
 	 */
 	public HttpServletFlowExecutionManager(Flow flow) {
 		super(flow);
+		initDefaults();
 	}
 
 	/**
@@ -49,6 +50,14 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager {
 	 */
 	public HttpServletFlowExecutionManager(FlowLocator flowLocator) {
 		super(flowLocator);
+		initDefaults();
+	}
+
+	/**
+	 * Sets defaults.
+	 */
+	protected void initDefaults() {
+		setFlowExecutionStorage(new HttpSessionFlowExecutionStorage());
 	}
 
 	/**

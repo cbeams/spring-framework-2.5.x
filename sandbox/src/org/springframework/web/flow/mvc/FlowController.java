@@ -44,8 +44,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * </tr>
  * <tr>
  * <td>flowExecutionManager</td>
- * <td>{@link org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager default}</td>
- * <td>Configures the flow execution manager implementation to use.</td>
+ * <td>Configures the http servlet flow execution manager implementation to use.</td>
  * </tr>
  * </table>
  * 

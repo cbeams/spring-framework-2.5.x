@@ -123,7 +123,7 @@ public class FlowAction extends TemplateAction {
 
 	public void setServlet(ActionServlet actionServlet) {
 		super.setServlet(actionServlet);
-		flowLocator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
+		this.flowLocator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
 	}
 
 	/**
