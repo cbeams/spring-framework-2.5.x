@@ -8,8 +8,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Generic, immutable composite key class. Useful for storing a structure as a
- * key in a map. Backed by a Hashset.
+ * Generic, immutable composite key class. Useful for storing a structure of
+ * unique objects as a unified key in a Map.
+ * 
+ * Backed by a HashSet.
  * 
  * @author Keith Donald
  */
