@@ -15,7 +15,7 @@ import org.springframework.ui.freemarker.ConfigurationFactory;
 /**
  * JavaBean to configure FreeMarker for web usage, via the "configLocation" and/or
  * "freemarkerProperties".  If neither of them is set, the default config location 
- * "/WEB-INF/freemarker.properties" will be used.
+ * "/WEB-INF/freemarker.properties" will be used if available.
  *
  * <p>This bean must be included in the application context of any application
  * using Spring's FreemarkerView for web MVC. It exists purely to configure FreeMarker.
@@ -26,7 +26,7 @@ import org.springframework.ui.freemarker.ConfigurationFactory;
  *
  * @author Darren Davison
  * @since 3/3/2004
- * @version $Id: FreemarkerConfigurer.java,v 1.1 2004-03-05 19:45:44 davison Exp $
+ * @version $Id: FreemarkerConfigurer.java,v 1.1 2004-03-11 20:02:26 davison Exp $
  * @see #setConfigLocation
  * @see #setFreemarkerProperties
  * @see FreemarkerView
@@ -40,6 +40,8 @@ public class FreemarkerConfigurer extends ConfigurationFactory
 
 	
     /**
+     * Sets a reference to the Spring application context and initializes the
+     * FreeMarker configuration.
      * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
      */
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -47,6 +49,11 @@ public class FreemarkerConfigurer extends ConfigurationFactory
 		initConfiguration();
     }
 
+	/**
+	 * Returns a <code>Resource</code> describing the default properties (settings)
+	 * that will be applied to the FreeMArker configuration if the Resource exists.
+	 * @see org.springframework.ui.freemarker.ConfigurationFactory#getDefaultConfigLocation()
+	 */
 	protected Resource getDefaultConfigLocation() {
 		return this.applicationContext.getResource(DEFAULT_CONFIG_LOCATION);
 	}

@@ -11,11 +11,17 @@ import freemarker.template.Configuration;
 
 
 /**
- * ConfigurationFactoryBean
+ * Factory bean that configures a FreeMarker Configuration and provides it as 
+ * bean reference. This bean is intended for any kind of usage of 
+ * FreeMarker in application code, e.g. for generating email content. 
+ * For web views, FreemarkerConfigurer is used to set up a 
+ * ConfigurationFactory.
+ *
+ * <p>See base class ConfigurationFactory for details.
  * 
  * @author Darren Davison
  * @since 3/3/2004
- * @version $Id: ConfigurationFactoryBean.java,v 1.1 2004-03-05 19:45:18 davison Exp $
+ * @version $Id: ConfigurationFactoryBean.java,v 1.1 2004-03-11 20:02:26 davison Exp $
  */
 public class ConfigurationFactoryBean extends ConfigurationFactory implements FactoryBean {
 

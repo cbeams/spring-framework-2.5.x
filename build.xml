@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.41 2004-03-04 13:57:43 pawlakjp Exp $
+    $Id: build.xml,v 1.42 2004-03-11 20:02:25 davison Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -333,6 +333,7 @@
 				<include name="lib/cos/**"/>
 				<include name="lib/dom4j/**"/>
 				<include name="lib/easymock/**"/>
+				<include name="lib/freemarker/**"/>
 				<include name="lib/hsqldb/**"/>
 				<include name="lib/hibernate/**"/>
 				<include name="lib/ibatis/**"/>

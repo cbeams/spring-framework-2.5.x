@@ -26,15 +26,24 @@ import org.springframework.beans.factory.FactoryBean;
  */
 public class VelocityEngineFactoryBean extends VelocityEngineFactory implements FactoryBean {
 
-	public Object getObject() {
+	/**
+     * @see org.springframework.beans.factory.FactoryBean#getObject()
+     */
+    public Object getObject() {
 		return getVelocityEngine();
 	}
 
-	public Class getObjectType() {
+	/**
+     * @see org.springframework.beans.factory.FactoryBean#getObjectType()
+     */
+    public Class getObjectType() {
 		return VelocityEngine.class;
 	}
 
-	public boolean isSingleton() {
+	/**
+     * @see org.springframework.beans.factory.FactoryBean#isSingleton()
+     */
+    public boolean isSingleton() {
 		return true;
 	}
 

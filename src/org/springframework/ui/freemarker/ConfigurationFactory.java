@@ -37,7 +37,7 @@ import freemarker.template.TemplateException;
  *
  * @author Darren Davison
  * @since 3/3/2004
- * @version $Id: ConfigurationFactory.java,v 1.1 2004-03-05 19:45:18 davison Exp $
+ * @version $Id: ConfigurationFactory.java,v 1.1 2004-03-11 20:02:26 davison Exp $
  */
 public class ConfigurationFactory {
 	

@@ -71,7 +71,7 @@
     <classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
     <classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1-rc1.jar"/>
     <classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
-    <classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
     <classpathentry kind="lib" path="lib/velocity/velocity-1.4-rc1.jar"/>
+    <classpathentry kind="lib" path="lib/freemarker/freemarker-2.3rc1.jar"/>
     <classpathentry kind="output" path="target/other-classes"/>
 </classpath>
