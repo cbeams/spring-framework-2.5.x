@@ -40,8 +40,6 @@ public class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
 	private boolean newSessionHolder;
 
-	private FlushMode previousFlushMode;
-
 	protected void setSessionHolder(SessionHolder sessionHolder, boolean newSessionHolder) {
 		this.sessionHolder = sessionHolder;
 		this.newSessionHolder = newSessionHolder;
@@ -57,14 +55,6 @@ public class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
 	public boolean hasTransaction() {
 		return (this.sessionHolder != null && this.sessionHolder.getTransaction() != null);
-	}
-
-	protected void setPreviousFlushMode(FlushMode previousFlushMode) {
-		this.previousFlushMode = previousFlushMode;
-	}
-
-	public FlushMode getPreviousFlushMode() {
-		return previousFlushMode;
 	}
 
 	public boolean isRollbackOnly() {

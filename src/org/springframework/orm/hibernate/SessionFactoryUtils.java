@@ -280,6 +280,11 @@ public abstract class SessionFactoryUtils {
 					TransactionSynchronizationManager.registerSynchronization(
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, false));
 					sessionHolder.setSynchronizedWithTransaction(true);
+					FlushMode flushMode = sessionHolder.getSession().getFlushMode();
+					if (FlushMode.NEVER.equals(flushMode)) {
+						sessionHolder.getSession().setFlushMode(FlushMode.AUTO);
+						sessionHolder.setPreviousFlushMode(flushMode);
+					}
 				}
 				return sessionHolder.getSession();
 			}
@@ -707,6 +712,9 @@ public abstract class SessionFactoryUtils {
 				if (this.newSession) {
 					closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 				}
+			}
+			if (this.sessionHolder.getPreviousFlushMode() != null) {
+				this.sessionHolder.getSession().setFlushMode(this.sessionHolder.getPreviousFlushMode());
 			}
 			this.sessionHolder.setSynchronizedWithTransaction(false);
 		}

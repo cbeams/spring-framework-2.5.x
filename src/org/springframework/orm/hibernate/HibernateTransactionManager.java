@@ -342,7 +342,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
 			logger.debug("Found thread-bound session [" + sessionHolder.getSession() +
-									 "] for Hibernate transaction");
+					"] for Hibernate transaction");
 			txObject.setSessionHolder(sessionHolder, false);
 			if (getDataSource() != null) {
 				ConnectionHolder conHolder = (ConnectionHolder)
@@ -362,8 +362,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
 		if (txObject.getSessionHolder() == null) {
-			Session session = SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor(),
-																											 getJdbcExceptionTranslator(), false);
+			Session session = SessionFactoryUtils.getSession(
+					getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator(), false);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Opened new session [" + session + "] for Hibernate transaction");
 			}
@@ -387,8 +387,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				// we need AUTO or COMMIT for a non-read-only transaction
 				FlushMode flushMode = session.getFlushMode();
 				if (FlushMode.NEVER.equals(flushMode)) {
-					txObject.setPreviousFlushMode(flushMode);
 					session.setFlushMode(FlushMode.AUTO);
+					txObject.getSessionHolder().setPreviousFlushMode(flushMode);
 				}
 			}
 
@@ -407,7 +407,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					conHolder.setTimeoutInSeconds(definition.getTimeout());
 				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("Exposing Hibernate transaction as JDBC transaction [" + conHolder.getConnection() + "]");
+					logger.debug("Exposing Hibernate transaction as JDBC transaction [" +
+							conHolder.getConnection() + "]");
 				}
 				TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 				txObject.setConnectionHolder(conHolder);
@@ -477,7 +478,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Rolling back Hibernate transaction on session [" +
-									 txObject.getSessionHolder().getSession() + "]");
+					txObject.getSessionHolder().getSession() + "]");
 		}
 		try {
 			txObject.getSessionHolder().getTransaction().rollback();
@@ -499,7 +500,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Setting Hibernate transaction on session [" +
-									 txObject.getSessionHolder().getSession() + "] rollback-only");
+					txObject.getSessionHolder().getSession() + "] rollback-only");
 		}
 		txObject.getSessionHolder().setRollbackOnly();
 	}
@@ -538,8 +539,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				logger.debug("Not closing pre-bound Hibernate session [" + session + "] after transaction");
 			}
 			txObject.getSessionHolder().setTransaction(null);
-			if (txObject.getPreviousFlushMode() != null) {
-				session.setFlushMode(txObject.getPreviousFlushMode());
+			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
+				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
 		}
 	}

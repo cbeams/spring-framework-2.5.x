@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.sf.hibernate.Session;
 import net.sf.hibernate.Transaction;
+import net.sf.hibernate.FlushMode;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
 
@@ -44,6 +45,8 @@ public class SessionHolder extends ResourceHolderSupport {
 	private final Map sessionMap = new HashMap(1);
 
 	private Transaction transaction;
+
+	private FlushMode previousFlushMode;
 
 
 	public SessionHolder(Session session) {
@@ -90,6 +93,14 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	public Transaction getTransaction() {
 		return transaction;
+	}
+
+	public void setPreviousFlushMode(FlushMode previousFlushMode) {
+		this.previousFlushMode = previousFlushMode;
+	}
+
+	public FlushMode getPreviousFlushMode() {
+		return previousFlushMode;
 	}
 
 }
