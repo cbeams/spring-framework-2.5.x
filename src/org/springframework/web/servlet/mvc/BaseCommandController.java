@@ -126,7 +126,6 @@ public abstract class BaseCommandController extends AbstractController {
 
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
-
 	private String commandName = DEFAULT_COMMAND_NAME;
 
 	private Class commandClass;
@@ -238,8 +237,8 @@ public abstract class BaseCommandController extends AbstractController {
 			for (int i = 0; i < this.validators.length; i++) {
 				if (this.commandClass != null && !this.validators[i].supports(this.commandClass))
 					throw new IllegalArgumentException("Validator [" + this.validators[i] +
-																						 "] does not support command class [" +
-																						 this.commandClass.getName() + "]");
+							"] does not support command class [" +
+							this.commandClass.getName() + "]");
 			}
 		}
 	}
@@ -265,7 +264,7 @@ public abstract class BaseCommandController extends AbstractController {
 	protected final Object createCommand() throws InstantiationException, IllegalAccessException {
 		if (this.commandClass == null) {
 			throw new IllegalStateException("Cannot create command without commandClass being set - " +
-																			"either set commandClass or override formBackingObject");
+					"either set commandClass or override formBackingObject");
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new command of class [" + this.commandClass.getName() + "]");
@@ -405,5 +404,4 @@ public abstract class BaseCommandController extends AbstractController {
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
 			throws Exception {
 	}
-
 }
