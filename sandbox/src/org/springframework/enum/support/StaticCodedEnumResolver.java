@@ -59,13 +59,16 @@ public class StaticCodedEnumResolver implements CodedEnumResolver {
     }
 
     public void registerStaticEnums(final Class clazz) {
+        System.out.println(clazz);
         new FieldGenerator(clazz).run(new UnaryProcedure() {
             public void run(Object o) {
                 Field f = (Field)o;
                 if (Modifier.isStatic(f.getModifiers())) {
-                    if (CodedEnum.class.isAssignableFrom(f.getDeclaringClass())) {
+                    if (CodedEnum.class.isAssignableFrom(f.getType())) {
                         try {
-                            add((CodedEnum)f.get(null));
+                            Object value = f.get(null);
+                            Assert.isTrue(CodedEnum.class.isInstance(value));
+                            add((CodedEnum)value);
                         } catch (IllegalAccessException e) {
                             throw new RuntimeException(e);
                         }

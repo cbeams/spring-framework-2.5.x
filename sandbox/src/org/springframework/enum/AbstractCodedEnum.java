@@ -22,6 +22,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ToStringBuilder;
+import org.springframework.util.comparators.NullSafeComparator;
 
 /**
  * @author Keith Donald
@@ -30,13 +31,13 @@ public abstract class AbstractCodedEnum implements CodedEnum,
         MessageSourceResolvable, Serializable, Comparable {
     private Comparable code;
     private String label;
-    
+
     public static final Comparator LABEL_ORDER = new Comparator() {
         public int compare(Object o1, Object o2) {
             AbstractCodedEnum e1 = (AbstractCodedEnum)o1;
             AbstractCodedEnum e2 = (AbstractCodedEnum)o2;
-            return String.CASE_INSENSITIVE_ORDER.compare(e1.getLabel(), e2
-                    .getLabel());
+            Comparator c = new NullSafeComparator(String.CASE_INSENSITIVE_ORDER);
+            return c.compare(e1.getLabel(), e2.getLabel());
         }
     };
 
