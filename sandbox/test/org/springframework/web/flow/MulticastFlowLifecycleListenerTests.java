@@ -32,7 +32,7 @@ public class MulticastFlowLifecycleListenerTests extends TestCase {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("multicast", new RootBeanDefinition(MulticastFlowLifecycleListener.class, null));
 
-		MulticastFlowLifecycleListener mfll = (MulticastFlowLifecycleListener) bf.getBean("multicast");
+		MulticastFlowLifecycleListener mfll = (MulticastFlowLifecycleListener)bf.getBean("multicast");
 		assertTrue("No listeners should have been found", mfll.getListeners().isEmpty());
 		mfll.flowEnded(new Flow("testFlow"), null, null, null);
 	}
@@ -41,11 +41,11 @@ public class MulticastFlowLifecycleListenerTests extends TestCase {
 		DefaultListableBeanFactory bf = createFactoryWith2Listeners();
 		bf.registerBeanDefinition("multicast", new RootBeanDefinition(MulticastFlowLifecycleListener.class, null));
 
-		MulticastFlowLifecycleListener mfll = (MulticastFlowLifecycleListener) bf.getBean("multicast");
+		MulticastFlowLifecycleListener mfll = (MulticastFlowLifecycleListener)bf.getBean("multicast");
 		assertEquals(2, mfll.getListeners().size());
 
-		CountingListener listener1 = (CountingListener) bf.getBean("listener1");
-		CountingListener listener2 = (CountingListener) bf.getBean("listener2");
+		CountingListener listener1 = (CountingListener)bf.getBean("listener1");
+		CountingListener listener2 = (CountingListener)bf.getBean("listener2");
 		mfll.flowStarted(new Flow("testFlow"), null, null);
 		assertEquals(1, listener1.flowStartedCount);
 		assertEquals(1, listener2.flowStartedCount);
@@ -77,26 +77,26 @@ public class MulticastFlowLifecycleListenerTests extends TestCase {
 		public int flowStateTransitionedCount;
 
 		public void flowEnded(Flow source, FlowSession endedFlowSession,
-				FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request) {
+				FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
 			++flowEndedCount;
 		}
 
 		public void flowEventProcessed(Flow source, String eventId, AbstractState state,
-				FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request) {
+				FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
 			++flowEventProcessedCount;
 		}
 
 		public void flowEventSignaled(Flow source, String eventId, AbstractState state,
-				FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request) {
+				FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
 			++flowEventSignaledCount;
 		}
 
-		public void flowStarted(Flow source, FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request) {
+		public void flowStarted(Flow source, FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
 			++flowStartedCount;
 		}
 
 		public void flowStateTransitioned(Flow source, AbstractState oldState, AbstractState newState,
-				FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request) {
+				FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
 			++flowStateTransitionedCount;
 		}
 	}

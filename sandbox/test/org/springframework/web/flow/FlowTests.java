@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
@@ -112,8 +112,10 @@ public class FlowTests extends TestCase {
 
         assertEquals(1, flow.getViewStateCount());
 
-        ViewDescriptor vdesc = flow.start(fes, req1, null, null);
-
+        FlowSessionExecutionStartResult result = flow.start(req1, null, null);
+        ViewDescriptor vdesc = result.getStartingView();
+        fes = (FlowSessionExecutionStack)result.getFlowSessionExecutionInfo();
+        
         assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
         assertEquals(0, vdesc.getModel().size());
 
@@ -183,8 +185,8 @@ public class FlowTests extends TestCase {
 
         assertEquals(2, flow.getViewStateCount());
 
-        ViewDescriptor vdesc = flow.resume(fes, getPetDetailsStateId, req1, null, null);
-
+        FlowSessionExecutionStartResult result = flow.resume(getPetDetailsStateId, req1, null, null);
+        ViewDescriptor vdesc = result.getStartingView();
         assertEquals(viewPetDetailsStateId, vdesc.getViewName());
         assertEquals(0, vdesc.getModel().size());
 
