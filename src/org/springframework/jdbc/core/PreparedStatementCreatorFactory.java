@@ -26,13 +26,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Helper class that can efficiently create multiple PreparedStatementCreator
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.14 2004-06-28 07:17:26 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.15 2004-06-28 21:22:08 jhoeller Exp $
  */
 public class PreparedStatementCreatorFactory {
 
@@ -45,7 +47,10 @@ public class PreparedStatementCreatorFactory {
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
 	private boolean updatableResults = false;
-	
+
+	private NativeJdbcExtractor nativeJdbcExtractor;
+
+
 	/**
 	 * Create a new factory. Will need to add parameters
 	 * via the addParameter() method or have no parameters.
@@ -103,6 +108,15 @@ public class PreparedStatementCreatorFactory {
 	public void setUpdatableResults(boolean updatableResults) {
 		this.updatableResults = updatableResults;
 	}
+
+	/**
+	 * Specify the NativeJdbcExtractor to use for unwrapping
+	 * PreparedStatements, if any.
+	 */
+	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
+		this.nativeJdbcExtractor = nativeJdbcExtractor;
+	}
+	
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
@@ -171,12 +185,18 @@ public class PreparedStatementCreatorFactory {
 		}
 
 		public void setValues(PreparedStatement ps) throws SQLException {
+			// determine PreparedStatement to pass to custom types
+			PreparedStatement psToUse = ps;
+			if (nativeJdbcExtractor != null) {
+				psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
+			}
+
 			// Set arguments: Does nothing if there are no parameters.
 			for (int i = 0; i < this.parameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
 				Object in = this.parameters.get(i);
 				int sqlColIndx = i + 1;
-				StatementCreatorUtils.setParameterValue(ps, sqlColIndx, declaredParameter, in);
+				StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx, declaredParameter, in);
 			}
 		}
 		

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Helper class that can efficiently create multiple CallableStatementCreator
@@ -33,6 +34,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * set of parameter declarations.
  * @author Rod Johnson
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class CallableStatementCreatorFactory { 
 
@@ -45,6 +47,9 @@ public class CallableStatementCreatorFactory {
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
 	private boolean updatableResults = false;
+
+	private NativeJdbcExtractor nativeJdbcExtractor;
+
 
 	/**
 	 * Create a new factory. Will need to add parameters
@@ -92,6 +97,15 @@ public class CallableStatementCreatorFactory {
 	public void setUpdatableResults(boolean updatableResults) {
 		this.updatableResults = updatableResults;
 	}
+
+	/**
+	 * Specify the NativeJdbcExtractor to use for unwrapping
+	 * CallableStatements, if any.
+	 */
+	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
+		this.nativeJdbcExtractor = nativeJdbcExtractor;
+	}
+
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameters.
@@ -159,6 +173,12 @@ public class CallableStatementCreatorFactory {
 														 updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
 
+			// determine CallabeStatement to pass to custom types
+			CallableStatement csToUse = cs;
+			if (nativeJdbcExtractor != null) {
+				csToUse = nativeJdbcExtractor.getNativeCallableStatement(cs);
+			}
+
 			int sqlColIndx = 1;
 			for (int i = 0; i < declaredParameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
@@ -170,7 +190,7 @@ public class CallableStatementCreatorFactory {
 				// the value may still be null
 				Object inValue = this.inParameters.get(declaredParameter.getName());
 				if (!(declaredParameter instanceof SqlOutParameter) && !(declaredParameter instanceof SqlReturnResultSet)) {
-					StatementCreatorUtils.setParameterValue(cs, sqlColIndx, declaredParameter, inValue);
+					StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
 				}
 				else {
 					// It's an output parameter. Skip SqlReturnResultSet parameters
