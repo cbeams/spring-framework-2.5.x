@@ -63,15 +63,31 @@
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
-	<!-- Petclinic primary business object: Hibernate implementation -->
-	<bean id="clinicTarget" class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
+    <!-- a parent bean definition which is a 'template' or base definition for
+	     transaction proxies. It is set as lazy-init, since it is never
+		 supposed to be instantiated itself. -->
+	<bean id="baseTxProxy" lazy-init="true"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
 	</bean>
 
-	<!-- Transactional proxy for the Petclinic primary business object -->
-	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target"><ref local="clinicTarget"/></property>
+	<!-- Petclinic primary business object: Hibernate implementation, as an
+	     inner bean wrapped by an outer transactional proxy. The two bean
+		 definitions could have been separate, but this is cleaner as there
+		 is no need to ever access the unwrapped object.
+		 Note that as an example, we override the transaction propagation settings
+		 from the parent 'baseTxProxy' definition -->
+	<bean id="clinic" parent="baseTxProxy">
+		<property name="target">
+			<bean class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
+				<property name="sessionFactory"><ref local="sessionFactory"/></property>
+			</bean>
+		</property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>

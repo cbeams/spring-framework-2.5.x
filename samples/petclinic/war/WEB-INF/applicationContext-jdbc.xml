@@ -62,15 +62,26 @@
 		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 
-	<!-- Transactional proxy for Petclinic's primary business object -->
-	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <!-- a parent bean definition which is a 'template' or base definition for
+	     transaction proxies. It is set as lazy-init, since it is never
+		 supposed to be instantiated itself. -->
+	<bean id="baseTxProxy" lazy-init="true"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target"><ref bean="${petclinic.jdbcImplBeanName}"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
+	</bean>
+
+	<!-- Transactional proxy for Petclinic's primary business object
+	     As opposed to the Hibernate example, we keep the business object
+		 as an external bean we refer to, not an inner bean. This is in
+		 order to demonstrate how the actual object being wrapped can be
+		 configured via PropertyPlaceholderConfigurer -->
+	<bean id="clinic"  parent="baseTxProxy">
+		<property name="target"><ref bean="${petclinic.jdbcImplBeanName}"/></property>
 	</bean>
 
 </beans>
