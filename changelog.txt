@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.144 2004-05-18 22:53:52 davison Exp $
+$Id: changelog.txt,v 1.145 2004-05-19 17:04:52 jhoeller Exp $
 
 
 Changes in version 1.0.2 (23.5.2003)
@@ -99,11 +99,14 @@ Package org.springframework.web
 * added "initBeanWrapper" callback to HttpServletBean, to allow for registering custom editors
 * refined ViewResolver's "resolveViewName" to expect null return value if not found, to allow for ViewResolver chaining
 * DispatcherServlet detects ViewResolvers by type to allow for ViewResolver chaining (respecting order values)
-* added "detectAllViewResolvers" property to DispatcherServlet, allowing to enforce a single ViewResolver
+* added "detectAllHandlerMappings" property to DispatcherServlet, expecting a single HandlerMapping when off
+* added "detectAllHandlerExceptionResolvers" to DispatcherServlet, expecting a single HandlerExceptionResolver when off
+* added "detectAllViewResolvers" property to DispatcherServlet, expecting a single ViewResolver when off
 * XmlViewResolver, ResourceBundleViewResolver and BeanNameViewResolver implement Ordered to allow for order values
 * refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
 * added "throws Exception" to ParameterizableViewController's "handleRequestInternal" method, for easier subclassing
 * added "validators" property to BaseCommandController, allowing to specify multiple Validators per controller
+* removed final marker from SimpleFormController's "showForm" implementation, allowing to override it for special cases 
 * added "doSubmitAction" template method to SimpleFormController, for submit actions without caring about ModelAndView
 * AbstractWizardFormController's checks for page-specific binding errors, showing the corresponding page again
 * AbstractWizardFormController's "getCurrentPage" method can be invoked from "processFinish" implementations

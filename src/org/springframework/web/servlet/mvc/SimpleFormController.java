@@ -177,8 +177,8 @@ public class SimpleFormController extends AbstractFormController {
 	 * in case of custom validation errors (i.e. not determined by the validator).
 	 * @see #setFormView
 	 */
-	protected final ModelAndView showForm(HttpServletRequest request, HttpServletResponse response,
-	                                      BindException errors) throws Exception {
+	protected ModelAndView showForm(HttpServletRequest request, HttpServletResponse response,
+	                                BindException errors) throws Exception {
 		return showForm(request, errors, getFormView());
 	}
 
