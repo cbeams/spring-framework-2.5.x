@@ -26,16 +26,18 @@ import org.springframework.util.comparator.NullSafeComparator;
  * A interface for objects that are enumerations. Each enum instance has the
  * following characteristics:
  * <p>
- * A type that identifies the enum's class. For example, "fileFormat".
+ * A type that identifies the enum's class. For example,
+ * <code>com.mycompany.util.FileFormat</code>.
  * <p>
  * A code that uniquely identifies the enum within the context of its type. For
- * example, "CSV". Different classes of codes are possible (Character, Integer,
- * String.)
+ * example, <code>CSV</code>. Different classes of codes are possible
+ * (Character, Integer, String.)
  * <p>
- * A descriptive label. For example, "the CSV File Format".
+ * A descriptive label. For example, <code>the CSV File Format</code>.
  * <p>
  * A uniquely identifying key that identifies the enum in the context of all
- * other enums (of potentially different types.) For example, "fileFormat.CSV".
+ * other enums (of potentially different types.) For example,
+ * <code>com.mycompany.util.FileFormat.CSV</code>.
  * @author Keith Donald
  */
 public interface CodedEnum extends MessageSourceResolvable, Comparable {

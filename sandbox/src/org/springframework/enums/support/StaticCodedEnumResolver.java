@@ -86,7 +86,6 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 	/**
 	 * Generator that generates a list of static field values that can be
 	 * processed.
-	 *
 	 * @author Keith Donald
 	 */
 	private static class CodedEnumFieldValueGenerator implements ProcessTemplate {
