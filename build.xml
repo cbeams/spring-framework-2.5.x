@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.40 2004-02-26 14:41:15 jhoeller Exp $
+    $Id: build.xml,v 1.41 2004-03-04 13:57:43 pawlakjp Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -66,6 +66,7 @@
 		<delete dir="${target.classes.dir}"/>
 		<delete dir="${target.clover.dir}"/>
 		<delete dir="${target.junit.reports.dir}"/>
+		<delete dir="${target.junit.summary.dir}"/>
 		<delete dir="${target.loadclasses.dir}"/>
 		<delete dir="${target.otherclasses.dir}"/>
 		<delete dir="${target.release.dir}"/>
@@ -409,10 +410,12 @@
 	<target name="tests" depends="buildtests" description="Run tests.">
 
 		<property name="reports.dir" value="${target.junit.reports.dir}"/>
+		<property name="summary.dir" value="${target.junit.summary.dir}"/>
 
 		<mkdir dir="${reports.dir}"/>
+		<mkdir dir="${summary.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="yes">
+		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
@@ -423,13 +426,23 @@
 
 			<classpath refid="all-libs"/>
 
-			<formatter type="plain"/>
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
 
 			<batchtest fork="yes" todir="${reports.dir}">
 				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
 
 		</junit>
+
+		<junitreport todir="${reports.dir}">
+
+			<fileset dir="${reports.dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report todir="${summary.dir}"/>
+
+		</junitreport>
 
 	</target>
 
