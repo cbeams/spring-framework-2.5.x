@@ -30,7 +30,7 @@
 
    <!-- the project home page -->
    <url>http://sourceforge.net/projects/springframework</url>
-   <issueTrackingUrl>http://sourceforge.net/tracker/?group_id=73357</issueTrackingUrl>
+   <issueTrackingUrl>http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa</issueTrackingUrl>
    <siteAddress></siteAddress>
    <siteDirectory>/srv/www/htdocs/spring</siteDirectory>
    <distributionDirectory>http://sourceforge.net/project/showfiles.php?group_id=73357</distributionDirectory>
