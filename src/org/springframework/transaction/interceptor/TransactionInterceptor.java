@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.util.Properties;
+
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -39,7 +41,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.21 2004-03-26 16:32:29 jhoeller Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.22 2004-05-23 20:14:16 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.aop.framework.ProxyFactoryBean
@@ -101,6 +103,24 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	}
 
 	/**
+	 * Set properties with method names as keys and transaction attribute
+	 * descriptors (parsed via TransactionAttributeEditor) as values:
+	 * e.g. key = "myMethod", value = "PROPAGATION_REQUIRED,readOnly".
+	 * <p>Note: Method names are always applied to the target class,
+	 * no matter if defined in an interface or the class itself.
+	 * <p>Internally, a NameMatchTransactionAttributeSource will be
+	 * created from the given properties.
+	 * @see #setTransactionAttributeSource
+	 * @see TransactionAttributeEditor
+	 * @see NameMatchTransactionAttributeSource
+	 */
+	public void setTransactionAttributes(Properties transactionAttributes) {
+		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
+		tas.setProperties(transactionAttributes);
+		this.transactionAttributeSource = tas;
+	}
+
+	/**
 	 * Set the transaction attribute source which is used to find transaction
 	 * attributes. If specifying a String property value, a PropertyEditor
 	 * will create a MethodMapTransactionAttributeSource from the value.
@@ -124,7 +144,9 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 			throw new IllegalArgumentException("transactionManager is required");
 		}
 		if (this.transactionAttributeSource == null) {
-			throw new IllegalArgumentException("transactionAttributeSource is required");
+			throw new IllegalArgumentException("Either 'transactionAttributeSource' or 'transactionAttributes' " +
+																				 "is required: If there are no transactional methods, don't use " +
+																				 "a TransactionInterceptor respectively a transactional proxy.");
 		}
 	}
 
