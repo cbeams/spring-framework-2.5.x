@@ -51,8 +51,8 @@
                     </fo:table-row>
                     <fo:table-row>
                         <fo:table-cell text-align="center">
-                            <fo:block font-family="Helvetica" font-size="22pt" padding="10mm">
-                                <xsl:value-of select="bookinfo/edition"/> 
+                            <fo:block font-family="Helvetica" font-size="14pt" padding="10mm">
+                                <xsl:value-of select="bookinfo/pubdate"/> 
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
