@@ -215,6 +215,10 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			}
 		});
 	}
+	
+	public List loadAll(final Class entityClass) throws DataAccessException {
+		return find("from " + entityClass.getName());
+	}
 
 	public void evict(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {

@@ -77,7 +77,18 @@ public interface HibernateOperations {
 	 */
 	Object load(final Class entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException;
-
+	
+	/**
+	 * Return all persistent instances of the given entity class, as a List.<br/>
+	 * Implemented with a query as follows: <code>find("from " + entityClass.getName())
+	 * </code><br/>
+	 *
+	 * @param entityClass a persistent class
+	 * @return a List containing 0 or more persistent instances
+	 * @throws DataAccessException if there is a Hibernate error
+	 */
+	public List loadAll(final Class entityClass) throws DataAccessException;
+	
 	/**
 	 * Remove the given object from the Session cache.
 	 * @param entity the persistent instance to lock
