@@ -84,6 +84,7 @@ Package org.springframework.transaction
 * introduced SmartTransactionObject interface, allowing to determine an internal rollback-only marker of a transaction
 * DefaultTransactionStatus always retrieves current rollback-only flag, either local or from SmartTransactionObject
 * removed "isRollbackOnly" method from AbstractPlatformTransactionManager (superseded by SmartTransactionObject)
+* removed dependency on AOP Alliance AspectException from AbstractPlatformTransactionManager and JtaTransactionManager
 * introduced JtaTransactionObject for JtaTransactionManager, implementing the SmartTransactionObject interface
 * added "autodetectTransactionManager" flag to JtaTransactionManager, to suppress the UserTransaction instanceof check
 
@@ -92,9 +93,11 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * added special parsing of original filenames to CommonsMultipartFile, detecting both Unix- and Windows-style paths
+* made CommonsMultipartFile implement Serializable (the underlying FileItem from Commons FileUpload is serializable)
 * reworked AbstractPathMapHandlerMapping's "getClassesWithPathMapAttributes" to return a Class array rather than names
 * deprecated AbstractWizardFormController's "getNrOfPages" in favor of "getPageCount" (for consistent method naming)
 * fixed MessageTag to write "null" to the JspWriter in case of a null value as message
+* added "http10Compatible" flag to RedirectView, to be turned off for sending HTTP 1.1 status code 303 rather than 302
 * added "allowRequestOverride" and "allowSessionOverride" properties to AbstractTemplateView (off by default)
 * added "buildPdfMetadata" callback to AbstractPdfView, for adding meta fields like author to the iText PDF Document
 * added LookupDispatchActionSupport class to Struts support, analogous to ActionSupport but for LookupDispatchActions
