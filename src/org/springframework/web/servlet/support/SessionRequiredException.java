@@ -14,24 +14,19 @@
  * limitations under the License.
  */ 
 
-package org.springframework.web.servlet.mvc;
+package org.springframework.web.servlet.support;
 
 import javax.servlet.ServletException;
 
 /**
- * Exception thrown when a Controller requires a session for the
- * current method. This exception is normally raised by framework
- * code, but may sometimes be handled by application code.
+ * Exception thrown when a web content generator requires a pre-existing session.
  * @author Rod Johnson
+ * @see WebContentGenerator
  */
 public class SessionRequiredException extends ServletException {
 
 	public SessionRequiredException(String msg) {
 		super(msg);
-	}
-
-	public SessionRequiredException(String msg, Throwable ex) {
-		super(msg, ex);
 	}
 
 }

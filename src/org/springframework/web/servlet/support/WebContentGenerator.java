@@ -161,19 +161,18 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		// check whether we should support the request method
 		String method = request.getMethod();
 		if (!this.supportedMethods.contains(method)) {
-			logger.info("Disallowed '" + method + "' request");
-			throw new ServletException("This resource does not support request method '" + method + "'");
+			throw new RequestMethodNotSupportedException("Request method '" + method + "' not supported");
 		}
 
 		// check whether session is required
 		if (this.requireSession) {
 			if (request.getSession(false) == null) {
-				throw new ServletException("This resource requires a pre-existing HttpSession: none was found");
+				throw new SessionRequiredException("Pre-existing session required but none found");
 			}
 		}
 
-		// do declarative cache control
-		// revalidate if the controller supports last-modified
+		// Do declarative cache control.
+		// Revalidate if the controller supports last-modified.
 		applyCacheSeconds(response, cacheSeconds, lastModified);
 	}
 
