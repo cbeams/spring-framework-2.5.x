@@ -15,7 +15,7 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: PrototypeInvokerInterceptorTests.java,v 1.1 2003-10-06 09:45:52 johnsonr Exp $
+ * @version $Id: PrototypeInvokerInterceptorTests.java,v 1.2 2003-10-06 17:29:48 johnsonr Exp $
  */
 public class PrototypeInvokerInterceptorTests extends TestCase {
 	
@@ -51,7 +51,7 @@ public class PrototypeInvokerInterceptorTests extends TestCase {
 		
 		SideEffectBean prototype = (SideEffectBean) beanFactory.getBean("prototype");
 		assertEquals(INITIAL_COUNT, prototype.getCount() );
-		singleton.doWork();
+		prototype.doWork();
 		assertEquals(INITIAL_COUNT, prototype.getCount() );
 	}
 
