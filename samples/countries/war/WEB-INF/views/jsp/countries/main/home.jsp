@@ -46,7 +46,7 @@
     <hr/>
 
     <div class="pagernav">
-      <c:if test="${countries.nrOfPages > 1}">
+      <c:if test="${countries.pageCount > 1}">
           <a href="<c:url value="/${lnk}"><c:param name="page" value="0"/></c:url>">1</a>
           &nbsp;...&nbsp;
           <c:forEach begin="${countries.firstLinkedPage}" end="${countries.lastLinkedPage}" var="crtpg">
@@ -60,7 +60,7 @@
             </c:choose>
           </c:forEach>
           &nbsp;...&nbsp;
-          <a href="<c:url value="/${lnk}"><c:param name="page" value="${countries.nrOfPages - 1}"/></c:url>"><c:out value="${countries.nrOfPages}"/></a>
+          <a href="<c:url value="/${lnk}"><c:param name="page" value="${countries.pageCount - 1}"/></c:url>"><c:out value="${countries.pageCount}"/></a>
 	    <fmt:message key="psize" var="ps"/>
       </c:if>
     </div>
@@ -83,7 +83,7 @@
           <td align="left" width="33%">
             <fmt:message key="pg.pages">
               <fmt:param value="${countries.page + 1}"/>
-              <fmt:param value="${countries.nrOfPages}"/>
+              <fmt:param value="${countries.pageCount}"/>
             </fmt:message>
           </td>
           <td align="center" width="34%">
