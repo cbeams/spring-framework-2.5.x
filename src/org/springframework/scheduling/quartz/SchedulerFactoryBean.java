@@ -482,6 +482,11 @@ public class SchedulerFactoryBean
 				props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
 			}
 
+            // make sure to set the scheduler name as configured in the spring configuration
+            if(schedulerName != null) {
+                props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, schedulerName);
+            }
+
 			((StdSchedulerFactory) schedulerFactory).initialize(props);
 		}
 
@@ -534,15 +539,21 @@ public class SchedulerFactoryBean
 	 * @see org.quartz.SchedulerFactory#getScheduler
 	 * @see org.quartz.SchedulerFactory#getScheduler(String)
 	 */
-	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
-			throws SchedulerException {
-		if (schedulerName != null) {
-			return schedulerFactory.getScheduler(schedulerName);
-		}
-		else {
-			return schedulerFactory.getScheduler();
-		}
-	}
+    protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
+            throws SchedulerException {
+	    if (schedulerName != null) {
+		    Scheduler scheduler = null;
+		    if(this.scheduler == null) {
+			    scheduler = schedulerFactory.getScheduler();
+		    } else {
+                schedulerFactory.getScheduler(schedulerName);
+            }
+		    return scheduler;
+	    }
+	    else {
+    		return schedulerFactory.getScheduler();
+    	}
+    }
 
 	/**
 	 * Register all specified listeners with the Scheduler.

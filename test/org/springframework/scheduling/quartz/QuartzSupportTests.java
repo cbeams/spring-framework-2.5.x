@@ -41,6 +41,8 @@ import org.quartz.TriggerListener;
 
 import org.springframework.beans.TestBean;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.TestMethodInvokingTask;
 
 /**
@@ -415,6 +417,18 @@ public class QuartzSupportTests extends TestCase {
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);
 	}
+
+    /** Tests the creation of multiple schedulers (#SPR772) */
+    public void testMultipleSchedulers() throws Exception {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext(
+                "/org/springframework/scheduling/quartz/multiple-schedulers.xml");
+
+        Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
+        Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
+
+        assertNotSame(scheduler1, scheduler2);
+        assertFalse(scheduler1.getSchedulerName().equals(scheduler2.getSchedulerName()));
+    }
 
 
 	private static class TestSchedulerListener implements SchedulerListener {
