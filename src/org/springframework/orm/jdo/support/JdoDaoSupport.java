@@ -43,8 +43,16 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	}
 
 	/**
+	 * Set the JdoTemplate for this DAO explicitly,
+	 * as an alternative to specifying a PersistenceManagerFactory.
+	 */
+	public final void setJdoTemplate(JdoTemplate jdoTemplate) {
+		this.jdoTemplate = jdoTemplate;
+	}
+
+	/**
 	 * Return the JdoTemplate for this DAO, pre-initialized
-	 * with the PersistenceManagerFactory of this DAO.
+	 * with the PersistenceManagerFactory or set explicitly.
 	 */
 	protected final JdoTemplate getJdoTemplate() {
 	  return jdoTemplate;
@@ -52,7 +60,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 
 	public final void afterPropertiesSet() throws Exception {
 		if (this.jdoTemplate == null) {
-			throw new IllegalArgumentException("persistenceManagerFactory is required");
+			throw new IllegalArgumentException("persistenceManagerFactory or jdoTemplate is required");
 		}
 		initDao();
 	}

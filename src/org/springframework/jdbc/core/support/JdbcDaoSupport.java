@@ -43,8 +43,16 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	}
 
 	/**
+	 * Set the JdbcTemplate for this DAO explicitly,
+	 * as an alternative to specifying a DataSource.
+	 */
+	public final void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	/**
 	 * Return the JdbcTemplate for this DAO,
-	 * pre-initialized with the DataSource.
+	 * pre-initialized with the DataSource or set explicitly.
 	 */
 	protected final JdbcTemplate getJdbcTemplate() {
 	  return jdbcTemplate;
@@ -52,7 +60,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 
 	public final void afterPropertiesSet() throws Exception {
 		if (this.jdbcTemplate == null) {
-			throw new IllegalArgumentException("dataSource is required");
+			throw new IllegalArgumentException("dataSource or jdbcTemplate is required");
 		}
 		initDao();
 	}

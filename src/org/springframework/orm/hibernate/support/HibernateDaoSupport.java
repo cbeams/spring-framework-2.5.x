@@ -43,8 +43,16 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	}
 
 	/**
-	 * Return the HibernateTemplate for this data access object,
-	 * pre-initialized with the SessionFactory of this DAO.
+	 * Set the HibernateTemplate for this DAO explicitly,
+	 * as an alternative to specifying a SessionFactory.
+	 */
+	public final void setHibernateTemplate(HibernateTemplate hibernateTemplate) {
+		this.hibernateTemplate = hibernateTemplate;
+	}
+
+	/**
+	 * Return the HibernateTemplate for this DAO,
+	 * pre-initialized with the SessionFactory or set explicitly.
 	 */
 	protected final HibernateTemplate getHibernateTemplate() {
 	  return hibernateTemplate;
@@ -52,7 +60,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 
 	public final void afterPropertiesSet() throws Exception {
 		if (this.hibernateTemplate == null) {
-			throw new IllegalArgumentException("sessionFactory is required");
+			throw new IllegalArgumentException("sessionFactory or hibernateTemplate is required");
 		}
 		initDao();
 	}
