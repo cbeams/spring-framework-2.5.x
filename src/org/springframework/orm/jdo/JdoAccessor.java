@@ -116,7 +116,7 @@ public class JdoAccessor implements InitializingBean {
 	public void flushIfNecessary(PersistenceManager pm, boolean existingTransaction) throws JDOException {
 		if (this.flushEager && this.jdoDialect != null) {
 			logger.debug("Eagerly flushing JDO persistence manager");
-			this.jdoDialect.flush(pm.currentTransaction());
+			this.jdoDialect.flush(pm);
 		}
 	}
 

@@ -83,9 +83,12 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * org.springframework.dao hierarchy.
 	 * <p>Unfortunately, JDO's JDOUserException covers a lot of distinct causes
 	 * like unparsable query, optimistic locking failure, etc. Thus, we are not able
-	 * to convert to Spring's DataAccessException hierarchy in a fine-granular way.
+	 * to convert to Spring's DataAccessException hierarchy in a fine-granular way
+	 * with standard JDO. JdoAccessor and JdoTransactionManager support more
+	 * sophisticated translation of exceptions via a JdoDialect.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
+	 * @see JdoDialect#translateException
 	 */
 	public static DataAccessException convertJdoAccessException(JDOException ex) {
 		if (ex instanceof JDOUserException || ex instanceof JDOFatalUserException) {

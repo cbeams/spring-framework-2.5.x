@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -101,7 +102,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Set the JDO dialect to use for this transaction manager.
-	 * <p>The dialect object can be used to retrieve the underlying JDBC connectionHolder
+	 * <p>The dialect object can be used to retrieve the underlying JDBC connection
 	 * and thus allows for exposing JDO transactions as JDBC transactions.
 	 */
 	public void setJdoDialect(JdoDialect jdoDialect) {
@@ -211,12 +212,12 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().commit();
 		}
 		catch (JDOFatalException ex) {
-			// assumably from commit call to underlying JDBC connectionHolder
+			// assumably from commit call to underlying JDBC connection
 			throw new TransactionSystemException("Could not commit JDO transaction", ex);
 		}
 		catch (JDOException ex) {
 			// assumably failed to flush changes to database
-			throw PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+			throw convertJdoAccessException(ex);
 		}
 	}
 
@@ -240,7 +241,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
 
-		// remove the JDBC connectionHolder holder from the thread, if set
+		// remove the JDBC connection holder from the thread, if set
 		if (this.dataSource != null) {
 			TransactionSynchronizationManager.unbindResource(this.dataSource);
 		}
@@ -259,6 +260,25 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 		else {
 			logger.debug("Not closing pre-bound JDO persistence manager after transaction");
+		}
+	}
+
+	/**
+	 * Convert the given JDOException to an appropriate exception from the
+	 * org.springframework.dao hierarchy. Delegates to the JdoDialect if set, falls
+	 * back to PersistenceManagerFactoryUtils' standard exception translation else.
+	 * May be overridden in subclasses.
+	 * @param ex JDOException that occured
+	 * @return the corresponding DataAccessException instance
+	 * @see JdoDialect#translateException
+	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
+	 */
+	protected DataAccessException convertJdoAccessException(JDOException ex) {
+		if (this.jdoDialect != null) {
+			return this.jdoDialect.translateException(ex);
+		}
+		else {
+			return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
 		}
 	}
 
