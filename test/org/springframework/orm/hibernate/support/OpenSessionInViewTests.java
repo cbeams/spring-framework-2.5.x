@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate.support;
 
 import java.io.IOException;
+import java.sql.Connection;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -28,6 +29,7 @@ import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
+import net.sf.hibernate.Transaction;
 import org.easymock.MockControl;
 
 import org.springframework.mock.web.MockFilterConfig;
@@ -35,7 +37,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.orm.hibernate.HibernateAccessor;
+import org.springframework.orm.hibernate.SessionFactoryUtils;
+import org.springframework.orm.hibernate.HibernateTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
@@ -45,7 +52,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
  */
 public class OpenSessionInViewTests extends TestCase {
 
-	public void testOpenSessionInViewInterceptor() throws HibernateException {
+	public void testOpenSessionInViewInterceptorWithSingleSession() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -91,7 +98,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testOpenSessionInViewInterceptorWithFlush() throws HibernateException {
+	public void testOpenSessionInViewInterceptorWithSingleSessionAndFlush() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -138,7 +145,44 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testOpenSessionInViewFilter() throws Exception {
+	public void testOpenSessionInViewInterceptorAndDeferredClose() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
+		interceptor.setSingleSession(false);
+		MockServletContext sc = new MockServletContext();
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
+		sfControl.replay();
+		sessionControl.replay();
+		interceptor.preHandle(request, response, "handler");
+		Session sess = SessionFactoryUtils.getSession(sf, true);
+		SessionFactoryUtils.closeSessionIfNecessary(sess, sf);
+		sfControl.verify();
+		sessionControl.verify();
+
+		sfControl.reset();
+		sessionControl.reset();
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testOpenSessionInViewFilterWithSingleSession() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -224,6 +268,131 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.verify();
 		sf2Control.verify();
 		session2Control.verify();
+
+		wac.close();
+	}
+
+	public void testOpenSessionInViewFilterWithDeferredClose() throws Exception {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		MockControl sf2Control = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf2 = (SessionFactory) sf2Control.getMock();
+		final MockControl session2Control = MockControl.createControl(Session.class);
+		final Session session2 = (Session) session2Control.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+
+		sf2.openSession();
+		sf2Control.setReturnValue(session2, 1);
+		session2.beginTransaction();
+		session2Control.setReturnValue(tx, 1);
+		session2.connection();
+		session2Control.setReturnValue(con, 2);
+		tx.commit();
+		txControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		sf2Control.replay();
+		session2Control.replay();
+		txControl.replay();
+		conControl.replay();
+
+		MockServletContext sc = new MockServletContext();
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory", sf);
+		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactory", sf2);
+		wac.refresh();
+		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
+		MockFilterConfig filterConfig2 = new MockFilterConfig(wac.getServletContext(), "filter2");
+		filterConfig.addInitParameter("singleSession", "false");
+		filterConfig2.addInitParameter("singleSession", "false");
+		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
+
+		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
+		filter.init(filterConfig);
+		final OpenSessionInViewFilter filter2 = new OpenSessionInViewFilter();
+		filter2.init(filterConfig2);
+
+		final FilterChain filterChain = new FilterChain() {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
+			    throws IOException, ServletException {
+				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
+				TransactionStatus ts = tm.getTransaction(
+						new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
+				Session sess = SessionFactoryUtils.getSession(sf, true);
+				SessionFactoryUtils.closeSessionIfNecessary(sess, sf);
+				tm.commit(ts);
+
+				sessionControl.verify();
+				sessionControl.reset();
+				try {
+					session.close();
+				}
+				catch (HibernateException ex) {
+				}
+				sessionControl.setReturnValue(null, 1);
+				sessionControl.replay();
+
+				servletRequest.setAttribute("invoked", Boolean.TRUE);
+			}
+		};
+
+		final FilterChain filterChain2 = new FilterChain() {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
+			    throws IOException, ServletException {
+				HibernateTransactionManager tm = new HibernateTransactionManager(sf2);
+				TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
+				tm.commit(ts);
+
+				session2Control.verify();
+				session2Control.reset();
+				try {
+					session2.close();
+				}
+				catch (HibernateException ex) {
+				}
+				session2Control.setReturnValue(null, 1);
+				session2Control.replay();
+
+				filter.doFilter(servletRequest, servletResponse, filterChain);
+			}
+		};
+
+		FilterChain filterChain3 = new FilterChain() {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
+			    throws IOException, ServletException {
+				filter2.doFilter(servletRequest, servletResponse, filterChain2);
+			}
+		};
+
+		filter2.doFilter(request, response, filterChain3);
+		assertNotNull(request.getAttribute("invoked"));
+
+		sfControl.verify();
+		sessionControl.verify();
+		sf2Control.verify();
+		session2Control.verify();
+		txControl.verify();
+		conControl.verify();
 
 		wac.close();
 	}

@@ -53,6 +53,18 @@ import org.springframework.web.servlet.ModelAndView;
  * objects with a Hibernate Session has to occur at the very beginning of request
  * processing, to avoid clashes will already loaded instances of the same objects.
  *
+ * <p>Alternatively, turn this interceptor into deferred close mode, by specifying
+ * "singleSession"="false": It will not use a single session per request then,
+ * but rather let each data access operation respectively transaction use its own
+ * session (like without Open Session in View). Each of those sessions will be
+ * registered for deferred close, though, actually processed at request completion.
+ *
+ * <p>A single session per request allows for most efficient first-level caching,
+ * but can cause side effects, for example on saveOrUpdate or if continuing
+ * after a rolled-back transaction. The deferred close strategy is as safe as
+ * no Open Session in View in that respect, while still allowing for lazy loading
+ * in views (but not providing a first-level cache for the entire request).
+ *
  * <p><b>NOTE</b>: This interceptor will by default not flush the Hibernate session,
  * as it assumes to be used in combination with middle tier transactions that care for
  * the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
@@ -61,6 +73,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Juergen Hoeller
  * @since 06.12.2003
+ * @see #setSingleSession
  * @see #setFlushMode
  * @see OpenSessionInViewFilter
  * @see org.springframework.orm.hibernate.HibernateInterceptor
@@ -69,6 +82,9 @@ import org.springframework.web.servlet.ModelAndView;
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class OpenSessionInViewInterceptor extends HibernateAccessor implements HandlerInterceptor {
+
+	private boolean singleSession = true;
+
 
 	/**
 	 * Create a new OpenSessionInViewInterceptor,
@@ -80,6 +96,27 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	}
 
 	/**
+	 * Set whether to use a single session for each request. Default is true.
+	 * <p>If set to false, each data access operation respectively transaction
+	 * will use its own session (like without Open Session in View). Each of
+	 * those sessions will be registered for deferred close, though, actually
+	 * processed at request completion.
+	 * @see SessionFactoryUtils#initDeferredClose
+	 * @see SessionFactoryUtils#processDeferredClose
+	 */
+	public void setSingleSession(boolean singleSession) {
+		this.singleSession = singleSession;
+	}
+
+	/**
+	 * Return whether to use a single session for each request.
+	 */
+	protected boolean isSingleSession() {
+		return singleSession;
+	}
+
+
+	/**
 	 * Open a new Hibernate Session according to the settings of this HibernateAccessor
 	 * and binds in to the thread via TransactionSynchronizationManager.
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
@@ -87,13 +124,18 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 */
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
 													 Object handler) throws DataAccessException {
-		logger.debug("Opening Hibernate session in OpenSessionInViewInterceptor");
-		Session session = SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor(),
-																										 getJdbcExceptionTranslator());
-		if (getFlushMode() == FLUSH_NEVER) {
-			session.setFlushMode(FlushMode.NEVER);
+		if (isSingleSession()) {
+			logger.debug("Opening single Hibernate session in OpenSessionInViewInterceptor");
+			Session session = SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor(),
+																											 getJdbcExceptionTranslator());
+			if (getFlushMode() == FLUSH_NEVER) {
+				session.setFlushMode(FlushMode.NEVER);
+			}
+			TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
 		}
-		TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
+		else {
+			SessionFactoryUtils.initDeferredClose(getSessionFactory());
+		}
 		return true;
 	}
 
@@ -104,13 +146,15 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 */
 	public void postHandle(HttpServletRequest request, HttpServletResponse response,
 												 Object handler, ModelAndView modelAndView) throws DataAccessException {
-		logger.debug("Flushing Hibernate session in OpenSessionInViewInterceptor");
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
-		try {
-			flushIfNecessary(sessionHolder.getSession(), false);
-		}
-		catch (HibernateException ex) {
-			throw convertHibernateAccessException(ex);
+		if (isSingleSession()) {
+			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
+			logger.debug("Flushing single Hibernate session in OpenSessionInViewInterceptor");
+			try {
+				flushIfNecessary(sessionHolder.getSession(), false);
+			}
+			catch (HibernateException ex) {
+				throw convertHibernateAccessException(ex);
+			}
 		}
 	}
 
@@ -121,9 +165,14 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 */
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
 															Object handler, Exception ex) throws DataAccessException {
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
-		logger.debug("Closing Hibernate session in OpenSessionInViewInterceptor");
-		SessionFactoryUtils.closeSessionIfNecessary(sessionHolder.getSession(), getSessionFactory());
+		if (isSingleSession()) {
+			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
+			logger.debug("Closing single Hibernate session in OpenSessionInViewInterceptor");
+			SessionFactoryUtils.closeSessionIfNecessary(sessionHolder.getSession(), getSessionFactory());
+		}
+		else {
+			SessionFactoryUtils.processDeferredClose(getSessionFactory());
+		}
 	}
 
 }

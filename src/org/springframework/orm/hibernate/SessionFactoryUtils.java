@@ -16,6 +16,12 @@
 
 package org.springframework.orm.hibernate;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -79,6 +85,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public abstract class SessionFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
+
+	private static ThreadLocal deferredCloseHolder = new ThreadLocal();
 
 
 	/**
@@ -439,6 +447,49 @@ public abstract class SessionFactoryUtils {
 
 
 	/**
+	 * Initialize deferred close for the given SessionFactory.
+	 * Sessions will not be actually closed on close calls then,
+	 * but rather at a final processDeferredClose call.
+	 * <p>Used by OpenSessionInViewFilter and OpenSessionInViewInterceptor
+	 * when not configured for a single session.
+	 * @param sessionFactory Hibernate SessionFactory
+	 * @see #processDeferredClose
+	 * @see #closeSessionIfNecessary
+	 * @see org.springframework.orm.hibernate.support.OpenSessionInViewFilter#setSingleSession
+	 * @see org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor#setSingleSession
+	 */
+	public static void initDeferredClose(SessionFactory sessionFactory) {
+		logger.debug("Initializing deferred close of Hibernate sessions");
+		Map holderMap = (Map) deferredCloseHolder.get();
+		if (holderMap == null) {
+			holderMap = new HashMap();
+			deferredCloseHolder.set(holderMap);
+		}
+		holderMap.put(sessionFactory, new HashSet());
+	}
+
+	/**
+	 * Process Sessions that have been registered for deferred close.
+	 * @param sessionFactory Hibernate SessionFactory
+	 * @see #initDeferredClose
+	 * @see #closeSessionIfNecessary
+	 */
+	public static void processDeferredClose(SessionFactory sessionFactory) {
+		Map holderMap = (Map) deferredCloseHolder.get();
+		if (holderMap == null || !holderMap.containsKey(sessionFactory)) {
+			throw new IllegalStateException("Deferred close not active for SessionFactory [" + sessionFactory + "]");
+		}
+		logger.debug("Processing deferred close of Hibernate sessions");
+		Set sessions = (Set) holderMap.remove(sessionFactory);
+		for (Iterator it = sessions.iterator(); it.hasNext();) {
+			doClose((Session) it.next());
+		}
+		if (holderMap.isEmpty()) {
+			deferredCloseHolder.set(null);
+		}
+	}
+
+	/**
 	 * Close the given Session, created via the given factory,
 	 * if it isn't bound to the thread.
 	 * @param session Session to close
@@ -452,7 +503,26 @@ public abstract class SessionFactoryUtils {
 		if (sessionHolder != null && sessionHolder.containsSession(session)) {
 			return;
 		}
-		doClose(session);
+		closeSessionOrRegisterDeferredClose(session, sessionFactory);
+	}
+
+	/**
+	 * Close the given Session or register it for deferred close.
+	 * @param session Session to close
+	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
+	 * @see #initDeferredClose
+	 * @see #processDeferredClose
+	 */
+	private static void closeSessionOrRegisterDeferredClose(Session session, SessionFactory sessionFactory) {
+		Map holderMap = (Map) deferredCloseHolder.get();
+		if (holderMap != null && holderMap.containsKey(sessionFactory)) {
+			logger.debug("Registering Hibernate session for deferred close");
+			Set sessions = (Set) holderMap.get(sessionFactory);
+			sessions.add(session);
+		}
+		else {
+			doClose(session);
+		}
 	}
 
 	/**
@@ -560,12 +630,12 @@ public abstract class SessionFactoryUtils {
 				if (this.sessionHolder.isEmpty()) {
 					TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 				}
-				doClose(session);
+				closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 			}
 			else if (this.newSession) {
 				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 				if (this.hibernateTransactionCompletion) {
-					doClose(this.sessionHolder.getSession());
+					closeSessionOrRegisterDeferredClose(this.sessionHolder.getSession(), this.sessionFactory);
 				}
 			}
 		}
@@ -577,7 +647,7 @@ public abstract class SessionFactoryUtils {
 					((SessionImplementor) session).afterTransactionCompletion(status == STATUS_COMMITTED);
 				}
 				if (this.newSession) {
-					doClose(session);
+					closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 				}
 			}
 			this.sessionHolder.setSynchronizedWithTransaction(false);

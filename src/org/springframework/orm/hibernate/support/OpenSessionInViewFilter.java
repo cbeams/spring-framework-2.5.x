@@ -53,6 +53,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * objects with a Hibernate Session has to occur at the very beginning of request
  * processing, to avoid clashes will already loaded instances of the same objects.
  *
+ * <p>Alternatively, turn this filter into deferred close mode, by specifying
+ * "singleSession"="false": It will not use a single session per request then,
+ * but rather let each data access operation respectively transaction use its own
+ * session (like without Open Session in View). Each of those sessions will be
+ * registered for deferred close, though, actually processed at request completion.
+ *
+ * <p>A single session per request allows for most efficient first-level caching,
+ * but can cause side effects, for example on saveOrUpdate or if continuing
+ * after a rolled-back transaction. The deferred close strategy is as safe as
+ * no Open Session in View in that respect, while still allowing for lazy loading
+ * in views (but not providing a first-level cache for the entire request).
+ * 
  * <p>Looks up the SessionFactory in Spring's root web application context.
  * Supports a "sessionFactoryBeanName" filter init-param; the default bean name is
  * "sessionFactory". Looks up the SessionFactory on each request, to avoid
@@ -67,6 +79,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * @author Juergen Hoeller
  * @since 06.12.2003
+ * @see #setSingleSession
  * @see #closeSession
  * @see OpenSessionInViewInterceptor
  * @see org.springframework.orm.hibernate.HibernateInterceptor
@@ -78,7 +91,11 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
 
+
 	private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
+
+	private boolean singleSession = true;
+
 
 	/**
 	 * Set the bean name of the SessionFactory to fetch from Spring's
@@ -98,6 +115,26 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
+	 * Set whether to use a single session for each request. Default is true.
+	 * <p>If set to false, each data access operation respectively transaction
+	 * will use its own session (like without Open Session in View). Each of
+	 * those sessions will be registered for deferred close, though, actually
+	 * processed at request completion.
+	 * @see SessionFactoryUtils#initDeferredClose
+	 * @see SessionFactoryUtils#processDeferredClose
+	 */
+	public void setSingleSession(boolean singleSession) {
+		this.singleSession = singleSession;
+	}
+
+	/**
+	 * Return whether to use a single session for each request.
+	 */
+	protected boolean isSingleSession() {
+		return singleSession;
+	}
+
+	/**
 	 * This implementation appends the SessionFactory bean name to the class name,
 	 * to be executed one per SessionFactory. Can be overridden in subclasses,
 	 * e.g. when also overriding lookupSessionFactory.
@@ -107,19 +144,31 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		return getClass().getName() + "." + this.sessionFactoryBeanName;
 	}
 
+
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 																	FilterChain filterChain) throws ServletException, IOException {
 		SessionFactory sessionFactory = lookupSessionFactory();
-		logger.debug("Opening Hibernate session in OpenSessionInViewFilter");
-		Session session = getSession(sessionFactory);
-		TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
+		Session session = null;
+		if (isSingleSession()) {
+			logger.debug("Opening single Hibernate session in OpenSessionInViewFilter");
+			session = getSession(sessionFactory);
+			TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
+		}
+		else {
+			SessionFactoryUtils.initDeferredClose(sessionFactory);
+		}
 		try {
 			filterChain.doFilter(request, response);
 		}
 		finally {
-			TransactionSynchronizationManager.unbindResource(sessionFactory);
-			logger.debug("Closing Hibernate session in OpenSessionInViewFilter");
-			closeSession(session, sessionFactory);
+			if (isSingleSession()) {
+				TransactionSynchronizationManager.unbindResource(sessionFactory);
+				logger.debug("Closing single Hibernate session in OpenSessionInViewFilter");
+				closeSession(session, sessionFactory);
+			}
+			else {
+				SessionFactoryUtils.processDeferredClose(sessionFactory);
+			}
 		}
 	}
 
