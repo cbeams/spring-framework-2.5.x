@@ -54,64 +54,64 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	/**
 	 * Used to obtain JMS connections.
 	 */
-	private ConnectionFactory _cf;
+	private ConnectionFactory cf;
 	
 	/**
 	 * The JMS Converter to use for send(object) methods.
 	 */
-	private JmsConverter _jmsConverter;
+	private JmsConverter jmsConverter;
 	
     /**
      * Default transaction mode for a JMS Session. 
      */
-	private boolean _sessionTransacted = true;
+	private boolean sessionTransacted = true;
 	
     /**
      * Default ack mode for a JMS Session.
      */
-	private int _sessionAcknowledgeMode =  Session.AUTO_ACKNOWLEDGE;
+	private int sessionAcknowledgeMode =  Session.AUTO_ACKNOWLEDGE;
 	
     
     /**
      * The default destination to use on send operations that do not specify an explicit destination.
      */
-    private Destination _defaultDestination;
+    private Destination defaultDestination;
     
     /**
      * Delegate mangement of JNDI lookups and dynamic destination creation to a JmsAdmin implementation.
      */
-	private JmsAdmin _jmsAdmin;
+	private JmsAdmin jmsAdmin;
     
     /**
      * The delivery mode to use when sending a message.  Only used if isExplicitQosEnabled = true.
      * 
      */
-    private int _deliveryMode;
+    private int deliveryMode;
     
     /**
      * The priority of the message.  Only used if isExplicitQosEnabled = true.
      */
-    private int _priority;
+    private int priority;
 	
     /**
      * The message's lifetime in milliseconds.  Only used if isExplicitQosEnabled = true.
      */
-    private long _timeToLive;
+    private long timeToLive;
     
     /**
      * Use the default or explicit QOS parameters.
      */
-    private boolean _explicitQosEnabled;
+    private boolean explicitQosEnabled;
     
 	/**
 	 * Enable creation of dynamic destinations.
 	 */
-	private boolean _enabledDynamicDestinations = false;
+	private boolean dynamicDestinationEnabled = false;
     
 	/**
 	 * By default usee the Point-to-Point domain.
 	 */
-	private boolean _isPubSubDomain = false;
+	private boolean isPubSubDomain = false;
 	    
     protected final Log logger = LogFactory.getLog(getClass());
     
@@ -121,15 +121,15 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 * @return the connection factory.
 	 */
 	public ConnectionFactory getConnectionFactory() {
-		return _cf;
+		return cf;
 	}
 
 	/**
      * Set the connection factory used for sending messages.
 	 * @param cf the connection factory.
 	 */
-	public void setConnectionFactory(ConnectionFactory cf) {
-		_cf = cf;
+	public void setConnectionFactory(ConnectionFactory c) {
+		cf = c;
 	}
 
 
@@ -138,10 +138,10 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 *
 	 */
 	public void afterPropertiesSet() {
-		if (_cf == null) {
+		if (cf == null) {
 			throw new IllegalArgumentException("ConnectionFactory is required");
 		}
-		if (_jmsAdmin == null)
+		if (jmsAdmin == null)
 		{
 			logger.info("Using DefaultJmsAdmin implementation");
 			//TODO This should be a singleton......since it has a cache of
@@ -159,7 +159,7 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
      * @return The ack mode used for sending a message.
      */
 	public int getSessionAcknowledgeMode() {
-		return _sessionAcknowledgeMode;
+		return sessionAcknowledgeMode;
 	}
     
     /**
@@ -174,7 +174,7 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
      * @param ackMode The acknowledgement mode.
      */
     public void setSessionAcknowledgeMode(int ackMode) {
-        _sessionAcknowledgeMode = ackMode;
+        sessionAcknowledgeMode = ackMode;
     }
 
 	/**
@@ -182,7 +182,7 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 * @return Return true if using a transacted JMS session, false otherwise.
 	 */
 	public boolean isSessionTransacted() {
-		return _sessionTransacted;
+		return sessionTransacted;
 	}
 
     /**
@@ -195,21 +195,21 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
      * @param txMode The transaction mode.
      */
 	 public void setSessionTransacted(boolean txMode) {
-		_sessionTransacted = txMode;
+		sessionTransacted = txMode;
 	 }
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public JmsAdmin getJmsAdmin() {
-		return _jmsAdmin;
+		return jmsAdmin;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setJmsAdmin(JmsAdmin admin) {
-		_jmsAdmin = admin;
+		jmsAdmin = admin;
 	}
 
 	/**
@@ -217,8 +217,8 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 * be created dynamically.
 	 * @return true if enabled.
 	 */
-	public boolean isEnabledDynamicDestinations() {
-		return _enabledDynamicDestinations;
+	public boolean isDynamicDestinationEnabled() {
+		return dynamicDestinationEnabled;
 	}
 
 	/**
@@ -227,7 +227,7 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 * @param b true to enable.
 	 */
 	public void setEnabledDynamicDestinations(boolean b) {
-		_enabledDynamicDestinations = b;
+		dynamicDestinationEnabled = b;
 	}
 
 	/**
@@ -241,7 +241,7 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 * otherwise the Point-to-Point domain (Queues) are used.
 	 */
 	public boolean isPubSubDomain() {
-		return _isPubSubDomain;
+		return isPubSubDomain;
 	}
 
 	/**
@@ -251,27 +251,27 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 * Point-to-Point domain (Queues)
 	 */
 	public void setPubSubDomain(boolean b) {
-		_isPubSubDomain = b;
+		isPubSubDomain = b;
 	}
 
     public int getDeliveryMode()
     {
-        return _deliveryMode;
+        return deliveryMode;
     }
 
     public boolean isExplicitQosEnabled()
     {
-        return _explicitQosEnabled;
+        return explicitQosEnabled;
     }
 
     public int getPriority()
     {
-        return _priority;
+        return priority;
     }
 
     public long getTimeToLive()
     {
-        return _timeToLive;
+        return timeToLive;
     }
 
     /**
@@ -280,7 +280,7 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
      */
     public void setDeliveryMode(int i)
     {
-        _deliveryMode = i;
+        deliveryMode = i;
     }
 
     /**
@@ -290,25 +290,25 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
      */
     public void setExplicitQosEnabled(boolean b)
     {
-        _explicitQosEnabled = b;
+        explicitQosEnabled = b;
     }
 
     /**
      * Set the priority of the message to be send.
      * @param priority of the message.
      */
-    public void setPriority(int priority)
+    public void setPriority(int p)
     {
-        _priority = priority;
+        priority = p;
     }
 
     /**
      * Set the message's lifetime in milliseconds.
      * @param timeToLive message's lifetime.
      */
-    public void setTimeToLive(long timeToLive)
+    public void setTimeToLive(long ttl)
     {
-        _timeToLive = timeToLive;
+        timeToLive = ttl;
     }
 
     /**
@@ -318,12 +318,12 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
      */
     public Destination getDefaultDestination()
     {
-        return _defaultDestination;
+        return defaultDestination;
     }
 
     public void setDefaultDestination(Destination destination)
     {
-        _defaultDestination = destination;
+        defaultDestination = destination;
     }
     
     /**
@@ -367,7 +367,7 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
     }
 
     public JmsConverter getJmsConverter() {
-        return _jmsConverter;
+        return jmsConverter;
     }
 
     /**
@@ -375,7 +375,7 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
      * @param converter The JMS converter
      */
     public void setJmsConverter(JmsConverter converter) {
-        _jmsConverter = converter;
+        jmsConverter = converter;
     }
 
 }

@@ -28,6 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Sets up a JMS Connection and exposes it for bean references.
+ * 
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  */
 public class JmsConnectionFactoryBean

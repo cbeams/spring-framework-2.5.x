@@ -32,6 +32,8 @@ import javax.jms.Session;
  *
  * If extra parameters need to be set, such as the delivery mode, priority or time
  * to live, override any of the getters with your own implementation.
+ * 
+ * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  */
 public interface MessageCreator {
 

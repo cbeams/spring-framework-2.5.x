@@ -170,7 +170,7 @@ public class JmsSender11 extends AbstractJmsSender
                 destination =
                     (Destination) getJmsAdmin().lookup(
                         destinationName,
-                        isEnabledDynamicDestinations(),
+                        isDynamicDestinationEnabled(),
                         isPubSubDomain());
             }
             if (logger.isInfoEnabled())

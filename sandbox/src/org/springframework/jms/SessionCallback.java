@@ -25,7 +25,7 @@ import javax.jms.Session;
  * The typical implementatino will perform multiple operations on the 
  * JMS Session 
  *
- * @author Mark Pollack
+ * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  */
 public interface SessionCallback
 {

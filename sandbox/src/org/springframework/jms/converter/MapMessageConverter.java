@@ -41,7 +41,7 @@ import javax.jms.Session;
  * inspiration.
  * 
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
- * @author <a href="mailto:jawaid.hakim@codestreet.com">jawaid.hakim </a>
+ * @author <a href="mailto:jawaid.hakim@codestreet.com">Jawaid Hakim</a>
  */
 public class MapMessageConverter implements JmsConverter {
 

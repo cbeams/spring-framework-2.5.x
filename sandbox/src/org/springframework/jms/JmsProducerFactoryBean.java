@@ -35,32 +35,32 @@ public class JmsProducerFactoryBean
     implements FactoryBean, InitializingBean, DisposableBean
 {
 
-    private MessageProducer _messageProducer;
+    private MessageProducer messageProducer;
     
-    private Session _session;
+    private Session session;
     
-    private Destination _jndiDestination;
+    private Destination jndiDestination;
     
-    private String _topicDestination;
+    private String topicDestination;
     
-    private String _queueDestination;
+    private String queueDestination;
     
-    private int _deliveryMode = Message.DEFAULT_DELIVERY_MODE;
+    private int deliveryMode = Message.DEFAULT_DELIVERY_MODE;
     
-    private int _priority = Message.DEFAULT_PRIORITY;
+    private int priority = Message.DEFAULT_PRIORITY;
     
-    private long _timeToLive = Message.DEFAULT_TIME_TO_LIVE;
+    private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
     
-    private boolean _disableMessageTimestamp = false;
+    private boolean disableMessageTimestamp = false;
 
-    private boolean _disableMessageID = false;
+    private boolean disableMessageID = false;
     
     
     protected final Log logger = LogFactory.getLog(getClass());
     
     public Object getObject() throws Exception
     {
-        return _messageProducer;
+        return messageProducer;
     }
 
     public Class getObjectType()
@@ -76,20 +76,20 @@ public class JmsProducerFactoryBean
 
     public void afterPropertiesSet() throws Exception
     {    
-        if (_session == null){
+        if (session == null){
             throw new IllegalArgumentException("Did not set required JMS session property");        
         }
         logger.info("Creating JMS Producer");
         int destCount = 0;
-        if (_jndiDestination != null)
+        if (jndiDestination != null)
         {
             destCount++;
         }
-        if (_topicDestination != null)
+        if (topicDestination != null)
         {
             destCount++;
         }       
-        if (_queueDestination != null)
+        if (queueDestination != null)
         {
             destCount ++;
         }
@@ -97,26 +97,26 @@ public class JmsProducerFactoryBean
         {
             throw new IllegalArgumentException("Must only specify one of jndi, queue, or topic destination");
         }
-        if (_jndiDestination != null)
+        if (jndiDestination != null)
         {
-            _messageProducer = _session.createProducer(_jndiDestination);
-        } else if (_topicDestination != null)
+            messageProducer = session.createProducer(jndiDestination);
+        } else if (topicDestination != null)
         {
-            _messageProducer = _session.createProducer(_session.createTopic(_topicDestination));
-        } else if (_queueDestination != null)
+            messageProducer = session.createProducer(session.createTopic(topicDestination));
+        } else if (queueDestination != null)
         {
-            _messageProducer = _session.createProducer(_session.createQueue(_queueDestination));
+            messageProducer = session.createProducer(session.createQueue(queueDestination));
         } else
         {
             logger.info("Creating a MessageProducer without a destination.  Just specify destination on each " +                "send operation.");
-            _messageProducer = _session.createProducer(null);
+            messageProducer = session.createProducer(null);
         }
   
-        _messageProducer.setDeliveryMode(_deliveryMode);
-        _messageProducer.setPriority(_priority);
-        _messageProducer.setTimeToLive(_timeToLive);
-        _messageProducer.setDisableMessageID(_disableMessageID);
-        _messageProducer.setDisableMessageTimestamp(_disableMessageTimestamp);
+        messageProducer.setDeliveryMode(deliveryMode);
+        messageProducer.setPriority(priority);
+        messageProducer.setTimeToLive(timeToLive);
+        messageProducer.setDisableMessageID(disableMessageID);
+        messageProducer.setDisableMessageTimestamp(disableMessageTimestamp);
         
         
      
@@ -126,7 +126,7 @@ public class JmsProducerFactoryBean
     public void destroy() throws Exception
     {
         logger.info("Closing JMS Session");
-        _session.close();
+        session.close();
     }
 
     /**
@@ -134,7 +134,7 @@ public class JmsProducerFactoryBean
      */
     public void setDeliveryMode(int i)
     {
-        _deliveryMode = i;
+        deliveryMode = i;
     }
 
     /**
@@ -142,7 +142,7 @@ public class JmsProducerFactoryBean
      */
     public void setPriority(int i)
     {
-        _priority = i;
+        priority = i;
     }
 
     /**
@@ -150,15 +150,15 @@ public class JmsProducerFactoryBean
      */
     public void setTimeToLive(long l)
     {
-        _timeToLive = l;
+        timeToLive = l;
     }
 
     /**
      * @param session
      */
-    public void setSession(Session session)
+    public void setSession(Session s)
     {
-        _session = session;
+        session = s;
     }
 
     /**
@@ -166,7 +166,7 @@ public class JmsProducerFactoryBean
      */
     public void setDisableMessageID(boolean b)
     {
-        _disableMessageID = b;
+        disableMessageID = b;
     }
 
     /**
@@ -174,15 +174,15 @@ public class JmsProducerFactoryBean
      */
     public void setDisableMessageTimestamp(boolean b)
     {
-        _disableMessageTimestamp = b;
+        disableMessageTimestamp = b;
     }
 
     /**
      * @param destination
      */
-    public void setJndiDestination(Destination destination)
+    public void setJndiDestination(Destination d)
     {
-        _jndiDestination = destination;
+        jndiDestination = d;
     }
 
     /**
@@ -190,23 +190,25 @@ public class JmsProducerFactoryBean
      */
     public void setMessageProducer(MessageProducer producer)
     {
-        _messageProducer = producer;
+        messageProducer = producer;
     }
 
     /**
-     * @param string
+     * Set the destination as a queue
+     * @param d queue name
      */
-    public void setQueueDestination(String string)
+    public void setQueueDestination(String d)
     {
-        _queueDestination = string;
+        queueDestination = d;
     }
 
     /**
-     * @param string
+     * Set the destination as a topic
+     * @param d destination name
      */
-    public void setTopicDestination(String string)
+    public void setTopicDestination(String d)
     {
-        _topicDestination = string;
+        topicDestination = d;
     }
 
 }

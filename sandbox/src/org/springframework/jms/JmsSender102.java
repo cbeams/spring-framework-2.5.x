@@ -125,7 +125,7 @@ public class JmsSender102 extends AbstractJmsSender {
                 topic =
                     (Topic) getJmsAdmin().lookup(
                         topicName,
-                        isEnabledDynamicDestinations(),
+                        isDynamicDestinationEnabled(),
                         isPubSubDomain());
             }
             TopicPublisher publisher = topicSession.createPublisher(topic);
@@ -195,7 +195,7 @@ public class JmsSender102 extends AbstractJmsSender {
                 queue =
                     (Queue) getJmsAdmin().lookup(
                         queueName,
-                        isEnabledDynamicDestinations(),
+                        isDynamicDestinationEnabled(),
                         isPubSubDomain());
             }
             if (logger.isInfoEnabled()) {

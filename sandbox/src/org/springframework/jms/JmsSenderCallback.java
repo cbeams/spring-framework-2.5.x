@@ -28,7 +28,7 @@ import javax.jms.Session;
  * to the appropriate domain implementation, either QueueSender or TopicPublisher,
  * to send a message.
  *
- * @author Mark Pollack
+ * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  */
 public interface JmsSenderCallback
 {

@@ -26,24 +26,25 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 /**
  * Create a JMS Session from a Connection.
+ * 
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  */
 public class JmsSessionFactoryBean
     implements FactoryBean, InitializingBean, DisposableBean
 {
-    private Connection _connection;
+    private Connection connection;
     
-    private Session _session;
+    private Session session;
     
-    private boolean _transacted;
+    private boolean transacted;
     
-    private int _acknowledgeMode;
+    private int acknowledgeMode;
     
     protected final Log logger = LogFactory.getLog(getClass());
     
     public Object getObject() throws Exception
     {
-        return _session;
+        return session;
     }
 
     public Class getObjectType()
@@ -59,42 +60,45 @@ public class JmsSessionFactoryBean
 
     public void afterPropertiesSet() throws Exception
     {    
-        if (_connection == null){
+        if (connection == null){
             throw new IllegalArgumentException("Did not set required JMS connection property");        
         }
         logger.info("Creating JMS Session");
-        _session = _connection.createSession(_transacted, _acknowledgeMode);
+        session = connection.createSession(transacted, acknowledgeMode);
     }
 
 
     public void destroy() throws Exception
     {
         logger.info("Closing JMS Session");
-        _session.close();
+        session.close();
     }
 
     /**
-     * @param i
+     * Set the acknowledgement mode
+     * @param i ack mode
      */
     public void setAcknowledgeMode(int i)
     {
-        _acknowledgeMode = i;
+        acknowledgeMode = i;
     }
 
     /**
-     * @param b
+     * Set the transaction attribute of the session.
+     * @param b true or false
      */
     public void setTransacted(boolean b)
     {
-        _transacted = b;
+        transacted = b;
     }
 
     /**
-     * @param connection
+     * Set the connection to use to create a session.
+     * @param c The JMS connection
      */
-    public void setConnection(Connection connection)
+    public void setConnection(Connection c)
     {
-        _connection = connection;
+        connection = c;
     }
 
 }
