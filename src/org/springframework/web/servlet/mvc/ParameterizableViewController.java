@@ -82,14 +82,18 @@ public class ParameterizableViewController extends AbstractController {
 		return viewName;
 	}
 
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
-		return new ModelAndView(this.viewName);
-	}
-
 	protected void initApplicationContext() {
 		if (this.viewName == null) {
 			throw new IllegalArgumentException("viewName is required");
 		}
+	}
+
+	/**
+	 * Return a ModelAndView object with the specified view name.
+	 */
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		return new ModelAndView(this.viewName);
 	}
 
 }
