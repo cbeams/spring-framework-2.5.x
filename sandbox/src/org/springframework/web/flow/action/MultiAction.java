@@ -23,7 +23,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CachingMapTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.ActionExecutionException;
-import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
@@ -120,8 +119,7 @@ public class MultiAction extends AbstractAction {
 			String executeMethodName = (String)key;
 			try {
 				return getDelegate().getClass().getMethod(executeMethodName, new Class[] { RequestContext.class });
-			}
-			catch (NoSuchMethodException e) {
+			} catch (NoSuchMethodException e) {
 				throw new ActionExecutionException(
 						"Unable to resolve action execute method with signature 'public Event " + executeMethodName
 								+ "(RequestContext context)' - make sure the method name is correct "
@@ -157,8 +155,7 @@ public class MultiAction extends AbstractAction {
 								+ "' returned an object of type " + result.getClass());
 			}
 			return (Event)result;
-		}
-		catch (InvocationTargetException e) {
+		} catch (InvocationTargetException e) {
 			Throwable t = e.getTargetException();
 			if (t instanceof Exception) {
 				throw (Exception)e.getTargetException();
@@ -226,8 +223,7 @@ public class MultiAction extends AbstractAction {
 	 */
 	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
 		public String getMethodName(RequestContext context, MultiAction action) {
-			Assert.isInstanceOf(ActionState.class, context.getCurrentState());
-			ActionStateAction actionStateAction = ((ActionState)context.getCurrentState()).getAction(action);
+			ActionStateAction actionStateAction = action.getActionStateAction(context);
 			if (StringUtils.hasText(actionStateAction.getMethod())) {
 				// use specified execute method name
 				return actionStateAction.getMethod();

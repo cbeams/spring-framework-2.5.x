@@ -20,7 +20,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 import org.springframework.web.flow.Action;
+import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.SimpleEvent;
@@ -117,6 +120,26 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 */
 	protected Event result(String resultId, Map parameters) {
 		return new SimpleEvent(this, resultId, parameters);
+	}
+
+	/**
+	 * Returns the parameter object that provides contextual information about this action's use within
+	 * the calling action state.
+	 * @param context the current request context
+	 * @return the action state action
+	 */
+	protected ActionStateAction getActionStateAction(RequestContext context) {
+		return getActionState(context).getAction(this);
+	}
+
+	/**
+	 * Returns the calling action state
+	 * @param context the request context
+	 * @return the current state (the calling action state)
+	 */
+	protected ActionState getActionState(RequestContext context) {
+		Assert.isInstanceOf(ActionState.class, context.getCurrentState());
+		return ((ActionState)context.getCurrentState());
 	}
 
 	// action pre and post execution logic
