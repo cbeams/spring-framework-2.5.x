@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.111 2004-03-18 15:00:38 jhoeller Exp $
+$Id: changelog.txt,v 1.112 2004-03-19 07:48:05 jhoeller Exp $
 
 
 Changes in version 1.0 final (20.3.2003)
@@ -11,12 +11,15 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * added support for directly setting array, List and Map elements to BeanWrapperImpl
+* added support for fetching a Set element via an index to BeanWrapperImpl, applying the index to the Set Iterator
+* removed BeanWrapperImpl's "invoke" method which lacked sophistication like support for overloaded methods
 * fixed BeanWrapperImpl's custom editor detection for indexed and mapped properties
 * fixed BeanWrapperImpl's default editor registration to use classes rather than instances, for thread-safety
 * fixed BeanWrapperImpl's conversion of Lists to arrays to correctly convert to primitive arrays
 * refined AbstractAutowireCapableBeanFactory's use of synchronization, particularly with custom editors
 * refined AbstractAutowireCapableBeanFactory's "destroyBean" implementation to detect "shutdown(boolean force)" methods
 * fixed type difference weight algorithm in AbstractAutowireCapableBeanFactory to ignore non-matching arguments
+* reworked DefaultListableBeanFactory's bean definition registry to respect the order of registration
 * added "ignoreUnresolvablePlaceholders" property to PropertyPlaceholderConfigurer
 * reworked PropertiesFactoryBean to work with PropertiesPersister strategy
 * trim the text value of a <prop> tag to avoid unwanted whitespace caused by typical XML formatting
@@ -75,6 +78,7 @@ Package org.springframework.orm
 
 Package org.springframework.scheduling
 * fixed SchedulerFactoryBean's JobDetail auto-registration when multiple triggers refer to the same JobDetail
+* added TimerTaskExecutionException to be thrown by TimerTask impls, analogous to Quartz' JobExecutionException
 
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager does not attempt rollback when afterCompletion callback throws an exception
