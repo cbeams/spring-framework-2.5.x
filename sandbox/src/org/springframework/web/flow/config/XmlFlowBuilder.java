@@ -129,7 +129,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String CLASSREF_ATTRIBUTE = "classref";
 
 	private static final String NAME_ATTRIBUTE = "name";
-	
+
+	private static final String METHOD_ATTRIBUTE = "method";
+
 	private static final String VALUE_ATTRIBUTE = "value";
 
 	private static final String VIEW_STATE_ELEMENT = "view-state";
@@ -425,6 +427,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		ActionStateAction actionStateAction = new ActionStateAction(targetAction);
 		if (element.hasAttribute(NAME_ATTRIBUTE)) {
 			actionStateAction.setName(element.getAttribute(NAME_ATTRIBUTE));
+		}
+		if (element.hasAttribute(METHOD_ATTRIBUTE)) {
+			actionStateAction.setMethod(element.getAttribute(METHOD_ATTRIBUTE));
 		}
 		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
 		for (int i = 0; i < propertyElements.size(); i++) {

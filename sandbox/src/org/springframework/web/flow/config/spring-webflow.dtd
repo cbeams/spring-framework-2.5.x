@@ -81,6 +81,12 @@
 <!ATTLIST action name CDATA #IMPLIED>
 
 <!--
+	Name of the target method to be invoked to execute this action.  The method's signature must
+	be of the form: 'public Event ${method}(RequestContext)'
+-->
+<!ATTLIST action method CDATA #IMPLIED>
+
+<!--
 	A property associated with an action in an action state. Properties are simple strings that 
 	allow you to annotate the action in the context of the state it is being linked with.
 	For example, the 'caption' property might serve a GUI tooltip or logging statement, and

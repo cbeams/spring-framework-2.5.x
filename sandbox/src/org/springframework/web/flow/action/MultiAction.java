@@ -228,9 +228,9 @@ public class MultiAction extends AbstractAction {
 		public String getMethodName(RequestContext context, MultiAction action) {
 			Assert.isInstanceOf(ActionState.class, context.getCurrentState());
 			ActionStateAction actionStateAction = ((ActionState)context.getCurrentState()).getAction(action);
-			if (StringUtils.hasText(actionStateAction.getExecuteMethodName())) {
+			if (StringUtils.hasText(actionStateAction.getMethod())) {
 				// use specified execute method name
-				return actionStateAction.getExecuteMethodName();
+				return actionStateAction.getMethod();
 			}
 			else {
 				// use current state name as method name

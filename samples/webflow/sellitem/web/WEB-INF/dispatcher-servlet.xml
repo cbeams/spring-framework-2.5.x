@@ -17,7 +17,7 @@
 		Not how you can just change the flow execution storage strategy without any impact
 		on the views!
 	-->	
-	<bean id="flowExecutionManager" class="org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager">
+	<bean id="flowExecutionManager" class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
 		<property name="flowLocator">
 			<bean class="org.springframework.web.flow.config.BeanFactoryFlowServiceLocator"/>
 		</property>

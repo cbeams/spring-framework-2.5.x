@@ -430,13 +430,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates an action state action that has a property that indicates which
 	 * method should be invoked on the target action when the state is entered.
-	 * @param executeMethodName the method name, with the signature
+	 * @param methodName the method name, with the signature
 	 *        <code>Event ${methodName}(RequestContext context)</code>
 	 * @return the action state action
 	 */
-	protected ActionStateAction method(String executeMethodName, Action action) {
+	protected ActionStateAction method(String methodName, Action action) {
 		ActionStateAction stateAction = new ActionStateAction(action);
-		stateAction.setExecuteMethodName(executeMethodName);
+		stateAction.setMethod(methodName);
 		return stateAction;
 	}
 

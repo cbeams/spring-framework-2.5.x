@@ -59,7 +59,7 @@ public class ActionStateAction {
 	 * public Event ${executeMethodName}(RequestContext context)
 	 * </pre>
 	 */
-	public static final String EXECUTE_METHOD_NAME_PROPERTY = "executeMethodName";
+	public static final String METHOD_PROPERTY = "method";
 
 	/**
 	 * The owning state that executes the action when entered.
@@ -192,11 +192,11 @@ public class ActionStateAction {
 	/**
 	 * Sets the name of the handler method on the target action instance to
 	 * invoke when this action is executed. Only used by multi-actions.
-	 * @param executeMethodName the method name, with the signature
+	 * @param methodName the method name, with the signature
 	 *        <code>Event ${methodName}(RequestContext context)</code>
 	 */
-	public void setExecuteMethodName(String executeMethodName) {
-		setProperty(EXECUTE_METHOD_NAME_PROPERTY, executeMethodName);
+	public void setMethod(String methodName) {
+		setProperty(METHOD_PROPERTY, methodName);
 	}
 
 	/**
@@ -236,8 +236,8 @@ public class ActionStateAction {
 	 * multi-actions.
 	 * @return the execute method name
 	 */
-	public String getExecuteMethodName() {
-		return (String)getProperty(EXECUTE_METHOD_NAME_PROPERTY);
+	public String getMethod() {
+		return (String)getProperty(METHOD_PROPERTY);
 	}
 
 	/**
