@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Helper class that simplifies JNDI operations. It provides methods to lookup
- * and bind objects, and allows implementations of the ContextCallback interface
+ * and bind objects, and allows implementations of the JndiCallback interface
  * to perform any operation they like with a JNDI naming context provided.
  *
  * <p>This is the central class in this package. It is analogous to the
@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see ContextCallback
+ * @see JndiCallback
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: JndiTemplate.java,v 1.4 2004-02-09 10:46:09 jhoeller Exp $
+ * @version $Id: JndiTemplate.java,v 1.5 2004-03-17 08:51:28 jhoeller Exp $
  */
 public class JndiTemplate {
 	
@@ -63,12 +63,12 @@ public class JndiTemplate {
 
 	/**
 	 * Execute the given JNDI context callback implementation.
-	 * @param contextCallback ContextCallback implementation
+	 * @param contextCallback JndiCallback implementation
 	 * @return a result object returned by the callback, or null
 	 * @throws NamingException thrown by the callback implementation
 	 * @see #createInitialContext
 	 */
-	public Object execute(ContextCallback contextCallback) throws NamingException {
+	public Object execute(JndiCallback contextCallback) throws NamingException {
 		Context ctx = createInitialContext();
 		try {
 			return contextCallback.doInContext(ctx);
@@ -95,7 +95,7 @@ public class JndiTemplate {
 	}
 
 	/**
-	 * Lookup the object with the given name in the current JNDI context.
+	 * Look up the object with the given name in the current JNDI context.
 	 * @param name the JNDI name of the object
 	 * @return object found (cannot be null; if a not so well-behaved
 	 * JNDI implementations returns null, a NamingException gets thrown)
@@ -103,12 +103,13 @@ public class JndiTemplate {
 	 * name bound to JNDI
 	 */
 	public Object lookup(final String name) throws NamingException {
-		return execute(new ContextCallback() {
+		return execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
 				logger.debug("Looking up JNDI object with name '" + name + "'");
 				Object located = ctx.lookup(name);
 				if (located == null) {
-					throw new NamingException("JNDI object not found: JNDI implementation returned null");
+					throw new NamingException("JNDI object with '" + name +
+																		"' not found: JNDI implementation returned null");
 				}
 				return located;
 			}
@@ -122,7 +123,7 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by JNDI, mostly name already bound
 	 */
 	public void bind(final String name, final Object object) throws NamingException {
-		execute(new ContextCallback() {
+		execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
 				logger.info("Binding JNDI object with name '" + name + "'");
 				ctx.bind(name, object);
@@ -137,7 +138,7 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by JNDI, mostly name not found
 	 */
 	public void unbind(final String name) throws NamingException {
-		execute(new ContextCallback() {
+		execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
 				logger.info("Unbinding JNDI object with name '" + name + "'");
 				ctx.unbind(name);
