@@ -143,7 +143,6 @@
 
 	<taskdef resource="org/apache/catalina/ant/catalina.tasks" onerror="ignore">
 		<classpath>
-			<fileset file="${commons.logging.jar}" />
 			<filelist dir="${tomcat.dir}/server/lib">
 				<file name="catalina.jar"/>
 				<file name="catalina-ant.jar"/>
