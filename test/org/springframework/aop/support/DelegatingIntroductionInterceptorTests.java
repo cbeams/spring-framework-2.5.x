@@ -20,7 +20,7 @@ import org.springframework.core.TimeStamped;
  * 
  * @author Rod Johnson
  * @since 13-May-2003
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DelegatingIntroductionInterceptorTests extends TestCase {
 
@@ -54,7 +54,7 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		tsControl.setReturnValue(timestamp, 1);
 		tsControl.replay();
 
-		factory.addAdvisor(0, new SimpleIntroductionAdvice(new DelegatingIntroductionInterceptor(ts)));
+		factory.addAdvisor(0, new SimpleIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
 		
 		TimeStamped tsp = (TimeStamped) factory.getProxy();
 		assertTrue(tsp.getTimeStamp() == timestamp);
@@ -78,7 +78,7 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		TestBean target = new TestBean();
 		
 		ProxyFactory pf = new ProxyFactory(target);
-		pf.addAdvisor(0, new SimpleIntroductionAdvice(ii));;
+		pf.addAdvisor(0, new SimpleIntroductionAdvisor(ii));;
 		
 		//assertTrue(Arrays.binarySearch(pf.getProxiedInterfaces(), TimeStamped.class) != -1);
 		TimeStamped ts = (TimeStamped) pf.getProxy();
@@ -105,7 +105,7 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		TestBean target = new TestBean();
 		
 		ProxyFactory pf = new ProxyFactory(target);
-		InterceptionIntroductionAdvisor ia = new SimpleIntroductionAdvice(ii);
+		InterceptionIntroductionAdvisor ia = new SimpleIntroductionAdvisor(ii);
 		assertTrue(ia.isPerInstance());
 		pf.addAdvisor(0, ia);
 		
@@ -126,7 +126,7 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		// Note that we need to construct a new proxy factory,
 		// or suppress the interface on the proxy factory
 		pf = new ProxyFactory(target);
-		pf.addAdvisor(0, new SimpleIntroductionAdvice(ii));
+		pf.addAdvisor(0, new SimpleIntroductionAdvisor(ii));
 		Object o = pf.getProxy();
 		assertTrue(!(o instanceof TimeStamped));
 	}
@@ -161,7 +161,7 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		TestBean target = new TargetClass(t + 1);
 	
 		ProxyFactory pf = new ProxyFactory(target);
-		pf.addAdvisor(0, new SimpleIntroductionAdvice(ii));
+		pf.addAdvisor(0, new SimpleIntroductionAdvisor(ii));
 	
 		TimeStamped ts = (TimeStamped) pf.getProxy();
 		// From introduction interceptor, not target

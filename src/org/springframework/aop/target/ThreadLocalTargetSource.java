@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.SimpleIntroductionAdvice;
+import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
@@ -31,7 +31,7 @@ import org.springframework.beans.factory.DisposableBean;
  * tested in production.</b>
  *
  * @author Rod Johnson
- * @version $Id: ThreadLocalTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: ThreadLocalTargetSource.java,v 1.2 2003-12-02 22:28:10 johnsonr Exp $
  */
 public class ThreadLocalTargetSource extends PrototypeTargetSource implements ThreadLocalTargetSourceStats, DisposableBean {
 	
@@ -133,7 +133,7 @@ public class ThreadLocalTargetSource extends PrototypeTargetSource implements Th
 	 */
 	public InterceptionIntroductionAdvisor getStatsMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
-		return new SimpleIntroductionAdvice(dii, ThreadLocalTargetSourceStats.class);
+		return new SimpleIntroductionAdvisor(dii, ThreadLocalTargetSourceStats.class);
 	}
 
 }

@@ -14,7 +14,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * TODO reentrance tests
  * @author Rod Johnson
- * @version $Id: ThreadLocalMethodInvocationFactory.java,v 1.3 2003-11-30 17:59:22 johnsonr Exp $
+ * @version $Id: ThreadLocalMethodInvocationFactory.java,v 1.4 2003-12-02 22:28:40 johnsonr Exp $
  */
 public class ThreadLocalMethodInvocationFactory extends SimpleMethodInvocationFactory {
 	
@@ -27,10 +27,10 @@ public class ThreadLocalMethodInvocationFactory extends SimpleMethodInvocationFa
 	
 	public MethodInvocation getMethodInvocation(AdvisedSupport advised, Object proxy, Method method, Class targetClass, Object[] args, List interceptorsAndDynamicInterceptionAdvice) {
 		
-		MethodInvocationImpl mii = (MethodInvocationImpl) instance.get();
+		ReflectiveMethodInvocation mii = (ReflectiveMethodInvocation) instance.get();
 		// Need to use OLD to replace so as not to zap existing
 		if (mii == null) {
-			mii = new MethodInvocationImpl();
+			mii = new ReflectiveMethodInvocation();
 			instance.set(mii);
 		}
 
@@ -47,7 +47,7 @@ public class ThreadLocalMethodInvocationFactory extends SimpleMethodInvocationFa
 
 	public void release(MethodInvocation invocation) {
 		// TODO move into AOP Alliance
-		((MethodInvocationImpl) invocation).clear();
+		((ReflectiveMethodInvocation) invocation).clear();
 	}
 
 	

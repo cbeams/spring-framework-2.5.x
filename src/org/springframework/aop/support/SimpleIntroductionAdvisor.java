@@ -14,22 +14,22 @@ import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.AopConfigException;
 
 /**
- * Simple IntroductionAdvice implementation that by default applies to any class.
+ * Simple IntroductionAdvisor implementation that by default applies to any class.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: SimpleIntroductionAdvice.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: SimpleIntroductionAdvisor.java,v 1.1 2003-12-02 22:28:10 johnsonr Exp $
  */
-public class SimpleIntroductionAdvice implements InterceptionIntroductionAdvisor, ClassFilter {
+public class SimpleIntroductionAdvisor implements InterceptionIntroductionAdvisor, ClassFilter {
 	
 	private IntroductionInterceptor interceptor;
 	
 	private Set interfaces = new HashSet();
 	
-	public SimpleIntroductionAdvice(IntroductionInterceptor interceptor) {
+	public SimpleIntroductionAdvisor(IntroductionInterceptor interceptor) {
 		this.interceptor = interceptor;
 	}
 	
-	public SimpleIntroductionAdvice(IntroductionInterceptor interceptor, Class clazz) throws AopConfigException {
+	public SimpleIntroductionAdvisor(IntroductionInterceptor interceptor, Class clazz) throws AopConfigException {
 		this(interceptor);
 		addInterface(clazz);
 	}
@@ -37,7 +37,7 @@ public class SimpleIntroductionAdvice implements InterceptionIntroductionAdvisor
 	/**
 	 * Wrap this interceptor and introduce all interfaces.
 	 */
-	public SimpleIntroductionAdvice(DelegatingIntroductionInterceptor dii) {
+	public SimpleIntroductionAdvisor(DelegatingIntroductionInterceptor dii) {
 		this((IntroductionInterceptor) dii);
 		for (int i = 0; i < dii.getIntroducedInterfaces().length; i++) {
 			Class intf = dii.getIntroducedInterfaces()[i];

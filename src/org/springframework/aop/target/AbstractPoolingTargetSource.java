@@ -6,7 +6,7 @@
 package org.springframework.aop.target;
 
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.SimpleIntroductionAdvice;
+import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.DisposableBean;
  * TODO inheritance is messy
  *
  * @author Rod Johnson
- * @version $Id: AbstractPoolingTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: AbstractPoolingTargetSource.java,v 1.2 2003-12-02 22:28:10 johnsonr Exp $
  */
 public abstract class AbstractPoolingTargetSource extends PrototypeTargetSource implements PoolingConfig, DisposableBean {
 	
@@ -110,9 +110,9 @@ public abstract class AbstractPoolingTargetSource extends PrototypeTargetSource 
 
 	
 	
-	public SimpleIntroductionAdvice getPoolingConfigMixin() {
+	public SimpleIntroductionAdvisor getPoolingConfigMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
-		return new SimpleIntroductionAdvice(dii, PoolingConfig.class);
+		return new SimpleIntroductionAdvisor(dii, PoolingConfig.class);
 	}
 
 }

@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.interceptor.AbstractQaInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
-import org.springframework.aop.support.SimpleIntroductionAdvice;
+import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
  * Also tests AdvisedSupport superclass.
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Id: ProxyFactoryTests.java,v 1.6 2003-11-30 17:17:33 johnsonr Exp $
+ * @version $Id: ProxyFactoryTests.java,v 1.7 2003-12-02 22:28:10 johnsonr Exp $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -84,7 +84,7 @@ public class ProxyFactoryTests extends TestCase {
 		
 		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
 		
-		factory.addAdvisor(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
+		factory.addAdvisor(0, new SimpleIntroductionAdvisor(ti, TimeStamped.class));
 		
 		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
 		
