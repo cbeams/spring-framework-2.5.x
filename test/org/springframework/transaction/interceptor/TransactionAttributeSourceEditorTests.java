@@ -19,7 +19,7 @@ import org.springframework.transaction.TransactionDefinition;
  * FQN.Method=tx attribute representation
  * @author Rod Johnson
  * @since 26-Apr-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TransactionAttributeSourceEditorTests extends TestCase {
 
@@ -57,9 +57,10 @@ public class TransactionAttributeSourceEditorTests extends TestCase {
 		TransactionAttributeSourceEditor pe = new TransactionAttributeSourceEditor();
 		// TODO need FQN?
 		pe.setAsText("java.lang.Object.hashCode=PROPAGATION_REQUIRED\n" +
-			"java.lang.Object.equals=PROPAGATION_MANDATORY\n" +
-		  "java.lang.Object.wait=PROPAGATION_SUPPORTS\n" +
-			"java.lang.Object.not*=PROPAGATION_REQUIRED");
+		             "java.lang.Object.equals=PROPAGATION_MANDATORY\n" +
+		             "java.lang.Object.wait=PROPAGATION_SUPPORTS\n" +
+		             "java.lang.Object.notify=PROPAGATION_SUPPORTS\n" +
+		             "java.lang.Object.not*=PROPAGATION_REQUIRED");
 		TransactionAttributeSource tas = (TransactionAttributeSource) pe.getValue();
 
 		checkTransactionProperties(tas, Object.class.getMethod("hashCode", null),
@@ -73,7 +74,7 @@ public class TransactionAttributeSourceEditorTests extends TestCase {
 		checkTransactionProperties(tas, Object.class.getMethod("wait", new Class[] { long.class, int.class }),
 		                     TransactionDefinition.PROPAGATION_SUPPORTS);
 		checkTransactionProperties(tas, Object.class.getMethod("notify", null),
-		                     TransactionDefinition.PROPAGATION_REQUIRED);
+		                     TransactionDefinition.PROPAGATION_SUPPORTS);
 		checkTransactionProperties(tas, Object.class.getMethod("notifyAll", null),
 		                     TransactionDefinition.PROPAGATION_REQUIRED);
 		checkTransactionProperties(tas, Object.class.getMethod("toString", null),
