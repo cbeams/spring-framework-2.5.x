@@ -73,6 +73,7 @@ Package org.springframework.web
 * added overloaded "validatePage" method with "finish" flag to AbstractWizardFormController
 * fixed TransformTag to derive from HtmlEscapingAwareTag and actually HTML-escape results (matching the TLD now)
 * introduced JSF support in the form of a DelegatingVariableResolver that can resolve variable names as Spring beans
+* DispatcherServlet now looks for handler adapters, handler mappings, exception resolvers and view resolves in ancestor contexts as well as leaf (servlet) context
 
 
 Changes in version 1.1 RC1 (28.7.2004)
