@@ -228,6 +228,14 @@
          <version>3.8.1</version>
       </dependency>
       <dependency>
+         <id>activemq</id>
+         <version>1.1</version>
+      </dependency>
+      <dependency>
+         <id>concurrent</id>
+         <version>1.3.4</version>
+      </dependency>
+      <dependency>
          <id>cos</id>
          <version>1.0</version>
       </dependency>
@@ -309,6 +317,10 @@
          <groupId>freemarker</groupId>
          <artifactId>freemarker</artifactId>
          <version>2.3</version>
+      </dependency>
+      <dependency>
+         <id>geronimo-spec+j2ee-management</id>
+         <version>1.0-rc2</version>
       </dependency>
       <dependency>
          <id>hibernate</id>
