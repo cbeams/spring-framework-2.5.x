@@ -3,25 +3,35 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.3 (5.12.2004)
+Changes in version 1.1.3 (8.12.2004)
 ------------------------------------
 
 Package org.springframework.beans
-* fixed TypeMismatchException constructor to avoid NPE in case of null as required type
+* BeanWrapperImpl automatically registers a default ResourceArrayPropertyEditor
+* fixed reported bean class in BeanWrapperImpl to always point to the root class at the top of the path
+* deprecated setting of a nested path without specifying the root object in BeanWrapperImpl
+* fixed TypeMismatchException constructor to avoid NullPointerException in case of null as required type
 * added "fileEncoding" and "propertiesPersister" properties to PropertyResourceConfigurer
 * added hooks for custom conversion of read-in property values to PropertyResourceConfigurer (e.g. for decryption)
 * fixed PropertyPlaceholderConfigurer to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
-* added "loadBeanDefinitions(Resource[])" method to XmlBeanDefinitionReader, for loading multiple files in batch
+* fixed AbstractAutowireCapableBeanFactory to not create prototype beans referenced by a "factory-bean" attribute twice
+* moved "loadBeanDefinitions(Resource[])" method from XmlBeanDefinitionReader up to AbstractBeanDefinitionReader
 
 Package org.springframework.context
 * ApplicationContext interface extends ResourcePatternResolver, offering "Resource[] getResources(locationPattern)" now
+* factored out AbstractRefreshableApplicationContext as base class of AbstractXmlApplicationContext
 * added "setResourceLoader" method to GenericApplicationContext, for overriding the default resource loading strategy
+* added "isContextRequired" method to ApplicationObjectSupport, allowing to enforce running in an ApplicationContext
 
 Package org.springframework.core
 * added initial capacity check to CollectionFactory, to always pass a positive capacity number to Commons Collections
 * added FileSystemResourceLoader, resolving paths as file system resources rather than as class path resources
 * fixed AbstractPathResolvingPropertyEditor to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
 * PathMatchingResourcePatternResolver supports path matching in jar files now (for both "classpath:" and "classpath*:")
+
+Package org.springframework.jdbc
+* added "execute(ConnectionCallback)" method to JdbcTemplate, allowing any kind of operation on a given Connection
+* added DB2SequenceMaxValueIncrementer, implementing the DataFieldMaxValueIncrementer interface for a DB2 sequence
 
 Package org.springframework.jndi
 * added optional "proxyInterface" property to JndiObjectFactoryBean, for exposing a proxy rather than the plain object
@@ -30,23 +40,49 @@ Package org.springframework.jndi
 Package org.springframework.mock
 * implemented "getResourcePaths" in MockServletContext, to allow for pattern matching via the ServletContext
 
+Package org.springframework.orm
+* fixed HibernateTransactionManager to not pre-initialize the SQLExceptionTranslator, lazily creating a specific one
+* SqlMapClientFactoryBean forces the iBATIS ExternalTransactionConfig to always keep the original auto-commit value
+* SqlMapClientFactoryBean lets lazy loading and direct SqlMapClient access participate in Spring-managed transactions
+* added "transactionConfigClass" and "transactionConfigProperties" customization properties to SqlMapClientFactoryBean
+
 Package org.springframework.remoting
 * added "codebaseUrl" property to HttpInvokerClientInterceptor, specifying a URL for dynamic class download
 * added support for dynamic class downloading to AbstractHttpInvokerRequestExecutor and its subclasses
+* added hooks for decorating input/output streams to AbstractHttpInvokerRequestExecutor and HttpInvokerServiceExporter
 
 Package org.springframework.ui
 * activated caching by default in VelocityEngineFactory, with file timestamp check for resources in the file system
 * added "preferFileSystemAccess" property to VelocityEngineFactory, to be able to suppress file system access
 * added "preferFileSystemAccess" property to FreeMarkerConfigurationFactory, to be able to suppress file system access
-* added JasperReportsUtils to allow for convenient creation of CSV/HTML/PDF/XLS reports with Jasper Reports
+* added JasperReportsUtils to allow for convenient rendering of CSV/HTML/PDF/XLS reports with Jasper Reports
+
+Package org.springframework.util
+* changed Log4jConfigurer's "initLogging" to only do config file refresh checks in case of explicit refresh interval
+
+Package org.springframework.validation
+* added "setIgnoreUnknownFields" method to DataBinder, enforcing request parameters to match fields when turned "false"
 
 Package org.springframework.web
+* changed Log4jConfigListener/Servlet to only do config file refresh checks with explicit "log4jRefreshInterval" param
+* factored out AbstractRefreshableWebApplicationContext as base class of XmlWebApplicationContext
+* StaticWebApplicationContext registers ServletContextAwareProcessor and ServletContextResourcePatternResolver
+* WebApplicationObjectSupport overrides "isContextRequired" to enforce running in an ApplicationContext
+* DispatcherServlet by default cleans up request attributes after include request (configurable via "cleanupOnInclude")
+* AbstractFormControllers and its subclasses use "cacheSeconds" default of 0 (-> no caching for all form controllers)
+* turned AbstractFormController's "getFormSessionAttributeName" method non-final, to allow for specifying the name
+* turned AbstractWizardFormController's "getPageSessionAttributeName" method non-final, to allow for specifying the name
+* changed AbstractWizardFormController's "validatePagesAndFinish" to show the offending page for global errors too
+* changed SimpleMappingExceptionResolver's "exceptionMappings" to support exception patterns (similar to rollback rules)
 * fixed BindStatus to look for plain target object in model map first (to also work in Velocity and FreeMarker views)
 * UrlBasedViewResolver supports a "forward:" prefix too, for forwards to other controllers through special view names
+* InternalResourceView performs an include if the response has already been committed (-> forward not possible anymore)
+* JstlView and TilesJstlView respect a JSTL "localizationContext" config in web.xml, checking those messages first
+* added overloaded "createVelocityContext" and "exposeHelpers" methods to VelocityView, with passed-in servlet response
 * factored out "doRender" and "getTemplate(name)" methods in VelocityView, for easy subclassing (multiple templates etc)
 * factored out "doRender" and "getTemplate(name, Locale)" methods in FreeMarkerView, for easy subclassing
 * changed value for "selected" attribute from "true" to "selected" in Velocity and FreeMarker macros (spring.vm/ftl)
-* added JasperReportsXxxView to allow for convenient creation of CSV/HTML/PDF/XLS web views with Jasper Reports
+* added JasperReportsXxxView to allow for convenient rendering of CSV/HTML/PDF/XLS web views with Jasper Reports
 
 
 Changes in version 1.1.2 (14.11.2004)
