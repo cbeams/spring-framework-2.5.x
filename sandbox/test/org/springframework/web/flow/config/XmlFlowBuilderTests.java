@@ -140,7 +140,7 @@ public class XmlFlowBuilderTests extends TestCase {
 			if ("action1".equals(actionId) || "action2".equals(actionId)) {
 				return new Action() {
 					public Event execute(FlowExecutionContext context) throws Exception {
-						return new LocalEvent("event1");
+						return new LocalEvent(this, "event1");
 					}
 				};
 			}
@@ -172,7 +172,7 @@ public class XmlFlowBuilderTests extends TestCase {
 
 	public static class TestAction implements Action {
 		public Event execute(FlowExecutionContext context) throws Exception {
-			return new LocalEvent("success");
+			return new LocalEvent(this, "success");
 		}
 	}
 }

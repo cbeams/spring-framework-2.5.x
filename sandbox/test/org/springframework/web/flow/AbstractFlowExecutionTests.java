@@ -25,7 +25,6 @@ import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Base class for tests that verify a flow executes as expected; that is, it
@@ -236,8 +235,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @param expectedLastEventId the expected event.
 	 */
 	protected void assertEventEquals(String expectedEventId) {
-		assertEquals("The last event '" + getEventId() + "' does not equal the expected event '"
-				+ expectedEventId + "'", expectedEventId, getEventId());
+		assertEquals("The last event '" + getEventId() + "' does not equal the expected event '" + expectedEventId
+				+ "'", expectedEventId, getEventId());
 	}
 
 	/**
