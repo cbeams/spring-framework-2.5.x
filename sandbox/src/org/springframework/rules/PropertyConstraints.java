@@ -20,10 +20,10 @@ import org.springframework.util.Assert;
 /**
  * @author Keith Donald
  */
-public class PropertyConstraintBuilder {
+public class PropertyConstraints {
     private String propertyName;
 
-    public PropertyConstraintBuilder(String propertyName) {
+    public PropertyConstraints(String propertyName) {
         setPropertyName(propertyName);
     }
 
