@@ -44,24 +44,24 @@ public interface SqlMapOperations {
 	Object executeQueryForObject(String statementName, Object parameterObject)
 			throws DataAccessException;
 
-	Object executeQueryForObject(String statementName, Object parameterObject,
-															 Object resultObject) throws DataAccessException;
+	Object executeQueryForObject(String statementName, Object parameterObject, Object resultObject)
+			throws DataAccessException;
 
 	List executeQueryForList(String statementName, Object parameterObject)
 			throws DataAccessException;
 
-	List executeQueryForList(String statementName, Object parameterObject,
-													 int skipResults, int maxResults)
+	List executeQueryForList(String statementName, Object parameterObject, int skipResults, int maxResults)
 			throws DataAccessException;
 
-	Map executeQueryForMap(String statementName, Object parameterObject,
-												 String keyProperty) throws DataAccessException;
+	Map executeQueryForMap(String statementName, Object parameterObject, String keyProperty)
+			throws DataAccessException;
 
-	Map executeQueryForMap(String statementName, Object parameterObject,
-												 String keyProperty, String valueProperty);
+	Map executeQueryForMap(String statementName, Object parameterObject, String keyProperty, String valueProperty)
+			throws DataAccessException;
 
-	void executeQueryWithRowHandler(String statementName, Object parameterObject,
-																	RowHandler rowHandler) throws DataAccessException;
+	void executeQueryWithRowHandler(
+			String statementName, Object parameterObject, RowHandler rowHandler)
+			throws DataAccessException;
 
 	int executeUpdate(String statementName, Object parameterObject)
 			throws DataAccessException;

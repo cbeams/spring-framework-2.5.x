@@ -32,25 +32,29 @@ import org.apache.commons.logging.LogFactory;
  * Supports a list of transaction synchronizations if synchronization is active.
  *
  * <p>Resource management code should check for thread-bound resources, e.g. JDBC
- * Connections or Hibernate Sessions, via getResource. It is normally not supposed
- * to bind resources to threads, as this is the responsiblity of transaction managers.
- * A further option is to lazily bind on first use if transaction synchronization
- * is active, for performing transactions that span an arbitrary number of resources.
+ * Connections or Hibernate Sessions, via <code>getResource</code>. Such code is
+ * normally not supposed to bind resources to threads, as this is the responsiblity
+ * of transaction managers. A further option is to lazily bind on first use if
+ * transaction synchronization is active, for performing transactions that span
+ * an arbitrary number of resources.
  *
  * <p>Transaction synchronization must be activated and deactivated by a transaction
- * manager via initSynchronization and clearSynchronization. This is automatically
- * supported by AbstractPlatformTransactionManager, and thus by all standard Spring
- * transaction managers, like HibernateTransactionManager and JtaTransactionManager.
+ * manager via <code>initSynchronization</code> and <code>clearSynchronization</code>.
+ * This is automatically supported by AbstractPlatformTransactionManager, and thus
+ * by all standard Spring transaction managers, like DataSourceTransactionManager
+ * and JtaTransactionManager.
  *
  * <p>Resource management code should only register synchronizations when this
- * manager is active, and perform resource cleanup immediately else.
- * If transaction synchronization isn't active, there is either no current
- * transaction, or the transaction manager doesn't support synchronizations.
+ * manager is active, which can be checked via <code>isSynchronizationActive</code>;
+ * it should perform immediate resource cleanup else. If transaction synchronization
+ * isn't active, there is either no current transaction, or the transaction manager
+ * doesn't support transaction synchronizations.
  *
  * <p>Synchronization is for example used to always return the same resources like
  * JDBC Connections or Hibernate Sessions within a JTA transaction, for any given
  * DataSource or SessionFactory. In the Hibernate case, the afterCompletion Session
- * close calls allow for proper transactional JVM-level caching even with JTA.
+ * close calls allow for proper transactional JVM-level caching even without a
+ * custom TransactionManagerLookup in Hibernate configuration.
  *
  * @author Juergen Hoeller
  * @since 02.06.2003
@@ -58,6 +62,7 @@ import org.apache.commons.logging.LogFactory;
  * @see #registerSynchronization
  * @see TransactionSynchronization
  * @see AbstractPlatformTransactionManager
+ * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
@@ -115,7 +120,7 @@ public abstract class TransactionSynchronizationManager {
 		Object value = map.get(key);
 		if (value != null && logger.isDebugEnabled()) {
 			logger.debug("Retrieved value [" + value + "] for key [" + key + "] bound to thread [" +
-									 Thread.currentThread().getName() + "]");
+					Thread.currentThread().getName() + "]");
 		}
 		return value;
 	}
@@ -184,7 +189,7 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Activate transaction synchronization for the current thread.
-	 * Called by transaction manager on transaction begin.
+	 * Called by a transaction manager on transaction begin.
 	 * @throws IllegalStateException if synchronization is already active
 	 */
 	public static void initSynchronization() throws IllegalStateException {
@@ -209,7 +214,7 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
-	 * Return an unmodifiable list of all registered synchronizations
+	 * Return an unmodifiable snapshot list of all registered synchronizations
 	 * for the current thread.
 	 * @return unmodifiable List of TransactionSynchronization instances
 	 * @throws IllegalStateException if synchronization is not active

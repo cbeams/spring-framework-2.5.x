@@ -42,18 +42,20 @@ import org.springframework.dao.DataAccessException;
  */
 public interface SqlMapClientOperations {
 
-	Object queryForObject(String statementName, Object parameterObject) throws DataAccessException;
+	Object queryForObject(String statementName, Object parameterObject)
+			throws DataAccessException;
 
 	Object queryForObject(String statementName, Object parameterObject,	Object resultObject)
 			throws DataAccessException;
 
-	List queryForList(String statementName, Object parameterObject) throws DataAccessException;
+	List queryForList(String statementName, Object parameterObject)
+			throws DataAccessException;
 
-	List queryForList(String statementName, Object parameterObject, int skipResults,
-										int maxResults) throws DataAccessException;
+	List queryForList(String statementName, Object parameterObject, int skipResults, int maxResults)
+			throws DataAccessException;
 
 	void queryWithRowHandler(String statementName, Object parameterObject, RowHandler rowHandler)
-		throws DataAccessException;
+			throws DataAccessException;
 
 	/**
 	 * @deprecated
@@ -67,13 +69,16 @@ public interface SqlMapClientOperations {
 	Map queryForMap(String statementName, Object parameterObject, String keyProperty)
 			throws DataAccessException;
 
-	Map queryForMap(String statementName, Object parameterObject, String keyProperty,
-									String valueProperty) throws DataAccessException;
+	Map queryForMap(String statementName, Object parameterObject, String keyProperty, String valueProperty)
+			throws DataAccessException;
 
-	Object insert(String statementName, Object parameterObject) throws DataAccessException;
+	Object insert(String statementName, Object parameterObject)
+			throws DataAccessException;
 
-	int update(String statementName, Object parameterObject) throws DataAccessException;
+	int update(String statementName, Object parameterObject)
+			throws DataAccessException;
 
-	int delete(String statementName, Object parameterObject) throws DataAccessException;
+	int delete(String statementName, Object parameterObject)
+			throws DataAccessException;
 
 }
