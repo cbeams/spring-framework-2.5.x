@@ -19,8 +19,24 @@ package org.springframework.aop.framework;
 /**
  * Interface to be implemented by objects that can create
  * AOP proxies based on AdvisedSupport objects.
+ * <p>Proxies should observe the following contract:
+ * <ul>
+ * <li>They should implement all interfaces that the configuration
+ * indicates should be proxied.
+ * <li>They should implement the Advised interface
+ * <li>They should implement the equals method to compare
+ * proxied interfaces, advice, and target
+ * <li>They should be serializable if all advisors and target
+ * are serializable
+ * <li>They should be threadsafe if advisors and target
+ * are threadsafe
+ * </ul>
+ * Proxies may or may not allow advice changes to be made. 
+ * If they do not permit advice changes (for example, because
+ * the configuration was frozen) a proxy should throw an 
+ * AopConfigException on an attempted advice change.
  * @author Rod Johnson
- * @version $Id: AopProxyFactory.java,v 1.3 2004-04-30 15:39:01 jhoeller Exp $
+ * @version $Id: AopProxyFactory.java,v 1.4 2004-07-27 16:44:29 johnsonr Exp $
  */
 public interface AopProxyFactory {
 	
