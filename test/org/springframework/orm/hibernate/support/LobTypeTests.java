@@ -16,6 +16,10 @@
 
 package org.springframework.orm.hibernate.support;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +32,7 @@ import javax.transaction.Synchronization;
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
+import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
 
 import org.springframework.jdbc.support.lob.LobCreator;
@@ -175,6 +180,90 @@ public class LobTypeTests extends TestCase {
 		assertEquals(content, type.nullSafeGet(rs, new String[] {"column"}, null));
 		tmControl.replay();
 		type.nullSafeSet(ps, content, 1);
+		Synchronization synch = transaction.getSynchronization();
+		assertNotNull(synch);
+		synch.afterCompletion(Status.STATUS_COMMITTED);
+		tmControl.verify();
+	}
+
+	public void testBlobSerializableType() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject("content");
+		oos.close();
+
+		lobHandler.getBlobAsBinaryStream(rs, 1);
+		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
+		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
+		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
+			public boolean matches(Object[] o1, Object[] o2) {
+				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
+			}
+			public String toString(Object[] objects) {
+				return null;
+			}
+		});
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobSerializableType type = new BlobSerializableType(lobHandler, null);
+		assertEquals(1, type.sqlTypes().length);
+		assertEquals(Types.BLOB, type.sqlTypes()[0]);
+		assertEquals(Serializable.class, type.returnedClass());
+		assertTrue(type.isMutable());
+
+		assertEquals("content", type.nullSafeGet(rs, new String[] {"column"}, null));
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			type.nullSafeSet(ps, "content", 1);
+			List synchs = TransactionSynchronizationManager.getSynchronizations();
+			assertEquals(1, synchs.size());
+			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+	}
+
+	public void testBlobSerializableTypeWithJtaSynchronization() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 1);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject("content");
+		oos.close();
+
+		lobHandler.getBlobAsBinaryStream(rs, 1);
+		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
+		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
+		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
+			public boolean matches(Object[] o1, Object[] o2) {
+				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
+			}
+			public String toString(Object[] objects) {
+				return null;
+			}
+		});
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobSerializableType type = new BlobSerializableType(lobHandler, tm);
+		assertEquals(1, type.sqlTypes().length);
+		assertEquals(Types.BLOB, type.sqlTypes()[0]);
+		assertEquals(Serializable.class, type.returnedClass());
+		assertTrue(type.isMutable());
+
+		assertEquals("content", type.nullSafeGet(rs, new String[] {"column"}, null));
+		tmControl.replay();
+		type.nullSafeSet(ps, "content", 1);
 		Synchronization synch = transaction.getSynchronization();
 		assertNotNull(synch);
 		synch.afterCompletion(Status.STATUS_COMMITTED);
