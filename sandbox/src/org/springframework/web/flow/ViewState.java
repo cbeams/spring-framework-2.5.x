@@ -126,7 +126,7 @@ public class ViewState extends TransitionableState {
 	 * model map needed when the view is rendered, for populating dynamic
 	 * content.
 	 * 
-	 * @param flowExecution The session execution stack, tracking the current
+	 * @param flowExecution The flow execution stack, tracking the current
 	 *        active flow session
 	 * @param request The client http request
 	 * @param response The server http response

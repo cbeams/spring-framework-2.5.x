@@ -22,13 +22,19 @@ import javax.servlet.http.HttpServletResponse;
  * An action that executes controller, mediator (bridge), and/or command-like
  * behavior. Actions typically delegate down to the service-layer to perform
  * business operations, and/or prep views with dynamic model data for rendering.
- * They act the bridge between the web-tier and the middle-tier.
+ * They act as a bridge between the web-tier (browser/views) and the middle-tier
+ * (service layer).
  * <p>
- * Action implementations are typically instantiated and managed by Spring to
- * take advantage of the container's configuration and dependency injection
- * (wiring) capabilities. However, actions can also be directly instantiated for
- * use im a standalone test environment and parameterized with mocks or stubs,
- * as they are simple POJOs.
+ * Action implementations are typically singletons instantiated and managed by
+ * Spring to take advantage of Spring's powerful configuration and dependency
+ * injection (wiring) capabilities. Actions can also be directly instantiated
+ * for use im a standalone test environment and parameterized with mocks or
+ * stubs, as they are simple POJOs.
+ * <p>
+ * Note: because Actions are singletons, take care not to store and/or modify
+ * caller-specific state. The Action execute method always runs in its own
+ * thread, so make you deal only with local data or internal, thread-safe
+ * services.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

@@ -28,10 +28,13 @@ import org.springframework.util.closure.Constraint;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * A transition takes the flow from one state to another when executed. A
- * transition is associated with exactly one source state.
+ * A transition takes a flow execution from one state to another when executed.
+ * A transition is associated with exactly one source
+ * <code>TransitionableState</code> managed by exactly one <code>Flow</code>
+ * definition.
  * 
  * @see org.springframework.web.flow.TransitionableState
+ * @see org.springframework.web.flow.Flow
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -109,14 +112,14 @@ public class Transition implements Serializable {
 	}
 
 	/**
-	 * @return The owning source (<i>from</i>) state of this transition.
+	 * @return The owning source ( <i>from </i>) state of this transition.
 	 */
 	protected TransitionableState getSourceState() {
 		return sourceState;
 	}
 
 	/**
-	 * @param owningState The owning source (<i>from</i>) state of this
+	 * @param owningState The owning source ( <i>from </i>) state of this
 	 *        transition.
 	 */
 	protected void setSourceState(TransitionableState owningState) {
@@ -124,14 +127,14 @@ public class Transition implements Serializable {
 	}
 
 	/**
-	 * @return The id of the target (<i>to</i>) state of this transition.
+	 * @return The id of the target ( <i>to </i>) state of this transition.
 	 */
 	public String getTargetStateId() {
 		return targetStateId;
 	}
 
 	/**
-	 * @return The target (<i>to</i>) state of this transition.
+	 * @return The target ( <i>to </i>) state of this transition.
 	 * @throws NoSuchFlowStateException When the target state cannot be found
 	 */
 	protected AbstractState getTargetState() throws NoSuchFlowStateException {
@@ -198,8 +201,8 @@ public class Transition implements Serializable {
 	 * @param response the server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the transition execution.
-	 * @throws CannotExecuteStateTransitionException thrown when this transition cannot
-	 *         be executed
+	 * @throws CannotExecuteStateTransitionException thrown when this transition
+	 *         cannot be executed
 	 */
 	protected ModelAndView execute(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) throws CannotExecuteStateTransitionException {

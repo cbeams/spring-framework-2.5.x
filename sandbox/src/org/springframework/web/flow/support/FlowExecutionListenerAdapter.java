@@ -23,9 +23,10 @@ import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowSession;
 
 /**
- * An abstract adapter class for flow execution lifecycle events.
- * The methods in this class are empty. This class exists as convenience
- * for creating listener objects.
+ * An abstract adapter class for listeners (observers) of flow execution
+ * lifecycle events. The methods in this class are empty. This class exists as
+ * convenience for creating listener objects; subclass it and override what you
+ * need.
  * 
  * @author Erwin Vervaet
  * @author Keith Donald
@@ -41,7 +42,7 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	public void requestProcessed(FlowExecution flowExecution, HttpServletRequest request) {
 	}
 
-	public void eventSignaled(FlowExecution flowExecution, String id) {
+	public void eventSignaled(FlowExecution flowExecution, String eventID) {
 	}
 
 	public void stateTransitioned(FlowExecution flowExecution, AbstractState previousState, AbstractState newState) {
