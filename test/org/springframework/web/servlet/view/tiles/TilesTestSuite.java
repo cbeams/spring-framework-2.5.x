@@ -38,7 +38,7 @@ public class TilesTestSuite extends TestCase {
 		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
 		irvr.setApplicationContext(wac);
 		irvr.setViewClass(TilesView.class);
-		View view = irvr.resolveViewName("testTile", new Locale("nl"));
+		View view = irvr.resolveViewName("testTile", new Locale("nl", ""));
 
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/someURL");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -64,7 +64,7 @@ public class TilesTestSuite extends TestCase {
 		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
 		irvr.setApplicationContext(wac);
 		irvr.setViewClass(TilesJstlView.class);
-		View view = irvr.resolveViewName("testTile", new Locale("nl"));
+		View view = irvr.resolveViewName("testTile", new Locale("nl", ""));
 
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/someURL");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -88,7 +88,7 @@ public class TilesTestSuite extends TestCase {
 		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
 		irvr.setApplicationContext(wac);
 		irvr.setViewClass(TilesView.class);
-		View view = irvr.resolveViewName("testTileWithController", new Locale("nl"));
+		View view = irvr.resolveViewName("testTileWithController", new Locale("nl", ""));
 
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/someURL");
 		MockHttpServletResponse response = new MockHttpServletResponse();

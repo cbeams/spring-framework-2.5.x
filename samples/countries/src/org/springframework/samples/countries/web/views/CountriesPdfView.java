@@ -129,12 +129,12 @@ public class CountriesPdfView extends AbstractPdfView {
 
 		cell = new PdfPCell(new Phrase(getMessage( "sort.asc", loc), HEADING_FONT));
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(getMessage(Boolean.toString(sort.isAscending()), loc), HEADING_DATA_FONT));
+		cell = new PdfPCell(new Phrase(getMessage(new Boolean(sort.isAscending()).toString(), loc), HEADING_DATA_FONT));
 		table.addCell(cell);
 
 		cell = new PdfPCell(new Phrase(getMessage( "sort.igncase", loc), HEADING_FONT));
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(getMessage(Boolean.toString(sort.isIgnoreCase()), loc), HEADING_DATA_FONT));
+		cell = new PdfPCell(new Phrase(getMessage(new Boolean(sort.isIgnoreCase()).toString(), loc), HEADING_DATA_FONT));
 		table.addCell(cell);
 
 		cell = new PdfPCell(new Phrase(getMessage( "filter.name", loc), HEADING_FONT));

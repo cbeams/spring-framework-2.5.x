@@ -43,7 +43,7 @@ public class CountriesController extends MultiActionController {
 	private String copyView = COPY_VIEW;
 
 	// handlers
-    
+
 	/**
 	 * Custom handler for home
 	 * @param request current HTTP request
@@ -136,7 +136,7 @@ public class CountriesController extends MultiActionController {
 		try {
 			if (null != secondDaoCountry) {
 				logger.info("A secondDao is configured");
-				secondDaoCountry.initBase(); 
+				secondDaoCountry.initBase();
 				logger.info("The database is initiallised");
 				Locale locs[] = {Locale.US, Locale.FRANCE, Locale.GERMANY};
 				for (int i = 0; i < locs.length; i++ ) {
@@ -148,7 +148,7 @@ public class CountriesController extends MultiActionController {
 				logger.error("No secondDao is configured. You cannot copy in a database.");
 			}
 		} finally {
-			return new ModelAndView(copyView, "copyMade", Boolean.valueOf(copyMade));
+			return new ModelAndView("copyView", "copyMade", new Boolean(copyMade));
 		}
 	}
 

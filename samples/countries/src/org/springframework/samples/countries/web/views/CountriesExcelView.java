@@ -121,12 +121,12 @@ public class CountriesExcelView extends AbstractExcelView {
 			row++;
 			
 			getCell(sheet, row, 0 ).setCellValue(getMessage("sort.asc", loc));
-			getCell(sheet, row, 1 ).setCellValue(getMessage(Boolean.toString(sort.isAscending()), loc));
+			getCell(sheet, row, 1 ).setCellValue(getMessage(new Boolean(sort.isAscending()).toString(), loc));
 			getCell(sheet, row, 1 ).setCellStyle(csp);
 			row++;
 			
 			getCell(sheet, row, 0 ).setCellValue(getMessage("sort.igncase", loc));
-			getCell(sheet, row, 1 ).setCellValue(getMessage(Boolean.toString(sort.isIgnoreCase()), loc));
+			getCell(sheet, row, 1 ).setCellValue(getMessage(new Boolean(sort.isIgnoreCase()).toString(), loc));
 			getCell(sheet, row, 1 ).setCellStyle(csp);
 			row++;
 			
