@@ -11,6 +11,7 @@ import org.springframework.util.closure.Closure;
 public abstract class AbstractLocalProcessTemplateWorkflow extends AbstractLocalProcessTemplate {
 
 	public final void run(Closure templateCallback) {
+		reset();
 		doSetup();
 		while (processing()) {
 			templateCallback.call(doWork());

@@ -22,16 +22,13 @@ import org.springframework.util.closure.ProcessTemplate;
 /**
  * Base superclass for process templates.
  * <p>
- * Note: instances deriving from this class should generally be created on a per
- * request basis. This 'local' implementation is not designed to be reused after
- * one use, or by use in multiple threads.
  * @author Keith Donald
  */
 public abstract class AbstractLocalProcessTemplate implements ProcessTemplate {
 
 	private ProcessTemplate wrappedTemplate;
 
-	private boolean stopped;
+	private volatile boolean stopped;
 
 	protected AbstractLocalProcessTemplate() {
 
@@ -86,6 +83,10 @@ public abstract class AbstractLocalProcessTemplate implements ProcessTemplate {
 
 	public void runUntil(Closure templateCallback, final Constraint constraint) {
 		run(new TemplateController(this, constraint, templateCallback));
+	}
+
+	protected void reset() {
+		this.stopped = false;
 	}
 
 	public abstract void run(Closure templateCallback);
