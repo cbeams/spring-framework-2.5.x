@@ -39,12 +39,15 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  */
 public class CodedEnumUserType implements UserType {
-    private static final Log logger = LogFactory.getLog(CodedEnumUserType.class);
-    
+    private static final Log logger = LogFactory
+            .getLog(CodedEnumUserType.class);
+
     private String enumType;
+
     private Class enumClass;
-    private CodedEnumResolver enumResolver = StaticCodedEnumResolver
-            .instance();
+
+    private CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
+
     private NullableType persistentType;
 
     protected CodedEnumUserType(Class enumClass) {
@@ -71,7 +74,8 @@ public class CodedEnumUserType implements UserType {
         this.persistentType = type;
     }
 
-    protected CodedEnumUserType(Class enumClass, String enumType, NullableType persistentType) {
+    protected CodedEnumUserType(Class enumClass, String enumType,
+            NullableType persistentType) {
         Assert.notNull(enumClass);
         Assert.notNull(enumType);
         Assert.notNull(persistentType);
@@ -81,15 +85,17 @@ public class CodedEnumUserType implements UserType {
         this.persistentType = persistentType;
     }
 
-
     private void setTypes(Class enumClass) {
         if (ShortCodedEnum.class.isAssignableFrom(enumClass)) {
             this.persistentType = Hibernate.SHORT;
-        } else if (LetterCodedEnum.class.isAssignableFrom(enumClass)) {
+        }
+        else if (LetterCodedEnum.class.isAssignableFrom(enumClass)) {
             this.persistentType = Hibernate.CHARACTER;
-        } else if (StringCodedEnum.class.isAssignableFrom(enumClass)) {
+        }
+        else if (StringCodedEnum.class.isAssignableFrom(enumClass)) {
             this.persistentType = Hibernate.STRING;
-        } else {
+        }
+        else {
             throw new IllegalArgumentException(
                     "Unable to determine enum sql type.");
         }
@@ -129,20 +135,21 @@ public class CodedEnumUserType implements UserType {
         Object code;
         if (persistentType == Hibernate.SHORT) {
             code = Hibernate.SHORT.nullSafeGet(rs, names[0]);
-        } else if (persistentType == Hibernate.CHARACTER) {
+        }
+        else if (persistentType == Hibernate.CHARACTER) {
             code = Hibernate.CHARACTER.nullSafeGet(rs, names[0]);
-        } else {
+        }
+        else {
             code = Hibernate.STRING.nullSafeGet(rs, names[0]);
         }
-        if (code == null) {
-            return null;
-        }
+        if (code == null) { return null; }
         if (enumType == null) {
             enumType = ClassUtils.getShortNameAsProperty(enumClass);
         }
         CodedEnum enum = enumResolver.getEnum(enumType, code, null);
         if (logger.isDebugEnabled()) {
-            logger.debug("Resolved enum '" + enum + "' of type '" + enumType + "' from persisted code " + code);
+            logger.debug("Resolved enum '" + enum + "' of type '" + enumType
+                    + "' from persisted code " + code);
         }
         return enum;
     }
@@ -154,16 +161,15 @@ public class CodedEnumUserType implements UserType {
     public void nullSafeSet(PreparedStatement stmt, Object value, int index)
             throws HibernateException, SQLException {
         if ((value != null)
-                && !returnedClass().isAssignableFrom(value.getClass())) {
-            throw new IllegalArgumentException("Received value is not a ["
-                    + returnedClass().getName() + "] but [" + value.getClass()
-                    + "]");
-        }
+                && !returnedClass().isAssignableFrom(value.getClass())) { throw new IllegalArgumentException(
+                "Received value is not a [" + returnedClass().getName()
+                        + "] but [" + value.getClass() + "]"); }
         CodedEnum enum = (CodedEnum)value;
         if (enum != null) {
             Object code = enum.getCode();
             stmt.setObject(index, code);
-        } else {
+        }
+        else {
             stmt.setNull(index, sqlTypes()[0]);
         }
     }
