@@ -31,8 +31,8 @@ import org.springframework.util.StringUtils;
  * Uses either the thread context class loader, a given ClassLoader
  * or a given Class for loading resources.
  *
- * <p>Supports resolution as File if the class path resource
- * resides in the file system, but not for resources in a JAR.
+ * <p>Supports resolution as <code>java.io.File</code> if the class path
+ * resource resides in the file system, but not for resources in a JAR.
  * Always supports resolution as URL.
  *
  * @author Juergen Hoeller
@@ -135,7 +135,7 @@ public class ClassPathResource extends AbstractResource {
 		URL url = getURL();
 		if (!URL_PROTOCOL_FILE.equals(url.getProtocol())) {
 			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path " +
-					"because it does not reside in the file system: URL=[" + url + "]");
+					"because it does not reside in the file system: " + url);
 		}
 		return new File(URLDecoder.decode(url.getFile()));
 	}
