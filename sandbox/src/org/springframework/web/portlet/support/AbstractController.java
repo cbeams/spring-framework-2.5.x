@@ -14,25 +14,25 @@
  * limitations under the License.
  */ 
 
-package org.springframework.web.portlet.mvc;
+package org.springframework.web.portlet.support;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.portlet.ModelAndView;
-import org.springframework.web.portlet.support.PortletContentGenerator;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.WebContentInterceptor;
 
 /**
  * <p>Convenient superclass for controller implementations, using the Template
  * Method design pattern.</p>
  * 
- * <p>As stated in the {@link org.springframework.web.portlet.mvc.Controller Controller}
+ * <p>As stated in the {@link org.springframework.web.portlet.support.PortletController PortletController}
  * interface, a lot of functionality is already provided by certain abstract
  * base controllers. The AbstractController is one of the most important
  * abstract base controller providing basic features such enabling or disabling of
@@ -40,7 +40,7 @@ import org.springframework.web.servlet.mvc.WebContentInterceptor;
  *
  * TODO review this
  * <p><b><a name="workflow">Workflow
- * (<a href="Controller.html#workflow">and that defined by interface</a>):</b><br>
+ * (<a href="PortletController.html#workflow">and that defined by interface</a>):</b><br>
  * <ol>
  *  <li>{@link #handleRequest(PortletRequest,PortletResponse) handleRequest()}
  *      will be called by the DispatcherServlet</li>
@@ -55,7 +55,7 @@ import org.springframework.web.servlet.mvc.WebContentInterceptor;
  * </p>
  *
  * <p><b><a name="config">Exposed configuration properties</a>
- * (<a href="Controller.html#config">and those defined by interface</a>):</b><br>
+ * (<a href="PortletController.html#config">and those defined by interface</a>):</b><br>
  * <table border="1">
  *  <tr>
  *      <td><b>name</b></th>
@@ -92,25 +92,40 @@ import org.springframework.web.servlet.mvc.WebContentInterceptor;
  * @author Juergen Hoeller
  * @see WebContentInterceptor
  */
-public abstract class AbstractController extends PortletContentGenerator implements Controller {
+public abstract class AbstractController implements PortletController {
 
 	private boolean synchronizeOnSession = false;
 
+	private boolean requireSession = false;
+	
 	/**
 	 * Set if controller execution should be synchronized on the session,
 	 * to serialize parallel invocations from the same client.
 	 * <p>More specifically, the execution of the handleRequestInternal
 	 * method will get synchronized if this flag is true.
-	 * @see org.springframework.web.portlet.mvc.AbstractController#handleRequestInternal
+	 * @see org.springframework.web.portlet.support.AbstractController#handleRequestInternal
 	 */
 	public final void setSynchronizeOnSession(boolean synchronizeOnSession) {
 		this.synchronizeOnSession = synchronizeOnSession;
 	}
 
+	/**
+	 * Set if a session should be required to handle requests.
+	 */	
+	public final void setRequiredSession(boolean requiredSession) {
+	    this.requireSession = requiredSession;
+	}
+	
+	protected void checkAndPrepare(PortletRequest request, PortletResponse response) throws PortletException {
+        if (this.requireSession) {
+            if (request.getPortletSession(false) == null) { throw new PortletException(
+                    "This resource requires a pre-existing PortletSession: none was found"); }
+        }
+    }
+	
 	public final ModelAndView handleRequest(RenderRequest request, RenderResponse response)
 			throws Exception {
 
-		// delegate to PortletContentGenerator for checking and preparing
 		checkAndPrepare(request, response);
 
 		// execute in synchronized block if required
@@ -128,7 +143,6 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	public final void handleRequest(ActionRequest request, ActionResponse response)
 		throws Exception {
 	    
-		// delegate to PortletContentGenerator for checking and preparing
 		checkAndPrepare(request, response);
 		
 		// execute in synchronized block if required

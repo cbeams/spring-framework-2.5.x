@@ -14,37 +14,34 @@
  * limitations under the License.
  */ 
 
-package org.springframework.web.portlet.mvc;
+package org.springframework.web.portlet.support;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractCommandController;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.AbstractFormController;
-//import org.springframework.web.servlet.mvc.AbstractCommandController;
-//import org.springframework.web.servlet.mvc.AbstractController;
-//import org.springframework.web.servlet.mvc.AbstractFormController;
 
 /**
  * TODO update this
- * Base Controller interface, representing a component that receives RenderRequest
+ * Base PortletController interface, representing a component that receives RenderRequest
  * and RenderResponse like a <code>Portlet</code> but is able to participate in
  * an MVC workflow. Comparable to the notion of a Struts <code>Action</code>
  *
- * <p>Any implementation of the Controller interface should be a
+ * <p>Any implementation of the PortletController interface should be a
  * <i>reusable, threadsafe</i> class, capable of handling multiple
  * portlet requests throughout the lifecycle of an application. To be able to
- * configure Controller in an easy way, Controllers are usually JavaBeans.</p>
+ * configure PortletController in an easy way, Controllers are usually JavaBeans.</p>
  *
  * <p><b><a name="workflow">Workflow</a>:</b><br>
  * After the DispatcherPortlet has received a request and has done its work
  * to resolve themes and things a like, it tries to resolve
- * a Controller, using a {@link org.springframework.web.portlet.HandlerMapping
- * HandlerMapping}. When a Controller has been found, the \
+ * a PortletController, using a {@link org.springframework.web.portlet.HandlerMapping
+ * HandlerMapping}. When a PortletController has been found, the \
  * {@link #handleRequest(RenderRequest, RenderResponse) handleRequest()}
  * method will be invoked, which is responsible for handling the actual
  * request and - if applicable - returning an appropriate ModelAndView.
@@ -59,18 +56,17 @@ import org.springframework.web.servlet.mvc.AbstractFormController;
  * {@link AbstractCommandController AbstractCommandController} and
  * {@link AbstractFormController AbstractFormController}.
  * </p>
- * <p>So basically any <i>direct</i> implementation of the Controller interface
+ * <p>So basically any <i>direct</i> implementation of the PortletController interface
  * just handles RenderRequests and should return a ModelAndView, to be
  * further used by the DispatcherPortlet. Any additional functionality such
  * as optional validation, formhandling, etcetera should be obtained by
  * extended one of the abstract controller mentioned above.
  * </p>
  *
- * @author Rod Johnson
- * @version $Id: Controller.java,v 1.1 2004-04-29 13:54:24 dkopylenko Exp $
- * @see SimpleControllerHandlerAdapter
+ * @author William G. Thompson, Jr.
+ * @version $Id: PortletController.java,v 1.1 2004-05-07 16:12:43 wgthom Exp $
  */
-public interface Controller {
+public interface PortletController {
 
 	/**
 	 * Process the request and return a ModelAndView object which the DispatcherPortlet

@@ -20,30 +20,33 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.servlet.ServletException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.OrderComparator;
-import org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter;
-import org.springframework.web.portlet.theme.FixedThemeResolver;
-import org.springframework.web.portlet.view.InternalResourceViewResolver;
+import org.springframework.web.portlet.support.PortletController;
+import org.springframework.web.portlet.support.PortletModeNameViewController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.ModelAndViewDefiningException;
+import org.springframework.web.servlet.ThemeResolver;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.ViewRendererServlet;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
  * Concrete front controller for use within the portlet MVC framework.
- * Dispatches to registered handlers for processing portlet requests.
+ * Dispatches to registered controllers for processing portlet requests.
  *
  * <p>This class and the MVC approach it delivers is based on the discussion in Chapter 12 of
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
@@ -56,15 +59,15 @@ import org.springframework.web.portlet.view.InternalResourceViewResolver;
  * <ul>
  * <li>It is based around a JavaBeans configuration mechanism.
  *
- * <li>It can use any HandlerMapping implementation - whether standard, or provided
- * as part of an application - to control the routing of requests to handler objects.
- * Additional HandlerMapping objects can be added through defining beans in the
- * servlet's application context that implement the HandlerMapping interface in this
- * package. HandlerMappings can be given any bean name (they are tested by type).
+ * <li>It can use any ControllerMapping implementation - whether standard, or provided
+ * as part of an application - to control the routing of requests to controller objects.
+ * Additional ControllerMapping objects can be added through defining beans in the
+ * servlet's application context that implement the ControllerMapping interface in this
+ * package. ControllerMappings can be given any bean name (they are tested by type).
  *
- * <li>It can use any HandlerAdapter. Default is SimpleControllerHandlerAdapter;
- * additional HandlerAdapter objects can be added through the application context.
- * Like HandlerMappings, HandlerAdapters can be given any bean name (tested by type).
+ * <li>It can use any ControllerAdapter. Default is SimpleControllerControllerAdapter;
+ * additional ControllerAdapter objects can be added through the application context.
+ * Like ControllerMappings, ControllerAdapters can be given any bean name (tested by type).
  *
  * <li>Its view resolution strategy can be specified via a ViewResolver implementation.
  * Standard implementations support mapping URLs to bean names, and explicit mappings.
@@ -79,26 +82,15 @@ import org.springframework.web.portlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherPortlet.java,v 1.1 2004-04-29 13:54:22 dkopylenko Exp $
- * @see HandlerMapping
- * @see HandlerAdapter
+ * @author William G. Thompson, Jr.
+ * @version $Id: DispatcherPortlet.java,v 1.2 2004-05-07 16:00:56 wgthom Exp $
+ * @see ControllerMapping
+ * @see ControllerAdapter
  * @see ViewResolver
- * @see ThemeResolver
  * @see org.springframework.web.portlet.context.PortletApplicationContext
  * @see org.springframework.web.portlet.context.FrameworkPortlet
  */
 public class DispatcherPortlet extends FrameworkPortlet {
-
-	/**
-	 * Well-known name for the ThemeResolver object in the bean factory for this namespace.
-	 * TODO: do we need this?
-	 */
-	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
-
-	/**
-	 * Well-known name for the ExceptionResolver object in the bean factory for this namespace.
-	 */
-	public static final String EXCEPTION_RESOLVER_BEAN_NAME = "exceptionResolver";
 
 	/**
 	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
@@ -110,130 +102,97 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * Otherwise only the global portlet app context is obtainable by tags etc.
 	 */
 	public static final String PORTLET_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherPortlet.class.getName() + ".CONTEXT";
-
-	/**
-	 * Request attribute to hold current locale, retrievable by views.
-	 * @see org.springframework.web.servlet.support.RequestContext
-	 */
-	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherPortlet.class.getName() + ".LOCALE";
-
-	/**
-	 * Request attribute to hold current theme, retrievable by views.
-	 * TODO do we need this?
-	 * @see org.springframework.web.servlet.support.RequestContext
-	 */
-	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherPortlet.class.getName() + ".THEME";
-
-	/**
-	 * Additional logger for use when no mapping handlers are found for a request.
-	 * TODO what to do about this?
-	 */
-	protected static final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
-
-	/** ThemeResolver used by this portlet */
-	private ThemeResolver themeResolver;
-
-	/** List of HandlerMappings used by this portlet */
-	private List handlerMappings;
-
-	/** List of HandlerAdapters used by this portlet */
-	private List handlerAdapters;
-
-	/** List of HandlerExceptionResolvers used by this portlet */
-	private List handlerExceptionResolvers;
+	
+	/** List of PortletControllerMappings used by this portlet */
+	private List controllerMappings;
+	
+	/** List of PortletControllers used by this portlet */
+	private List portletControllers;
+	
+	/** List of ControllerExceptionResolvers used by this portlet */
+	private List portletControllerExceptionResolvers;	
 
 	/** ViewResolver used by this portlet */
 	private ViewResolver viewResolver;
-
+	
 
 	/**
 	 * Overridden method, invoked after any bean properties have been set and the
 	 * PortletApplicationContext and BeanFactory for this namespace is available.
-	 * <p>Loads HandlerMapping and HandlerAdapter objects, and configures a
+	 * <p>Loads ControllerMapping and ControllerAdapter objects, and configures a
 	 * ViewResolver.
 	 */
 	protected void initFrameworkPortlet() throws PortletException, BeansException {
-		initThemeResolver();
-		initHandlerMappings();
-		initHandlerAdapters();
-		initHandlerExceptionResolvers();
+	    initPortletControllerMappings();
+	    initPortletControllers();
+	    initPortletControllerExceptionResolvers();
 		initViewResolver();
 	}
 
-	private void initThemeResolver() throws BeansException {
-		try {
-			this.themeResolver = (ThemeResolver) getPortletApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME);
-			logger.info("Loaded theme resolver [" + this.themeResolver + "]");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// we need to use the default
-			this.themeResolver = new FixedThemeResolver();
-			logger.info("Unable to locate theme resolver with name '" + THEME_RESOLVER_BEAN_NAME +
-			            "': using default [" + this.themeResolver + "]");
-		}
-	}
-
 	/**
-	 * Initialize the HandlerMappings used by this class.
-	 * If no HandlerMapping beans are defined in the BeanFactory
-	 * for this namespace, we default to BeanNameUrlHandlerMapping.
-	 * TODO need multiple list for PortletModes and new default mapping
+	 * Initialize the PortletControllerMappings used by this class.
+	 * If no PortletController beans are defined in the BeanFactory
+	 * for this namespace, we default to PortletModeViewNameMapping.
 	 */
-	private void initHandlerMappings() throws BeansException {
-		// find all HandlerMappings in the ApplicationContext
-		Map matchingBeans = getPortletApplicationContext().getBeansOfType(HandlerMapping.class, true, false);
-		this.handlerMappings = new ArrayList(matchingBeans.values());
-		// Ensure we have at least one HandlerMapping, by registering
-		// a default HandlerMapping if no other mappings are found.
-		if (this.handlerMappings.isEmpty()) {
-		    // TODO implement default portlet handler mapping
-			//BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
-			//hm.setApplicationContext(getPortletApplicationContext());
-			//this.handlerMappings.add(hm);
-			logger.info("No HandlerMappings found in portlet '" + getPortletName() + "': using default");
+	private void initPortletControllerMappings() throws BeansException {
+		// find all PortletControllerMappings in the ApplicationContext
+		Map matchingBeans = getPortletApplicationContext().getBeansOfType(PortletControllerMapping.class, true, false);
+		this.controllerMappings = new ArrayList(matchingBeans.values());
+		// Ensure we have at least one PortletController, by registering
+		// a default PortletController if no other mappings are found.
+		if (this.controllerMappings.isEmpty()) {
+			// TODO map view, edit, help 
+		    // PortletModeControllerMapping controllerMapping = new PortletModeControllerMapping();
+		    
+		    
+		    // TODO i we need this
+			// hm.setApplicationContext(getPortletApplicationContext());
+			//this.controllerMappings.add(controllerMapping);
+			logger.info("No PortletControllerMappings found for portlet '" + getPortletName() + "': using default");
 		}
 		else {
-			// we keep HandlerMappings in sorted order
-			Collections.sort(this.handlerMappings, new OrderComparator());
+			// we keep PortletControllerMappings in sorted order
+			Collections.sort(this.controllerMappings, new OrderComparator());
 		}
 	}
 
+	
 	/**
-	 * Initialize the HandlerAdapters used by this class.
-	 * If no HandlerAdapter beans are defined in the BeanFactory
-	 * for this namespace, we default to SimpleControllerHandlerAdapter.
+	 * Initialize the PortletControllers used by this class.
+	 * If no PortletController beans are defined in the BeanFactory
+	 * for this namespace, we default to PortletModeViewNameController.
 	 */
-	private void initHandlerAdapters() throws BeansException {
-		// find all HandlerAdapters in the ApplicationContext
-		Map matchingBeans = getPortletApplicationContext().getBeansOfType(HandlerAdapter.class, true, false);
-		this.handlerAdapters = new ArrayList(matchingBeans.values());
-		// Ensure we have at least one HandlerAdapter, by registering
-		// a default HandlerAdapter if no other adapters are found.
-		if (this.handlerAdapters.isEmpty()) {
-			this.handlerAdapters.add(new SimpleControllerHandlerAdapter());
-			// TODO do we need this handlerapapter??
-			//this.handlerAdapters.add(new ThrowawayControllerHandlerAdapter());
-			logger.info("No HandlerAdapters found in porltet '" + getPortletName() + "': using defaults");
+	private void initPortletControllers() throws BeansException {
+		// find all PortletControllers in the ApplicationContext
+		Map matchingBeans = getPortletApplicationContext().getBeansOfType(PortletController.class, true, false);
+		this.portletControllers = new ArrayList(matchingBeans.values());
+		// Ensure we have at least one PortletController, by registering
+		// a default PortletController if no other adapters are found.
+		if (this.portletControllers.isEmpty()) {
+			this.portletControllers.add(new PortletModeNameViewController());
+			//this.portletControllers.add(new ThrowawayControllerPortletController());
+			logger.info("No PortletControllers found for portlet '" + getPortletName() + "': using defaults");
 		}
 		else {
-			// we keep HandlerAdapters in sorted order
-			Collections.sort(this.handlerAdapters, new OrderComparator());
+			// we keep PortletControllers in sorted order
+			Collections.sort(this.portletControllers, new OrderComparator());
 		}
 	}
-
+	
 	/**
-	 * Initialize the HandlerExceptionResolver used by this class.
+	 * Initialize the PortletControllerExceptionResolver used by this class.
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to no exception resolver.
 	 */
-	private void initHandlerExceptionResolvers() throws BeansException {
-		// find all HandlerExceptionResolvers in the ApplicationContext
-		Map matchingBeans = getPortletApplicationContext().getBeansOfType(HandlerExceptionResolver.class, true, false);
-		this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
-		// we keep HandlerExceptionResolvers in sorted order
-		Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
+	private void initPortletControllerExceptionResolvers() throws BeansException {
+		// find all PortletControllerExceptionResolvers in the ApplicationContext
+		Map matchingBeans = getPortletApplicationContext().getBeansOfType(PortletControllerExceptionResolver.class, true, false);
+		this.portletControllerExceptionResolvers = new ArrayList(matchingBeans.values());
+		// we keep PortletControllerExceptionResolvers in sorted order
+		Collections.sort(this.portletControllerExceptionResolvers, new OrderComparator());
 	}
-
+	
+	
 	/**
 	 * Initialize the ViewResolver used by this class.
 	 * If no bean is defined with the given name in the BeanFactory
@@ -253,41 +212,27 @@ public class DispatcherPortlet extends FrameworkPortlet {
 									"': using default [" + this.viewResolver + "]");
 		}
 	}
-
-
-	/**
-	 * Return the handler for this request.
-	 * Try all handler mappings in order.
-	 * @return the handler, or null if no handler could be found
-	 */
-	private HandlerExecutionChain getHandler(PortletRequest request) throws Exception {
-		Iterator itr = this.handlerMappings.iterator();
-		while (itr.hasNext()) {
-			HandlerMapping hm = (HandlerMapping) itr.next();
-			logger.debug("Testing handler map [" + hm  + "] in DispatcherPortlet with name '" + getPortletName() + "'");
-			HandlerExecutionChain handler = hm.getHandler(request);
-			if (handler != null)
-				return handler;
-		}
-		return null;
+	
+	private void initControllerMappings() throws BeansException {
+	
+	
 	}
 
 	/**
-	 * Return the HandlerAdapter for this handler class.
-	 * @throws ServletException if no HandlerAdapter can be found for the handler.
-	 * This is a fatal error.
+	 * Return the controller for this request.
+	 * Try all controller mappings in order.
+	 * @return the controller, or null if no controller could be found
 	 */
-	private HandlerAdapter getHandlerAdapter(Object handler) throws PortletException {
-		Iterator itr = this.handlerAdapters.iterator();
+	private PortletControllerExecutionChain getPortletController(PortletRequest request) throws Exception {
+		Iterator itr = this.controllerMappings.iterator();
 		while (itr.hasNext()) {
-			HandlerAdapter ha = (HandlerAdapter) itr.next();
-			logger.debug("Testing handler adapter [" + ha + "]");
-			if (ha.supports(handler)) {
-				return ha;
-			}
+			PortletControllerMapping cm = (PortletControllerMapping) itr.next();
+			logger.debug("Testing controller map [" + cm  + "] in DispatcherPortlet with name '" + getPortletName() + "'");
+			PortletControllerExecutionChain controller = cm.getPortletController(request);
+			if (controller != null)
+				return controller;
 		}
-		throw new PortletException("No adapter for handler [" + handler +
-		                           "]: Does your handler implement a supported interface like Controller?");
+		return null;
 	}
 
 	/**
@@ -295,12 +240,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * It may involve resolving the view by name.
 	 * @throws Exception if there's a problem rendering the view
 	 */
-	private void render(ModelAndView mv, RenderRequest request, RenderResponse response, Locale locale)
+	private void render(ModelAndView mv, RenderRequest request, RenderResponse response)
 	    throws Exception {
 		View view = null;
 		if (mv.isReference()) {
 			// we need to resolve this view name
-			view = this.viewResolver.resolveViewName(mv.getViewName(), locale);
+			view = this.viewResolver.resolveViewName(mv.getViewName(), request.getLocale());
 		}
 		else {
 			// no need to lookup: the ModelAndView object contains the actual View object
@@ -310,144 +255,117 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			throw new PortletException("Error in ModelAndView object or View resolution encountered by portlet with name '" +
 																 getPortletName() + "': View to render cannot be null with ModelAndView [" + mv + "]");
 		}
-		view.render(mv.getModel(), request, response);
+		request.setAttribute(ViewRendererServlet.VIEW_ATTRIBUTE, view);
+		request.setAttribute(ViewRendererServlet.MODEL_ATTRIBUTE, mv.getModel());
+		request.setAttribute(ViewRendererServlet.DISPATCHER_PORTLET_APPLICATION_CONTEXT_ATTRIBUTE, getPortletContextAttributeName());
+		PortletRequestDispatcher prd = getPortletContext().getRequestDispatcher(getViewRendererServlet());
+		prd.include(request, response);
 	}
 
-	/**
-	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
-	 * Will just invoke afterCompletion for all interceptors whose preHandle
-	 * invocation has successfully completed and returned true.
-	 * @param mappedHandler the mapped HandlerExecutionChain
-	 * @param interceptorIndex index of last interceptor that successfully completed
-	 * @param ex Exception thrown on handler execution, or null if none
-	 * @see HandlerInterceptor#afterCompletion
-	 */
-	private void triggerAfterCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
-            PortletRequest request, PortletResponse response, Exception ex) throws Exception {
-        // apply afterCompletion methods of registered interceptors
-        Exception currEx = ex;
-        if (mappedHandler != null) {
-            if (mappedHandler.getInterceptors() != null) {
-                for (int i = interceptorIndex; i >= 0; i--) {
-                    HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-                    try {
-                        interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
-                    } catch (Exception ex2) {
-                        if (currEx != null) {
-                            logger.error("Exception overridden by HandlerInterceptor.afterCompletion exception", currEx);
-                        }
-                        currEx = ex2;
-                    }
-                }
-            }
-        }
-        if (currEx != null) { throw currEx; }
-    }
 
 	/**
-	 * Obtain and use the handler for this method.
-	 * The handler will be obtained by applying the portlet's HandlerMappings in order.
-	 * The HandlerAdapter will be obtained by querying the portlets's
-	 * installed HandlerAdapters to find the first that supports the handler class.
+	 * Obtain and use the controller for this method.
+	 * The controller will be obtained by applying the portlet's ControllerMappings in order.
+	 * The ControllerAdapter will be obtained by querying the portlets's
+	 * installed ControllerAdapters to find the first that supports the controller class.
 	 * All ActionRequests are handled by this method.
-	 * It's up to HandlerAdapters to decide which PortletModes are acceptable.
+	 * It's up to ControllerAdapters to decide which PortletModes are acceptable.
 	 */
     protected void doActionService(ActionRequest request, ActionResponse response) throws Exception {
         logger.debug("DispatcherPortlet with name '" + getPortletName() + "' in context [" + request.getContextPath() 
                 + "] received an Action request.");
 
-        // make framework objects available for handlers
+        // make framework objects available for controllers
         request.setAttribute(PORTLET_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
 
         ActionRequest processedRequest = request;
-        HandlerExecutionChain mappedHandler = null;
+        PortletControllerExecutionChain mappedController = null;
         int interceptorIndex = -1;
         try {
-                mappedHandler = getHandler(processedRequest);
-                if (mappedHandler == null || mappedHandler.getHandler() == null) {
-                    // if we didn't find a handler
-                    pageNotFoundLogger.warn("No mapping for ActionRequest in DispatcherPortlet with name '" + getPortletName() + "'"
-                            + " in context [" + request.getContextPath() + "].");
+                mappedController = getPortletController(processedRequest);
+                if (mappedController == null || mappedController.getPortletController() == null) {
+                    // if we didn't find a controller
+                    //pageNotFoundLogger.warn("No controller mapping for ActionRequest in DispatcherPortlet with name '" + getPortletName() + "'"
+                    //        + " in context [" + request.getContextPath() + "].");
                     // TODO how to indicate to portal we have a problem
                     // response.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
 
-                // apply preHandle methods of registered interceptors
-                if (mappedHandler.getInterceptors() != null) {
-                    for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
-                        HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-                        if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
-                            triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+                // apply preController methods of registered interceptors
+                if (mappedController.getInterceptors() != null) {
+                    for (int i = 0; i < mappedController.getInterceptors().length; i++) {
+                        PortletControllerInterceptor interceptor = mappedController.getInterceptors()[i];
+                        if (!interceptor.preController(processedRequest, response, mappedController.getPortletController())) {
+                            triggerAfterCompletion(mappedController, interceptorIndex, processedRequest, response, null);
                             return;
                         }
                         interceptorIndex = i;
                     }
                 }
 
-                // actually invoke the handler
-                HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
-                ha.handle(processedRequest, response, mappedHandler.getHandler());
+                // actually invoke the controller
+                PortletController pc = mappedController.getPortletController();
+                pc.handleRequest(processedRequest, response);
 
-            triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+            triggerAfterCompletion(mappedController, interceptorIndex, processedRequest, response, null);
         } catch (Exception ex) {
-            triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+            triggerAfterCompletion(mappedController, interceptorIndex, processedRequest, response, ex);
         }
     }
 
 	/**
-	 * Obtain and use the handler for this method.
-	 * The handler will be obtained by applying the portlet's HandlerMappings in order.
-	 * The HandlerAdapter will be obtained by querying the portlets's
-	 * installed HandlerAdapters to find the first that supports the handler class.
+	 * Obtain and use the controller for this method.
+	 * The controller will be obtained by applying the portlet's ControllerMappings in order.
+	 * The ControllerAdapter will be obtained by querying the portlets's
+	 * installed ControllerAdapters to find the first that supports the controller class.
 	 * All RenderRequests are handled by this method.
-	 * It's up to HandlerAdapters to decide which PortletModes are acceptable.
+	 * It's up to ControllerAdapters to decide which PortletModes are acceptable.
 	 */
     protected void doRenderService(RenderRequest request, RenderResponse response) throws Exception {
         logger.debug("DispatcherPortlet with name '" + getPortletName() + "' in context [" + request.getContextPath() 
                 + "] received a Render request.");
 
-        // make framework objects available for handlers
+        // make framework objects available for controllers
         request.setAttribute(PORTLET_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
-        request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 
         RenderRequest processedRequest = request;
-        HandlerExecutionChain mappedHandler = null;
+        PortletControllerExecutionChain mappedController = null;
         int interceptorIndex = -1;
         try {
             ModelAndView mv = null;
             try {
-                mappedHandler = getHandler(processedRequest);
-                if (mappedHandler == null || mappedHandler.getHandler() == null) {
-                    // if we didn't find a handler
-                    pageNotFoundLogger.warn("No mapping for RenderRequest in DispatcherPortlet with name '" + getPortletName() + "'"
-                            + " in context [" + request.getContextPath() + "].");
+                mappedController = getPortletController(processedRequest);
+                if (mappedController == null || mappedController.getPortletController() == null) {
+                    // if we didn't find a controller
+                    //pageNotFoundLogger.warn("No mapping for RenderRequest in DispatcherPortlet with name '" + getPortletName() + "'"
+                    //        + " in context [" + request.getContextPath() + "].");
                     // TODO how to indicate to portal we have a problem
                     // response.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
 
                 // apply preHandle methods of registered interceptors
-                if (mappedHandler.getInterceptors() != null) {
-                    for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
-                        HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-                        if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
-                            triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+                if (mappedController.getInterceptors() != null) {
+                    for (int i = 0; i < mappedController.getInterceptors().length; i++) {
+                        PortletControllerInterceptor interceptor = mappedController.getInterceptors()[i];
+                        if (!interceptor.preController(processedRequest, response, mappedController.getPortletController())) {
+                            triggerAfterCompletion(mappedController, interceptorIndex, processedRequest, response, null);
                             return;
                         }
                         interceptorIndex = i;
                     }
                 }
 
-                // actually invoke the handler
-                HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
-                mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+                // actually invoke the controller
+                PortletController pc = mappedController.getPortletController();
+                mv = pc.handleRequest(processedRequest, response);
 
                 // apply postHandle methods of registered interceptors
-                if (mappedHandler.getInterceptors() != null) {
-                    for (int i = mappedHandler.getInterceptors().length - 1; i >= 0; i--) {
-                        HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-                        interceptor.postHandle(processedRequest, response, mappedHandler.getHandler(), mv);
+                if (mappedController.getInterceptors() != null) {
+                    for (int i = mappedController.getInterceptors().length - 1; i >= 0; i--) {
+                        PortletControllerInterceptor interceptor = mappedController.getInterceptors()[i];
+                        interceptor.postController(processedRequest, response, mappedController.getPortletController(), mv);
                     }
                 }
             } catch (ModelAndViewDefiningException ex) {
@@ -455,35 +373,71 @@ public class DispatcherPortlet extends FrameworkPortlet {
                 mv = ex.getModelAndView();
             } catch (Exception ex) {
                 ModelAndView exMv = null;
-                Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
-                for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
-                    HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();
-                    exMv = resolver.resolveException(request, response, handler, ex);
+                PortletController pc = (mappedController != null ? mappedController.getPortletController() : null);
+                for (Iterator it = this.portletControllerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
+                    PortletControllerExceptionResolver resolver = (PortletControllerExceptionResolver) it.next();
+                    exMv = resolver.resolveException(request, response, pc, ex);
                 }
                 if (exMv != null) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
+                        logger.debug("PortletControllerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
                     }
-                    logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
+                    logger.warn("PortletController execution resulted in exception - forwarding to resolved error view", ex);
                     mv = exMv;
                 } else {
                     throw ex;
                 }
             }
 
-            // did the handler return a view to render?
+            // did the controller return a view to render?
             if (mv != null) {
                 logger.debug("Will render view in DispatcherPortlet with name '" + getPortletName() + "'");
-                render(mv, processedRequest, response, request.getLocale());
+                render(mv, processedRequest, response);
             } else {
                 logger.debug("Null ModelAndView returned to DispatcherPortlet with name '" + getPortletName()
-                        + "': assuming HandlerAdapter completed request handling");
+                        + "': assuming ControllerAdapter completed request handling");
             }
 
-            triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+            triggerAfterCompletion(mappedController, interceptorIndex, processedRequest, response, null);
         } catch (Exception ex) {
-            triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+            triggerAfterCompletion(mappedController, interceptorIndex, processedRequest, response, ex);
         }
     }
 
+	/**
+	 * Trigger afterCompletion callbacks on the mapped PortletControllerInterceptors.
+	 * Will just invoke afterCompletion for all interceptors whose preController
+	 * invocation has successfully completed and returned true.
+	 * @param mappedController the mapped PortletControllerExecutionChain
+	 * @param interceptorIndex index of last interceptor that successfully completed
+	 * @param ex Exception thrown on handler execution, or null if none
+	 * @see PortletControllerInterceptor#afterCompletion
+	 */
+	private void triggerAfterCompletion(PortletControllerExecutionChain mappedController, int interceptorIndex,
+																					 PortletRequest request, PortletResponse response,
+																					 Exception ex) throws Exception {
+		// apply afterCompletion methods of registered interceptors
+		Exception currEx = ex;
+		if (mappedController != null) {
+			if (mappedController.getInterceptors() != null) {
+				for (int i = interceptorIndex; i >=0; i--) {
+					PortletControllerInterceptor interceptor = mappedController.getInterceptors()[i];
+					try {
+						interceptor.afterCompletion(request, response, mappedController.getPortletController(), ex);
+					}
+					catch (Exception ex2) {
+						if (currEx != null) {
+							logger.error("Exception overridden by PortletControllerInterceptor.afterCompletion exception", currEx);
+						}
+						currEx = ex2;
+					}
+				}
+			}
+		}
+		if (currEx != null) {
+			throw currEx;
+		}
+	}
+
+    
 }

@@ -21,9 +21,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 
@@ -31,9 +28,9 @@ import org.springframework.web.portlet.context.ConfigurablePortletApplicationCon
 /**
  * PortletApplicationContext implementation that takes configuration from an XML document.
  *
- * <p>By default, the configuration will be taken from "/WEB-INF/applicationContext.xml"
- * for the root context, and "/WEB-INF/test-portlet.xml" for a context with the namespace
- * "test-portlet" (like for a DispatcherPortlet instance with the portlet-name "test").
+ * <p>By default, the configuration will be take from "/WEB-INF/test-portlet.xml" for a 
+ * context with the namespace "test-portlet" (like for a DispatcherPortlet instance with
+ * the portlet-name "test").
  *
  * <p>The config location defaults can be overridden via setConfigLocations,
  * respectively via the "contextConfigLocation" parameters of ContextLoader and
@@ -49,26 +46,22 @@ import org.springframework.web.portlet.context.ConfigurablePortletApplicationCon
  * the web application root. Absolute paths, e.g. for files outside the portlet app root,
  * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
  *
- * <p>In addition to the special beans detected by AbstractApplicationContext,
- * this class detects a ThemeSource bean in the context, with the name
- * "themeSource".
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author William G. Thompson, Jr.
  * @see #setNamespace
  * @see #setConfigLocations
- * @see org.springframework.web.context.ContextLoader#initPortletApplicationContext
- * @see org.springframework.web.servlet.FrameworkServlet#initPortletApplicationContext
+ * @see org.springframework.web.portlet.FrameworkPortlet#initPortletApplicationContext
  * @see org.springframework.util.PathMatcher#retrieveMatchingFiles
  * @see org.springframework.context.support.AbstractApplicationContext#getResource
- * @see org.springframework.ui.context.ThemeSource
  */
 
 public class XmlPortletApplicationContext extends AbstractXmlApplicationContext implements
         ConfigurablePortletApplicationContext {
 
 	/** Default config location for the root context */
-	public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/applicationContext.xml";
+	//public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/applicationContext.xml";
+    // TODO default doesn't make sense anymore ??? since root is loaded by WAC
 
 	/** Default prefix for building a config location for a namespace */
 	public static final String DEFAULT_CONFIG_LOCATION_PREFIX = "/WEB-INF/";
@@ -76,8 +69,7 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 	/** Default suffix for building a config location for a namespace */
 	public static final String DEFAULT_CONFIG_LOCATION_SUFFIX = ".xml";
 
-
-	/** Servlet context that this context runs in */
+	/** Portlet context that this context runs in */
 	private PortletContext portletContext;
 
 	/** Namespace of this context, or null if root */
@@ -85,9 +77,6 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 
 	/** Paths to XML configuration files */
 	private String[] configLocations;
-
-	/** the ThemeSource for this ApplicationContext */
-	private ThemeSource themeSource;
 
 
 	public void setPortletContext(PortletContext portletContext) {
@@ -124,10 +113,11 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 			}
 		}
 		else {
-			setDisplayName("Root XmlPortletApplicationContext");
-			if (this.configLocations == null || this.configLocations.length == 0) {
-				this.configLocations = new String[] {DEFAULT_CONFIG_LOCATION};
-			}
+		    // TODO throw BeansException?  only load PAC...
+//			setDisplayName("Root XmlPortletApplicationContext");
+//			if (this.configLocations == null || this.configLocations.length == 0) {
+//				this.configLocations = new String[] {DEFAULT_CONFIG_LOCATION};
+//			}
 		}
 		super.refresh();
 	}
@@ -149,17 +139,6 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 		return new PortletContextResource(this.portletContext, path);
 	}
 
-	/**
-	 * Initialize the theme capability.
-	 */
-	protected void onRefresh() {
-		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
-	}
-
-	public Theme getTheme(String themeName) {
-		return this.themeSource.getTheme(themeName);
-	}
-
 
 	/**
 	 * Return diagnostic information.
@@ -169,5 +148,6 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 		sb.append("config locations=[" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "]; ");
 		return sb.toString();
 	}
+
 
 }

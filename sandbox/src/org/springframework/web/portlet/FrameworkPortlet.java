@@ -31,11 +31,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
-import org.springframework.web.portlet.context.ContextLoader;
 import org.springframework.web.portlet.context.PortletApplicationContext;
-import org.springframework.web.portlet.context.support.PortletApplicationContextUtils;
 import org.springframework.web.portlet.context.support.PortletRequestHandledEvent;
+import org.springframework.web.portlet.context.support.PortletWebApplicationContextUtils;
 import org.springframework.web.portlet.context.support.XmlPortletApplicationContext;
 
 
@@ -79,7 +79,8 @@ import org.springframework.web.portlet.context.support.XmlPortletApplicationCont
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.1 $
+ * @author William G. Thompson, Jr.
+ * @version $Revision: 1.2 $
  * @see #doService
  * @see #initFrameworkPortlet
  * @see #setContextClass
@@ -108,6 +109,13 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * The completion is the portlet name.
 	 */
 	public static final String PORTLET_CONTEXT_PREFIX = FrameworkPortlet.class.getName() + ".CONTEXT.";
+	
+	/**
+	 * Default URL to ViewRendererServlet.  This bridge servlet is used to convert
+	 * portlet render requests to servlet requests in order to leverage the view support
+	 * in org.springframework.web.view.
+	 */
+	public static final String DEFAULT_VIEW_RENDERER_SERVLET = "/view";
 
 	/** Custom PortletApplicationContext implementation class */
 	private Class contextClass = DEFAULT_CONTEXT_CLASS;
@@ -123,9 +131,24 @@ public abstract class FrameworkPortlet extends PortletBean {
 
 	/** PortletApplicationContext for this portlet */
 	private PortletApplicationContext portletApplicationContext;
-	
-	private ContextLoader contextLoader;
 
+	/** ViewRendererServlet **/
+	private String viewRendererServlet;
+
+    /**
+     * Return the ViewRendererServlet.
+     */
+    public String getViewRendererServlet() {
+        return (viewRendererServlet != null ? viewRendererServlet : DEFAULT_VIEW_RENDERER_SERVLET);
+    }
+    
+    /**
+     * Set the ViewRendererServlet.  This servlet is used to ultimately render
+     * all views in the portlet application.
+     */
+    public void setViewRendererServlet(String viewRendererServlet) {
+        this.viewRendererServlet = viewRendererServlet;
+    }
 
 	/**
 	 * Set a custom context class. This class must be of type PortletApplicationContext;
@@ -194,14 +217,6 @@ public abstract class FrameworkPortlet extends PortletBean {
 	}
 
 	/**
-	 * Create the ContextLoader to use. Can be overridden in subclasses.
-	 * @return the new ContextLoader
-	 */
-	protected ContextLoader createContextLoader() {
-		return new ContextLoader();
-	}
-	
-	/**
 	 * Overridden method of PortletBean, invoked after any bean properties
 	 * have been set. Creates this portlet's PortletApplicationContext.
 	 */
@@ -211,9 +226,6 @@ public abstract class FrameworkPortlet extends PortletBean {
 			logger.info("Framework portlet '" + getPortletName() + "' init");
 		}
 
-		this.contextLoader = createContextLoader();
-		this.contextLoader.initPortletApplicationContext(getPortletContext());
-		
 		try {
 			this.portletApplicationContext = initPortletApplicationContext();
 			initFrameworkPortlet();
@@ -241,9 +253,9 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * @see #createPortletApplicationContext
 	 */
 	protected PortletApplicationContext initPortletApplicationContext() throws BeansException {
-		getPortletContext().log("Initializing PortletApplicationContext for portlet '" + getPortletName() + "'");
-		PortletContext portletContext = getPortletContext();
-		PortletApplicationContext parent = PortletApplicationContextUtils.getPortletApplicationContext(portletContext);
+	    PortletContext portletContext = getPortletContext();
+		portletContext.log("Initializing PortletApplicationContext for portlet '" + getPortletName() + "'");
+		WebApplicationContext parent = PortletWebApplicationContextUtils.getWebApplicationContext(portletContext);
 
 		PortletApplicationContext pac = createPortletApplicationContext(parent);
 		if (logger.isInfoEnabled()) {
@@ -271,7 +283,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * @see #setContextClass
 	 * @see org.springframework.web.portlet.context.support.XmlPortletApplicationContext
 	 */
-	protected PortletApplicationContext createPortletApplicationContext(PortletApplicationContext parent)
+	protected PortletApplicationContext createPortletApplicationContext(WebApplicationContext parent)
 			throws BeansException {
 
 		if (logger.isInfoEnabled()) {
@@ -327,14 +339,17 @@ public abstract class FrameworkPortlet extends PortletBean {
 	}
 
 	/**
-	 * Overide default GenericPortlet doDispatch method to route 
-	 * all Render requests to serviceWrapper. 
+	 * Overide GenericPortlet's doDispatch method to route all Render requests
+	 * to the serviceWrapper. 
 	 */
     protected final void doDispatch(RenderRequest request, RenderResponse response) 
     	throws PortletException, IOException {
         serviceWrapper(request, response);
     }
 
+    /**
+     * Route all Action requests to serviceWrapper.
+     */
     public final void processAction(ActionRequest request, ActionResponse response) 
     	throws PortletException, IOException {
         serviceWrapper(request, response);
@@ -413,17 +428,15 @@ public abstract class FrameworkPortlet extends PortletBean {
 		throws Exception;
 	
 	/**
-	 * Close both the root PortletApplicationContext and the
-	 * PortletApplicationContext of this portlet.
+	 * Close the PortletApplicationContext of this portlet.
 	 * @see org.springframework.context.ConfigurableApplicationContext#close
 	 */
 	public void destroy() {
-	    // Close the root portlet application context.
-		this.contextLoader.closePortletApplicationContext(getPortletContext());
-		// Close the portlet portlet application context.
+		// Close the portlet application context of this portlet.
 		getPortletContext().log("Closing PortletApplicationContext of portlet '" + getPortletName() + "'");
 		if (this.portletApplicationContext instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) this.portletApplicationContext).close();
 		}
 	}
+
 }

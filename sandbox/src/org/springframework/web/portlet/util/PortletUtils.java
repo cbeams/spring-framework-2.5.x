@@ -25,21 +25,20 @@ import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
-import org.springframework.web.util.Log4jWebConfigurer;
-import org.springframework.web.util.WebAppRootListener;
-
 /**
- * Miscellaneous utilities for web applications.
+ * Miscellaneous utilities for portlet applications.
  * Used by various framework classes.
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author William G. Thompson, Jr.
+ * @version $Revision: 1.2 $
  */
 public abstract class PortletUtils {
 
 	/**
 	 * Default character encoding to use when request.getCharacterEncoding
-	 * returns null, according to the Servlet spec.
-	 * @see PortletRequest#getCharacterEncoding
+	 * returns null, according to the Portlet spec.
+	 * @see RenderRequest#getCharacterEncoding
 	 */
 	public static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";
 
@@ -47,51 +46,13 @@ public abstract class PortletUtils {
 	 * Standard Servlet spec context attribute that specifies a temporary
 	 * directory for the current web application, of type java.io.File
 	 */
-	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.portlet.context.tempdir";
+	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
-	/**
-	 * Portlet app root key parameter at the portlet context level
-	 * (i.e. web.xml): "portletAppRootKey".
-	 */
-	public static final String PORTLET_APP_ROOT_KEY_PARAM = "portletAppRootKey";
-
-	/** Default portlet app root key: "portletapp.root" */
-	public static final String DEFAULT_PORTLET_APP_ROOT_KEY = "portletapp.root";
-
+	
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
 
 
-	/**
-	 * Set a system property to the portlet application root directory.
-	 * The key of the system property can be defined with the "portletAppRootKey"
-	 * context-param in web.xml. Default is "portletapp.root".
-	 * <p>Can be used for toolkits that support substition with System.getProperty
-	 * values, like Log4J's "${key}" syntax within log file locations.
-	 * @param portletContext the portlet context of the portlet application
-	 * @throws IllegalStateException if the system property is already set,
-	 * or if the WAR file is not expanded
-	 * @see #PORTLET_APP_ROOT_KEY_PARAM
-	 * @see #DEFAULT_PORTLET_APP_ROOT_KEY
-	 * @see WebAppRootListener
-	 * @see Log4jWebConfigurer
-	 */
-	public static void setWebAppRootSystemProperty(PortletContext portletContext) throws IllegalStateException {
-		String param = portletContext.getInitParameter(PORTLET_APP_ROOT_KEY_PARAM);
-		String key = (param != null ? param : DEFAULT_PORTLET_APP_ROOT_KEY);
-		String oldValue = System.getProperty(key);
-		String root = portletContext.getRealPath("/");
-		if (root == null) {
-			throw new IllegalStateException("Cannot set portlet app root system property when WAR file is not expanded");
-		}
-		if (oldValue != null && !oldValue.equals(root)) {
-			throw new IllegalStateException("Portlet app root system property already set to different value: '" +
-																			key + "' = [" + oldValue +
-																			"] - Choose unique portletAppRootKey values in your web.xml files!");
-		}
-		System.setProperty(key, root);
-		portletContext.log("Set portlet app root system property: " + key + " = " + root);
-	}
 
 	/**
 	 * Return the temporary directory for the current web application,

@@ -22,16 +22,14 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Interface to be implemented by configurable portlet application contexts.
- * Expected by ContextLoader and FrameworkPortlet.
- * TODO ContextLoader still relevant?
+ * Expected by FrameworkPortlet.
+ * 
  * <p>Note: The setters of this interface need to be called before an invocation
  * of the refresh method inherited from ConfigurableApplicationContext.
  * They do not cause an initialization of the context on their own.
  *
  * @author Juergen Hoeller
- * @since 05.12.2003
- * @see #refresh
- * @see ContextLoader#createWebApplicationContext
+ * @author William G. Thompson, Jr.
  * @see org.springframework.web.portlet.FrameworkPortlet#createPortletApplicationContext
  */
 public interface ConfigurablePortletApplicationContext extends PortletApplicationContext, ConfigurableApplicationContext {

@@ -28,8 +28,10 @@ import org.springframework.web.portlet.util.PortletUtils;
 /**
  * Convenient superclass for application objects running in a PortletApplicationContext.
  * Provides getPortletApplicationContext, getPortletContext, and getTempDir methods.
+ * 
  * @author Juergen Hoeller
- * @since 28.08.2003
+ * @author William G. Thompson, Jr.
+ * @version $Revision: 1.2 $
  */
 public abstract class PortletApplicationObjectSupport extends ApplicationObjectSupport {
 

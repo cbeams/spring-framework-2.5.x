@@ -19,31 +19,33 @@ package org.springframework.web.portlet;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
+import org.springframework.web.servlet.ModelAndView;
+
 /**
  * Interface to be implemented by objects than can resolve exceptions thrown
- * during handler mapping or execution, in the typical case to error views.
- * Implementors are typically registered as beans in the application context.
+ * during controller mapping or execution, in the typical case to error views.
+ * Implementors are typically registered as beans in the portlet application context.
  *
  * <p>Error views are analogous to the error page JSPs, but can be used with
  * any kind of exception including any checked exception, with potentially
- * fine-granular mappings for specific handlers.
+ * fine-granular mappings for specific controllers.
  *
- * @author Juergen Hoeller
+ * @author William G. Thompson, Jr.
  * @since 22.11.2003
  */
-public interface HandlerExceptionResolver {
+public interface PortletControllerExceptionResolver {
 
 	/**
-	 * Try to resolve the given exception that got thrown during on handler execution,
+	 * Try to resolve the given exception that got thrown during on controller execution,
 	 * returning a ModelAndView that represents a specific error page if appropriate.
 	 * @param request current portlet request
 	 * @param response current portlet response
-	 * @param handler the executed handler, or null if none chosen at the time of
+	 * @param controller the executed controller, or null if none chosen at the time of
 	 * the exception (for example, if multipart resolution failed)
-	 * @param ex the exception that got thrown during handler execution
+	 * @param ex the exception that got thrown during controller execution
 	 * @return a matching ModelAndView to forward to, or null for default processing
 	 */
 	ModelAndView resolveException(RenderRequest request, RenderResponse response,
-	                              Object handler, Exception ex);
+	                              Object controller, Exception ex);
 
 }

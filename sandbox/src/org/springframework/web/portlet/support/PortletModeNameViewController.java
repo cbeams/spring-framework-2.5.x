@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.web.portlet.mvc;
+package org.springframework.web.portlet.support;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -22,14 +22,16 @@ import javax.portlet.PortletMode;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Controller that transforms the PortletMode to a view name. 
- * Example: PortletMode.VIEW -> "VIEW"
- * @author Alef Arendsen
+ * PortletController that transforms the PortletMode to a view name. 
+ * Example: PortletMode.VIEW -> "view"
+ * 
+ * @author William G. Thompson, Jr.
+ * @version $Revision: 1.1 $
  */
-public class PortletModeNameViewController implements Controller {
+public class PortletModeNameViewController implements PortletController {
 
     public ModelAndView handleRequest(RenderRequest request, RenderResponse response) throws Exception {
         PortletMode portletMode = request.getPortletMode();

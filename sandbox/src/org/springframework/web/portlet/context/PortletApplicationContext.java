@@ -19,17 +19,16 @@ package org.springframework.web.portlet.context;
 import javax.portlet.PortletContext;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.ui.context.ThemeSource;
 
 /** 
  * Interface to provide configuration for a portlet application. This is read-only while
  * the application is running, but may be reloaded if the implementation supports this.
  *
  * <p>This interface adds a getPortletContext method to the generic ApplicationContext
- * interface, and defines a well-known application attribute name that the root
- * context must be bound to in the bootstrap process.
+ * interface.  Portlet applications also leverage WebApplicationContext which defines a 
+ * well-known application attribute name that the root context must be bound to in
+ * the bootstrap process.
  *
- * TODO: review this.
  * <p>Like generic application contexts, portlet application contexts are hierarchical.
  * There is a single root context per application, while each portlet in the application
  * (including a dispatcher portlet in the MVC framework) has its own child context.
@@ -40,21 +39,11 @@ import org.springframework.ui.context.ThemeSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since January 19, 2001
- * @version $Revision: 1.1 $
+ * @author William G. Thompson, Jr.
+ * @version $Revision: 1.2 $
  * @see PortletContextAware#setPortletContext
  */
-public interface PortletApplicationContext extends ApplicationContext, ThemeSource {
-
-	/**
-	 * Context attribute to bind root PortletApplicationContext to on successful startup.
-	 * <p>Note: If the startup of the root context fails, this attribute can contain
-	 * an exception or error as value. Use PortletApplicationContextUtils for convenient
-	 * lookup of the root PortletApplicationContext.
-	 * @see org.springframework.web.portlet.context.support.PortletApplicationContextUtils#getPortletApplicationContext
-	 * @see org.springframework.web.portlet.context.support.PortletApplicationContextUtils#getRequiredPortletApplicationContext
-	 */
-	String ROOT_PORTLET_APPLICATION_CONTEXT_ATTRIBUTE = PortletApplicationContext.class + ".ROOT";
+public interface PortletApplicationContext extends ApplicationContext {
 
 	/**
 	 * Return the standard Portlet API PorletContext for this application.
