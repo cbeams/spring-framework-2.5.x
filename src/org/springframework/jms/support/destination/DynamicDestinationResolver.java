@@ -18,25 +18,48 @@ package org.springframework.jms.support.destination;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.QueueSession;
 import javax.jms.Session;
+import javax.jms.TopicSession;
 
 /**
  * Simple implementation of the DestinationResolver interface,
  * resolving destination names as dynamic destinations.
+ *
+ * <p>This implementation will work on both JMS 1.1 and JMS 1.0.2,
+ * because it uses the QueueSession respectively TopicSession methods
+ * if possible, falling back to JMS 1.1's generic Session methods.
+ *
  * @author Juergen Hoeller
- * @since 20.07.2004
+ * @since 1.1
+ * @see javax.jms.QueueSession#createQueue
+ * @see javax.jms.TopicSession#createTopic
  * @see javax.jms.Session#createQueue
  * @see javax.jms.Session#createTopic
  */
 public class DynamicDestinationResolver implements DestinationResolver {
 
-	public Destination resolveDestinationName(Session session, String destinationName, boolean isPubSubDomain)
+	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
-		if (isPubSubDomain) {
-			return session.createTopic(destinationName);
+		if (pubSubDomain) {
+			if (session instanceof TopicSession) {
+				// cast to TopicSession: will work on both JMS 1.1 and 1.0.2
+				return ((TopicSession) session).createTopic(destinationName);
+			}
+			else {
+				// fallback to generic JMS Session: will only work on JMS 1.1
+				return session.createTopic(destinationName);
+			}
 		}
 		else {
-			return session.createQueue(destinationName);
+			if (session instanceof QueueSession) {
+				// cast to QueueSession: will work on both JMS 1.1 and 1.0.2
+				return ((QueueSession) session).createQueue(destinationName);
+			}
+			else {
+				// fallback to generic JMS Session: will only work on JMS 1.1
+				return session.createQueue(destinationName);
+			}
 		}
 	}
 
