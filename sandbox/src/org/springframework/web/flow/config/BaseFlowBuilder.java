@@ -50,8 +50,8 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	/**
 	 * The default FlowCreator implementation. This just instantiates the
 	 * <code>Flow</code> class. If you need a custom <code>Flow</code>
-	 * implementation, configure the BaseFlowBuilder witha custom
-	 * <code>FlowCreator</code>.
+	 * implementation, configure the BaseFlowBuilder with a custom
+	 * <code>FlowCreator</code> factory.
 	 * 
 	 * @see org.springframework.web.flow.Flow
 	 */

@@ -33,8 +33,8 @@ import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Base, abstract action implementation that provides a number of helper methods
- * for:
+ * Base action implementation that provides a number of helper methods generally
+ * useful to any controller/command action.  These include:
  * <ul>
  * <li>Creating common <code>ActionResult</code> objects
  * <li>Accessing request parameters

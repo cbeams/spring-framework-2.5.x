@@ -18,10 +18,12 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.Flow;
 
 /**
- * Builder interface used to build flows. Implementations should encapsulate
- * flow construction logic (for a specific kind of flow, for example,
- * <code>EditUsersMasterFlowBuilder</code>) or a generic flow builder
- * strategy (like the XmlFlowBuilder, for building flows from a xml-definition).
+ * Builder interface used to build flows.
+ * <p>
+ * Implementations should encapsulate flow construction logic, either for a
+ * specific kind of flow, for example, <code>a EditUsersMasterFlowBuilder</code>
+ * built in java code, or a generic flow builder strategy, like the
+ * XmlFlowBuilder, for building flows from a xml-definition.
  * <p>
  * Flow builders are executed by the FlowFactoryBean, which acts as an assembler
  * (director). This is the classic GoF Builder pattern.

@@ -18,12 +18,12 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.Flow;
 
 /**
- * Strategy object that encapsulates the creation of a <code>Flow</code>
- * instance. The instance created may be Flow (in the default case) or a
- * specific specialization.
+ * Factory that encapsulates the creation of a <code>Flow</code> instance. The
+ * instance may be <code>Flow</code>, in the default case, or a custom
+ * extension.
  * 
  * This interface is useful when you require specific <code>Flow</code>
- * specializations that are shared between different <code>FlowBuilder</code>
+ * specialization that are shared between different <code>FlowBuilder</code>
  * implementations.
  * 
  * @author Keith Donald
