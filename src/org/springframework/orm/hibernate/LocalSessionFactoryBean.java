@@ -95,7 +95,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * nor any mapping resources are set, a default Hibernate configuration
 	 * will be performed, using "/hibernate.cfg.xml".
 	 */
-	public final void setConfigLocation(String configLocation) {
+	public void setConfigLocation(String configLocation) {
 		this.configLocation = configLocation;
 	}
 
@@ -105,7 +105,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * <p>Can be used to override values from a Hibernate XML config file,
 	 * or to specify all mappings locally.
 	 */
-	public final void setMappingResources(String[] mappingResources) {
+	public void setMappingResources(String[] mappingResources) {
 		this.mappingResources = mappingResources;
 	}
 
@@ -118,7 +118,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * provider settings and use a Spring-set DataSource instead.
 	 * @see #setDataSource
 	 */
-	public final void setHibernateProperties(Properties hibernateProperties) {
+	public void setHibernateProperties(Properties hibernateProperties) {
 		this.hibernateProperties = hibernateProperties;
 	}
 
@@ -128,7 +128,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * <p>Note: If this is set, the Hibernate settings do not have to define
 	 * a connection provider at all, avoiding duplicated configuration.
 	 */
-	public final void setDataSource(DataSource dataSource) {
+	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
@@ -139,15 +139,25 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * <p>Such an interceptor can either be set at the SessionFactory level,
 	 * i.e. on LocalSessionFactoryBean, or at the Session level, i.e. on
 	 * HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
+	 * It's preferable to set it on LocalSessionFactoryBean or HibernateTransactionManager
+	 * to avoid repeated configuration and guarantee consistent behavior in transactions.
 	 * @see HibernateTemplate#setEntityInterceptor
 	 * @see HibernateInterceptor#setEntityInterceptor
 	 * @see HibernateTransactionManager#setEntityInterceptor
 	 */
-	public final void setEntityInterceptor(Interceptor entityInterceptor) {
+	public void setEntityInterceptor(Interceptor entityInterceptor) {
 		this.entityInterceptor = entityInterceptor;
 	}
 
-	public final void setSchemaUpdate(boolean schemaUpdate) {
+	/**
+	 * Set whether to execute a schema update after SessionFactory initialization.
+	 * <p>For details on how to make schema update scripts work, see the Hibernate
+	 * documentation, as this class leverages the same schema update script support
+	 * in net.sf.hibernate.cfg.Configuration than Hibernate's own SchemaUpdate tool.
+	 * @see net.sf.hibernate.cfg.Configuration#generateSchemaUpdateScript
+	 * @see net.sf.hibernate.tool.hbm2ddl.SchemaUpdate
+	 */
+	public void setSchemaUpdate(boolean schemaUpdate) {
 		this.schemaUpdate = schemaUpdate;
 	}
 
@@ -156,7 +166,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @throws IllegalArgumentException in case of illegal property values
 	 * @throws HibernateException in case of Hibernate initialization errors
 	 */
-	public final void afterPropertiesSet() throws IllegalArgumentException, HibernateException {
+	public void afterPropertiesSet() throws IllegalArgumentException, HibernateException {
 		// create Configuration instance
 		Configuration config = newConfiguration();
 
@@ -198,6 +208,9 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			config.setInterceptor(this.entityInterceptor);
 		}
 
+		// perform custom post-processing in subclasses
+		postProcessConfiguration(config);
+
 		// build SessionFactory instance
 		logger.info("Building new Hibernate SessionFactory for LocalSessionFactoryBean [" + this + "]");
 		this.sessionFactory = newSessionFactory(config);
@@ -225,6 +238,15 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
+	 * To be implemented by subclasses that want to to perform custom post-processing
+	 * of the Configuration object after the default initialization took place.
+	 * @param config the current Configuration object
+	 * @throws HibernateException in case of Hibernate initialization errors
+	 */
+	protected void postProcessConfiguration(Configuration config) throws HibernateException {
+	}
+
+	/**
 	 * Subclasses can override this method to perform custom initialization
 	 * of the SessionFactory instance, creating it via the given Configuration
 	 * object that got prepared by this LocalSessionFactoryBean.
@@ -240,6 +262,18 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		return config.buildSessionFactory();
 	}
 
+	/**
+	 * Execute schema update script determined by the given Configuration object.
+	 * A replacement for Hibernate's SchemaUpdate class, for automatically
+	 * executing schema update scripts on application startup.
+	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
+	 * connection to perform the script. Therefore, it gets invoked after
+	 * SessionFactory initialization.
+	 * @param config the current Configuration object
+	 * @throws HibernateException in case of Hibernate initialization errors
+	 * @see net.sf.hibernate.cfg.Configuration#generateSchemaUpdateScript
+	 * @see net.sf.hibernate.tool.hbm2ddl.SchemaUpdate
+	 */
 	protected void executeSchemaUpdate(final Configuration config) throws HibernateException {
 		final Dialect dialect = Dialect.getDialect(config.getProperties());
 		HibernateTemplate template = new HibernateTemplate(this.sessionFactory);
@@ -275,22 +309,22 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	/**
 	 * Return the singleton SessionFactory.
 	 */
-	public final Object getObject() {
+	public Object getObject() {
 		return this.sessionFactory;
 	}
 
-	public final Class getObjectType() {
+	public Class getObjectType() {
 		return (this.sessionFactory != null) ? this.sessionFactory.getClass() : SessionFactory.class;
 	}
 
-	public final boolean isSingleton() {
+	public boolean isSingleton() {
 		return true;
 	}
 
 	/**
 	 * Close the SessionFactory on context shutdown.
 	 */
-	public final void destroy() throws HibernateException {
+	public void destroy() throws HibernateException {
 		logger.info("Closing Hibernate SessionFactory of LocalSessionFactoryBean [" + this + "]");
 		this.sessionFactory.close();
 	}

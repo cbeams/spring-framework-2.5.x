@@ -45,7 +45,8 @@ import org.aopalliance.intercept.MethodInvocation;
  * <li>no anonymous classes necessary for callback implementations;
  * <li>the possibility to throw any application exceptions from within data access code.
  * </ul>
- * The drawbacks are:
+ *
+ * <p>The drawbacks are:
  * <ul>
  * <li>the dependency on interceptor configuration;
  * <li>the delegating try/catch blocks.
@@ -79,10 +80,7 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 		}
 		try {
 			Object retVal = methodInvocation.proceed();
-			if (isFlushNecessary(existingTransaction)) {
-				logger.debug("Eagerly flushing Hibernate session in HibernateInterceptor");
-				session.flush();
-			}
+			flushIfNecessary(session, existingTransaction);
 			return retVal;
 		}
 		finally {

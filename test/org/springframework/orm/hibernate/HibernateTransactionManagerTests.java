@@ -65,12 +65,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(con, 4);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.NEVER);
-		sessionControl.setVoidCallable(1);
 		query.setTimeout(10);
 		queryControl.setReturnValue(query, 1);
 		query.list();
@@ -86,7 +80,9 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 		queryControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf, ds);
+		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setSessionFactory(sf);
+		tm.setDataSource(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 		tt.setTimeout(10);
@@ -145,7 +141,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 		txControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf, null);
+		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread session", !SessionFactoryUtils.getThreadObjectManager().hasThreadObject(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isActive());
@@ -202,7 +198,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 		txControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf, null);
+		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread session", !SessionFactoryUtils.getThreadObjectManager().hasThreadObject(sf));
 
@@ -245,11 +241,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
-		sessionControl.setVoidCallable(2);
-		session.setFlushMode(FlushMode.NEVER);
 		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
@@ -263,7 +255,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 		txControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf, null);
+		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		final List l = new ArrayList();
 		l.add("test");
@@ -320,7 +312,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 		txControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf, null);
+		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		try {
 			tt.execute(new TransactionCallback() {
@@ -373,7 +365,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 		txControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf, null);
+		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		final List l = new ArrayList();
 		l.add("test");
@@ -559,8 +551,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(tx, 1);
 		session.connection();
 		sessionControl.setReturnValue(con, 4);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		con.getTransactionIsolation();
 		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED);
 		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -577,7 +567,9 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 		txControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf, ds);
+		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setSessionFactory(sf);
+		tm.setDataSource(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 		final List l = new ArrayList();
@@ -634,12 +626,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.NEVER);
-		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.commit();
@@ -653,7 +639,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 		conControl.replay();
 
-		HibernateTransactionManager tm = new HibernateTransactionManager(sf, null);
+		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		tm.setEntityInterceptor(entityInterceptor);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		final List l = new ArrayList();
@@ -704,8 +690,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setVoidCallable(1);
 		session.connection();
 		sessionControl.setReturnValue(con, 2);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.commit();
@@ -721,7 +705,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 		conControl.replay();
 
-		HibernateTransactionManager tm = new HibernateTransactionManager(sf, null);
+		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setReadOnly(true);
 		final List l = new ArrayList();
@@ -768,10 +752,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
-		session.flush();
-		sessionControl.setThrowable(new HibernateException("ex"), 1);
+		tx.commit();
+		txControl.setThrowable(new HibernateException("ex"), 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -785,7 +767,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 		conControl.replay();
 
-		HibernateTransactionManager tm = new HibernateTransactionManager(sf, null);
+		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		final List l = new ArrayList();
 		l.add("test");
@@ -793,7 +775,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isActive());
 
 		try {
-			Object result = tt.execute(new TransactionCallback() {
+			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread session", SessionFactoryUtils.getThreadObjectManager().hasThreadObject(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);

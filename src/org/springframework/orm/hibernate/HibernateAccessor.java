@@ -1,27 +1,29 @@
 package org.springframework.orm.hibernate;
 
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
+import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.core.SQLExceptionTranslator;
 import org.springframework.util.Constants;
 
 /**
- * Base class for HibernateTemplate and HibernateInterceptor,
- * defining common properties and constants.
+ * Base class for HibernateTemplate and HibernateInterceptor, defining common
+ * properties like flushing behavior.
  *
- * <p>Not intended to be used directly.
- * See HibernateTemplate and HibernateInterceptor.
+ * <p>Not intended to be used directly. See HibernateTemplate and HibernateInterceptor.
  *
  * @author Juergen Hoeller
  * @since 29.07.2003
  * @see HibernateTemplate
  * @see HibernateInterceptor
+ * @see #setFlushMode
  */
-public abstract class HibernateAccessor {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class HibernateAccessor implements InitializingBean {
 
 	/**
 	 * Never flush is a good strategy for read-only units of work.
@@ -32,18 +34,20 @@ public abstract class HibernateAccessor {
 	public static final int FLUSH_NEVER = 0;
 
 	/**
-	 * Automatic flushing is the default mode of both a Hibernate Session
-	 * and this class. A Session gets flushed on commit and on certain
-	 * find operations that might involve already modified instances,
-	 * but not after each unit of work like with eager flushing.
+	 * Automatic flushing is the default mode for a Hibernate session.
+	 * A session will get flushed on transaction commit or session closing,
+	 * and on certain find operations that might involve already modified
+	 * instances, but not after each unit of work like with eager flushing.
 	 * @see #setFlushMode
 	 */
 	public static final int FLUSH_AUTO = 1;
 
 	/**
 	 * Eager flushing leads to immediate synchronization with the database,
-	 * even if in a Hibernate transaction. This causes inconsistencies to show up
-	 * and throw a respective exception immediately. But the drawbacks are:
+	 * even if in a transaction. This causes inconsistencies to show up and throw
+	 * a respective exception immediately, and JDBC access code that participates
+	 * in the same transaction will see the changes as the database is already
+	 * aware of them then. But the drawbacks are:
 	 * <ul>
 	 * <li>additional communication roundtrips with the database, instead of a
 	 * single batch at transaction commit;
@@ -56,6 +60,8 @@ public abstract class HibernateAccessor {
 
 	/** Constants instance for HibernateAccessor */
 	private static final Constants constants = new Constants(HibernateAccessor.class);
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private SessionFactory sessionFactory;
 
@@ -82,14 +88,16 @@ public abstract class HibernateAccessor {
 	/**
 	 * Set a Hibernate entity interceptor that allows to inspect and change
 	 * property values before writing to and reading from the database.
-	 * Will get applied to any <b>new</b> Session created by this class.
+	 * Will get applied to any <b>new</b> Session created by this object.
 	 * <p>Such an interceptor can either be set at the SessionFactory level,
 	 * i.e. on LocalSessionFactoryBean, or at the Session level, i.e. on
 	 * HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
+	 * It's preferable to set it on LocalSessionFactoryBean or HibernateTransactionManager
+	 * to avoid repeated configuration and guarantee consistent behavior in transactions.
 	 * @see LocalSessionFactoryBean#setEntityInterceptor
 	 * @see HibernateTransactionManager#setEntityInterceptor
 	 */
-	public final void setEntityInterceptor(Interceptor entityInterceptor) {
+	public void setEntityInterceptor(Interceptor entityInterceptor) {
 		this.entityInterceptor = entityInterceptor;
 	}
 
@@ -102,8 +110,8 @@ public abstract class HibernateAccessor {
 
 	/**
 	 * Set the flush behavior by the name of the respective constant
-	 * in this class, e.g. "FLUSH_AUTO".
-	 * Will get applied to any <b>new</b> Session created by this class.
+	 * in this class, e.g. "FLUSH_AUTO". Default is FLUSH_AUTO.
+	 * Will get applied to any <b>new</b> Session created by this object.
 	 * @param constantName name of the constant
 	 * @see #setFlushMode
 	 * @see #FLUSH_AUTO
@@ -114,7 +122,8 @@ public abstract class HibernateAccessor {
 
 	/**
 	 * Set the flush behavior to one of the constants in this class.
-	 * Will get applied to any <b>new</b> Session created by this class.
+	 * Default is FLUSH_AUTO. Will get applied to any <b>new</b> Session
+	 * created by this object.
 	 * @see #setFlushModeName
 	 * @see #FLUSH_AUTO
 	 */
@@ -136,12 +145,16 @@ public abstract class HibernateAccessor {
 	}
 
 	/**
-	 * Evaluate if a flush is necessary via the set flush mode.
+	 * Flush the given Hibernate session if necessary.
+	 * @param session the current Hibernate session
 	 * @param existingTransaction if executing within an existing transaction
-	 * @return if Session.flush() should be called
+	 * @throws HibernateException in case of Hibernate flushing errors
 	 */
-	protected boolean isFlushNecessary(boolean existingTransaction) {
-		return (getFlushMode() == FLUSH_EAGER || (!existingTransaction && getFlushMode() == FLUSH_AUTO));
+	protected void flushIfNecessary(Session session, boolean existingTransaction) throws HibernateException {
+		if (getFlushMode() == FLUSH_EAGER || (!existingTransaction && getFlushMode() == FLUSH_AUTO)) {
+			logger.debug("Eagerly flushing Hibernate session");
+			session.flush();
+		}
 	}
 
 }

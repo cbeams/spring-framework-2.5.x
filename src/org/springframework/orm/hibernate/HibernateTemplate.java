@@ -7,12 +7,15 @@ import java.util.List;
 
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
+import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Query;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.type.Type;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.SQLExceptionTranslator;
+import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
 
 /**
  * Helper class that simplifies Hibernate data access code, and converts
@@ -67,6 +70,8 @@ import org.springframework.dao.DataAccessException;
  */
 public class HibernateTemplate extends HibernateAccessor {
 
+	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+
 	private boolean allowCreate = true;
 
 	/**
@@ -94,6 +99,26 @@ public class HibernateTemplate extends HibernateAccessor {
 		setSessionFactory(sessionFactory);
 		setAllowCreate(allowCreate);
 		afterPropertiesSet();
+	}
+
+	/**
+	 * Set the JDBC exception translator for this instance.
+	 * Applied to SQLExceptions thrown by callback code, be it direct
+	 * SQLExceptions or wrapped HibernateJDBCExceptions.
+	 * <p>The default exception translator evaluates the exception's SQLState.
+	 * @param jdbcExceptionTranslator exception translator
+	 * @see org.springframework.jdbc.core.SQLStateSQLExceptionTranslator
+	 * @see org.springframework.jdbc.core.SQLErrorCodeSQLExceptionTranslator
+	 */
+	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
+		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
+	}
+
+	/**
+	 * Return the JDBC exception translator for this instance.
+	 */
+	public SQLExceptionTranslator getJdbcExceptionTranslator() {
+		return this.jdbcExceptionTranslator;
 	}
 
 	/**
@@ -142,17 +167,17 @@ public class HibernateTemplate extends HibernateAccessor {
 		}
 		try {
 			Object result = action.doInHibernate(session);
-			if (isFlushNecessary(existingTransaction)) {
-				logger.debug("Eagerly flushing Hibernate session in HibernateTemplate");
-				session.flush();
-			}
+			flushIfNecessary(session, existingTransaction);
 			return result;
-		}
-		catch (HibernateException ex) {
-			throw convertHibernateAccessException(ex);
 		}
 		catch (SQLException ex) {
 			throw convertJdbcAccessException(ex);
+		}
+		catch (JDBCException ex) {
+			throw convertJdbcAccessException(ex.getSQLException());
+		}
+		catch (HibernateException ex) {
+			throw convertHibernateAccessException(ex);
 		}
 		catch (RuntimeException ex) {
 			// callback code threw application exception
@@ -175,14 +200,21 @@ public class HibernateTemplate extends HibernateAccessor {
 
 	/**
 	 * Convert the given SQLException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Can be overridden in subclasses.
+	 * org.springframework.dao hierarchy. Uses a JDBC exception translater if set,
+	 * and a generic HibernateJdbcException else. Can be overridden in subclasses.
 	 * <p>Note that SQLException can just occur here when callback code
 	 * performs direct JDBC access via Session.connection().
 	 * @param ex SQLException that occured
 	 * @return the corresponding DataAccessException instance
+	 * @see #setJdbcExceptionTranslator
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
-		return new HibernateJdbcException(ex);
+		if (this.jdbcExceptionTranslator != null) {
+			return this.jdbcExceptionTranslator.translate("HibernateTemplate", null, ex);
+		}
+		else {
+			return new HibernateJdbcException(ex);
+		}
 	}
 
 	/**

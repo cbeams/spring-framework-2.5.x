@@ -5,8 +5,9 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.SessionFactory;
-
 import org.easymock.MockControl;
+
+import org.springframework.orm.hibernate.HibernateTemplate;
 
 /**
  * @author Juergen Hoeller
@@ -14,7 +15,7 @@ import org.easymock.MockControl;
  */
 public class HibernateDaoSupportTests extends TestCase {
 
-	public void testHibernateDaoSupport() throws Exception {
+	public void testHibernateDaoSupportWithSessionFactory() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		sfControl.replay();
@@ -26,8 +27,23 @@ public class HibernateDaoSupportTests extends TestCase {
 		};
 		dao.setSessionFactory(sf);
 		dao.afterPropertiesSet();
-		assertEquals("Correct SessionFactory", dao.getSessionFactory(), sf);
-		assertEquals("Correct HibernateTemplate", dao.getHibernateTemplate().getSessionFactory(), sf);
+		assertEquals("Correct SessionFactory", sf, dao.getSessionFactory());
+		assertEquals("Correct HibernateTemplate", sf, dao.getHibernateTemplate().getSessionFactory());
+		assertEquals("initDao called", test.size(), 1);
+		sfControl.verify();
+	}
+
+	public void testHibernateDaoSupportWithHibernateTemplate() throws Exception {
+		HibernateTemplate template = new HibernateTemplate();
+		final List test = new ArrayList();
+		HibernateDaoSupport dao = new HibernateDaoSupport() {
+			protected void initDao() {
+				test.add("test");
+			}
+		};
+		dao.setHibernateTemplate(template);
+		dao.afterPropertiesSet();
+		assertEquals("Correct HibernateTemplate", template, dao.getHibernateTemplate());
 		assertEquals("initDao called", test.size(), 1);
 	}
 

@@ -25,6 +25,7 @@ import org.easymock.MockControl;
 
 import org.springframework.beans.TestBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * @author Juergen Hoeller
@@ -791,16 +792,16 @@ public class HibernateTemplateTests extends TestCase {
 	}
 
 	public void testExceptions() throws HibernateException {
-		final SQLException sqlex = new SQLException();
+		final SQLException sqlex = new SQLException("argh", "27");
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
 					throw new JDBCException(sqlex);
 				}
 			});
-			fail("Should have thrown HibernateJdbcException");
+			fail("Should have thrown DataIntegrityViolationException");
 		}
-		catch (HibernateJdbcException ex) {
+		catch (DataIntegrityViolationException ex) {
 			// expected
 			assertEquals(sqlex, ex.getRootCause());
 		}
