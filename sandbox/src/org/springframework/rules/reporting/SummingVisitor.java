@@ -17,12 +17,12 @@ package org.springframework.rules.reporting;
 
 import java.util.Iterator;
 
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
-import org.springframework.rules.predicates.UnaryAnd;
-import org.springframework.rules.predicates.UnaryOr;
-import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
-import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
+import org.springframework.rules.Constraint;
+import org.springframework.rules.constraints.CompoundBeanPropertyExpression;
+import org.springframework.rules.constraints.And;
+import org.springframework.rules.constraints.Or;
+import org.springframework.rules.constraints.beans.BeanPropertiesConstraint;
+import org.springframework.rules.constraints.beans.ParameterizedBeanPropertyConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
@@ -33,9 +33,9 @@ import org.springframework.util.visitor.Visitor;
 public class SummingVisitor implements Visitor {
     private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
     private int sum;
-    private UnaryPredicate constraint;
+    private Constraint constraint;
 
-    public SummingVisitor(UnaryPredicate constraint) {
+    public SummingVisitor(Constraint constraint) {
         Assert.notNull(constraint);
         this.constraint = constraint;
     }
@@ -49,31 +49,31 @@ public class SummingVisitor implements Visitor {
         visitorSupport.invokeVisit(this, rule.getPredicate());
     }
 
-    void visit(BeanPropertiesExpression e) {
+    void visit(BeanPropertiesConstraint e) {
         sum++;
     }
 
-    void visit(ParameterizedBeanPropertyExpression e) {
+    void visit(ParameterizedBeanPropertyConstraint e) {
         sum++;
     }
 
-    void visit(UnaryAnd and) {
+    void visit(And and) {
         Iterator it = and.iterator();
         while (it.hasNext()) {
-            UnaryPredicate p = (UnaryPredicate)it.next();
+            Constraint p = (Constraint)it.next();
             visitorSupport.invokeVisit(this, p);
         }
     }
 
-    void visit(UnaryOr or) {
+    void visit(Or or) {
         Iterator it = or.iterator();
         while (it.hasNext()) {
-            UnaryPredicate p = (UnaryPredicate)it.next();
+            Constraint p = (Constraint)it.next();
             visitorSupport.invokeVisit(this, p);
         }
     }
 
-    void visit(UnaryPredicate constraint) {
+    void visit(Constraint constraint) {
         sum++;
     }
 

@@ -19,14 +19,14 @@ package org.springframework.rules;
  * @author Keith Donald
  */
 public interface Generator {
-    
+
     /**
-     * Execute the generator, and for each element generated, pass it to the
-     * specified procedure.
+     * Execute the generator, and for each element generated, pass it as an
+     * argument to the specified closure callback for processing.
      * 
-     * @param procedureCallback
+     * @param closure
      *            The procedure callback that will process each generated
      *            element.
      */
-    public void forEachRun(UnaryProcedure procedureCallback);
+    public void generate(Closure closure);
 }

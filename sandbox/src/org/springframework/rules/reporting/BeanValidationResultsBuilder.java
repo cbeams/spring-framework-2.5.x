@@ -20,29 +20,35 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.functions.GetProperty;
-import org.springframework.rules.predicates.beans.BeanPropertyExpression;
-import org.springframework.rules.values.PropertyAccessStrategy;
+import org.springframework.binding.PropertyAccessStrategy;
+import org.springframework.binding.support.BeanPropertyAccessStrategy;
+import org.springframework.rules.Constraint;
+import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
 
 /**
  * @author Keith Donald
  */
 public class BeanValidationResultsBuilder extends ValidationResultsBuilder
         implements BeanValidationResults {
-    private Object bean;
-    
     private String currentProperty;
 
     private Object currentPropertyValue;
 
     private Map beanResults = new HashMap();
 
+    private PropertyAccessStrategy beanPropertyAccessStrategy;
+
     public BeanValidationResultsBuilder(Object bean) {
         super();
-        this.bean = bean;
+        if (bean instanceof PropertyAccessStrategy) {
+            this.beanPropertyAccessStrategy = (PropertyAccessStrategy)bean;
+        }
+        else {
+            this.beanPropertyAccessStrategy = new BeanPropertyAccessStrategy(
+                    bean);
+        }
     }
-    
+
     public Map getResults() {
         return Collections.unmodifiableMap(beanResults);
     }
@@ -60,7 +66,7 @@ public class BeanValidationResultsBuilder extends ValidationResultsBuilder
         return count;
     }
 
-    protected void constraintViolated(UnaryPredicate constraint) {
+    protected void constraintViolated(Constraint constraint) {
         if (logger.isDebugEnabled()) {
             logger.debug("[Done] collecting results for property '"
                     + getCurrentPropertyName() + "'.  Constraints violated: ["
@@ -87,19 +93,14 @@ public class BeanValidationResultsBuilder extends ValidationResultsBuilder
     }
 
     public void setCurrentBeanPropertyExpression(
-            BeanPropertyExpression expression) {
+            BeanPropertyConstraint expression) {
         this.currentProperty = expression.getPropertyName();
         this.currentPropertyValue = getPropertyValue(this.currentProperty);
         super.clear();
     }
-    
+
     private Object getPropertyValue(String propertyName) {
-        if (bean instanceof PropertyAccessStrategy) {
-            return ((PropertyAccessStrategy)bean).getPropertyValue(propertyName);
-        }
-        else {
-            return new GetProperty(bean).evaluate(propertyName);
-        }
+        return beanPropertyAccessStrategy.getPropertyValue(propertyName);
     }
 
 }

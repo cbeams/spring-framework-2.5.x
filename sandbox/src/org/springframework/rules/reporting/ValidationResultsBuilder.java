@@ -19,11 +19,11 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.predicates.CompoundUnaryPredicate;
-import org.springframework.rules.predicates.UnaryAnd;
-import org.springframework.rules.predicates.UnaryNot;
-import org.springframework.rules.predicates.UnaryOr;
+import org.springframework.rules.Constraint;
+import org.springframework.rules.constraints.CompoundConstraint;
+import org.springframework.rules.constraints.And;
+import org.springframework.rules.constraints.Not;
+import org.springframework.rules.constraints.Or;
 import org.springframework.util.ToStringBuilder;
 
 /**
@@ -32,37 +32,37 @@ import org.springframework.util.ToStringBuilder;
 public abstract class ValidationResultsBuilder {
     protected static final Log logger = LogFactory
             .getLog(ValidationResultsBuilder.class);
-    private UnaryPredicate top;
+    private Constraint top;
     private Stack levels = new Stack();
 
     public void pushAnd() {
-        UnaryAnd and = new UnaryAnd();
+        And and = new And();
         add(and);
     }
 
     public void pushOr() {
-        UnaryOr or = new UnaryOr();
+        Or or = new Or();
         add(or);
     }
 
     public void pushNot() {
-        UnaryNot not = new UnaryNot();
+        Not not = new Not();
         add(not);
     }
 
-    private void add(UnaryPredicate predicate) {
+    private void add(Constraint predicate) {
         if (top != null) {
-            if (top instanceof UnaryNot) {
+            if (top instanceof Not) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Negating predicate [" + predicate + "]");
                 }
-                ((UnaryNot)this.top).setPredicate(predicate);
+                ((Not)this.top).setPredicate(predicate);
             } else {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Aggregating nested predicate [" + predicate
                             + "]");
                 }
-                ((CompoundUnaryPredicate)this.top).add(predicate);
+                ((CompoundConstraint)this.top).add(predicate);
             }
         }
         levels.push(predicate);
@@ -72,17 +72,17 @@ public abstract class ValidationResultsBuilder {
         }
     }
 
-    public void push(UnaryPredicate constraint) {
-        if (this.top instanceof CompoundUnaryPredicate) {
+    public void push(Constraint constraint) {
+        if (this.top instanceof CompoundConstraint) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Adding constraint [" + constraint + "]");
             }
-            ((CompoundUnaryPredicate)this.top).add(constraint);
-        } else if (this.top instanceof UnaryNot) {
+            ((CompoundConstraint)this.top).add(constraint);
+        } else if (this.top instanceof Not) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Negating constraint [" + constraint + "]");
             }
-            ((UnaryNot)this.top).setPredicate(constraint);
+            ((Not)this.top).setPredicate(constraint);
         } else if (this.top == null) {
             constraintViolated(constraint);
         } else {
@@ -91,7 +91,7 @@ public abstract class ValidationResultsBuilder {
     }
 
     public void pop(boolean result) {
-        UnaryPredicate p = (UnaryPredicate)levels.pop();
+        Constraint p = (Constraint)levels.pop();
         if (logger.isDebugEnabled()) {
             logger.debug("Top [" + p + "] popped; result was " + result
                     + "; stack now has " + levels.size() + " elements");
@@ -104,13 +104,13 @@ public abstract class ValidationResultsBuilder {
             }
             top = null;
         } else {
-            this.top = (UnaryPredicate)levels.peek();
+            this.top = (Constraint)levels.peek();
             if (result) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Removing compound predicate [" + p
                             + "]; tested true.");
                 }
-                ((CompoundUnaryPredicate)this.top).remove(p);
+                ((CompoundConstraint)this.top).remove(p);
             }
         }
     }
@@ -124,14 +124,14 @@ public abstract class ValidationResultsBuilder {
         if (levels.size() == 0) {
             return false;
         }
-        return peek() instanceof UnaryNot;
+        return peek() instanceof Not;
     }
     
-    private UnaryPredicate peek() {
-        return (UnaryPredicate)levels.peek();
+    private Constraint peek() {
+        return (Constraint)levels.peek();
     }
 
-    protected abstract void constraintViolated(UnaryPredicate constraint);
+    protected abstract void constraintViolated(Constraint constraint);
     protected abstract void constraintSatisfied();
 
     public String toString() {

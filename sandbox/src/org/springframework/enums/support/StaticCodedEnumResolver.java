@@ -21,8 +21,9 @@ import java.lang.reflect.Modifier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.enums.CodedEnum;
+import org.springframework.rules.Closure;
 import org.springframework.rules.Generator;
-import org.springframework.rules.UnaryProcedure;
+import org.springframework.rules.support.ClosureWithoutResult;
 import org.springframework.util.Assert;
 
 /**
@@ -53,8 +54,8 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
                     .debug("Registering statically defined coded enums for class "
                             + clazz);
         }
-        new FieldValueGenerator(clazz).forEachRun(new UnaryProcedure() {
-            public void run(Object value) {
+        new FieldValueGenerator(clazz).generate(new ClosureWithoutResult() {
+            protected void doCall(Object value) {
                 add((CodedEnum)value);
             }
         });
@@ -77,7 +78,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
             this.clazz = clazz;
         }
 
-        public void forEachRun(UnaryProcedure procedure) {
+        public void generate(Closure procedure) {
             Field[] fields = clazz.getFields();
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
@@ -89,7 +90,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
                             Assert
                                     .isTrue(CodedEnum.class.isInstance(value),
                                             "Field value must be a CodedEnum instance.");
-                            procedure.run(value);
+                            procedure.call(value);
                         }
                         catch (IllegalAccessException e) {
                             logger.warn(

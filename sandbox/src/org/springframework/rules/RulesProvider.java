@@ -15,11 +15,11 @@
  */
 package org.springframework.rules;
 
-import org.springframework.rules.predicates.beans.BeanPropertyExpression;
+import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
 
 /**
  * @author Keith Donald
  */
 public interface RulesProvider {
-    public BeanPropertyExpression getRules(String propertyName);
+    public BeanPropertyConstraint getRules(String propertyName);
 }

@@ -18,7 +18,7 @@ package org.springframework.rules.reporting;
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
-import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.Constraint;
 import org.springframework.util.ToStringBuilder;
 
 /**
@@ -28,11 +28,11 @@ public class PropertyResults implements ValidationResults {
 
     private String propertyName;
     private Object rejectedValue;
-    private UnaryPredicate violatedConstraint;
+    private Constraint violatedConstraint;
     private Severity severity = Severity.ERROR;
 
     public PropertyResults(String propertyName, Object rejectedValue,
-            UnaryPredicate violatedConstraint) {
+            Constraint violatedConstraint) {
         this.propertyName = propertyName;
         this.rejectedValue = rejectedValue;
         this.violatedConstraint = violatedConstraint;
@@ -50,7 +50,7 @@ public class PropertyResults implements ValidationResults {
         return rejectedValue;
     }
 
-    public UnaryPredicate getViolatedConstraint() {
+    public Constraint getViolatedConstraint() {
         return violatedConstraint;
     }
 

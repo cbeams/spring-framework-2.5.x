@@ -10,26 +10,26 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.rules.closures.StringLength;
+import org.springframework.rules.constraints.And;
+import org.springframework.rules.constraints.ClosureResultConstraint;
+import org.springframework.rules.constraints.EqualTo;
+import org.springframework.rules.constraints.GreaterThan;
+import org.springframework.rules.constraints.GreaterThanEqualTo;
+import org.springframework.rules.constraints.LessThan;
+import org.springframework.rules.constraints.LessThanEqualTo;
+import org.springframework.rules.constraints.Not;
+import org.springframework.rules.constraints.Or;
+import org.springframework.rules.constraints.ParameterizedBinaryConstraint;
+import org.springframework.rules.constraints.Range;
+import org.springframework.rules.constraints.RelationalOperator;
+import org.springframework.rules.constraints.Required;
+import org.springframework.rules.constraints.StringLengthConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertiesConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertyValueConstraint;
+import org.springframework.rules.constraints.beans.ParameterizedBeanPropertyConstraint;
 import org.springframework.rules.factory.Constraints;
-import org.springframework.rules.functions.GetProperty;
-import org.springframework.rules.functions.StringLength;
-import org.springframework.rules.predicates.EqualTo;
-import org.springframework.rules.predicates.GreaterThan;
-import org.springframework.rules.predicates.GreaterThanEqualTo;
-import org.springframework.rules.predicates.LessThan;
-import org.springframework.rules.predicates.LessThanEqualTo;
-import org.springframework.rules.predicates.ParameterizedBinaryPredicate;
-import org.springframework.rules.predicates.Range;
-import org.springframework.rules.predicates.Required;
-import org.springframework.rules.predicates.StringLengthConstraint;
-import org.springframework.rules.predicates.UnaryAnd;
-import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
-import org.springframework.rules.predicates.UnaryNot;
-import org.springframework.rules.predicates.UnaryOr;
-import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
-import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 
 /**
  * @author Keith Donald
@@ -44,7 +44,7 @@ public class RulesTestSuite extends TestCase {
         Number n2 = new Integer(30);
         Number n3 = new Integer(-15);
         Number n4 = new Integer(26);
-        BinaryPredicate p = GreaterThan.instance();
+        BinaryConstraint p = GreaterThan.instance();
         assertTrue(p.test(n2, n1));
         assertFalse(p.test(n3, n2));
 
@@ -70,17 +70,17 @@ public class RulesTestSuite extends TestCase {
 
     public void testParameterizedBinaryPredicate() {
         Integer number = new Integer(25);
-        ParameterizedBinaryPredicate p = new ParameterizedBinaryPredicate(
+        ParameterizedBinaryConstraint p = new ParameterizedBinaryConstraint(
                 GreaterThan.instance(), number);
         assertTrue(p.test(new Integer(26)));
         assertFalse(p.test(new Integer(24)));
     }
 
-    public void testFunctionResultConstraint() {
+    public void testClosureResultConstraint() {
         String s = "12345";
-        UnaryFunctionResultConstraint p = new UnaryFunctionResultConstraint(
-                StringLength.instance(), constraints.bind(EqualTo.instance(),
-                        new Integer(s.length())));
+        ClosureResultConstraint p = new ClosureResultConstraint(StringLength
+                .instance(), constraints.bind(EqualTo.instance(), new Integer(s
+                .length())));
         assertTrue(p.test(s));
         assertFalse(p.test("1234567"));
     }
@@ -93,7 +93,7 @@ public class RulesTestSuite extends TestCase {
         group.add(o1);
         group.add(o2);
         group.add(o3);
-        UnaryPredicate p = constraints.inGroup(group);
+        Constraint p = constraints.inGroup(group);
         assertTrue(p.test("o1"));
         assertTrue(p.test(o1));
         assertFalse(p.test("o4"));
@@ -107,7 +107,7 @@ public class RulesTestSuite extends TestCase {
         String keithDonald = "keith donald";
         String keith = "keith";
         String donald = "donald";
-        UnaryPredicate p = constraints.like(keithDonald);
+        Constraint p = constraints.like(keithDonald);
         assertTrue(p.test("keith donald"));
         assertFalse(p.test("Keith Donald"));
 
@@ -129,19 +129,19 @@ public class RulesTestSuite extends TestCase {
 
     public void testMethodInvokingRule() {
         TestBean b = new TestBean();
-        UnaryPredicate p = constraints.method(b, "isTooMuch", "max");
+        Constraint p = constraints.method(b, "isTooMuch", "max");
         assertTrue(p.test(new Integer(26)));
         assertFalse(p.test(new Integer(25)));
     }
 
     public void testRegExpConstraint() {
-        UnaryPredicate p = constraints.regexp("a*b");
+        Constraint p = constraints.regexp("a*b");
         assertTrue(p.test("aaaaab"));
         assertFalse(p.test("bbbbbba"));
     }
 
     public void testRequired() {
-        UnaryPredicate req = Required.instance();
+        Constraint req = Required.instance();
         assertFalse(req.test(""));
         assertFalse(req.test(null));
         assertTrue(req.test(new Integer(25)));
@@ -149,7 +149,7 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testMaxLengthConstraint() {
-        UnaryPredicate p = new StringLengthConstraint(5);
+        Constraint p = new StringLengthConstraint(5);
         assertTrue(p.test(null));
         assertTrue(p.test(new Integer(12345)));
         assertFalse(p.test(new Integer(123456)));
@@ -158,7 +158,7 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testMinLengthConstraint() {
-        UnaryPredicate p = new StringLengthConstraint(
+        Constraint p = new StringLengthConstraint(
                 RelationalOperator.GREATER_THAN_EQUAL_TO, 5);
         assertFalse(p.test(null));
         assertTrue(p.test(new Integer(12345)));
@@ -168,7 +168,7 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testRangeConstraint() {
-        UnaryPredicate p = new Range(new Integer(0), new Integer(10));
+        Constraint p = new Range(new Integer(0), new Integer(10));
         assertTrue(p.test(new Integer(0)));
         assertTrue(p.test(new Integer(10)));
         assertFalse(p.test(new Integer(-1)));
@@ -176,7 +176,7 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testAnd() {
-        UnaryAnd and = new UnaryAnd();
+        And and = new And();
         and.add(Required.instance());
         and.add(new StringLengthConstraint(5));
         assertTrue(and.test("12345"));
@@ -185,7 +185,7 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testOr() {
-        UnaryOr or = new UnaryOr();
+        Or or = new Or();
         or.add(Required.instance());
         or.add(new StringLengthConstraint(5));
         assertTrue(or.test("12345"));
@@ -195,15 +195,10 @@ public class RulesTestSuite extends TestCase {
 
     public void testNot() {
         Number n = new Integer("25");
-        UnaryPredicate p = constraints.bind(EqualTo.instance(), n);
-        UnaryNot not = new UnaryNot(p);
+        Constraint p = constraints.bind(EqualTo.instance(), n);
+        Not not = new Not(p);
         assertTrue(not.test(new Integer(24)));
         assertFalse(not.test(new Integer("25")));
-    }
-
-    public void testGetProperty() {
-        UnaryFunction getter = new GetProperty(new TestBean());
-        assertEquals("testValue", getter.evaluate("test"));
     }
 
     public class TestBean {
@@ -249,10 +244,10 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testBeanPropertyValueConstraint() {
-        UnaryAnd p = constraints.conjunction();
+        And p = constraints.conjunction();
         p.add(constraints.required());
         p.add(constraints.maxLength(9));
-        BeanPropertyExpression e = new BeanPropertyValueConstraint("test", p);
+        BeanPropertyConstraint e = new BeanPropertyValueConstraint("test", p);
         assertTrue(e.test(new TestBean()));
 
         p = constraints.conjunction();
@@ -263,20 +258,20 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testBeanPropertiesExpression() {
-        BeanPropertiesExpression p = new BeanPropertiesExpression("test",
+        BeanPropertiesConstraint p = new BeanPropertiesConstraint("test",
                 EqualTo.instance(), "confirmTest");
         assertTrue(p.test(new TestBean()));
 
-        p = new BeanPropertiesExpression("test", EqualTo.instance(), "min");
+        p = new BeanPropertiesConstraint("test", EqualTo.instance(), "min");
         assertFalse(p.test(new TestBean()));
     }
 
     public void testParameterizedBeanPropertyExpression() {
-        ParameterizedBeanPropertyExpression p = new ParameterizedBeanPropertyExpression(
+        ParameterizedBeanPropertyConstraint p = new ParameterizedBeanPropertyConstraint(
                 "test", EqualTo.instance(), "testValue");
         assertTrue(p.test(new TestBean()));
 
-        p = new ParameterizedBeanPropertyExpression("test", EqualTo.instance(),
+        p = new ParameterizedBeanPropertyConstraint("test", EqualTo.instance(),
                 "test2Value");
         assertFalse(p.test(new TestBean()));
     }
@@ -309,8 +304,8 @@ public class RulesTestSuite extends TestCase {
         Rules r = Rules.createRules(TestBean.class);
         // test must be required, and have a length in range 3 to 25
         // or test must just equal confirmTest
-        UnaryPredicate rules = constraints.or(constraints.all("test",
-                new UnaryPredicate[] { constraints.required(),
+        Constraint rules = constraints.or(constraints.all("test",
+                new Constraint[] { constraints.required(),
                         constraints.maxLength(25), constraints.minLength(3) }),
                 constraints.eqProperty("test", "confirmTest"));
         r.add(rules);

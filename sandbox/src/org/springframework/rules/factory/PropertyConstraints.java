@@ -15,8 +15,8 @@
  */
 package org.springframework.rules.factory;
 
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.predicates.beans.BeanPropertyExpression;
+import org.springframework.rules.Constraint;
+import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
 import org.springframework.util.Assert;
 
 /**
@@ -37,59 +37,59 @@ public class PropertyConstraints {
         this.propertyName = propertyName;
     }
 
-    public BeanPropertyExpression all(UnaryPredicate[] valueConstraints) {
+    public BeanPropertyConstraint all(Constraint[] valueConstraints) {
         return c.all(propertyName, valueConstraints);
     }
 
-    public BeanPropertyExpression any(UnaryPredicate[] valueConstraints) {
+    public BeanPropertyConstraint any(Constraint[] valueConstraints) {
         return c.any(propertyName, valueConstraints);
     }
 
-    public BeanPropertyExpression eq(Object value) {
+    public BeanPropertyConstraint eq(Object value) {
         return c.eq(propertyName, value);
     }
 
-    public BeanPropertyExpression lt(Object value) {
+    public BeanPropertyConstraint lt(Object value) {
         return c.lt(propertyName, value);
     }
 
-    public BeanPropertyExpression lte(Object value) {
+    public BeanPropertyConstraint lte(Object value) {
         return c.lte(propertyName, value);
     }
 
-    public BeanPropertyExpression gt(Object value) {
+    public BeanPropertyConstraint gt(Object value) {
         return c.gte(propertyName, value);
     }
 
-    public BeanPropertyExpression gte(Object value) {
+    public BeanPropertyConstraint gte(Object value) {
         return c.gte(propertyName, value);
     }
 
-    public BeanPropertyExpression eqProperty(String otherPropertyName) {
+    public BeanPropertyConstraint eqProperty(String otherPropertyName) {
         return c.eqProperty(propertyName, otherPropertyName);
     }
 
-    public BeanPropertyExpression ltProperty(String otherPropertyName) {
+    public BeanPropertyConstraint ltProperty(String otherPropertyName) {
         return c.ltProperty(propertyName, otherPropertyName);
     }
 
-    public BeanPropertyExpression lteProperty(String otherPropertyName) {
+    public BeanPropertyConstraint lteProperty(String otherPropertyName) {
         return c.lteProperty(propertyName, otherPropertyName);
     }
 
-    public BeanPropertyExpression gtProperty(String otherPropertyName) {
+    public BeanPropertyConstraint gtProperty(String otherPropertyName) {
         return c.gtProperty(propertyName, otherPropertyName);
     }
 
-    public BeanPropertyExpression gteProperty(String otherPropertyName) {
+    public BeanPropertyConstraint gteProperty(String otherPropertyName) {
         return c.gteProperty(propertyName, otherPropertyName);
     }
 
-    public BeanPropertyExpression inRange(Comparable min, Comparable max) {
+    public BeanPropertyConstraint inRange(Comparable min, Comparable max) {
         return c.inRange(propertyName, min, max);
     }
 
-    public BeanPropertyExpression inRangeProperties(String minProperty,
+    public BeanPropertyConstraint inRangeProperties(String minProperty,
             String maxProperty) {
         return c.inRangeProperties(propertyName, minProperty, maxProperty);
     }

@@ -22,11 +22,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
-import org.springframework.rules.predicates.CompoundUnaryPredicate;
-import org.springframework.rules.predicates.UnaryAnd;
-import org.springframework.rules.predicates.beans.BeanPropertyExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
+import org.springframework.rules.constraints.And;
+import org.springframework.rules.constraints.CompoundBeanPropertyExpression;
+import org.springframework.rules.constraints.CompoundConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
 import org.springframework.validation.Errors;
@@ -36,11 +36,12 @@ import org.springframework.validation.Validator;
  * A factory for creating rules.
  * 
  * @author Keith Donald
- * @TODO move to validation package at some point...
  */
-public class Rules implements UnaryPredicate, Validator {
+public class Rules implements Constraint, Validator {
     private static final Log logger = LogFactory.getLog(Rules.class);
+
     private Class beanClass;
+
     private Map propertyRules = new HashMap();
 
     public Rules() {
@@ -65,19 +66,22 @@ public class Rules implements UnaryPredicate, Validator {
             Map.Entry entry = (Map.Entry)i.next();
             String propertyName = (String)entry.getKey();
             Object val = entry.getValue();
-            BeanPropertyExpression e;
+            BeanPropertyConstraint e;
             if (val instanceof List) {
-                UnaryAnd and = new UnaryAnd();
+                And and = new And();
                 and.addAll((List)val);
                 e = new BeanPropertyValueConstraint(propertyName, and);
-            } else {
-                UnaryPredicate p = (UnaryPredicate)val;
-                if (p instanceof CompoundUnaryPredicate) {
+            }
+            else {
+                Constraint p = (Constraint)val;
+                if (p instanceof CompoundConstraint) {
                     e = new CompoundBeanPropertyExpression(
-                            (CompoundUnaryPredicate)p);
-                } else if (p instanceof BeanPropertyExpression) {
-                    e = (BeanPropertyExpression)p;
-                } else {
+                            (CompoundConstraint)p);
+                }
+                else if (p instanceof BeanPropertyConstraint) {
+                    e = (BeanPropertyConstraint)p;
+                }
+                else {
                     e = new BeanPropertyValueConstraint(propertyName, p);
                 }
             }
@@ -85,8 +89,8 @@ public class Rules implements UnaryPredicate, Validator {
         }
     }
 
-    private void internalSetRules(BeanPropertyExpression e) {
-        UnaryAnd and = new UnaryAnd();
+    private void internalSetRules(BeanPropertyConstraint e) {
+        And and = new And();
         and.add(e);
         if (logger.isDebugEnabled()) {
             logger.debug("Configuring rules for property '"
@@ -96,8 +100,8 @@ public class Rules implements UnaryPredicate, Validator {
                 new CompoundBeanPropertyExpression(and));
     }
 
-    public BeanPropertyExpression getRules(String property) {
-        return (BeanPropertyExpression)propertyRules.get(property);
+    public BeanPropertyConstraint getRules(String property) {
+        return (BeanPropertyConstraint)propertyRules.get(property);
     }
 
     public Iterator iterator() {
@@ -122,12 +126,13 @@ public class Rules implements UnaryPredicate, Validator {
      *            the bean property expression
      * @return this, to support chaining.
      */
-    public Rules add(BeanPropertyExpression expression) {
+    public Rules add(BeanPropertyConstraint expression) {
         CompoundBeanPropertyExpression and = (CompoundBeanPropertyExpression)propertyRules
                 .get(expression.getPropertyName());
         if (and == null) {
             internalSetRules(expression);
-        } else {
+        }
+        else {
             and.add(expression);
         }
         return this;
@@ -141,7 +146,7 @@ public class Rules implements UnaryPredicate, Validator {
      * @param valueConstraint
      *            The value constraint.
      */
-    public void add(String propertyName, UnaryPredicate valueConstraint) {
+    public void add(String propertyName, Constraint valueConstraint) {
         add(new BeanPropertyValueConstraint(propertyName, valueConstraint));
     }
 
@@ -151,39 +156,27 @@ public class Rules implements UnaryPredicate, Validator {
      * 
      * @param compoundPredicate
      */
-    public void add(UnaryPredicate compoundPredicate) {
+    public void add(Constraint compoundPredicate) {
         Assert
                 .isTrue(
-                        compoundPredicate instanceof CompoundUnaryPredicate,
+                        compoundPredicate instanceof CompoundConstraint,
                         "Argument must be a compound predicate composed of BeanPropertyExpression objects.");
         add(new CompoundBeanPropertyExpression(
-                (CompoundUnaryPredicate)compoundPredicate));
+                (CompoundConstraint)compoundPredicate));
     }
 
-    /**
-     * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
-     */
     public boolean test(Object bean) {
         for (Iterator i = propertyRules.values().iterator(); i.hasNext();) {
-            UnaryPredicate predicate = (UnaryPredicate)i.next();
-            if (!predicate.test(bean)) {
-                return false;
-            }
+            Constraint predicate = (Constraint)i.next();
+            if (!predicate.test(bean)) { return false; }
         }
         return true;
     }
 
-    /**
-     * @see org.springframework.validation.Validator#supports(java.lang.Class)
-     */
     public boolean supports(Class clazz) {
         return clazz.equals(this.beanClass);
     }
 
-    /**
-     * @see org.springframework.validation.Validator#validate(java.lang.Object,
-     *      org.springframework.validation.Errors)
-     */
     public void validate(final Object bean, final Errors errors) {
 
     }

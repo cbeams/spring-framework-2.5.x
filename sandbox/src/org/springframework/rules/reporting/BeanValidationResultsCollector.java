@@ -15,15 +15,15 @@
  */
 package org.springframework.rules.reporting;
 
-import org.springframework.rules.Algorithms;
+import org.springframework.rules.Constraint;
 import org.springframework.rules.Rules;
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.UnaryProcedure;
-import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
-import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
-import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
+import org.springframework.rules.constraints.CompoundBeanPropertyExpression;
+import org.springframework.rules.constraints.beans.BeanPropertiesConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertyValueConstraint;
+import org.springframework.rules.constraints.beans.ParameterizedBeanPropertyConstraint;
+import org.springframework.rules.support.Algorithms;
+import org.springframework.rules.support.ClosureWithoutResult;
 import org.springframework.util.Assert;
 import org.springframework.util.visitor.Visitor;
 
@@ -54,23 +54,24 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
     public BeanValidationResults collectResults(Rules rules) {
         Assert.notNull(rules);
         setResultsBuilder(new BeanValidationResultsBuilder(bean));
-        Algorithms.instance().forEach(rules.iterator(), new UnaryProcedure() {
-            public void run(Object beanPropertyConstraint) {
-                collectPropertyResultsInternal((BeanPropertyExpression)beanPropertyConstraint);
-            }
-        });
+        Algorithms.instance().forEach(rules.iterator(),
+                new ClosureWithoutResult() {
+                    public void doCall(Object beanPropertyConstraint) {
+                        collectPropertyResultsInternal((BeanPropertyConstraint)beanPropertyConstraint);
+                    }
+                });
         return resultsBuilder;
     }
 
     public PropertyResults collectPropertyResults(
-            BeanPropertyExpression propertyRootExpression) {
+            BeanPropertyConstraint propertyRootExpression) {
         Assert.notNull(propertyRootExpression);
         setResultsBuilder(new BeanValidationResultsBuilder(this.bean));
         return collectPropertyResultsInternal(propertyRootExpression);
     }
 
     private PropertyResults collectPropertyResultsInternal(
-            BeanPropertyExpression rootExpression) {
+            BeanPropertyConstraint rootExpression) {
         resultsBuilder.setCurrentBeanPropertyExpression(rootExpression);
         setArgument(resultsBuilder.getCurrentPropertyValue());
         boolean result = ((Boolean)visitorSupport.invokeVisit(this,
@@ -94,7 +95,7 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
         return (Boolean)visitorSupport.invokeVisit(this, rule.getPredicate());
     }
 
-    boolean visit(BeanPropertiesExpression constraint) {
+    boolean visit(BeanPropertiesConstraint constraint) {
         if (logger.isDebugEnabled()) {
             logger.debug("Validating bean properties expression [" + constraint
                     + "]...");
@@ -102,7 +103,7 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
         return testBeanPropertyExpression(constraint);
     }
 
-    boolean visit(ParameterizedBeanPropertyExpression constraint) {
+    boolean visit(ParameterizedBeanPropertyConstraint constraint) {
         if (logger.isDebugEnabled()) {
             logger.debug("Validating parameterized bean property expression ["
                     + constraint + "]...");
@@ -110,7 +111,7 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
         return testBeanPropertyExpression(constraint);
     }
 
-    private boolean testBeanPropertyExpression(BeanPropertyExpression constraint) {
+    private boolean testBeanPropertyExpression(BeanPropertyConstraint constraint) {
         boolean result = constraint.test(bean);
         result = applyAnyNegation(result);
         if (!result) {
@@ -132,7 +133,7 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
                 .getPredicate());
     }
 
-    boolean visit(UnaryPredicate constraint) {
+    boolean visit(Constraint constraint) {
         return super.visit(constraint);
     }
 

@@ -50,11 +50,11 @@ public class ValidationResultsTests extends TestCase {
         Person p = new Person();
 
         Rules rules = Rules.createRules(Person.class);
-        UnaryPredicate constraint =
+        Constraint constraint =
             constraints.or(
                 constraints.all(
                     "firstName",
-                    new UnaryPredicate[] {
+                    new Constraint[] {
                         constraints.required(),
                         constraints.minLength(2)}),
                 constraints.not(

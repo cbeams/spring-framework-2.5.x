@@ -1,15 +1,15 @@
 package org.springframework.rules.reporting;
 
-import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.Constraint;
 
 /**
  * @author Keith Donald
  */
 public class ValueValidationResults implements ValidationResults {
     private Object argument;
-    private UnaryPredicate violatedConstraint;
+    private Constraint violatedConstraint;
     
-    public ValueValidationResults(Object argument, UnaryPredicate violatedConstraint) {
+    public ValueValidationResults(Object argument, Constraint violatedConstraint) {
         this.argument = argument;
         this.violatedConstraint = violatedConstraint;
     }
@@ -28,7 +28,7 @@ public class ValueValidationResults implements ValidationResults {
     /**
      * @see org.springframework.rules.reporting.ValidationResults#getViolatedConstraint()
      */
-    public UnaryPredicate getViolatedConstraint() {
+    public Constraint getViolatedConstraint() {
         return violatedConstraint;
     }
 

@@ -19,12 +19,12 @@ import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.rules.UnaryFunction;
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.predicates.UnaryAnd;
-import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
-import org.springframework.rules.predicates.UnaryNot;
-import org.springframework.rules.predicates.UnaryOr;
+import org.springframework.rules.Closure;
+import org.springframework.rules.Constraint;
+import org.springframework.rules.constraints.And;
+import org.springframework.rules.constraints.ClosureResultConstraint;
+import org.springframework.rules.constraints.Not;
+import org.springframework.rules.constraints.Or;
 import org.springframework.util.ToStringBuilder;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
@@ -50,12 +50,12 @@ public class ValidationResultsCollector implements Visitor {
     }
 
     public ValidationResults collect(final Object argument,
-            final UnaryPredicate constraint) {
+            final Constraint constraint) {
         this.resultsBuilder = new ValidationResultsBuilder() {
             public void constraintSatisfied() {
             }
 
-            public void constraintViolated(UnaryPredicate constraint) {
+            public void constraintViolated(Constraint constraint) {
                 results = new ValueValidationResults(argument, constraint);
             }
         };
@@ -79,7 +79,7 @@ public class ValidationResultsCollector implements Visitor {
         this.argument = argument;
     }
 
-    boolean visit(UnaryAnd and) {
+    boolean visit(And and) {
         resultsBuilder.pushAnd();
         if (logger.isDebugEnabled()) {
             logger.debug("Starting [and]...");
@@ -108,7 +108,7 @@ public class ValidationResultsCollector implements Visitor {
         return result;
     }
 
-    boolean visit(UnaryOr or) {
+    boolean visit(Or or) {
         resultsBuilder.pushOr();
         if (logger.isDebugEnabled()) {
             logger.debug("Starting [or]...");
@@ -129,7 +129,7 @@ public class ValidationResultsCollector implements Visitor {
         return false;
     }
 
-    Boolean visit(UnaryNot not) {
+    Boolean visit(Not not) {
         resultsBuilder.pushNot();
         if (logger.isDebugEnabled()) {
             logger.debug("Starting [not]...");
@@ -143,17 +143,17 @@ public class ValidationResultsCollector implements Visitor {
         return result;
     }
 
-    Boolean visit(UnaryFunctionResultConstraint ofConstraint) {
-        UnaryFunction f = ofConstraint.getFunction();
+    Boolean visit(ClosureResultConstraint ofConstraint) {
+        Closure f = ofConstraint.getFunction();
         if (logger.isDebugEnabled()) {
             logger.debug("Invoking function with argument " + argument);
         }
-        setArgument(f.evaluate(argument));
+        setArgument(f.call(argument));
         return (Boolean)visitorSupport.invokeVisit(this, ofConstraint
                 .getPredicate());
     }
 
-    boolean visit(UnaryPredicate constraint) {
+    boolean visit(Constraint constraint) {
         if (logger.isDebugEnabled()) {
             logger.debug("Testing constraint [" + constraint + "] with argument '"
                     + argument + "']");

@@ -25,19 +25,19 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
-import org.springframework.rules.predicates.ParameterizedBinaryPredicate;
-import org.springframework.rules.predicates.Range;
-import org.springframework.rules.predicates.StringLengthConstraint;
-import org.springframework.rules.predicates.UnaryAnd;
-import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
-import org.springframework.rules.predicates.UnaryNot;
-import org.springframework.rules.predicates.UnaryOr;
-import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
-import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
+import org.springframework.rules.Constraint;
+import org.springframework.rules.constraints.CompoundBeanPropertyExpression;
+import org.springframework.rules.constraints.ParameterizedBinaryConstraint;
+import org.springframework.rules.constraints.Range;
+import org.springframework.rules.constraints.StringLengthConstraint;
+import org.springframework.rules.constraints.And;
+import org.springframework.rules.constraints.ClosureResultConstraint;
+import org.springframework.rules.constraints.Not;
+import org.springframework.rules.constraints.Or;
+import org.springframework.rules.constraints.beans.BeanPropertiesConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
+import org.springframework.rules.constraints.beans.BeanPropertyValueConstraint;
+import org.springframework.rules.constraints.beans.ParameterizedBeanPropertyConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.DefaultObjectStyler;
@@ -70,21 +70,21 @@ public class DefaultMessageTranslator implements Visitor {
         this.messages = messages;
     }
 
-    public String getMessage(UnaryPredicate constraint) {
+    public String getMessage(Constraint constraint) {
         String objectName = null;
-        if (constraint instanceof BeanPropertyExpression) {
-            objectName = ((BeanPropertyExpression)constraint).getPropertyName();
+        if (constraint instanceof BeanPropertyConstraint) {
+            objectName = ((BeanPropertyConstraint)constraint).getPropertyName();
         }
         String message = buildMessage(objectName, null, constraint, Locale.getDefault());
         return message;
     }
 
-    public String getMessage(String objectName, UnaryPredicate constraint) {
+    public String getMessage(String objectName, Constraint constraint) {
         return buildMessage(objectName, null, constraint, Locale.getDefault());
     }
 
     public String getMessage(String objectName, Object rejectedValue,
-            UnaryPredicate constraint) {
+            Constraint constraint) {
         return buildMessage(objectName, rejectedValue, constraint, Locale
                 .getDefault());
     }
@@ -102,7 +102,7 @@ public class DefaultMessageTranslator implements Visitor {
     }
 
     private String buildMessage(String objectName, Object rejectedValue,
-            UnaryPredicate constraint, Locale locale) {
+            Constraint constraint, Locale locale) {
         StringBuffer buf = new StringBuffer(255);
         MessageSourceResolvable[] args = resolveArguments(constraint);
         if (logger.isDebugEnabled()) {
@@ -129,7 +129,7 @@ public class DefaultMessageTranslator implements Visitor {
         return buf.toString();
     }
 
-    private MessageSourceResolvable[] resolveArguments(UnaryPredicate constraint) {
+    private MessageSourceResolvable[] resolveArguments(Constraint constraint) {
         visitorSupport.invokeVisit(this, constraint);
         return (MessageSourceResolvable[])args
                 .toArray(new MessageSourceResolvable[0]);
@@ -139,14 +139,14 @@ public class DefaultMessageTranslator implements Visitor {
         visitorSupport.invokeVisit(this, rule.getPredicate());
     }
 
-    void visit(BeanPropertiesExpression e) {
+    void visit(BeanPropertiesConstraint e) {
         add(
                 getMessageCode(e.getPredicate()),
                 new Object[] { resolvableObjectName(e.getOtherPropertyName()) },
                 e.toString());
     }
 
-    void visit(ParameterizedBeanPropertyExpression e) {
+    void visit(ParameterizedBeanPropertyConstraint e) {
         add(getMessageCode(e.getPredicate()),
                 new Object[] { e.getParameter() }, e.toString());
     }
@@ -170,10 +170,10 @@ public class DefaultMessageTranslator implements Visitor {
         visitorSupport.invokeVisit(this, valueConstraint.getPredicate());
     }
 
-    void visit(UnaryAnd and) {
+    void visit(And and) {
         Iterator it = and.iterator();
         while (it.hasNext()) {
-            UnaryPredicate p = (UnaryPredicate)it.next();
+            Constraint p = (Constraint)it.next();
             visitorSupport.invokeVisit(this, p);
             if (it.hasNext()) {
                 add("and", null, "add");
@@ -181,10 +181,10 @@ public class DefaultMessageTranslator implements Visitor {
         }
     }
 
-    void visit(UnaryOr or) {
+    void visit(Or or) {
         Iterator it = or.iterator();
         while (it.hasNext()) {
-            UnaryPredicate p = (UnaryPredicate)it.next();
+            Constraint p = (Constraint)it.next();
             visitorSupport.invokeVisit(this, p);
             if (it.hasNext()) {
                 add("or", null, "or");
@@ -192,19 +192,19 @@ public class DefaultMessageTranslator implements Visitor {
         }
     }
 
-    void visit(UnaryNot not) {
+    void visit(Not not) {
         add("not", null, "not");
         visitorSupport.invokeVisit(this, not.getPredicate());
     }
 
     //@TODO - consider standard visitor here...
     void visit(StringLengthConstraint constraint) {
-        UnaryFunctionResultConstraint c = (UnaryFunctionResultConstraint)constraint
+        ClosureResultConstraint c = (ClosureResultConstraint)constraint
                 .getPredicate();
         Object p = c.getPredicate();
         MessageSourceResolvable resolvable;
-        if (p instanceof ParameterizedBinaryPredicate) {
-            resolvable = handleParameterizedBinaryPredicate((ParameterizedBinaryPredicate)p);
+        if (p instanceof ParameterizedBinaryConstraint) {
+            resolvable = handleParameterizedBinaryPredicate((ParameterizedBinaryConstraint)p);
         }
         else {
             resolvable = handleRange((Range)p);
@@ -213,12 +213,12 @@ public class DefaultMessageTranslator implements Visitor {
         add(getMessageCode(constraint), args, constraint.toString());
     }
 
-    void visit(UnaryFunctionResultConstraint c) {
+    void visit(ClosureResultConstraint c) {
         visitorSupport.invokeVisit(this, c.getPredicate());
     }
 
     private MessageSourceResolvable handleParameterizedBinaryPredicate(
-            ParameterizedBinaryPredicate p) {
+            ParameterizedBinaryConstraint p) {
         MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
                 new String[] { getMessageCode(p.getPredicate()) },
                 new Object[] { p.getParameter() }, p.toString());
@@ -232,7 +232,7 @@ public class DefaultMessageTranslator implements Visitor {
         return resolvable;
     }
 
-    void visit(UnaryPredicate constraint) {
+    void visit(Constraint constraint) {
         if (constraint instanceof Range) {
             this.args.add(handleRange((Range)constraint));
         }
