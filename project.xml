@@ -198,6 +198,10 @@
          <version>5.1</version>
       </dependency>
       <dependency>
+         <id>cos</id>
+         <version>1.0</version>
+      </dependency>      
+      <dependency>
          <id>burlap</id>
          <version>2.1.7</version>
       </dependency>
@@ -238,17 +242,25 @@
          <version>1.0.3</version>
       </dependency>
       <dependency>
+         <id>commons-pool</id>
+         <version>1.1</version>
+      </dependency>      
+      <dependency>
          <id>easymock</id>
          <version>1.0</version>
       </dependency>
       <dependency>
          <id>hibernate</id>
-         <version>2.0-final</version>
+         <version>2.0.3</version>
       </dependency>
       <dependency>
          <id>hessian</id>
          <version>3.0.1</version>
       </dependency>
+      <dependency>
+         <id>ibatis</id>
+         <version>1.0</version>
+      </dependency>      
       <dependency>
          <id>itext</id>
          <version>0.99</version>
@@ -357,7 +369,8 @@
       <report>maven-changelog-plugin</report>
       <report>maven-developer-activity-plugin</report>
       <report>maven-file-activity-plugin</report>
-      <report>maven-checkstyle-plugin</report>
+      <report>maven-statcvs-plugin</report>
+      <report>maven-checkstyle-plugin</report> 
       <report>maven-javadoc-plugin</report>
       <report>maven-jxr-plugin</report>
       <report>maven-junit-report-plugin</report>
