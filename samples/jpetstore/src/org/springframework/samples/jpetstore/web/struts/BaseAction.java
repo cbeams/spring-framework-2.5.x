@@ -9,6 +9,12 @@ import org.springframework.samples.jpetstore.domain.logic.PetStoreFacade;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+/**
+ * Superclass for Struts actions in this application. 
+ * Looks up the Spring WebApplicationContext via the ServletContext,
+ * and obtains the PetStoreFacade implementation from it, making it available
+ * to subclasses via a protected getter method. 
+ */
 public abstract class BaseAction extends Action {
 
   private PetStoreFacade petStore;
