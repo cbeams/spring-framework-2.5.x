@@ -24,12 +24,11 @@ import org.springframework.core.NestedRuntimeException;
  * Obviously, the client code should be somewhat aware that it _could work_
  * on a remote service, for example in terms of repeated method calls that
  * cause unnecessary roundtrips etc. But it doesn't have to be aware whether
- * it _actually works_ on a remote service or a local implementation, or with
- * which remoting toolkit under the hood.
+ * it <i>actually works</i> on a remote service or a local implementation, or
+ * with which remoting toolkit under the hood.
  *
  * @author Juergen Hoeller
  * @since 14.05.2003
- * @see org.springframework.remoting.support.RemoteProxyFactoryBean
  */
 public class RemoteAccessException extends NestedRuntimeException {
 
