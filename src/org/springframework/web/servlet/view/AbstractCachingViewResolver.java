@@ -77,8 +77,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 				// ask the subclass to load the View
 				view = loadAndConfigureView(viewName, locale);
 				this.viewMap.put(cacheKey, view);
-				if (logger.isInfoEnabled()) {
-					logger.info("Cached view '" + cacheKey + "'");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cached view '" + cacheKey + "'");
 				}
 			}
 			return view;
