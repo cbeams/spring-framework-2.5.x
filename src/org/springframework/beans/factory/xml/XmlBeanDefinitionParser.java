@@ -18,7 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Document;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.core.io.Resource;
 
@@ -46,9 +46,9 @@ public interface XmlBeanDefinitionParser {
 	 * @param doc the DOM document
 	 * @param resource descriptor of the original XML resource
 	 * (useful for displaying parse errors)
-	 * @throws BeansException in case of parsing errors
+	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
 	int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
-			throws BeansException;
+			throws BeanDefinitionStoreException;
 
 }

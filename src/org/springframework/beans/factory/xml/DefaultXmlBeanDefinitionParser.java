@@ -33,7 +33,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -162,7 +161,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 
 	public int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
-			throws BeansException {
+			throws BeanDefinitionStoreException {
 
 		this.beanDefinitionReader = reader;
 		this.resource = resource;
