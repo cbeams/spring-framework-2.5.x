@@ -14,48 +14,49 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.support;
+package org.springframework.jdbc.support.rowset;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Map;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataRetrievalFailureException;
 
-import javax.sql.RowSet;
-import javax.sql.RowSetMetaData;
-import java.math.BigDecimal;
-import java.sql.*;
-import java.util.Calendar;
-import java.util.Map;
-
 /**
- * An implementation of Spring's RowSet interface.  This implementation wraps a
- * javax.sql.RowSet catching any SQLExceptions and translating them to the appropriate
- * Spring DataAccessException.
+ * Default implementation of Spring's SqlRowSet interface.
+ *
+ * <p>This implementation wraps a <code>javax.sql.ResultSet</code>,
+ * catching any SQLExceptions and translating them to the
+ * appropriate Spring DataAccessException.
+ *
+ * <p>The passed-in ResultSets should already be disconnected if the
+ * SqlRowSet is supposed to be usable in a disconnected fashion. This
+ * means that you will usually pass in a <code>javax.sql.CachedRowSet</code>,
+ * which implements the ResultSet interface.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 1.2
+ * @see java.sql.ResultSet
+ * @see javax.sql.rowset.CachedRowSet
  */
 public class SqlRowSetImpl implements SqlRowSet {
-	private RowSet rowSet;
-	private SqlRowSetMetaData rowSetMetaData;
-	private String sql;
 
-	public SqlRowSetImpl() {
-	}
+	private final ResultSet resultSet;
 
-	public SqlRowSetImpl(RowSet rowSet) throws DataAccessResourceFailureException {
-		this.setRowSet(rowSet);
-	}
+	private final SqlRowSetMetaData rowSetMetaData;
 
-	
-	// Configuration methods exposed to calling classes
 
-	/**
-	 *  Set the underlying RowSet
-	 */
-	public void setRowSet(RowSet rowSet) throws DataAccessResourceFailureException {
-		this.rowSet = rowSet;
+	public SqlRowSetImpl(ResultSet resultSet) throws DataAccessResourceFailureException {
+		this.resultSet = resultSet;
 		try {
-			rowSetMetaData = new SqlRowSetMetaDataImpl((RowSetMetaData)rowSet.getMetaData());
+			this.rowSetMetaData = new SqlRowSetMetaDataImpl(resultSet.getMetaData());
 		}
 		catch (SQLException se) {
 			throw new DataAccessResourceFailureException(se.getMessage(), se);
@@ -63,29 +64,12 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 *  Return the underlying RowSet
+	 *  Return the underlying ResultSet.
 	 */
-	public RowSet getRowSet() {
-		return this.rowSet;
+	public ResultSet getResultSet() {
+		return this.resultSet;
 	}
 
-	/**
-	 *  Set the underlying SQL
-	 */
-	public void setCommand(String command) {
-		this.sql = command;
-	}
-
-	/**
-	 *  Return the underlying SQL
-	 */
-	public String getCommand() {
-		return sql;
-	}
-
-		
-	// MetaData methods supported
-	
 	/**
 	 * @see java.sql.ResultSetMetaData#getCatalogName(int)
 	 */
@@ -93,38 +77,15 @@ public class SqlRowSetImpl implements SqlRowSet {
 		return this.rowSetMetaData;
 	}
 	
+	
 	// ResultSet/RowSet methods supported to retrieve data
 	
 	/**
-	 * @see java.sql.ResultSet#findColumn(java.lang.String)
+	 * @see java.sql.ResultSet#findColumn(String)
 	 */
 	public int findColumn(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.findColumn(columnName);
-		}
-		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
-		}
-	}
-	
-	/**
-	 * @see java.sql.ResultSet#getArray(int)
-	 */
-	public Array getArray(int columnIndex) throws DataRetrievalFailureException {
-		try {
-			return rowSet.getArray(columnIndex);
-		}
-		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
-		}
-	}
-	
-	/**
-	 * @see java.sql.ResultSet#getArray(java.lang.String)
-	 */
-	public Array getArray(String columnName) throws DataRetrievalFailureException {
-		try {
-			return rowSet.getArray(columnName);
+			return this.resultSet.findColumn(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -136,7 +97,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public BigDecimal getBigDecimal(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getBigDecimal(columnIndex);
+			return this.resultSet.getBigDecimal(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -144,11 +105,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getBigDecimal(java.lang.String)
+	 * @see java.sql.ResultSet#getBigDecimal(String)
 	 */
 	public BigDecimal getBigDecimal(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getBigDecimal(columnName);
+			return this.resultSet.getBigDecimal(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -160,7 +121,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean getBoolean(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getBoolean(columnIndex);
+			return this.resultSet.getBoolean(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -168,11 +129,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getBoolean(java.lang.String)
+	 * @see java.sql.ResultSet#getBoolean(String)
 	 */
 	public boolean getBoolean(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getBoolean(columnName);
+			return this.resultSet.getBoolean(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -184,7 +145,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public byte getByte(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getByte(columnIndex);
+			return this.resultSet.getByte(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -192,11 +153,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getByte(java.lang.String)
+	 * @see java.sql.ResultSet#getByte(String)
 	 */
 	public byte getByte(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getByte(columnName);
+			return this.resultSet.getByte(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -208,7 +169,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public Date getDate(int columnIndex, Calendar cal) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getDate(columnIndex, cal);
+			return this.resultSet.getDate(columnIndex, cal);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -220,18 +181,18 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public Date getDate(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getDate(columnIndex);
+			return this.resultSet.getDate(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
 	/**
-	 * @see java.sql.ResultSet#getDate(java.lang.String, java.util.Calendar)
+	 * @see java.sql.ResultSet#getDate(String, java.util.Calendar)
 	 */
 	public Date getDate(String columnName, Calendar cal) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getDate(columnName, cal);
+			return this.resultSet.getDate(columnName, cal);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -239,11 +200,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getDate(java.lang.String)
+	 * @see java.sql.ResultSet#getDate(String)
 	 */
 	public Date getDate(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getDate(columnName);
+			return this.resultSet.getDate(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -255,7 +216,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public double getDouble(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getDouble(columnIndex);
+			return this.resultSet.getDouble(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -263,11 +224,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getDouble(java.lang.String)
+	 * @see java.sql.ResultSet#getDouble(String)
 	 */
 	public double getDouble(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getDouble(columnName);
+			return this.resultSet.getDouble(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -279,7 +240,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public float getFloat(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getFloat(columnIndex);
+			return this.resultSet.getFloat(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -287,11 +248,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getFloat(java.lang.String)
+	 * @see java.sql.ResultSet#getFloat(String)
 	 */
 	public float getFloat(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getFloat(columnName);
+			return this.resultSet.getFloat(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -302,7 +263,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public int getInt(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getInt(columnIndex);
+			return this.resultSet.getInt(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -310,11 +271,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getInt(java.lang.String)
+	 * @see java.sql.ResultSet#getInt(String)
 	 */
 	public int getInt(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getInt(columnName);
+			return this.resultSet.getInt(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -326,7 +287,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public long getLong(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getLong(columnIndex);
+			return this.resultSet.getLong(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -334,11 +295,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getLong(java.lang.String)
+	 * @see java.sql.ResultSet#getLong(String)
 	 */
 	public long getLong(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getLong(columnName);
+			return this.resultSet.getLong(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -350,7 +311,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public Object getObject(int i, Map map) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getObject(i, map);
+			return this.resultSet.getObject(i, map);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -362,7 +323,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public Object getObject(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getObject(columnIndex);
+			return this.resultSet.getObject(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -370,11 +331,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getObject(java.lang.String, java.util.Map)
+	 * @see java.sql.ResultSet#getObject(String, java.util.Map)
 	 */
 	public Object getObject(String columnName, Map map) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getObject(columnName, map);
+			return this.resultSet.getObject(columnName, map);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -382,11 +343,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getObject(java.lang.String)
+	 * @see java.sql.ResultSet#getObject(String)
 	 */
 	public Object getObject(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getObject(columnName);
+			return this.resultSet.getObject(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -398,7 +359,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public int getRow() throws DataRetrievalFailureException {
 		try {
-			return rowSet.getRow();
+			return this.resultSet.getRow();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -410,7 +371,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public short getShort(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getShort(columnIndex);
+			return this.resultSet.getShort(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -418,11 +379,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getShort(java.lang.String)
+	 * @see java.sql.ResultSet#getShort(String)
 	 */
 	public short getShort(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getShort(columnName);
+			return this.resultSet.getShort(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -434,7 +395,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public String getString(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getString(columnIndex);
+			return this.resultSet.getString(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -442,11 +403,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getString(java.lang.String)
+	 * @see java.sql.ResultSet#getString(String)
 	 */
 	public String getString(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getString(columnName);
+			return this.resultSet.getString(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -458,7 +419,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public Time getTime(int columnIndex, Calendar cal) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getTime(columnIndex, cal);
+			return this.resultSet.getTime(columnIndex, cal);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -470,7 +431,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public Time getTime(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getTime(columnIndex);
+			return this.resultSet.getTime(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -478,11 +439,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getTime(java.lang.String, java.util.Calendar)
+	 * @see java.sql.ResultSet#getTime(String, java.util.Calendar)
 	 */
 	public Time getTime(String columnName, Calendar cal) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getTime(columnName, cal);
+			return this.resultSet.getTime(columnName, cal);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -490,11 +451,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getTime(java.lang.String)
+	 * @see java.sql.ResultSet#getTime(String)
 	 */
 	public Time getTime(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getTime(columnName);
+			return this.resultSet.getTime(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -507,7 +468,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	public Timestamp getTimestamp(int columnIndex, Calendar cal)
 			throws DataRetrievalFailureException {
 		try {
-			return rowSet.getTimestamp(columnIndex, cal);
+			return this.resultSet.getTimestamp(columnIndex, cal);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -519,7 +480,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public Timestamp getTimestamp(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getTimestamp(columnIndex);
+			return this.resultSet.getTimestamp(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -527,12 +488,12 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getTimestamp(java.lang.String, java.util.Calendar)
+	 * @see java.sql.ResultSet#getTimestamp(String, java.util.Calendar)
 	 */
 	public Timestamp getTimestamp(String columnName, Calendar cal)
 			throws DataRetrievalFailureException {
 		try {
-			return rowSet.getTimestamp(columnName, cal);
+			return this.resultSet.getTimestamp(columnName, cal);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -540,11 +501,11 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getTimestamp(java.lang.String)
+	 * @see java.sql.ResultSet#getTimestamp(String)
 	 */
 	public Timestamp getTimestamp(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getTimestamp(columnName);
+			return this.resultSet.getTimestamp(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -556,28 +517,22 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public int getType() throws DataRetrievalFailureException {
 		try {
-			return rowSet.getType();
+			return this.resultSet.getType();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
 		}
 	}
+	
 
-	/**
-	 * @see javax.sql.RowSet#isReadOnly()
-	 */
-	public boolean isReadOnly() {
-	 	return rowSet.isReadOnly();
-	 }
-
-	 // ResultSet/RowSet navigation
+	// ResultSet/RowSet navigation
 	
 	/**
 	 * @see java.sql.ResultSet#absolute(int)
 	 */
 	public boolean absolute(int row) throws DataRetrievalFailureException {
 		try {
-			return rowSet.absolute(row);
+			return this.resultSet.absolute(row);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -589,7 +544,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public void afterLast() throws DataRetrievalFailureException {
 		try {
-			rowSet.afterLast();
+			this.resultSet.afterLast();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -601,7 +556,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public void beforeFirst() throws DataRetrievalFailureException {
 		try {
-			rowSet.beforeFirst();
+			this.resultSet.beforeFirst();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -613,7 +568,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean first() throws DataRetrievalFailureException {
 		try {
-			return rowSet.first();
+			return this.resultSet.first();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -625,7 +580,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean isAfterLast() throws DataRetrievalFailureException {
 		try {
-			return rowSet.isAfterLast();
+			return this.resultSet.isAfterLast();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -637,7 +592,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean isBeforeFirst() throws DataRetrievalFailureException {
 		try {
-			return rowSet.isBeforeFirst();
+			return this.resultSet.isBeforeFirst();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -649,7 +604,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean isFirst() throws DataRetrievalFailureException {
 		try {
-			return rowSet.isFirst();
+			return this.resultSet.isFirst();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -661,7 +616,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean isLast() throws DataRetrievalFailureException {
 		try {
-			return rowSet.isLast();
+			return this.resultSet.isLast();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -673,19 +628,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean last() throws DataRetrievalFailureException {
 		try {
-			return rowSet.last();
-		}
-		catch (SQLException se) {
-			throw new DataRetrievalFailureException(se.getMessage(), se);
-		}
-	}
-	
-	/**
-	 * @see java.sql.ResultSet#moveToCurrentRow()
-	 */
-	public void moveToCurrentRow() throws DataRetrievalFailureException {
-		try {
-			rowSet.moveToCurrentRow();
+			return this.resultSet.last();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -697,7 +640,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean next() throws DataRetrievalFailureException {
 		try {
-			return rowSet.next();
+			return this.resultSet.next();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -709,7 +652,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean previous() throws DataRetrievalFailureException {
 		try {
-			return rowSet.previous();
+			return this.resultSet.previous();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -721,7 +664,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean relative(int rows) throws DataRetrievalFailureException {
 		try {
-			return rowSet.relative(rows);
+			return this.resultSet.relative(rows);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
@@ -733,7 +676,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	 */
 	public boolean wasNull() throws DataRetrievalFailureException {
 		try {
-			return rowSet.wasNull();
+			return this.resultSet.wasNull();
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage(), se);
