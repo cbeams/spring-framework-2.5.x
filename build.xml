@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.51 2004-04-22 08:12:46 jhoeller Exp $
+    $Id: build.xml,v 1.52 2004-04-25 23:05:02 kdonald Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -737,6 +737,13 @@
 				<include name="**/*.dtd"/>
 			</fileset>
 		</copy>
+
+		<copy todir="${sandbox.target.classes.dir}/META-INF" preservelastmodified="true">
+			<fileset dir="${sandbox.src.dir}/org/springframework/validation/commons/taglib">
+				<include name="*.tld"/>
+			</fileset>
+		</copy>
+					
 	</target>
 
 	<target name="buildtests-sandbox" depends="buildtests"
