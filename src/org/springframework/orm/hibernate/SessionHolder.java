@@ -35,7 +35,6 @@ import org.springframework.transaction.support.ResourceHolderSupport;
  * @author Juergen Hoeller
  * @since 06.05.2003
  * @see HibernateTransactionManager
- * @see HibernateTransactionObject
  * @see SessionFactoryUtils
  */
 public class SessionHolder extends ResourceHolderSupport {
