@@ -15,7 +15,7 @@
  */
 package org.springframework.functor;
 
-import org.springframework.functor.predicates.BindConstantUnaryPredicate;
+import org.springframework.functor.predicates.ParameterizedBinaryPredicate;
 import org.springframework.functor.predicates.UnaryFunctionEvaluator;
 
 /**
@@ -25,7 +25,7 @@ public class PredicateFactory {
     public static UnaryPredicate bind(
         BinaryPredicate predicate,
         Object value) {
-        return new BindConstantUnaryPredicate(predicate, value);
+        return new ParameterizedBinaryPredicate(predicate, value);
     }
 
     public static UnaryPredicate attachResultEvaluator(

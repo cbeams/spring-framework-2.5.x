@@ -14,6 +14,10 @@ import org.springframework.functor.predicates.Range;
 public class StringLengthConstraint implements UnaryPredicate {
     private UnaryPredicate predicate;
 
+    public StringLengthConstraint(int length) {
+        this(BinaryOperator.LESS_THAN_EQUAL_TO, length);
+    }
+    
     public StringLengthConstraint(BinaryOperator operator, int length) {
         BinaryPredicate comparer = operator.getPredicate();
         UnaryPredicate lengthConstraint = PredicateFactory.bind(
