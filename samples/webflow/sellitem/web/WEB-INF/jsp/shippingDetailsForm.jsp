@@ -12,7 +12,7 @@
 			Category: <c:out value="${sale.category}"/><BR>
 			Shipping: <c:out value="${sale.shipping}"/>
 
-			<FORM name="shippingForm">
+			<FORM name="shippingForm" method="post">
 				<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 		

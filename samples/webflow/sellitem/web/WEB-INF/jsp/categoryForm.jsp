@@ -10,7 +10,7 @@
 			Price: <c:out value="${sale.price}"/><BR>
 			Item count: <c:out value="${sale.itemCount}"/>
 			
-			<FORM name="categoryForm">
+			<FORM name="categoryForm" method="post">
 				<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 			

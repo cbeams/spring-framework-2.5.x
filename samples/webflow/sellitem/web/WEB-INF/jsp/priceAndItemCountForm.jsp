@@ -7,7 +7,7 @@
 		<DIV align="left">Enter price and item count</DIV>
 		<HR>
 		<DIV align="left">
-			<FORM name="priceAndItemCountForm">
+			<FORM name="priceAndItemCountForm" method="post">
 				<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 				

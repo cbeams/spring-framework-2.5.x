@@ -14,7 +14,7 @@
 
 	<!--
 		Custom configuration of the HTTP request flow execution manager.
-		Not how you can just change the flow execution storage strategy without any impact
+		Note how you can just change the flow execution storage strategy without any impact
 		on the views!
 	-->	
 	<bean id="flowExecutionManager" class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
