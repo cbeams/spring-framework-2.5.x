@@ -31,7 +31,7 @@
   XML documents that conform to this DTD should declare the following doctype:
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.17 2004-01-14 07:36:59 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.18 2004-01-17 17:02:10 colins Exp $
 -->
 
 <!--
@@ -211,7 +211,7 @@
 -->
 <!ELEMENT property (
         description?,
-        (bean | ref | list | map | props | value)
+        (bean | ref | list | map | props | value | beanid)
 )>
 
 <!--
@@ -250,7 +250,7 @@
 	is automatically performed by AbstractBeanFactory. 
 -->
 <!ELEMENT list (
-        (bean | ref | list | map | props | value)*
+        (bean | ref | list | map | props | value | beanid)*
 )>
 
 <!--
@@ -266,7 +266,7 @@
 	The name of the property is given by the "key" attribute.
 -->
 <!ELEMENT entry (
-        (bean | ref | list | map | props | value)
+        (bean | ref | list | map | props | value | beanid)
 )>
 
 <!ATTLIST entry key CDATA #REQUIRED>
@@ -306,3 +306,23 @@
 	properties to references to other beans.
 -->
 <!ELEMENT value (#PCDATA)>
+
+<!--
+	Defines a string property value, which must also be the id of another
+	bean in this factory or an external factory (parent or included factory).
+	While a regular 'value' element could instead be used for the same effect,
+	using beanid in this case allows validation of local bean ids by the xml
+	parser, and name completion by helper tools.
+-->
+<!ELEMENT beanid EMPTY>
+
+<!--
+	Beanids must specify a name of the target bean.
+	The "bean" attribute can reference any name from any bean in the context,
+	to be checked at runtime by future Spring implementations.
+	Local references, using the "local" attribute, have to use bean ids;
+	they can be checked by this DTD, thus should be preferred for references
+	within the same bean factory XML file.
+-->
+<!ATTLIST beanid bean CDATA #IMPLIED>
+<!ATTLIST beanid local IDREF #IMPLIED>

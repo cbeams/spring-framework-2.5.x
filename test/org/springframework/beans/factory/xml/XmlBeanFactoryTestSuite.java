@@ -35,7 +35,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.29 2004-01-14 07:38:00 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.30 2004-01-17 17:02:21 colins Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 	
@@ -231,6 +231,20 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 
+	public void testPropertyWithBeanIdLocalAttrSubelement() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		TestBean verbose = (TestBean) xbf.getBean("verbose2");
+		assertTrue(verbose.getName().equals("verbose"));
+	}
+	
+	public void testPropertyWithBeanIdBeanAttrSubelement() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		TestBean verbose = (TestBean) xbf.getBean("verbose3");
+		assertTrue(verbose.getName().equals("verbose"));
+	}
+	
 	public void testRefSubelementsBuildCollection() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -294,11 +308,12 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(1, MixedCollectionBean.nrOfInstances);
 		TestBean dave = (TestBean) xbf.getBean("david");
 		assertTrue("Expected 3 elements, not " + jumble.getJumble().size(),
-				jumble.getJumble().size() == 3);
+				jumble.getJumble().size() == 4);
 		List l = (List) jumble.getJumble();
 		assertTrue(l.get(0).equals(xbf.getBean("david")));
 		assertTrue(l.get(1).equals("literal"));
 		assertTrue(l.get(2).equals(xbf.getBean("jenny")));
+		assertTrue(l.get(3).equals("rod"));
 	}
 
 	/**
@@ -368,10 +383,11 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		HasMap hasMap = (HasMap) xbf.getBean("mixedMap");
-		assertTrue(hasMap.getMap().size() == 2);
+		assertTrue(hasMap.getMap().size() == 3);
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertTrue(hasMap.getMap().get("jenny") == jenny);
+		assertTrue(hasMap.getMap().get("david").equals("david"));
 	}
 
 	public void testMapWithLiteralsAndPrototypeReferences() throws Exception {

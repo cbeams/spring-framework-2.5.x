@@ -90,6 +90,7 @@
 				<ref local="david"/>
 				<value>literal</value>
 				<ref local="jenny" />
+				<beanid local="rod" />
 			</list>
 		</property>
 	</bean>
@@ -98,6 +99,14 @@
 		<property name="name"><value>verbose</value></property>
 	</bean>
 	
+	<bean id="verbose2" class="org.springframework.beans.TestBean">	
+		<property name="name"><beanid local="verbose"/></property>
+	</bean>
+
+	<bean id="verbose3" class="org.springframework.beans.TestBean">	
+		<property name="name"><beanid bean="verbose"/></property>
+	</bean>
+
 	<!--
 		Check automatic creation of alias, to allow for
 		names that are illegal as XML ids
@@ -139,6 +148,7 @@
 			<map>
 				<entry key="foo"><value>bar</value></entry>
 				<entry key="jenny"><ref local="jenny"/></entry>
+				<entry key="david"><beanid bean="david"/></entry>
 			</map>
 		</property>
 	</bean>

@@ -67,6 +67,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String INDEX_ATTRIBUTE = "index";
 	public static final String PROPERTY_ELEMENT = "property";
 	public static final String REF_ELEMENT = "ref";
+	public static final String BEANID_ELEMENT = "beanid";
 	public static final String LIST_ELEMENT = "list";
 	public static final String MAP_ELEMENT = "map";
 	public static final String KEY_ATTRIBUTE = "key";
@@ -380,6 +381,18 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				}
 			}
 			return new RuntimeBeanReference(beanName);
+		}
+		else if (ele.getTagName().equals(BEANID_ELEMENT)) {
+			// a generic reference to any name of any bean
+			String beanName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+			if ("".equals(beanName)) {
+				// a reference to the id of another bean in the same XML file
+				beanName = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
+				if ("".equals(beanName)) {
+					throw new FatalBeanException("Either 'bean' or 'local' is required for a beanid");
+				}
+			}
+			return beanName;
 		}
 		else if (ele.getTagName().equals(VALUE_ELEMENT)) {
 			// it's a literal value
