@@ -31,7 +31,8 @@ import org.springframework.web.servlet.ViewResolver;
  * Caches views once resolved: This means that view resolution won't be a
  * performance problem, no matter how costly initial view retrieval is.
  *
- * <p>View retrieval is deferred to subclasses via the loadView template method.
+ * <p>View retrieval is deferred to subclasses via the <code>loadView</code>
+ * template method.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -64,22 +65,24 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
-		View view = null;
 		if (!this.cache) {
 			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This can severely impair performance");
-			view = loadAndConfigureView(viewName, locale);
+			return loadAndConfigureView(viewName, locale);
 		}
 		else {
 			String cacheKey = getCacheKey(viewName, locale);
-			view = (View) this.viewMap.get(cacheKey);
+			// no synchronization, as we can live with occasional double caching
+			View view = (View) this.viewMap.get(cacheKey);
 			if (view == null) {
 				// ask the subclass to load the View
 				view = loadAndConfigureView(viewName, locale);
 				this.viewMap.put(cacheKey, view);
-				logger.info("Cached view '" + cacheKey + "'");
+				if (logger.isInfoEnabled()) {
+					logger.info("Cached view '" + cacheKey + "'");
+				}
 			}
+			return view;
 		}
-		return view;
 	}
 
 	/**
