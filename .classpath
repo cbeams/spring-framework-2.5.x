@@ -71,5 +71,6 @@
     <classpathentry kind="lib" path="lib/cglib/asm.jar"/>
     <classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
     <classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1-rc1.jar"/>
+    <classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
     <classpathentry kind="output" path="target/other-classes"/>
 </classpath>
