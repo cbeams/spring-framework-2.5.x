@@ -1,76 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sql-map
-    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
-    "http://www.ibatis.com/dtd/sql-map.dtd">
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
 
-<sql-map name="Item">
+<sqlMap namespace="Item">
 
-  <cache-model name="oneDayItem" reference-type="WEAK">
-    <flush-interval hours="24"/>
-  </cache-model>
+  <cacheModel id="oneDayItem" type="MEMORY">
+    <flushInterval hours="24"/>
+    <property name="reference-type" value="WEAK"/>
+  </cacheModel>
 
-  <cache-model name="oneDayQuantity" reference-type="WEAK">
-    <flush-interval hours="24"/>
-    <flush-on-execute statement="updateInventoryQuantity"/>
-  </cache-model>
+  <cacheModel id="oneDayQuantity" type="MEMORY">
+    <flushInterval hours="24"/>
+    <flushOnExecute statement="updateInventoryQuantity"/>
+    <property name="reference-type" value="WEAK"/>
+  </cacheModel>
 
-  <result-map name="result" class="org.springframework.samples.jpetstore.domain.Item">
-    <property name="itemId" column="itemid" columnIndex="1"/>
-    <property name="listPrice" column="listprice" columnIndex="2"/>
-    <property name="unitCost" column="unitcost" columnIndex="3"/>
-    <property name="supplierId" column="supplier" columnIndex="4"/>
-    <property name="productId" column="productid" columnIndex="5"/>
-    <property name="product.productId" column="productid" columnIndex="5"/>
-    <property name="product.name" column="name" columnIndex="6"/>
-    <property name="product.description" column="descn" columnIndex="7"/>
-    <property name="product.categoryId" column="category" columnIndex="8"/>
-    <property name="status" column="status" columnIndex="9"/>
-    <property name="attribute1" column="attr1" columnIndex="10"/>
-    <property name="attribute2" column="attr2" columnIndex="11"/>
-    <property name="attribute3" column="attr3" columnIndex="12"/>
-    <property name="attribute4" column="attr4" columnIndex="13"/>
-    <property name="attribute5" column="attr5" columnIndex="14"/>
-  </result-map>
+  <resultMap id="result" class="org.springframework.samples.jpetstore.domain.Item">
+    <result property="itemId" column="itemid" columnIndex="1"/>
+    <result property="listPrice" column="listprice" columnIndex="2"/>
+    <result property="unitCost" column="unitcost" columnIndex="3"/>
+    <result property="supplierId" column="supplier" columnIndex="4"/>
+    <result property="productId" column="productid" columnIndex="5"/>
+    <result property="product.productId" column="productid" columnIndex="5"/>
+    <result property="product.name" column="name" columnIndex="6"/>
+    <result property="product.description" column="descn" columnIndex="7"/>
+    <result property="product.categoryId" column="category" columnIndex="8"/>
+    <result property="status" column="status" columnIndex="9"/>
+    <result property="attribute1" column="attr1" columnIndex="10"/>
+    <result property="attribute2" column="attr2" columnIndex="11"/>
+    <result property="attribute3" column="attr3" columnIndex="12"/>
+    <result property="attribute4" column="attr4" columnIndex="13"/>
+    <result property="attribute5" column="attr5" columnIndex="14"/>
+  </resultMap>
 
-  <result-map name="result-with-quantity" class="org.springframework.samples.jpetstore.domain.Item">
-    <property name="itemId" column="itemid" columnIndex="1"/>
-    <property name="listPrice" column="listprice" columnIndex="2"/>
-    <property name="unitCost" column="unitcost" columnIndex="3"/>
-    <property name="supplierId" column="supplier" columnIndex="4"/>
-    <property name="productId" column="productid" columnIndex="5"/>
-    <property name="product.productId" column="productid" columnIndex="5"/>
-    <property name="product.name" column="name" columnIndex="6"/>
-    <property name="product.description" column="descn" columnIndex="7"/>
-    <property name="product.categoryId" column="category" columnIndex="8"/>
-    <property name="status" column="status" columnIndex="9"/>
-    <property name="attribute1" column="attr1" columnIndex="10"/>
-    <property name="attribute2" column="attr2" columnIndex="11"/>
-    <property name="attribute3" column="attr3" columnIndex="12"/>
-    <property name="attribute4" column="attr4" columnIndex="13"/>
-    <property name="attribute5" column="attr5" columnIndex="14"/>
-    <property name="quantity" column="qty" columnIndex="15"/>
-  </result-map>
+  <resultMap id="result-with-quantity" class="org.springframework.samples.jpetstore.domain.Item">
+    <result property="itemId" column="itemid" columnIndex="1"/>
+    <result property="listPrice" column="listprice" columnIndex="2"/>
+    <result property="unitCost" column="unitcost" columnIndex="3"/>
+    <result property="supplierId" column="supplier" columnIndex="4"/>
+    <result property="productId" column="productid" columnIndex="5"/>
+    <result property="product.productId" column="productid" columnIndex="5"/>
+    <result property="product.name" column="name" columnIndex="6"/>
+    <result property="product.description" column="descn" columnIndex="7"/>
+    <result property="product.categoryId" column="category" columnIndex="8"/>
+    <result property="status" column="status" columnIndex="9"/>
+    <result property="attribute1" column="attr1" columnIndex="10"/>
+    <result property="attribute2" column="attr2" columnIndex="11"/>
+    <result property="attribute3" column="attr3" columnIndex="12"/>
+    <result property="attribute4" column="attr4" columnIndex="13"/>
+    <result property="attribute5" column="attr5" columnIndex="14"/>
+    <result property="quantity" column="qty" columnIndex="15"/>
+  </resultMap>
 
-  <mapped-statement name="getItemListByProduct" result-map="result">
+  <select id="getItemListByProduct" resultMap="result">
     select
       itemid, listprice, unitcost, supplier, i.productid, name,
       descn, category, status, attr1, attr2, attr3, attr4, attr5
     from item i, product p where p.productid = i.productid and i.productid = #value#
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="getItem" result-map="result-with-quantity">
+  <select id="getItem" resultMap="result-with-quantity">
     select
       i.itemid, listprice, unitcost, supplier, i.productid, name,
       descn, category, status, attr1, attr2, attr3, attr4, attr5, qty
     from item i, inventory v, product p where p.productid = i.productid and i.itemid = v.itemid and i.itemid = #value#
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="getInventoryQuantity" result-class="java.lang.Integer">
+  <select id="getInventoryQuantity" resultClass="java.lang.Integer">
     select qty as value from inventory where itemid = #value#
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="updateInventoryQuantity">
+  <update id="updateInventoryQuantity">
     update inventory set qty = qty - #increment# where itemid = #itemid#
-  </mapped-statement>
+  </update>
 
-</sql-map>
+</sqlMap>

@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sql-map
-    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
-    "http://www.ibatis.com/dtd/sql-map.dtd">
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
 
-<sql-map name="Category">
+<sqlMap namespace="Category">
 
-  <cache-model name="oneDayCategory" reference-type="WEAK">
-    <flush-interval hours="24"/>
-  </cache-model>
+  <cacheModel id="oneDayCategory" type="MEMORY">
+    <flushInterval hours="24"/>
+    <property name="reference-type" value="WEAK"/>
+  </cacheModel>
 
-  <result-map name="result" class="org.springframework.samples.jpetstore.domain.Category">
-    <property name="categoryId" column="catid" columnIndex="1"/>
-    <property name="name" column="name" columnIndex="2"/>
-    <property name="description" column="descn" columnIndex="3"/>
-  </result-map>
+  <resultMap id="result" class="org.springframework.samples.jpetstore.domain.Category">
+    <result property="categoryId" column="catid" columnIndex="1"/>
+    <result property="name" column="name" columnIndex="2"/>
+    <result property="description" column="descn" columnIndex="3"/>
+  </resultMap>
 
-  <mapped-statement name="getCategory" result-map="result">
+  <select id="getCategory" resultMap="result">
     select catid, name, descn from category where catid = #value#
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="getCategoryList" result-map="result">
+  <select id="getCategoryList" resultMap="result">
     select catid, name, descn from category
-  </mapped-statement>
+  </select>
 
-</sql-map>
+</sqlMap>

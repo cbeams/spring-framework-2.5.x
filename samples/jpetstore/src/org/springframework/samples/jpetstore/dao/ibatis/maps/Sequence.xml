@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sql-map
-    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
-    "http://www.ibatis.com/dtd/sql-map.dtd">
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
 
-<sql-map name="Sequence">
+<sqlMap namespace="Sequence">
 
-  <result-map name="result" class="org.springframework.samples.jpetstore.dao.ibatis.Sequence">
-    <property name="name" column="name" columnIndex="1"/>
-    <property name="nextId" column="nextid" columnIndex="2"/>
-  </result-map>
+  <resultMap id="result" class="org.springframework.samples.jpetstore.dao.ibatis.Sequence">
+    <result property="name" column="name" columnIndex="1"/>
+    <result property="nextId" column="nextid" columnIndex="2"/>
+  </resultMap>
 
-  <mapped-statement name="oracleSequence" result-map="result">
+  <select id="oracleSequence" resultMap="result">
     select '$name$' as name, $name$.nextval as nextid from dual
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="getSequence" result-map="result">
+  <select id="getSequence" resultMap="result">
     select name, nextid from sequence where name = #name#
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="updateSequence">
+  <update id="updateSequence">
     update sequence set nextid = #nextId# where name = #name#
-  </mapped-statement>
+  </update>
 
-</sql-map>
+</sqlMap>

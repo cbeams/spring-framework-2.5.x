@@ -1,36 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sql-map
-    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
-    "http://www.ibatis.com/dtd/sql-map.dtd">
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
 
-<sql-map name="Product">
+<sqlMap namespace="Product">
 
-  <cache-model name="oneDayProduct" reference-type="WEAK">
-    <flush-interval hours="24"/>
-  </cache-model>
+  <cacheModel id="oneDayProduct" type="MEMORY">
+    <flushInterval hours="24"/>
+    <property name="reference-type" value="WEAK"/>
+  </cacheModel>
 
-  <result-map name="result" class="org.springframework.samples.jpetstore.domain.Product">
-    <property name="productId" column="productid" columnIndex="1"/>
-    <property name="name" column="name" columnIndex="2"/>
-    <property name="description" column="descn" columnIndex="3"/>
-    <property name="categoryId" column="category" columnIndex="4"/>
-  </result-map>
+  <resultMap id="result" class="org.springframework.samples.jpetstore.domain.Product">
+    <result property="productId" column="productid" columnIndex="1"/>
+    <result property="name" column="name" columnIndex="2"/>
+    <result property="description" column="descn" columnIndex="3"/>
+    <result property="categoryId" column="category" columnIndex="4"/>
+  </resultMap>
 
-  <mapped-statement name="getProduct" result-map="result">
+  <select id="getProduct" resultMap="result">
     select productid, name, descn, category from product where productid = #value#
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="getProductListByCategory" result-map="result">
+  <select id="getProductListByCategory" resultMap="result">
     select productid, name, descn, category from product where category = #value#
-  </mapped-statement>
+  </select>
 
-  <dynamic-mapped-statement name="searchProductList" result-map="result">
+  <select id="searchProductList" resultMap="result">
     select productid, name, descn, category from product
     <dynamic prepend="where">
       <iterate property="keywordList" open="(" close=")" conjunction="OR">
         lower(name) like #keywordList[]# OR lower(category) like #keywordList[]# OR lower(descn) like #keywordList[]#
       </iterate>
     </dynamic>
-  </dynamic-mapped-statement>
+  </select>
 
-</sql-map>
+</sqlMap>

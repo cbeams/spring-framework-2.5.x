@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sql-map
-    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
-    "http://www.ibatis.com/dtd/sql-map.dtd">
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
 
+<sqlMap namespace="LineItem">
 
-<sql-map name="LineItem">
+  <resultMap id="result" class="org.springframework.samples.jpetstore.domain.LineItem">
+    <result property="orderId" column="orderid" columnIndex="1"/>
+    <result property="lineNumber" column="linenum" columnIndex="2"/>
+    <result property="itemId" column="itemid" columnIndex="3"/>
+    <result property="quantity" column="quantity" columnIndex="4"/>
+    <result property="unitPrice" column="unitprice" columnIndex="5"/>
+  </resultMap>
 
-  <result-map name="result" class="org.springframework.samples.jpetstore.domain.LineItem">
-    <property name="orderId" column="orderid" columnIndex="1"/>
-    <property name="lineNumber" column="linenum" columnIndex="2"/>
-    <property name="itemId" column="itemid" columnIndex="3"/>
-    <property name="quantity" column="quantity" columnIndex="4"/>
-    <property name="unitPrice" column="unitprice" columnIndex="5"/>
-  </result-map>
-
-  <mapped-statement name="getLineItemsByOrderId" result-map="result">
+  <select id="getLineItemsByOrderId" resultMap="result">
     select orderid, linenum, itemid, quantity, unitprice from lineitem where orderid = #value#
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="insertLineItem">
+  <insert id="insertLineItem">
     insert into lineitem (orderid, linenum, itemid, quantity, unitprice) values (#orderId#, #lineNumber#, #itemId#, #quantity#, #unitPrice#)
-  </mapped-statement>
+  </insert>
 
-</sql-map>
+</sqlMap>

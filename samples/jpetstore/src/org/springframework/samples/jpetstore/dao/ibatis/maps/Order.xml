@@ -1,41 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sql-map
-    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
-    "http://www.ibatis.com/dtd/sql-map.dtd">
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
 
+<sqlMap namespace="Order">
 
-<sql-map name="Order">
+  <resultMap id="result" class="org.springframework.samples.jpetstore.domain.Order">
+    <result property="billAddress1" column="billaddr1" columnIndex="1"/>
+    <result property="billAddress2" column="billaddr2" columnIndex="2"/>
+    <result property="billCity" column="billcity" columnIndex="3"/>
+    <result property="billCountry" column="billcountry" columnIndex="4"/>
+    <result property="billState" column="billstate" columnIndex="5"/>
+    <result property="billToFirstName" column="billtofirstname" columnIndex="6"/>
+    <result property="billToLastName" column="billtolastname" columnIndex="7"/>
+    <result property="billZip" column="billzip" columnIndex="8"/>
+    <result property="shipAddress1" column="shipaddr1" columnIndex="9"/>
+    <result property="shipAddress2" column="shipaddr2" columnIndex="10"/>
+    <result property="shipCity" column="shipcity" columnIndex="11"/>
+    <result property="shipCountry" column="shipcountry" columnIndex="12"/>
+    <result property="shipState" column="shipstate" columnIndex="13"/>
+    <result property="shipToFirstName" column="shiptofirstname" columnIndex="14"/>
+    <result property="shipToLastName" column="shiptolastname" columnIndex="15"/>
+    <result property="shipZip" column="shipzip" columnIndex="16"/>
+    <result property="cardType" column="cardtype" columnIndex="17"/>
+    <result property="courier" column="courier" columnIndex="18"/>
+    <result property="creditCard" column="creditcard" columnIndex="19"/>
+    <result property="expiryDate" column="exprdate" columnIndex="20"/>
+    <result property="locale" column="locale" columnIndex="21"/>
+    <result property="orderDate" column="orderdate" columnIndex="22"/>
+    <result property="orderId" column="orderid" columnIndex="23"/>
+    <result property="totalPrice" column="totalprice" columnIndex="24"/>
+    <result property="username" column="userid" columnIndex="25"/>
+    <result property="status" column="status" columnIndex="26"/>
+  </resultMap>
 
-  <result-map name="result" class="org.springframework.samples.jpetstore.domain.Order">
-    <property name="billAddress1" column="billaddr1" columnIndex="1"/>
-    <property name="billAddress2" column="billaddr2" columnIndex="2"/>
-    <property name="billCity" column="billcity" columnIndex="3"/>
-    <property name="billCountry" column="billcountry" columnIndex="4"/>
-    <property name="billState" column="billstate" columnIndex="5"/>
-    <property name="billToFirstName" column="billtofirstname" columnIndex="6"/>
-    <property name="billToLastName" column="billtolastname" columnIndex="7"/>
-    <property name="billZip" column="billzip" columnIndex="8"/>
-    <property name="shipAddress1" column="shipaddr1" columnIndex="9"/>
-    <property name="shipAddress2" column="shipaddr2" columnIndex="10"/>
-    <property name="shipCity" column="shipcity" columnIndex="11"/>
-    <property name="shipCountry" column="shipcountry" columnIndex="12"/>
-    <property name="shipState" column="shipstate" columnIndex="13"/>
-    <property name="shipToFirstName" column="shiptofirstname" columnIndex="14"/>
-    <property name="shipToLastName" column="shiptolastname" columnIndex="15"/>
-    <property name="shipZip" column="shipzip" columnIndex="16"/>
-    <property name="cardType" column="cardtype" columnIndex="17"/>
-    <property name="courier" column="courier" columnIndex="18"/>
-    <property name="creditCard" column="creditcard" columnIndex="19"/>
-    <property name="expiryDate" column="exprdate" columnIndex="20"/>
-    <property name="locale" column="locale" columnIndex="21"/>
-    <property name="orderDate" column="orderdate" columnIndex="22"/>
-    <property name="orderId" column="orderid" columnIndex="23"/>
-    <property name="totalPrice" column="totalprice" columnIndex="24"/>
-    <property name="username" column="userid" columnIndex="25"/>
-    <property name="status" column="status" columnIndex="26"/>
-  </result-map>
-
-  <mapped-statement name="getOrder" result-map="result">
+  <select id="getOrder" resultMap="result">
     select
         billaddr1, billaddr2, billcity, billcountry, billstate,
         billtofirstname, billtolastname, billzip, shipaddr1,
@@ -44,9 +43,9 @@
         exprdate, locale, orderdate, orders.orderid, totalprice,
         userid, status
     from orders, orderstatus where orders.orderid = #value# and orders.orderid = orderstatus.orderid
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="getOrdersByUsername" result-map="result">
+  <select id="getOrdersByUsername" resultMap="result">
     select
         billaddr1, billaddr2, billcity, billcountry, billstate,
         billtofirstname, billtolastname, billzip, shipaddr1,
@@ -55,24 +54,24 @@
         exprdate, locale, orderdate, orders.orderid, totalprice,
         userid, status
     from orders, orderstatus where orders.userid = #value# and orders.orderid = orderstatus.orderid
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="insertOrder">
+  <insert id="insertOrder">
     insert into orders (orderid, userid, orderdate, shipaddr1, shipaddr2, shipcity, shipstate, shipzip, shipcountry, billaddr1, billaddr2, billcity, billstate, billzip, billcountry, courier, totalprice, billtofirstname, billtolastname, shiptofirstname, shiptolastname, creditcard, exprdate, cardtype, locale)
-    values (#orderId#, #username#, #orderDate#, #shipAddress1#, #shipAddress2:varchar#, #shipCity#, #shipState#, #shipZip#, #shipCountry#, #billAddress1#, #billAddress2:VARCHAR#, #billCity#, #billState#, #billZip#, #billCountry#, #courier#, #totalPrice#, #billToFirstName#, #billToLastName#, #shipToFirstName#, #shipToLastName#, #creditCard#, #expiryDate#, #cardType#, #locale#)
-  </mapped-statement>
+      values (#orderId#, #username#, #orderDate#, #shipAddress1#, #shipAddress2:varchar#, #shipCity#, #shipState#, #shipZip#, #shipCountry#, #billAddress1#, #billAddress2:VARCHAR#, #billCity#, #billState#, #billZip#, #billCountry#, #courier#, #totalPrice#, #billToFirstName#, #billToLastName#, #shipToFirstName#, #shipToLastName#, #creditCard#, #expiryDate#, #cardType#, #locale#)
+  </insert>
 
   <!-- Special MS SQL Server hack to allow the Item ID to be retrieved so that it can be used for Line Item foreign keys!
-       This is called with executeQueryForObject despite it's being an update!  -->
-  <mapped-statement name="msSqlServerInsertOrder" result-class="java.lang.Integer">
+       This is called with queryForObject despite it's being an update!  -->
+  <statement id="msSqlServerInsertOrder" resultClass="java.lang.Integer">
     insert into orders (userid, orderdate, shipaddr1, shipaddr2, shipcity, shipstate, shipzip, shipcountry, billaddr1, billaddr2, billcity, billstate, billzip, billcountry, courier, totalprice, billtofirstname, billtolastname, shiptofirstname, shiptolastname, creditcard, exprdate, cardtype, locale)
-    values (#username#, #orderDate#, #shipAddress1#, #shipAddress2:VARCHAR#, #shipCity#, #shipState#, #shipZip#, #shipCountry#, #billAddress1#, #billAddress2:VARCHAR#, #billCity#, #billState#, #billZip#, #billCountry#, #courier#, #totalPrice#, #billToFirstName#, #billToLastName#, #shipToFirstName#, #shipToLastName#, #creditCard#, #expiryDate#, #cardType#, #locale#);
+      values (#username#, #orderDate#, #shipAddress1#, #shipAddress2:VARCHAR#, #shipCity#, #shipState#, #shipZip#, #shipCountry#, #billAddress1#, #billAddress2:VARCHAR#, #billCity#, #billState#, #billZip#, #billCountry#, #courier#, #totalPrice#, #billToFirstName#, #billToLastName#, #shipToFirstName#, #shipToLastName#, #creditCard#, #expiryDate#, #cardType#, #locale#);
     select @@identity as value
-  </mapped-statement>
+  </statement>
 
   <!-- As per Microsoft's PetShop demo... -->
-  <mapped-statement name="insertOrderStatus">
+  <insert id="insertOrderStatus">
     insert into orderstatus (orderid, linenum, timestamp, status) values (#orderId#, #orderId#, #orderDate#, #status#)
-  </mapped-statement>
+  </insert>
 
-</sql-map>
+</sqlMap>

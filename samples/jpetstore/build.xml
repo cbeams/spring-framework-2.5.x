@@ -23,8 +23,8 @@
 			<include name="axis.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/ibatis">
-			<include name="ibatis-common.jar"/>
-			<include name="ibatis-sqlmap.jar"/>
+			<include name="ibatis-common-2.jar"/>
+			<include name="ibatis-sqlmap-2.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="jaxrpc.jar"/>
@@ -108,8 +108,8 @@
 				<include name="hsqldb.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/ibatis">
-				<include name="ibatis-common.jar"/>
-				<include name="ibatis-sqlmap.jar"/>
+				<include name="ibatis-common-2.jar"/>
+				<include name="ibatis-sqlmap-2.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jaxrpc.jar"/>

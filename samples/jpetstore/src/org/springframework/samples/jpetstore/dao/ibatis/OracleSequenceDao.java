@@ -12,7 +12,7 @@ public class OracleSequenceDao extends SqlMapSequenceDao {
   public int getNextId(String name) throws DataAccessException {
     Sequence sequence = new Sequence();
     sequence.setName(name);
-    sequence = (Sequence) getSqlMapTemplate().executeQueryForObject("oracleSequence", sequence);
+    sequence = (Sequence) getSqlMapClientTemplate().queryForObject("oracleSequence", sequence);
     return sequence.getNextId();
   }
 

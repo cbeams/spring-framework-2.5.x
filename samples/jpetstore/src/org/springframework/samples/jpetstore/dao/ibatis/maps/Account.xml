@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sql-map
-    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
-    "http://www.ibatis.com/dtd/sql-map.dtd">
+<!DOCTYPE sqlMap
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
 
-<sql-map name="Account">
+<sqlMap namespace="Account">
 
-  <result-map name="result" class="org.springframework.samples.jpetstore.domain.Account">
-    <property name="username" column="userid" columnIndex="1"/>
-    <property name="email" column="email" columnIndex="2"/>
-    <property name="firstName" column="firstname" columnIndex="3"/>
-    <property name="lastName" column="lastname" columnIndex="4"/>
-    <property name="status" column="status" columnIndex="5"/>
-    <property name="address1" column="addr1" columnIndex="6"/>
-    <property name="address2" column="addr2" columnIndex="7"/>
-    <property name="city" column="city" columnIndex="8"/>
-    <property name="state" column="state" columnIndex="9"/>
-    <property name="zip" column="zip" columnIndex="10"/>
-    <property name="country" column="country" columnIndex="11"/>
-    <property name="phone" column="phone" columnIndex="12"/>
-    <property name="languagePreference" column="langpref" columnIndex="13"/>
-    <property name="favouriteCategoryId" column="favcategory" columnIndex="14"/>
-    <property name="listOption" column="mylistopt" columnIndex="15"/>
-    <property name="bannerOption" column="banneropt" columnIndex="16"/>
-    <property name="bannerName" column="bannername" columnIndex="17"/>
-  </result-map>
+  <resultMap  id="result" class="org.springframework.samples.jpetstore.domain.Account">
+    <result property="username" column="userid" columnIndex="1"/>
+    <result property="email" column="email" columnIndex="2"/>
+    <result property="firstName" column="firstname" columnIndex="3"/>
+    <result property="lastName" column="lastname" columnIndex="4"/>
+    <result property="status" column="status" columnIndex="5"/>
+    <result property="address1" column="addr1" columnIndex="6"/>
+    <result property="address2" column="addr2" columnIndex="7"/>
+    <result property="city" column="city" columnIndex="8"/>
+    <result property="state" column="state" columnIndex="9"/>
+    <result property="zip" column="zip" columnIndex="10"/>
+    <result property="country" column="country" columnIndex="11"/>
+    <result property="phone" column="phone" columnIndex="12"/>
+    <result property="languagePreference" column="langpref" columnIndex="13"/>
+    <result property="favouriteCategoryId" column="favcategory" columnIndex="14"/>
+    <result property="listOption" column="mylistopt" columnIndex="15"/>
+    <result property="bannerOption" column="banneropt" columnIndex="16"/>
+    <result property="bannerName" column="bannername" columnIndex="17"/>
+  </resultMap>
 
-  <mapped-statement name="getAccountByUsername" result-map="result">
+  <select id="getAccountByUsername" resultMap="result">
     select
           signon.username as userid,
           account.email,
@@ -49,9 +49,9 @@
       and signon.username = account.userid
       and profile.userid = account.userid
       and profile.favcategory = bannerdata.favcategory
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="getAccountByUsernameAndPassword" result-map="result">
+  <select id="getAccountByUsernameAndPassword" resultMap="result">
     select
       signon.username as userid,
       account.email,
@@ -76,34 +76,34 @@
       and signon.username = account.userid
       and profile.userid = account.userid
       and profile.favcategory = bannerdata.favcategory
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="getUsernameList" result-class="java.lang.String">
+  <select id="getUsernameList" resultClass="java.lang.String">
     select username as value from signon
-  </mapped-statement>
+  </select>
 
-  <mapped-statement name="updateAccount">
+  <update id="updateAccount">
     update account set email = #email#, firstname = #firstName#, lastname = #lastName#, status = #status#, addr1 = #address1#, addr2 = #address2:varchar#, city = #city#, state = #state#, zip = #zip#, country = #country#, phone = #phone# where userid = #username#
-  </mapped-statement>
+  </update>
 
-  <mapped-statement name="insertAccount">
+  <insert id="insertAccount">
     insert into account (email, firstname, lastname, status, addr1, addr2, city, state, zip, country, phone, userid) values (#email#, #firstName#, #lastName#, #status#, #address1#, #address2:varchar#, #city#, #state#, #zip#, #country#, #phone#, #username#)
-  </mapped-statement>
+  </insert>
 
-  <mapped-statement name="updateProfile">
+  <update id="updateProfile">
     update profile set langpref = #languagePreference#, favcategory = #favouriteCategoryId#, mylistopt = #listOptionAsInt#, banneropt = #bannerOptionAsInt# where userid = #username#
-  </mapped-statement>
+  </update>
 
-  <mapped-statement name="insertProfile">
+  <insert id="insertProfile">
     insert into profile (langpref, favcategory, mylistopt, banneropt, userid) values (#languagePreference#, #favouriteCategoryId#, #listOptionAsInt#, #bannerOptionAsInt#, #username#)
-  </mapped-statement>
+  </insert>
 
-  <mapped-statement name="updateSignon">
+  <update id="updateSignon">
     update signon set password = #password# where username = #username#
-  </mapped-statement>
+  </update>
 
-  <mapped-statement name="insertSignon">
+  <insert id="insertSignon">
     insert into signon (password,username) values (#password#,#username#)
-  </mapped-statement>
+  </insert>
 
-</sql-map>
+</sqlMap>

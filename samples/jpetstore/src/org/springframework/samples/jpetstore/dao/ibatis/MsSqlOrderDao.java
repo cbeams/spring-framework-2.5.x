@@ -11,13 +11,13 @@ public class MsSqlOrderDao extends SqlMapOrderDao {
    * that we can use it to link the foreign key of the Line Items!
    */
   public void insertOrder(Order order) throws DataAccessException {
-    Integer orderId = (Integer) getSqlMapTemplate().executeQueryForObject("msSqlServerInsertOrder", order);
+    Integer orderId = (Integer) getSqlMapClientTemplate().queryForObject("msSqlServerInsertOrder", order);
     order.setOrderId(orderId.intValue());
-    getSqlMapTemplate().executeUpdate("insertOrderStatus", order);
+    getSqlMapClientTemplate().update("insertOrderStatus", order);
     for (int i = 0; i < order.getLineItems().size(); i++) {
       LineItem lineItem = (LineItem) order.getLineItems().get(i);
       lineItem.setOrderId(order.getOrderId());
-      getSqlMapTemplate().executeUpdate("insertLineItem", lineItem);
+      getSqlMapClientTemplate().update("insertLineItem", lineItem);
     }
   }
   
