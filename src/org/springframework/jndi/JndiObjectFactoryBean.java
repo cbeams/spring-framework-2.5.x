@@ -18,6 +18,7 @@ package org.springframework.jndi;
 
 import javax.naming.NamingException;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
@@ -28,10 +29,11 @@ import org.springframework.beans.factory.FactoryBean;
  * (e.g. for a certain JNDI DataSource) in an application context,
  * and give bean references to application services that need it.
  *
- * <p><b>Assumptions:</b> The resource obtained from JNDI is available
- * at context startup time and can be cached. If this is not the case,
- * consider using a ProxyFactoryBean with JndiObjectTargetSource,
- * which fetches objects from JNDI on demand.
+ * <p>The default behavior is to look up the JNDI object on startup and
+ * cache it. This can be customized through the "lookupOnStartup" and
+ * "cache" properties, using a JndiObjectTargetSource underneath.
+ * Note that you need to specify a "proxyInterface" in such a scenario,
+ * because the actual JNDI object type is not known in advance.
  *
  * <p>Of course, service implementations can lookup e.g. a DataSource from
  * JNDI themselves, but this class enables central configuration of the
@@ -44,20 +46,83 @@ import org.springframework.beans.factory.FactoryBean;
  *
  * @author Juergen Hoeller
  * @since 22.05.2003
+ * @see #setProxyInterface
+ * @see #setLookupOnStartup
+ * @see #setCache
  * @see JndiObjectTargetSource
  * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
  */
 public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryBean {
 
+	private Class proxyInterface;
+
+	private boolean lookupOnStartup = true;
+
+	private boolean cache = true;
+
 	private Object jndiObject;
+
+
+	/**
+	 * Specify the proxy interface to use for the JNDI object.
+	 * Needs to be specified because the actual JNDI object type is not known
+	 * in advance in case of a lazy lookup.
+	 * <p>Typically used in conjunction with "lookupOnStartup"=false and/or "cache"=false.
+	 * @see #setLookupOnStartup
+	 * @see #setCache
+	 */
+	public void setProxyInterface(Class proxyInterface) {
+		if (!proxyInterface.isInterface()) {
+			throw new IllegalArgumentException("[" + proxyInterface.getName() + "] is not an interface");
+		}
+		this.proxyInterface = proxyInterface;
+	}
+
+	/**
+	 * Set whether to look up the JNDI object on startup. Default is true.
+	 * <p>Can be turned off to allow for late availability of the JNDI object.
+	 * In this case, the JNDI object will be fetched on first access.
+	 * <p>For a lazy lookup, a proxy interface needs to be specified.
+	 * @see #setProxyInterface
+	 * @see #setCache
+	 */
+	public void setLookupOnStartup(boolean lookupOnStartup) {
+		this.lookupOnStartup = lookupOnStartup;
+	}
+
+	/**
+	 * Set whether to cache the JNDI object once it has been located.
+	 * Default is true.
+	 * <p>Can be turned off to allow for hot redeployment of JNDI objects.
+	 * In this case, the JNDI object will be fetched for each invocation.
+	 * <p>For hot redeployment, a proxy interface needs to be specified.
+	 * @see #setProxyInterface
+	 * @see #setLookupOnStartup
+	 */
+	public void setCache(boolean cache) {
+		this.cache = cache;
+	}
 
 	/**
 	 * Look up the JNDI object and store it.
 	 */
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
-		this.jndiObject = lookup();
+
+		if (this.proxyInterface != null) {
+			// We need a proxy and a JndiObjectTargetSource.
+			this.jndiObject =
+			    JndiObjectProxyFactory.createJndiObjectProxy(this);
+		}
+		else {
+			if (!this.lookupOnStartup || !this.cache) {
+				throw new IllegalArgumentException(
+				    "Cannot deactivate 'lookupOnStartup' or 'cache' without specifying a 'proxyInterface'");
+			}
+			this.jndiObject = lookup();
+		}
 	}
+
 
 	/**
 	 * Return the singleton JNDI object.
@@ -72,6 +137,31 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	/**
+	 * Inner class to just introduce an AOP dependency
+	 * when actually creating a proxy.
+	 */
+	private static class JndiObjectProxyFactory {
+
+		private static Object createJndiObjectProxy(JndiObjectFactoryBean jof) throws NamingException {
+			// Create a JndiObjectTargetSource that mirrors the JndiObjectFactoryBean's configuration.
+			JndiObjectTargetSource targetSource = new JndiObjectTargetSource();
+			targetSource.setJndiTemplate(jof.getJndiTemplate());
+			targetSource.setJndiName(jof.getJndiName());
+			targetSource.setResourceRef(jof.isResourceRef());
+			targetSource.setLookupOnStartup(jof.lookupOnStartup);
+			targetSource.setCache(jof.cache);
+			targetSource.afterPropertiesSet();
+
+			// Create a proxy with JndiObjectFactoryBean's proxy interface and the JndiObjectTargetSource.
+			ProxyFactory proxyFactory = new ProxyFactory();
+			proxyFactory.addInterface(jof.proxyInterface);
+			proxyFactory.setTargetSource(targetSource);
+			return proxyFactory.getProxy();
+		}
 	}
 
 }

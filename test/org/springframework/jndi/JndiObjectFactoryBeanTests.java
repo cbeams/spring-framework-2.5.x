@@ -21,6 +21,8 @@ import javax.naming.NamingException;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.mock.jndi.ExpectedLookupTemplate;
 
 /**
@@ -112,4 +114,128 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		jof.afterPropertiesSet();
 		assertTrue(jof.getObject() == o);
 	}
+
+	public void testLookupWithProxyInterface() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		TestBean tb = new TestBean();
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", tb));
+		jof.setJndiName("foo");
+		jof.setProxyInterface(ITestBean.class);
+		jof.afterPropertiesSet();
+		assertTrue(jof.getObject() instanceof ITestBean);
+		ITestBean proxy = (ITestBean) jof.getObject();
+		assertEquals(0, tb.getAge());
+		proxy.setAge(99);
+		assertEquals(99, tb.getAge());
+	}
+
+	public void testLookupWithProxyInterfaceAndLazyLookup() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		final TestBean tb = new TestBean();
+		jof.setJndiTemplate(new JndiTemplate() {
+			public Object lookup(String name) {
+				if ("foo".equals(name)) {
+					tb.setName("tb");
+					return tb;
+				}
+				return null;
+			}
+		});
+		jof.setJndiName("foo");
+		jof.setProxyInterface(ITestBean.class);
+		jof.setLookupOnStartup(false);
+		jof.afterPropertiesSet();
+		assertTrue(jof.getObject() instanceof ITestBean);
+		ITestBean proxy = (ITestBean) jof.getObject();
+		assertNull(tb.getName());
+		assertEquals(0, tb.getAge());
+		proxy.setAge(99);
+		assertEquals("tb", tb.getName());
+		assertEquals(99, tb.getAge());
+	}
+
+	public void testLookupWithProxyInterfaceWithNotCache() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		final TestBean tb = new TestBean();
+		jof.setJndiTemplate(new JndiTemplate() {
+			public Object lookup(String name) {
+				if ("foo".equals(name)) {
+					tb.setName("tb");
+					tb.setAge(tb.getAge() + 1);
+					return tb;
+				}
+				return null;
+			}
+		});
+		jof.setJndiName("foo");
+		jof.setProxyInterface(ITestBean.class);
+		jof.setCache(false);
+		jof.afterPropertiesSet();
+		assertTrue(jof.getObject() instanceof ITestBean);
+		ITestBean proxy = (ITestBean) jof.getObject();
+		assertEquals("tb", tb.getName());
+		assertEquals(1, tb.getAge());
+		proxy.returnsThis();
+		assertEquals(2, tb.getAge());
+		proxy.haveBirthday();
+		assertEquals(4, tb.getAge());
+	}
+
+	public void testLookupWithProxyInterfaceWithLazyLookupAndNotCache() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		final TestBean tb = new TestBean();
+		jof.setJndiTemplate(new JndiTemplate() {
+			public Object lookup(String name) {
+				if ("foo".equals(name)) {
+					tb.setName("tb");
+					tb.setAge(tb.getAge() + 1);
+					return tb;
+				}
+				return null;
+			}
+		});
+		jof.setJndiName("foo");
+		jof.setProxyInterface(ITestBean.class);
+		jof.setLookupOnStartup(false);
+		jof.setCache(false);
+		jof.afterPropertiesSet();
+		assertTrue(jof.getObject() instanceof ITestBean);
+		ITestBean proxy = (ITestBean) jof.getObject();
+		assertNull(tb.getName());
+		assertEquals(0, tb.getAge());
+		proxy.returnsThis();
+		assertEquals("tb", tb.getName());
+		assertEquals(1, tb.getAge());
+		proxy.returnsThis();
+		assertEquals(2, tb.getAge());
+		proxy.haveBirthday();
+		assertEquals(4, tb.getAge());
+	}
+
+	public void testLazyLookupWithoutProxyInterface() throws NamingException {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		jof.setJndiName("foo");
+		jof.setLookupOnStartup(false);
+		try {
+			jof.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testNotCacheWithoutProxyInterface() throws NamingException {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		jof.setJndiName("foo");
+		jof.setCache(false);
+		try {
+			jof.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
 }

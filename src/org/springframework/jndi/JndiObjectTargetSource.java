@@ -24,14 +24,16 @@ import org.springframework.aop.TargetSource;
  * TargetSource which performs a fresh JNDI lookup for each call.
  *
  * <p>Can be used as alternative to JndiObjectFactoryBean, to allow for
- * relocating a JNDI object for each operation. This is particularly useful
- * during development, as it allows for hot restarting of the JMS server.
+ * relocating a JNDI object lazily or for each operation (see "lookupOnStartup"
+ * and "cache" properties). This is particularly useful during development, as it
+ * allows for hot restarting of the JNDI server (for example, a remote JMS server).
  *
  * <p>Example:
  *
  * <pre>
  * &lt;bean id="queueConnectionFactoryTarget" class="org.springframework.jndi.JndiObjectTargetSource"&gt;
  *   &lt;property name="jndiName"&gt;&lt;value&gt;JmsQueueConnectionFactory&lt;/value&gt;&lt;/property&gt;
+ *   &lt;property name="lookupOnStartup"&gt;&lt;value&gt;false&lt;/value&gt;&lt;/property&gt;
  * &lt;/bean&gt;
  *
  * &lt;bean id="queueConnectionFactory" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
@@ -40,13 +42,20 @@ import org.springframework.aop.TargetSource;
  * &lt;/bean&gt;</pre>
  *
  * A <code>createQueueConnection</code> call on the "queueConnectionFactory" proxy will
- * cause a JNDI lookup for "JmsQueueConnectionFactory" and a subsequent delegating call
- * to the retrieved QueueConnectionFactory's <code>createQueueConnection</code>.
+ * cause a lazy JNDI lookup for "JmsQueueConnectionFactory" and a subsequent delegating
+ * call to the retrieved QueueConnectionFactory's <code>createQueueConnection</code>.
+ *
+ * <p><b>Alternatively, use a JndiObjectFactoryBean with a "proxyInterface".</b>
+ * "lookupOnStartup" and "cache" can then be specified on the JndiObjectFactoryBean,
+ * creating a JndiObjectTargetSource underneath (instead of defining separate
+ * ProxyFactoryBean and JndiObjectTargetSource beans).
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @see JndiObjectFactoryBean
- * @see org.springframework.aop.framework.ProxyFactoryBean#setTargetSource(TargetSource)
+ * @see #setLookupOnStartup
+ * @see #setCache
+ * @see org.springframework.aop.framework.ProxyFactoryBean#setTargetSource
+ * @see JndiObjectFactoryBean#setProxyInterface
  */
 public class JndiObjectTargetSource extends JndiObjectLocator implements TargetSource {
 
