@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet;
 
@@ -243,7 +243,7 @@ public class DispatcherServletTests extends TestCase {
 		complexDispatcherServlet.service(multipartRequest, response);
 		//System.out.println(response.getForwardedUrl());
 		multipartResolver.cleanupMultipart(multipartRequest);
-		assertTrue(multipartResolver.cleaned);
+		assertNotNull(request.getAttribute("cleanedUp"));
 	}
 
 	public void testMultipartResolutionFailed() throws Exception {
@@ -415,6 +415,30 @@ public class DispatcherServletTests extends TestCase {
 		}
 	}
 
+	public void testHeadMethodWithExplicitHandling() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "HEAD", "/head.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals(5, response.getContentLength());
+
+		request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/head.do");
+		response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals("", response.getContentAsString());
+	}
+
+	public void testHeadMethodWithNoBodyResponse() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "HEAD", "/body.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals(4, response.getContentLength());
+
+		request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/body.do");
+		response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals("body", response.getContentAsString());
+	}
+
 	public void testNotDetectAllHandlerMappings() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
@@ -427,8 +451,7 @@ public class DispatcherServletTests extends TestCase {
 		complexDispatcherServlet.service(request, response);
 		assertTrue(response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
 	}
-	
-	
+
 	public void testHandlerNotMappedWithAutodetect() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		// No parent

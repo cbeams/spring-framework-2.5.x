@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet;
 
@@ -47,6 +47,7 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -75,7 +76,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("myUrlMapping2", SimpleUrlHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=formHandler"));
+		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=formHandler\n/head.do=headController\nbody.do=bodyController"));
 		pvs.addPropertyValue(new PropertyValue("order", "1"));
 		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
 
@@ -100,6 +101,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("localeHandler", ComplexLocaleChecker.class, null);
 		registerSingleton("anotherLocaleHandler", ComplexLocaleChecker.class, null);
 		registerSingleton("unknownHandler", Object.class, null);
+
+		registerSingleton("headController", HeadController.class, null);
+		registerSingleton("bodyController", BodyController.class, null);
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("order", "1");
@@ -146,6 +150,26 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		interceptors.add(new MyHandlerInterceptor1());
 		interceptors.add(new MyHandlerInterceptor2());
 		myUrlMapping1.setInterceptors((HandlerInterceptor[]) interceptors.toArray(new HandlerInterceptor[interceptors.size()]));
+	}
+
+
+	public static class HeadController implements Controller {
+
+		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+			if ("HEAD".equals(request.getMethod())) {
+				response.setContentLength(5);
+			}
+			return null;
+		}
+	}
+
+
+	public static class BodyController implements Controller {
+
+		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+			response.getOutputStream().write("body".getBytes());
+			return null;
+		}
 	}
 
 
@@ -246,8 +270,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			return true;
 		}
 
-		public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-													 ModelAndView modelAndView) throws ServletException {
+		public void postHandle(
+				HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+				throws ServletException {
 			if (request.getAttribute("test1x") == null) {
 				throw new ServletException("Wrong interceptor order");
 			}
@@ -257,8 +282,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			request.removeAttribute("test2x");
 		}
 
-		public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-																Object handler, Exception ex) throws Exception {
+		public void afterCompletion(
+				HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+				throws Exception {
 			if (request.getAttribute("test1y") == null) {
 				throw new ServletException("Wrong interceptor order");
 			}
@@ -310,9 +336,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class MockMultipartResolver implements MultipartResolver {
 
-		private boolean resolved;
-		public boolean cleaned;
-
 		public boolean isMultipart(HttpServletRequest request) {
 			return true;
 		}
@@ -324,19 +347,19 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			if (request instanceof MultipartHttpServletRequest) {
 				throw new IllegalStateException("Already a multipart request");
 			}
-			if (this.resolved) {
+			if (request.getAttribute("resolved") != null) {
 				throw new IllegalStateException("Already resolved");
 			}
-			this.resolved = true;
+			request.setAttribute("resolved", Boolean.TRUE);
 			return new AbstractMultipartHttpServletRequest(request) {
 			};
 		}
 
 		public void cleanupMultipart(MultipartHttpServletRequest request) {
-			if (this.cleaned) {
-				throw new IllegalStateException("Already cleaned");
+			if (request.getAttribute("cleanedUp") != null) {
+				throw new IllegalStateException("Already cleaned up");
 			}
-			this.cleaned = true;
+			request.setAttribute("cleanedUp", Boolean.TRUE);
 		}
 	}
 
