@@ -246,9 +246,11 @@ public class Constraints {
      * @return The negated predicate.
      */
     public UnaryPredicate not(UnaryPredicate predicate) {
-        if (predicate instanceof UnaryNot) { throw new IllegalArgumentException(
-                "Predicate is already negated"); }
-        return new UnaryNot(predicate);
+        if (!(predicate instanceof UnaryNot)) {
+            return new UnaryNot(predicate);
+        } else {
+            return ((UnaryNot)predicate).getPredicate();
+        }
     }
 
     /**
