@@ -97,6 +97,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	private boolean cacheQueries = false;
 
+	private boolean checkWriteOperations = true;
+
 
 	/**
 	 * Create a new HibernateTemplate instance.
@@ -160,6 +162,28 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	public boolean isCacheQueries() {
 		return cacheQueries;
+	}
+
+	/**
+	 * Set whether to check that the Hibernate Session is not in read-only mode
+	 * in case of write operations (save/update/delete).
+	 * <p>Default is true, for fail-fast behavior when attempting write operations
+	 * within a read-only transaction. Turn this off to allow save/update/delete
+	 * on a Session with flush mode NEVER.
+	 * @see #setFlushMode
+	 * @see #checkWriteOperationAllowed
+	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly
+	 */
+	public void setCheckWriteOperations(boolean checkWriteOperations) {
+		this.checkWriteOperations = checkWriteOperations;
+	}
+
+	/**
+	 * Return whether to check that the Hibernate Session is not in read-only
+	 * mode in case of write operations (save/update/delete).
+	 */
+	public boolean isCheckWriteOperations() {
+		return checkWriteOperations;
 	}
 
 
@@ -893,11 +917,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * in case of FlushMode.NEVER. Can be overridden in subclasses.
 	 * @param session current Hibernate Session
 	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
+	 * @see #setCheckWriteOperations
+	 * @see #getFlushMode
+	 * @see #FLUSH_EAGER
 	 * @see net.sf.hibernate.Session#getFlushMode
 	 * @see net.sf.hibernate.FlushMode#NEVER
 	 */
 	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
-		if (FlushMode.NEVER.equals(session.getFlushMode())) {
+		if (isCheckWriteOperations() && getFlushMode() != FLUSH_EAGER &&
+				FlushMode.NEVER.equals(session.getFlushMode())) {
 			throw new InvalidDataAccessApiUsageException(
 					"Write operations are not allowed in read-only mode (FlushMode.NEVER) - turn your Session " +
 					"into FlushMode.AUTO respectively remove 'readOnly' marker from transaction definition");
