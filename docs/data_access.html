@@ -83,8 +83,8 @@ public List loadProductsByCategory(String category) throws MyException {<br>
 public void increasePriceOfAllProductsInCategory(final String category) {<br>
 &nbsp;&nbsp;TransactionTemplate transactionTemplate = new TransactionTemplate(this.transactionManager);<br>
 &nbsp;&nbsp;transactionTemplate.execute(<br>
-&nbsp;&nbsp;&nbsp;&nbsp;new TransactionCallback() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public void doInTransaction(TransactionStatus status) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new TransactionCallbackWithoutResult() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public void doInTransactionWithoutResult(TransactionStatus status) {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List productsToChange = this.productDAO.loadProductsByCategory(category);<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
