@@ -44,14 +44,17 @@ public interface MutablePropertyAccessStrategy extends PropertyAccessStrategy,
 
     public PropertyEditor findCustomEditor(String propertyName);
 
+    public ValueModel getDomainObjectHolder();
+
+    public ValueModel getPropertyValueModel(String propertyPath)
+            throws BeansException;
+
     public MutablePropertyAccessStrategy getPropertyAccessStrategyForPath(
             String propertyPath) throws BeansException;
 
-    public ValueModel getDomainObjectHolder();
+    public void addValueListener(ValueListener listener, String propertyName);
 
-    public void addValueListener(ValueListener listener, String propertyPath);
-
-    public void removeValueListener(ValueListener listener, String propertyPath);
+    public void removeValueListener(ValueListener listener, String propertyName);
 
     public MutablePropertyAccessStrategy newPropertyAccessStrategy(
             ValueModel domainObjectHolder);

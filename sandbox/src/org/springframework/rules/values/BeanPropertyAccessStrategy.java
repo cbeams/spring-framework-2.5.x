@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -50,6 +49,8 @@ public class BeanPropertyAccessStrategy implements
     private PropertyMetadataAccessStrategy metaAspectAccessor;
 
     private Map nestedPropertyAccessors;
+
+    private Map propertyValueModels;
 
     private String nestedPath = "";
 
@@ -81,9 +82,9 @@ public class BeanPropertyAccessStrategy implements
         });
     }
 
-    private BeanPropertyAccessStrategy(Object nestedBeanValue,
+    private BeanPropertyAccessStrategy(ValueModel nestedDomainObjectHolder,
             String nestedPropertyName, final BeanPropertyAccessStrategy parent) {
-        this(new ValueHolder(nestedBeanValue));
+        this(nestedDomainObjectHolder);
         this.nestedPath = nestedPropertyName;
         parent.getDomainObjectHolder().addValueListener(new ValueListener() {
             public void valueChanged() {
@@ -93,23 +94,7 @@ public class BeanPropertyAccessStrategy implements
         });
     }
 
-    /**
-     * Get the last component of the path. Also works if not nested.
-     * 
-     * @param pas
-     *            BeanAccessStrategy to work on
-     * @param nestedPath
-     *            property path we know is nested
-     * @return last component of the path (the property on the target bean)
-     */
-    private String getFinalPath(PropertyAccessStrategy pas, String nestedPath) {
-        if (pas == this) { return nestedPath; }
-        return nestedPath.substring(getNestedPropertySeparatorIndex(nestedPath,
-                true) + 1);
-    }
-
     public Object getPropertyValue(String propertyName) throws BeansException {
-        if (beanHolder.get() == null) { return null; }
         return beanWrapper.getPropertyValue(propertyName);
     }
 
@@ -126,40 +111,28 @@ public class BeanPropertyAccessStrategy implements
         beanWrapper.setPropertyValues(map);
     }
 
+    public void setPropertyValues(PropertyValues pvs) throws BeansException {
+        beanWrapper.setPropertyValues(pvs);
+    }
+
     public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
             throws BeansException {
         beanWrapper.setPropertyValues(pvs, ignoreUnknown);
-    }
-
-    public void setPropertyValues(PropertyValues pvs) throws BeansException {
-        beanWrapper.setPropertyValues(pvs);
     }
 
     public Class getWrappedClass() {
         return beanWrapper.getWrappedClass();
     }
 
-    protected static int getNestedPropertySeparatorIndex(String propertyPath,
-            boolean last) {
-        boolean inKey = false;
-        int i = (last ? propertyPath.length() - 1 : 0);
-        while ((last && i >= 0) || (!last && i < propertyPath.length())) {
-            switch (propertyPath.charAt(i)) {
-            case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR:
-            case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR:
-                inKey = !inKey;
-                break;
-            case PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR:
-                if (!inKey) { return i; }
-            }
-            if (last) {
-                i--;
-            }
-            else {
-                i++;
-            }
+    public ValueModel getPropertyValueModel(String propertyPath)
+            throws BeansException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Retrieving property value model for path '"
+                    + propertyPath + "'");
         }
-        return -1;
+        BeanPropertyAccessStrategy nestedAccessor = (BeanPropertyAccessStrategy)getPropertyAccessStrategyForPath(propertyPath);
+        return nestedAccessor.getOrCreateValueModel(getFinalPath(
+                nestedAccessor, propertyPath));
     }
 
     /**
@@ -187,6 +160,44 @@ public class BeanPropertyAccessStrategy implements
         }
     }
 
+    protected static int getNestedPropertySeparatorIndex(String propertyPath,
+            boolean last) {
+        boolean inKey = false;
+        int i = (last ? propertyPath.length() - 1 : 0);
+        while ((last && i >= 0) || (!last && i < propertyPath.length())) {
+            switch (propertyPath.charAt(i)) {
+            case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR:
+            case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR:
+                inKey = !inKey;
+                break;
+            case PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR:
+                if (!inKey) { return i; }
+            }
+            if (last) {
+                i--;
+            }
+            else {
+                i++;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Get the last component of the path. Also works if not nested.
+     * 
+     * @param pas
+     *            BeanAccessStrategy to work on
+     * @param nestedPath
+     *            property path we know is nested
+     * @return last component of the path (the property on the target bean)
+     */
+    private String getFinalPath(PropertyAccessStrategy pas, String nestedPath) {
+        if (pas == this) { return nestedPath; }
+        return nestedPath.substring(getNestedPropertySeparatorIndex(nestedPath,
+                true) + 1);
+    }
+
     /**
      * Retrieve a PropertyAccessStrategy for the given nested property. Create a
      * new one if not found in the cache.
@@ -202,21 +213,18 @@ public class BeanPropertyAccessStrategy implements
         }
         String[] tokens = getPropertyNameTokens(nestedPropertyName);
         String canonicalName = tokens[0];
-        Object propertyValue = getPropertyValue(canonicalName);
-        if (propertyValue == null) { throw new NullValueInNestedPathException(
-                getWrappedClass(), this.nestedPath + canonicalName); }
-
-        // lookup cached sub-BeanWrapper, create new one if not found
         PropertyAccessStrategy nestedAccessor = (PropertyAccessStrategy)this.nestedPropertyAccessors
                 .get(canonicalName);
+        // lookup cached sub-BeanWrapper, create new one if not found
         if (nestedAccessor == null) {
             if (logger.isDebugEnabled()) {
                 logger
                         .debug("Creating new nested BeanPropertyAccessor for property '"
                                 + canonicalName + "'");
             }
-            nestedAccessor = new BeanPropertyAccessStrategy(propertyValue,
-                    this.nestedPath + canonicalName
+            ValueModel propertyValueHolder = getOrCreateValueModel(nestedPropertyName);
+            nestedAccessor = new BeanPropertyAccessStrategy(
+                    propertyValueHolder, this.nestedPath + canonicalName
                             + PropertyAccessor.NESTED_PROPERTY_SEPARATOR, this);
             this.nestedPropertyAccessors.put(canonicalName, nestedAccessor);
         }
@@ -228,6 +236,19 @@ public class BeanPropertyAccessStrategy implements
             }
         }
         return nestedAccessor;
+    }
+
+    protected ValueModel getOrCreateValueModel(String propertyName) {
+        if (propertyValueModels == null) {
+            this.propertyValueModels = new HashMap();
+        }
+        ValueModel propertyValueHolder = (ValueModel)propertyValueModels
+                .get(propertyName);
+        if (propertyValueHolder == null) {
+            propertyValueHolder = new PropertyAdapter(this, propertyName);
+            propertyValueModels.put(propertyName, propertyValueHolder);
+        }
+        return propertyValueHolder;
     }
 
     protected String[] getPropertyNameTokens(String propertyPath) {
