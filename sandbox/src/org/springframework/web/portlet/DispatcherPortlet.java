@@ -38,10 +38,10 @@ import org.springframework.web.portlet.support.PortletController;
 import org.springframework.web.portlet.support.PortletModeNameViewController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ModelAndViewDefiningException;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewRendererServlet;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
@@ -70,7 +70,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Id: DispatcherPortlet.java,v 1.4 2004-05-08 01:26:36 dkopylenko Exp $
+ * @version $Id: DispatcherPortlet.java,v 1.5 2004-05-08 04:29:38 wgthom Exp $
  * @see PortletControllerMapping
  * @see ViewResolver
  * @see org.springframework.web.portlet.context.PortletApplicationContext
@@ -83,6 +83,13 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
+	/**
+	 * Request attribute to hold the portlet render request locale.  Used
+	 * by the RequestContextUtils to lookup the Locale.
+	 */
+	// TODO where should this go?
+	//public static final String PORTLET_LOCALE_ATTRIBUTE = "portletLocale";
+	
 	/**
 	 * Request attribute to hold current portlet application context.
 	 * Otherwise only the global portlet app context is obtainable by tags etc.
@@ -314,6 +321,11 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
         // make framework objects available for controllers
         request.setAttribute(PORTLET_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
+        
+        // make Locale available for views
+        //TODO: clean up request.setAttribute(PORTLET_LOCALE_ATTRIBUTE, request.getLocale());
+        request.setAttribute(RequestContextUtils.LOCALE_ATTRIBUTE, request.getLocale());
+        
 
         RenderRequest processedRequest = request;
         PortletControllerExecutionChain mappedController = null;
