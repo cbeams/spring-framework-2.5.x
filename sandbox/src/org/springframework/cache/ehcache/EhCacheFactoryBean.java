@@ -20,14 +20,60 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * FactoryBean that creates a named EHCache Cache singleton for a given classloader-wide CacheManager singleton.
+ * <p>
+ * If the specified named Cache is not configured in the cache configuration descriptor, this FactoryBean will construct an
+ * instance of a Cache with the provided name and the specified cache properties and add it to the CacheManager for later
+ * retrieveval. If some or all properties are not set at configuration time, this FactoryBean will use default values.
+ * <p>
+ * Note, if the named Cache instance is found, the properties will be ignored and that instance will be retrieveved from
+ * CacheManager.
  * 
  * @author Dmitriy Kopylenko
  * @since 1.1.1
  */
 public class EhCacheFactoryBean implements FactoryBean, InitializingBean {
 
+    /**
+     * The name of the cache. This is used to identify the cache. It must be unique.
+     * This is a required property.
+     */
     private String cacheName;
 
+    /**
+     * The maximum number of objects that will be created in memory. Default is 10000 elements.
+     */
+    private int maxElementsInMemory = 10000;
+
+    /**
+     * The flag to indicate whether elements can overflow to disk 
+     * when the in-memory cache has reached the maxInMemory limit Default is true.
+     */
+    private boolean overflowToDisk = true;
+
+    /**
+     * The flag to indicate whether elements are eternal. 
+     * If true, timeouts are ignored and the element is never expired. Default is false.
+     */
+    private boolean eternal = false;
+
+    /**
+     * The time in seconds to live for an element before it expires. 
+     * i.e. the maximum time between creation time and when an element expires. 
+     * It is only used if the element is not eternal. Default is 120 seconds.
+     */
+    private int timeToLive = 120;
+
+    /**
+     * The time in seconds to idle for an element before it expires. 
+     * i.e. the maximum amount of time between accesses before an element expires.
+     * It is only used if the element is not eternal. Default is 120 seconds.
+     */
+    private int timeToIdle = 120;
+
+    /**
+     * The classloader-wide CacheManager singleton from which to fetch named cache regions.
+     * This is a required property.
+     */
     private CacheManager cacheManager;
 
     /**
@@ -38,13 +84,47 @@ public class EhCacheFactoryBean implements FactoryBean, InitializingBean {
     }
 
     /**
+     * @param eternal The eternal to set.
+     */
+    public void setEternal(boolean eternal) {
+        this.eternal = eternal;
+    }
+
+    /**
+     * @param maxElementsInMemory The maxElementsInMemory to set.
+     */
+    public void setMaxElementsInMemory(int maxMemory) {
+        this.maxElementsInMemory = maxMemory;
+    }
+
+    /**
+     * @param overflowToDisk The overflowToDisk to set.
+     */
+    public void setOverflowToDisk(boolean overflowToDisk) {
+        this.overflowToDisk = overflowToDisk;
+    }
+
+    /**
+     * @param timeToIdle The timeToIdle to set.
+     */
+    public void setTimeToIdle(int timeToIdle) {
+        this.timeToIdle = timeToIdle;
+    }
+
+    /**
+     * @param timeToLive The timeToLive to set.
+     */
+    public void setTimeToLive(int timeToLive) {
+        this.timeToLive = timeToLive;
+    }
+
+    /**
      * Set a CacheManager from which to retrieve a named Cache instance.
      */
     public void setCacheManager(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
-    
-    
+
     public void afterPropertiesSet() throws IOException, CacheException {
         if (this.cacheName == null) {
             throw new IllegalStateException("A name for a cache must be specified.");
@@ -52,27 +132,14 @@ public class EhCacheFactoryBean implements FactoryBean, InitializingBean {
         if (this.cacheManager == null) {
             throw new IllegalStateException("A CacheManager is required.");
         }
+        if (!this.cacheManager.cacheExists(this.cacheName)) {
+            //Manually construct the named Cache instance and add it to CacheManager
+            Cache cache = new Cache(this.cacheName, this.maxElementsInMemory, this.overflowToDisk, this.eternal, this.timeToLive, this.timeToIdle);
+            this.cacheManager.addCache(cache);
+        }
     }
 
     public Object getObject() {
-        /*What if the named cache is not configured?
-        Is it ok to "expose" null? This would be certainly a misconfiguration by a user.
-        Or we could go further than that and if the Cache is not configured, we could manually construct it
-        and add it via CacheManager. Here is the fragment from one of the Acegi's EHCaches:
-        
-        public void afterPropertiesSet() throws Exception {
-        if (CacheManager.getInstance().cacheExists(CACHE_NAME)) {
-            // don’t remove the cache
-        } else {
-            manager = CacheManager.create();
-
-            // Cache name, max memory, overflowToDisk, eternal, timeToLive, timeToIdle
-            cache = new Cache(CACHE_NAME, Integer.MAX_VALUE, false, false,
-                    minutesToIdle * 60, minutesToIdle * 60);
-
-            manager.addCache(cache);
-        }
-    }*/ 
         return this.cacheManager.getCache(this.cacheName);
     }
 
