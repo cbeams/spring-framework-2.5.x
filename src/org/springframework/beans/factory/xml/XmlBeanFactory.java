@@ -25,9 +25,9 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
 /**
- * Convenience extension of DefaultListableBeanFactory that reads bean definitions from
- * an XML document. Delegates to DefaultXmlBeanDefinitionReader underneath; effectively
- * equivalent to using a DefaultXmlBeanDefinitionReader for a DefaultListableBeanFactory.
+ * Convenience extension of DefaultListableBeanFactory that reads bean definitions
+ * from an XML document. Delegates to XmlBeanDefinitionReader underneath; effectively
+ * equivalent to using an XmlBeanDefinitionReader with a DefaultListableBeanFactory.
  *
  * <p>The structure, element and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
@@ -35,9 +35,9 @@ import org.springframework.core.io.Resource;
  * document: This class will parse all bean definition elements in the XML file.
  *
  * <p>This class registers each bean definition with the DefaultListableBeanFactory
- * superclass, and relies on the latter's implementation of the BeanFactory
- * interface. It supports singletons, prototypes and references to either of
- * these kinds of bean.
+ * superclass, and relies on the latter's implementation of the BeanFactory interface.
+ * It supports singletons, prototypes, and references to either of these kinds of bean.
+ * See "spring-beans.dtd" for details on options and configuration style.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -62,13 +62,13 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
 	 * which must be parsable using DOM.
 	 * <p>It's preferable to use a Resource argument instead of an
 	 * InputStream, to retain location information. This constructor
-	 * is mainly kept for backward compatibility.
+	 * is mainly kept for backwards compatibility.
 	 * @param is XML InputStream to load bean definitions from
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #XmlBeanFactory(Resource)
 	 */
 	public XmlBeanFactory(InputStream is) throws BeansException {
-		this(new InputStreamResource(is, "(no description)"), null);
+		this(new InputStreamResource(is), null);
 	}
 
 	/**

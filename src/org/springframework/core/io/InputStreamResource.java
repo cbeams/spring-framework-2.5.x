@@ -40,6 +40,14 @@ public class InputStreamResource extends AbstractResource {
 	/**
 	 * Create a new InputStreamResource.
 	 * @param inputStream the InputStream to use
+	 */
+	public InputStreamResource(InputStream inputStream) {
+		this(inputStream, "resource for InputStream");
+	}
+
+	/**
+	 * Create a new InputStreamResource.
+	 * @param inputStream the InputStream to use
 	 * @param description where the InputStream comes from
 	 */
 	public InputStreamResource(InputStream inputStream, String description) {
@@ -65,7 +73,7 @@ public class InputStreamResource extends AbstractResource {
 	public InputStream getInputStream() throws IOException, IllegalStateException {
 		if (this.inputStream == null) {
 			throw new IllegalStateException("InputStream has already been read - " +
-			                                "do not use InputStreamResource if a stream needs to be read multiple times");
+					"do not use InputStreamResource if a stream needs to be read multiple times");
 		}
 		InputStream result = this.inputStream;
 		this.inputStream = null;
