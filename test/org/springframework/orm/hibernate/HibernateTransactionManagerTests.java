@@ -607,6 +607,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+				SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+				assertTrue("Has thread transaction", sessionHolder.getTransaction() != null);
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				return ht.executeFind(new HibernateCallback() {
 					public Object doInHibernate(Session session) throws HibernateException {
@@ -618,6 +620,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Correct result list", result == l);
 
 		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+		assertTrue("Hasn't thread transaction", sessionHolder.getTransaction() == null);
 		TransactionSynchronizationManager.unbindResource(sf);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
