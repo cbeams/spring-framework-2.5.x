@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -404,6 +405,19 @@ public abstract class StringUtils {
 		System.arraycopy(arr, 0, newArr, 0, arr.length);
 		newArr[arr.length] = str;
 		return newArr;
+	}
+
+	/**
+	 * Turn given source String array into sorted array.
+	 * @param source the source array
+	 * @return the sorted array (never null)
+	 */
+	public static String[] sortStringArray(String[] source) {
+		if (source == null) {
+			return new String[0];
+		}
+		Arrays.sort(source);
+		return source;
 	}
 
 
