@@ -1,7 +1,5 @@
 package org.springframework.context.support;
 
-import java.io.IOException;
-
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -20,6 +18,7 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
+ * @version $Id: ClassPathXmlApplicationContext.java,v 1.9 2004-02-24 01:23:11 dkopylenko Exp $
  */
 public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationContext {
 

@@ -1,7 +1,6 @@
 package org.springframework.beans.factory.config;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.InitializingBean;
  * of Sets via the "set" element in XML bean definitions.
  * @author Juergen Hoeller
  * @since 21.01.2003
+ * @version $Id: SetFactoryBean.java,v 1.2 2004-02-24 01:22:58 dkopylenko Exp $
  */
 public class SetFactoryBean implements FactoryBean, InitializingBean {
 

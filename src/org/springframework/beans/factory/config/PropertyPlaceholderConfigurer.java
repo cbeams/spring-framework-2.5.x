@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -71,6 +70,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
  * @see #setPlaceholderSuffix
  * @see #setCheckSystemProperties
  * @see System#getProperty(String)
+ * @version $Id: PropertyPlaceholderConfigurer.java,v 1.6 2004-02-24 01:22:57 dkopylenko Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 

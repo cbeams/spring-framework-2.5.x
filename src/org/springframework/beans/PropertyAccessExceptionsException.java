@@ -6,8 +6,6 @@ import java.util.List;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import org.springframework.util.StringUtils;
-
 /**
  * Combined exception, composed of individual binding exceptions.
  * An object of this class is created at the beginning of the binding
@@ -19,7 +17,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 18 April 2001
- * @version $Id: PropertyAccessExceptionsException.java,v 1.2 2004-02-07 00:14:02 jhoeller Exp $
+ * @version $Id: PropertyAccessExceptionsException.java,v 1.3 2004-02-24 01:23:11 dkopylenko Exp $
  */
 public class PropertyAccessExceptionsException extends BeansException {
 
