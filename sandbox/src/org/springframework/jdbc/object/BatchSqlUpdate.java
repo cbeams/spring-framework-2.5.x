@@ -162,10 +162,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 		if (this.parameterQueue.isEmpty()) {
 			return new int[0];
 		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Executing batch update statement [" + getSql() + "]");
-		}
+		
 		int[] rowsAffected = getJdbcTemplate().batchUpdate(
 				getSql(),
 				new BatchPreparedStatementSetter() {

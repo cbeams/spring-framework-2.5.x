@@ -83,7 +83,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.43 2004-05-28 16:06:39 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.44 2004-05-29 21:20:22 jhoeller Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -191,11 +191,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public void execute(final String sql) throws DataAccessException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing SQL statement [" + sql + "]");
+		}
 		execute(new StatementCallback() {
 			public Object doInStatement(Statement stmt) throws SQLException {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Executing SQL [" + sql + "]");
-				}
 				stmt.execute(sql);
 				return null;
 			}
@@ -204,14 +204,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
 		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL may not be null");
+			throw new InvalidDataAccessApiUsageException("SQL must not be null");
 		}
 		if (sql.indexOf("?") != -1) {
 			throw new InvalidDataAccessApiUsageException(
 					"Cannot execute [" + sql + "] as a static query: it contains bind variables");
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing static SQL query [" + sql + "] using a java.sql.Statement");
+			logger.debug("Executing SQL query [" + sql + "]");
 		}
 		return execute(new StatementCallback() {
 			public Object doInStatement(Statement stmt) throws SQLException {
@@ -254,11 +254,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public int update(final String sql) throws DataAccessException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing SQL update [" + sql + "]");
+		}
 		Integer result = (Integer) execute(new StatementCallback() {
 			public Object doInStatement(Statement stmt) throws SQLException {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Executing SQL update [" + sql + "]");
-				}
 				int rows = stmt.executeUpdate(sql);
 				if (logger.isDebugEnabled()) {
 					logger.debug("SQL update affected " + rows + " rows");
@@ -323,7 +323,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	protected Object query(PreparedStatementCreator psc, final PreparedStatementSetter pss,
 												 final ResultSetExtractor rse) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing SQL query using PreparedStatementCreator [" + psc + "]");
+			String sql = getSql(psc);
+			logger.debug("Executing SQL query" + (sql != null ? " [" + sql  + "]" : ""));
 		}
 		return execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
@@ -411,7 +412,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	protected int update(PreparedStatementCreator psc, final PreparedStatementSetter pss) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing SQL update using PreparedStatementCreator [" + psc + "]");
+			String sql = getSql(psc);
+			logger.debug("Executing SQL update" + (sql != null ? " [" + sql  + "]" : ""));
 		}
 		Integer result = (Integer) execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
@@ -445,6 +447,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public int[] batchUpdate(String sql, final BatchPreparedStatementSetter pss) throws DataAccessException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing SQL batch update [" + sql + "]");
+		}
 		return (int[]) execute(sql, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				int batchSize = pss.getBatchSize();
@@ -474,6 +479,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	//-------------------------------------------------------------------------
 
 	public Object execute(CallableStatementCreator csc, CallableStatementCallback action) {
+		if (logger.isDebugEnabled()) {
+			String sql = getSql(csc);
+			logger.debug("Calling stored procedure" + (sql != null ? " [" + sql  + "]" : ""));
+		}
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		CallableStatement cs = null;
 		try {
@@ -508,9 +517,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public Map call(CallableStatementCreator csc, final List declaredParameters) throws DataAccessException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Executing call using CallableStatementCreator [" + csc + "]");
-		}
 		return (Map) execute(csc, new CallableStatementCallback() {
 			public Object doInCallableStatement(CallableStatement cs) throws SQLException {
 				boolean retVal = cs.execute();

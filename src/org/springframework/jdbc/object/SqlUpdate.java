@@ -35,7 +35,7 @@ import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException
  *
  * @author Rod Johnson
  * @author Isabelle Muszynski
- * @version $Id: SqlUpdate.java,v 1.7 2004-05-28 16:11:13 jhoeller Exp $
+ * @version $Id: SqlUpdate.java,v 1.8 2004-05-29 21:20:23 jhoeller Exp $
  */
 public class SqlUpdate extends SqlOperation {
 
@@ -149,15 +149,8 @@ public class SqlUpdate extends SqlOperation {
 	 */
 	public int update(Object[] args) throws DataAccessException {
 		validateParameters(args);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Executing update statement [" + getSql() + "]");
-		}
 		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args));
-
 		checkRowsAffected(rowsAffected);
-		if (logger.isDebugEnabled()) {
-			logger.debug(rowsAffected + " rows affected by SQL update [" + getSql() + "]");
-		}
 		return rowsAffected;
 	}
 
