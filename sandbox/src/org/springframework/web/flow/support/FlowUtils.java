@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.AttributesAccessor;
-import org.springframework.web.flow.FlowExecutionInfo;
+import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.MutableAttributesAccessor;
 
 /**
@@ -53,12 +53,12 @@ import org.springframework.web.flow.MutableAttributesAccessor;
 public class FlowUtils {
 
 	/**
-	 * Retrieve information about the current flow session execution.
+	 * Retrieve information about the current flow execution.
 	 * @param model The model for the executing flow.
-	 * @return The session info
+	 * @return The flow execution
 	 */
-	public static FlowExecutionInfo getFlowExecutionInfo(AttributesAccessor model) {
-		return (FlowExecutionInfo)model.getRequiredAttribute(FlowExecutionInfo.ATTRIBUTE_NAME);
+	public static FlowExecution getFlowExecution(AttributesAccessor model) {
+		return (FlowExecution)model.getRequiredAttribute(FlowExecution.ATTRIBUTE_NAME);
 	}
 
 	// token related functionality like in Struts

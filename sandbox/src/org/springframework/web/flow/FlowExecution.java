@@ -23,6 +23,8 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAccessor {
 
+	public static String ATTRIBUTE_NAME = "flowExecutionInfo";
+
 	/**
 	 * Add a flow execution listener; the added listener will receive callbacks
 	 * on events occuring in this flow execution.

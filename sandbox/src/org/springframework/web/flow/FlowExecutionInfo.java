@@ -26,8 +26,6 @@ import java.io.Serializable;
  */
 public interface FlowExecutionInfo extends AttributesAccessor, Serializable {
 
-	public static String ATTRIBUTE_NAME = "flowExecutionInfo";
-
 	/**
 	 * Return the id of this flow session execution. This is not a human
 	 * readable flow definition ID, but a system generated session key.

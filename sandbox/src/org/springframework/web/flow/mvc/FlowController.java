@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
@@ -57,7 +56,7 @@ public class FlowController extends AbstractController {
 	}
 
 	protected String getFlowExecutionInfoAttributeName() {
-		return FlowExecutionInfo.ATTRIBUTE_NAME;
+		return FlowExecution.ATTRIBUTE_NAME;
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)

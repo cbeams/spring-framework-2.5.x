@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.ActionResult;
-import org.springframework.web.flow.FlowExecutionInfo;
+import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.support.FlowUtils;
 
@@ -66,7 +66,7 @@ public class MultiAction extends AbstractAction {
 
 	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
-		FlowExecutionInfo flowExecution = FlowUtils.getFlowExecutionInfo(model);
+		FlowExecution flowExecution = FlowUtils.getFlowExecution(model);
 		String eventId = flowExecution.getLastEventId();
 		String handlerMethodName = methodNameResolver.getHandlerMethodName(eventId);
 		try {

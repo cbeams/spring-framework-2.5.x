@@ -29,7 +29,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
@@ -96,7 +95,7 @@ public class FlowAction extends TemplateAction {
 	}
 
 	protected String getFlowExecutionInfoAttributeName() {
-		return FlowExecutionInfo.ATTRIBUTE_NAME;
+		return FlowExecution.ATTRIBUTE_NAME;
 	}
 
 	protected String getActionPathAttributeName() {
