@@ -83,7 +83,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			return (FlowAttributesMapper)getBeanFactory().getBean(flowAttributesMapperId, FlowAttributesMapper.class);
 		}
 		catch (BeansException e) {
-			throw new FlowServiceLookupException(flowAttributesMapperId, e);
+			throw new NoSuchFlowAttributesMapperException(flowAttributesMapperId, e);
 		}
 	}
 
@@ -100,7 +100,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 					flowAttributesMapperImplementationClass);
 		}
 		catch (BeansException e) {
-			throw new FlowServiceLookupException(flowAttributesMapperImplementationClass, e);
+			throw new NoSuchFlowAttributesMapperException(flowAttributesMapperImplementationClass, e);
 		}
 	}
 }
