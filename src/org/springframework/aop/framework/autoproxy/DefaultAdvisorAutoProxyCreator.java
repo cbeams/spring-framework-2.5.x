@@ -37,16 +37,18 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * The separator (.) will also be used in this case.
  *
  * @author Rod Johnson
- * @version $Id: DefaultAdvisorAutoProxyCreator.java,v 1.1 2004-03-23 14:31:51 jhoeller Exp $
+ * @version $Id: DefaultAdvisorAutoProxyCreator.java,v 1.2 2004-08-10 19:29:44 jhoeller Exp $
  */
 public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator implements BeanNameAware {
 
 	/** Separator between prefix and remainder of bean name */
 	public final static String SEPARATOR = ".";
-	
+
+
 	private boolean usePrefix;
 
 	private String advisorBeanNamePrefix;
+
 
 	/**
 	 * Set whether to exclude advisors with a certain prefix
@@ -65,9 +67,9 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	}
 
 	/**
-	 * Set the prefix for bean names that will cause them to be excluded for
-	 * autoproxying by this object. This prefix should be set to avoid
-	 * circular references. Default value is the bean name of this object.
+	 * Set the prefix for bean names that will cause them to be included for
+	 * autoproxying by this object. This prefix should be set to avoid circular
+	 * references. Default value is the bean name of this object + a dot.
 	 * @param advisorBeanNamePrefix the exclusion prefix
 	 */
 	public void setAdvisorBeanNamePrefix(String advisorBeanNamePrefix) {
@@ -75,8 +77,8 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	}
 
 	/**
-	 * Return the prefix for bean names that will cause them not to
-	 * be considered for autoproxying by this object.
+	 * Return the prefix for bean names that will cause them to be included
+	 * for autoproxying by this object.
 	 */
 	public String getAdvisorBeanNamePrefix() {
 		return this.advisorBeanNamePrefix;
