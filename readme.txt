@@ -54,7 +54,7 @@ about it immediately.
 The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). J2SE 1.4 is
 required for building the framework. Note that J2EE 1.2 (Servlet 2.2, JSP 1.1) is good enough if not using
 Spring's web MVC or EJB support. Integration is provided with Log4J 1.2, CGLIB 1.0, Jakarta Commons Attributes,
-Hibernate 2.1, JDO 1.0, iBATIS SQL Maps 1.3, JAX-RPC 1.1, Caucho's Hessian and Burlap 2.1/3.0, Quartz 1.3,
+Hibernate 2.1, JDO 1.0, iBATIS SQL Maps 1.3/2.0, JAX-RPC 1.1, Caucho's Hessian and Burlap 2.1/3.0, Quartz 1.3,
 JSTL 1.0, Velocity 1.3, Struts-Tiles 1.1, Jakarta Commons FileUpload, Jason Hunter's COS, etc.
 
 Release contents:
@@ -97,13 +97,13 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: application context, validation framework, UI support, JNDI, mail, EJB, remoting, scheduling
 - Dependencies: spring-beans, (JavaMail, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
-* "spring-dao" (~180 KB)
+* "spring-dao" (~170 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
-- Dependencies: spring-beans, (spring-aop, spring-context, JTA)
+- Dependencies: spring-beans, (spring-aop, JTA)
 
-* "spring-orm" (~90 KB)
+* "spring-orm" (~105 KB)
 - Contents: Hibernate support, JDO support, iBATIS SQL Maps support
-- Dependencies: spring-jdbc, (Hibernate, JDO, iBATIS SQL Maps)
+- Dependencies: spring-dao, (Hibernate, JDO, iBATIS SQL Maps)
 
 * "spring-web" (~60 KB)
 - Contents: web application context, multipart resolver, web utilities
@@ -113,7 +113,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: web MVC framework, web controllers, web views
 - Dependencies: spring-web, (JSP, JSTL, Velocity, iText, POI)
 
-* "spring" (~890 KB)
+* "spring" (~900 KB)
 - Contents: all of the above
 - Dependencies: all of the above
 
@@ -149,6 +149,10 @@ The Spring JPetStore is an adapted version of Clinton Begin's JPetStore (availab
 It leverages Spring's support for the iBATIS SQL Maps to improve the original JPetStore in terms of
 internal structure and wiring. On top of a Spring-managed middle tier, it offers two alternative web
 tier implementations: one using Spring's web MVC plus JSTL, and one using Struts 1.1 plus JSTL.
+
+The Image Database sample is a simple one-screen image management web app that illustrates various
+Spring-integrated technologies: Velocity for web views, BLOB/CLOB handling with MySQL and Oracle,
+scheduling via Quartz and Timer, and mail sending via JavaMail.
 
 "Expert One-on-One J2EE Design and Development" discusses many of Spring's design ideas in detail.
 Note: The code examples in the book refer to the original framework version that came with the book.
