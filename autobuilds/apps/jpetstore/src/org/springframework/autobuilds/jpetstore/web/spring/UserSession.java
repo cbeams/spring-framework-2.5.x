@@ -1,0 +1,32 @@
+package org.springframework.autobuilds.jpetstore.web.spring;
+
+import org.springframework.beans.support.PagedListHolder;
+import org.springframework.autobuilds.jpetstore.domain.Account;
+
+/**
+ * @author Juergen Hoeller
+ * @since 30.11.2003
+ */
+public class UserSession {
+
+	private Account account;
+
+	private PagedListHolder myList;
+
+	public UserSession(Account account) {
+		this.account = account;
+	}
+
+	public Account getAccount() {
+		return account;
+	}
+
+	public void setMyList(PagedListHolder myList) {
+		this.myList = myList;
+	}
+
+	public PagedListHolder getMyList() {
+		return myList;
+	}
+
+}
