@@ -14,15 +14,11 @@
  * limitations under the License.
  */ 
 
-package org.springframework.scheduling;
+package org.springframework.scheduling.quartz;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
@@ -30,79 +26,22 @@ import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerContext;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
-import org.quartz.SchedulerContext;
 
 import org.springframework.beans.TestBean;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.scheduling.quartz.CronTriggerBean;
-import org.springframework.scheduling.quartz.JobDetailBean;
-import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.scheduling.quartz.SimpleTriggerBean;
-import org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean;
-import org.springframework.scheduling.timer.ScheduledTimerTask;
-import org.springframework.scheduling.timer.TimerFactoryBean;
+import org.springframework.scheduling.TestMethodInvokingTask;
 
 /**
  * @author Juergen Hoeller
+ * @author Alef Arendsen
  * @since 20.02.2004
  */
-public class SchedulingTestSuite extends TestCase {
-
-	public void testTimerFactoryBean() throws Exception {
-		final TestTimerTask timerTask0 = new TestTimerTask();
-		TestMethodInvokingTask task1 = new TestMethodInvokingTask();
-		MethodInvokingTimerTaskFactoryBean mittfb = new MethodInvokingTimerTaskFactoryBean();
-		mittfb.setTargetObject(task1);
-		mittfb.setTargetMethod("doSomething");
-		mittfb.afterPropertiesSet();
-		final TimerTask timerTask1 = (TimerTask) mittfb.getObject();
-
-		ScheduledTimerTask[] tasks = new ScheduledTimerTask[2];
-		tasks[0] = new ScheduledTimerTask(timerTask0, 0, 10, false);
-		tasks[1] = new ScheduledTimerTask(timerTask1, 10, 20, true);
-
-		final List success = new ArrayList(3);
-		final Timer timer = new Timer(true) {
-			public void schedule(TimerTask task, long delay, long period) {
-				if (task == timerTask0 && delay == 0 && period == 10) {
-					success.add(Boolean.TRUE);
-				}
-			}
-			public void scheduleAtFixedRate(TimerTask task, long delay, long period) {
-				if (task == timerTask1 && delay == 10 && period == 20) {
-					success.add(Boolean.TRUE);
-				}
-			}
-			public void cancel() {
-				success.add(Boolean.TRUE);
-			}
-		};
-
-		TimerFactoryBean timerFactoryBean = new TimerFactoryBean() {
-			protected Timer createTimer(boolean daemon) {
-				return timer;
-			}
-		};
-		try {
-			timerFactoryBean.setScheduledTimerTasks(tasks);
-			timerFactoryBean.afterPropertiesSet();
-			assertTrue(timerFactoryBean.getObject() instanceof Timer);
-			timerTask0.run();
-			timerTask1.run();
-		}
-		finally {
-			timerFactoryBean.destroy();
-		}
-
-		assertTrue("Correct Timer invocations", success.size() == 3);
-		assertTrue("TimerTask0 works", timerTask0.counter == 1);
-		assertTrue("TimerTask1 works", task1.counter == 1);
-	}
+public class QuartzSupportTests extends TestCase {
 
 	public void testSchedulerFactoryBean() throws Exception {
 		TestBean tb = new TestBean("tb", 99);
@@ -186,19 +125,17 @@ public class SchedulingTestSuite extends TestCase {
 		methodInvokingConcurrency(true);
 	}
 	
-	// we can't test both since Quartz somehow seems to keep things in memory
-	// enable both and one of them will fail (order doesn't matter)
+	// We can't test both since Quartz somehow seems to keep things in memory
+	// enable both and one of them will fail (order doesn't matter).
 	/*public void testMethodInvocationWithoutConcurrency() throws Exception {
 		methodInvokingConcurrency(false);
 	}*/
-	
-	public void methodInvokingConcurrency(boolean concurrent) 
-	throws Exception {
-		
-		// test the concurrency flag
-		// method invoking job with two triggers
-		// if the concurrent flag is false, the triggers are NOT allowed
-		// to interfere with eachother
+
+	private void methodInvokingConcurrency(boolean concurrent) throws Exception {
+		// Test the concurrency flag.
+		// Method invoking job with two triggers.
+		// If the concurrent flag is false, the triggers are NOT allowed
+		// to interfere with each other.
 
 		TestMethodInvokingTask task1 = new TestMethodInvokingTask();
 		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
@@ -230,12 +167,12 @@ public class SchedulingTestSuite extends TestCase {
 		
 		
 		schedulerFactoryBean.setJobDetails(new JobDetail[] { jobDetail1 } );
-		schedulerFactoryBean.setTriggers(new Trigger[] { trigger1, trigger0} );		
+		schedulerFactoryBean.setTriggers(new Trigger[] { trigger1, trigger0} );
 		schedulerFactoryBean.afterPropertiesSet();
 		
 		// ok scheduler is set up... let's wait for like 1 seconds
 		try {
-			Thread.sleep(4000);			
+			Thread.sleep(4000);
 		} catch (InterruptedException e) {
 			// fall through
 		}
@@ -252,7 +189,7 @@ public class SchedulingTestSuite extends TestCase {
 		}		
 		
 		try {
-			Thread.sleep(4000);			
+			Thread.sleep(4000);
 		} catch (InterruptedException e) {
 			// fall through
 		}
@@ -400,47 +337,6 @@ public class SchedulingTestSuite extends TestCase {
 
 		assertEquals(tb, jobDetail.getJobDataMap().get("testBean"));
 		assertEquals(ac, jobDetail.getJobDataMap().get("appCtx"));
-	}
-
-
-	private static class TestTimerTask extends TimerTask {
-
-		private int counter = 0;
-
-		public void run() {
-			counter++;
-		}
-	}
-
-
-	public static class TestMethodInvokingTask {
-
-		private int counter = 0;
-		
-		private Object lock = new Object();
-		
-		public void doSomething() {
-			counter++;
-		}
-		
-		public void doWait() {
-			counter++;
-			// wait until stop is called
-			synchronized (lock) {
-				try {
-					lock.wait();
-				} 
-				catch (InterruptedException e) {
-					// fall through
-				}
-			}
-		}
-		
-		void stop() {
-			synchronized(lock) {
-				lock.notify();
-			}
-		}
 	}
 
 }
