@@ -33,13 +33,14 @@ import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Base class for tests that verifies a flow executes as expected; that is, it
+ * Base class for tests that verify a flow executes as expected; that is, it
  * responds to all supported events correctly, transitioning to the correct
  * states.
  * <p>
  * Belongs in the spring-test.jar.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSpringContextTests {
 
@@ -61,6 +62,14 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	private FlowLocator flowLocator;
 
 	/**
+	 * Returns the flow locator used to resolve the Flow to be tested
+	 * by <code>id</code>.
+	 */
+	protected FlowLocator getFlowLocator() {
+		return flowLocator;
+	}
+
+	/**
 	 * Set the flow locator.
 	 * @param flowLocator the locator
 	 */
@@ -70,8 +79,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 
 	/**
 	 * Get the singleton flow definition whose execution is being tested.
-	 * @return The singleton flow definition
-	 * @throws NoSuchFlowDefinitionExeception, if the flow identified by
+	 * @return the singleton flow definition
+	 * @throws NoSuchFlowDefinitionExeception if the flow identified by
 	 *         flowId() could not be resolved (if this.flow was null)
 	 */
 	protected Flow getFlow() throws NoSuchFlowDefinitionException {
@@ -82,13 +91,20 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	}
 
 	/**
+	 * Set the flow definition whose execution is being tested. 
+	 * @param flow the singleton flow definition
+	 */
+	protected void setFlow(Flow flow) {
+		Assert.notNull(flow, "The flow definition whose execution to test is required");
+		this.flow = flow;
+	}
+
+	/**
 	 * Subclasses should override to return the <code>flowId</code> whose
 	 * execution should be tested.
 	 * @return The flow id, whose execution is to be tested.
 	 */
-	protected String flowId() {
-		return null;
-	}
+	protected abstract String flowId();
 
 	/**
 	 * Subclasses may override to return the FlowBuilder implementation that is
@@ -97,11 +113,6 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 */
 	protected Class flowBuilderClass() {
 		return null;
-	}
-
-	protected void setFlow(Flow flow) {
-		Assert.notNull(flow, "The flow definition whose execution to test is required");
-		this.flow = flow;
 	}
 
 	/**
@@ -113,8 +124,15 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 		setFlow(new FlowFactoryBean(flowBuilder).getFlow());
 	}
 
-	protected FlowLocator getFlowLocator() {
-		return flowLocator;
+	/**
+	 * Start a new flow execution for the flow definition that is being tested.
+	 * Uses a mock http request and response object.
+	 * @param input any input attribtes to pass to the flow execution
+	 * @return the model and view returned as a result of starting the flow
+	 *         (returned when the first view state is entered)
+	 */
+	protected ModelAndView startFlow(Map input) {
+		return startFlow(new MockHttpServletRequest(), new MockHttpServletResponse(), input);
 	}
 
 	/**
@@ -123,7 +141,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @param response the http response, typically a mock http response
 	 * @param input any input attribtes to pass to the flow execution
 	 * @return the model and view returned as a result of starting the flow
-	 *         (returned when the first view state is entered.)
+	 *         (returned when the first view state is entered)
 	 */
 	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
 		this.flowExecution = getFlow().createExecution();
@@ -132,39 +150,27 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	}
 
 	/**
-	 * Hook method where you can do additional setup a flow execution before it
-	 * is started, like register a execution listener.
-	 * @param flowExecution the flow execution.
+	 * Hook method where you can do additional setup of a flow execution before it
+	 * is started, like register an execution listener.
+	 * @param flowExecution the flow execution
 	 */
 	protected void setupFlowExecution(FlowExecution flowExecution) {
-
-	}
-
-	/**
-	 * Start a new flow execution for the flow definition that is being tested.
-	 * Uses a mock http request and response object.
-	 * @param input any input attribtes to pass to the flow execution
-	 * @return the model and view returned as a result of starting the flow
-	 *         (returned when the first view state is entered.)
-	 */
-	protected ModelAndView startFlow(Map input) {
-		return startFlow(new MockHttpServletRequest(), new MockHttpServletResponse(), input);
 	}
 
 	/**
 	 * Signal an occurence of an event in the current state of the flow
 	 * execution being tested.
 	 * <p>
-	 * Note: signaling an event with cause state transitions to occur in a chain
+	 * Note: signaling an event will cause state transitions to occur in a chain
 	 * UNTIL control is returned to the caller. Control will be returned once a
 	 * view state is entered or an end state is entered and the flow terminates.
 	 * Action states are executed without returning control, as their result
-	 * always triggers another state transition, executed interally. Action
-	 * states can also be executed in a chain like fashion (e.g action state 1
+	 * always triggers another state transition, executed internally. Action
+	 * states can also be executed in a chain like fashion (e.g. action state 1
 	 * (result), action state 2 (result), action state 3 (result), view state
 	 * <control returns so view can be rendered>).
 	 * <p>
-	 * If you wish to verify expected behaivior on each state transition (and
+	 * If you wish to verify expected behavior on each state transition (and
 	 * not just when the view state triggers return of control back to the
 	 * client), you have a few options:
 	 * <p>
@@ -173,31 +179,32 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * action executes its core logic and responds to any exceptions it must
 	 * handle. When you do this, you may mock or stub out services the Action
 	 * implementation needs that are expensive to initialize. You can also
-	 * verify there that the action put everything in the model or the request
+	 * verify there that the action puts everything in the model or the request
 	 * it was supposed to (to meet its contract with the view it is prepping for
-	 * display, if it’s a view setup action).
+	 * display, if it's a view setup action).
 	 * <p>
 	 * Second, you can attach a FlowExecutionListener to the ongoing flow
 	 * execution at any time within your test code, which receives callbacks on
-	 * each state transition (among at other points). To add a listener, call
+	 * each state transition (among other points). To add a listener, call
 	 * <code>getFlowExecution().getListenerList().add(myListener)</code>,
 	 * where myListener is a class that implements the FlowExecutionListener
-	 * interface (It is recommended you extend FlowExecutionListenerAdapter and
-	 * only override what you need.
+	 * interface (It is recommended you extend
+	 * {@link org.springframework.web.flow.support.FlowExecutionListenerAdapter}
+	 * and only override what you need.
 	 * 
 	 * @param eventId The event to signal
 	 * @param request The request
 	 * @param response The response
 	 * @return the model and view, returned once control is returned to the
 	 *         client (occurs when the flow enters a view state, or an end
-	 *         state).
+	 *         state)
 	 */
 	protected ModelAndView signalEvent(String eventId, MockHttpServletRequest request, MockHttpServletResponse response) {
 		return getFlowExecution().signalEvent(eventId, getCurrentStateId(), request, response);
 	}
 
 	/**
-	 * Returns the ongoing flow execution for this test;
+	 * Returns the ongoing flow execution for this test.
 	 * @return the flow execution
 	 * @throws IllegalStateException the execution has not been started
 	 */
@@ -209,7 +216,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	}
 
 	/**
-	 * Assert that the active flow session is for the flow with the provided id
+	 * Assert that the active flow session is for the flow with the provided id.
 	 * @param expectedActiveFlowId The flow id that should have a session active
 	 *        in the tested flow execution.
 	 */
@@ -263,6 +270,9 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 		return flowExecution.getLastEventId();
 	}
 
+	/**
+	 * Assert that an attribute with specified name is present in given model.
+	 */
 	protected void assertModelAttributePresent(Map model, String attributeName) {
 		assertTrue("The model attribute '" + attributeName + "' is not present in model", model
 				.containsKey(attributeName));
