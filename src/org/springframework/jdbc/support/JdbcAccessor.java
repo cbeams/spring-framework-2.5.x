@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.InitializingBean;
+
 /**
  * Base class for JdbcTemplate and other JDBC-accessing DAO helpers,
  * defining common properties like DataSource and exception translator.
@@ -31,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
  * @since 28.11.2003
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
-public abstract class JdbcAccessor {
+public abstract class JdbcAccessor implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
