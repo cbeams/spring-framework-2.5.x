@@ -62,16 +62,11 @@ public class CommonsMultipartFile implements MultipartFile {
 		return this.fileItem.get();
 	}
 
-	public InputStream getInputStream() throws MultipartException {
-		try {
-			return this.fileItem.getInputStream();
-		}
-		catch (IOException ex) {
-			throw new MultipartException("Could not read contents", ex);
-		}
+	public InputStream getInputStream() throws IOException {
+		return this.fileItem.getInputStream();
 	}
 
-	public void transferTo(File dest) throws MultipartException, IllegalStateException {
+	public void transferTo(File dest) throws IOException, IllegalStateException {
 		try {
 			this.fileItem.write(dest);
 			logger.debug("Multipart file [" + getName() + "] with original file name [" +
@@ -81,8 +76,12 @@ public class CommonsMultipartFile implements MultipartFile {
 		catch (FileUploadException ex) {
 			throw new IllegalStateException(ex.getMessage());
 		}
+		catch (IOException ex) {
+			throw ex;
+		}
 		catch (Exception ex) {
-			throw new MultipartException("Could not transfer to file", ex);
+			logger.error("Could not transfer to file", ex);
+			throw new IOException("Could not transfer to file: " + ex.getMessage());
 		}
 	}
 

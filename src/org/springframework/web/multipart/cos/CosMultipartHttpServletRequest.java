@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.oreilly.servlet.MultipartRequest;
 
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 
@@ -106,25 +105,15 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 			return multipartRequest.getFile(this.name).length();
 		}
 
-		public byte[] getBytes() throws MultipartException {
-			try {
-				return FileCopyUtils.copyToByteArray(multipartRequest.getFile(this.name));
-			}
-			catch (IOException ex) {
-				throw new MultipartException("Could not read contents", ex);
-			}
+		public byte[] getBytes() throws IOException {
+			return FileCopyUtils.copyToByteArray(multipartRequest.getFile(this.name));
 		}
 
-		public InputStream getInputStream() throws MultipartException {
-			try {
-				return new FileInputStream(multipartRequest.getFile(this.name));
-			}
-			catch (IOException ex) {
-				throw new MultipartException("Could not read contents", ex);
-			}
+		public InputStream getInputStream() throws IOException {
+			return new FileInputStream(multipartRequest.getFile(this.name));
 		}
 
-		public void transferTo(File dest) throws MultipartException, IllegalStateException {
+		public void transferTo(File dest) throws IOException, IllegalStateException {
 			File temp = multipartRequest.getFile(this.name);
 			if (!temp.exists()) {
 				throw new IllegalStateException("File has already been moved -- cannot be transferred again");
@@ -137,12 +126,7 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 				}
 			}
 			else {
-				try {
-					FileCopyUtils.copy(temp, dest);
-				}
-				catch (IOException ex) {
-					throw new MultipartException("Could not read contents", ex);
-				}
+				FileCopyUtils.copy(temp, dest);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Multipart file [" + getName() + "] with original file name [" +
 											 getOriginalFileName() + "], stored at [" + temp.getAbsolutePath() +

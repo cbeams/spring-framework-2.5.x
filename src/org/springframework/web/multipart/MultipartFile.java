@@ -2,6 +2,7 @@ package org.springframework.web.multipart;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
 
 /**
  * Interface which represents a file received in a multipart request.
@@ -48,17 +49,19 @@ public interface MultipartFile {
 	/**
 	 * Return the contents of the file as an array of bytes.
 	 * @return the contents of the file as bytes
+	 * @throws IOException in case of access errors
+	 * (if the temporary store fails)
 	 */
-	byte[] getBytes() throws MultipartException;
+	byte[] getBytes() throws IOException;
 
 	/**
 	 * Return an InputStream to read the contents of the file from.
 	 * The user is responsible for closing the stream.
 	 * @return the contents of the file as stream
-	 * @throws org.springframework.web.multipart.MultipartException in case of access errors
+	 * @throws IOException in case of access errors
 	 * (if the temporary store fails)
 	 */
-	InputStream getInputStream() throws MultipartException;
+	InputStream getInputStream() throws IOException;
 
 	/**
 	 * Transfer the received file to the given destination file.
@@ -68,10 +71,10 @@ public interface MultipartFile {
 	 * be invoked again. Therefore, call this method just once to be able to
 	 * work with any storage mechanism.
 	 * @param dest the destination file
-	 * @throws org.springframework.web.multipart.MultipartException in case of reading or writing errors
+	 * @throws IOException in case of reading or writing errors
 	 * @throws java.lang.IllegalStateException if the file has already been moved in the
 	 * filesystem as is not available anymore for another transfer
 	 */
-	void transferTo(File dest) throws MultipartException, IllegalStateException;
+	void transferTo(File dest) throws IOException, IllegalStateException;
 
 }
