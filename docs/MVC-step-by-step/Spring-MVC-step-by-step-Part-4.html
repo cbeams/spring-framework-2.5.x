@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <HTML>
 <HEAD>
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
@@ -47,8 +47,8 @@ database.</P>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0cm"><I>We need to replace Spring's<SPAN LANG="en-US">
 		distribution </SPAN>jar file - copy
-		</I>spring-framework-1.0m1/dist/spring-full-1.0.jar<I> to replace
-		</I>war/WEB-INF/lib/spring-framework-0.9.jar.</P>
+		</I>spring-framework-1.0m1/dist/spring.jar<I> to replace
+		</I>war/WEB-INF/lib/spring-full-0.9.jar.</P>
 	</UL>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0cm"><I>We also need to replace the
@@ -76,12 +76,12 @@ database.</P>
 <FONT COLOR="#000000">        war/WEB-INF/jsp/priceincrease.jsp</FONT></PRE>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0cm"><I>Remove i21.tld and
-		spring-framework-0.9.jar from the deployment directory for Tomcat.
+		spring-full-0.9.jar from the deployment directory for Tomcat.
 		I removed the following files: </I>
 		</P>
 	</UL>
 	<PRE><FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/i21.tld</FONT>
-<FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/lib/spring-framework-0.9.jar</FONT></PRE><P STYLE="margin-bottom: 0cm; font-style: normal">
+<FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/lib/spring-full-0.9.jar</FONT></PRE><P STYLE="margin-bottom: 0cm; font-style: normal">
 	<FONT COLOR="#000000">After all these changes, deploy and test the
 	application.</FONT></P>
 </DIV>
@@ -133,7 +133,7 @@ tomcat.manager.password=tomcat
 </TABLE>
 <P STYLE="margin-bottom: 0cm">Next I add the targets I need to the
 build script. There are targets to create and delete tables and to
-load and delete test data. 
+load and delete test data.
 </P>
 <TABLE WIDTH=807 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=797>
@@ -264,7 +264,7 @@ Object<SPAN LANG="en-US"> implementation </SPAN>for JDBC.</B></P>
 database access.  In this directory I create a new interface called
 'ProductManagerDao.java'.  This will be the interface that defines
 the functionality that the DAO implementation classes will provide –
-we could choose to have more than one implementation. 
+we could choose to have more than one implementation.
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -392,7 +392,7 @@ MappingSqlQuery, which is a central class in Spring's JDBC framework.
  The idea behind this class is that you have to specify a SQL query
 when this class is created, and you are also responsible for
 implementing the mapRow method to map the data from each row into a
-class that represents the entity you are retrieving in your query. 
+class that represents the entity you are retrieving in your query.
 That's it, that's all you have to provide.  The rest is managed by
 the framework.   In the constructor of the ProductQuery class I pass
 in the data source.  This<SPAN LANG="en-US"> data source </SPAN>will
@@ -402,10 +402,10 @@ retrieving </SPAN>a data source in our DAO class.  In the constructor
 I also define the SQL query that we will use to retrieve the
 products.  The mapRow method will be called once for each row
 returned by the query.  It creates a new Product and populates it
-based on the data retrieved from the current row of the resultset. 
+based on the data retrieved from the current row of the resultset.
 You should not call getNext on the resultset, it is all handled by
 the framework.  This is another example of an Inversion of Control
-solution.  
+solution.
 </P>
 <P STYLE="margin-bottom: 0cm">The second method increasePrice is
 utilizing an SqlUpdate class.  This class is passed the<SPAN LANG="en-US">
