@@ -20,9 +20,11 @@ package org.springframework.beans;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: Person.java,v 1.1 2004-07-24 10:26:10 johnsonr Exp $
+ * @version $Id: Person.java,v 1.2 2004-07-25 12:01:53 johnsonr Exp $
  */
 public interface Person {
 	String getName();
+	void setName(String name);
 	int getAge();
+	void setAge(int i);
 }
