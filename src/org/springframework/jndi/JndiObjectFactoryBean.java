@@ -37,8 +37,12 @@ public class JndiObjectFactoryBean extends AbstractJndiLocator implements Factor
 		return this.jndiObject;
 	}
 
+	public Class getObjectType() {
+		return (this.jndiObject != null) ? this.jndiObject.getClass() : null;
+	}
+
 	public boolean isSingleton() {
-		return false;
+		return true;
 	}
 
 }

@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +36,7 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
+import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
 
 /**
  * Abstract superclass that makes implementing a BeanFactory very easy.
@@ -52,7 +55,7 @@ import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.10 2003-10-23 18:44:30 uid112313 Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.11 2003-10-31 17:01:25 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
@@ -76,7 +79,11 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	/** Parent bean factory, for bean inheritance support */
 	private BeanFactory parentBeanFactory;
 
-	private BeanPostProcessor[] beanPostProcessors;
+	/** BeanPostProcessors to apply on createBean */
+	private List beanPostProcessors = new ArrayList();
+
+	/** Dependency types to ignore on dependency check and autowire */
+	private Set ignoreDependencyTypes = new HashSet();
 
 	/** Cache of singletons: bean name --> bean instance */
 	private Map singletonCache = new HashMap();
@@ -93,6 +100,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * Create a new AbstractBeanFactory.
 	 */
 	public AbstractBeanFactory() {
+		ignoreDependencyType(BeanFactory.class);
 	}
 
 	/**
@@ -101,6 +109,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * @see #getBean
 	 */
 	public AbstractBeanFactory(BeanFactory parentBeanFactory) {
+		this();
 		this.parentBeanFactory = parentBeanFactory;
 	}
 
@@ -108,12 +117,39 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		return parentBeanFactory;
 	}
 
-	public void setBeanPostProcessors(BeanPostProcessor[] beanPostProcessors) {
-		this.beanPostProcessors = beanPostProcessors;
+	/**
+	 * Add a new BeanPostPrcoessor that will get applied to
+	 * beans created with this factory.
+	 */
+	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+		this.beanPostProcessors.add(beanPostProcessor);
 	}
 
-	public BeanPostProcessor[] getBeanPostProcessors() {
+	/**
+	 * Return the list of BeanPostProcessors that will get applied to
+	 * beans created with this factory.
+	 */
+	public List getBeanPostProcessors() {
 		return beanPostProcessors;
+	}
+
+	/**
+	 * Ignore the given dependency type for autowiring.
+	 * <p>This will typically be used for dependencies that are resolved
+	 * in other ways, like BeanFactory through BeanFactoryAware or
+	 * ApplicationContext through ApplicationContextAware.
+	 * @see BeanFactoryAware
+	 * @see org.springframework.context.ApplicationContextAware
+	 */
+	public void ignoreDependencyType(Class type) {
+		this.ignoreDependencyTypes.add(type);
+	}
+
+	/**
+	 * Return the set of classes that will get ignored for autowiring.
+	 */
+	public Set getIgnoredDependencyTypes() {
+		return ignoreDependencyTypes;
 	}
 
 
@@ -246,11 +282,17 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 				// Configure and return new bean instance from factory
 				FactoryBean factory = (FactoryBean) beanInstance;
 				logger.debug("Bean with name '" + name + "' is a factory bean");
-				beanInstance = factory.getObject();
+				try {
+					beanInstance = factory.getObject();
+				}
+				catch (Exception ex) {
+					throw new FatalBeanException("FactoryBean threw exception on object creation", ex);
+				}
 
 				if (beanInstance == null) {
-					throw new FatalBeanException("Factory bean '" + name + "' returned null object -- " +
-					                             "possible cause: not fully initialized due to circular bean reference");
+					throw new FactoryBeanCircularReferenceException(
+					    "Factory bean '" + name + "' returned null object -- " +
+					    "possible cause: not fully initialized due to circular bean reference");
 				}
 
 				// Set pass-through properties
@@ -295,21 +337,43 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 			this.singletonCache.put(name, bean);
 		}
 
-		mergedBeanDefinition.autowireByName(name);
-		
+		if (mergedBeanDefinition.getAutowire() == AbstractBeanDefinition.AUTOWIRE_BY_NAME) {
+			autowireByName(name, mergedBeanDefinition);
+		}
+
 		// Add further property values based on autowire by type if it's applied
 		if (mergedBeanDefinition.getAutowire() == AbstractBeanDefinition.AUTOWIRE_BY_TYPE) {
 			autowireByType(name, mergedBeanDefinition, instanceWrapper);
 		}
 				
 		// We can apply dependency checks regardless of autowiring
-		mergedBeanDefinition.dependencyCheck(name);
+		mergedBeanDefinition.dependencyCheck(name, this.ignoreDependencyTypes);
 
-		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
-		applyPropertyValues(name, instanceWrapper, pvs, name);
+		applyPropertyValues(name, instanceWrapper, mergedBeanDefinition.getPropertyValues(), name);
+
 		callLifecycleMethodsIfNecessary(bean, name, mergedBeanDefinition, instanceWrapper);
 
 		return applyBeanPostProcessors(bean, name, mergedBeanDefinition);
+	}
+
+	/**
+	 * Fills in any missing property values with references to
+	 * other beans in this factory if autowire is set to "byName".
+	 * @param beanName name of the bean we're wiring up.
+	 * Useful for debugging messages; not used functionally.
+	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 */
+	protected void autowireByName(String beanName, RootBeanDefinition mergedBeanDefinition) {
+		String[] propertyNames = mergedBeanDefinition.unsatisfiedObjectProperties(getIgnoredDependencyTypes());
+		for (int i = 0; i < propertyNames.length; i++) {
+			String propertyName = propertyNames[i];
+			Object bean = getBean(propertyName);
+			if (bean != null) {
+				mergedBeanDefinition.addPropertyValue(new PropertyValue(propertyName, bean));
+			}
+			logger.info("Added autowiring by propertyName from bean propertyName '" + beanName +
+				"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
+		}
 	}
 
 	/**
@@ -322,31 +386,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 */
 	private Object applyBeanPostProcessors(Object bean, String name, RootBeanDefinition definition) {
 		Object result = bean;
-		if (this.beanPostProcessors != null) {
-			for (int i = 0; i < this.beanPostProcessors.length; i++) {
-				result = this.beanPostProcessors[i].postProcessBean(result, name, definition);
-			}
+		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
+			result = ((BeanPostProcessor) it.next()).postProcessBean(result, name, definition);
 		}
 		return result;
-	}
-
-	/**
-	 * Abstract method defining autowire by type behaviour.
-	 * This is like PicoContainer default, in which there must be exactly
-	 * one bean of the property type in the bean factory. 
-	 * This makes bean factories simple to configure for small namespaces,
-	 * but doesn't work as well as standard Spring behaviour for bigger applications.
-	 * <p>This method is unsupported in this class, and throws UnsupportedOperationException.
-	 * Subclasses should override it if they can obtain information about bean names
-	 * by type, as a ListableBeanFactory implementation* can.
-	 * Invoked before any property setters have been applied. This method should add
-	 * more RuntimeBeanReferences to the merged bean definition's property values.
-	 * @param name name of the bean to autowire by type
-	 * @param mergedBeanDefinition bean definition to update through autowiring
-	 * @param instanceWrapper BeanWrapper from which we can obtain information about the bean
-	 */
-	protected void autowireByType(String name, RootBeanDefinition mergedBeanDefinition, BeanWrapper instanceWrapper) {
-		throw new UnsupportedOperationException("AbstractBeanFactory does not support autowiring by type.");
 	}
 
 	/**
@@ -665,5 +708,24 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * @throws NoSuchBeanDefinitionException if the bean definition cannot be resolved
 	 */
 	protected abstract AbstractBeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Abstract method defining autowire by type behaviour.
+	 * This is like PicoContainer default, in which there must be exactly
+	 * one bean of the property type in the bean factory.
+	 * This makes bean factories simple to configure for small namespaces,
+	 * but doesn't work as well as standard Spring behaviour for bigger applications.
+	 * <p>This method is unsupported in this class, and throws UnsupportedOperationException.
+	 * Subclasses should override it if they can obtain information about bean names
+	 * by type, as a ListableBeanFactory implementation* can.
+	 * Invoked before any property setters have been applied. This method should add
+	 * more RuntimeBeanReferences to the merged bean definition's property values.
+	 * @param name name of the bean to autowire by type
+	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 * @param instanceWrapper BeanWrapper from which we can obtain information about the bean
+	 */
+	protected void autowireByType(String name, RootBeanDefinition mergedBeanDefinition, BeanWrapper instanceWrapper) {
+		throw new UnsupportedOperationException("AbstractBeanFactory does not support autowiring by type.");
+	}
 
 }

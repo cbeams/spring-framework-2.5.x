@@ -23,7 +23,7 @@ import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
  *
  * @author Rod Johnson
  * @since 10-Mar-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractFactoryBean implements PropertyValuesProviderFactoryBean {
 
@@ -40,7 +40,6 @@ public abstract class AbstractFactoryBean implements PropertyValuesProviderFacto
 	 * Default is for factories to return a singleton instance.
 	 */
 	private boolean singleton = true;
-
 
 	/**
 	 * Implementation of PropertyValuesProviderFactoryBean interface. Not declared on
@@ -64,7 +63,15 @@ public abstract class AbstractFactoryBean implements PropertyValuesProviderFacto
 	public void setPropertyValues(PropertyValues pvs) {
 		this.pvs = pvs;
 	}
-	
+
+	/**
+	 * This implementation of getObjectType simply returns null,
+	 * meaning no hint in terms of which type this FactoryBean will create.
+	 */
+	public Class getObjectType() {
+		return null;
+	}
+
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
 	 */

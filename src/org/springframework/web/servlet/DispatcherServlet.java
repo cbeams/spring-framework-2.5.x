@@ -12,6 +12,7 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.OrderComparator;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -94,7 +94,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.9 2003-10-23 10:21:02 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.10 2003-10-31 17:05:11 jhoeller Exp $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -261,7 +261,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initHandlerMappings() throws ServletException {
 		//Find all HandlerMappings in the ApplicationContext
-		this.handlerMappings = BeanFactoryUtils.beansOfType(HandlerMapping.class, getWebApplicationContext());
+		this.handlerMappings = new ArrayList(getWebApplicationContext().getBeansOfType(HandlerMapping.class).values());
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings.isEmpty()) {
@@ -295,7 +295,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initHandlerAdapters() throws ServletException {
 		//Find all HandlerAdapters in the ApplicationContext
-		this.handlerAdapters = BeanFactoryUtils.beansOfType(HandlerAdapter.class, getWebApplicationContext());
+		this.handlerAdapters = new ArrayList(getWebApplicationContext().getBeansOfType(HandlerAdapter.class).values());
 		// Ensure we have at least one HandlerAdapter, by registering
 		// a default HandlerAdapter if no other adapters are found.
 		if (this.handlerAdapters.isEmpty()) {

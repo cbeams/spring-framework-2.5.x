@@ -30,7 +30,7 @@ import org.springframework.context.BeanThatListens;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.7 2003-10-25 18:46:21 johnsonr Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.8 2003-10-31 17:01:29 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -109,7 +109,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		ACATest acaPr = (ACATest) getListableBeanFactory().getBean("aca-prototype");
 		acaPr.getApplicationContext();
 		TestInterceptor ti = (TestInterceptor) getListableBeanFactory().getBean("testInterceptorForCreator");
-		assertEquals(2, ti.nrOfInvocations);
+		assertEquals(4, ti.nrOfInvocations);
 		TestAutoProxyCreator tapc = (TestAutoProxyCreator) getListableBeanFactory().getBean("testAutoProxyCreator");
 		assertEquals(3, tapc.testInterceptor.nrOfInvocations);
 	}

@@ -5,7 +5,7 @@
 
 package org.springframework.beans.factory;
 
-import org.springframework.beans.BeansException;
+
 
 /**
  * Interface to be implemented by objects used within a BeanFactory
@@ -20,7 +20,7 @@ import org.springframework.beans.BeansException;
  * @author Rod Johnson
  * @since March 08, 2003
  * @see org.springframework.beans.factory.BeanFactory
- * @version $Id: FactoryBean.java,v 1.4 2003-10-28 11:54:07 jhoeller Exp $
+ * @version $Id: FactoryBean.java,v 1.5 2003-10-31 17:01:24 jhoeller Exp $
  */
 public interface FactoryBean {
 
@@ -30,7 +30,19 @@ public interface FactoryBean {
 	 * support for both the Singleton and Prototype design pattern.
 	 * @return an instance of the bean
 	 */
-	Object getObject() throws BeansException;
+	Object getObject() throws Exception;
+
+	/**
+	 * Return the type of objects that this FactoryBean generates, or null
+	 * if not known in advance. This allows to check for specific types of
+	 * beans without instantiating objects, e.g. on autowiring.
+	 * <p>For a singleton, this can simply return getObject().getClass(),
+	 * or even null, as autowiring will always check the actual objects
+	 * for singletons. For prototypes, returning a meaningful type here
+	 * is highly advisable, as autowiring will simply ignore them else.
+	 * @see ListableBeanFactory#getBeansOfType
+	 */
+	Class getObjectType();
 
 	/**
 	 * Is the bean managed by this factory a singleton or a prototype?

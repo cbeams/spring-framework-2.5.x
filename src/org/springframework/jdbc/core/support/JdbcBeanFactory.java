@@ -3,6 +3,7 @@ package org.springframework.jdbc.core.support;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -20,7 +21,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
  * as string. Formats for each are identical to the properties format
  * recognized by ListableBeanFactoryImpl.
  * @author Rod Johnson
- * @version $Id: JdbcBeanFactory.java,v 1.1.1.1 2003-08-14 16:20:30 trisberg Exp $
+ * @version $Id: JdbcBeanFactory.java,v 1.2 2003-10-31 17:01:24 jhoeller Exp $
  */
 public class JdbcBeanFactory implements ListableBeanFactory {
 	
@@ -88,6 +89,10 @@ public class JdbcBeanFactory implements ListableBeanFactory {
 
 	public String[] getBeanDefinitionNames(Class type) {
 		return delegate.getBeanDefinitionNames(type);
+	}
+
+	public Map getBeansOfType(Class type) {
+		return delegate.getBeansOfType(type);
 	}
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {

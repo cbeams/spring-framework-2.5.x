@@ -5,9 +5,10 @@
  
 package org.springframework.beans.factory.support;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -23,7 +24,7 @@ import org.springframework.web.servlet.mvc.DemoController;
  * 
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtilsTests.java,v 1.2 2003-10-13 16:45:26 jhoeller Exp $
+ * @version $Id: BeanFactoryUtilsTests.java,v 1.3 2003-10-31 17:01:28 jhoeller Exp $
  */
 public class BeanFactoryUtilsTests extends TestCase {
 
@@ -42,27 +43,6 @@ public class BeanFactoryUtilsTests extends TestCase {
 		child.loadBeanDefinitions(ClassLoaderUtils.getResourceAsStream(getClass(), "leaf.xml"));
 		this.listableFactory = child;
 	}
-	
-	public void testNoBeansOfType() {
-		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
-		lbf.addBean("foo", new Object());
-		List l = BeanFactoryUtils.beansOfType(ITestBean.class, lbf);
-		assertTrue(l.isEmpty());
-	}
-	
-	public void testFindsBeansOfType() {
-		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
-		lbf.addBean("t1", new TestBean());
-		lbf.addBean("t2", new TestBean());
-		List l = BeanFactoryUtils.beansOfType(ITestBean.class, lbf);
-		assertTrue(l.size() == 2);
-		assertTrue(l.get(0) instanceof ITestBean);
-		assertTrue(l.get(1) instanceof ITestBean);
-		// Hierarchical find should produce fine results as there's no hierarchy
-		assertTrue(BeanFactoryUtils.beansOfTypeIncludingAncestors(ITestBean.class, lbf).equals(l));
-	}
-	
-	
 	
 	public void testHierarchicalCountBeansWithNonHierarchicalFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
@@ -84,32 +64,52 @@ public class BeanFactoryUtilsTests extends TestCase {
 	}
 	
 	public void testHierarchicalNamesWithOverride() throws Exception {
-		Collection c = BeanFactoryUtils.beanNamesIncludingAncestors(ITestBean.class, this.listableFactory);
-		assertTrue(c.contains("test"));
-		assertTrue(c.contains("test3"));
-		assertTrue(c.size() == 2);
+		List names = Arrays.asList(BeanFactoryUtils.beanNamesIncludingAncestors(ITestBean.class, this.listableFactory));
+		assertEquals(2, names.size());
+		assertTrue(names.contains("test"));
+		assertTrue(names.contains("test3"));
 	}
-	
-	public void testHierarchicalResolutionWithOverride() throws Exception {
-		Collection c = BeanFactoryUtils.beansOfTypeIncludingAncestors(ITestBean.class, this.listableFactory);
-		assertTrue(c.size() == 2);
-		Iterator iter = c.iterator();
-		assertTrue(iter.next() instanceof ITestBean);
-		assertTrue(iter.next() instanceof ITestBean);
-	}
-	
+
 	public void testHierarchicalNamesWithNoMatch() throws Exception {
-		Collection c = BeanFactoryUtils.beanNamesIncludingAncestors(HandlerAdapter.class, this.listableFactory);
-		assertTrue("Expected 0 beans, not " + c.size(), c.size() == 0);
+		List names = Arrays.asList(BeanFactoryUtils.beanNamesIncludingAncestors(HandlerAdapter.class, this.listableFactory));
+		assertEquals(0, names.size());
 	}
-	
+
 	public void testHierarchicalNamesWithMatchOnlyInRoot() throws Exception {
-		Collection c = BeanFactoryUtils.beanNamesIncludingAncestors(DemoController.class, this.listableFactory);
-		assertTrue("Expected 0 beans, not " + c.size(), c.size() == 1);
-		assertTrue(c.contains("demoController"));
-		
+		List names = Arrays.asList(BeanFactoryUtils.beanNamesIncludingAncestors(DemoController.class, this.listableFactory));
+		assertEquals(1, names.size());
+		assertTrue(names.contains("demoController"));
+
 		// Distinguish from default ListableBeanFactory behaviour
 		assertTrue(listableFactory.getBeanDefinitionNames(DemoController.class).length == 0);
+	}
+
+	public void testNoBeansOfType() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		lbf.addBean("foo", new Object());
+		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(ITestBean.class, lbf);
+		assertTrue(beans.isEmpty());
+	}
+
+	public void testFindsBeansOfType() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		TestBean t1 = new TestBean();
+		TestBean t2 = new TestBean();
+		lbf.addBean("t1", t1);
+		lbf.addBean("t2", t2);
+		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(ITestBean.class, lbf);
+		assertEquals(2, beans.size());
+		assertEquals(t1, beans.get("t1"));
+		assertEquals(t2, beans.get("t2"));
+	}
+
+	public void testHierarchicalResolutionWithOverride() throws Exception {
+		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(ITestBean.class, this.listableFactory);
+		Object test3 = this.listableFactory.getBean("test3");
+		Object test = this.listableFactory.getBean("test");
+		assertEquals(2, beans.size());
+		assertEquals(test3, beans.get("test3"));
+		assertEquals(test, beans.get("test"));
 	}
 
 }

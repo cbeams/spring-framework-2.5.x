@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.12 2003-10-23 18:45:50 uid112313 Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.13 2003-10-31 17:01:27 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -72,51 +72,40 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	 * Value of a T/F attribute that represents true.
 	 * Anything else represents false. Case seNsItive.
 	 */
-	private static final String TRUE_ATTRIBUTE_VALUE = "true";
+	private static final String TRUE_VALUE = "true";
+	private static final String DEFAULT_VALUE = "default";
 
 	private static final String BEAN_ELEMENT = "bean";
-
 	private static final String CLASS_ATTRIBUTE = "class";
-
 	private static final String PARENT_ATTRIBUTE = "parent";
-
 	private static final String ID_ATTRIBUTE = "id";
-
 	private static final String NAME_ATTRIBUTE = "name";
-
 	private static final String SINGLETON_ATTRIBUTE = "singleton";
-
 	private static final String PROPERTY_ELEMENT = "property";
-
 	private static final String REF_ELEMENT = "ref";
-
 	private static final String LIST_ELEMENT = "list";
-
 	private static final String MAP_ELEMENT = "map";
-
 	private static final String KEY_ATTRIBUTE = "key";
-
 	private static final String ENTRY_ELEMENT = "entry";
-
 	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
-
 	private static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
-
 	private static final String BEAN_REF_ATTRIBUTE = "bean";
-
 	private static final String LOCAL_REF_ATTRIBUTE = "local";
-
 	private static final String EXTERNAL_REF_ATTRIBUTE = "external";
-
 	private static final String VALUE_ELEMENT = "value";
-
 	private static final String PROPS_ELEMENT = "props";
-
 	private static final String PROP_ELEMENT = "prop";
 
 	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
+	private static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
+	private static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
+	private static final String DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE = "simple";
+	private static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
 
+	private static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
+	private static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
+	private static final String AUTOWIRE_BY_NAME_VALUE = "byName";
 
 
 	private boolean validating = true;
@@ -274,29 +263,35 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	 * @param doc the DOM document
 	 */
 	public void loadBeanDefinitions(Document doc) throws BeansException {
-		Element root = doc.getDocumentElement();
 		logger.debug("Loading bean definitions");
+		Element root = doc.getDocumentElement();
+
+		String defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
+		logger.debug("Default dependency check '" + defaultDependencyCheck + "'");
+		String defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
+		logger.debug("Default autowire '" + defaultAutowire + "'");
+
 		NodeList nl = root.getElementsByTagName(BEAN_ELEMENT);
 		logger.debug("Found " + nl.getLength() + " <" + BEAN_ELEMENT + "> elements defining beans");
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node n = nl.item(i);
-			loadBeanDefinition((Element) n);
+			loadBeanDefinition((Element) n, defaultDependencyCheck, defaultAutowire);
 		}
 	}
 
 	/**
 	 * Parse an element definition: We know this is a BEAN element.
 	 */
-	private void loadBeanDefinition(Element el) throws BeansException {
+	private void loadBeanDefinition(Element el, String defaultDependencyCheck, String defaultAutowire) {
 		// The DTD guarantees an id attribute is present
 		String id = el.getAttribute(ID_ATTRIBUTE);
-		logger.debug("Parsing bean definition with id [" + id + "]");
+		logger.debug("Parsing bean definition with id '" + id + "'");
 
 		// Create BeanDefinition now: we'll build up PropertyValues later
 		AbstractBeanDefinition beanDefinition;
 
 		PropertyValues pvs = getPropertyValueSubElements(el);
-		beanDefinition = parseBeanDefinition(el, id, pvs);
+		beanDefinition = parseBeanDefinition(el, id, pvs, defaultDependencyCheck, defaultAutowire);
 		registerBeanDefinition(id, beanDefinition);
 
 		String name = el.getAttribute(NAME_ATTRIBUTE);
@@ -313,7 +308,8 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	/**
 	 * Parse a standard bean definition.
 	 */
-	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs) {
+	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs,
+	                                                   String defaultDependencyCheck, String defaultAutowire) {
 		String className = null;
 		boolean singleton = true;
 		AbstractBeanDefinition bd = null;
@@ -321,7 +317,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 		if (el.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			// Default is singleton
 			// Can override by making non-singleton if desired
-			singleton = TRUE_ATTRIBUTE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
+			singleton = TRUE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
 		}
 
 		try {
@@ -330,8 +326,9 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			String parent = null;
 			if (el.hasAttribute(PARENT_ATTRIBUTE))
 				parent = el.getAttribute(PARENT_ATTRIBUTE);
-			if (className == null && parent == null)
+			if (className == null && parent == null) {
 				throw new FatalBeanException("No className or parent in bean definition '" + beanName + "'", null);
+			}
 			if (className != null) {
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
 				String initMethodName = el.getAttribute(INIT_METHOD_ATTRIBUTE);
@@ -347,8 +344,16 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 				bd = new ChildBeanDefinition(parent, pvs, singleton);
 			}
 
-			bd.setDependencyCheck(getDependencyCheck(el));
-			bd.setAutowire(getAutowire(el));
+			String dependencyCheck = el.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+			if (DEFAULT_VALUE.equals(dependencyCheck))
+				dependencyCheck = defaultDependencyCheck;
+			bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
+
+			String autowire = el.getAttribute(AUTOWIRE_ATTRIBUTE);
+			if (DEFAULT_VALUE.equals(autowire))
+				autowire = defaultAutowire;
+			bd.setAutowire(getAutowire(autowire));
+
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
@@ -356,32 +361,30 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 		}
 	}
 
-	private int getDependencyCheck(Element beanEle) {
-		String att = beanEle.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+	private int getDependencyCheck(String att) {
 		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
-		if ("all".equals(att)) {
+		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
 			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
 		}
-		else if ("simple".equals(att)) {
+		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
 			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
 		}
-		else if ("objects".equals(att)) {
+		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
 			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
 		}
 		// else leave default value
 		return dependencyCheckCode;
 	}
 
-	private int getAutowire(Element beanEle) {
+	private int getAutowire(String att) {
 		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
-		String att = beanEle.getAttribute(AUTOWIRE_ATTRIBUTE);
-		if ("byType".equals(att)) {
+		if (AUTOWIRE_BY_TYPE_VALUE.equals(att)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
 		}
-		else if ("byName".equals(att)) {
+		else if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
 		}
-		// else leave default:
+		// else leave default value
 		return autowire;
 	}
 
@@ -420,12 +423,15 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 		Element childEle = null;
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
-				if (childEle != null)
-					throw new BeanDefinitionStoreException("<property> element can have only one child element, not " + nl.getLength(), null);
+				if (childEle != null) {
+					throw new BeanDefinitionStoreException("<property> element can have only one child element, not " + nl.getLength());
+				}
 				childEle = (Element) nl.item(i);
 			}
 		}
-
+		if (childEle == null) {
+			throw new BeanDefinitionStoreException("<property> must have a child element");
+		}
 		return parsePropertySubelement(childEle);
 	}
 
@@ -529,9 +535,8 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			return "";
 		}
 		if (nl.getLength() != 1 || !(nl.item(0) instanceof Text)) {
-			throw new FatalBeanException("Unexpected element or type mismatch: " +
-			                             "expected single node of " + nl.item(0).getClass() + " to be of type Text: "
-			                             + "found " + e, null);
+			throw new FatalBeanException("Unexpected element or type mismatch: expected single node of " +
+			                             nl.item(0).getClass() + " to be of type Text: " + "found " + e, null);
 		}
 		Text t = (Text) nl.item(0);
 		// This will be a String

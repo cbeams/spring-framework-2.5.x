@@ -6,21 +6,22 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 
 /** 
 * Root bean definitions have a class and properties.
 * @author Rod Johnson
-* @version $Id: RootBeanDefinition.java,v 1.4 2003-10-21 13:36:51 jhoeller Exp $
+* @version $Id: RootBeanDefinition.java,v 1.5 2003-10-31 17:01:27 jhoeller Exp $
 */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
@@ -61,8 +62,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.clazz = other.clazz;
 		this.initMethodName = other.initMethodName;
 		this.destroyMethodName = other.destroyMethodName;
-
-		// We'll just use this to look at descriptors, not make changes 
 		this.bw = other.bw;
 	}
 	
@@ -90,77 +89,56 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Perform a dependency check that all properties exposed have
-	 * been set, if desired.
-	 * Dependency checks can be simple (primitives and String),
-	 * object (collaborating beans)
-	 * or all (both)
+	 * Perform a dependency check that all properties exposed have been set,
+	 * if desired. Dependency checks can be objects (collaborating beans),
+	 * simple (primitives and String), or all (both).
+	 * @param beanName name of the bean
+	 * @param ignoreTypes property types to ignore
 	 * @throws UnsatisfiedDependencyException
 	 */
-	public void dependencyCheck(String beanName) throws UnsatisfiedDependencyException {
-		if (getDependencyCheck() == DEPENDENCY_CHECK_NONE) {
+	public void dependencyCheck(String beanName, Set ignoreTypes) throws UnsatisfiedDependencyException {
+		if (getDependencyCheck() == DEPENDENCY_CHECK_NONE)
 			return;
-		}
-		
-		BeanWrapper bw = new BeanWrapperImpl(this.clazz);
-		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
+
+		PropertyDescriptor[] pds = this.bw.getPropertyDescriptors();
 		for (int i = 0; i < pds.length; i++) {
-			String name = pds[i].getName();
-			if (getPropertyValues().getPropertyValue(name) == null &&
-					!pds[i].getName().equals("class")) {
-				boolean isSimple = pds[i].getPropertyType().isPrimitive() || pds[i].getPropertyType().equals(String.class);
+			if (pds[i].getWriteMethod() != null &&
+			    !ignoreTypes.contains(pds[i].getPropertyType()) &&
+			    getPropertyValues().getPropertyValue(pds[i].getName()) == null) {
+				boolean isSimple = BeanUtils.isSimpleProperty(pds[i].getPropertyType());
 				boolean unsatisfied = getDependencyCheck() == DEPENDENCY_CHECK_ALL ||
 					(isSimple && getDependencyCheck() == DEPENDENCY_CHECK_SIMPLE) ||
-					(!isSimple && getDependencyCheck() == DEPENDENCY_CHECK_OBJECTS); 
-				// The property isn't set
-				if (unsatisfied) 
-					throw new UnsatisfiedDependencyException(beanName, name);
+					(!isSimple && getDependencyCheck() == DEPENDENCY_CHECK_OBJECTS);
+				if (unsatisfied) {
+					throw new UnsatisfiedDependencyException(beanName, pds[i].getName());
+				}
 			}
 		}
 	}
-	
-	
+
 	/**
-	 * Return a set of object-type property names that are unsatisfied
-	 * @return  a set of object-type property names that are unsatisfied.
+	 * Return an array of object-type property names that are unsatisfied.
 	 * These are probably unsatisfied references to other beans in the
-	 * factory. Does not include properties of type String.
+	 * factory. Does not include simple properties like primitives or Strings.
+	 * @param ignoreTypes property types to ignore
+	 * @return an array of object-type property names that are unsatisfied
+	 * @see org.springframework.beans.BeanUtils#isSimpleProperty
 	 */
-	public Set unsatisfiedObjectProperties() {
-		Set s = new TreeSet();
+	public String[] unsatisfiedObjectProperties(Set ignoreTypes) {
+		Set result = new TreeSet();
 		PropertyDescriptor[] pds = this.bw.getPropertyDescriptors();
 		for (int i = 0; i < pds.length; i++) {
 			String name = pds[i].getName();
-			if (!pds[i].getPropertyType().isPrimitive()
-				&& !pds[i].getName().equals("class")
-				&& !pds[i].getPropertyType().equals(String.class)
-				&& getPropertyValues().getPropertyValue(name) == null) {
-				s.add(name);
+			if (pds[i].getWriteMethod() != null &&
+			    !BeanUtils.isSimpleProperty(pds[i].getPropertyType()) &&
+			    !ignoreTypes.contains(pds[i].getPropertyType()) &&
+			    getPropertyValues().getPropertyValue(name) == null) {
+				result.add(name);
 			}
 		}
-		return s;
+		return (String[]) result.toArray(new String[result.size()]);
 	}
-	
-	
-	/**
-	 * Fill in any missing property values with references to
-	 * other beans in this factory if autowire is set to "byName".
-	 * @param beanName name of the bean we're wiring up.
-	 * Useful for debugging. Not used functionally.
-	 */
-	public void autowireByName(String beanName) {
-		if (getAutowire() == AUTOWIRE_BY_NAME) {
-			Set s = unsatisfiedObjectProperties();
-			for (Iterator itr = s.iterator(); itr.hasNext(); ) {
-				String propertyName = (String) itr.next();
-				addPropertyValue(new PropertyValue(propertyName, new RuntimeBeanReference(propertyName)));
-				logger.info("Added autowiring by name from bean name '" + beanName + 
-					"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
-			} // for each unsatisfied property
-		} // if we should autowire by name
-	}	
 
-		
 	public boolean equals(Object obj) {
 		if (!(obj instanceof RootBeanDefinition))
 			return false;

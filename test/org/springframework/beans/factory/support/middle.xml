@@ -9,19 +9,11 @@
 		<property name="age"><value>666</value></property>
 	</bean>
 	
-	
-	
 	<!--
 		Check that invoker is automatically added to wrap target.
 		Non pointcut bean name should be wrapped in invoker.
 	-->
-	<bean id="numberTestBean" 
-			class="org.springframework.beans.NumberTestBean"
-	>	
-
-		
-	</bean>
-	
+	<bean id="numberTestBean" class="org.springframework.beans.NumberTestBean"/>
 
 </beans>		
 	

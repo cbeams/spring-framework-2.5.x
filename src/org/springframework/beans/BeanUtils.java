@@ -32,6 +32,18 @@ public abstract class BeanUtils {
 		}
 	}
 
+	public static boolean isPrimitiveArray(Class clazz) {
+		return boolean[].class.equals(clazz) || byte[].class.equals(clazz) || char[].class.equals(clazz) ||
+		    short[].class.equals(clazz) || int[].class.equals(clazz) || long[].class.equals(clazz) ||
+		    float[].class.equals(clazz) || double[].class.equals(clazz);
+	}
+
+	public static boolean isSimpleProperty(Class clazz) {
+		return clazz.isPrimitive() || isPrimitiveArray(clazz) ||
+		    clazz.equals(String.class) || clazz.equals(String[].class) ||
+		    clazz.equals(Class.class) || clazz.equals(Class[].class);
+	}
+
 	/**
 	 * Copy the property values of the given source bean into the target bean.
 	 * @param source source bean

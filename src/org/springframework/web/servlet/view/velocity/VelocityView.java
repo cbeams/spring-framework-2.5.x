@@ -10,7 +10,6 @@ import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -59,7 +58,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.7 2003-10-29 08:23:06 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.8 2003-10-31 17:01:20 jhoeller Exp $
  * @see VelocityConfiguration
  * @see VelocityConfigurer
  */
@@ -139,17 +138,14 @@ public class VelocityView extends AbstractView {
  	* find the relevant VelocityEngine for this factory.
  	*/
 	protected void initApplicationContext() throws ApplicationContextException {
-
 		if (this.templateName == null) {
 			throw new ApplicationContextException("Must set templateName property on VelocityView");
 		}
 
-		Collection c = BeanFactoryUtils.beansOfTypeIncludingAncestors(VelocityConfiguration.class, getWebApplicationContext());
-
-		if (c.size() == 1) {
+		Map configs = BeanFactoryUtils.beansOfTypeIncludingAncestors(VelocityConfiguration.class, getWebApplicationContext());
+		if (configs.size() == 1) {
 			// We need exactly one VelocityConfiguration bean
-			System.out.println(c.iterator().next().getClass());
-			VelocityConfiguration vconfig = (VelocityConfiguration) c.iterator().next();
+			VelocityConfiguration vconfig = (VelocityConfiguration) configs.values().iterator().next();
 			this.velocityEngine = vconfig.getVelocityEngine();
 		}
 		else {

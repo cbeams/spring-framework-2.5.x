@@ -147,7 +147,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		this.entityInterceptor = entityInterceptor;
 	}
 
-	public void setSchemaUpdate(boolean schemaUpdate) {
+	public final void setSchemaUpdate(boolean schemaUpdate) {
 		this.schemaUpdate = schemaUpdate;
 	}
 
@@ -240,11 +240,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		return config.buildSessionFactory();
 	}
 
-	/**
-	 * Execute a schema update via 
-	 * @param config
-	 * @throws HibernateException
-	 */
 	protected void executeSchemaUpdate(final Configuration config) throws HibernateException {
 		final Dialect dialect = Dialect.getDialect(config.getProperties());
 		HibernateTemplate template = new HibernateTemplate(this.sessionFactory);
@@ -284,6 +279,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		return this.sessionFactory;
 	}
 
+	public final Class getObjectType() {
+		return (this.sessionFactory != null) ? this.sessionFactory.getClass() : SessionFactory.class;
+	}
+
 	public final boolean isSingleton() {
 		return true;
 	}
@@ -291,7 +290,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	/**
 	 * Close the SessionFactory on context shutdown.
 	 */
-	public void destroy() throws HibernateException {
+	public final void destroy() throws HibernateException {
 		logger.info("Closing Hibernate SessionFactory of LocalSessionFactoryBean [" + this + "]");
 		this.sessionFactory.close();
 	}

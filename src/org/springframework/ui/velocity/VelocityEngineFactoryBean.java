@@ -5,6 +5,8 @@
 
 package org.springframework.ui.velocity;
 
+import org.apache.velocity.app.VelocityEngine;
+
 import org.springframework.beans.factory.FactoryBean;
 
 /**
@@ -26,6 +28,10 @@ public class VelocityEngineFactoryBean extends VelocityEngineFactory implements 
 
 	public Object getObject() {
 		return getVelocityEngine();
+	}
+
+	public Class getObjectType() {
+		return VelocityEngine.class;
 	}
 
 	public boolean isSingleton() {

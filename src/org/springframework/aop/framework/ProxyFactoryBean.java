@@ -6,7 +6,6 @@
 package org.springframework.aop.framework;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,6 +14,7 @@ import java.util.Map;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -45,7 +45,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.2 2003-09-06 17:06:21 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.3 2003-10-31 17:01:23 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  */
@@ -200,18 +200,18 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	 * Add all global interceptors and pointcuts.
 	 */
 	private void addGlobalInterceptorsAndPointcuts(ListableBeanFactory beanFactory, String prefix) {
-		Collection globalPointcutNames = BeanFactoryUtils.beanNamesIncludingAncestors(MethodPointcut.class, beanFactory);
-		Collection globalInterceptorNames = BeanFactoryUtils.beanNamesIncludingAncestors(Interceptor.class, beanFactory);
-		List beans = new ArrayList(globalPointcutNames.size() + globalInterceptorNames.size());
+		String[] globalPointcutNames = BeanFactoryUtils.beanNamesIncludingAncestors(MethodPointcut.class, beanFactory);
+		String[] globalInterceptorNames = BeanFactoryUtils.beanNamesIncludingAncestors(Interceptor.class, beanFactory);
+		List beans = new ArrayList(globalPointcutNames.length + globalInterceptorNames.length);
 		Map names = new HashMap();
-		for (Iterator itr = globalPointcutNames.iterator(); itr.hasNext();) {
-			String name = (String) itr.next();
+		for (int i = 0; i < globalPointcutNames.length; i++) {
+			String name = globalPointcutNames[i];
 			Object bean = beanFactory.getBean(name);
 			beans.add(bean);
 			names.put(bean, name);
 		}
-		for (Iterator itr = globalInterceptorNames.iterator(); itr.hasNext();) {
-			String name = (String) itr.next();
+		for (int i = 0; i < globalInterceptorNames.length; i++) {
+			String name = globalInterceptorNames[i];
 			Object bean = beanFactory.getBean(name);
 			beans.add(bean);
 			names.put(bean, name);
@@ -276,8 +276,8 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	}
 	
 	/**
-	 * Create an instance of the AOP proxy to be returned by this factory. 
-	 * The instance will be cached for a singleton, and create on each call to 
+	 * Create an instance of the AOP proxy to be returned by this factory.
+	 * The instance will be cached for a singleton, and create on each call to
 	 * getObject() for a proxy.
 	 * @return Object a fresh AOP proxy reflecting the current
 	 * state of this factory
@@ -286,6 +286,10 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 		refreshInterceptorChain();
 		AopProxy proxy = new AopProxy(this);
 		return proxy.getProxy();
+	}
+
+	public Class getObjectType() {
+		return (this.singletonInstance != null) ? this.singletonInstance.getClass() : null;
 	}
 
 	/**

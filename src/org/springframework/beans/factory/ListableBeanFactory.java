@@ -5,6 +5,8 @@
 
 package org.springframework.beans.factory;
 
+import java.util.Map;
+
 /**
  * Extension of BeanFactory to be implemented by bean factories that can
  * enumerate all their bean instances, rather than attempting bean lookup
@@ -24,7 +26,7 @@ package org.springframework.beans.factory;
  *
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: ListableBeanFactory.java,v 1.1.1.1 2003-08-14 16:20:18 trisberg Exp $
+ * @version $Id: ListableBeanFactory.java,v 1.2 2003-10-31 17:01:25 jhoeller Exp $
  */
 public interface ListableBeanFactory extends BeanFactory {
 
@@ -44,13 +46,29 @@ public interface ListableBeanFactory extends BeanFactory {
 	String[] getBeanDefinitionNames();
 	
 	/**
-	 * Return the names of beans matching the given object type 
-	 * (including subclasses). 
-	 * Does not consider any hierarchy this factory may participate in.
+	 * Return the names of beans matching the given object type (including
+	 * subclasses), judging from the bean definitions. Will <i>not</i>
+	 * consider FactoryBeans as the type of their created objects is not
+	 * known before instantiation.
+	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @param type class or interface to match
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
 	 */
 	String[] getBeanDefinitionNames(Class type);
-    
+
+	/**
+	 * Return the bean instances that match the given object type (including
+	 * subclasses), judging from either bean definitions or the value of
+	 * getObjectType() in the case of FactoryBeans.
+	 * <p>If FactoryBean's getObjectType() returns null and the bean is a
+	 * singleton, the type of the actually created objects should be evaluated.
+	 * Prototypes without explicit object type specification will be ignored.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * @param type class or interface to match
+	 * @return a Map with the matching beans, containing the bean names as
+	 * keys and the corresponding bean instances as values
+	 */
+	Map getBeansOfType(Class type);
+
 }

@@ -14,10 +14,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +29,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.beans.factory.support.BeanPostProcessor;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
 import org.springframework.context.ApplicationContext;
@@ -63,7 +65,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -204,8 +206,8 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 		this.startupTime = System.currentTimeMillis();
 
 		refreshBeanFactory();
-		getBeanFactory().setBeanPostProcessors(
-		    new BeanPostProcessor[] { new ApplicationContextAwareProcessor(this) });
+		getBeanFactory().ignoreDependencyType(ApplicationContext.class);
+		getBeanFactory().addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 
 		if (getBeanDefinitionCount() == 0)
 			logger.warn("No beans defined in ApplicationContext [" + getDisplayName() + "]");
@@ -276,9 +278,9 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 				beanProcessors.add(getBean(beanNames[i]));
 			}
 			Collections.sort(beanProcessors, new OrderComparator());
-			beanProcessors.addAll(0, Arrays.asList(getBeanFactory().getBeanPostProcessors()));
-			getBeanFactory().setBeanPostProcessors(
-					(BeanPostProcessor[]) beanProcessors.toArray(new BeanPostProcessor[beanProcessors.size()]));
+			for (Iterator it = beanProcessors.iterator(); it.hasNext();) {
+				getBeanFactory().addBeanPostProcessor((BeanPostProcessor) it.next());
+			}
 		}
 	}
 
@@ -340,10 +342,10 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 */
 	private void refreshListeners() {
 		logger.info("Refreshing listeners");
-		List listeners = BeanFactoryUtils.beansOfType(ApplicationListener.class, this);
+		Collection listeners = getBeansOfType(ApplicationListener.class).values();
 		logger.debug("Found " + listeners.size() + " listeners in bean factory");
-		for (int i = 0; i < listeners.size(); i++) {
-			ApplicationListener listener = (ApplicationListener) listeners.get(i);
+		for (Iterator it = listeners.iterator(); it.hasNext();) {
+			ApplicationListener listener = (ApplicationListener) it.next();
 			addListener(listener);
 			logger.info("Bean listener added: [" + listener + "]");
 		}
@@ -400,11 +402,12 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 			URL url = new URL(location);
 			logger.debug("Opening as URL: " + location);
 			return url.openStream();
-		} catch (MalformedURLException ex) {
+		}
+		catch (MalformedURLException ex) {
 			// no URL -> try (file) path
 			InputStream in = getResourceByPath(location);
 			if (in == null) {
-				throw new FileNotFoundException("Location [" + location + "] isn't a URL and cannot be interpreted as file path");
+				throw new FileNotFoundException("Location [" + location + "] could not be opened as file path");
 			}
 			return in;
 		}
@@ -415,7 +418,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 * <p>Default implementation supports file paths, either absolute or
 	 * relative to the application's working directory. This should be
 	 * appropriate for standalone implementations but can be overridden,
-	 * e.g. for implementations targetted at a container.
+	 * e.g. for implementations targeted at a container.
 	 * @param path path to the resource
 	 * @return InputStream for the specified resource, can be null if
 	 * not found (instead of throwing an exception)
@@ -487,6 +490,10 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 
 	public String[] getBeanDefinitionNames(Class type) {
 		return getBeanFactory().getBeanDefinitionNames(type);
+	}
+
+	public Map getBeansOfType(Class type) {
+		return getBeanFactory().getBeansOfType(type);
 	}
 
 	public BeanFactory getParentBeanFactory() {

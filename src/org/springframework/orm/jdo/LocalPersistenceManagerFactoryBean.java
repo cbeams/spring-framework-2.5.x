@@ -124,6 +124,11 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 		return this.persistenceManagerFactory;
 	}
 
+	public Class getObjectType() {
+		return (this.persistenceManagerFactory != null) ?
+		    this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class;
+	}
+
 	public final boolean isSingleton() {
 		return true;
 	}

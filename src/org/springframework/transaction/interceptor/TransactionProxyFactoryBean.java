@@ -37,7 +37,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
  * @since 21.08.2003
- * @version $Id: TransactionProxyFactoryBean.java,v 1.6 2003-10-13 16:06:08 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.7 2003-10-31 17:01:19 jhoeller Exp $
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
@@ -184,6 +184,18 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 
 	public Object getObject() {
 		return this.proxy;
+	}
+
+	public Class getObjectType() {
+		if (this.proxy != null) {
+			return this.proxy.getClass();
+		}
+		else if (this.target != null) {
+			return this.target.getClass();
+		}
+		else {
+			return null;
+		}
 	}
 
 	public boolean isSingleton() {

@@ -31,24 +31,16 @@ import com.mockobjects.servlet.MockHttpServletResponse;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.3 2003-09-22 21:11:33 johnsonr Exp $
+ * @version $Id: VelocityViewTests.java,v 1.4 2003-10-31 17:01:21 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
-
-	/**
-	 * Constructor for VelocityViewTests.
-	 * @param arg0
-	 */
-	public VelocityViewTests(String arg0) {
-		super(arg0);
-	}
 
 	public void testNoVelocityConfiguration() throws Exception {
 		VelocityView vv = new VelocityView();
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getBeanDefinitionNames(VelocityConfiguration.class);
-		wmc.setReturnValue(new String[0]);
+		wac.getBeansOfType(VelocityConfiguration.class);
+		wmc.setReturnValue(new HashMap());
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
 		wmc.replay();
@@ -99,22 +91,15 @@ public class VelocityViewTests extends TestCase {
 
 	/**
 	 * Check for failure to lookup a template for a range of reasons
-	 * @param templateLookupException
-	 * @throws Exception
 	 */
 	private void testCannotResolveTemplateName(final Exception templateLookupException) throws Exception {
 		final String templateName = "test.vm";
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getBeanDefinitionNames(VelocityConfiguration.class);
-		String configurerName = "velocityConfigurer";
-		wmc.setReturnValue(new String[] { configurerName });
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
-		wac.getBean(configurerName);
-		final Template expectedTemplate = new Template();
-		wmc.setReturnValue(new VelocityConfiguration() {
+		VelocityConfiguration vc = new VelocityConfiguration() {
 			public VelocityEngine getVelocityEngine() {
 				return new VelocityEngine() {
 					public Template getTemplate(String tn)
@@ -123,9 +108,12 @@ public class VelocityViewTests extends TestCase {
 						throw templateLookupException;
 					}
 				};
-
 			}
-		});
+		};
+		wac.getBeansOfType(VelocityConfiguration.class);
+		Map configurers = new HashMap();
+		configurers.put("velocityConfigurer", vc);
+		wmc.setReturnValue(configurers);
 		wmc.replay();
 
 		VelocityView vv = new VelocityView();
@@ -176,18 +164,18 @@ public class VelocityViewTests extends TestCase {
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getBeanDefinitionNames(VelocityConfiguration.class);
-		String configurerName = "velocityConfigurer";
-		wmc.setReturnValue(new String[] { configurerName });
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
-		wac.getBean(configurerName);
 		final Template expectedTemplate = new Template();
-		wmc.setReturnValue(new VelocityConfiguration() {
+		VelocityConfiguration vc = new VelocityConfiguration() {
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
-		});
+		};
+		wac.getBeansOfType(VelocityConfiguration.class);
+		Map configurers = new HashMap();
+		configurers.put("velocityConfigurer", vc);
+		wmc.setReturnValue(configurers);
 		wmc.replay();
 
 		// Let it ask for locale

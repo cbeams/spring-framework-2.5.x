@@ -29,6 +29,10 @@ public class HessianProxyFactoryBean extends HessianClientInterceptor implements
 		return this.serviceProxy;
 	}
 
+	public Class getObjectType() {
+		return (this.serviceProxy != null) ? this.serviceProxy.getClass() : getServiceInterface();
+	}
+	
 	public boolean isSingleton() {
 		return true;
 	}
