@@ -33,6 +33,8 @@ import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.cfg.Configuration;
 import net.sf.hibernate.cfg.Environment;
+import net.sf.hibernate.cfg.ImprovedNamingStrategy;
+import net.sf.hibernate.cfg.NamingStrategy;
 import net.sf.hibernate.connection.UserSuppliedConnectionProvider;
 import org.easymock.MockControl;
 
@@ -307,6 +309,29 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		catch (IllegalArgumentException ex) {
 			// expected
 			assertTrue("Correct exception", ex.getMessage().equals(entityInterceptor.toString()));
+		}
+	}
+
+	public void testLocalSessionFactoryBeanWithNamingStrategy() throws Exception {
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public Configuration setNamingStrategy(NamingStrategy namingStrategy) {
+						throw new IllegalArgumentException(namingStrategy.toString());
+					}
+				};
+			}
+		};
+		sfb.setMappingResources(new String[0]);
+		sfb.setDataSource(new DriverManagerDataSource());
+		sfb.setNamingStrategy(ImprovedNamingStrategy.INSTANCE);
+		try {
+			sfb.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+			assertTrue("Correct exception", ex.getMessage().equals(ImprovedNamingStrategy.INSTANCE.toString()));
 		}
 	}
 
