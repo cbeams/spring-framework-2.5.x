@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow.action;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
@@ -24,7 +25,6 @@ import org.springframework.validation.PropertyEditorRegistrar;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionContext;
 
@@ -42,7 +42,7 @@ import org.springframework.web.flow.FlowExecutionContext;
  * </tr>
  * <tr>
  * <td>formObjectName</td>
- * <td><i>{@link AbstractAction#FORM_OBJECT_ATTRIBUTE}</i></td>
+ * <td><i>{@link AbstractAction#FORM_OBJECT_ATTRIBUTE_NAME}</i></td>
  * <td>The name of the formObject in the model.</td>
  * </tr>
  * <tr>
@@ -86,7 +86,7 @@ import org.springframework.web.flow.FlowExecutionContext;
  */
 public class BindAndValidateAction extends AbstractAction {
 
-	private String formObjectName = FORM_OBJECT_ATTRIBUTE;
+	private String formObjectName = FormObjectAccessor.FORM_OBJECT_ATTRIBUTE_NAME;
 
 	private Class formObjectClass;
 
@@ -234,9 +234,9 @@ public class BindAndValidateAction extends AbstractAction {
 
 	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
 		Object formObject = loadRequiredFormObject(context);
-		ServletRequestDataBinder binder = createBinder(context, formObject);
+		DataBinder binder = createBinder(context, formObject);
 		Event result = bindAndValidate(context, binder);
-		// exposeBindExceptionErrors(context, binder.getErrors());
+		new FormObjectAccessor(context).exposeBindExceptionErrors(binder.getErrors());
 		if (result != null) {
 			return result;
 		}
@@ -371,8 +371,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @return the new binder instance
 	 * @see #initBinder
 	 */
-	protected ServletRequestDataBinder createBinder(FlowExecutionContext context, Object formObject) {
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(formObject, getFormObjectName());
+	protected DataBinder createBinder(FlowExecutionContext context, Object formObject) {
+		DataBinder binder = new DataBinder(formObject, getFormObjectName());
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
 		}
@@ -402,7 +402,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 */
-	protected void initBinder(FlowExecutionContext context, ServletRequestDataBinder binder) {
+	protected void initBinder(FlowExecutionContext context, DataBinder binder) {
 		if (propertyEditorRegistrar != null) {
 			propertyEditorRegistrar.registerCustomEditors(binder);
 		}
@@ -425,7 +425,7 @@ public class BindAndValidateAction extends AbstractAction {
 			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
 					+ "', details='" + binder.getTarget() + "'");
 		}
-		// binder.bind(context);
+		binder.bind(new MutablePropertyValues(context.getEvent().getParameters()));
 		onBind(context, binder.getTarget(), binder.getErrors());
 		if (logger.isDebugEnabled()) {
 			logger.debug("After bind of object '" + binder.getObjectName() + "', details='" + binder.getTarget() + "'");

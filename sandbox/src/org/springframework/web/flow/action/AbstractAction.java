@@ -18,6 +18,8 @@ package org.springframework.web.flow.action;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowConstants;
@@ -38,18 +40,6 @@ import org.springframework.web.flow.LocalEvent;
  * @author Erwin Vervaet
  */
 public abstract class AbstractAction implements Action, InitializingBean {
-
-	/**
-	 * The form object instance is aliased under this attribute name in the flow
-	 * model by the default form setup and bind and validate actions.
-	 */
-	public static final String FORM_OBJECT_ATTRIBUTE = "formObject";
-
-	/**
-	 * The form object errors instance is aliased under this attribute name in
-	 * the flow model by the default form setup and bind and validate actions.
-	 */
-	public static final String FORM_OBJECT_ERRORS_ATTRIBUTE = "formObjectErrors";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -120,7 +110,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * This implementation just returns <code>null</code>.
 	 * @param request The http request
 	 * @param response The http response
-	 * @param model The flow data model
+	 * @param context The flow data context
 	 * @return The non-<code>null</code> action result, in which case the
 	 *         <code>doExecuteAction()</code> will not be called. Or
 	 *         <code>null</code> if the <code>doExecuteAction()</code>
@@ -137,7 +127,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * specific action execution logic.
 	 * @param request The http request
 	 * @param response The http response
-	 * @param model The flow data model
+	 * @param context The flow data context
 	 * @return The action result
 	 * @throws Exception An <b>unrecoverable</b> exception occured, either
 	 *         checked or unchecked
@@ -150,7 +140,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * This implementation does nothing.
 	 * @param request The http request
 	 * @param response The http response
-	 * @param model The flow data model
+	 * @param context The flow data context
 	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
