@@ -20,8 +20,10 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,57 +43,62 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @since 05 May 2001
-*  @version $Id: CachedIntrospectionResults.java,v 1.8 2004-03-19 07:40:13 jhoeller Exp $
+*  @version $Id: CachedIntrospectionResults.java,v 1.9 2004-05-23 20:25:06 jhoeller Exp $
  */
 final class CachedIntrospectionResults {
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
-	/** Map keyed by class containing CachedIntrospectionResults */
-	private static HashMap classCache = new HashMap();
+	/**
+	 * Map keyed by class containing CachedIntrospectionResults.
+	 * Needs to be a WeakHashMap with WeakReferences as values
+	 * to allow for proper garbage collection on shutdown!
+	 */
+	private static final Map classCache = new WeakHashMap();
 
 	/**
 	 * We might use this from the EJB tier, so we don't want to use synchronization.
 	 * Object references are atomic, so we can live with doing the occasional
 	 * unnecessary lookup at startup only.
 	 */
-	protected static CachedIntrospectionResults forClass(Class clazz) throws BeansException {
-		Object results = classCache.get(clazz);
+	protected static synchronized CachedIntrospectionResults forClass(Class clazz) throws BeansException {
+		WeakReference weakRef = (WeakReference) classCache.get(clazz);
+		CachedIntrospectionResults results = (weakRef != null) ? (CachedIntrospectionResults) weakRef.get() : null;
 		if (results == null) {
 			// can throw BeansException
 			results = new CachedIntrospectionResults(clazz);
-			classCache.put(clazz, results);
+			classCache.put(clazz, new WeakReference(results));
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Using cached introspection results for class " + clazz.getName());
+				logger.debug("Using cached introspection results for class [" + clazz.getName() + "]");
 			}
 		}
-		return (CachedIntrospectionResults) results;
+		return results;
 	}
 
 
-	private BeanInfo beanInfo;
+	private final BeanInfo beanInfo;
 
 	/** Property descriptors keyed by property name */
-	private Map propertyDescriptorMap;
+	private final Map propertyDescriptorCache;
 
 	/**
 	 * Create new CachedIntrospectionResults instance fot the given class.
 	 */
-	private CachedIntrospectionResults(Class clazz) throws FatalBeanException {
+	private CachedIntrospectionResults(Class clazz) throws BeansException {
 		try {
 			logger.debug("Getting BeanInfo for class [" + clazz.getName() + "]");
 			this.beanInfo = Introspector.getBeanInfo(clazz);
 
 			logger.debug("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
-			this.propertyDescriptorMap = new HashMap();
+			this.propertyDescriptorCache = new HashMap();
 			// This call is slow so we do it once
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
 				logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() +
 										 "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
-				this.propertyDescriptorMap.put(pds[i].getName(), pds[i]);
+				this.propertyDescriptorCache.put(pds[i].getName(), pds[i]);
 			}
 		}
 		catch (IntrospectionException ex) {
@@ -100,15 +107,15 @@ final class CachedIntrospectionResults {
 	}
 
 	protected BeanInfo getBeanInfo() {
-		return beanInfo;
+		return this.beanInfo;
 	}
 
 	protected Class getBeanClass() {
-		return beanInfo.getBeanDescriptor().getBeanClass();
+		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
 	protected PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
-		PropertyDescriptor pd = (PropertyDescriptor) this.propertyDescriptorMap.get(propertyName);
+		PropertyDescriptor pd = (PropertyDescriptor) this.propertyDescriptorCache.get(propertyName);
 		if (pd == null) {
 			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass().getName() + "]", null);
 		}
