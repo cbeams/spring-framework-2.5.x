@@ -3,27 +3,43 @@
  */
 package org.springframework.web.flow.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
 
-public class FlowFactoryBean implements FactoryBean {
-
-	private String flowId;
-
-	private Collection flowExecutionListeners = new ArrayList(6);
+/**
+ * Factory bean that acts as a director for assembling flows, delegating to a
+ * builder to construct the Flow.
+ * @author Keith Donald
+ */
+public class FlowFactoryBean implements FactoryBean, InitializingBean {
 
 	private FlowBuilder flowBuilder;
 
 	private Flow flow;
 
+	public FlowFactoryBean() {
+
+	}
+
+	public FlowFactoryBean(FlowBuilder flowBuilder) {
+		setFlowBuilder(flowBuilder);
+	}
+
 	public void setFlowBuilder(FlowBuilder flowBuilder) {
 		this.flowBuilder = flowBuilder;
 	}
-	
+
+	public void afterPropertiesSet() {
+		Assert.state(flowBuilder != null, "The flow builder is required to assemble the flow produced by this factory");
+	}
+
 	public Object getObject() throws Exception {
+		return getFlow();
+	}
+
+	public Flow getFlow() {
 		if (this.flow == null) {
 			new FlowAssembler(this.flowBuilder).assemble();
 			this.flow = this.flowBuilder.getResult();
@@ -36,7 +52,7 @@ public class FlowFactoryBean implements FactoryBean {
 	}
 
 	public boolean isSingleton() {
-		return false;
+		return true;
 	}
 
 	public static class FlowAssembler {
@@ -52,5 +68,4 @@ public class FlowFactoryBean implements FactoryBean {
 			this.builder.buildExecutionListeners();
 		}
 	}
-
 }
