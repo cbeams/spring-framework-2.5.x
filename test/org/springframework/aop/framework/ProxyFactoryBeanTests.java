@@ -52,8 +52,7 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * Test cases for AOP FactoryBean, using XML bean factory.
- * Note that this FactoryBean will work in any bean factory
- * implementation.
+ * Note that this FactoryBean will work in any bean factory implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
  */
@@ -651,15 +650,14 @@ public class ProxyFactoryBeanTests extends TestCase {
 		}
 	}
 	
-	 /**
-     * Simple test of a ProxyFactoryBean that has an inner bean as target that specifies autowiring.
-     * Checks for correct use of getType() by bean factory.
-     */
-    public void testInnerBeanTargetUsingAutowiring() {
-        BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryBeanAutowiringTests.xml", getClass()));
-        bf.getBean("testBean");
-        
-    }
+	/**
+	 * Simple test of a ProxyFactoryBean that has an inner bean as target that specifies autowiring.
+	 * Checks for correct use of getType() by bean factory.
+	 */
+	public void testInnerBeanTargetUsingAutowiring() {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryBeanAutowiringTests.xml", getClass()));
+		bf.getBean("testBean");
+	}
 	
 
 	/**

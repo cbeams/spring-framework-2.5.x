@@ -203,24 +203,26 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 
 	/**
-	 * Return a proxy. Invoked when clients obtain beans
-	 * from this factory bean. Create an instance of the AOP proxy to be returned by this factory.
+	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
+	 * Create an instance of the AOP proxy to be returned by this factory.
 	 * The instance will be cached for a singleton, and create on each call to
 	 * getObject() for a proxy.
-	 * @return Object a fresh AOP proxy reflecting the current
-	 * state of this factory
+	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	public Object getObject() throws BeansException {
-		return (this.singleton) ? getSingletonInstance() : newPrototypeInstance();
-	}
-
-	public Class getObjectType() {
-		return (this.singleton ? getSingletonInstance().getClass() : getTargetSource().getTargetClass());
+		return this.singleton ? getSingletonInstance() : newPrototypeInstance();
 	}
 
 	/**
-	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
+	 * Return the type of the proxy. Will check the singleton instance if
+	 * already created, falling back to the TargetSource's target class.
+	 * @see org.springframework.aop.TargetSource#getTargetClass
 	 */
+	public Class getObjectType() {
+		return (this.singletonInstance != null) ?
+		    this.singletonInstance.getClass() : getTargetSource().getTargetClass();
+	}
+
 	public boolean isSingleton() {
 		return this.singleton;
 	}
