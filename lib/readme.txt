@@ -70,7 +70,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0.7 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.0.8 (http://www.ibatis.com)
 - ibatis-sqlmap-2.jar is required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
@@ -193,6 +193,11 @@ distribution/website before using any of them in your own applications.
 - Jakarta's JSTL implementation 1.0.6 (http://jakarta.apache.org/taglibs)
 - required for running JPetStore, Petclinic, Countries, and Tiles Example
 
+* jamon/JAMon.jar
+- JAMon API (Java Application Monitor) 1.0 (http://www.jamonapi.com)
+- required for building the framework
+- required at runtime when using Spring's JamonPerformanceMonitorInterceptor
+
 * jasperreports/jasperreports-0.6.2.jar
 - JasperReports 0.6.2 (http://www.jasperreports.org)
 - required for building the framework
@@ -226,8 +231,8 @@ distribution/website before using any of them in your own applications.
 - JUnit 3.8.1 (http://www.junit.org)
 - required for building the test suite
 
-* log4j/log4j-1.2.8.jar
-- Log4J 1.2.8 (http://logging.apache.org/log4j)
+* log4j/log4j-1.2.9.jar
+- Log4J 1.2.9 (http://logging.apache.org/log4j)
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
