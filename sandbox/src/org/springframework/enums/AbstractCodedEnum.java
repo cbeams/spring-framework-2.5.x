@@ -16,15 +16,11 @@
 package org.springframework.enums;
 
 import java.io.Serializable;
-import java.util.Comparator;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.comparator.ComparableComparator;
-import org.springframework.util.comparator.CompoundComparator;
-import org.springframework.util.comparator.NullSafeComparator;
 
 /**
  * Abstract base superclass for CodedEnum implementations.

@@ -70,7 +70,7 @@ public interface CodedEnum extends MessageSourceResolvable, Comparable {
      * natural order.
      */
     public static final Comparator DEFAULT_ORDER = new CompoundComparator(
-            new Comparator[] { LABEL_ORDER, ComparableComparator.instance() });
+            new Comparator[] { LABEL_ORDER, CODE_ORDER });
 
     /**
      * Returns this enumeration's type. Each type should be unique.
