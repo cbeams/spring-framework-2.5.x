@@ -50,12 +50,6 @@
 		<property name="singleton"><value>false</value></property>
 	</bean>
 
-	<bean id="factoryPassThrough"
-		class="org.springframework.beans.factory.DummyFactory">
-		<property name="singleton"><value>true</value></property>
-		<property name="propertyValues"><value>name=passThrough</value></property>
-	</bean>
-
 	<!-- Check that the circular reference resolution mechanism doesn't break
 	     repeated references to the same FactoryBean -->
 	<bean id="factoryReferencer" class="org.springframework.beans.factory.xml.DummyReferencer">

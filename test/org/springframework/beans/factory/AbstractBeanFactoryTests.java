@@ -28,7 +28,7 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
  * @version $RevisionId$
  * REQUIRES THE FOLLOWING BEAN DEFINITIONS:
  * see lbiinit
- * @version $Id: AbstractBeanFactoryTests.java,v 1.6 2003-11-21 09:52:46 jhoeller Exp $
+ * @version $Id: AbstractBeanFactoryTests.java,v 1.7 2003-12-04 18:45:15 jhoeller Exp $
  */
 public abstract class AbstractBeanFactoryTests extends TestCase {
 
@@ -245,8 +245,11 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		assertTrue(getBeanFactory().isSingleton("singletonFactory"));
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
 		assertTrue("Singleton from factory has correct name, not " + tb.getName(), tb.getName().equals(DummyFactory.SINGLETON_NAME));
+		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("singletonFactory");
 		assertTrue("Singleton references ==", tb == tb2);
+		assertTrue("Created bean is BeanFactoryAware", tb.getBeanFactory() != null);
+		assertTrue("FactoryBean is BeanFactoryAware", factory.getBeanFactory() != null);
 	}
 	
 	public void testFactoryPrototype() throws Exception {
@@ -256,16 +259,6 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		assertTrue(!tb.getName().equals(DummyFactory.SINGLETON_NAME));
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("prototypeFactory");
 		assertTrue("Prototype references !=", tb != tb2);
-	}
-	
-	/**
-	 * Check that passthrough values work
-	 * @throws Exception
-	 */
-	public void testPassthroughFactoryPassesThroughPropertyValues() throws Exception {
-		TestBean tb = (TestBean) getBeanFactory().getBean("factoryPassThrough");
-		assertTrue("Name property was passed through: incorrect value was '" + tb.getName() + "'", 
-				tb.getName().equals("passThrough"));
 	}
 	
 	/**

@@ -173,10 +173,6 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		public String[] getAliases(String name) {
 			throw new UnsupportedOperationException("getAliases");
 		}
-
-		public void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException("autowireExistingBean");
-		}
 	}
 
 	/* (non-Javadoc)

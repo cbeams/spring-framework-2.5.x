@@ -1,16 +1,19 @@
 package org.springframework.beans.factory.xml;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DummyFactory;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.TestBean;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.ITestBean;
 
 /**
  * @author Juergen Hoeller
@@ -36,6 +39,17 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		// Load from classpath, NOT a file path
 		InputStream is = getClass().getResourceAsStream("test.xml");
 		this.factory = new XmlBeanFactory(is, parent);
+		this.factory.addBeanPostProcessor(new BeanPostProcessor() {
+			public Object postProcessBean(Object bean, String name) throws BeansException {
+				if (bean instanceof TestBean) {
+					((TestBean) bean).setPostProcessed(true);
+				}
+				if (bean instanceof DummyFactory) {
+					((DummyFactory) bean).setPostProcessed(true);
+				}
+				return bean;
+			}
+		});
 		this.factory.preInstantiateSingletons();
 	}
 
@@ -70,6 +84,17 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		assertTrue("Not referencing same bean twice", ref1.getTestBean1() != ref2.getTestBean1());
 		assertTrue("Not referencing same bean twice", ref1.getTestBean2() != ref2.getTestBean2());
 		assertTrue("Not referencing same bean twice", ref1.getTestBean1() != ref2.getTestBean2());
+	}
+
+	public void testBeanPostProcessor() throws Exception {
+		TestBean kerry = (TestBean) getBeanFactory().getBean("kerry");
+		TestBean kathy = (TestBean) getBeanFactory().getBean("kathy");
+		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
+		TestBean factoryCreated = (TestBean) getBeanFactory().getBean("singletonFactory");
+		assertTrue(kerry.isPostProcessed());
+		assertTrue(kathy.isPostProcessed());
+		assertTrue(factory.isPostProcessed());
+		assertTrue(factoryCreated.isPostProcessed());
 	}
 
 }

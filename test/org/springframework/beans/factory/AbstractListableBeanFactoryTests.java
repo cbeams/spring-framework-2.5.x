@@ -27,7 +27,7 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	 * Subclasses can override this.
 	 */
 	public void testCount() {
-		assertCount(15);
+		assertCount(14);
 	}
 	
 	protected final void assertCount(int count) {
@@ -56,8 +56,8 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	 * and it may even change over time).
 	 */
 	public void testGetCountForFactoryClass() {
-		assertTrue("Should have 3 factories, not " + getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length, 
-			getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length == 3);
+		assertTrue("Should have 2 factories, not " + getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length,
+			getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length == 2);
 	}
 
 }

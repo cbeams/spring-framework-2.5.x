@@ -14,7 +14,9 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.beans.factory.xml.DependenciesBean;
+import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 
 /**
  * This largely tests Properties population:
@@ -363,14 +365,25 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		}
 	}
 
+	public void testAutowireConstructor() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
+		lbf.registerBeanDefinition("spouse", bd);
+		ConstructorDependenciesBean bean = (ConstructorDependenciesBean) lbf.autowireConstructor(ConstructorDependenciesBean.class);
+		Object spouse = lbf.getBean("spouse");
+		assertTrue(bean.getSpouse1() == spouse);
+		assertTrue(BeanFactoryUtils.beanOfType(lbf, TestBean.class) == spouse);
+	}
+
 	public void testAutowireExistingBeanByName() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
 		lbf.registerBeanDefinition("spouse", bd);
 		DependenciesBean existingBean = new DependenciesBean();
-		lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_NAME, true);
-		TestBean test = (TestBean) lbf.getBean("spouse");
-		assertEquals(existingBean.getSpouse(), test);
+		lbf.autowireExistingBean(existingBean, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, true);
+		TestBean spouse = (TestBean) lbf.getBean("spouse");
+		assertEquals(existingBean.getSpouse(), spouse);
+		assertTrue(BeanFactoryUtils.beanOfType(lbf, TestBean.class) == spouse);
 	}
 
 	public void testAutowireExistingBeanByNameWithDependencyCheck() {
@@ -379,7 +392,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		lbf.registerBeanDefinition("spous", bd);
 		DependenciesBean existingBean = new DependenciesBean();
 		try {
-			lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_NAME, true);
+			lbf.autowireExistingBean(existingBean, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, true);
 			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException ex) {
@@ -392,7 +405,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
 		lbf.registerBeanDefinition("spous", bd);
 		DependenciesBean existingBean = new DependenciesBean();
-		lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_NAME, false);
+		lbf.autowireExistingBean(existingBean, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, false);
 		assertNull(existingBean.getSpouse());
 	}
 
@@ -401,7 +414,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
 		lbf.registerBeanDefinition("test", bd);
 		DependenciesBean existingBean = new DependenciesBean();
-		lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_TYPE, true);
+		lbf.autowireExistingBean(existingBean, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 		TestBean test = (TestBean) lbf.getBean("test");
 		assertEquals(existingBean.getSpouse(), test);
 	}
@@ -410,7 +423,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		DependenciesBean existingBean = new DependenciesBean();
 		try {
-			lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_TYPE, true);
+			lbf.autowireExistingBean(existingBean, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException ex) {
@@ -421,7 +434,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 	public void testAutowireExistingBeanByTypeWithNoDependencyCheck() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		DependenciesBean existingBean = new DependenciesBean();
-		lbf.autowireExistingBean(existingBean, BeanFactory.AUTOWIRE_BY_TYPE, false);
+		lbf.autowireExistingBean(existingBean, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 		assertNull(existingBean.getSpouse());
 	}
 

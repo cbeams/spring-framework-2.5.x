@@ -25,6 +25,10 @@ public class ConstructorDependenciesBean {
 
 	private LifecycleBean other;
 
+	public ConstructorDependenciesBean(TestBean spouse1) {
+		this.spouse1 = spouse1;
+	}
+
 	public ConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, LifecycleBean other) {
 		this.spouse1 = spouse1;
 		this.spouse2 = spouse2;

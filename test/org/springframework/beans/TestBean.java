@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.4 2003-11-12 19:09:53 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.5 2003-12-04 18:45:15 jhoeller Exp $
  */
 
 package org.springframework.beans;
@@ -10,13 +10,20 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanFactory;
+
 /**
  * Simple test bean used for testing bean factories,
  * AOP framework etc.
  * @author  Rod Johnson
  * @since 15 April 2001
  */
-public class TestBean implements ITestBean, IOther {
+public class TestBean implements BeanFactoryAware, ITestBean, IOther {
+
+	private BeanFactory beanFactory;
+
+	private boolean postProcessed;
 
 	/** Holds value of property age. */
 	private int age;
@@ -52,6 +59,22 @@ public class TestBean implements ITestBean, IOther {
 	public TestBean(String name, int age) {
 		this.name = name;
 		this.age = age;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+	public BeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+
+	public void setPostProcessed(boolean postProcessed) {
+		this.postProcessed = postProcessed;
+	}
+
+	public boolean isPostProcessed() {
+		return postProcessed;
 	}
 
 	public void setTouchy(String touchy) throws Exception {

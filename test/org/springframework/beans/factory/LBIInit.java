@@ -54,12 +54,6 @@ public class LBIInit {
 		m.put("prototypeFactory.class", "org.springframework.beans.factory.DummyFactory");
 		m.put("prototypeFactory.singleton", "false");
 		
-		m.put("factoryPassThrough.class", "org.springframework.beans.factory.DummyFactory");
-		m.put("factoryPassThrough.singleton", "true");
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("name", "passThrough"));
-		m.put("factoryPassThrough.propertyValues", pvs);
-		
 		m.put("mustBeInitialized.class", "org.springframework.beans.factory.MustBeInitialized");
 		
 		m.put("lifecycle.class", "org.springframework.beans.factory.LifecycleBean");
