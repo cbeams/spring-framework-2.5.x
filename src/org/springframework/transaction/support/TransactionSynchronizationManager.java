@@ -67,11 +67,7 @@ public abstract class TransactionSynchronizationManager {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
-	private static ThreadLocal resources = new ThreadLocal() {
-		protected Object initialValue() {
-			return new HashMap();
-		}
-	};
+	private static ThreadLocal resources = new ThreadLocal();
 
 	private static final ThreadLocal synchronizations = new ThreadLocal();
 
@@ -84,11 +80,16 @@ public abstract class TransactionSynchronizationManager {
 	 * Return all resources that are bound to the current thread.
 	 * <p>Mainly for debugging purposes. Resource managers should always invoke
 	 * hasResource for a specific resource key that they are interested in.
-	 * @return Map with resource keys and resource objects
+	 * @return Map with resource keys and resource objects,
+	 * or null if currently none bound
 	 * @see #hasResource
 	 */
 	public static Map getResourceMap() {
-		return (Map) resources.get();
+		Map map = (Map) resources.get();
+		if (map == null) {
+			map = new HashMap();
+		}
+		return Collections.unmodifiableMap(map);
 	}
 
 	/**
@@ -97,7 +98,8 @@ public abstract class TransactionSynchronizationManager {
 	 * @return if there is a value bound to the current thread
 	 */
 	public static boolean hasResource(Object key) {
-		return getResourceMap().containsKey(key);
+		Map map = (Map) resources.get();
+		return (map != null && map.containsKey(key));
 	}
 
 	/**
@@ -106,7 +108,11 @@ public abstract class TransactionSynchronizationManager {
 	 * @return a value bound to the current thread, or null if none
 	 */
 	public static Object getResource(Object key) {
-		Object value = getResourceMap().get(key);
+		Map map = (Map) resources.get();
+		if (map == null) {
+			return null;
+		}
+		Object value = map.get(key);
 		if (value != null && logger.isDebugEnabled()) {
 			logger.debug("Retrieved value [" + value + "] for key [" + key + "] bound to thread [" +
 									 Thread.currentThread().getName() + "]");
@@ -121,10 +127,16 @@ public abstract class TransactionSynchronizationManager {
 	 * @throws IllegalStateException if there is already a value bound to the thread
 	 */
 	public static void bindResource(Object key, Object value) throws IllegalStateException {
-		if (hasResource(key)) {
+		Map map = (Map) resources.get();
+		// set ThreadLocal Map if none found
+		if (map == null) {
+			map = new HashMap();
+			resources.set(map);
+		}
+		if (map.containsKey(key)) {
 			throw new IllegalStateException("Already a value for key [" + key + "] bound to thread");
 		}
-		getResourceMap().put(key, value);
+		map.put(key, value);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bound value [" + value + "] for key [" + key + "] to thread [" +
 									 Thread.currentThread().getName() + "]");
@@ -138,10 +150,15 @@ public abstract class TransactionSynchronizationManager {
 	 * @throws IllegalStateException if there is no value bound to the thread
 	 */
 	public static Object unbindResource(Object key) throws IllegalStateException {
-		if (!hasResource(key)) {
+		Map map = (Map) resources.get();
+		if (map == null || !map.containsKey(key)) {
 			throw new IllegalStateException("No value for key [" + key + "] bound to thread");
 		}
-		Object value = getResourceMap().remove(key);
+		Object value = map.remove(key);
+		// remove entire ThreadLocal if empty
+		if (map.isEmpty()) {
+			resources.set(null);
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removed value [" + value + "] for key [" + key + "] from thread [" +
 									 Thread.currentThread().getName() + "]");
