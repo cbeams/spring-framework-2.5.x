@@ -91,37 +91,22 @@ public class SqlMapTests extends TestCase {
 	public void testSqlMapDaoSupport() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
-		TestSqlMapDaoSupport testDao = new TestSqlMapDaoSupport();
+		SqlMapDaoSupport testDao = new SqlMapDaoSupport() {
+		};
 		testDao.setDataSource(ds);
-		assertEquals(ds, testDao.getDSource());
+		assertEquals(ds, testDao.getDataSource());
 
 		SqlMap map = new SqlMap();
 		testDao.setSqlMap(map);
-		assertEquals(map, testDao.getSMap());
+		assertEquals(map, testDao.getSqlMap());
 
 		SqlMapTemplate template = new SqlMapTemplate();
 		template.setDataSource(ds);
 		template.setSqlMap(map);
 		testDao.setSqlMapTemplate(template);
-		assertEquals(template, testDao.getSMTemplate());
+		assertEquals(template, testDao.getSqlMapTemplate());
 
 		testDao.afterPropertiesSet();
-	}
-	
-
-	private class TestSqlMapDaoSupport extends SqlMapDaoSupport{
-	
-		public DataSource getDSource(){
-			return super.getDataSource();
-		}
-	
-		public SqlMap getSMap() {
-			return super.getSqlMap();
-		}
-	
-		public SqlMapTemplate getSMTemplate(){
-			return super.getSqlMapTemplate();
-		}
 	}
 
 }

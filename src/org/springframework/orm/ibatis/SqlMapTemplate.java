@@ -33,10 +33,10 @@ import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Helper class that simplifies data access via the MappedStatement API of the
- * iBATIS Database Layer, and converts checked SQLExceptions into unchecked
- * DataAccessExceptions, compatible to the org.springframework.dao exception
- * hierarchy. Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
+ * Helper class that simplifies data access via the MappedStatement API of iBATIS
+ * SQL Maps, and converts checked SQLExceptions into unchecked DataAccessExceptions,
+ * following the <code>org.springframework.dao</code> exception hierarchy.
+ * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
  *
  * <p>The main method is execute, taking the name of a mapped statement defined
  * in the iBATIS SqlMap config file and a callback that implements a data access

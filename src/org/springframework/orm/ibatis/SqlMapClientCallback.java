@@ -21,8 +21,8 @@ import java.sql.SQLException;
 import com.ibatis.sqlmap.client.SqlMapExecutor;
 
 /**
- * Callback interface for data access code that works on an iBATIS Database Layer
- * SqlMapSession. To be used with SqlMapClientTemplate's execute method,
+ * Callback interface for data access code that works with the iBATIS Database Layer
+ * SqlMapExecutor interfae. To be used with SqlMapClientTemplate's execute method,
  * assumably often as anonymous classes within a method implementation.
  *
  * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
@@ -34,7 +34,7 @@ import com.ibatis.sqlmap.client.SqlMapExecutor;
 public interface SqlMapClientCallback {
 
 	/**
-	 * Gets called by SqlMapClientTemplate.execute with an active SqlMapSession.
+	 * Gets called by SqlMapClientTemplate.execute with an active SqlMapExecutor.
 	 * Does not need to care about activating or closing the session,
 	 * or handling transactions.
 	 *
