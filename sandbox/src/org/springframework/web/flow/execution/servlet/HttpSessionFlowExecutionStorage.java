@@ -62,7 +62,8 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 			FlowExecutionStorageException {
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(getHttpServletRequest(requestingEvent), id);
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			throw new NoSuchFlowExecutionException(id, e);
 		}
 	}
@@ -90,7 +91,7 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 	}
 
 	/**
-	 * Helper to generate a unique id for a flow execution in the storage
+	 * Helper to generate a unique id for a flow execution in the storage.
 	 */
 	protected String createId() {
 		return new RandomGuid().toString();

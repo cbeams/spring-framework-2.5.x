@@ -37,29 +37,6 @@ public abstract class FlowConstants {
 	 */
 	public static final String SEPARATOR = ".";
 
-	// controller constants
-
-	/**
-	 * Clients can send the current state to a controller in a request parameter
-	 * with this name ("_currentStateId").
-	 */
-	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
-
-	/**
-	 * Clients can send the event to be signaled to a controller in a request
-	 * parameter with this name ("_eventId").
-	 */
-	public static final String EVENT_ID_PARAMETER = "_eventId";
-
-	/**
-	 * The event to signaled can also be sent to a controller using a request
-	 * attribute set by an intercepting filter, with this name
-	 * ("_mapped_eventId"). Use this when you can't use the EVENT_ID_PARAMETER
-	 * to pass in the event -- for example, when using image buttons with
-	 * javascript restrictions.
-	 */
-	public static final String EVENT_ID_REQUEST_ATTRIBUTE = "_mapped_eventId";
-
 	// transaction management constants
 
 	/**

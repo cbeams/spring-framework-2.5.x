@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution.servlet;
+package org.springframework.web.flow.execution.portlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -30,35 +30,35 @@ import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.FlowExecutionManager;
 
 /**
- * Flow execution manager to manage flow executions using HTTP servlet
- * requests and the HTTP session.
+ * Flow execution manager to manage flow executions using portlet requests and
+ * the portlet session.
  * 
- * @author Erwin Vervaet
- * @author Keith Donald
+ * @author J.Enrique Ruiz
+ * @author César Ordiñana
  */
-public class HttpServletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
+public class PortletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
 
 	/**
-	 * Creates an HTTP-servlet based flow execution manager.
+	 * Creates a portlet based flow execution manager.
 	 */
-	public HttpServletFlowExecutionManager() {
+	public PortletFlowExecutionManager() {
 		initDefaults();
 	}
 
 	/**
-	 * Creates an HTTP-servlet based flow execution manager.
+	 * Creates a portlet based flow execution manager.
 	 * @param flow the flow to manage
 	 */
-	public HttpServletFlowExecutionManager(Flow flow) {
+	public PortletFlowExecutionManager(Flow flow) {
 		initDefaults();
 		setFlow(flow);
 	}
 
 	/**
-	 * Creates an HTTP-servlet based flow execution manager.
+	 * Creates a portlet based flow execution manager.
 	 * @param flowLocator the locator to find flows to manage
 	 */
-	public HttpServletFlowExecutionManager(FlowLocator flowLocator) {
+	public PortletFlowExecutionManager(FlowLocator flowLocator) {
 		initDefaults();
 		setFlowLocator(flowLocator);
 	}
@@ -67,7 +67,7 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	 * Set default properties for this manager.
 	 */
 	protected void initDefaults() {
-		setFlowExecutionStorage(new HttpSessionFlowExecutionStorage());
+		setFlowExecutionStorage(new PortletSessionFlowExecutionStorage());
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -78,26 +78,26 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	}
 
 	/**
-	 * The main entry point into managed HTTP-based flow executions.
-	 * @param request the current HTTP request
-	 * @param response the current HTTP response
+	 * The main entry point into managed portlet flow executions.
+	 * @param request the current portlet request
+	 * @param response the current portlet response
 	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
 	 */
-	public ViewDescriptor handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public ViewDescriptor handle(PortletRequest request, PortletResponse response) throws Exception {
 		return handle(createEvent(request, response));
 	}
 
 	/**
-	 * The main entry point into managed HTTP-based flow executions.
-	 * @param request the current HTTP request
-	 * @param response the current HTTP response
-	 * @param flowExecutionListener a listener interested in flow execution
-	 *        lifecycle events that happen <i>while handling this request</i>
+	 * The main entry point into managed portlet flow executions.
+	 * @param request the current portlet request
+	 * @param response the current portlet response
+	 * @param flowExecutionListener a listener interested in flow
+	 *        execution lifecycle events that happen <i>while handling this request</i>
 	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
 	 */
-	public ViewDescriptor handle(HttpServletRequest request, HttpServletResponse response,
+	public ViewDescriptor handle(PortletRequest request, PortletResponse response,
 			FlowExecutionListener flowExecutionListener) throws Exception {
 		return handle(createEvent(request, response), flowExecutionListener);
 	}
@@ -105,12 +105,9 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	// subclassing hooks
 
 	/**
-	 * Create a flow event wrapping given request and response. Subclasses
-	 * can override this, e.g. when the want to use special names for the
-	 * request parameters.
+	 * Create a flow event wrapping given portlet request and response.
 	 */
-	protected Event createEvent(HttpServletRequest request, HttpServletResponse response) {
-		return new HttpServletRequestEvent(request, response);
+	protected Event createEvent(PortletRequest request, PortletResponse response) {
+		return new PortletRequestEvent(request, response);
 	}
-
 }

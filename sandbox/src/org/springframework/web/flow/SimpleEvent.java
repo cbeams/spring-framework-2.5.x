@@ -16,7 +16,6 @@
 package org.springframework.web.flow;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public class SimpleEvent extends Event {
 	/**
 	 * The event timestamp.
 	 */
-	private long timestamp = new Date().getTime();
+	private long timestamp = System.currentTimeMillis();
 
 	/**
 	 * The state in which this event was signaled (optional).
@@ -56,6 +55,14 @@ public class SimpleEvent extends Event {
 	 * Event parameters (optional).
 	 */
 	private Map parameters;
+	
+	/**
+	 * Constructor for use in subclasses.
+	 * @param source the source of the event
+	 */
+	protected SimpleEvent(Object source) {
+		super(source);
+	}
 
 	/**
 	 * Create a simple event with the specified <code>id</code>.
@@ -77,7 +84,7 @@ public class SimpleEvent extends Event {
 	public SimpleEvent(Object source, String id, String stateId) {
 		super(source);
 		setId(id);
-		this.stateId = stateId;
+		setStateId(stateId);
 	}
 
 	/**
@@ -105,8 +112,12 @@ public class SimpleEvent extends Event {
 	public SimpleEvent(Object source, String id, String stateId, Map parameters) {
 		super(source);
 		setId(id);
-		this.stateId = stateId;
+		setStateId(stateId);
 		setParameters(parameters);
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	/**
@@ -117,25 +128,19 @@ public class SimpleEvent extends Event {
 		this.id = id;
 	}
 
-	/**
-	 * Set the contextual parameters.
-	 */
-	protected void setParameters(Map parameters) {
-		if (parameters != null) {
-			this.parameters = new HashMap(parameters);
-		}
-	}
-
-	public String getId() {
-		return id;
-	}
-
 	public long getTimestamp() {
 		return timestamp;
 	}
 
 	public String getStateId() {
 		return stateId;
+	}
+	
+	/**
+	 * Set the state identifier.
+	 */
+	protected void setStateId(String stateId) {
+		this.stateId = stateId;
 	}
 
 	public Object getParameter(String parameterName) {
@@ -147,6 +152,15 @@ public class SimpleEvent extends Event {
 		}
 	}
 
+	/**
+	 * Set the contextual parameters.
+	 */
+	protected void setParameters(Map parameters) {
+		if (parameters != null) {
+			this.parameters = new HashMap(parameters);
+		}
+	}
+
 	public Map getParameters() {
 		if (parameters != null) {
 			return Collections.unmodifiableMap(parameters);
@@ -154,5 +168,12 @@ public class SimpleEvent extends Event {
 		else {
 			return null;
 		}
+	}
+	
+	/**
+	 * Add given parameters to the set of parameters of this event.
+	 */
+	protected void addParameters(Map parameters) {
+		this.parameters.putAll(parameters);
 	}
 }

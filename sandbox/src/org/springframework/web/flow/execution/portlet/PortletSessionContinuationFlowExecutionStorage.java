@@ -13,34 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution.servlet;
+package org.springframework.web.flow.execution.portlet;
 
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
 import org.springframework.web.flow.execution.FlowExecutionContinuation;
 import org.springframework.web.flow.execution.FlowExecutionStorageException;
-import org.springframework.web.util.WebUtils;
+import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * Flow execution storage that stores flow executions as <i>continuations</i>
- * in the HttpSession.
+ * in the PortletSession.
  * <p>
- * A downside of this storage strategy (and of server-side continuations in general)
- * is that there could be many copies of the flow execution stored in the HTTP
- * session, increasing server memory requirements. It is advised that you use the
- * {@link org.springframework.web.flow.support.ExpiredFlowCleanupFilter} to
- * cleanup any flow execution continuations as soon as the can be considered
- * to have expired.
+ * A downside of this storage strategy (and of server-side continuations in
+ * general) is that there could be many copies of the flow execution stored in
+ * the portlet session, increasing server memory requirements.
  * <p>
- * This storage strategy requires a <code>HttpServletRequestEvent</code>.
+ * This storage strategy requires a <code>PortletRequestEvent</code>.
  * 
- * @see org.springframework.web.flow.support.ExpiredFlowCleanupFilter
- * @see org.springframework.web.flow.execution.servlet.HttpServletRequestEvent
+ * @see org.springframework.web.flow.execution.portlet.PortletRequestEvent
  * 
- * @author Erwin Vervaet
+ * @author J.Enrique Ruiz
+ * @author César Ordiñana
  */
-public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlowExecutionStorage {
+public class PortletSessionContinuationFlowExecutionStorage extends PortletSessionFlowExecutionStorage {
 
 	private boolean compress = false;
 
@@ -58,11 +55,11 @@ public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlow
 		this.compress = compress;
 	}
 
-	public FlowExecution load(String id, Event requestingEvent) throws NoSuchFlowExecutionException,
-			FlowExecutionStorageException {
+	public FlowExecution load(String id, Event requestingEvent)
+			throws NoSuchFlowExecutionException, FlowExecutionStorageException {
 		try {
-			FlowExecutionContinuation continuation = (FlowExecutionContinuation)WebUtils.getRequiredSessionAttribute(
-					getHttpServletRequest(requestingEvent), id);
+			FlowExecutionContinuation continuation =
+				(FlowExecutionContinuation)PortletUtils.getRequiredSessionAttribute(getPortletRequest(requestingEvent), id);
 			return continuation.getFlowExecution();
 		}
 		catch (IllegalStateException e) {
@@ -74,7 +71,8 @@ public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlow
 			throws FlowExecutionStorageException {
 		// generate a new id for each continuation
 		id = createId();
-		getHttpSession(requestingEvent).setAttribute(id, new FlowExecutionContinuation(flowExecution, isCompress()));
+		getPortletSession(requestingEvent).setAttribute(id,
+				new FlowExecutionContinuation(flowExecution, isCompress()));
 		return id;
 	}
 
