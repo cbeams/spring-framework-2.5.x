@@ -11,12 +11,15 @@ package org.springframework.jdbc.datasource;
  * @since 02.05.2003
  * @see DataSourceTransactionManager
  * @see ConnectionHolder
+ * @version $Id: DataSourceTransactionObject.java,v 1.3 2003-11-27 14:32:42 johnsonr Exp $
  */
 public class DataSourceTransactionObject {
 
 	private ConnectionHolder connectionHolder;
 
 	private Integer previousIsolationLevel;
+	
+	private boolean mustRestoreAutoCommit;
 
 	/**
 	 * Create DataSourceTransactionObject for new ConnectionHolder.
@@ -50,4 +53,16 @@ public class DataSourceTransactionObject {
 		return previousIsolationLevel;
 	}
 
+	/**
+	 * @return was autocommit previously set?
+	 */
+	public boolean getMustRestoreAutoCommit() {
+		return mustRestoreAutoCommit;
+	}
+	/**
+	 * @param whether autocommit was previously set?
+	 */
+	public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
+		this.mustRestoreAutoCommit = mustRestoreAutoCommit;
+	}
 }

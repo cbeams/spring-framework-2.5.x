@@ -28,18 +28,34 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @since 04.07.2003
  */
 public class DataSourceTransactionManagerTests extends TestCase {
+	
+	public void testTransactionCommitRestoringAutoCommitToTrue() throws Exception {
+		testTransactionCommitRestoringAutoCommit(true);
+	}
+	
+	public void testTransactionCommitWithAutoCommitToFalse() throws Exception {
+		testTransactionCommitRestoringAutoCommit(false);
+	}
 
-	public void testTransactionCommit() throws Exception {
+	private void testTransactionCommitRestoringAutoCommit(final boolean autoCommit) throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
-		con.setAutoCommit(false);
-		conControl.setVoidCallable(1);
+		con.getAutoCommit();
+		conControl.setReturnValue(autoCommit, 1);
+		if (autoCommit) {
+			// Must disable autocommit
+			con.setAutoCommit(false);
+			conControl.setVoidCallable(1);
+		}
 		con.commit();
 		conControl.setVoidCallable(1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
-		con.setAutoCommit(true);
-		conControl.setVoidCallable(1);
+		if (autoCommit) {
+			// Must restore autocommit
+			con.setAutoCommit(true);
+			conControl.setVoidCallable(1);
+		}
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -60,6 +76,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 				assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue("Is new transaction", status.isNewTransaction());
+				assertEquals("Preserved information about old autocommit setting", 
+						autoCommit, ((DataSourceTransactionObject) status.getTransaction()).getMustRestoreAutoCommit());
 			}
 		});
 
@@ -68,18 +86,34 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.verify();
 		dsControl.verify();
 	}
+	
+	public void testTransactionRollbackRestoringAutoCommitToTrue() throws Exception  {
+		testTransactionRollbackRestoringAutoCommit(true);
+	}
+	
+	public void testTransactionRollbackWithAutoCommitFalse() throws Exception  {
+		testTransactionRollbackRestoringAutoCommit(false);
+	}
 
-	public void testTransactionRollback() throws Exception {
+	private void testTransactionRollbackRestoringAutoCommit(final boolean autoCommit) throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
-		con.setAutoCommit(false);
-		conControl.setVoidCallable(1);
+		con.getAutoCommit();
+		conControl.setReturnValue(autoCommit, 1);
+		if (autoCommit) {
+			// Must disable autocommit
+			con.setAutoCommit(false);
+			conControl.setVoidCallable(1);
+		}
 		con.rollback();
 		conControl.setVoidCallable(1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
-		con.setAutoCommit(true);
-		conControl.setVoidCallable(1);
+		if (autoCommit) {
+			// Must restore autocommit
+			con.setAutoCommit(true);
+			conControl.setVoidCallable(1);
+		}
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -102,6 +136,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 					assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue("Is new transaction", status.isNewTransaction());
+					assertEquals("Preserved information about old autocommit setting", 
+											autoCommit, ((DataSourceTransactionObject) status.getTransaction()).getMustRestoreAutoCommit());
 					throw ex;
 				}
 			});
@@ -162,14 +198,13 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	public void testExistingTransaction() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
-		con.setAutoCommit(false);
-		conControl.setVoidCallable(1);
+		con.getAutoCommit();
+		// Won't need to reset it to true
+		conControl.setReturnValue(false, 1);
 		con.rollback();
 		conControl.setVoidCallable(1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
-		con.setAutoCommit(true);
-		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -216,8 +251,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED, 1);
 		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 		conControl.setVoidCallable(1);
+		con.getAutoCommit();
+		// Will need to restore
+		conControl.setReturnValue(true, 1);
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
+		
 		con.commit();
 		conControl.setVoidCallable(1);
 		con.setAutoCommit(true);
@@ -255,8 +294,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		PreparedStatement ps = (PreparedStatement) psControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
+		con.getAutoCommit();
+		// Will need to reset it
+		conControl.setReturnValue(true, 1);
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
+				
 		con.prepareStatement("some SQL statement");
 		conControl.setReturnValue(ps, 1);
 		ps.setQueryTimeout(10);
@@ -296,6 +339,10 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		psControl.verify();
 	}
 
+	/**
+	 * Test behaviour if the first operation on a connection (getAutoCommit) throws SQLException
+	 * @throws Exception
+	 */
 	public void testTransactionWithExceptionOnBegin() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
@@ -303,7 +350,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
-		con.setAutoCommit(false);
+		con.getAutoCommit();
 		conControl.setThrowable(new SQLException("Cannot begin"));
 		conControl.replay();
 		dsControl.replay();
@@ -333,12 +380,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
-		con.setAutoCommit(false);
-		conControl.setVoidCallable(1);
+		con.getAutoCommit();
+		// No need to restore it
+		conControl.setReturnValue(false, 1);
 		con.commit();
 		conControl.setThrowable(new SQLException("Cannot commit"), 1);
-		con.setAutoCommit(true);
-		conControl.setVoidCallable(1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		con.close();
@@ -371,13 +417,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
-		con.setAutoCommit(false);
-		conControl.setVoidCallable(1);
+		con.getAutoCommit();
+		// No need to change or restore
+		conControl.setReturnValue(false);
 		con.commit();
 		conControl.setThrowable(new SQLException("Cannot commit"), 1);
 		con.rollback();
-		conControl.setVoidCallable(1);
-		con.setAutoCommit(true);
 		conControl.setVoidCallable(1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
@@ -412,8 +457,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
+		con.getAutoCommit();
+		conControl.setReturnValue(true, 1);
+		// Must restore
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
+				
 		con.rollback();
 		conControl.setThrowable(new SQLException("Cannot rollback"), 1);
 		con.setAutoCommit(true);

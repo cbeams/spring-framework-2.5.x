@@ -45,6 +45,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @version $Id: DataSourceTransactionManager.java,v 1.8 2003-11-27 14:32:42 johnsonr Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -114,7 +115,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 
 		Connection con = txObject.getConnectionHolder().getConnection();
-		logger.debug("Switching JDBC connection [" + con + "] to manual commit");
 		try {
 			// apply isolation level
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
@@ -134,8 +134,14 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				}
 			}
 
-			// switch to manual commit
-			con.setAutoCommit(false);
+			// Switch to manual commit if necessary. This is very expensive in some JDBC
+			// drivers, so we don't want to do it unnecessarily (for example if we're configured
+			// Commons DBCP to set it already)
+			if (con.getAutoCommit()) {
+				txObject.setMustRestoreAutoCommit(true);
+				logger.debug("Switching JDBC connection [" + con + "] to manual commit");
+				con.setAutoCommit(false);
+			}
 
 			// register transaction timeout
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -194,7 +200,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		try {
 			// reset to auto-commit
-			con.setAutoCommit(true);
+			if (txObject.getMustRestoreAutoCommit()) {
+				con.setAutoCommit(true);
+			}
 
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (txObject.getPreviousIsolationLevel() != null) {
