@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+	<display-name>Spring JPetStore</display-name>
+
+	<description>Spring JPetStore sample application</description>
+	
+	<!--
+	  - Location of the XML file that defines the root application context
+	  Default value is "/WEB-INF/applicationContext-hibernate.xml" if
+	  this optional parameter is not provided. Supports multiple files,
+	  as shown below. In this case we want the generic declarativeServices.xml
+	  file, defining transaction autoproxying, as the parent.
+	  -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		
+		<!-- 
+			This is the Commons Attributes definition, for attribute-driven
+			declarative transaction management
+		-->
+		<param-value>/WEB-INF/declarativeServices.xml,/WEB-INF/applicationContext.xml</param-value>
+		
+	</context-param>
+
+	<!--
+	  - Loads the root application context of this web app at startup,
+	  - by default from "/WEB-INF/applicationContext.xml".
+		- Note that it is preferable to use ContextLoaderListener in a servlet container
+		- that follows the Servlet 2.4 initialization order (most Servlet 2.3 containers do).
+		-
+	  - Use WebApplicationContextUtils.getWebApplicationContext(servletContext)
+	  - to access it anywhere in the web application, outside of the framework.
+	  -
+	  - The root context is the parent of all servlet-specific contexts.
+	  - This means that its beans are automatically available in these child contexts,
+	  - both for getBean(name) calls and (external) bean references.
+    -->
+	<servlet>
+		<servlet-name>context</servlet-name>
+		<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<!--
+	  - Servlet that dispatches request to registered handlers (Controller implementations).
+	  - Has its own application context, by default defined in "{servlet-name}-servlet.xml",
+	  - i.e. "petclinic-servlet.xml".
+	  -
+	  - A web app can contain any number of such servlets.
+	  - Note that this web app has a shared root application context, serving as parent
+	  - of all DispatcherServlet contexts.
+	  -->
+	<servlet>
+		<servlet-name>petstore</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<!--
+	  - Struts servlet that dispatches to registered actions.
+		- Reads its configuration from "struts-config.xml".
+		-
+		- A web app can just contain one such servlet.
+		- If you need multiple namespaces, use Struts' module mechanism.
+    -->
+	<servlet>
+		<servlet-name>action</servlet-name>
+		<servlet-class>org.apache.struts.action.ActionServlet</servlet-class>
+		<load-on-startup>3</load-on-startup>
+	</servlet>
+
+	<!--
+		- Dispatcher servlet mapping.
+		- Either refering to "petstore" for the Spring web MVC dispatcher,
+		- or to "action" for the Struts dispatcher.
+		-
+		- Simply comment out the "petstore" reference in favour of "action"
+		- to switch from the Spring web tier to the Struts web tier.
+		-->
+	<servlet-mapping>
+		<servlet-name>petstore</servlet-name>
+		<!--
+		<servlet-name>action</servlet-name>
+		-->
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+</web-app>
