@@ -3,6 +3,8 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.List;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Static convenience methods for JavaBeans.
@@ -13,10 +15,9 @@ import java.util.List;
 public abstract class BeanUtils {
 
 	/**
-	 * Convenience method to instantiate a class using its
-	 * no arg constructor. As this method doesn't try to load
-	 * classes by name, it should avoid class-loading issues.
-	 * @param clazz class to instantiate.
+	 * Convenience method to instantiate a class using its no-arg constructor.
+	 * As this method doesn't try to load classes by name, it should avoid class-loading issues.
+	 * @param clazz class to instantiate
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Class clazz) throws BeansException {
@@ -25,10 +26,31 @@ public abstract class BeanUtils {
 			return clazz.newInstance();
 		}
 		catch (InstantiationException ex) {
-			throw new FatalBeanException("Cannot instantiate [" + clazz + "]; is it an interface or an abstract class?", ex);
+			throw new FatalBeanException("Could not instantiate [" + clazz + "]; is it an interface or an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Cannot instantiate [" + clazz + "]; has class definition changed? Is there a public constructor?", ex);
+			throw new FatalBeanException("Could not instantiate [" + clazz + "]; has class definition changed? Is there a public constructor?", ex);
+		}
+	}
+
+	/**
+	 * Convenience method to instantiate a class using the given constructor.
+	 * As this method doesn't try to load classes by name, it should avoid class-loading issues.
+	 * @param constructor constructor to instantiate
+	 * @return the new instance
+	 */
+	public static Object instantiateClass(Constructor constructor, Object[] arguments) throws BeansException {
+		try {
+			return constructor.newInstance(arguments);
+		}
+		catch (InstantiationException ex) {
+			throw new FatalBeanException("Could not instantiate [" + constructor.getDeclaringClass() + "]; is it an interface or an abstract class?", ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new FatalBeanException("Could not instantiate [" + constructor.getDeclaringClass() + "]; has class definition changed? Is there a public constructor?", ex);
+		}
+		catch (InvocationTargetException ex) {
+			throw new FatalBeanException("Could not instantiate [" + constructor.getDeclaringClass() + "]; constructor threw exception", ex.getTargetException());
 		}
 	}
 
