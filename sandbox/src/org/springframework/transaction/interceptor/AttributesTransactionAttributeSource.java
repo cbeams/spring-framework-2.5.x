@@ -9,14 +9,9 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.metadata.Attributes;
-import org.springframework.transaction.interceptor.RollbackRuleAttribute;
-import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
-import org.springframework.transaction.interceptor.TransactionAttribute;
-import org.springframework.transaction.interceptor.TransactionAttributeSource;
 
 /**
  * Implementation of TransactionAttributeSource that uses
@@ -27,7 +22,7 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
  * overrides a class transaction attribute.
  * @author Rod Johnson
  * @since 15-Apr-2003
- * @version $Id: AttributesTransactionAttributeSource.java,v 1.1 2003-11-22 10:01:52 johnsonr Exp $
+ * @version $Id: AttributesTransactionAttributeSource.java,v 1.2 2003-11-28 13:58:41 johnsonr Exp $
  */
 public class AttributesTransactionAttributeSource implements TransactionAttributeSource {
 	
@@ -54,7 +49,7 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 	 * @return null if the method is non-transactional
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeSource#getTransactionAttribute(org.aopalliance.intercept.MethodInvocation)
 	 */
-	public TransactionAttribute getTransactionAttribute(MethodInvocation mi) {
+	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
 		// TODO change to method and target class
 		
 //		Class targetClass = mi.getMethod().getDeclaringClass();
@@ -62,12 +57,7 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 //			targetClass = mi.getThis().getClass();
 //		}
 
-	
-		// TODO add knowledge about target class?
-		
-		Method method = mi.getMethod();
-		
-		// TODO!?
+
 		List atts = this.attributes.getAttributes(method);
 		TransactionAttribute txAtt = findTransactionAttribute(atts);
 		if (txAtt != null)
