@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jndi.AbstractJndiLocator;
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
  
@@ -49,7 +50,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.12 2004-06-21 09:08:30 jhoeller Exp $
+ * @version $Id: DataSourceUtils.java,v 1.13 2004-07-03 10:27:55 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -160,6 +161,76 @@ public abstract class DataSourceUtils {
 		}
 		catch (SQLException ex) {
 			throw new CannotGetJdbcConnectionException("Could not get JDBC connection", ex);
+		}
+	}
+
+	/**
+	 * Prepare the given Connection with the given transaction semantics.
+	 * @param con Connection to prepare
+	 * @param definition the transaction definition to apply
+	 * @return the previous isolation level, if any
+	 * @throws SQLException if thrown by JDBC methods
+	 * @see #resetConnectionAfterTransaction
+	 */
+	public static Integer prepareConnectionForTransaction(Connection con, TransactionDefinition definition)
+			throws SQLException {
+
+		// apply read-only
+		if (definition.isReadOnly()) {
+			try {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Setting JDBC connection [" + con + "] read-only");
+				}
+				con.setReadOnly(true);
+			}
+			catch (Exception ex) {
+				// SQLException or UnsupportedOperationException
+				logger.warn("Could not set JDBC connection read-only", ex);
+			}
+		}
+
+		// apply isolation level
+		Integer previousIsolationLevel = null;
+		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Changing isolation level of JDBC connection [" + con + "] to " +
+										 definition.getIsolationLevel());
+			}
+			previousIsolationLevel = new Integer(con.getTransactionIsolation());
+			con.setTransactionIsolation(definition.getIsolationLevel());
+		}
+
+		return previousIsolationLevel;
+	}
+
+	/**
+	 * Reset the given Connection after a transaction,
+	 * regarding read-only flag and isolation level.
+	 * @param con Conneciton to reset
+	 * @param previousIsolationLevel the isolation level to restore, if any
+	 * @see #prepareConnectionForTransaction
+	 */
+	public static void resetConnectionAfterTransaction(Connection con, Integer previousIsolationLevel) {
+		try {
+			// reset transaction isolation to previous value, if changed for the transaction
+			if (previousIsolationLevel != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resetting isolation level of connection [" + con + "] to " +
+											 previousIsolationLevel);
+				}
+				con.setTransactionIsolation(previousIsolationLevel.intValue());
+			}
+
+			// reset read-only
+			if (con.isReadOnly()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resetting read-only flag of connection [" + con + "]");
+				}
+				con.setReadOnly(false);
+			}
+		}
+		catch (Exception ex) {
+			logger.info("Could not reset JDBC connection after transaction", ex);
 		}
 	}
 

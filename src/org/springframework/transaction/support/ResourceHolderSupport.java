@@ -37,6 +37,7 @@ public abstract class ResourceHolderSupport {
 
 	private Date deadline;
 
+
 	/**
 	 * Mark the resource as synchronized with a transaction.
 	 */
@@ -82,13 +83,6 @@ public abstract class ResourceHolderSupport {
 	}
 
 	/**
-	 * Clear the timeout, leaving this object without an associated timeout.
-	 */
-	public void clearTimeout() {
-		this.deadline = null;
-	}
-
-	/**
 	 * Return whether this object has an associated timeout.
 	 */
 	public boolean hasTimeout() {
@@ -119,6 +113,15 @@ public abstract class ResourceHolderSupport {
 	 */
 	public long getTimeToLiveInMillis() {
 		return deadline.getTime() - System.currentTimeMillis();
+	}
+
+	/**
+	 * Clear the transaction state of this resource holder.
+	 */
+	public void clear() {
+		this.synchronizedWithTransaction = false;
+		this.rollbackOnly = false;
+		this.deadline = null;
 	}
 
 }

@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.datasource;
 
@@ -66,7 +66,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.18 2004-07-02 15:26:27 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.19 2004-07-03 10:27:55 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -133,59 +133,33 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 
-		// cache to avoid repeated checks
-		boolean debugEnabled = logger.isDebugEnabled();
-
-		if (debugEnabled) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("Opening new connection for JDBC transaction");
 		}
 		Connection con = DataSourceUtils.getConnection(this.dataSource, false);
+
 		txObject.setConnectionHolder(new ConnectionHolder(con));
 		txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
+
 		try {
-
-			// apply read-only
-			if (definition.isReadOnly()) {
-				if (debugEnabled) {
-					logger.debug("Setting JDBC connection [" + con + "] read-only");
-				}
-				try {
-					con.setReadOnly(true);
-				}
-				catch (Exception ex) {
-					// SQLException or UnsupportedOperationException
-					logger.warn("Could not set JDBC connection read-only", ex);
-				}
-			}
-
-			// apply isolation level
-			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-				if (debugEnabled) {
-					logger.debug("Changing isolation level of JDBC connection [" + con + "] to " +
-											 definition.getIsolationLevel());
-				}
-				txObject.setPreviousIsolationLevel(new Integer(con.getTransactionIsolation()));
-				con.setTransactionIsolation(definition.getIsolationLevel());
-			}
+			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
+			txObject.setPreviousIsolationLevel(previousIsolationLevel);
 
 			// Switch to manual commit if necessary. This is very expensive in some JDBC drivers,
 			// so we don't want to do it unnecessarily (for example if we're configured
 			// Commons DBCP to set it already).
 			if (con.getAutoCommit()) {
 				txObject.setMustRestoreAutoCommit(true);
-				if (debugEnabled) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("Switching JDBC connection [" + con + "] to manual commit");
 				}
 				con.setAutoCommit(false);
 			}
 
-			// register transaction timeout
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 				txObject.getConnectionHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
-
-			// bind the connection holder to the thread
-			TransactionSynchronizationManager.bindResource(this.dataSource, txObject.getConnectionHolder());
+			TransactionSynchronizationManager.bindResource(getDataSource(), txObject.getConnectionHolder());
 		}
 
 		catch (SQLException ex) {
@@ -252,40 +226,18 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		// remove the connection holder from the thread
 		TransactionSynchronizationManager.unbindResource(this.dataSource);
-
-		txObject.getConnectionHolder().setSynchronizedWithTransaction(false);
-		txObject.getConnectionHolder().clearTimeout();
+		txObject.getConnectionHolder().clear();
 
 		// reset connection
 		Connection con = txObject.getConnectionHolder().getConnection();
-
 		try {
-			// reset to auto-commit
 			if (txObject.getMustRestoreAutoCommit()) {
 				con.setAutoCommit(true);
 			}
-
-			// reset transaction isolation to previous value, if changed for the transaction
-			if (txObject.getPreviousIsolationLevel() != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Resetting isolation level of connection [" + con + "] to " +
-											 txObject.getPreviousIsolationLevel());
-				}
-				con.setTransactionIsolation(txObject.getPreviousIsolationLevel().intValue());
-			}
-
-			// reset read-only
-			if (con.isReadOnly()) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Resetting read-only flag of connection [" + con + "]");
-				}
-				con.setReadOnly(false);
-			}
+			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 		}
-		catch (Exception ex) {
-			// SQLException or UnsupportedOperationException
-			// typically not something to worry about, can be ignored
-			logger.info("Could not reset JDBC connection", ex);
+		catch (SQLException ex) {
+			logger.info("Could not reset JDBC connection after transaction", ex);
 		}
 
 		if (logger.isDebugEnabled()) {

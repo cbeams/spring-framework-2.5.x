@@ -89,7 +89,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.connection();
-		sessionControl.setReturnValue(con, 4);
+		sessionControl.setReturnValue(con, 2);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setTimeout(10);
@@ -157,7 +157,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.rollback();
 		txControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 1);
+		sessionControl.setReturnValue(con, 2);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		sfControl.replay();
@@ -215,7 +215,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.rollback();
 		txControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 1);
+		sessionControl.setReturnValue(con, 2);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		sfControl.replay();
@@ -268,7 +268,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.commit();
 		txControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 1);
+		sessionControl.setReturnValue(con, 2);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		sfControl.replay();
@@ -321,7 +321,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.rollback();
 		txControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 1);
+		sessionControl.setReturnValue(con, 2);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		sfControl.replay();
@@ -375,7 +375,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.rollback();
 		txControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 1);
+		sessionControl.setReturnValue(con, 2);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		sfControl.replay();
@@ -430,7 +430,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.commit();
 		txControl.setVoidCallable(2);
 		session.connection();
-		sessionControl.setReturnValue(con, 2);
+		sessionControl.setReturnValue(con, 4);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 2);
 		sfControl.replay();
@@ -491,7 +491,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.commit();
 		txControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 1);
+		sessionControl.setReturnValue(con, 2);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		sfControl.replay();
@@ -592,7 +592,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.setFlushMode(FlushMode.NEVER);
 		sessionControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 4);
+		sessionControl.setReturnValue(con, 2);
 		con.getTransactionIsolation();
 		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED);
 		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -673,7 +673,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.commit();
 		txControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 1);
+		sessionControl.setReturnValue(con, 2);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		sfControl.replay();
@@ -794,7 +794,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.rollback();
 		txControl.setVoidCallable(1);
 		session.connection();
-		sessionControl.setReturnValue(con, 1);
+		sessionControl.setReturnValue(con, 2);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		sfControl.replay();
