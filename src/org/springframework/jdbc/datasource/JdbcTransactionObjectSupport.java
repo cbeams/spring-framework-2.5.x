@@ -49,7 +49,7 @@ import org.springframework.transaction.support.SmartTransactionObject;
  */
 public abstract class JdbcTransactionObjectSupport implements SavepointManager, SmartTransactionObject {
 
-	protected static final Log logger = LogFactory.getLog(DataSourceTransactionObject.class);
+	protected static final Log logger = LogFactory.getLog(JdbcTransactionObjectSupport.class);
 
 	private static boolean savepointClassAvailable;
 
@@ -161,8 +161,8 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 					"Transaction manager does not allow nested transactions");
 		}
 		if (getConnectionHolder() == null) {
-			throw new TransactionUsageException("Cannot create nested transaction if not exposing " +
-																					"a JDBC transaction");
+			throw new TransactionUsageException(
+					"Cannot create nested transaction if not exposing a JDBC transaction");
 		}
 		return getConnectionHolder();
 	}
