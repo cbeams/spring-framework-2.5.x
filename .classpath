@@ -81,5 +81,6 @@
 	<classpathentry kind="lib" path="lib/cglib/cglib-full-2.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
+	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.0.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
