@@ -33,6 +33,14 @@ import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.util.WebUtils;
 
 /**
+ * Base, abstract action implementation that provides a number of helper methods
+ * for:
+ * <ul>
+ * <li>Creating common <code>ActionResult</code> objects
+ * <li>Accessing request parameters
+ * <li>Accessing and export form objects
+ * <li>Inserting action pre and post execution logic (may also be done with an
+ * interceptor)
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -59,87 +67,120 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * 
-	 */
 	public void afterPropertiesSet() {
 		initAction();
 	}
 
 	/**
-	 * 
+	 * Action initializing callback, may be overriden by subclasses to perform
+	 * custom initialization.
 	 */
 	protected void initAction() {
 
 	}
 
+	/**
+	 * Factory method that produces the common 'success' result parameter
+	 * object.
+	 * @return a success result object
+	 */
 	protected ActionResult success() {
 		return new ActionResult(FlowConstants.SUCCESS);
 	}
 
+	/**
+	 * Factory method that produces the common 'error' result parameter object.
+	 * @return a error result object
+	 */
 	protected ActionResult error() {
 		return new ActionResult(FlowConstants.ERROR);
 	}
 
+	/**
+	 * Factory method that produces the common 'add' result parameter object.
+	 * @return a add result object
+	 */
 	protected ActionResult add() {
 		return new ActionResult(FlowConstants.ADD);
 	}
 
+	/**
+	 * Factory method that produces the common 'search' result parameter object.
+	 * @return a search result object
+	 */
 	protected ActionResult search() {
 		return new ActionResult(FlowConstants.SEARCH);
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
+	 * Factory method that produces a <code>ActionResult</code> parameter
+	 * object given a string identifier
+	 * @param resultId The result id
+	 * @return The action result
+	 */
+	protected ActionResult actionResult(String resultId) {
+		return new ActionResult(resultId);
+	}
+
+	/**
+	 * Get a string request parameter with a <code>null</code> fallback value.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value, or null if not found
 	 */
 	protected String getStringParameter(HttpServletRequest request, String parameterName) {
 		return RequestUtils.getStringParameter(request, parameterName, null);
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
+	 * Get a short request parameter with a <code>-1</code> fallback value.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value
 	 */
 	protected short getShortParameter(HttpServletRequest request, String parameterName) {
 		return (short)RequestUtils.getIntParameter(request, parameterName, -1);
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
+	 * Get a int request parameter with a <code>-1</code> fallback value.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value
 	 */
 	protected int getIntParameter(HttpServletRequest request, String parameterName) {
 		return RequestUtils.getIntParameter(request, parameterName, -1);
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @param defaultValue
-	 * @return
+	 * Get a boolean request parameter with a <code>defaultValue</code>
+	 * fallback value.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @param defaultValue the fallback value
+	 * @return The parameter value
 	 */
 	protected boolean getBooleanParameter(HttpServletRequest request, String parameterName, boolean defaultValue) {
 		return RequestUtils.getBooleanParameter(request, parameterName, defaultValue);
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
+	 * Get a long request parameter with a <code>-1</code> fallback value.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value
 	 */
 	protected long getLongParameter(HttpServletRequest request, String parameterName) {
 		return RequestUtils.getLongParameter(request, parameterName, -1);
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
-	 * @throws ServletRequestBindingException
+	 * Get a string request parameter throwing an exception if not found.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value
+	 * @throws ServletRequestBindingException The parameter was not present in
+	 *         the request
 	 */
 	protected String getRequiredStringParameter(HttpServletRequest request, String parameterName)
 			throws ServletRequestBindingException {
@@ -147,10 +188,12 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
-	 * @throws ServletRequestBindingException
+	 * Get a short request parameter throwing an exception if not found.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value
+	 * @throws ServletRequestBindingException The parameter was not present in
+	 *         the request
 	 */
 	protected short getRequiredShortParameter(HttpServletRequest request, String parameterName)
 			throws ServletRequestBindingException {
@@ -158,10 +201,12 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
-	 * @throws ServletRequestBindingException
+	 * Get a integer request parameter throwing an exception if not found.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value
+	 * @throws ServletRequestBindingException The parameter was not present in
+	 *         the request
 	 */
 	protected int getRequiredIntParameter(HttpServletRequest request, String parameterName)
 			throws ServletRequestBindingException {
@@ -169,10 +214,12 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
-	 * @throws ServletRequestBindingException
+	 * Get a long request parameter throwing an exception if not found.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value
+	 * @throws ServletRequestBindingException The parameter was not present in
+	 *         the request
 	 */
 	protected long getRequiredLongParameter(HttpServletRequest request, String parameterName)
 			throws ServletRequestBindingException {
@@ -180,10 +227,12 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * @param request
-	 * @param parameterName
-	 * @return
-	 * @throws ServletRequestBindingException
+	 * Get a boolean request parameter throwing an exception if not found.
+	 * @param request The http request
+	 * @param parameterName The parameter name
+	 * @return The parameter value
+	 * @throws ServletRequestBindingException The parameter was not present in
+	 *         the request
 	 */
 	protected boolean getRequiredBooleanParameter(HttpServletRequest request, String parameterName)
 			throws ServletRequestBindingException {
@@ -191,18 +240,22 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * @param request
-	 * @param name
-	 * @return
+	 * Get a attribute out of the http session, throwing an exception if not
+	 * found.
+	 * @param request The http request with a session accessor
+	 * @param name The attribute name
+	 * @return The attribute value
+	 * @throws IllegalStateException the attribute was not present in session
 	 */
-	protected Object getRequiredSessionAttribute(HttpServletRequest request, String name) {
+	protected Object getRequiredSessionAttribute(HttpServletRequest request, String name) throws IllegalStateException {
 		return WebUtils.getRequiredSessionAttribute(request, name);
 	}
 
 	/**
-	 * @param request
-	 * @param name
-	 * @return
+	 * Get a attribute out of the http session, returning null if not found.
+	 * @param request The http request with a session accessor
+	 * @param name The attribute name
+	 * @return The attribute value
 	 */
 	protected Object getSessionAttribute(HttpServletRequest request, String name) {
 		return WebUtils.getSessionAttribute(request, name);
@@ -219,23 +272,31 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         model
 	 */
-	protected Object getLocalFormObject(AttributesAccessor model, Class formObjectClass) {
+	protected Object getLocalFormObject(AttributesAccessor model, Class formObjectClass) throws IllegalStateException {
 		return model.getRequiredAttribute(LOCAL_FORM_OBJECT_NAME, formObjectClass);
 	}
 
 	/**
-	 * @param model
-	 * @return
+	 * Gets the form object from the model, using the local (to flow) name of
+	 * {@link #LOCAL_FORM_OBJECT_NAME}
+	 * 
+	 * @param model the flow model
+	 * @throws IllegalStateException if the form object is not found in the
+	 *         model
 	 */
-	protected Object getLocalFormObject(AttributesAccessor model) {
+	protected Object getLocalFormObject(AttributesAccessor model) throws IllegalStateException {
 		return model.getRequiredAttribute(LOCAL_FORM_OBJECT_NAME);
 	}
 
 	/**
-	 * @param model
-	 * @return
+	 * Gets the form object <code>Errors</code> tracker from the model, using
+	 * the local (to flow) name of {@link #LOCAL_FORM_OBJECT_NAME}
+	 * 
+	 * @param model the flow model
+	 * @throws IllegalStateException if the Errors instance is not found in the
+	 *         model
 	 */
-	protected Errors getLocalFormErrors(AttributesAccessor model) {
+	protected Errors getLocalFormErrors(AttributesAccessor model) throws IllegalStateException {
 		return (Errors)model.getRequiredAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class);
 	}
 
@@ -252,38 +313,49 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * @param model
-	 * @param formObjectName
-	 * @return
+	 * Gets the form object from the model, using the specified name
+	 * @param model the flow model
+	 * @param formName the name of the form in the model
+	 * @return the form object
 	 */
 	protected Object getRequiredFormObject(AttributesAccessor model, String formObjectName) {
 		return model.getRequiredAttribute(formObjectName);
 	}
 
 	/**
-	 * @param model
-	 * @param formObjectName
-	 * @return
+	 * Gets the form object <code>Errors</code> tracker from the model, using
+	 * the specified name
+	 * @param model The flow model
+	 * @param formObjectName The name of the form object
+	 * @return The form object errors instance
 	 */
 	protected Errors getRequiredFormErrors(AttributesAccessor model, String formObjectName) {
 		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName, Errors.class);
 	}
 
-	protected void exportErrors(String formObjectName, Object formObject, MutableAttributesAccessor model) {
-		exportErrors(new BindException(formObject, formObjectName), model);
-	}
-
-	protected void exportErrors(BindException errors, MutableAttributesAccessor model) {
-		// and also bind it under the local (to flow) alias, so other
-		// actions can find it easily
-		model.setAttribute(LOCAL_FORM_OBJECT_NAME, errors.getTarget());
-		model.setAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, errors);
-		model.setAttributes(errors.getModel());
+	/**
+	 * Export a <i>new </i> errors instance to the flow model for the form
+	 * object under the local (to flow) form object name,
+	 * {@link #LOCAL_FORM_OBJECT_NAME}.
+	 * 
+	 * @param model The flow model
+	 * @param formObject The form object to export an errors instance under
+	 */
+	protected void exportErrors(MutableAttributesAccessor model, Object formObject) {
+		exportErrors(model, formObject, LOCAL_FORM_OBJECT_NAME);
 	}
 
 	/**
-	 * 
+	 * Export a <i>new </i> errors instance to the flow model for the form
+	 * object with the specified form object name.
+	 * @param model The flow model
+	 * @param formObject The form object
+	 * @param formObjectName The name of the form object
 	 */
+	protected void exportErrors(MutableAttributesAccessor model, Object formObject, String formObjectName) {
+		exportErrors(model, new BindException(formObject, formObjectName));
+	}
+
 	public final ActionResult execute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
 		if (logger.isDebugEnabled()) {
@@ -312,6 +384,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
+	 * Pre-action-execution hook, subclasses may override.
+	 * 
 	 * @param request
 	 * @param response
 	 * @param model
@@ -324,16 +398,19 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * @param request
-	 * @param response
-	 * @param model
-	 * @return
-	 * @throws Exception
+	 * Template hook method subclasses should override to encapsulate their
+	 * specific action execution logic.
+	 * @param request The http request
+	 * @param response The http response
+	 * @param model The flow data model
+	 * @return The action result
+	 * @throws Exception A unrecoverable exception occured
 	 */
 	protected abstract ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception;
 
 	/**
+	 * Post-action execution hook, subclasses may override.
 	 * @param request
 	 * @param response
 	 * @param model
