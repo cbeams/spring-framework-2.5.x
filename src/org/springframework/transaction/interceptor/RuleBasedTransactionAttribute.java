@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
@@ -34,8 +34,8 @@ import org.apache.commons.logging.LogFactory;
  * <p>The TransactionAttributeEditor property editor creates objects
  * of this class.
  *
- * @since 09-Apr-2003
  * @author Rod Johnson
+ * @since 09.04.2003
  */
 public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 	
@@ -43,23 +43,70 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 	protected static final Log logger = LogFactory.getLog(RuleBasedTransactionAttribute.class);
 
 	private List rollbackRules;
-	
+
+
+	/**
+	 * Create a new RuleBasedTransactionAttribute, with default settings.
+	 * Can be modified through bean property setters.
+	 * @see #setPropagationBehavior
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 * @see #setName
+	 * @see #setRollbackRules
+	 */
 	public RuleBasedTransactionAttribute() {
+		super();
 		this.rollbackRules = new ArrayList();
 	}
 
+	/**
+	 * Copy constructor. Definition can be modified through bean property setters.
+	 * @see #setPropagationBehavior
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 * @see #setName
+	 * @see #setRollbackRules
+	 */
+	public RuleBasedTransactionAttribute(RuleBasedTransactionAttribute other) {
+		super(other);
+		this.rollbackRules = new ArrayList(other.rollbackRules);
+	}
+
+	/**
+	 * Create a new DefaultTransactionAttribute with the the given
+	 * propagation behavior. Can be modified through bean property setters.
+	 * @param propagationBehavior one of the propagation constants in the
+	 * TransactionDefinition interface
+	 * @param rollbackRules the list of RollbackRuleAttributes to apply
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 */
 	public RuleBasedTransactionAttribute(int propagationBehavior, List rollbackRules) {
 		super(propagationBehavior);
 		this.rollbackRules = rollbackRules;
 	}
 
+
+	/**
+	 * Set the list of <code>RollbackRuleAttribute</code> objects
+	 * (and/or <code>NoRollbackRuleAttribute</code> objects) to apply.
+	 * @see RollbackRuleAttribute
+	 * @see NoRollbackRuleAttribute
+	 */
 	public void setRollbackRules(List rollbackRules) {
 		this.rollbackRules = rollbackRules;
 	}
 
+	/**
+	 * Return the list of <code>RollbackRuleAttribute</code> objects.
+	 */
 	public List getRollbackRules() {
 		return rollbackRules;
 	}
+
 
 	/**
 	 * Winning rule is the shallowest rule (that is, the closest in the

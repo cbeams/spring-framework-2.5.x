@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
@@ -32,12 +32,45 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	/** Prefix for commit-on-exception rules in description strings */
 	public static final String COMMIT_RULE_PREFIX = "+";
 
+
+	/**
+	 * Create a new DefaultTransactionAttribute, with default settings.
+	 * Can be modified through bean property setters.
+	 * @see #setPropagationBehavior
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 * @see #setName
+	 */
 	public DefaultTransactionAttribute() {
+		super();
 	}
 
+	/**
+	 * Copy constructor. Definition can be modified through bean property setters.
+	 * @see #setPropagationBehavior
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 * @see #setName
+	 */
+	public DefaultTransactionAttribute(TransactionAttribute other) {
+		super(other);
+	}
+
+	/**
+	 * Create a new DefaultTransactionAttribute with the the given
+	 * propagation behavior. Can be modified through bean property setters.
+	 * @param propagationBehavior one of the propagation constants in the
+	 * TransactionDefinition interface
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 */
 	public DefaultTransactionAttribute(int propagationBehavior) {
 		super(propagationBehavior);
 	}
+
 
 	/**
 	 * Default behavior is as with EJB: rollback on unchecked exception.
