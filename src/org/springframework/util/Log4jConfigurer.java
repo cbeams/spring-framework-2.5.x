@@ -12,12 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URL;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
@@ -44,6 +45,9 @@ import org.apache.log4j.xml.DOMConfigurator;
  */
 public abstract class Log4jConfigurer {
 
+	/** Pseudo URL prefix for loading from the class path: "classpath:" */
+	public static final String CLASSPATH_URL_PREFIX = "classpath:";
+
 	/**
 	 * Default refresh interval, previously used for initLogging(location).
 	 * @deprecated Either choose no config file refreshing (initLogging with plain
@@ -61,21 +65,21 @@ public abstract class Log4jConfigurer {
 
 	/**
 	 * Initialize Log4J from the given file location, with no config file refreshing.
-	 * Assumes an XML file in case of a ".xml" file extension, and a properties
-	 * file else.
-	 * @param location the location of the config file
+	 * Assumes an XML file in case of a ".xml" file extension, and a properties file else.
+	 * @param location the location of the config file: either a "classpath:" location
+	 * (e.g. "classpath:myLog4j.properties"), an absolute file URL
+	 * (e.g. "file:C:/log4j.properties), or a plain absolute path in the file system
+	 * (e.g. "C:/log4j.properties")
 	 * @throws FileNotFoundException if the location specifies an invalid file path
 	 * @see #DEFAULT_REFRESH_INTERVAL
 	 */
 	public static void initLogging(String location) throws FileNotFoundException {
-		if (!(new File(location)).exists()) {
-			throw new FileNotFoundException("Log4J config file [" + location + "] not found");
-		}
+		URL url = ResourceUtils.getURL(location);
 		if (location.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
-			DOMConfigurator.configure(location);
+			DOMConfigurator.configure(url);
 		}
 		else {
-			PropertyConfigurator.configure(location);
+			PropertyConfigurator.configure(url);
 		}
 	}
 
@@ -91,19 +95,23 @@ public abstract class Log4jConfigurer {
 	 * in particular, it does not terminate on LogManager shutdown. Therefore, it is
 	 * recommended to <i>not</i> use config file refreshing in a production J2EE
 	 * environment; the watchdog thread would not stop on application shutdown there.
-	 * @param location the location of the config file
+	 * @param location the location of the config file: either a "classpath:" location
+	 * (e.g. "classpath:myLog4j.properties"), an absolute file URL
+	 * (e.g. "file:C:/log4j.properties), or a plain absolute path in the file system
+	 * (e.g. "C:/log4j.properties")
 	 * @param refreshInterval interval between config file refresh checks, in milliseconds
 	 * @throws FileNotFoundException if the location specifies an invalid file path
 	 */
 	public static void initLogging(String location, long refreshInterval) throws FileNotFoundException {
-		if (!(new File(location)).exists()) {
+		File file = ResourceUtils.getFile(location);
+		if (!file.exists()) {
 			throw new FileNotFoundException("Log4J config file [" + location + "] not found");
 		}
 		if (location.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
-			DOMConfigurator.configureAndWatch(location, refreshInterval);
+			DOMConfigurator.configureAndWatch(file.getAbsolutePath(), refreshInterval);
 		}
 		else {
-			PropertyConfigurator.configureAndWatch(location, refreshInterval);
+			PropertyConfigurator.configureAndWatch(file.getAbsolutePath(), refreshInterval);
 		}
 	}
 
