@@ -1,11 +1,14 @@
 package org.springframework.jdbc.support.lob;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
+
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Spring's default implementation of the java.sql.Blob interface.
@@ -58,9 +61,25 @@ public class DefaultBlobImpl implements Blob {
 	}
 
 	/**
+	 * Note: This implementation reads the content stream.
+	 * Afterwards, the stream will be empty.
 	 * @see java.sql.Blob#getBytes(long, int)
 	 */
-	public byte[] getBytes(long arg0, int arg1) {
+	public byte[] getBytes(long pos, int length) throws SQLException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(this.contentLength);
+		try {
+			FileCopyUtils.copy(this.contentStream, baos);
+		}
+		catch (IOException ex) {
+			throw new SQLException("Could not read input stream: " + ex.getMessage());
+		}
+		return baos.toByteArray();
+	}
+
+	/**
+	 * @see java.sql.Blob#setBinaryStream(long)
+	 */
+	public OutputStream setBinaryStream(long arg0) {
 		throw new UnsupportedOperationException("Blob may not be manipulated other than via constructors");
 	}
 
@@ -76,13 +95,6 @@ public class DefaultBlobImpl implements Blob {
 	 */
 	public int setBytes(long arg0, byte[] arg1, int arg2, int arg3)
 	throws SQLException {
-		throw new UnsupportedOperationException("Blob may not be manipulated other than via constructors");
-	}
-
-	/**
-	 * @see java.sql.Blob#setBinaryStream(long)
-	 */
-	public OutputStream setBinaryStream(long arg0) {
 		throw new UnsupportedOperationException("Blob may not be manipulated other than via constructors");
 	}
 
