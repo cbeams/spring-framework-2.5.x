@@ -58,11 +58,12 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StopWatch;
 
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.50 2004-06-25 09:10:43 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.51 2004-06-25 17:59:38 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -1086,18 +1087,49 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 	
 	public void testLookupOverrideMethodsWithSetterInjection() {
-		testLookupOverrideMethodsWithSetterInjection("overrideOneMethod");
-		// Should work identically on subclass definition, in which lookup
-		// methods are inherited
-		testLookupOverrideMethodsWithSetterInjection("overrideInheritedMethod");
-	}
-	
-	private void testLookupOverrideMethodsWithSetterInjection(String beanName) {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
+		
+		testLookupOverrideMethodsWithSetterInjection(xbf, "overrideOneMethod", true);
+		// Should work identically on subclass definition, in which lookup
+		// methods are inherited
+		testLookupOverrideMethodsWithSetterInjection(xbf, "overrideInheritedMethod", true);
+		
+		// Check cost of repeated construction of beans with method overrides
+		// Will pick up misuse of CGLIB
+		int howmany = 100;
+		StopWatch sw = new StopWatch();
+		sw.start("Look up " + howmany + " prototype bean instances with method overrides");
+		for (int i = 0; i < howmany; i++) {
+			testLookupOverrideMethodsWithSetterInjection(xbf, "overrideOnPrototype", false);
+		}
+		sw.stop();
+		System.out.println(sw);
+		assertTrue(sw.getTotalTimeMillis() < 1000);
+		
+		// Now test distinct bean with swapped value in factory, to ensure the two are independent
+		OverrideOneMethod swappedOom = (OverrideOneMethod) xbf.getBean("overrideOneMethodSwappedReturnValues");
+		
+		TestBean tb = swappedOom.getPrototypeDependency();
+		assertEquals("David", tb.getName()); 
+		tb = swappedOom.protectedOverrideSingleton();
+		assertEquals("Jenny", tb.getName()); 
+		
+	}
+	
+	private void testLookupOverrideMethodsWithSetterInjection(BeanFactory xbf, String beanName, boolean singleton) {
+		
 		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean(beanName);
+		
+		if (singleton) {
+			assertSame(oom, xbf.getBean(beanName));
+		}
+		else {
+			assertNotSame(oom, xbf.getBean(beanName));
+		}
+		
 		TestBean jenny1 = oom.getPrototypeDependency();
 		assertEquals("Jenny", jenny1.getName()); 
 		TestBean jenny2 = oom.getPrototypeDependency();

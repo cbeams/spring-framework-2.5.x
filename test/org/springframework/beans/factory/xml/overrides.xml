@@ -25,6 +25,34 @@
 	</bean>
 	
 	
+	<!--
+		We can use this to test the construction cost of beans with method
+		overrides
+	-->
+	<bean id="overrideOnPrototype" 
+		singleton="false"
+		class="org.springframework.beans.factory.xml.OverrideOneMethod">
+		
+		<lookup-method name="getPrototypeDependency" bean="jenny" />
+		
+		<lookup-method name="protectedOverrideSingleton" bean="david" />
+		
+	</bean>
+	
+	
+	<!--
+		Effect of overrides is swapped
+	-->
+	<bean id="overrideOneMethodSwappedReturnValues" 
+		class="org.springframework.beans.factory.xml.OverrideOneMethod">
+		
+		<lookup-method name="getPrototypeDependency" bean="david" />
+		
+		<lookup-method name="protectedOverrideSingleton" bean="jenny" />
+		
+	</bean>
+	
+	
 	<bean id="jenny" class="org.springframework.beans.TestBean"
 		singleton="false">	
 		<property name="name"><value>Jenny</value></property>

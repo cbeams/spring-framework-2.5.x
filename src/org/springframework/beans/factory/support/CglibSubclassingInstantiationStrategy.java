@@ -39,7 +39,7 @@ import org.springframework.beans.factory.BeanFactory;
  * However, the core IoC container will still run without CGLIB being available.
  *
  * @author Rod Johnson
- * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.4 2004-06-25 09:12:08 johnsonr Exp $
+ * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.5 2004-06-25 18:00:02 johnsonr Exp $
  */
 public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationStrategy {
 
@@ -105,26 +105,49 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 					enhancer.create() : 
 					enhancer.create(ctor.getParameterTypes(), args);
 		}
+		
+		/**
+		 * Class providing hashCode and equals methods required by CGLIB to
+		 * ensure that CGLIB doesn't generate a distinct class per bean.
+		 * Identity is based on class and bean definition. 
+		 */
+		private class CglibIdentitySupport {
+			/**
+			 * Exposed for equals method to allow access to enclosing class field
+			 */
+			protected RootBeanDefinition getBeanDefinition() {
+				return beanDefinition;
+			}
+			
+			public int hashCode() {
+				return beanDefinition.hashCode();
+			}
+			
+			public boolean equals(Object other) {
+				return (other.getClass() == getClass()) &&
+						((CglibIdentitySupport) other).getBeanDefinition() == beanDefinition;
+			}
+		}
 
 
 		/**
 		 * CGLIB MethodInterceptor to override methods, replacing them with an
 		 * implementation that returns a bean looked up in the container.
 		 */
-		private class LookupOverrideMethodInterceptor implements MethodInterceptor {
+		private class LookupOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
 
 			public Object intercept(Object o, Method m, Object[] args, MethodProxy mp) throws Throwable {
 				// cast is safe as CallbackFilter filters are used selectively
 				LookupOverride lo = (LookupOverride) beanDefinition.getMethodOverrides().getOverride(m);
 				return owner.getBean(lo.getBeanName());
-			}
+			}			
 		}
 
 
 		/**
 		 * CGLIB object to filter method interception behavior.
 		 */
-		private class CallbackFilterImpl implements CallbackFilter {
+		private class CallbackFilterImpl extends CglibIdentitySupport implements CallbackFilter {
 
 			public int accept(Method method) {
 				MethodOverride methodOverride = beanDefinition.getMethodOverrides().getOverride(method);
@@ -138,7 +161,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 					return LOOKUP_OVERRIDE;
 				}
 				throw new UnsupportedOperationException("Unexpected MethodOverride subclass: " +
-																								methodOverride.getClass().getName());
+													methodOverride.getClass().getName());
 			}
 		}
 	}
