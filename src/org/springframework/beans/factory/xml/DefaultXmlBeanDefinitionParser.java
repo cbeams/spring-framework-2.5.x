@@ -104,7 +104,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	private String defaultAutowire;
 
 
-	public void loadBeanDefinitions(BeanDefinitionRegistry beanFactory, ClassLoader beanClassLoader,
+	public void registerBeanDefinitions(BeanDefinitionRegistry beanFactory, ClassLoader beanClassLoader,
 	                                Document doc, Resource resource) {
 		this.beanFactory = beanFactory;
 		this.beanClassLoader = beanClassLoader;
