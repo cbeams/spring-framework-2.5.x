@@ -47,10 +47,15 @@
 
 <!--
 	Convenience attribute when the action-state executes exactly one action.
-	This is the id of the action.  It may also be the fully qualified implementation
-	class of the action.
+	This is the id of the action.
 -->
 <!ATTLIST action-state action CDATA #IMPLIED>
+
+<!--
+	Convenience attribute when the action-state executes exactly one action.
+	This is the implementation class of the action.
+-->
+<!ATTLIST action-state action-class CDATA #IMPLIED>
 
 <!--
 	Defines an action that is executed by the flow in an action state.
@@ -66,9 +71,16 @@
 <!--
 	Implementation class of the action exported in the configured registry.
 	For "by type" action lookup to work, there must be exactly one action implementation
-	exported of that type.  If there is more than one, specify the id.
+	exported of that type.
 -->
 <!ATTLIST action class CDATA #IMPLIED>
+
+<!--
+	Implementation class of the action exported in the configured registry.
+	For "by type" action lookup to work, there must be exactly one action implementation
+	exported of that type.
+-->
+<!ATTLIST action classref CDATA #IMPLIED>
 
 <!--
 	Name of the action. This is optional. When not specified, the action will
@@ -76,6 +88,13 @@
 	action name prepended to them.
 -->
 <!ATTLIST action name CDATA #IMPLIED>
+
+<!--
+	Name of the action. This is optional. When not specified, the action will
+	not have any name and the events signaled by the action will not get the
+	action name prepended to them.
+-->
+<!ATTLIST action autowire (no | byName | byType | default) "default">
 
 <!--
 	Defines a view state: a state where a view will be rendered.
@@ -142,7 +161,7 @@
 	Name (unique bean id) of the sub flow that will be spawned.  When not present,
 	the ID of the subflow-state will be treated as the ID of the subflow.
 -->
-<!ATTLIST subflow-state flow CDATA #IMPLIED>
+<!ATTLIST subflow-state flow CDATA #REQUIRED>
 
 <!--
 	Optional indentifier of a mapper that will map data to and from
