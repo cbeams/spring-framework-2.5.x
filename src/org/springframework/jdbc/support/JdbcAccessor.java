@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
 
@@ -30,14 +30,13 @@ import javax.sql.DataSource;
  */
 public abstract class JdbcAccessor {
 
-	/**
-	 * Used to obtain connections throughout the lifecycle of this object.
-	 * This enables this class to close connections if necessary.
-	 **/
+	/** Used to obtain connections throughout the lifecycle of this object */
 	private DataSource dataSource;
 
 	/** Helper to translate SQL exceptions to DataAccessExceptions */
 	private SQLExceptionTranslator exceptionTranslator;
+
+	private boolean lazyInit = false;
 
 
 	/**
@@ -83,6 +82,24 @@ public abstract class JdbcAccessor {
 	}
 
 	/**
+	 * Set whether to lazily initialize the SQLExceptionTranslator for this
+	 * template. Only applies if <code>afterPropertiesSet</code> is called.
+	 * @see #getExceptionTranslator
+	 * @see #afterPropertiesSet
+	 */
+	public void setLazyInit(boolean lazyInit) {
+		this.lazyInit = lazyInit;
+	}
+
+	/**
+	 * Return whether to lazily initialize the SQLExceptionTranslator for
+	 * this template.
+	 */
+	public boolean isLazyInit() {
+		return lazyInit;
+	}
+
+	/**
 	 * Eagerly initialize the exception translator,
 	 * creating a default one for the specified DataSource if none set.
 	 */
@@ -90,7 +107,9 @@ public abstract class JdbcAccessor {
 		if (getDataSource() == null) {
 			throw new IllegalArgumentException("dataSource is required");
 		}
-		getExceptionTranslator();
+		if (!isLazyInit()) {
+			getExceptionTranslator();
+		}
 	}
 	
 }

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.core;
 
@@ -703,6 +703,58 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			assertTrue("Check root cause", ex.getCause() == sex);
 		}
 		
+		ctrlDataSource.verify();
+	}
+
+	public void testCouldntGetConnectionForOperationOrExceptionTranslator() throws SQLException {
+		SQLException sex = new SQLException("foo", "07xxx");
+
+		// Change behavior in setUp() because we only expect one call to getConnection():
+		// none is necessary to get metadata for exception translator
+		ctrlDataSource = MockControl.createControl(DataSource.class);
+		mockDataSource = (DataSource) ctrlDataSource.getMock();
+		mockDataSource.getConnection();
+		// Expect two calls (one call after caching data product name): make get Metadata fail also
+		ctrlDataSource.setThrowable(sex, 2);
+		replay();
+
+		try {
+			JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
+			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+			template2.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
+			fail("Shouldn't have executed query without a connection");
+		}
+		catch (CannotGetJdbcConnectionException ex) {
+			// pass
+			assertTrue("Check root cause", ex.getCause() == sex);
+		}
+
+		ctrlDataSource.verify();
+	}
+
+	public void testCouldntGetConnectionForOperationWithLazyExceptionTranslator() throws SQLException {
+		SQLException sex = new SQLException("foo", "07xxx");
+
+		ctrlDataSource = MockControl.createControl(DataSource.class);
+		mockDataSource = (DataSource) ctrlDataSource.getMock();
+		mockDataSource.getConnection();
+		ctrlDataSource.setThrowable(sex, 1);
+		replay();
+
+		try {
+			JdbcTemplate template2 = new JdbcTemplate();
+			template2.setDataSource(mockDataSource);
+			template2.setLazyInit(true);
+			template2.afterPropertiesSet();
+			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+			template2.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
+			fail("Shouldn't have executed query without a connection");
+		}
+		catch (CannotGetJdbcConnectionException ex) {
+			// pass
+			assertTrue("Check root cause", ex.getCause() == sex);
+		}
+
 		ctrlDataSource.verify();
 	}
 
