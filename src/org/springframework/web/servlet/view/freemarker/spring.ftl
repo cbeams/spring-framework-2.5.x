@@ -73,6 +73,13 @@
 	<#else>
 		<#assign status = springMacroRequestContext.getBindStatus(path)>
 	</#if>
+	<#-- assign a temporary value, forcing a string representation for any
+	kind of variable.  This temp value is only used in this macro lib -->
+	<#if status.value?exists && status.value?is_boolean>
+	  	<#assign stringStatusValue=spring.status.value?string> 
+	<#else>
+	  	<#assign stringStatusValue=spring.status.value?default("")> 
+    </#if>
 </#macro>
 
 <#--
@@ -83,6 +90,13 @@
  -->
 <#macro bindEscaped path, htmlEscape>
 	<#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
+	<#-- assign a temporary value, forcing a string representation for any
+	kind of variable.  This temp value is only used in this macro lib -->
+	<#if status.value?exists && status.value?is_boolean>
+	  	<#assign stringStatusValue=spring.status.value?string> 
+	<#else>
+	  	<#assign stringStatusValue=spring.status.value?default("")> 
+    </#if>
 </#macro>
 
 <#--
@@ -97,7 +111,7 @@
  -->
 <#macro formInput path attributes="" >
 	<@bind path/>
-	<input type="text" name="${spring.status.expression}" value="${spring.status.value?default("")}" ${attributes} <@closeTag/>
+	<input type="text" name="${spring.status.expression}" value="${spring.stringStatusValue}" ${attributes} <@closeTag/>
 </#macro>
 
 <#--
@@ -111,7 +125,7 @@
  -->
 <#macro formTextarea path attributes="" >
 	<@bind path/>
-	<textarea name="${spring.status.expression}" ${attributes}>${spring.status.value?default("")}</textarea>
+	<textarea name="${spring.status.expression}" ${attributes}>${spring.stringStatusValue}</textarea>
 </#macro>
 
 <#--
@@ -130,7 +144,7 @@
 	<select name="${spring.status.expression}" ${attributes}>
 		<#list options?keys as value>
 		<option value="${value}" 
-		<#if spring.status.value?default("") == value>selected="selected"</#if>>${options[value]}</option>
+		<#if spring.stringStatusValue == value>selected="selected"</#if>>${options[value]}</option>
 		</#list>
 	</select>
 </#macro>
@@ -172,7 +186,7 @@
 	<@bind path/>
 	<#list options?keys as value>
 	<input type="radio" name="${spring.status.expression}" value="${value}"
-	  <#if spring.status.value?default("") == value>checked="checked"</#if> ${attributes}
+	  <#if spring.stringStatusValue == value>checked="checked"</#if> ${attributes}
 	<@closeTag/>
 	${options[value]}${separator}
 	</#list>
