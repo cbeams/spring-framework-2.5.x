@@ -32,7 +32,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @since 08.05.2003
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
- *  @version $Id: DefaultTransactionDefinition.java,v 1.8 2004-07-26 17:50:20 johnsonr Exp $
+ *  @version $Id: DefaultTransactionDefinition.java,v 1.9 2004-11-07 16:45:54 jhoeller Exp $
  */
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
@@ -55,9 +55,26 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	private boolean readOnly = false;
 
 
+	/**
+	 * Create a new DefaultTransactionDefinition, with default settings.
+	 * Can be modified through bean property setters.
+	 * @see #setPropagationBehavior
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 */
 	public DefaultTransactionDefinition() {
 	}
 
+	/**
+	 * Create a new DefaultTransactionDefinition with the the given
+	 * propagation behavior. Can be modified through bean property setters.
+	 * @param propagationBehavior one of the propagation constants in the
+	 * TransactionDefinition interface
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 */
 	public DefaultTransactionDefinition(int propagationBehavior) {
 		this.propagationBehavior = propagationBehavior;
 	}
@@ -67,7 +84,8 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * TransactionDefinition, e.g. "PROPAGATION_REQUIRED".
 	 * @param constantName name of the constant
 	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
-	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED
+	 * @see #setPropagationBehavior
+	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehaviorName(String constantName) throws IllegalArgumentException {
 		if (constantName == null || !constantName.startsWith(PROPAGATION_CONSTANT_PREFIX)) {
@@ -76,6 +94,11 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		setPropagationBehavior(constants.asNumber(constantName).intValue());
 	}
 
+	/**
+	 * Set the propagation behavior. Must be one of the propagation constants
+	 * in the TransactionDefinition interface. Default is PROPAGATION_REQUIRED.
+	 * @see #PROPAGATION_REQUIRED
+	 */
 	public final void setPropagationBehavior(int propagationBehavior) {
 		if (!constants.getValues(PROPAGATION_CONSTANT_PREFIX).contains(new Integer(propagationBehavior))) {
 			throw new IllegalArgumentException("Only values of propagation constants allowed");
@@ -92,7 +115,8 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * TransactionDefinition, e.g. "ISOLATION_DEFAULT".
 	 * @param constantName name of the constant
 	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
-	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_DEFAULT
+	 * @see #setIsolationLevel
+	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevelName(String constantName) throws IllegalArgumentException {
 		if (constantName == null || !constantName.startsWith(ISOLATION_CONSTANT_PREFIX)) {
@@ -101,6 +125,11 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		setIsolationLevel(constants.asNumber(constantName).intValue());
 	}
 
+	/**
+	 * Set the isolation level. Must be one of the isolation constants
+	 * in the TransactionDefinition interface. Default is ISOLATION_DEFAULT.
+	 * @see #ISOLATION_DEFAULT
+	 */
 	public final void setIsolationLevel(int isolationLevel) {
 		if (!constants.getValues(ISOLATION_CONSTANT_PREFIX).contains(new Integer(isolationLevel))) {
 			throw new IllegalArgumentException("Only values of isolation constants allowed");
@@ -112,6 +141,11 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		return isolationLevel;
 	}
 
+	/**
+	 * Set the timeout to apply, as number of seconds.
+	 * Default is TIMEOUT_DEFAULT (-1).
+	 * @see #TIMEOUT_DEFAULT
+	 */
 	public final void setTimeout(int timeout) {
 		if (timeout < TIMEOUT_DEFAULT) {
 			throw new IllegalArgumentException("Timeout must be a positive integer or TIMEOUT_DEFAULT");
@@ -123,6 +157,10 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		return timeout;
 	}
 
+	/**
+	 * Set whether to optimize as read-only transaction.
+	 * Default is false.
+	 */
 	public final void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
 	}
