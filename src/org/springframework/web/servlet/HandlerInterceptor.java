@@ -1,8 +1,5 @@
 package org.springframework.web.servlet;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,14 +59,13 @@ public interface HandlerInterceptor {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
-	 * @return if the execution chain should proceed with the next interceptor resp.
-	 * the handler itself, else DispatcherServlet assumes that this interceptor has
-	 * already dealed with the response
-	 * @throws ServletException if there is an internal error
-	 * @throws IOException in case of an I/O error when writing the response
+	 * @return if the execution chain should proceed with the next interceptor
+	 * respectively the handler itself, else DispatcherServlet assumes that this
+	 * interceptor has already dealed with the response itself
+	 * @throws Exception in case of errors
 	 */
 	boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws ServletException, IOException;
+	    throws Exception;
 
 	/**
 	 * Intercept the execution of a handler. Called after HandlerAdapter actually
@@ -83,10 +79,9 @@ public interface HandlerInterceptor {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
-	 * @throws ServletException if there is an internal error
-	 * @throws IOException in case of an I/O error when writing the response
+	 * @throws Exception in case of errors
 	 */
 	void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws ServletException, IOException;
+	    throws Exception;
 
 }

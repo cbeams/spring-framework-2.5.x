@@ -21,10 +21,9 @@ import javax.servlet.http.HttpSession;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.SessionRequiredException;
-import org.springframework.web.servlet.mvc.WebContentGenerator;
 
 /**
  * Controller implementation that allows multiple request types to be
@@ -68,7 +67,7 @@ import org.springframework.web.servlet.mvc.WebContentGenerator;
  * @author Rod Johnson
  * @see MethodNameResolver
  */
-public class MultiActionController extends WebContentGenerator implements Controller, LastModified  {
+public class MultiActionController extends AbstractController implements LastModified  {
 		
 	/** Prefix for last modified methods */
 	public static final String LAST_MODIFIED_METHOD_SUFFIX = "LastModified";
@@ -260,8 +259,8 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	// Implementation of Controller
 	//---------------------------------------------------------------------
 
-	public final ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+	    throws Exception {
 		String name = this.methodNameResolver.getHandlerMethodName(request);
 		return invokeNamedMethod(name, request, response);
 	}
