@@ -16,11 +16,11 @@
 package org.springframework.binding;
 
 /**
- * A type converter converts objects of one type to that of another and back
- * again. For example, a "DateToString" type converter would convert Date
- * objects to String (convert to), as well as properly-formatted Strings back to
- * Dates (convert from).
- * @author Keith
+ * A type converter converts objects of one type to that of another. They may
+ * also support conversion for multiple different types. For example, a
+ * "DateToString" type converter would convert Date objects to String (convert
+ * to), as well as properly-formatted Strings back to Dates (convert from).
+ * @author Keith Donald
  */
 public interface TypeConverter {
 
@@ -28,12 +28,14 @@ public interface TypeConverter {
 	 * Convert the provided object argument to another type.
 	 * <p>
 	 * A typical type converter implementation is capable of converting from one
-	 * type to another and back.  For example:
+	 * type to another and back. For example:
+	 * 
 	 * <pre>
-	 *     TypeConverter converter = new NumberToStringTypeConverter(Long.class);
-	 *     Long number = (Long)converter.convert("12356");
-	 *     String numberString = (String)converter.convert(number);
+	 * TypeConverter converter = new NumberFormatter(Long.class);
+	 * Long number = (Long)converter.convert(&quot;12356&quot;);
+	 * String numberString = (String)converter.convert(number);
 	 * </pre>
+	 * 
 	 * @throws TypeConversionException An exception occured during the
 	 *         conversion.
 	 */

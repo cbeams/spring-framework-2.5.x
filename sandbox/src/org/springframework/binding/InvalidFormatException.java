@@ -4,6 +4,7 @@
 package org.springframework.binding;
 
 /**
+ * Thrown when a formatted value is of the wrong form.
  * @author Keith Donald
  */
 public class InvalidFormatException extends Exception {

@@ -11,7 +11,7 @@ import org.springframework.binding.formatters.NumberFormatter;
 import org.springframework.core.io.Resource;
 
 /**
- * Registry for type converters
+ * Registry for type converters.
  * @author Keith Donald
  */
 public class TypeConverters implements TypeConverterRegistry {
