@@ -16,45 +16,62 @@
 
 package org.springframework.jms.support.converter;
 
-import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
+import javax.jms.MapMessage;
 import javax.jms.Message;
-import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
 /**
- * A simple message converter that can handle BytesMessages, TextMessages,
- * and ObjectMessages.
+ * A simple message converter that can handle TextMessages, BytesMessages,
+ * and MapMessages.
  *
- * <p>Converts a byte array to a JMS BytesMessage, a String to a JMS TextMessage,
- * and a Serializable object to a JMS ObjectMessage (and vice versa).
+ * <p>Converts a String to a JMS TextMessage, a byte array to a JMS BytesMessage,
+ * and a Map to a JMS MapMessage (and vice versa).
  *
  * @author Juergen Hoeller
  * @since 25.07.2004
+ * @see javax.jms.TextMessage
+ * @see javax.jms.BytesMessage
+ * @see javax.jms.MapMessage
  */
 public class SimpleMessageConverter implements MessageConverter {
 
 	/**
-	 * This implementation creates a ByteMessage for a byte array, a TextMessage
-	 * for a String, and an ObjectMessage for a Serializable object.
+	 * This implementation creates a TextMessage for a String, a
+	 * BytesMessage for a byte array, and a MapMessage for a Map.
 	 * @see javax.jms.Session#createBytesMessage
 	 * @see javax.jms.Session#createTextMessage
 	 * @see javax.jms.Session#createObjectMessage
 	 */
-	public Message toMessage(Object object, Session session) throws JMSException {
-		if (object instanceof byte[]) {
+	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
+		if (object instanceof String) {
+			return session.createTextMessage((String) object);
+		}
+		else if (object instanceof byte[]) {
 			BytesMessage message = session.createBytesMessage();
 			message.writeBytes((byte[]) object);
 			return message;
 		}
-		else if (object instanceof String) {
-			return session.createTextMessage((String) object);
-		}
-		else if (object instanceof Serializable) {
-			return session.createObjectMessage((Serializable) object);
+		else if (object instanceof Map) {
+			MapMessage message = session.createMapMessage();
+			Map map = (Map) object;
+			for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				if (!(entry.getKey() instanceof String)) {
+					throw new MessageConversionException("Cannot convert non-String key of type [" +
+																							 (entry.getKey() != null ? entry.getKey().getClass().getName() : null) +
+																							 "] to MapMessage entry");
+				}
+				message.setObject((String) entry.getKey(), entry.getValue());
+			}
+			return message;
 		}
 		else {
 			throw new MessageConversionException("Cannot convert object [" + object + "] to JMS message");
@@ -62,22 +79,28 @@ public class SimpleMessageConverter implements MessageConverter {
 	}
 
 	/**
-	 * This implementation converts a ByteMessage back to a byte array,
-	 * a TextMessage back to a String, and an ObjectMessage back to a
-	 * Serializable object.
+	 * This implementation converts a TextMessage back to a String, a
+	 * ByteMessage back to a byte array, and a MapMessage back to a Map.
 	 */
-	public Object fromMessage(Message message) throws JMSException {
-		if (message instanceof BytesMessage) {
+	public Object fromMessage(Message message) throws JMSException, MessageConversionException {
+		if (message instanceof TextMessage) {
+			return ((TextMessage) message).getText();
+		}
+		else if (message instanceof BytesMessage) {
 			BytesMessage bytesMessage = (BytesMessage) message;
 			byte[] bytes = new byte[(int) bytesMessage.getBodyLength()];
 			bytesMessage.readBytes(bytes);
 			return bytes;
 		}
-		else if (message instanceof TextMessage) {
-			return ((TextMessage) message).getText();
-		}
-		else if (message instanceof ObjectMessage) {
-			return ((ObjectMessage) message).getObject();
+		else if (message instanceof MapMessage) {
+			MapMessage mapMessage = (MapMessage) message;
+			Map map = new HashMap();
+			Enumeration enum = mapMessage.getMapNames();
+			while (enum.hasMoreElements()) {
+				String key = (String) enum.nextElement();
+				map.put(key, mapMessage.getObject(key));
+			}
+			return map;
 		}
 		else {
 			throw new MessageConversionException("Cannot convert JMS message [" + message + "] to object");
