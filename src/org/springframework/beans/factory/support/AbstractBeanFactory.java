@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.17 2003-11-11 08:18:24 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.18 2003-11-12 19:04:26 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -203,36 +203,46 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 	public Object getBean(String name, Class requiredType) throws BeansException {
 		Object bean = getBean(name);
-		Class clazz = bean.getClass();
-		if (!requiredType.isAssignableFrom(clazz)) {
+		if (!requiredType.isAssignableFrom(bean.getClass())) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean);
 		}
 		return bean;
 	}
 
-	public boolean isSingleton(String beanName) throws NoSuchBeanDefinitionException {
-		String name = transformedBeanName(beanName);
+	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+		String beanName = transformedBeanName(name);
 		try {
-			return getMergedBeanDefinition(name).isSingleton();
+			return getBeanDefinition(beanName).isSingleton();
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Not found -> check parent
 			if (this.parentBeanFactory != null)
-				return this.parentBeanFactory.isSingleton(name);
+				return this.parentBeanFactory.isSingleton(beanName);
 			throw ex;
 		}
 	}
 
-	public String[] getAliases(String beanName) {
-		String name = transformedBeanName(beanName);
-		List aliases = new ArrayList();
-		for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			if (entry.getValue().equals(name)) {
-				aliases.add(entry.getKey());
+	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
+		String beanName = transformedBeanName(name);
+		try {
+			// check if bean actually exists in this bean factory
+			getBeanDefinition(beanName);
+			// if found, gather aliases
+			List aliases = new ArrayList();
+			for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				if (entry.getValue().equals(beanName)) {
+					aliases.add(entry.getKey());
+				}
 			}
+			return (String[]) aliases.toArray(new String[aliases.size()]);
 		}
-		return (String[]) aliases.toArray(new String[aliases.size()]);
+		catch (NoSuchBeanDefinitionException ex) {
+			// Not found -> check parent
+			if (this.parentBeanFactory != null)
+				return this.parentBeanFactory.getAliases(beanName);
+			throw ex;
+		}
 	}
 
 
@@ -244,30 +254,30 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * Get a singleton instance of this bean name. Note that this method shouldn't
 	 * be called too often: Callers should keep hold of instances. Hence, the whole
 	 * method is synchronized here.
-	 * @param beanName name that may include factory dereference prefix
+	 * @param name name that may include factory dereference prefix
 	 */
-	protected synchronized Object getSharedInstance(String beanName, RootBeanDefinition mergedBeanDefinition)
+	protected synchronized Object getSharedInstance(String name, RootBeanDefinition mergedBeanDefinition)
 			throws BeansException {
 		// Get rid of the dereference prefix if there is one
-		String name = transformedBeanName(beanName);
+		String beanName = transformedBeanName(name);
 
-		Object beanInstance = this.singletonCache.get(name);
+		Object beanInstance = this.singletonCache.get(beanName);
 		if (beanInstance == null) {
-			logger.info("Creating shared instance of singleton bean '" + name + "'");
-			beanInstance = createBean(name, mergedBeanDefinition);
+			logger.info("Creating shared instance of singleton bean '" + beanName + "'");
+			beanInstance = createBean(beanName, mergedBeanDefinition);
 			// Re-cache the instance even if already eagerly cached in createBean,
 			// as it could have been wrapped by a BeanPostProcessor
-			this.singletonCache.put(name, beanInstance);
+			this.singletonCache.put(beanName, beanInstance);
 		}
 		else {
 			if (logger.isDebugEnabled())
-				logger.debug("Returning cached instance of singleton bean '" + name + "'");
+				logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 		}
 
 		// Don't let calling code try to dereference the
 		// bean factory if the bean isn't a factory
-		if (isFactoryDereference(beanName) && !(beanInstance instanceof FactoryBean)) {
-			throw new BeanIsNotAFactoryException(name, beanInstance);
+		if (isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
+			throw new BeanIsNotAFactoryException(beanName, beanInstance);
 		}
 
 		// Now we have the beanInstance, which may be a normal bean
@@ -275,10 +285,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		// create a bean instance, unless the caller actually wants
 		// a reference to the factory.
 		if (beanInstance instanceof FactoryBean) {
-			if (!isFactoryDereference(beanName)) {
+			if (!isFactoryDereference(name)) {
 				// Configure and return new bean instance from factory
 				FactoryBean factory = (FactoryBean) beanInstance;
-				logger.debug("Bean with name '" + name + "' is a factory bean");
+				logger.debug("Bean with name '" + beanName + "' is a factory bean");
 				try {
 					beanInstance = factory.getObject();
 				}
@@ -288,15 +298,15 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 				if (beanInstance == null) {
 					throw new FactoryBeanCircularReferenceException(
-					    "Factory bean '" + name + "' returned null object - " +
+					    "Factory bean '" + beanName + "' returned null object - " +
 					    "possible cause: not fully initialized due to circular bean reference");
 				}
 
 				// Set pass-through properties
 				if (factory instanceof PropertyValuesProviderFactoryBean) {
-					PropertyValues pvs = ((PropertyValuesProviderFactoryBean) factory).getPropertyValues(name);
+					PropertyValues pvs = ((PropertyValuesProviderFactoryBean) factory).getPropertyValues(beanName);
 					if (pvs != null) {
-						logger.debug("Applying pass-through properties to bean with name '" + name + "'");
+						logger.debug("Applying pass-through properties to bean with name '" + beanName + "'");
 						new BeanWrapperImpl(beanInstance).setPropertyValues(pvs);
 					}
 				}
@@ -305,7 +315,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			}
 			else {
 				// The user wants the factory itself
-				logger.debug("Calling code asked for FactoryBean instance for name '" + name + "'");
+				logger.debug("Calling code asked for FactoryBean instance for name '" + beanName + "'");
 			}
 		}	// if we're dealing with a factory bean
 
