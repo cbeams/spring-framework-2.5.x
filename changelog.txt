@@ -11,26 +11,37 @@ Documentation
 
 Package org.springframework.aop
 * adapted AdvisedSupport to keep the order of proxy interfaces, to create JDK proxy with specified order of interfaces
+* introduced private monitor within ConcurrencyThrottleInterceptor, to avoid synchronizing on the user-visible instance
 
 Package org.springframework.beans
 * ClassEditor trims class name strings and converts empty strings into null values
+* CustomBooleanEditor only accepts default "true/"on"/"yes" and "false"/"off"/"no" if not given explicit Strings
 * added "getBeanNamesForType" method to ListableBeanFactory interface, also checking FactoryBeans and manual singletons
 * added "beanNamesForTypeIncludingAncestors" method to BeanFactoryUtils, corresponding to "getBeanNamesForType"
 * renamed FactoryBeanCircularReferenceException to FactoryBeanNotInitializedException, reflecting general causes
+* fixed AbstractAutowireCapableBeanFactory to ignore further satisfiable constructors with less arguments
+* added "getResourceLoader" method to BeanDefinitionReader interface, plus setter in AbstractBeanDefinitionReader
+* moved "loadBeanDefinitions(Resource[])" method from AbstractBeanDefinitionReader to BeanDefinitionReader interface
+* DefaultXmlBeanDefinitionParser supports "classpath:" and standard URLs as resource locations for the "import" tag
 
 Package org.springframework.context
 * AbstractApplicationContext uses new DelegatingMessageSource as placeholder, to avoid StaticMessageSource side effects
+* AbstractApplicationContext detects and registers prototype beans that implement the ApplicationListener interface too
 * added overloaded "registerSingleton"/"registerPrototype" methods without property values to StaticApplicationContext
 
 Package org.springframework.core
 * fixed FileSystemResource's "createRelative" to correctly apply a given relative path when starting from a directory
 
 Package org.springframework.jdbc
-* added "int[] batchExecute(String[] sql)" method for executing a group os sql statements as a batch, if that is supported by the JDBC driver
+* added "int[] batchUpdate(String[] sql)" method to JdbcTemplate, for executing a group of SQL statements as a batch
 * DataSourceUtils only executes Connection cleanup in "beforeCompletion" synchronization if there are no open references
 * added C3P0NativeJdbcExtractor for C3P0 0.8.5 or later (for earlier C3P0 versions, use SimpleNativeJdbcExtractor)
 * added "maxRows" bean property to JdbcTemplate, allowing to specify the maximum number of rows to be fetched
 * added "fetchSize" and "maxRows" bean properties to RdbmsOperation, passing the values to the internal JdbcTemplate
+* BatchSqlUpdate stores clones of passed-in argument arrays, to avoid side effects with reused (modified) arrays
+
+Package org.springframework.jndi
+* added "lookup(name, requiredType)" convenience method to JndiTemplate, matching the JNDI object against the given type
 
 Package org.springframework.mail
 * introduced MailMessage interface as common interface for SimpleMailMessage and JavaMail MIME messages
@@ -45,29 +56,49 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * reworked SqlMapClientTemplate to execute calls directly on SqlMapClient in case of TransactionAwareDataSourceProxy
+* added AbstractLobTypeHandler class for iBATIS SQL Maps 2.0.9, for type handlers that delegate to a Spring LobHandler
+* added ClobStringTypeHandler, BlobByteArrayTypeHandler and BlobSerializableTypeHandler for iBATIS SQL Maps 2.0.9
 * fixed AbstractLobType for Hibernate, cleaning up in afterCompletion if necessary (for HibernateTransactionManager)
 * AbstractLobType uses low order value for transaction synchronizations, to always execute before resource cleanup
+* added "lookupSessionFactory(request)" callback to OpenSessionInViewFilter, for request-dependent SessionFactory lookup
 * SessionFactoryUtils/PersistenceManagerFactoryUtils/OjbFactoryUtils execute synchronizations before Connection cleanup
 
 Package org.springframework.samples
+* changed JPetStore's "declarativeServices.xml" file to avoid autowiring (avoid autowiring for BeanPostProcessors!)
 * introduced C3P0 ComboPooledDataSource as connection pool for Image Database (to show an alternative to Commons DBCP)
 
 Package org.springframework.transaction
-* TransactionSynchronization objects can influence their execution order through implementing the Ordered interface
+* added TransactionTimedOutException, to be thrown if an explicit transaction timeout is detected
+* ResourceHolderSupport throws TransactionTimedOutException if no time-to-live left (before attempting an operation)
 * added optional reference counting to ResourceHolderSupport, to be able to check for pending resource release calls
+* AbstractPlatformTransactionManager throws IllegalTransactionStateException on repeated commit/rollback attempts
+* AbstractPlatformTransactionManager's "isExistingTransaction" and "doSetRollbackOnly" are provided in default impls now
+* AbstractPlatformTransactionManager's "doSuspend" and "doResume" are provided in default impls now, throwing exceptions
+* TransactionSynchronization objects can influence their execution order through implementing the Ordered interface
 * MethodMap/NameMatchTransactionAttributeSource automatically convert String values to TransactionAttribute instances
+* reworked TransactionAttributeSourceAdvisor and AttributesTransactionAttributeSource to allow bean-style configuration
+* TransactionProxyFactoryBean auto-detects a matching PlatformTransactionManager bean if not explicitly specified
+* JtaTransactionManager is able to work with a JTA TransactionManager only (i.e. without a UserTransaction handle)
 
 Package org.springframework.util
+* added ResourceUtils utility class, for resolving resource locations to files in the file system (without any logging)
+* Log4jConfigurer accepts a "classpath:" URL or a "file:" URL as location too, not just a plain file path
+* Log4jConfigurer accepts config files that do not reside in the file system, as long as there is no refresh interval
 * fixed DefaultPropertiesPersister to correctly handle empty property values when reading with specific encoding
 
 Package org.springframework.validation
 * added overloaded "reject" and "rejectValue" methods without default message to Errors interface and BindException
 
 Package org.springframework.web
-* added "searchAttributes" option to ServletContextPropertyPlaceholderConfigurer, resolving stringified attribute values
+* Log4jWebConfigurer supports a "log4jExposeWebAppRoot" context-param, for turning off exposure of the system property
+* added "contextOverride" option to ServletContextPropertyPlaceholderConfigurer, letting web.xml override local settings
+* added "searchContextAttributes" option to ServletContextPropertyPlaceholderConfigurer, resolving context attributes
 * reworked DispatcherServlet's fallback to default strategies, reading in default strategy names from a properties file
 * DispatcherServlet does not override "doHead" anymore, leveraging HttpServlet's default "HEAD" handling via "doGet"
+* factored out protected "resolveViewName" method from DispatcherServlet's "render" implementation
 * added "HEAD" to WebContentGenerator's default set of supported methods (in addition to "GET" and "POST")
+* added overloaded "showForm" version with request, response, errors and control model to SimpleFormController
+* added "suppressValidation" calls to AbstractWizardFormController, analogous to SimpleFormController's behavior
 * added SimpleServletHandlerAdapter, supporting handlers that implement the Servlet interface within DispatcherServlet
 * added SimpleServletPostProcessor, applies init and destruction callbacks to beans that implement the Servlet interface
 * added support for declarative configuration of exporter parameters to AbstractJasperReportsView
@@ -872,7 +903,7 @@ Package org.springframework.transaction
 
 Package org.springframework.util
 * deprecated ResponseTimeMonitorImpl's "getUptime" method in favor of "getUptimeMillis"
-* deprecated StopWatch's "getLastInterval"/"getTotalTime" in favor of "getLastTaskTimeMillis"/"getTotalTimeMillis"
+* deprecated StopWatch'sgetLastInterval"/"getTotalTime" in favor of "getLastTaskTimeMillis"/"getTotalTimeMillis"
 
 Package org.springframework.validation
 * added "rejectIfEmptyOrWhitespace" method to ValidationUtils, for rejecting if empty or just containing whitespace
