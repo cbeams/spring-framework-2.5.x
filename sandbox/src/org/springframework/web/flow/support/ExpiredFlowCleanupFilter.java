@@ -41,7 +41,6 @@ import org.springframework.web.flow.FlowExecution;
  * of your web application. Here's an example:
  * 
  * <pre>
- * 
  *  &lt;!DOCTYPE web-app PUBLIC &quot;-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN&quot;
  *  	&quot;http://java.sun.com/dtd/web-app_2_3.dtd&quot;&gt;
  *  &lt;web-app&gt;
@@ -54,7 +53,6 @@ import org.springframework.web.flow.FlowExecution;
  *  		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
  *  	&lt;/filter-mapping&gt;
  *  	...
- *  
  * </pre>
  * 
  * <p>

@@ -174,7 +174,7 @@ public class HttpServletFlowExecutionManager {
 			if (executionListener != null) {
 				flowExecution.getListenerList().add(executionListener);
 			}
-			viewDescriptor = flowExecution.start(createEvent(request));
+			viewDescriptor = flowExecution.start(createEvent(request, response));
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -188,7 +188,7 @@ public class HttpServletFlowExecutionManager {
 				flowExecution.getListenerList().add(executionListener);
 			}
 			// signal the event within the current state
-			Event event = createEvent(request);
+			Event event = createEvent(request, response);
 			Assert.hasText(event.getId(), "The '" + getEventIdParameterName() + "' request parameter (or '"
 					+ getEventIdRequestAttributeName()
 					+ "' request attribute) is present in the request -- programmer error?");
@@ -239,8 +239,8 @@ public class HttpServletFlowExecutionManager {
 	/**
 	 * Create a flow event wrapping given request.
 	 */
-	protected Event createEvent(HttpServletRequest request) {
-		return new HttpServletRequestEvent(request, getEventIdParameterName(), getEventIdRequestAttributeName(),
+	protected Event createEvent(HttpServletRequest request, HttpServletResponse response) {
+		return new HttpServletRequestEvent(request, response, getEventIdParameterName(), getEventIdRequestAttributeName(),
 				getCurrentStateIdParameterName(), getParameterNameValueDelimiter());
 	}
 

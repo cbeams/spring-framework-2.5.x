@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
@@ -32,6 +33,11 @@ import org.springframework.web.flow.FlowConstants;
  * @author Erwin Vervaet
  */
 public class HttpServletRequestEvent extends Event {
+	
+	/**
+	 * The response associated with the request that originated this event.
+	 */
+	private HttpServletResponse response;
 
 	/**
 	 * The event timestamp.
@@ -59,8 +65,14 @@ public class HttpServletRequestEvent extends Event {
 	 */
 	private String parameterNameValueDelimiter;
 
-	public HttpServletRequestEvent(HttpServletRequest request) {
+	/**
+	 * Construct a flow event for the specified HTTP servlet request.
+	 * @param request the HTTP servlet request
+	 * @param response the HTTP servlet response associated with the request
+	 */
+	public HttpServletRequestEvent(HttpServletRequest request, HttpServletResponse response) {
 		super(request);
+		this.response = response;
 		this.eventIdParameterName = FlowConstants.EVENT_ID_PARAMETER;
 		this.eventIdAttributeName = FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
 		this.currentStateIdParameterName = FlowConstants.CURRENT_STATE_ID_PARAMETER;
@@ -68,12 +80,22 @@ public class HttpServletRequestEvent extends Event {
 	}
 
 	/**
-	 * Construct a flow event for the specified servlet request.
+	 * Construct a flow event for the specified HTTP servlet request.
 	 * @param request the HTTP servlet request
+	 * @param response the HTTP servlet response associated with the request
+	 * @param eventIdParameterName name of the event id parameter in the request
+	 * @param eventIdAttributeName name of the event id attribute in the request
+	 * @param currentStateIdParameterName name of the current state id parameter
+	 *        in the request
+	 * @param parameterValueDelimiter delimiter used when a parameter value is
+	 *        sent as part of the name of a request parameter
+	 *        (e.g. "_eventId_value=bar")
 	 */
-	public HttpServletRequestEvent(HttpServletRequest request, String eventIdParameterName,
-			String eventIdAttributeName, String currentStateIdParameterName, String parameterValueDelimiter) {
+	public HttpServletRequestEvent(HttpServletRequest request, HttpServletResponse response,
+			String eventIdParameterName, String eventIdAttributeName,
+			String currentStateIdParameterName, String parameterValueDelimiter) {
 		super(request);
+		this.response = response;
 		this.eventIdParameterName = eventIdParameterName;
 		this.eventIdAttributeName = eventIdAttributeName;
 		this.currentStateIdParameterName = currentStateIdParameterName;
@@ -85,6 +107,14 @@ public class HttpServletRequestEvent extends Event {
 	 */
 	public HttpServletRequest getRequest() {
 		return (HttpServletRequest)getSource();
+	}
+	
+	/**
+	 * Returns the HTTP servlet response associated with the HTTP
+	 * servlet request that originated this event.
+	 */
+	public HttpServletResponse getResponse() {
+		return response;
 	}
 
 	public String getId() {
