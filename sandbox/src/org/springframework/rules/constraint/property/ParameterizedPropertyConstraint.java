@@ -47,7 +47,7 @@ public class ParameterizedPropertyConstraint implements PropertyConstraint {
 		return parameterizedExpression.getPropertyName();
 	}
 
-	public boolean tests(String propertyName) {
+	public boolean isDependentOn(String propertyName) {
 		return parameterizedExpression.test(propertyName);
 	}
 	

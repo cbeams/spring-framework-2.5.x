@@ -51,7 +51,11 @@ public class PropertiesConstraint extends AbstractPropertyConstraint {
 		this.beanPropertyExpression = beanPropertyExpression;
 	}
 
-	public boolean tests(String propertyName) {
+	public boolean isCompoundRule() {
+		return true;
+	}
+	
+	public boolean isDependentOn(String propertyName) {
 		return getPropertyName().equals(propertyName) || getOtherPropertyName().equals(propertyName);
 	}
 

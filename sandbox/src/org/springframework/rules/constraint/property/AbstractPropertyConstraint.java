@@ -28,7 +28,7 @@ public abstract class AbstractPropertyConstraint implements PropertyConstraint {
 		return propertyName;
 	}
 
-	public boolean tests(String propertyName) {
+	public boolean isDependentOn(String propertyName) {
 		return getPropertyName().equals(propertyName);
 	}
 	

@@ -39,8 +39,8 @@ public class RequiredIfOthersPresent extends RequiredIfTrue {
 		this(propertyName, otherPropertyNames, LogicalOperator.AND);
 	}
 
-	public boolean tests(String propertyName) {
-		return getPropertyName().equals(propertyName) || ((CompoundPropertyConstraint)getConstraint()).tests(propertyName);
+	public boolean isDependentOn(String propertyName) {
+		return getPropertyName().equals(propertyName) || ((CompoundPropertyConstraint)getConstraint()).isDependentOn(propertyName);
 	}
 
 	public boolean isCompoundRule() {

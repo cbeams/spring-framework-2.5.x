@@ -27,7 +27,7 @@ public interface PropertyConstraint extends Constraint {
 	 * @param propertyName
 	 * @return true or false
 	 */
-	public boolean tests(String propertyName);
+	public boolean isDependentOn(String propertyName);
 
 	/**
 	 * Does this property constraint effect more than one property?

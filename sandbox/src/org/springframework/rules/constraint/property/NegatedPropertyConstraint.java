@@ -29,8 +29,8 @@ public class NegatedPropertyConstraint extends Not implements PropertyConstraint
 		return ((PropertyConstraint)super.getConstraint()).getPropertyName();
 	}
 	
-	public boolean tests(String propertyName) {
-		return ((PropertyConstraint)super.getConstraint()).test(propertyName);
+	public boolean isDependentOn(String propertyName) {
+		return ((PropertyConstraint)super.getConstraint()).isDependentOn(propertyName);
 	}
 
 	public boolean isCompoundRule() {

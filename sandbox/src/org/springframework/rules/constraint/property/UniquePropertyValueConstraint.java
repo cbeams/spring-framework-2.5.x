@@ -37,7 +37,7 @@ public class UniquePropertyValueConstraint extends AbstractConstraint implements
 		return propertyName;
 	}
 
-	public boolean tests(String propertyName) {
+	public boolean isDependentOn(String propertyName) {
 		return getPropertyName().equals(propertyName);
 	}
 	

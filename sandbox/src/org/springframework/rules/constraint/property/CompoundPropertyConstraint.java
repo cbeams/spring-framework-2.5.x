@@ -35,10 +35,10 @@ public class CompoundPropertyConstraint implements PropertyConstraint {
 		return e.getPropertyName();
 	}
 
-	public boolean tests(final String propertyName) {
+	public boolean isDependentOn(final String propertyName) {
 		return new AbstractConstraint() {
 			public boolean test(Object o) {
-				return ((PropertyConstraint)o).equals(propertyName);
+				return ((PropertyConstraint)o).isDependentOn(propertyName);
 			}
 		}.anyTrue(compoundConstraint.iterator());
 	}
