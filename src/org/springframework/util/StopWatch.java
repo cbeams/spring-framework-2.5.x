@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @since May 2, 2001
- * @version $Id: StopWatch.java,v 1.2 2003-11-07 15:31:37 jhoeller Exp $
+ * @version $Id: StopWatch.java,v 1.3 2003-11-14 08:24:06 johnsonr Exp $
  */
 public class StopWatch {
 
@@ -51,6 +51,12 @@ public class StopWatch {
 	 * and need to distinguish between them in log or console output.
 	 */
 	private String id = "";
+	
+	private boolean keepTaskList = true;
+	
+	private TaskInfo lastTaskInfo;
+	
+	private int taskCount;
 
 
 	//---------------------------------------------------------------------
@@ -72,6 +78,20 @@ public class StopWatch {
 	 */
 	public StopWatch(String id) {
 		this.id = id;
+	}
+	
+	/**
+	 * Determines whether TaskInfo array is built over time. Set this to false
+	 * when using a stopwatch for millions of intervals, or the task info structure
+	 * will consume excessive memory. Default is true.
+	 * @param keepTaskList
+	 */
+	public void setKeepTaskList(boolean keepTaskList) {
+		this.keepTaskList = keepTaskList;
+	}
+	
+	public boolean getKeepTaskList() {
+		return this.keepTaskList;
 	}
 
 
@@ -103,7 +123,11 @@ public class StopWatch {
 		}
 		long lastTime = System.currentTimeMillis() - this.startTime;
 		this.runningTime += lastTime;
-		this.taskList.add(new TaskInfo(this.currentTask, lastTime));
+		this.lastTaskInfo = new TaskInfo(this.currentTask, lastTime);
+		if (this.keepTaskList) {
+			this.taskList.add(lastTaskInfo);
+		}
+		++this.taskCount;
 		this.running = false;
 		this.currentTask = null;
 	}
@@ -119,10 +143,9 @@ public class StopWatch {
 	 * Returns the time taken by the last operation.
 	 */
 	public long getLastInterval() throws IllegalStateException {
-		if (taskList.size() == 0)
+		if (lastTaskInfo == null)
 			throw new IllegalStateException("No tests run: can't get last interval");
-		TaskInfo ti = (TaskInfo) taskList.get(taskList.size() - 1);
-		return ti.getTime();
+		return lastTaskInfo.getTime();
 	}
 
 	/**
@@ -136,13 +159,16 @@ public class StopWatch {
 	 * Returns the number of tasks timed.
 	 */
 	public int getTaskCount() {
-		return taskList.size();
+		return taskCount;
 	}
 
 	/**
 	 * Returns an array of the data for tasks performed.
 	 */
 	public TaskInfo[] getTaskInfo() {
+		if (!this.keepTaskList) {
+			throw new UnsupportedOperationException("Task info is not being kept!");
+		}
 		return (TaskInfo[]) taskList.toArray(new TaskInfo[0]);
 	}
 
@@ -166,15 +192,20 @@ public class StopWatch {
 	 */
 	public String prettyPrint() {
 		StringBuffer sb = new StringBuffer(shortSummary());
-		TaskInfo[] tasks = getTaskInfo();
-		sb.append("-----------------------------------------\n");
-		sb.append("ms\t%\tTask name\n");
-		sb.append("-----------------------------------------\n");
-		for (int i = 0; i < tasks.length; i++) {
-			sb.append(tasks[i].getTime() + "\t");
-			long percent = Math.round((100.0 * tasks[i].getTimeSecs()) / getTotalTimeSecs());
-			sb.append(percent + "%\t");
-			sb.append(tasks[i].getTaskName() + "\n");
+		if (!this.keepTaskList) {
+			sb.append("No task info kept");
+		}
+		else {
+			TaskInfo[] tasks = getTaskInfo();
+			sb.append("-----------------------------------------\n");
+			sb.append("ms\t%\tTask name\n");
+			sb.append("-----------------------------------------\n");
+			for (int i = 0; i < tasks.length; i++) {
+				sb.append(tasks[i].getTime() + "\t");
+				long percent = Math.round((100.0 * tasks[i].getTimeSecs()) / getTotalTimeSecs());
+				sb.append(percent + "%\t");
+				sb.append(tasks[i].getTaskName() + "\n");
+			}
 		}
 		return sb.toString();
 	}
@@ -185,13 +216,18 @@ public class StopWatch {
 	 */
 	public String toString() {
 		StringBuffer sb = new StringBuffer(shortSummary());
-		TaskInfo[] tasks = getTaskInfo();
-		for (int i = 0; i < tasks.length; i++) {
-			if (i > 0)
-				sb.append("; ");
-			sb.append("[" + tasks[i].getTaskName() + "] took " + tasks[i].getTimeSecs());
-			long percent = Math.round((100.0 * tasks[i].getTimeSecs()) / getTotalTimeSecs());
-			sb.append("=" + percent + "%");
+		if (this.keepTaskList) {
+			TaskInfo[] tasks = getTaskInfo();
+			for (int i = 0; i < tasks.length; i++) {
+				if (i > 0)
+					sb.append("; ");
+				sb.append("[" + tasks[i].getTaskName() + "] took " + tasks[i].getTimeSecs());
+				long percent = Math.round((100.0 * tasks[i].getTimeSecs()) / getTotalTimeSecs());
+				sb.append("=" + percent + "%");
+			}
+		}
+		else {
+			sb.append("Not keeping task info");
 		}
 		return sb.toString();
 	}

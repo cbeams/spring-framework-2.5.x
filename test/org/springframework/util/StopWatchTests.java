@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 /**
  *
  * @author Rod Johnson
- * @version $Id: StopWatchTests.java,v 1.1.1.1 2003-08-14 16:21:21 trisberg Exp $
+ * @version $Id: StopWatchTests.java,v 1.2 2003-11-14 08:25:17 johnsonr Exp $
  */
 public class StopWatchTests extends TestCase {
 
@@ -61,6 +61,48 @@ public class StopWatchTests extends TestCase {
 		assertTrue(tasks.length == 2);
 		assertTrue(tasks[0].getTaskName().equals(name1));
 		assertTrue(tasks[1].getTaskName().equals(name2));
+		sw.toString();
+	}
+	
+	public void testValidUsageNotKeepingTaskList() throws Exception {
+		StopWatch sw = new StopWatch();
+		sw.setKeepTaskList(false);
+		long int1 = 166L;
+		long int2 = 45L;
+		String name1 = "Task 1";
+		String name2 = "Task 2";
+	
+		long fudgeFactor = 5L;
+		assertFalse(sw.isRunning());
+		sw.start(name1);
+		Thread.sleep(int1);
+		assertTrue(sw.isRunning());
+		sw.stop();
+	
+		// TODO are timings off in JUnit? Why do these assertions sometimes fail
+		// under both Ant and Eclipse?
+	
+		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1);
+		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1 + fudgeFactor);
+		sw.start(name2);
+		Thread.sleep(int2);
+		sw.stop();
+		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1 + int2);
+		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1 + int2 + fudgeFactor);
+	
+		assertTrue(sw.getTaskCount() == 2);
+		String pp = sw.prettyPrint();
+		assertTrue(pp.indexOf("kept") != -1);
+		sw.toString();
+	
+		try {
+			sw.getTaskInfo();
+			fail();
+		}
+		catch (UnsupportedOperationException ex) {
+			// Ok
+		}
+		
 	}
 	
 	public void testFailureToStartBeforeGettingTimings() {
