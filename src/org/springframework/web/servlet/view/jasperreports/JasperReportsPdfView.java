@@ -20,12 +20,12 @@ import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 
 /**
- * Implementation of AbstractJasperReportsView that renders report results in PDF format.
+ * Implementation of <code>AbstractJasperReportsSingleFormatView</code> that renders report results in PDF format.
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.1.3
  */
-public class JasperReportsPdfView extends AbstractJasperReportsView {
+public class JasperReportsPdfView extends AbstractJasperReportsSingleFormatView {
 
 	public JasperReportsPdfView() {
 		setContentType("application/pdf");

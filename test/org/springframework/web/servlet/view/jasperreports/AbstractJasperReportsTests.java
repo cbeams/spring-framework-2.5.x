@@ -39,18 +39,18 @@ import org.springframework.ui.jasperreports.ProductBean;
  */
 public abstract class AbstractJasperReportsTests extends TestCase {
 
-	private static final String COMPILED_REPORT =
+	protected static final String COMPILED_REPORT =
 			"org/springframework/ui/jasperreports/DataSourceReport.jasper";
 
-	private static final String UNCOMPILED_REPORT =
+	protected static final String UNCOMPILED_REPORT =
 			"org/springframework/ui/jasperreports/DataSourceReport.jrxml";
 
-	private static final String SUB_REPORT_PARENT =
+	protected static final String SUB_REPORT_PARENT =
 			"org/springframework/ui/jasperreports/subReportParent.jrxml";
 
-	private MockHttpServletRequest request;
+	protected MockHttpServletRequest request;
 
-	private MockHttpServletResponse response;
+	protected MockHttpServletResponse response;
 
 	protected abstract AbstractJasperReportsView getViewImplementation();
 
@@ -98,7 +98,10 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 
 	public void testContentType() throws Exception {
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
-		assertEquals("View content type is incorrect", getDesiredContentType(), view.getContentType());
+
+		// removed assert because not all views no in advance what the content type will be,
+		// plus the important test is the finished response.
+		//assertEquals("View content type is incorrect", getDesiredContentType(), view.getContentType());
 		view.render(getModel(), request, response);
 		assertEquals("Response content type is incorrect", getDesiredContentType(), response.getContentType());
 	}
@@ -279,21 +282,27 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 
 	}
 
-	private AbstractJasperReportsView getView(String url) throws Exception {
+	protected AbstractJasperReportsView getView(String url) throws Exception {
 		AbstractJasperReportsView view = getViewImplementation();
 		view.setUrl(url);
 		view.setApplicationContext(new StaticApplicationContext());
 		return view;
 	}
 
-	private Map getModel() {
+	protected Map getModel() {
 		Map model = new HashMap();
 		model.put("ReportTitle", "Dear Lord!");
 		model.put("dataSource", new JRBeanCollectionDataSource(getData()));
+		extendModel(model);
 		return model;
 	}
 
-	private List getData() {
+	/**
+	 * Subclasses can extend the model if they need to.
+	 */
+	protected void extendModel(Map model) {};
+
+	protected List getData() {
 		List list = new ArrayList();
 		for (int x = 0; x < 10; x++) {
 			PersonBean bean = new PersonBean();

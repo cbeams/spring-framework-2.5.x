@@ -54,6 +54,18 @@ public class ReportController extends MultiActionController {
 		return new ModelAndView("simpleReportCompile", model);
 	}
 
+	public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+
+		String uri = request.getRequestURI();
+		String format = uri.substring(uri.lastIndexOf(".") + 1);
+
+		Map model = getModel();
+		model.put("format", format);
+
+		return new ModelAndView("simpleReportMulti", model);
+	}
+
 	public ModelAndView handleSimpleReportCompile(HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 

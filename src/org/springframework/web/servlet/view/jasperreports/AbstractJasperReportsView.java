@@ -135,6 +135,8 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	private Properties headers;
 
+	private Properties exporterParameters;
+
 
 	/**
 	 * Set the name of the model attribute that represents the report data.
@@ -234,7 +236,15 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		if (!this.headers.containsKey(HEADER_CONTENT_DISPOSITION)) {
 			this.headers.setProperty(HEADER_CONTENT_DISPOSITION, CONTENT_DISPOSITION_INLINE);
 		}
+
+		initJasperView();
 	}
+
+	/**
+	 * Called after this class is initialized to allow sub-classes a chance to
+	 * perform any additional initialization steps.
+	 */
+	protected void initJasperView() throws ApplicationContextException{;}
 
 	/**
 	 * Loads a <code>JasperReport</code> from the specified <code>Resource</code>. If
@@ -314,7 +324,16 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 		}
 
+		populateHeaders(response);
 		renderReport(this.report, model, dataSource, response);
+	}
+
+	private void populateHeaders(HttpServletResponse response) {
+		// Apply the headers to the response.
+		for (Enumeration en = this.headers.propertyNames(); en.hasMoreElements();) {
+			String key = (String) en.nextElement();
+			response.addHeader(key, this.headers.getProperty(key));
+		}
 	}
 
 	/**
@@ -379,64 +398,24 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Subclasses should implement this method to perform the actual rendering process.
-	 * @param report the <code>JasperReport</code> to render
-	 * @param parameters the map containing report parameters
-	 * @param dataSource the <code>JRDataSource</code> containing the report data
-	 * @param response the HTTP response the report should be rendered to
-	 * @throws Exception if rendering failed
+	 * Allows sub-classes to get access to the <code>JasperReport</code> instance
+	 * loaded by Spring.
+	 * @return an instance of <code>JasperReport</code>.
 	 */
-	protected void renderReport(
-			JasperReport report, Map parameters, JRDataSource dataSource, HttpServletResponse response)
-			throws Exception {
-
-		// Prepare report for rendering.
-		JRAbstractExporter exporter = createExporter();
-		JasperPrint print = JasperFillManager.fillReport(report, parameters, dataSource);
-
-		// Apply the headers to the response.
-		for (Enumeration en = this.headers.propertyNames(); en.hasMoreElements();) {
-			String key = (String) en.nextElement();
-			response.addHeader(key, this.headers.getProperty(key));
-		}
-
-		if (useWriter()) {
-			// Render report into HttpServletResponse's Writer.
-			JasperReportsUtils.render(exporter, print, response.getWriter());
-		}
-		else {
-			// Render report into local OutputStream.
-			// IE workaround: write into byte array first.
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			JasperReportsUtils.render(exporter, print, baos);
-
-			// Write content length (determined via byte array).
-			response.setContentLength(baos.size());
-
-			// Flush byte array to servlet output stream.
-			ServletOutputStream out = response.getOutputStream();
-			baos.writeTo(out);
-			out.flush();
-		}
+	protected JasperReport getReport() {
+		return this.report;
 	}
 
-
 	/**
-	 * Create a JasperReports exporter for a specific output format,
-	 * which will be used to render the report to the HTTP response.
-	 * <p>The <code>useWriter</code> method determines whether the
-	 * output will be written as text or as binary content.
-	 * @see #useWriter
+	 * Sub-classes should implement this method to actually render a <code>JasperReport</code>
+	 * to the <code>HttpServletResponse</code>.
+	 * @param report the <code>JasperReport</code>
+	 * @param model
+	 * @param dataSource
+	 * @param response
 	 */
-	protected abstract JRAbstractExporter createExporter();
+	protected abstract void renderReport(JasperReport report, Map model, JRDataSource dataSource,
+			HttpServletResponse response) throws Exception;
 
-	/**
-	 * Return whether to use a <code>java.io.Writer</code> to write text content
-	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
-	 * to write binary content to the response.
-	 * @see javax.servlet.ServletResponse#getWriter
-	 * @see javax.servlet.ServletResponse#getOutputStream
-	 */
-	protected abstract boolean useWriter();
 
 }

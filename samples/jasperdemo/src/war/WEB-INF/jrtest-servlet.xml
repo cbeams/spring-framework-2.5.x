@@ -40,13 +40,15 @@
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="mappings">
 			<props>
-				<prop key="/simpleReport.pdf">controller</prop>
+
+				<prop key="/simpleReport*.*">controller</prop>
+				<!--<prop key="/simpleReport.pdf">controller</prop>
 				<prop key="/simpleReportPost.pdf">controller</prop>
 				<prop key="/simpleReportPost.action">controller</prop>
 				<prop key="/simpleReportCompile.pdf">controller</prop>
 				<prop key="/simpleReportHtml.html">controller</prop>
 				<prop key="/simpleReportCsv.csv">controller</prop>
-				<prop key="/simpleReportExcel.xls">controller</prop>
+				<prop key="/simpleReportExcel.xls">controller</prop>-->
 				<prop key="/subReport.pdf">controller</prop>
 			</props>
 		</property>
@@ -68,6 +70,7 @@
 				<prop key="/simpleReportHtml.html">handleSimpleReportHtml</prop>
 				<prop key="/simpleReportCsv.csv">handleSimpleReportCsv</prop>
 				<prop key="/simpleReportExcel.xls">handleSimpleReportExcel</prop>
+				<prop key="/simpleReportMulti.*">handleSimpleReportMulti</prop>
 				<prop key="/subReport.pdf">handleSubReport</prop>
 			</props>
 		</property>

@@ -20,12 +20,12 @@ import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.export.JRHtmlExporter;
 
 /**
- * Implementation of AbstractJasperReportsView that renders report results in HTML format.
+ * Implementation of <code>AbstractJasperReportsSingleFormatView</code> that renders report results in HTML format.
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.1.3
  */
-public class JasperReportsHtmlView extends AbstractJasperReportsView {
+public class JasperReportsHtmlView extends AbstractJasperReportsSingleFormatView {
 
 	public JasperReportsHtmlView() {
 		setContentType("text/html");
