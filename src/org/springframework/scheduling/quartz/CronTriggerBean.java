@@ -23,9 +23,11 @@ import java.util.TimeZone;
 import org.quartz.CronTrigger;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.SimpleTrigger;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.Constants;
 
 /**
  * Convenience subclass of Quartz' CronTrigger class that eases
@@ -54,6 +56,8 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class CronTriggerBean extends CronTrigger
     implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
+	
+	private static final Constants constants = new Constants(CronTrigger.class);
 
 	private JobDetail jobDetail;
 
@@ -73,6 +77,17 @@ public class CronTriggerBean extends CronTrigger
 
 	public JobDetail getJobDetail() {
 		return jobDetail;
+	}
+	
+	/**
+	 * Set the misfire instruction via the name of the corresponding
+	 * constant in the CronTrigger class. Default is
+	 * MISFIRE_INSTRUCTION_SMART_POLICY.
+	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_FIRE_NOW
+	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
+	 */
+	public void setMisfireInstructionName(String constantName) {
+		setMisfireInstruction(constants.asNumber(constantName).intValue());
 	}
 
 	public void setBeanName(String beanName) {
