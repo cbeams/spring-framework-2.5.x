@@ -3,15 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.1 (28.9.2004)
+Changes in version 1.1.1 (29.9.2004)
 ------------------------------------
 
 Package org.springframework.aop
-* Introduced new IntroductionInfo interface, allowing introduction without an IntroductionAdvisor
-* DelegatingIntroductionInterceptor lets unchecked exceptions thrown by introduction delegates through without wrapping them
+* introduced new IntroductionInfo interface, allowing introduction without an IntroductionAdvisor
+* DelegatingIntroductionInterceptor lets unchecked exceptions thrown by introduction delegates through without wrapping
+* HashMapCachingAdvisorChainFactory uses Commons Collections IdentityMap (if available, on JDK <= 1.4) for method cache
 
 Package org.springframework.beans
 * MutablePropertyValues's "addPropertyValues" methods return MutablePropertyValues, for invocation chains in 1 statement
+* AbstractAutowireCapableBeanFactory uses Commons Collections LinkedMap (if available, on JDK <= 1.4) for managed maps
 * AbstractAutowireCapableBeanFactory is able to create non-public classes and invoke non-public init and destroy methods
 * AbstractAutowireCapableBeanFactory regards bean references for correct destruction order (not requiring "depends-on")
 * AbstractAutowireCapableBeanFactory regards bean references and "depends-on" for destruction order of inner beans too
@@ -19,6 +21,9 @@ Package org.springframework.beans
 * fixed DefaultListableBeanFactory's "getBeansOfType" implementation to correctly ignore abstract FactoryBeans
 * added "import" element for XML bean definitions, to allow for loading further bean definitions from relative paths
 * modified SingletonBeanFactoryLocator to work in environments where classloader resources are not on file system
+
+Package org.springframework.cache
+* added explicit support for EHCache via EhCacheManagerFactoryBean and EhCacheFactoryBean in the "ehcache" subpackage
 
 Package org.springframework.context
 * factored out the "publishEvent" method into the ApplicationEventPublisher interface, extended by ApplicationContext
@@ -29,6 +34,7 @@ Package org.springframework.context
 * ContextSingletonBeanFactoryLocator resource handling modified in similar fashion as for SingletonBeanFactoryLocator
 
 Package org.springframework.core
+* added CollectionFactory helper, abstracting linked/identity map creation (detecting JDK 1.4 and Commons Collections)
 * fixed "createRelative" implementation in ClassPathResource to correctly handle relative subdirectories
 * added constructor that takes an explicit ClassLoader to ClassPathResource
 
@@ -39,6 +45,7 @@ Package org.springframework.jdbc
 * SingleConnectionDataSource and TransactionAwareDataSourceProxy do not use thread context class loader for proxies
 * clarified that LobHandler's getters are supposed to return Java null in case of SQL NULL (following the JDBC spec)
 * OracleLobHandler's getter implementations return null rather than an empty array/stream in case of SQL NULL
+* JdbcTemplate uses Commons Collections LinkedMap (if available, on JDK <= 1.4) for mapping result rows in lists
 
 Package org.springframework.jms
 * added SimpleMessageConverter102 subclass which handles BytesMessage without JMS 1.1's "getBodyLength" method
@@ -51,7 +58,7 @@ Package org.springframework.mock
 * added full support for scoped attributes to MockPageContext, properly regarding request/session/application scope
 
 Package org.springframework.test
-* New package included in mock JAR, offering superclasses for tests requiring Spring contexts
+* included new "test" package in mock JAR, offering superclasses for tests requiring Spring contexts
 
 Package org.springframework.orm
 * LocalSessionFactoryBean exposes a config-time JTA TransactionManager before mapping resources get registered
@@ -64,6 +71,8 @@ Package org.springframework.orm
 Package org.springframework.web
 * fixed "createRelative" implementation in ServletContextResource to correctly handle relative subdirectories
 * turned protected getter methods in controller implementations to public, for introspection and testing purposes
+* added ServletForwardingController, forwarding to a named servlet (e.g. to apply Spring HandlerInterceptors)
+* added ServletWrappingController, wrapping a servlet instance (e.g. to apply Spring HandlerInterceptors to Struts)
 * added "exposeHelpers" hook to InternalResourceView, for use by JstlView by TilesJstlView (to avoid super calls)
 * call ServletRequest's "removeAttribute" if a model attribute is null in InternalResourceView (e.g. for includes)
 * fixed resetting of previous nested path in NestedPathTag, properly working in request scope (rather than page scope)
@@ -72,9 +81,6 @@ Package org.springframework.web
 * added "javaScriptEscape" attribute to MessageTag, to apply JavaScript escaping to output texts
 * added EscapeBodyTag class aka "spring:escapeBody", allowing to HTML- and/or JavaScript-escape enclosed body content
 * added JavaScriptUtils class to util package, containing generic code for JavaScript escaping
-
-Package org.springframework.cache
-* added suppport for EHCache by introducing EhCacheManagerFactoryBean and EhCacheFactoryBean
 
 
 Changes in version 1.1 final (5.9.2004)
