@@ -6,7 +6,7 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: tomcat5-build.xml,v 1.4 2004-01-08 01:32:06 davison Exp $
+	$Id: tomcat5-build.xml,v 1.5 2004-01-08 11:52:22 davison Exp $
 -->
 <project name="autobuilds-tomcat5" basedir="." default="usage">
 
@@ -21,6 +21,9 @@
 		</fileset>
 		<fileset dir="${servers.install.dir}/${appserver.distname}/common/lib">
 			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${spring.lib.dir}/hsqldb">
+			<include name="*.jar" />
 		</fileset>
 		<pathelement location="${servers.install.dir}/${appserver.distname}/bin/bootstrap.jar" />
 	</path>
