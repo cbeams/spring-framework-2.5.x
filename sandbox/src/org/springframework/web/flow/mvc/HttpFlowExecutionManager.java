@@ -215,6 +215,10 @@ public class HttpFlowExecutionManager {
 	 */
 	protected FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException {
 		String flowExecutionId = getRequestParameter(request, getFlowExecutionIdParameterName());
+		if (!StringUtils.hasText(flowExecutionId)) {
+			throw new IllegalStateException(
+					"The '" + getFlowExecutionIdParameterName() + "' parameter is not present in the request; not enough information to lookup flow execution");
+		}
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(request, flowExecutionId);
 		}

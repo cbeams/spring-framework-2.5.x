@@ -30,6 +30,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.action.AbstractAction;
+import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.mvc.HttpFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.struts.BindingActionForm;
@@ -86,8 +87,8 @@ public class FlowAction extends TemplateAction {
 			HttpServletResponse response) throws Exception {
 		synchronized (this) {
 			if (executionManager == null) {
-				executionManager = new HttpFlowExecutionManager(logger, getFlow(mapping), getWebApplicationContext(),
-						null);
+				executionManager = new HttpFlowExecutionManager(logger, getFlow(mapping),
+						new BeanFactoryFlowServiceLocator(getWebApplicationContext()), null);
 			}
 		}
 		if (form instanceof BindingActionForm) {
@@ -99,7 +100,8 @@ public class FlowAction extends TemplateAction {
 			request.setAttribute(getActionFormAttributeName(), form);
 		}
 		ModelAndView modelAndView = executionManager.handleRequest(request, response, getFlowExecutionInput(request));
-		FlowExecution flowExecution = executionManager.getRequiredFlowExecution(request);
+		// this is not very clean
+		FlowExecution flowExecution = (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
 		if (flowExecution.isActive()) {
 			// struts specific
 			String mappingFlowId = getFlowId(mapping);

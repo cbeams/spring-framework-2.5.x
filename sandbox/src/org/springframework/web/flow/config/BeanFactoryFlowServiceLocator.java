@@ -34,6 +34,14 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 
 	private BeanFactory beanFactory;
 
+	public BeanFactoryFlowServiceLocator() {
+		
+	}
+
+	public BeanFactoryFlowServiceLocator(BeanFactory beanFactory) {
+		setBeanFactory(beanFactory);
+	}
+
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 	}
