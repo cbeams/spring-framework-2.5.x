@@ -5,14 +5,14 @@
  
 package org.springframework.beans.factory.access;
 
-import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.BeansException;
 
 /**
  * <p>An interface for a class used to lookup/use, and optionally allow the
  * release of a BeanFactory, or BeanFactory subclass such as ApplicationContext.
  *
  * <p>Where this interface is implemented as a singleton class such as
- * KeyedSingletonBeanFactoryLocator, the Spring team <strong>strongly</strong>
+ * SingletonBeanFactoryLocator, the Spring team <strong>strongly</strong>
  * suggests that it be used sparingly and with caution. By far the vast majority
  * of the code inside an application is best written in a Dependency Injection
  * style, where that code is served out of a BeanFactory/ApplicationContext
@@ -27,12 +27,12 @@ import org.springframework.beans.FatalBeanException;
  * proper Dependency Injection has been achieved. As another example, in a complex
  * J2EE app with multiple layers, with each layer having its own
  * ApplicationContext definition (in a hierarchy), a class like
- * KeyedSingletonBeanFactoryLocator may be used to demand load these contexts.  
+ * SingletonBeanFactoryLocator may be used to demand load these contexts.
  * 
- * @author colin sampaleanu
- * @version $Revision: 1.2 $
+ * @author Colin Sampaleanu
+ * @version $Revision: 1.3 $
  * @see org.springframework.beans.factory.BeanFactory
- * @see org.springframework.context.access.LocatorFactory
+ * @see org.springframework.context.access.DefaultLocatorFactory
  * @see org.springframework.context.ApplicationContext
  */
 public interface BeanFactoryLocator {
@@ -40,12 +40,12 @@ public interface BeanFactoryLocator {
   /**
    * Use the BeanFactory (or derived class such as ApplicationContext) specified
    * by the factoryKey parameter. The definition is possibly loaded/created as needed.
-   * @param factoryKey a resourceName specifying which BeanFactory the BeanFactoryLocator
-   * should return for usage. The actual meaning of the resourceName is specific to the
+   * @param factoryKey a resource name specifying which BeanFactory the BeanFactoryLocator
+   * should return for usage. The actual meaning of the resource name is specific to the
    * actual implementation of BeanFactoryLocator.
-   * @return the BeanFactory instance, wrapped as a {@link BeanFactoryReference} object
-   * @throws FatalBeanException if there is an error loading or accessing the BeanFactory
+   * @return the BeanFactory instance, wrapped as a BeanFactoryReference object
+   * @throws BeansException if there is an error loading or accessing the BeanFactory
    */
-  BeanFactoryReference useFactory(String factoryKey) throws FatalBeanException;
+  BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException;
 
 }

@@ -7,15 +7,16 @@ package org.springframework.beans.factory.access;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.jndi.support.SimpleNamingContextBuilder;
 
 /**
  * @author Rod Johnson
- * @author colin sampaleanu
- * @version $Id: SimpleJndiBeanFactoryLocatorTests.java,v 1.2 2004-02-04 17:26:18 jhoeller Exp $
+ * @author Colin Sampaleanu
+ * @version $Id: JndiBeanFactoryLocatorTests.java,v 1.1 2004-02-13 17:54:14 jhoeller Exp $
  */
-public class SimpleJndiBeanFactoryLocatorTests extends TestCase {
+public class JndiBeanFactoryLocatorTests extends TestCase {
 	
 	public static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
 
@@ -23,9 +24,9 @@ public class SimpleJndiBeanFactoryLocatorTests extends TestCase {
 		// Set up initial context but don't bind anything
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
-		SimpleJndiBeanFactoryLocator jbfl = createLocator();
+		JndiBeanFactoryLocator jbfl = createLocator();
 		try {
-			jbfl.useFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
+			jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
 			fail();
 		}
 		catch (BootstrapException ex) {
@@ -37,17 +38,17 @@ public class SimpleJndiBeanFactoryLocatorTests extends TestCase {
 	public void testBeanFactoryPathFromJndiEnvironmentNotFound() throws Exception  {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 		
-		String bogusPath = "/RUBBISH/com/xxxx/framework/server/test1.xml";
+		String bogusPath = "RUBBISH/com/xxxx/framework/server/test1.xml";
 	
 		// Set up initial context
 		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, bogusPath);
 
-		SimpleJndiBeanFactoryLocator jbfl = createLocator();
+		JndiBeanFactoryLocator jbfl = createLocator();
 		try {
-			jbfl.useFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
+			jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
 			fail();
 		}
-		catch (BootstrapException ex) {
+		catch (BeansException ex) {
 			// Check for helpful JNDI message
 			assertTrue(ex.getMessage().indexOf(bogusPath) != -1);
 		}
@@ -56,17 +57,17 @@ public class SimpleJndiBeanFactoryLocatorTests extends TestCase {
 	public void testBeanFactoryPathFromJndiEnvironmentNotValidXml() throws Exception {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 	
-		String nonXmlPath = "/com/xxxx/framework/server/SlsbEndpointBean.class";
+		String nonXmlPath = "com/xxxx/framework/server/SlsbEndpointBean.class";
 
 		// Set up initial context
 		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, nonXmlPath);
 
-		SimpleJndiBeanFactoryLocator jbfl = createLocator();
+		JndiBeanFactoryLocator jbfl = createLocator();
 		try {
-			jbfl.useFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
+			jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
 			fail();
 		}
-		catch (BootstrapException ex) {
+		catch (BeansException ex) {
 			// Check for helpful JNDI message
 			assertTrue(ex.getMessage().indexOf(nonXmlPath) != -1);
 		}
@@ -75,13 +76,13 @@ public class SimpleJndiBeanFactoryLocatorTests extends TestCase {
 	public void testBeanFactoryPathFromJndiEnvironmentWithSingleFile() throws Exception {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
-		String path = "/org/springframework/beans/factory/xml/collections.xml";
+		String path = "org/springframework/beans/factory/xml/collections.xml";
 
 		// Set up initial context
 		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, path);
 
-		SimpleJndiBeanFactoryLocator jbfl = createLocator();
-		BeanFactory bf = jbfl.useFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY).getFactory();
+		JndiBeanFactoryLocator jbfl = createLocator();
+		BeanFactory bf = jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY).getFactory();
 		assertTrue(bf.containsBean("rod"));
 	}
 
@@ -93,8 +94,8 @@ public class SimpleJndiBeanFactoryLocatorTests extends TestCase {
 		// Set up initial context
 		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, path);
 
-		SimpleJndiBeanFactoryLocator jbfl = createLocator();
-		BeanFactory bf = jbfl.useFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY).getFactory();
+		JndiBeanFactoryLocator jbfl = createLocator();
+		BeanFactory bf = jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY).getFactory();
 		assertTrue(bf.containsBean("rod"));
 		assertTrue(bf.containsBean("inheritedTestBean"));
 	}
@@ -103,8 +104,8 @@ public class SimpleJndiBeanFactoryLocatorTests extends TestCase {
 	 * Allows locator impl to be overriden so we can test subclasses as well
 	 * @return
 	 */
-	private SimpleJndiBeanFactoryLocator createLocator() {
-		SimpleJndiBeanFactoryLocator jbfl = new SimpleJndiBeanFactoryLocator();
+	private JndiBeanFactoryLocator createLocator() {
+		JndiBeanFactoryLocator jbfl = new JndiBeanFactoryLocator();
 		return jbfl;
 	}
 	

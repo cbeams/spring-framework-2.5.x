@@ -3,18 +3,17 @@ package org.springframework.beans.factory.access;
 import java.util.List;
 
 /**
- * Scrap bean for use in test
- * 
- * @version $Revision: 1.1 $
- * @author colin sampaleanu
+ * Scrap bean for use in tests.
+ * @author Colin Sampaleanu
+ * @version $Revision: 1.2 $
  */
 public class TestBean {
 
-  String name;
+  private String name;
 
-  List list;
+  private List list;
 
-  Object objRef;
+  private Object objRef;
 
   /**
    * @return Returns the name.

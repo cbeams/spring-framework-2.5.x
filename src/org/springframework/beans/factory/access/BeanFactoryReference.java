@@ -10,10 +10,10 @@ import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Class used to track a reference to a BeanFactory obtained through
- * {@link BeanFactoryLocator}
- * 
- * @version $Revision: 1.2 $
- * @author colin sampaleanu
+ * a BeanFactoryLocator.
+ * @author Colin Sampaleanu
+ * @version $Revision: 1.3 $
+ * @see BeanFactoryLocator
  */
 public interface BeanFactoryReference {
   
@@ -31,10 +31,8 @@ public interface BeanFactoryReference {
    * may 'close' it.</p>
    * <p>In an EJB usage scenario this would normally be called from ejbRemove and
    * ejbPassivate.
-   * 
    * @throws FatalBeanException if the BeanFactory cannot be released
-   * 
-   * @see org.springframework.beans.factory.access.BeanFactoryLocator 
+   * @see org.springframework.beans.factory.access.BeanFactoryLocator
    */
   void release() throws FatalBeanException;
 

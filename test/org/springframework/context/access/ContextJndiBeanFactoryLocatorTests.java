@@ -6,22 +6,22 @@
 package org.springframework.context.access;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.access.SimpleJndiBeanFactoryLocator;
-import org.springframework.beans.factory.access.SimpleJndiBeanFactoryLocatorTests;
+import org.springframework.beans.factory.access.JndiBeanFactoryLocator;
+import org.springframework.beans.factory.access.JndiBeanFactoryLocatorTests;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jndi.support.SimpleNamingContextBuilder;
 
 /**
- * @author colin sampaleanu
- * @version $Id: JndiBeanFactoryLocatorTests.java,v 1.1 2004-01-27 00:03:47 colins Exp $
+ * @author Colin Sampaleanu
+ * @version $Id: ContextJndiBeanFactoryLocatorTests.java,v 1.1 2004-02-13 17:54:14 jhoeller Exp $
  */
-public class JndiBeanFactoryLocatorTests extends SimpleJndiBeanFactoryLocatorTests {
+public class ContextJndiBeanFactoryLocatorTests extends JndiBeanFactoryLocatorTests {
 
 	/**
 	 * Override default imple to use JndiBeanFactoryLocator instead of Simple variant
 	 */
-	private SimpleJndiBeanFactoryLocator createLocator() {
-		SimpleJndiBeanFactoryLocator jbfl = new JndiBeanFactoryLocator();
+	private JndiBeanFactoryLocator createLocator() {
+		JndiBeanFactoryLocator jbfl = new ContextJndiBeanFactoryLocator();
 		return jbfl;
 	}
 
@@ -39,8 +39,8 @@ public class JndiBeanFactoryLocatorTests extends SimpleJndiBeanFactoryLocatorTes
 		// Set up initial context
 		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, path);
 
-		SimpleJndiBeanFactoryLocator jbfl = createLocator();
-		BeanFactory bf = jbfl.useFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY)
+		JndiBeanFactoryLocator jbfl = createLocator();
+		BeanFactory bf = jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY)
 				.getFactory();
 		assertTrue(bf instanceof ApplicationContext);
 	}

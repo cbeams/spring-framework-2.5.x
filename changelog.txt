@@ -1,6 +1,27 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.88 2004-02-12 14:20:47 colins Exp $
+$Id: changelog.txt,v 1.89 2004-02-13 17:56:22 jhoeller Exp $
+
+
+Changes in version 1.0 (01.03.2003)
+-----------------------------------
+
+Package org.springframework.beans
+* refactored AbstractBeanFactory into AbstractBeanFactory and AbstractAutowireCapableBeanFactory
+* revised BeanFactoryLocator exception handling
+* renamed SimpleJndiBeanFactoryLocator to JndiBeanFactoryLocator
+
+Package org.springframework.context
+* renamed JndiBeanFactoryLocator to ContextJndiBeanFactoryLocator
+* renamed DefaultBeanFactoryLocator to ContextSingletonBeanFactoryLocator
+* renamed LocatorFactory to DefaultLocatorFactory
+* fixed "useCodeAsDefaultMessage" fallback for multiple codes in a MessageSourceResolvable
+
+Package org.springframework.ejb
+* moved logger instance from AbstractEnterpriseBean to AbstractStatelessSession Bean and AbstractMessageDrivenBean
+
+Package org.springframework.util
+* removed package path utility methods from ClassLoaderUtils
 
 
 Changes in version 1.0 RC1 (11.02.2003)
@@ -46,9 +67,9 @@ Package org.springframework.beans
 * added support for "autodetect" autowire mode to XML bean definition format
 * added "set" tag to XML bean definition format, analogous to "list" and "map"
 * fixed "constructor-arg" detection in DefaultXmlBeanDefinitionParser to not interfere with inner bean definitions
-* reworked BeanFactoryLoader interface as BeanFactoryLocator
-* added SingletonBeanFactoryLocator class, for use by glue code needing to access BeanFactories/ApplicationContexts
-* added SimpleJndiBeanFactoryLocator class
+* reworked BeanFactoryLoader interface into org.springframework.beans.factory.access.BeanFactoryLocator
+* added SingletonBeanFactoryLocator class, for use by glue code needing to access a BeanFactory/ApplicationContext
+* added SimpleJndiBeanFactoryLocator class, for example for use in Spring's EJB support classes
 
 Package org.springframework.context
 * ApplicationContext interface does not extend AutowireCapableBeanFactory anymore (use ConfigurableApplicationContext)
@@ -59,8 +80,8 @@ Package org.springframework.context
 * reworked internal structure of AbstractNestingMessageSource and ResourceBundleMessageSource
 * added ReloadableResourceBundleMessageSource, supporting hot reloading of message definition files
 * added "useCodeAsDefaultMessage" property to AbtractNestingMessageSource, to ease development and debugging
-* added DefaultBeanFactoryLocator class, for use by glue code needing to access BeanFactories/ApplicationContexts
-* added JndiBeanFactoryLocator class
+* added DefaultBeanFactoryLocator class, for use by glue code needing to access a BeanFactory/ApplicationContext
+* added JndiBeanFactoryLocator class, for example for use in Spring's EJB support classes
 
 Package org.springframework.core
 * removed HasRootCause, InternalErrorException, ParameterizableErrorCoded, and Timestamped
@@ -74,8 +95,8 @@ Package org.springframework.dao
 * TypeMismatchException extends InvalidDataAccessResourceUsageException
 
 Package org.springframework.ejb
-* replaced use of BeanFactoryLoader interface with BeanFactoryLocator, to load BeanFactories/ApplicationContexts for EJBs
-* removed XmlBeanFactoryLoader; its functionality is replaced by SimpleJndiBeanFactoryLocator/JndiBeanFactoryLocator
+* replaced BeanFactoryLoader interface with BeanFactoryLocator, to load a BeanFactory or ApplicationContext for EJBs
+* removed XmlBeanFactoryLoader, superseded by JndiBeanFactoryLocator/SimpleJndiBeanFactoryLocator
 
 Package org.springframework.jdbc
 * added support for transaction suspension to DataSourceTransactionManager
@@ -123,7 +144,7 @@ Package org.springframework.transaction
 * added JotmFactoryBean for exposing a JOTM instance (implementing UserTransaction and TransactionManager)
 * added WebSphereTransactionManagerFactoryBean for exposing a WebSphere 4/5's JTA TransactionManager
 * allow advisors for TransactionProxyFactoryBean's "preInterceptors" and "postInterceptors" properties
-* removed AbstractTransactionAttributeSource, moved isMatch implementation to concrete subclasses 
+* removed AbstractTransactionAttributeSource, moved isMatch implementation to concrete subclasses
 
 Package org.springframework.ui
 * added VelocityEngineUtils utility class for convenient merging of a Velocity template with a model

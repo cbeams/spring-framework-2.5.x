@@ -9,41 +9,30 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 
 /**
- * A factory class to get a BeanFactoryLocator instance.<br/> By default, an
- * instance of type DefaultBeanFactoryLocator is returned.
- * 
+ * A factory class to get a default ContextSingletonBeanFactoryLocator instance.
+ * @author Colin Sampaleanu
  * @version $Revision: 1.1 $
- * @author colin sampaleanu
- * 
- * @see org.springframework.context.access.DefaultBeanFactoryLocator
+ * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  */
-public class LocatorFactory {
+public class DefaultLocatorFactory {
 
 	/**
 	 * Return an instance object implementing BeanFactoryLocator. This will normally
-	 * be a singleton instance of the specific DefaultBeanFactoryLocator class,
+	 * be a singleton instance of the specific ContextSingletonBeanFactoryLocator class,
 	 * using the default resource selector.
-	 *  
-	 * @return BeanFactoryLocator
-	 * @throws FatalBeanException
 	 */
 	public static BeanFactoryLocator getInstance() throws FatalBeanException {
-		return DefaultBeanFactoryLocator.getInstance();
+		return ContextSingletonBeanFactoryLocator.getInstance();
 	}
 
 	/**
 	 * Return an instance object implementing BeanFactoryLocator. This will normally
-	 * be a singleton instance of the specific DefaultBeanFactoryLocator class,
+	 * be a singleton instance of the specific ContextSingletonBeanFactoryLocator class,
 	 * using the specified resource selector.
-	 * 
 	 * @param selector a selector variable which provides a hint to the factory as to
 	 * which instance to return.
-	 * 
-	 * @return BeanFactoryLocator
-	 * @throws FatalBeanException
 	 */
-	public static BeanFactoryLocator getInstance(String selector)
-			throws FatalBeanException {
-		return DefaultBeanFactoryLocator.getInstance(selector);
+	public static BeanFactoryLocator getInstance(String selector) throws FatalBeanException {
+		return ContextSingletonBeanFactoryLocator.getInstance(selector);
 	}
 }

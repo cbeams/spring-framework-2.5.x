@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -27,13 +28,15 @@ import org.springframework.core.io.UrlResource;
 
 /**
  * <p>Keyed-singleton implementation of BeanFactoryLocator, which leverages existing
- * Spring constructs. This is normally accessed through LocatorFactory, but may also
+ * Spring constructs. This is normally accessed through DefaultLocatorFactory, but may also
  * be used directly.</p>
+ *
  * <p>Please see the warning in BeanFactoryLocator's JavaDoc about appropriate usage
  * of singleton style BeanFactoryLocator implementations. It is the opinion of the 
  * Spring team that the use of this class and similar classes is unecessary except
  * (sometimes) for a small amount of glue code. Excessive usage will lead to code
- * that is more tightly coupled, and harder to modify or test.</p> 
+ * that is more tightly coupled, and harder to modify or test.</p>
+ *
  * <p>In this implementation, an ApplicationContext is built up from one or more XML
  * definition files, accessed as resources. The default name of the resource file(s)
  * is 'beanRefFactory.xml', which is used when the instance is obtained with the no-arg 
@@ -46,16 +49,18 @@ import org.springframework.core.io.UrlResource;
  * pieces of code, which are not able to work in a Dependency Injection fashion, to
  * refer to and use the same target BeanFactory/ApplicationContext instance(s), by
  * different names.<p>
- * <p>Consider an example application scenario:<br/><br/>
+ *
+ * <p>Consider an example application scenario:<br><br>
  * <code>com.mycompany.myapp.util.applicationContext.xml</code> - ApplicationContext
- * definition file which defines beans for 'util' layer.<br/>
+ * definition file which defines beans for 'util' layer.<br>
  * <code>com.mycompany.myapp.dataaccess-applicationContext.xml</code> -
  * ApplicationContext definition file which defines beans for 'data access' layer.
- * Depends on the above<br/>
+ * Depends on the above<br>
  * <code>com.mycompany.myapp.services.applicationContext.xml</code> -
  * ApplicationContext definition file which defines beans for 'services' layer.
- * Depends on the above<br/><br/>
- * In an ideal scenario, these would be combined to create one ApplicationContext,
+ * Depends on the above.
+ *
+ * <p>In an ideal scenario, these would be combined to create one ApplicationContext,
  * or created as three hierarchical ApplicationContexts, by one piece of code
  * somewhere at application startup (perhaps a Servlet filter), from which all other
  * code in the application would flow, obtained as beans from the context(s). However
@@ -70,21 +75,23 @@ import org.springframework.core.io.UrlResource;
  * use, as depending on what is inside it, that can be an expensive operation.
  * Additionally, there is a fairly tight coupling between the stub and the name of
  * the definition resource for the BeanFactory/ApplicationContext. This is where
- * KeyedSingletonBeanFactoryLocator comes in. The stub can obtain a 
- * KeyedSingletonBeanFactoryLocator instance, which is effectively a singleton, and
+ * SingletonBeanFactoryLocator comes in. The stub can obtain a
+ * SingletonBeanFactoryLocator instance, which is effectively a singleton, and
  * ask it for an appropriate BeanFactory. A subsequent invocation (assuming the
  * same classloader is involved) by the stub or another piece of code, will obtain
  * the same instance. The simple aliasing mechanism allows the context to be asked
  * for by a name which is appropriate for (or describes) the user. The deployer can
- * match alias names to actual context names.<br><br>
- * Another use of KeyedSingletonBeanFactoryLocator, is to demand-load/use one or more
+ * match alias names to actual context names.
+ *
+ * <p>Another use of SingletonBeanFactoryLocator, is to demand-load/use one or more
  * BeanFactories/ApplicationContexts. Because the definiiton can contain one of more
  * BeanFactories/ApplicationContexts, which can be independent or in a hierarchy, if 
  * they are set to lazy-initialize, they will only be created when actually requested
- * for use.<br/>
- * Given the above=mentioned three ApplicationContexts, consider the simplest
- * KeyedSingletonBeanFactoryLocator usage scenario, where there is only one single
- * <code>beanRefFactory.xml</code> definition file:<br/>
+ * for use.
+ *
+ * <p>Given the above-mentioned three ApplicationContexts, consider the simplest
+ * SingletonBeanFactoryLocator usage scenario, where there is only one single
+ * <code>beanRefFactory.xml</code> definition file:<br>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -106,13 +113,13 @@ import org.springframework.core.io.UrlResource;
  * </pre>
  * The client code is as simple as:
  * <pre>
- * BeanFactoryLocator bfl = KeyedSingletonBeanFactoryLocator.getInstance();
+ * BeanFactoryLocator bfl = SingletonBeanFactoryLocator.getInstance();
  * BeanFactoryReference bf = bfl.useFactory("com.mycompany.myapp");
  * // now use some bean from factory 
  * MyClass zed = bf.getFactory().getBean("mybean");
  * </pre>
  * Another relatively simple variation of the <code>beanRefFactory.xml</code> definition file could be:
- * <br/>
+ * <br>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -158,18 +165,21 @@ import org.springframework.core.io.UrlResource;
  * 
  * &lt;/beans>
  * </pre>
- * In this example, there is a hierarchy of three contexts created. The (potential)
+ *
+ * <p>In this example, there is a hierarchy of three contexts created. The (potential)
  * advantage is that if the lazy flag is set to true, a context will only be created
  * if it's actually used. If there is some code that is only needed some of the time,
  * this mechanism can save some resources. Additionally, an alias to the last context
  * has been created. Aliases allow usage of the idiom where client code asks for a
  * context with an id which represents the package or module the code is in, and the
- * actual definition file(s) for the KeyedSingletonBeanFactoryLocator maps that id to
- * a real context id.<br/><br/>
- * A final example is more complex, with a <code>beanRefFactory.xml</code> for every module.
- * All the files are automatically combined to create the final definition.<br/>
- * <code>beanRefFactory.xml</code> file inside jar for util module:<br/><br>
- * <pre>
+ * actual definition file(s) for the SingletonBeanFactoryLocator maps that id to
+ * a real context id.
+ *
+ * <p>A final example is more complex, with a <code>beanRefFactory.xml</code> for every module.
+ * All the files are automatically combined to create the final definition.<br>
+ * <code>beanRefFactory.xml</code> file inside jar for util module:
+ *
+ * <p><pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
  * 
@@ -183,7 +193,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  * 
- * <code>beanRefFactory.xml</code> file inside jar for data-access module:<br/>
+ * <code>beanRefFactory.xml</code> file inside jar for data-access module:<br>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -202,7 +212,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  * 
- * <code>beanRefFactory.xml</code> file inside jar for services module:<br/>
+ * <code>beanRefFactory.xml</code> file inside jar for services module:<br>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -223,7 +233,7 @@ import org.springframework.core.io.UrlResource;
  * 
  * <code>beanRefFactory.xml</code> file inside jar for mypackage module. This doesn't
  * create any of its own contexts, but allows the other ones to be referred to be
- * a name known to this module:<br/>
+ * a name known to this module:<br>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -240,9 +250,9 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  *   
- * @author colin sampaleanu
- * @version $Revision: 1.7 $
- * @see org.springframework.context.access.LocatorFactory
+ * @author Colin Sampaleanu
+ * @version $Revision: 1.8 $
+ * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
@@ -253,12 +263,14 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	// the keyed singleton instances
 	private static Map instances = new HashMap();
 
+
 	// we map BeanFactoryGroup objects by String keys, and by the definition object
 	private Map bfgInstancesByKey = new HashMap();
 
 	private Map bfgInstancesByObj = new HashMap();
 
 	private String resourceName;
+
 
 	/**
 	 * Returns an instance which uses the default "beanRefFactory.xml", as the name of the
@@ -276,22 +288,23 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * classloader's getResources() method with this name will be combined to create a
 	 * definition, which is just a a BeanFactory.
 	 * @param selector the name of the resource(s) which will be read and combine to
-	 * form the definition for the KeyedSingletonBeanFactoryLocator instance
+	 * form the definition for the SingletonBeanFactoryLocator instance
 	 */
 	public static BeanFactoryLocator getInstance(String selector) throws FatalBeanException {
 		synchronized (instances) {
-			logger.debug("SingletonBeanFactoryLocator.getInstance(): SingletonBeanFactoryLocator.class="
-				+ SingletonBeanFactoryLocator.class + ", hash= " + SingletonBeanFactoryLocator.class.hashCode());
-			logger.debug("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" + instances.hashCode() + ", instances=" + instances);
+			if (logger.isDebugEnabled()) {
+				logger.debug("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
+				             instances.hashCode() + ", instances=" + instances);
+			}
 			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
 			if (bfl == null) {
 				bfl = new SingletonBeanFactoryLocator(selector);
 				instances.put(selector, bfl);
 			}
-
 			return bfl;
 		}
 	}
+
 
 	/**
 	 * Constructor which uses the default "beanRefFactory.xml", as the name of the
@@ -299,7 +312,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * getResources() method with this name will be combined to create a definition.
 	 */
 	protected SingletonBeanFactoryLocator() {
-		resourceName = BEANS_REFS_XML_NAME;
+		this.resourceName = BEANS_REFS_XML_NAME;
 	}
 
 	/**
@@ -312,54 +325,60 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		this.resourceName = resourceName;
 	}
 
-	public BeanFactoryReference useFactory(String factoryKey) throws FatalBeanException {
-		synchronized (bfgInstancesByKey) {
-			BeanFactoryGroup bfg = (BeanFactoryGroup) bfgInstancesByKey
-					.get(resourceName);
-			logger.debug("bfgInstancesByKey=" + bfgInstancesByKey);
+	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
+		synchronized (this.bfgInstancesByKey) {
+			BeanFactoryGroup bfg = (BeanFactoryGroup) this.bfgInstancesByKey
+					.get(this.resourceName);
+			if (logger.isDebugEnabled()) {
+				logger.debug("bfgInstancesByKey=" + this.bfgInstancesByKey);
+			}
 
 			if (bfg != null) {
-				logger.debug("Factory group with resourceName '" + resourceName
-						+ "' requested. Using existing instance.");
-				bfg.refcount++;
+				if (logger.isDebugEnabled()) {
+					logger.debug("Factory group with resourceName '" + this.resourceName
+							+ "' requested. Using existing instance.");
+				}
+				bfg.refCount++;
 			}
 			else {
 				// this group definition doesn't exist, we need to try to load it
-				logger.debug("Factory group with resourceName '" + resourceName
-						+ "' requested. Creating new instance.");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Factory group with resourceName '" + this.resourceName
+							+ "' requested. Creating new instance.");
+				}
 
 				Collection resourceUrls;
 				try {
-					resourceUrls = getAllDefinitionResources(resourceName);
+					resourceUrls = getAllDefinitionResources(this.resourceName);
 				}
-				catch (IOException e) {
+				catch (IOException ex) {
 					throw new FatalBeanException(
 							"Unable to load group definition. Group resource name:"
-									+ resourceName + ", factoryKey:" + factoryKey,
-							e);
+									+ this.resourceName + ", factoryKey:" + factoryKey,
+							ex);
 				}
 
 				int numResources = resourceUrls.size();
 				if (numResources == 0)
 					throw new FatalBeanException(
 							"Unable to find definition for specified definition. Group:"
-									+ resourceName + ", contextId:" + factoryKey);
+									+ this.resourceName + ", contextId:" + factoryKey);
 
 				String[] resources = new String[numResources];
 				Iterator it = resourceUrls.iterator();
 				for (int i = 0; i < numResources; ++i) {
-					URL u = (URL) it.next();
-					resources[i] = u.toExternalForm();
+					URL url = (URL) it.next();
+					resources[i] = url.toExternalForm();
 				}
 
 				BeanFactory groupContext = createDefinition(resources);
 
 				bfg = new BeanFactoryGroup();
 				bfg.definition = groupContext;
-				bfg.resourceName = resourceName;
-				bfg.refcount = 1;
-				bfgInstancesByKey.put(resourceName, bfg);
-				bfgInstancesByObj.put(groupContext, bfg);
+				bfg.resourceName = this.resourceName;
+				bfg.refCount = 1;
+				this.bfgInstancesByKey.put(this.resourceName, bfg);
+				this.bfgInstancesByObj.put(groupContext, bfg);
 			}
 
 			BeanFactory groupContext = bfg.definition;
@@ -373,7 +392,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				throw new FatalBeanException(
 						"Unable to return specified BeanFactory instance: factoryKey="
 								+ factoryKey + ", from group with resourceName: "
-								+ resourceName, e);
+								+ this.resourceName, e);
 			}
 
 			if (bean instanceof String) {
@@ -387,7 +406,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 							"Unable to return specified BeanFactory instance: lookupId="
 									+ lookupId + ", factoryKey=" + factoryKey
 									+ ", from group with resourceName: "
-									+ resourceName, e);
+									+ this.resourceName, e);
 				}
 			}
 
@@ -395,13 +414,13 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				throw new FatalBeanException(
 						"Returned bean is not BeanFactory or its subclass. lookupId="
 								+ lookupId + ", factoryKey=" + factoryKey
-								+ ", from group with resourceName: " + resourceName
+								+ ", from group with resourceName: " + this.resourceName
 								+ ". Returned cbject class is: " + bean.getClass());
 
-			final BeanFactory retval = (BeanFactory) bean;
+			final BeanFactory beanFactory = (BeanFactory) bean;
 			return new BeanFactoryReference() {
 				public BeanFactory getFactory() {
-					return retval;
+					return beanFactory;
 				}
 				public void release() throws FatalBeanException {
 					// Currently does nothing.
@@ -419,7 +438,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * method so that subclasses can override the actual type uses (to be an
 	 * ApplicationContext, for example).
 	 */
-	protected BeanFactory createDefinition(String[] resources) throws FatalBeanException {
+	protected BeanFactory createDefinition(String[] resources) throws BeansException {
 		DefaultListableBeanFactory fac = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(fac);
 		for (int i = 0; i < resources.length; ++i) {
@@ -427,7 +446,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				reader.loadBeanDefinitions(new UrlResource(resources[i]));
 			}
 			catch (MalformedURLException e) {
-				throw new FatalBeanException("Bad URL when loading definition", e);
+				throw new BeanDefinitionStoreException("Bad URL when loading definition", e);
 			}
 		}
 		fac.preInstantiateSingletons();
@@ -435,32 +454,32 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	}
 
 	/**
-	 * method which returns resources (as URLs) which make up the definition of one
-	 * beanfactory/appcontext.
-	 * it is protected so that test cases may subclass this class and override this method
-	 * to avoid the need for multiple classloaders to test multi-file capability in the rest
-	 * of the class.
+	 * Method which returns resources (as URLs) which make up the definition of one
+	 * bean factory/application context.
+	 * <p>Protected so that test cases may subclass this class and override this
+	 * method to avoid the need for multiple classloaders to test multi-file
+	 * capability in the rest of the class.
 	 */
 	protected Collection getAllDefinitionResources(String resourceName) throws IOException {
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		// don't depend on JDK 1.4, do our own conversion
-		Enumeration e = cl.getResources(resourceName);
-		ArrayList l = new ArrayList();
-		while (e.hasMoreElements()) {
-			l.add(e.nextElement());
+		Enumeration resourceEnum = cl.getResources(resourceName);
+		Collection list = new ArrayList();
+		while (resourceEnum.hasMoreElements()) {
+			list.add(resourceEnum.nextElement());
 		}
-		return l;
+		return list;
 	}
 
 
-	// we track BeanFactory instances with this class
+	// We track BeanFactory instances with this class
 	private class BeanFactoryGroup {
+
+		private BeanFactory definition;
 
 		private String resourceName;
 
-		private int refcount = 0;
-
-		private BeanFactory definition;
+		private int refCount = 0;
 	}
 
 }
