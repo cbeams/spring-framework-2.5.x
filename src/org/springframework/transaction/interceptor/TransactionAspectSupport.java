@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
@@ -21,38 +21,38 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
 /**
  * Superclass for transactional aspects, such as the AOP Alliance-compatible
  * TransactionInterceptor, or an AspectJ aspect. This enables the underlying
  * Spring transaction infrastructure to be used easily to implement an aspect
- * for any aspect system. 
+ * for any aspect system.
  * <p>
  * Subclasses are responsible for calling methods in this class in the correct order.
- * 
+ *
  * <p>Uses the <b>Strategy</b> design pattern. A PlatformTransactionManager
  * implementation will perform the actual transaction management.
  *
  * <p>This class could set JTA as default transaction manager as that
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
- *  
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: TransactionAspectSupport.java,v 1.4 2004-07-06 08:04:59 johnsonr Exp $
+ * @version $Id: TransactionAspectSupport.java,v 1.5 2004-07-08 14:07:52 jhoeller Exp $
  */
 public class TransactionAspectSupport implements InitializingBean {
-	
-	/** 
+
+	/**
 	 * Holder to support the currentTransactionStatus() method, and communication
 	 * between different cooperating advices (e.g. before and after advice)
 	 * if the aspect involves more than a single method (as will be the case for
-	 * around advice). 
+	 * around advice).
 	 */
 	private static ThreadLocal currentTransactionInfo = new ThreadLocal();
 
@@ -67,10 +67,10 @@ public class TransactionAspectSupport implements InitializingBean {
 	public static TransactionStatus currentTransactionStatus() throws NoTransactionException {
 		return currentTransactionInfo().transactionStatus;
 	}
-	
+
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.
-	 * Only subclasses that cannot handle all operations in one method, 
+	 * Only subclasses that cannot handle all operations in one method,
 	 * such as an AspectJ aspect involving distinct before and after
 	 * advice, need to use this mechanism to get at the current
 	 * TransactionInfo. An around advice such as an AOP Alliance
@@ -90,13 +90,13 @@ public class TransactionAspectSupport implements InitializingBean {
 		}
 		return info;
 	}
-	
-	
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
-	
+
 	/** Delegate used to create, commit and rollback transactions */
 	protected PlatformTransactionManager transactionManager;
-	
+
 	/** Helper used to find transaction attributes */
 	protected TransactionAttributeSource transactionAttributeSource;
 
@@ -166,7 +166,7 @@ public class TransactionAspectSupport implements InitializingBean {
 			                                   "a TransactionInterceptor respectively a transactional proxy.");
 		}
 	}
-	
+
 	/**
 	 * Create a transaction if necessary
 	 * @param method method about to execute
@@ -184,11 +184,11 @@ public class TransactionAspectSupport implements InitializingBean {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Getting transaction for " + txInfo.joinpointIdentification());
 			}
-								
+
 			// The transaction manager will flag an error if an incompatible tx already exists
-			txInfo.newTransactionStatus(this.transactionManager.getTransaction(transAtt));			
+			txInfo.newTransactionStatus(this.transactionManager.getTransaction(transAtt));
 		}
-		else {	
+		else {
 			// The TransactionInfo.hasTransaction() method will return
 			// false. We created it only to preserve the integrity of
 			// the ThreadLocal stack maintained in this class.
@@ -196,7 +196,7 @@ public class TransactionAspectSupport implements InitializingBean {
 				logger.debug("Don't need to create transaction for " + methodIdentification(method) +
 				             ": this method isn't transactional");
 		}
-		
+
 		// We always bind the TransactionInfo to the thread, even if
 		// we didn't create a new transaction here.
 		// This guarantees that the TransactionInfo stack will be
@@ -205,7 +205,7 @@ public class TransactionAspectSupport implements InitializingBean {
 		txInfo.bindToThread();
 		return txInfo;
 	}
-	
+
 	/**
 	 * Convenience method to return a String representation of this Method
 	 * for use in logging.
@@ -220,27 +220,31 @@ public class TransactionAspectSupport implements InitializingBean {
 	 * Handle a throwable, closing out the transaction.
 	 * We may commit or roll back, depending on our configuration.
 	 * @param txInfo information about the current transaction
-	 * @param t throwable encountered
+	 * @param ex throwable encountered
 	 */
-	protected void doCloseTransactionAfterThrowing(TransactionInfo txInfo, Throwable t) {
+	protected void doCloseTransactionAfterThrowing(TransactionInfo txInfo, Throwable ex) {
 		if (txInfo.hasTransaction()) {
-			if (txInfo.transactionAttribute.rollbackOn(t)) {
+			if (txInfo.transactionAttribute.rollbackOn(ex)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Invoking rollback for transaction on " + txInfo.joinpointIdentification() +
-					            " due to throwable [" + t + "]");
+					            " due to throwable [" + ex + "]");
 				}
 				try {
 					this.transactionManager.rollback(txInfo.getTransactionStatus());
 				}
-				catch (TransactionException tex) {
-					logger.error("Application exception overridden by rollback exception", t);
-					throw tex;
+				catch (RuntimeException ex2) {
+					logger.error("Application exception overridden by rollback exception", ex);
+					throw ex2;
+				}
+				catch (Error err) {
+					logger.error("Application exception overridden by rollback error", ex);
+					throw err;
 				}
 			}
 			else {
 				// we don't roll back on this exception
 				if (logger.isDebugEnabled()) {
-					logger.debug(txInfo.joinpointIdentification() + " threw throwable [" + t +
+					logger.debug(txInfo.joinpointIdentification() + " threw throwable [" + ex +
 					             "] but this does not force transaction rollback");
 				}
 				// will still roll back if rollbackOnly is true
@@ -248,7 +252,7 @@ public class TransactionAspectSupport implements InitializingBean {
 			}
 		}
 	}
-	
+
 	/**
 	 * Execute after successful completion of call, but not
 	 * after an exception was handled.
@@ -256,14 +260,14 @@ public class TransactionAspectSupport implements InitializingBean {
 	 * @param txInfo information about the current transaction
 	 */
 	protected void doCommitTransactionAfterReturning(TransactionInfo txInfo) {
-		if (txInfo != null && txInfo.hasTransaction()) {			
+		if (txInfo != null && txInfo.hasTransaction()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking commit for transaction on " + txInfo.joinpointIdentification());
 			}
 			this.transactionManager.commit(txInfo.getTransactionStatus());
 		}
 	}
-	
+
 	/**
 	 * Call this in all cases: exception or normal return. Resets
 	 * the TransactionInfo ThreadLocal
@@ -295,7 +299,7 @@ public class TransactionAspectSupport implements InitializingBean {
 			this.transactionAttribute = transactionAttribute;
 			this.method = method;
 		}
-		
+
 		/**
 		 * @return whether a transaction was created by this aspect,
 		 * or whether we just have a placeholder to keep ThreadLocal
@@ -316,7 +320,7 @@ public class TransactionAspectSupport implements InitializingBean {
 		public void newTransactionStatus(TransactionStatus status) {
 			this.transactionStatus = status;
 		}
-		
+
 		private void bindToThread() {
 			// Expose current TransactionStatus, preserving any existing transactionStatus for
 			// restoration after this transaction is complete.

@@ -140,9 +140,13 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 		try {
 			this.transactionManager.rollback(status);
 		}
-		catch (TransactionException tex) {
+		catch (RuntimeException ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
-			throw tex;
+			throw ex2;
+		}
+		catch (Error err) {
+			logger.error("Application exception overridden by rollback error", ex);
+			throw err;
 		}
 	}
 
