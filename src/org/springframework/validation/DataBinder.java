@@ -25,13 +25,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.util.StringUtils;
 
 /**
@@ -65,13 +63,14 @@ import org.springframework.util.StringUtils;
  * MessageCodesResolver strategy. DefaultMessageCodesResolver's javadoc
  * gives details on the default resolution rules.
  *
- * <p>By default, binding errors are resolved through the binding errors processors
+ * <p>By default, binding errors are resolved through the binding error processor
  * for required binding errors and property access exceptions. You can override
- * those if needed.
+ * those if needed, for example to generate different error codes.
  *
  * <p>This generic data binder can be used in any sort of environment.
  * It is heavily used by Spring's web binding features, via the subclass
- * ServletRequestDataBinder.
+ * <code>org.springframework.web.bind.ServletRequestDataBinder</code>.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setAllowedFields
@@ -87,23 +86,6 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.web.bind.ServletRequestDataBinder
  */
 public class DataBinder {
-
-	/**
-	 * Error code that a type mismatch error (i.e. a property value not
-	 * matching the type of the target field) will be registered with:
-	 * "typeMismatch".
-	 * @see org.springframework.beans.TypeMismatchException#ERROR_CODE
-	 */
-	public static final String TYPE_MISMATCH_ERROR_CODE = TypeMismatchException.ERROR_CODE;
-
-	/**
-	 * Error code that a type mismatch error (i.e. a property value not
-	 * matching the type of the target field) will be registered with:
-	 * "methodInvocation".
-	 * @see org.springframework.beans.MethodInvocationException#ERROR_CODE
-	 */
-	public static final String METHOD_INVOCATION_ERROR_CODE = MethodInvocationException.ERROR_CODE;
-
 
 	/**
 	 * We'll create a lot of DataBinder instances: Let's use a static logger.
@@ -218,7 +200,13 @@ public class DataBinder {
 
 	/**
 	 * Register fields that are required for each binding process.
+	 * <p>If one of the specified fields is not contained in the list of
+	 * incoming property values, a corresponding "missing field" error
+	 * will be created, with error code "required" (by the default
+	 * binding error processor).
 	 * @param requiredFields array of field names
+	 * @see #setBindingErrorProcessor
+	 * @see DefaultBindingErrorProcessor#MISSING_FIELD_ERROR_CODE
 	 */
 	public void setRequiredFields(String[] requiredFields) {
 		this.requiredFields = requiredFields;
@@ -272,7 +260,9 @@ public class DataBinder {
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to the underlying errors holder.
+	 * <p>Default is a DefaultMessageCodesResolver.
 	 * @see BindException#setMessageCodesResolver
+	 * @see DefaultMessageCodesResolver
 	 */
 	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
 		this.errors.setMessageCodesResolver(messageCodesResolver);
@@ -281,6 +271,8 @@ public class DataBinder {
 	/**
 	 * Set the strategy to use for processing binding errors, that is,
 	 * required field errors and <code>PropertyAccessException</code>s.
+	 * <p>Default is a DefaultBindingErrorProcessor.
+	 * @see DefaultBindingErrorProcessor
 	 */
 	public void setBindingErrorProcessor(BindingErrorProcessor bindingErrorProcessor) {
 		this.bindingErrorProcessor = bindingErrorProcessor;
@@ -327,6 +319,9 @@ public class DataBinder {
 					// Use bind error processor to create FieldError.
 					String field = this.requiredFields[i];
 					this.bindingErrorProcessor.processMissingFieldError(field, this.errors);
+					// Remove property from property values to bind:
+					// It has already caused a field error with a rejected value.
+					mpvs.removePropertyValue(field);
 				}
 			}
 		}

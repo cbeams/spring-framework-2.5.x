@@ -248,22 +248,29 @@ public class DataBinderTests extends TestCase {
 		tb.setSpouse(new TestBean());
 
 		DataBinder binder = new DataBinder(tb, "person");
-		binder.setRequiredFields(new String[]{"touchy", "name", "date", "spouse.name"});
+		binder.setRequiredFields(new String[]{"touchy", "name", "age", "date", "spouse.name"});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("touchy", ""));
 		pvs.addPropertyValue(new PropertyValue("name", null));
+		pvs.addPropertyValue(new PropertyValue("age", null));
 		pvs.addPropertyValue(new PropertyValue("spouse.name", "     "));
 
 		binder.bind(pvs);
 
 		BindException ex = binder.getErrors();
-		assertEquals("Wrong amount of errors", 4, ex.getErrorCount());
+		assertEquals("Wrong number of errors", 5, ex.getErrorCount());
 
 		assertEquals("required", ex.getFieldError("touchy").getCode());
+		assertEquals("", ex.getFieldValue("touchy"));
 		assertEquals("required", ex.getFieldError("name").getCode());
+		assertEquals("", ex.getFieldValue("name"));
+		assertEquals("required", ex.getFieldError("age").getCode());
+		assertEquals("", ex.getFieldValue("age"));
 		assertEquals("required", ex.getFieldError("date").getCode());
+		assertEquals("", ex.getFieldValue("date"));
 		assertEquals("required", ex.getFieldError("spouse.name").getCode());
+		assertEquals("", ex.getFieldValue("spouse.name"));
 	}
 
 	public void testBindingWithNestedObjectCreation() throws Exception {
