@@ -39,7 +39,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.13 2003-12-21 17:16:58 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.14 2003-12-22 16:01:18 johnsonr Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -200,9 +200,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					TransactionSynchronizationManager.triggerBeforeCompletion();
 				}
 				if (status.isNewTransaction()) {
-					if (status.isDebug()) {
-						logger.debug("Initiating transaction commit");
-					}
+					logger.info("Initiating transaction commit");
 					doCommit(status);
 				}
 				triggerAfterCompletion(status, TransactionSynchronization.STATUS_COMMITTED, null);
@@ -254,9 +252,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				TransactionSynchronizationManager.triggerBeforeCompletion();
 			}
 			if (status.isNewTransaction()) {
-				if (status.isDebug()) {
-					logger.debug("Initiating transaction rollback");
-				}
+				logger.info("Initiating transaction rollback");
 				doRollback(status);
 			}
 			else if (status.getTransaction() != null) {
