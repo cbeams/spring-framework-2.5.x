@@ -852,6 +852,27 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("someValue", bw.getPropertyValue("someProperty"));
 		assertEquals("someValue", bean.getSomeProperty());
 	}
+	
+	/*public void testErrorMessageOfNestedProperty() {
+		ITestBean parent = new TestBean();
+		ITestBean child = new DifferentTestBean();
+		child.setName("test");
+		parent.setSpouse(child);
+		BeanWrapper bw = new BeanWrapperImpl(parent);
+		try {
+			bw.getPropertyValue("spouse.bla");
+			// IMHO we should get: "Invalid property 'spouse.bla' of bean class [org.springframework.beans.TestBean]"
+			// but we're getting "of bean class [org.springframework.beans.BeanWrapperTests$DifferentTestBean]"
+			// we're trying to retrieve the property spouse.bla from the TestBean instance,
+			// not from the DifferentTestBean instance, the error message indicates otherwise.			
+		} catch (NotReadablePropertyException e) {
+			assertTrue(e.getMessage().indexOf("org.springframework.beans.TestBean") != -1);
+		}
+	}*/
+	
+	private static class DifferentTestBean extends TestBean {		
+		// class to test naming of beans in a beanwrapper error message
+	}
 
 
 	private static class NoRead {
