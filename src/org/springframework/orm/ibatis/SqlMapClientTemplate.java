@@ -38,9 +38,10 @@ import org.springframework.jdbc.support.JdbcAccessor;
  * DataAccessExceptions, compatible to the org.springframework.dao exception
  * hierarchy. Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
  *
- * <p>The main method is execute, a callback that implements a data access action.
- * This class provides numerous convenience methods that mirror SqlMapSession's
- * execution methods. See the SqlMapClient javadocs for details on those methods.
+ * <p>The main method of this class executes a callback that implements a
+ * data access action. Furthermore, this class provides numerous convenience
+ * methods that mirror SqlMapSession's execution methods. See the SqlMapClient
+ * javadocs for details on those methods.
  *
  * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
  * With SQL Maps 1.x, the SqlMap/MappedStatement API has to be used.
@@ -96,29 +97,33 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 
 	/**
-	 * Execute the given data access action on an SqlMapSession.
+	 * Execute the given data access action on a SqlMapSession.
 	 * @param action callback object that specifies the data access action
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public Object execute(SqlMapClientCallback action) throws DataAccessException {
 		SqlMapSession session = this.sqlMapClient.openSession();
-		Connection con = DataSourceUtils.getConnection(getDataSource());
 		try {
-			session.setUserConnection(con);
-			return action.doInSqlMapClient(session);
-		}
-		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("SqlMapClientTemplate", "(mapped statement)", ex);
+			Connection con = DataSourceUtils.getConnection(getDataSource());
+			try {
+				session.setUserConnection(con);
+				return action.doInSqlMapClient(session);
+			}
+			catch (SQLException ex) {
+				throw getExceptionTranslator().translate("SqlMapClientTemplate", "(mapped statement)", ex);
+			}
+			finally {
+				DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+			}
 		}
 		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 			session.close();
 		}
 	}
 
 	/**
-	 * Execute the given data access action on an SqlMapSession,
+	 * Execute the given data access action on a SqlMapSession,
 	 * expecting a List result.
 	 * @param action callback object that specifies the data access action
 	 * @return the List result
@@ -129,7 +134,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	}
 
 	/**
-	 * Execute the given data access action on an SqlMapSession,
+	 * Execute the given data access action on a SqlMapSession,
 	 * expecting a Map result.
 	 * @param action callback object that specifies the data access action
 	 * @return the Map result
