@@ -48,7 +48,7 @@ public class ToStringCreatorTests extends TestCase {
         };
         System.out.println(stringy.toString());
         assertEquals(
-                "[ToStringCreatorTest.4@"
+                "[ToStringCreatorTests.4@"
                         + ObjectUtils.getIdentityHexString(stringy)
                         + " familyFavoriteSport = map['Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football']]",
                 stringy.toString());
@@ -67,7 +67,7 @@ public class ToStringCreatorTests extends TestCase {
         String str = new ToStringCreator(array).toString();
         System.out.println(str);
         assertEquals("[@" + ObjectUtils.getIdentityHexString(array)
-                + " array<ToStringCreatorTest.SomeObject>[A, B, C]]", str);
+                + " array<ToStringCreatorTests.SomeObject>[A, B, C]]", str);
     }
 
     public void testPrimitiveArrays() {
@@ -75,7 +75,7 @@ public class ToStringCreatorTests extends TestCase {
         String str = new ToStringCreator(integers).toString();
         System.out.println(str);
         assertEquals("[@" + ObjectUtils.getIdentityHexString(integers)
-                + " array<Object>[0, 1, 2, 3, 4]]", str);
+                + " array<Integer>[0, 1, 2, 3, 4]]", str);
     }
 
     public void testList() {
@@ -86,7 +86,7 @@ public class ToStringCreatorTests extends TestCase {
         String str = new ToStringCreator(this).append("myLetters", list)
                 .toString();
         System.out.println(str);
-        assertEquals("[ToStringCreatorTest@"
+        assertEquals("[ToStringCreatorTests@"
                 + ObjectUtils.getIdentityHexString(this)
                 + " myLetters = list[A, B, C]]", str);
     }
@@ -99,7 +99,7 @@ public class ToStringCreatorTests extends TestCase {
         String str = new ToStringCreator(this).append("myLetters", set)
                 .toString();
         System.out.println(str);
-        assertEquals("[ToStringCreatorTest@"
+        assertEquals("[ToStringCreatorTests@"
                 + ObjectUtils.getIdentityHexString(this)
                 + " myLetters = set[A, B, C]]", str);
     }
@@ -108,24 +108,24 @@ public class ToStringCreatorTests extends TestCase {
         String str = new ToStringCreator(this).append("myClass",
                 this.getClass()).toString();
         System.out.println(str);
-        assertEquals("[ToStringCreatorTest@"
+        assertEquals("[ToStringCreatorTests@"
                 + ObjectUtils.getIdentityHexString(this)
-                + " myClass = ToStringCreatorTest]", str);
+                + " myClass = ToStringCreatorTests]", str);
     }
 
     public void testMethod() throws Exception {
         String str = new ToStringCreator(this).append("myMethod",
                 this.getClass().getMethod("testMethod", null)).toString();
         System.out.println(str);
-        assertEquals("[ToStringCreatorTest@"
+        assertEquals("[ToStringCreatorTests@"
                 + ObjectUtils.getIdentityHexString(this)
-                + " myMethod = testMethod@ToStringCreatorTest]", str);
+                + " myMethod = testMethod@ToStringCreatorTests]", str);
     }
 
     public void testAppendProperties() throws Exception {
         Parent parent = new Parent();
         System.out.println(parent);
-        assertEquals("[ToStringCreatorTest.Parent@"
+        assertEquals("[ToStringCreatorTests.Parent@"
                 + ObjectUtils.getIdentityHexString(parent)
                 + " child = [null], name = 'parent']", parent.toString());
     }
@@ -135,7 +135,7 @@ public class ToStringCreatorTests extends TestCase {
         Child child = new Child(parent);
         parent.setChild(child);
         System.out.println(parent);
-        assertEquals("[ToStringCreatorTest.Parent@"
+        assertEquals("[ToStringCreatorTests.Parent@"
                 + ObjectUtils.getIdentityHexString(parent)
                 + " child = 'child', name = 'parent']", parent.toString());
     }

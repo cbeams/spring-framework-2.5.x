@@ -56,11 +56,11 @@ public class NumberToStringTypeConverter extends AbstractToStringTypeConverter {
     protected Object doConvertBack(Object text) throws TypeConversionException {
         // use given NumberFormat for parsing text
         if (this.numberFormat != null) {
-            return NumberUtils.parseNumber((String)text, getConvertFromClass(), this.numberFormat);
+            return NumberUtils.parseNumber((String)text, getConvertFromType(), this.numberFormat);
         }
         // use default valueOf methods for parsing text
         else {
-            return NumberUtils.parseNumber((String)text, getConvertFromClass());
+            return NumberUtils.parseNumber((String)text, getConvertFromType());
         }
     }
 

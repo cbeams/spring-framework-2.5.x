@@ -84,7 +84,7 @@ public interface CodedEnum extends MessageSourceResolvable, Comparable {
      * 
      * @return The code.
      */
-    public Object getCode();
+    public Comparable getCode();
 
     /**
      * Returns a descriptive, optional label.

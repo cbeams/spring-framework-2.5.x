@@ -10,5 +10,5 @@ import org.springframework.beans.PropertyAccessException;
 public interface PropertyAccessor {
     public Map getPropertyValues();
 
-    public Object getPropertyValue(String propertyName) throws PropertyAccessException;
+    public Object getPropertyValue(String propertyPath) throws PropertyAccessException;
 }

@@ -31,8 +31,7 @@ import org.springframework.beans.BeanWrapperImpl;
 public class ToStringCreator {
     private static ToStringStyler DEFAULT_STYLER = new DefaultToStringStyler();
 
-    public static final void setDefaultToStringStyler(
-            ToStringStyler defaultStyler) {
+    public static final void setDefaultToStringStyler(ToStringStyler defaultStyler) {
         DEFAULT_STYLER = defaultStyler;
     }
 
@@ -47,8 +46,7 @@ public class ToStringCreator {
     /**
      * Creates a ToStringBuilder for this object.
      * 
-     * @param o
-     *            the object to be stringified
+     * @param o the object to be stringified
      */
     public ToStringCreator(Object o) {
         this(o, DEFAULT_STYLER);
@@ -57,10 +55,8 @@ public class ToStringCreator {
     /**
      * Creates a ToStringBuilder for this object with the provided style.
      * 
-     * @param o
-     *            the object to be stringified
-     * @param styler
-     *            the styler encapsulating pretty-print instructions
+     * @param o the object to be stringified
+     * @param styler the styler encapsulating pretty-print instructions
      */
     public ToStringCreator(Object o, ToStringStyler styler) {
         setObject(o);
@@ -80,10 +76,8 @@ public class ToStringCreator {
     /**
      * Append a byte field value.
      * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
+     * @param fieldName The name of the field, usually the member variable name.
+     * @param value The field value.
      * @return this, to support call-chaining.
      */
     public ToStringCreator append(String fieldName, byte value) {
@@ -93,10 +87,8 @@ public class ToStringCreator {
     /**
      * Append a short field value.
      * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
+     * @param fieldName The name of the field, usually the member variable name.
+     * @param value The field value.
      * @return this, to support call-chaining.
      */
     public ToStringCreator append(String fieldName, short value) {
@@ -106,10 +98,8 @@ public class ToStringCreator {
     /**
      * Append a integer field value.
      * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
+     * @param fieldName The name of the field, usually the member variable name.
+     * @param value The field value.
      * @return this, to support call-chaining.
      */
     public ToStringCreator append(String fieldName, int value) {
@@ -119,10 +109,8 @@ public class ToStringCreator {
     /**
      * Append a float field value.
      * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
+     * @param fieldName The name of the field, usually the member variable name.
+     * @param value The field value.
      * @return this, to support call-chaining.
      */
     public ToStringCreator append(String fieldName, float value) {
@@ -132,10 +120,8 @@ public class ToStringCreator {
     /**
      * Append a double field value.
      * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
+     * @param fieldName The name of the field, usually the member variable name.
+     * @param value The field value.
      * @return this, to support call-chaining.
      */
     public ToStringCreator append(String fieldName, double value) {
@@ -145,10 +131,8 @@ public class ToStringCreator {
     /**
      * Append a long field value.
      * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
+     * @param fieldName The name of the field, usually the member variable name.
+     * @param value The field value.
      * @return this, to support call-chaining.
      */
     public ToStringCreator append(String fieldName, long value) {
@@ -158,10 +142,8 @@ public class ToStringCreator {
     /**
      * Append a boolean field value.
      * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
+     * @param fieldName The name of the field, usually the member variable name.
+     * @param value The field value.
      * @return this, to support call-chaining.
      */
     public ToStringCreator append(String fieldName, boolean value) {
@@ -171,15 +153,23 @@ public class ToStringCreator {
     /**
      * Append a field value.
      * 
-     * @param fieldName
-     *            The name of the field, usually the member variable name.
-     * @param value
-     *            The field value.
+     * @param fieldName The name of the field, usually the member variable name.
+     * @param value The field value.
      * @return this, to support call-chaining.
      */
     public ToStringCreator append(String fieldName, Object value) {
         printFieldSeparatorIfNeccessary();
         styler.styleField(buffer, fieldName, value);
+        return this;
+    }
+
+    /**
+     * Append the provided string
+     * @param string The string to append
+     * @return this, to support call-chaining.
+     */
+    public ToStringCreator append(String string) {
+        styler.styleString(buffer, string);
         return this;
     }
 
@@ -198,22 +188,16 @@ public class ToStringCreator {
         PropertyDescriptor[] properties = wrapper.getPropertyDescriptors();
         for (int i = 0; i < properties.length; i++) {
             PropertyDescriptor property = properties[i];
-            if (property.getReadMethod() != null
-                    && !"class".equals(property.getName())) {
-                Object propertyValue = wrapper.getPropertyValue(property
-                        .getName());
-                if (propertyValue != null
-                        && !BeanUtils
-                                .isSimpleProperty(propertyValue.getClass())) {
+            if (property.getReadMethod() != null && !"class".equals(property.getName())) {
+                Object propertyValue = wrapper.getPropertyValue(property.getName());
+                if (propertyValue != null && !BeanUtils.isSimpleProperty(propertyValue.getClass())) {
                     wrapper.setWrappedInstance(propertyValue);
-                    if (isBidirectionalRelationship(wrapper
-                            .getPropertyDescriptors(), object.getClass())) {
+                    if (isBidirectionalRelationship(wrapper.getPropertyDescriptors(), object.getClass())) {
                         if (wrapper.getPropertyDescriptor("name") != null) {
                             propertyValue = wrapper.getPropertyValue("name");
                         }
                         else if (wrapper.getPropertyDescriptor("displayName") != null) {
-                            propertyValue = wrapper
-                                    .getPropertyValue("displayName");
+                            propertyValue = wrapper.getPropertyValue("displayName");
                         }
                         else {
                             wrapper.setWrappedInstance(object);
@@ -228,11 +212,12 @@ public class ToStringCreator {
         return this;
     }
 
-    private boolean isBidirectionalRelationship(
-            PropertyDescriptor[] properties, Class propertyType) {
+    private boolean isBidirectionalRelationship(PropertyDescriptor[] properties, Class propertyType) {
         for (int i = 0; i < properties.length; i++) {
             PropertyDescriptor property = properties[i];
-            if (propertyType.equals(property.getPropertyType())) { return true; }
+            if (propertyType.equals(property.getPropertyType())) {
+                return true;
+            }
         }
         return false;
     }
@@ -278,42 +263,41 @@ public class ToStringCreator {
         /**
          * Style a toString()'ed object before its fields are styled.
          * 
-         * @param buffer
-         *            the buffer to print to.
-         * @param o
-         *            The object to style.
+         * @param buffer the buffer to print to.
+         * @param o The object to style.
          */
         public void styleStart(StringBuffer buffer, Object o);
 
         /**
          * Style a toString()'ed object after it's fields are styled.
          * 
-         * @param buffer
-         *            the buffer to print to.
-         * @param o
-         *            The object to style.
+         * @param buffer the buffer to print to.
+         * @param o The object to style.
          */
         public void styleEnd(StringBuffer buffer, Object o);
 
         /**
          * Style a field value as a string.
          * 
-         * @param buffer
-         *            buffer to print to.
-         * @param fieldName
-         *            The name of the field.
-         * @param value
-         *            The field value.
+         * @param buffer buffer to print to.
+         * @param fieldName The name of the field.
+         * @param value The field value.
          * @return The pretty-printed string.
          */
-        public void styleField(StringBuffer buffer, String fieldName,
-                Object value);
+        public void styleField(StringBuffer buffer, String fieldName, Object value);
+
+        /**
+         * Style a plain old string.
+         * 
+         * @param buffer
+         * @param string
+         */
+        public void styleString(StringBuffer buffer, String string);
 
         /**
          * Style the field separator.
          * 
-         * @param buffer
-         *            buffer to print to.
+         * @param buffer buffer to print to.
          */
         public void styleFieldSeparator(StringBuffer buffer);
     }
@@ -342,8 +326,7 @@ public class ToStringCreator {
 
         public void styleStart(StringBuffer buffer, Object o) {
             if (!o.getClass().isArray()) {
-                buffer.append('[')
-                        .append(ClassUtils.getShortName(o.getClass()));
+                buffer.append('[').append(ClassUtils.getShortName(o.getClass()));
                 styleIdentityHashCode(buffer, o);
             }
             else {
@@ -363,10 +346,13 @@ public class ToStringCreator {
             buffer.append(']');
         }
 
-        public void styleField(StringBuffer buffer, String fieldName,
-                Object value) {
+        public void styleField(StringBuffer buffer, String fieldName, Object value) {
             styleFieldStart(buffer, fieldName);
             styleValue(buffer, value);
+        }
+
+        public void styleString(StringBuffer buffer, String string) {
+            styleValue(buffer, string);
         }
 
         public void styleValue(StringBuffer buffer, Object value) {

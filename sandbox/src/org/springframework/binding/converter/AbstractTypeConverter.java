@@ -34,14 +34,14 @@ public abstract class AbstractTypeConverter implements TypeConverter, Closure {
     /**
      * @return Returns the convertFromClass.
      */
-    public Class getConvertFromClass() {
+    public Class getConvertFromType() {
         return convertFromClass;
     }
 
     /**
      * @return Returns the convertToClass.
      */
-    public Class getConvertToClass() {
+    public Class getConvertToType() {
         return convertToClass;
     }
 
@@ -49,9 +49,9 @@ public abstract class AbstractTypeConverter implements TypeConverter, Closure {
         if (allowEmpty && isEmpty(o)) {
             return getConvertToClassEmptyValue();
         }
-        Assert.notNull(o, "Object to convert from '" + getConvertFromClass().getName() + "' to '" + getConvertToClass()
+        Assert.notNull(o, "Object to convert from '" + getConvertFromType().getName() + "' to '" + getConvertToType()
                 + "' cannot be null");
-        Assert.isInstanceOf(getConvertFromClass(), o);
+        Assert.isInstanceOf(getConvertFromType(), o);
         return doConvert(o);
     }
 
@@ -61,9 +61,9 @@ public abstract class AbstractTypeConverter implements TypeConverter, Closure {
         if (allowEmpty && isEmpty(o)) {
             return getConvertFromClassEmptyValue();
         }
-        Assert.notNull(o, "Object to convert back to '" + getConvertFromClass().getName() + "' from '"
-                + getConvertToClass() + "' cannot be null");
-        Assert.isInstanceOf(getConvertToClass(), o);
+        Assert.notNull(o, "Object to convert back to '" + getConvertFromType().getName() + "' from '"
+                + getConvertToType() + "' cannot be null");
+        Assert.isInstanceOf(getConvertToType(), o);
         return doConvertBack(o);
     }
 

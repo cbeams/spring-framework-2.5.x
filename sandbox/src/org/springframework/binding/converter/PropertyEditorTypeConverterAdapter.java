@@ -18,7 +18,7 @@ public class PropertyEditorTypeConverterAdapter extends PropertyEditorSupport {
 
     public PropertyEditorTypeConverterAdapter(TypeConverter typeConverter) {
         Assert.notNull(typeConverter, "Type converter is required");
-        Assert.isTrue(typeConverter.getConvertToClass().equals(String.class),
+        Assert.isTrue(typeConverter.getConvertToType().equals(String.class),
                 "Adapted type converter must convert to string");
         this.typeConverter = typeConverter;
     }

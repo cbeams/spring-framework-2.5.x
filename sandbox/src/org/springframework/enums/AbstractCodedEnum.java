@@ -28,24 +28,22 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResolvable, Serializable, Comparable {
 
-    private Comparable code;
-
     private String label;
 
-    protected AbstractCodedEnum(Comparable code) {
-        this(code, null);
+    protected AbstractCodedEnum() {
+
     }
 
-    protected AbstractCodedEnum(Comparable code, String label) {
-        Assert.notNull(code, "code is required");
-        this.code = code;
+    protected AbstractCodedEnum(String label) {
+        setLabel(label);
+    }
+
+    public abstract Comparable getCode();
+
+    protected void setLabel(String label) {
         this.label = label;
     }
-
-    public Object getCode() {
-        return code;
-    }
-
+    
     public String getKey() {
         return getType() + "." + getCode();
     }
@@ -59,17 +57,17 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
             return false;
         }
         AbstractCodedEnum e = (AbstractCodedEnum)o;
-        return this.code.equals(e.code) && this.getType().equals(e.getType());
+        return this.getCode().equals(e.getCode()) && this.getType().equals(e.getType());
     }
 
     public int compareTo(Object o) {
         AbstractCodedEnum e = (AbstractCodedEnum)o;
         Assert.isTrue(getType().equals(e.getType()), "You may only compare enumerations of the same type.");
-        return code.compareTo(e.code);
+        return getCode().compareTo(e.getCode());
     }
 
     public int hashCode() {
-        return code.hashCode() + getType().hashCode();
+        return getCode().hashCode() + getType().hashCode();
     }
 
     /**
@@ -102,7 +100,7 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
     protected static StaticCodedEnumResolver getStaticEnumResolver() {
         return StaticCodedEnumResolver.instance();
     }
-    
+
     public String toString() {
         String enumStr = (label != null ? (getLabel() + " (" + getCode() + ")") : String.valueOf(getCode()));
         return "[" + getType() + "." + enumStr + "]";

@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.hibernate.collection.PersistentCollection;
+
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
 
@@ -65,8 +67,7 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
     /**
      * Static accessor that calls the default styler's style method.
      * 
-     * @param o
-     *            the argument to style
+     * @param o the argument to style
      * @return The styled string.
      */
     public static String call(Object o) {
@@ -78,8 +79,7 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
      * pattern. The reflective help removes the need to define a vistable class
      * for each type of styled valued.
      * 
-     * @param o
-     *            The object to be styled.
+     * @param o The object to be styled.
      * @return The styled string.
      */
     public String style(Object o) {
@@ -99,11 +99,19 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
     }
 
     String visit(Method method) {
-        return method.getName() + "@"
-                + ClassUtils.getShortName(method.getDeclaringClass());
+        return method.getName() + "@" + ClassUtils.getShortName(method.getDeclaringClass());
     }
 
     String visit(Map value) {
+        if (value instanceof PersistentCollection) {
+            return visit((PersistentCollection)value);
+        }
+        else {
+            return visitInternal(value);
+        }
+    }
+
+    private String visitInternal(Map value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
         buffer.append(MAP + "[");
         for (Iterator i = value.entrySet().iterator(); i.hasNext();) {
@@ -125,6 +133,15 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
     }
 
     String visit(Collection value) {
+        if (value instanceof PersistentCollection) {
+            return visit((PersistentCollection)value);
+        }
+        else {
+            return visitInternal(value);
+        }
+    }
+
+    private String visitInternal(Collection value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
         buffer.append(getCollectionTypeString(value) + "[");
         for (Iterator i = value.iterator(); i.hasNext();) {
@@ -152,6 +169,23 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
         }
     }
 
+    String visit(PersistentCollection hibernateCollection) {
+        if (hibernateCollection.wasInitialized()) {
+            if (hibernateCollection instanceof Collection) {
+                return visitInternal((Collection)hibernateCollection);
+            }
+            else if (hibernateCollection instanceof Map) {
+                return visitInternal((Map)hibernateCollection);
+            }
+            else {
+                return style("<initialized unknown hibernate collection>");
+            }
+        }
+        else {
+            return style("<uninitialized hibernate collection>");
+        }
+    }
+
     String visit(Object value) {
         if (value.getClass().isArray()) {
             return styleArray(getObjectArray(value));
@@ -167,10 +201,7 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
 
     private String styleArray(Object[] array) {
         StringBuffer buffer = new StringBuffer(array.length * 8 + 16);
-        buffer.append(ARRAY
-                + "<"
-                + StringUtils.delete(ClassUtils.getShortName(array.getClass()),
-                        ";") + ">[");
+        buffer.append(ARRAY + "<" + StringUtils.delete(ClassUtils.getShortName(array.getClass()), ";") + ">[");
         for (int i = 0; i < array.length - 1; i++) {
             buffer.append(style(array[i]));
             buffer.append(',').append(' ');

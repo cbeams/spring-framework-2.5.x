@@ -105,7 +105,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
                 if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
-                    if (CodedEnum.class.isAssignableFrom(field.getType())) {
+                    if (clazz.isAssignableFrom(field.getType())) {
                         try {
                             Object value = field.get(null);
                             Assert.isTrue(CodedEnum.class.isInstance(value),

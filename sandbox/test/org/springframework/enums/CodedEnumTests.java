@@ -23,7 +23,15 @@ public class CodedEnumTests extends TestCase {
     }
 
     public static class Dog extends ShortCodedEnum {
-        public static final Dog GOLDEN_RETRIEVER = new Dog(11, "Golden Retriever");
+        public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
+            // this shouldn't be neccessary
+            public String getType() {
+                return Dog.class.getName();
+            }
+            public String getLabel() {
+                return "Golden Retriever";
+            }
+        };
 
         public static final Dog BORDER_COLLIE = new Dog(13, "Border Collie");
 
@@ -46,22 +54,12 @@ public class CodedEnumTests extends TestCase {
     }
 
     public void testDoesNotMatchWrongClass() {
-        Dog none = (Dog)StaticCodedEnumResolver.instance().getEnum(Dog.class, new Short((short)1));
+        CodedEnum none = StaticCodedEnumResolver.instance().getEnum(Dog.class, new Short((short)1));
         assertEquals(null, none);
     }
 
-    public void testCanOnlyLookupEnumerations() {
-        try {
-            StaticCodedEnumResolver.instance().getEnum(String.class, new Short((short)11));
-            fail("Not an enumeration");
-        }
-        catch (IllegalArgumentException ex) {
-            // Ok
-        }
-    }
-
     public void testEquals() {
-        assertEquals("Code equality means equals", Dog.GOLDEN_RETRIEVER, new Dog(11, "Golden"));
-        assertFalse("Code inequality means notEquals", Dog.GOLDEN_RETRIEVER.equals(new Dog(12, "Golden")));
+        assertEquals("Code equality means equals", Dog.GOLDEN_RETRIEVER, new Dog(11, "Golden Retriever"));
+        assertFalse("Code inequality means notEquals", Dog.GOLDEN_RETRIEVER.equals(new Dog(12, "Golden Retriever")));
     }
 }

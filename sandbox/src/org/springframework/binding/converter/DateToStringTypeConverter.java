@@ -43,7 +43,7 @@ public class DateToStringTypeConverter extends AbstractToStringTypeConverter {
             return dateFormat.parse((String)dateString);
         }
         catch (ParseException ex) {
-            throw new InvalidFormatException(dateString, getConvertFromClass(), getConvertToClass(), ex,
+            throw new InvalidFormatException(dateString, getConvertFromType(), getConvertToType(), ex,
                     "Could not parse date: " + ex.getMessage());
         }
     }

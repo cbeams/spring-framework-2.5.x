@@ -109,7 +109,18 @@ public class AbstractBeanAccessor implements PropertyAccessor {
         if (propertyValueHolder == null) {
             propertyValueHolder = createPropertyValueAccessor(propertyName);
             PropertyMetadata propertyMetadata = getBeanMetadata().getPropertyMetadata(propertyName);
+            //ValueProcessingChain chain = new ValueProcessingChain();
+            //chain.add(new PropertyValueGuard(propertyMetadata));
+            //chain.add(new TypeConverter(propertyMetadata));
+            //chain.add(new ConstraintValidator(this, propertyMetadata));
+            //propertyValueHolder = new ChainedValueModel(chain, propertyValueHolder);
+            //propertyValueHolder.setValue(value);
+            //wrappedValueModel.getValue(chain.processGet());
+            //wrappedValueModel.setValue(chain.processSet());
+            
             propertyValueHolder = new PropertyValueGuard(propertyMetadata, propertyValueHolder);
+            //propertyValueHolder = new TypeConverterValueGuard(propertyMetadata, propertyValueHolder);
+            //propertyValueHolder = new ConstraintValidatorValueGuard(propertyMetadata, propertyValueHolder);
             if (isLazy() && propertyMetadata.isCollection()) {
                 propertyValueHolder = new LazyCollectionInitializer(propertyMetadata, propertyValueHolder);
             }

@@ -15,17 +15,27 @@
  */
 package org.springframework.enums;
 
+import org.springframework.util.Assert;
+
 /**
  * @author Keith Donald
  */
 public abstract class StringCodedEnum extends AbstractCodedEnum {
 
+    private String code;
+    
     protected StringCodedEnum(String code) {
-        super(code);
+        this(code, null);
     }
 
     protected StringCodedEnum(String code, String label) {
-        super(code, label);
+        super(label);
+        Assert.hasText(code, "The string code is required");
+        this.code = code;
+    }
+
+    public Comparable getCode() {
+        return code;
     }
 
     public String getStringCode() {

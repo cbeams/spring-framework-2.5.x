@@ -20,12 +20,19 @@ package org.springframework.enums;
  */
 public abstract class ShortCodedEnum extends AbstractCodedEnum {
 
+    private Short code;
+    
     protected ShortCodedEnum(int code) {
         this(code, null);
     }
 
     protected ShortCodedEnum(int code, String label) {
-        super(new Short((short)code), label);
+        super(label);
+        this.code = new Short((short)code);
+    }
+
+    public Comparable getCode() {
+        return code;
     }
 
     public short getShortCode() {

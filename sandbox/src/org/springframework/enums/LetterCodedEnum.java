@@ -22,14 +22,19 @@ import org.springframework.util.Assert;
  */
 public abstract class LetterCodedEnum extends AbstractCodedEnum {
 
+    private Character code;
+    
     protected LetterCodedEnum(char code) {
-        super(new Character(code));
-        Assert.isTrue(Character.isLetter(code), "The code " + code + " is invalid; it must be a letter.");
+        this(code, null);
     }
 
     protected LetterCodedEnum(char code, String label) {
-        super(new Character(code), label);
+        super(label);
         Assert.isTrue(Character.isLetter(code), "The code " + code + " is invalid; it must be a letter.");
+    }
+    
+    public Comparable getCode() {
+        return code;
     }
 
     public char getLetterCode() {
