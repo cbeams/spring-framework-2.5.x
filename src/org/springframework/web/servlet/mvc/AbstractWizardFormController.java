@@ -209,6 +209,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
+	 * Consider an explicit finish or cancel request as a form submission too.
+	 */
+	protected boolean isFormSubmission(HttpServletRequest request) {
+		return super.isFormSubmission(request) || isFinish(request) || isCancel(request);
+	}
+
+	/**
 	 * Call page-specific referenceData method.
 	 */
 	protected final Map referenceData(HttpServletRequest request, Object command, Errors errors)
@@ -253,7 +260,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Show first page as form view.
 	 */
-	protected final ModelAndView showForm(HttpServletRequest request, HttpServletResponse response, BindException errors)
+	protected final ModelAndView showForm(
+			HttpServletRequest request, HttpServletResponse response, BindException errors)
 	    throws Exception {
 		return showPage(request, errors, getInitialPage(request, errors.getTarget()));
 	}
@@ -271,7 +279,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected final ModelAndView showPage(HttpServletRequest request, BindException errors, int page)
 	    throws Exception {
 		if (page >= 0 && page < this.pages.length) {
-			logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
+			}
 			// set page session attribute, expose overriding request attribute
 			Integer pageInteger = new Integer(page);
 			request.getSession().setAttribute(getPageSessionAttributeName(), pageInteger);
@@ -338,11 +348,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		return showNewForm(request, response);
 	}
 
+
 	/**
 	 * Apply wizard workflow: finish, cancel, page change.
 	 */
-	protected final ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response,
-	                                                   Object command, BindException errors) throws Exception {
+	protected final ModelAndView processFormSubmission(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
+			throws Exception {
 		int currentPage = getCurrentPage(request);
 		// remove page session attribute, provide copy as request attribute
 		request.getSession().removeAttribute(getPageSessionAttributeName());
@@ -350,22 +362,30 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 		// cancel?
 		if (isCancel(request)) {
-			logger.debug("Cancelling wizard for form bean '" + getCommandName() + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cancelling wizard for form bean '" + getCommandName() + "'");
+			}
 			return processCancel(request, response, command, errors);
 		}
 
 		// finish?
 		if (isFinish(request)) {
-			logger.debug("Finishing wizard for form bean '" + getCommandName() + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Finishing wizard for form bean '" + getCommandName() + "'");
+			}
 			return validatePagesAndFinish(request, response, command, errors, currentPage);
 		}
 
 		// normal submit: validate current page and show specified target page
-		logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
-		validatePage(command, errors, currentPage);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
+		}
+		validatePage(command, errors, currentPage, false);
 
 		int targetPage = getTargetPage(request, command, errors, currentPage);
-		logger.debug("Target page " + targetPage + " requested");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Target page " + targetPage + " requested");
+		}
 		if (targetPage != currentPage) {
 			if (!errors.hasErrors() || (this.allowDirtyBack && targetPage < currentPage) ||
 					(this.allowDirtyForward && targetPage > currentPage)) {
@@ -472,9 +492,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Validate all pages and process finish.
 	 * If there are page validation errors, show the respective view page.
 	 */
-	private ModelAndView validatePagesAndFinish(HttpServletRequest request, HttpServletResponse response,
-	                                            Object command, BindException errors, int currentPage)
-			throws Exception {
+	private ModelAndView validatePagesAndFinish(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors,
+			int currentPage) throws Exception {
 
 		// in case of binding errors  -> show current page
 		if (errors.getErrorCount() - errors.getGlobalErrorCount() > 0) {
@@ -483,7 +503,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 		// in case of field errors on a page -> show the page
 		for (int page = 0; page < this.pages.length; page++) {
-			validatePage(command, errors, page);
+			validatePage(command, errors, page, true);
 			if (errors.getErrorCount() - errors.getGlobalErrorCount() > 0) {
 				return showPage(request, errors, page);
 			}
@@ -496,6 +516,26 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for custom validation logic for individual pages.
+	 * Default implementation calls validatePage(command, errors, page).
+	 * <p>Implementations will typically call fine-granular validateXXX methods of this
+	 * instance's validator, combining them to validation of the respective pages.
+	 * The validator's default <code>validate</code> method will not be called by a
+	 * wizard form controller!
+	 * @param command form object with the current wizard state
+	 * @param errors validation errors holder
+	 * @param page number of page to validate
+	 * @param finish whether this method is called during final revalidation on finish
+	 * (else, it is called for validating the current page)
+	 * @see #validatePage(Object, Errors, int)
+	 * @see org.springframework.validation.Validator#validate
+	 */
+	protected void validatePage(Object command, Errors errors, int page, boolean finish) {
+		validatePage(command, errors, page);
+	}
+
+	/**
+	 * Template method for custom validation logic for individual pages.
+	 * Default implementation is empty.
 	 * <p>Implementations will typically call fine-granular validateXXX methods of this
 	 * instance's validator, combining them to validation of the respective pages.
 	 * The validator's default <code>validate</code> method will not be called by a
@@ -505,7 +545,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param page number of page to validate
 	 * @see org.springframework.validation.Validator#validate
 	 */
-	protected abstract void validatePage(Object command, Errors errors, int page);
+	protected void validatePage(Object command, Errors errors, int page) {
+	}
 
 	/**
 	 * Template method for processing the final action of this wizard.
@@ -521,11 +562,15 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
-	protected abstract ModelAndView processFinish(HttpServletRequest request, HttpServletResponse response,
-	                                              Object command, BindException errors) throws Exception;
+	protected abstract ModelAndView processFinish(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
+			throws Exception;
 
 	/**
 	 * Template method for processing the cancel action of this wizard.
+	 * <p>Default implementation throws a ServletException, saying that a cancel
+	 * operation is not supported by this controller. Thus, you do not need to
+	 * implement this template method if you do not support a cancel operation.
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
@@ -538,7 +583,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
-	protected abstract ModelAndView processCancel(HttpServletRequest request, HttpServletResponse response,
-	                                              Object command, BindException errors) throws Exception;
+	protected ModelAndView processCancel(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
+			throws Exception {
+		throw new ServletException(
+				"Wizard form controller class [" + getClass().getName() + "] does not support a cancel operation");
+	}
 
 }
