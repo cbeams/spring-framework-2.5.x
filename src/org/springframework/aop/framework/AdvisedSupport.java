@@ -33,10 +33,32 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.8 2003-12-01 10:02:25 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.9 2003-12-01 10:57:43 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport implements Advised {
+	
+	/**
+	 * Canonical TargetSource when there's no target, and behaviour is supplied
+	 * by the advisors.
+	 */
+	public static TargetSource EMPTY_TARGET_SOURCE = new TargetSource() {
+		public Class getTargetClass() {
+			return null;
+		}
+
+		public boolean isStatic() {
+			return true;
+		}
+
+		public Object getTarget() {
+			return null;
+		}
+
+		public void releaseTarget(Object target) {
+		}
+	};
+	
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -56,7 +78,7 @@ public class AdvisedSupport implements Advised {
 	/** Interfaces to be implemented by the proxy */
 	private Set interfaces = new HashSet();
 
-	private TargetSource targetSource;
+	private TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
 	/**
 	 * Should proxies obtained from this configuration expose
@@ -133,9 +155,16 @@ public class AdvisedSupport implements Advised {
 	}
 	
 	/**
+	 *  @return the TargetSource. Never returns null
+	 */
+	public final TargetSource getTargetSource() {
+		return this.targetSource;
+	}
+	
+	/**
 	 * Return the AdvisorChainFactory associated with this ProxyConfig.
 	 */
-	public AdvisorChainFactory getAdvisorChainFactory() {
+	public final AdvisorChainFactory getAdvisorChainFactory() {
 		return this.advisorChainFactory;
 	}
 
@@ -143,7 +172,7 @@ public class AdvisedSupport implements Advised {
 	/**
 	 * @return Returns the methodInvocationFactory.
 	 */
-	public MethodInvocationFactory getMethodInvocationFactory() {
+	public final MethodInvocationFactory getMethodInvocationFactory() {
 		return this.methodInvocationFactory;
 	}
 	/**
@@ -152,6 +181,7 @@ public class AdvisedSupport implements Advised {
 	public void setMethodInvocationFactory(MethodInvocationFactory methodInvocationFactory) {
 		this.methodInvocationFactory = methodInvocationFactory;
 	}
+	
 	/**
 	 * Call this method on a new instance created by the no-arg consructor
 	 * to create an independent copy of the configuration
@@ -185,15 +215,15 @@ public class AdvisedSupport implements Advised {
 	/**
 	 * Return whether the AopContext class will be usable by target objects.
 	 */
-	public boolean getExposeInvocation() {
+	public final boolean getExposeInvocation() {
 		return exposeInvocation;
 	}
 	
-	public boolean getExposeProxy() {
+	public final boolean getExposeProxy() {
 		return this.exposeProxy;
 	}
 	
-	public void setExposeProxy(boolean exposeProxy) {
+	public final void setExposeProxy(boolean exposeProxy) {
 		this.exposeProxy = exposeProxy;
 	}
 	
@@ -206,7 +236,7 @@ public class AdvisedSupport implements Advised {
 	 * can be optimized out. This can't be done if the proxy or invocation is
 	 * exposed, as users might have written code that expects to get them.
 	 */
-	public boolean canOptimizeOutEmptyAdviceChain() {
+	public final boolean canOptimizeOutEmptyAdviceChain() {
 		return !(exposeInvocation || exposeProxy);
 	}
 	
@@ -309,10 +339,6 @@ public class AdvisedSupport implements Advised {
 		return classes;
 	}
 
-	public TargetSource getTargetSource() {
-		return this.targetSource;
-	}
-
 	public void addAdvisor(int pos, InterceptionAroundAdvisor advice) throws AopConfigException {
 		addAdviceInternal(pos, advice);
 	}
@@ -367,12 +393,12 @@ public class AdvisedSupport implements Advised {
 		this.advisorsArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
 	}
 	
-	public Advisor[] getAdvisors() {
+	public final Advisor[] getAdvisors() {
 		return this.advisorsArray;
 	}
 
 	/**
-	 * TODO comments WHAT IF IT'S AN INTRODUCTION OR PROXY?
+	 * TODO comments WHAT IF IT'S AN INTRODUCTION
 	 * Replace the given pointcut
 	 * @param a pointcut to replace
 	 * @param b pointcut to replace it with
