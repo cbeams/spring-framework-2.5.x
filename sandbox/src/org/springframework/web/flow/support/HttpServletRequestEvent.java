@@ -16,7 +16,8 @@
 package org.springframework.web.flow.support;
 
 import java.util.Date;
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowConstants;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
  * A flow event that orginated from an incoming HTTP servlet request.
@@ -101,7 +103,7 @@ public class HttpServletRequestEvent extends Event {
 		this.currentStateIdParameterName = currentStateIdParameterName;
 		this.parameterNameValueDelimiter = parameterValueDelimiter;
 	}
-
+	
 	/**
 	 * Returns the HTTP servlet request that originated this event.
 	 */
@@ -116,54 +118,43 @@ public class HttpServletRequestEvent extends Event {
 	public HttpServletResponse getResponse() {
 		return response;
 	}
-
-	public String getId() {
-		String eventId = searchForRequestParameter(getRequest(), eventIdParameterName, parameterNameValueDelimiter);
-		if (!StringUtils.hasText(eventId)) {
-			// see if the eventId is set as a request attribute (put there by a
-			// servlet filter)
-			eventId = (String)getRequest().getAttribute(eventIdAttributeName);
-		}
-		return eventId;
-	}
-
+	
 	/**
-	 * Obtain a named parameter from an HTTP servlet request. This method will
+	 * Obtain a named parameter from the event parameters. This method will
 	 * try to obtain a parameter value using the following algorithm:
 	 * <ol>
-	 * <li>Try to get the parameter value from the request using just the given
-	 * <i>logical</i> name. This handles request parameters of the form
-	 * <tt>logicalName = value</tt>. For normal request parameters, e.g.
+	 * <li>Try to get the parameter value from using just the given
+	 * <i>logical</i> name. This handles parameters of the form
+	 * <tt>logicalName = value</tt>. For normal parameters, e.g.
 	 * submitted using a hidden HTML form field, this will return the requested
 	 * value.</li>
 	 * <li>Try to obtain the parameter value from the parameter name, where the
-	 * parameter name in the request is of the form
+	 * parameter name in the event is of the form
 	 * <tt>logicalName_value = xyz</tt> with "_" being the specified
 	 * delimiter. This deals with parameter values submitted using an HTML form
 	 * submit button.</li>
 	 * <li>If the value obtained in the previous step has a ".x" or ".y"
 	 * suffix, remove that. This handles cases where the value was submitted
 	 * using an HTML form image button. In this case the parameter in the
-	 * request would actually be of the form <tt>logicalName_value.x = 123</tt>.
+	 * event would actually be of the form <tt>logicalName_value.x = 123</tt>.
 	 * </li>
 	 * </ol>
-	 * @param request the current HTTP request
 	 * @param logicalName the <i>logical</i> name of the request parameter
 	 * @param delimiter the delimiter to use
 	 * @return the value of the parameter, or <code>null</code> if the
 	 *         parameter does not exist in given request
 	 */
-	protected String searchForRequestParameter(HttpServletRequest request, String logicalName, String delimiter) {
+	protected String searchForParameter(String logicalName, String delimiter) {
 		// first try to get it as a normal name=value parameter
-		String value = request.getParameter(logicalName);
+		String value = getRequest().getParameter(logicalName);
 		if (value != null) {
 			return value;
 		}
 		// if no value yet, try to get it as a name_value=xyz parameter
 		String prefix = logicalName + delimiter;
-		Enumeration paramNames = request.getParameterNames();
-		while (paramNames.hasMoreElements()) {
-			String paramName = (String)paramNames.nextElement();
+		Iterator paramNames = getParameters().keySet().iterator();
+		while (paramNames.hasNext()) {
+			String paramName = (String)paramNames.next();
 			if (paramName.startsWith(prefix)) {
 				value = paramName.substring(prefix.length());
 				// support images buttons, which would submit parameters as
@@ -178,6 +169,16 @@ public class HttpServletRequestEvent extends Event {
 		return null;
 	}
 
+	public String getId() {
+		String eventId = searchForParameter(eventIdParameterName, parameterNameValueDelimiter);
+		if (!StringUtils.hasText(eventId)) {
+			// see if the eventId is set as a request attribute (put there by a
+			// servlet filter)
+			eventId = (String)getRequest().getAttribute(eventIdAttributeName);
+		}
+		return eventId;
+	}
+
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -187,10 +188,23 @@ public class HttpServletRequestEvent extends Event {
 	}
 
 	public Object getParameter(String parameterName) {
-		return getRequest().getParameter(parameterName);
+		String[] values = getRequest().getParameterValues(parameterName);
+		Object res = values;
+		if (values.length == 1) {
+			res = values[0];
+		}
+		if (res == null && getRequest() instanceof MultipartHttpServletRequest) {
+			res = ((MultipartHttpServletRequest)getRequest()).getFile(parameterName);
+		}
+		return res;
 	}
 
 	public Map getParameters() {
-		return getRequest().getParameterMap();
+		Map res = new HashMap(getRequest().getParameterMap());
+		if (getRequest() instanceof MultipartHttpServletRequest) {
+			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) getRequest();
+			res.putAll(multipartRequest.getFileMap());
+		}
+		return res;
 	}
 }
