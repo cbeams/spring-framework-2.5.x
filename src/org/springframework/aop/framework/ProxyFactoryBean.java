@@ -14,7 +14,7 @@ import java.util.Map;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
-
+import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -42,10 +42,17 @@ import org.springframework.core.OrderComparator;
  * <p>Creates a J2SE proxy when proxy interfaces are given, a CGLIB proxy for the
  * actual target class if not. Note that the latter will only work if the target class
  * does not have final methods, as a dynamic subclass will be created at runtime.
+ * 
+ * <p>It's possible to obtain the ProxyFactoryBean reference and programmatically 
+ * manipulate it. This won't work for prototype references, which are independent. However,
+ * it will work for prototypes subsequently obtained from the factory. Changes to interception
+ * will work immediately on singletons (including existing references). However, to change
+ * interfaces or target call the reconfigureSingleton() before obtaining a new bean from
+ * the factory. 
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.3 2003-10-31 17:01:23 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.4 2003-11-04 13:46:28 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  */
@@ -107,6 +114,20 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 		this.interceptorNames = interceptorNames;
 	}
 	
+	
+	/**
+	 * Users must invoke this method after modifying interfaces, interceptors
+	 * etc. so that a singleton will return a differently configured instance on
+	 * the next getBean() call. The target and existing interceptors
+	 * will be unchanged.
+	 */
+	public void reconfigureSingleton() {
+		if (!this.isSingleton()) {
+			throw new AopConfigException("Cannot refresh singleton on a prototype ProxyFactoryBean");
+		}
+		this.singletonInstance = createInstance();	
+	}
+	
 	/**
 	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
 	 */
@@ -118,8 +139,9 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 		
 		// Eagerly create singleton proxy instance if necessary
 		if (isSingleton()) {
-			this.singletonInstance = createInstance();
+			reconfigureSingleton();
 		}
+		logger.info("ProxyFactoryBean config: " + this);
 	}
 
 
@@ -156,7 +178,9 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 			}
 			else {
 				// Add a named interceptor
-				addPointcutOrInterceptor(this.beanFactory.getBean(this.interceptorNames[i]), this.interceptorNames[i]);
+				Object pointcutOrInterceptor = this.beanFactory.getBean(this.interceptorNames[i]);
+				//logger.debug("Adding pointcut or interceptor [" + pointcutOrInterceptor + "] from bean name '" + this.interceptorNames[i] + "'");
+				addPointcutOrInterceptor(pointcutOrInterceptor, this.interceptorNames[i]);
 			}
 		}
 	}
@@ -181,6 +205,9 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 				if (bean instanceof MethodPointcut) {
 					pc2 = (MethodPointcut) bean;
 				}
+				else if (bean instanceof MethodInterceptor) {
+					pc2 = new AlwaysInvoked((MethodInterceptor) bean);
+				}
 				else {
 					// The special case when the object was a target
 					// object, not an invoker or pointcut.
@@ -192,6 +219,13 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 				
 				// What about aspect interfaces!? we're only updating
 				replaceMethodPointcut(pc, pc2);
+				// Keep name mapping up to date
+				sourceMap.put(pc2, beanName);
+			}
+			else {
+				// We can't throw an exception here, as the user may have added additional
+				// pointcuts programmatically we don't know about
+				logger.info("Cannot find bean name for MethodPointcut [" + pc + "] when refreshing interceptor chain");
 			}
 		}
 	}
@@ -236,27 +270,31 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	 */
 	private void addPointcutOrInterceptor(Object next, String name) {
 		logger.debug("Adding pointcut or interceptor [" + next + "] with name [" + name + "]");
+		// We need to add a method pointcut so that our source reference matches
+		// what we find from superclass interceptors
+		MethodPointcut pc = null;
 		if (next instanceof MethodPointcut) {
-			addMethodPointcut((MethodPointcut) next);
+			pc = (MethodPointcut) next;
 		}
-		else if (next instanceof Interceptor) {
-			addInterceptor((Interceptor) next);
+		else if (next instanceof MethodInterceptor) {
+			pc = new AlwaysInvoked((MethodInterceptor) next);
 		}
 		else {
 			// It's not a pointcut or interceptor.
 			// It's a bean that needs an invoker around it.
 			// TODO how do these get refreshed
 			InvokerInterceptor ii = new InvokerInterceptor(next);
-			addInterceptor(ii);
+			pc = new AlwaysInvoked(ii);
 			//throw new AopConfigException("Illegal type: bean '" + name + "' must be of type MethodPointcut or Interceptor");
 		}
 		
-		// Record the ultimate object as descended from the given bean name.
-		// This tells us how to refresh the interceptor list, which we'll need to
+		addMethodPointcut(pc);
+		// Record the pointcut as descended from the given bean name.
+		// This allows us to refresh the interceptor list, which we'll need to
 		// do if we have to create a new prototype instance. Otherwise the new
 		// prototype instance wouldn't be truly independent, because it might reference
 		// the original instances of prototype interceptors.
-		this.sourceMap.put(next, name);
+		this.sourceMap.put(pc, name);
 	}
 
 	/**
@@ -283,11 +321,28 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	 * state of this factory
 	 */
 	private Object createInstance() {
-		refreshInterceptorChain();
-		AopProxy proxy = new AopProxy(this);
+		AopProxy proxy = null;
+		if (this.singleton) {
+			// This object can configure the proxy directly if it's
+			// being used as a singleton
+			proxy = new AopProxy(this);
+		}
+		else {
+			refreshInterceptorChain();
+			// In the case of a prototype, we need to give the proxy
+			// an independent instance of the configuration
+			if (logger.isDebugEnabled())
+				logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
+			DefaultProxyConfig copy = new DefaultProxyConfig();
+			copy.copyConfigurationFrom(this);
+			proxy = new AopProxy(copy);
+		}
 		return proxy.getProxy();
 	}
 
+	/**
+	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
+	 */
 	public Class getObjectType() {
 		return (this.singletonInstance != null) ? this.singletonInstance.getClass() : null;
 	}
