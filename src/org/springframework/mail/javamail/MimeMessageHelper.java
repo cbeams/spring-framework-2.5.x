@@ -30,6 +30,7 @@ import javax.activation.FileTypeMap;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -84,7 +85,11 @@ public class MimeMessageHelper {
 
 	private static final String MULTIPART_SUBTYPE_RELATED = "related";
 
+	private static final String MULTIPART_SUBTYPE_ALTERNATIVE = "alternative";
+
 	private static final String CONTENT_TYPE_HTML = "text/html";
+
+	private static final String CONTENT_TYPE_ALTERNATIVE = "text/alternative";
 
 	private static final String CONTENT_TYPE_CHARSET_SUFFIX = ";charset=";
 
@@ -102,7 +107,8 @@ public class MimeMessageHelper {
 
 	/**
 	 * Create a new MimeMessageHelper for the given MimeMessage,
-	 * assuming a simple text message (no multipart content).
+	 * assuming a simple text message (no multipart content,
+	 * i.e. no alternative texts and no inline elements or attachments).
 	 * @param mimeMessage MimeMessage to work on
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
 	 */
@@ -112,7 +118,8 @@ public class MimeMessageHelper {
 
 	/**
 	 * Create a new MimeMessageHelper for the given MimeMessage,
-	 * assuming a simple text message (no multipart content).
+	 * assuming a simple text message (no multipart content,
+	 * i.e. no alternative texts and no inline elements or attachments).
 	 * @param mimeMessage MimeMessage to work on
 	 * @param encoding the character encoding to use for the message
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
@@ -124,10 +131,11 @@ public class MimeMessageHelper {
 
 	/**
 	 * Create a new MimeMessageHelper for the given MimeMessage,
-	 * in multipart mode (supporting attachments) if requested.
+	 * in multipart mode (supporting alternative texts, inline
+	 * elements and attachments) if requested.
 	 * @param mimeMessage MimeMessage to work on
 	 * @param multipart whether to create a multipart message that
-	 * supports attachments
+	 * supports alternative texts, inline elements and attachments
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart) throws MessagingException {
 		this.mimeMessage = mimeMessage;
@@ -139,10 +147,11 @@ public class MimeMessageHelper {
 
 	/**
 	 * Create a new MimeMessageHelper for the given MimeMessage,
-	 * in multipart mode (supporting attachments) if requested.
+	 * in multipart mode (supporting alternative texts, inline
+	 * elements and attachments) if requested.
 	 * @param mimeMessage MimeMessage to work on
 	 * @param multipart whether to create a multipart message that
-	 * supports attachments
+	 * supports alternative texts, inline elements and attachments
 	 * @param encoding the character encoding to use for the message
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, String encoding)
@@ -152,7 +161,7 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Return the underlying MimeMessage.
+	 * Return the underlying MimeMessage object.
 	 */
 	public final MimeMessage getMimeMessage() {
 		return mimeMessage;
@@ -160,7 +169,7 @@ public class MimeMessageHelper {
 
 	/**
 	 * Return whether this helper is in multipart mode,
-	 * i.e. holds a multipart message.
+	 * i.e. whether it holds a multipart message.
 	 * @see #MimeMessageHelper(MimeMessage, boolean)
 	 */
 	public final boolean isMultipart() {
@@ -168,13 +177,17 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Return the underlying MIME multipart object, if any
+	 * Return the underlying MIME multipart object, if any.
+	 * Cam be used to manually add body parts etc.
 	 * @throws IllegalStateException if this helper is not in multipart mode
 	 * @see #isMultipart
+	 * @see javax.mail.internet.MimeMultipart#addBodyPart
 	 */
 	public final MimeMultipart getMimeMultipart() throws IllegalStateException {
 		if (this.mimeMultipart == null) {
-			throw new IllegalStateException("Cannot access root multipart object - not in multipart mode");
+			throw new IllegalStateException("Not in multipart mode - " +
+			    "create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
+			    "if you need to set alternative texts or add inline elements or attachments.");
 		}
 		return this.mimeMultipart;
 	}
@@ -430,42 +443,74 @@ public class MimeMessageHelper {
 		else {
 			partToUse = this.mimeMessage;
 		}
-		setTextToMimePart(partToUse, text, html);
+		if (html) {
+			setHtmlTextToMimePart(partToUse, text);
+		}
+		else {
+			setPlainTextToMimePart(partToUse, text);
+		}
+	}
+
+	/**
+	 * Set the given plain text and HTML text as alternatives, offering
+	 * both options to the email client. Requires multipart mode.
+	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
+	 * readers might not be able to resolve inline references correctly.
+	 * @param plainText the plain text for the message
+	 * @param htmlText the HTML text for the message	 * @throws MessagingException in case of errors
+	 * @see #addInline
+	 */
+	public void setText(String plainText, String htmlText) throws MessagingException {
+		Multipart messageBody = new MimeMultipart(MULTIPART_SUBTYPE_ALTERNATIVE);
+		MimeBodyPart mimeBodyPart;
+
+		// create the plain text part of the message
+		mimeBodyPart = new MimeBodyPart();
+		setPlainTextToMimePart(mimeBodyPart, plainText);
+		messageBody.addBodyPart(mimeBodyPart);
+
+		// create the HTML text part of the message
+		mimeBodyPart = new MimeBodyPart();
+		setHtmlTextToMimePart(mimeBodyPart, htmlText);
+		messageBody.addBodyPart(mimeBodyPart);
+
+		getMainPart().setContent(messageBody, CONTENT_TYPE_ALTERNATIVE);
 	}
 
 	private MimeBodyPart getMainPart() throws MessagingException {
+		MimeMultipart mimeMultipart = getMimeMultipart();
 		MimeBodyPart bodyPart = null;
-		for (int i = 0; i < this.mimeMultipart.getCount(); i++) {
-			BodyPart bp = this.mimeMultipart.getBodyPart(i);
+		for (int i = 0; i < mimeMultipart.getCount(); i++) {
+			BodyPart bp = mimeMultipart.getBodyPart(i);
 			if (bp.getFileName() == null) {
 				bodyPart = (MimeBodyPart) bp;
 			}
 		}
 		if (bodyPart == null) {
 			MimeBodyPart mimeBodyPart = new MimeBodyPart();
-			this.mimeMultipart.addBodyPart(mimeBodyPart);
+			mimeMultipart.addBodyPart(mimeBodyPart);
 			bodyPart = mimeBodyPart;
 		}
 		return bodyPart;
 	}
 
-	private void setTextToMimePart(MimePart mimePart, String text, boolean html)
+	private void setPlainTextToMimePart(MimePart mimePart, String text)
 	    throws MessagingException {
-		if (html) {
-			if (getEncoding() != null) {
-				mimePart.setContent(text, CONTENT_TYPE_HTML + CONTENT_TYPE_CHARSET_SUFFIX + getEncoding());
-			}
-			else {
-				mimePart.setContent(text, CONTENT_TYPE_HTML);
-			}
+		if (getEncoding() != null) {
+			mimePart.setText(text, getEncoding());
 		}
 		else {
-			if (getEncoding() != null) {
-				mimePart.setText(text, getEncoding());
-			}
-			else {
-				mimePart.setText(text);
-			}
+			mimePart.setText(text);
+		}
+	}
+
+	private void setHtmlTextToMimePart(MimePart mimePart, String text)
+	    throws MessagingException {
+		if (getEncoding() != null) {
+			mimePart.setContent(text, CONTENT_TYPE_HTML + CONTENT_TYPE_CHARSET_SUFFIX + getEncoding());
+		}
+		else {
+			mimePart.setContent(text, CONTENT_TYPE_HTML);
 		}
 	}
 
