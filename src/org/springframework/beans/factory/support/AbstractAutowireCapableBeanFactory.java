@@ -339,7 +339,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Class factoryClass = null;
 		if (mergedBeanDefinition.getFactoryBeanName() != null) {
 			// It's an instance method on the factory bean's class.
-			factoryClass = getBean(mergedBeanDefinition.getFactoryBeanName()).getClass();
+			factoryClass = getType(mergedBeanDefinition.getFactoryBeanName());
 			isStatic = false;
 		}
 		else {

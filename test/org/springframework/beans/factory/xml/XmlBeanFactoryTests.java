@@ -1479,8 +1479,10 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		InstanceFactory.count = 0;
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("instanceFactoryMethodWithoutArgs");
 		assertEquals("instanceFactory", fm.getTestBean().getName());
+		assertEquals(1, InstanceFactory.count);
 
 		//tb = (TestBean) xbf.getBean("externalFactoryMethodWithArgs");
 		//assertEquals(33, tb.getAge());

@@ -90,8 +90,7 @@
 			factory-method="defaultInstance">
 	</bean>
 	
-	<bean id="instanceFactory"
-		class="org.springframework.beans.factory.xml.InstanceFactory">
+	<bean id="instanceFactory" class="org.springframework.beans.factory.xml.InstanceFactory" singleton="false">
 		<property name="factoryBeanProperty"><value>instanceFactory</value></property>
 	</bean>
 

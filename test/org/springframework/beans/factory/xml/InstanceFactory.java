@@ -18,17 +18,21 @@ package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.TestBean;
 
-
 /**
- * Test class for Spring's ability to create
- * objects using static factory methods, rather
- * than constructors. 
+ * Test class for Spring's ability to create objects using
+ * static factory methods, rather than constructors.
  * @author Rod Johnson
  */
 public class InstanceFactory {
-	
+
+	protected static int count = 0;
+
 	private String factoryBeanProperty;
-	
+
+	public InstanceFactory() {
+		count++;
+	}
+
 	public void setFactoryBeanProperty(String s) {
 		this.factoryBeanProperty = s;
 	}
@@ -44,7 +48,7 @@ public class InstanceFactory {
 	}
 	
 	/**
-	 * Note that overloaded methods are supported
+	 * Note that overloaded methods are supported.
 	 */
 	public FactoryMethods newInstance(TestBean tb) {
 		return FactoryMethods.newInstance(tb);
