@@ -39,6 +39,8 @@ July 2003</i>
 
 <li>An application context is very quick to start up: You can start it in a single JUnit test, and you'll never notice the overhead.
 
+<li>The "spring-beans" jar file with just the bean container is very tiny (~90 KB in 1.0 M1). This jar even contains all of Spring's out-of-the-box bean factory implementations.
+
 <li>In short, Spring is such a lightweight container that you won't even notice it's there. It is as simple to handle as a library: It can be included in any application, running in any container, without deployment steps.
 </ul>
 
@@ -52,12 +54,16 @@ July 2003</i>
 <p><code>
 &lt;beans&gt;<br>
 <br>
-&nbsp;&nbsp;&lt;bean id="mySessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"/&gt;<br>
+&nbsp;&nbsp;&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="driverClassName"&gt;&lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;&lt;/property&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="url"&gt;&lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;&lt;/property&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="username"&gt;&lt;value&gt;root&lt;/value&gt;&lt;/property&gt;<br>
+&nbsp;&nbsp;&lt;/bean&gt;<br>
 <br>
 &nbsp;&nbsp;&lt;bean id="myTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;<br>
 <br>
 &nbsp;&nbsp;&lt;bean id="exampleDataAccessObject" class="example.ExampleDataAccessObject"&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="sessionFactory"&gt;&lt;ref bean="mySessionFactory"/&gt;&lt;/property&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="dataSource"&gt;&lt;ref bean="myDataSource"/&gt;&lt;/property&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="exampleParam"&gt;&lt;value&gt;someValue&lt;/value&gt;&lt;/property&gt;<br>
 &nbsp;&nbsp;&lt;/bean&gt;<br>
 <br>
@@ -70,9 +76,11 @@ July 2003</i>
 &lt;/beans&gt;
 </code>
 
-<p>Note that "exampleDataAccessObject" depends on a Hibernate SessionFactory: It exposes a "sessionFactory" property (i.e. a "setSessionFactory(SessionFactory)" method) that receives a reference to the "mySessionFactory" bean from Spring. The same applies to "exampleBusinessObject" with its "transactionManager" property.
+<p>Note that the BasicDataSource from the Jakarta Commons DBCP project can be reused easily in a Spring context, as it offers bean-style configuration. The close method that needs to be called on shutdown can be registered via Spring's "destroy-method" attribute, to avoid the need of making BasicDataSource implement any Spring interface.
 
-<p>Such application beans do not need to depend on Spring: They don't need to implement any Spring specifics, they just need to stick to the JavaBean pattern. Reusing one outside of a Spring application context is easy, for example in a test environment: Just instantiate it with its default constructor, and set its properties manually (i.e. via respective "setSessionFactory" or "setExampleParam" calls).
+<p>"exampleDataAccessObject" depends on a JDBC DataSource: It exposes a "dataSource" property (i.e. a "setDataSource(DataSource)" method) that receives a reference to the "myDataSource" bean from Spring. The same applies to "exampleBusinessObject" with its "transactionManager" property.
+
+<p>Such application beans do not need to depend on Spring: They don't need to implement any Spring specifics, they just need to stick to the JavaBean pattern. Reusing one outside of a Spring application context is easy, for example in a test environment: Just instantiate it with its default constructor, and set its properties manually (i.e. via respective "setDataSource" or "setExampleParam" calls).
 
 <p>Note that an application context definition does not depend on any specific environment like a web container, at least if it just contains business and data access objects. It can be bootstrapped via any appropriate ApplicationContext implementation, like XmlWebApplicationContext, FileSystemXmlApplicationContext, or ClassPathXmlApplicationContext.
 
@@ -108,12 +116,25 @@ July 2003</i>
 <p>Note that most business and data access objects will implement a respective interface, so that client classes like web controllers just need to know the interfaces. This allows for flexible reconfiguration, e.g. simply switching a certain bean definition to a different class that implements the same interface, without any implications on the definitions of client objects.
 
 
-<p><h3>5. Spring Application Context vs PicoContainer</h3>
+<p><h3>5. Spring Bean Container vs Avalon / Excalibur</h3>
 
-<p>Another lightweight container getting attention is the PicoContainer. It is built around components that specify dependencies via constructor arguments. This infrastructure intends to solve the same problems as Spring's application context concept but has some severe drawbacks:
+<p>Avalon is the oldest IoC container in the field, although still not very prevalent. It is basically just a set of interfaces for components and service managers, with various implementations. Most of the latter are in somewhat unclear states though, the only major ones are Phoenix and Excalibur.
+
+<p>For wiring up, every Avalon component needs to look up cooperating components via the Avalon ServiceManager, passed to it automatically if it implements the Serviceable interface. This is very intrusive, as practically every application component with dependencies has to implement that Avalon interface. Furthermore, the lookup mechanism is based on the service interface. If you want to receive a specific instance, you have to use the ServiceSelector with a specific key - another special mechanism. 
+
+<p>A further major difference to Spring is that Avalon defines quite a lot of optional interfaces that a component can implement, like Startable, Stoppable, etc. Spring solely offers InitializingBean and DisposableBean as of 1.0 M1, mainly because there has not been demand for explicit start/stop cycles yet. Alternatively, one can also specify an "init-method" and/or "destroy-method" in the bean definition, so that a bean does not even have to implement a Spring-specific interface for such resource handling callbacks.
+
+<p>Avalon's most important container implementation, Phoenix, targets standalone applications like full servers. Avalon has its advantages there, as it has been designed for start/stop cycles etc. The only stable implementation for embedded use like within a web application is Excalibur, which competes with Spring's bean container. Judging from the website and mailing list activity, Spring is more actively developed. And of course, Spring's feature set goes far beyond the bean container itself. 
+
+<p>Finally, an example for Avalon's intrusiveness: If you'd like to create the above generic application context with Avalon, you'd have to subclass BasicDataSource and make it implement Configurable (for the parameters) and Stoppable (for the close call). Furthermore, "exampleDataAccessObject" would have to implement Serviceable to look up the DataSource, and use the ServiceSelector mechanism to choose one by some key if there were more than one.
+
+
+<p><h3>6. Spring Bean Container vs PicoContainer</h3>
+
+<p>Another lightweight container getting attention recently is the PicoContainer. Its original incentive is to offer a more lightweight and less intrusive model than Avalon. It is built around components that specify dependencies via constructor arguments, instead of having to use some ServiceManager. This infrastructure intends to solve the same problems as Spring's application context concept but has some severe drawbacks:
 
 <ul>
-<li>There's no notion of a specific instance, just one implementation class for any given type. What if one would like to use 2 DataSource instances for 2 databases? How to configure the 2 differently? How to pass a specific one of those to a certain component? This is not possible with PicoContainer: It registers exactly one instance per type.
+<li>There's no notion of a specific component instance, just one implementation class for any given type. What if one would like to use 2 DataSource instances for 2 databases? How to configure the 2 differently? How to pass a specific one of those to a certain component? This is not possible with PicoContainer: It registers exactly one instance per type.
 
 <li>Pico-managed classes are only allowed to have one single constructor, with all objects that the class depends on as arguments. This does not allow for convenient reuse of the class.
 
@@ -129,24 +150,28 @@ July 2003</i>
 
 <li>Constructors are less obvious in IDEs than bean properties. It's trivial to see the properties on any object.
 
-<li>In the future, Spring may offer dynamic reconfiguration of contexts, if beans can handle it by updating individual changed properties. With constructors alone this would mean changing the identity of the service object.
+<li>In the future, Spring may offer dynamic reconfiguration of contexts, if beans can handle it by updating individual changed properties. With constructors alone this would mean changing the identity of the component.
 </ul>
 
-<p>PicoContainer's main advantage is that it doesn't need any meta data like an XML application context definition. As this basic design strategy leads to the above mentioned severe limitations, we consider it very questionable. Using very simple XML meta data, Spring offers a significantly more flexible and powerful infrastructure that achieves similar goals.
+<p>PicoContainer's main advantage is that it does not need instance-specific meta data like XML bean definitions, although it does need some kind of component and parameter registration. As this basic design strategy leads to the above mentioned severe limitations, we consider it very questionable. Using very simple XML meta data, Spring offers a significantly more flexible and powerful infrastructure that achieves similar goals.
 
-<p><b>P.S. [24-07-2003]</b>
+<p>An example: To create the above generic application context with PicoContainer, you'd have to subclass BasicDataSource to give it one single constructor that takes all "necessary" parameters (is password or validationQuery necessary, for example?), and you would just be able to register one such instance for the DataSource interface (what if you'd like to access 2 databases?).
 
-<p>PicoContainer features a bean-style component factory now, as of 1.0 alpha-2. This can remedy some of the issues that we've mentioned, although PicoContainer still focuses on the constructor-based approach in all of its documentation.
+<p><b>P.S. on PicoContainer's new bean-style factory [24-07-2003]</b>
+
+<p>PicoContainer features a bean-style component factory now, as of 1.0 alpha-2, in response to the first version of this article. This can remedy some of the issues that we've mentioned, although PicoContainer still focuses on the constructor-based approach in all of its documentation.
 
 <p>Note that the first and most important issue still applies: There is no notion of a specific instance for a given type. We consider passing a reference to a specific instance a very important feature for wiring up applications, which necessarily involves some kind of configuration like in an XML file (Spring makes this pluggable). PicoContainer sacrifices this to be able to adhere to its configuration-less "Type 3 IoC" dogma.
 
-<p>Finally, regarding the argument that constructor-based "Type 3 IoC" cannot miss any dependencies: Why should every component need to receive instances for all possible dependencies and parameters? A bean-based approach, aka "Type 2 IoC", allows for optional dependencies without any hassle. We consider such flexibility more important than to avoid missing dependencies at any cost.
+<p>Finally, regarding the argument that constructor-based "Type 3 IoC" cannot miss any dependencies: Why should every component need to receive instances for all possible dependencies and parameters? A bean-description-based approach, aka "Type 2 IoC" but without "enabler" interfaces, allows for optional dependencies without any hassle. We consider such flexibility more important than to avoid missing dependencies at any cost.
 
 
 <p><h3>Links</h3>
 
 <a href="http://www.springframework.org" target="_">Spring Framework website</a><br>
 
+<a href="http://avalon.apache.org" target="_">Avalon website</a><br
+>
 <a href="http://www.picocontainer.org" target="_">PicoContainer website</a><br>
 
 </body>
