@@ -31,7 +31,7 @@ import org.springframework.beans.TestBean;
  * and other property editors.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: PropertyEditorTestSuite.java,v 1.3 2004-03-18 03:01:20 trisberg Exp $
+ * @version $Id: PropertyEditorTestSuite.java,v 1.4 2004-05-17 10:06:41 jhoeller Exp $
  */
 public class PropertyEditorTestSuite extends TestCase {
 
@@ -154,6 +154,13 @@ public class PropertyEditorTestSuite extends TestCase {
 		classEditor.setAsText("org.springframework.beans.TestBean");
 		assertEquals(TestBean.class, classEditor.getValue());
 		assertEquals("org.springframework.beans.TestBean", classEditor.getAsText());
+	}
+
+	public void testClassEditorWithArray() {
+		PropertyEditor classEditor = new ClassEditor();
+		classEditor.setAsText("org.springframework.beans.TestBean[]");
+		assertEquals(TestBean[].class, classEditor.getValue());
+		assertEquals("org.springframework.beans.TestBean[]", classEditor.getAsText());
 	}
 
 	public void testFileEditor() {

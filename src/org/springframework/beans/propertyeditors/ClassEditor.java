@@ -17,29 +17,46 @@
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
+import java.lang.reflect.Array;
 
 /**
  * Editor for java.lang.Class, to directly feed a Class property
  * instead of using a String class name property.
+ *
+ * <p>Also supports "java.lang.String[]"-style array class names,
+ * in contrast to the standard Class.forName method.
+ *
  * @author Juergen Hoeller
  * @since 13.05.2003
  * @see java.lang.Class
+ * @see java.lang.Class#forName
  */
 public class ClassEditor extends PropertyEditorSupport {
+
+	public static final String ARRAY_SUFFIX = "[]";
 
 	public void setAsText(String text) throws IllegalArgumentException {
 		Class clazz = null;
 		try {
-			clazz = Class.forName(text, true, Thread.currentThread().getContextClassLoader());
+			if (text.endsWith(ARRAY_SUFFIX)) {
+				// special handling for array class names
+				String elementClassName = text.substring(0, text.length() - ARRAY_SUFFIX.length());
+				Class elementClass = Class.forName(elementClassName, true, Thread.currentThread().getContextClassLoader());
+				clazz = Array.newInstance(elementClass, 0).getClass();
+			}
+			else {
+				clazz = Class.forName(text, true, Thread.currentThread().getContextClassLoader());
+			}
 		}
 		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException("Invalid class name [" + text + "]: " + ex.getMessage());
+			throw new IllegalArgumentException("Invalid class name: " + ex.getMessage());
 		}
 		setValue(clazz);
 	}
 
 	public String getAsText() {
-		return ((Class) getValue()).getName();
+		Class clazz = (Class) getValue();
+		return (clazz.isArray() ? clazz.getComponentType().getName() + ARRAY_SUFFIX : clazz.getName());
 	}
 
 }
