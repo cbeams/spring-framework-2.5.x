@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: BeanWrapperTestSuite.java,v 1.17 2004-03-19 16:09:10 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.18 2004-03-26 11:06:42 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -799,11 +799,11 @@ public class BeanWrapperTestSuite extends TestCase {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("array[0]", tb5);
-		pvs.addPropertyValue("array[1]",tb4);
+		pvs.addPropertyValue("array[1]", tb4);
 		pvs.addPropertyValue("list[0]", tb3);
 		pvs.addPropertyValue("list[1]", tb2);
-		pvs.addPropertyValue("list[2]",tb0);
-		pvs.addPropertyValue("list[4]",tb1);
+		pvs.addPropertyValue("list[2]", tb0);
+		pvs.addPropertyValue("list[4]", tb1);
 		pvs.addPropertyValue("map[key1]", tb1);
 		pvs.addPropertyValue("map['key2']", tb0);
 		pvs.addPropertyValue("map[key5]", tb4);
@@ -831,6 +831,118 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals(tb0, bw.getPropertyValue("map['key2']"));
 		assertEquals(tb4, bw.getPropertyValue("map[\"key5\"]"));
 		assertEquals(tb5, bw.getPropertyValue("map['key9']"));
+	}
+
+	public void testIndexedPropertiesWithDirectAccessAndPropertyEditors() {
+		IndexedTestBean bean = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.registerCustomEditor(String.class, "array", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("array" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		bw.registerCustomEditor(String.class, "list", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("list" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		bw.registerCustomEditor(String.class, "map", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("map" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0]", "a");
+		pvs.addPropertyValue("array[1]", "b");
+		pvs.addPropertyValue("list[0]", "c");
+		pvs.addPropertyValue("list[1]", "d");
+		pvs.addPropertyValue("map[key1]", "e");
+		pvs.addPropertyValue("map['key2']", "f");
+		bw.setPropertyValues(pvs);
+		assertEquals("arraya", bean.getArray()[0].getName());
+		assertEquals("arrayb", bean.getArray()[1].getName());
+		assertEquals("listc", ((TestBean) bean.getList().get(0)).getName());
+		assertEquals("listd", ((TestBean) bean.getList().get(1)).getName());
+		assertEquals("mape", ((TestBean) bean.getMap().get("key1")).getName());
+		assertEquals("mapf", ((TestBean) bean.getMap().get("key2")).getName());
+	}
+
+	public void testIndexedPropertiesWithDirectAccessAndSpecificPropertyEditors() {
+		IndexedTestBean bean = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.registerCustomEditor(String.class, "array[0]", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("array0" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		bw.registerCustomEditor(String.class, "array[1]", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("array1" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		bw.registerCustomEditor(String.class, "list[0]", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("list0" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		bw.registerCustomEditor(String.class, "list[1]", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("list1" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		bw.registerCustomEditor(String.class, "map[key1]", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("mapkey1" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		bw.registerCustomEditor(String.class, "map[key2]", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("mapkey2" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0]", "a");
+		pvs.addPropertyValue("array[1]", "b");
+		pvs.addPropertyValue("list[0]", "c");
+		pvs.addPropertyValue("list[1]", "d");
+		pvs.addPropertyValue("map[key1]", "e");
+		pvs.addPropertyValue("map['key2']", "f");
+		bw.setPropertyValues(pvs);
+		assertEquals("array0a", bean.getArray()[0].getName());
+		assertEquals("array1b", bean.getArray()[1].getName());
+		assertEquals("list0c", ((TestBean) bean.getList().get(0)).getName());
+		assertEquals("list1d", ((TestBean) bean.getList().get(1)).getName());
+		assertEquals("mapkey1e", ((TestBean) bean.getMap().get("key1")).getName());
+		assertEquals("mapkey2f", ((TestBean) bean.getMap().get("key2")).getName());
 	}
 
 	public void testArrayToArrayConversion() throws PropertyVetoException {

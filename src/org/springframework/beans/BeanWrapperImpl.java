@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.33 2004-03-19 16:09:16 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.34 2004-03-26 11:06:41 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -217,12 +217,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 			this.customEditors = new HashMap();
 		}
 		if (propertyName != null) {
-			// consistency check
-			PropertyDescriptor descriptor = getPropertyDescriptor(propertyName);
-			if (requiredType != null && !descriptor.getPropertyType().isAssignableFrom(requiredType)) {
-				throw new IllegalArgumentException("Types do not match: required [" + requiredType.getName() +
-																					 "], found [" + descriptor.getPropertyType().getName() + "]");
-			}
 			this.customEditors.put(propertyName, propertyEditor);
 		}
 		else {
@@ -249,24 +243,21 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		if (propertyName != null) {
 			// check property-specific editor first
-			PropertyDescriptor descriptor = null;
 			try {
-				descriptor = getPropertyDescriptor(propertyName);
 				PropertyEditor editor = (PropertyEditor) this.customEditors.get(propertyName);
-				if (editor != null) {
-					// consistency check
-					if (requiredType != null) {
-						if (!descriptor.getPropertyType().isAssignableFrom(requiredType)) {
-							throw new IllegalArgumentException("Types do not match: required=" + requiredType.getName() +
-																								 ", found=" + descriptor.getPropertyType());
-						}
+				if (editor == null) {
+					int keyIndex = propertyName.indexOf('[');
+					if (keyIndex != -1) {
+						editor = (PropertyEditor) this.customEditors.get(propertyName.substring(0, keyIndex));
 					}
+				}
+				if (editor != null) {
 					return editor;
 				}
 				else {
 					if (requiredType == null) {
 						// try property type
-						requiredType = descriptor.getPropertyType();
+						requiredType = getPropertyDescriptor(propertyName).getPropertyType();
 					}
 				}
 			}
@@ -311,7 +302,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	private BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) {
 		int pos = propertyPath.indexOf(NESTED_PROPERTY_SEPARATOR);
-		// Handle nested properties recursively
+		// handle nested properties recursively
 		if (pos > -1) {
 			String nestedProperty = propertyPath.substring(0, pos);
 			String nestedPath = propertyPath.substring(pos + 1);
@@ -472,8 +463,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 					                             propertyName + "': returned null");
 				}
 				else if (value.getClass().isArray()) {
-					Object[] array = (Object[]) value;
-					return array[Integer.parseInt(key)];
+					return Array.get(value, Integer.parseInt(key));
 				}
 				else if (value instanceof List) {
 					List list = (List) value;
@@ -549,14 +539,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 																		 propertyName + "': returned null");
 			}
 			else if (propValue.getClass().isArray()) {
-				Object[] array = (Object[]) propValue;
-				array[Integer.parseInt(key)] = value;
+				Object newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value,
+																											propValue.getClass().getComponentType());
+				Array.set(propValue, Integer.parseInt(key), newValue);
 			}
 			else if (propValue instanceof List) {
+				Object newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, null);
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
 				if (index < list.size()) {
-					list.set(index, value);
+					list.set(index, newValue);
 				}
 				else if (index >= list.size()) {
 					for (int i = list.size(); i < index; i++) {
@@ -569,12 +561,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 																					 "': List does not support filling up gaps with null elements");
 						}
 					}
-					list.add(value);
+					list.add(newValue);
 				}
 			}
 			else if (propValue instanceof Map) {
+				Object newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, null);
 				Map map = (Map) propValue;
-				map.put(key, value);
+				map.put(key, newValue);
 			}
 			else {
 				throw new FatalBeanException("Property referenced in indexed property path '" + propertyName +
@@ -722,12 +715,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws BeansException if there is an internal error
 	 * @return new value, possibly the result of type convertion
 	 */
-	protected Object doTypeConversionIfNecessary(String propertyName, String propertyDescriptor,
+	protected Object doTypeConversionIfNecessary(String propertyName, String fullPropertyName,
 																							 Object oldValue, Object newValue,
 																							 Class requiredType) throws BeansException {
 		if (newValue != null) {
 
-			if (requiredType.isArray()) {
+			if (requiredType != null && requiredType.isArray()) {
 				// convert individual elements to array elements
 				Class componentType = requiredType.getComponentType();
 				if (newValue instanceof List) {
@@ -753,10 +746,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 
 			// custom editor for this type?
-			PropertyEditor pe = findCustomEditor(requiredType, propertyName);
+			PropertyEditor pe = findCustomEditor(requiredType, fullPropertyName);
 
 			// value not of required type?
-			if (pe != null || !requiredType.isAssignableFrom(newValue.getClass())) {
+			if (pe != null || (requiredType != null && !requiredType.isAssignableFrom(newValue.getClass()))) {
 
 				if (newValue instanceof String[]) {
 					if (logger.isDebugEnabled()) {
@@ -784,12 +777,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 							newValue = pe.getValue();
 						}
 						catch (IllegalArgumentException ex) {
-							throw new TypeMismatchException(createPropertyChangeEvent(propertyDescriptor, oldValue, newValue),
+							throw new TypeMismatchException(createPropertyChangeEvent(fullPropertyName, oldValue, newValue),
 																							requiredType, ex);
 						}
 					}
 					else {
-						throw new TypeMismatchException(createPropertyChangeEvent(propertyDescriptor, oldValue, newValue),
+						throw new TypeMismatchException(createPropertyChangeEvent(fullPropertyName, oldValue, newValue),
 																						requiredType);
 					}
 				}
@@ -804,16 +797,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 						newValue = pe.getValue();
 					}
 					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchException(createPropertyChangeEvent(propertyDescriptor, oldValue, newValue),
+						throw new TypeMismatchException(createPropertyChangeEvent(fullPropertyName, oldValue, newValue),
 																						requiredType, ex);
 					}
 				}
 			}
 
-			if (requiredType.isArray() && !newValue.getClass().isArray()) {
+			if (requiredType != null && requiredType.isArray() && !newValue.getClass().isArray()) {
 				Class componentType = requiredType.getComponentType();
 				Object result = Array.newInstance(componentType, 1) ;
-				Object val = doTypeConversionIfNecessary(propertyName, propertyName + "[" + 0 + "]",
+				Object val = doTypeConversionIfNecessary(propertyName, propertyName + "[0]",
 																								 null, newValue, componentType);
 				Array.set(result, 0, val) ;
 				return result;
