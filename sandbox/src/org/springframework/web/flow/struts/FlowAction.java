@@ -150,6 +150,7 @@ public class FlowAction extends TemplateAction {
 			// was provided - start a new one
 			Flow flow = getFlow(mapping);
 			flowExecution = createFlowExecution(flow);
+			flowExecution.start(null, request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
