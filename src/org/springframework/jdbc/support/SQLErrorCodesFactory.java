@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -45,7 +46,7 @@ import org.springframework.core.io.Resource;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SQLErrorCodesFactory.java,v 1.16 2004-06-30 12:54:27 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.17 2004-06-30 15:39:25 jhoeller Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -216,7 +217,7 @@ public class SQLErrorCodesFactory {
 				String dbName = (String) dbmdInfo.get("DatabaseProductName");
 				String driverVersion = (String) dbmdInfo.get("DriverVersion");
 				// special check for DB2
-				if (dbName != null && dbName.startsWith("DB2/")) {
+				if (dbName != null && dbName.startsWith("DB2")) {
 					dbName = "DB2";
 				}
 				if (dbName != null) {
