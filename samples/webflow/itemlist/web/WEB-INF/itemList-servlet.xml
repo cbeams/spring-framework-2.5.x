@@ -27,5 +27,4 @@
 	
 	<bean id="item.add" class="org.springframework.samples.itemlist.web.flow.AddItemAction"/>
 	
-	
 </beans>

@@ -6,17 +6,17 @@
 <web-flow id="Upload" start-state="selectFile.view">
 
 	<view-state id="selectFile.view" view="selectFile.view">
-		<transition event="submit" to="processUpload"/>
+		<transition on="submit" to="processUpload"/>
 	</view-state>
 
 	<action-state id="processUpload">
-		<action bean="Upload.process"/>
-		<transition event="success" to="confirmation.view"/>
-		<transition event="error" to="selectFile.view"/>
+		<action id="Upload.process"/>
+		<transition on="success" to="confirmation.view"/>
+		<transition on="error" to="selectFile.view"/>
 	</action-state>
 	
 	<view-state id="confirmation.view" view="confirmation.view">
-		<transition event="back" to="selectFile.view"/>
+		<transition on="back" to="selectFile.view"/>
 	</view-state>
 	
 </web-flow>

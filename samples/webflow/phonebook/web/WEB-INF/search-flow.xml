@@ -5,35 +5,35 @@
 <web-flow id="person.Search" start-state="criteria.view">
 
 	<view-state id="criteria.view" view="person.Search.criteria.view">
-		<transition event="submit" to="criteria.bindAndValidate"/>
+		<transition on="submit" to="criteria.bindAndValidate"/>
 	</view-state>
 
 	<action-state id="criteria.bindAndValidate">
-		<action bean="person.Search.criteria.bindAndValidate"/>
-		<transition event="success" to="executeQuery"/>
-		<transition event="error" to="criteria.view"/>
+		<action id="person.Search.criteria.bindAndValidate"/>
+		<transition on="success" to="executeQuery"/>
+		<transition on="error" to="criteria.view"/>
 	</action-state>
 	
 	<action-state id="executeQuery">
-		<action bean="person.Search.executeQuery"/>
-		<transition event="success" to="results.view"/>
+		<action id="person.Search.executeQuery"/>
+		<transition on="success" to="results.view"/>
 	</action-state>
 	
 	<view-state id="results.view" view="person.Search.results.view">
-		<transition event="newSearch" to="criteria.view"/>
-		<transition event="select" to="personId.set"/>
+		<transition on="newSearch" to="criteria.view"/>
+		<transition on="select" to="personId.set"/>
 	</view-state>
 
 	<action-state id="personId.set">
-		<action bean="person.Search.id.set"/>
-		<transition event="success" to="person.Detail"/>
-		<transition event="error" to="error"/>
+		<action id="person.Search.id.set"/>
+		<transition on="success" to="person.Detail"/>
+		<transition on="error" to="error"/>
 	</action-state>
 	
-	<sub-flow-state id="person.Detail" flow="person.Detail" model-mapper="id.modelMapper">
-		<transition event="finish" to="results.view"/>
-		<transition event="error" to="error"/>
-	</sub-flow-state>
+	<subflow-state id="person.Detail" flow="person.Detail" attribute-mapper="id.attributeMapper">
+		<transition on="finish" to="results.view"/>
+		<transition on="error" to="error"/>
+	</subflow-state>
 	
 	<end-state id="error" view="error.view"/>
 	
