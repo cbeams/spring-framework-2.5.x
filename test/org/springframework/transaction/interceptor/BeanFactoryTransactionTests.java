@@ -22,6 +22,7 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.transaction.CountingTxManager;
 import org.springframework.transaction.DummyTxManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -31,7 +32,7 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.11 2003-12-02 16:22:14 johnsonr Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.12 2003-12-02 16:29:17 johnsonr Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
@@ -127,7 +128,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 	 */
 	public void testDynamicTargetSource() throws NoSuchMethodException {
 		// Install facade
-		DummyTxManager txMan = new DummyTxManager();
+		CountingTxManager txMan = new CountingTxManager();
 		PlatformTransactionManagerFacade.delegate = txMan;
 		
 		TestBean tb = (TestBean) factory.getBean("hotSwapped");
