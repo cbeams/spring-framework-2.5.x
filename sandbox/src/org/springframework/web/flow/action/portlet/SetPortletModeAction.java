@@ -21,6 +21,7 @@ import javax.portlet.PortletMode;
 import org.springframework.core.Constants;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.action.AbstractAction;
@@ -44,7 +45,7 @@ public class SetPortletModeAction extends AbstractAction {
 	private static final Constants PORTLET_MODE_CONSTANTS = new Constants(PortletMode.class);
 	
 	/**
-	 * The portlet mode to set can be specified in as an action state action
+	 * The portlet mode to set can be specified in an action state action
 	 * property with this name.
 	 */
 	public static final String PORTLET_MODE_PROPERTY = "portletMode";
@@ -88,9 +89,6 @@ public class SetPortletModeAction extends AbstractAction {
 
 		PortletRequestEvent event = (PortletRequestEvent)context.getOriginatingEvent();
 
-		// portlet mode and the window state can be changed through
-		// ActionResponse only, if this assert is false it means that this
-		// action has been invoked directly in a RenderRequest phase.
 		if (event.getResponse() instanceof ActionResponse) {
 			PortletMode mode = getPortletMode();
 			if (containsProperty(PORTLET_MODE_PROPERTY, context)) {
@@ -100,8 +98,12 @@ public class SetPortletModeAction extends AbstractAction {
 			return success();
 		}
 		else {
-			//TODO: should we throw an exception here?
-			return error();
+			// portlet mode and the window state can be changed through
+			// ActionResponse only, if this is not the case, it means that this
+			// action has been invoked directly in a RenderRequest
+			throw new ActionExecutionException(
+					"SetPortletModeAction can only work with 'ActionResponse' " +
+					"-- make sure you are not invoking it in a RenderRequest", null);
 		}
 	}
 }

@@ -27,7 +27,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  * A flow event that originated from an incoming portlet request.
  * 
  * @author J.Enrique Ruiz
- * @author Cï¿½sar Ordiï¿½ana
+ * @author César Ordiñana
  * @author Erwin Vervaet
  */
 public class PortletRequestEvent extends ExternalEvent {
@@ -66,7 +66,7 @@ public class PortletRequestEvent extends ExternalEvent {
 		this.response = response;
 		// initialize parameters
 		setParameters(PortletUtils.getParametersStartingWith(request, null));
-		// TODO multipart portlet request support
+		// TODO multipart portlet request support -- not yet supported by Spring Portlet MVC
 		String eventId = (String)searchForParameter(eventIdParameterName, parameterValueDelimiter);
 		if (!StringUtils.hasText(eventId)) {
 			// see if the eventId is set as a request attribute (put there by a

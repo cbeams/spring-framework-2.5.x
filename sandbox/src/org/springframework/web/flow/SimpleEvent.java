@@ -57,7 +57,8 @@ public class SimpleEvent extends Event {
 	private Map parameters;
 
 	/**
-	 * Constructor for use in subclasses.
+	 * Create a simple event, with no embedded event id. Such
+	 * an event is typically used to start a flow execution.
 	 * @param source the source of the event
 	 */
 	public SimpleEvent(Object source) {
@@ -107,8 +108,12 @@ public class SimpleEvent extends Event {
 		return id;
 	}
 
-	private void setRequiredId(String id) {
-		Assert.hasText(id, "The event id is required for this use - please set to a non-blank string identifier");
+	/**
+	 * Set the event identifier and make sure it is not null.
+	 * @param id the event identifier
+	 */
+	protected void setRequiredId(String id) {
+		Assert.hasText(id, "The event id is required for this use -- please set to a non-blank string identifier");
 		this.id = id;
 	}
 

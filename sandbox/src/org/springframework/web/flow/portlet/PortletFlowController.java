@@ -19,7 +19,6 @@ import javax.portlet.*;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-import org.springframework.web.flow.NoMatchingTransitionException;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.execution.portlet.PortletFlowExecutionManager;
 import org.springframework.web.portlet.support.AbstractController;
@@ -117,15 +116,8 @@ public class PortletFlowController extends AbstractController implements Initial
 	 * @throws Exception in case of errors
 	 */
 	protected void handleRequestInternal(ActionRequest request, ActionResponse response) throws Exception {
-		try {
-			ViewDescriptor viewDescriptor = flowExecutionManager.handle(request, response);
-			request.setAttribute(VIEWDESCRIPTOR_ATTRIBUTE, viewDescriptor);
-		}
-		catch (NoMatchingTransitionException ex) {
-			//TODO: why can't we let this exception propagate?
-			throw new PortletException(ex);
-		}
-
+		ViewDescriptor viewDescriptor = flowExecutionManager.handle(request, response);
+		request.setAttribute(VIEWDESCRIPTOR_ATTRIBUTE, viewDescriptor);
 	}
 
 	/**
@@ -141,13 +133,7 @@ public class PortletFlowController extends AbstractController implements Initial
 	protected ModelAndView handleRequestInternal(RenderRequest request, RenderResponse response) throws Exception {
 		ViewDescriptor viewDescriptor = (ViewDescriptor) request.getAttribute(VIEWDESCRIPTOR_ATTRIBUTE);
 		if (viewDescriptor == null) {
-			try {
-				viewDescriptor = flowExecutionManager.handle(request, response);
-			}
-			catch (NoMatchingTransitionException ex) {
-				//TODO: why can't we let this exception propagate?
-				throw new PortletException(ex);
-			}
+			viewDescriptor = flowExecutionManager.handle(request, response);
 		}
 
 		// convert the view descriptor to a ModelAndView object

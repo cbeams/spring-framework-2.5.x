@@ -21,8 +21,8 @@ import org.springframework.web.flow.SimpleEvent;
 
 /**
  * Abstract superclass for events encapsulating a request coming into a
- * flow execution. This kind of event is typically the originating event
- * of a <code>RequestContext</code> in a flow execution.
+ * flow execution for an external source (client). This kind of event is typically
+ * the originating event of a <code>RequestContext</code> in a flow execution.
  * 
  * @see org.springframework.web.flow.RequestContext
  * 
@@ -49,7 +49,8 @@ public abstract class ExternalEvent extends SimpleEvent {
 	public static final String PARAMETER_VALUE_DELIMITER = "_";
 
 	/**
-	 * Creates a external event with the specified external source, for example a http request.
+	 * Creates an external event with the specified external source,
+	 * for example a HTTP request.
 	 * @param source the event source
 	 */
 	public ExternalEvent(Object source) {
