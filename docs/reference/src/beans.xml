@@ -588,6 +588,14 @@ public class AnotherExampleBean implements DisposableBean {
         // do some destruction work
     }
 }</programlisting></para>
+		<para>
+			<emphasis>Note: when deploying a bean in the prototype mode, the lifecycle of the bean changes slightly.
+			By definition, Spring can not manage the complete lifecycle of a non-singleton/prototype bean, since 
+			after it is created, it is given to the client and the container does not keep track of it 
+			at all any longer. You can think of Spring's role when talking about a non-singleton/prototype bean 
+			as a replacement for the 'new' operator. Any lifecycle aspects past that point have to be handled by the client.
+			The lifecycle of a bean in the BeanFactory is further described in <xref linkend="beans-factory-lifecycle" /></emphasis>
+		</para>
       </sect3>
     </sect2>
 
