@@ -15,11 +15,12 @@ import javax.jms.Message;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.BeanFactoryLoader;
+import org.springframework.beans.factory.access.BeanFactoryLocator;
+import org.springframework.beans.factory.access.BeanFactoryRef;
 import org.springframework.beans.factory.support.BootstrapException;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jndi.support.SimpleNamingContextBuilder;
@@ -29,7 +30,7 @@ import org.springframework.jndi.support.SimpleNamingContextBuilder;
  * to implement ejbCreate() methods.
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: EjbSupportTests.java,v 1.5 2003-12-30 02:04:18 jhoeller Exp $
+ * @version $Id: EjbSupportTests.java,v 1.6 2004-01-27 00:03:47 colins Exp $
  */
 public class EjbSupportTests extends TestCase {
 
@@ -39,11 +40,17 @@ public class EjbSupportTests extends TestCase {
 		mc.replay();
 		
 		final BeanFactory bf = new StaticListableBeanFactory();
-		BeanFactoryLoader bfl = new BeanFactoryLoader() {
-			public BeanFactory loadBeanFactory() throws BootstrapException {
-				return bf;
-			}
-			public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
+		BeanFactoryLocator bfl = new BeanFactoryLocator() {
+			public BeanFactoryRef useFactory(String factoryKey)
+					throws FatalBeanException {
+				return new BeanFactoryRef() {
+					public BeanFactory getFactory() {
+						return bf;
+					}
+					public void release() throws FatalBeanException {
+						// nothing to do in default implementation
+					}
+				};
 			}
 		};
 		
@@ -64,7 +71,7 @@ public class EjbSupportTests extends TestCase {
 		};
 		
 		MySfsb sfsb = new MySfsb();
-		sfsb.setBeanFactoryLoader(bfl);
+		sfsb.setBeanFactoryLocator(bfl);
 		sfsb.setSessionContext(sc);
 		sfsb.ejbCreate();
 		assertTrue(sc == sfsb.getSessionContext());
@@ -105,11 +112,17 @@ public class EjbSupportTests extends TestCase {
 		mc.replay();
 		
 		final BeanFactory bf = new StaticListableBeanFactory();
-		BeanFactoryLoader bfl = new BeanFactoryLoader() {
-			public BeanFactory loadBeanFactory() throws BootstrapException {
-				return bf;
-			}
-			public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
+		BeanFactoryLocator bfl = new BeanFactoryLocator() {
+			public BeanFactoryRef useFactory(String factoryKey)
+					throws FatalBeanException {
+				return new BeanFactoryRef() {
+					public BeanFactory getFactory() {
+						return bf;
+					}
+					public void release() throws FatalBeanException {
+						// nothing to do in default implementation
+					}
+				};
 			}
 		};
 	
@@ -120,7 +133,7 @@ public class EjbSupportTests extends TestCase {
 			}
 		};
 		// Must call this method before ejbCreate()
-		slsb.setBeanFactoryLoader(bfl);
+		slsb.setBeanFactoryLocator(bfl);
 		slsb.setSessionContext(sc);
 		assertTrue(sc == slsb.getSessionContext());
 		slsb.ejbCreate();
@@ -147,11 +160,17 @@ public class EjbSupportTests extends TestCase {
 		mc.replay();
 	
 		final BeanFactory bf = new StaticListableBeanFactory();
-		BeanFactoryLoader bfl = new BeanFactoryLoader() {
-			public BeanFactory loadBeanFactory() throws BootstrapException {
-				return bf;
-			}
-			public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
+		BeanFactoryLocator bfl = new BeanFactoryLocator() {
+			public BeanFactoryRef useFactory(String factoryKey)
+					throws FatalBeanException {
+				return new BeanFactoryRef() {
+					public BeanFactory getFactory() {
+						return bf;
+					}
+					public void release() throws FatalBeanException {
+						// nothing to do in default implementation
+					}
+				};
 			}
 		};
 
@@ -166,7 +185,7 @@ public class EjbSupportTests extends TestCase {
 			}
 		};
 		// Must call this method before ejbCreate()
-		mdb.setBeanFactoryLoader(bfl);
+		mdb.setBeanFactoryLocator(bfl);
 		mdb.setMessageDrivenContext(sc);
 		assertTrue(sc == mdb.getMessageDrivenContext());
 		mdb.ejbCreate();
@@ -178,20 +197,18 @@ public class EjbSupportTests extends TestCase {
 		mc.replay();
 	
 		final BeanFactory bf = new StaticListableBeanFactory();
-		BeanFactoryLoader bfl = new BeanFactoryLoader() {
-			public BeanFactory loadBeanFactory() throws BootstrapException {
+		BeanFactoryLocator bfl = new BeanFactoryLocator() {
+			public BeanFactoryRef useFactory(String factoryKey)
+					throws FatalBeanException {
 				throw new BootstrapException("", null);
-			}
-			public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
-			}
-		};
+		}};
 
 		AbstractStatelessSessionBean slsb = new AbstractStatelessSessionBean() {
 			protected void onEjbCreate() throws CreateException {
 			}
 		};
 		// Must call this method before ejbCreate()
-		slsb.setBeanFactoryLoader(bfl);
+		slsb.setBeanFactoryLocator(bfl);
 		slsb.setSessionContext(sc);
 		
 		try {

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: ref1.xml,v 1.1 2004-01-27 00:03:45 colins Exp $ -->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+  <bean id="a.qualified.name.of.some.sort"
+  	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
+    <constructor-arg>
+      <value>org/springframework/beans/factory/access/beans1.xml</value>
+   	</constructor-arg>
+  </bean>
+
+</beans>

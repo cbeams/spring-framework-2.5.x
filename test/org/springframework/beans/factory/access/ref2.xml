@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: ref2.xml,v 1.1 2004-01-27 00:03:46 colins Exp $ -->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+  <bean id="another.qualified.name"
+  	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
+    <constructor-arg>
+      <list><value>org/springframework/beans/factory/access/beans2.xml</value></list>
+   	</constructor-arg>
+    <constructor-arg>
+      <ref bean="a.qualified.name.of.some.sort"/>
+   	</constructor-arg>
+  </bean>
+  
+  <bean id="a.qualified.name.which.is.an.alias" class="java.lang.String">
+    <constructor-arg><value>another.qualified.name</value></constructor-arg>
+  </bean>
+  
+</beans>
+

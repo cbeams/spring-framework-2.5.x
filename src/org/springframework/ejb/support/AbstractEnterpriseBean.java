@@ -9,11 +9,12 @@ import javax.ejb.EnterpriseBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.BeanFactoryLoader;
+import org.springframework.beans.factory.access.BeanFactoryLocator;
+import org.springframework.beans.factory.access.BeanFactoryRef;
 import org.springframework.beans.factory.support.BootstrapException;
+import org.springframework.context.access.JndiBeanFactoryLocator;
 
 /** 
  * Superclass for all EJBs. Package-visible: not intended for direct
@@ -35,9 +36,11 @@ import org.springframework.beans.factory.support.BootstrapException;
  * EJB lifecycle methods, as this violates the EJB specification.
  *
  * @author Rod Johnson
- * @version $Id: AbstractEnterpriseBean.java,v 1.6 2004-01-18 00:09:10 colins Exp $
+ * @version $Id: AbstractEnterpriseBean.java,v 1.7 2004-01-27 00:03:45 colins Exp $
  */
 abstract class AbstractEnterpriseBean implements EnterpriseBean {
+	
+	public static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
 
 	/**
 	 * Logger, available to subclasses. Not final since stateful session beans
@@ -49,10 +52,15 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * Helper strategy that knows how to load Spring BeanFactory (or
 	 * ApplicationContext subclass).
 	 */
-	private BeanFactoryLoader beanFactoryLoader;
+	private BeanFactoryLocator beanFactoryLocator;
+	
+	/**
+	 * FactoryKey to be used with BeanFactoryLocator
+	 */
+	private String factoryKey;
 
 	/** Spring BeanFactory that provides the namespace for this EJB */
-	private BeanFactory beanFactory;
+	private BeanFactoryRef beanFactoryRef;
 
 	/**
 	 * Load a Spring BeanFactory namespace.
@@ -61,10 +69,12 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * @see org.springframework.ejb.support.AbstractStatelessSessionBean#ejbCreate()
 	 */
 	void loadBeanFactory() throws BootstrapException {
-		if (this.beanFactoryLoader == null) {
-			this.beanFactoryLoader = new XmlApplicationContextBeanFactoryLoader();
+		if (this.beanFactoryLocator == null) {
+			this.beanFactoryLocator = new JndiBeanFactoryLocator();
+			this.factoryKey = BEAN_FACTORY_PATH_ENVIRONMENT_KEY;
+ 
 		}
-		this.beanFactory = this.beanFactoryLoader.loadBeanFactory();
+		this.beanFactoryRef = this.beanFactoryLocator.useFactory(this.factoryKey);
 	}
 	
 	/**
@@ -75,9 +85,9 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * subclasses.
 	 */
 	void unloadBeanFactory() throws FatalBeanException {
-		if (this.beanFactory != null) {
-		  this.beanFactoryLoader.unloadBeanFactory(this.beanFactory);
-		  this.beanFactory = null;
+		if (this.beanFactoryRef != null) {
+			beanFactoryRef.release();
+			beanFactoryRef = null;
 		}
 	}
 
@@ -86,16 +96,30 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * Invoke in constructor or setXXXXContext() if you want
 	 * to override the default bean factory loader.
 	 */
-	public void setBeanFactoryLoader(BeanFactoryLoader beanFactoryLoader) {
-		this.beanFactoryLoader = beanFactoryLoader;
+	public void setBeanFactoryLocator(BeanFactoryLocator beanFactoryLocator) {
+		this.beanFactoryLocator = beanFactoryLocator;
 	}
+	
+	/**
+	 * Can be invoked before loadBeanFactory.
+	 * Invoke in constructor or setXXXXContext() if you want
+	 * to override the default bean factory factory key.
+	 * If the default BeanFactoryLocator implementation,
+	 * JndiBeanFactoryLocator, this is the JNDI path. The
+	 * default value of this property is
+	 * {@link #BEAN_FACTORY_PATH_ENVIRONMENT_KEY} 
+	 */
+	public void setBeanFactoryLocatorKey(String factoryKey) {
+		this.factoryKey = factoryKey;
+	}
+	
 
 	/**
 	 * May be called after ejbCreate().
 	 * @return the bean Factory
 	 */
 	protected BeanFactory getBeanFactory() {
-		return this.beanFactory;
+		return this.beanFactoryRef.getFactory();
 	}
 
 	/**
