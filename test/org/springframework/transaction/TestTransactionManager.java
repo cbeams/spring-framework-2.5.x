@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction;
 
@@ -63,13 +63,6 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.begin = true;
 	}
 
-	protected Object doSuspend(Object transaction) {
-		return null;
-	}
-
-	protected void doResume(Object transaction, Object suspendedResources) {
-	}
-
 	protected void doCommit(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
@@ -89,9 +82,6 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 			throw new IllegalArgumentException("Not the same transaction object");
 		}
 		this.rollbackOnly = true;
-	}
-
-	protected void doCleanupAfterCompletion(Object transaction) {
 	}
 
 }
