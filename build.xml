@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.3 2003-08-19 16:36:26 jhoeller Exp $
+    $Id: build.xml,v 1.4 2003-08-29 14:35:47 jhoeller Exp $
 
     See page 594 of "Expert One-on-One J2EE" for a description
     of the JAR files produced by this build script, and how
@@ -91,13 +91,16 @@
 
 		<delete file="${dist.dir}/${spring-beans.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-beans.jar}">
+		<jar jarfile="${dist.dir}/${spring-beans.jar}" index="true">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/util/ClassLoaderUtils*"/>
 				<include name="org/springframework/util/StringUtils*"/>
 			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+			</manifest>
 		</jar>
 
 	</target>
@@ -107,13 +110,16 @@
 
 		<delete file="${dist.dir}/${spring-aop.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-aop.jar}">
+		<jar jarfile="${dist.dir}/${spring-aop.jar}" index="true">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/util/**"/>
 			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+			</manifest>
 		</jar>
 
 	</target>
@@ -123,7 +129,7 @@
 
 		<delete file="${dist.dir}/${spring-jdbc.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-jdbc.jar}">
+		<jar jarfile="${dist.dir}/${spring-jdbc.jar}" index="true">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/core/**"/>
@@ -134,6 +140,9 @@
 				<include name="org/springframework/jndi/**"/>
 				<include name="org/springframework/util/**"/>
 			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+			</manifest>
 		</jar>
 
 	</target>
@@ -143,7 +152,7 @@
 
 		<delete file="${dist.dir}/${spring-orm.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-orm.jar}">
+		<jar jarfile="${dist.dir}/${spring-orm.jar}" index="true">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/beans/**"/>
@@ -156,6 +165,9 @@
 				<include name="org/springframework/transaction/**"/>
 				<include name="org/springframework/util/**"/>
 			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+			</manifest>
 		</jar>
 
 	</target>
@@ -165,7 +177,7 @@
 
 		<delete file="${dist.dir}/${spring-context.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-context.jar}">
+		<jar jarfile="${dist.dir}/${spring-context.jar}" index="true">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/beans/**"/>
@@ -183,6 +195,9 @@
 				<include name="org/springframework/web/**"/>
 				<exclude name="org/springframework/web/servlet/**"/>
 			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+			</manifest>
 		</jar>
 
 	</target>
@@ -192,10 +207,13 @@
 
 		<delete file="${dist.dir}/${spring-full.jar}"/>
 
-		<jar jarfile="${dist.dir}/${spring-full.jar}">
+		<jar jarfile="${dist.dir}/${spring-full.jar}" index="true">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/**"/>
 			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version-detail}"/>
+			</manifest>
 		</jar>
 
 	</target>
