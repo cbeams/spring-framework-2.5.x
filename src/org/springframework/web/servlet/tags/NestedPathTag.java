@@ -31,7 +31,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * to its own path to form a complete path to the bean or bean property.
  *
  * <p>This tag will also prepend any existing nested path that is currently set.
- * Thus, you can nested multiple nested path tags.
+ * Thus, you can nest multiple nested path tags.
  *
  * @author Seth Ladd
  * @author Juergen Hoeller

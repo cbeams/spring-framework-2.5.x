@@ -27,11 +27,11 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
  * <p>Bind tag, supporting evaluation of binding errors for a certain
- * bean or bean property. Exports a "status" variable of type BindStatus</p>
+ * bean or bean property. Exports a "status" variable of type BindStatus.</p>
  *
  * <p>The errors object that has been bound using this tag is exposed, as well
  * as the property that this errors object applies to. Children tags can
- * use the exposed properties
+ * use the exposed properties.
  *
  * <p>Discussed in Chapter 12 of
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>

@@ -1,4 +1,4 @@
-<!-- author: aarendsen (alef@jteam.nl) -->
+<!-- author: Alef Arendsen, Erwin Vervaet -->
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="../styles.css"/>
@@ -7,8 +7,6 @@
 		<h2><code>spring:bind</code></h2>
 		<h3>org.springframework.web.servlet.tags.BindTag</h3>
 		<hr>
-		<p>
-		</p>
 		<p>
 			<table class="tag" width="100%">
 				<tr>
@@ -35,8 +33,8 @@
 				</tr>
 				<tr>
 					<td>The path to the bean or bean property to bind status information
-						for. For instance <code>Account.name</code>, <code>Company.address.zipCode</code>
-						or just <code>Employee</code>. The status object will exported to the 
+						for. For instance <code>account.name</code>, <code>company.address.zipCode</code>
+						or just <code>employee</code>. The status object will exported to the 
 						page scope, specifically for this bean or bean property
 					</td>
 				</tr>
@@ -45,6 +43,35 @@
 				</tr>
 				<tr>
 					<td>el-support: yes</tD>
+				</tr>
+				<tr>
+					<td class="tagheader"><b>ignoreNestedPath</b></td>
+				</tr>
+				<tr>
+					<td>
+						Set whether to ignore a nested path, if any. Default is to not ignore.
+					</td>
+				</tr>
+				<tr>
+					<td>required: no</td>
+				</tr>
+				<tr>
+					<td>el-support: no</td>
+				</tr>
+				<tr>
+					<td class="tagheader"><b>htmlEscape</b></td>
+				</tr>
+				<tr>
+					<td>
+						Set HTML escaping for this tag, as boolean value.
+						Overrides the default HTML escaping setting for the current page.
+					</td>
+				</tr>
+				<tr>
+					<td>required: no</td>
+				</tr>
+				<tr>
+					<td>el-support: yes</td>
 				</tr>
 				<tr>
 					<td class="tagsection"><b>Variables</b></td>
@@ -63,11 +90,13 @@
 					<td><code>status.expression</code>: the expression that was used to retrieve the bean or property</td>
 				</tr>
 				<tr>
-					<td><code>status.value</code>: the actual value of the bean or property (transformed using PropertyEditors
-					registered</td>
+					<td>
+						<code>status.value</code>: the actual value of the bean or property (transformed using registered
+						PropertyEditors)
+					</td>
 				</tr>
 				<tr>
-					<td><code>status.errorMessages</code>: an array of errors Strings, resulting from validation</td>
+					<td><code>status.errorMessages</code>: an array of error messages, resulting from validation</td>
 				</tr>
 				<tr>
 					<td class="tagsection" colspan="2"><b>Also have a look at</b></td>
@@ -91,6 +120,12 @@
 					for more information about command objects (your data objects) and how they works</td>
 				</tr>
 				<tr>
+					<td>
+						the <a href="NestedPathTag.html"><code>spring:nestedPath</code></a> tag,
+						which allows you to set a nested bean or bean property path
+					</td>
+				</tr>
+				<tr>
 					<td class="tagsection"><b>A possible usecase</b></td>
 				</tr>
 				<tr>
@@ -100,35 +135,36 @@
 							<li>SimpleFormController that controls <code>Company</code> objects</li>
 							<li><code>Company</code> has a <code>name</code> and an <code>address</code>
 								property, where <code>address</code> is of type <code>Address</code></li>
-							<li><code>Address</code> has three properties, i.e. <code>street</code>
+							<li><code>Address</code> has three properties, i.e. <code>street</code>,
 								<code>zipCode</code> and <code>city</code></li>
 							<li>in your formBackObject you have already instantiated the empty
 								<code>Company</code> object containing an empty <code>Address</code>
 								object</li>
 						</ul>
 						To display a form rendering all properties (that - in case of validation failures -
-						forward to the formView and fills in all properties that were already set, also
+						forward to the formView and fills in all properties that were already set) and also
 						displaying errors:
 			
 <pre>
 &lt;form method="post"&gt;
     ## first bind on the object itself to display global errors - if available
-    &lt;spring:bind path="Company"&gt;
+    &lt;spring:bind path="company"&gt;
         &lt;c:forEach items="${status.errorMessages}" var="error"&gt;
         Error code: &lt;c:out value="${error}"/&gt;&lt;br&gt;
         &lt;/c:forEach&gt;
     &lt;/spring:bind&gt;
     
-    ## if you need to display all errors (both global and all field errors, use wildcard (*) in place of the property name
-    &lt;spring:bind path="Company.*"&gt;
+    ## if you need to display all errors (both global and all field errors,
+    ## use wildcard (*) in place of the property name
+    &lt;spring:bind path="company.*"&gt;
         &lt;c:forEach items="${status.errorMessages}" var="error"&gt;
         Error code: &lt;c:out value="${error}"/&gt;&lt;br&gt;
         &lt;/c:forEach&gt;
     &lt;/spring:bind&gt;
 	
     ## now bind on the name of the company
-    &lt;spring:bind path="Company.name"&gt;
-        ## render a form field, containing the value, the expression
+    &lt;spring:bind path="company.name"&gt;
+        ## render a form field, containing the value and the expression
         Name: &lt;input 
             type="text" 
             value="&lt;c:out value="${status.value}"/&gt;"
@@ -142,7 +178,7 @@
             &lt;/c:if&gt;
     &lt;/spring:bind&gt;
 	
-    &lt;spring:bind path="Company.address.street"&gt;
+    &lt;spring:bind path="company.address.street"&gt;
         Name: &lt;input 
             type="text"
             value="&lt;c:out value="${status.value}"/&gt;"
