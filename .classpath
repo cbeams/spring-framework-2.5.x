@@ -89,5 +89,7 @@
 	<classpathentry kind="lib" path="lib/bsh/bsh-2.0b1.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmx/jmxremote.jar"/>
+	<classpathentry kind="lib" path="lib/jmx/jmxremote_optional.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>

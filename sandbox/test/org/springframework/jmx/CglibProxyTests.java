@@ -3,6 +3,7 @@
  */
 package org.springframework.jmx;
 
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 import org.springframework.jmx.proxy.CglibJmxObjectProxyFactory;
@@ -46,4 +47,8 @@ public class CglibProxyTests extends AbstractProxyTests {
         assertFalse("The classes should be different", proxy1.getClass().equals(proxy2.getClass()));
         
     }
+
+	protected MBeanServerConnection getServerConnection() throws Exception{
+		return server;
+	}
 }

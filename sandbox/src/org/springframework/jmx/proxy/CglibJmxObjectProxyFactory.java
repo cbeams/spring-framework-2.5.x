@@ -15,6 +15,7 @@
  */
 package org.springframework.jmx.proxy;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,7 @@ import javax.management.JMException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
-import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 import net.sf.cglib.proxy.Callback;
@@ -55,9 +56,9 @@ import org.springframework.jmx.exceptions.ProxyCreationException;
 public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
 
     /**
-     * The MBeanServer instance to redirect calls to
+     * The MBeanServerConnection instance to redirect calls to
      */
-    private MBeanServer server;
+    private MBeanServerConnection server;
 
     /**
      * The ObjectName to point all calls at.
@@ -97,7 +98,7 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
      * @param server
      *            The MBeanServer that the resource is registered with
      */
-    public Object createProxy(final MBeanServer server,
+    public Object createProxy(final MBeanServerConnection server,
             final ObjectName objectName) {
 
         // store server and name
@@ -140,7 +141,13 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
             throw new ProxyCreationException(
                     "A problem occured at the JMX Server. Check the root cause for more details.",
                     ex);
-        }
+        } catch (IOException ex) {
+			throw new ProxyCreationException(
+					"An IOException occurred when communicating with the MBeanServer. "
+							+ "It is likely that you are communicating with a remote MBeanServer. "
+							+ "Check the inner exception for exact details.",
+					ex);
+		}
     }
 
     /**

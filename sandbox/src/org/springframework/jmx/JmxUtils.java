@@ -16,13 +16,19 @@
 package org.springframework.jmx;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import javax.management.MBeanParameterInfo;
+import javax.management.MBeanServerFactory;
+import javax.management.MBeanServer;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.springframework.jmx.exceptions.MethodNameTooShortException;
+import org.springframework.jmx.exceptions.MBeanServerNotFoundException;
 import org.springframework.util.ClassUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Generic utility methods to support Spring JMX.
@@ -30,6 +36,8 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  */
 public class JmxUtils {
+
+    private static final Log log = LogFactory.getLog(JmxUtils.class);
 
     private static final String GET = "get";
 
@@ -260,6 +268,26 @@ public class JmxUtils {
         }
 
         return signature;
+    }
+
+    public static MBeanServer locateMBeanServer() {
+        List servers = MBeanServerFactory.findMBeanServer(null);
+
+        // check to see if an MBeanServer is registered
+        if ((servers == null) || (servers.size() == 0)) {
+            throw new MBeanServerNotFoundException(
+                    "Unable to locate an MBeanServer instance");
+        }
+
+        //TODO: Throw exception if more than one exists
+
+        MBeanServer server = (MBeanServer)servers.get(0);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Found MBeanServer: " + server.toString());
+        }
+
+        return server;
     }
 
 }

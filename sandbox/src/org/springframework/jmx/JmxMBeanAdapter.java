@@ -16,13 +16,11 @@
 package org.springframework.jmx;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.management.JMException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBean;
@@ -39,7 +37,6 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.jmx.assemblers.reflection.ReflectiveModelMBeanInfoAssembler;
 import org.springframework.jmx.exceptions.MBeanAssemblyException;
-import org.springframework.jmx.exceptions.MBeanServerNotFoundException;
 import org.springframework.jmx.invokers.reflection.ReflectiveMBeanInvoker;
 import org.springframework.jmx.naming.KeyNamingStrategy;
 import org.springframework.jmx.naming.ObjectNamingStrategy;
@@ -126,7 +123,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         // JBoss where there is already an MBeanServer loaded
         if (server == null) {
             log.debug("No MBeanServer provided. Attempting to locate one...");
-            locateMBeanServer();
+            this.server = JmxUtils.locateMBeanServer();
         }
     }
 
@@ -152,24 +149,6 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 
     public void setUseRequiredModelMBean(boolean useRequiredModelMBean) {
         this.useRequiredModelMBean = useRequiredModelMBean;
-    }
-
-    private void locateMBeanServer() {
-        List servers = MBeanServerFactory.findMBeanServer(null);
-
-        // check to see if an MBeanServer is registered
-        if ((servers == null) || (servers.size() == 0)) {
-            throw new MBeanServerNotFoundException(
-                    "Unable to locate an MBeanServer instance");
-        }
-
-        //TODO: Throw exception if more than one exists
-
-        this.server = (MBeanServer) servers.get(0);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Found MBeanServer: " + server.toString());
-        }
     }
 
     /**

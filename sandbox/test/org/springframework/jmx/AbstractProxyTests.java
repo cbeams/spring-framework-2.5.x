@@ -3,6 +3,7 @@
  */
 package org.springframework.jmx;
 
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 import org.springframework.jmx.proxy.JmxObjectProxyFactory;
@@ -19,6 +20,8 @@ public abstract class AbstractProxyTests extends AbstractJmxTests {
     protected abstract ObjectName getObjectNameForProxy() throws Exception;
 
     protected abstract JmxObjectProxyFactory getProxyFactory() throws Exception;
+    
+    protected abstract MBeanServerConnection getServerConnection() throws Exception;
 
     protected IJmxTestBean getProxy() throws Exception {
         return getProxy(getProxyFactory());
@@ -28,7 +31,7 @@ public abstract class AbstractProxyTests extends AbstractJmxTests {
             throws Exception {
         ObjectName objectName = getObjectNameForProxy();
         factory.setProxyInterfaces(new Class[] { IJmxTestBean.class });
-        return (IJmxTestBean) factory.createProxy(server, objectName);
+        return (IJmxTestBean) factory.createProxy(getServerConnection(), objectName);
     }
 
     public void testProxyClassIsDifferent() throws Exception {

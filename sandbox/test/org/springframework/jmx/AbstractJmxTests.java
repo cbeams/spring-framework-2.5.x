@@ -24,7 +24,7 @@ public class AbstractJmxTests extends TestCase {
         super(name);
     }
 
-    public void setUp() {
+    public void setUp() throws Exception{
         server = MBeanServerFactory.createMBeanServer();
         ctx = new FileSystemXmlApplicationContext(getApplicationContextPath());
     }

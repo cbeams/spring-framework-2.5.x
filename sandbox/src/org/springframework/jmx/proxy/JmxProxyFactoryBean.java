@@ -3,7 +3,7 @@
  */
 package org.springframework.jmx.proxy;
 
-import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -24,13 +24,13 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
 
     private Class implementationClass;
 
-    private MBeanServer mbeanServer;
+    private MBeanServerConnection mbeanServer;
 
     private JmxObjectProxyFactory factory;
 
     private Class[] proxyInterfaces;
 
-    public void setMBeanServer(MBeanServer mbeanServer) {
+    public void setMBeanServer(MBeanServerConnection mbeanServer) {
         this.mbeanServer = mbeanServer;
     }
 

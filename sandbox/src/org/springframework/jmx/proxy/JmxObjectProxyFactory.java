@@ -15,7 +15,7 @@
  */ 
 package org.springframework.jmx.proxy;
 
-import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 /**
@@ -24,7 +24,7 @@ import javax.management.ObjectName;
  */
 public interface JmxObjectProxyFactory {
 
-    public Object createProxy(MBeanServer server, ObjectName objectName);
+    public Object createProxy(MBeanServerConnection server, ObjectName objectName);
     
     public void setIgnoreInvalidInvocations(boolean ignoreInvalidInvocatios);
     public boolean getIgnoreInvalidInvocations();

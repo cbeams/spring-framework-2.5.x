@@ -3,13 +3,15 @@
  */
 package org.springframework.jmx.proxy;
 
+import java.io.IOException;
+
 import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import org.springframework.util.ClassUtils;
 import org.springframework.jmx.exceptions.ProxyCreationException;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author robh
@@ -47,7 +49,7 @@ public abstract class AbstractJmxObjectProxyFactory implements
      * @param objectName
      */
     protected Class getClassForInstance(final ObjectName objectName,
-            final MBeanServer server) {
+            final MBeanServerConnection server) {
         ObjectInstance instance = null;
         
         try {
@@ -68,6 +70,12 @@ public abstract class AbstractJmxObjectProxyFactory implements
             throw new ProxyCreationException("Unable to load class ["
                     + instance.getClassName() + "] for MBean [" + objectName
                     + "]. Ensure that this class is on the classpath.");
-        }
+        } catch (IOException ex) {
+			throw new ProxyCreationException(
+					"An IOException occurred when communicating with the MBeanServer. "
+							+ "It is likely that you are communicating with a remote MBeanServer. "
+							+ "Check the inner exception for exact details.",
+					ex);
+		}
     }
 }

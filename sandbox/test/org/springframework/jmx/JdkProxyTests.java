@@ -3,6 +3,7 @@
  */
 package org.springframework.jmx;
 
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 import org.springframework.jmx.proxy.JdkJmxObjectProxyFactory;
@@ -26,5 +27,9 @@ public class JdkProxyTests extends AbstractProxyTests {
     protected JmxObjectProxyFactory getProxyFactory() throws Exception {
         return new JdkJmxObjectProxyFactory();
     }
+
+	protected MBeanServerConnection getServerConnection() throws Exception {
+		return server;
+	}
 
 }
