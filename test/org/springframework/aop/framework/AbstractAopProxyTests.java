@@ -26,11 +26,11 @@ import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -41,6 +41,7 @@ import org.springframework.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
 import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.aop.support.Pointcuts;
@@ -611,6 +612,36 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 	}
 	
+	public void testUndeclaredUnheckedException() throws Throwable {
+		final RuntimeException unexpectedException = new RuntimeException();
+		// Test return value
+		MethodInterceptor mi = new MethodInterceptor() {
+			public Object invoke(MethodInvocation invocation) throws Throwable {
+				throw unexpectedException;
+			}
+		};
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
+		pc.addAdvice(mi);
+	
+		// We don't care about the object
+		pc.setTarget(new TestBean());
+		AopProxy aop = createAopProxy(pc);
+		ITestBean tb = (ITestBean) aop.getProxy();
+		
+		try {
+			// Note: exception param below isn't used
+			tb.getAge();
+			fail("Should have wrapped exception raised by interceptor");
+		} 
+		catch (RuntimeException thrown) {			
+			assertEquals("exception matches", unexpectedException, thrown);
+		}
+		//catch (net.sf.cglib.proxy.UndeclaredThrowableException thrown) {			
+		//	assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
+		//}
+	}
+	
 	/**
 	 * Check that although a method is eligible for advice chain optimization and
 	 * direct reflective invocation, it doesn't happen if we've asked to see the proxy,
@@ -765,18 +796,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 	
 	
-	public static class NoInterfaces {
-		private int age;
-		public int getAge() { 
-			return age;
-		}
-		public void setAge(int age) {
-			this.age = age;
-		}
-	}
-	
-	
-	
 	public void testCannotAddIntroductionInterceptorExceptInIntroductionAdvice() throws Throwable {
 		TestBean target = new TestBean();
 		target.setAge(21);
@@ -812,6 +831,35 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		ITestBean proxied = (ITestBean) createProxy(pc);
 		assertEquals(target.getAge(), proxied.getAge());
+	}
+	
+	/**
+	 * Note that an introduction can't throw an unexpected checked exception, 
+	 * as it's constained by the interface
+	 * @throws Throwable
+	 */
+	public void testIntroductionThrowsUncheckedException() throws Throwable {
+		TestBean target = new TestBean();
+		target.setAge(21);
+		ProxyFactory pc = new ProxyFactory(target);
+		
+		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
+			/**
+			 * @see org.springframework.aop.framework.TimeStamped#getTimeStamp()
+			 */
+			public long getTimeStamp() {
+				throw new UnsupportedOperationException();
+			}
+		}
+		pc.addAdvisor(new DefaultIntroductionAdvisor(new MyDi()));
+		
+		TimeStamped ts = (TimeStamped) createProxy(pc);
+		try {
+			ts.getTimeStamp();
+			fail("Should throw UnsupportedOperationException");
+		}
+		catch (UnsupportedOperationException ex) {
+		}
 	}
 	
 	/**

@@ -28,6 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.IntroductionInterceptor;
+import org.springframework.aop.framework.AopProxyUtils;
 
 /**
  * Convenient implementation of the IntroductionInterceptor interface.
@@ -131,7 +132,9 @@ public class DelegatingIntroductionInterceptor implements IntroductionIntercepto
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking self on invocation [" + mi + "]; breaking interceptor chain");
 			}
-			return mi.getMethod().invoke(this.delegate, mi.getArguments());
+			// Using the following method rather than direct reflection, we
+			// get correct handling of InvocationTargetException if the introduced method throws an exception
+			return AopProxyUtils.invokeJoinpointUsingReflection(delegate, mi.getMethod(), mi.getArguments());
 		}
 		
 		// If we get here, just pass the invocation on
