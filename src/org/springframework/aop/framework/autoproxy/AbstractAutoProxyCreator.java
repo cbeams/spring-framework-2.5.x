@@ -75,7 +75,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.11 2004-06-09 00:52:15 dkopylenko Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.12 2004-08-10 14:19:16 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		implements BeanPostProcessor, BeanFactoryAware, Ordered {
@@ -204,13 +204,18 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			return bean;
 		}
 		
-		TargetSource targetSource = getTargetSource(bean, beanName);
+		TargetSource targetSource = getCustomTargetSource(bean, beanName);		
 		
-		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, beanName);
+		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, beanName, targetSource);
 		
 		// proxy if we have advice or if a TargetSourceCreator wants to do some
 		// fancy stuff such as pooling
-		if (specificInterceptors != DO_NOT_PROXY || !(targetSource instanceof SingletonTargetSource)) {
+		if (specificInterceptors != DO_NOT_PROXY || targetSource != null) {
+			
+			if (targetSource == null) {
+				// use default of simple, default target source
+				targetSource = new SingletonTargetSource(bean);	
+			}
 
 			// handle prototypes correctly
 			Advisor[] commonInterceptors = resolveInterceptorNames();
@@ -251,13 +256,25 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 				Advisor advisor = this.advisorAdapterRegistry.wrap(it.next());
 				proxyFactory.addAdvisor(advisor);
 			}
-			proxyFactory.setTargetSource(getTargetSource(bean, beanName));
+			proxyFactory.setTargetSource(targetSource);
+			customizeProxyFactory(bean, proxyFactory);
 			
 			return proxyFactory.getProxy();
 		}
 		else {
 			return bean;
 		}
+	}
+	
+	/**
+	 * Subclasses may choose to implement this: for example,
+	 * to change the interfaces exposed
+	 * @param bean bean about to be autoproxied
+	 * @param pf ProxyFactory that will be used to create the proxy
+	 * immediably after this method returns
+	 */
+	protected void customizeProxyFactory(Object bean, ProxyFactory pf) {
+		// This implementation does nothing
 	}
 
 	private Advisor[] resolveInterceptorNames() {
@@ -289,14 +306,16 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	/**
 	 * Create a target source for bean instances. Uses any
-	 * TargetSourceCreators if set; default is a SingletonTargetSource.
+	 * TargetSourceCreators if set. Returns null if no Custom TargetSource 
+	 * should be used.
+	 * This implementation uses the customTargetSourceCreators property.
+	 * Subclasses can override this method to use a different mechanism.
 	 * @param bean the new bean instance
 	 * @param beanName the name of the bean
 	 * @return a TargetSource for this bean
 	 * @see #setCustomTargetSourceCreators
-	 * @see org.springframework.aop.target.SingletonTargetSource
 	 */
-	private TargetSource getTargetSource(Object bean, String beanName) {
+	protected TargetSource getCustomTargetSource(Object bean, String beanName) {
 		// we can't create fancy target sources for singletons
 		if (this.owningBeanFactory != null && this.owningBeanFactory.containsBean(beanName) &&
 				!this.owningBeanFactory.isSingleton(beanName)) {
@@ -314,15 +333,20 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 				}
 			}
 		}
-		// default is a simple, default target source
-		return new SingletonTargetSource(bean);
+		
+		// no custom TargetSourceFound
+		return null;
 	}
 
 	/**
 	 * Return whether the given bean is to be proxied,
 	 * and what additional interceptors and pointcuts to apply.
+	 * <b>The third parameter, customTargetSource, is new in Spring 1.1;
+	 * add it to existing implementations of this method.</b>
 	 * @param bean the new bean instance
 	 * @param beanName the name of the bean
+	 * @param customTargetSource targetSource returned by getTargetSource() method: may be ignored.
+	 * Will be null unless a custom target source is in use.
 	 * @return an array of additional interceptors for the particular bean;
 	 * or an empty array if no additional interceptors but just the common ones;
 	 * or null if no proxy at all, not even with the common interceptors.
@@ -332,7 +356,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
-	protected abstract Object[] getInterceptorsAndAdvisorsForBean(Object bean, String beanName)
+	protected abstract Object[] getInterceptorsAndAdvisorsForBean(Object bean, String beanName, TargetSource customTargetSource)
 	    throws BeansException;
 
 }

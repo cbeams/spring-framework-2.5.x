@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.aop.TargetSource;
+
 /**
  * Auto proxy creator that identifies beans to proxy via a list of names.
  * Checks for direct, "xxx*", and "*xxx" matches.
@@ -44,7 +46,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	/**
 	 * Identify as bean to proxy if the bean name is in the configured list of names.
 	 */
-	protected Object[] getInterceptorsAndAdvisorsForBean(Object bean, String beanName) {
+	protected Object[] getInterceptorsAndAdvisorsForBean(Object bean, String beanName, TargetSource targetSource) {
 		if (this.beanNames != null) {
 			if (this.beanNames.contains(beanName)) {
 				return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
