@@ -13,7 +13,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * EnterpriseServices test that ources attributes from source-level metadata.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.1 2003-12-12 16:50:43 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.2 2003-12-12 18:42:36 johnsonr Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends AbstractAdvisorAutoProxyCreatorTests {
 
@@ -27,7 +27,7 @@ public class AdvisorAutoProxyCreatorTests extends AbstractAdvisorAutoProxyCreato
 	}
 	
 	protected BeanFactory getBeanFactory() throws IOException {
-		return new ClassPathXmlApplicationContext("/org/springframework/aop/framework/support/advisorAutoProxyCreator.xml");
+		return new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/advisorAutoProxyCreator.xml");
 	}
 	
 }

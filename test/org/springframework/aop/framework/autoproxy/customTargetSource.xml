@@ -17,7 +17,7 @@
 	</bean>
 	
 	<bean id="auto_poolingTargetSourceCreator"
-		class="org.springframework.aop.framework.autoproxy.PoolingTargetSourceCreator">
+		class="org.springframework.aop.framework.autoproxy.TestPoolingTargetSourceCreator">
 	</bean>
 
 
