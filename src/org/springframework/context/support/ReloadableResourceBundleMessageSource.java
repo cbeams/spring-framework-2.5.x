@@ -48,8 +48,8 @@ import org.springframework.util.StringUtils;
  * resources somewhere else (for example, in the "WEB-INF" directory of a web app).
  * Otherwise changes of files in the classpath are not reflected in the application.
  *
- * <p>Note that the base names set as teh "basename" and "basenames" properties are
- * are treated in a slightly different fashion than the "basename" property of 
+ * <p>Note that the base names set as the "basename" and "basenames" properties are
+ * treated in a slightly different fashion than the "basename" property of 
  * ResourceBundleMessageSource. It follows the basic ResourceBundle rule of not
  * specifying file extension or language codes, but can refer to any Spring resource
  * location (instead of being restricted to classpath resources). With a "classpath:"
