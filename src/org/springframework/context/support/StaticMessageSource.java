@@ -23,7 +23,7 @@ public class StaticMessageSource extends AbstractMessageSource {
 
 	private Map messages = new HashMap();
 
-	protected MessageFormat resolve(String code, Locale locale) {
+	protected MessageFormat resolveCode(String code, Locale locale) {
 		return (MessageFormat) this.messages.get(code + "_" + locale.toString());
 	}
 

@@ -64,7 +64,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 		this.basenames = basenames;
 	}
 
-	protected final MessageFormat resolve(String code, Locale locale) {
+	protected final MessageFormat resolveCode(String code, Locale locale) {
 		MessageFormat messageFormat = null;
 		for (int i = 0; messageFormat == null && i < this.basenames.length; i++) {
 			messageFormat = resolve(this.basenames[i], code, locale);

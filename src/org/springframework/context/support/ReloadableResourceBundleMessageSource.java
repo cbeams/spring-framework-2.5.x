@@ -127,7 +127,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	}
 
 
-	protected MessageFormat resolve(String code, Locale locale) {
+	protected MessageFormat resolveCode(String code, Locale locale) {
 		for (int i = 0; i < this.basenames.length; i++) {
 			List filenames = calculateAllFilenames(this.basenames[i], locale);
 			for (int j = 0; j < filenames.size(); j++) {

@@ -2,10 +2,12 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.context.support;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.logging.Log;
@@ -19,14 +21,19 @@ import org.springframework.context.NoSuchMessageException;
 /**
  * Abstract implementation of HierarchicalMessageSource interface,
  * making it easy to implement a custom MessageSource.
- * Subclasses must implement the abstract resolve method.
+ * Subclasses must implement the abstract resolveCode method.
+ *
+ * <p>Supports not only MessageSourceResolvables as primary messages
+ * but also resolution of message arguments that are in turn
+ * MessageSourceResolvables themselves.
  *
  * <p>This class does not implement caching, thus subclasses can
  * dynamically change messages over time.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #resolve
+ * @author Seth Ladd
+ * @see #resolveCode
  */
 public abstract class AbstractMessageSource implements HierarchicalMessageSource {
 
@@ -94,7 +101,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			return codes[0];
 		}
 		else {
-			throw new NoSuchMessageException(codes[codes.length-1], locale);
+			throw new NoSuchMessageException(codes[codes.length - 1], locale);
 		}
 	}
 
@@ -110,9 +117,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		if (locale == null) {
 			locale = Locale.getDefault();
 		}
-		MessageFormat messageFormat = resolve(code, locale);
+		MessageFormat messageFormat = resolveCode(code, locale);
 		if (messageFormat != null) {
-			return messageFormat.format(args);
+			return messageFormat.format(resolveArgs(args, locale));
 		}
 		else {
 			if (this.parentMessageSource != null) {
@@ -128,6 +135,33 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	}
 
 	/**
+	 * Search through an array of objects, finds any MessageSourceResolvable
+	 * objects, and resolves them.
+	 * <p>Allows for messages to have MessageSourceResolvables as arguments.
+	 * @param args array of arguments for a Message
+	 * @param locale the locale to resolve through
+	 * @return an array of arguments that have any MessageSourceResolvables resolved
+	 */
+	private Object[] resolveArgs(Object[] args, Locale locale) {
+		if (args == null) {
+			return new Object[0];
+		}
+
+		List resolvedArgs = new ArrayList();
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] instanceof MessageSourceResolvable) {
+				resolvedArgs.add(getMessage((MessageSourceResolvable) args[i],
+				                            locale));
+			}
+			else {
+				resolvedArgs.add(args[i]);
+			}
+		}
+
+		return resolvedArgs.toArray(new Object[resolvedArgs.size()]);
+	}
+
+	/**
 	 * Subclasses must implement this method to resolve a message.
 	 * <p>Returns a MessageFormat instance rather than a message String,
 	 * to allow for appropriate caching of MessageFormats in subclasses.
@@ -136,6 +170,6 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * Subclasses are encouraged to support internationalization.
 	 * @return the MessageFormat for the message, or null if not found
 	 */
-	protected abstract MessageFormat resolve(String code, Locale locale);
+	protected abstract MessageFormat resolveCode(String code, Locale locale);
 
 }
