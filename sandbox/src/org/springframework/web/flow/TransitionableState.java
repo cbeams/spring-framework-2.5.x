@@ -28,9 +28,9 @@ import org.springframework.util.ToStringCreator;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * A state that has one or more transitions. State transitions are triggered by
- * events, specifically, when an occurence of an supported event in this state
- * is signaled.
+ * Abstract superclass for states that have one or more transitions.
+ * State transitions are triggered by events, specifically, when an
+ * occurence of a supported event in this state is signaled.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -87,7 +87,6 @@ public abstract class TransitionableState extends AbstractState {
 	/**
 	 * Signal an occurence of the event identified by <code>eventId</code> in
 	 * this state.
-	 * 
 	 * @param eventId The id of the event to execute (e.g 'submit', 'next',
 	 *        'back')
 	 * @param flowExecution A flow execution stack, tracking any suspended
@@ -96,7 +95,7 @@ public abstract class TransitionableState extends AbstractState {
 	 * @param response the server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
-	 * @throws EventNotSupportedException if the <ode>eventId>does not map to
+	 * @throws EventNotSupportedException if the eventId does not map to a
 	 *         valid transition for this state
 	 * @throws CannotExecuteStateTransitionException if a state transition could
 	 *         not be executed.
@@ -109,22 +108,22 @@ public abstract class TransitionableState extends AbstractState {
 	}
 
 	/**
-	 * @return An iterator looping over all transitions in this state
+	 * Returns an iterator looping over all transitions in this state.
 	 */
 	public Iterator transitionsIterator() {
 		return transitions.iterator();
 	}
 
 	/**
-	 * @return The list of transitions owned by this state
+	 * Returns the list of transitions owned by this state.
 	 */
 	public Transition[] getTransitions() {
 		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
 	}
 
 	/**
-	 * @return A collection of all the criteria (Constraint objects) used to
-	 *         match events with transitions in this state.
+	 * Returns a collection of all the criteria (Constraint objects) used to
+	 * match events with transitions in this state.
 	 */
 	public Collection getEventIdCriteria() {
 		if (transitions.isEmpty()) {
@@ -142,6 +141,8 @@ public abstract class TransitionableState extends AbstractState {
 	 * Get a transition in this state for given id. Throws and exception when
 	 * the event is not supported by this state, e.g. when there is no
 	 * corresponding transition.
+	 * @throws EventNotSupportedException When the event is not supported by
+	 *         this state
 	 */
 	protected Transition getRequiredTransition(String eventId) throws EventNotSupportedException {
 		Transition transition = getTransition(eventId);
@@ -154,6 +155,7 @@ public abstract class TransitionableState extends AbstractState {
 	}
 
 	/**
+	 * Get a transition for given event id.
 	 * @param eventId The event id of the transition to look up
 	 * @return The transition associated with the event, or null if there is no
 	 *         such transition in this state

@@ -219,17 +219,17 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * @return An iterator that returns the set of actions to execute for this
-	 *         state. Both named and unnamed actions will be returned, but all
-	 *         are wrapped as NamedAction objects.
+	 * Returns an iterator that lists the set of actions to execute for this
+	 * state. Both named and unnamed actions will be returned, but all
+	 * are wrapped as {@link ActionState.NamedAction} objects.
 	 */
 	protected Iterator namedActionIterator() {
 		return this.namedActions.iterator();
 	}
 
 	/**
-	 * @return The number of actions executed by this action state when it is
-	 *         entered.
+	 * Returns the number of actions executed by this action state when it is
+	 * entered.
 	 */
 	public int getActionCount() {
 		return namedActions.size();
@@ -324,7 +324,7 @@ public class ActionState extends TransitionableState {
 	 * Wrapper class for actions that associates an action with its name (or
 	 * null if its an unnamed action).
 	 * <p>
-	 * For internal use only.
+	 * For internal use by the ActionState.
 	 * 
 	 * @author Keith Donald
 	 * @author Erwin Vervaet
@@ -354,21 +354,21 @@ public class ActionState extends TransitionableState {
 		}
 
 		/**
-		 * @return The name of the wrapped action, or null when it's unnamed
+		 * Returns the name of the wrapped action, or null when it's unnamed.
 		 */
 		protected String getName() {
 			return name;
 		}
 
 		/**
-		 * @return The wrapped action
+		 * Returns the wrapped action.
 		 */
 		protected Action getAction() {
 			return action;
 		}
 
 		/**
-		 * @return True when the wrapped action is named, false otherwise
+		 * Returns true when the wrapped action is named, false otherwise.
 		 */
 		public boolean isNamed() {
 			return StringUtils.hasText(name);
@@ -391,8 +391,8 @@ public class ActionState extends TransitionableState {
 		}
 
 		/**
-		 * Get the event id to be as grounds for a transition in this state,
-		 * based on given result returned from action execution.
+		 * Get the event id to be used as grounds for a transition in the
+		 * containing state, based on given result returned from action execution.
 		 * <p>
 		 * If the wrapped action is named, the name will be used as a qualifier
 		 * (e.g. "myAction.success").

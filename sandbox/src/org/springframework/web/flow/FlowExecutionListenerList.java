@@ -36,6 +36,7 @@ public class FlowExecutionListenerList {
 	private EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(FlowExecutionListener.class);
 
 	/**
+	 * Add a listener.
 	 * @param listener The listener to add
 	 */
 	public boolean add(FlowExecutionListener listener) {
@@ -43,6 +44,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
+	 * Add a set of listeners.
 	 * @param listeners The listeners to add
 	 */
 	public boolean add(FlowExecutionListener[] listeners) {
@@ -50,6 +52,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
+	 * Add a list of listeners.
 	 * @param flowExecutionListenerList The listeners to add
 	 */
 	public boolean add(FlowExecutionListenerList flowExecutionListenerList) {
@@ -67,6 +70,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
+	 * Remove a listener from the list.
 	 * @param listener the listener to remove
 	 */
 	public void remove(FlowExecutionListener listener) {
@@ -84,7 +88,7 @@ public class FlowExecutionListenerList {
 	 * Is at least one instance of the provided FlowExecutionListener
 	 * implementation present in the listener list?
 	 * @param listenerImplementationClass The flow execution listener
-	 *        implementation, must be an impl of FlowExecutionListener
+	 *        implementation, must be an implementation of FlowExecutionListener
 	 * @return true if present, false otherwise
 	 */
 	public boolean isAdded(Class listenerImplementationClass) {
@@ -104,7 +108,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * @return An iterator looping over all listeners in this list
+	 * Returns an iterator looping over all listeners in this list.
 	 */
 	public Iterator iterator() {
 		return this.flowExecutionListeners.iterator();

@@ -35,7 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
  * a specific type of state.
  * <p>
  * Subclasses should override the <code>doEnterState</code> method to execute
- * the action that should occur when this state is entered, acting on its
+ * the processing that should occur when this state is entered, acting on its
  * configuration information. The ability to plugin custom state types that
  * execute different behaivior polymorphically is the classic GoF State pattern.
  * 
@@ -90,14 +90,14 @@ public abstract class AbstractState implements Serializable {
 	}
 
 	/**
-	 * @return The owning flow.
+	 * Returns the owning flow.
 	 */
 	public Flow getFlow() {
 		return flow;
 	}
 
 	/**
-	 * @param flow The owning flow.
+	 * Set the owning flow.
 	 */
 	private void setFlow(Flow flow) {
 		Assert.notNull(flow, "The owning flow is required");
@@ -108,7 +108,7 @@ public abstract class AbstractState implements Serializable {
 	 * Is this state transitionable? That is, is this state capable of executing
 	 * a transition to another state on the occurence of an event? All
 	 * subclasses of <code>TransitionableState</code> are transitionable.
-	 * @return true or false
+	 * @return true when this is a <code>TransitionableState</code>, false otherwise
 	 */
 	public boolean isTransitionable() {
 		return this instanceof TransitionableState;
@@ -168,7 +168,7 @@ public abstract class AbstractState implements Serializable {
 	}
 
 	/**
-	 * Subclasses may override this hook method to insert stringfy their
+	 * Subclasses may override this hook method to stringfy their
 	 * internal state. This default implementation does nothing.
 	 * @param creator The toString creator, to stringify properties.
 	 */

@@ -33,7 +33,7 @@ import org.springframework.web.servlet.ModelAndView;
  * physical resource template (like a jsp file.)
  * <p>
  * A view state can also be a <i>marker</i> state with no associated view. In
- * this case it just return control back to the HTTP client. Marker states are
+ * this case it just returns control back to the HTTP client. Marker states are
  * useful for situations where an action has already generated the response.
  * 
  * @author Keith Donald
@@ -99,22 +99,21 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
-	 * @return The logical name of the view to render in this view state.
+	 * Returns the logical name of the view to render in this view state.
 	 */
 	public String getViewName() {
 		return viewName;
 	}
 
 	/**
-	 * @param viewName The logical name of the view to render in this view
-	 *        state.
+	 * Set the logical name of the view to render in this view state.
 	 */
 	protected void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
 	/**
-	 * @return True if this view state has no associated view, false otherwise.
+	 * Returns true if this view state has no associated view, false otherwise.
 	 */
 	public boolean isMarker() {
 		return !StringUtils.hasText(getViewName());

@@ -28,7 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
  * State that spawns a subflow when executed.
  * <p>
  * A sub flow state has the ability to map data between the parent and sub flow
- * models. Set the <code>FlowModelMapper</code> interface definition for info on
+ * models. See the {@link FlowModelMapper} interface definition for info on
  * how to do this.
  * 
  * @see org.springframework.web.flow.FlowModelMapper
@@ -100,6 +100,7 @@ public class SubFlowState extends TransitionableState implements FlowModelMapper
 	}
 
 	/**
+	 * Set the sub flow that will be spawned by this state.
 	 * @param subFlow The sub flow to spawn
 	 */
 	protected void setSubFlow(Flow subFlow) {
@@ -108,24 +109,23 @@ public class SubFlowState extends TransitionableState implements FlowModelMapper
 	}
 
 	/**
-	 * @return The sub flow spawned by this state.
+	 * Returns the sub flow spawned by this state.
 	 */
 	public Flow getSubFlow() {
 		return this.subFlow;
 	}
 
 	/**
-	 * @param modelMapper The model mapper to use to map model data
-	 *        between parent and sub flow model. Can be null if no mapper is
-	 *        needed.
+	 * Set the model mapper to use to map model data between parent and
+	 * sub flow model. Can be null if no mapping is needed.
 	 */
 	protected void setFlowModelMapper(FlowModelMapper modelMapper) {
 		this.flowModelMapper = modelMapper;
 	}
 
 	/**
-	 * @return The model mapper used to map data between parent and sub
-	 *         flow model, or null if no mapping is done
+	 * Returns the model mapper used to map data between parent and sub
+	 * flow model, or null if no mapping is needed.
 	 */
 	public FlowModelMapper getFlowModelMapper() {
 		return this.flowModelMapper;

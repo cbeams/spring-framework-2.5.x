@@ -53,8 +53,12 @@ import org.springframework.util.ToStringCreator;
  * but may also be subclassed. This class, and the rest of the web.flow system,
  * has been purposefully designed with minimal dependencies on other parts of
  * Spring, and are easily usable in a standalone fashion (as well as in the
- * context of other request-driven frameworks like Struts or Webwork, for
+ * context of other request-driven frameworks like Struts or WebWork, for
  * example).
+ * <p>
+ * A flow object also acts as a factory for <code>FlowExecution</code>s executing
+ * the flow as the top-level flow. See the {@link #createExecution()} method for
+ * more information.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -104,14 +108,14 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * @return The unique id of this flow.
+	 * Returns the unique id of this flow.
 	 */
 	public String getId() {
 		return id;
 	}
 
 	/**
-	 * @param id The unique id of this flow.
+	 * Set the unique id of this flow.
 	 */
 	protected void setId(String id) {
 		Assert.notNull(id, "The flow id is required");
@@ -140,7 +144,7 @@ public class Flow implements Serializable {
 	 * this method is to be called by the (privileged) state definition classes
 	 * themselves during state construction as part of a FlowBuilder invocation.
 	 * 
-	 * @param state The state, if already added noting happens, if another
+	 * @param state The state, if already added nothing happens, if another
 	 *        instance is added with the same id, an exception is thrown
 	 * @throws IllegalArgumentException when the state cannot be added to the
 	 *         flow; specifically, if another state shares the same ID as the
@@ -151,7 +155,7 @@ public class Flow implements Serializable {
 			throw new IllegalArgumentException("State " + state + " cannot be added to this flow '" + getId()
 					+ "' - it already belongs to a different flow");
 		}
-		if (containsInstance(state)) {
+		if (containsStateInstance(state)) {
 			return;
 		}
 		if (containsState(state.getId())) {
@@ -273,11 +277,11 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * Is this state instance present in this flow? Does a "same" (==) check.
+	 * Is given state instance present in this flow? Does a "same" (==) check.
 	 * @param state the state
 	 * @return true if yes (the same instance is present), false otherwise
 	 */
-	protected boolean containsInstance(AbstractState state) {
+	protected boolean containsStateInstance(AbstractState state) {
 		Iterator it = statesIterator();
 		while (it.hasNext()) {
 			AbstractState s = (AbstractState)it.next();
@@ -298,7 +302,7 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * Return the <code>TransitionableState</code> with this <id>stateId
+	 * Return the <code>TransitionableState</code> with given <id>stateId
 	 * </id>, throwing an exception if not found.
 	 * @param stateId Id of the state to look up
 	 * @return The transitionableState
@@ -328,6 +332,19 @@ public class Flow implements Serializable {
 	}
 
 	/**
+	 * Factory method that produces a new <code>FlowExecution</code> instance
+	 * for this flow on every invocation. Typically called by controller clients
+	 * that need to manage a new flow execution; might also be called by flow
+	 * execution test code.
+	 * @return A new flow execution, used by the caller to manage a single client
+	 *         instance of an executing flow (typically managed in the http
+	 *         session.)
+	 */
+	public FlowExecution createExecution() {
+		return new FlowExecutionStack(this);
+	}
+
+	/**
 	 * Returns true if this flow equals the other one; two flows are treated as
 	 * equal if they share the same ID.
 	 */
@@ -337,19 +354,6 @@ public class Flow implements Serializable {
 		}
 		Flow flow = (Flow)o;
 		return id.equals(flow.id);
-	}
-
-	/**
-	 * Factory method that produces a new <code>FlowExecution</code> instance
-	 * for this flow on every invocation. Typically called by controller clients
-	 * that need to manage a new flow execution; might also be called by flow
-	 * execution test code.
-	 * @return A new flow execution, used by caller to manage a single client
-	 *         instance of an executing flow (typically managed in the http
-	 *         session.)
-	 */
-	public FlowExecution createExecution() {
-		return new FlowExecutionStack(this);
 	}
 
 	public int hashCode() {

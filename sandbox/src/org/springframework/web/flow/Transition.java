@@ -112,7 +112,7 @@ public class Transition implements Serializable {
 	}
 
 	/**
-	 * @return The owning source ( <i>from </i>) state of this transition.
+	 * Returns the owning source (<i>from</i>) state of this transition.
 	 * @throws IllegalStateException, if the source state has not been set.
 	 */
 	protected TransitionableState getSourceState() {
@@ -123,22 +123,21 @@ public class Transition implements Serializable {
 	}
 
 	/**
-	 * @param owningState The owning source ( <i>from </i>) state of this
-	 *        transition.
+	 * Set the owning source (<i>from</i>) state of this transition.
 	 */
 	protected void setSourceState(TransitionableState owningState) {
 		this.sourceState = owningState;
 	}
 
 	/**
-	 * @return The id of the target ( <i>to </i>) state of this transition.
+	 * Returns the id of the target (<i>to</i>) state of this transition.
 	 */
 	public String getTargetStateId() {
 		return targetStateId;
 	}
 
 	/**
-	 * @return The target ( <i>to </i>) state of this transition.
+	 * Returns the target (<i>to</i>) state of this transition.
 	 * @throws NoSuchFlowStateException When the target state cannot be found
 	 */
 	protected AbstractState getTargetState() throws NoSuchFlowStateException {
@@ -182,7 +181,7 @@ public class Transition implements Serializable {
 	}
 
 	/**
-	 * @return The strategy used to match event ids with this transition
+	 * Returns the strategy used to match event ids with this transition
 	 */
 	public Constraint getEventIdCriteria() {
 		return this.eventIdCriteria;

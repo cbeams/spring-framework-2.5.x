@@ -26,17 +26,17 @@ import org.springframework.web.servlet.ModelAndView;
  * Terminates an active web flow session when entered. If the terminated session
  * is the root flow session, the entire flow execution ends. If the terminated
  * session is a subflow session, control returns to the parent flow session, and
- * this state is used as grounds the transition in that resuming parent.
+ * this state is used as grounds for the transition in that resuming parent.
  * <p>
  * An end state may optionally be configured with the name of a view. This view
  * will be rendered if the end state terminates the entire flow execution.
  * <p>
- * Note: if no</code> viewName</code> property is specified AND this EndState
- * terminates the entire flow execution, it is expected that some other action
+ * Note: if no</code> viewName</code> property is specified <b>and</b> this EndState
+ * terminates the entire flow execution, it is expected that some action
  * has already written the response (or else a blank response will result.) On
- * the other hand, if no <code>viewName</code> is specified AND this EndState
- * reliniqushes control back to a parent flow, view rendering responsibility is
- * falls on the parent.
+ * the other hand, if no <code>viewName</code> is specified <b>and</b> this EndState
+ * reliniquishes control back to a parent flow, view rendering responsibility is
+ * falls on the parent flow.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -72,24 +72,23 @@ public class EndState extends AbstractState {
 	}
 
 	/**
-	 * @param viewName The name of the view that should be rendered if this end
-	 *        state terminates flow execution.
+	 * Set the name of the view that should be rendered if this end
+	 * state terminates flow execution.
 	 */
 	protected void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
 	/**
-	 * @return The name of the view that will be rendered if this end state
-	 *         terminates flow execution, or null if there is no associated
-	 *         view.
+	 * Returns the name of the view that will be rendered if this end state
+	 * terminates flow execution, or null if there is no associated view.
 	 */
 	public String getViewName() {
 		return viewName;
 	}
 
 	/**
-	 * @return True if this end state has no associated view, false otherwise.
+	 * Returns true if this end state has no associated view, false otherwise.
 	 */
 	public boolean isMarker() {
 		return !StringUtils.hasText(viewName);
