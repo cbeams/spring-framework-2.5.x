@@ -36,7 +36,7 @@ import org.springframework.util.ClassLoaderUtils;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
-   @version $Id: SQLErrorCodesFactory.java,v 1.2 2003-12-10 02:15:17 trisberg Exp $
+   @version $Id: SQLErrorCodesFactory.java,v 1.3 2003-12-10 02:19:13 trisberg Exp $
  */
 public class SQLErrorCodesFactory {
 
@@ -113,7 +113,7 @@ public class SQLErrorCodesFactory {
 				else
 				rdbmsErrorCodes.put(ec.getDatabaseProductName(), ec);
 			}
-			logger.warn("SQLErrorCodes loaded " + rdbmsErrorCodes.keySet());
+			logger.info("SQLErrorCodes loaded " + rdbmsErrorCodes.keySet());
 		}
 		catch (BeanDefinitionStoreException be) {
 			logger.warn("Error loading error codes from config file.  Message = " + be.getMessage());
