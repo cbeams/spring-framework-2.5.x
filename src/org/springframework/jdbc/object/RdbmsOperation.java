@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.object;
 
@@ -87,28 +87,54 @@ public abstract class RdbmsOperation implements InitializingBean {
 	
 	
 	/**
-	 * Set the JDBC DataSource to obtain connections from.
-	 */
-	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate.setDataSource(dataSource);
-	}
-
-	/**
 	 * An alternative to the more commonly used setDataSource() when you want to
 	 * use the same JdbcTemplate in multiple RdbmsOperations. This is appropriate if the
 	 * JdbcTemplate has special configuration such as a SQLExceptionTranslator that should
 	 * apply to multiple RdbmsOperation objects.
-	 * @param jdbcTemplate
 	 */
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		if (jdbcTemplate == null) {
+			throw new IllegalArgumentException("jdbcTemplate must not be null");
+		}
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	/**
 	 * Return the JdbcTemplate object used by this object.
 	 */
-	protected JdbcTemplate getJdbcTemplate() {
+	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
+	}
+
+	/**
+	 * Set the JDBC DataSource to obtain connections from.
+	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate.setDataSource(dataSource);
+	}
+
+	/**
+	 * Set the fetch size for this RDBMS operation. This is important for processing
+	 * large result sets: Setting this higher than the default value will increase
+	 * processing speed at the cost of memory consumption; setting this lower can
+	 * avoid transferring row data that will never be read by the application.
+	 * <p>Default is 0, indicating to use the driver's default.
+	 * @see org.springframework.jdbc.core.JdbcTemplate#setFetchSize
+	 */
+	public void setFetchSize(int fetchSize) {
+		this.jdbcTemplate.setFetchSize(fetchSize);
+	}
+
+	/**
+	 * Set the maximum number of rows for this RDBMS operation. This is important
+	 * for processing subsets of large result sets, avoiding to read and hold
+	 * the entire result set in the database or in the JDBC driver.
+	 * <p>Default is 0, indicating to use the driver's default.
+	 * @see org.springframework.jdbc.core.JdbcTemplate#setMaxRows
+	 */
+	public void setMaxRows(int maxRows) {
+		this.jdbcTemplate.setMaxRows(maxRows);
 	}
 
 	/**
@@ -117,25 +143,28 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @see java.sql.ResultSet#TYPE_FORWARD_ONLY
 	 * @see java.sql.ResultSet#TYPE_SCROLL_INSENSITIVE
 	 * @see java.sql.ResultSet#TYPE_SCROLL_SENSITIVE
+	 * @see java.sql.Connection#prepareStatement(String, int, int)
 	 */
-	protected void setResultSetType(int resultSetType) {
+	public void setResultSetType(int resultSetType) {
 		this.resultSetType = resultSetType;
 	}
 
 	/**
 	 * Return whether statements will return a specific type of ResultSet.
 	 */
-	protected int getResultSetType() {
+	public int getResultSetType() {
 		return resultSetType;
 	}
 
 	/**
 	 * Set whether to use statements that are capable of returning
 	 * updatable ResultSets.
+	 * @see java.sql.Connection#prepareStatement(String, int, int)
 	 */
-	protected void setUpdatableResults(boolean updatableResults) {
+	public void setUpdatableResults(boolean updatableResults) {
 		if (isCompiled()) {
-			throw new InvalidDataAccessApiUsageException("The updateableResults flag must be set before the operation is compiled");
+			throw new InvalidDataAccessApiUsageException(
+					"The updateableResults flag must be set before the operation is compiled");
 		}
 		this.updatableResults = updatableResults;
 	}
@@ -143,13 +172,14 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Return whether statements will return updatable ResultSets.
 	 */
-	protected boolean isUpdatableResults() {
+	public boolean isUpdatableResults() {
 		return updatableResults;
 	}
 
 	/**
 	 * Set whether prepared statements should be capable of returning
 	 * auto-generated keys.
+	 * @see java.sql.Connection#prepareStatement(String, int)
 	 */
 	public void setReturnGeneratedKeys(boolean returnGeneratedKeys) {
 		if (isCompiled()) {
@@ -163,12 +193,13 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Return whether statements should be capable of returning
 	 * auto-generated keys.
 	 */
-	protected boolean isReturnGeneratedKeys() {
+	public boolean isReturnGeneratedKeys() {
 		return returnGeneratedKeys;
 	}
 
 	/**
 	 * Set the column names of the auto-generated keys.
+	 * @see java.sql.Connection#prepareStatement(String, String[])
 	 */
 	public void setGeneratedKeysColumnNames(String[] names) {
 		if (isCompiled()) {
@@ -203,11 +234,11 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Add anonymous parameters, specifying only their SQL types
-	 * as defined in the java.sql.Types class.
+	 * as defined in the <code>java.sql.Types</code> class.
 	 * <p>Parameter ordering is significant. This method is an alternative
 	 * to the declareParameter() method, which should normally be preferred.
 	 * @param types array of SQL types as defined in the
-	 * java.sql.Types class
+	 * <code>java.sql.Types</code> class
 	 * @throws InvalidDataAccessApiUsageException if the operation is already compiled
 	 */
 	public void setTypes(int[] types) throws InvalidDataAccessApiUsageException {
