@@ -6,8 +6,10 @@
 package org.springframework.web.servlet.view.xslt;
 
 import java.util.Locale;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
+
 import org.w3c.dom.Element;
 
 /**
@@ -15,7 +17,7 @@ import org.w3c.dom.Element;
  * @author Rod Johnson
  * @author Darren Davison
  * @since 26-Jul-2003
- * @version $Id: FormatHelperTests.java,v 1.5 2003-11-07 15:11:54 jhoeller Exp $
+ * @version $Id: FormatHelperTests.java,v 1.6 2003-11-13 15:25:09 colins Exp $
  */
 public class FormatHelperTests extends TestCase {
 
@@ -44,37 +46,39 @@ public class FormatHelperTests extends TestCase {
 		}
 	}
 	
-	/*
-	 * Test for Node dateTimeElement(long, String, String)
-	 */
 	public void testDateTimeElement() {
+		// save the current default TZ
+		TimeZone curr = TimeZone.getDefault();
+		// force the right TZ to ensure parsed Date works
+		TimeZone.setDefault(TimeZone.getTimeZone("Europe/London"));
+
 		Element e = (Element) FormatHelper.dateTimeElement(testTime, Locale.UK);
 		assertTrue(e.getTagName().equals("formatted-date"));
 		Element el;
 		el = (Element) e.getElementsByTagName("year").item(0);
-		assertTrue( "2003".equals(el.getFirstChild().getNodeValue() ));
+		assertTrue("2003".equals(el.getFirstChild().getNodeValue()));
 		el = (Element) e.getElementsByTagName("month").item(0);
-		assertTrue( "September".equals(el.getFirstChild().getNodeValue() ));
+		assertTrue("September".equals(el.getFirstChild().getNodeValue()));
 		el = (Element) e.getElementsByTagName("day-of-week").item(0);
-		assertTrue( "Wednesday".equals(el.getFirstChild().getNodeValue() ));
+		assertTrue("Wednesday".equals(el.getFirstChild().getNodeValue()));
 		el = (Element) e.getElementsByTagName("day-of-month").item(0);
-		assertTrue( "24".equals(el.getFirstChild().getNodeValue() ));
-		/*
-		// mysteriously fails on some installation
+		assertTrue("24".equals(el.getFirstChild().getNodeValue()));
 		el = (Element) e.getElementsByTagName("hours").item(0);
 		assertEquals( "12", el.getFirstChild().getNodeValue() );
-		*/
 		el = (Element) e.getElementsByTagName("minutes").item(0);
-		assertTrue( "26".equals(el.getFirstChild().getNodeValue() ));
+		assertTrue("26".equals(el.getFirstChild().getNodeValue()));
 		el = (Element) e.getElementsByTagName("am-pm").item(0);
-		assertTrue( "AM".equals(el.getFirstChild().getNodeValue() ));
-		
+		assertTrue("AM".equals(el.getFirstChild().getNodeValue()));
+
 		// prove a different locale changes the output
 		e = (Element) FormatHelper.dateTimeElement(testTime, Locale.FRANCE);
 		el = (Element) e.getElementsByTagName("day-of-week").item(0);
-		assertTrue( "mercredi".equals(el.getFirstChild().getNodeValue() ));
-	}
+		assertTrue("mercredi".equals(el.getFirstChild().getNodeValue()));
 
+		// reset TZ in case later tests have a problem
+		TimeZone.setDefault(curr);
+	}
+	
 	public void testCurrency() {
 		String s;
 		s = FormatHelper.currency( 50.0d, Locale.US);
