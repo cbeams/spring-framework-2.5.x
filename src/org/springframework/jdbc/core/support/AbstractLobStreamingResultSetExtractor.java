@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
@@ -31,6 +32,21 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  * <p>Delegates to the <code>streamData</code> template method for streaming LOB
  * content to some OutputStream, typically using a LobHandler. Converts an
  * IOException thrown during streaming to a LobRetrievalFailureException.
+ *
+ * <p>A usage example with JdbcTemplate:
+ *
+ * <pre>
+ * JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
+ * final LobHandler lobHandler = new DefaultLobHandler();  // reusable object
+ *
+ * jdbcTemplate.query(
+ *		 "SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
+ *		 new AbstractLobStreamingResultSetExtractor() {
+ *			 public void streamData(ResultSet rs) throws SQLException, IOException {
+ *				 FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), os);
+ *			 }
+ *		 }
+ * );</pre>
  *
  * @author Juergen Hoeller
  * @since 28.04.2004
@@ -69,21 +85,23 @@ public abstract class AbstractLobStreamingResultSetExtractor implements ResultSe
 	/**
 	 * Handle the case where the ResultSet does not contain a row.
 	 * @throws DataAccessException a corresponding exception,
-	 * by default a LobRetrievalFailureException
+	 * by default an IncorrectResultSizeDataAccessException
 	 * @see org.springframework.jdbc.LobRetrievalFailureException
 	 */
 	protected void handleNoRowFound() throws DataAccessException {
-		throw new LobRetrievalFailureException("No row found in database");
+		throw new IncorrectResultSizeDataAccessException("LobStreamingResultSetExtractor did not find row in database",
+		                                                 1, 0);
 	}
 
 	/**
 	 * Handle the case where the ResultSet contains multiple rows.
 	 * @throws DataAccessException a corresponding exception,
-	 * by default a LobRetrievalFailureException
+	 * by default an IncorrectResultSizeDataAccessException
 	 * @see org.springframework.jdbc.LobRetrievalFailureException
 	 */
 	protected void handleMultipleRowsFound() throws DataAccessException {
-		throw new LobRetrievalFailureException("Multiple rows found in database");
+		throw new IncorrectResultSizeDataAccessException("LobStreamingResultSetExtractor found multiple rows in database",
+		                                                 1, -1);
 	}
 
 	/**
