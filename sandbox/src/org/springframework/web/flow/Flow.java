@@ -2045,7 +2045,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public String attributesMapper(String attributesMapperBeanNamePrefix) {
-		return attributesMapperBeanNamePrefix + "." + ATTRIBUTES_MAPPER_ID_SUFFIX;
+		if (!attributesMapperBeanNamePrefix.endsWith(ATTRIBUTES_MAPPER_ID_SUFFIX)) {
+			return attributesMapperBeanNamePrefix + "." + ATTRIBUTES_MAPPER_ID_SUFFIX;
+		} else {
+			return attributesMapperBeanNamePrefix;
+		}
 	}
 
 	/**
