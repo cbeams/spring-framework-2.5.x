@@ -40,7 +40,7 @@ public class PropertyPresent extends AbstractBeanPropertyExpression implements
 
     protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
         return Required.instance().test(
-                domainObjectAccessStrategy.getValue(getPropertyName()));
+                domainObjectAccessStrategy.getPropertyValue(getPropertyName()));
     }
 
     public String toString() {

@@ -17,10 +17,25 @@ package org.springframework.rules.values;
 
 import java.beans.PropertyEditor;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyAccessor;
+
 /**
+ * <p>
+ * An extension of the base property access strategy interface that allows for
+ * mutable operations. Specifically, this interface allows:
+ * </p>
+ * <ul>
+ * <li>registering custom property editors for performing type conversions
+ * <li>returning a domain object holder allowing the underying domain object to
+ * be changed and subscribed to for modification, and
+ * <li>adding listeners for changes on particular properties.
+ * </ul>
+ * 
  * @author Keith Donald
  */
-public interface MutablePropertyAccessStrategy extends PropertyAccessStrategy {
+public interface MutablePropertyAccessStrategy extends PropertyAccessStrategy,
+        PropertyAccessor {
     public void registerCustomEditor(Class propertyType,
             PropertyEditor propertyEditor);
 
@@ -29,17 +44,16 @@ public interface MutablePropertyAccessStrategy extends PropertyAccessStrategy {
 
     public PropertyEditor findCustomEditor(String propertyName);
 
-    public boolean isValueUpdating();
-
-    public void setValue(String propertyName, Object value);
-
-    public MutablePropertyAccessStrategy newNestedAccessor(
-            ValueModel childValueHolder);
+    public MutablePropertyAccessStrategy getPropertyAccessStrategyForPath(
+            String propertyPath) throws BeansException;
 
     public ValueModel getDomainObjectHolder();
 
-    public void addValueListener(ValueListener listener, String aspect);
+    public void addValueListener(ValueListener listener, String propertyPath);
 
-    public void removeValueListener(ValueListener listener, String aspect);
+    public void removeValueListener(ValueListener listener, String propertyPath);
+
+    public MutablePropertyAccessStrategy newPropertyAccessStrategy(
+            ValueModel domainObjectHolder);
 
 }

@@ -18,8 +18,8 @@ package org.springframework.rules.values;
 import org.springframework.util.ToStringBuilder;
 
 /**
- * Adapts access to a domain model aspect (generally a property) to the value
- * model interface. The aspect access strategy is pluggable.
+ * Adapts access to a domain model property to the value model interface. The
+ * property access strategy is pluggable.
  * 
  * @author Keith Donald
  */
@@ -33,7 +33,7 @@ public class PropertyAdapter extends AbstractValueModel {
             String propertyName) {
         if (propertyAccessStrategy.getDomainObjectHolder() != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("[Aspect Adapter for aspect '" + propertyName
+                logger.debug("[Property adapter for property '" + propertyName
                         + "' attaching to mutable domain object holder.]");
             }
             propertyAccessStrategy.getDomainObjectHolder().addValueListener(
@@ -66,11 +66,11 @@ public class PropertyAdapter extends AbstractValueModel {
     }
 
     public Object get() {
-        return propertyAccessStrategy.getValue(propertyName);
+        return propertyAccessStrategy.getPropertyValue(propertyName);
     }
 
     public void set(Object value) {
-        propertyAccessStrategy.setValue(propertyName, value);
+        propertyAccessStrategy.setPropertyValue(propertyName, value);
     }
 
     public String toString() {

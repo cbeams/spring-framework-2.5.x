@@ -61,8 +61,8 @@ public class BeanPropertiesExpression extends AbstractBeanPropertyExpression {
 
     protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
         return beanPropertyExpression.test(domainObjectAccessStrategy
-                .getValue(getPropertyName()), domainObjectAccessStrategy
-                .getValue(getOtherPropertyName()));
+                .getPropertyValue(getPropertyName()), domainObjectAccessStrategy
+                .getPropertyValue(getOtherPropertyName()));
     }
 
     public String toString() {

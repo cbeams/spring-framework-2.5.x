@@ -60,7 +60,7 @@ public class RequiredIfTrue extends AbstractBeanPropertyExpression implements
     protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
         if (predicate.test(domainObjectAccessStrategy)) {
             return Required.instance().test(
-                    domainObjectAccessStrategy.getValue(getPropertyName()));
+                    domainObjectAccessStrategy.getPropertyValue(getPropertyName()));
         }
         else {
             return true;

@@ -682,7 +682,7 @@ public class Constraints {
                 else {
                     accessor.getDomainObjectHolder().set(bean);
                 }
-                Object value = accessor.getValue(propertyName);
+                Object value = accessor.getPropertyValue(propertyName);
                 Integer hashCode;
                 if (value == null) {
                     hashCode = new Integer(0);

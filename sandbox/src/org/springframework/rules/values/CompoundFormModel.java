@@ -15,9 +15,11 @@
  */
 package org.springframework.rules.values;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
@@ -31,6 +33,8 @@ import org.springframework.util.Assert;
  */
 public class CompoundFormModel extends AbstractFormModel implements
         NestingFormModel {
+
+    private List childFormObjectBuffers = new ArrayList(9);
 
     private Map formModels = new LinkedHashMap(9);
 
@@ -54,7 +58,7 @@ public class CompoundFormModel extends AbstractFormModel implements
             MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
         super(domainObjectAccessStrategy);
-        setBufferChangesDefault(bufferChanges);
+        setBufferChangesDefault(bufferChanges);        
     }
 
     public MutableFormModel createChild(String childFormModelName) {
@@ -83,6 +87,7 @@ public class CompoundFormModel extends AbstractFormModel implements
                 getPropertyAccessStrategy(), parentPropertyFormObjectPath);
         if (getBufferChangesDefault()) {
             valueHolder = new BufferedValueModel(valueHolder);
+            childFormObjectBuffers.add(valueHolder);
         }
         boolean enabledDefault = valueHolder.get() != null;
         Class valueClass = getMetadataAccessStrategy().getPropertyType(
@@ -144,7 +149,7 @@ public class CompoundFormModel extends AbstractFormModel implements
             String childFormModelName, ValueModel childFormObjectHolder,
             boolean enabled) {
         MutablePropertyAccessStrategy childObjectAccessStrategy = getPropertyAccessStrategy()
-                .newNestedAccessor(childFormObjectHolder);
+                .newPropertyAccessStrategy(childFormObjectHolder);
         childModel.setPropertyAccessStrategy(childObjectAccessStrategy);
         childModel.setEnabled(enabled);
         childModel.setBufferChangesDefault(getBufferChangesDefault());
@@ -298,6 +303,15 @@ public class CompoundFormModel extends AbstractFormModel implements
                             ((FormModel)formModel).commit();
                         }
                     });
+            if (getBufferChangesDefault()) {
+                Algorithms.instance().forEachIn(childFormObjectBuffers,
+                        new UnaryProcedure() {
+                            public void run(Object bufferedValueModel) {
+                                ((BufferedValueModel)bufferedValueModel)
+                                        .commit();
+                            }
+                        });
+            }
             postEditCommit();
         }
     }

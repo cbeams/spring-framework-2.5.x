@@ -27,7 +27,7 @@ public class DefaultFormModel extends AbstractFormModel implements
         MutableFormModel {
     public static final String HAS_ERRORS_PROPERTY = "hasErrors";
 
-    private ValueModel commitTrigger;
+    private ValueModel commitTrigger = new ValueHolder(null);
 
     private Map formValueModels = new HashMap();
 
@@ -51,15 +51,6 @@ public class DefaultFormModel extends AbstractFormModel implements
             MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
         super(domainObjectAccessStrategy);
-        this.commitTrigger = new ValueHolder(null);
-        // @TODO this seems kind of hacky - does it make sense to always commit
-        // the form object value model if it is buffered? or is that the
-        // responsiblity
-        // of a higher-level object?
-        if (getFormObjectHolder() instanceof BufferedValueModel) {
-            ((BufferedValueModel)getFormObjectHolder())
-                    .setCommitTrigger(commitTrigger);
-        }
         setBufferChangesDefault(bufferChanges);
     }
 
@@ -107,7 +98,8 @@ public class DefaultFormModel extends AbstractFormModel implements
                     + formPropertyPath + "'");
         }
         ValueModel formValueModel = new PropertyAdapter(
-                getPropertyAccessStrategy(), formPropertyPath);
+                getPropertyAccessStrategy().getPropertyAccessStrategyForPath(
+                        formPropertyPath), formPropertyPath);
         if (bufferChanges) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating form value buffer for property '"

@@ -48,7 +48,7 @@ public class BeanPropertyValueConstraint extends AbstractBeanPropertyExpression
 
     protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
         return valueConstraint.test(domainObjectAccessStrategy
-                .getValue(getPropertyName()));
+                .getPropertyValue(getPropertyName()));
     }
 
     public UnaryPredicate getPredicate() {

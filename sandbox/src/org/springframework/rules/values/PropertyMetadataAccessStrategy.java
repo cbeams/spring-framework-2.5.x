@@ -16,13 +16,20 @@
 package org.springframework.rules.values;
 
 /**
+ * Simple interface for accessing metadata about a particular property.
+ * 
  * @author Keith Donald
  */
 public interface PropertyMetadataAccessStrategy {
     public boolean isReadable(String propertyName);
+
     public boolean isWriteable(String propertyName);
+
     public boolean isEnumeration(String propertyName);
+
     public boolean isNumber(String propertyName);
+
     public boolean isDate(String propertyName);
+
     public Class getPropertyType(String propertyName);
 }

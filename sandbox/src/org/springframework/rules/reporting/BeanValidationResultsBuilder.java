@@ -95,7 +95,7 @@ public class BeanValidationResultsBuilder extends ValidationResultsBuilder
     
     private Object getPropertyValue(String propertyName) {
         if (bean instanceof PropertyAccessStrategy) {
-            return ((PropertyAccessStrategy)bean).getValue(propertyName);
+            return ((PropertyAccessStrategy)bean).getPropertyValue(propertyName);
         }
         else {
             return new GetProperty(bean).evaluate(propertyName);

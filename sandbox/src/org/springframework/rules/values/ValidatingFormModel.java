@@ -39,7 +39,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
     private Map validationErrors = new HashMap();
 
     private List validationListeners = new ArrayList();
-    
+
     public ValidatingFormModel() {
     }
 
@@ -60,6 +60,10 @@ public class ValidatingFormModel extends DefaultFormModel implements
             MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
         super(domainObjectAccessStrategy, bufferChanges);
+    }
+
+    public Object getPropertyValue(String propertyName) {
+        return getValue(propertyName);
     }
 
     public Object getDomainObject() {
@@ -167,7 +171,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
 
     protected BeanPropertyExpression getValidationRule(
             String domainObjectProperty) {
-        BeanPropertyExpression constraint;
+        BeanPropertyExpression constraint = null;
         //@TODO if form object changes, rules aren't updated...introduces
         // subtle bugs...
         // ... for rules dependent on instance...
@@ -176,13 +180,15 @@ public class ValidatingFormModel extends DefaultFormModel implements
                     .getRules(domainObjectProperty);
         }
         else {
-            if (getRulesSource() == null) {
+            if (getRulesSource() != null) {
+                constraint = getRulesSource().getRules(getFormObjectClass(),
+                        domainObjectProperty);
+            }
+            else {
                 logger
                         .info("No rules source has been configured; "
                                 + "please set a valid reference to enable rules-based validation.");
             }
-            constraint = getRulesSource().getRules(getFormObjectClass(),
-                    domainObjectProperty);
         }
         return constraint;
     }

@@ -26,6 +26,10 @@ import org.springframework.util.ObjectUtils;
 public class ValueHolder extends AbstractValueModel {
     private Object value;
 
+    protected ValueHolder() {
+
+    }
+
     public ValueHolder(Object value) {
         this.value = value;
     }

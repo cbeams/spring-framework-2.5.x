@@ -96,9 +96,6 @@ public class MethodInvokingConstraint implements UnaryPredicate, TypeResolvable 
                 || returnType == boolean.class);
     }
 
-    /**
-     * @see org.springframework.rules.reporting.TypeResolvable#getType()
-     */
     public String getType() {
         return type;
     }
@@ -107,9 +104,6 @@ public class MethodInvokingConstraint implements UnaryPredicate, TypeResolvable 
         this.type = type;
     }
 
-    /**
-     * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
-     */
     public boolean test(Object argument) {
         try {
             return ((Boolean)testMethod.invoke(targetObject,
