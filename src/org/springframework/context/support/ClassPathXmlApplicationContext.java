@@ -41,7 +41,7 @@ import org.springframework.context.ApplicationContext;
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
- * @see #getResourcePatternResolver
+ * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 

@@ -19,6 +19,7 @@ package org.springframework.context;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /** 
  * Central interface to provide configuration for an application.
@@ -50,7 +51,7 @@ import org.springframework.core.io.ResourceLoader;
  * @see ApplicationContextAware#setApplicationContext
  */
 public interface ApplicationContext extends ListableBeanFactory, HierarchicalBeanFactory,
-		MessageSource, ApplicationEventPublisher, ResourceLoader {
+		MessageSource, ApplicationEventPublisher, ResourceLoader, ResourcePatternResolver {
 	
 	/**
 	 * Return the parent context, or null if there is no parent,

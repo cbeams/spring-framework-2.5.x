@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -130,6 +131,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** System time in milliseconds when this context started */
 	private long startupTime;
 
+	/** ResourcePatternResolver used by this context */
+	private ResourcePatternResolver resourcePatternResolver;
+
 	/** MessageSource we delegate our implementation of this interface to */
 	private MessageSource messageSource;
 
@@ -145,6 +149,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Create a new AbstractApplicationContext with no parent.
 	 */
 	public AbstractApplicationContext() {
+		this(null);
 	}
 
 	/**
@@ -153,6 +158,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	public AbstractApplicationContext(ApplicationContext parent) {
 		this.parent = parent;
+		this.resourcePatternResolver = getResourcePatternResolver();
 	}
 
 
@@ -257,7 +263,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.registerCustomEditor(InputStream.class,
 		    new InputStreamEditor(new ResourceEditor(this)));
 		beanFactory.registerCustomEditor(Resource[].class,
-		    new ResourceArrayPropertyEditor(getResourcePatternResolver()));
+		    new ResourceArrayPropertyEditor(this.resourcePatternResolver));
 
 		// configure the bean factory with context semantics
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
@@ -311,7 +317,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Return the ResourcePatternResolver to use for resolving location patterns
 	 * into Resource instances. Default is PathMatchingResourcePatternResolver,
 	 * supporting Ant-style location patterns.
-	 * <p>Can be overridden in subclasses, for extended resolution strategies.
+	 * <p>Can be overridden in subclasses, for extended resolution strategies,
+	 * for example in a web environment.
+	 * <p><b>Do not call this when needing to resolve a location pattern.
+	 * Call the context's <code>getResources</code> method instead, which
+	 * will delegate to the ResourcePatternResolver.
+	 * @see #getResources
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
 	protected ResourcePatternResolver getResourcePatternResolver() {
@@ -582,6 +593,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected MessageSource getInternalParentMessageSource() {
 		return (getParent() instanceof AbstractApplicationContext) ?
 		    ((AbstractApplicationContext) getParent()).messageSource : getParent();
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of ResourcePatternResolver
+	//---------------------------------------------------------------------
+
+	public Resource[] getResources(String locationPattern) throws IOException {
+		return this.resourcePatternResolver.getResources(locationPattern);
 	}
 
 

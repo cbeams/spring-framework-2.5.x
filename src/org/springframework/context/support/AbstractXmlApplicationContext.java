@@ -25,7 +25,6 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Convenient abstract superclass for ApplicationContext implementations,
@@ -132,14 +131,14 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	 * @throws IOException if the required XML document isn't found
 	 * @see #refreshBeanFactory
 	 * @see #getConfigLocations
+	 * @see #getResources
 	 * @see #getResourcePatternResolver
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
-			ResourcePatternResolver resourcePatternResolver = getResourcePatternResolver();
 			for (int i = 0; i < configLocations.length; i++) {
-				Resource[] configResources = resourcePatternResolver.getResources(configLocations[i]);
+				Resource[] configResources = getResources(configLocations[i]);
 				for (int j = 0; j < configResources.length; j++) {
 					reader.loadBeanDefinitions(configResources[j]);
 				}
@@ -153,6 +152,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	 * <p>Can also include location patterns, which will get resolved
 	 * via a ResourcePatternResolver.
 	 * @return an array of resource locations, or null if none
+	 * @see #getResources
 	 * @see #getResourcePatternResolver
 	 */
 	protected abstract String[] getConfigLocations();

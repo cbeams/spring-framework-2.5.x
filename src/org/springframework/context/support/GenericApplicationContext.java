@@ -22,6 +22,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * Generic ApplicationContext implementation which does not assume a specific
@@ -58,7 +60,7 @@ import org.springframework.context.ApplicationContext;
  * mixing arbitrary bean definition formats.
  *
  * @author Juergen Hoeller
- * @since 20.10.2004
+ * @since 1.1.2
  * @see #registerBeanDefinition
  * @see #refresh
  * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
@@ -70,6 +72,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
 	private final DefaultListableBeanFactory beanFactory;
 
+	private ResourceLoader resourceLoader;
+
 	private boolean refreshed = false;
 
 
@@ -79,7 +83,17 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext() {
-		this(null);
+		this.beanFactory = new DefaultListableBeanFactory();
+	}
+
+	/**
+	 * Create a new GenericApplicationContext with the given DefaultListableBeanFactory.
+	 * @param beanFactory the DefaultListableBeanFactory instance to use for this context
+	 * @see #registerBeanDefinition
+	 * @see #refresh
+	 */
+	public GenericApplicationContext(DefaultListableBeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 	/**
@@ -90,10 +104,55 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	public GenericApplicationContext(ApplicationContext parent) {
 		super(parent);
-
-		// create bean factory with parent
 		this.beanFactory = new DefaultListableBeanFactory(getInternalParentBeanFactory());
 	}
+
+	/**
+	 * Create a new GenericApplicationContext with the given DefaultListableBeanFactory.
+	 * @param beanFactory the DefaultListableBeanFactory instance to use for this context
+	 * @param parent the parent application context
+	 * @see #registerBeanDefinition
+	 * @see #refresh
+	 */
+	public GenericApplicationContext(DefaultListableBeanFactory beanFactory, ApplicationContext parent) {
+		super(parent);
+		this.beanFactory = beanFactory;
+	}
+
+
+	/**
+	 * Set a ResourceLoader to use for this context. If set, the context
+	 * will delegate all resource loading to the given ResourceLoader.
+	 * If not set, default resource loading will apply.
+	 * <p>The main reason to specify a custom ResourceLoader is to resolve
+	 * resource paths (withour URL prefix) in a specific fashion.
+	 * The default behavior is to resolve such paths as class path locations.
+	 * To resolve resource paths as file system locations, specify a
+	 * FileSystemResourceLoader here.
+	 * @see #getResource
+	 * @see org.springframework.core.io.DefaultResourceLoader
+	 * @see org.springframework.core.io.FileSystemResourceLoader
+	 */
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+
+	/**
+	 * This implementation delegates to this context's ResourceLoader if set,
+	 * falling back to the default superclass behavior else.
+	 * @see #setResourceLoader
+	 */
+	public Resource getResource(String location) {
+		if (this.resourceLoader != null) {
+			return this.resourceLoader.getResource(location);
+		}
+		return super.getResource(location);
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementations of AbstractApplicationContext's template methods
+	//---------------------------------------------------------------------
 
 	/**
 	 * Do nothing: We hold a single internal BeanFactory and rely on callers to
