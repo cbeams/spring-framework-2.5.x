@@ -4,15 +4,15 @@ Andre submitted the first code.  The work is to refine his initial upload to the
 sandbox.
 
 At the high level send and recieve functionality are handled seprately, as
-they are currently in the sandbox code Andre. This makes sence especially in
+they are currently in the sandbox code Andre. This makes sense especially in
 the case of J2EE usage since all J2EE users are interested in doing in
 client code is sending since the container creates the receiving
 infrastructure.  Since spring is mainly focused on J2EE users, sending should
 be made as easily as possible.  Also since app servers provide advanced 
 implementations of the ConnectionFactory, spring jms should be able to
-leverage this just as in the case of jdbc datasources.  The listening side 
-would primarily be for creating stand-alone JMS apps, that is, outside 
-the J2EE container that uses MDBs.
+leverage this just as in the case of jdbc datasources provided by vendors.  
+The listening side would primarily be for creating stand-alone JMS apps, 
+that is, outside the J2EE container that uses MDBs.
 
 Another goal is to hide as much as possible the difference between the 
 two messaging domain, point-to-point (queues) and publish/subscribe (topics)
@@ -46,7 +46,7 @@ do perform a sync request/reply.  The reason a Destination object should
 be in the signatures is in the case of sending to a destination defined in
 an incoming messages Message.getJMSReplyTo() It will also be possible to
 send to a destination specifying the jndi string of the destinaton,
-proably the most common usage.  There should also be some accomdation to
+probably the most common usage.  There should also be some accomdation to
 allow transactional sending of multiple messages.
 
 
