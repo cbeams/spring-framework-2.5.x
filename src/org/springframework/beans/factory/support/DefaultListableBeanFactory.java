@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
  * or as a superclass for custom bean factories.
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.5 2003-12-09 08:39:00 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.6 2003-12-10 08:54:35 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -38,6 +38,9 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 	//---------------------------------------------------------------------
 	// Instance data
 	//---------------------------------------------------------------------
+
+	/* Whether to allow re-registration of a different definition with the same name */
+	private boolean allowBeanDefinitionOverriding = true;
 
 	/** Map of BeanDefinition objects, keyed by prototype name */
 	private Map beanDefinitionMap = new HashMap();
@@ -59,6 +62,15 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 	 */
 	public DefaultListableBeanFactory(BeanFactory parentBeanFactory) {
 		super(parentBeanFactory);
+	}
+
+	/**
+	 * Set if it should be allowed to override bean definitions by registering a
+	 * different definition with the same name, automatically replacing the former.
+	 * If not, an exception will be thrown. Default is true.
+	 */
+	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
+		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
 	}
 
 
@@ -210,9 +222,14 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 		}
 		Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
 		if (oldBeanDefinition != null) {
-			throw new BeanDefinitionStoreException("Could not register bean definition [" + beanDefinition +
-			                                       "] under bean name '" + beanName + "': there's already bean definition [" +
-			                                       oldBeanDefinition + " bound");
+			if (!this.allowBeanDefinitionOverriding) {
+				throw new BeanDefinitionStoreException("Cannot register bean definition [" + beanDefinition + "] for bean '" +
+																							 beanName + "': there's already [" + oldBeanDefinition + "] bound");
+			}
+			else {
+				logger.info("Overriding bean definition for bean '" + beanName +
+										"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
+			}
 		}
 		this.beanDefinitionMap.put(beanName, beanDefinition);
 	}
