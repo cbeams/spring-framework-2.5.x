@@ -13,34 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.functor.predicates;
+package org.springframework.functor;
 
-import java.util.Comparator;
-
-import org.springframework.functor.BinaryPredicate;
 
 /**
  * @author Keith Donald
  */
-public class LessThan extends ComparingBinaryPredicate implements
-        BinaryPredicate {
-
-    public LessThan() {
-        super();
+public class UnaryNot implements UnaryPredicate {
+    private UnaryPredicate predicate;
+    
+    public UnaryNot(UnaryPredicate predicate) {
+        this.predicate = predicate;
     }
 
-    public LessThan(Comparator comparator) {
-        super(comparator);
+    public boolean evaluate(Object value) {
+        return !predicate.evaluate(value);
     }
-
-    protected boolean evaluateCompareResult(int result) {
-        return result < 0;
-    }
-
-    public static BinaryPredicate instance() {
-        return INSTANCE;
-    }
-
-    private static final LessThan INSTANCE = new LessThan();
 
 }

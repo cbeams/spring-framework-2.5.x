@@ -22,7 +22,7 @@ import org.springframework.functor.BinaryPredicate;
 /**
  * @author Keith Donald
  */
-public class LessThanEqualTo extends OperatorBinaryPredicate implements
+public class LessThanEqualTo extends ComparingBinaryPredicate implements
         BinaryPredicate {
 
     public LessThanEqualTo() {
@@ -33,7 +33,7 @@ public class LessThanEqualTo extends OperatorBinaryPredicate implements
         super(comparator);
     }
 
-    protected boolean evaluateOperatorResult(int result) {
+    protected boolean evaluateCompareResult(int result) {
         return result <= 0;
     }
 

@@ -15,25 +15,16 @@
  */
 package org.springframework.functor.predicates;
 
-import java.util.Comparator;
-
 import org.springframework.functor.BinaryPredicate;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author Keith Donald
  */
-public class EqualTo extends OperatorBinaryPredicate implements BinaryPredicate {
+public class EqualTo implements BinaryPredicate {
 
     public EqualTo() {
         super();
-    }
-
-    public EqualTo(Comparator comparator) {
-        super(comparator);
-    }
-
-    protected boolean evaluateOperatorResult(int result) {
-        return result == 0;
     }
 
     public static BinaryPredicate instance() {
@@ -41,5 +32,9 @@ public class EqualTo extends OperatorBinaryPredicate implements BinaryPredicate 
     }
 
     private static final EqualTo INSTANCE = new EqualTo();
+
+    public boolean evaluate(Object value1, Object value2) {
+        return ObjectUtils.nullSafeEquals(value1, value2);
+    }
 
 }

@@ -1,7 +1,7 @@
 /*
  * $Header:
  * /usr/local/cvs/product/project/src/java/com/csi/product/project/Type.java,v
- * 1.1 2004/01/26 23:10:32 keith Exp $ $Revision: 1.1 $ $Date: 2004/01/26
+ * 1.1 2004/01/26 23:10:32 keith Exp $ $Revision: 1.2 $ $Date: 2004/01/26
  * 23:10:32 $
  * 
  * Copyright Computer Science Innovations (CSI), 2003. All rights reserved.
@@ -15,7 +15,7 @@ import org.springframework.functor.BinaryPredicate;
 /**
  * @author Keith Donald
  */
-public class GreaterThanEqualTo extends OperatorBinaryPredicate implements
+public class GreaterThanEqualTo extends ComparingBinaryPredicate implements
         BinaryPredicate {
 
     public GreaterThanEqualTo() {
@@ -26,7 +26,7 @@ public class GreaterThanEqualTo extends OperatorBinaryPredicate implements
         super(comparator);
     }
 
-    public boolean evaluateOperatorResult(int result) {
+    public boolean evaluateCompareResult(int result) {
         return result >= 0;
     }
 
