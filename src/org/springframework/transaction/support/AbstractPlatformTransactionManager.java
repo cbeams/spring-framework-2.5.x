@@ -42,11 +42,12 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * used internally by the data access support classes for JDBC, Hibernate,
  * and JDO: They register resources that are opened within the transaction
  * for closing at transaction completion time, allowing e.g. for reuse of
- * the same Hibernate Session within the transaction.
+ * the same Hibernate Session within the transaction. The same mechanism
+ * can also be used for custom synchronization efforts.
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.20 2004-02-06 18:07:39 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.21 2004-02-11 11:00:02 jhoeller Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -513,7 +514,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @throws org.springframework.transaction.IllegalTransactionStateException
 	 * if suspending is not supported by the transaction manager implementation
 	 * @throws TransactionException in case of system errors
-	 * @see #suspend
 	 * @see #doResume
 	 */
 	protected abstract Object doSuspend(Object transaction) throws TransactionException;
@@ -527,7 +527,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @throws org.springframework.transaction.IllegalTransactionStateException
 	 * if resuming is not supported by the transaction manager implementation
 	 * @throws TransactionException in case of system errors
-	 * @see #resume
 	 * @see #doSuspend
 	 */
 	protected abstract void doResume(Object transaction, Object suspendedResources)
