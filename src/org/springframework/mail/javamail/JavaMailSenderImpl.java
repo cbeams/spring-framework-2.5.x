@@ -6,7 +6,9 @@
 package org.springframework.mail.javamail;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
@@ -115,7 +117,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				}
 				mimeMessages.add(mimeMessage);
 			}
-			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
 		}
 		catch (MessagingException ex) {
 			throw new MailParseException(ex);
@@ -131,7 +133,11 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(MimeMessage[] mimeMessages) throws MailException {
-		JavaMailSendException sendEx = new JavaMailSendException();
+		send(mimeMessages, null);
+	}
+
+	public void send(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
+		Map failedMessages = new HashMap();
 		try {
 			Transport transport = getTransport();
 			transport.connect(this.host, this.username, this.password);
@@ -143,10 +149,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 						transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
 					}
 					catch (MessagingException ex) {
-						sendEx.addFailedMimeMessage(mimeMessage, ex);
+						Object original = (originalMessages != null) ? originalMessages[i] : mimeMessage;
+						failedMessages.put(original, ex);
 					}
 				}
-				sendEx.throwIfNotEmpty();
 			}
 			finally {
 				transport.close();
@@ -156,7 +162,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			throw new MailAuthenticationException(ex);
 		}
 		catch (MessagingException ex) {
-			throw new MailSendException(ex);
+			throw new MailSendException("Mail server connection failed", ex);
+		}
+		if (!failedMessages.isEmpty()) {
+			throw new MailSendException(failedMessages);
 		}
 	}
 

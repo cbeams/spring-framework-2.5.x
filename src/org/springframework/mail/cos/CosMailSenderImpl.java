@@ -2,6 +2,8 @@ package org.springframework.mail.cos;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.oreilly.servlet.MailMessage;
 
@@ -35,33 +37,38 @@ public class CosMailSenderImpl implements MailSender {
 	}
 
 	public void send(SimpleMailMessage simpleMessage) throws MailException {
-		try {
-			MailMessage cosMessage = new MailMessage(this.host);
-			cosMessage.from(simpleMessage.getFrom());
-			cosMessage.to(simpleMessage.getTo());
-			if (simpleMessage.getCc() != null) {
-				for (int i = 0; i < simpleMessage.getCc().length; i++) {
-					cosMessage.cc(simpleMessage.getCc()[i]);
-				}
-			}
-			if (simpleMessage.getBcc() != null) {
-				for (int i = 0; i < simpleMessage.getBcc().length; i++) {
-					cosMessage.bcc(simpleMessage.getBcc()[i]);
-				}
-			}
-			cosMessage.setSubject(simpleMessage.getSubject());
-			PrintStream textStream = cosMessage.getPrintStream();
-			textStream.print(simpleMessage.getText());
-			cosMessage.sendAndClose();
-		}
-		catch (IOException ex) {
-			throw new MailSendException(ex);
-		}
+		send(new SimpleMailMessage[] {simpleMessage});
 	}
 
 	public void send(SimpleMailMessage[] simpleMessages) throws MailException {
+		Map failedMessages = new HashMap();
 		for (int i = 0; i < simpleMessages.length; i++) {
-			send(simpleMessages[i]);
+			try {
+				MailMessage cosMessage = new MailMessage(this.host);
+				cosMessage.from(simpleMessages[i].getFrom());
+				cosMessage.to(simpleMessages[i].getTo());
+				if (simpleMessages[i].getCc() != null) {
+					for (int j = 0; j < simpleMessages[j].getCc().length; j++) {
+						cosMessage.cc(simpleMessages[j].getCc()[j]);
+					}
+				}
+				if (simpleMessages[i].getBcc() != null) {
+					for (int j = 0; j < simpleMessages[j].getBcc().length; j++) {
+						cosMessage.bcc(simpleMessages[j].getBcc()[j]);
+					}
+				}
+				cosMessage.setSubject(simpleMessages[i].getSubject());
+				PrintStream textStream = cosMessage.getPrintStream();
+				textStream.print(simpleMessages[i].getText());
+				cosMessage.sendAndClose();
+			}
+			catch (IOException ex) {
+				failedMessages.put(simpleMessages[i], ex);
+			}
+		}
+		if (!failedMessages.isEmpty()) {
+			throw new MailSendException(failedMessages);
 		}
 	}
+
 }

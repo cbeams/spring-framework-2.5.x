@@ -38,10 +38,14 @@ public class SimpleMailMessage {
 	public SimpleMailMessage(SimpleMailMessage original) {
 		this.from = original.getFrom();
 		this.to = original.getTo();
-		this.cc = new String[original.getCc().length];
-		System.arraycopy(original.getCc(), 0, this.cc, 0, original.getCc().length);
-		this.bcc = new String[original.getBcc().length];
-		System.arraycopy(original.getCc(), 0, this.bcc, 0, original.getBcc().length);
+		if (original.getCc() != null) {
+			this.cc = new String[original.getCc().length];
+			System.arraycopy(original.getCc(), 0, this.cc, 0, original.getCc().length);
+		}
+		if (original.getBcc() != null) {
+			this.bcc = new String[original.getBcc().length];
+			System.arraycopy(original.getBcc(), 0, this.bcc, 0, original.getBcc().length);
+		}
 		this.subject = original.getSubject();
 		this.text = original.getText();
 	}

@@ -17,20 +17,19 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.URLName;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.AddressException;
 
 import junit.framework.TestCase;
 
-import org.springframework.mail.javamail.JavaMailSendException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailTestSuite.java,v 1.7 2003-10-10 07:06:11 jhoeller Exp $
+ * @version $Id: MailTestSuite.java,v 1.8 2003-10-21 14:44:42 jhoeller Exp $
  */
 public class MailTestSuite extends TestCase {
 
@@ -38,6 +37,11 @@ public class MailTestSuite extends TestCase {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom("me@mail.org");
 		message.setTo("you@mail.org");
+
+		SimpleMailMessage messageCopy = new SimpleMailMessage(message);
+		assertEquals("me@mail.org", messageCopy.getFrom());
+		assertEquals("you@mail.org", messageCopy.getTo());
+
 		message.setCc(new String[] {"he@mail.org", "she@mail.org"});
 		message.setBcc(new String[] {"us@mail.org", "them@mail.org"});
 		message.setSubject("my subject");
@@ -54,7 +58,7 @@ public class MailTestSuite extends TestCase {
 		assertEquals("my subject", message.getSubject());
 		assertEquals("my text", message.getText());
 
-		SimpleMailMessage messageCopy = new SimpleMailMessage(message);
+		messageCopy = new SimpleMailMessage(message);
 		assertEquals("me@mail.org", messageCopy.getFrom());
 		assertEquals("you@mail.org", messageCopy.getTo());
 		ccs = Arrays.asList(messageCopy.getCc());
@@ -258,7 +262,37 @@ public class MailTestSuite extends TestCase {
 		}
 	}
 
-	public void testJavaMailSendException() throws MessagingException, IOException, MailException {
+	public void testFailedSimpleMessage() throws MessagingException, IOException, MailException {
+		MockJavaMailSender sender = new MockJavaMailSender();
+		sender.setHost("host");
+		sender.setUsername("username");
+		sender.setPassword("password");
+
+		SimpleMailMessage simpleMessage1 = new SimpleMailMessage();
+		simpleMessage1.setTo("he@mail.org");
+		simpleMessage1.setSubject("fail");
+		SimpleMailMessage simpleMessage2 = new SimpleMailMessage();
+		simpleMessage2.setTo("she@mail.org");
+
+		try {
+			sender.send(new SimpleMailMessage[] {simpleMessage1, simpleMessage2});
+		}
+		catch (MailSendException ex) {
+			assertEquals(sender.transport.getConnectedHost(), "host");
+			assertEquals(sender.transport.getConnectedUsername(), "username");
+			assertEquals(sender.transport.getConnectedPassword(), "password");
+			assertTrue(sender.transport.isCloseCalled());
+			assertEquals(1, sender.transport.getSentMessages().size());
+			assertEquals(new InternetAddress("she@mail.org"), sender.transport.getSentMessage(0).getAllRecipients()[0]);
+			assertEquals(1, ex.getFailedMessages().size());
+			assertEquals(simpleMessage1, ex.getFailedMessages().keySet().iterator().next());
+			Object subEx = ex.getFailedMessages().values().iterator().next();
+			assertTrue(subEx instanceof MessagingException);
+			assertEquals("failed", ((MessagingException) subEx).getMessage());
+		}
+	}
+
+	public void testFailedMimeMessage() throws MessagingException, IOException, MailException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -273,16 +307,16 @@ public class MailTestSuite extends TestCase {
 		try {
 			sender.send(new MimeMessage[] {mimeMessage1, mimeMessage2});
 		}
-		catch (JavaMailSendException ex) {
+		catch (MailSendException ex) {
 			assertEquals(sender.transport.getConnectedHost(), "host");
 			assertEquals(sender.transport.getConnectedUsername(), "username");
 			assertEquals(sender.transport.getConnectedPassword(), "password");
 			assertTrue(sender.transport.isCloseCalled());
 			assertEquals(1, sender.transport.getSentMessages().size());
 			assertEquals(mimeMessage2, sender.transport.getSentMessage(0));
-			assertEquals(1, ex.getFailedMimeMessages().size());
-			assertEquals(mimeMessage1, ex.getFailedMimeMessages().keySet().iterator().next());
-			Object subEx = ex.getFailedMimeMessages().values().iterator().next();
+			assertEquals(1, ex.getFailedMessages().size());
+			assertEquals(mimeMessage1, ex.getFailedMessages().keySet().iterator().next());
+			Object subEx = ex.getFailedMessages().values().iterator().next();
 			assertTrue(subEx instanceof MessagingException);
 			assertEquals("failed", ((MessagingException) subEx).getMessage());
 		}
