@@ -20,7 +20,7 @@
 <!ELEMENT webflow ( (action-state | view-state | subflow-state | end-state)+ )>
 
 <!--
-	Unique identifier of the web flow; should be unique to all other webflows.
+	Unique identifier of the web flow; should be unique to all other web flows.
 -->
 <!ATTLIST webflow id ID #REQUIRED>
 
@@ -42,13 +42,13 @@
 <!ATTLIST action-state id ID #REQUIRED>
 
 <!--
-	Defines a single Action to be be executed when the action state is entered.
+	Defines a single Action to be executed when the action state is entered.
 -->
 <!ELEMENT action ( property* )>
 
 <!--
 	Identifier of the action implementation exported in the configured registry, typically
-	the Spring Bean Factory.  This is similar to the <ref bean="myBean"/> notation of
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
 	the Spring beans DTD.
 -->
 <!ATTLIST action bean CDATA #IMPLIED>
@@ -62,7 +62,7 @@
 	
 <!--
 	Dependency (aka collaborator) autowiring options for use when instantiating the action 
-	mplementation with the class attribute.
+	implementation with the class attribute.
 -->
 <!ATTLIST action autowire (no | byName | byType | constructor | autodetect | default) "default">
 
@@ -75,20 +75,22 @@
 
 <!--
 	Optional name qualifier for the action. When specified, the action will
-	qualify execution result event identifiers by this name.
+	qualify execution result event identifiers by this name. An action with
+	a name is ofter referred to as a "named action".
 -->
 <!ATTLIST action name CDATA #IMPLIED>
 
 <!--
-	A property associated with an action in an action state.  Properties are simple strings that 
+	A property associated with an action in an action state. Properties are simple strings that 
 	allow you to annotate the action in the context of the state it is being linked with.
-	For example, the 'caption' property might serve a GUI tooltip or logging statement.
-	The 'executeMethodName'	property my specify a target method to invoke on the action instance.
+	For example, the 'caption' property might serve a GUI tooltip or logging statement, and
+	the 'executeMethodName' property might specify a target method to invoke on a multi-action
+	instance.
 -->
 <!ELEMENT property ( value? )>
 
 <!--
-	The name of the property
+	The name of the property.
 -->
 <!ATTLIST property name CDATA #REQUIRED>
 
@@ -98,7 +100,7 @@
 <!ATTLIST property value CDATA #IMPLIED>
 
 <!--
-	The value of the property
+	The value of the property.
 -->
 <!ELEMENT value ( #PCDATA )>
 
@@ -123,13 +125,13 @@
 <!ATTLIST view-state view CDATA #IMPLIED>
 
 <!--
-	Defines a transition from one state to another.  Transitions define the supported 
+	Defines a transition from one state to another. Transitions define the supported 
 	paths through the flow.
 -->
 <!ELEMENT transition EMPTY>
 
 <!--
-	The identifier of the event that can trigger this transition.  A event describes something
+	The identifier of the event that can trigger this transition. An event describes something
 	that happens e.g "submit", "back", "success", "error".
 	Note: in the future, custom transitional expressions will be definable from this element.
 -->
@@ -141,7 +143,7 @@
 <!ATTLIST transition to IDREF #REQUIRED>
 
 <!--
-	Defines a sub flow state: a state that spawns sub flow when entered. When the
+	Defines a sub flow state: a state that spawns a sub flow when entered. When the
 	sub flow completes execution (reaches a end state), the result of subflow execution
 	will be used as grounds for a transition out of this state.
 -->
@@ -153,7 +155,7 @@
 <!ATTLIST subflow-state id ID #REQUIRED>
 
 <!--
-	Reference to the id of the webflow to be spawned when this subflow state is entered.
+	Reference to the id of the web flow to be spawned when this subflow state is entered.
 -->
 <!ATTLIST subflow-state flow CDATA #REQUIRED>
 
@@ -164,8 +166,8 @@
 
 <!--
 	Identifier of the flow attribute mapper implementation exported in the
-	configured registry, typically a Spring Bean Factory. This is similar to the <ref bean="myBean"/>
-	notation of the Spring beans DTD.
+	configured registry, typically a Spring Bean Factory. This is similar
+	to the <ref bean="myBean"/> notation of the Spring beans DTD.
 -->
 <!ATTLIST attribute-mapper bean CDATA #IMPLIED>
 
@@ -195,7 +197,7 @@
 <!ELEMENT end-state EMPTY>
 
 <!--
-	Unique identifier of a end state; must be unique to this flow.
+	Unique identifier of an end state; must be unique to this flow.
 -->
 <!ATTLIST end-state id ID #REQUIRED>
 
