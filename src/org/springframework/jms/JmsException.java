@@ -75,8 +75,9 @@ public abstract class JmsException extends NestedRuntimeException {
 	}
 	
 	/**
-	 * Return the detail message, including the message from the nested exception
+	 * Return the detail message, including the message from the linked exception
 	 * if there is one.
+	 * @see javax.jms.JMSException#getLinkedException
 	 */
 	public String getMessage() {
 		// Even if you cannot set the cause of this exception other than through
@@ -87,14 +88,15 @@ public abstract class JmsException extends NestedRuntimeException {
 			return super.getMessage();
 		}
 		else {
-			if ( ( getCause().getClass().isAssignableFrom(JMSException.class) ) &&
-				 ( ((JMSException)getCause()).getLinkedException() != null ) )   {
-				Exception le = ((JMSException)getCause()).getLinkedException();
+			if (getCause().getClass().isAssignableFrom(JMSException.class) &&
+				  ((JMSException)getCause()).getLinkedException() != null) {
+				Exception le = ((JMSException) getCause()).getLinkedException();
 					return super.getMessage() + "; nested exception is " + le.getClass().getName() +
-					": " + le.getMessage();					
-			} else {
+							": " + le.getMessage();
+			}
+			else {
 				return super.getMessage() + "; nested exception is " + getCause().getClass().getName() +
-					": " + getCause().getMessage();
+						": " + getCause().getMessage();
 			}
 		}
 	}
