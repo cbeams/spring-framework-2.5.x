@@ -74,11 +74,11 @@ public class XmlFlowBuilderTest extends TestCase {
 					throws FlowServiceLookupException {
 				if ("attribMapper1".equals(flowAttributesMapperId)) {
 					return new FlowAttributesMapper() {
-						public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowModel) {
+						public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
 							return new HashMap();
 						}
 	
-						public void mapToResumingParentFlow(AttributesAccessor endingSubFlowModel,
+						public void mapSubFlowOutputAttributes(AttributesAccessor endingSubFlowModel,
 								MutableAttributesAccessor resumingParentFlowModel) {
 						}
 					};

@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -104,7 +104,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 								+ "'; as a result, no attributes in the parent flow scope will be passed to the spawned subflow '"
 								+ subFlow.getId() + "'");
 			}
-			return Collections.EMPTY_MAP;
+			return new HashMap(1);
 		}
 	}
 
