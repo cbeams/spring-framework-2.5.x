@@ -270,6 +270,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @param command form object with request parameters bound onto it
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
+	 * @deprecated in favor of onSubmit(command, errors)
 	 * @see #onSubmit(Object, BindException)
 	 */
 	protected ModelAndView onSubmit(Object command) throws Exception {
