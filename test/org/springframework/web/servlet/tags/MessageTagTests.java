@@ -26,12 +26,12 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * @author Juergen Hoeller
@@ -281,10 +281,10 @@ public class MessageTagTests extends AbstractTagTests {
 	
 	public void testNullMessageSource() throws JspException {
 		PageContext pc = createPageContext();
-		ConfigurableApplicationContext ctx = (ConfigurableApplicationContext)pc.getRequest().getAttribute(
-		    DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		ConfigurableWebApplicationContext ctx = (ConfigurableWebApplicationContext)
+				RequestContextUtils.getWebApplicationContext(pc.getRequest(), pc.getServletContext());
 		ctx.close();
-		
+
 		MessageTag tag = new MessageTag();
 		tag.setPageContext(pc);
 		tag.setCode("test");
@@ -294,7 +294,7 @@ public class MessageTagTests extends AbstractTagTests {
 
 	public void testRequestContext() throws ServletException {
 		PageContext pc = createPageContext();
-		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest());
+		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest(), pc.getServletContext());
 		assertEquals("test message", rc.getMessage("test"));
 		assertEquals("test message", rc.getMessage("test", (Object[]) null));
 		assertEquals("test message", rc.getMessage("test", "default"));

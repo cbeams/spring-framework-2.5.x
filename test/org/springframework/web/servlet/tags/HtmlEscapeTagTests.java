@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.BodyTag;
 
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.util.WebUtils;
@@ -104,6 +105,78 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		tag.setDefaultHtmlEscape("false");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
+	}
+
+	public void testEscapeBody() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer result = new StringBuffer();
+		EscapeBodyTag tag = new EscapeBodyTag() {
+			protected String readBodyContent() {
+				return "test text";
+			}
+			protected void writeBodyContent(String content) {
+				result.append(content);
+			}
+		};
+		tag.setPageContext(pc);
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
+		assertEquals("test text", result.toString());
+	}
+
+	public void testEscapeBodyWithHtmlEscape() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer result = new StringBuffer();
+		EscapeBodyTag tag = new EscapeBodyTag() {
+			protected String readBodyContent() {
+				return "test & text";
+			}
+			protected void writeBodyContent(String content) {
+				result.append(content);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setHtmlEscape("true");
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
+		assertEquals("test &#38; text", result.toString());
+	}
+
+	public void testEscapeBodyWithJavaScriptEscape() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer result = new StringBuffer();
+		EscapeBodyTag tag = new EscapeBodyTag() {
+			protected String readBodyContent() {
+				return "' test & text \\";
+			}
+			protected void writeBodyContent(String content) {
+				result.append(content);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setJavaScriptEscape("true");
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
+		assertEquals("Correct content", "\\' test & text \\\\", result.toString());
+	}
+
+	public void testEscapeBodyWithHtmlEscapeAndJavaScriptEscape() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer result = new StringBuffer();
+		EscapeBodyTag tag = new EscapeBodyTag() {
+			protected String readBodyContent() {
+				return "' test & text \\";
+			}
+			protected void writeBodyContent(String content) {
+				result.append(content);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setHtmlEscape("true");
+		tag.setJavaScriptEscape("true");
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
+		assertEquals("Correct content", "\\' test &#38; text \\\\", result.toString());
 	}
 
 }

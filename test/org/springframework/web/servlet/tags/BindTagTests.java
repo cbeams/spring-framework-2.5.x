@@ -17,6 +17,9 @@
 package org.springframework.web.servlet.tags;
 
 import java.beans.PropertyEditorSupport;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
@@ -24,6 +27,7 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -34,37 +38,6 @@ import org.springframework.web.servlet.support.BindStatus;
  * @author Alef Arendsen
  */
 public class BindTagTests extends AbstractTagTests {
-
-	public void testBindErrorsTagWithErrors() throws JspException {
-		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
-		errors.reject("test", null, "test");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
-		BindErrorsTag tag = new BindErrorsTag();
-		tag.setPageContext(pc);
-		tag.setName("tb");
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Has errors variable", pc.getAttribute(BindErrorsTag.ERRORS_VARIABLE_NAME) == errors);
-	}
-
-	public void testBindErrorsTagWithoutErrors() throws JspException {
-		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
-		BindErrorsTag tag = new BindErrorsTag();
-		tag.setPageContext(pc);
-		tag.setName("tb");
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.SKIP_BODY);
-		assertTrue("Doesn't have errors variable", pc.getAttribute(BindErrorsTag.ERRORS_VARIABLE_NAME) == null);
-	}
-
-	public void testBindErrorsTagWithoutBean() throws JspException {
-		PageContext pc = createPageContext();
-		BindErrorsTag tag = new BindErrorsTag();
-		tag.setPageContext(pc);
-		tag.setName("tb");
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.SKIP_BODY);
-	}
 
 	public void testBindTagWithoutErrors() throws JspException {
 		PageContext pc = createPageContext();
@@ -138,7 +111,7 @@ public class BindTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertEquals("Error messages String should be 'message1'",
-								 status.getErrorMessagesAsString(","), "message1");
+				status.getErrorMessagesAsString(","), "message1");
 
 		// two errors
 		pc = createPageContext();
@@ -152,7 +125,7 @@ public class BindTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertEquals("Error messages String should be 'message1,message2'",
-								 status.getErrorMessagesAsString(","), "message1,message2");
+				status.getErrorMessagesAsString(","), "message1,message2");
 
 		// no errors
 		pc = createPageContext();
@@ -163,8 +136,7 @@ public class BindTagTests extends AbstractTagTests {
 		tag.setPath("tb");
 		tag.doStartTag();
 		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
-		assertEquals("Error messages String should be ''",
-								 status.getErrorMessagesAsString(","), "");
+		assertEquals("Error messages String should be ''", status.getErrorMessagesAsString(","), "");
 	}
 
 	public void testBindTagWithFieldErrors() throws JspException {
@@ -196,7 +168,8 @@ public class BindTagTests extends AbstractTagTests {
 		assertTrue("Correct errorMessage", "message &#38; 1".equals(status.getErrorMessage()));
 		assertTrue("Correct errorMessage", "message &#38; 1".equals(status.getErrorMessages()[0]));
 		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
-		assertTrue("Correct errorMessagesAsString", "message &#38; 1 - message2".equals(status.getErrorMessagesAsString(" - ")));
+		assertTrue("Correct errorMessagesAsString",
+				"message &#38; 1 - message2".equals(status.getErrorMessagesAsString(" - ")));
 
 		tag = new BindTag();
 		tag.setPageContext(pc);
@@ -402,6 +375,348 @@ public class BindTagTests extends AbstractTagTests {
 		catch (JspException ex) {
 			// expected
 		}
+	}
+
+
+	public void testBindErrorsTagWithoutErrors() throws JspException {
+		PageContext pc = createPageContext();
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		BindErrorsTag tag = new BindErrorsTag();
+		tag.setPageContext(pc);
+		tag.setName("tb");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.SKIP_BODY);
+		assertTrue("Doesn't have errors variable", pc.getAttribute(BindErrorsTag.ERRORS_VARIABLE_NAME) == null);
+	}
+
+	public void testBindErrorsTagWithErrors() throws JspException {
+		PageContext pc = createPageContext();
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		errors.reject("test", null, "test");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		BindErrorsTag tag = new BindErrorsTag();
+		tag.setPageContext(pc);
+		tag.setName("tb");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertTrue("Has errors variable", pc.getAttribute(BindErrorsTag.ERRORS_VARIABLE_NAME) == errors);
+	}
+
+	public void testBindErrorsTagWithoutBean() throws JspException {
+		PageContext pc = createPageContext();
+		BindErrorsTag tag = new BindErrorsTag();
+		tag.setPageContext(pc);
+		tag.setName("tb");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.SKIP_BODY);
+	}
+
+
+	public void testNestedPathDoEndTag() throws JspException {
+		PageContext pc = createPageContext();
+		NestedPathTag tag = new NestedPathTag();
+		tag.setPath("foo");
+		tag.setPageContext(pc);
+		tag.doStartTag();
+		int returnValue = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, returnValue);
+		assertEquals("", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+	}
+
+	public void testNestedPathDoEndTagWithNesting() throws JspException {
+		PageContext pc = createPageContext();
+		NestedPathTag tag = new NestedPathTag();
+		tag.setPath("foo");
+		tag.setPageContext(pc);
+		tag.doStartTag();
+
+		NestedPathTag anotherTag = new NestedPathTag();
+		anotherTag.setPageContext(pc);
+		anotherTag.setPath("bar");
+		anotherTag.doStartTag();
+		anotherTag.doEndTag();
+
+		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+
+		tag.doEndTag();
+		assertEquals("", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+	}
+
+	public void testNestedPathDoStartTagInternal() throws JspException {
+		PageContext pc = createPageContext();
+		NestedPathTag tag = new NestedPathTag();
+		tag.setPath("foo");
+		tag.setPageContext(pc);
+		int returnValue = tag.doStartTag();
+
+		assertEquals(Tag.EVAL_BODY_INCLUDE, returnValue);
+		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+	}
+
+	public void testNestedPathDoStartTagInternalWithNesting() throws JspException {
+		PageContext pc = createPageContext();
+		NestedPathTag tag = new NestedPathTag();
+		tag.setPath("foo");
+		tag.setPageContext(pc);
+		tag.doStartTag();
+		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+
+		NestedPathTag anotherTag = new NestedPathTag();
+		anotherTag.setPageContext(pc);
+		anotherTag.setPath("bar");
+		anotherTag.doStartTag();
+
+		assertEquals("foo.bar.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+
+		NestedPathTag yetAnotherTag = new NestedPathTag();
+		yetAnotherTag.setPageContext(pc);
+		yetAnotherTag.setPath("boo");
+		yetAnotherTag.doStartTag();
+
+		assertEquals("foo.bar.boo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+
+		yetAnotherTag.doEndTag();
+
+		NestedPathTag andAnotherTag = new NestedPathTag();
+		andAnotherTag.setPageContext(pc);
+		andAnotherTag.setPath("boo2");
+		andAnotherTag.doStartTag();
+
+		assertEquals("foo.bar.boo2.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+	}
+
+	public void testNestedPathWithBindTag() throws JspException {
+		PageContext pc = createPageContext();
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+
+		NestedPathTag tag = new NestedPathTag();
+		tag.setPath("tb");
+		tag.setPageContext(pc);
+		tag.doStartTag();
+
+		BindTag bindTag = new BindTag();
+		bindTag.setPageContext(pc);
+		bindTag.setPath("name");
+
+		assertTrue("Correct doStartTag return value", bindTag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		org.springframework.web.servlet.tags.BindStatus status = (org.springframework.web.servlet.tags.BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertEquals("tb.name", status.getPath());
+	}
+
+	public void testNestedPathWithBindTagWithIgnoreNestedPath() throws JspException {
+		PageContext pc = createPageContext();
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb2").getErrors();
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb2", errors);
+
+		NestedPathTag tag = new NestedPathTag();
+		tag.setPath("tb");
+		tag.setPageContext(pc);
+		tag.doStartTag();
+
+		BindTag bindTag = new BindTag();
+		bindTag.setPageContext(pc);
+		bindTag.setIgnoreNestedPath(true);
+		bindTag.setPath("tb2.name");
+
+		assertTrue("Correct doStartTag return value", bindTag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		org.springframework.web.servlet.tags.BindStatus status = (org.springframework.web.servlet.tags.BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertEquals("tb2.name", status.getPath());
+	}
+
+
+	public void testTransformTagCorrectBehavior() throws JspException {
+		// first set up the pagecontext and the bean
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		CustomDateEditor l = new CustomDateEditor(df, true);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+
+		// execute the bind tag using the date property
+		BindTag bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.date");
+		bind.doStartTag();
+
+		// transform stuff
+		TransformTag transform = new TransformTag();
+		transform.setPageContext(pc);
+		pc.setAttribute("date", tb.getDate());
+		transform.setParent(bind);
+		transform.setValue("${date}");
+		transform.setVar("theDate");
+		transform.doStartTag();
+
+		assertNotNull(pc.getAttribute("theDate"));
+		assertEquals(pc.getAttribute("theDate"), df.format(tb.getDate()));
+
+		// try another time, this time using Strings
+		bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.name");
+		bind.doStartTag();
+
+		transform = new TransformTag();
+		transform.setPageContext(pc);
+		pc.setAttribute("string", "name");
+		transform.setValue("${string}");
+		transform.setParent(bind);
+		transform.setVar("theString");
+		transform.doStartTag();
+
+		assertNotNull(pc.getAttribute("theString"));
+		assertEquals(pc.getAttribute("theString"), "name");
+	}
+
+	public void testTransformTagWithHtmlEscape() throws JspException {
+		// first set up the PageContext and the bean
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		CustomDateEditor l = new CustomDateEditor(df, true);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+
+		// try another time, this time using Strings
+		BindTag bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.name");
+		bind.doStartTag();
+
+		TransformTag transform = new TransformTag();
+		transform.setPageContext(pc);
+		pc.setAttribute("string", "na<me");
+		transform.setValue("${string}");
+		transform.setParent(bind);
+		transform.setVar("theString");
+		transform.setHtmlEscape("true");
+		transform.doStartTag();
+
+		assertNotNull(pc.getAttribute("theString"));
+		assertEquals(pc.getAttribute("theString"), "na&#60;me");
+	}
+
+	public void testTransformTagOutsideBindTag() throws JspException {
+		// first set up the pagecontext and the bean
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		CustomDateEditor l = new CustomDateEditor(df, true);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+
+		// now try to execute the tag outside a bindtag
+		TransformTag transform = new TransformTag();
+		transform.setPageContext(pc);
+		transform.setVar("var");
+		transform.setValue("bla");
+		try {
+			transform.doStartTag();
+			fail("Tag can be executed outside BindTag");
+		}
+		catch (JspException e) {
+			// this is ok!
+		}
+
+		// now try to execute the tag outside a bindtag, but inside a messageTag
+		MessageTag message = new MessageTag();
+		message.setPageContext(pc);
+		transform = new TransformTag();
+		transform.setPageContext(pc);
+		transform.setVar("var");
+		transform.setValue("bla");
+		transform.setParent(message);
+		try {
+			transform.doStartTag();
+			fail("Tag can be executed outside BindTag and inside messagtag");
+		}
+		catch (JspException e) {
+			// this is ok!
+		}
+	}
+
+	public void testTransformTagNonExistingValue() throws JspException {
+		// first set up the pagecontext and the bean
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		CustomDateEditor l = new CustomDateEditor(df, true);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+
+		// try with non-existing value
+		BindTag bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.name");
+		bind.doStartTag();
+
+		TransformTag transform = new TransformTag();
+		transform.setPageContext(pc);
+		transform.setValue("${string2}");
+		transform.setParent(bind);
+		transform.setVar("theString2");
+		transform.doStartTag();
+
+		assertNull(pc.getAttribute("theString2"));
+	}
+
+	public void testTransformTagWithSettingOfScope() throws JspException {
+		// first set up the pagecontext and the bean
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		CustomDateEditor l = new CustomDateEditor(df, true);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+
+		// execute the bind tag using the date property
+		BindTag bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.date");
+		bind.doStartTag();
+
+		// transform stuff
+		TransformTag transform = new TransformTag();
+		transform.setPageContext(pc);
+		pc.setAttribute("date", tb.getDate());
+		transform.setParent(bind);
+		transform.setValue("${date}");
+		transform.setVar("theDate");
+		transform.setScope("page");
+		transform.doStartTag();
+
+		transform.release();
+
+		assertNotNull(pc.getAttribute("theDate"));
+		assertEquals(pc.getAttribute("theDate"), df.format(tb.getDate()));
+
+		// try another time, this time using Strings
+		bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.name");
+		bind.doStartTag();
+
+		transform = new TransformTag();
+		transform.setPageContext(pc);
+		pc.setAttribute("string", "name");
+		pc.setAttribute("scopy", "page");
+		transform.setValue("${string}");
+		transform.setParent(bind);
+		transform.setVar("theString");
+		transform.setScope("${scopy}");
+		transform.doStartTag();
+
+		transform.release();
+
+		assertNotNull(pc.getAttribute("theString"));
+		assertEquals(pc.getAttribute("theString"), "name");
 	}
 
 }

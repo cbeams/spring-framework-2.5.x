@@ -67,7 +67,8 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 				if (!(this.pageContext.getRequest() instanceof HttpServletRequest)) {
 					throw new JspException("RequestContextAwareTag just supports HTTP requests");
 				}
-				this.requestContext =	new RequestContext((HttpServletRequest) this.pageContext.getRequest());
+				this.requestContext =	new RequestContext(
+						(HttpServletRequest) this.pageContext.getRequest(), this.pageContext.getServletContext());
 				pageContext.setAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE, this.requestContext);
 			}
 			return doStartTagInternal();
