@@ -80,11 +80,9 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 * Called by doStartTag to perform the actual work.
 	 * @return same as TagSupport.doStartTag
 	 * @throws Exception any exception, any checked one other than
-	 * JspException gets wrapped in a JspException by doStartTag
+	 * a JspException gets wrapped in a JspException by doStartTag
 	 * @see javax.servlet.jsp.tagext.TagSupport#doStartTag
 	 */
-	protected int doStartTagInternal() throws Exception {
-		return super.doStartTag();
-	}
+	protected abstract int doStartTagInternal() throws Exception;
 
 }
