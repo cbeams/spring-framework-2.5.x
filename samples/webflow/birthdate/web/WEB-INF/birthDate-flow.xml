@@ -19,22 +19,22 @@
 		editors are available for form display.
 	-->
 	<action-state id="setupForm">
-		<action name="prepare" bean="birthDateFormAction"/>
-		<transition on="prepare.success" to="formView"/>
+		<action bean="birthDateFormAction"/>
+		<transition on="success" to="formView"/>
 	</action-state>
 	
 	<!--
 		Display the input form view.
 	-->
 	<view-state id="formView" view="enterBirthDate">
-		<transition on="submit" to="bindAndValidate"/>
+		<transition on="submit" to="bindAndValidateForm"/>
 	</view-state>
 	
 	<!--
 		Bind and validate input data from the form. This is similar to the bindAndValidate()
 		method of the SimpleFormController.
 	-->
-	<action-state id="bindAndValidate">
+	<action-state id="bindAndValidateForm">
 		<action name="bindAndValidate" bean="birthDateFormAction"/>
 		<transition on="bindAndValidate.success" to="calculateAge"/>
 		<transition on="bindAndValidate.error" to="formView"/>
