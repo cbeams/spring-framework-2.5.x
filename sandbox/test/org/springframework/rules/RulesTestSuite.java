@@ -25,7 +25,6 @@ import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
-import org.springframework.samples.petclinic.Person;
 
 /**
  * @author Keith Donald
