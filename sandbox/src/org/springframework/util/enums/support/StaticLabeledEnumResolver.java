@@ -18,7 +18,6 @@ package org.springframework.util.enums.support;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -43,7 +42,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 		return INSTANCE;
 	}
 
-	protected Map findLocalizedEnums(String type, Locale locale) {
+	protected Map findLabeledEnums(String type) {
 		final Map enums = new TreeMap();
 		try {
 			new LabeledEnumFieldValueGenerator(ClassUtils.forName(type)).run(new Block() {
@@ -59,26 +58,6 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 			throw iae;
 		}
 		return enums;
-	}
-
-	/**
-	 * Call to register all the statically defined enumerations for a specific
-	 * enumeration <code>Class</code>.
-	 * <p>
-	 * Iterates over the static fields of the class and adds all instances of
-	 * <code>LabeledEnum</code> to the list resolvable by this resolver.
-	 * 
-	 * @param clazz The enum class.
-	 */
-	public void registerStaticEnums(final Class clazz) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering statically defined coded enums for class " + clazz);
-		}
-		new LabeledEnumFieldValueGenerator(clazz).run(new Block() {
-			protected void handle(Object value) {
-				add((LabeledEnum)value);
-			}
-		});
 	}
 
 	/**
@@ -117,19 +96,19 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 		}
 	}
 
-	public LabeledEnum getEnum(Class type, Comparable code) {
-		return getEnum(type.getName(), code, null);
+	public LabeledEnum getLabeledEnum(Class type, Comparable code) {
+		return getLabeledEnum(type.getName(), code);
 	}
 
-	public LabeledEnum getRequiredEnum(Class type, Comparable code) {
-		return getRequiredEnum(type.getName(), code, null);
+	public LabeledEnum getRequiredLabeledEnum(Class type, Comparable code) {
+		return getRequiredEnum(type.getName(), code);
 	}
 
-	public Collection getEnumAsCollection(Class type) {
-		return getEnumsAsCollection(type.getName(), null);
+	public Collection getLabeledEnumCollection(Class type) {
+		return getLabeledEnumCollection(type.getName());
 	}
 
-	public Map getEnumAsMap(Class type) {
-		return getEnumsAsMap(type.getName(), null);
+	public Map getLabeledEnumMap(Class type) {
+		return getLabeledEnumMap(type.getName());
 	}
 }

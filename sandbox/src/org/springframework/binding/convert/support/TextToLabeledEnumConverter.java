@@ -15,8 +15,6 @@
  */
 package org.springframework.binding.convert.support;
 
-import java.util.Locale;
-
 import org.springframework.util.StringUtils;
 import org.springframework.util.enums.LabeledEnum;
 import org.springframework.util.enums.LabeledEnumResolver;
@@ -43,14 +41,10 @@ public class TextToLabeledEnumConverter extends AbstractConverter {
 		return new Class[] { LabeledEnum.class };
 	}
 
-	protected Locale getLocale() {
-		return null;
-	}
-
 	protected Object doConvert(Object source, Class targetClass) throws Exception {
 		String text = (String)source;
 		if (StringUtils.hasText(text)) {
-			return this.enumResolver.getEnum(targetClass.getName(), (Comparable)source, getLocale());
+			return this.enumResolver.getLabeledEnum(targetClass.getName(), (Comparable)source);
 		}
 		else {
 			return null;

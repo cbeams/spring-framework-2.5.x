@@ -18,31 +18,34 @@ package org.springframework.util.enums.support.hibernate;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.orm.hibernate.HibernateTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.support.Block;
 import org.springframework.util.enums.LabeledEnum;
-import org.springframework.util.enums.support.AbstractLabeledEnumResolver;
+import org.springframework.util.enums.LabeledEnumResolver;
 
 /**
- * A enum resolver that loads enums using the <code>Hibernate</code> data access apis.
+ * A enum resolver that loads enums using the <code>Hibernate</code> data
+ * access apis.
  * @author Keith Donald
  */
-public class HibernateLabeledEnumResolver extends AbstractLabeledEnumResolver {
+public class HibernateLabeledEnumResolver implements LabeledEnumResolver {
 
+	private final Log logger = LogFactory.getLog(getClass());
+	
 	private HibernateTemplate hibernateTemplate;
 
 	public HibernateLabeledEnumResolver(HibernateTemplate template) {
-		super(false);
 		Assert.notNull(template, "The hibernate template is required");
 		this.hibernateTemplate = template;
 	}
 
-	public LabeledEnum getEnum(String type, Comparable code, Locale locale) {
+	public LabeledEnum getLabeledEnum(String type, Comparable code) {
 		try {
 			Class clazz = ClassUtils.forName(type);
 			if (logger.isDebugEnabled()) {
@@ -64,7 +67,11 @@ public class HibernateLabeledEnumResolver extends AbstractLabeledEnumResolver {
 		}
 	}
 
-	public Collection getEnumsAsCollection(String type, Locale locale) {
+	public LabeledEnum getLabeledEnum(String type, String label) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Collection getLabeledEnumCollection(String type) {
 		try {
 			Class clazz = ClassUtils.forName(type);
 			if (logger.isDebugEnabled()) {
@@ -80,8 +87,8 @@ public class HibernateLabeledEnumResolver extends AbstractLabeledEnumResolver {
 		}
 	}
 
-	public Map getEnumsAsMap(String type, Locale locale) {
-		Collection all = getEnumsAsCollection(type, locale);
+	public Map getLabeledEnumMap(String type) {
+		Collection all = getLabeledEnumCollection(type);
 		final Map map = new HashMap(all.size());
 		new Block() {
 			protected void handle(Object o) {

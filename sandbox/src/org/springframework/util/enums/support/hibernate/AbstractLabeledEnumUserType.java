@@ -43,17 +43,17 @@ public abstract class AbstractLabeledEnumUserType implements UserType, Serializa
 
 	private transient final Log logger = LogFactory.getLog(getClass());
 
-	private transient LabeledEnumResolver enumResolver = StaticLabeledEnumResolver.instance();
+	private transient LabeledEnumResolver resolver = StaticLabeledEnumResolver.instance();
 
-	protected LabeledEnumResolver getEnumResolver() {
-		if (enumResolver == null) {
+	protected LabeledEnumResolver getResolver() {
+		if (resolver == null) {
 			return StaticLabeledEnumResolver.instance();
 		}
-		return enumResolver;
+		return resolver;
 	}
 
-	public void setEnumResolver(LabeledEnumResolver resolver) {
-		this.enumResolver = resolver;
+	public void setResolver(LabeledEnumResolver resolver) {
+		this.resolver = resolver;
 	}
 
 	public int[] sqlTypes() {
@@ -85,7 +85,7 @@ public abstract class AbstractLabeledEnumUserType implements UserType, Serializa
 		if (code == null) {
 			return null;
 		}
-		LabeledEnum e = enumResolver.getEnum(enumType(), code, null);
+		LabeledEnum e = resolver.getLabeledEnum(enumType(), code);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolved enum '" + e + "' of type '" + enumType() + "' from persisted code " + code);
 		}

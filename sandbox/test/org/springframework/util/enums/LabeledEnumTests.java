@@ -28,14 +28,14 @@ import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 public class LabeledEnumTests extends TestCase {
 
 	public void testForCodeFound() {
-		Dog golden = (Dog) StaticLabeledEnumResolver.instance().getEnum(Dog.class, new Short((short) 11));
-		Dog borderCollie = (Dog) StaticLabeledEnumResolver.instance().getEnum(Dog.class, new Short((short) 13));
+		Dog golden = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short) 11));
+		Dog borderCollie = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short) 13));
 		assertSame(golden, Dog.GOLDEN_RETRIEVER);
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
 	}
 
 	public void testDoesNotMatchWrongClass() {
-		LabeledEnum none = StaticLabeledEnumResolver.instance().getEnum(Dog.class, new Short((short) 1));
+		LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short) 1));
 		assertEquals(null, none);
 	}
 

@@ -16,13 +16,10 @@
 package org.springframework.util.enums;
 
 import java.util.Collection;
-import java.util.Locale;
 import java.util.Map;
 
 /**
- * Interface for looking up <code>LabeledEnum</code> instances. If you require
- * localized enumerations, use the Locale parameter to specify the locale to
- * use.
+ * Interface for looking up <code>LabeledEnum</code> instances.
  * @author Keith Donald
  */
 public interface LabeledEnumResolver {
@@ -31,27 +28,33 @@ public interface LabeledEnumResolver {
 	 * Returns a set of enumerations of a particular type. Each element in the
 	 * list should be an instance of LabeledEnum.
 	 * @param type the enum type
-	 * @param locale the locale
 	 * @return A list of localized enumeration instances for the provided type.
 	 */
-	public Collection getEnumsAsCollection(String type, Locale locale);
+	public Collection getLabeledEnumCollection(String type);
 
 	/**
 	 * Returns a map of enumerations of a particular type. Each element in the
 	 * map should be a key->value pair, where the key is the enum code, and the
 	 * value is the <code>LabeledEnum</code> instance.
 	 * @param type the enum type
-	 * @param locale the locale
 	 * @return A map of localized enumeration instances.
 	 */
-	public Map getEnumsAsMap(String type, Locale locale);
+	public Map getLabeledEnumMap(String type);
 
 	/**
 	 * Resolves a single <code>LabeledEnum</code> by its identifying code.
 	 * @param type the enum type
 	 * @param code the enum code
-	 * @param locale the locale
 	 * @return The enum, or <code>null</code> if not found.
 	 */
-	public LabeledEnum getEnum(String type, Comparable code, Locale locale);
+	public LabeledEnum getLabeledEnum(String type, Comparable code);
+
+	/**
+	 * Resolves a single <code>LabeledEnum</code> by its identifying code.
+	 * @param type the enum type
+	 * @param label the enum label
+	 * @return The enum, or <code>null</code> if not found.
+	 */
+	public LabeledEnum getLabeledEnum(String type, String label);
+
 }

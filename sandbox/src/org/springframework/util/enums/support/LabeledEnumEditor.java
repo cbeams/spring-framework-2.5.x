@@ -131,7 +131,7 @@ public class LabeledEnumEditor extends PropertyEditorSupport {
 				}
 			}
 		}
-		LabeledEnum ce = this.enumResolver.getEnum(type, code, getLocale());
+		LabeledEnum ce = this.enumResolver.getLabeledEnum(type, code);
 		if (!allowsEmpty) {
 			Assert.notNull(ce, "The encoded code '" + encodedCode + "' did not map to a valid enum instance for type "
 					+ type);

@@ -17,74 +17,51 @@ package org.springframework.util.enums.support;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.Styler;
+import org.springframework.util.CachingMapTemplate;
 import org.springframework.util.enums.LabeledEnum;
 import org.springframework.util.enums.LabeledEnumResolver;
 
 /**
- * Abstract base class for localized coded enum resolvers.
+ * Abstract base class for labeled enum resolvers.
  * @author Keith Donald
  */
 public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver {
 	protected transient final Log logger = LogFactory.getLog(getClass());
 
-	private Map localeCache;
-
-	private boolean caching = true;
+	private CachingMapTemplate labeledEnumCache = new CachingMapTemplate() {
+		protected Object create(Object key) {
+			Map typeEnums = findLabeledEnums((String)key);
+			if (typeEnums != null) {
+				return typeEnums;
+			}
+			else {
+				return Collections.unmodifiableMap(Collections.EMPTY_MAP);
+			}
+		}
+	};
 
 	protected AbstractLabeledEnumResolver() {
 	}
 
-	protected AbstractLabeledEnumResolver(boolean caching) {
-		setCaching(caching);
+	public Collection getLabeledEnumCollection(String type) {
+		return Collections.unmodifiableSet(new TreeSet(getLabeledEnumMap(type).values()));
 	}
 
-	public void setCaching(boolean caching) {
-		this.caching = caching;
-	}
-
-	public Collection getEnumsAsCollection(String type, Locale locale) {
-		return Collections.unmodifiableSet(new TreeSet(getEnumsAsMap(type, locale).values()));
-	}
-
-	public Map getEnumsAsMap(String type, Locale locale) {
+	public Map getLabeledEnumMap(String type) {
 		Assert.notNull(type, "No type specified");
-		Map typeEnums;
-		if (caching) {
-			Map localizedEnumTypes = getLocaleEnums(locale);
-			typeEnums = (Map)localizedEnumTypes.get(type);
-			if (typeEnums == null) {
-				typeEnums = findLocalizedEnums(type, locale);
-				if (typeEnums == null) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("No enum types found for locale " + locale + "; returning empty map.");
-					}
-					return Collections.unmodifiableMap(Collections.EMPTY_MAP);
-				}
-				localizedEnumTypes.put(type, typeEnums);
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Returned map of enums of type '" + type + "; map contents="
-						+ Styler.call(typeEnums));
-			}
-		}
-		else {
-			typeEnums = findLocalizedEnums(type, locale);
-		}
+		Map typeEnums = (Map)labeledEnumCache.get(type);
 		return Collections.unmodifiableMap(typeEnums);
 	}
 
-	public LabeledEnum getEnum(String type, Comparable code, Locale locale) {
+	public LabeledEnum getLabeledEnum(String type, Comparable code) {
 		Assert.notNull(code, "No enum code specified");
-		Map typeEnums = getEnumsAsMap(type, locale);
+		Map typeEnums = getLabeledEnumMap(type);
 		LabeledEnum codedEnum = (LabeledEnum)typeEnums.get(code);
 		if (codedEnum == null) {
 			logger.info("No enum found of type '" + type + "' with '" + code.getClass() + " code " + code
@@ -93,51 +70,20 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 		return codedEnum;
 	}
 
-	private Map getLocaleEnums(Locale locale) {
-		synchronized (this) {
-			if (localeCache == null) {
-				this.localeCache = new HashMap();
-			}
-		}
-		Map m = (Map)localeCache.get(locale);
-		if (m == null) {
-			m = new HashMap();
-			localeCache.put(locale, m);
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Returning enum type map for locale " + locale);
-		}
-		return m;
+	public LabeledEnum getLabeledEnum(String type, String label) {
+		throw new UnsupportedOperationException();
 	}
 
-	protected void put(Locale locale, LabeledEnum codedEnum) {
-		Map localizedTypes = getLocaleEnums(locale);
-		Map typeEnums = (Map)localizedTypes.get(codedEnum.getType());
-		if (typeEnums == null) {
-			typeEnums = new HashMap();
-			localizedTypes.put(codedEnum.getType(), typeEnums);
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering enum of type '" + codedEnum.getType() + "', details=" + codedEnum);
-		}
-		typeEnums.put(codedEnum.getCode(), codedEnum);
-	}
-
-	protected void add(LabeledEnum codedEnum) {
-		put(null, codedEnum);
-	}
-
-	public LabeledEnum getRequiredEnum(String type, Comparable code, Locale locale) throws IllegalStateException {
-		LabeledEnum codedEnum = getEnum(type, code, locale);
+	public LabeledEnum getRequiredEnum(String type, Comparable code) throws IllegalStateException {
+		LabeledEnum codedEnum = getLabeledEnum(type, code);
 		if (codedEnum == null) {
-			throw new IllegalStateException("Enum does not exist with type '" + type + "', code " + code
-					+ ", and locale " + locale);
+			throw new IllegalStateException("Enum does not exist with type '" + type + "', code " + code);
 		}
 		return codedEnum;
 	}
 
-	protected Map findLocalizedEnums(String type, Locale locale) {
-		logger.info("Assuming no enums exist for type " + type + " and locale " + locale);
+	protected Map findLabeledEnums(String type) {
+		logger.info("Assuming no enums exist for type " + type + "'");
 		return null;
 	}
 }
