@@ -124,7 +124,6 @@ public class SimpleEvent extends Event {
 	 * Set the event identifier.
 	 */
 	protected void setId(String id) {
-		Assert.hasText(id, "The event id is required - signaled events must be identified!");
 		this.id = id;
 	}
 
