@@ -48,6 +48,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.CollectionFactory;
 
@@ -176,29 +177,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		applyPropertyValues(beanName, bd, createBeanWrapper(existingBean), bd.getPropertyValues());
 	}
 
-	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
+	/**
+	 * Apply InstantiationAwareBeanPostProcessors to the given existing bean instance,
+	 * invoking their <code>postProcessBeforeInstantiation</code> methods.
+	 * The returned bean instance may be a wrapper around the original.
+	 * @param beanClass the class of the bean to be instantiated
+	 * @param beanName the name of the bean
+	 * @return the bean object to use instead of a default instance of the target bean
+	 * @throws BeansException if any post-processing failed
+	 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
+	 */
+	protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName)
 			throws BeansException {
-		return applyBeanPostProcessorsBeforeInitialization(existingBean, beanName, null);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking BeanPostProcessors before instantiaion of bean '" + beanName + "'");
+		}
+		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+			if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+				Object result = ((InstantiationAwareBeanPostProcessor) beanProcessor).postProcessBeforeInstantiation(
+						beanClass, beanName);
+				if (result != null) {
+					return result;
+				}
+			}
+		}
+		return null;
 	}
 
-	/**
-	 * Apply BeanPostProcessors to the given bean instance,
-	 * invoking their postProcessBeforeInitialization methods.
-	 * The returned bean instance may be a wrapper around the original.
-	 * @param bean the bean instance
-	 * @param beanName the name of the bean
-	 * @param mergedBeanDefinition the corresponding bean definition,
-	 * for checking destroy methods (can be null)
-	 * @return the bean instance to use, either the original or a wrapped one
-	 * @throws BeansException if any post-processing failed
-	 * @see BeanPostProcessor#postProcessBeforeInitialization
-	 */
-	public Object applyBeanPostProcessorsBeforeInitialization(
-			Object bean, String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
+	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
+			throws BeansException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking BeanPostProcessors before initialization of bean '" + beanName + "'");
 		}
-		Object result = bean;
+		Object result = existingBean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			result = beanProcessor.postProcessBeforeInitialization(result, beanName);
@@ -213,27 +225,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
-		return applyBeanPostProcessorsAfterInitialization(existingBean, beanName, null);
-	}
-
-	/**
-	 * Apply BeanPostProcessors to the given bean instance,
-	 * invoking their postProcessAfterInitialization methods.
-	 * The returned bean instance may be a wrapper around the original.
-	 * @param bean the bean instance
-	 * @param beanName the name of the bean
-	 * @param mergedBeanDefinition the corresponding bean definition,
-	 * for checking destroy methods (can be null)
-	 * @return the bean instance to use, either the original or a wrapped one
-	 * @throws BeansException if any post-processing failed
-	 * @see BeanPostProcessor#postProcessAfterInitialization
-	 */
-	public Object applyBeanPostProcessorsAfterInitialization(
-			Object bean, String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking BeanPostProcessors after initialization of bean '" + beanName + "'");
 		}
-		Object result = bean;
+		Object result = existingBean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			result = beanProcessor.postProcessAfterInitialization(result, beanName);
@@ -281,15 +276,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					"' with merged definition [" + mergedBeanDefinition + "]");
 		}
 
+		Object bean = null;
+
+		// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+		if (mergedBeanDefinition.hasBeanClass()) {
+			bean = applyBeanPostProcessorsBeforeInstantiation(mergedBeanDefinition.getBeanClass(), beanName);
+			if (bean != null) {
+				return bean;
+			}
+		}
+
+		// Guarantee initialization of beans that the current one depends on.
 		if (mergedBeanDefinition.getDependsOn() != null) {
 			for (int i = 0; i < mergedBeanDefinition.getDependsOn().length; i++) {
-				// Guarantee initialization of beans that the current one depends on.
 				getBean(mergedBeanDefinition.getDependsOn()[i]);
 			}
 		}
 
 		BeanWrapper instanceWrapper = null;
-		Object bean = null;
 		Object originalBean = null;
 		String errorMessage = null;
 		boolean eagerlyCached = false;
@@ -339,9 +343,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 
 			originalBean = bean;
-			bean = applyBeanPostProcessorsBeforeInitialization(bean, beanName, mergedBeanDefinition);
+			bean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 			invokeInitMethods(beanName, bean, mergedBeanDefinition);
-			bean = applyBeanPostProcessorsAfterInitialization(bean, beanName, mergedBeanDefinition);
+			bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 		}
 		catch (BeanCreationException ex) {
 			if (eagerlyCached) {
