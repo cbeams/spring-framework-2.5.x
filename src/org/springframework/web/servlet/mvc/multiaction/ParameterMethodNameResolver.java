@@ -54,7 +54,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Colin Sampaleanu
  * @see #setParamName
  * @see #setDefaultMethodName
- * @see #setMappings(String[])
+ * @see #setParamNameList(String[])
  */
 public class ParameterMethodNameResolver implements MethodNameResolver {
 
