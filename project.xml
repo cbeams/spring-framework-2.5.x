@@ -39,7 +39,7 @@
         the connection element has the form:
         scm:<system>:<system specific connection string> -->
    <repository>
-      <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/springframework:spring</connection>
+<!--      <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/springframework:spring</connection> -->
       <developerConnection>scm:cvs:ext:${maven.username}@cvs.sourceforge.net:/cvsroot/springframework:spring</developerConnection>
       <url>http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/springframework/spring/</url>
    </repository>
