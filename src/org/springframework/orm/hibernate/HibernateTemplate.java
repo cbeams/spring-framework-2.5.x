@@ -7,7 +7,6 @@ import java.util.List;
 
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
-import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Query;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
@@ -149,14 +148,11 @@ public class HibernateTemplate extends HibernateAccessor {
 			flushIfNecessary(session, existingTransaction);
 			return result;
 		}
-		catch (SQLException ex) {
-			throw convertJdbcAccessException(ex);
-		}
-		catch (JDBCException ex) {
-			throw convertJdbcAccessException(ex.getSQLException());
-		}
 		catch (HibernateException ex) {
 			throw convertHibernateAccessException(ex);
+		}
+		catch (SQLException ex) {
+			throw convertJdbcAccessException(ex);
 		}
 		catch (RuntimeException ex) {
 			// callback code threw application exception

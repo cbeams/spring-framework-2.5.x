@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
+import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import org.apache.commons.logging.Log;
@@ -185,12 +186,22 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception from
-	 * the org.springframework.dao hierarchy. Can be overridden in subclasses.
+	 * the org.springframework.dao hierarchy. Will automatically detect
+	 * wrapped SQLExceptions and convert them accordingly.
+	 * <p>The default implementation delegates to SessionFactoryUtils
+	 * and convertJdbcAccessException. Can be overridden in subclasses.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
+	 * @see #convertJdbcAccessException
+	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */
 	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
-		return SessionFactoryUtils.convertHibernateAccessException(ex);
+		if (ex instanceof JDBCException) {
+			return convertJdbcAccessException(((JDBCException) ex).getSQLException());
+		}
+		else {
+			return SessionFactoryUtils.convertHibernateAccessException(ex);
+		}
 	}
 
 	/**

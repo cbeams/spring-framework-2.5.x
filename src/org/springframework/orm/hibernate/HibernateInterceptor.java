@@ -1,9 +1,8 @@
 package org.springframework.orm.hibernate;
 
 import net.sf.hibernate.FlushMode;
-import net.sf.hibernate.Session;
-import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.HibernateException;
+import net.sf.hibernate.Session;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -86,9 +85,6 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 			Object retVal = methodInvocation.proceed();
 			flushIfNecessary(session, existingTransaction);
 			return retVal;
-		}
-		catch (JDBCException ex) {
-			throw convertJdbcAccessException(ex.getSQLException());
 		}
 		catch (HibernateException ex) {
 			throw convertHibernateAccessException(ex);
