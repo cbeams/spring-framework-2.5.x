@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.support.MethodOverrides;
 
 /**
  * A BeanDefinition describes a bean instance, which has property values,
@@ -34,6 +35,7 @@ import org.springframework.beans.MutablePropertyValues;
  * @see PropertyPlaceholderConfigurer
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
+ * @version $Id: BeanDefinition.java,v 1.2 2004-06-23 21:06:47 johnsonr Exp $
  */
 public interface BeanDefinition {
 
@@ -46,6 +48,13 @@ public interface BeanDefinition {
 	 * Return the constructor argument values for this bean.
 	 */
 	ConstructorArgumentValues getConstructorArgumentValues();
+	
+	/**
+	 * Return information about methods to be overridden by the IoC
+	 * container. This will be empty if there are no method overrides.
+	 * Never returns null.
+	 */
+	MethodOverrides getMethodOverrides();
 
 	/**
 	 * Return a description of the resource that this bean definition
