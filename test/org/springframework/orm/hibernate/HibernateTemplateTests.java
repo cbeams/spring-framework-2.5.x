@@ -229,7 +229,7 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.load(TestBean.class, "id");
-		ObjectNotFoundException onfex = new ObjectNotFoundException("msg", "id", TestBean.class);
+		ObjectNotFoundException onfex = new ObjectNotFoundException("id", TestBean.class);
 		sessionControl.setThrowable(onfex);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
@@ -833,7 +833,7 @@ public class HibernateTemplateTests extends TestCase {
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new ObjectDeletedException("", "");
+					throw new ObjectDeletedException("msg", "id", TestBean.class);
 				}
 			});
 			fail("Should have thrown HibernateObjectRetrievalFailureException");
