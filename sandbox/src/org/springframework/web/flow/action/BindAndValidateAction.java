@@ -257,7 +257,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
             throws InstantiationException, IllegalAccessException, ServletRequestBindingException {
         if (this.formObjectClass == null) {
             throw new IllegalStateException("Cannot create formObject without formObjectClass being set - "
-                    + "either set formObjectClass or override formBackingObject");
+                    + "either set formObjectClass, override loadFormObject, or override this method");
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Creating new formObject of class [" + this.formObjectClass.getName() + "]");

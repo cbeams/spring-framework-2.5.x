@@ -592,11 +592,15 @@ public class Flow implements FlowEventProcessor, Serializable {
     }
 
     protected Transition onSubmitBindAndValidate(String bindAndValidateStateIdSuffix) {
-        return OnEvent.Submit.bindAndValidate(bindAndValidateStateIdSuffix);
+        return onSubmit(bindAndValidate(bindAndValidateStateIdSuffix));
+    }
+
+    protected Transition onSubmitEdit(String stateIdSuffix) {
+        return onSubmit(edit(stateIdSuffix));
     }
 
     protected Transition onSubmitEnd() {
-        return OnEvent.Submit.end();
+        return onSubmit(EndState.DEFAULT_FINISH_STATE_ID);
     }
 
     protected Transition onSearchGet(String getSearchResultsActionStateIdSuffix) {
@@ -695,10 +699,6 @@ public class Flow implements FlowEventProcessor, Serializable {
         return EndState.DEFAULT_FINISH_STATE_ID;
     }
 
-    public Transition bindAndValidate(String stateIdSuffix) {
-        return OnEvent.bindAndValidate(buildStateId(BIND_AND_VALIDATE_FORM_ACTION_PREFIX, stateIdSuffix));
-    }
-
     public static String buildStateId(String prefix, String suffix) {
         return prefix + StringUtils.capitalize(suffix);
     }
@@ -759,6 +759,10 @@ public class Flow implements FlowEventProcessor, Serializable {
         return buildStateId(ADD_ACTION_PREFIX, addActionStateIdSuffix);
     }
 
+    public static String bindAndValidate(String bindAndValidateStateIdSuffix) {
+        return buildStateId(BIND_AND_VALIDATE_FORM_ACTION_PREFIX, bindAndValidateStateIdSuffix);
+    }
+    
     public static String save(String saveActionStateIdSuffix) {
         return buildStateId(SAVE_ACTION_PREFIX, saveActionStateIdSuffix);
     }
