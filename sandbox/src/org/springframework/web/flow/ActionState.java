@@ -165,6 +165,13 @@ public class ActionState extends TransitionableState {
 		};
 	}
 
+	/**
+	 * @return
+	 */
+	protected String getActionBeanName() {
+		return ((ActionBeanHolder)actionBeans.iterator().next()).actionBeanName;
+	}
+
 	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
 		Iterator it = actionBeanIterator(flow);
@@ -200,4 +207,5 @@ public class ActionState extends TransitionableState {
 		}
 		return getTransition(event.getId(), flow);
 	}
+
 }
