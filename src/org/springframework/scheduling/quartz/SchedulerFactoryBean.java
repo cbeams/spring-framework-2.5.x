@@ -70,7 +70,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @since 18.02.2004
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
- * @version $Id: SchedulerFactoryBean.java,v 1.13 2004-08-02 16:02:12 jhoeller Exp $
+ * @version $Id: SchedulerFactoryBean.java,v 1.14 2004-08-10 13:12:30 jhoeller Exp $
  */
 public class SchedulerFactoryBean
     implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
@@ -488,6 +488,9 @@ public class SchedulerFactoryBean
 							}
 						}
 						this.scheduler.scheduleJob(trigger);
+					}
+					else if (this.overwriteExistingJobs) {
+						this.scheduler.rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
 					}
 				}
 			}
