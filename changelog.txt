@@ -9,6 +9,7 @@ Changes in version 1.0 M1 (xx.8.2003)
 * introduced "destroy-method" attribute for XML bean definitions
 * SingleConnectionDataSource implements DisposableBean
 * LocalSessionFactoryBean implements DisposableBean
+* fixed typeMismatch reporting for nested bean properties
 * added getValues and toCode methods to Constants utility class
 * DynamicMethodPointcut now takes method, args and AttributeRegistry arguments instead of MethodInvocation
 * dissolved ReadOnlyResultSet to make JdbcTemplate return the underlying ResultSet
@@ -26,7 +27,7 @@ Changes in version 1.0 M1 (xx.8.2003)
 * re-added deprecated ContextLoaderServlet for Servlet 2.2 containers
 * refactored Log4jConfigListener into Log4jWebConfigurer and listener
 * introduced deprecated Log4jConfigServlet for Servlet 2.2 containers
-* introduced tiles support to throug the TilesView and the TilesConfigurer
+* introduced Tiles support through TilesView and TilesConfigurer
 
 Changes in version 0.9.1 (8.8.2003)
 -----------------------------------
