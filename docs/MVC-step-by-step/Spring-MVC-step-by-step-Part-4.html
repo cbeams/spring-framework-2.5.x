@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20031121;22422900">
+	<META NAME="CHANGED" CONTENT="20031121;23441800">
 	<STYLE>
 	<!--
 		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
@@ -628,8 +628,8 @@ option.</P>
 <FONT COLOR="#000000">        ListIterator li = products.listIterator();</FONT>
 <FONT COLOR="#000000">        while (li.hasNext()) {</FONT>
 <FONT COLOR="#000000">            Product p = (Product) li.next();</FONT>
-<FONT COLOR="#800000">            double newPrice = p.getPrice().doubleValue() * (100 + pct)/100;</FONT>
-<FONT COLOR="#800000">            p.setPrice(new Double(newPrice));</FONT>
+<FONT COLOR="#800000"><STRIKE>            double newPrice = p.getPrice().doubleValue() * (100 + pct)/100;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>            p.setPrice(new Double(newPrice));</STRIKE></FONT>
 <FONT COLOR="#800000">            pmd.increasePrice(p, pct);</FONT>
 <FONT COLOR="#000000">        }</FONT>
 <FONT COLOR="#000000">        </FONT>
@@ -691,7 +691,7 @@ springapp-servlet.xml.</P>
 <FONT COLOR="#800000">    &lt;bean id=&quot;dataSource&quot; class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;&gt;</FONT>
 <FONT COLOR="#800000">      &lt;property name=&quot;driverClassName&quot;&gt;&lt;value&gt;org.hsqldb.jdbcDriver&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#800000">      &lt;property name=&quot;url&quot;&gt;</FONT>
-<FONT COLOR="#800000">        &lt;value&gt;jdbc:hsqldb:/home/trisberg/workspace/springapp2/db/test&lt;/value&gt;</FONT>
+<FONT COLOR="#800000">        &lt;value&gt;jdbc:hsqldb:/home/trisberg/workspace/springapp/db/test&lt;/value&gt;</FONT>
 <FONT COLOR="#800000">      &lt;/property&gt;</FONT>
 <FONT COLOR="#800000">      &lt;property name=&quot;username&quot;&gt;&lt;value&gt;sa&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#800000">      &lt;property name=&quot;password&quot;&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;</FONT>
@@ -707,29 +707,29 @@ springapp-servlet.xml.</P>
 <FONT COLOR="#800000">        &lt;property name=&quot;productManagerDao&quot;&gt;</FONT>
 <FONT COLOR="#800000">            &lt;ref bean=&quot;prodManDao&quot;/&gt;</FONT>
 <FONT COLOR="#800000">        &lt;/property&gt;</FONT>
-<FONT COLOR="#800000">        &lt;property name=&quot;products&quot;&gt;</FONT>
-<FONT COLOR="#800000">            &lt;list&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref bean=&quot;product1&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref bean=&quot;product2&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref bean=&quot;product3&quot;/&gt;</FONT>
-<FONT COLOR="#800000">            &lt;/list&gt;</FONT>
-<FONT COLOR="#800000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#800000"><STRIKE>        &lt;property name=&quot;products&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>            &lt;list&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product1&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product2&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product3&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>            &lt;/list&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>        &lt;/property&gt;</STRIKE></FONT>
 <FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 <FONT COLOR="#800000">    </FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Lamp&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;5.75&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</FONT>
-<FONT COLOR="#800000">        </FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product2&quot; class=&quot;bus.Product&quot;&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Table&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;75.25&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Lamp&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;5.75&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>        </STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product2&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Table&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;75.25&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</STRIKE></FONT>
 
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product3&quot; class=&quot;bus.Product&quot;&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Chair&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;22.79&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#800000"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product3&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Chair&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;22.79&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</STRIKE></FONT>
 
 <FONT COLOR="#000000">    &lt;bean id=&quot;messageSource&quot; class=&quot;org.springframework.context.support.ResourceBundleMessageSource&quot;&gt;</FONT>
 <FONT COLOR="#000000">        &lt;property name=&quot;basename&quot;&gt;&lt;value&gt;messages&lt;/value&gt;&lt;/property&gt;</FONT>
@@ -866,13 +866,13 @@ ProductManagerDao and give ProductManager a reference to this DAO.</P>
 <FONT COLOR="#800000">        &lt;property name=&quot;productManagerDao&quot;&gt;</FONT>
 <FONT COLOR="#800000">            &lt;ref bean=&quot;prodManDao&quot;/&gt;</FONT>
 <FONT COLOR="#800000">        &lt;/property&gt;</FONT>
-<FONT COLOR="#800000">        &lt;property name=&quot;products&quot;&gt;</FONT>
-<FONT COLOR="#800000">            &lt;list&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref bean=&quot;product1&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref bean=&quot;product2&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;ref bean=&quot;product3&quot;/&gt;</FONT>
-<FONT COLOR="#800000">            &lt;/list&gt;</FONT>
-<FONT COLOR="#800000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#800000"><STRIKE>        &lt;property name=&quot;products&quot;&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>            &lt;list&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product1&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product2&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product3&quot;/&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>            &lt;/list&gt;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>        &lt;/property&gt;</STRIKE></FONT>
 <FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 
 <FONT COLOR="#000000">    &lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</FONT>
@@ -890,23 +890,6 @@ ProductManagerDao and give ProductManager a reference to this DAO.</P>
 <FONT COLOR="#000000">        &lt;property name=&quot;price&quot;&gt;&lt;value&gt;22.79&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 
-<FONT COLOR="#000000">    &lt;bean id=&quot;messageSource&quot; class=&quot;org.springframework.context.support.ResourceBundleMessageSource&quot;&gt;</FONT>
-<FONT COLOR="#000000">        &lt;property name=&quot;basename&quot;&gt;&lt;value&gt;messages&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
-
-<FONT COLOR="#000000">    &lt;bean id=&quot;urlMapping&quot; class=&quot;org.springframework.web.servlet.handler.SimpleUrlHandlerMapping&quot;&gt; </FONT>
-<FONT COLOR="#000000">        &lt;property name=&quot;mappings&quot;&gt;</FONT>
-<FONT COLOR="#000000">            &lt;props&gt;</FONT>
-<FONT COLOR="#000000">                &lt;prop key=&quot;/hello.htm&quot;&gt;springappController&lt;/prop&gt;</FONT>
-<FONT COLOR="#000000">            &lt;/props&gt;</FONT>
-<FONT COLOR="#000000">        &lt;/property&gt;</FONT>
-<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
-
-<FONT COLOR="#000000">    &lt;bean id=&quot;viewResolver&quot; class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;</FONT>
-<FONT COLOR="#000000">        &lt;property name=&quot;viewClass&quot;&gt;&lt;value&gt;org.springframework.web.servlet.view.JstlView&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#000000">        &lt;property name=&quot;prefix&quot;&gt;&lt;value&gt;/WEB-INF/jsp/&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#000000">        &lt;property name=&quot;suffix&quot;&gt;&lt;value&gt;.jsp&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 <FONT COLOR="#000000">&lt;/beans&gt; </FONT>       </PRE>
 		</TD>
 	</TR>
@@ -948,7 +931,7 @@ public class TestProductManager extends TestCase {
         p.setDescription(&quot;Table&quot;);
         p.setPrice(new Double(&quot;150.10&quot;));
         al.add(p);
-<FONT COLOR="#800000">        pm.setProducts(al);</FONT>
+<FONT COLOR="#800000"><STRIKE>        pm.setProducts(al);</STRIKE></FONT>
 <FONT COLOR="#800000">        MockProductManagerDaoImpl pmdao = new MockProductManagerDaoImpl();</FONT>
 <FONT COLOR="#800000">        pmdao.setProducts(al);</FONT>
 <FONT COLOR="#800000">        pm.setProductManagerDao(pmdao);</FONT>
