@@ -36,14 +36,16 @@ public class ResourceEditor extends PropertyEditorSupport {
 		if (resolvedPath.startsWith(CLASSPATH_URL_PREFIX)) {
 			setValue(new ClassPathResource(resolvedPath.substring(CLASSPATH_URL_PREFIX.length())));
 		}
-		try {
-			// try URL
-			URL url = new URL(resolvedPath);
-			setValue(new UrlResource(url));
-		}
-		catch (MalformedURLException ex) {
-			// no URL -> try classpath
-			setValue(new ClassPathResource(text));
+		else {
+			try {
+				// try URL
+				URL url = new URL(resolvedPath);
+				setValue(new UrlResource(url));
+			}
+			catch (MalformedURLException ex) {
+				// no URL -> try classpath
+				setValue(new ClassPathResource(text));
+			}
 		}
 	}
 
