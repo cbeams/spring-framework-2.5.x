@@ -31,8 +31,11 @@ public abstract class AbstractConverter implements Converter {
 		catch (ConversionException e) {
 			throw e;
 		}
-		catch (Exception e) {
-			throw new ConversionException(source, null, e);
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Throwable e) {
+			throw new RuntimeException(e);
 		}
 	}
 

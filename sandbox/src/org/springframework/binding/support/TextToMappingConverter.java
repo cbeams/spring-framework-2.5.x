@@ -49,27 +49,33 @@ public class TextToMappingConverter extends AbstractConverter {
 		return new Class[] { Mapping.class };
 	}
 
-	protected Object doConvert(Object o, Class targetClass) throws Exception {
+	protected Object doConvert(Object source, Class targetClass) throws Exception {
 		//format: <sourceAttributeName>[,class][->targetAttributeName[,class]]
-		String[] sourceTarget = StringUtils.delimitedListToStringArray((String)o, "->");
+		String[] sourceTarget = StringUtils.delimitedListToStringArray((String)source, "->");
 		String[] sourceMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[0]);
 		String sourceAttributeName = sourceMappingInfo[0];
 		String targetAttributeName = sourceMappingInfo[0];
-		Class sourceAttributeClass = String.class;
-		Class targetAttributeClass = String.class;
+		Class sourceAttributeClass = null;
+		Class targetAttributeClass = null;
 		if (sourceMappingInfo.length == 2) {
 			sourceAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class).call(
 					sourceMappingInfo[1]);
+			targetAttributeClass = String.class;
 		}
 		if (sourceTarget.length == 2) {
 			String[] targetMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[1]);
 			targetAttributeName = targetMappingInfo[0];
 			if (targetMappingInfo.length == 2) {
-				targetClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class).call(
-						targetMappingInfo[1]);
+				targetAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class)
+						.call(targetMappingInfo[1]);
 			}
 		}
-		return new Mapping(sourceAttributeName, targetAttributeName, getConversionService().getConversionExecutor(
-				sourceAttributeClass, targetAttributeClass));
+		if (sourceAttributeClass != null) {
+			return new Mapping(sourceAttributeName, targetAttributeName, getConversionService().getConversionExecutor(
+					sourceAttributeClass, targetAttributeClass));
+		}
+		else {
+			return new Mapping(sourceAttributeName, targetAttributeName);
+		}
 	}
 }

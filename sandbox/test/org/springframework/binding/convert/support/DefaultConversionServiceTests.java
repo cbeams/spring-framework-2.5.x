@@ -95,8 +95,8 @@ public class DefaultConversionServiceTests extends TestCase {
 		ConversionExecutor executor = service.getConversionExecutor(String.class, Mapping.class);
 		Mapping mapping = (Mapping)executor.execute("id");
 		mapping = (Mapping)executor.execute("id->id");
-		mapping = (Mapping)executor.execute("id->collegueId,java.lang.Long");
-		mapping = (Mapping)executor.execute("id,java.lang.String->collegueId,java.lang.Long");
+		mapping = (Mapping)executor.execute("id->colleagueId,java.lang.Long");
+		mapping = (Mapping)executor.execute("id,java.lang.String->colleagueId,java.lang.Long");
 	}
 
 	public static class MyEnum extends ShortCodedLabeledEnum {

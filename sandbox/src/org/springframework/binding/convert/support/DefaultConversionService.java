@@ -108,7 +108,15 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 		if (Modifier.isInterface(modifiers)) {
 			throw new IllegalArgumentException("Target class for conversion must not be an interface");
 		}
+		if (sourceClass.equals(targetClass)) {
+			throw new IllegalArgumentException("Source class '" + sourceClass
+					+ "' already equals target class; no conversion to perform");
+		}
 		Map sourceTargetConverters = (Map)findConvertersForSource(sourceClass);
+		if (sourceTargetConverters == null) {
+			throw new IllegalArgumentException("No converters registered to convert from sourceClass '" + sourceClass
+					+ "' (including any of its superclasses or interfaces)");
+		}
 		Converter converter = (Converter)sourceTargetConverters.get(targetClass);
 		if (converter != null) {
 			return new ConversionExecutor(converter, targetClass);
@@ -137,8 +145,7 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 				classQueue.addFirst(interfaces[i]);
 			}
 		}
-		throw new IllegalArgumentException("No converters registered to convert from sourceClass '" + sourceClass
-				+ "' (including any of its superclasses or interfaces)");
+		return null;
 	}
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
