@@ -31,13 +31,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.flow.FlowExecution;
 
 /**
- * <p>Servlet 2.3 filter that cleans up expired web flow executions in
- * the HTTP session associated with the request being filtered. A flow
- * execution has expired when it has not handled any requests for more
- * than a specified timeout period.
- * 
- * <p>This filter can be configured in the <tt>web.xml</tt> deployment
- * descriptor of your web application. Here's an example:
+ * Servlet 2.3 filter that cleans up expired web flow executions in the HTTP
+ * session associated with the request being filtered. A flow execution has
+ * expired when it has not handled any requests for more than a specified
+ * timeout period.
+ * <p>
+ * This filter can be configured in the <tt>web.xml</tt> deployment descriptor
+ * of your web application. Here's an example:
  * <pre>
  * &lt;!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
  * 	"http://java.sun.com/dtd/web-app_2_3.dtd"&gt;
@@ -50,112 +50,103 @@ import org.springframework.web.flow.FlowExecution;
  * 		&lt;filter-name&gt;flowCleanup&lt;/filter-name&gt;
  * 		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
  * 	&lt;/filter-mapping&gt;
- * 
  * 	...
  * </pre>
- * 
- * <p><b>Exposed configuration properties:</b><br>
+ * <p>
+ * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
- *  <tr>
- *      <td><b>name</b></th>
- *      <td><b>default</b></td>
- *      <td><b>description</b></td>
- *  </tr>
- *  <tr>
- *      <td>timeout</td>
- *      <td>10</td>
- *      <td>
- * 			Specifies the flow execution timeout in <b>minutes</b>. If the flow
- * 			execution is inactive for more that this period of time it will expire
- * 			and be removed from the HTTP session.
- *		</td>
- *  </tr>
- * </table>
- * These parameters can be configured using <tt>init-param</tt> values
- * in the deployment descriptor.
- * 
+ * <tr>
+ * <td><b>name </b></th>
+ * <td><b>default </b></td>
+ * <td><b>description </b></td>
+ * </tr>
+ * <tr>
+ * <td>timeout</td>
+ * <td>10</td>
+ * <td>Specifies the flow execution timeout in <b>minutes </b>. If the flow
+ * execution is inactive for more that this period of time it will expire and be
+ * removed from the HTTP session.</td>
+ * </tr>
+ * </table> These parameters can be configured using <tt>init-param</tt>
+ * values in the deployment descriptor.
  * @author Erwin Vervaet
  */
 public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
-	
+
 	/**
-	 * <p>Default web flow timout: 10 minutes.
+	 * Default web flow timout: 10 minutes.
 	 */
-	public static final int DEFAULT_TIMEOUT=10;
-	
-	private int timeout=DEFAULT_TIMEOUT; //in minutes
-	
+	public static final int DEFAULT_TIMEOUT = 10;
+
+	// in minutes
+	private int timeout = DEFAULT_TIMEOUT;
+
 	/**
-	 * <p>Get the flow timout (expiry), expressed in minutes.
+	 * Get the flow timout (expiry), expressed in minutes.
 	 */
 	public int getTimeout() {
 		return timeout;
 	}
 
 	/**
-	 * <p>Set the flow timout (expiry), expressed in minutes.
+	 * Set the flow timout (expiry), expressed in minutes.
 	 */
 	public void setTimeout(int timeout) {
-		this.timeout=timeout;
+		this.timeout = timeout;
 	}
-	
+
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		doCleanup(request);
 		filterChain.doFilter(request, response);
 	}
-	
+
 	/**
-	 * <p>Remove expired flow executions from the HTTP session
-	 * associated with given request.
+	 * <p>
+	 * Remove expired flow executions from the HTTP session associated with
+	 * given request.
 	 */
 	protected void doCleanup(HttpServletRequest request) {
 		//get the session if there is one
-		HttpSession session=request.getSession(false);
-		if (session==null) {
+		HttpSession session = request.getSession(false);
+		if (session == null) {
 			return;
 		}
-		
 		//execute the cleanup process
-		Set namesToBeDeleted=new HashSet();
-		
-		Enumeration names=session.getAttributeNames();
+		Set namesToBeDeleted = new HashSet();
+		Enumeration names = session.getAttributeNames();
 		while (names.hasMoreElements()) {
-			String name=(String)names.nextElement();
-			Object value=session.getAttribute(name);
+			String name = (String)names.nextElement();
+			Object value = session.getAttribute(name);
 			if (value instanceof FlowExecution) {
-				FlowExecution flowExecution=(FlowExecution)value;
+				FlowExecution flowExecution = (FlowExecution)value;
 				if (hasExpired(request, flowExecution)) {
 					namesToBeDeleted.add(name);
 					if (logger.isInfoEnabled()) {
-						logger.info("Flow execution '"
-								+ name
-								+ "' for flow '"
-								+ flowExecution.getActiveFlowId()
+						logger.info("Flow execution '" + name + "' for flow '" + flowExecution.getActiveFlowId()
 								+ "' has expired and will be removed from the HTTP session '" + session.getId() + "'");
 					}
 				}
 			}
 		}
-		
-		Iterator it=namesToBeDeleted.iterator();
+		Iterator it = namesToBeDeleted.iterator();
 		while (it.hasNext()) {
 			session.removeAttribute((String)it.next());
 		}
 	}
-	
+
 	/**
-	 * <p>Check if given web flow execution, found in the session associated with
+	 * Check if given web flow execution, found in the session associated with
 	 * given request, has expired.
+	 * <p>
+	 * Subclasses can override this method if they want to change the expiry
+	 * logic, e.g. to keep flow executions alive in certain situations.
 	 * 
-	 * <p>Subclasses can override this method if they want to change the expiry logic,
-	 * e.g. to keep flow executions alive in certain situations.
-	 *  
 	 * @param request current HTTP request
-	 * @param flowExecution the web flow execution that needs to be checked for expiry
+	 * @param flowExecution the web flow execution that needs to be checked for
+	 *        expiry
 	 */
 	protected boolean hasExpired(HttpServletRequest request, FlowExecution flowExecution) {
-		return (System.currentTimeMillis()-flowExecution.getLastEventTimestamp()) > (getTimeout()*60000);
+		return (System.currentTimeMillis() - flowExecution.getLastEventTimestamp()) > (getTimeout() * 60000);
 	}
-
 }
