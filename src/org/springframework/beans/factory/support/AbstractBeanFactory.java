@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -434,6 +435,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return beanPostProcessors;
 	}
 
+
+	/**
+	 * Create a new BeanWrapper for the given bean instance.
+	 * <p>Default implementation creates a BeanWrapperImpl.
+	 * Can be overridden for custom BeanWrapper adaptations.
+	 * @param beanInstance the bean instance to create the BeanWrapper for,
+	 * or null for a BeanWrapper that does not yet contain a target object
+	 * @return the BeanWrapper
+	 */
+	protected BeanWrapper createBeanWrapper(Object beanInstance) {
+		return (beanInstance != null ? new BeanWrapperImpl(beanInstance) : new BeanWrapperImpl());
+	}
 
 	/**
 	 * Initialize the given BeanWrapper with the custom editors registered

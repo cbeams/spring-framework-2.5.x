@@ -126,7 +126,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		else {
 			Object bean = this.instantiationStrategy.instantiate(bd, null, this);
-			populateBean(bean.getClass().getName(), bd, new BeanWrapperImpl(bean));
+			populateBean(bean.getClass().getName(), bd, createBeanWrapper(bean));
 			return bean;
 		}
 	}
@@ -137,12 +137,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throw new IllegalArgumentException("Just constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE allowed");
 		}
 		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), autowireMode, dependencyCheck);
-		populateBean(existingBean.getClass().getName(), bd, new BeanWrapperImpl(existingBean));
+		populateBean(existingBean.getClass().getName(), bd, createBeanWrapper(existingBean));
 	}
 
 	public void applyBeanPropertyValues(Object existingBean, String name) throws BeansException {
 		RootBeanDefinition bd = getMergedBeanDefinition(name, true);
-		applyPropertyValues(name, bd, new BeanWrapperImpl(existingBean), bd.getPropertyValues());
+		applyPropertyValues(name, bd, createBeanWrapper(existingBean), bd.getPropertyValues());
 	}
 
 	public Object applyBeanPostProcessorsBeforeInitialization(Object bean, String name) throws BeansException {
@@ -240,7 +240,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else {
 				// use no-arg constructor
 				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this);
-				instanceWrapper = new BeanWrapperImpl(beanInstance);
+				instanceWrapper = createBeanWrapper(beanInstance);
 				initBeanWrapper(instanceWrapper);
 			}
 			bean = instanceWrapper.getWrappedInstance();
@@ -332,7 +332,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			expectedArgCount = args.length;
 		}
 
-		BeanWrapperImpl bw = new BeanWrapperImpl();
+		BeanWrapper bw = createBeanWrapper(null);
 		initBeanWrapper(bw);
 
 		boolean isStatic = true;
@@ -407,7 +407,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		ConstructorArgumentValues cargs = mergedBeanDefinition.getConstructorArgumentValues();
 		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
 
-		BeanWrapperImpl bw = new BeanWrapperImpl();
+		BeanWrapper bw = createBeanWrapper(null);
 		initBeanWrapper(bw);
 
 		int minNrOfArgs = 0;
@@ -515,7 +515,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	private Object[] createArgumentArray(
 			String beanName, RootBeanDefinition mergedBeanDefinition,
-			ConstructorArgumentValues resolvedValues, BeanWrapperImpl bw, Class[] argTypes) {
+			ConstructorArgumentValues resolvedValues, BeanWrapper bw, Class[] argTypes)
+	    throws UnsatisfiedDependencyException {
 
 		Object[] args = new Object[argTypes.length];
 		Set usedValueHolders = new HashSet(argTypes.length);
@@ -526,15 +527,31 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Do not consider the same value definition multiple times!
 				usedValueHolders.add(valueHolder);
 
-				// Synchronize if custom editors are registered.
-				// Necessary because PropertyEditors are not thread-safe.
-				if (!getCustomEditors().isEmpty()) {
-					synchronized (getCustomEditors()) {
-						args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+				if (bw instanceof BeanWrapperImpl) {
+					// Synchronize if custom editors are registered.
+					// Necessary because PropertyEditors are not thread-safe.
+					if (!getCustomEditors().isEmpty()) {
+						synchronized (getCustomEditors()) {
+							args[j] = ((BeanWrapperImpl) bw).doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+						}
+					}
+					else {
+						args[j] = ((BeanWrapperImpl) bw).doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
 					}
 				}
 				else {
-					args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+					// Fallback: a BeanWrapper that oes not support type conversion
+					// for given values (currently BeanWrapperImpl is needed for this).
+					if (argTypes[j].isInstance(valueHolder.getValue())) {
+						args[j] = valueHolder.getValue();
+					}
+					else {
+						throw new UnsatisfiedDependencyException(
+								mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
+								"Could not convert constructor argument value [" + valueHolder.getValue() +
+						    "] to required type [" + argTypes[j].getName() + "] because BeanWrapper [" + bw +
+						    "] does not support type conversion for given values (BeanWrapperImpl needed)");
+					}
 				}
 			}
 
