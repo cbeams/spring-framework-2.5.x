@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 	
@@ -60,7 +60,7 @@
 		Check automatic creation of alias, to allow for
 		names that are illegal as XML ids
 	-->
-	<bean id="aliased" class="org.springframework.beans.TestBean" name="I have an alias">
+	<bean id="aliased" class="org.springframework.beans.TestBean" name="myalias">
 		<property name="name"><value>aliased</value></property>
 	</bean>
 	

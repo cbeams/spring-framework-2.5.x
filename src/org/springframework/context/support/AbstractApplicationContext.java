@@ -12,12 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,9 +26,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanFactoryUtils;
+import org.springframework.beans.factory.support.BeanPostProcessor;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventMulticaster;
@@ -63,7 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -114,12 +114,6 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 * specified), enabling a different thread usage policy for event publication.
 	 */
 	private ApplicationEventMulticaster eventMulticaster = new ApplicationEventMulticasterImpl();
-
-	/**
-	 * Set of ApplicationContextAware objects that have already received the context
-	 * reference, to be able to avoid double initialization of managed objects.
-	 */
-	private Set managedSingletons = new HashSet();
 
 
 	//---------------------------------------------------------------------
@@ -210,14 +204,19 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 		this.startupTime = System.currentTimeMillis();
 
 		refreshBeanFactory();
+		getBeanFactory().setBeanPostProcessors(
+		    new BeanPostProcessor[] { new ApplicationContextAwareProcessor(this) });
 
 		if (getBeanDefinitionCount() == 0)
 			logger.warn("No beans defined in ApplicationContext [" + getDisplayName() + "]");
 		else
 			logger.info(getBeanDefinitionCount() + " beans defined in ApplicationContext [" + getDisplayName() + "]");
 
-		// invoke configurers that can override values in the bean definitions
-		invokeContextConfigurers();
+		// invoke factory processors that can override values in the bean definitions
+		invokeBeanFactoryPostProcessors();
+
+		// register bean processor that intercept bean creation
+		registerBeanPostProcessors();
 
 		// load options bean for this context
 		loadOptions();
@@ -251,16 +250,35 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 * respecting explicit order if given.
 	 * Must be called before singleton instantiation.
 	 */
-	private void invokeContextConfigurers() {
+	private void invokeBeanFactoryPostProcessors() {
 		String[] beanNames = getBeanDefinitionNames(BeanFactoryPostProcessor.class);
-		BeanFactoryPostProcessor[] configurers = new BeanFactoryPostProcessor[beanNames.length];
+		BeanFactoryPostProcessor[] factoryProcessors = new BeanFactoryPostProcessor[beanNames.length];
 		for (int i = 0; i < beanNames.length; i++) {
-			configurers[i] = (BeanFactoryPostProcessor) getBean(beanNames[i]);
+			factoryProcessors[i] = (BeanFactoryPostProcessor) getBean(beanNames[i]);
 		}
-		Arrays.sort(configurers, new OrderComparator());
-		for (int i = 0; i < configurers.length; i++) {
-			BeanFactoryPostProcessor configurer = configurers[i];
-			configurer.postProcessBeanFactory(getBeanFactory());
+		Arrays.sort(factoryProcessors, new OrderComparator());
+		for (int i = 0; i < factoryProcessors.length; i++) {
+			BeanFactoryPostProcessor factoryProcessor = factoryProcessors[i];
+			factoryProcessor.postProcessBeanFactory(getBeanFactory());
+		}
+	}
+
+	/**
+	 * Instantiate and invoke all registered BeanPostProcessor beans,
+	 * respecting explicit order if given.
+	 * Must be called before singleton instantiation.
+	 */
+	private void registerBeanPostProcessors() {
+		String[] beanNames = getBeanDefinitionNames(BeanPostProcessor.class);
+		if (beanNames.length > 0) {
+			List beanProcessors = new ArrayList();
+			for (int i = 0; i < beanNames.length; i++) {
+				beanProcessors.add(getBean(beanNames[i]));
+			}
+			Collections.sort(beanProcessors, new OrderComparator());
+			beanProcessors.addAll(0, Arrays.asList(getBeanFactory().getBeanPostProcessors()));
+			getBeanFactory().setBeanPostProcessors(
+					(BeanPostProcessor[]) beanProcessors.toArray(new BeanPostProcessor[beanProcessors.size()]));
 		}
 	}
 
@@ -313,22 +331,6 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 			if (isSingleton(beanName)) {
 				getBean(beanName);
 			}
-		}
-	}
-
-	/**
-	 * If the object is context-aware, give it a reference to this object.
-	 * Does not reinitialize singletons that have already received the context.
-	 * @param bean object to invoke the setApplicationContext() method on,
-	 * if it implements the ApplicationContextAware interface
-	 */
-	private void configureManagedObject(String name, Object bean) {
-		if (bean instanceof ApplicationContextAware &&
-				(!isSingleton(name) || !this.managedSingletons.contains(bean))) {
-			logger.debug("Setting application context on ApplicationContextAware object [" + bean + "]");
-			ApplicationContextAware aca = (ApplicationContextAware) bean;
-			aca.setApplicationContext(this);
-			this.managedSingletons.add(bean);
 		}
 	}
 
@@ -455,15 +457,11 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	//---------------------------------------------------------------------
 
 	public Object getBean(String name) throws BeansException {
-		Object bean = getBeanFactory().getBean(name);
-		configureManagedObject(name, bean);
-		return bean;
+		return getBeanFactory().getBean(name);
 	}
 
 	public Object getBean(String name, Class requiredType) throws BeansException {
-		Object bean = getBeanFactory().getBean(name, requiredType);
-		configureManagedObject(name, bean);
-		return bean;
+		return getBeanFactory().getBean(name, requiredType);
 	}
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {

@@ -21,6 +21,7 @@ import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.HasMap;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -29,9 +30,8 @@ import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
- *
  * @author Rod Johnson
-* @version $Id: XmlBeanFactoryTestSuite.java,v 1.6 2003-10-04 15:57:20 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.7 2003-10-10 13:59:54 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -104,7 +104,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		ITestBean jenksJen = jenks.getSpouse();
 		assertTrue("1 jen instances", davesJen == jenksJen);
 	}
-	
+
 	public void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
 		InputStream pis = getClass().getResourceAsStream("parent.xml");
 		XmlBeanFactory parent = new XmlBeanFactory(pis);
@@ -118,7 +118,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		TestBean inherits2 = (TestBean) child.getBean("inheritsFromParentFactory");
 		assertTrue(inherits2 == inherits);
 	}
-	
+
 	public void testPrototypeInheritanceFromParentFactoryPrototype() throws Exception {
 		InputStream pis = getClass().getResourceAsStream("parent.xml");
 		XmlBeanFactory parent = new XmlBeanFactory(pis);
@@ -136,7 +136,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		// Shouldn't have changed first instance
 		assertTrue(inherits.getAge() == 2);
 	}
-	
+
 	public void testPrototypeInheritanceFromParentFactorySingleton() throws Exception {
 		InputStream pis = getClass().getResourceAsStream("parent.xml");
 		XmlBeanFactory parent = new XmlBeanFactory(pis);
@@ -154,7 +154,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		 // Shouldn't have changed first instance
 		 assertTrue(inherits.getAge() == 1);
 	}
-	
+
 	/**
 	 * Check that a prototype can't inherit from a bogus parent.
 	 * If a singleton does this the factory will fail to load.
@@ -171,11 +171,11 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Ok
-			// Check exception message contains the name 
+			// Check exception message contains the name
 			assertTrue(ex.getMessage().indexOf("bogusParent") != -1);
 		}
 	}
-	
+
 	/**
 	 * Note that prototype/singleton distinction is <b>not</b> inherited.
 	 * It's possible for a subclass singleton not to return independent
@@ -220,16 +220,12 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertTrue("Not referencing same bean twice", ref.getTestBean1() != ref.getTestBean2());
 	}
 
-	public void testFactoryReferenceCircleDoesNotWork() {
+	public void testFactoryReferenceCircle() {
 		InputStream is = getClass().getResourceAsStream("factoryCircle.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		try {
-			xbf.getBean("singletonFactory");
-			fail("Should have thrown StackOverflowError");
-		}
-		catch (StackOverflowError err) {
-			// expected
-		}
+		TestBean tb = (TestBean) xbf.getBean("singletonFactory");
+		DummyFactory db = (DummyFactory) xbf.getBean("&singletonFactory");
+		assertTrue(tb == db.getOtherTestBean());
 	}
 
 	public void testRefSubelement() throws Exception {
@@ -300,7 +296,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		TestBean tb1 = (TestBean) xbf.getBean("aliased");
-		TestBean alias1 = (TestBean) xbf.getBean("I have an alias");
+		TestBean alias1 = (TestBean) xbf.getBean("myalias");
 		assertTrue(tb1 == alias1);
 		TestBean tb2 = (TestBean) xbf.getBean("multiAliased");
 		TestBean alias2 = (TestBean) xbf.getBean("alias1");
@@ -334,7 +330,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertTrue(hasMap.getMap().get("jenny").equals(jenny));
 	}
-	
+
 	public void testMapWithLiteralsReferencesAndList() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -343,7 +339,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertTrue(hasMap.getMap().get("jenny").equals(jenny));
-		
+
 		// Check list
 		List l = (List) hasMap.getMap().get("list");
 		assertNotNull(l);
@@ -352,7 +348,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertTrue("List elt 1 should be equal to jenny bean, not " + l.get(1),
 			l.get(1).equals(jenny));
 	}
-	
+
 	public void testEmptyProps() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -360,7 +356,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertTrue(hasMap.getMap().size() == 0);
 		assertTrue(hasMap.getMap().size() == 0);
 	}
-	
+
 	public void testPopulatedProps() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -369,7 +365,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
 		assertTrue(hasMap.getMap().get("2").equals("TWO"));
 	}
-	
+
 	public void testObjectArray() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -378,7 +374,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertTrue(hasMap.getObjectArray()[0].equals("one"));
 		assertTrue(hasMap.getObjectArray()[1].equals(xbf.getBean("jenny")));
 	}
-	
+
 	public void testClassArray() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -387,7 +383,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertTrue(hasMap.getClassArray()[0].equals(String.class));
 		assertTrue(hasMap.getClassArray()[1].equals(Exception.class));
 	}
-	
+
 	/*
 	 * TODO address this failure
 	 *
@@ -401,7 +397,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertTrue(hasMap.getIntegerArray()[2].intValue() == 2);
 	}
 	*/
-	
+
 	public void testInitMethodIsInvoked() throws Exception {
 		InputStream is = getClass().getResourceAsStream("initializers.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -409,10 +405,9 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		// Initializer should have doubled value
 		assertEquals(14, in.getNum());
 	}
-	
+
 	/**
 	 * Test that if a custom initializer throws an exception, it's handled correctly
-	 * @throws Exception
 	 */
 	public void testInitMethodThrowsException() {
 		InputStream is = getClass().getResourceAsStream("initializers.xml");
@@ -440,7 +435,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 			assertTrue(ex.getMessage().indexOf("beans.TestBean") != -1);
 		}
 	}
-	
+
 	/**
 	 * Check that InitializingBean method is called first.
 	 * @throws Exception
@@ -482,10 +477,10 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 			// TODO Check that the error message includes filename
 		}
 	}
-	
+
 	public void testUnsatisfiedObjectDependencyCheck() throws Exception {
 		InputStream is = getClass().getResourceAsStream("unsatisfiedObjectDependencyCheck.xml");
-	
+
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(is);
 			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
@@ -497,7 +492,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 			//assertTrue(ex.getMessage().indexOf("spouse"))
 		}
 	}
-	
+
 	public void testUnsatisfiedSimpleDependencyCheck() throws Exception {
 		InputStream is = getClass().getResourceAsStream("unsatisfiedSimpleDependencyCheck.xml");
 		try {
@@ -519,14 +514,14 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertNotNull(a.getSpouse());
 	}
-	
+
 	public void testSatisfiedSimpleDependencyCheck() throws Exception {
 		InputStream is = getClass().getResourceAsStream("satisfiedSimpleDependencyCheck.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertEquals(a.getAge(), 33);
 	}
-	
+
 	public void testUnsatisfiedAllDependencyCheck() throws Exception {
 		InputStream is = getClass().getResourceAsStream("unsatisfiedAllDependencyCheckMissingObjects.xml");
 		try {
@@ -540,7 +535,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 			//assertTrue(ex.getMessage().indexOf("spouse"))
 		}
 	}
-	
+
 	public void testSatisfiedAllDependencyCheck() throws Exception {
 		InputStream is = getClass().getResourceAsStream("satisfiedAllDependencyCheck.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -549,8 +544,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertNotNull(a.getName());
 		assertNotNull(a.getSpouse());
 	}
-	
-	
+
 	public void testSatisfiedAutowireByType() throws Exception {
 		InputStream is = getClass().getResourceAsStream("autowire.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -558,9 +552,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		// Should have been autowired
 		assertNotNull(rod.getSpouse());
 		assertTrue(rod.getSpouse().getName().equals("Kerry"));
-
 	}
-
 
 	public void testSatisfiedAutowireByName() throws Exception {
 		InputStream is = getClass().getResourceAsStream("autowire.xml");
@@ -569,7 +561,6 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		// Should have been autowired
 		assertNotNull(rod.getSpouse());
 		assertTrue(rod.getSpouse().getName().equals("Kerry"));
-
 	}
 
 //		public void testUnsatisfiedAutowireByType() throws Exception {

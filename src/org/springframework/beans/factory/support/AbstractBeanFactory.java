@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -51,7 +52,7 @@ import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.5 2003-10-04 15:58:28 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.6 2003-10-10 13:59:46 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
@@ -74,6 +75,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
 	/** Parent bean factory, for bean inheritance support */
 	private BeanFactory parentBeanFactory;
+
+	private BeanPostProcessor[] beanPostProcessors;
 
 	/** Cache of singletons: bean name --> bean instance */
 	private Map singletonCache = new HashMap();
@@ -103,6 +106,14 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
 	public BeanFactory getParentBeanFactory() {
 		return parentBeanFactory;
+	}
+
+	public void setBeanPostProcessors(BeanPostProcessor[] beanPostProcessors) {
+		this.beanPostProcessors = beanPostProcessors;
+	}
+
+	public BeanPostProcessor[] getBeanPostProcessors() {
+		return beanPostProcessors;
 	}
 
 
@@ -137,32 +148,15 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * @param name name of the bean to retrieve
 	 */
 	public final Object getBean(String name) {
-		return getBeanInternal(name, null);
-	}
-
-	/**
-	 * Return the bean with the given name,
-	 * checking the parent bean factory if not found.
-	 * @param name name of the bean to retrieve
-	 * @param newlyCreatedBeans cache with newly created beans (name, instance)
-	 * if triggered by the creation of another bean, or null else
-	 * (necessary to resolve circular references)
-	 */
-	private Object getBeanInternal(String name, Map newlyCreatedBeans) {
 		if (name == null)
 			throw new NoSuchBeanDefinitionException(null, "Cannot get bean with null name");
 		try {
 			AbstractBeanDefinition bd = getBeanDefinition(transformedBeanName(name));
 			if (bd.isSingleton()) {
-				// Check for bean instance created in the current call,
-				// to be able to resolve circular references
-				if (newlyCreatedBeans != null && newlyCreatedBeans.containsKey(name)) {
-					return newlyCreatedBeans.get(name);
-				}
-				return getSharedInstance(name, newlyCreatedBeans);
+				return getSharedInstance(name);
 			}
 			else {
-				return createBean(name, newlyCreatedBeans);
+				return createBean(name, false);
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -219,18 +213,15 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * TODO: There probably isn't any need for this to be synchronized,
 	 * at least not if we pre-instantiate singletons.
 	 * @param pname name that may include factory dereference prefix
-	 * @param newlyCreatedBeans cache with newly created beans (name, instance)
-	 * if triggered by the creation of another bean, or null else
-	 * (necessary to resolve circular references)
 	 */
-	private final synchronized Object getSharedInstance(String pname, Map newlyCreatedBeans) throws BeansException {
+	private final synchronized Object getSharedInstance(String pname) throws BeansException {
 		// Get rid of the dereference prefix if there is one
 		String name = transformedBeanName(pname);
 
 		Object beanInstance = this.singletonCache.get(name);
 		if (beanInstance == null) {
 			logger.info("Creating shared instance of singleton bean '" + name + "'");
-			beanInstance = createBean(name, newlyCreatedBeans);
+			beanInstance = createBean(name, true);
 			this.singletonCache.put(name, beanInstance);
 		}
 		else {
@@ -283,27 +274,20 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * First look up BeanDefinition for the given bean name.
 	 * Uses recursion to support instance "inheritance".
 	 * @param name name of the bean. Must be unique in the BeanFactory
-	 * @param newlyCreatedBeans cache with newly created beans (name, instance)
-	 * if triggered by the creation of another bean, or null else
-	 * (necessary to resolve circular references)
 	 * @return a new instance of this bean
 	 */
-	private Object createBean(String name, Map newlyCreatedBeans) throws BeansException {
+	private Object createBean(String name, boolean singleton) throws BeansException {
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(name);
-		
 		logger.debug("Creating instance of bean '" + name + "' with merged definition [" + mergedBeanDefinition + "]");
 		BeanWrapper instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
 		Object bean = instanceWrapper.getWrappedInstance();
 
-		// Cache new instance to be able resolve circular references, but ignore
-		// FactoryBean instances as they can't create objects if not initialized
-		if (!(bean instanceof FactoryBean)) {
-			if (newlyCreatedBeans == null) {
-				newlyCreatedBeans = new HashMap();
-			}
-			newlyCreatedBeans.put(name, bean);
+		// Eagerly cache singletons to be able to resolve circular references
+		// even when triggered by lifecycle interfaces like BeanFactoryAware
+		if (singleton) {
+			this.singletonCache.put(name, bean);
 		}
-		
+
 		mergedBeanDefinition.autowireByName(name);
 		
 		// Add further property values based on autowire by type
@@ -316,27 +300,41 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		mergedBeanDefinition.dependencyCheck(name);
 
 		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
-		applyPropertyValues(instanceWrapper, pvs, name, newlyCreatedBeans);
+		applyPropertyValues(instanceWrapper, pvs, name);
 		callLifecycleMethodsIfNecessary(bean, name, mergedBeanDefinition, instanceWrapper);
-		return bean;
+
+		return applyBeanPostProcessors(bean, name, mergedBeanDefinition);
 	}
-	
-	
+
+	/**
+	 * Apply BeanPostProcessors to a new bean instance.
+	 * The returned bean instance may be a wrapper around the original.
+	 * @param bean the new bean instance
+	 * @param name the name of the bean
+	 * @param definition the definition that the bean was created with
+	 * @return the bean instance to use, either the original or a wrapped one
+	 */
+	private Object applyBeanPostProcessors(Object bean, String name, RootBeanDefinition definition) {
+		Object result = bean;
+		if (this.beanPostProcessors != null) {
+			for (int i = 0; i < this.beanPostProcessors.length; i++) {
+				result = this.beanPostProcessors[i].postProcessBean(result, name, definition);
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Abstract method defining autowire by type behaviour.
 	 * This is like PicoContainer default, in which there must be exactly
 	 * one bean of the property type in the bean factory. 
 	 * This makes bean factories simple to configure for small namespaces,
-	 * but doesn't work as well as standard Spring behaviour for
-	 * bigger applications.
-	 * <br>
-	 * This method is unsupported in this class, and throws UnsupportedOperationException.
-	 * Subclasses should override it if they can obtain information
-	 * about bean names by type, as a ListableBeanFactory implementation
-	 * can.
-	 * Invoked before any property setters have been applied. This method
-	 * should add more RuntimeBeanReferences to the merged bean definition's
-	 * property values.
+	 * but doesn't work as well as standard Spring behaviour for bigger applications.
+	 * <p>This method is unsupported in this class, and throws UnsupportedOperationException.
+	 * Subclasses should override it if they can obtain information about bean names
+	 * by type, as a ListableBeanFactory implementation* can.
+	 * Invoked before any property setters have been applied. This method should add
+	 * more RuntimeBeanReferences to the merged bean definition's property values.
 	 * @param name name of the bean to autowire by type
 	 * @param mergedBeanDefinition bean definition to update through autowiring
 	 * @param instanceWrapper BeanWrapper from which we can obtain information about the bean
@@ -352,11 +350,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * @param bw BeanWrapper wrapping the target object
 	 * @param pvs new property values
 	 * @param name bean name passed for better exception information
-	 * @param newlyCreatedBeans cache with newly created beans (name, instance)
-	 * if triggered by the creation of another bean, or null else
-	 * (necessary to resolve circular references)
 	 */
-	private void applyPropertyValues(BeanWrapper bw, PropertyValues pvs, String name, Map newlyCreatedBeans) throws BeansException {
+	private void applyPropertyValues(BeanWrapper bw, PropertyValues pvs, String name) throws BeansException {
 		if (pvs == null)
 			return;
 
@@ -364,7 +359,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		PropertyValue[] pvals = deepCopy.getPropertyValues();
 		
 		for (int i = 0; i < pvals.length; i++) {
-			PropertyValue pv = new PropertyValue(pvals[i].getName(), resolveValueIfNecessary(bw, newlyCreatedBeans, pvals[i]));
+			PropertyValue pv = new PropertyValue(pvals[i].getName(), resolveValueIfNecessary(bw, pvals[i]));
 			// Update mutable copy
 			deepCopy.setPropertyValueAt(pv, i);
 		}
@@ -391,7 +386,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * If the value is a simple object, but the property takes a Collection type,
 	 * the value must be placed in a list.
 	 */
-	private Object resolveValueIfNecessary(BeanWrapper bw, Map newlyCreatedBeans, PropertyValue pv)
+	private Object resolveValueIfNecessary(BeanWrapper bw, PropertyValue pv)
 	    throws BeansException {
 		Object val;
 		
@@ -400,20 +395,20 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		// If it does, we'll attempt to instantiate the bean and set the reference.
 		if (pv.getValue() != null && (pv.getValue() instanceof RuntimeBeanReference)) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) pv.getValue();
-			val = resolveReference(pv.getName(), ref, newlyCreatedBeans);
+			val = resolveReference(pv.getName(), ref);
 		}	
 		else if (pv.getValue() != null && (pv.getValue() instanceof ManagedList)) {
 			// Convert from managed list. This is a special container that
 			// may contain runtime bean references.
 			// May need to resolve references
-			val = resolveManagedList(pv.getName(), (ManagedList) pv.getValue(), newlyCreatedBeans);
+			val = resolveManagedList(pv.getName(), (ManagedList) pv.getValue());
 		}
 		else if (pv.getValue() != null && (pv.getValue() instanceof ManagedMap)) {
 			// Convert from managed map. This is a special container that
 			// may contain runtime bean references as values.
 			// May need to resolve references
 			ManagedMap mm = (ManagedMap) pv.getValue();
-			val = resolveManagedMap(pv.getName(), mm, newlyCreatedBeans);	
+			val = resolveManagedMap(pv.getName(), mm);
 		}
 		else {
 			// It's an ordinary property. Just copy it.
@@ -440,11 +435,11 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * Resolve a reference to another bean in the factory.
 	 * @param name included for diagnostics
 	 */
-	private Object resolveReference(String name, RuntimeBeanReference ref, Map newlyCreatedBeans) {
+	private Object resolveReference(String name, RuntimeBeanReference ref) {
 		try {
 			// Try to resolve bean reference
 			logger.debug("Resolving reference from bean [" + name + "] to bean [" + ref.getBeanName() + "]");
-			Object bean = getBeanInternal(ref.getBeanName(), newlyCreatedBeans);
+			Object bean = getBean(ref.getBeanName());
 			// Create a new PropertyValue object holding the bean reference
 			return bean;
 		}
@@ -457,18 +452,18 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * For each element in the ManagedMap, resolve references if necessary.
 	 * Allow ManagedLists as map entries.
 	 */
-	private ManagedMap resolveManagedMap(String name, ManagedMap mm, Map newlyCreatedBeans) {
+	private ManagedMap resolveManagedMap(String name, ManagedMap mm) {
 		Iterator keys = mm.keySet().iterator();
 		while (keys.hasNext()) {
 			Object key = keys.next();
 			Object value = mm.get(key);
 			if (value instanceof RuntimeBeanReference) {
-				mm.put(key, resolveReference(name, (RuntimeBeanReference) value, newlyCreatedBeans));
+				mm.put(key, resolveReference(name, (RuntimeBeanReference) value));
 			}
 			else if (value instanceof ManagedList) {
 				// An entry may be a ManagedList, in which case we may need to
 				// resolve references
-				mm.put(key, resolveManagedList(name, (ManagedList) value, newlyCreatedBeans));
+				mm.put(key, resolveManagedList(name, (ManagedList) value));
 			}
 		}	// for each key in the managed map
 		return mm;
@@ -477,10 +472,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private ManagedList resolveManagedList(String name, ManagedList l, Map newlyCreatedBeans) {
+	private ManagedList resolveManagedList(String name, ManagedList l) {
 		for (int j = 0; j < l.size(); j++) {
 			if (l.get(j) instanceof RuntimeBeanReference) {
-				l.set(j, resolveReference(name, (RuntimeBeanReference) l.get(j), newlyCreatedBeans));
+				l.set(j, resolveReference(name, (RuntimeBeanReference) l.get(j)));
 			}
 		}
 		return l;
