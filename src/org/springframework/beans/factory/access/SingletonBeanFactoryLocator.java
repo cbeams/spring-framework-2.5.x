@@ -477,7 +477,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		}
 		catch (BeansException e) {
 			throw new FatalBeanException("Unable to load group definition. " +
-					"Group resource name [" + this.resourceName + "], factory key [" + factoryKey + "]");
+					"Group resource name [" + this.resourceName + "], factory key [" + factoryKey + "]", e);
 		}
 		return factory;
 	}
