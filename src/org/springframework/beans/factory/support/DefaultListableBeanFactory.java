@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
  * or as a superclass for custom bean factories.
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.4 2003-12-04 18:44:21 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.5 2003-12-09 08:39:00 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -165,16 +165,18 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 		}
 		String[] beanNames = getBeanDefinitionNames();
 		for (int i = 0; i < beanNames.length; i++) {
-			RootBeanDefinition bd = getMergedBeanDefinition(beanNames[i], false);
-			if (bd.isSingleton() && !bd.isLazyInit()) {
-				if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
-					FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanNames[i]);
-					if (factory.isSingleton()) {
+			if (containsBeanDefinition(beanNames[i])) {
+				RootBeanDefinition bd = getMergedBeanDefinition(beanNames[i], false);
+				if (bd.isSingleton() && !bd.isLazyInit()) {
+					if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
+						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanNames[i]);
+						if (factory.isSingleton()) {
+							getBean(beanNames[i]);
+						}
+					}
+					else {
 						getBean(beanNames[i]);
 					}
-				}
-				else {
-					getBean(beanNames[i]);
 				}
 			}
 		}
@@ -232,12 +234,14 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 		List dependingBeanNames = new ArrayList();
 		String[] beanDefinitionNames = getBeanDefinitionNames();
 		for (int i = 0; i < beanDefinitionNames.length; i++) {
-			RootBeanDefinition bd = getMergedBeanDefinition(beanDefinitionNames[i], false);
-			if (bd.getDependsOn() != null) {
-				List dependsOn = Arrays.asList(bd.getDependsOn());
-				if (dependsOn.contains(beanName)) {
-					logger.debug("Found depending bean '" + beanDefinitionNames[i] + "' for bean '" + beanName + "'");
-					dependingBeanNames.add(beanDefinitionNames[i]);
+			if (containsBeanDefinition(beanDefinitionNames[i])) {
+				RootBeanDefinition bd = getMergedBeanDefinition(beanDefinitionNames[i], false);
+				if (bd.getDependsOn() != null) {
+					List dependsOn = Arrays.asList(bd.getDependsOn());
+					if (dependsOn.contains(beanName)) {
+						logger.debug("Found depending bean '" + beanDefinitionNames[i] + "' for bean '" + beanName + "'");
+						dependingBeanNames.add(beanDefinitionNames[i]);
+					}
 				}
 			}
 		}
