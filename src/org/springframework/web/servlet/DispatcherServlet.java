@@ -53,14 +53,16 @@ import org.springframework.web.util.WebUtils;
  * package. HandlerMappings can be given any bean name (they are tested by type).
  * <li>It can use any HandlerAdapter (additional HandlerAdapter objects can be added
  * through the application context).
- * <li>Its view resoltion strategy can be specified via a ViewResolver implementation.
+ * <li>Its view resolution strategy can be specified via a ViewResolver implementation.
  * Standard implementations support mapping URLs to bean names, and explicit mappings.
  * <li>Its locale resolution strategy is determined by a LocaleResolver implementation.
- * Standard implementations work via HTTP accept header, cookie, or session.
+ * Out-of-the-box implementations work via HTTP accept header, cookie, or session.
+ * <li>Its theme resolution strategy is determined by a ThemeResolver implementation.
+ * Implementations for a fixed theme and for cookie and session storage are included.
  * </ul>
  *
  * <p>A web application can use any number of dispatcher servlets.
- * Each servlet will operate in its own namespace. Only the default name space,
+ * Each servlet will operate in its own namespace. Only the root application context,
  * and any config objects set for the application as a whole, will be shared.
  *
  * @see HandlerMapping
@@ -71,7 +73,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -144,7 +146,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Initialize the LocaleResolver used by this class.
 	 * If no bean is defined with the given name in the BeanFactory
-	 * for this namespace, we default to a AcceptHeaderLocaleResolver.
+	 * for this namespace, we default to AcceptHeaderLocaleResolver.
 	 */
 	private void initLocaleResolver() throws ServletException {
 		try {
@@ -186,7 +188,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Initialize the HandlerMappings used by this class.
 	 * If no HandlerMapping beans are defined in the BeanFactory
-	 * for this namespace, we default to a BeanNameUrlHandlerMapping.
+	 * for this namespace, we default to BeanNameUrlHandlerMapping.
 	 */
 	private void initHandlerMappings() throws ServletException {
 		this.handlerMappings = new ArrayList();
@@ -212,7 +214,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the given HandlerMapping object.
-	 * @param beanName bean beanName in the current web application context
+	 * @param beanName bean name in the current web application context
 	 */
 	private void initHandlerMapping(String beanName) throws ServletException {
 		try {
@@ -243,7 +245,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Initialize the HandlerAdapters used by this class.
 	 * If no HandlerAdapter beans are defined in the BeanFactory
-	 * for this namespace, we default to a SimpleControllerHandlerAdapter.
+	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
 	private void initHandlerAdapters() throws ServletException {
 		this.handlerAdapters = new ArrayList();
@@ -300,7 +302,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Initialize the ViewResolver used by this class.
 	 * If no bean is defined with the given name in the BeanFactory
-	 * for this namespace, we default to a InternalResourceViewResolver.
+	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
 	private void initViewResolver() throws ServletException {
 		try {
