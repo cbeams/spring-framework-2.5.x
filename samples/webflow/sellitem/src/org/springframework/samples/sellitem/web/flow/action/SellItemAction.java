@@ -29,7 +29,7 @@ public class SellItemAction extends FormAction {
 	}
 
 	protected boolean suppressValidation(RequestContext context) {
-		return getActionStateAction(context).getProperty(VALIDATOR_METHOD_PROPERTY) == null;
+		return !getActionStateAction(context).containsProperty(VALIDATOR_METHOD_PROPERTY);
 	}
 
 	public Event isShipping(RequestContext context) throws Exception {

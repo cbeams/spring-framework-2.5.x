@@ -270,6 +270,15 @@ public class ActionStateAction {
 		getProperties().setProperty(propertyName, value);
 	}
 
+	/**
+	 * Does this action state action have the specified property present?
+	 * @param property the property
+	 * @return true if present, false if not present
+	 */
+	public boolean containsProperty(String propertyName) {
+		return getProperties().containsKey(propertyName);
+	}
+
 	public String toString() {
 		return new ToStringCreator(this).append("stateId", state.getId()).append("targetAction", targetAction).append(
 				"properties", properties).toString();

@@ -240,7 +240,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 */
 	public void setFormObjectClass(Class formObjectClass) {
 		this.formObjectClass = formObjectClass;
-		this.validateMethodDispatcher.setParameterTypes(new Class[] { this.formObjectClass, Errors.class});
+		this.validateMethodDispatcher.setParameterTypes(new Class[] { this.formObjectClass, Errors.class });
 	}
 
 	/**
@@ -563,7 +563,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 			logger.debug("Binding completed for object '" + binder.getObjectName() + "', details='"
 					+ binder.getTarget() + "'");
 		}
-		if (getValidator() != null && isValidateOnBinding() && !suppressValidation(context)) {
+		if (getValidator() != null && isValidateOnBinding() && shouldValidate(context)) {
 			validate(context, binder.getTarget(), binder.getErrors());
 		}
 		return onBindAndValidate(context, binder.getTarget(), binder.getErrors());
@@ -621,18 +621,18 @@ public class FormAction extends MultiAction implements InitializingBean {
 	// subclassing hook methods
 
 	/**
-	 * Return whether to suppress validation for the given action execution
+	 * Return whether validation should be performed given the state of the flow request
 	 * context.
 	 * <p>
-	 * Default implementation always returns false. Can be overridden
-	 * in subclasses to suppress validation, for example, if a special
+	 * Default implementation always returns true. Can be overridden
+	 * in subclasses to test validation, for example, if a special
 	 * event parameter is set.
-	 * @param context the action execution context, for accessing and setting
+	 * @param context the request context, for accessing and setting
 	 *        data in "flow scope" or "request scope"
-	 * @return whether or not to suppress validation
+	 * @return whether or not validation is enabled
 	 */
-	protected boolean suppressValidation(RequestContext context) {
-		return false;
+	protected boolean shouldValidate(RequestContext context) {
+		return true;
 	}
 
 	/**
