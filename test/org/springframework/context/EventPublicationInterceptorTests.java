@@ -21,19 +21,21 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.context.event.EventPublicationInterceptor;
 import org.springframework.context.support.StaticApplicationContext;
 
 /** 
  * @author Dmitriy Kopylenko
+ * @author Juergen Hoeller
  */
 public class EventPublicationInterceptorTests extends TestCase {
 
 	public void testWithIncorrectRequiredProperties() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		ApplicationContext ctx = new StaticApplicationContext();
-		interceptor.setApplicationContext(ctx);
+		interceptor.setApplicationEventPublisher(ctx);
 
 		try {
 			interceptor.afterPropertiesSet();
@@ -63,13 +65,16 @@ public class EventPublicationInterceptorTests extends TestCase {
 			}
 		}
 
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("applicationEventClass", TestEvent.class.getName());
+		// should automatically receive applicationEventPublisher reference
+
 		StaticApplicationContext ctx = new TestContext();
+		ctx.registerSingleton("publisher", EventPublicationInterceptor.class, pvs);
 		ctx.refresh();
 
-		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationContext(ctx);
-		interceptor.setApplicationEventClass(TestEvent.class);
-
+		EventPublicationInterceptor interceptor =
+				(EventPublicationInterceptor) ctx.getBean("publisher");
 		ProxyFactory factory = new ProxyFactory(target);
 		factory.addAdvice(0, interceptor);
 

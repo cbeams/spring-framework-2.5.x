@@ -23,6 +23,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
 
 /**
@@ -57,6 +59,18 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
 				logger.debug("Invoking setResourceLoader on ResourceLoaderAware bean '" + name + "'");
 			}
 			((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
+		}
+		if (bean instanceof ApplicationEventPublisherAware) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking setApplicationEventPublisher on ApplicationEventPublisherAware bean '" + name + "'");
+			}
+			((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
+		}
+		if (bean instanceof MessageSourceAware) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking setMessageSource on MessageSourceAware bean '" + name + "'");
+			}
+			((MessageSourceAware) bean).setMessageSource(this.applicationContext);
 		}
 		if (bean instanceof ApplicationContextAware) {
 			if (logger.isDebugEnabled()) {

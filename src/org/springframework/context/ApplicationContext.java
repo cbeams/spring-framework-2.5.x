@@ -49,8 +49,8 @@ import org.springframework.core.io.ResourceLoader;
  * @author Juergen Hoeller
  * @see ApplicationContextAware#setApplicationContext
  */
-public interface ApplicationContext
-    extends ListableBeanFactory, HierarchicalBeanFactory, MessageSource, ResourceLoader {
+public interface ApplicationContext extends ListableBeanFactory, HierarchicalBeanFactory,
+		MessageSource, ApplicationEventPublisher, ResourceLoader {
 	
 	/**
 	 * Return the parent context, or null if there is no parent,
