@@ -20,6 +20,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -32,11 +34,13 @@ import org.springframework.util.StringUtils;
  * to override to add Method Injection  support, for example by overriding methods.
  * 
  * @author Rod Johnson
- * @version $Id: SimpleInstantiationStrategy.java,v 1.1 2004-06-24 08:43:53 jhoeller Exp $
+ * @version $Id: SimpleInstantiationStrategy.java,v 1.2 2004-06-27 13:49:48 johnsonr Exp $
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
+	
+	protected final Log log = LogFactory.getLog(getClass());
 
-	public final Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner) {
+	public Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner) {
 		// don't override the class with CGLIB if no overrides
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(beanDefinition.getBeanClass());
@@ -57,8 +61,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	public final Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
-																	Constructor ctor, Object[] args) {
+	public Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
+									Constructor ctor, Object[] args) {
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(ctor, args);
 		}
@@ -74,26 +78,30 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * Instantiation should use the given constructor and parameters.
 	 */
 	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, BeanFactory owner,
-																									Constructor ctor, Object[] args) {
+														Constructor ctor, Object[] args) {
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	public final Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
-																	Method factoryMethod, Object[] args) {
+	
+	public Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
+														Method factoryMethod, Object[] args) {
 		try {
 			// must be a static method
 			return factoryMethod.invoke(null, args);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new BeanDefinitionStoreException("Illegal arguments to factory method " + factoryMethod + "; " +
-																						 "args=" + StringUtils.arrayToCommaDelimitedString(args));
+													"args=" + StringUtils.arrayToCommaDelimitedString(args));
 		}
 		catch (IllegalAccessException ex) {
 			throw new BeanDefinitionStoreException("Cannot access factory method " + factoryMethod + "; is it public?");
 		}
 		catch (InvocationTargetException ex) {
-			throw new BeanDefinitionStoreException("Factory method " + factoryMethod + " threw exception",
-																						 ex.getTargetException());
+			String mesg = "Factory method " + factoryMethod + " threw exception";
+			// We want to log this one, as it may be a config error:
+			// the method may match, but may have been given incorrect arguments	
+			log.warn(mesg, ex.getTargetException());
+			throw new BeanDefinitionStoreException(mesg, ex.getTargetException());			
 		}
 	}
 	
