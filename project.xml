@@ -270,7 +270,7 @@
       </dependency>
       <dependency>
          <groupId>cglib</groupId>
-         <artifactId>cglib</artifactId>
+         <artifactId>cglib-full</artifactId>
          <version>2.0.2</version>
       </dependency>
       <dependency>
@@ -401,6 +401,11 @@
          <version>0.07</version>
       </dependency>
       <dependency>
+         <groupId>ojb</groupId>
+         <artifactId>db-ojb</artifactId>
+         <version>1.0.0</version>
+      </dependency>
+      <dependency>
          <id>oro</id>
          <version>2.0.7</version>
       </dependency>
@@ -459,9 +464,9 @@
          <version>1.0</version>
       </dependency>
       <dependency>
+         <groupId>aopalliance</groupId>
          <id>aopalliance</id>
-         <version>0.1-dev</version>
-         <jar>aopalliance.jar</jar>
+         <version>1.0</version>
       </dependency>
       <dependency>
          <groupId>poi</groupId>
