@@ -6,7 +6,6 @@
 
 	<property name="war.dir" value="war"/>
 	<property name="src.dir" value="src"/>
-	<property name="lib.dir" value="lib"/>
 	<property name="build.dir" value=".classes"/>
 	<property name="docs.dir" value="${war.dir}/docs"/>
 	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
@@ -40,8 +39,7 @@
 	</path>
 
 	<path id="test-classpath">
-		<fileset dir="${lib.dir}">
-			<include name="hsqldb.jar"/>
+		<fileset dir="${db.dir}/mysql">
 			<include name="mysql*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/aop-alliance">
@@ -50,8 +48,13 @@
 		<fileset dir="${spring.root}/lib/cglib">
 			<include name="cglib-asm.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/hibernate">
+		<fileset dir="${spring.root}/lib/hsqldb">
+			<include name="hsqldb.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/dom4j">
 			<include name="dom4j.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/hibernate">
 			<include name="odmg.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
@@ -63,11 +66,7 @@
 			<include name="servlet.jar"/>
 			<include name="jdbc2_0-stdext.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/dist">
-			<include name="spring.jar"/>
-		</fileset>
 	</path>
-
 
 
 	<target name="usage">
@@ -123,8 +122,7 @@
 		<jar jarfile="${weblib.dir}/petclinic.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
-			<fileset dir="${lib.dir}">
-				<include name="hsqldb.jar"/>
+			<fileset dir="${db.dir}/mysql">
 				<include name="mysql*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/aop-alliance">
@@ -132,6 +130,9 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/cglib">
 				<include name="cglib-asm.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/hsqldb">
+				<include name="hsqldb.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/dom4j">
 				<include name="dom4j.jar"/>
@@ -165,7 +166,7 @@
 		<mkdir dir="${docs.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" packagenames="*" private="true"
-			 author="true" version="true" use="true" windowtitle="Petclinic">
+			author="true" version="true" use="true" windowtitle="Petclinic">
 			<doctitle><![CDATA[<h1>Petclinic</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Ken Krebs and Spring contributors 2003.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
@@ -176,9 +177,6 @@
 
 	<target name="warfile" depends="build,docs" description="Build the web application archive">
 
-		<!-- To not include jboss file if jboss.root was not set before -->
-		<property name="jboss.root" value="${war.dir}/WEB-INF"/>
-
 		<mkdir dir="${dist.dir}"/>
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
@@ -187,14 +185,11 @@
 			<include name="html/**"/>
 			<include name="WEB-INF/applicationContext*.xml"/>
 			<include name="WEB-INF/petclinic-servlet.xml"/>
-			<include name="WEB-INF/spring.tld"/>
+			<include name="WEB-INF/jboss-web.xml"/>
 			<include name="WEB-INF/classes/*.properties"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<exclude name="**/.*"/>
-			<webinf dir="${jboss.root}">
-				<include name="jboss-web.xml"/>
-			</webinf>
 		</war>
 
 	</target>
@@ -275,6 +270,7 @@
 
 	</target>
 
-	<target name="all" depends="clean,build,docs,warfile,test" description="Clean,build,warfile,docs,test"/>
+
+	<target name="all" depends="clean,build,docs,warfile,test" description="Clean,build,docs,warfile,test"/>
 
 </project>
