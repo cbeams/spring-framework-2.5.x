@@ -43,10 +43,10 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 3/3/2004
- * @version $Id: FreemarkerView.java,v 1.2 2004-03-14 21:40:04 jhoeller Exp $
+ * @version $Id: FreemarkerView.java,v 1.3 2004-03-15 07:57:12 jhoeller Exp $
  * @see #setUrl
  * @see #setEncoding
- * @see #setFreemarkerConfiguration
+ * @see #setConfiguration
  * @see FreemarkerConfig
  * @see FreemarkerConfigurer
  */
@@ -54,7 +54,7 @@ public class FreemarkerView extends AbstractUrlBasedView {
 
 	private String encoding;
 
-	private Configuration freemarkerConfiguration;
+	private Configuration configuration;
 
 	/**
 	 * Set the encoding of the FreeMarker template file. Default is determined
@@ -79,15 +79,15 @@ public class FreemarkerView extends AbstractUrlBasedView {
 	 * is expected in the current web application context, with any bean name.
 	 * @see FreemarkerConfig
 	 */
-	public void setFreemarkerConfiguration(Configuration freemarkerConfiguration) {
-		this.freemarkerConfiguration = freemarkerConfiguration;
+	public void setConfiguration(Configuration configration) {
+		this.configuration = configration;
 	}
 
 	/**
 	 * Return the FreeMarker configuration used by this view.
 	 */
-	protected Configuration getFreemarkerConfiguration() {
-		return freemarkerConfiguration;
+	protected Configuration getConfiguration() {
+		return configuration;
 	}
 
 	/**
@@ -101,12 +101,12 @@ public class FreemarkerView extends AbstractUrlBasedView {
 	protected void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 
-		if (this.freemarkerConfiguration == null) {
+		if (this.configuration == null) {
 			try {
 				FreemarkerConfig freemarkerConfig = (FreemarkerConfig)
 						BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(),
 																													FreemarkerConfig.class, true, true);
-				this.freemarkerConfiguration = freemarkerConfig.getFreemarkerConfiguration();
+				this.configuration = freemarkerConfig.getConfiguration();
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new ApplicationContextException("Must define a single FreemarkerConfig bean in this web application " +
@@ -117,7 +117,7 @@ public class FreemarkerView extends AbstractUrlBasedView {
 
 		try {
 			// check that we can get the template, even if we might subsequently get it again
-			getTemplate(this.freemarkerConfiguration.getLocale());
+			getTemplate(this.configuration.getLocale());
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException("Cannot load FreeMarker template for URL [" + getUrl() +
@@ -149,8 +149,8 @@ public class FreemarkerView extends AbstractUrlBasedView {
 	 * @throws IOException if the template file could not be retrieved
 	 */
 	protected Template getTemplate(Locale locale) throws IOException {
-		return (this.encoding != null ? this.freemarkerConfiguration.getTemplate(getUrl(), locale, this.encoding) :
-				this.freemarkerConfiguration.getTemplate(getUrl(), locale));
+		return (this.encoding != null ? this.configuration.getTemplate(getUrl(), locale, this.encoding) :
+				this.configuration.getTemplate(getUrl(), locale));
 	}
 
 	/**

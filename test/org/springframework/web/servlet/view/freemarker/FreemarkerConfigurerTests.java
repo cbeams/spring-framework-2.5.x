@@ -42,7 +42,7 @@ public class FreemarkerConfigurerTests extends TestCase {
 	public void testVelocityEngineFactoryBeanWithResourceLoaderPath() throws IOException, TemplateException {
 		final File[] files = new File[1];
 		FreemarkerConfigurationFactoryBean fcfb = new FreemarkerConfigurationFactoryBean() {
-			protected Configuration newFreemarkerConfiguration() {
+			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public void setDirectoryForTemplateLoading(File file) throws IOException {
 						files[0] = file;
@@ -81,7 +81,7 @@ public class FreemarkerConfigurerTests extends TestCase {
 	public void testFreemarkerConfigurer() throws IOException, TemplateException {
 		final File[] files = new File[1];
 		FreemarkerConfigurer fc = new FreemarkerConfigurer() {
-			protected Configuration newFreemarkerConfiguration() {
+			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public void setDirectoryForTemplateLoading(File file) throws IOException {
 						files[0] = file;
@@ -91,7 +91,7 @@ public class FreemarkerConfigurerTests extends TestCase {
 		};
 		fc.setTemplateLoaderPath("file:/mydir");
 		fc.afterPropertiesSet();
-		assertTrue(fc.getFreemarkerConfiguration() instanceof Configuration);
+		assertTrue(fc.getConfiguration() instanceof Configuration);
 		assertEquals(new File("/mydir").getPath(), files[0].getPath());
 	}
 

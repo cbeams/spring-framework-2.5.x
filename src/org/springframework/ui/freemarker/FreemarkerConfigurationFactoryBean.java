@@ -26,19 +26,19 @@ import org.springframework.context.ResourceLoaderAware;
  *
  * @author Darren Davison
  * @since 3/3/2004
- * @version $Id: FreemarkerConfigurationFactoryBean.java,v 1.1 2004-03-14 21:40:05 jhoeller Exp $
+ * @version $Id: FreemarkerConfigurationFactoryBean.java,v 1.2 2004-03-15 07:57:11 jhoeller Exp $
  */
 public class FreemarkerConfigurationFactoryBean extends FreemarkerConfigurationFactory
 		implements FactoryBean, InitializingBean, ResourceLoaderAware {
 
-	private Configuration freemarkerConfiguration;
+	private Configuration configuration;
 
 	public void afterPropertiesSet() throws IOException, TemplateException {
-		this.freemarkerConfiguration = createFreemarkerConfiguration();
+		this.configuration = createConfiguration();
 	}
 
 	public Object getObject() {
-		return this.freemarkerConfiguration;
+		return this.configuration;
 	}
 
 	public Class getObjectType() {

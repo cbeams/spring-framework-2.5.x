@@ -81,7 +81,7 @@ public class FreemarkerViewTests extends TestCase {
 		wac.getBeansOfType(FreemarkerConfig.class, true, true);
 		Map configs = new HashMap();
 		FreemarkerConfigurer configurer = new FreemarkerConfigurer();
-		configurer.setFreemarkerConfiguration(new TestConfiguration());
+		configurer.setConfiguration(new TestConfiguration());
 		configs.put("freemarkerConfig", configurer);
 		wmc.setReturnValue(configs);
 		wac.getParentBeanFactory();

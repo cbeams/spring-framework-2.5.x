@@ -18,7 +18,7 @@ import org.springframework.ui.freemarker.FreemarkerConfigurationFactory;
  * JavaBean to configure FreeMarker for web usage, via the "configLocation"
  * and/or "freemarkerSettings" and/or "templateLoaderPath" properties.
  * The simplest way to use this class is to specify just a "templateLoaderPath":
- * You do not need any further freemarkerConfiguration then.
+ * You do not need any further configuration then.
  *
  * <p><code>
  * &lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreemarkerConfigurer"&gt;<br>
@@ -33,27 +33,27 @@ import org.springframework.ui.freemarker.FreemarkerConfigurationFactory;
  * depending on the bean name the configurer. Each DispatcherServlet can define its
  * own FreemarkerConfigurer if desired.
  *
- * <p>Note that you can also refer to a preconfigured FreeMarkerConfiguration instance,
- * for example one set up by FreemarkerConfigurationFactoryBean, via the
- * "freemarkerConfiguration" property. This allows to share a FreeMarker Configuration
+ * <p>Note that you can also refer to a preconfigured FreeMarker Configuration
+ * instance, for example one set up by FreemarkerConfigurationFactoryBean, via
+ * the "configuration" property. This allows to share a FreeMarker Configuration
  * for web and email usage, for example.
  *
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
  * @author Darren Davison
  * @since 3/3/2004
- * @version $Id: FreemarkerConfigurer.java,v 1.2 2004-03-14 21:40:04 jhoeller Exp $
+ * @version $Id: FreemarkerConfigurer.java,v 1.3 2004-03-15 07:57:12 jhoeller Exp $
  * @see #setConfigLocation
  * @see #setFreemarkerSettings
  * @see #setTemplateLoaderPath
- * @see #setFreemarkerConfiguration
+ * @see #setConfiguration
  * @see org.springframework.ui.freemarker.FreemarkerConfigurationFactoryBean
  * @see FreemarkerView
  */
 public class FreemarkerConfigurer extends FreemarkerConfigurationFactory
 		implements FreemarkerConfig, InitializingBean, ResourceLoaderAware {
 
-	private Configuration freemarkerConfiguration;
+	private Configuration configuration;
 
 	/**
 	 * Set a preconfigured Configuration to use for the FreeMarker web config, e.g. a
@@ -62,24 +62,24 @@ public class FreemarkerConfigurer extends FreemarkerConfigurationFactory
 	 * this class) have to be specified.
 	 * @see org.springframework.ui.freemarker.FreemarkerConfigurationFactoryBean
 	 */
-	public void setFreemarkerConfiguration(Configuration freemarkerConfiguration) {
-		this.freemarkerConfiguration = freemarkerConfiguration;
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	/**
 	 * Initialize FreemarkerConfigurationFactory's Configuration
 	 * if not overridden by a preconfigured FreeMarker Configuation.
-	 * @see #createFreemarkerConfiguration
-	 * @see #setFreemarkerConfiguration
+	 * @see #createConfiguration
+	 * @see #setConfiguration
 	 */
 	public void afterPropertiesSet() throws IOException, TemplateException {
-		if (this.freemarkerConfiguration == null) {
-			this.freemarkerConfiguration = createFreemarkerConfiguration();
+		if (this.configuration == null) {
+			this.configuration = createConfiguration();
 		}
 	}
 
-	public synchronized Configuration getFreemarkerConfiguration() {
-		return this.freemarkerConfiguration;
+	public synchronized Configuration getConfiguration() {
+		return this.configuration;
 	}
 
 }

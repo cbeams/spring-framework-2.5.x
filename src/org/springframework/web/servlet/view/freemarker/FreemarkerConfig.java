@@ -13,19 +13,19 @@ import freemarker.template.Configuration;
  * used by FreemarkerView.
  * @author Darren Davison
  * @since 3/3/2004
- * @version $Id: FreemarkerConfig.java,v 1.2 2004-03-14 21:40:04 jhoeller Exp $
+ * @version $Id: FreemarkerConfig.java,v 1.3 2004-03-15 07:57:12 jhoeller Exp $
  * @see FreemarkerConfigurer
  * @see FreemarkerView
  */
 public interface FreemarkerConfig {
-	
+
 	/**
-	 * Return the FreeMarker <code>Configuration</code> object for the current
+	 * Return the FreeMarker Configuration object for the current
 	 * web application context.
 	 * <p>A FreeMarker Configuration object may be used to set FreeMarker
-	 * properties and shared objects, and allows to retrieve <code>Template</code>s.
+	 * properties and shared objects, and allows to retrieve templates.
 	 * @return the FreeMarker Configuration
 	 */
-	Configuration getFreemarkerConfiguration();
-	
+	Configuration getConfiguration();
+
 }
