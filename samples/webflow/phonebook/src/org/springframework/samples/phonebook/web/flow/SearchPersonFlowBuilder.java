@@ -57,9 +57,11 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		// view search criteria
 		addViewState("viewCriteria", "person.Search.criteria.view", on(submit(), "bindAndValidateCriteria"));
 
-		// bind and validate search criteria - dispatches to a target method on a multi-action
-		addActionState("bindAndValidateCriteria", name(multiAction("person.Search.criteria.formAction"),
-				"bindAndValidate"), new Transition[] { on(error(), "viewCriteria"), on(success(), "executeQuery") });
+		// bind and validate search criteria - dispatches to a target method on
+		// a multi-action
+		addActionState("bindAndValidateCriteria",
+				method("bindAndValidate", action("person.Search.criteria.formAction")), new Transition[] {
+						on(error(), "viewCriteria"), on(success(), "executeQuery") });
 
 		// execute query
 		addActionState("executeQuery", action(ExecuteQueryAction.class, AutowireMode.BY_TYPE), new Transition[] {

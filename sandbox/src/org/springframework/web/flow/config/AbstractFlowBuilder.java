@@ -49,23 +49,23 @@ import org.springframework.web.flow.action.MultiAction;
  * 	}
  * 
  * public void buildStates() {
- *      // get customer information
- *      addActionState(&quot;getDetails&quot;,
- *          action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *          on(success(), &quot;viewDetails&quot;));
- *      // view customer information               
- *      addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *          on(submit(), &quot;bindAndValidate&quot;);
- *      // bind and validate customer information updates 
- *      addActionState(&quot;bindAndValidate&quot;,
- *          action(&quot;customer.Detail.bindAndValidate&quot;),
- *          new Transition[] {
- *              on(error(), &quot;viewDetails&quot;),
- *              on(success(), &quot;finish&quot;)
- *          }
- *      // finish
- *      addEndState(&quot;finish&quot;);
- *    }}
+ *            // get customer information
+ *            addActionState(&quot;getDetails&quot;,
+ *                action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *                on(success(), &quot;viewDetails&quot;));
+ *            // view customer information               
+ *            addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *                on(submit(), &quot;bindAndValidate&quot;);
+ *            // bind and validate customer information updates 
+ *            addActionState(&quot;bindAndValidate&quot;,
+ *                action(&quot;customer.Detail.bindAndValidate&quot;),
+ *                new Transition[] {
+ *                    on(error(), &quot;viewDetails&quot;),
+ *                    on(success(), &quot;finish&quot;)
+ *                }
+ *            // finish
+ *            addEndState(&quot;finish&quot;);
+ *          }}
  * 
  * </pre>
  * 
@@ -420,20 +420,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the multi-action with the specified id be executed when the
-	 * action state being built is entered. Simply looks the multi-action up by
-	 * name and returns it.
-	 * @param actionId The multi action id
-	 * @return The multi action
-	 * @throws NoSuchActionException the action could not be resolved.
-	 */
-	protected MultiAction multiAction(String actionId) throws NoSuchActionException {
-		Action action = getFlowServiceLocator().getAction(actionId);
-		Assert.isInstanceOf(MultiAction.class, action, "Multi-action lookup with id '" + actionId + "' failed:");
-		return (MultiAction)action;
-	}
-
-	/**
 	 * Request that the actions with the specified implementation be executed
 	 * when the action state being built is entered. Looks the action up by
 	 * implementation class and returns it.
@@ -448,17 +434,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Creates an action state action suitable for adding to exactly one action
-	 * state, wrapping the specified target action and annoated with the
-	 * specified name.
-	 * <p>
-	 * Note: the action name can be used to map an invocation on the target
-	 * action instance to a specified method call on that target.
+	 * state, invoking the specified execute method name on the target action
+	 * when executed.
+	 * @param executeMethodName the action execute method name
 	 * @param action the action
-	 * @param name the action name
 	 * @return the action state action
 	 */
-	protected ActionStateAction name(Action action, String name) {
-		return new ActionStateAction(action, name);
+	protected ActionStateAction method(String executeMethodName, Action action) {
+		ActionStateAction stateAction = new ActionStateAction(action);
+		stateAction.setExecuteMethodName(executeMethodName);
+		return stateAction;
 	}
 
 	/**

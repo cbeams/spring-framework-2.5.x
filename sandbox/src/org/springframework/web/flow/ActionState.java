@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.util.Styler;
 
 /**
@@ -412,8 +413,8 @@ public class ActionState extends TransitionableState {
 			if (resultEvent == null) {
 				return null;
 			}
-			if (action.isNamed()) {
-				return new ActionNameQualifiedEvent(action.getName(), resultEvent);
+			if (StringUtils.hasText(action.getResultQualifier())) {
+				return new ActionNameQualifiedEvent(action.getResultQualifier(), resultEvent);
 			}
 			else {
 				return resultEvent;

@@ -82,8 +82,10 @@ public class StateTests extends TestCase {
 		ActionStateAction[] actions = new ActionStateAction[4];
 		actions[0] = new ActionStateAction(new ExecutionCounterAction("not mapped result"));
 		actions[1] = new ActionStateAction(new ExecutionCounterAction(null));
-		actions[2] = new ActionStateAction(new ExecutionCounterAction(""), "action3");
-		actions[3] = new ActionStateAction(new ExecutionCounterAction("success"), "action4");
+		actions[2] = new ActionStateAction(new ExecutionCounterAction(""));
+		actions[2].setResultQualifier("action3");
+		actions[3] = new ActionStateAction(new ExecutionCounterAction("success"));
+		actions[3].setResultQualifier("action4");
 		ActionState state = new ActionState(flow, "actionState", actions, new Transition("action4.success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();

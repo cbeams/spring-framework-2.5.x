@@ -346,7 +346,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Transition[] transitions = parseTransitions(element);
 		ActionStateAction[] stateActions = new ActionStateAction[actions.length];
 		for (int i = 0; i < stateActions.length; i++) {
-			stateActions[i] = new ActionStateAction(actions[i], actionNames[i]);
+			stateActions[i] = new ActionStateAction(actions[i]);
+			stateActions[i].setResultQualifier(actionNames[i]);
 		}
 		new ActionState(flow, id, stateActions, transitions);
 	}

@@ -230,10 +230,10 @@ public class MultiAction extends AbstractAction {
 	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
 		public String getMethodName(RequestContext context, MultiAction action) {
 			Assert.isInstanceOf(ActionState.class, context.getCurrentState());
-			String actionName = ((ActionState)context.getCurrentState()).getAction(action).getName();
-			if (StringUtils.hasText(actionName)) {
+			String methodName = ((ActionState)context.getCurrentState()).getAction(action).getExecuteMethodName();
+			if (StringUtils.hasText(methodName)) {
 				// use action name as method name
-				return actionName;
+				return methodName;
 			}
 			else {
 				// use current state name as method name
