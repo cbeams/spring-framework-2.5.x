@@ -119,6 +119,35 @@ public class ServletContextSupportTests extends TestCase {
 		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my");
+		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
+
+		wac.refresh();
+
+		TestBean tb1 = (TestBean) wac.getBean("tb1");
+		TestBean tb2 = (TestBean) wac.getBean("tb2");
+		assertEquals(98, tb1.getAge());
+		assertEquals("namemyvarmyvar${", tb1.getName());
+		assertEquals(tb2, tb1.getSpouse());
+	}
+
+	public void testServletContextPropertyPlaceholderConfigurerWithSearchAttributes() {
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("key4", "mykey4");
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("age", "${age}");
+		pvs.addPropertyValue("name", "name${var}${var}${");
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		wac.registerSingleton("tb1", TestBean.class, pvs);
+
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
 		cas.addIndexedArgumentValue(1, "${age}");
 		cas.addGenericArgumentValue("${var}name${age}");
@@ -148,8 +177,11 @@ public class ServletContextSupportTests extends TestCase {
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my");
+		pvs.addPropertyValue("properties", "var=${m}var\nref=tb2\nm=my");
+		pvs.addPropertyValue("searchAttributes", Boolean.TRUE);
 		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
+		sc.setAttribute("age", new Integer(98));
+
 		wac.refresh();
 
 		TestBean tb1 = (TestBean) wac.getBean("tb1");
