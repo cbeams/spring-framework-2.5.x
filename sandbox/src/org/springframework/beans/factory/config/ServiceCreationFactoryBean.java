@@ -16,34 +16,32 @@
 
 package org.springframework.beans.factory.config;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.FatalBeanException;
-import org.springframework.aop.framework.ProxyFactory;
 
 /**
  * <p><code>FactoryBean</code> implementation that creates proxy objects that route calls
  * to methods on a service creation interface to corresponding constructors on a service implementation
  * type. </p>
- * <p>
+ * <p/>
  * Using this class, applications can create services using runtime-determined configuration without
  * knowing the exact implementation type of the service and without requiring client code to populate
  * beans with configuration data via setters.
  * </p>
- * <p>
+ * <p/>
  * Usage of this class involves the definition of a service creation interface with methods such as
  * MyService xxx([args]). This class will create a proxy of the service creation interface that will
  * re-route calls to the methods on the service creation interface to constructors on some service
  * implementation type.
  * </p>
- * <p>
+ * <p/>
  * For example, consider this interface:
  * <pre>
  * public interface ServiceCreator {
@@ -56,7 +54,7 @@ import org.springframework.aop.framework.ProxyFactory;
  * the implementation type with args (String, int), for example consider the following implementation type:
  * <pre>
  * public class MyServiceImpl implements MyService {
- *
+ * <p/>
  *    public MyServiceImpl(String name, int age) {
  *        // do something
  *    }
@@ -68,14 +66,15 @@ import org.springframework.aop.framework.ProxyFactory;
  * in the service creation interface and all methods in the service creation interface must have parameter lists
  * that can be matched to constructors on the service implementation type.
  * </p>
- * <p>
+ * <p/>
  * The service creation interface is specified via <code>setServiceCreatorInterface</code> and the service
  * implementation type is specified via <code>setServiceImplementationType</code>. Both properties are required.
+ *
  * @author Rob Harrop
- * @since 1.2
  * @see ServiceLocatorFactoryBean
  * @see #setServiceCreatorInterface(Class)
  * @see #setServiceImplementationType(Class)
+ * @since 1.2
  */
 public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean {
 
@@ -103,6 +102,7 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 
 	/**
 	 * Returns the type specified by the service implementation type.
+	 *
 	 * @return the service implementation type.
 	 */
 	public Class getObjectType() {
@@ -118,6 +118,7 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 
 	/**
 	 * Sets the service creator interface.
+	 *
 	 * @param serviceCreatorInterface the interface that the proxy should implement.
 	 */
 	public void setServiceCreatorInterface(Class serviceCreatorInterface) {
@@ -132,6 +133,7 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 
 	/**
 	 * Sets the service implementation type.
+	 *
 	 * @param serviceImplementationType
 	 */
 	public void setServiceImplementationType(Class serviceImplementationType) {
@@ -164,16 +166,16 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 	 * Creates the actual proxy to the service creator interface.
 	 */
 	private void createProxy() {
-		ProxyFactory pf = new ProxyFactory();
-		pf.setInterfaces(new Class[]{serviceCreatorInterface});
-		pf.addAdvice(new ServiceCreationMethodInterceptor(this.serviceImplementationType));
-		this.proxy = pf.getProxy();
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		InvocationHandler handler = new ServiceCreationInvocationHandler(this.serviceImplementationType);
+		this.proxy = Proxy.newProxyInstance(loader, new Class[]{this.serviceCreatorInterface}, handler);
 	}
 
 	/**
 	 * Validates that all the creation methods on the service creation
 	 * interface have return types that are compatible with the service implementation
 	 * type, and parameters lists that match a constructor on the service implementation.
+	 *
 	 * @throws FatalBeanException if validation fails.
 	 */
 	private void validateCreationMethods() throws FatalBeanException {
@@ -190,6 +192,7 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 	/**
 	 * Validates that the given <code>Method</code> can be matched to a constructor on
 	 * the service implementation type that has the same parameter list.
+	 *
 	 * @param method the <code>Method</code> to validate.
 	 * @throws FatalBeanException if the <code>Method</code> does not having a matching constructor.
 	 */
@@ -208,6 +211,7 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 	/**
 	 * Validates that the return type of the supplied <code>Method</code> is compatible with the
 	 * service implementation type.
+	 *
 	 * @param method the <code>Method</code> to validate
 	 * @throws FatalBeanException if the return type is not compatible.
 	 */
@@ -224,11 +228,11 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 	}
 
 	/**
-	 * <code>MethodInterceptor</code> implementation that routes method calls to the corresponding
+	 * <code>InvocationHandler</code> implementation that routes method calls to the corresponding
 	 * constructor on the service implementation type and returns the resultant instance of the
 	 * service implementation type.
 	 */
-	private class ServiceCreationMethodInterceptor implements MethodInterceptor {
+	private class ServiceCreationInvocationHandler implements InvocationHandler {
 
 		/**
 		 * Stores the service implementation type.
@@ -238,19 +242,19 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 		/**
 		 * Creates a new <code>ServiceCreationMethodInterceptor</code> for the supplied
 		 * service implementation type.
+		 *
 		 * @param serviceImplementationType the implementation type of the service.
 		 */
-		public ServiceCreationMethodInterceptor(Class serviceImplementationType) {
+		public ServiceCreationInvocationHandler(Class serviceImplementationType) {
 			this.serviceImplementationType = serviceImplementationType;
 		}
 
 		/**
 		 * Re-routes method calls to the correponding constructor on the service implementation type.
 		 */
-		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-			Method method = methodInvocation.getMethod();
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			Constructor ctor = serviceImplementationType.getConstructor(method.getParameterTypes());
-			return ctor.newInstance(methodInvocation.getArguments());
+			return ctor.newInstance(args);
 		}
 	}
 }
