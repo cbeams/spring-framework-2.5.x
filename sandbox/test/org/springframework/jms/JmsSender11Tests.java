@@ -25,7 +25,8 @@ import org.springframework.jms.support.DefaultJmsAdmin;
  * @author Andre Biryukov
  * @author Mark Pollack
  */
-public class JmsSender11Tests extends JmsTestCase {
+public class JmsSender11Tests extends JmsTestCase
+{
 
     private MockControl _connectionFactoryControl;
     private ConnectionFactory _mockConnectionFactory;
@@ -41,20 +42,22 @@ public class JmsSender11Tests extends JmsTestCase {
 
     private int _deliveryMode = DeliveryMode.PERSISTENT;
     private int _priority = 9;
-    private int _timetoLive = 10000;
+    private int _timeToLive = 10000;
 
     /**
      * Constructor for JmsSender11Tests.
      * @param name name of the test
      */
-    public JmsSender11Tests(String name) {
+    public JmsSender11Tests(String name)
+    {
         super(name);
     }
 
     /**
      * Create the mock objects for testing.
      */
-    protected void setUp() throws Exception {
+    protected void setUp() throws Exception
+    {
         mockJndiControl = MockControl.createControl(Context.class);
         mockJndiContext = (Context) this.mockJndiControl.getMock();
 
@@ -66,7 +69,8 @@ public class JmsSender11Tests extends JmsTestCase {
     }
 
     private void createMockforDestination()
-        throws JMSException, NamingException {
+        throws JMSException, NamingException
+    {
         _connectionFactoryControl =
             MockControl.createControl(ConnectionFactory.class);
         _mockConnectionFactory =
@@ -91,12 +95,57 @@ public class JmsSender11Tests extends JmsTestCase {
         mockJndiContext.lookup("testDestination");
         mockJndiControl.setReturnValue(_mockQueue);
     }
+    
+    public void testJmsSenderCallback() throws Exception
+    {
+        JmsSender11 sender = new JmsSender11();
+        sender.setConnectionFactory(_mockConnectionFactory);
+
+        //Session behavior
+        _mockSession.getTransacted();
+        _sessionControl.setReturnValue(true);
+
+
+        //Mock the javax.jms MessageProducer
+        MockControl messageProducerControl =
+            MockControl.createControl(MessageProducer.class);
+        MessageProducer mockMessageProducer =
+            (MessageProducer) messageProducerControl.getMock();
+            
+        _mockSession.createProducer(null);
+        _sessionControl.setReturnValue(mockMessageProducer);
+
+        mockMessageProducer.getPriority();
+        messageProducerControl.setReturnValue(4);
+        
+        _sessionControl.replay();
+        messageProducerControl.replay();
+        
+
+        //connection behavior
+        _mockConnection.close();
+        _connectionControl.replay();
+
+        sender.execute(new JmsSenderCallback()
+        {
+            public void doInJms(Session session, MessageProducer msgProducer) throws JMSException
+            {
+                boolean b = session.getTransacted();
+                int i = msgProducer.getPriority();
+            }
+        });
+
+        _connectionFactoryControl.verify();
+        _connectionControl.verify();
+        _sessionControl.verify();
+    }
 
     /**
      * Test the method execute(SessionCallback action).
      * @throws Exception unexpected, let JUnit handle it.
      */
-    public void testSessionCallback() throws Exception {
+    public void testSessionCallback() throws Exception
+    {
         JmsSender11 sender = new JmsSender11();
         sender.setConnectionFactory(_mockConnectionFactory);
 
@@ -104,13 +153,17 @@ public class JmsSender11Tests extends JmsTestCase {
         _mockSession.getTransacted();
         _sessionControl.setReturnValue(true);
         _sessionControl.replay();
+        
+  
 
         //connection behavior
         _mockConnection.close();
         _connectionControl.replay();
 
-        sender.execute(new SessionCallback() {
-            public void doInJms(Session session) throws JMSException {
+        sender.execute(new SessionCallback()
+        {
+            public void doInJms(Session session) throws JMSException
+            {
                 boolean b = session.getTransacted();
             }
         });
@@ -126,8 +179,9 @@ public class JmsSender11Tests extends JmsTestCase {
      * send(Destination d, MessageCreator messageCreator)
      * @throws Exception unexpected, let JUnit handle it.
      */
-    public void testSendDestination() throws Exception {
-        sendDestination(true, true);
+    public void testSendDestination() throws Exception
+    {
+        sendDestination(true, true, false);
     }
 
     /**
@@ -136,28 +190,50 @@ public class JmsSender11Tests extends JmsTestCase {
      * parameters
      * @throws Exception unexpected, let JUnit handle it.
      */
-    public void testSendDestinationWithQOS() throws Exception {
-        sendDestination(false, true);
+    public void testSendDestinationWithQOS() throws Exception
+    {
+        sendDestination(false, true, false);
+    }
+
+    /**
+     * Test seding to a destination using the method
+     * send(String d, MessageCreator messageCreator)
+     * @throws Exception unexpected, let JUnit handle it.
+     */
+    public void testSendStringDestination() throws Exception
+    {
+        sendDestination(true, false, false);
+    }
+
+    /**
+     * Test sending to a destination using the method
+     * send(String d, MessageCreator messageCreator) using QOS
+     * parameters
+     * @throws Exception unexpected, let JUnit handle it.
+     */
+    public void testSendStringDestinationWithQOS() throws Exception
+    {
+        sendDestination(false, false, false);
+    }
+
+    /**
+     * Test sending to the default destination.
+     * @throws Exception unexpected, let JUnit handle it.
+     */
+    public void testSendDefaultDestination() throws Exception
+    {
+        sendDestination(true, true, true);
     }
     
-	/**
-	 * Test seding to a destination using the method
-	 * send(String d, MessageCreator messageCreator)
-	 * @throws Exception unexpected, let JUnit handle it.
-	 */
-	public void testSendStringDestination() throws Exception {
-		sendDestination(true, false);
-	}
-
-	/**
-	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator) using QOS
-	 * parameters
-	 * @throws Exception unexpected, let JUnit handle it.
-	 */
-	public void testSendStringDestinationWithQOS() throws Exception {
-		sendDestination(false, false);
-	}
+    /**
+     * Test sending to the default destination using explicit QOS parameters.
+     * @throws Exception unexpected, let JUnit handle it.
+     */
+    public void testSendDefaultDestinationWithQOS() throws Exception
+    {
+        sendDestination(false, true, true);
+    }
+   
 
     /**
      * Common method for testing a send method that uses the MessageCreator
@@ -167,11 +243,17 @@ public class JmsSender11Tests extends JmsTestCase {
      */
     private void sendDestination(
         boolean ignoreQOS,
-        boolean explicitDestination)
-        throws Exception {
+        boolean explicitDestination,
+        boolean useDefaultDestination)
+        throws Exception
+    {
         JmsSender11 sender = new JmsSender11();
         sender.setConnectionFactory(_mockConnectionFactory);
         sender.setJmsAdmin(new DefaultJmsAdmin());
+        if (useDefaultDestination)
+        {
+            sender.setDefaultDestination(_mockQueue);
+        }
 
         //Mock the javax.jms MessageProducer
         MockControl messageProducerControl =
@@ -192,51 +274,58 @@ public class JmsSender11Tests extends JmsTestCase {
         _sessionControl.setReturnValue(mockMessage);
         _sessionControl.replay();
 
-        if (ignoreQOS) {
+        if (ignoreQOS)
+        {
             mockMessageProducer.send(_mockQueue, mockMessage);
-        } else {
+        } else
+        {
+            sender.setExplicitQosEnabled(true);
+            sender.setDeliveryMode(_deliveryMode);
+            sender.setPriority(_priority);
+            sender.setTimeToLive(_timeToLive);
             mockMessageProducer.send(
                 _mockQueue,
                 mockMessage,
                 _deliveryMode,
                 _priority,
-                _timetoLive);
+                _timeToLive);
         }
 
         messageProducerControl.replay();
 
-        if (ignoreQOS) {
+        if (useDefaultDestination)
+        {
+            sender.send(new MessageCreator()
+            {
+                public Message createMessage(Session session) throws JMSException
+                {
+                    return session.createTextMessage("just testing");
+                }
+            });
 
-            if (explicitDestination) {
-                sender.send(_mockQueue, new MessageCreator() {
+        } else
+        {
+
+            if (explicitDestination)
+            {
+                sender.send(_mockQueue, new MessageCreator()
+                {
                     public Message createMessage(Session session)
-                        throws JMSException {
+                        throws JMSException
+                    {
                         return session.createTextMessage("just testing");
                     }
                 });
-            } else {
-                sender.send("testDestination", new MessageCreator() {
+            } else
+            {
+                sender.send("testDestination", new MessageCreator()
+                {
                     public Message createMessage(Session session)
-                        throws JMSException {
+                        throws JMSException
+                    {
                         return session.createTextMessage("just testing");
                     }
                 });
-            }
-        } else {
-            if (explicitDestination) {
-				sender.send(_mockQueue, new MessageCreator() {
-					public Message createMessage(Session session)
-						throws JMSException {
-						return session.createTextMessage("just testing");
-					}
-				}, _deliveryMode, _priority, _timetoLive);
-            } else {
-                sender.send("testDestination", new MessageCreator() {
-                    public Message createMessage(Session session)
-                        throws JMSException {
-                        return session.createTextMessage("just testing");
-                    }
-                }, _deliveryMode, _priority, _timetoLive);
             }
         }
 
