@@ -198,8 +198,7 @@ public class BindStatus {
 	 * Return if this status represents a field or object error.
 	 */
 	public boolean isError() {
-		// need to check array size since BindTag creates empty String[]
-		return (errorCodes != null) && (errorCodes.length > 0);
+		return (this.errorCodes != null && this.errorCodes.length > 0);
 	}
 
 	/**
