@@ -37,10 +37,10 @@ import javax.servlet.http.HttpServletResponse;
  * than ContextLoaderServlet, when using custom Log4J initialization.
  *
  * <p><i>Note that this class has been deprecated for containers implementing
- * Servlet API 2.4 or higher in favour of Log4jConfigListener.</i><br>
+ * Servlet API 2.4 or higher, in favor of Log4jConfigListener.</i><br>
  * According to Servlet 2.4, listeners must be initialized before load-on-startup
  * servlets. Many Servlet 2.3 containers already enforce this behavior
- * (see ContextLoaderServlet javadoc for details). If you use such a container,
+ * (see ContextLoaderServlet javadocs for details). If you use such a container,
  * this servlet can be replaced with Log4jConfigListener. Else or if working
  * with a Servlet 2.2 container, stick with this servlet.
  *

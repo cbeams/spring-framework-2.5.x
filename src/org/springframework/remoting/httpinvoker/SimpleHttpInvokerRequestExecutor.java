@@ -47,8 +47,11 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 		}
 		HttpURLConnection httpCon = (HttpURLConnection) con;
 
+		// send request
 		prepareConnection(httpCon, baos.size());
 		baos.writeTo(httpCon.getOutputStream());
+
+		// parse response
 		return readRemoteInvocationResult(httpCon.getInputStream(), config.getCodebaseUrl());
 	}
 

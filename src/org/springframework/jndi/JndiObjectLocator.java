@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Convenient superclass for JNDI-based service locators. Subclasses are
- * JavaBeans, exposing a jndiName property. This may or may not include
+ * JavaBeans, exposing a "jndiName" property. This may or may not include
  * the "java:comp/env/" prefix expected by J2EE applications when accessing
  * a locally mapped (ENC - Environmental Naming Context) resource. If it
  * doesn't, the "java:comp/env/" prefix will be prepended if the "resourceRef"

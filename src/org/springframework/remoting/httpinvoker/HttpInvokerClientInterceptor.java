@@ -83,9 +83,9 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Set the HttpInvokerRequestExecutor implementation to use for executing
-	 * remote invocations. Default is SimpleHttpInvokerRequestExecutor.
-	 * <p>Alternatively, consider CommonsHttpInvokerRequestExecutor for more
-	 * sophisticated needs.
+	 * remote invocations.
+	 * <p>Default is SimpleHttpInvokerRequestExecutor. Alternatively, consider
+	 * CommonsHttpInvokerRequestExecutor for more sophisticated needs.
 	 * @see SimpleHttpInvokerRequestExecutor
 	 * @see CommonsHttpInvokerRequestExecutor
 	 */
