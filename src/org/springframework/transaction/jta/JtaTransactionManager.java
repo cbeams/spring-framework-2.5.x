@@ -65,8 +65,8 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * no need to configure Hibernate's JTATransaction strategy or a container-specific
  * Hibernate TransactionManagerLookup. However, certain JTA implementations are
  * restrictive in terms of what JDBC calls they allow after transaction completion,
- * complaining even on close calls: In that case, it is indeed necessary to configure
- * a Hibernate TransactionManagerLookup; Spring will automatically adapt to this.
+ * complaining even on close calls: In that case, it is indeed necessary to configure a
+ * Hibernate TransactionManagerLookup, potentially via Spring's LocalSessionFactoryBean.
  *
  * <p>If JtaTransactionManager participates in an existing JTA transaction, e.g. from
  * EJB CMT, synchronization will be triggered on finishing the nested transaction,
@@ -74,6 +74,16 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * container-specific Hibernate TransactionManagerLookup is the only way to achieve
  * exact afterCompletion callbacks for transactional cache handling with Hibernate.
  * In such a scenario, use Hibernate >=2.1 which features automatic JTA detection.
+ *
+ * <p><b>For typical JTA transactions (REQUIRED, SUPPORTS, MANDATORY, NEVER),
+ * a plain JtaTransactionManager definition is all you need, completely portable
+ * across all J2EE servers.</b> This corresponds to the functionality of the JTA
+ * UserTransaction, for which J2EE specifies a standard JNDI name
+ * ("java:comp/UserTransaction"). There is no need to configure a server-specific
+ * TransactionManager lookup for this kind of JTA usage.
+ *
+ * <p><b>Note: Advanced JTA usage below. Dealing with these mechanisms is not
+ * necessary for typical usage scenarios.</b>
  *
  * <p>Transaction suspension (REQUIRES_NEW, NOT_SUPPORTED) is just available with
  * a JTA TransactionManager being registered, via the "transactionManagerName" or
@@ -92,6 +102,11 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * be auto-detected on initialization of JtaTransactionManager. Thus, there's no need
  * to specify the "transactionManagerName" in this case (for Resin, Orion, JOnAS).
  *
+ * <p>A JNDI lookup can also be factored out into a corresponding JndiObjectFactoryBean,
+ * passed into JtaTransactionManager's "transactionManager" property. Such a bean
+ * definition can then be reused by other objects, for example Spring's
+ * LocalSessionFactoryBean for Hibernate (see below).
+ *
  * <p>For IBM WebSphere and standalone JOTM, static accessor methods are required to
  * obtain the JTA TransactionManager: Therefore, WebSphere and JOTM have their own
  * FactoryBean implementations, to be wired with the "transactionManager" property.
@@ -100,9 +115,19 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * <p>The internal JTA TransactionManager can also be used to register custom
  * synchronizations with the JTA transaction itself instead of Spring's
- * transaction manager. LocalSessionFactoryBean supports plugging a given
- * TransactionManager into Hibernate's TransactionManagerLookup mechanism,
- * for Hibernate-driven cache synchronization without double configuration.
+ * transaction manager. This is particularly useful for closing resources with
+ * rigid JTA implementations like Weblogic's or WebSphere's that do not allow
+ * any access to resources after transaction completion, not even for cleanup.
+ * For example, Hibernate access is affected by this issue, as outlined above
+ * in the discussion of transaction synchronization.
+ *
+ * <p>Spring's LocalSessionFactoryBean for Hibernate supports plugging a given
+ * JTA TransactionManager into Hibernate's TransactionManagerLookup mechanism,
+ * for Hibernate-driven cache synchronization and proper cleanup without warnings.
+ * The same JTA TransactionManager configuration as above can be used in this case
+ * (with a JndiObjectFactoryBean for a JNDI lookup, or one of the FactoryBeans),
+ * avoiding double configuration. Alternatively, specify corresponding Hibernate
+ * properties (see Hibernate docs for details).
  *
  * <p>JtaTransactionManager supports timeouts but not custom isolation levels.
  * Custom subclasses can override applyIsolationLevel for specific JTA
@@ -113,10 +138,13 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @author Juergen Hoeller
  * @since 24.03.2003
  * @see #setUserTransactionName
+ * @see #setUserTransaction
  * @see #setTransactionManagerName
+ * @see #setTransactionManager
  * @see #applyIsolationLevel
  * @see JotmFactoryBean
  * @see WebSphereTransactionManagerFactoryBean
+ * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
