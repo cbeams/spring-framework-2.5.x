@@ -51,7 +51,7 @@
 	</bean>
 	-->
 
-    <!-- a parent bean definition which is a template' or base definition for
+    <!-- a parent bean definition which is a 'template' or base definition for
 	     transaction proxies. It is set as lazy-init, since it is never
 		 supposed to be instantiated itself. -->
 	<bean id="baseTxProxy" lazy-init="true"
