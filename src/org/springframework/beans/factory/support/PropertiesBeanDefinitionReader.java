@@ -1,9 +1,12 @@
 package org.springframework.beans.factory.support;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -15,11 +18,13 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.core.io.Resource;
 
 /**
  * Bean definition reader for a simple properties format.
- * Provides loadBeanDefinition methods for Properties, ResourceBundle, and Map.
- * Typically applied to a DefaultListableBeanFactory.
+ * Provides bean definition registration methods for Map/Properties and
+ * ResourceBundle. Typically applied to a DefaultListableBeanFactory.
+ * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see DefaultListableBeanFactory
@@ -108,20 +113,57 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 
 	/**
-	 * Register bean definitions in a resource bundle,
+	 * Load bean definitions from the specified properties file,
 	 * using all property keys (i.e. not filtering by prefix).
+	 * @param resource the resource descriptor for the properties file
+	 * @return the number of bean definitions found
+	 * @throws BeansException in case of loading or parsing errors
+	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource, String)
+	 */
+	public int loadBeanDefinitions(Resource resource) {
+		return loadBeanDefinitions(resource, null);
+	}
+
+	/**
+	 * Load bean definitions from the specified properties file.
+	 * @param resource the resource descriptor for the properties file
+	 * @return the number of bean definitions found
+	 * @throws BeansException in case of loading or parsing errors
+	 */
+	public int loadBeanDefinitions(Resource resource, String prefix) {
+		Properties props = new Properties();
+		try {
+			InputStream is = resource.getInputStream();
+			try {
+				props.load(is);
+			}
+			finally {
+				is.close();
+			}
+			return registerBeanDefinitions(props, prefix);
+		}
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException("IOException parsing properties from " + resource, ex);
+		}
+	}
+
+	/**
+	 * Register bean definitions contained in a resource bundle,
+	 * using all property keys (i.e. not filtering by prefix).
+	 * @return the number of bean definitions found
+	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(java.util.ResourceBundle, String)
-	 * @throws org.springframework.beans.factory.BeanDefinitionStoreException in a bean definition is invalid
 	 */
 	public int registerBeanDefinitions(ResourceBundle rb) throws BeanDefinitionStoreException {
 		return registerBeanDefinitions(rb, null);
 	}
 
 	/**
-	 * Register bean definitions in a ResourceBundle. Similar syntax
-	 * as for a Map. This method is useful to enable standard
-	 * Java internationalization support.
-	 * @throws org.springframework.beans.factory.BeanDefinitionStoreException in a bean definition is invalid
+	 * Register bean definitions contained in a ResourceBundle.
+	 * <p>Similar syntax as for a Map. This method is useful to enable
+	 * standard Java internationalization support.
+	 * @return the number of bean definitions found
+	 * @throws BeansException in case of loading or parsing errors
 	 */
 	public int registerBeanDefinitions(ResourceBundle rb, String prefix) throws BeanDefinitionStoreException {
 		// Simply create a map and call overloaded method
@@ -135,17 +177,18 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	}
 
 	/**
-	 * Register bean definitions in a properties file,
+	 * Register bean definitions contained in a Map,
 	 * using all property keys (i.e. not filtering by prefix).
+	 * @return the number of bean definitions found
+	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(java.util.Map, String)
-	 * @throws org.springframework.beans.factory.BeanDefinitionStoreException in a bean definition is invalid
 	 */
 	public int registerBeanDefinitions(Map m) throws BeansException {
 		return registerBeanDefinitions(m, null);
 	}
 
 	/**
-	 * Register valid bean definitions in a properties file.
+	 * Register bean definitions contained in a Map.
 	 * Ignore ineligible properties.
 	 * @param m Map name -> property (String or Object). Property values
 	 * will be strings if coming from a Properties file etc. Property names
@@ -165,10 +208,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * techie.department=Software Engineering
 	 * techie.usesDialUp=true              // overridden property
 	 * </code>
-	 * @param prefix The match or filter within the keys
-	 * in the map: e.g. 'beans.'
+	 * @param prefix The match or filter within the keys in the map: e.g. 'beans.'
 	 * @return the number of bean definitions found
-	 * @throws org.springframework.beans.factory.BeanDefinitionStoreException in a bean definition is invalid
+	 * @throws BeansException in case of loading or parsing errors
 	 */
 	public int registerBeanDefinitions(Map m, String prefix) throws BeansException {
 		if (prefix == null) {
