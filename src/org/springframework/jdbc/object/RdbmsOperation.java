@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.object;
 
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  * The appropriate execute or update method can then be invoked.
  *
  * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.9 2004-05-27 14:46:26 jhoeller Exp $
+ * @version $Id: RdbmsOperation.java,v 1.10 2004-06-05 02:23:04 trisberg Exp $
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
  */
@@ -229,6 +230,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 			while (iter.hasNext()) {
 				Object param = iter.next();
 				if (!(param instanceof SqlOutParameter) && !(param instanceof SqlReturnResultSet)) {
+					if ((this instanceof BatchSqlUpdate) && (((SqlParameter)param).getSqlType() == Types.CLOB || ((SqlParameter)param).getSqlType() == Types.BLOB))
+						throw new InvalidDataAccessApiUsageException("CLOB or BLOB parameters are not allowed for batch updates.");
 					declaredInParameters++;
 				}
 			}
