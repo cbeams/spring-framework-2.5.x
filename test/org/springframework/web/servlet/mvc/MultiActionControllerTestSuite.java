@@ -22,17 +22,13 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 import org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver;
+import org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver;
+import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /**
- *
  * @author Rod Johnson
- * @version $RevisionId$
  */
 public class MultiActionControllerTestSuite extends TestCase {
-
-	public MultiActionControllerTestSuite(String arg0) {
-		super(arg0);
-	}
 
 	public void testDefaultNameExtraction() throws Exception {
 		testDefaultNameExtraction("/foo.html", "foo");
@@ -51,15 +47,48 @@ public class MultiActionControllerTestSuite extends TestCase {
 		           actual.equals(expected));
 	}
 
+	public void testParameterMethodNameResolver() throws NoSuchRequestHandlingMethodException {
+		ParameterMethodNameResolver mnr = new ParameterMethodNameResolver();
+		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/foo.html");
+		request.addParameter("action", "bar");
+		assertEquals("bar", mnr.getHandlerMethodName(request));
+		request = new MockHttpServletRequest(null, "GET", "/foo.html");
+		try {
+			mnr.getHandlerMethodName(request);
+			// should have thrown NoSuchRequestHandlingMethodException
+		}
+		catch (NoSuchRequestHandlingMethodException ex) {
+			// expected
+		}
+	}
+
+	public void testParameterMethodNameResolverWithCustomParamName() throws NoSuchRequestHandlingMethodException {
+		ParameterMethodNameResolver mnr = new ParameterMethodNameResolver();
+		mnr.setParamName("myparam");
+		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/foo.html");
+		request.addParameter("myparam", "bar");
+		assertEquals("bar", mnr.getHandlerMethodName(request));
+	}
+
+	public void testParameterMethodNameResolverWithDefaultMethodName() throws NoSuchRequestHandlingMethodException {
+		ParameterMethodNameResolver mnr = new ParameterMethodNameResolver();
+		mnr.setDefaultMethodName("foo");
+		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/foo.html");
+		request.addParameter("action", "bar");
+		assertEquals("bar", mnr.getHandlerMethodName(request));
+		request = new MockHttpServletRequest(null, "GET", "/foo.html");
+		assertEquals("foo", mnr.getHandlerMethodName(request));
+	}
+
 	public void testInvokesCorrectMethod() throws Exception {
 		TestMaController mc = new TestMaController();
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
 		HttpServletResponse response = new MockHttpServletResponse();
 		Properties p = new Properties();
 		p.put("/welcome.html", "welcome");
-		PropertiesMethodNameResolver mn = new PropertiesMethodNameResolver();
-		mn.setMappings(p);
-		mc.setMethodNameResolver(mn);
+		PropertiesMethodNameResolver mnr = new PropertiesMethodNameResolver();
+		mnr.setMappings(p);
+		mc.setMethodNameResolver(mnr);
 
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("Invoked welcome method", mc.wasInvoked("welcome"));
