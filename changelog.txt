@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.160 2004-06-07 09:37:18 jhoeller Exp $
+$Id: changelog.txt,v 1.161 2004-06-09 18:58:18 jhoeller Exp $
 
 
 Changes in version 1.0.3 (27.6.2004)
@@ -14,20 +14,33 @@ Package org.springframework.beans
 * fixed MethodInvokingFactoryBean's singleton initialization to properly allow for circular reference detection
 
 Package org.springframework.jdbc
-* refactored Prepared/CallableStatement.setXxxx method invocations into JdbcUtils.setParameters utility method
+* adapted CommonsDbcpNativeJdbcExtractor for Commons DBCP 1.2, to support both DBCP 1.1 and 1.2
+* added WebSphereNativeJdbcExtractor, using WSJdbcUtil's "getNativeConnection" method (tested with WLS 5.1.0)
+* refactored Prepared/CallableStatement.setXxx method invocations into JdbcUtils.setParameters utility method
 * added support for BLOB/CLOB parameters to SqlUpdate and StoredProcedure
 * added BatchSqlUpdate class to jdbc.object package, for convenient execution of batch updates
 
 Package org.springframework.mail
-* added "replyTo" and "sentDate" fields to SimpleMailMessage
-* added "setReplyTo" and "setSentDate" methods to MimeMessageHelper
+* added "replyTo" and "sentDate" bean properties to SimpleMailMessage, understood by JavaMailSenderImpl
+* added "setReplyTo" and "setSentDate" methods to MimeMessageHelper, analogous to SimpleMailMessage
 
 Package org.springframework.orm
-* added "delete" methods to HibernateOperations/HibernateTemplate, according to the "delete" in the Session interface
+* added "delete" methods to HibernateOperations/HibernateTemplate, analogous to "delete" in the Session interface
+
+Package org.springframework.scheduling
+* added "jobSchedulingDataLocation" property to SchedulerFactoryBean, supporting Quartz 1.3's job definition XML files
+* added "dataSource" property to SchedulerFactoryBean, for using a Spring-managed DataSource as Quartz job store
+* added "overwriteExistingJobs" property to SchedulerFactoryBean, to control overwriting of persistent jobs
+
+Package org.springframework.util
+* deprecated ResponseTimeMonitorImpl's "getUptime" method in favor of "getUptimeMillis"
+* deprecated StopWatch's "getLastInterval"/"getTotalTime" in favor of "getLastTaskTimeMillis"/"getTotalTimeMillis"
 
 Package org.springframework.web
 * added IntrospectorCleanupListener to web.util package, for cleaning up JavaBeans Introspector leaks on shutdown
-* added optional "sessionId" and "username" fields to RequestHandledEvent, for easier session and user tracking
+* deprecated RequestHandledEvent's getURL/getTimeMillis/getIpAddress -> getUrl/getProcessingTime/getClientAddress
+* added optional "sessionId" and "userName" fields to RequestHandledEvent, for easier session and user tracking
+* support multiple delimited URLs in ResourceServlet, including them one by one (and taking the latest file timestamp)
 
 
 Changes in version 1.0.2 (3.6.2004)
