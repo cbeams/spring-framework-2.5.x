@@ -25,11 +25,11 @@ import javax.servlet.ServletOutputStream;
  * Delegating implementation of ServletOutputStream.
  *
  * <p>Used by MockHttpServletResponse; typically not
- * necessary for testing application controllers.
+ * directly used for testing application controllers.
  *
  * @author Juergen Hoeller
  * @since 27.04.2004
- * @see org.springframework.mock.web.MockHttpServletResponse
+ * @see MockHttpServletResponse
  */
 public class DelegatingServletOutputStream extends ServletOutputStream {
 
@@ -45,6 +45,11 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 
 	public void write(int b) throws IOException {
 		this.targetStream.write(b);
+	}
+
+	public void flush() throws IOException {
+		super.flush();
+		this.targetStream.flush();
 	}
 
 	public void close() throws IOException {
