@@ -1,16 +1,17 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.128 2004-04-14 18:59:21 johnsonr Exp $
+$Id: changelog.txt,v 1.129 2004-04-20 22:04:43 jhoeller Exp $
 
 
-Changes in version 1.0.1 (18.4.2003)
+Changes in version 1.0.1 (20.4.2003)
 ------------------------------------
 
 Package org.springframework.aop
-* AdvisedSupport: added addAfterReturningAdvice() method
-* Advised: added addBeforeAdvice(), addAfterReturningAdvice() and addThrowsAdvice() methods, now available on all Spring AOP proxies
+* added "addBeforeAdvice", "addAfterReturningAdvice", "addThrowsAdvice" methods to Advised, available on all AOP proxies
+* added "addAfterReturningAdvice" method to AdvisedSupport
 * refined usage of AopConfigException, to avoid cyclic dependencies between org.springframework.aop subpackages
 * moved internal class AopUtils from package aop.framework.support to aop.support, to avoid cyclic package dependencies
+* renamed AbstractPrototypeTargetSource to AbstractPrototypeBasedTargetSource
 
 Package org.springframework.beans
 * added "getPropertyType" method to BeanWrapper/BeanWrapperImpl, capable of checking indexed/mapped elements
@@ -38,11 +39,11 @@ Package org.springframework.context
 * EventPublicationInterceptor implements ApplicationContextAware rather than extending ApplicationObjectSupport
 
 Package org.springframework.jdbc.object
-* added method setSqlReadyForUse to StoredProcedure for indicating that the sql should be used as provided, no need to add parameter placeholders
+* added "setSqlReadyForUse" method to StoredProcedure, for indicating that the SQL should be used as provided
 
 Package org.springframework.jdbc.support
-* changed SQLErrorCodesFactory, it now caches database product name in a Map based on hashCode from DataSource to avoid unnecessary meta data lookups
-* added an extractDatabaseMetaData method to JdbcUtils.  This change also adds an interface named DatabaseMetaDataCallBackHandler that must be used for this method
+* SQLErrorCodesFactory caches database product name in a Map based on DataSource to avoid unnecessary meta data lookups
+* added "extractDatabaseMetaData" method to JdbcUtils, with a DatabaseMetaDataCallBackHandler interface as parameter
 * added property 'useSqlStateForTranslation' to SqlErrorCodes to allow for translation of PostgreSQL state codes
 
 Package org.springframework.orm
@@ -53,6 +54,7 @@ Package org.springframework.orm
 
 Package org.springframework.remoting
 * refined exceptions thrown by RmiClientInterceptor's "createRmiProxy" and RmiProxyFactoryBean's "afterPropertiesSet"
+* added "getApplicationContext" method to ServletEndpointSupport, as alternative to "getWebApplicationContext"
 
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager's handling of beforeCompletion callbacks in case of beforeCommit failures
@@ -70,13 +72,16 @@ Package org.springframework.validation
 * DefaultMessageCodesResolver generates code for the object name in case of an ObjectError, e.g. "myError.myForm"
 
 Package org.springframework.web
+* WebApplicationObjectSupport applies lazy WebApplicationContext type check to facilitate easier unit testing
 * added MaxUploadSizeExceededException to multipart package, as a specific subclass of MultipartException
 * CommonsMultipartResolver and CosMultipartResolver throw MaxUploadSizeExceededException when appropriate
+* fixed HttpServletBean's support for required properties, renaming "setRequiredProperty" to "addRequiredProperty"
 * apply HandlerExceptionResolvers also if multipart resolution of handler mapping failed (passing in null as handler)
 * added "messageCodesResolver" property to BaseCommandController, available to all command and form controllers
 * added overloaded "onBind" method with an additional BindException parameter to BaseCommandController
 * added overloaded "onSubmit" method with just command and BindException parameters to SimpleFormController
 * added "getThemeMessage" methods to RequestContext, for easy access to theme-specific messages in non-JSP views
+* reworked ComponentControllerSupport class for Tiles to be compatible with both Struts 1.1 and Struts 1.2
 * added Struts ActionSupport and DispatchActionSupport base classes, for easy access to a Spring context from Actions
 * added Struts ContextLoaderPlugIn and DelegatingActionProxy, superseding Don Brown's Spring Struts Plugin
 
