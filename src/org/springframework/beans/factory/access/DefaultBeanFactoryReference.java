@@ -20,11 +20,15 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
- * Default implementation of BeanFactoryReference, wrapping a newly created
- * BeanFactory, destroying its singletons on release. As per
- * BeanFactoryReference contract, release may be called more than once, with
- * subsequent calls not doing anything. However, callging getFactory after a
- * release call will cause an exception.
+ * <pDefault implementation of BeanFactoryReference, wrapping a newly created
+ * BeanFactory, destroying its singletons on release.
+ * </p>
+ * 
+ * <p>
+ * As per BeanFactoryReference contract, release may be called more than once,
+ * with subsequent calls not doing anything. However, callging getFactory after
+ * a release call will cause an exception.
+ * </p>
  * 
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
@@ -55,6 +59,7 @@ public class DefaultBeanFactoryReference implements BeanFactoryReference {
 				beanFactory = null;
 			}
 
+			// we don't actually guarantee thread-safty, but it's not a lot of extra work
 			if (savedFactory != null && savedFactory instanceof ConfigurableBeanFactory) {
 				((ConfigurableBeanFactory) savedFactory).destroySingletons();
 			}

@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.access;
+package org.springframework.context.access;
 
 import junit.framework.TestCase;
 
 import org.easymock.MockControl;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * Unit test for DefaultBeanFactoryReference
+ * Unit test for ContextBeanFactoryReference
  * 
  * @author Colin Sampaleanu
  */
-public class DefaultBeanFactoryReferenceTests extends TestCase {
-
+public class ContextBeanFactoryReferenceTests extends TestCase {
+	
 	public void testAllOperations() {
-		MockControl control = MockControl.createControl(ConfigurableBeanFactory.class);
-		ConfigurableBeanFactory bf = (ConfigurableBeanFactory) control.getMock();
+		MockControl control = MockControl.createControl(ConfigurableApplicationContext.class);
+		ConfigurableApplicationContext ctx = (ConfigurableApplicationContext) control.getMock();
 
-		bf.destroySingletons();
+		ctx.close();
 		control.replay();
 
-		DefaultBeanFactoryReference bfr = new DefaultBeanFactoryReference(bf);
+		ContextBeanFactoryReference bfr = new ContextBeanFactoryReference(ctx);
 
 		assertNotNull(bfr.getFactory());
 		bfr.release();
