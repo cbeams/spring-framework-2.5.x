@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -23,7 +24,7 @@ public class ReflectionRowExtractor extends RowCountCallbackHandler implements R
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private List l;
+	private List resultList;
 
 	private Class resultClass;
 
@@ -32,8 +33,7 @@ public class ReflectionRowExtractor extends RowCountCallbackHandler implements R
 
 	public ReflectionRowExtractor(Class resultClass, int rowsExpected) throws InvalidDataAccessApiUsageException {
 		// Use the more efficient collection if we know how many rows to expect
-		this.l = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
-
+		this.resultList = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
 		this.resultClass = resultClass;
 		//this.columnExtractor = new DefaultColumnExtractor();
 		try {
@@ -46,7 +46,7 @@ public class ReflectionRowExtractor extends RowCountCallbackHandler implements R
 	}
 
 	protected void processRow(ResultSet rs, int rowNum) throws SQLException, InvalidDataAccessApiUsageException {
-		//l.add(columnExtractor.extractColumn(1, requiredType, rs));
+		//resultList.add(columnExtractor.extractColumn(1, requiredType, rs));
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < getColumnCount(); i++) {
 			String colname = getColumnNames()[i];
@@ -61,18 +61,16 @@ public class ReflectionRowExtractor extends RowCountCallbackHandler implements R
 		}
 		try {
 			BeanWrapper bw = new BeanWrapperImpl(resultClass);
-			bw.setEventPropagationEnabled(false);
 			bw.setPropertyValues(pvs);
-			l.add(bw.getWrappedInstance());
+			resultList.add(bw.getWrappedInstance());
 		}
 		catch (BeansException ex) {
 			throw new InvalidDataAccessApiUsageException("Can't add row results: " + ex);
 		}
 	}
 
-
 	public List getResults() {
-		return l;
+		return resultList;
 	}
 
 }
