@@ -21,7 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,6 +47,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
+import org.springframework.web.servlet.handler.SimpleServletHandlerAdapter;
+import org.springframework.web.servlet.handler.SimpleServletPostProcessor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -63,15 +69,15 @@ import org.springframework.web.servlet.view.ResourceBundleViewResolver;
 public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public void refresh() throws BeansException {
-		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class, null);
-		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class, null);
+		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class);
+		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=localeHandler\n/locale.do=localeHandler\nloc.do=anotherLocaleHandler"));
 		registerSingleton("myUrlMapping1", SimpleUrlHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=localeHandler\n/unknown.do=unknownHandler"));
+		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=localeHandler\n/unknown.do=unknownHandler\nservlet.do=myServlet"));
 		pvs.addPropertyValue(new PropertyValue("order", "2"));
 		registerSingleton("myUrlMapping2", SimpleUrlHandlerMapping.class, pvs);
 
@@ -80,9 +86,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs.addPropertyValue(new PropertyValue("order", "1"));
 		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
 
-		registerSingleton("myDummyAdapter", MyDummyAdapter.class, null);
-		registerSingleton("myHandlerAdapter", MyHandlerAdapter.class, null);
-		registerSingleton("standardHandlerAdapter", SimpleControllerHandlerAdapter.class, null);
+		registerSingleton("myDummyAdapter", MyDummyAdapter.class);
+		registerSingleton("myHandlerAdapter", MyHandlerAdapter.class);
+		registerSingleton("standardHandlerAdapter", SimpleControllerHandlerAdapter.class);
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("order", new Integer(0)));
@@ -98,12 +104,16 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs.addPropertyValue(new PropertyValue("formView", "form"));
 		registerSingleton("formHandler", SimpleFormController.class, pvs);
 
-		registerSingleton("localeHandler", ComplexLocaleChecker.class, null);
-		registerSingleton("anotherLocaleHandler", ComplexLocaleChecker.class, null);
-		registerSingleton("unknownHandler", Object.class, null);
+		registerSingleton("localeHandler", ComplexLocaleChecker.class);
+		registerSingleton("anotherLocaleHandler", ComplexLocaleChecker.class);
+		registerSingleton("unknownHandler", Object.class);
 
-		registerSingleton("headController", HeadController.class, null);
-		registerSingleton("bodyController", BodyController.class, null);
+		registerSingleton("headController", HeadController.class);
+		registerSingleton("bodyController", BodyController.class);
+
+		registerSingleton("servletPostProcessor", SimpleServletPostProcessor.class);
+		registerSingleton("servletHandlerAdapter", SimpleServletHandlerAdapter.class);
+		registerSingleton("myServlet", MyServlet.class);
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("order", "1");
@@ -123,8 +133,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs.addPropertyValue("defaultErrorView", "failed2");
 		registerSingleton("handlerExceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
-		registerSingleton("multipartResolver", MockMultipartResolver.class, null);
-		registerSingleton("testListener", TestApplicationListener.class, null);
+		registerSingleton("multipartResolver", MockMultipartResolver.class);
+		registerSingleton("testListener", TestApplicationListener.class);
 
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
@@ -169,6 +179,32 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			response.getOutputStream().write("body".getBytes());
 			return null;
+		}
+	}
+
+
+	public static class MyServlet implements Servlet {
+
+		private ServletConfig servletConfig;
+
+		public void init(ServletConfig servletConfig) throws ServletException {
+			this.servletConfig = servletConfig;
+		}
+
+		public ServletConfig getServletConfig() {
+			return servletConfig;
+		}
+
+		public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
+			servletResponse.getOutputStream().write("body".getBytes());
+		}
+
+		public String getServletInfo() {
+			return null;
+		}
+
+		public void destroy() {
+			this.servletConfig = null;
 		}
 	}
 
