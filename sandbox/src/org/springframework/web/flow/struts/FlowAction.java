@@ -46,11 +46,11 @@ public class FlowAction extends TemplateAction {
 
 	public static final String CURRENT_STATE_ID_ATTRIBUTE = "currentStateId";
 
-	public static final String FLOW_SESSION_ID_ATTRIBUTE = "flowSessionId";
+	public static final String FLOW_EXECUTION_ID_ATTRIBUTE = "flowExecutionId";
 
 	public static final String EVENT_ID_ATTRIBUTE = "_mapped_eventId";
 
-	public static final String FLOW_SESSION_ID_PARAMETER = "_flowSessionId";
+	public static final String FLOW_EXECUTION_ID_PARAMETER = "_flowExecutionId";
 
 	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
 
@@ -62,8 +62,8 @@ public class FlowAction extends TemplateAction {
 
 	public static final String ACTION_PATH_ATTRIBUTE = "actionPath";
 
-	protected String getFlowSessionIdParameterName() {
-		return FLOW_SESSION_ID_PARAMETER;
+	protected String getFlowExecutionIdParameterName() {
+		return FLOW_EXECUTION_ID_PARAMETER;
 	}
 
 	protected String getCurrentStateIdParameterName() {
@@ -78,8 +78,8 @@ public class FlowAction extends TemplateAction {
 		return NOT_SET_EVENT_ID;
 	}
 
-	protected String getFlowSessionIdAttributeName() {
-		return FLOW_SESSION_ID_ATTRIBUTE;
+	protected String getFlowExecutionIdAttributeName() {
+		return FLOW_EXECUTION_ID_ATTRIBUTE;
 	}
 
 	protected String getCurrentStateIdAttributeName() {
@@ -90,7 +90,7 @@ public class FlowAction extends TemplateAction {
 		return EVENT_ID_ATTRIBUTE;
 	}
 
-	protected String getFlowSessionExecutionInfoAttributeName() {
+	protected String getFlowExecutionInfoAttributeName() {
 		return FlowExecutionInfo.ATTRIBUTE_NAME;
 	}
 
@@ -119,7 +119,7 @@ public class FlowAction extends TemplateAction {
 	/**
 	 * The main entry point for this action. Looks for a flow session ID in the
 	 * request. If none exists, it creates one. If one exists, it looks in the
-	 * user's session find the current FlowSessionExecutionStack. The request
+	 * user's session find the current FlowExecutionExecutionStack. The request
 	 * should also contain the current state ID and event ID. These String
 	 * values can be passed to the FlowEventProcessor to execute the action.
 	 * Execution will typically result in a state transition.
@@ -145,7 +145,7 @@ public class FlowAction extends TemplateAction {
 		FlowExecution flowExecution;
 		ModelAndView viewDescriptor = null;
 
-		if (getStringParameter(request, getFlowSessionIdParameterName()) == null) {
+		if (getStringParameter(request, getFlowExecutionIdParameterName()) == null) {
 			// No existing flow session execution to lookup as no _flowSessionId
 			// was provided - start a new one
 			Flow flow = getFlow(mapping);
@@ -156,7 +156,7 @@ public class FlowAction extends TemplateAction {
 			// Client is participating in an existing flow session execution,
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(getRequiredStringParameter(request,
-					getFlowSessionIdParameterName()), request);
+					getFlowExecutionIdParameterName()), request);
 
 			// let client tell you what state they are in (if possible)
 			String stateId = getStringParameter(request, getCurrentStateIdParameterName());
@@ -202,12 +202,12 @@ public class FlowAction extends TemplateAction {
 			if (viewDescriptor != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("[Placing information about the new current flow state in request scope]");
-					logger.debug("    - " + getFlowSessionIdAttributeName() + "=" + flowExecution.getId());
+					logger.debug("    - " + getFlowExecutionIdAttributeName() + "=" + flowExecution.getId());
 					logger.debug("    - " + getCurrentStateIdAttributeName() + "=" + flowExecution.getCurrentStateId());
 				}
-				request.setAttribute(getFlowSessionIdAttributeName(), flowExecution.getId());
+				request.setAttribute(getFlowExecutionIdAttributeName(), flowExecution.getId());
 				request.setAttribute(getCurrentStateIdAttributeName(), flowExecution.getCurrentStateId());
-				request.setAttribute(getFlowSessionExecutionInfoAttributeName(), flowExecution);
+				request.setAttribute(getFlowExecutionInfoAttributeName(), flowExecution);
 
 				// struts specific
 				String mappingFlowId = getFlowId(mapping);
@@ -279,17 +279,17 @@ public class FlowAction extends TemplateAction {
 		}
 	}
 
-	protected void saveInHttpSession(FlowExecutionInfo sessionInfo, HttpServletRequest request) {
+	protected void saveInHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Saving flow session '" + sessionInfo.getId() + "' in HTTP session");
+			logger.debug("Saving flow session '" + flowExecution.getId() + "' in HTTP session");
 		}
-		request.getSession().setAttribute(sessionInfo.getId(), sessionInfo);
+		request.getSession().setAttribute(flowExecution.getId(), flowExecution);
 	}
 
-	private void removeFromHttpSession(FlowExecutionInfo sessionInfo, HttpServletRequest request) {
+	private void removeFromHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Removing flow session '" + sessionInfo.getId() + "' from HTTP session");
+			logger.debug("Removing flow session '" + flowExecution.getId() + "' from HTTP session");
 		}
-		request.getSession().removeAttribute(sessionInfo.getId());
+		request.getSession().removeAttribute(flowExecution.getId());
 	}
 }
