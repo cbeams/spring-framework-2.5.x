@@ -18,8 +18,9 @@ package org.springframework.web.flow;
 import org.springframework.util.DefaultObjectStyler;
 
 /**
- * Thrown when no event with id <code>eventId</code> exists in the specified
- * state for the specified flow.
+ * Thrown the event identified by <code>eventId</code> does not map to a valid
+ * transition in the current state. That is, there is no "handler" trasition for
+ * the given event in the current state.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

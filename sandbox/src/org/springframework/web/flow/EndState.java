@@ -23,13 +23,20 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Terminates an active web flow session when entered.
- * 
+ * Terminates an active web flow session when entered. If the terminated session
+ * is the root flow session, the entire flow execution ends. If the terminated
+ * session is a subflow session, control returns to the parent flow session, and
+ * this state is used as grounds the transition in that resuming parent.
  * <p>
- * An end state can optionally have a view name specified. This view
- * will be rendered if the end state terminates the entire flow
- * execution. If there is a parent flow, execution will continue in
- * that parent flow and the resulting view will be rendered.
+ * An end state may optionally be configured with the name of a view. This view
+ * will be rendered if the end state terminates the entire flow execution.
+ * <p>
+ * Note: if no</code> viewName</code> property is specified AND this EndState
+ * terminates the entire flow execution, it is expected that some other action
+ * has already written the response (or else a blank response will result.) On
+ * the other hand, if no <code>viewName</code> is specified AND this EndState
+ * reliniqushes control back to a parent flow, view rendering responsibility is
+ * falls on the parent.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -43,19 +50,21 @@ public class EndState extends AbstractState {
 	 * Create a new end state with no associated view.
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public EndState(Flow flow, String id) throws IllegalArgumentException {
 		super(flow, id);
 	}
 
 	/**
-	 * Create a new end state with specified associated view. 
+	 * Create a new end state with specified associated view.
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
-	 * @param viewName The name of the view that should be rendered if this end state
-	 *                 terminates flow execution
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @param viewName The name of the view that should be rendered if this end
+	 *        state terminates flow execution
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public EndState(Flow flow, String id, String viewName) throws IllegalArgumentException {
 		super(flow, id);
@@ -63,16 +72,17 @@ public class EndState extends AbstractState {
 	}
 
 	/**
-	 * @param viewName The name of the view that should be rendered if this end state
-	 *                 terminates flow execution.
+	 * @param viewName The name of the view that should be rendered if this end
+	 *        state terminates flow execution.
 	 */
 	protected void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
 	/**
-	 * @return The name of the view that will be rendered if this end state terminates
-	 *         flow execution, or null if there is no associated view.
+	 * @return The name of the view that will be rendered if this end state
+	 *         terminates flow execution, or null if there is no associated
+	 *         view.
 	 */
 	public String getViewName() {
 		return viewName;
@@ -85,6 +95,14 @@ public class EndState extends AbstractState {
 		return !StringUtils.hasText(viewName);
 	}
 
+	/**
+	 * Hook method implementation that initiates state-specific processing.
+	 * 
+	 * This implementation pops the top (active) flow session off the execution
+	 * stack, ending it, and resumes control in the spawning parent flow (if
+	 * neccessary.) If the ended session is the root flow, a ModelAndView is
+	 * returned (when viewName is not null, else null is returned.)
+	 */
 	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		FlowSession endingFlowSession = flowExecution.endActiveSession();
