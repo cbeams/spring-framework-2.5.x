@@ -16,13 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.aop.framework.Cglib2AopProxy;
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-import org.springframework.test.AbstractSpringContextTests;
 
 /**
  * 
@@ -37,46 +32,28 @@ public class SPR391LookupMethodWrappedByCglibProxyTests extends AbstractDependen
         return new String[] { "/org/springframework/beans/factory/xml/overloadOverrides.xml" };
     }
     
-    // Confirm presence of bug. 
-    // TODO fix this
-    public void testSPR391() {
-        try {
-            BUGtestAutoProxiedLookup();          
-            fail();
-        }
-        catch (BeanCreationException ex) {
-            System.err.println("****** SPR-391:  Cannot use CGLIB proxying around beans with method lookup");
-            ex.printStackTrace();
-        }
-    }
     
-    public void BUGtestAutoProxiedLookup() {
+    public void testAutoProxiedLookup() {
         OverloadLookup olup = (OverloadLookup) applicationContext.getBean("autoProxiedOverload");
         ITestBean jenny = olup.newTestBean();
         assertEquals("Jenny", jenny.getName());
+        assertEquals("foo", olup.testMethod());
     }
     
-    public void BUGtestRegularlyProxiedLookup() {
+    public void testRegularlyProxiedLookup() {
         OverloadLookup olup = (OverloadLookup) applicationContext.getBean("regularlyProxiedOverload");
         ITestBean jenny = olup.newTestBean();
         assertEquals("Jenny", jenny.getName());
+        assertEquals("foo", olup.testMethod());
     }
-    
-    
     
     public static abstract class OverloadLookup {
         
         public abstract ITestBean newTestBean();
         
-//        public void overloaded() {            
-//        }
-       
-//        public void overloaded(String s) {   
-//        }
-//        
-//        public String overloaded(float f) {
-//            return "";
-//        }
+        public String testMethod() {
+            return "foo";
+        }
     }
 
 }

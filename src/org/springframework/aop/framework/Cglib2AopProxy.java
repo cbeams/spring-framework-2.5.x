@@ -133,7 +133,12 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		Enhancer enhancer = new Enhancer();
 		try {
 			Class rootClass = this.advised.getTargetSource().getTargetClass();
-			enhancer.setSuperclass(rootClass);
+            
+            if(AopUtils.isCglibProxyClass(rootClass)) {
+                enhancer.setSuperclass(rootClass.getSuperclass());
+            } else {
+                enhancer.setSuperclass(rootClass);
+            }
 			enhancer.setCallbackFilter(new ProxyCallbackFilter(this.advised));
 			enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
