@@ -34,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
  * @since 28.12.2003
  * @see #PLACEHOLDER_PREFIX
  * @see #PLACEHOLDER_SUFFIX
- * @see #getResourceLoader
  * @see Resource
  * @see ResourceLoader
  * @see DefaultResourceLoader
@@ -48,8 +47,26 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
+	private final ResourceLoader resourceLoader;
+
+	/**
+	 * Create new ResourceEditor with DefaultResourceLoader.
+	 * @see DefaultResourceLoader
+	 */
+	public ResourceEditor() {
+		this.resourceLoader = new DefaultResourceLoader();
+	}
+
+	/**
+	 * Create new ResourceEditor with given ResourceLoader.
+	 * @param resourceLoader the ResourceLoader to use
+	 */
+	public ResourceEditor(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+
 	public void setAsText(String text) {
-		setValue(getResourceLoader().getResource(resolvePath(text)));
+		setValue(this.resourceLoader.getResource(resolvePath(text)));
 	}
 
 	/**
@@ -77,15 +94,6 @@ public class ResourceEditor extends PropertyEditorSupport {
 			}
 		}
 		return path;
-	}
-
-	/**
-	 * Determine the ResourceLoader to use for converting the
-	 * property text to a Resource. Default is DefaultResourceLoader.
-	 * @see DefaultResourceLoader
-	 */
-	protected ResourceLoader getResourceLoader() {
-		return new DefaultResourceLoader();
 	}
 
 }

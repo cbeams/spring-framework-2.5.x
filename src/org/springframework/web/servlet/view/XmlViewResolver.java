@@ -21,8 +21,8 @@ import java.util.Locale;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.context.support.ContextResourceEditor;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
 import org.springframework.web.servlet.View;
 
 /**
@@ -96,7 +96,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 			actualLocation = getApplicationContext().getResource(DEFAULT_LOCATION);
 		}
 		XmlBeanFactory xbf = new XmlBeanFactory(actualLocation, getApplicationContext());
-		xbf.registerCustomEditor(Resource.class, new ContextResourceEditor(getApplicationContext()));
+		xbf.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));
 		xbf.preInstantiateSingletons();
 		if (isCache()) {
 			this.cachedFactory = xbf;
