@@ -16,13 +16,20 @@
 
 package org.springframework.web.servlet.mvc;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Interceptor that checks and prepares request and response. Checks for supported
@@ -39,11 +46,120 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  */
 public class WebContentInterceptor extends WebContentGenerator implements HandlerInterceptor {
 
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+
+	private Map cacheMappings = new HashMap();
+
+
+	/**
+	 * Set if URL lookup should always use full path within current servlet
+	 * context. Else, the path within the current servlet mapping is used
+	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
+	 * Default is false.
+	 * <p>Only relevant for the "cacheMappings" setting.
+	 * @see #setCacheMappings
+	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
+	 */
+	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
+	}
+
+	/**
+	 * Set if context path and request URI should be URL-decoded.
+	 * Both are returned <i>undecoded</i> by the Servlet API,
+	 * in contrast to the servlet path.
+	 * <p>Uses either the request encoding or the default encoding according
+	 * to the Servlet spec (ISO-8859-1).
+	 * <p>Note: Setting this to true requires J2SE 1.4, as J2SE 1.3's
+	 * URLDecoder class does not offer a way to specify the encoding.
+	 * <p>Only relevant for the "cacheMappings" setting.
+	 * @see #setCacheMappings
+	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
+	 */
+	public void setUrlDecode(boolean urlDecode) {
+		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
+	 * or to share common UrlPathHelper settings across multiple HandlerMappings
+	 * and MethodNameResolvers.
+	 * <p>Only relevant for the "cacheMappings" setting.
+	 * @see #setCacheMappings
+	 * @see org.springframework.web.servlet.handler.AbstractUrlHandlerMapping#setUrlPathHelper
+	 * @see org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver#setUrlPathHelper
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	/**
+	 * Map specific URL paths to specific cache seconds.
+	 * <p>Overrides the default cache seconds setting of this interceptor.
+	 * Can specify "-1" to exclude an URL path from default caching.
+	 * @param cacheMappings a mapping between URL paths (as keys) and
+	 * cache seconds (as values, need to be integer-parsable)
+	 * @see #setCacheSeconds
+	 */
+	public void setCacheMappings(Properties cacheMappings) {
+		this.cacheMappings.clear();
+		for (Iterator it = cacheMappings.keySet().iterator(); it.hasNext();) {
+			String path = (String) it.next();
+			this.cacheMappings.put(path, Integer.valueOf(cacheMappings.getProperty(path)));
+		}
+	}
+
+
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 	    throws ServletException {
-		checkAndPrepare(request, response, handler instanceof LastModified);
+
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking up cache seconds for [" + lookupPath + "]");
+		}
+
+		Integer cacheSeconds = lookupCacheSeconds(lookupPath);
+		if (cacheSeconds != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Applying " + cacheSeconds + " cache seconds to [" + lookupPath + "]");
+			}
+			checkAndPrepare(request, response, cacheSeconds.intValue(), handler instanceof LastModified);
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Applying default cache seconds to [" + lookupPath + "]");
+			}
+			checkAndPrepare(request, response, handler instanceof LastModified);
+		}
+
 		return true;
 	}
+
+	/**
+	 * Look up a cache seconds value for the given URL path.
+	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
+	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
+	 * both "/test" and "/team". For details, see the PathMatcher class.
+	 * @param urlPath URL the bean is mapped to
+	 * @return the associated cache seconds, or null if not found
+	 * @see org.springframework.util.PathMatcher
+	 */
+	protected Integer lookupCacheSeconds(String urlPath) {
+		// direct match?
+		Integer cacheSeconds = (Integer) this.cacheMappings.get(urlPath);
+		if (cacheSeconds == null) {
+			// pattern match?
+			for (Iterator it = this.cacheMappings.keySet().iterator(); it.hasNext();) {
+				String registeredPath = (String) it.next();
+				if (PathMatcher.match(registeredPath, urlPath)) {
+					cacheSeconds = (Integer) this.cacheMappings.get(registeredPath);
+				}
+			}
+		}
+		return cacheSeconds;
+	}
+
 
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 												 ModelAndView modelAndView) {
