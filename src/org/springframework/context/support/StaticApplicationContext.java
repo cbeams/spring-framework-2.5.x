@@ -20,7 +20,6 @@ import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -29,65 +28,68 @@ import org.springframework.context.ApplicationContext;
  * ApplicationContext that allows concrete registration of beans and
  * messages in code, rather than from external configuration sources.
  * Mainly useful for testing.
+ *
+ * <p>Will automatically refresh itself on first access, if not explicitly
+ * initialized.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @see #registerSingleton
+ * @see #registerPrototype
+ * @see #getDefaultListableBeanFactory
+ * @see #refresh
  */
-public class StaticApplicationContext extends AbstractApplicationContext {
+public class StaticApplicationContext extends GenericApplicationContext {
 
-	private DefaultListableBeanFactory beanFactory;
+	private final StaticMessageSource messageSource;
 
 	/**
-	 * Create new StaticApplicationContext.
+	 * Create a new StaticApplicationContext.
+	 * @see #registerSingleton
+	 * @see #registerPrototype
+	 * @see #getDefaultListableBeanFactory
+	 * @see #refresh
 	 */
 	public StaticApplicationContext() throws BeansException {
 		this(null);
 	}
 
 	/**
-	 * Create new StaticApplicationContext with the given parent.
-	 * @param parent the parent application context
+	 * Create a new StaticApplicationContext with the given parent.
+	 * @see #registerSingleton
+	 * @see #registerPrototype
+	 * @see #getDefaultListableBeanFactory
+	 * @see #refresh
 	 */
 	public StaticApplicationContext(ApplicationContext parent) throws BeansException {
 		super(parent);
 
-		// create bean factory with parent
-		this.beanFactory = new DefaultListableBeanFactory(getInternalParentBeanFactory());
-
-		// Register the message source bean
-		registerSingleton(MESSAGE_SOURCE_BEAN_NAME, StaticMessageSource.class, null);
+		// initialize and register StaticMessageSource
+		this.messageSource = new StaticMessageSource();
+		getBeanFactory().registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
 	}
 
 	/**
-	 * Return the underlying bean factory of this context.
+	 * Return the internal StaticMessageSource used by this context.
+	 * Can be used to register messages on it.
+	 * @see #addMessage
 	 */
-	public DefaultListableBeanFactory getDefaultListableBeanFactory() {
-		return beanFactory;
-	}
-
-	/**
-	 * Return underlying bean factory for super class.
-	 */
-	public ConfigurableListableBeanFactory getBeanFactory() {
-		return beanFactory;
-	}
-
-	/**
-	 * Do nothing: We rely on callers to update our public methods.
-	 */
-	protected void refreshBeanFactory() {
+	public StaticMessageSource getStaticMessageSource() {
+		return messageSource;
 	}
 
 	/**
 	 * Register a singleton bean with the default bean factory.
 	 */
 	public void registerSingleton(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
-		this.beanFactory.registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs));
+		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs));
 	}
 
 	/**
 	 * Register a prototype bean with the default bean factory.
 	 */
 	public void registerPrototype(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
-		this.beanFactory.registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs, false));
+		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs, false));
 	}
 
 	/**
@@ -97,8 +99,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	 * @param defaultMessage message associated with this lookup code
 	 */
 	public void addMessage(String code, Locale locale, String defaultMessage) {
-		StaticMessageSource messageSource = (StaticMessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME);
-		messageSource.addMessage(code, locale, defaultMessage);
+		getStaticMessageSource().addMessage(code, locale, defaultMessage);
 	}
 
 }

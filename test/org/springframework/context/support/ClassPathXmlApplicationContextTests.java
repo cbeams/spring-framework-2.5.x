@@ -29,6 +29,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -115,6 +116,18 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		writer = new StringWriter();
 		FileCopyUtils.copy(new InputStreamReader(resource2.getInputStream()), writer);
 		assertEquals("contexttest", writer.toString());
+	}
+
+	public void testGenericApplicationContextWithXmlBeanDefinitions() throws Exception {
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(ctx);
+		reader.loadBeanDefinitions(new ClassPathResource("contextB.xml", getClass()));
+		reader.loadBeanDefinitions(new ClassPathResource("contextC.xml", getClass()));
+		reader.loadBeanDefinitions(new ClassPathResource("contextA.xml", getClass()));
+		ctx.refresh();
+		assertTrue(ctx.containsBean("service"));
+		assertTrue(ctx.containsBean("logicOne"));
+		assertTrue(ctx.containsBean("logicTwo"));
 	}
 
 }
