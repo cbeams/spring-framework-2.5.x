@@ -2,6 +2,7 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,20 +11,24 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.DefaultPropertiesPersister;
+import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
 /**
  * MessageSource that accesses the ResourceBundles with the specified basenames.
  * This class uses java.util.Properties instances as its internal data structure
- * for messages.
+ * for messages, loading them via a PropertiesPersister strategy: The default
+ * strategy can load properties files with a specific charset.
  *
- * <p>In contrast to ResourceBundleMessageSoruce, this class supports reloading
+ * <p>In contrast to ResourceBundleMessageSource, this class supports reloading
  * of properties files through the "cacheSeconds" setting, and also through
  * programmatically clearing the properties cache. Since application servers do
- * typcially cache all files loaded from the classpath, it is necessary to store
+ * typically cache all files loaded from the classpath, it is necessary to store
  * resources somewhere else (for example, in the "WEB-INF" directory of a web app).
  * Otherwise changes of files in the classpath are not reflected in the application.
  *
@@ -33,22 +38,34 @@ import org.springframework.util.StringUtils;
  * (instead of being restricted to classpath resources). With a "classpath:" prefix,
  * resources can still be loaded from the classpath, but "cacheSeconds" values
  * other than "-1" (caching forever) will not work in this case.
+ *
+ * <p>This MessageSource can easily be used outside an ApplicationContext: It uses
+ * a DefaultResourceLoader as default, getting overridden with the ApplicationContext
+ * if running in a context. It does not have any other specific dependencies.
  * 
  * @author Thomas Achleitner
  * @author Juergen Hoeller
  * @see #setCacheSeconds
  * @see #setBasenames
+ * @see #setDefaultCharset
+ * @see #setFileCharsets
+ * @see #setPropertiesPersister
+ * @see #setResourceLoader
+ * @see org.springframework.util.DefaultPropertiesPersister
+ * @see org.springframework.core.io.DefaultResourceLoader
  * @see ResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
 public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
-    implements ApplicationContextAware {
+    implements ResourceLoaderAware {
 
 	public static final String PROPERTIES_SUFFIX = ".properties";
 
-	private ApplicationContext applicationContext;
-
 	private String[] basenames;
+
+	private String defaultCharset;
+
+	private Properties fileCharsets;
 
 	private boolean fallbackToSystemLocale = true;
 
@@ -59,6 +76,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/** Cache to hold already loaded properties per filename */
 	private final Map cachedProperties = new HashMap();
+
+	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
+
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 
 	/**
@@ -88,6 +109,30 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	public void setBasenames(String[] basenames) {
 		this.basenames = basenames;
+	}
+
+	/**
+	 * Set the default charset to use for parsing properties files.
+	 * Used if no file-specific charset is specified for a file.
+	 * <p>Default is none, using java.util.Properties' default charset.
+	 * @see #setFileCharsets
+	 * @see org.springframework.util.PropertiesPersister#load
+	 */
+	public void setDefaultCharset(String defaultCharset) {
+		this.defaultCharset = defaultCharset;
+	}
+
+	/**
+	 * Set per-file charsets to use for parsing properties files.
+	 * @param fileCharsets Properties with filenames as keys and charset
+	 * names as values. Filenames have to match the basename syntax,
+	 * with optional locale-specific appendices: e.g. "WEB-INF/messages"
+	 * or "WEB-INF/messages_en".
+	 * @see #setBasenames
+	 * @see org.springframework.util.PropertiesPersister#load
+	 */
+	public void setFileCharsets(Properties fileCharsets) {
+		this.fileCharsets = fileCharsets;
 	}
 
 	/**
@@ -122,8 +167,23 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		this.cacheMillis = cacheSeconds * 1000;
 	}
 
-	public void setApplicationContext(ApplicationContext context) {
-		this.applicationContext = context;
+	/**
+	 * Set the PropertiesPersister to use for parsing properties files.
+	 * The default is DefaultPropertiesPersister.
+	 * @see org.springframework.util.DefaultPropertiesPersister
+	 */
+	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
+		this.propertiesPersister = propertiesPersister;
+	}
+
+	/**
+	 * Set the ResourceLoader to use for loading bundle properties files.
+	 * The default is DefaultResourceLoader. Will get overridden by the
+	 * ApplicationContext if running in a context.
+	 * @see org.springframework.core.io.DefaultResourceLoader
+	 */
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
 	}
 
 
@@ -240,7 +300,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	protected PropertiesHolder refreshProperties(String filename, PropertiesHolder propHolder) {
 		long refreshTimestamp = (this.cacheMillis < 0) ? -1 : System.currentTimeMillis();
-		Resource resource = this.applicationContext.getResource(filename + PROPERTIES_SUFFIX);
+		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
 		try {
 			long fileTimestamp = -1;
 			if (this.cacheMillis >= 0) {
@@ -258,13 +318,28 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 					return propHolder;
 				}
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loading properties for filename [" + filename + "]");
-			}
 			InputStream is = resource.getInputStream();
 			Properties props = new Properties();
 			try {
-				props.load(is);
+				String charset = null;
+				if (this.fileCharsets != null) {
+					charset = this.fileCharsets.getProperty(filename);
+				}
+				if (charset == null) {
+					charset = this.defaultCharset;
+				}
+				if (charset != null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Loading properties for filename [" + filename + "] with charset '" + charset + "'");
+					}
+					this.propertiesPersister.load(props, new InputStreamReader(is, charset));
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Loading properties for filename [" + filename + "]");
+					}
+					this.propertiesPersister.load(props, is);
+				}
 				propHolder = new PropertiesHolder(props, fileTimestamp);
 			}
 			finally {
@@ -324,31 +399,31 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		/** Cache to hold already generated MessageFormats per message code */
 		private final Map cachedMessageFormats = new HashMap();
 
-		public PropertiesHolder(Properties properties, long fileTimestamp) {
+		protected PropertiesHolder(Properties properties, long fileTimestamp) {
 			this.properties = properties;
 			this.fileTimestamp = fileTimestamp;
 		}
 
-		public PropertiesHolder() {
+		protected PropertiesHolder() {
 		}
 
-		public Properties getProperties() {
+		protected Properties getProperties() {
 			return properties;
 		}
 
-		public long getFileTimestamp() {
+		protected long getFileTimestamp() {
 			return fileTimestamp;
 		}
 
-		public void setRefreshTimestamp(long refreshTimestamp) {
+		protected void setRefreshTimestamp(long refreshTimestamp) {
 			this.refreshTimestamp = refreshTimestamp;
 		}
 
-		public long getRefreshTimestamp() {
+		protected long getRefreshTimestamp() {
 			return refreshTimestamp;
 		}
 
-		public synchronized MessageFormat getMessageFormat(String code) {
+		protected synchronized MessageFormat getMessageFormat(String code) {
 			synchronized (this.cachedMessageFormats) {
 				MessageFormat result = (MessageFormat) this.cachedMessageFormats.get(code);
 				if (result != null) {

@@ -1,6 +1,7 @@
 package org.springframework.context.support;
 
 import java.util.Locale;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -21,12 +22,12 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		String basepath = "org/springframework/context/support/";
 		String[] basenames = null;
 		if (reloadable) {
-			basenames = new String[]{"classpath:" + basepath + "messages",
-			                         "classpath:" + basepath + "more-messages"};
+			basenames = new String[] {"classpath:" + basepath + "messages",
+			                          "classpath:" + basepath + "more-messages"};
 		}
 		else {
-			basenames = new String[]{basepath + "messages",
-			                         basepath + "more-messages"};
+			basenames = new String[] {basepath + "messages",
+			                          basepath + "more-messages"};
 		}
 		pvs.addPropertyValue("basenames", basenames);
 		if (!fallbackToSystemLocale) {
@@ -95,6 +96,68 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 
 	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
 		doTestMessageAccess(true, false, true, true);
+	}
+
+	public void testResourceBundleMessageSourceStandalone() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
+	}
+
+	public void testReloadableResourceBundleMessageSourceStandalone() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
+	}
+
+	public void testReloadableResourceBundleMessageSourceWithDefaultCharset() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setDefaultCharset("ISO-8859-1");
+		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
+	}
+
+	public void testReloadableResourceBundleMessageSourceWithInappropriateDefaultCharset() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setDefaultCharset("unicode");
+		Properties fileCharsets = new Properties();
+		fileCharsets.setProperty("org/springframework/context/support/messages_de", "unicode");
+		ms.setFileCharsets(fileCharsets);
+		ms.setFallbackToSystemLocale(false);
+		try {
+			ms.getMessage("code1", null, Locale.ENGLISH);
+			fail("Should have thrown NoSuchMessageException");
+		}
+		catch (NoSuchMessageException ex) {
+			// expected
+		}
+	}
+
+	public void testReloadableResourceBundleMessageSourceWithInappropriateEnglishCharset() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setFallbackToSystemLocale(false);
+		Properties fileCharsets = new Properties();
+		fileCharsets.setProperty("org/springframework/context/support/messages", "unicode");
+		ms.setFileCharsets(fileCharsets);
+		try {
+			ms.getMessage("code1", null, Locale.ENGLISH);
+			fail("Should have thrown NoSuchMessageException");
+		}
+		catch (NoSuchMessageException ex) {
+			// expected
+		}
+	}
+
+	public void testReloadableResourceBundleMessageSourceWithInappropriateGermanCharset() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setFallbackToSystemLocale(false);
+		Properties fileCharsets = new Properties();
+		fileCharsets.setProperty("org/springframework/context/support/messages_de", "unicode");
+		ms.setFileCharsets(fileCharsets);
+		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
 	}
 
 }
