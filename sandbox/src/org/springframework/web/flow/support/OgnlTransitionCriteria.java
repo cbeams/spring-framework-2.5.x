@@ -23,15 +23,15 @@ import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
- * 
+ * Transtition criteria that tests the value of a OGNL expression.
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class OgnlTransitionCondition implements TransitionCriteria {
+public class OgnlTransitionCriteria implements TransitionCriteria {
 
 	private String expressionString;
 
-	public OgnlTransitionCondition(String expressionString) {
+	public OgnlTransitionCriteria(String expressionString) {
 		this.expressionString = expressionString;
 	}
 
