@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -27,16 +27,18 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.IntroductionInfo;
 
 /**
  * Support for implementations of IntroductionAdvice.
- * This class allows for querying of all introduced interfaces,
- * as well as implemented the implementsInterface() method
- * from IntroductionAdvice.
- * It also allows subclasses to conveniently add all interfaces
- * from a given object, and to suppress interfaces that should
- * not be added.
+ *
+ * <p>This class allows for querying all introduced interfaces and implements
+ * the <code>implementsInterface</code> method from IntroductionAdvice.
+ *
+ * <p>This class also allows subclasses to conveniently add all interfaces
+ * from a given object, and to suppress interfaces that should not be added.
+ *
  * @author Rod Johnson
  */
 public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
@@ -47,10 +49,9 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	protected Set publishedInterfaces = new HashSet();
 
 	/**
-	 * Suppress the specified interface, which will have
-	 * been autodetected due to its implementation by
-	 * the delegate.
-	 * Does nothing if it's not implemented by the delegate
+	 * Suppress the specified interface, which will have been
+	 * autodetected due to its implementation by the delegate.
+	 * Does nothing if it's not implemented by the delegate.
 	 * @param intf interface to suppress
 	 */
 	public void suppressInterface(Class intf) {
@@ -61,10 +62,6 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 		return (Class[]) this.publishedInterfaces.toArray(new Class[this.publishedInterfaces.size()]);
 	}
 
-	/**
-	 * Implementation of IntroductionAdvice method
-	 * @see org.springframework.aop.DynamicIntroductionAdvice#implementsInterface(java.lang.Class)
-	 */
 	public boolean implementsInterface(Class intf) {
 		for (Iterator it = this.publishedInterfaces.iterator(); it.hasNext();) {
 			Class pubIntf = (Class) it.next();
@@ -76,7 +73,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	}
 	
 	protected void implementInterfacesOnObject(Object delegate) {
-		this.publishedInterfaces.addAll(AopUtils.getAllInterfacesAsList(delegate));
+		this.publishedInterfaces.addAll(AopUtils.getAllInterfacesAsSet(delegate));
 	}
 
 	/**
@@ -94,16 +91,17 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	 * would use this class's log category.
 	 */
 	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization
+		// Rely on default serialization, just initialize state after deserialization.
 		try {
 			ois.defaultReadObject();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize Spring DelegatingIntroductionInterceptor:" +
-					"Check that Spring AOP libraries and implementation class for the introduction are available on the client side");
+			throw new AspectException("Failed to deserialize Spring DelegatingIntroductionInterceptor: " +
+					"check that Spring AOP libraries and implementation class for the introduction are " +
+					"available on the client side");
 		}
 		
-		// Initialize transient fields
+		// Initialize transient fields.
 		this.logger = LogFactory.getLog(getClass());
 	}
 

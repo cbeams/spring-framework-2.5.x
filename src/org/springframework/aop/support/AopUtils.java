@@ -21,8 +21,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.aopalliance.aop.AspectException;
 
@@ -174,7 +176,7 @@ public abstract class AopUtils {
 	 * @return all interfaces that the given object implements as array
 	 */
 	public static Class[] getAllInterfaces(Object object) {
-		List interfaces = getAllInterfacesAsList(object);
+		Set interfaces = getAllInterfacesAsSet(object);
 		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
 	}
 
@@ -185,7 +187,7 @@ public abstract class AopUtils {
 	 * @return all interfaces that the given object implements as array
 	 */
 	public static Class[] getAllInterfacesForClass(Class clazz) {
-		List interfaces = getAllInterfacesForClassAsList(clazz);
+		Set interfaces = getAllInterfacesForClassAsSet(clazz);
 		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
 	}
 
@@ -194,9 +196,21 @@ public abstract class AopUtils {
 	 * including ones implemented by superclasses.
 	 * @param object the object to analyse for interfaces
 	 * @return all interfaces that the given object implements as List
+	 * @deprecated in favor of <code>getAllInterfacesForClassAsList</code>
+	 * @see #getAllInterfacesForClassAsList
 	 */
 	public static List getAllInterfacesAsList(Object object) {
 		return getAllInterfacesForClassAsList(object.getClass());
+	}
+
+	/**
+	 * Return all interfaces that the given object implements as List,
+	 * including ones implemented by superclasses.
+	 * @param object the object to analyse for interfaces
+	 * @return all interfaces that the given object implements as List
+	 */
+	public static Set getAllInterfacesAsSet(Object object) {
+		return getAllInterfacesForClassAsSet(object.getClass());
 	}
 
 	/**
@@ -204,9 +218,21 @@ public abstract class AopUtils {
 	 * including ones implemented by superclasses.
 	 * @param clazz the class to analyse for interfaces
 	 * @return all interfaces that the given object implements as List
+	 * @deprecated in favor of <code>getAllInterfacesForClassAsSet</code>
+	 * @see #getAllInterfacesForClassAsSet
 	 */
 	public static List getAllInterfacesForClassAsList(Class clazz) {
-		List interfaces = new ArrayList();
+		return new ArrayList(getAllInterfacesForClassAsSet(clazz));
+	}
+
+	/**
+	 * Return all interfaces that the given class implements as Set,
+	 * including ones implemented by superclasses.
+	 * @param clazz the class to analyse for interfaces
+	 * @return all interfaces that the given object implements as Set
+	 */
+	public static Set getAllInterfacesForClassAsSet(Class clazz) {
+		Set interfaces = new HashSet();
 		while (clazz != null) {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {
 				Class ifc = clazz.getInterfaces()[i];
@@ -230,7 +256,7 @@ public abstract class AopUtils {
 			return false;
 		}
 		
-		List classes = getAllInterfacesForClassAsList(targetClass);
+		Set classes = getAllInterfacesForClassAsSet(targetClass);
 		classes.add(targetClass);
 		for (Iterator it = classes.iterator(); it.hasNext();) {
 			Class clazz = (Class) it.next();
