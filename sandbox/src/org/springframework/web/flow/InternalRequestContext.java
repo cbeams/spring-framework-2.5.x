@@ -38,7 +38,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	protected final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
-	private Event requestEvent;
+	private Event firstEvent;
 
 	private Event lastEvent;
 
@@ -48,12 +48,12 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	/**
 	 * Create a new request context.
-	 * @param requestEvent the request event
+	 * @param event the request event
 	 * @param flowExecution the owning flow execution
 	 */
-	public InternalRequestContext(Event requestEvent, FlowExecutionStack flowExecution) {
-		this.requestEvent = requestEvent;
-		this.lastEvent = requestEvent;
+	public InternalRequestContext(Event event, FlowExecutionStack flowExecution) {
+		this.firstEvent = event;
+		this.lastEvent = event;
 		this.flowExecution = flowExecution;
 	}
 
@@ -83,8 +83,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return this.flowExecution.getCurrentState();
 	}
 
-	public Event getRequestEvent() {
-		return this.requestEvent;
+	public Event getFirstEvent() {
+		return this.firstEvent;
 	}
 
 	public Event getLastEvent() {
