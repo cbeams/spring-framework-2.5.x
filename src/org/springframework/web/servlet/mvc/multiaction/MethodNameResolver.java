@@ -23,9 +23,11 @@ import javax.servlet.http.HttpServletRequest;
  * using the <b>Strategy</b> GoF Design pattern, allowing
  * the mapping from incoming request to handler method name
  * to be varied without affecting other application code.
- * <br>Illustrates how delegation can be more flexible than
- * subclassing.
+ *
+ * <p>Illustrates how delegation can be more flexible than subclassing.
+ *
  * @author Rod Johnson
+ * @see MultiActionController#setMethodNameResolver
  */
 public interface MethodNameResolver {
 	
@@ -33,9 +35,10 @@ public interface MethodNameResolver {
 	 * Return a method name that can handle this request. Such
 	 * mappings are typically, but not necessarily, based on URL.
 	 * @return a method name that can handle this request.
-	 * Never returns null; throws exception
+	 * Never returns null; throws exception if not resolvable.
 	 * @throws NoSuchRequestHandlingMethodException if no method
 	 * can be found for this URL
 	 */
 	String getHandlerMethodName(HttpServletRequest request) throws NoSuchRequestHandlingMethodException;
+
 }

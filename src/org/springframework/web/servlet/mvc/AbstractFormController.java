@@ -443,8 +443,9 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * <p>Subclasses can override this to provide custom submission handling
 	 * like triggering a custom action. They can also provide custom validation
 	 * and call showForm or proceed with the submission accordingly.
-	 * <p>Can call errors.getModel() to populate the ModelAndView model with the command
-	 * and the Errors instance, under the specified bean name.
+	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * with the command and the Errors instance, under the specified command name,
+	 * as expected by the "spring:bind" tag.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
@@ -454,6 +455,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #isFormSubmission
 	 * @see #showForm
 	 * @see org.springframework.validation.Errors
+	 * @see org.springframework.validation.BindException#getModel
 	 */
 	protected abstract ModelAndView processFormSubmission(HttpServletRequest request,	HttpServletResponse response,
 	                                                      Object command, BindException errors)
