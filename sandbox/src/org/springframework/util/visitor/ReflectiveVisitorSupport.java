@@ -5,12 +5,12 @@
 package org.springframework.util.visitor;
 
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.Cache;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CompositeKey;
 import org.springframework.util.StringUtils;
@@ -19,42 +19,96 @@ import org.springframework.util.StringUtils;
  * Helper implementation of a reflective visitor.
  * <p>
  * <p>
- * To use call <code>doVisit</code> on an Visitor object and pass in the
- * argument to accept (double-dispatch.) For example:
+ * To use, call <code>invokeVisitor</code>, passing a Visitor object and the
+ * data argument to accept (double-dispatch.) For example:
  * 
  * <pre>
  *  public String ToStringStyler.styleValue(Object value) {
+ *      // visit&lt;valueType&gt; callback will be invoked
+ *         using reflection
  *      reflectiveVistorSupport.invokeVisit(this, value)
- *       // visit&lt;valueType&gt; callback will be invoked using reflection
  *  }
  * </pre>
  * 
  * @author Keith Donald
  */
 public class ReflectiveVisitorSupport {
-    private static final Log logger = LogFactory
-            .getLog(ReflectiveVisitorSupport.class);
-    private Map visitorClassVisitMethods = new WeakHashMap();
+    private static final Log logger =
+        LogFactory.getLog(ReflectiveVisitorSupport.class);
     private static final String VISIT_PREFIX = "visit";
     private static final String VISIT_DEFAULT = "visitObject";
     private static final String VISIT_NULL = "visitNull";
-
-    private Method getMethod(Class visitorClass, Object argument) {
-        CompositeKey key = new CompositeKey(visitorClass,
-                (argument != null ? argument.getClass() : null));
-        Method m = (Method)visitorClassVisitMethods.get(key);
-        if (m == null) {
-            m = findMethod(visitorClass, argument);
-            visitorClassVisitMethods.put(key, m);
+    
+    /**
+     * Use reflection to call the appropriate visit method on the provided
+     * visitor, passing in the specified argument.
+     * 
+     * If the arg is Visitable, accept(Visitor) will be called instead, and the
+     * it will be expected to perform the double-dispatch. Otherwise the visit
+     * method will be called directly on the visitor based on the class of the
+     * argument.
+     * 
+     * @param visitor,
+     *            The visitor encapsulating the logic to process the argument.
+     * @param argument,
+     *            The argument to dispatch, or a instanceof Vistable.
+     * @throws IllegalArgumentException
+     *            if the visitor parameter is null.
+     * @see org.springframework.utils.visitor.Visitor#visit(java.lang.Object)
+     */
+    public final void invokeVisit(Visitor visitor, Object argument) {
+        Assert.notNull(visitor);
+        try {
+            if (argument instanceof Visitable) {
+                callAccept((Visitable)argument, visitor);
+            } else {
+                Method method = getMethod(visitor.getClass(), argument);
+                if (method == null) {
+                    logger.warn(
+                        "No method found by reflection for visitor class "
+                            + visitor.getClass()
+                            + " and argument '"
+                            + (argument != null ? argument.getClass() : null)
+                            + "'");
+                    return;
+                }
+                try {
+                    Object[] args = null;
+                    if (argument != null) {
+                        args = new Object[] { argument };
+                    }
+                    method.invoke(visitor, args);
+                } catch (Exception e) {
+                    throw e;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Exception occured dispatching to visitor " + e);
+            throw new RuntimeException(e);
         }
-        return m;
+    }
+    
+    private Method getMethod(Class visitorClass, Object argument) {
+        CompositeKey key =
+            new CompositeKey(
+                    visitorClass,
+                    (argument != null ? argument.getClass() : null));
+        return (Method)visitorClassVisitMethods.get(key);
     }
 
-    private Method findMethod(Class visitorClass, Object argument) {
-        if (argument == null) {
+    Cache visitorClassVisitMethods = new Cache() {
+        public Object create(Object key) {
+            Iterator parts = ((CompositeKey)key).parts();
+            Class visitorClass = (Class)parts.next();
+            Class argumentClass = (Class)parts.next();
+            return findMethod(visitorClass, argumentClass);
+        }
+    };
+
+    private Method findMethod(Class visitorClass, Class argumentClass) {
+        if (argumentClass == null) {
             return findNullVisitorMethod(visitorClass);
         }
-        Class argumentClass = argument.getClass();
         Class tempClass = argumentClass;
         Method m = null;
         // Try the superclasses
@@ -64,8 +118,12 @@ public class ReflectiveVisitorSupport {
                 method = StringUtils.delete(method, ".");
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Looking for method '" + method + "("
-                        + ClassUtils.getShortName(tempClass) + ")");
+                logger.debug(
+                        "Looking for class method '"
+                        + method
+                        + "("
+                        + ClassUtils.getShortName(tempClass)
+                        + ")");
             }
             try {
                 m = visitorClass.getMethod(method, new Class[] { tempClass });
@@ -79,18 +137,24 @@ public class ReflectiveVisitorSupport {
         if (m == null) {
             Class[] interfaces = argumentClass.getInterfaces();
             for (int i = 0; i < interfaces.length; i++) {
-                String method = VISIT_PREFIX
-                        + ClassUtils.getShortName(interfaces[i]);
+                String method =
+                    VISIT_PREFIX + ClassUtils.getShortName(interfaces[i]);
                 if (interfaces[i].getDeclaringClass() != null) {
                     method = StringUtils.delete(method, ".");
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Looking for method '" + method + "("
-                            + ClassUtils.getShortName(interfaces[i]) + ")");
+                    logger.debug(
+                            "Looking for interface method '"
+                            + method
+                            + "("
+                            + ClassUtils.getShortName(interfaces[i])
+                            + ")");
                 }
                 try {
-                    m = visitorClass.getMethod(method,
-                            new Class[] { interfaces[i] });
+                    m =
+                        visitorClass.getMethod(
+                                method,
+                                new Class[] { interfaces[i] });
                 } catch (NoSuchMethodException e) {
                 }
             }
@@ -115,68 +179,28 @@ public class ReflectiveVisitorSupport {
     private Method findDefaultVisitorMethod(Class visitorClass) {
         try {
             if (logger.isDebugEnabled()) {
-                logger.debug("Looking for default visitor method '"
-                        + VISIT_DEFAULT + "'" + "' on class " + visitorClass);
+                logger.debug(
+                        "Looking for default visitor method '"
+                        + VISIT_DEFAULT
+                        + "'"
+                        + "' on class "
+                        + visitorClass);
             }
-            return visitorClass.getMethod(VISIT_DEFAULT,
+            return visitorClass.getMethod(
+                    VISIT_DEFAULT,
                     new Class[] { Object.class });
         } catch (Exception e) {
-            logger.warn("No default '" + VISIT_DEFAULT
+            logger.warn(
+                    "No default '"
+                    + VISIT_DEFAULT
                     + "' method found.  Returning <null>");
             return null;
         }
     }
-
+    
     /**
-     * Use reflection to call the appropriate visit method on the provided
-     * visitor, passing in the specified argument.
-     * 
-     * If the arg is Visitable, accept(Visitor) will be called instead, and the
-     * it will be expected to perform the double-dispatch. Otherwise the visit
-     * method will be called directly on the visitor based on the class of the
-     * argument.
-     * 
-     * @param visitor,
-     *            The visitor encapsulating the logic to process the argument.
-     * @param argument,
-     *            The argument to dispatch, or a instanceof Vistable.
-     * @see org.springframework.rcp.utils.visitor.Visitor#visit(java.lang.Object)
-     */
-    public final void invokeVisit(Visitor visitor, Object argument) {
-        Assert.notNull(visitor);
-        try {
-            if (argument instanceof Visitable) {
-                callAccept((Visitable)argument, visitor);
-            } else {
-                Method method = getMethod(visitor.getClass(), argument);
-                if (method == null) {
-                    logger
-                            .warn("No method found by reflection for visitor class "
-                                    + visitor.getClass()
-                                    + " and argument '"
-                                    + (argument != null ? argument.getClass()
-                                            : null) + "'");
-                    return;
-                }
-                try {
-                    Object[] args = null;
-                    if (argument != null) {
-                        args = new Object[] { argument };
-                    }
-                    method.invoke(visitor, args);
-                } catch (Exception e) {
-                    throw e;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Exception occured dispatching to visitor " + e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Call the accept() method on the visitable object, passing in the visitor
-     * (the first of the double-dispatch.)
+     * Call the accept(visitor) method on the visitable object, passing in
+     * the visitor (the first of the double-dispatch.)
      * 
      * @param visitable
      *            The vistable (the type)

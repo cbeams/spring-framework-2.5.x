@@ -18,7 +18,8 @@ import org.springframework.util.visitor.Visitor;
  * the reflective visitor pattern to nicely encapsulate styling algorithms for
  * each type of styled object.
  * 
- * This class is used by ToStringBuilder to style toString() output.
+ * This class is used by ToStringBuilder to style toString() output in
+ * a consistent manner.
  * 
  * @author Keith Donald
  */

@@ -23,6 +23,13 @@ public class ReflectiveVisitorSupportTests extends TestCase {
     public void testDirectDefaultLookup() {
         ensureVisit(new DirectMockVisitor(), new ArrayList());
     }
+    
+    public void testDirectDefaultLookupCache() {
+        DirectMockVisitor visitor = new DirectMockVisitor();
+        ensureVisit(visitor, new ArrayList());
+        visitor.visited = false;
+        ensureVisit(visitor, new ArrayList());
+    }
 
     public void testSuperclassDefaultLookup() {
         ensureVisit(new SuperclassMockVisitor(), new ArrayList());
