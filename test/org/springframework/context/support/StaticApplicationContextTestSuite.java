@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.context.support;
 
 import java.lang.reflect.Proxy;
@@ -29,7 +29,7 @@ import org.springframework.context.config.ConfigurableApplicationContext;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.9 2003-11-04 23:10:04 jhoeller Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.10 2003-11-07 15:13:48 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -139,7 +139,9 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		public int nrOfInvocations = 0;
 
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-			nrOfInvocations++;
+			if (!methodInvocation.getMethod().getName().equals("finalize")) {
+				nrOfInvocations++;
+			}
 			return methodInvocation.proceed();
 		}
 	}
