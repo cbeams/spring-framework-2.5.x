@@ -41,7 +41,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 
 
 	/** Constants instance for TransactionDefinition */
-	private final Constants constants = new Constants(TransactionDefinition.class);
+	private static final Constants constants = new Constants(TransactionDefinition.class);
 
 	private int propagationBehavior = PROPAGATION_REQUIRED;
 

@@ -83,7 +83,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Constants instance for HibernateAccessor */
-	private final Constants constants = new Constants(HibernateAccessor.class);
+	private static final Constants constants = new Constants(HibernateAccessor.class);
 
 	private SessionFactory sessionFactory;
 
