@@ -28,6 +28,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * @author Colin Sampaleanu
+ * 
+ * TODO: need to consolidate this with SingletonBeanFactoryLocatorTests!
  */
 public class ContextSingletonBeanFactoryLocatorTests extends TestCase {
 
@@ -49,28 +51,28 @@ public class ContextSingletonBeanFactoryLocatorTests extends TestCase {
 		
 		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		BeanFactory fac = bfr.getFactory();
-		bfr = facLoc.useBeanFactory("another.qualified.name");
-		fac = bfr.getFactory();
+		BeanFactoryReference bfr2 = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr2.getFactory();
 		// verify that the same instance is returned
 		TestBean tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("beans1.bean1"));
 		tb.setName("was beans1.bean1");
-		bfr = facLoc.useBeanFactory("another.qualified.name");
-		fac = bfr.getFactory();
+		BeanFactoryReference bfr3 = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 
-		bfr = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
-		fac = bfr.getFactory();
+		BeanFactoryReference bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
+		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 		
-		// now verify that we can call release 4 times, and the 5th should log warning
+		// now verify that we can call release in any order
+		// unfortunately this doesn't validate complete release after the last one
+		bfr2.release();
+		bfr3.release();
 		bfr.release();
-		bfr.release();
-		bfr.release();
-		bfr.release();
-		bfr.release();
+		bfr4.release();
 	}
 	
 	// this test can run multiple times, but due to static keyed lookup of the locators,
@@ -85,26 +87,26 @@ public class ContextSingletonBeanFactoryLocatorTests extends TestCase {
 		
 		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		BeanFactory fac = bfr.getFactory();
-		bfr = facLoc.useBeanFactory("another.qualified.name");
-		fac = bfr.getFactory();
+		BeanFactoryReference bfr2 = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr2.getFactory();
 		// verify that the same instance is returned
 		TestBean tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("beans1.bean1"));
 		tb.setName("was beans1.bean1");
-		bfr = facLoc.useBeanFactory("another.qualified.name");
-		fac = bfr.getFactory();
+		BeanFactoryReference bfr3 = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 
-		bfr = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
-		fac = bfr.getFactory();
+		BeanFactoryReference bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
+		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 		
 		bfr.release();
-		bfr.release();
-		bfr.release();
-		bfr.release();
+		bfr3.release();
+		bfr2.release();
+		bfr4.release();
 		
 		facLoc = ContextSingletonBeanFactoryLocator.getInstance(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(
@@ -112,26 +114,26 @@ public class ContextSingletonBeanFactoryLocatorTests extends TestCase {
 
 		bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		fac = bfr.getFactory();
-		bfr = facLoc.useBeanFactory("another.qualified.name");
-		fac = bfr.getFactory();
+		bfr2 = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr2.getFactory();
 		// verify that the same instance is returned
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("beans1.bean1"));
 		tb.setName("was beans1.bean1");
-		bfr = facLoc.useBeanFactory("another.qualified.name");
-		fac = bfr.getFactory();
+		bfr3 = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 
-		bfr = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
-		fac = bfr.getFactory();
+		bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
+		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 		
 		bfr.release();
-		bfr.release();
-		bfr.release();
-		bfr.release();
+		bfr2.release();
+		bfr4.release();
+		bfr3.release();
 
 		// this will actually get another locator instance, as the key is the resource name
 		facLoc = ContextSingletonBeanFactoryLocator.getInstance(
@@ -140,25 +142,25 @@ public class ContextSingletonBeanFactoryLocatorTests extends TestCase {
 		
 		bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		fac = bfr.getFactory();
-		bfr = facLoc.useBeanFactory("another.qualified.name");
-		fac = bfr.getFactory();
+		bfr2 = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr2.getFactory();
 		// verify that the same instance is returned
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("beans1.bean1"));
 		tb.setName("was beans1.bean1");
-		bfr = facLoc.useBeanFactory("another.qualified.name");
-		fac = bfr.getFactory();
+		bfr3 = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 
-		bfr = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
-		fac = bfr.getFactory();
+		bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
+		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 		
-		bfr.release();
-		bfr.release();
-		bfr.release();
+		bfr4.release();
+		bfr3.release();
+		bfr2.release();
 		bfr.release();
 	}
 }
