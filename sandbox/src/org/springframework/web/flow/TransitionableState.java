@@ -76,9 +76,8 @@ public abstract class TransitionableState extends State {
 		transition.setSourceState(this);
 		if (transition.getTargetStateId().equals(this.getId())) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(
-					"Loop detected: the source and target state of transition '" + transition + "' are the same" +
-					" -- make sure this is not a bug!");
+				logger.debug("Loop detected: the source and target state of transition '" + transition
+						+ "' are the same" + " -- make sure this is not a bug!");
 			}
 		}
 		this.transitions.add(transition);
@@ -131,7 +130,7 @@ public abstract class TransitionableState extends State {
 	 * Throws and exception when when there is no corresponding transition.
 	 * @throws NoMatchingTransitionException when the transition cannot be found
 	 */
-	public Transition getRequiredTransition(RequestContext context) throws NoMatchingTransitionException {
+	public Transition transitionFor(RequestContext context) throws NoMatchingTransitionException {
 		Transition transition = getTransition(context);
 		if (transition != null) {
 			return transition;
@@ -142,10 +141,11 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Get a transition for given flow execution request context.
+	 * Internal helper method that get a transition for given flow execution request context.
 	 * @param context a flow execution context
+	 * @param return the transition, or null if not found
 	 */
-	public Transition getTransition(RequestContext context) {
+	protected Transition getTransition(RequestContext context) {
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
@@ -155,7 +155,7 @@ public abstract class TransitionableState extends State {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns whether or not this state has a transition that will fire
 	 * for given flow execution request context.
@@ -163,21 +163,6 @@ public abstract class TransitionableState extends State {
 	 */
 	public boolean hasTransitionFor(RequestContext context) {
 		return getTransition(context) != null;
-	}
-
-	/**
-	 * Execute the transition that fires for given flow execution request context.
-	 * @param context a flow execution context
-	 * @return a view descriptor containing model and view information needed to
-	 *         render the results of the transition execution
-	 * @throws NoMatchingTransitionException when no transition can be found
-	 * @throws CannotExecuteStateTransitionException if a state transition could
-	 *         not be executed
-	 */
-	public ViewDescriptor executeTransition(StateContext context)
-			throws NoMatchingTransitionException, CannotExecuteStateTransitionException {
-		Transition transition = getRequiredTransition(context);
-		return transition.execute(context);
 	}
 
 	protected void createToString(ToStringCreator creator) {

@@ -76,11 +76,11 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(2, actionState1.getTransitions().length);
 		context.setLastEvent(createEvent("event1"));
 		assertTrue(actionState1.hasTransitionFor(context));
-		Transition transition = actionState1.getTransition(context);
+		Transition transition = actionState1.transitionFor(context);
 		assertEquals("viewState1", transition.getTargetStateId());
 		context.setLastEvent(createEvent("action2Name.event2"));
 		assertTrue(actionState1.hasTransitionFor(context));
-		transition = actionState1.getTransition(context);
+		transition = actionState1.transitionFor(context);
 		assertEquals("viewState2", transition.getTargetStateId());
 		assertEquals("prop1Value", actionState1.getActions()[0].getProperty("prop1"));
 		assertEquals("prop2Value", actionState1.getActions()[0].getProperty("prop2"));
@@ -92,7 +92,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(1, viewState1.getTransitions().length);
 		context.setLastEvent(createEvent("event1"));
 		assertTrue(viewState1.hasTransitionFor(context));
-		transition = viewState1.getTransition(context);
+		transition = viewState1.transitionFor(context);
 		assertEquals("subFlowState1", transition.getTargetStateId());
 
 		ViewState viewState2 = (ViewState) flow.getState("viewState2");
@@ -102,7 +102,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(1, viewState2.getTransitions().length);
 		context.setLastEvent(createEvent("event2"));
 		assertTrue(viewState2.hasTransitionFor(context));
-		transition = viewState2.getTransition(context);
+		transition = viewState2.transitionFor(context);
 		assertEquals("subFlowState2", transition.getTargetStateId());
 
 		SubFlowState subFlowState1 = (SubFlowState) flow.getState("subFlowState1");
@@ -113,7 +113,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(1, subFlowState1.getTransitions().length);
 		context.setLastEvent(createEvent("event1"));
 		assertTrue(subFlowState1.hasTransitionFor(context));
-		transition = subFlowState1.getTransition(context);
+		transition = subFlowState1.transitionFor(context);
 		assertEquals("endState1", transition.getTargetStateId());
 
 		SubFlowState subFlowState2 = (SubFlowState) flow.getState("subFlowState2");
@@ -124,7 +124,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(1, subFlowState2.getTransitions().length);
 		context.setLastEvent(createEvent("event2"));
 		assertTrue(subFlowState2.hasTransitionFor(context));
-		transition = subFlowState2.getTransition(context);
+		transition = subFlowState2.transitionFor(context);
 		assertEquals("endState2", transition.getTargetStateId());
 
 		EndState endState1 = (EndState) flow.getState("endState1");

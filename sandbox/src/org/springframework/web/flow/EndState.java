@@ -145,18 +145,19 @@ public class EndState extends State {
 			}
 			Assert.isInstanceOf(FlowAttributeMapper.class, parentFlowSession.getCurrentState());
 			FlowAttributeMapper resumingState = (FlowAttributeMapper)parentFlowSession.getCurrentState();
-			resumingState.mapSubFlowOutputAttributes(
-					context.getActiveFlowSession().getFlowScope(), parentFlowSession.getFlowScope());
+			resumingState.mapSubFlowOutputAttributes(context.getActiveFlowSession().getFlowScope(), parentFlowSession
+					.getFlowScope());
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
 			// actually end the subflow
 			context.endActiveFlowSession();
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
 			context.setLastEvent(createEndingSubFlowResultEvent());
-			return ((TransitionableState)resumingState).executeTransition(context);
+			Transition toNextState = ((TransitionableState)resumingState).transitionFor(context);
+			return toNextState.execute(context);
 		}
 	}
-	
+
 	/**
 	 * Factory method to create a internal sub flow ending result event with no
 	 * parameters. Subclasses may override.

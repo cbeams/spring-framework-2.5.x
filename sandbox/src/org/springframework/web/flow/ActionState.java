@@ -320,8 +320,9 @@ public class ActionState extends TransitionableState {
 			if (event != null) {
 				eventIds[executionCount] = event.getId();
 				context.setLastEvent(event);
-				if (hasTransitionFor(context)) {
-					return executeTransition(context);
+				Transition toNextState = getTransition(context);
+				if (toNextState != null) {
+					return toNextState.execute(context);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
@@ -347,10 +348,8 @@ public class ActionState extends TransitionableState {
 					+ Styler.call(getTransitionalCriteria()) + "'");
 		}
 		else {
-			throw new IllegalStateException(
-					"No actions were executed, thus I cannot execute any state transition "
-							+ "-- programmer configuration error; "
-							+ "make sure you add at least one action to this state");
+			throw new IllegalStateException("No actions were executed, thus I cannot execute any state transition "
+					+ "-- programmer configuration error; " + "make sure you add at least one action to this state");
 		}
 	}
 
@@ -394,8 +393,7 @@ public class ActionState extends TransitionableState {
 					logger.debug("Executing action '" + this + "'");
 				}
 				return getEvent(action.getTargetAction().execute(context));
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ActionExecutionException(action, e);
 			}
 		}
