@@ -92,9 +92,9 @@ public class DataBinder extends BindException {
 	 */
 	public Object getFieldValue(String field) {
 		Object value = super.getFieldValue(field);
-		Class type = getBeanWrapper().getPropertyDescriptor(field).getPropertyType();
-		// just treat values of the actual type, ignoring type mismatch values
-		if (type.isInstance(value)) {
+		Object propertyValue = getBeanWrapper().getPropertyValue(field);
+		// just treat actual property values, ignoring type mismatch values
+		if (value != null && value.equals(propertyValue)) {
 			PropertyEditor customEditor = getBeanWrapper().findCustomEditor(null, field);
 			if (customEditor != null) {
 				customEditor.setValue(value);
