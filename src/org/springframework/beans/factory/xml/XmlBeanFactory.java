@@ -60,7 +60,7 @@ import org.xml.sax.SAXParseException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.3 2003-09-03 23:41:26 johnsonr Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.4 2003-09-04 12:52:24 dkopylenko Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -315,8 +315,8 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 		}
 		
 		if (el.hasAttribute(DEPENDENCY_CHECK_ATTRIBUTE)) {
-			// Default is singleton
-			// Can override by making non-singleton if desired
+			// Default is "none"
+			// Can override by making "objects", "simple", "all"
 			dependencyCheck = el.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 		}
 		
