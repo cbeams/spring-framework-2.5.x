@@ -29,19 +29,18 @@ import org.springframework.integrationtest.ejbtest.simple.ejb.SimpleService;
  * EJB used for the test of Hibernate session binding...
  * 
  * @author colin sampaleanu
- * @version $Id: CachedHomeTest.java,v 1.1 2004-05-19 12:16:29 colins Exp $
+ * @version $Id: CachedHomeTest.java,v 1.2 2004-05-19 15:39:25 colins Exp $
  */
 public class CachedHomeTest extends TestCase {
 
 	// --- statics
-	public static final String SERVICE_ID_CACHE_ON = "cmtJtaNoSpringTx";
+	public static final String SERVICE_ID_CACHE_ON = "cachedHomeProxy";
 	public static final String SERVICE_ID_CACHE_OFF = "noCachedHomeProxy";
 
 	// --- attributes
 
 	BeanFactoryReference bfr;
 	
-
 	// --- methods
 
 	public static Test suite() {
@@ -53,7 +52,6 @@ public class CachedHomeTest extends TestCase {
 	protected void setUp() throws Exception {
 		bfr = ContextSingletonBeanFactoryLocator.getInstance().useBeanFactory(
 				Constants.SERVICE_LAYER_CONTEXT_ID);
-
 	}
 
 	protected void tearDown() throws Exception {
@@ -69,7 +67,7 @@ public class CachedHomeTest extends TestCase {
 
 	
 	public void testInvocationsWithNoCache() {
-		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_CACHE_ON);
+		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_CACHE_OFF);
 		ejb.echo("hello");
 		ejb.echo("hello");
 		ejb.echo("hello");
