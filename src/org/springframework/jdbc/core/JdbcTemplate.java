@@ -100,7 +100,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	/** If this variable is false, we will throw exceptions on SQL warnings */
 	private boolean ignoreWarnings = true;
 
-	/** 
+	/**
 	 * If this variable is set to a non-zero value it will be used for setting the fetchSize on
 	 * statements used for query processing.
 	 */
@@ -275,24 +275,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (List) query(sql, new ListResultSetExtractor());
 	}
 
-    /* superclass has JavaDoc! leave this as normal comment
-     * @see org.springframework.jdbc.core.JdbcOperations#queryForObject(java.lang.String, java.lang.Class)
-     */
 	public Object queryForObject(String sql, Class requiredType) throws DataAccessException {
 		return query(sql, new ObjectResultSetExtractor(requiredType));
 	}
 
-    /* superclass has JavaDoc! leave this as normal comment
-     * @see org.springframework.jdbc.core.JdbcOperations#queryForLong(java.lang.String)
-     */
 	public long queryForLong(String sql) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, Number.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
-    /* superclass has JavaDoc! leave this as normal comment
-     * @see org.springframework.jdbc.core.JdbcOperations#queryForInt(java.lang.String)
-     */
 	public int queryForInt(String sql) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, Number.class);
 		return (number != null ? number.intValue() : 0);
@@ -685,7 +676,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			throws SQLException {
 		Map returnedResults = new HashMap();
 		int rsIndex = 0;
-		boolean moreResults; 
+		boolean moreResults;
 		do {
 			if (updateCount == -1) {
 				Object param = null;
@@ -826,18 +817,20 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	/**
 	 * Retrieve a standard JDBC object from a ResultSet using the getObject method.
-	 * This method includes a "hack" to get around Oracle returning a non standard object 
-	 * for their TIMESTAMP datatype. 
+	 * This method includes a "hack" to get around Oracle returning a non standard
+	 * object for their TIMESTAMP datatype.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @return the Object returned
 	 */
 	private static Object getJdbcObject(ResultSet rs, int index) throws SQLException {
-		Object o = rs.getObject(index);
-		if (o != null && o.getClass().getName().startsWith("oracle.sql.TIMESTAMP"))
-			o = rs.getTimestamp(index);
-		return o;
+		Object obj = rs.getObject(index);
+		if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
+			obj = rs.getTimestamp(index);
+		}
+		return obj;
 	}
+
 
 	/**
 	 * Simple adapter for PreparedStatementCreator, allowing to use a plain SQL statement.
@@ -1020,7 +1013,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
 				if (String.class.equals(this.requiredType)) {
 					result = result.toString();
-				} 
+				}
 				else if (Number.class.isAssignableFrom(this.requiredType) && Number.class.isInstance(result)) {
 					try {
 						result = NumberUtils.convertNumberToTargetClass(((Number) result), this.requiredType);

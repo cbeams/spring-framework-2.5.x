@@ -68,7 +68,8 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class LocaleChecker implements Controller, LastModified {
 
-		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
 			if (!(RequestContextUtils.getWebApplicationContext(request) instanceof SimpleWebApplicationContext)) {
 				throw new ServletException("Incorrect WebApplicationContext");
 			}
@@ -92,13 +93,13 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		private StaticMessageSource messageSource;
 
 		public DummyThemeSource() {
-			messageSource = new StaticMessageSource();
-			messageSource.addMessage("themetest", Locale.ENGLISH, "theme test message");
+			this.messageSource = new StaticMessageSource();
+			this.messageSource.addMessage("themetest", Locale.ENGLISH, "theme test message");
 		}
 
 		public Theme getTheme(String themeName) {
 			if (AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(themeName)) {
-				return new SimpleTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME, messageSource);
+				return new SimpleTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME, this.messageSource);
 			}
 			else {
 				return null;
@@ -125,6 +126,5 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 			return new ModelAndView("view" + this.myInt);
 		}
 	}
-
 
 }
