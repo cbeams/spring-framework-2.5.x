@@ -22,9 +22,11 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.reflect.Proxy;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
 import javax.jdo.Transaction;
 import javax.sql.DataSource;
 import javax.transaction.Status;
@@ -33,6 +35,7 @@ import javax.transaction.UserTransaction;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.beans.TestBean;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.SimpleConnectionHandle;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -54,7 +57,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
-		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		final PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 
@@ -86,7 +89,8 @@ public class JdoTransactionManagerTests extends TestCase {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
-					public Object doInJdo(PersistenceManager pm) {
+					public Object doInJdo(PersistenceManager pm2) {
+						assertSame(pm, pm2);
 						return l;
 					}
 				});
@@ -159,7 +163,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
-		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		final PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 
@@ -188,7 +192,8 @@ public class JdoTransactionManagerTests extends TestCase {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				jt.execute(new JdoCallback() {
-					public Object doInJdo(PersistenceManager pm) {
+					public Object doInJdo(PersistenceManager pm2) {
+						assertSame(pm, pm2);
 						return null;
 					}
 				});
@@ -207,7 +212,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
-		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		final PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		final MockControl txControl = MockControl.createControl(Transaction.class);
 		final Transaction tx = (Transaction) txControl.getMock();
 
@@ -243,7 +248,8 @@ public class JdoTransactionManagerTests extends TestCase {
 					public Object doInTransaction(TransactionStatus status) {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						return jt.execute(new JdoCallback() {
-							public Object doInJdo(PersistenceManager pm) {
+							public Object doInJdo(PersistenceManager pm2) {
+								assertSame(pm, pm2);
 								return l;
 							}
 						});
@@ -320,7 +326,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
-		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		final PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		final MockControl txControl = MockControl.createControl(Transaction.class);
 		final Transaction tx = (Transaction) txControl.getMock();
 
@@ -356,7 +362,8 @@ public class JdoTransactionManagerTests extends TestCase {
 					public Object doInTransaction(TransactionStatus status) {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						jt.execute(new JdoCallback() {
-							public Object doInJdo(PersistenceManager pm) {
+							public Object doInJdo(PersistenceManager pm2) {
+								assertSame(pm, pm2);
 								return l;
 							}
 						});
@@ -376,7 +383,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
-		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		final PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		final MockControl txControl = MockControl.createControl(Transaction.class);
 		final Transaction tx = (Transaction) txControl.getMock();
 
@@ -415,7 +422,8 @@ public class JdoTransactionManagerTests extends TestCase {
 					public Object doInTransaction(TransactionStatus status) {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						return jt.execute(new JdoCallback() {
-							public Object doInJdo(PersistenceManager pm) {
+							public Object doInJdo(PersistenceManager pm2) {
+								assertSame(pm, pm2);
 								return l;
 							}
 						});
@@ -471,14 +479,14 @@ public class JdoTransactionManagerTests extends TestCase {
 				jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
 						assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
-						assertEquals(pm, pm2);
+						assertSame(pm, pm2);
 						return l;
 					}
 				});
 				Object result = jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
 						assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
-						assertEquals(pm, pm2);
+						assertSame(pm, pm2);
 						return l;
 					}
 				});
@@ -822,7 +830,8 @@ public class JdoTransactionManagerTests extends TestCase {
 				jt.setPersistenceManagerFactory(pmf);
 				jt.setJdoDialect(dialect);
 				return jt.execute(new JdoCallback() {
-					public Object doInJdo(PersistenceManager pm) {
+					public Object doInJdo(PersistenceManager pm2) {
+						assertSame(pm, pm2);
 						return l;
 					}
 				});
@@ -939,7 +948,8 @@ public class JdoTransactionManagerTests extends TestCase {
 				}
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
-					public Object doInJdo(PersistenceManager pm) {
+					public Object doInJdo(PersistenceManager pm2) {
+						assertSame(pm, pm2);
 						return l;
 					}
 				});
@@ -957,6 +967,95 @@ public class JdoTransactionManagerTests extends TestCase {
 		conControl.verify();
 		mdControl.verify();
 		spControl.verify();
+	}
+
+	public void testTransactionTimeoutWithJdoDialect() throws SQLException {
+		doTestTransactionTimeoutWithJdoDialect(true);
+	}
+
+	public void testTransactionTimeoutWithJdoDialectAndPmProxy() throws SQLException {
+		doTestTransactionTimeoutWithJdoDialect(false);
+	}
+
+	private void doTestTransactionTimeoutWithJdoDialect(final boolean exposeNativePm) throws SQLException {
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
+		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
+		final PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		MockControl dialectControl = MockControl.createControl(JdoDialect.class);
+		final JdoDialect dialect = (JdoDialect) dialectControl.getMock();
+
+		TransactionTemplate tt = new TransactionTemplate();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 2);
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm, 1);
+		pm.currentTransaction();
+		pmControl.setReturnValue(tx, 2);
+		dialect.beginTransaction(tx, tt);
+		dialectControl.setReturnValue(null, 1);
+		if (!exposeNativePm) {
+			dialect.applyQueryTimeout(query, 10);
+		}
+		dialect.cleanupTransaction(null);
+		dialectControl.setVoidCallable(1);
+		pm.newQuery(TestBean.class);
+		pmControl.setReturnValue(query, 1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		tx.commit();
+		txControl.setVoidCallable(1);
+
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
+		queryControl.replay();
+		dialectControl.replay();
+
+		JdoTransactionManager tm = new JdoTransactionManager(pmf);
+		tm.setJdoDialect(dialect);
+		tt.setTransactionManager(tm);
+		tt.setTimeout(10);
+
+		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
+				JdoTemplate jt = new JdoTemplate(pmf);
+				jt.setJdoDialect(dialect);
+				if (!exposeNativePm) {
+					jt.setExposeNativePersistenceManager(false);
+				}
+				return jt.execute(new JdoCallback() {
+					public Object doInJdo(PersistenceManager pm2) {
+						if (exposeNativePm) {
+							assertSame(pm, pm2);
+						}
+						else {
+							assertTrue(Proxy.isProxyClass(pm2.getClass()));
+						}
+						pm2.newQuery(TestBean.class);
+						return null;
+					}
+				});
+			}
+		});
+
+		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		pmfControl.verify();
+		pmControl.verify();
+		txControl.verify();
+		dialectControl.verify();
+		queryControl.verify();
 	}
 
 	protected void tearDown() {

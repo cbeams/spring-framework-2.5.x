@@ -17,6 +17,10 @@
 package org.springframework.orm.jdo;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Map;
 
@@ -93,6 +97,8 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	private boolean allowCreate = true;
 
+	private boolean exposeNativePersistenceManager = true;
+
 
 	/**
 	 * Create a new JdoTemplate instance.
@@ -140,14 +146,57 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		return allowCreate;
 	}
 
+	/**
+	 * Set whether to expose the native JDO PersistenceManager to JdoCallback
+	 * code. Default is true; if turned off, a PersistenceManager proxy will be
+	 * returned, suppressing <code>close</code> calls and automatically applying
+	 * transaction timeouts (if any).
+	 * <p>The default is "true" for the time being, because there is often a need
+	 * to cast to a vendor-specific PersistenceManager class in DAOs that use the
+	 * JDO 1.0 API, for JDO 2.0 previews and other vendor-specific functionality.
+	 * This is likely to change to "false" in a later Spring version.
+	 * @see JdoCallback
+	 * @see javax.jdo.PersistenceManager
+	 * @see #prepareQuery
+	 */
+	public void setExposeNativePersistenceManager(boolean exposeNativePersistenceManager) {
+		this.exposeNativePersistenceManager = exposeNativePersistenceManager;
+	}
+
+	/**
+	 * Return whether to expose the native JDO PersistenceManager to JdoCallback
+	 * code, or rather a PersistenceManager proxy.
+	 */
+	public boolean isExposeNativePersistenceManager() {
+		return exposeNativePersistenceManager;
+	}
+
 
 	public Object execute(JdoCallback action) throws DataAccessException {
+		return execute(action, isExposeNativePersistenceManager());
+	}
+
+	public Collection executeFind(JdoCallback action) throws DataAccessException {
+		return (Collection) execute(action, isExposeNativePersistenceManager());
+	}
+
+	/**
+	 * Execute the action specified by the given action object within a
+	 * PersistenceManager.
+	 * @param action callback object that specifies the JDO action
+	 * @param exposeNativePersistenceManager whether to expose the native
+	 * JDO persistence manager to callback code
+	 * @return a result object returned by the action, or null
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 */
+	public Object execute(JdoCallback action, boolean exposeNativePersistenceManager) throws DataAccessException {
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(
 		    getPersistenceManagerFactory(), isAllowCreate());
 		boolean existingTransaction =
 		    TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory());
 		try {
-			Object result = action.doInJdo(pm);
+			PersistenceManager pmToExpose = (exposeNativePersistenceManager ? pm : createPersistenceManagerProxy(pm));
+			Object result = action.doInJdo(pmToExpose);
 			flushIfNecessary(pm, existingTransaction);
 			return result;
 		}
@@ -163,8 +212,19 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}
 	}
 
-	public Collection executeFind(JdoCallback action) throws DataAccessException {
-		return (Collection) execute(action);
+	/**
+	 * Create a close-suppressing proxy for the given JDO PersistenceManager.
+	 * The proxy also prepares returned JDO Query objects.
+	 * @param pm the JDO PersistenceManager to create a proxy for
+	 * @return the PersistenceManager proxy
+	 * @see javax.jdo.PersistenceManager#close
+	 * @see #prepareQuery
+	 */
+	protected PersistenceManager createPersistenceManagerProxy(PersistenceManager pm) {
+		return (PersistenceManager) Proxy.newProxyInstance(
+				getClass().getClassLoader(),
+				new Class[] {PersistenceManager.class},
+				new CloseSuppressingInvocationHandler(pm));
 	}
 
 
@@ -266,11 +326,11 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	// Convenience finder methods
 	//-------------------------------------------------------------------------
 
-	public Collection find(final Class entityClass) throws DataAccessException {
+	public Collection find(Class entityClass) throws DataAccessException {
 		return find(entityClass, null, null);
 	}
 
-	public Collection find(final Class entityClass, final String filter) throws DataAccessException {
+	public Collection find(Class entityClass, String filter) throws DataAccessException {
 		return find(entityClass, filter, null);
 	}
 
@@ -279,17 +339,16 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = (filter != null ? pm.newQuery(entityClass, filter) : pm.newQuery(entityClass));
+				prepareQuery(query);
 				if (ordering != null) {
 					query.setOrdering(ordering);
 				}
-				prepareQuery(query);
 				return query.execute();
 			}
 		});
 	}
 
-	public Collection find(
-			final Class entityClass, final String filter, final String parameters, final Object[] values)
+	public Collection find(Class entityClass, String filter, String parameters, Object[] values)
 			throws DataAccessException {
 		return find(entityClass, filter, parameters, values, null);
 	}
@@ -300,18 +359,17 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
+				prepareQuery(query);
 				query.declareParameters(parameters);
 				if (ordering != null) {
 					query.setOrdering(ordering);
 				}
-				prepareQuery(query);
 				return query.executeWithArray(values);
 			}
 		});
 	}
 
-	public Collection find(
-			final Class entityClass, final String filter, final String parameters, final Map values)
+	public Collection find(Class entityClass, String filter, String parameters, Map values)
 			throws DataAccessException {
 		return find(entityClass, filter, parameters, values, null);
 	}
@@ -322,11 +380,11 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
+				prepareQuery(query);
 				query.declareParameters(parameters);
 				if (ordering != null) {
 					query.setOrdering(ordering);
 				}
-				prepareQuery(query);
 				return query.executeWithMap(values);
 			}
 		});
@@ -335,16 +393,62 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	/**
 	 * Prepare the given JDO query object. To be used within a JdoCallback.
-	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
+	 * Applies a transaction timeout, if any. If you don't use such timeouts,
 	 * the call is a no-op.
+	 * <p>In general, prefer a proxied PersistenceManager instead, which will
+	 * automatically apply the transaction timeout (through the use of a special
+	 * PersistenceManager proxy). You need to set the "exposeNativePersistenceManager"
+	 * property to "false" to activate this. Note that you won't be able to cast
+	 * to a vendor-specific JDO PersistenceManager class anymore then.
 	 * @param query the JDO query object
 	 * @throws JDOException if the query could not be properly prepared
 	 * @see JdoCallback#doInJdo
 	 * @see PersistenceManagerFactoryUtils#applyTransactionTimeout
+	 * @see #setExposeNativePersistenceManager
 	 */
 	public void prepareQuery(Query query) throws JDOException {
 		PersistenceManagerFactoryUtils.applyTransactionTimeout(
 				query, getPersistenceManagerFactory(), getJdoDialect());
+	}
+
+
+	/**
+	 * Invocation handler that suppresses close calls on JDO PersistenceManagers.
+	 * Also prepares returned Query and Criteria objects.
+	 * @see javax.jdo.PersistenceManager#close
+	 * @see #prepareQuery
+	 */
+	private class CloseSuppressingInvocationHandler implements InvocationHandler {
+
+		private static final String PERSISTENCE_MANAGER_CLOSE_METHOD_NAME = "close";
+
+		private final PersistenceManager target;
+
+		public CloseSuppressingInvocationHandler(PersistenceManager target) {
+			this.target = target;
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// Handle close method: suppress, not valid.
+			if (method.getName().equals(PERSISTENCE_MANAGER_CLOSE_METHOD_NAME)) {
+				return null;
+			}
+
+			// Invoke method on target connection.
+			try {
+				Object retVal = method.invoke(this.target, args);
+
+				// If return value is a JDO Query object, apply transaction timeout.
+				if (retVal instanceof Query) {
+					prepareQuery(((Query) retVal));
+				}
+
+				return retVal;
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		}
 	}
 
 }
