@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.16 2004-04-07 02:42:48 colins Exp $-->
+<!--$Id: views.xml,v 1.17 2004-04-18 18:45:34 colins Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -1176,7 +1176,7 @@ public class PDFPage extends AbstractPdfView {
         a page to get an instance of the UserService, for example, would be
         with code such as: <programlisting>    WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
         getRequestCycle().getRequestContext().getServlet().getServletContext());
-    UserService userService = appContext.getBean("userService");
+    UserService userService = (UserService) appContext.getBean("userService");
     ... some code which uses UserService</programlisting> This mechanism does
         work. It can be made a lot less verbose by encapsulating most of the
         functionality in a method in the base class for the page or component.
