@@ -1,0 +1,90 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
+package org.springframework.web.portlet.handler;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+
+import org.springframework.beans.BeansException;
+
+/**
+ * TODO write this up
+ * Implementation of the HandlerMapping interface to map from URLs to
+ * request handler beans. Supports both mapping to bean instances and
+ * mapping to bean names: The latter is required for prototype handlers.
+ *
+ * <p>The "portletModeMap" property is suitable for populating the handler map
+ * with bean references, e.g. via the map element in XML bean definitions.
+ *
+ * <p>Mappings to bean names can be set via the "mappings" property, in a
+ * form accepted by the java.util.Properties class, like as follows:<br>
+ * <code>
+ * /welcome.html=ticketController
+ * /show.html=ticketController
+ * </code><br>
+ * The syntax is PATH=HANDLER_BEAN_NAME.
+ * If the path doesn't begin with a slash, one is prepended.
+ *
+ * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
+ * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
+ * matches both "/test" and "/team", "/test/*" matches all paths in the
+ * "/test" directory, "/test/**" matches all paths below "/test".
+ * For details, see the PathMatcher class.
+ *
+ * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @see org.springframework.web.servlet.DispatcherServlet
+ * @see org.springframework.util.PathMatcher
+ * @see java.util.Properties
+ */
+public class SimplePortletModeHandlerMapping extends AbstractPortletModelHandlerMapping {
+	
+	private Map portletModeMap;
+
+	/**
+	 * Set a Map with PortletModes as keys and handler beans as values.
+	 * Convenient for population with bean references.
+	 * @param portletModeMap map with PortletModes as keys and beans as values
+	 */
+	public void setPortletModeMap(Map portletModeMap) {
+		this.portletModeMap = portletModeMap;
+	}
+
+	/**
+	 * Set PortletMode to handler bean name mappings from a Properties object.
+	 * @param mappings properties with PortletMode.toString() as key and bean name as value
+	 */
+	public void setMappings(Properties mappings) {
+		this.portletModeMap = mappings;
+	}
+
+	public void initApplicationContext() throws BeansException {
+		if (this.portletModeMap == null || this.portletModeMap.isEmpty()) {
+			logger.info("Neither 'portletModeMap' nor 'mappings' set on SimplePortletModeHandlerMapping");
+		}
+		else {
+			Iterator itr = this.portletModeMap.keySet().iterator();
+			while (itr.hasNext()) {
+				String portletMode = (String) itr.next();
+				Object handler = this.portletModeMap.get(portletMode);
+				registerHandler(portletMode, handler);
+			}
+		}
+	}
+
+}
