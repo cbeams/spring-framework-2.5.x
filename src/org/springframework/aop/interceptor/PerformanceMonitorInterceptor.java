@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.interceptor;
 
@@ -22,6 +22,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.StopWatch;
 
 /**
@@ -36,24 +37,22 @@ import org.springframework.util.StopWatch;
  */
 public class PerformanceMonitorInterceptor implements MethodInterceptor, Serializable {
 
-	/**
-	 * Static to avoid the need to serialize it
-	 */
+	/** Static to avoid serializing the logger */
 	protected static final Log logger = LogFactory.getLog(PerformanceMonitorInterceptor.class);
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		String name = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
-		logger.debug("Begin performance monitoring of method '" + name + "'");
-
 		StopWatch sw = new StopWatch(name);
 		sw.start(name);
-		Object rval = invocation.proceed();
-		sw.stop();
-
-		logger.info(sw.shortSummary());
-		logger.debug("End performance monitoring of method '" + name + "'");
-
-		return rval;
+		try {
+			return invocation.proceed();
+		}
+		finally {
+			sw.stop();
+			if (logger.isInfoEnabled()) {
+				logger.info(sw.shortSummary());
+			}
+		}
 	}
 
 }
