@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
@@ -32,12 +31,12 @@ import org.springframework.util.StringUtils;
  * to support deep copy and construction from a Map.
  * @author Rod Johnson
  * @since 13 May 2001
- * @version $Id: MutablePropertyValues.java,v 1.7 2004-04-29 09:56:50 jhoeller Exp $
+ * @version $Id: MutablePropertyValues.java,v 1.8 2004-05-18 07:36:40 jhoeller Exp $
  */
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/** List of PropertyValue objects */
-	private List propertyValuesList;
+	private final List propertyValuesList = new ArrayList();
 
 	/**
 	 * Creates a new empty MutablePropertyValues object.
@@ -46,19 +45,38 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * @see #addPropertyValue(String, Object)
 	 */
 	public MutablePropertyValues() {
-		this.propertyValuesList = new ArrayList(10);
 	}
 
 	/**
 	 * Deep copy constructor. Guarantees PropertyValue references
 	 * are independent, although it can't deep copy objects currently
-	 * referenced by individual PropertyValue objects
+	 * referenced by individual PropertyValue objects.
+	 * @param source the PropertyValues to copy
+	 * @see #addPropertyValues(PropertyValues)
 	 */
-	public MutablePropertyValues(PropertyValues other) {
-		this();
-		if (other != null) {
-			PropertyValue[] pvs = other.getPropertyValues();
-			this.propertyValuesList = new ArrayList(pvs.length);
+	public MutablePropertyValues(PropertyValues source) {
+		addPropertyValues(source);
+	}
+
+	/**
+	 * Construct a new PropertyValues object from a Map.
+	 * @param source Map with property values keyed by property name,
+	 * which must be a String
+	 * @see #addPropertyValues(Map)
+	 */
+	public MutablePropertyValues(Map source) {
+		addPropertyValues(source);
+	}
+
+	/**
+	 * Copy all given PropertyValues into this object. Guarantees PropertyValue
+	 * references are independent, although it can't deep copy objects currently
+	 * referenced by individual PropertyValue objects.
+	 * @param source the PropertyValues to copy
+	 */
+	public void addPropertyValues(PropertyValues source) {
+		if (source != null) {
+			PropertyValue[] pvs = source.getPropertyValues();
 			for (int i = 0; i < pvs.length; i++) {
 				addPropertyValue(new PropertyValue(pvs[i].getName(), pvs[i].getValue()));
 			}
@@ -66,17 +84,17 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Construct a new PropertyValues object from a Map.
-	 * @param map Map with property values keyed by property name,
+	 * Add all property values from the given Map.
+	 * @param source Map with property values keyed by property name,
 	 * which must be a String
 	 */
-	public MutablePropertyValues(Map map) {
-		Set keys = map.keySet();
-		this.propertyValuesList = new ArrayList(keys.size());
-		Iterator itr = keys.iterator();
-		while (itr.hasNext()) {
-			String key = (String) itr.next();
-			addPropertyValue(new PropertyValue(key, map.get(key)));
+	public void addPropertyValues(Map source) {
+		if (source != null) {
+			Iterator it = source.keySet().iterator();
+			while (it.hasNext()) {
+				String key = (String) it.next();
+				addPropertyValue(new PropertyValue(key, source.get(key)));
+			}
 		}
 	}
 
