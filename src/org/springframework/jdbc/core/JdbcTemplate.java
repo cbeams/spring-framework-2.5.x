@@ -64,7 +64,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.16 2003-12-05 17:03:12 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.17 2003-12-10 02:13:55 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -563,7 +563,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		catch (SQLException ex) {
 			throw getExceptionTranslator().translate(
 			    "JdbcTemplate.execute()",
-			    cs.toString(),
+			    csc.toString(),
 			    ex);
 		}
 		finally {
