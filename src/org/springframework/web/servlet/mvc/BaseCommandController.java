@@ -130,7 +130,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	private Class commandClass;
 
-	private Validator validator;
+	private Validator[] validators;
 
 	private boolean validateOnBinding = true;
 
@@ -157,7 +157,6 @@ public abstract class BaseCommandController extends AbstractController {
 	 * An instance of this class gets populated and validated on each request.
 	 */
 	public final void setCommandClass(Class commandClass) {
-		checkValidator(this.validator, commandClass);
 		this.commandClass = commandClass;
 	}
 
@@ -169,19 +168,33 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Set the Validator for this controller (can also be null).
+	 * Set the primary Validator for this controller.
 	 * The Validator must support the specified command class.
 	 */
-	public final void setValidator(Validator validator) {
-		checkValidator(validator, this.commandClass);
-		this.validator = validator;
+	public final void setValidators(Validator[] validators) {
+		this.validators = validators;
 	}
 
 	/**
-	 * Return the Validator for this controller.
+	 * Return the Validators for this controller.
+	 */
+	protected final Validator[] getValidators() {
+		return validators;
+	}
+
+	/**
+	 * Set the Validators for this controller.
+	 * The Validator must support the specified command class.
+	 */
+	public final void setValidator(Validator validator) {
+		this.validators = new Validator[] {validator};
+	}
+
+	/**
+	 * Return the primary Validator for this controller.
 	 */
 	protected final Validator getValidator() {
-		return validator;
+		return (validators != null && validators.length > 0 ? validators[0] : null);
 	}
 
 	/**
@@ -216,17 +229,17 @@ public abstract class BaseCommandController extends AbstractController {
 		return messageCodesResolver;
 	}
 
-
-	/**
-	 * Check if the given Validator and command class match.
-	 * @param validator Validator instance
-	 * @param commandClass command class
-	 */
-	private void checkValidator(Validator validator, Class commandClass) throws IllegalArgumentException {
-		if (validator != null && commandClass != null && !validator.supports(commandClass))
-			throw new IllegalArgumentException("Validator [" + validator + "] does not support command class [" +
-			                                   commandClass.getName() + "]");
+	protected void initApplicationContext() {
+		if (this.validators != null) {
+			for (int i = 0; i < this.validators.length; i++) {
+				if (this.commandClass != null && !this.validators[i].supports(this.commandClass))
+					throw new IllegalArgumentException("Validator [" + this.validators[i] +
+																						 "] does not support command class [" +
+																						 this.commandClass.getName() + "]");
+			}
+		}
 	}
+
 
 	/**
 	 * Retrieve a command object for the given request.
@@ -276,8 +289,10 @@ public abstract class BaseCommandController extends AbstractController {
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
 		onBind(request, command, binder.getErrors());
-		if (isValidateOnBinding()) {
-			ValidationUtils.invokeValidator(getValidator(), command, binder.getErrors());
+		if (isValidateOnBinding() && this.validators != null) {
+			for (int i = 0; i < this.validators.length; i++) {
+				ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
+			}
 		}
 		onBindAndValidate(request, command, binder.getErrors());
 		return binder;

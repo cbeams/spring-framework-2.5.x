@@ -36,6 +36,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -242,8 +243,8 @@ public class FormControllerTestSuite extends TestCase {
 		TestController mc = new TestController();
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
-		mc.setValidator(new TestValidator());
-		
+		mc.setValidators(new Validator[] {new TestValidator(), new TestValidator2()});
+
 		String name = "Rod";
 		// will be rejected
 		String age = "xxx";
@@ -264,17 +265,22 @@ public class FormControllerTestSuite extends TestCase {
 		assertTrue("bean age is default", person.getAge() == TestController.DEFAULT_AGE);
 		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
-		assertTrue("One error", errors.getErrorCount() == 2);
+		assertTrue("3 errors", errors.getErrorCount() == 3);
 		FieldError fe = errors.getFieldError("age");
 		assertTrue("Saved invalid value", fe.getRejectedValue().equals(age));
 		assertTrue("Correct field", fe.getField().equals("age"));
 		
-		// Raised by validator
+		// raised by first validator
 		fe = errors.getFieldError("name");
 		assertTrue("Saved invalid value", fe.getRejectedValue().equals(name));
 		assertTrue("Correct field", fe.getField().equals("name"));
 		assertTrue("Correct validation code: expected '" +TestValidator.TOOSHORT + "', not '" 
 		+ fe.getCode() + "'", fe.getCode().equals(TestValidator.TOOSHORT));
+
+		// raised by second validator
+		ObjectError oe = errors.getGlobalError();
+		assertEquals("test", oe.getCode());
+		assertEquals("testmessage", oe.getDefaultMessage());
 	}
 
 	public void testSessionController() throws Exception {
@@ -397,13 +403,24 @@ public class FormControllerTestSuite extends TestCase {
 
 		public boolean supports(Class clazz) { return true; }
 
-		public void validate(Object o, Errors errors) {
-			// CHECK THERE ISN'T ALREADY AN ERROR!?
-			TestBean tb = (TestBean) o;
+		public void validate(Object obj, Errors errors) {
+			TestBean tb = (TestBean) obj;
 			if (tb.getName() == null || "".equals(tb.getName()))
 				errors.rejectValue("name", "needname", null, "need name");
 			else if (tb.getName().length() < 5)
 				errors.rejectValue("name", TOOSHORT, null, "need full name");
+		}
+	}
+
+
+	private static class TestValidator2 implements Validator {
+
+		public static String TOOSHORT = "tooshort";
+
+		public boolean supports(Class clazz) { return true; }
+
+		public void validate(Object obj, Errors errors) {
+			errors.reject("test", "testmessage");
 		}
 	}
 
