@@ -40,38 +40,38 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
  * <tr>
- * <td>toMappings</td>
+ * <td>inputMappings</td>
  * <td>empty</td>
- * <td>Mappings executed when mapping parent flow data <i>to </i> a newly
- * spawned sub flow. The provided list contains the names of the attributes in
+ * <td>Mappings executed when mapping <i>input data</i> from the parent flow to
+ * a newly spawned sub flow. The provided list contains the names of the attributes in
  * the parent to pass to the subflow for access. The same name is used in both
  * parent flow and sub flow model.</td>
  * </tr>
  * <tr>
- * <td>toMappingsMap</td>
+ * <td>inputMappingsMap</td>
  * <td>empty</td>
- * <td>Mappings executed when mapping parent flow data <i>to </i> a newly
- * spawned sub flow. The keys in given map are the names of entries in the
+ * <td>Mappings executed when mapping <i>input data</i> from the parent flow to
+ * a newly spawned sub flow. The keys in given map are the names of entries in the
  * parent model that will be mapped. The value associated with a key is the name
  * of the target entry that will be placed in the subflow model.</td>
  * </tr>
  * <tr>
- * <td>fromMappings</td>
+ * <td>outputMappings</td>
  * <td>empty</td>
- * <td>Mappings executed when mapping subflow data <i>from </i> the subflow
- * back to the parent flow (once the subflow ends and the parent flow resumes).
+ * <td>Mappings executed when mapping subflow <i>output</i> data back to the
+ * parent flow (once the subflow ends and the parent flow resumes).
  * The provided list contains the names of the attributes in the subflow to pass
  * to the parent for access. The same name is used in both parent flow and sub
  * flow model.</td>
  * </tr>
  * <tr>
- * <td>fromMappingsMap</td>
+ * <td>outputMappingsMap</td>
  * <td>empty</td>
- * <td>Mappings executed when mapping subflow flow data <i>from </i> the
- * subflow back to the parent flow (once the subflow ends and the parent flow
- * resumes). The keys in given map are the names of entries in the parent model
+ * <td>Mappings executed when mapping subflow <i>output</i> data back to the
+ * parent flow (once the subflow ends and the parent flow resumes).
+ * The keys in given map are the names of entries in the subflow model
  * that will be mapped. The value associated with a key is the name of the
- * target entry that will be placed in the subflow model.</td>
+ * target entry that will be placed in the parent flow model.</td>
  * </tr>
  * </table>
  * 
@@ -92,86 +92,78 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 
 	protected final Log logger = LogFactory.getLog(getClass());;
 
-	private Map toMappings = Collections.EMPTY_MAP;
+	private Map inputMappings = Collections.EMPTY_MAP;
 
-	private Map fromMappings = Collections.EMPTY_MAP;
+	private Map outputMappings = Collections.EMPTY_MAP;
 
 	private boolean mapMissingAttributesToNull = false;
 
 	/**
-	 * Set the mappings that will be executed when mapping model data <i>to </i>
+	 * Set the mappings that will be executed when mapping model data to
 	 * a sub flow. Each list item must be a String, a List, or a Map. If the
 	 * list item is a simple String value, the attribute will be mapped as
-	 * having the same name in the parent flow and in the child flow. If the
+	 * having the same name in the parent flow and in the sub flow. If the
 	 * list item is a Map, each map entry must be a String key naming the
 	 * attribute in the parent flow, and a String value naming the attribute in
 	 * the child flow. If the list item is itself a List, then that list is
 	 * itself evaluated recursively, and must itself contain Strings, Lists, or
 	 * Maps.
 	 * 
-	 * <p>
-	 * Only <strong>one </strong> of setToMappings or setToMappingsMap must be
-	 * called.
+	 * <p>Only <strong>one</strong> of setInputMappings or setInputMappingsMap
+	 * must be called.
 	 */
-	public void setToMappings(Collection toMappings) {
-		this.toMappings = new HashMap();
-		putCollectionMappings(this.toMappings, toMappings);
+	public void setInputMappings(Collection inputMappings) {
+		this.inputMappings = new HashMap();
+		putCollectionMappings(this.inputMappings, inputMappings);
 	}
 
 	/**
-	 * <p>
-	 * Set the mappings that will be executed when mapping model data <i>to </i>
-	 * the sub flow. This is essentially a just a short form of calling
-	 * @link ParameterizableFlowAttributesMapper#setToMappings(List) with a List
+	 * Set the mappings that will be executed when mapping model data to
+	 * the sub flow. This is essentially just a short form of calling
+	 * @link ParameterizableFlowAttributesMapper#setInputMappings(List) with a List
 	 *       containing one item which is a Map. Each map entry must be a String
 	 *       key naming the attribute in the parent flow, and a String value
 	 *       naming the attribute in the child flow.
-	 *       </p>
 	 * 
-	 * <p>
-	 * Only <strong>one </strong> of setToMappings or setToMappingsMap must be
-	 * called.
+	 * <p>Only <strong>one</strong> of setInputMappings or setInputMappingsMap
+	 * must be called.
 	 */
-	public void setToMappingsMap(Map toMappings) {
-		this.toMappings = new HashMap(toMappings);
+	public void setInputMappingsMap(Map inputMappings) {
+		this.inputMappings = new HashMap(inputMappings);
 	}
 
 	/**
-	 * Set the mappings that will be executed when mapping model data <i>from
-	 * </i> the sub flow. Each list item must be a String, a List, or a Map. If
+	 * Set the mappings that will be executed when mapping model data from
+	 * the sub flow. Each list item must be a String, a List, or a Map. If
 	 * the list item is a simple String value, the attribute will be mapped as
 	 * having the same name in the parent flow and in the child flow. If the
 	 * list item is a Map, each map entry must be a String key naming the
-	 * attribute in the child flow, and a String value naming the attribute in
+	 * attribute in the sub flow, and a String value naming the attribute in
 	 * the parent flow. If the list item is itself a List, then that list is
 	 * itself evaluated recursively, and must itself contain Strings, Lists, or
 	 * Maps.
 	 * 
-	 * <p>
-	 * Only <strong>one </strong> of setFromMappings or setFromMappingsMap must
-	 * be called.
+	 * <p>Only <strong>one</strong> of setOutputMappings or setOutputMappingsMap
+	 * must be called.
 	 */
-	public void setFromMappings(Collection fromMappings) {
-		this.fromMappings = new HashMap(fromMappings.size());
-		putCollectionMappings(this.fromMappings, fromMappings);
+	public void setOutputMappings(Collection outputMappings) {
+		this.outputMappings = new HashMap(outputMappings.size());
+		putCollectionMappings(this.outputMappings, outputMappings);
 	}
 
 	/**
-	 * <p>
-	 * Set the mappings that will be executed when mapping model data <i>from
-	 * </i> the sub flow. This is essentially a just a short form of calling
-	 * @link ParameterizableFlowAttributesMapper#setFromMappings(List) with a
+	 * Set the mappings that will be executed when mapping model data from
+	 * the sub flow. This is essentially just a short form of calling
+	 * @link ParameterizableFlowAttributesMapper#setOutputMappings(List) with a
 	 *       List containing one item which is a Map. Each map entry must be a
-	 *       String key naming the attribute in the child flow, and a String
+	 *       String key naming the attribute in the sub flow, and a String
 	 *       value naming the attribute in the parent flow.
-	 *       </p>
 	 * 
-	 * <p>
-	 * Only <strong>one </strong> of setToMappings or setToMappingsMap must be
-	 * called.
+	 * <p>Only <strong>one</strong> of setOutputMappings or setOutputMappingsMap
+	 * must be called.
 	 */
-	public void setFromMappingsMap(Map fromMappings) {
-		this.fromMappings = new HashMap(fromMappings);
+	public void setOutputMappingsMap(Map fromMappings) {
+		this.outputMappings = new HashMap(fromMappings);
 	}
 
 	// internal worker function
@@ -214,13 +206,13 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 
 	public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
 		Map subFlowAttributes = new HashMap();
-		map(parentFlowModel, new MapAttributesAccessorAdapter(subFlowAttributes), toMappings);
+		map(parentFlowModel, new MapAttributesAccessorAdapter(subFlowAttributes), inputMappings);
 		return Collections.unmodifiableMap(subFlowAttributes);
 	}
 
 	public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel,
 			MutableAttributesAccessor parentFlowModel) {
-		map(subFlowModel, parentFlowModel, fromMappings);
+		map(subFlowModel, parentFlowModel, outputMappings);
 	}
 
 	/**
@@ -288,7 +280,6 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	}
 
 	/**
-	 * <p>
 	 * Create a new bean wrapper wrapping given object. Can be redefined in
 	 * subclasses in case special property editors need to be registered or when
 	 * other similar tuning is required.
