@@ -75,11 +75,17 @@ public class ContextLoader {
 	 */
 	public WebApplicationContext initWebApplicationContext(ServletContext servletContext) throws BeansException {
 		servletContext.log("Loading root WebApplicationContext");
-		ApplicationContext parent = loadParentContext(servletContext);
-		WebApplicationContext wac = createWebApplicationContext(servletContext, parent);
-		logger.info("Using context class [" + wac.getClass().getName() + "] for root WebApplicationContext");
-		WebApplicationContextUtils.publishWebApplicationContext(wac);
-		return wac;
+		try {
+			ApplicationContext parent = loadParentContext(servletContext);
+			WebApplicationContext wac = createWebApplicationContext(servletContext, parent);
+			logger.info("Using context class [" + wac.getClass().getName() + "] for root WebApplicationContext");
+			WebApplicationContextUtils.publishWebApplicationContext(wac);
+			return wac;
+		}
+		catch (BeansException ex) {
+			logger.error("Context initialization failed", ex);
+			throw ex;
+		}
 	}
 
 	/**
@@ -94,7 +100,7 @@ public class ContextLoader {
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected WebApplicationContext createWebApplicationContext(ServletContext servletContext,
-																ApplicationContext parent) throws BeansException {
+																															ApplicationContext parent) throws BeansException {
 		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		Class contextClass = DEFAULT_CONTEXT_CLASS;
 		if (contextClassName != null) {

@@ -61,7 +61,7 @@ import org.springframework.web.util.WebUtils;
  * the "namespace" servlet init-param.
  *
  * @author Rod Johnson
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see #doService
  * @see #initFrameworkServlet
  * @see #setContextClass
@@ -197,8 +197,20 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected final void initServletBean() throws ServletException, BeansException {
 		long startTime = System.currentTimeMillis();
 		logger.info("Framework servlet '" + getServletName() + "' init");
-		this.webApplicationContext = initWebApplicationContext();
-		initFrameworkServlet();
+		
+		try {
+			this.webApplicationContext = initWebApplicationContext();
+			initFrameworkServlet();
+		}
+		catch (ServletException ex) {
+			logger.error("Context initialization failed", ex);
+			throw ex;
+		}
+		catch (BeansException ex) {
+			logger.error("Context initialization failed", ex);
+			throw ex;
+		}
+
 		long elapsedTime = System.currentTimeMillis() - startTime;
 		logger.info("Framework servlet '" + getServletName() + "' init completed in " + elapsedTime + " ms");
 	}
