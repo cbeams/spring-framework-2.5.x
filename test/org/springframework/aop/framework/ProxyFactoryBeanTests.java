@@ -651,7 +651,12 @@ public class ProxyFactoryBeanTests extends TestCase {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryBeanAutowiringTests.xml", getClass()));
 		bf.getBean("testBean");
 	}
-
+	
+	/* TEST FAILS, setFrozen IS CALLED BEFORE setInterceptorNames */
+	/*public void testFrozenFactoryBean() {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("frozenProxyFactoryBean.xml", getClass()));
+		bf.getBean("frozen");
+	}*/
 
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
