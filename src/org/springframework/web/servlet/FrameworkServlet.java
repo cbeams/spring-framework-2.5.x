@@ -17,6 +17,7 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
+import java.security.Principal;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -33,6 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Base servlet for servlets within the web framework. Allows integration
@@ -73,7 +75,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @see #doService
  * @see #initFrameworkServlet
  * @see #setContextClass
@@ -359,20 +361,32 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		}
 		finally {
 			long processingTime = System.currentTimeMillis() - startTime;
-			// whether or not we succeeded, publish an event
 			if (failureCause != null) {
 				logger.error("Could not complete request", failureCause);
-				this.webApplicationContext.publishEvent(
-				    new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
-				                            request.getMethod(), getServletConfig().getServletName(), failureCause));
 			}
 			else {
 				logger.debug("Successfully completed request");
-				this.webApplicationContext.publishEvent(
-				    new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
-				                            request.getMethod(), getServletConfig().getServletName()));
 			}
+			// whether or not we succeeded, publish an event
+			this.webApplicationContext.publishEvent(
+					new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
+																	request.getMethod(), getServletConfig().getServletName(),
+																	WebUtils.getSessionId(request), getUsernameForRequest(request),
+																	failureCause));
 		}
+	}
+
+	/**
+	 * Determine the username for the given request.
+	 * Default implementation takes the name of the UserPrincipal, if any.
+	 * Can be overridden in subclasses.
+	 * @param request current HTTP request
+	 * @return the username, or null if none
+	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal
+	 */
+	protected String getUsernameForRequest(HttpServletRequest request) {
+		Principal userPrincipal = request.getUserPrincipal();
+		return (userPrincipal != null ? userPrincipal.getName() : null);
 	}
 
 	/**
