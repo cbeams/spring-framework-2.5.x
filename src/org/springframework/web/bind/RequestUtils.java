@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
  * This is very useful for simple submissions.
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Jean-Pierre Pawlak
  */
 public abstract class RequestUtils {
 
@@ -58,6 +59,38 @@ public abstract class RequestUtils {
 		}
 		catch (NumberFormatException ex) {
 				throw new ServletRequestBindingException("Required int parameter '" + name + "' value of '" + s + "' was not a valid number");
+		}
+	}
+
+	/**
+	 * Get an int parameter, with a fallback value. Never throws an exception.
+	 * Can pass a distinguished value to default to enable checks of whether it was supplied.
+	 */
+	public static long getLongParameter(HttpServletRequest request, String name, long defaultVal) {
+		try {
+			return getRequiredLongParameter(request, name);
+		}
+		catch (ServletRequestBindingException ex) {
+			return defaultVal;
+		}
+	}
+
+	/**
+	 * Get a long parameter, throwing an exception if it isn't found or isn't a number.
+	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * so it doesn't need to be caught
+	 */
+	public static long getRequiredLongParameter(HttpServletRequest request, String name) throws ServletRequestBindingException {
+		String s = request.getParameter(name);
+		if (s == null)
+			throw new ServletRequestBindingException("Required long parameter '" + name + "' was not supplied");
+		if ("".equals(s))
+			throw new ServletRequestBindingException("Required long parameter '" + name + "' contained no value");
+		try {
+			return Long.parseLong(s);
+		}
+		catch (NumberFormatException ex) {
+				throw new ServletRequestBindingException("Required long parameter '" + name + "' value of '" + s + "' was not a valid number");
 		}
 	}
 
