@@ -97,6 +97,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String PARENT_ATTRIBUTE = "parent";
 
 	public static final String CLASS_ATTRIBUTE = "class";
+	public static final String ABSTRACT_ATTRIBUTE = "abstract";
 	public static final String SINGLETON_ATTRIBUTE = "singleton";
 	public static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
 	public static final String AUTOWIRE_ATTRIBUTE = "autowire";
@@ -315,6 +316,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			getReplacedMethodSubElements(bd.getMethodOverrides(), beanName, ele);
 
 			bd.setResourceDescription(this.resource.getDescription());
+
+			if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
+				bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
+			}
 
 			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));

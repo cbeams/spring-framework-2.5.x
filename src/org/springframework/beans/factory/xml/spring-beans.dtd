@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.36 2004-08-17 21:46:27 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.37 2004-08-30 20:51:50 jhoeller Exp $
 -->
 
 
@@ -93,6 +93,12 @@
 <!ATTLIST bean name CDATA #IMPLIED>
 
 <!--
+	Each bean definition must specify the fully qualified name of the class,
+	except if it pure serves as parent for child bean definitions.
+-->
+<!ATTLIST bean class CDATA #IMPLIED>
+
+<!--
   Optionally specify a parent bean definition.
 
   Will use the bean class of the parent if none specified, but can
@@ -111,10 +117,12 @@
 <!ATTLIST bean parent CDATA #IMPLIED>
 
 <!--
-	Each bean definition must specify the fully qualified name of the class,
-	except if it pure serves as parent for child bean definitions.
+	Is this bean "abstract", i.e. not meant to be instantiated itself but
+	rather just serving as parent for concrete child bean definitions.
+	Default is false. Specify true to tell the bean factory to not try to
+	instantiate that particular bean in any case.
 -->
-<!ATTLIST bean class CDATA #IMPLIED>
+<!ATTLIST bean abstract (true | false) "false">
 
 <!--
 	Is this bean a "singleton" (one shared instance, which will
@@ -210,43 +218,41 @@
 <!ATTLIST bean destroy-method CDATA #IMPLIED>
 
 <!--
-	Optional attribute specifying the name of a factory method to use
-	to create this object. Use constructor-arg elements to specify arguments
-	to the factory method, if it takes arguments. Autowiring does not
-	apply to factory methods.
-	
-	If the "class" attribute is present, the factory method will be 
-	a static method on the class specified by the "class" attribute
-	on this bean definition. Often this will be the same class as that of the
-	constructed object - for example, when the factory method is used as an
-	alternative to a constructor. However, it may be on a different class. In 
-	that case, the created object will *not* be of the class specified in
-	the "class" attribute. This is analogous to FactoryBean behaviour.
-	
-	If the "factory-bean" attribute is present, the "class" attribute
-	is not used, and the factory method will be an instance method on the object returned 
-	from a getBean() call with the specified bean name. The factory bean may
-	be defined as a singleton or a prototype.
-	
-	The factory method can have any number of arguments. Autowiring is not supported.
-	Use indexed constructor-arg elements in conjunction with the factory-method
-	attribute.
-	
+	Optional attribute specifying the name of a factory method to use to
+	create this object. Use constructor-arg elements to specify arguments
+	to the factory method, if it takes arguments. Autowiring does not apply
+	to factory methods.
+
+	If the "class" attribute is present, the factory method will be a static
+	method on the class specified by the "class" attribute on this bean
+	definition. Often this will be the same class as that of the constructed
+	object - for example, when the factory method is used as an alternative
+	to a constructor. However, it may be on a different class. In that case,
+	the created object will *not* be of the class specified in the "class"
+	attribute. This is analogous to FactoryBean behaviour.
+
+	If the "factory-bean" attribute is present, the "class" attribute is not
+	used, and the factory method will be an instance method on the object
+	returned from a getBean call with the specified bean name. The factory
+	bean may be defined as a singleton or a prototype.
+
+	The factory method can have any number of arguments. Autowiring is not
+	supported. Use indexed constructor-arg elements in conjunction with the
+	factory-method attribute.
+
 	Setter Injection can be used in conjunction with a factory method.
-	Method Injection cannot, as the factory method returns an instance, which
-	will be used when the container creates the bean.
+	Method Injection cannot, as the factory method returns an instance,
+	which will be used when the container creates the bean.
 -->
 <!ATTLIST bean factory-method CDATA #IMPLIED>
 
 <!--
 	Alternative to class attribute for factory-method usage.
 	If this is specified, no class attribute should be used.
-	This should be set to the name of a bean in the current
-	or ancestor factories that contains the
-	relevant factory method. 
-	This allows the factory itself to be configured using
-	Dependency Injection, and an instance, rather than static,
-	method to be used.
+	This should be set to the name of a bean in the current or
+	ancestor factories that contains the relevant factory method.
+	This allows the factory itself to be configured using Dependency
+	Injection, and an instance (rather than static) method to be used.
 -->
 <!ATTLIST bean factory-bean CDATA #IMPLIED>
 

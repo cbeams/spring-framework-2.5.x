@@ -2,19 +2,18 @@
 <!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-	
-	<bean id="targetDependency"
-		class="org.springframework.beans.TestBean">
+
+	<bean id="targetDependency" class="org.springframework.beans.TestBean">
 		<property name="name"><value>dependency</value></property>
 	</bean>
 
 	<!-- Simple target -->
-	<bean id="target" class="org.springframework.beans.DerivedTestBean">	
+	<bean id="target" class="org.springframework.beans.DerivedTestBean">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
 		<property name="spouse"><ref local="targetDependency"/></property>
 	</bean>
-	
+
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 
 	<bean id="mockMan" class="org.springframework.transaction.interceptor.PlatformTransactionManagerFacade"/>
@@ -29,7 +28,7 @@
 			</value>
 		</property>
 	</bean>
-	
+
 	<bean id="proxyFactory1" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces">
 			<value>org.springframework.beans.ITestBean</value>
@@ -39,13 +38,12 @@
 				<value>txInterceptor</value>
 				<value>target</value>
 			</list>
-		</property>		
+		</property>
 	</bean>
-	
 
-	<bean id="proxyFactory2DynamicProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="baseProxyFactory" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		  abstract="true">
 		<property name="transactionManager"><ref local="mockMan"/></property>
-		<property name="target"><ref local="target"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="s*">PROPAGATION_MANDATORY</prop>
@@ -54,34 +52,22 @@
 			</props>
 		</property>
 	</bean>
-	
+
+	<bean id="proxyFactory2DynamicProxy" parent="baseProxyFactory">
+		<property name="target"><ref local="target"/></property>
+	</bean>
+
 	<!--
-		Same as ProxyFactory2 but forces the use of CGLIB
+		Same as proxyFactory2DynamicProxy but forces the use of CGLIB.
 	-->
-	<bean id="proxyFactory2Cglib" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="mockMan"/></property>
+	<bean id="proxyFactory2Cglib" parent="baseProxyFactory">
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="target"><ref local="target"/></property>
-		<property name="transactionAttributes">
-			<props>
-				<prop key="s*">PROPAGATION_MANDATORY</prop>
-				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
-				<prop key="set*">PROPAGATION_SUPPORTS</prop>
-			</props>
-		</property>
 	</bean>
 
-	<bean id="proxyFactory3" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="mockMan"/></property>
+	<bean id="proxyFactory3" parent="baseProxyFactory">
 		<property name="target"><ref local="target"/></property>
 		<property name="proxyTargetClass"><value>true</value></property>
-		<property name="transactionAttributes">
-			<props>
-				<prop key="s*">PROPAGATION_MANDATORY</prop>
-				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
-				<prop key="set*">PROPAGATION_SUPPORTS</prop>
-			</props>
-		</property>
 		<property name="pointcut">
 			<ref local="txnInvocationCounterPointcut"/>
 		</property>
@@ -96,33 +82,32 @@
 			</list>
 		</property>
 	</bean>
-	
-	
+
 	<bean name="cglibNoInterfaces"
 		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		
+
 		<property name="transactionManager"><ref local="mockMan"/></property>
-		
+
 		<property name="target">
 			<bean class="org.springframework.transaction.interceptor.ImplementsNoInterfaces">
 				<property name="dependency"><ref local="targetDependency"/></property>
-			</bean>	
+			</bean>
 		</property>
-		
+
 		<property name="transactionAttributes">
 			<props>
 				<prop key="*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
 	</bean>
-	
+
 	<!--
 		The HotSwappableTargetSource is a Type 3 component.
 	-->
 	<bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource">
 		<constructor-arg><ref local="target"/></constructor-arg>
 	</bean>
-	
+
 	<bean id="hotSwapped" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="mockMan"/></property>
 		<!-- Should automatically pick up the target source, rather than simple target -->
@@ -138,7 +123,7 @@
 		<property name="optimize"><value>false</value></property>
 	</bean>
 
-	<bean id="txnInvocationCounterPointcut" 
+	<bean id="txnInvocationCounterPointcut"
 		class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterPointcut"
 	/>
 

@@ -31,7 +31,6 @@ import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.CountingTxManager;
@@ -48,7 +47,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
-	private BeanFactory factory;
+	private XmlBeanFactory factory;
 
 	public void setUp() {
 		this.factory = new XmlBeanFactory(new ClassPathResource("transactionalBeanFactory.xml", getClass()));
@@ -63,6 +62,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory2DynamicProxy() throws NoSuchMethodException {
+		this.factory.preInstantiateSingletons();
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2DynamicProxy");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
 		executeGetsAreNotTransactional(testBean);

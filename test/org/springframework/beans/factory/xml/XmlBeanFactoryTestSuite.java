@@ -16,11 +16,11 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +47,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.HasMap;
@@ -207,11 +208,27 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(inherits.getAge() == 1);
 	}
 
-	public void testGetBeansOfTypeWithParentWithoutClass() {
+	public void testAbstractParentBeans() {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
-		Map tbs = parent.getBeansOfType(TestBean.class, true, true);
-		assertEquals(2, tbs.size());
+		parent.preInstantiateSingletons();
 		assertTrue(parent.isSingleton("inheritedTestBeanWithoutClass"));
+
+		// abstract beans should not match
+		Map tbs = parent.getBeansOfType(TestBean.class, true, true);
+		assertEquals(1, tbs.size());
+		assertEquals("inheritedTestBeanPrototype", tbs.keySet().iterator().next());
+
+		// abstract bean should throw exception on creation attempt
+		try {
+			parent.getBean("inheritedTestBeanWithoutClass");
+			fail("Should have thrown BeanIsAbstractException");
+		}
+		catch (BeanIsAbstractException ex) {
+			// expected
+		}
+
+		// non-abstract bean should work, even if it serves as parent
+		assertTrue(parent.getBean("inheritedTestBeanPrototype") instanceof TestBean);
 	}
 
 	public void testDependenciesMaterializeThis() throws Exception {

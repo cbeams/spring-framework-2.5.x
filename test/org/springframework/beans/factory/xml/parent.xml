@@ -3,12 +3,12 @@
 
 <beans>
 
-	<bean id="inheritedTestBean" class="org.springframework.beans.TestBean">
+	<bean id="inheritedTestBean" class="org.springframework.beans.TestBean" abstract="true">
 		<property name="name"><value>parent</value></property>
 		<property name="age"><value>1</value></property>
 	</bean>
 	
-	<bean id="inheritedTestBeanWithoutClass">
+	<bean id="inheritedTestBeanWithoutClass" abstract="true">
 		<property name="name"><value>parent</value></property>
 		<property name="age"><value>1</value></property>
 	</bean>
