@@ -31,7 +31,7 @@
         <subtitle>
           Reference Documentation
         </subtitle>
-        <releaseinfo>Version 1.1.2</releaseinfo>
+        <releaseinfo>Version 1.1.3</releaseinfo>
         <pubdate>(Work in progress)</pubdate>
         
         <authorgroup>
@@ -41,7 +41,7 @@
             </author>
             <author>
                 <firstname>Juergen</firstname>
-                <surname> Hoeller</surname>
+                <surname>Hoeller</surname>
             </author>
             <author>
                 <firstname>Alef</firstname>
