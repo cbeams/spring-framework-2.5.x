@@ -53,7 +53,6 @@
 	<classpathentry kind="lib" path="lib/j2ee/jstl.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
 	<classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
-	<classpathentry kind="lib" path="lib/jboss/jboss-common-jdbc-wrapper.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-common.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
@@ -80,7 +79,6 @@
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
 	<classpathentry kind="lib" path="lib/rowset/rowset.jar"/>
-	<classpathentry kind="lib" path="lib/jboss/jboss.jar"/>
 	<classpathentry kind="lib" path="lib/cglib/cglib-2.0.2-dev.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
