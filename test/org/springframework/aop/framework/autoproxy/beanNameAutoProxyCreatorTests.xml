@@ -78,6 +78,15 @@
 		<property name="name"><value>second-introductionUsingJdk</value></property>
 	</bean>
 	
+	<!--
+		Lazy only because it breaks other tests until this
+		test is fixed
+	-->
+	<bean id="factory-introductionUsingJdk" 
+		lazy-init="true"
+		class="org.springframework.aop.framework.autoproxy.CreatesTestBean">	
+	</bean>
+	
 	<bean id="jdk1" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>jdk1</value></property>
 	</bean>
