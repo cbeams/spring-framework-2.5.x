@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
  * to override to add Method Injection  support, for example by overriding methods.
  * 
  * @author Rod Johnson
- * @version $Id: SimpleInstantiationStrategy.java,v 1.2 2004-06-27 13:49:48 johnsonr Exp $
+ * @version $Id: SimpleInstantiationStrategy.java,v 1.3 2004-08-02 13:44:56 johnsonr Exp $
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	
@@ -85,9 +85,14 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	
 	public Object instantiate(RootBeanDefinition beanDefinition, BeanFactory owner,
 														Method factoryMethod, Object[] args) {
+		Object target = null;
+		if (beanDefinition.getFactoryBeanName() != null) {
+			target = owner.getBean(beanDefinition.getFactoryBeanName());
+		}
+		
 		try {
-			// must be a static method
-			return factoryMethod.invoke(null, args);
+			// A static method if the target is null
+			return factoryMethod.invoke(target, args);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new BeanDefinitionStoreException("Illegal arguments to factory method " + factoryMethod + "; " +

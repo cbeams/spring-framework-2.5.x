@@ -61,7 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.62 2004-07-29 08:40:43 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.63 2004-08-02 13:44:56 johnsonr Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
@@ -177,11 +177,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			if (args != null) {
 				if (mergedBeanDefinition.isSingleton()) {			
 					throw new BeanDefinitionStoreException("Cannot specify arguments in the getBean() method when " +
-																								 "referring to a singleton bean definition");
+															"referring to a singleton bean definition");
 				}
-				else if (mergedBeanDefinition.getStaticFactoryMethodName() == null) {			
+				else if (mergedBeanDefinition.getFactoryMethodName() == null) {			
 					throw new BeanDefinitionStoreException("Can only specify arguments in the getBean() method in " +
-																								 "conjunction with a static factory method");
+															 "conjunction with a factory method");
 				}
 			}
 			

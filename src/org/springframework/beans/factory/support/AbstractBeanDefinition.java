@@ -34,7 +34,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractBeanDefinition.java,v 1.19 2004-07-27 16:56:44 jhoeller Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.20 2004-08-02 13:44:56 johnsonr Exp $
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -72,7 +72,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private String destroyMethodName;
 
-	private String staticFactoryMethodName;
+	private String factoryMethodName;
+	
+	private String factoryBeanName;
 
 	private int autowireMode = AUTOWIRE_NO;
 
@@ -104,7 +106,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 		setInitMethodName(other.getInitMethodName());
 		setDestroyMethodName(other.getDestroyMethodName());
-		setStaticFactoryMethodName(other.getStaticFactoryMethodName());
+		setFactoryMethodName(other.getFactoryMethodName());
+		setFactoryBeanName(other.getFactoryBeanName());
 
 		setDependsOn(other.getDependsOn());
 		setAutowireMode(other.getAutowireMode());
@@ -144,8 +147,11 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		if (other.getDestroyMethodName() != null) {
 			setDestroyMethodName(other.getDestroyMethodName());
 		}
-		if (other.getStaticFactoryMethodName() != null) {
-			setStaticFactoryMethodName(other.getStaticFactoryMethodName());
+		if (other.getFactoryMethodName() != null) {
+			setFactoryMethodName(other.getFactoryMethodName());
+		}
+		if (other.getFactoryBeanName() != null) {
+			setFactoryBeanName(other.getFactoryBeanName());
 		}
 
 		setDependsOn(other.getDependsOn());
@@ -284,24 +290,37 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Specify a static factory method, if any. This method will be invoked with
+	 * Specify a factory method, if any. This method will be invoked with
 	 * constructor arguments, or with no arguments if none are specified.
 	 * The static method will be invoked on the specifed beanClass.
-	 * @param staticFactoryMethodName static factory method name, or null if
+	 * @param factoryMethodName static factory method name, or null if
 	 * normal constructor creation should be used
 	 * @see #getBeanClass
 	 */
-	public void setStaticFactoryMethodName(String staticFactoryMethodName) {
-		this.staticFactoryMethodName = staticFactoryMethodName;
+	public void setFactoryMethodName(String factoryMethodName) {
+		this.factoryMethodName = factoryMethodName;
 	}
 
 	/**
-	 * Return a static factory method, if any.
+	 * Return a factory method, if any.
 	 */
-	public String getStaticFactoryMethodName() {
-		return this.staticFactoryMethodName;
+	public String getFactoryMethodName() {
+		return this.factoryMethodName;
 	}
 
+	/**
+	 * @return Returns the factoryBeanName.
+	 */
+	public String getFactoryBeanName() {
+		return factoryBeanName;
+	}
+	/**
+	 * @param factoryBeanName The factoryBeanName to set.
+	 */
+	public void setFactoryBeanName(String factoryBeanName) {
+		this.factoryBeanName = factoryBeanName;
+	}
+	
 	/**
 	 * Set the autowire code. This determines whether any automagical detection
 	 * and setting of bean references will happen. Default is AUTOWIRE_NO,
@@ -450,11 +469,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 			throw new BeanDefinitionValidationException("Lazy initialization is applicable only to singleton beans");
 		}
 
-		if (!getMethodOverrides().isEmpty() && getStaticFactoryMethodName() != null) {
+		if (!getMethodOverrides().isEmpty() && getFactoryMethodName() != null) {
 			throw new  BeanDefinitionValidationException("Cannot combine static factory method with method overrides: " +
 			                                             "the static factory method must create the instance");
 		}
-		
 		
 		if (hasBeanClass()) {
 			// Check that lookup methods exists

@@ -74,7 +74,7 @@ import org.springframework.core.JdkVersion;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13.02.2004
- * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.28 2004-08-01 16:15:41 johnsonr Exp $
+ * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.29 2004-08-02 13:44:56 johnsonr Exp $
  * @see #findMatchingBeans
  * @see DefaultListableBeanFactory
  */
@@ -239,7 +239,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// instantiate bean
 			errorMessage = "Instantiation of bean failed";
 
-			if (mergedBeanDefinition.getStaticFactoryMethodName() != null)  {
+			if (mergedBeanDefinition.getFactoryMethodName() != null)  {
 				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition, args);
 			}
 			else if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
@@ -302,9 +302,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Instantiate the bean using a named factory method. This involves iterating over the static
+	 * Instantiate the bean using a named factory method. The method may be static, if the
+	 * mergedBeanDefinition parameter specifies a class, rather than a factoryBean, or
+	 * an instance variable on a factory object itself configured using Dependency Injection. 
+	 * <br>Implementation requires iterating over the static or instance
 	 * methods with the name specified in the RootBeanDefinition (the method may be overloaded)
-	 * and trying to match with the parameters. Unfortunately we don't have the types attached to
+	 * and trying to match with the parameters. We don't have the types attached to
 	 * constructor args, so trial and error is the only way to go here.
 	 * The args array may contain argument values passed in programmatically via the overloaded
 	 * getBean() method.
@@ -328,12 +331,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		initBeanWrapper(bw);
+		
+		boolean isStatic = true;
+		Class factoryClass = null;
+		if (mergedBeanDefinition.getFactoryBeanName() != null) {
+			// It's an instance method on the factory bean's class
+			factoryClass = getBean(mergedBeanDefinition.getFactoryBeanName()).getClass();
+			isStatic = false;
+		}
+		else {
+			// It's a static factory method on the bean class
+			factoryClass = mergedBeanDefinition.getBeanClass();
+		}
 
 		// Try all methods with this name to see if they match constructor arguments
-		for (int i = 0; i < mergedBeanDefinition.getBeanClass().getMethods().length; i++) {
-			Method factoryMethod = mergedBeanDefinition.getBeanClass().getMethods()[i];
-			if (Modifier.isStatic(factoryMethod.getModifiers()) &&
-					factoryMethod.getName().equals(mergedBeanDefinition.getStaticFactoryMethodName()) &&
+		for (int i = 0; i < factoryClass.getMethods().length; i++) {
+			Method factoryMethod = factoryClass.getMethods()[i];
+			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
+					factoryMethod.getName().equals(mergedBeanDefinition.getFactoryMethodName()) &&
 					factoryMethod.getParameterTypes().length == expectedArgCount) {
 
 				Class[] argTypes = factoryMethod.getParameterTypes();
@@ -365,7 +380,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}	// for each method
 
 		// If we get here, we didn't match any method
-		throw new BeanDefinitionStoreException("Cannot find matching factory method " + mergedBeanDefinition.getStaticFactoryMethodName());
+		throw new BeanDefinitionStoreException("Cannot find matching factory method " + mergedBeanDefinition.getFactoryMethodName() +
+				" on class " + factoryClass);
 	}
 
 

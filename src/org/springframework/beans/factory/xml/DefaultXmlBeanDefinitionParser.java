@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.32 2004-07-27 14:22:25 jhoeller Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.33 2004-08-02 13:46:13 johnsonr Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
@@ -105,6 +105,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String INIT_METHOD_ATTRIBUTE = "init-method";
 	public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
 	public static final String FACTORY_METHOD_ATTRIBUTE = "factory-method";
+	public static final String FACTORY_BEAN_ATTRIBUTE = "factory-bean";
 
 	public static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
 	public static final String INDEX_ATTRIBUTE = "index";
@@ -287,7 +288,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 
 			if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {
-				bd.setStaticFactoryMethodName(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
+				bd.setFactoryMethodName(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
+			}
+			if (ele.hasAttribute(FACTORY_BEAN_ATTRIBUTE)) {
+				bd.setFactoryBeanName(ele.getAttribute(FACTORY_BEAN_ATTRIBUTE));
 			}
 
 			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);

@@ -83,5 +83,16 @@
 		<constructor-arg index="0"><value>Rod</value></constructor-arg>
 		<constructor-arg index="1"><value>33</value></constructor-arg>
 	</bean>
+	
+	
+	<bean id="instanceFactoryMethodWithoutArgs" 
+			factory-bean="instanceFactory"
+			factory-method="defaultInstance">
+	</bean>
+	
+	<bean id="instanceFactory"
+		class="org.springframework.beans.factory.xml.InstanceFactory">
+		<property name="factoryBeanProperty"><value>instanceFactory</value></property>
+	</bean>
 
 </beans>
