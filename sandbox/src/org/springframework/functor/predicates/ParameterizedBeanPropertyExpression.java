@@ -57,8 +57,8 @@ public class ParameterizedBeanPropertyExpression implements UnaryPredicate {
     }
 
     /**
-     * Tests the values of the two specified properties of this bean using the
-     * configured binary predicate.
+     * Tests the value of the configured propertyName for this bean against the
+     * configured parameter value using the configured binary predicate.
      * 
      * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
      */

@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 
 /**
  * A unary predicate that test an expression consisting of two variable bean
- * property values.  For example, <code>pet.ageAtFirstVisit > pet.currentAge</code>
+ * property values. For example, <code>pet.ageAtFirstVisit > pet.currentAge</code>
  * 
  * @author Keith Donald
  */
@@ -54,7 +54,7 @@ public class BeanPropertyExpression implements UnaryPredicate {
     }
 
     /**
-     * Tests the values of the two specified properties of this bean using the
+     * Tests the values of the two configured propertyNames for this bean using
      * configured binary predicate.
      * 
      * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
