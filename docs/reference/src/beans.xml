@@ -428,7 +428,7 @@
       specifying the constructor <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
     &lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
     &lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
-    &lt;constructor-arg&gt;1&lt;/constructor-arg&gt;
+    &lt;constructor-arg&gt;<value>1</value>&lt;/constructor-arg&gt;
 &lt;/bean&gt;
 
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
@@ -900,12 +900,9 @@ jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
 jdbc.password=root</programlisting>
 
-      <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileInputStream("beans.xml"));
-
-Properties props = new Properties();
-props.load(new FileInputStream("jdbc.properties"));
-
-PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer(props);
+      <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+cfg.setLocation(new FileSystemResource("jdbc.properties"));
 cfg.postProcessBeanFactory(factory);</programlisting>
 
       <para>The <literal>PropertyPlaceHolderConfigurer</literal> does not only
@@ -1531,7 +1528,7 @@ public class DependsOnExoticType {
 &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
   &lt;property name="targetObject"&gt;&lt;ref local='sysProps'/&gt;&lt;/property&gt;
   &lt;property name="targetMethod"&gt;&lt;value&gt;getProperty&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="args"&gt;
+  &lt;property name="arguments"&gt;
     &lt;list&gt;
       &lt;value&gt;|java.version|&lt;/value&gt;
     &lt;/list&gt;
