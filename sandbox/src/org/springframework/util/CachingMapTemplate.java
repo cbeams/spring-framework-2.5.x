@@ -33,11 +33,10 @@ import org.apache.commons.logging.LogFactory;
  * This class is abstract template; caching map implementations should subclass
  * and override the create(key) method which encapsulates new expensive object
  * creation.
- * 
  * @author Keith Donald
  */
 public abstract class CachingMapTemplate implements Map, Serializable {
-	private static transient final Log logger = LogFactory.getLog(CachingMapTemplate.class);
+	protected static final Log logger = LogFactory.getLog(CachingMapTemplate.class);
 
 	private static Object NULL_VALUE = new Object();
 
