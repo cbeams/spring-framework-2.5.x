@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -50,37 +50,6 @@ public class AopUtilsTests extends TestCase {
 		assertTrue("Contains IOther", ifcs.contains(IOther.class));
 	}
 	
-	public void testIsMethodDeclaredOnOneOfTheseInterfaces() throws Exception {
-		Method m = Object.class.getMethod("hashCode", (Class[]) null);
-		assertFalse(AopUtils.methodIsOnOneOfTheseInterfaces(m, null));
-		assertFalse(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { ITestBean.class }));
-		m = TestBean.class.getMethod("getName", (Class[]) null);
-		assertTrue(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { ITestBean.class }));
-		assertTrue(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { Comparable.class, ITestBean.class }));
-		assertFalse(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { Comparable.class }));
-	}
-	
-	/*
-	public void testIsMethodDeclaredOnOneOfTheseInterfacesWithSameNameMethodNotFromInterface() throws Exception {
-		class Unconnected {
-			public String getName() { throw new UnsupportedOperationException(); }
-		}
-		Method m = Unconnected.class.getMethod("getName", null);
-		// TODO What do do?
-	}
-	*/
-	
-	public void testIsMethodDeclaredOnOneOfTheseInterfacesRequiresInterfaceArguments() throws Exception {
-		Method m = Object.class.getMethod("hashCode", (Class[]) null);
-		try {
-			assertFalse(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { TestBean.class }));
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			// Ok
-		}
-	}
-
 	public void testPointcutCanNeverApply() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			public boolean matches(Method method, Class clazzy) {
@@ -89,12 +58,12 @@ public class AopUtilsTests extends TestCase {
 		}
 	
 		Pointcut no = new TestPointcut();
-		assertFalse(AopUtils.canApply(no, Object.class, null));
+		assertFalse(AopUtils.canApply(no, Object.class));
 	}
 
 	public void testPointcutAlwaysApplies() {
-		assertTrue(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), Object.class, null));
-		assertTrue(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), TestBean.class, new Class[] { ITestBean.class }));
+		assertTrue(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), Object.class));
+		assertTrue(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), TestBean.class));
 	}
 
 	public void testPointcutAppliesToOneMethodOnObject() {
@@ -106,34 +75,14 @@ public class AopUtilsTests extends TestCase {
 
 		Pointcut pc = new TestPointcut();
 	
-		// Will return true if we're not proxying interfaces
-		assertTrue(AopUtils.canApply(pc, Object.class, null));
-	
-		// Will return false if we're proxying interfaces
-		assertFalse(AopUtils.canApply(pc, Object.class, new Class[] { ITestBean.class }));
+		// will return true if we're not proxying interfaces
+		assertTrue(AopUtils.canApply(pc, Object.class));
 	}
 
-	public void testPointcutAppliesToOneInterfaceOfSeveral() {
-		class TestPointcut extends StaticMethodMatcherPointcut {
-			public boolean matches(Method method, Class clazz) {
-				return method.getName().equals("getName");
-			}
-		}
-
-		Pointcut pc = new TestPointcut();
-
-		// Will return true if we're proxying interfaces including ITestBean 
-		assertTrue(AopUtils.canApply(pc, TestBean.class, new Class[] { ITestBean.class, Comparable.class }));
-	
-		// Will return true if we're proxying interfaces including ITestBean 
-		assertFalse(AopUtils.canApply(pc, TestBean.class, new Class[] { Comparable.class }));
-	}
-	
 	/**
-	 * Test that when we serialize and deserialize various
-	 * canonical instances of AOP classes, they return the same instance,
-	 * not a new instance that's subverted the singleton construction
-	 * limitation.
+	 * Test that when we serialize and deserialize various canonical instances
+	 * of AOP classes, they return the same instance, not a new instance
+	 * that's subverted the singleton construction limitation.
 	 */
 	public void testCanonicalFrameworkClassesStillCanonicalOnDeserialization() throws Exception {
 		assertSame(MethodMatcher.TRUE, SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE));
@@ -142,7 +91,8 @@ public class AopUtilsTests extends TestCase {
 		assertSame(EmptyTargetSource.INSTANCE, SerializationTestUtils.serializeAndDeserialize(EmptyTargetSource.INSTANCE));
 		assertSame(Pointcuts.SETTERS, SerializationTestUtils.serializeAndDeserialize(Pointcuts.SETTERS));
 		assertSame(Pointcuts.GETTERS, SerializationTestUtils.serializeAndDeserialize(Pointcuts.GETTERS));
-		assertSame(ExposeInvocationInterceptor.INSTANCE, SerializationTestUtils.serializeAndDeserialize(ExposeInvocationInterceptor.INSTANCE));
+		assertSame(ExposeInvocationInterceptor.INSTANCE,
+				SerializationTestUtils.serializeAndDeserialize(ExposeInvocationInterceptor.INSTANCE));
 	}
 
 	public void testDynamicSuperclasses() {

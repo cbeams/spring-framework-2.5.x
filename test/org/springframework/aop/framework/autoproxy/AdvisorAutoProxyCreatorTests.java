@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy;
 
@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.Lockable;
+import org.springframework.aop.framework.MethodCounter;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.CommonsPoolTargetSource;
@@ -58,8 +59,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	}
 	
 	/**
-	 * If no pointcuts match (no atts) there should be proxying
-	 * @throws Exception
+	 * If no pointcuts match (no attrs) there should be proxying.
 	 */
 	public void testNoProxy() throws Exception {
 		BeanFactory bf = getBeanFactory();
@@ -73,11 +73,19 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		assertTrue(AopUtils.isAopProxy(test));
 	}
 	
+	public void testRegexpApplied() throws Exception {
+		BeanFactory bf = getBeanFactory();
+		ITestBean test = (ITestBean) bf.getBean("test");
+		MethodCounter counter = (MethodCounter) bf.getBean("countingAdvice");
+		assertEquals(0, counter.getCalls());
+		test.getName();
+		assertEquals(1, counter.getCalls());
+	}
+
 	/**
 	 * Check that we can provide a common interceptor that will
 	 * appear in the chain before "specific" interceptors,
 	 * which are sourced from matching advisors
-	 * @throws Exception
 	 */
 	public void testCommonInterceptorAndAdvisor() throws Exception {
 		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/advisorAutoProxyCreatorWithCommonInterceptors.xml");
@@ -107,7 +115,6 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	/**
 	 * We have custom TargetSourceCreators but there's no match, and
 	 * hence no proxying, for this bean
-	 * @throws Exception
 	 */
 	public void testCustomTargetSourceNoMatch() throws Exception {
 		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
@@ -277,7 +284,6 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	 * a Modifiable mixin. Tests that the autoproxy infrastructure can create
 	 * advised objects with independent interceptor instances.
 	 * The Modifiable behaviour of each instance of TestBean should be distinct.
-	 * @throws Exception
 	 */
 	/*
 	public void testIntroductionViaPrototype() throws Exception {

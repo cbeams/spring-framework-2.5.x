@@ -80,7 +80,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		for (int i = 0; i < candidateAdvisors.size(); i++) {
 			// Sun, give me generics, please!
 			Advisor candidate = (Advisor) candidateAdvisors.get(i);
-			if (AopUtils.canApply(candidate, clazz, null)) {
+			if (AopUtils.canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);
 				if (logger.isInfoEnabled()) {
 					logger.info("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");

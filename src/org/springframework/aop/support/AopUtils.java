@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2002-2004 the original author or authors.
  * 
@@ -13,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -217,61 +216,30 @@ public abstract class AopUtils {
 	}
 	
 	/**
-	 * Is the given method declared on one of these interfaces?
-	 * @param method method to check
-	 * @param interfaces array of interfaces we want to check
-	 * @return whether the method is declared on one of these interfaces
-	 */
-	public static boolean methodIsOnOneOfTheseInterfaces(Method method, Class[] interfaces) {
-		if (interfaces == null) {
-			return false;
-		}
-
-		for (int i = 0; i < interfaces.length; i++) {
-			if (!interfaces[i].isInterface()) {
-				throw new IllegalArgumentException(interfaces[i].getName() + " is not an interface");
-			}
-			// TODO: Check that the method with this name actually comes from the interface?
-			try {
-				interfaces[i].getDeclaredMethod(method.getName(), method.getParameterTypes());
-				return true;
-			}
-			catch (NoSuchMethodException ex) {
-				// Didn't find it... keep going.
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Can the given pointcut apply at all on the given class?
 	 * This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
 	 * @param pc pc static or dynamic pointcut to check
 	 * @param targetClass class we're testing
-	 * @param proxyInterfaces proxy interfaces. If null, all methods
-	 * on class may be proxied
 	 * @return whether the pointcut can apply on any method
 	 */
-	public static boolean canApply(Pointcut pc, Class targetClass, Class[] proxyInterfaces) {
+	public static boolean canApply(Pointcut pc, Class targetClass) {
 		if (!pc.getClassFilter().matches(targetClass)) {
 			return false;
 		}
 		
-		// It may apply to the class
-		// Check whether it can apply on any method
-		// Checks public methods, including inherited methods
-		Method[] methods = targetClass.getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			Method m = methods[i];
-			// If we're looking only at interfaces and this method
-			// isn't on any of them, skip it
-			if (proxyInterfaces != null && !methodIsOnOneOfTheseInterfaces(m, proxyInterfaces)) {
-				continue;
+		List classes = getAllInterfacesForClassAsList(targetClass);
+		classes.add(targetClass);
+		for (Iterator it = classes.iterator(); it.hasNext();) {
+			Class clazz = (Class) it.next();
+			Method[] methods = clazz.getMethods();
+			for (int j = 0; j < methods.length; j++) {
+				if (pc.getMethodMatcher().matches(methods[j], targetClass)) {
+					return true;
+				}
 			}
-			if (pc.getMethodMatcher().matches(m, targetClass))
-				return true;
 		}
+
 		return false;
 	}
 	
@@ -281,17 +249,15 @@ public abstract class AopUtils {
 	 * out a advisor for a class.
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
-	 * @param proxyInterfaces proxy interfaces. If null, all methods
-	 * on class may be proxied
 	 * @return whether the pointcut can apply on any method
 	 */
-	public static boolean canApply(Advisor advisor, Class targetClass, Class[] proxyInterfaces) {
+	public static boolean canApply(Advisor advisor, Class targetClass) {
 		if (advisor instanceof IntroductionAdvisor) {
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
 		else if (advisor instanceof PointcutAdvisor) {
 			PointcutAdvisor pca = (PointcutAdvisor) advisor;
-			return canApply(pca.getPointcut(), targetClass, proxyInterfaces);
+			return canApply(pca.getPointcut(), targetClass);
 		}
 		else {
 			// It doesn't have a pointcut so we assume it applies

@@ -63,12 +63,12 @@
 		singleton, so it may pose circular reference problems, or
 		an infinite loop.
 	-->
-	<bean id="neverMatchAdvisor"  class="org.springframework.aop.framework.autoproxy.NeverMatchAdvisor"
+	<bean id="neverMatchAdvisor" class="org.springframework.aop.framework.autoproxy.NeverMatchAdvisor"
 			singleton="false">
 		<property name="dependencies">
 			<list>
-				<ref local="singletonDependency" />
-				<ref local="prototypeDependency" />
+				<ref local="singletonDependency"/>
+				<ref local="prototypeDependency"/>
 			</list>
 		</property>
 	</bean>
@@ -80,7 +80,14 @@
 	<bean id="prototypeDependency" class="org.springframework.beans.TestBean" singleton="false" />
 	
 	<!-- ====== End test for prototype definitions to try to provoke circular references ========================= -->
-	
+
+	<bean class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="advice"><ref bean="countingAdvice"/></property>
+		<property name="pattern"><value>org.springframework.beans.ITestBean.getName</value></property>
+	</bean>
+
+	<bean id="countingAdvice" class="org.springframework.aop.framework.CountingAfterReturningAdvice"/>
+
 	<bean id="test" class="org.springframework.beans.TestBean">
 		<property name="age"><value>4</value></property>
 	</bean>
