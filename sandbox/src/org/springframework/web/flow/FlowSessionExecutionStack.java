@@ -36,7 +36,7 @@ import org.springframework.web.util.SessionKeyUtils;
  * 
  * @author Keith Donald
  */
-public class FlowSessionExecutionStack implements MutableAttributesAccessor, Serializable, FlowSessionExecutionInfo {
+public class FlowSessionExecutionStack implements FlowSessionExecution, Serializable {
 	private static final Log logger = LogFactory.getLog(FlowSessionExecutionStack.class);
 
 	private String id;
@@ -283,7 +283,7 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		}
 		return s;
 	}
-	
+
 	public String toString() {
 		return executingFlowSessions.isEmpty() ? "[Empty FlowSessionExecutionStack " + getId()
 				+ "; no flows are active]" : new ToStringCreator(this).append("id", getId()).append("activeFlowId",

@@ -16,7 +16,6 @@
 package org.springframework.web.flow;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -115,22 +114,22 @@ public class ActionState extends TransitionableState {
 	}
 
 	public void setActionBean(ActionBean actionBean) {
-		this.actionBeans = new HashSet(1);
+		this.actionBeans = new LinkedHashSet(1);
 		addActionBean(actionBean);
 	}
 
 	public void setActionBeanName(String actionBeanName) {
-		this.actionBeans = new HashSet(1);
+		this.actionBeans = new LinkedHashSet(1);
 		addActionBeanName(actionBeanName);
 	}
 
 	public void setActionBeans(ActionBean[] actionBeans) {
-		this.actionBeans = new HashSet(actionBeans.length);
+		this.actionBeans = new LinkedHashSet(actionBeans.length);
 		addActionBeans(actionBeans);
 	}
 
 	public void setActionBeanNames(String[] actionBeanNames) {
-		this.actionBeans = new HashSet(actionBeanNames.length);
+		this.actionBeans = new LinkedHashSet(actionBeanNames.length);
 		addActionBeanNames(actionBeanNames);
 	}
 

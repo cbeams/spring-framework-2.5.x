@@ -74,10 +74,10 @@ public class MulticastFlowLifecycleListener implements FlowLifecycleListener, Be
 
 	/*
 	 * @see uk.co.voca.common.web.flow.FlowLifecycleListener#flowStarted(uk.co.voca.common.web.flow.Flow,
-	 *      uk.co.voca.common.web.flow.FlowSessionExecutionInfo,
+	 *      uk.co.voca.common.web.flow.FlowSessionExecution,
 	 *      javax.servlet.http.HttpServletRequest)
 	 */
-	public void flowStarted(final Flow source, final FlowSessionExecutionInfo sessionExecutionInfo,
+	public void flowStarted(final Flow source, final FlowSessionExecution sessionExecutionInfo,
 			final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Flow [started] call back received; flowId='" + source.getId() + "', sessionExecutionInfo='"
@@ -93,11 +93,11 @@ public class MulticastFlowLifecycleListener implements FlowLifecycleListener, Be
 	/*
 	 * @see uk.co.voca.common.web.flow.FlowLifecycleListener#flowEventSignaled(uk.co.voca.common.web.flow.Flow,
 	 *      java.lang.String, uk.co.voca.common.web.flow.AbstractState,
-	 *      uk.co.voca.common.web.flow.FlowSessionExecutionInfo,
+	 *      uk.co.voca.common.web.flow.FlowSessionExecution,
 	 *      javax.servlet.http.HttpServletRequest)
 	 */
 	public void flowEventSignaled(final Flow source, final String eventId, final AbstractState state,
-			final FlowSessionExecutionInfo sessionExecutionInfo, final HttpServletRequest request) {
+			final FlowSessionExecution sessionExecutionInfo, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Flow [event signaled] call back received; flowId='" + source.getId() + ", eventId='"
 					+ eventId + "', stateId='" + state.getId() + "', sessionExecutionInfo='" + sessionExecutionInfo
@@ -114,11 +114,11 @@ public class MulticastFlowLifecycleListener implements FlowLifecycleListener, Be
 	 * @see uk.co.voca.common.web.flow.FlowLifecycleListener#flowStateTransitioned(uk.co.voca.common.web.flow.Flow,
 	 *      uk.co.voca.common.web.flow.AbstractState,
 	 *      uk.co.voca.common.web.flow.AbstractState,
-	 *      uk.co.voca.common.web.flow.FlowSessionExecutionInfo,
+	 *      uk.co.voca.common.web.flow.FlowSessionExecution,
 	 *      javax.servlet.http.HttpServletRequest)
 	 */
 	public void flowStateTransitioned(final Flow source, final AbstractState oldState, final AbstractState newState,
-			final FlowSessionExecutionInfo sessionExecutionInfo, final HttpServletRequest request) {
+			final FlowSessionExecution sessionExecutionInfo, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Flow [state transition] call back received; flowId='" + source.getId() + "', oldStateId='"
 					+ (oldState != null ? oldState.getId() : "[none - this is the start state]") + "', newStateId='"
@@ -135,11 +135,11 @@ public class MulticastFlowLifecycleListener implements FlowLifecycleListener, Be
 	/*
 	 * @see uk.co.voca.common.web.flow.FlowLifecycleListener#flowEventProcessed(uk.co.voca.common.web.flow.Flow,
 	 *      java.lang.String, uk.co.voca.common.web.flow.AbstractState,
-	 *      uk.co.voca.common.web.flow.FlowSessionExecutionInfo,
+	 *      uk.co.voca.common.web.flow.FlowSessionExecution,
 	 *      javax.servlet.http.HttpServletRequest)
 	 */
 	public void flowEventProcessed(final Flow source, final String eventId, final AbstractState state,
-			final FlowSessionExecutionInfo sessionExecutionInfo, final HttpServletRequest request) {
+			final FlowSessionExecution sessionExecutionInfo, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Flow [event processed] call back received; flowId='" + source.getId() + "', eventId='"
 					+ eventId + "', stateId='" + (state != null ? state.getId() : null) + "', sessionExecutionInfo='"
@@ -154,11 +154,11 @@ public class MulticastFlowLifecycleListener implements FlowLifecycleListener, Be
 
 	/*
 	 * @see uk.co.voca.common.web.flow.FlowLifecycleListener#flowEnded(uk.co.voca.common.web.flow.Flow,
-	 *      uk.co.voca.common.web.flow.FlowSessionExecutionInfo,
+	 *      uk.co.voca.common.web.flow.FlowSessionExecution,
 	 *      javax.servlet.http.HttpServletRequest)
 	 */
 	public void flowEnded(final Flow source, final FlowSession flowSession,
-			final FlowSessionExecutionInfo sessionExecutionInfo, final HttpServletRequest request) {
+			final FlowSessionExecution sessionExecutionInfo, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Flow [ended] call back received; flowId='" + source.getId() + "', sessionExecutionInfo='"
 					+ sessionExecutionInfo + "'");
