@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -88,10 +89,11 @@ import org.springframework.util.ClassUtils;
  * 
  * @author Keith Donald
  */
-public class SingletonServiceLocatorLoader implements BeanFactoryPostProcessor {
+public class SingletonServiceLocatorLoader implements BeanFactoryPostProcessor, Ordered {
     private static final Log logger = LogFactory
             .getLog(SingletonServiceLocatorLoader.class);
     public String[] locatorBeanIds;
+    private int order = Integer.MAX_VALUE;
     private String loadMethodName = "load";
     private static final char CLASS_SEPARATOR = '@';
 
@@ -117,6 +119,17 @@ public class SingletonServiceLocatorLoader implements BeanFactoryPostProcessor {
     public void setLoadMethodName(String loadMethodName) {
         Assert.notNull(loadMethodName);
         this.loadMethodName = loadMethodName;
+    }
+    
+    /**
+     * @see org.springframework.core.Ordered#getOrder()
+     */
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     /**
