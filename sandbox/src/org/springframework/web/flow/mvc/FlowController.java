@@ -35,11 +35,9 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * Web controller for the Spring MVC framework that handles requests using a web
  * flow. Requests are managed using an {@link HttpFlowExecutionManager}. Consult
  * the JavaDoc of that class for more information on how requests are processed.
- * 
  * <p>
  * This controller requires sessions to keep track of flow state. So it will force
  * the "requireSession" attribute defined by the AbstractController to true.
- *
  * <p>
  * <b>Exposed configuration properties:</b><br>
  * <table border="1">
@@ -100,7 +98,6 @@ public class FlowController extends AbstractController implements InitializingBe
 	public void afterPropertiesSet() throws Exception {
 		//web flows need a session!
 		setRequireSession(true);
-		
 		//setup our flow execution manager
 		this.manager = createHttpFlowExecutionManager();
 	}

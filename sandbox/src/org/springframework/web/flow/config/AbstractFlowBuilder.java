@@ -2320,8 +2320,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param stateId The state id
 	 * @return The transition
 	 */
-	protected Transition onSuccess(String actionName, String successStateId) {
-		return onEvent(actionName, getSuccessEventId(), successStateId);
+	protected Transition onSuccess(String actionName, String stateId) {
+		return onEvent(actionName, getSuccessEventId(), stateId);
 	}
 
 	/**
@@ -2722,7 +2722,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * transition to the state with the id <code>${stateId}</code>
 	 * </ul>
 	 * @param actionName the action name qualifier
-	 * @param stateIdPrefix The state id
+	 * @param stateId The state id
 	 * @return The transition The transition
 	 */
 	protected Transition onError(String actionName, String stateId) {

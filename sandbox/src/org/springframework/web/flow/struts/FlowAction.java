@@ -39,13 +39,11 @@ import org.springframework.web.util.WebUtils;
  * in the application. Alternatively, a single FlowController may manage all
  * flow executions by parameterization with the appropriate <code>flowId</code>
  * in views that start new flow executions.
- * 
  * <p>
  * Requests are managed using an {@link HttpFlowExecutionManager}. Consult
  * the JavaDoc of that class for more information on how requests are processed.
  * 
  * @see org.springframework.web.flow.support.HttpFlowExecutionManager
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -56,7 +54,7 @@ public class FlowAction extends TemplateAction {
 		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
 		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(getFlowId(mapping), locator);
 		ModelAndView modelAndView = executionManager.handleRequest(request, response);
-		// this is not very clean (pulling attribute from hard coded name)
+		//TODO: this is not extremely clean (pulling a attribute from hard coded name that is configurable elsewhere)
 		FlowExecution flowExecution = (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
 		if (flowExecution != null && flowExecution.isActive()) {
 			if (form instanceof BindingActionForm) {

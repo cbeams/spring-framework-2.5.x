@@ -27,8 +27,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.FlowConstants;
+import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.util.WebUtils;
 
@@ -49,14 +49,14 @@ import org.springframework.web.util.WebUtils;
 public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
-	 * The form object instance is aliased under this attribute name in
-	 * the flow model by the default populate and bind actions.
+	 * The form object instance is aliased under this attribute name in the flow
+	 * model by the default form setup and bind and validate actions.
 	 */
 	public static final String FORM_OBJECT_ATTRIBUTE = "localFormObject";
 
 	/**
-	 * The form object errors instance is aliased under this attribute name
-	 * in the flow model by the default populate and bind actions.
+	 * The form object errors instance is aliased under this attribute name in
+	 * the flow model by the default form setup and bind and validate actions.
 	 */
 	public static final String FORM_OBJECT_ERRORS_ATTRIBUTE = "localFormObjectErrors";
 
@@ -226,7 +226,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Gets the form object from the model, using the name {@link #FORM_OBJECT_ATTRIBUTE}.
+	 * Gets the form object from the model, using the name
+	 * {@link #FORM_OBJECT_ATTRIBUTE}.
 	 * 
 	 * @param model the flow model
 	 * @param formObjectClass the class of the form object, which will be
@@ -240,7 +241,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Gets the form object from the model, using the name {@link #LOCAL_FORM_OBJECT_NAME}.
+	 * Gets the form object from the model, using the name
+	 * {@link #LOCAL_FORM_OBJECT_NAME}.
 	 * 
 	 * @param model the flow model
 	 * @throws IllegalStateException if the form object is not found in the
@@ -303,7 +305,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Export a <i>new</i> errors instance to the flow model for the form
+	 * Export a <i>new </i> errors instance to the flow model for the form
 	 * object using name {@link #FORM_OBJECT_ATTRIBUTE}.
 	 * 
 	 * @param model The flow model
@@ -314,27 +316,27 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Export a <i>new</i> errors instance to the flow model for the form
+	 * Export a <i>new </i> errors instance to the flow model for the form
 	 * object with the specified form object name.
 	 * @param model The flow model
 	 * @param formObject The form object
 	 * @param formObjectName The name of the form object
 	 */
 	protected void exportErrors(MutableFlowModel model, Object formObject, String formObjectName) {
-		exportErrorsInternal(model, new BindException(formObject, formObjectName));
+		exportBindExceptionErrors(model, new BindException(formObject, formObjectName));
 	}
 
 	/**
-	 * Helper to export form object error information.
+	 * Internal helper to export form object error information.
 	 */
-	protected void exportErrorsInternal(MutableFlowModel model, BindException errors) {
+	protected void exportBindExceptionErrors(MutableFlowModel model, BindException errors) {
 		model.setAttribute(FORM_OBJECT_ATTRIBUTE, errors.getTarget());
 		model.setAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE, errors);
 		model.setAttributes(errors.getModel());
 	}
 
-	public final String execute(HttpServletRequest request, HttpServletResponse response,
-			MutableFlowModel model) throws Exception {
+	public final String execute(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
+			throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Action '" + getClass().getName() + "' beginning execution");
 		}
@@ -362,11 +364,12 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Pre-action-execution hook, subclasses may override. If this method
-	 * returns a non-<code>null</code> value, the <code>doExecuteAction()</code>
-	 * method will <b>not</b> be called and the returned value will be used to select
-	 * a transition to trigger in the calling action state. If this method
-	 * returns <code>null</code>, <code>doExecuteAction()</code> will be
-	 * called to obtain an action result.
+	 * returns a non- <code>null</code> value, the
+	 * <code>doExecuteAction()</code> method will <b>not </b> be called and
+	 * the returned value will be used to select a transition to trigger in the
+	 * calling action state. If this method returns <code>null</code>,
+	 * <code>doExecuteAction()</code> will be called to obtain an action
+	 * result.
 	 * 
 	 * <p>
 	 * This implementation just returns <code>null</code>.
@@ -374,15 +377,15 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param request The http request
 	 * @param response The http response
 	 * @param model The flow data model
-	 * @return The non-<code>null</code> action result, in which case the
+	 * @return The non- <code>null</code> action result, in which case the
 	 *         <code>doExecuteAction()</code> will not be called. Or
-	 *         <code>null</code> if the <code>doExecuteAction()</code> method
-	 *         should be called to obtain the action result.
-	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 *         <code>null</code> if the <code>doExecuteAction()</code>
+	 *         method should be called to obtain the action result.
+	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
-	protected String onPreExecute(HttpServletRequest request, HttpServletResponse response,
-			MutableFlowModel model) throws Exception {
+	protected String onPreExecute(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
+			throws Exception {
 		return null;
 	}
 
@@ -394,7 +397,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param response The http response
 	 * @param model The flow data model
 	 * @return The action result
-	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
 	protected abstract String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
@@ -409,7 +412,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param request The http request
 	 * @param response The http response
 	 * @param model The flow data model
-	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
 	protected void onPostExecute(HttpServletRequest request, HttpServletResponse response, FlowModel model)

@@ -79,7 +79,7 @@ public class SetupFormAction extends BindAndValidateAction {
 			}
 			binder.bind(request);
 		}
-		exportErrorsInternal(model, binder.getErrors());
+		exportBindExceptionErrors(model, binder.getErrors());
 		exportViewPlaceholders(request, model);
 		try {
 			setupReferenceData(request, model);
