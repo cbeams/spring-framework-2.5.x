@@ -364,9 +364,9 @@ public class PredicateFactory {
      * 
      * @param propertyName
      *            the property with the range constraint.
-     * @param lowPropertyName
+     * @param minPropertyName
      *            the low edge of the range
-     * @param highPropertyName
+     * @param maxPropertyName
      *            the high edge of the range
      * @return The range predicate constraint
      */
