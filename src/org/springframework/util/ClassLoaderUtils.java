@@ -1,7 +1,6 @@
 package org.springframework.util;
 
 import java.io.InputStream;
-import java.util.StringTokenizer;
 
 /**
  * Utility class for class loading, and for diagnostic purposes
@@ -76,12 +75,7 @@ public abstract class ClassLoaderUtils {
 		StringBuffer retval	= new StringBuffer("/");
 		if (clazz == null)
 			return retval.toString();
-		StringTokenizer	st = new StringTokenizer(clazz.getPackage().getName(), ".");
-		while (st.hasMoreTokens()) {
-			retval.append(st.nextToken());
-			if (st.hasMoreTokens())
-				retval.append("/");
-		}
+		retval.append(clazz.getPackage().getName().replace('.', '/'));
 		return retval.toString();
 	}
   
