@@ -39,21 +39,21 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
 
 /**
- * Bean definition reader for Spring's default XML bean definition format.
+ * Bean definition reader for XML bean definitions. Delegates the actual XML
+ * parsing to an implementation of the XmlBeanDefinitionParser interface.
  * Typically applied to a DefaultListableBeanFactory.
  *
- * <p>The structure, element and attribute names of the required XML document
- * are hard-coded in this class. (Of course a transform could be run if necessary
- * to produce this format). "beans" doesn't need to be the root element of the XML
- * document: This class will parse all bean definition elements in the XML file.
- *
- * <p>This class registers each bean definition with the given bean factory superclass,
- * and relies on the latter's implementation of the BeanDefinitionRegistry interface.
- * It supports singletons, prototypes, and references to either of these kinds of bean.
+ * <p>This class loads a DOM document and applies the bean definition parser to it.
+ * The parser will register each bean definition with the given bean factory,
+ * relying on the latter's implementation of the BeanDefinitionRegistry interface.
 
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see #setParserClass
+ * @see XmlBeanDefinitionParser
+ * @see DefaultXmlBeanDefinitionParser
+ * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
+ * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -79,9 +79,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set a SAX entity resolver to be used for parsing. By default, BeansDtdResolver
-	 * will be used. Can be overridden for custom entity resolution, e.g. relative
-	 * to some specific base path.
+	 * Set a SAX entity resolver to be used for parsing. By default,
+	 * BeansDtdResolver will be used. Can be overridden for custom entity
+	 * resolution, for example relative to some specific base path.
 	 * @see org.springframework.beans.factory.xml.BeansDtdResolver
 	 */
 	public void setEntityResolver(EntityResolver entityResolver) {
@@ -89,7 +89,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set the XmlBeanDefinitionParser implementation to use.
+	 * Set the XmlBeanDefinitionParser implementation to use,
+	 * responsible for the actual parsing of XML bean definitions.
 	 * Default is DefaultXmlBeanDefinitionParser.
 	 * @see XmlBeanDefinitionParser
 	 * @see DefaultXmlBeanDefinitionParser
@@ -131,8 +132,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throw new BeanDefinitionStoreException("Parser configuration exception parsing XML from " + resource, ex);
 		}
 		catch (SAXParseException ex) {
-			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document from " +
-			                                       resource + " is invalid", ex);
+			throw new BeanDefinitionStoreException(
+			    "Line " + ex.getLineNumber() + " in XML document from " + resource + " is invalid", ex);
 		}
 		catch (SAXException ex) {
 			throw new BeanDefinitionStoreException("XML document from " + resource + " is invalid", ex);
@@ -154,10 +155,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Register the bean definitions contained in the given DOM document.
-	 * All calls go through this.
+	 * Called by <code>loadBeanDefinitions</code>.
+	 * <p>Creates a new instance of the parser class and invokes
+	 * <code>registerBeanDefinitions</code> on it.
 	 * @param doc the DOM document
 	 * @param resource the resource descriptor (for context information)
 	 * @throws BeansException in case of parsing errors
+	 * @see #loadBeanDefinitions
+	 * @see #setParserClass
+	 * @see XmlBeanDefinitionParser#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
 		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);

@@ -56,7 +56,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the XmlBeanDefinitionParser interface.
- * Parses bean definitions according to the "spring-beans" DTD.
+ * Parses bean definitions according to the "spring-beans" DTD,
+ * i.e. Spring's default XML bean definition format.
+ *
+ * <p>The structure, elements and attribute names of the required XML document
+ * are hard-coded in this class. (Of course a transform could be run if necessary
+ * to produce this format). "beans" doesn't need to be the root element of the XML
+ * document: This class will parse all bean definition elements in the XML file.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003

@@ -49,19 +49,20 @@ import java.io.PrintWriter;
 public abstract class NestedRuntimeException extends RuntimeException {
 
 	/** Root cause of this nested exception */
-	private Throwable cause;
+	private final Throwable cause;
 
 	/**
-	 * Construct a <code>ExceptionWrapperException</code> with the specified detail message.
+	 * Construct a <code>NestedRuntimeException</code> with the specified detail message.
 	 * @param msg the detail message
 	 */
 	public NestedRuntimeException(String msg) {
 		super(msg);
+		this.cause = null;
 	}
 
 	/**
-	 * Construct a <code>RemoteException</code> with the specified detail message and
-	 * nested exception.
+	 * Construct a <code>NestedRuntimeException</code> with the specified detail message
+	 * and nested exception.
 	 * @param msg the detail message
 	 * @param ex the nested exception
 	 */
@@ -74,7 +75,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * Return the nested cause, or null if none.
 	 */
 	public Throwable getCause() {
-		return (cause == this ? null : cause);
+		return (this.cause == this ? null : this.cause);
 	}
 
 	/**
