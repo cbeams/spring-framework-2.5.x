@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.enums.support;
 
 import java.io.Serializable;
@@ -27,6 +28,7 @@ import net.sf.hibernate.type.NullableType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.enums.CodedEnum;
 import org.springframework.enums.CodedEnumResolver;
 import org.springframework.enums.LetterCodedEnum;
@@ -39,87 +41,87 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractCodedEnumUserType implements UserType, Serializable {
 
-    private transient final Log logger = LogFactory.getLog(getClass());
+	private transient final Log logger = LogFactory.getLog(getClass());
 
-    private transient CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
+	private transient CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
 
-    protected CodedEnumResolver getEnumResolver() {
-        if (enumResolver == null) {
-            return StaticCodedEnumResolver.instance();
-        }
-        return enumResolver;
-    }
+	protected CodedEnumResolver getEnumResolver() {
+		if (enumResolver == null) {
+			return StaticCodedEnumResolver.instance();
+		}
+		return enumResolver;
+	}
 
-    public void setEnumResolver(CodedEnumResolver resolver) {
-        this.enumResolver = resolver;
-    }
+	public void setEnumResolver(CodedEnumResolver resolver) {
+		this.enumResolver = resolver;
+	}
 
-    public int[] sqlTypes() {
-        return persistentType().sqlTypes(null);
-    }
+	public int[] sqlTypes() {
+		return persistentType().sqlTypes(null);
+	}
 
-    protected String enumType() {
-        return returnedClass().getName();
-    }
+	protected String enumType() {
+		return returnedClass().getName();
+	}
 
-    public boolean equals(Object o1, Object o2) throws HibernateException {
-        return ObjectUtils.nullSafeEquals(o1, o2);
-    }
+	public boolean equals(Object o1, Object o2) throws HibernateException {
+		return ObjectUtils.nullSafeEquals(o1, o2);
+	}
 
-    protected NullableType persistentType() {
-        if (ShortCodedEnum.class.isAssignableFrom(returnedClass())) {
-            return Hibernate.SHORT;
-        }
-        else if (LetterCodedEnum.class.isAssignableFrom(returnedClass())) {
-            return Hibernate.CHARACTER;
-        }
-        else {
-            return Hibernate.STRING;
-        }
-    }
+	protected NullableType persistentType() {
+		if (ShortCodedEnum.class.isAssignableFrom(returnedClass())) {
+			return Hibernate.SHORT;
+		}
+		else if (LetterCodedEnum.class.isAssignableFrom(returnedClass())) {
+			return Hibernate.CHARACTER;
+		}
+		else {
+			return Hibernate.STRING;
+		}
+	}
 
-    public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
-        Comparable code;
-        code = (Comparable)persistentType().nullSafeGet(rs, names[0]);
-        if (code == null) {
-            return null;
-        }
-        CodedEnum e = enumResolver.getEnum(enumType(), code, null);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Resolved enum '" + e + "' of type '" + enumType() + "' from persisted code " + code);
-        }
-        return e;
-    }
+	public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
+		Comparable code;
+		code = (Comparable) persistentType().nullSafeGet(rs, names[0]);
+		if (code == null) {
+			return null;
+		}
+		CodedEnum e = enumResolver.getEnum(enumType(), code, null);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resolved enum '" + e + "' of type '" + enumType() + "' from persisted code " + code);
+		}
+		return e;
+	}
 
-    public void nullSafeSet(PreparedStatement stmt, Object value, int index) throws HibernateException, SQLException {
-        if ((value != null) && !returnedClass().isAssignableFrom(value.getClass())) {
-            throw new IllegalArgumentException("Received value is not a [" + returnedClass().getName() + "] but ["
-                    + value.getClass() + "]");
-        }
-        CodedEnum codedEnum = (CodedEnum)value;
-        if (codedEnum != null) {
-            Object code = codedEnum.getCode();
-            Assert.notNull(code, "Enum codes cannot be null!");
-            // for some reason some characters don't map well, convert to string
-            // instead...
-            if (code instanceof Character) {
-                stmt.setString(index, ((Character)code).toString());
-            }
-            else {
-                stmt.setObject(index, code);
-            }
-        }
-        else {
-            stmt.setNull(index, sqlTypes()[0]);
-        }
-    }
+	public void nullSafeSet(PreparedStatement stmt, Object value, int index) throws HibernateException, SQLException {
+		if ((value != null) && !returnedClass().isAssignableFrom(value.getClass())) {
+			throw new IllegalArgumentException("Received value is not a [" + returnedClass().getName() + "] but ["
+					+ value.getClass() + "]");
+		}
+		CodedEnum codedEnum = (CodedEnum) value;
+		if (codedEnum != null) {
+			Object code = codedEnum.getCode();
+			Assert.notNull(code, "Enum codes cannot be null!");
+			// for some reason some characters don't map well, convert to string
+			// instead...
+			if (code instanceof Character) {
+				stmt.setString(index, ((Character) code).toString());
+			}
+			else {
+				stmt.setObject(index, code);
+			}
+		}
+		else {
+			stmt.setNull(index, sqlTypes()[0]);
+		}
+	}
 
-    public Object deepCopy(Object value) throws HibernateException {
-        return value;
-    }
+	public Object deepCopy(Object value) throws HibernateException {
+		return value;
+	}
 
-    public boolean isMutable() {
-        return false;
-    }
+	public boolean isMutable() {
+		return false;
+	}
 
 }

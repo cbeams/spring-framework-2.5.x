@@ -1,6 +1,19 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
+
 package org.springframework.enums.support;
 
 import java.io.Serializable;
@@ -19,53 +32,54 @@ import org.springframework.util.closure.support.Block;
  * @author Keith Donald
  */
 public class HibernateCodedEnumResolver extends AbstractCodedEnumResolver {
-    private HibernateTemplate hibernateTemplate;
 
-    public HibernateCodedEnumResolver(HibernateTemplate template) {
-        super(false);
-        Assert.notNull(template, "The hibernate template is required");
-        this.hibernateTemplate = template;
-    }
+	private HibernateTemplate hibernateTemplate;
 
-    public CodedEnum getEnum(String type, Comparable code, Locale locale) {
-        try {
-            return (CodedEnum)hibernateTemplate.load(ClassUtils.forName(type), (Serializable)code);
-        }
-        catch (ClassNotFoundException e) {
-            IllegalArgumentException iae = new IllegalArgumentException(
-                    "The type must be a valid java class identifier");
-            iae.initCause(e);
-            throw iae;
-        }
-        catch (ClassCastException e) {
-            IllegalArgumentException iae = new IllegalArgumentException("The code must be a serializable");
-            iae.initCause(e);
-            throw iae;
-        }
-    }
+	public HibernateCodedEnumResolver(HibernateTemplate template) {
+		super(false);
+		Assert.notNull(template, "The hibernate template is required");
+		this.hibernateTemplate = template;
+	}
 
-    public Collection getEnumsAsCollection(String type, Locale locale) {
-        try {
-            return (Collection)hibernateTemplate.loadAll(ClassUtils.forName(type));
-        }
-        catch (ClassNotFoundException e) {
-            IllegalArgumentException iae = new IllegalArgumentException(
-                    "The type must be a valid java class identifier");
-            iae.initCause(e);
-            throw iae;
-        }
-    }
+	public CodedEnum getEnum(String type, Comparable code, Locale locale) {
+		try {
+			return (CodedEnum) hibernateTemplate.load(ClassUtils.forName(type), (Serializable) code);
+		}
+		catch (ClassNotFoundException e) {
+			IllegalArgumentException iae = new IllegalArgumentException(
+					"The type must be a valid java class identifier");
+			iae.initCause(e);
+			throw iae;
+		}
+		catch (ClassCastException e) {
+			IllegalArgumentException iae = new IllegalArgumentException("The code must be a serializable");
+			iae.initCause(e);
+			throw iae;
+		}
+	}
 
-    public Map getEnumsAsMap(String type, Locale locale) {
-        Collection all = getEnumsAsCollection(type, locale);
-        final Map map = new HashMap(all.size());
-        new Block() {
-            protected void handle(Object o) {
-                CodedEnum ce = (CodedEnum)o;
-                map.put(ce.getCode(), ce);
-            }
-        }.forEach(all);
-        return map;
-    }
+	public Collection getEnumsAsCollection(String type, Locale locale) {
+		try {
+			return (Collection) hibernateTemplate.loadAll(ClassUtils.forName(type));
+		}
+		catch (ClassNotFoundException e) {
+			IllegalArgumentException iae = new IllegalArgumentException(
+					"The type must be a valid java class identifier");
+			iae.initCause(e);
+			throw iae;
+		}
+	}
+
+	public Map getEnumsAsMap(String type, Locale locale) {
+		Collection all = getEnumsAsCollection(type, locale);
+		final Map map = new HashMap(all.size());
+		new Block() {
+			protected void handle(Object o) {
+				CodedEnum ce = (CodedEnum) o;
+				map.put(ce.getCode(), ce);
+			}
+		}.forEach(all);
+		return map;
+	}
 
 }

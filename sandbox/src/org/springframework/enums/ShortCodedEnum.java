@@ -13,40 +13,41 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.enums;
 
 /**
  * <p>Implementation of CodedEnum which uses Short as the code type.</p>
- * 
+ *
  * <p>Should almsot always be subclassed, but for some simple situations it may
  * be used directly. Note that you will not be able to use unique type based
- * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.</p> 
- * 
+ * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.</p>
+ *
  * @author Keith Donald
  */
 public class ShortCodedEnum extends AbstractCodedEnum {
 
-    private Short code;
-    
-    protected ShortCodedEnum() {
-        super();
-    }
-    
-    protected ShortCodedEnum(int code) {
-        this(code, null);
-    }
+	private Short code;
 
-    protected ShortCodedEnum(int code, String label) {
-        super(label);
-        this.code = new Short((short)code);
-    }
+	protected ShortCodedEnum() {
+		super();
+	}
 
-    public Comparable getCode() {
-        return code;
-    }
+	protected ShortCodedEnum(int code) {
+		this(code, null);
+	}
 
-    public short getShortCode() {
-        return ((Short)getCode()).shortValue();
-    }
+	protected ShortCodedEnum(int code, String label) {
+		super(label);
+		this.code = new Short((short) code);
+	}
+
+	public Comparable getCode() {
+		return code;
+	}
+
+	public short getShortCode() {
+		return ((Short) getCode()).shortValue();
+	}
 
 }

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.enums.support;
 
 import org.springframework.enums.AbstractCodedEnum;
@@ -23,83 +24,83 @@ import org.springframework.util.Assert;
  */
 public class GenericLabeledCodedEnum extends AbstractCodedEnum {
 
-    private Comparable code;
+	private Comparable code;
 
-    private String type;
+	private String type;
 
-    protected GenericLabeledCodedEnum() {
+	protected GenericLabeledCodedEnum() {
+	}
 
-    }
+	public GenericLabeledCodedEnum(String type, int code, String label) {
+		super(label);
+		setShortCode((short) code);
+		setType(type);
+	}
 
-    public GenericLabeledCodedEnum(String type, int code, String label) {
-        super(label);
-        setShortCode((short)code);
-        setType(type);
-    }
+	public GenericLabeledCodedEnum(String type, char code, String label) {
+		super(label);
+		setLetterCode(code);
+		setType(type);
+	}
 
-    public GenericLabeledCodedEnum(String type, char code, String label) {
-        super(label);
-        setLetterCode(code);
-        setType(type);
-    }
+	public GenericLabeledCodedEnum(String type, String code, String label) {
+		super(label);
+		setStringCode(code);
+		setType(type);
+	}
 
-    public GenericLabeledCodedEnum(String type, String code, String label) {
-        super(label);
-        setStringCode(code);
-        setType(type);
-    }
+	protected void setType(String type) {
+		Assert.hasText(type, "Type is required");
+		this.type = type;
+	}
 
-    protected void setType(String type) {
-        Assert.hasText(type, "Type is required");
-        this.type = type;
-    }
+	public short getShortCode() {
+		Assert.state(isShortCoded(), "Not short coded");
+		return ((Short) code).shortValue();
+	}
 
-    public short getShortCode() {
-        Assert.state(isShortCoded(), "Not short coded");
-        return ((Short)code).shortValue();
-    }
+	protected void setShortCode(short code) {
+		this.code = new Short(code);
+	}
 
-    protected void setShortCode(short code) {
-        this.code = new Short(code);
-    }
+	public char getLetterCode() {
+		Assert.state(isLetterCoded(), "Not letter coded");
+		return ((Character) code).charValue();
+	}
 
-    public char getLetterCode() {
-        Assert.state(isLetterCoded(), "Not letter coded");
-        return ((Character)code).charValue();
-    }
+	protected void setLetterCode(char code) {
+		Assert.isTrue(Character.isLetter(code), "The code " + code + " is invalid; it must be a letter.");
+		this.code = new Character((char) code);
+	}
 
-    protected void setLetterCode(char code) {
-        Assert.isTrue(Character.isLetter(code), "The code " + code + " is invalid; it must be a letter.");
-        this.code = new Character((char)code);
-    }
+	public String getStringCode() {
+		Assert.state(isStringCoded(), "Not string coded");
+		return (String) code;
+	}
 
-    public String getStringCode() {
-        Assert.state(isStringCoded(), "Not string coded");
-        return (String)code;
-    }
+	protected void setStringCode(String code) {
+		Assert.hasText(code, "The string code is required");
+		this.code = code;
+	}
 
-    protected void setStringCode(String code) {
-        Assert.hasText(code, "The string code is required");
-        this.code = code;
-    }
+	public boolean isShortCoded() {
+		return code instanceof Short;
+	}
 
-    public boolean isShortCoded() {
-        return code instanceof Short;
-    }
+	public boolean isLetterCoded() {
+		return code instanceof Character;
+	}
 
-    public boolean isLetterCoded() {
-        return code instanceof Character;
-    }
+	public boolean isStringCoded() {
+		return code instanceof String;
+	}
 
-    public boolean isStringCoded() {
-        return code instanceof String;
-    }
+	public Comparable getCode() {
+		return code;
+	}
 
-    public Comparable getCode() {
-        return code;
-    }
+	public String getType() {
+		return type;
+	}
 
-    public String getType() {
-        return type;
-    }
 }

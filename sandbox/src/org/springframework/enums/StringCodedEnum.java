@@ -13,42 +13,44 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.enums;
 
 import org.springframework.util.Assert;
 
 /**
  * <p>Implementation of CodedEnum which uses a String as the code type.</p>
- * 
+ *
  * <p>Should almsot always be subclassed, but for some simple situations it may
  * be used directly. Note that you will not be able to use unique type based
- * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.</p> 
- * 
+ * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.</p>
+ *
  * @author Keith Donald
  */
 public class StringCodedEnum extends AbstractCodedEnum {
 
-    private String code;
-    
-    protected StringCodedEnum() {
-        super();
-    }
+	private String code;
 
-    protected StringCodedEnum(String code) {
-        this(code, null);
-    }
+	protected StringCodedEnum() {
+		super();
+	}
 
-    protected StringCodedEnum(String code, String label) {
-        super(label);
-        Assert.hasText(code, "The string code is required");
-        this.code = code;
-    }
+	protected StringCodedEnum(String code) {
+		this(code, null);
+	}
 
-    public Comparable getCode() {
-        return code;
-    }
+	protected StringCodedEnum(String code, String label) {
+		super(label);
+		Assert.hasText(code, "The string code is required");
+		this.code = code;
+	}
 
-    public String getStringCode() {
-        return (String)getCode();
-    }
+	public Comparable getCode() {
+		return code;
+	}
+
+	public String getStringCode() {
+		return (String) getCode();
+	}
+
 }
