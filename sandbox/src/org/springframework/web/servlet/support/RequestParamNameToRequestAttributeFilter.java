@@ -141,5 +141,6 @@ public class RequestParamNameToRequestAttributeFilter extends GenericFilterBean 
                 req.setAttribute(name, value);
             }
         }
+        filterChain.doFilter(req, resp);
     }
 }
