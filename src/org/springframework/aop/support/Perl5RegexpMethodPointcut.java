@@ -23,23 +23,24 @@ import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
- * Perl5 regular expression pointcut bean. JavaBean properties are:
+ * Perl5-style regular expression pointcut. JavaBean properties are:
  * <ul>
  * <li>pattern: Perl5 regular expression for the fully-qualified method names to match
- * <li>patterns: alternative property taking a String array of patterns. The result will
- * be the union of these patterns.
+ * <li>patterns: alternative property taking a String array of patterns.
+ * The result will be the union of these patterns.
  * </ul>
  *
  * <p>Note: the regular expressions must be a match. For example,
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
  * <code>get.*</code> will not.
  *
- * <p>Currently uses Jakarta ORO regular expression library.
- * Does not require J2SE 1.4, although it runs under 1.4.
+ * <p>Currently uses the <a href="http://jakarta.apache.org/oro">Jakarta ORO</a>
+ * regular expression library. Does not require JDK 1.4+, in contrast to
+ * JdkRegexpMethodPointcut.
  *
  * @author Rod Johnson
  * @since 1.1
- * @see org.springframework.aop.support.AbstractRegexpMethodPointcut
+ * @see JdkRegexpMethodPointcut
  */
 public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut { 
 	

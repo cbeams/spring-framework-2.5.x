@@ -53,7 +53,7 @@ import org.springframework.aop.ClassFilter;
 public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut
 		implements ClassFilter, Serializable {
 	
-	/** Transient as it's reinitialized on deserialization. */
+	/** Transient as it's reinitialized on deserialization */
 	protected transient Log logger = LogFactory.getLog(getClass());
 	
 	/** Regular expressions to match */

@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * Java 1.4 regular expression pointcut bean. JavaBean properties are:
+ * Java 1.4 regular expression pointcut. JavaBean properties are:
  * <ul>
  * <li>pattern: Java 1.4 regular expression for the fully-qualified method names to match
  * <li>patterns: alternative property taking a String array of patterns. The result will
@@ -32,11 +32,13 @@ import java.util.regex.PatternSyntaxException;
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
  * <code>get.*</code> will not.
  *
- * <p>Requires J2SE 1.4, as it builds on the <code>java.util.regex</code> package.
+ * <p>Requires JDK 1.4+, as it builds on the <code>java.util.regex</code> package.
+ * As alternative on JDK 1.3 or for Perl5-style regular expression parsing,
+ * consider Perl5RegexpMethodPointcut.
  *
  * @author Dmitriy Kopylenko
  * @since 1.1
- * @see org.springframework.aop.support.AbstractRegexpMethodPointcut
+ * @see Perl5RegexpMethodPointcut
  */
 public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	
