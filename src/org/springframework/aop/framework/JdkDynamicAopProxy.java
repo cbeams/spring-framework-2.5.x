@@ -32,7 +32,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.3 2003-12-02 15:08:34 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.4 2003-12-05 13:23:39 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -107,6 +107,12 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			if (target != null) {
 				targetClass = target.getClass();
 			}
+			
+			if (this.advised.getExposeProxy()) {
+				// Make invocation available if necessary
+				oldProxy = AopContext.setCurrentProxy(proxy);
+				setProxyContext = true;
+			}
 		
 			// Get the interception chain for this method
 			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
@@ -114,8 +120,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			// Check whether we only have one InvokerInterceptor: that is, no real advice,
 			// but just reflective invocation of the target.
 			// We can only do this if the AdvisedSupport config object lets us.
-			if (advised.canOptimizeOutEmptyAdviceChain() && 
-					chain.isEmpty()) {
+			if (chain.isEmpty() && !advised.getExposeInvocation()) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
@@ -134,12 +139,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 					// this block may not have been reached even if exposeInvocation
 					// is true
 					setInvocationContext = true;
-				}
-				
-				if (this.advised.getExposeProxy()) {
-					// Make invocation available if necessary
-					oldProxy = AopContext.setCurrentProxy(proxy);
-					setProxyContext = true;
 				}
 				
 				// Proceed to the joinpoint through the interception chain

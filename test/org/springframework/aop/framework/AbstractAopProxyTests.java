@@ -33,7 +33,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.7 2003-12-05 13:05:54 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.8 2003-12-05 13:23:53 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -435,13 +435,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		NeedsToSeeProxy target = new NeedsToSeeProxy();
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { INeedsToSeeProxy.class } );
 		pc.setTarget(target);
-		assertTrue(pc.canOptimizeOutEmptyAdviceChain());
-		pc.setExposeInvocation(true);
-		assertFalse(pc.canOptimizeOutEmptyAdviceChain());
-		pc.setExposeInvocation(false);
-		assertTrue(pc.canOptimizeOutEmptyAdviceChain());
 		pc.setExposeProxy(true);
-		assertFalse(pc.canOptimizeOutEmptyAdviceChain());
 		
 		// Now let's try it with the special target
 		AopProxy aop = createAopProxy(pc);

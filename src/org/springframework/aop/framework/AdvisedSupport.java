@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.13 2003-12-05 13:05:54 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.14 2003-12-05 13:23:39 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -183,15 +183,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	}
 
-
-	/**
-	 * @return true if when there's no advice for a method, a final InvokerInterceptor
-	 * can be optimized out. This can't be done if the proxy or invocation is
-	 * exposed, as users might have written code that expects to get them.
-	 */
-	public final boolean canOptimizeOutEmptyAdviceChain() {
-		return !(getExposeInvocation() || getExposeProxy());
-	}
 	
 	public void addInterceptor(Interceptor interceptor) {
 		int pos = (this.advisors != null) ? this.advisors.size() : 0;

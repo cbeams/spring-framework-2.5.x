@@ -36,7 +36,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: Cglib1AopProxy.java,v 1.4 2003-12-03 11:32:32 johnsonr Exp $
+ * @version $Id: Cglib1AopProxy.java,v 1.5 2003-12-05 13:23:39 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
 class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
@@ -105,14 +105,19 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 			if (target != null) {
 				targetClass = target.getClass();
 			}
+			
+			if (this.advised.getExposeProxy()) {
+				// Make invocation available if necessary
+				oldProxy = AopContext.setCurrentProxy(proxy);
+				setProxyContext = true;
+			}
 		
 			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
 			
 			// Check whether we only have one InvokerInterceptor: that is, no real advice,
 			// but just reflective invocation of the target.
 			// We can only do this if the Advised config object lets us.
-			if (advised.canOptimizeOutEmptyAdviceChain() && 
-					chain.isEmpty()) {
+			if (chain.isEmpty() && !advised.getExposeInvocation()) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
@@ -132,12 +137,6 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 					// this block may not have been reached even if exposeInvocation
 					// is true
 					setInvocationContext = true;
-				}
-				
-				if (this.advised.getExposeProxy()) {
-					// Make invocation available if necessary
-					oldProxy = AopContext.setCurrentProxy(proxy);
-					setProxyContext = true;
 				}
 				
 				// If we get here, we need to create a MethodInvocation
