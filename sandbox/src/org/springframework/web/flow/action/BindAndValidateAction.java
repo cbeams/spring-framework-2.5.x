@@ -27,6 +27,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.flow.ActionBean;
 import org.springframework.web.flow.ActionBeanEvent;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
@@ -54,8 +55,15 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 
 	private MessageCodesResolver messageCodesResolver;
 
-	protected static final ActionBeanEvent USE_DEFAULT_EVENT = new ActionBeanEvent(null, null);
-	
+	private static final ActionBean ACTION_BEAN_NULL_OBJECT = new ActionBean() {
+		public ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
+				MutableAttributesAccessor model) {
+			return null;
+		}
+	};
+
+	protected static final ActionBeanEvent USE_DEFAULT_EVENT = new ActionBeanEvent(ACTION_BEAN_NULL_OBJECT, null);
+
 	/**
 	 * Set the name of the formObject in the model. The formObject object will
 	 * be included in the model under this name.
