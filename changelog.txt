@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC1 (24.3.2005)
+Changes in version 1.2 RC1 (25.3.2005)
 --------------------------------------
 
 Overall
@@ -23,6 +23,7 @@ Package org.springframework.aop
 * added LazyInitTargetSourceCreator, automatically creating a LazyInitTargetSource for each bean marked as "lazy-init"
 
 Package org.springframework.beans
+* fixed BeanUtils' "copyProperties" to avoid fetching a property descriptor for a property that will be ignored anyway
 * added protected "convertElement" hook to CustomCollectionEditor, for converting each encountered collection element
 * added InstantiationAwareBeanPostProcessor extension of BeanPostProcessor interface, intercepting before instantiation
 * added TypedStringValue class, allowing to register property values with a specific target type on a bean definition
@@ -37,6 +38,8 @@ Package org.springframework.beans
 
 Package org.springframework.context
 * fixed DelegatingMessageSource to return default message for MessageSourceResolvable, if no parent MessageSource found
+* fixed ReloadableResourceBundleMessageSource's "clearCache" operation to clear the cache for merged properties too
+* ReloadableResourceBundleMessageSource accepts non-refreshable (non-file-system) resources even if "cacheSeconds" >0
 
 Package org.springframework.core
 * PathMatchingResourcePatternResolver collects resource entries in a Set and normalizes paths (to avoid double entries)
@@ -57,6 +60,7 @@ Package org.springframework.jdbc
 * added LOB accessor methods that take column names to LobHandler interface, pre-implemented in AbstractLobHandler class
 * added "support.rowset" package, with SqlRowSet abstraction for disconnected result sets with Spring exceptions
 * added "queryForRowSet" methods to JdbcTemplate, returning a SqlRowSet as generic representation of the result rows
+* deprecated "queryForList" methods on JdbcOperations and JdbcTemplate, in favor of the new "queryForRowSet" methods
 * added "queryForObject" convenience methods to JdbcTemplate, taking a RowMapper argument and expecting a single row
 * factored out protected "createJdbcTemplate" in JdbcDaoSupport, allowing to override JdbcTemplate creation
 
@@ -77,6 +81,12 @@ Package org.springframework.samples
 * migrated Petclinic's Hibernate layer from Hibernate 2.1 to Hibernate3
 * added new JPetStore version based on Spring's JDK 1.5+ Transactional annotation (in "samples/jpetstore/annotation")
 
+Package org.springframework.scheduling
+* fixed Quartz SchedulerFactoryBean to properly pass on given scheduler name, supporting multiple Scheduler instances
+* fixed Quartz LocalDataSourceJobStore to use scheduler name as part of Quartz data source name, avoiding conflicts
+* added "nonTransactionalDataSource" property to SchedulerFactoryBean, for an explicit non-transactional DataSource
+* reworked LocalDataSourceJobStore to use a non-transactional DataSource if specified, falling back to the default else
+
 Package org.springframework.transaction
 * added JDK 1.5+ "Transactional" annotation, plus corresponding AnnotationTransactionAttributeSource
 * added "getName" method to TransactionDefinition interface, allowing to specify a symbolic name for a transaction
@@ -94,13 +104,12 @@ Package org.springframework.util
 
 Package org.springframework.validation
 * added "addAllErrors(Errors)" method to Errors interface and BindException, for merging Errors objects
-* factored out BindingErrorProcessor strategy from DataBinder, with DefaultBindErrorProcessor implementation
+* factored out BindingErrorProcessor strategy from DataBinder, with DefaultBindingErrorProcessor implementation
 * DataBinder does not generate any further field errors for "requiredField" that has already caused missing field error
 
 Package org.springframework.web
 * UrlPathHelper accepts different case for context path in "getRequestURI" vs "getContextPath" (can happen on Resin)
 * CommonsMultipartResolver exposes query parameters in multipart requests too, not just multipart POST parameters
-* ParameterMethodNameResolver can optionally resolve methods based purely based on existence of specified parameters
 * AbstractFormController/AbstractWizardFormController perform debug logging for session attributes being added/removed
 * AbstractWizardFormController allows for dynamic pages through overriding the "getPageCount" and "getViewName" methods
 * changed MultiActionController's log level from INFO to DEBUG
