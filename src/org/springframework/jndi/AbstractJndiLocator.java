@@ -25,7 +25,7 @@ import org.springframework.beans.factory.InitializingBean;
  * <p><b>Assumptions:</b> The resource obtained from JNDI can be cached.
  *
  * @author Rod Johnson
- * @version $Id: AbstractJndiLocator.java,v 1.3 2003-11-07 15:27:35 jhoeller Exp $
+ * @version $Id: AbstractJndiLocator.java,v 1.4 2003-12-23 10:30:44 johnsonr Exp $
  * @see #setInContainer
  */
 public abstract class AbstractJndiLocator implements InitializingBean {
@@ -98,7 +98,7 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 	 * contain it. Default is true.
 	 * <p>Note: Will only get applied if no other scheme like "java:" is given.
 	 */
-	public final void setInContainer(boolean inContainer) {
+	public void setInContainer(boolean inContainer) {
 		this.inContainer = inContainer;
 	}
 
