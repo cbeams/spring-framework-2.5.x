@@ -43,7 +43,7 @@ A central focus of Spring is to allow for reusable business and data access obje
 J2EE services. Such objects can be reused across J2EE environments (web or EJB), standalone applications, test
 environments, etc without any hassle.
 
-Spring has a layered architecture. All its functionality builds on lower levels. So you can e.g. use the
+Spring has a layered architecture; all its functionality builds on lower levels. So you can e.g. use the
 JavaBeans configuration management without using the MVC framework or AOP support. But if you use the web MVC
 framework or AOP support, you'll find they build on the configuration framework, so you can apply your knowledge
 about it immediately.
@@ -91,15 +91,15 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 * "spring-aop" (~110 KB)
 - Contents: AOP framework, source-level metadata support
-- Dependencies: spring-beans, AOP Alliance, (CGLIB, Commons Attributes)
+- Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
 * "spring-context" (~160 KB)
 - Contents: application context, validation framework, UI support, JNDI, mail, EJB, remoting, scheduling
-- Dependencies: spring-beans, (JavaMail, EJB, JAX-RPC, Hessian, Burlap, Quartz)
+- Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
-* "spring-dao" (~180 KB)
+* "spring-dao" (~175 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
-- Dependencies: spring-beans, (spring-aop, JTA)
+- Dependencies: spring-core, (spring-aop, JTA)
 
 * "spring-orm" (~110 KB)
 - Contents: Hibernate support, JDO support, iBATIS SQL Maps support
@@ -109,11 +109,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: web application context, multipart resolver, web utilities
 - Dependencies: spring-context, Servlet, (Commons FileUpload, COS)
 
-* "spring-webmvc" (~135 KB)
+* "spring-webmvc" (~130 KB)
 - Contents: web MVC framework, web controllers, web views
-- Dependencies: spring-web, (JSP, JSTL, Velocity, FreeMarker, iText, POI)
+- Dependencies: spring-web, (JSP, JSTL, Tiles, iText, POI)
 
-* "spring" (~940 KB)
+* "spring" (~930 KB)
 - Contents: all of the above
 - Dependencies: all of the above
 
@@ -151,8 +151,8 @@ internal structure and wiring. On top of a Spring-managed middle tier, it offers
 tier implementations: one using Spring's web MVC plus JSTL, and one using Struts 1.1 plus JSTL.
 
 The Image Database sample is a simple one-screen image management web app that illustrates various
-Spring-integrated technologies: Velocity for web views, BLOB/CLOB handling with MySQL and Oracle,
-scheduling via Quartz and Timer, and mail sending via JavaMail.
+Spring-integrated technologies: BLOB/CLOB handling with MySQL and Oracle, Velocity and FreeMarker for
+web views, scheduling via Quartz and Timer, and mail sending via JavaMail.
 
 "Expert One-on-One J2EE Design and Development" discusses many of Spring's design ideas in detail.
 Note: The code examples in the book refer to the original framework version that came with the book.
