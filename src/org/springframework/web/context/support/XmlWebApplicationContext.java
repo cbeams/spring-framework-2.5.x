@@ -140,11 +140,6 @@ public class XmlWebApplicationContext extends AbstractXmlApplicationContext
 	 * This implementation supports file paths beneath the root of the web application.
 	 */
 	protected Resource getResourceByPath(String path) {
-		if (path != null && !path.startsWith("/")) {
-			// the Servlet spec requires that resource paths start with a slash,
-			// even if many containers accept paths without leading slash too
-			path = "/" + path;
-		}
 		return new ServletContextResource(this.servletContext, path);
 	}
 

@@ -47,11 +47,18 @@ public class ServletContextResource extends AbstractResource {
 
 	/**
 	 * Create a new ServletContextResource.
+	 * <p>The Servlet spec requires that resource paths start with a slash,
+	 * even if many containers accept paths without leading slash too.
+	 * Consequently, the given path will be prepended with a slash if it
+	 * doesn't already start with one.
 	 * @param servletContext the ServletContext to load from
 	 * @param path the path of the resource
 	 */
 	public ServletContextResource(ServletContext servletContext, String path) {
 		this.servletContext = servletContext;
+		if (path != null && !path.startsWith("/")) {
+			path = "/" + path;
+		}
 		this.path = path;
 	}
 
