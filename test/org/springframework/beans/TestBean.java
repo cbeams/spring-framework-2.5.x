@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.15 2004-10-19 13:01:59 robharrop Exp $
+ *	$Id: TestBean.java,v 1.16 2004-10-20 05:43:55 jhoeller Exp $
  */
 
 /*
@@ -69,15 +69,18 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	private IndexedTestBean nestedIndexedBean;
 
+	private boolean destroyed = false;
+
+
 	public TestBean() {
-	}	
+	}
 
 	public TestBean(String name, int age) {
 		this.name = name;
 		this.age = age;
 	}
 
-	
+
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -209,8 +212,9 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 	 * @see ITestBean#exceptional(Throwable)
 	 */
 	public void exceptional(Throwable t) throws Throwable {
-		if (t != null)
+		if (t != null) {
 			throw t;
+		}
 	}
 
 	/**
@@ -225,9 +229,18 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 	 */
 	public void absquatulate() {
 	}
-	
+
 	public int haveBirthday() {
 		return age++;
+	}
+
+
+	public void destroy() {
+		this.destroyed = true;
+	}
+
+	public boolean wasDestroyed() {
+		return destroyed;
 	}
 
 
