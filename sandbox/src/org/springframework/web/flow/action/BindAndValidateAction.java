@@ -209,7 +209,7 @@ public class BindAndValidateAction extends AbstractAction {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		ActionResult event = bindAndValidate(request, model, binder);
-		exportErrors(model, binder.getErrors());
+		exportErrorsInternal(model, binder.getErrors());
 		if (event != null && event != USE_DEFAULT_EVENT) {
 			return event;
 		}

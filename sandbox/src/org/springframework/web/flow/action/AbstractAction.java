@@ -38,9 +38,10 @@ import org.springframework.web.util.WebUtils;
  * <ul>
  * <li>Creating common <code>ActionResult</code> objects
  * <li>Accessing request parameters
- * <li>Accessing and export form objects
+ * <li>Accessing and exporting form objects
  * <li>Inserting action pre and post execution logic (may also be done with an
  * interceptor)
+ * </ul>
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -353,10 +354,10 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param formObjectName The name of the form object
 	 */
 	protected void exportErrors(MutableAttributesAccessor model, Object formObject, String formObjectName) {
-		exportErrors(model, new BindException(formObject, formObjectName));
+		exportErrorsInternal(model, new BindException(formObject, formObjectName));
 	}
 
-	private void exportErrors(MutableAttributesAccessor model, BindException errors) {
+	protected void exportErrorsInternal(MutableAttributesAccessor model, BindException errors) {
 		// also bind it under the local (to flow) alias, so other actions can
 		// find it easily
 		model.setAttribute(LOCAL_FORM_OBJECT_NAME, errors.getTarget());
