@@ -92,10 +92,24 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Set if a session should be required to handle requests.
+	 * Return the HTTP methods that this content generator supports.
+	 */
+	protected String[] getSupportedMethods() {
+		return (String[]) this.supportedMethods.toArray(new String[this.supportedMethods.size()]);
+	}
+
+	/**
+	 * Set whether a session should be required to handle requests.
 	 */
 	public final void setRequireSession(boolean requireSession) {
 		this.requireSession = requireSession;
+	}
+
+	/**
+	 * Return whether a session is required to handle requests.
+	 */
+	protected boolean isRequireSession() {
+		return requireSession;
 	}
 
 	/**
@@ -108,12 +122,26 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
+	 * Return whether the HTTP 1.0 expires header is used.
+	 */
+	protected boolean isUseExpiresHeader() {
+		return useExpiresHeader;
+	}
+
+	/**
 	 * Set whether to use the HTTP 1.1 cache-control header. Default is true.
 	 * <p>Note: Cache headers will only get applied if caching is enabled
 	 * for the current request.
 	 */
 	public final void setUseCacheControlHeader(boolean useCacheControlHeader) {
 		this.useCacheControlHeader = useCacheControlHeader;
+	}
+
+	/**
+	 * Return whether the HTTP 1.1 cache-control header is used.
+	 */
+	protected boolean isUseCacheControlHeader() {
+		return useCacheControlHeader;
 	}
 
 	/**
@@ -125,6 +153,13 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public final void setCacheSeconds(int seconds) {
 		this.cacheSeconds = seconds;
+	}
+
+	/**
+	 * Return the number of seconds that content is cached.
+	 */
+	protected int getCacheSeconds() {
+		return cacheSeconds;
 	}
 
 
