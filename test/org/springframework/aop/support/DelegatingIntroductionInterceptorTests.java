@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
+
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.easymock.MockControl;
@@ -24,14 +26,18 @@ import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.TimeStamped;
+import org.springframework.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.Person;
+import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * 
  * @author Rod Johnson
  * @since 13-May-2003
- * @version $Revision: 1.8 $
+ * @version $Id: DelegatingIntroductionInterceptorTests.java,v 1.9 2004-07-24 18:48:17 johnsonr Exp $
  */
 public class DelegatingIntroductionInterceptorTests extends TestCase {
 
@@ -180,6 +186,42 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		pf.addAdvisor(0, new DefaultIntroductionAdvisor(ii));
 		Object o = pf.getProxy();
 		assertTrue(!(o instanceof TimeStamped));
+	}
+	
+	protected static class SerializableTimeStamped implements TimeStamped, Serializable {
+		private final long ts;
+		public SerializableTimeStamped(long ts) {
+			this.ts = ts;
+		}
+		 /**
+		 * @see org.springframework.aop.framework.TimeStamped#getTimeStamp()
+		 */
+		public long getTimeStamp() {
+			return ts;
+		}
+	};
+	
+	public void testSerializableDelegatingIntroductionInterceptorSerializable() throws Exception {
+		SerializablePerson serializableTarget = new SerializablePerson();
+		String name = "Tony";
+		serializableTarget.setName("Tony");
+		
+		ProxyFactory factory = new ProxyFactory(serializableTarget);
+		factory.addInterface(Person.class);
+		long time = 1000;
+		TimeStamped ts = new SerializableTimeStamped(time);
+	
+		factory.addAdvisor(new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
+		factory.addAdvice(new SerializableNopInterceptor());
+		
+		Person p = (Person) factory.getProxy();
+		
+		assertEquals(name, p.getName());
+		assertEquals(time, ((TimeStamped) p).getTimeStamp());
+		
+		Person p1 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		assertEquals(name, p1.getName());
+		assertEquals(time, ((TimeStamped) p1).getTimeStamp());
 	}
 
 

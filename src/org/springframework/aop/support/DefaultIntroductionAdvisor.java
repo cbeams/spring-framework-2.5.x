@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -31,9 +32,9 @@ import org.springframework.core.Ordered;
  * Simple IntroductionAdvisor implementation that by default applies to any class.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: DefaultIntroductionAdvisor.java,v 1.6 2004-04-21 17:49:37 jhoeller Exp $
+ * @version $Id: DefaultIntroductionAdvisor.java,v 1.7 2004-07-24 18:48:25 johnsonr Exp $
  */
-public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered {
+public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered, Serializable {
 
 	private int order = Integer.MAX_VALUE;
 

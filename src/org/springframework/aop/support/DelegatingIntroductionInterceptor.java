@@ -16,14 +16,17 @@
 
 package org.springframework.aop.support;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.IntroductionInterceptor;
 
 /**
@@ -41,13 +44,15 @@ import org.springframework.aop.IntroductionInterceptor;
  * <p>The suppressInterface() method can be used to suppress interfaces
  * implemented by the delegate but which should not be introduced to the
  * owning AOP proxy.
+ * 
+ * <p>A DelegatingIntroductionInterceptor is serializable if the delegate is.
  *
  * @author Rod Johnson
- * @version $Id: DelegatingIntroductionInterceptor.java,v 1.4 2004-04-21 10:26:21 jhoeller Exp $
+ * @version $Id: DelegatingIntroductionInterceptor.java,v 1.5 2004-07-24 18:48:25 johnsonr Exp $
  */
-public class DelegatingIntroductionInterceptor implements IntroductionInterceptor {
+public class DelegatingIntroductionInterceptor implements IntroductionInterceptor, Serializable {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected transient Log logger = LogFactory.getLog(getClass());
 		
 	/** Set of Class */
 	private Set publishedInterfaces = new HashSet();
@@ -141,6 +146,28 @@ public class DelegatingIntroductionInterceptor implements IntroductionIntercepto
 	 */
 	protected final boolean isMethodOnIntroducedInterface(MethodInvocation mi) {
 		return implementsInterface(mi.getMethod().getDeclaringClass());
+	}
+	
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+	/**
+	 * This method is implemented only to restore the logger.
+	 * We don't make the logger static as that would mean that subclasses
+	 * would use this class's log category.
+	 */
+	private void readObject(ObjectInputStream ois) throws IOException {
+		// Rely on default serialization, just initialize state after deserialization
+		try {
+			ois.defaultReadObject();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new AspectException("Failed to deserialize Spring DelegatingIntroductionInterceptor:" +
+					"Check that Spring AOP libraries and implementation class for the introduction are available on the client side");
+		}
+		
+		// Initialize transient fields
+		this.logger = LogFactory.getLog(getClass());
 	}
 
 }
