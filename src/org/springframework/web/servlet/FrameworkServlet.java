@@ -19,7 +19,6 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.security.Principal;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -223,22 +222,22 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * @see #createWebApplicationContext
 	 */
 	protected WebApplicationContext initWebApplicationContext() throws BeansException {
-		getServletContext().log("Initializing WebApplicationContext for servlet '" + getServletName() + "'");
-		ServletContext servletContext = getServletContext();
-		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+		getServletContext().log("Loading WebApplicationContext for servlet '" + getServletName() + "'");
 
+		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = createWebApplicationContext(parent);
 		if (logger.isInfoEnabled()) {
-			logger.info("Using context class '" + wac.getClass().getName() + "' for servlet '" + getServletName() + "'");
+			logger.info("Using context class [" + wac.getClass().getName() +
+					"] for servlet '" + getServletName() + "'");
 		}
 
 		if (this.publishContext) {
 			// publish the context as a servlet context attribute
 			String attName = getServletContextAttributeName();
-			servletContext.setAttribute(attName, wac);
+			getServletContext().setAttribute(attName, wac);
 			if (logger.isInfoEnabled()) {
 				logger.info("Published WebApplicationContext of servlet '" + getServletName() +
-										"' as ServletContext attribute with name [" + attName + "]");
+						"' as ServletContext attribute with name [" + attName + "]");
 			}
 		}
 		return wac;
@@ -258,14 +257,14 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Servlet with name '" + getServletName() +
-									"' will try to create custom WebApplicationContext context of class '" +
-									getContextClass().getName() + "'" + " using parent context [" + parent + "]");
+					"' will try to create custom WebApplicationContext context of class '" +
+					getContextClass().getName() + "'" + " using parent context [" + parent + "]");
 		}
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(getContextClass())) {
-			throw new ApplicationContextException("Fatal initialization error in servlet with name '" +
-																						getServletName() + "': custom WebApplicationContext class [" +
-																						getContextClass().getName() +
-																						"] is not of type ConfigurableWebApplicationContext");
+			throw new ApplicationContextException(
+					"Fatal initialization error in servlet with name '" + getServletName() +
+					"': custom WebApplicationContext class [" + getContextClass().getName() +
+					"] is not of type ConfigurableWebApplicationContext");
 		}
 
 		ConfigurableWebApplicationContext wac =
@@ -275,9 +274,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		wac.setNamespace(getNamespace());
 		if (this.contextConfigLocation != null) {
 			wac.setConfigLocations(
-			    StringUtils.tokenizeToStringArray(this.contextConfigLocation,
-			                                      ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS,
-			                                      true, true));
+			    StringUtils.tokenizeToStringArray(
+							this.contextConfigLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS,
+							true, true));
 		}
 		wac.refresh();
 		return wac;
@@ -347,9 +346,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			// whether or not we succeeded, publish an event
 			this.webApplicationContext.publishEvent(
 					new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
-																	request.getMethod(), getServletConfig().getServletName(),
-																	WebUtils.getSessionId(request), getUsernameForRequest(request),
-																	failureCause));
+							request.getMethod(), getServletConfig().getServletName(), WebUtils.getSessionId(request),
+							getUsernameForRequest(request), failureCause));
 		}
 	}
 

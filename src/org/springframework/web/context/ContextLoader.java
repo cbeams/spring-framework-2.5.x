@@ -78,6 +78,7 @@ public class ContextLoader {
 	 */
 	public static final String CONFIG_LOCATION_PARAM = "contextConfigLocation";
 
+
 	private final Log logger = LogFactory.getLog(ContextLoader.class);
 
 
@@ -92,16 +93,21 @@ public class ContextLoader {
 	 */
 	public WebApplicationContext initWebApplicationContext(ServletContext servletContext) throws BeansException {
 		servletContext.log("Loading root WebApplicationContext");
+
 		try {
+			// determine parent for root web application context, if any
 			ApplicationContext parent = loadParentContext(servletContext);
+
 			WebApplicationContext wac = createWebApplicationContext(servletContext, parent);
-			logger.info("Using context class [" + wac.getClass().getName() + "] for root WebApplicationContext");
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+
 			if (logger.isInfoEnabled()) {
-				logger.info("Published root WebApplicationContext [" + wac +
-										"] as ServletContext attribute with name [" +
-										WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
+				logger.info("Using context class [" + wac.getClass().getName() + "] for root WebApplicationContext");
+				logger.info(
+						"Published root WebApplicationContext [" + wac + "] as ServletContext attribute with name [" +
+						WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
 			}
+
 			return wac;
 		}
 		catch (RuntimeException ex) {
@@ -119,16 +125,19 @@ public class ContextLoader {
 	/**
 	 * Instantiate the root WebApplicationContext for this loader, either a default
 	 * XmlWebApplicationContext or a custom context class if specified.
-	 * This implementation expects custom contexts to implement ConfigurableWebApplicationContext.
+	 * <p>This implementation expects custom contexts to implement ConfigurableWebApplicationContext.
 	 * Can be overridden in subclasses.
+	 * @param servletContext current servlet context
+	 * @param parent the parent ApplicationContext to use, or null if none
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #CONTEXT_CLASS_PARAM
 	 * @see #DEFAULT_CONTEXT_CLASS
 	 * @see ConfigurableWebApplicationContext
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
-	protected WebApplicationContext createWebApplicationContext(ServletContext servletContext, ApplicationContext parent)
-			throws BeansException {
+	protected WebApplicationContext createWebApplicationContext(
+			ServletContext servletContext, ApplicationContext parent) throws BeansException {
+
 		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		Class contextClass = DEFAULT_CONTEXT_CLASS;
 		if (contextClassName != null) {
@@ -143,6 +152,7 @@ public class ContextLoader {
 					"Custom context class [" + contextClassName + "] is not of type ConfigurableWebApplicationContext");
 			}
 		}
+
 		ConfigurableWebApplicationContext wac =
 		    (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 		wac.setParent(parent);
@@ -153,6 +163,7 @@ public class ContextLoader {
 				StringUtils.tokenizeToStringArray(
 					configLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS, true, true));
 		}
+
 		wac.refresh();
 		return wac;
 	}
@@ -160,8 +171,11 @@ public class ContextLoader {
 	/**
 	 * Template method which may be overridden by a subclass to load or obtain
 	 * an ApplicationContext instance which will be used as the parent context
-	 * of the root WebApplicationContext if it is not null.
-	 * @param servletContext
+	 * of the root WebApplicationContext (if it is not null).
+	 * <p>The main reason for this hook is to allow root web application contexts
+	 * to be children of a shared EAR context that's also visible to EJBs.
+	 * For pure web applications, there is usually no need to worry about this.
+	 * @param servletContext current servlet context
 	 * @return the parent application context, or null if none
 	 * @throws BeansException if the context couldn't be initialized
 	 */
