@@ -176,25 +176,39 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
 		Map matches = new HashMap();
+		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
+
 		Iterator it = this.beans.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
-			String name = (String) entry.getKey();
-			Object bean = entry.getValue();
-			if (bean instanceof FactoryBean && includeFactoryBeans) {
-				FactoryBean factory = (FactoryBean) bean;
-				Class objectType = factory.getObjectType();
-				if ((objectType == null && factory.isSingleton()) ||
-						((factory.isSingleton() || includePrototypes) &&
-						objectType != null && type.isAssignableFrom(objectType))) {
-					Object createdObject = getBean(name);
-					if (type.isInstance(createdObject)) {
-						matches.put(name, createdObject);
+			String beanName = (String) entry.getKey();
+			Object beanInstance = entry.getValue();
+
+			// Is bean a FactoryBean?
+			if (beanInstance instanceof FactoryBean && !isFactoryType) {
+				if (includeFactoryBeans) {
+					// Match object created by FactoryBean.
+					FactoryBean factory = (FactoryBean) beanInstance;
+					Class objectType = factory.getObjectType();
+					if ((objectType == null && factory.isSingleton()) ||
+							((includePrototypes || factory.isSingleton()) &&
+							objectType != null && type.isAssignableFrom(objectType))) {
+						Object createdObject = getBean(beanName);
+						if (type.isInstance(createdObject)) {
+							matches.put(beanName, createdObject);
+						}
 					}
 				}
 			}
-			else if (type.isAssignableFrom(bean.getClass())) {
-				matches.put(name, bean);
+			else {
+				if (type.isInstance(beanInstance)) {
+					// If type to match is FactoryBean, return FactoryBean itself.
+					// Else, return bean instance.
+					if (isFactoryType) {
+						beanName = FACTORY_BEAN_PREFIX + beanName;
+					}
+					matches.put(beanName, beanInstance);
+				}
 			}
 		}
 		return matches;

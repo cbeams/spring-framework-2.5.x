@@ -147,32 +147,61 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
 			throws BeansException {
 		Map result = new HashMap();
+		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 
+		// Check all bean definitions.
 		Iterator it = this.beanDefinitionNames.iterator();
 		while (it.hasNext()) {
 			String beanName = (String) it.next();
 			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
-			if (!rbd.isAbstract() && rbd.hasBeanClass() && (includePrototypes || rbd.isSingleton())) {
-				if (FactoryBean.class.isAssignableFrom(rbd.getBeanClass())) {
+
+			// Only check bean definition if it is complete.
+			if (!rbd.isAbstract() && rbd.hasBeanClass()) {
+				// In case of FactoryBean, match object created by FactoryBean.
+				if (FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) {
 					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
-							isBeanTypeMatch(beanName, type)) {
+					    isBeanTypeMatch(beanName, type)) {
 						addBeanToResultMap(beanName, result);
 					}
 				}
-				else if (type == null || type.isAssignableFrom(rbd.getBeanClass())) {
-					addBeanToResultMap(beanName, result);
+				else {
+					// If type to match is FactoryBean, match FactoryBean itself.
+					// Else, match bean instance.
+					if (isFactoryType) {
+						beanName = FACTORY_BEAN_PREFIX + beanName;
+					}
+					if ((includePrototypes || rbd.isSingleton()) &&
+					    (type == null || type.isAssignableFrom(rbd.getBeanClass()))) {
+						addBeanToResultMap(beanName, result);
+					}
 				}
 			}
 		}
 
+		// Check singletons too, to catch manually registered singletons.
 		String[] singletonNames = getSingletonNames();
 		for (int i = 0; i < singletonNames.length; i++) {
 			String beanName = singletonNames[i];
-			if (!containsBeanDefinition(beanName) && isSingleton(beanName) &&
-					isBeanTypeMatch(beanName, type) && (includeFactoryBeans || !isFactoryBean(beanName))) {
-				// Directly registered singleton with correct type.
-				// Needed to check "singleton" flag to cover FactoryBeans.
-				addBeanToResultMap(beanName, result);
+
+			// Only check if manually registered.
+			if (!containsBeanDefinition(beanName)) {
+				// In case of FactoryBean, match object created by FactoryBean.
+				if (isFactoryBean(beanName) && !isFactoryType) {
+					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
+					    isBeanTypeMatch(beanName, type)) {
+						addBeanToResultMap(beanName, result);
+					}
+				}
+				else {
+					// If type to match is FactoryBean, match FactoryBean itself.
+					// Else, match bean instance.
+					if (isFactoryType) {
+						beanName = FACTORY_BEAN_PREFIX + beanName;
+					}
+					if (isBeanTypeMatch(beanName, type)) {
+						addBeanToResultMap(beanName, result);
+					}
+				}
 			}
 		}
 

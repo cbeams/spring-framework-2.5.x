@@ -27,6 +27,7 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.servlet.HandlerAdapter;
 
@@ -36,7 +37,7 @@ import org.springframework.web.servlet.HandlerAdapter;
  */
 public class BeanFactoryUtilsTests extends TestCase {
 
-	private ListableBeanFactory listableFactory;
+	private ConfigurableListableBeanFactory listableBeanFactory;
 
 	protected void setUp() {
 		// Interesting hierarchical factory to test counts.
@@ -44,7 +45,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		XmlBeanFactory grandParent = new XmlBeanFactory(new ClassPathResource("root.xml", getClass()));
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("middle.xml", getClass()), grandParent);
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("leaf.xml", getClass()), parent);
-		this.listableFactory = child;
+		this.listableBeanFactory = child;
 	}
 
 	public void testHierarchicalCountBeansWithNonHierarchicalFactory() {
@@ -59,15 +60,15 @@ public class BeanFactoryUtilsTests extends TestCase {
 	 */
 	public void testHierarchicalCountBeansWithOverride() throws Exception {
 		// Leaf count
-		assertTrue(this.listableFactory.getBeanDefinitionCount() == 1);
+		assertTrue(this.listableBeanFactory.getBeanDefinitionCount() == 1);
 		// Count minus duplicate
-		assertTrue("Should count 7 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableFactory),
-			BeanFactoryUtils.countBeansIncludingAncestors(this.listableFactory) == 7);
+		assertTrue("Should count 7 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory),
+			BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 7);
 	}
 
 	public void testHierarchicalNamesWithOverride() throws Exception {
 		List names = Arrays.asList(
-				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, ITestBean.class));
+				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableBeanFactory, ITestBean.class));
 		assertEquals(2, names.size());
 		assertTrue(names.contains("test"));
 		assertTrue(names.contains("test3"));
@@ -75,17 +76,17 @@ public class BeanFactoryUtilsTests extends TestCase {
 
 	public void testHierarchicalNamesWithNoMatch() throws Exception {
 		List names = Arrays.asList(
-				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, HandlerAdapter.class));
+				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableBeanFactory, HandlerAdapter.class));
 		assertEquals(0, names.size());
 	}
 
 	public void testHierarchicalNamesWithMatchOnlyInRoot() throws Exception {
 		List names = Arrays.asList(
-				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, IndexedTestBean.class));
+				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
 		assertEquals(1, names.size());
 		assertTrue(names.contains("indexedBean"));
 		// Distinguish from default ListableBeanFactory behavior
-		assertTrue(listableFactory.getBeanDefinitionNames(IndexedTestBean.class).length == 0);
+		assertTrue(listableBeanFactory.getBeanDefinitionNames(IndexedTestBean.class).length == 0);
 	}
 
 	public void testNoBeansOfType() {
@@ -95,7 +96,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertTrue(beans.isEmpty());
 	}
 
-	public void testFindsBeansOfType() {
+	public void testFindsBeansOfTypeWithStaticFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		TestBean t1 = new TestBean();
 		TestBean t2 = new TestBean();
@@ -106,6 +107,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		lbf.addBean("t2", t2);
 		lbf.addBean("t3", t3);
 		lbf.addBean("t4", t4);
+
 		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
 		assertEquals(2, beans.size());
 		assertEquals(t1, beans.get("t1"));
@@ -121,29 +123,98 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertEquals(t2, beans.get("t2"));
 		assertEquals(t3.getObject(), beans.get("t3"));
 		assertTrue(beans.get("t4") instanceof TestBean);
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, DummyFactory.class, true, true);
+		assertEquals(2, beans.size());
+		assertEquals(t3, beans.get("&t3"));
+		assertEquals(t4, beans.get("&t4"));
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, FactoryBean.class, true, true);
+		assertEquals(2, beans.size());
+		assertEquals(t3, beans.get("&t3"));
+		assertEquals(t4, beans.get("&t4"));
+	}
+
+	public void testFindsBeansOfTypeWithDefaultFactory() {
+		Object test3 = this.listableBeanFactory.getBean("test3");
+		Object test = this.listableBeanFactory.getBean("test");
+		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
+
+		TestBean t1 = new TestBean();
+		TestBean t2 = new TestBean();
+		DummyFactory t3 = new DummyFactory();
+		DummyFactory t4 = new DummyFactory();
+		t4.setSingleton(false);
+		this.listableBeanFactory.registerSingleton("t1", t1);
+		this.listableBeanFactory.registerSingleton("t2", t2);
+		this.listableBeanFactory.registerSingleton("t3", t3);
+		this.listableBeanFactory.registerSingleton("t4", t4);
+
+		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, false);
+		assertEquals(4, beans.size());
+		assertEquals(test3, beans.get("test3"));
+		assertEquals(test, beans.get("test"));
+		assertEquals(t1, beans.get("t1"));
+		assertEquals(t2, beans.get("t2"));
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, true);
+		assertEquals(5, beans.size());
+		assertEquals(test, beans.get("test"));
+		assertEquals(testFactory1, beans.get("testFactory1"));
+		assertEquals(t1, beans.get("t1"));
+		assertEquals(t2, beans.get("t2"));
+		assertEquals(t3.getObject(), beans.get("t3"));
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, true);
+		assertEquals(8, beans.size());
+		assertEquals(test3, beans.get("test3"));
+		assertEquals(test, beans.get("test"));
+		assertEquals(testFactory1, beans.get("testFactory1"));
+		assertTrue(beans.get("testFactory2") instanceof TestBean);
+		assertEquals(t1, beans.get("t1"));
+		assertEquals(t2, beans.get("t2"));
+		assertEquals(t3.getObject(), beans.get("t3"));
+		assertTrue(beans.get("t4") instanceof TestBean);
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, DummyFactory.class, true, true);
+		assertEquals(4, beans.size());
+		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));
+		assertEquals(this.listableBeanFactory.getBean("&testFactory2"), beans.get("&testFactory2"));
+		assertEquals(t3, beans.get("&t3"));
+		assertEquals(t4, beans.get("&t4"));
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, FactoryBean.class, true, true);
+		assertEquals(4, beans.size());
+		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));
+		assertEquals(this.listableBeanFactory.getBean("&testFactory2"), beans.get("&testFactory2"));
+		assertEquals(t3, beans.get("&t3"));
+		assertEquals(t4, beans.get("&t4"));
 	}
 
 	public void testHierarchicalResolutionWithOverride() throws Exception {
-		Object test3 = this.listableFactory.getBean("test3");
-		Object test = this.listableFactory.getBean("test");
-		Object testFactory1 = this.listableFactory.getBean("testFactory1");
-		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableFactory, ITestBean.class, true, false);
+		Object test3 = this.listableBeanFactory.getBean("test3");
+		Object test = this.listableBeanFactory.getBean("test");
+		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
+
+		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, false);
 		assertEquals(2, beans.size());
 		assertEquals(test3, beans.get("test3"));
 		assertEquals(test, beans.get("test"));
-		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableFactory, ITestBean.class, false, false);
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, false);
 		assertEquals(1, beans.size());
 		assertEquals(test, beans.get("test"));
-		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableFactory, ITestBean.class, false, true);
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, true);
 		assertEquals(2, beans.size());
 		assertEquals(test, beans.get("test"));
 		assertEquals(testFactory1, beans.get("testFactory1"));
-		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableFactory, ITestBean.class, true, true);
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, true);
 		assertEquals(4, beans.size());
 		assertEquals(test3, beans.get("test3"));
 		assertEquals(test, beans.get("test"));
 		assertEquals(testFactory1, beans.get("testFactory1"));
 		assertTrue(beans.get("testFactory2") instanceof TestBean);
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, DummyFactory.class, true, true);
+		assertEquals(2, beans.size());
+		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));
+		assertEquals(this.listableBeanFactory.getBean("&testFactory2"), beans.get("&testFactory2"));
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, FactoryBean.class, true, true);
+		assertEquals(2, beans.size());
+		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));
+		assertEquals(this.listableBeanFactory.getBean("&testFactory2"), beans.get("&testFactory2"));
 	}
 
 }
