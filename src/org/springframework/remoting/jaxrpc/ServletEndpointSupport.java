@@ -44,7 +44,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>This class does not extend WebApplicationContextSupport to not expose
  * any public setters. For some reason, Axis tries to resolve public setters
- * with WSDL means...
+ * in a special way...
  *
  * @author Juergen Hoeller
  * @since 16.12.2003
@@ -52,7 +52,7 @@ import org.springframework.web.util.WebUtils;
  * @see #getWebApplicationContext
  * @see org.springframework.web.context.support.WebApplicationObjectSupport
  */
-public class ServletEndpointSupport implements ServiceLifecycle {
+public abstract class ServletEndpointSupport implements ServiceLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 	
