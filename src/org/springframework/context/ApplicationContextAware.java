@@ -26,9 +26,8 @@ import org.springframework.beans.BeansException;
  * 
  * <p><strong>Note,</strong> This is an ApplicationContext lifecycle interface.
  * setApplicationContext will be called after InitializingBean's <code>
- * afterPropertiesSet</code> method, after BeanFactoryAware's <code>
- * setBeanFactory</code> method, and after after any BeanPostProcessors
- * are applied by the ApplicationContext.
+ * afterPropertiesSet</code> method, and after BeanFactoryAware's <code>
+ * setBeanFactory</code> method.
  *
  * @author Rod Johnson
  * @see org.springframework.context.ApplicationContext#getResource
@@ -49,9 +48,9 @@ public interface ApplicationContextAware {
 	 * is reloadable. The implementation must check itself if it is
 	 * already initialized resp. if it wants to perform reinitialization.
 	 * <p>It is guaranteed to be called after InitializingBean's <code>
-     * afterPropertiesSet</code> method, after BeanFactoryAware's <code>
-     * setBeanFactory</code> method, and after any BeanPostProcessors
-     * are applied by the ApplicationContext.
+     * afterPropertiesSet</code> method, anf after BeanFactoryAware's <code>
+     * setBeanFactory</code> method.
+     * 
 	 * @param context ApplicationContext object to be used by this object
 	 * @throws ApplicationContextException in case of context initialization errors
 	 * @throws BeansException if thrown by application context methods
