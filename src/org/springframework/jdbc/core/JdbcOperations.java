@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.jdbc.core;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.support.SqlRowSet;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.support.SqlRowSet;
 
 import java.util.List;
 import java.util.Map;
@@ -198,8 +198,9 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForRowSet(String, Object[])
 	 * @see javax.sql.RowSet
-	 * @see SqlRowSet
+	 * @see org.springframework.jdbc.core.support.SqlRowSet
 	 */
+	
 	SqlRowSet queryForRowSet(String sql) throws DataAccessException;
 
 	/**
