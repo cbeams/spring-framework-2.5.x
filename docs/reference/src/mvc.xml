@@ -1678,13 +1678,4 @@ public class FileUploadBean {
     handlers.</para>
   </sect1>
 
-  <sect1 id="mvc-utilities">
-    <title>Commonly used utilities</title>
-
-    <sect2 id="mvc-utilities-pathmatching">
-      <title>A little story about the pathmatcher</title>
-
-      <para>ToDo</para>
-    </sect2>
-  </sect1>
 </chapter>
