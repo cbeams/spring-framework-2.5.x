@@ -168,11 +168,40 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 
 	/**
-	 * Create a new JtaTransactionManager instance.
+	 * Create a new JtaTransactionManager instance, to be configured as bean.
+	 * Invoke afterPropertiesSet to activate the configuration.
+	 * @see #setUserTransactionName
+	 * @see #setUserTransaction
+	 * @see #setTransactionManagerName
+	 * @see #setTransactionManager
+	 * @see #afterPropertiesSet
 	 */
 	public JtaTransactionManager() {
 		setNestedTransactionAllowed(true);
 	}
+
+	/**
+	 * Create a new JtaTransactionManager instance.
+	 * @param userTransaction the JTA UserTransaction to use as direct reference
+	 */
+	public JtaTransactionManager(UserTransaction userTransaction) {
+		this();
+		this.userTransaction = userTransaction;
+		afterPropertiesSet();
+	}
+
+	/**
+	 * Create a new JtaTransactionManager instance.
+	 * @param userTransaction the JTA UserTransaction to use as direct reference
+	 * @param transactionManager the JTA TransactionManager to use as direct reference
+	 */
+	public JtaTransactionManager(UserTransaction userTransaction, TransactionManager transactionManager) {
+		this();
+		this.userTransaction = userTransaction;
+		this.transactionManager = transactionManager;
+		afterPropertiesSet();
+	}
+
 
 	/**
 	 * Set the JndiTemplate to use for JNDI lookups.
