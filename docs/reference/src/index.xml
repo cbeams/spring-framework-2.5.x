@@ -6,7 +6,7 @@
 <!ENTITY beans				SYSTEM "beans.xml">
 <!ENTITY mail				SYSTEM "mail.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
-<!ENTITY transaction			SYSTEM "transaction.xml">
+<!ENTITY transaction		SYSTEM "transaction.xml">
 <!ENTITY aop				SYSTEM "aop.xml">
 <!ENTITY metadata			SYSTEM "metadata.xml">
 <!ENTITY dao				SYSTEM "dao.xml">
@@ -16,6 +16,7 @@
 <!ENTITY views				SYSTEM "views.xml">
 <!ENTITY ejb				SYSTEM "ejb.xml">
 <!ENTITY scheduling			SYSTEM "scheduling.xml">
+<!ENTITY remoting			SYSTEM "remoting.xml">
 <!ENTITY background			SYSTEM "background.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 ]>
@@ -96,7 +97,7 @@
 	    
 	    <!-- &jndi; -->
 	    
-	    <!-- &remoting; -->
+	    &remoting;
 	    
 	    &mail;
 	    

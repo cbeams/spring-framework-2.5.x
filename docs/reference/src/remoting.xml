@@ -1,0 +1,325 @@
+<chapter id="remoting">
+  <title>Remoting and web services using Spring</title>
+  
+	<sect1>
+		<title>Introduction</title>
+		<para>
+			Spring features integration classes for remoting support using various
+			technologies. The remoting support eases the development of remote-enabled
+			services, implemented by your usual (Spring) POJOs. Currently, Spring supports
+			four remoting technologies:
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						<emphasis>Remote Method Invocation (RMI)</emphasis>. Through the use
+						of the <literal>RmiProxyFactoryBean</literal> and the
+						<literal>RmiServiceExporter</literal> Spring supports transparent
+						remoting via RMI and invokers.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>Hessian</emphasis>. By using hte 
+						<literal>HessianProxyFactoryBean</literal>
+						and the <literal>HessianServiceExporter</literal> you can transparently
+						expose your services using the lightweigt binary HTTP-based protocol
+						provided by Caucho.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>Burlap</emphasis>. Burlap is the XML-based
+						alternative for Hessian. Spring provides supporting classes such
+						as <literal>BurlapProxyFactoryBean</literal> and 
+						<literal>BurlapServiceExporter</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>JAX RPC (TODO)</emphasis>.
+					</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			While discussing the remoting capabilities of Spring, we'll use the following domain 
+			model and corresponding services:
+			<programlisting><![CDATA[
+// Account domain object
+public class Account implements Serializable{
+  private String name;
+
+  public String getName();
+  public void setName(String name) {
+    this.name = name;
+  }
+}
+			]]></programlisting>
+			<programlisting><![CDATA[
+// Account service
+public interface AccountService {
+
+  public void insertAccount(Account acc);
+  
+  public List getAccounts(String name);
+}
+			]]></programlisting>
+			<programlisting><![CDATA[
+// ... and corresponding implement doing nothing at the moment
+public class AccountServiceImpl implements AccountService {
+
+  public void insertAccount(Account acc) {
+    // do something
+  }
+  
+  public List getAccounts(String name) {
+    // do something
+  }
+}
+			]]></programlisting>
+		</para>
+		<para>
+			We will start exposing the service to a remote client by using RMI and 
+			talk a bit about the drawbacks of using RMI. We'll then continue to show
+			Hessian and Burlap support.
+		</para>		
+	</sect1>	
+	<sect1>
+		<title>Exposing services using RMI</title>
+		<para>
+			Using Spring's support for RMI you can transparently expose your services through
+			RMI. After having this set up, you basically have a configuration similar to Enterprise
+			JavaBeans, except for the fact that the security features are missing.
+			Security features are provided by HTTP-based protocols like Hessian and Burlap, but
+			note that those use custom serialization which might result in problems when using
+			complex domain models and other object graphs that need to pass over the wire.
+		</para>
+		<sect2>
+			<title>Exporting the service using the <literal>RmiServiceExporter</literal></title>
+			<para>
+				Using the <literal>RmiServiceExporter</literal> we can expose the interface
+				of our AccountServer object as RMI object. The interface can be accessed
+				via plain RMI or by using <literal>RmiProxyFactoryBean</literal>.
+				The <literal>RmiServiceExporter</literal> explicitly supports the exposing of 
+				any non-RMI services via RMI invokers.
+			</para>
+			<para>
+				Of course, we first have to set up our service in the Spring BeanFactory:
+				<programlisting><![CDATA[
+<bean id="accountService" class="example.AccountServiceImpl">
+    <!-- any additional properties, maybe a DAO? -->
+</bean>
+				]]></programlisting>				
+			</para>
+			<para>
+				Next we'll have to expose our service using the <literal>RmiServiceExporter</literal>:
+				<programlisting><![CDATA[
+<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+	<!-- does not necessarily have to be the same name as the bean to be exported -->
+	<property name="serviceName"><value>AccountService</value></property>
+	<property name="service"><ref bean="accountService"/></property>
+	<property name="serviceInterface"><value>example.AccountService</value></property>
+	<!-- defaults to 1099 -->
+	<property name="registryPort"><value>1199</value></property>
+</bean>
+				]]></programlisting>							
+				As you can see, we're overriding the port for the RMI registry. Oftentimes,
+				your application server also maintains an RMI registry and it is wise
+				to not interfere with that one.
+				Furthermore, the service name is used to bind the service under. So right now,
+				the service will be bound at <literal>rmi://HOST:1199/AccountService</literal>.				
+				We'll use the URL later on to link in the service at the client side.
+			</para>
+			<para>
+				<emphasis>Note: we've left out one property, i.e. the <literal>servicePort</literal>
+					property, which is 0 by default. This means an anonymous port will be used
+					to communicate with the service. You can specify a different port if you like.</emphasis>
+			</para>
+		</sect2>
+		<sect2>
+			<title>Linking in the service at the client</title>
+			<para>
+				Our client is a simple object using the AccountService to manage accounts:
+				<programlisting><![CDATA[
+public class SimpleObject {
+  private AccountService accountService;
+  public void setAccountService(AccountService accountService) {
+    this.accountService = accountService;
+  }
+}
+				]]></programlisting>				
+			</para>
+			<para>
+				To link in the service on the client, we'll create a separate bean factory,
+				containing the simple object and the service linking configuration bits:
+				<programlisting><![CDATA[
+<bean class="example.SimpleObject">
+	<property name="accountService"><ref bean="accountService"/></bean>
+</bean>
+
+<bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+	<property name="serviceUrl"><value>rmi://HOST:1199/AccountService</value></property>
+	<property name="serviceInterface"><value>example.AccountService</value></property>
+</bean>
+				]]></programlisting>
+				That's all we need to do to support the remote account service on the client.
+				Spring will transparently create an invoker and remotely enable the account
+				service through the RmiServiceExporter. At the client we're linking it in using
+				the RmiProxyFactoryBean.
+			</para>
+		</sect2>				
+	</sect1>
+	<sect1>
+		<title>Using Hessian to remotely call service via HTTP</title>
+		<para>
+			Hessian offers a binary HTTP-based remoting protocol. It's created by
+			Caucho and more information about Hessian itself can be found 
+			at <ulink url="http://www.caucho.com"/>.			
+		</para>
+		<sect2>
+			<title>Wiring up the DispatcherServlet for Hessian</title>
+			<para>
+				Hessian communicates via HTTP and does so using a custom servlet.
+				Using Spring's DispatcherServlet principles, you can easily 
+				wire up such a servlet exposing your services. First we'll have to
+				create a new servlet in your application (this an excerpt from
+				<literal>web.xml</literal>):
+				<programlisting><![CDATA[
+<servlet>
+	<servlet-name>remote</servlet-name>
+	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	<load-on-startup>1</load-on-startup>
+</servlet>
+				]]></programlisting>
+			</para>
+			<para>
+				You're probably familiar with Spring's DispatcherServlet principles and if so,
+				you know that know you'll have to create an application context named
+				<literal>remote-servlet.xml</literal> (after the name of your servlet) in 
+				the <literal>WEB-INF</literal> directory. The application context will be used
+				in the next section.
+			</para>
+		</sect2>
+		<sect2>
+			<title>Exposing your beans by using the HessianServiceExporter</title>
+			<para>
+				In the newly created application context called <literal>remote-servlet.xml</literal>
+				we'll create a HessianServiceExporter exporting your services:
+				<programlisting><![CDATA[
+<bean id="accountService" class="example.AccountServiceImpl">
+    <!-- any additional properties, maybe a DAO? -->
+</bean>
+
+<bean name="/AccountService" class="org.springframework.remoting.caucho.HessianServiceExporter">
+    <property name="service"><ref bean="accountService"/></property>
+    <property name="serviceInterface">
+        <value>example.AccountService</value>
+    </property>
+</bean>
+				]]></programlisting>
+				Now we're ready to link in the service at the client. No handler mapping
+				is specified mapping requests (urls) onto services and that's why the BeanNameUrlHandlerMapping
+				will be used, hence the service will be exported at the URL <literal>http://HOST:8080/AccountService</literal>.
+			</para>
+		</sect2>
+		<sect2>
+			<title>Linking in the service on the client</title>
+			<para>
+				Using the <literal>HessianProxyFactoryBean</literal> we can link in the service
+				at the client. The same principles apply as with the RMI example. We'll create
+				a separate bean factory or application context and mention the following beans
+				where the SimpleObject is using the AccountService to manage accounts:
+				<programlisting><![CDATA[
+<bean class="example.SimpleObject">
+    <property name="accountService"><ref bean="accountService"/></property>
+</bean>
+
+<bean id="accountService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+	<property name="serviceUrl"><value>http://remotehost:8080/AccountService</value></property>
+	<property name="ServiceInterface"><value>example.AccountService</value></property>
+</bean>
+				]]></programlisting>
+				That's all there is to it.
+			</para>
+		</sect2>
+		<sect2>
+			<title>Using Burlap</title>
+			<para>
+				We won't discuss Burlap, the XML based equivalent of Hessian, here since
+				it is configured and set up in exactly the same way as the Hessian variant
+				explained above. Just replace the word <literal>Hessian</literal> with
+				<literal>Burlap</literal> and you're all set to go.
+			</para>
+		</sect2>
+		<sect2>
+			<title>Applying security to service exposed through Hessian or Burlap</title>
+			<para>
+				One of the advantages of Hessian and Burlap is that we can easily apply security.
+				This is because both protocols are HTTP-based. Your normal security mechanism 
+				can easily be applied if you're using the <literal>web.xml</literal> security features for example.				
+			</para>
+			<para>
+				<programlisting><![CDATA[
+<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+	<property name="interceptors">
+		<list>
+			<ref bean="authorizationInterceptor"/>
+		</list>
+	</property>
+</bean>
+
+<bean id="authorizationInterceptor" 
+	class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor">
+	<property name="authorizedRoles">
+		<list>
+			<value>administrator</value>
+			<value>operator</value>
+		</list>
+	</property>	
+</bean>
+				]]></programlisting>
+			</para>
+			<para>
+				This an example where we explicitly mention the BeanNameUrlHandlerMapping
+				and set an interceptor allowing only administrators and operators to call
+				the beans mentioned in this application context.
+			</para>
+			<para>
+				<emphasis>Note: of course this example doesn't show a flexible kind of security application.
+				For more options as far as security is concerned, have a look
+				at Acegi Security System for Spring to be found at 
+				<ulink url="http://acegisecurity.sourceforge.net"/></emphasis>
+			</para>
+		</sect2>
+	</sect1>
+	
+	<sect1>
+		<title>Considerations when choosing a technology</title>
+		<para>
+			Each and every technology presented here has its drawbacks. This doesn't mean
+			you shouldn't use them. You should however carefully consider you needs,
+			the services your exposing and the beans you'll be sending over the wire when
+			choosing a technology.
+		</para>
+		<para>			
+			When using RMI, it's not possible to access the
+			objects through the HTTP protocol, unless you're tunneling the RMI traffic.
+			RMI is a fairly heavy-weight protocol in that it support full-object serialization which 
+			is importing when using a complex data model that needs serializing over the wire.
+			More light-weight protocols like Hessian and/or Burlap might provide significant
+			value when operating in a low-bandwidth environment since they don't support the same
+			full-object serialization. Known problems include the serialization of Hibernate objects
+			in combination with lazily initializing collections. If you have such a data model, consider using
+			RMI instead of Hessian.
+		</para>
+		<para>
+			Last but not least, EJB has the advantage over RMI in that it supports 
+			role-based authentication and authorization. It is possible to get RMI to support
+			this as well, although some custom coding has to be done in order to get it to work.
+			If you're in need of code that supports JAAS-based RMI, please ask the people at 
+			the development list. Hessian and Burlap do provide role based authentication. Both
+			protocols are HTTP-based and work using the Spring DispatcherServlet, thus fully
+			support the use of interceptors, etcetera. You've seen an example above.
+		</para>
+	</sect1>  		
+</chapter>
