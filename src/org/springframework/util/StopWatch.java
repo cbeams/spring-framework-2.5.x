@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @since May 2, 2001
- * @version $Id: StopWatch.java,v 1.1.1.1 2003-08-14 16:20:46 trisberg Exp $
+ * @version $Id: StopWatch.java,v 1.2 2003-11-07 15:31:37 jhoeller Exp $
  */
 public class StopWatch {
 
@@ -46,7 +46,7 @@ public class StopWatch {
 	private boolean running;
 
 	/**
-	 * Identifier of this stopwatch.
+	 * Identifier of this stop watch.
 	 * Handy when we have output from multiple stop watches
 	 * and need to distinguish between them in log or console output.
 	 */
@@ -85,9 +85,10 @@ public class StopWatch {
 	 * @param task name of the task to start
 	 */
 	public void start(String task) throws IllegalStateException {
-		if (this.running)
+		if (this.running) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
-		startTime = System.currentTimeMillis();
+		}
+		this.startTime = System.currentTimeMillis();
 		this.currentTask = task;
 		this.running = true;
 	}
@@ -97,13 +98,14 @@ public class StopWatch {
 	 * called without invoking at least one pair start()/stop() methods.
 	 */
 	public void stop() throws IllegalStateException {
-		if (!this.running)
+		if (!this.running) {
 			throw new IllegalStateException("Can't stop StopWatch: it's not running");
-		long lastTime = System.currentTimeMillis() - startTime;
-		runningTime += lastTime;
-		taskList.add(new TaskInfo(currentTask, lastTime));
+		}
+		long lastTime = System.currentTimeMillis() - this.startTime;
+		this.runningTime += lastTime;
+		this.taskList.add(new TaskInfo(this.currentTask, lastTime));
 		this.running = false;
-		currentTask = "No task running";
+		this.currentTask = null;
 	}
 
 	/**
@@ -208,25 +210,27 @@ public class StopWatch {
 
 		private long time;
 
-		TaskInfo(String task, long time) {
+		private TaskInfo(String task, long time) {
 			this.task = task;
 			this.time = time;
 		}
 
-		/** Return the name of this task */
+		/**
+		 * Return the name of this task.
+		 */
 		public String getTaskName() {
 			return task;
 		}
 
-		/** Return the time in milliseconds this task took
-		 * @return the time in milliseconds this task took
+		/**
+		 * Return the time in milliseconds this task took.
 		 */
 		public long getTime() {
 			return time;
 		}
 
-		/** Return the time in seconds this task took
-		 * @return the time in seconds this task took
+		/**
+		 * Return the time in seconds this task took.
 		 */
 		public double getTimeSecs() {
 			return ((double) time) / 1000.0;

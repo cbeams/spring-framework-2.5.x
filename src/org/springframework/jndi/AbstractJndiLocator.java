@@ -9,6 +9,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -21,10 +22,10 @@ import org.springframework.beans.factory.InitializingBean;
  * <p>Subclasses must implement the located() method to cache the results
  * of the JNDI lookup. They don't need to worry about error handling.
  *
- * <p><b>Assumptions: </b>The resource obtained from JNDI can be cached.
+ * <p><b>Assumptions:</b> The resource obtained from JNDI can be cached.
  *
  * @author Rod Johnson
- * @version $Id: AbstractJndiLocator.java,v 1.2 2003-08-22 12:20:36 jhoeller Exp $
+ * @version $Id: AbstractJndiLocator.java,v 1.3 2003-11-07 15:27:35 jhoeller Exp $
  * @see #setInContainer
  */
 public abstract class AbstractJndiLocator implements InitializingBean {
@@ -80,14 +81,14 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 	 * @param jndiName JNDI name of bean to look up
 	 * @see #setInContainer
 	 */
-	public void setJndiName(String jndiName) {
+	public final void setJndiName(String jndiName) {
 		this.jndiName = jndiName;
 	}
 
 	/**
 	 * Return the JNDI name to look up.
 	 */
-	public String getJndiName() {
+	public final String getJndiName() {
 		return jndiName;
 	}
 
@@ -97,14 +98,14 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 	 * contain it. Default is true.
 	 * <p>Note: Will only get applied if no other scheme like "java:" is given.
 	 */
-	public void setInContainer(boolean inContainer) {
+	public final void setInContainer(boolean inContainer) {
 		this.inContainer = inContainer;
 	}
 
 	/**
 	 * Return if the lookup occurs in a J2EE container.
 	 */
-	public boolean isInContainer() {
+	public final boolean isInContainer() {
 		return inContainer;
 	}
 
@@ -127,10 +128,9 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 	}
 
 	/**
-	 * Subclasses must implement this to cache the object this class has obtained
-	 * from JNDI.
-	 * @param o object successfully retrieved from JNDI
+	 * Subclasses must implement this to cache the object this class has obtained from JNDI.
+	 * @param jndiObject object successfully retrieved from JNDI
 	 */
-	protected abstract void located(Object o);
+	protected abstract void located(Object jndiObject);
 
 }

@@ -5,9 +5,6 @@ import org.springframework.beans.factory.FactoryBean;
 /**
  * FactoryBean that looks up a JNDI object. Behaves like the object when
  * used as bean reference, e.g. for JdbcTemplate's dataSource property.
- * Note that switching to e.g. DriverManagerDataSource is just a matter
- * of configuration: replace the definition of this FactoryBean with a
- * DriverManagerDataSource definition!
  *
  * <p>The typical usage will be to register this as singleton factory
  * (e.g. for a certain JNDI DataSource) in an application context,
@@ -18,6 +15,10 @@ import org.springframework.beans.factory.FactoryBean;
  * JNDI name, and easy switching to non-JNDI replacements. The latter can
  * be used for test setups, standalone clients, etc.
  *
+ * <p>Note that switching to e.g. DriverManagerDataSource is just a matter
+ * of configuration: replace the definition of this FactoryBean with a
+ * DriverManagerDataSource definition!
+ *
  * @author Juergen Hoeller
  * @since 22.05.2003
  * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
@@ -26,8 +27,8 @@ public class JndiObjectFactoryBean extends AbstractJndiLocator implements Factor
 
 	private Object jndiObject;
 
-	protected void located(Object o) {
-		this.jndiObject = o;
+	protected void located(Object jndiObject) {
+		this.jndiObject = jndiObject;
 	}
 
 	/**
