@@ -9,6 +9,7 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyConfig;
@@ -55,9 +56,9 @@ import org.springframework.core.Ordered;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since October 13, 2003
- * @see #setInterceptors
+ * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.4 2004-01-13 14:00:26 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.5 2004-01-14 07:35:50 jhoeller Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, BeanFactoryAware, Ordered {
 
@@ -162,13 +163,16 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	}
 
 
+	public Object postProcessBeforeInitialization(Object bean, String name) {
+		return bean;
+	}
+
 	/**
 	 * Create a proxy with the configured interceptors if the bean is
 	 * identified as one to proxy by the subclass.
 	 * @see #getInterceptorsAndAdvisorsForBean
 	 */
-	public Object postProcessBean(Object bean, String name) throws BeansException {
-		
+	public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
 		// Check for special cases. We don't want to try to autoproxy a part of the autoproxying
 		// infrastructure, lest we get a stack overflow.
 		if (isInfrastructureClass(bean, name) || shouldSkip(bean, name)) {
@@ -229,7 +233,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 			return bean;
 		}
 	}
-	
 
 	private Advisor[] resolveInterceptorNames() {
 		Advisor[] advisors = new Advisor[interceptorNames.length];
@@ -293,7 +296,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	 * or null if no proxy at all, not even with the common interceptors.
 	 * See constants DO_NOT_PROXY and PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS.
 	 * @throws org.springframework.beans.BeansException in case of errors
-	 * @see #postProcessBean
+	 * @see #postProcessAfterInitialization
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */

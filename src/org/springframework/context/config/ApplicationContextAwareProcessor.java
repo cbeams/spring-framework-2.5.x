@@ -1,5 +1,8 @@
 package org.springframework.context.config;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
@@ -19,7 +22,9 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
-	private ApplicationContext applicationContext;
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private final ApplicationContext applicationContext;
 
 	/**
 	 * Create a new ApplicationContextAwareProcessor for the given context.
@@ -28,10 +33,17 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		this.applicationContext = applicationContext;
 	}
 
-	public Object postProcessBean(Object bean, String name) throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 		if (bean instanceof ApplicationContextAware) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking setApplicationContext() on ApplicationContextAware bean '" + name + "'");
+			}
 			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 		}
+		return bean;
+	}
+
+	public Object postProcessAfterInitialization(Object bean, String name) {
 		return bean;
 	}
 
