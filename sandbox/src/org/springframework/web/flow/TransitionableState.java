@@ -70,7 +70,7 @@ public abstract class TransitionableState extends AbstractState {
 		Iterator it = transitions.iterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
-			if (transition.getId().equals(eventId)) {
+			if (transition.matches(eventId)) {
 				return transition;
 			}
 		}

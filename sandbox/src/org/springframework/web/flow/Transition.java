@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
+import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald
@@ -35,13 +36,39 @@ public class Transition implements Serializable {
 
 	private String id;
 
+	private Constraint eventIdCriteria;
+
 	private String toState;
+
+	// constant that says match on any event
+	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
+		public boolean test(Object o) {
+			return true;
+		}
+	};
 
 	public Transition(String id, String toState) {
 		Assert.notNull(id, "The id property is required");
 		Assert.notNull(toState, "The toState property is required");
 		this.id = id;
+		this.eventIdCriteria = createDefaultEventIdCriteria();
 		this.toState = toState;
+	}
+
+	public Transition(String id, String toState, Constraint eventIdCriteria) {
+		Assert.notNull(id, "The id property is required");
+		Assert.notNull(toState, "The toState property is required");
+		this.id = id;
+		this.eventIdCriteria = createDefaultEventIdCriteria();
+		this.toState = toState;
+	}
+
+	protected Constraint createDefaultEventIdCriteria() {
+		return new Constraint() {
+			public boolean test(Object eventId) {
+				return id.equals(eventId);
+			}
+		};
 	}
 
 	public String getId() {
@@ -50,6 +77,10 @@ public class Transition implements Serializable {
 
 	public String getToState() {
 		return toState;
+	}
+
+	public boolean matches(String eventId) {
+		return eventIdCriteria.test(eventId);
 	}
 
 	public ViewDescriptor execute(Flow flow, TransitionableState fromState, FlowSessionExecutionStack sessionExecution,

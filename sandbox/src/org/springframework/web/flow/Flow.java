@@ -747,6 +747,80 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return new FlowSession(getId(), null, input);
 	}
 
+	// lifecycle event publishers
+	
+	/**
+	 * @param eventId
+	 * @param fromState
+	 * @param sessionExecution
+	 * @param request
+	 */
+	protected void fireEventSignaled(final String eventId, final TransitionableState fromState,
+			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowEventSignaled(Flow.this, eventId, fromState, sessionExecution, request);
+			}
+		});
+	}
+
+	/**
+	 * @param eventid
+	 * @param fromState
+	 * @param sessionExecution
+	 * @param request
+	 */
+	protected void fireEventProcessed(final String eventId, final TransitionableState fromState,
+			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowEventProcessed(Flow.this, eventId, fromState, sessionExecution, request);
+			}
+		});
+	}
+
+	/**
+	 * @param oldState
+	 * @param state
+	 * @param sessionExecution
+	 * @param request
+	 */
+	protected void fireStateTransitioned(final AbstractState oldState, final AbstractState newState,
+			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowStateTransitioned(Flow.this, oldState, newState, sessionExecution,
+						request);
+			}
+		});
+	}
+
+	/**
+	 * @param sessionExecutionStack
+	 * @param request
+	 */
+	protected void fireStarted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowStarted(Flow.this, sessionExecution, request);
+			}
+		});
+	}
+
+	/**
+	 * @param endingFlowSession
+	 * @param sessionExecutionStack
+	 * @param request
+	 */
+	protected void fireEndEnded(final FlowSession endingFlowSession, final FlowSessionExecution sessionExecution,
+			final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowEnded(Flow.this, endingFlowSession, sessionExecution, request);
+			}
+		});
+	}
+
 	// flow config factory methods
 
 	/**
@@ -2025,80 +2099,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public String getDefaultFlowAttributesMapperId() {
 		return attributesMapper(getId());
-	}
-
-	// lifecycle event publishers
-	
-	/**
-	 * @param eventId
-	 * @param fromState
-	 * @param sessionExecution
-	 * @param request
-	 */
-	protected void fireEventSignaled(final String eventId, final TransitionableState fromState,
-			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowEventSignaled(Flow.this, eventId, fromState, sessionExecution, request);
-			}
-		});
-	}
-
-	/**
-	 * @param eventid
-	 * @param fromState
-	 * @param sessionExecution
-	 * @param request
-	 */
-	protected void fireEventProcessed(final String eventId, final TransitionableState fromState,
-			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowEventProcessed(Flow.this, eventId, fromState, sessionExecution, request);
-			}
-		});
-	}
-
-	/**
-	 * @param oldState
-	 * @param state
-	 * @param sessionExecution
-	 * @param request
-	 */
-	protected void fireStateTransitioned(final AbstractState oldState, final AbstractState newState,
-			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowStateTransitioned(Flow.this, oldState, newState, sessionExecution,
-						request);
-			}
-		});
-	}
-
-	/**
-	 * @param sessionExecutionStack
-	 * @param request
-	 */
-	protected void fireStarted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowStarted(Flow.this, sessionExecution, request);
-			}
-		});
-	}
-
-	/**
-	 * @param endingFlowSession
-	 * @param sessionExecutionStack
-	 * @param request
-	 */
-	protected void fireEndEnded(final FlowSession endingFlowSession, final FlowSessionExecution sessionExecution,
-			final HttpServletRequest request) {
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowEnded(Flow.this, endingFlowSession, sessionExecution, request);
-			}
-		});
 	}
 
 	public String toString() {
