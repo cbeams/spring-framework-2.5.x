@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * RowMapper implementation that creates a <code>java.util.Map</code>
@@ -47,7 +48,7 @@ public class ColumnMapRowMapper implements RowMapper {
 		Map mapOfColValues = createColumnMap(columnCount);
 		for (int i = 1; i <= columnCount; i++) {
 			String key = getColumnKey(rsmd.getColumnName(i));
-			Object obj = getJdbcObject(rs, i);
+			Object obj = getColumnValue(rs, i);
 			mapOfColValues.put(key, obj);
 		}
 		return mapOfColValues;
@@ -77,20 +78,17 @@ public class ColumnMapRowMapper implements RowMapper {
 	}
 
 	/**
-	 * Retrieve a JDBC object value from a ResultSet.
+	 * Retrieve a JDBC object value for the specified column.
 	 * <p>The default implementation uses the <code>getObject</code> method.
 	 * Additionally, this implementation includes a "hack" to get around Oracle
 	 * returning a non standard object for their TIMESTAMP datatype.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @return the Object returned
+	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue
 	 */
-	protected Object getJdbcObject(ResultSet rs, int index) throws SQLException {
-		Object obj = rs.getObject(index);
-		if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
-			obj = rs.getTimestamp(index);
-		}
-		return obj;
+	protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+		return JdbcUtils.getResultSetValue(rs, index);
 	}
 
 }

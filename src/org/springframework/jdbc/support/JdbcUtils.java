@@ -92,6 +92,25 @@ public class JdbcUtils {
 	}
 
 	/**
+	 * Retrieve a JDBC object value from a ResultSet. Uses the <code>getObject</code>
+	 * method, but includes an additional "hack" to get around Oracle returning a
+	 * non-standard object for their TIMESTAMP datatype: This will explicitly be
+	 * extracted as standard <code>java.sql.Timestamp</code> object.
+	 * @param rs is the ResultSet holding the data
+	 * @param index is the column index
+	 * @return the Object returned
+	 * @see oracle.sql.TIMESTAMP
+	 * @see java.sql.Timestamp
+	 */
+	public static Object getResultSetValue(ResultSet rs, int index) throws SQLException {
+		Object obj = rs.getObject(index);
+		if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
+			obj = rs.getTimestamp(index);
+		}
+		return obj;
+	}
+
+	/**
 	 * Extract database meta data via the given DatabaseMetaDataCallback.
 	 * <p>This method will open a connection to the database and retrieve the database metadata.
 	 * Since this method is called before the exception translation feature is configured for

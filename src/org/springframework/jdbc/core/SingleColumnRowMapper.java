@@ -22,6 +22,7 @@ import java.sql.SQLException;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.TypeMismatchDataAccessException;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -57,7 +58,7 @@ public class SingleColumnRowMapper implements RowMapper {
 			throw new IncorrectResultSizeDataAccessException(
 					"Expected single column but found " + nrOfColumns, 1, nrOfColumns);
 		}
-		Object result = getJdbcObject(rs, 1);
+		Object result = getColumnValue(rs, 1);
 		if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
 			if (String.class.equals(this.requiredType)) {
 				result = result.toString();
@@ -81,20 +82,17 @@ public class SingleColumnRowMapper implements RowMapper {
 	}
 
 	/**
-	 * Retrieve a JDBC object value from a ResultSet.
+	 * Retrieve a JDBC object value for the specified column.
 	 * <p>The default implementation uses the <code>getObject</code> method.
 	 * Additionally, this implementation includes a "hack" to get around Oracle
-	 * returning a non standard object for their TIMESTAMP datatype.
+	 * returning a non-standard object for their TIMESTAMP datatype.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @return the Object returned
+	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue
 	 */
-	protected Object getJdbcObject(ResultSet rs, int index) throws SQLException {
-		Object obj = rs.getObject(index);
-		if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
-			obj = rs.getTimestamp(index);
-		}
-		return obj;
+	protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+		return JdbcUtils.getResultSetValue(rs, index);
 	}
 
 }
