@@ -33,7 +33,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.4 2003-11-04 18:02:21 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.5 2003-11-04 21:38:22 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -62,10 +62,32 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue("test1 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
 	}
 	
+	
+	/**
+	 * The instances are equal, but do not have object identity.
+	 * Interceptors and interfaces and the target are the same.
+	 */
 	public void testSingletonInstancesAreEqual() {
 		ITestBean test1 = (ITestBean) factory.getBean("test1");
 		ITestBean test1_1 = (ITestBean) factory.getBean("test1");
-		assertTrue("Singleton instances ==", test1 == test1_1);
+		//assertTrue("Singleton instances ==", test1 == test1_1);
+		assertEquals("Singleton instances ==", test1, test1_1);
+		test1.setAge(25);
+		assertEquals(test1.getAge(), test1_1.getAge());
+		test1.setAge(250);
+		assertEquals(test1.getAge(), test1_1.getAge());
+		ProxyConfig pc1 = (ProxyConfig) test1;
+		ProxyConfig pc2 = (ProxyConfig) test1_1;
+		assertEquals(pc1.getMethodPointcuts(), pc2.getMethodPointcuts());
+		int oldLength = pc1.getMethodPointcuts().size();
+		DebugInterceptor di = new DebugInterceptor();
+		pc1.addInterceptor(1, di);
+		assertEquals(pc1.getMethodPointcuts(), pc2.getMethodPointcuts());
+		assertEquals(oldLength + 1, pc2.getMethodPointcuts().size());
+		assertEquals(di.getCount(), 0);
+		test1.setAge(5);
+		assertEquals(test1_1.getAge(), test1.getAge());
+		assertEquals(di.getCount(), 3);
 	}
 	
 	
@@ -158,8 +180,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	}
 	
 	/**
-	 * Should see effect immediately on behaviour,
-	 * later on interfaces if reconfigureSingleton() is invoked
+	 * Should see effect immediately on behaviour.
 	 */
 	public void testCanAddAndRemoveAspectInterfacesOnSingleton() {
 		try {
@@ -178,8 +199,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		int oldCount = config.getMethodPointcuts().size();
 		config.addInterceptor(0, ti);
 		
-		// Must call this to update the singleton
-		config.reconfigureSingleton();
+		
 		
 		assertTrue(config.getMethodPointcuts().size() == oldCount + 1);
 	
@@ -188,7 +208,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 		// Can remove
 		config.removeInterceptor(ti);
-		config.reconfigureSingleton();
+
 		assertTrue(config.getMethodPointcuts().size() == oldCount);
 	
 		try {
@@ -209,7 +229,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 		// Now check non-effect of removing interceptor that isn't there
 		config.removeInterceptor(new DebugInterceptor());
-		config.reconfigureSingleton();
+	
 		assertTrue(config.getMethodPointcuts().size() == oldCount);
 	
 		ITestBean it = (ITestBean) ts;
@@ -291,17 +311,6 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(time, ts.getTimeStamp());
 	}
 	
-	
-	public void testCantReconfigureSingletonOnPrototypeFactoryBean() {
-		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test2");
-		try {
-			config.reconfigureSingleton();
-			fail();
-		}
-		catch (AopConfigException ex) {
-			// Ok
-		}
-	}
 	
 	
 	/**

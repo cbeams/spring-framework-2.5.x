@@ -43,16 +43,19 @@ import org.springframework.core.OrderComparator;
  * actual target class if not. Note that the latter will only work if the target class
  * does not have final methods, as a dynamic subclass will be created at runtime.
  * 
- * <p>It's possible to obtain the ProxyFactoryBean reference and programmatically 
- * manipulate it. This won't work for prototype references, which are independent. However,
+ * <p>It's possible to cast a proxy obtained from this factory to ProxyConfig,
+ * or to obtain the ProxyFactoryBean reference and programmatically 
+ * manipulate it. This won't work for existing prototype references, which are independent. However,
  * it will work for prototypes subsequently obtained from the factory. Changes to interception
  * will work immediately on singletons (including existing references). However, to change
- * interfaces or target call the reconfigureSingleton() before obtaining a new bean from
- * the factory. 
+ * interfaces or target it's necessary to obtain a new instance from
+ * the factory. This means that singleton instances obtained from the factory do not
+ * have the same object identity. However, they do have the same interceptors and target, and
+ * changing any reference will change all objects.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.4 2003-11-04 13:46:28 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.5 2003-11-04 21:37:56 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  */
@@ -70,11 +73,6 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	 * object is initialized.
 	 */
 	private BeanFactory beanFactory;
-	
-	/**
-	 * Singleton instance if we're using a singleton
-	 */
-	private Object singletonInstance;
 	
 	/** 
 	 * Map from PointCut or interceptor to bean name or null,
@@ -115,18 +113,6 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	}
 	
 	
-	/**
-	 * Users must invoke this method after modifying interfaces, interceptors
-	 * etc. so that a singleton will return a differently configured instance on
-	 * the next getBean() call. The target and existing interceptors
-	 * will be unchanged.
-	 */
-	public void reconfigureSingleton() {
-		if (!this.isSingleton()) {
-			throw new AopConfigException("Cannot refresh singleton on a prototype ProxyFactoryBean");
-		}
-		this.singletonInstance = createInstance();	
-	}
 	
 	/**
 	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
@@ -137,10 +123,6 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 		logger.debug("Set BeanFactory. Will configure interceptor beans...");
 		createInterceptorChain();
 		
-		// Eagerly create singleton proxy instance if necessary
-		if (isSingleton()) {
-			reconfigureSingleton();
-		}
 		logger.info("ProxyFactoryBean config: " + this);
 	}
 
@@ -303,14 +285,7 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	public Object getObject() throws BeansException {
-		if (this.singleton) {
-			// Return singleton
-			return this.singletonInstance;
-		}
-		else {
-			// Create new interface
-			return createInstance();
-		}
+		return createInstance();
 	}
 	
 	/**
@@ -344,7 +319,7 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
 	public Class getObjectType() {
-		return (this.singletonInstance != null) ? this.singletonInstance.getClass() : null;
+		return (getTarget() != null) ? this.getTarget().getClass() : null;
 	}
 
 	/**
