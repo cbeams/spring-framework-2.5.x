@@ -18,6 +18,7 @@ package org.springframework.orm.jdo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.jdo.JDOException;
@@ -185,8 +186,11 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 		}
 
 		if (this.jdoProperties != null) {
-			// add given JDO properties
-			props.putAll(this.jdoProperties);
+			// use propertyNames enumeration to also catch default properties
+			for (Enumeration enum = this.jdoProperties.propertyNames(); enum.hasMoreElements();) {
+				String key = (String) enum.nextElement();
+				props.setProperty(key, this.jdoProperties.getProperty(key));
+			}
 		}
 
 		// build factory instance

@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.springframework.core.io.Resource;
@@ -110,27 +111,35 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 		if (this.properties == null && this.locations == null) {
 			throw new IllegalArgumentException("Either properties or location(s) must be set");
 		}
+
 		Properties result = new Properties();
+		
 		if (this.properties != null) {
-			result.putAll(this.properties);
+			// use propertyNames enumeration to also catch default properties
+			for (Enumeration enum = this.properties.propertyNames(); enum.hasMoreElements();) {
+				String key = (String) enum.nextElement();
+				result.setProperty(key, this.properties.getProperty(key));
+			}
 		}
+
 		if (this.locations != null) {
-			result.putAll(loadProperties());
+			loadProperties(result);
 		}
+
 		return result;
 	}
 
 	/**
-	 * Load the Properties instance. Invoked either by afterPropertiesSet
-	 * or by getObject, depending on singleton or prototype mode.
-	 * @return the freshly loaded Properties instance
+	 * Load properties into the given instance.
 	 * @throws java.io.IOException in case of I/O errors
+	 * @see #setLocations
 	 */
-	protected Properties loadProperties() throws IOException {
-		Properties props = new Properties();
+	protected void loadProperties(Properties props) throws IOException {
 		for (int i = 0; i < this.locations.length; i++) {
 			Resource location = this.locations[i];
-			logger.info("Loading properties file from " + location);
+			if (logger.isInfoEnabled()) {
+				logger.info("Loading properties file from " + location);
+			}
 			InputStream is = location.getInputStream();
 			try {
 				if (this.fileEncoding != null) {
@@ -144,7 +153,6 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 				is.close();
 			}
 		}
-		return props;
 	}
 
 }

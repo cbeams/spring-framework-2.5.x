@@ -1,7 +1,7 @@
 package org.springframework.context.support;
 
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -53,8 +53,8 @@ public class ResourceMapFactoryBean extends PropertiesFactoryBean implements Res
 	protected Object createInstance() throws Exception {
 		Map resourceMap = new HashMap();
 		Properties props = mergeProperties();
-		for (Iterator it = props.keySet().iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		for (Enumeration enum = props.propertyNames(); enum.hasMoreElements();) {
+			String key = (String) enum.nextElement();
 			String location = props.getProperty(key);
 			resourceMap.put(key, this.resourceLoader.getResource(this.resourceBasePath + location));
 		}

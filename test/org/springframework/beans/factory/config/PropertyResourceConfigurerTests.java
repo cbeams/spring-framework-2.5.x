@@ -276,6 +276,21 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		}
 	}
 
+	public void testPropertyPlaceholderConfigurerWithDefaultProperties() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("touchy", "${test}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("test", "mytest");
+		pvs.addPropertyValue("properties", new Properties(props));
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("mytest", tb.getTouchy());
+	}
+
 	public void testPreferencesPlaceholderConfigurer() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();

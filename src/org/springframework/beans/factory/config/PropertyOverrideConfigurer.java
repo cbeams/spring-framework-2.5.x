@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.springframework.beans.BeansException;
@@ -50,14 +50,14 @@ import org.springframework.beans.FatalBeanException;
  * @author Juergen Hoeller
  * @since 12.03.2003
  * @see PropertyPlaceholderConfigurer
- * @version $Id: PropertyOverrideConfigurer.java,v 1.6 2004-04-22 07:58:22 jhoeller Exp $
+ * @version $Id: PropertyOverrideConfigurer.java,v 1.7 2004-06-23 09:07:50 jhoeller Exp $
  */
 public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
 			throws BeansException {
-		for (Iterator it = props.keySet().iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		for (Enumeration enum = props.propertyNames(); enum.hasMoreElements();) {
+			String key = (String) enum.nextElement();
 			processKey(beanFactory, key, props.getProperty(key));
 		}
 	}

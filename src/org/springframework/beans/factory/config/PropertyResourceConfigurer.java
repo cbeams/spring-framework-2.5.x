@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -101,13 +102,14 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		Properties props = new Properties();
+		Properties mergedProps = new Properties();
 
 		if (this.properties != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Applying directly specified properties [" + this.properties + "]");
+			// use propertyNames enumeration to also catch default properties
+			for (Enumeration enum = this.properties.propertyNames(); enum.hasMoreElements();) {
+				String key = (String) enum.nextElement();
+				mergedProps.setProperty(key, this.properties.getProperty(key));
 			}
-			props.putAll(this.properties);
 		}
 
 		if (this.locations != null) {
@@ -117,7 +119,7 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 				try {
 					InputStream is = location.getInputStream();
 					try {
-						props.load(is);
+						mergedProps.load(is);
 					}
 					finally {
 						is.close();
@@ -135,7 +137,7 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 			}
 		}
 
-		processProperties(beanFactory, props);
+		processProperties(beanFactory, mergedProps);
 	}
 
 	/**
