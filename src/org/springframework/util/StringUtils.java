@@ -22,7 +22,7 @@ import java.util.TreeSet;
  * strings, such as CSV strings, and collections and arrays.
  * @author  Rod Johnson
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.2 2003-09-21 12:40:37 johnsonr Exp $
+ * @version $Id: StringUtils.java,v 1.3 2003-10-08 14:18:39 jhoeller Exp $
  */
 public abstract class StringUtils {
 
@@ -214,24 +214,12 @@ public abstract class StringUtils {
 	public static String collectionToCommaDelimitedString(Collection c) {
 		return collectionToDelimitedString(c, ",");
 	}
-	
-	/**
-	 * Given a fully qualified name, return a class name:
-	 * e.g. com.foo.Bar returns Bar,
-	 * com.foo.Bar$Inner returns Bar$Inner.
-	 * @param clazz class to find name for
-	 * @return the class name without the package prefix.
-	 * Will include any enclosing class name, which is also after
-	 * the dot.
-	 */
-	public static String classNameWithoutPackagePrefix(Class clazz) {
-		String name = clazz.getName();
-		int lastDotIndex = name.lastIndexOf(".");
-		// There must be characters after the ., so we don't
-		// need to program defensively for that case
-		return (lastDotIndex == -1) ?
-			name :					// default package
-		 	name.substring(lastDotIndex + 1);
+
+	public static String[] addStringToArray(String[] arr, String s) {
+		String[] newArr = new String[arr.length + 1];
+		System.arraycopy(arr, 0, newArr, 0, arr.length);
+		newArr[arr.length] = s;
+		return newArr;
 	}
 
 }

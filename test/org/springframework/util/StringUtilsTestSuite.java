@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 /**
  *
  * @author Rod Johnson
- * @version $Id: StringUtilsTestSuite.java,v 1.2 2003-09-21 12:40:53 johnsonr Exp $
+ * @version $Id: StringUtilsTestSuite.java,v 1.3 2003-10-08 14:18:39 jhoeller Exp $
  */
 public class StringUtilsTestSuite extends TestCase { 
 
@@ -167,17 +167,4 @@ public class StringUtilsTestSuite extends TestCase {
 		assertTrue("Still has chars", cleaned.length() > 10);
 	} 
 	
-	public void testClassNameNoFqn() {
-		Class clazz = Exception.class;
-		assertEquals(StringUtils.classNameWithoutPackagePrefix(clazz), "Exception");
-		
-		// Test with inner class
-		clazz = MyInnerClass.class;
-		assertEquals(StringUtils.classNameWithoutPackagePrefix(clazz), "StringUtilsTestSuite$MyInnerClass");
-	}
-	
-	// Purely for testing class name resolution
-	public static class MyInnerClass {
-	} 
-
 }

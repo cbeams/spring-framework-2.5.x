@@ -65,21 +65,6 @@ public abstract class ClassLoaderUtils {
 	}
 
 	/**
-	 * Given an	input class	object,	returns	a string which consists	of the class's package
-	 * name	as a pathname, i.e., a leading '/' is added, and all dots ('.')	are	replaced by
-	 * slashes ('/'). A	trailing slash is <b>not</b> added.
-	 * @param clazz	the	input class. A null value will result in "/" being returned.
-	 * @return a path which	represents the package name, including a leading slash
-	 */
-	public static String classPackageAsResourcePath(Class clazz) {
-		StringBuffer retval	= new StringBuffer("/");
-		if (clazz != null)
-			retval.append(clazz.getPackage().getName().replace('.', '/'));
-		return retval.toString();
-	}
-  
-  
-	/**
 	 * Return a path suitable for use with Class.getResource. Built by taking
 	 * the package of the specified	class file,	converting all dots	('.') to slashes
 	 * ('/'), adding a trailing	slash, and concatenating the specified resource	name
@@ -95,6 +80,39 @@ public abstract class ClassLoaderUtils {
 			return classPackageAsResourcePath(clazz) + "/" + resourceName;
 		else
 			return classPackageAsResourcePath(clazz) + resourceName;
+	}
+
+	/**
+	 * Given an	input class	object,	returns	a string which consists	of the class's package
+	 * name	as a pathname, i.e., a leading '/' is added, and all dots ('.')	are	replaced by
+	 * slashes ('/'). A	trailing slash is <b>not</b> added.
+	 * @param clazz	the	input class. A null value will result in "/" being returned.
+	 * @return a path which	represents the package name, including a leading slash
+	 */
+	public static String classPackageAsResourcePath(Class clazz) {
+		StringBuffer retval	= new StringBuffer("/");
+		if (clazz != null)
+			retval.append(clazz.getPackage().getName().replace('.', '/'));
+		return retval.toString();
+	}
+  
+	/**
+	 * Given a fully qualified name, return a class name:
+	 * e.g. com.foo.Bar returns Bar,
+	 * com.foo.Bar$Inner returns Bar$Inner.
+	 * @param clazz class to find name for
+	 * @return the class name without the package prefix.
+	 * Will include any enclosing class name, which is also after
+	 * the dot.
+	 */
+	public static String classNameWithoutPackagePrefix(Class clazz) {
+		String name = clazz.getName();
+		int lastDotIndex = name.lastIndexOf(".");
+		// There must be characters after the ., so we don't
+		// need to program defensively for that case
+		return (lastDotIndex == -1) ?
+			name :					// default package
+		 	name.substring(lastDotIndex + 1);
 	}
 
 }
