@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.65 2004-06-11 23:59:06 jhoeller Exp $
+    $Id: build.xml,v 1.66 2004-07-06 15:46:37 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -230,6 +230,7 @@
 
 		<jar jarfile="${dist.dir}/spring-webmvc.jar">
 			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/*.tld"/>
 				<include name="org/springframework/web/servlet/**"/>
 			</fileset>
 			<manifest>
@@ -404,6 +405,7 @@
 				<include name="lib/jotm/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
+				<include name="lib/ojb/**"/>
 				<include name="lib/poi/**"/>
 				<include name="lib/quartz/**"/>
 				<include name="lib/regexp/**"/>

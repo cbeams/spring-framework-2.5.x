@@ -213,6 +213,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
+* ojb/db-ojb-1.0.0.jar
+- Apache ObJectRelationalBridge 1.0.0 (http://db.apache.org/ojb)
+- required for building the framework
+- required at runtime when using Spring's OJB support
+
 * poi/poi-2.5.jar
 - Apache POI 2.5 (http://jakarta.apache.org/poi)
 - required for building the framework
