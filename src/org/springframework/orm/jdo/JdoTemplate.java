@@ -253,31 +253,21 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	//-------------------------------------------------------------------------
 
 	public Collection find(final Class entityClass) throws DataAccessException {
-		return executeFind(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = pm.newQuery(entityClass);
-				prepareQuery(query);
-				return query.execute();
-			}
-		});
+		return find(entityClass, null, null);
 	}
 
 	public Collection find(final Class entityClass, final String filter) throws DataAccessException {
-		return executeFind(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = pm.newQuery(entityClass, filter);
-				prepareQuery(query);
-				return query.execute();
-			}
-		});
+		return find(entityClass, filter, null);
 	}
 
 	public Collection find(final Class entityClass, final String filter, final String ordering)
 			throws DataAccessException {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = pm.newQuery(entityClass, filter);
-				query.setOrdering(ordering);
+				Query query = (filter != null ? pm.newQuery(entityClass, filter) : pm.newQuery(entityClass));
+				if (ordering != null) {
+					query.setOrdering(ordering);
+				}
 				prepareQuery(query);
 				return query.execute();
 			}
@@ -287,14 +277,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Collection find(
 			final Class entityClass, final String filter, final String parameters, final Object[] values)
 			throws DataAccessException {
-		return executeFind(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = pm.newQuery(entityClass, filter);
-				query.declareParameters(parameters);
-				prepareQuery(query);
-				return query.executeWithArray(values);
-			}
-		});
+		return find(entityClass, filter, parameters, values, null);
 	}
 
 	public Collection find(
@@ -304,7 +287,9 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				query.declareParameters(parameters);
-				query.setOrdering(ordering);
+				if (ordering != null) {
+					query.setOrdering(ordering);
+				}
 				prepareQuery(query);
 				return query.executeWithArray(values);
 			}
@@ -314,14 +299,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Collection find(
 			final Class entityClass, final String filter, final String parameters, final Map values)
 			throws DataAccessException {
-		return executeFind(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = pm.newQuery(entityClass, filter);
-				query.declareParameters(parameters);
-				prepareQuery(query);
-				return query.executeWithMap(values);
-			}
-		});
+		return find(entityClass, filter, parameters, values, null);
 	}
 
 	public Collection find(
@@ -331,7 +309,9 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				query.declareParameters(parameters);
-				query.setOrdering(ordering);
+				if (ordering != null) {
+					query.setOrdering(ordering);
+				}
 				prepareQuery(query);
 				return query.executeWithMap(values);
 			}

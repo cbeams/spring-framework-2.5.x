@@ -353,7 +353,7 @@ public interface HibernateOperations {
 	 * to a "?" parameter of the given type in the query string.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @param type Hibernate type of the parameter
+	 * @param type Hibernate type of the parameter (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
@@ -378,7 +378,7 @@ public interface HibernateOperations {
 	 * values to "?" parameters of the given types in the query string.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @param types Hibernate types of the parameters
+	 * @param types Hibernate types of the parameters (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
@@ -406,7 +406,7 @@ public interface HibernateOperations {
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param paramName the name of the parameter
 	 * @param value the value of the parameter
-	 * @param type Hibernate type of the parameter
+	 * @param type Hibernate type of the parameter (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
@@ -435,7 +435,7 @@ public interface HibernateOperations {
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param paramNames the names of the parameters
 	 * @param values the values of the parameters
-	 * @param types Hibernate types of the parameters
+	 * @param types Hibernate types of the parameters (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
@@ -489,7 +489,7 @@ public interface HibernateOperations {
 	 * one value to a "?" parameter in the query string.
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @param type Hibernate type of the parameter
+	 * @param type Hibernate type of the parameter (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
@@ -516,7 +516,7 @@ public interface HibernateOperations {
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param values the values of the parameters
-	 * @param types Hibernate types of the parameters
+	 * @param types Hibernate types of the parameters (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
@@ -579,7 +579,7 @@ public interface HibernateOperations {
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param paramName the name of the parameter
 	 * @param value the value of the parameter
-	 * @param type Hibernate type of the parameter
+	 * @param type Hibernate type of the parameter (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
@@ -610,7 +610,7 @@ public interface HibernateOperations {
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param paramNames the names of the parameters
 	 * @param values the values of the parameters
-	 * @param types Hibernate types of the parameters
+	 * @param types Hibernate types of the parameters (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
@@ -652,12 +652,26 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute a query for persistent instances, binding one value
+	 * to a "?" parameter in the query string.
+	 * <p>Returns the results as Iterator. Entities returned are initialized
+	 * on demand. See Hibernate docs for details.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param value the value of the parameter
+	 * @return a List containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#iterate(String, Object, net.sf.hibernate.type.Type)
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	Iterator iterate(String queryString, Object value) throws DataAccessException;
+
+	/**
+	 * Execute a query for persistent instances, binding one value
 	 * to a "?" parameter of the given type in the query string.
 	 * <p>Returns the results as Iterator. Entities returned are initialized
 	 * on demand. See Hibernate docs for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @param type Hibernate type of the parameter
+	 * @param type Hibernate type of the parameter (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#iterate(String, Object, net.sf.hibernate.type.Type)
@@ -667,12 +681,26 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute a query for persistent instances, binding a number of
+	 * values to "?" parameters in the query string.
+	 * <p>Returns the results as Iterator. Entities returned are initialized
+	 * on demand. See Hibernate docs for details.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param values the values of the parameters
+	 * @return a List containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	Iterator iterate(String queryString, Object[] values) throws DataAccessException;
+
+	/**
+	 * Execute a query for persistent instances, binding a number of
 	 * values to "?" parameters of the given types in the query string.
 	 * <p>Returns the results as Iterator. Entities returned are initialized
 	 * on demand. See Hibernate docs for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @param types Hibernate types of the parameters
+	 * @param types Hibernate types of the parameters (or null)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
@@ -702,7 +730,7 @@ public interface HibernateOperations {
 	 * Delete all objects returned by the query. Return the number of objects deleted.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @param type Hibernate type of the parameter
+	 * @param type Hibernate type of the parameter (or null)
 	 * @return the number of instances deleted
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#delete(String, Object, net.sf.hibernate.type.Type)
@@ -713,7 +741,7 @@ public interface HibernateOperations {
 	 * Delete all objects returned by the query. Return the number of objects deleted.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @param types Hibernate types of the parameters
+	 * @param types Hibernate types of the parameters (or null)
 	 * @return the number of instances deleted
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#delete(String, Object[], net.sf.hibernate.type.Type[])

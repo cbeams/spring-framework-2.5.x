@@ -182,7 +182,7 @@ public interface JdoOperations {
 	 * Return all persistent instances of the given class that match the given
 	 * JDOQL filter.
 	 * @param entityClass a persistent class
-	 * @param filter the JDOQL filter to match
+	 * @param filter the JDOQL filter to match (or null if none)
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
@@ -193,8 +193,8 @@ public interface JdoOperations {
 	 * Return all persistent instances of the given class that match the given
 	 * JDOQL filter, with the given result ordering.
 	 * @param entityClass a persistent class
-	 * @param filter the JDOQL filter to match
-	 * @param ordering the ordering of the result
+	 * @param filter the JDOQL filter to match (or null if none)
+	 * @param ordering the ordering of the result (or null if none)
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
@@ -227,7 +227,7 @@ public interface JdoOperations {
 	 * @param filter the JDOQL filter to match
 	 * @param parameters the JDOQL parameter declarations
 	 * @param values the corresponding parameter values
-	 * @param ordering the ordering of the result
+	 * @param ordering the ordering of the result (or null if none)
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
@@ -235,8 +235,9 @@ public interface JdoOperations {
 	 * @see javax.jdo.Query#executeWithArray
 	 * @see javax.jdo.Query#setOrdering
 	 */
-	Collection find(Class entityClass, String filter, String parameters, Object[] values,
-									String ordering) throws DataAccessException;
+	Collection find(
+			Class entityClass, String filter, String parameters, Object[] values, String ordering)
+			throws DataAccessException;
 
 	/**
 	 * Return all persistent instances of the given class that match the given
@@ -262,7 +263,7 @@ public interface JdoOperations {
 	 * @param filter the JDOQL filter to match
 	 * @param parameters the JDOQL parameter declarations
 	 * @param values a Map with parameter names as keys and parameter values
-	 * @param ordering the ordering of the result
+	 * @param ordering the ordering of the result (or null if none)
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
@@ -270,7 +271,7 @@ public interface JdoOperations {
 	 * @see javax.jdo.Query#executeWithMap
 	 * @see javax.jdo.Query#setOrdering
 	 */
-	Collection find(Class entityClass, String filter, String parameters, Map values,
-									String ordering) throws DataAccessException;
+	Collection find(Class entityClass, String filter, String parameters, Map values, String ordering)
+			throws DataAccessException;
 
 }
