@@ -56,10 +56,10 @@ public class ProxyFactory extends AdvisedSupport {
 	}
 
 	/**
-	 * Create new proxy according to the settings in this factory.
+	 * Create a new proxy according to the settings in this factory.
 	 * Can be called repeatedly. Effect will vary if we've added
-	 * or removed interfaces. Can add and remove "interceptors"
-	 * @return Object
+	 * or removed interfaces. Can add and remove interceptors.
+	 * @return the new proxy
 	 */
 	public Object getProxy() {
 		AopProxy proxy = createAopProxy();
