@@ -34,14 +34,15 @@ import javax.portlet.RenderResponse;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.OrderComparator;
+import org.springframework.web.portlet.i18n.RenderRequestLocaleResolver;
 import org.springframework.web.portlet.support.PortletController;
 import org.springframework.web.portlet.support.PortletModeNameViewController;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ModelAndViewDefiningException;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewRendererServlet;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
@@ -70,7 +71,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Id: DispatcherPortlet.java,v 1.5 2004-05-08 04:29:38 wgthom Exp $
+ * @version $Id: DispatcherPortlet.java,v 1.6 2004-05-08 05:55:04 wgthom Exp $
  * @see PortletControllerMapping
  * @see ViewResolver
  * @see org.springframework.web.portlet.context.PortletApplicationContext
@@ -84,11 +85,16 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
 	/**
-	 * Request attribute to hold the portlet render request locale.  Used
-	 * by the RequestContextUtils to lookup the Locale.
+	 * Well-known name for the LocaleResolver object in the bean factory for this namespace.
 	 */
-	// TODO where should this go?
-	//public static final String PORTLET_LOCALE_ATTRIBUTE = "portletLocale";
+	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";	
+
+	/**
+	 * Request attribute to hold current locale, retrievable by views.
+	 * @see org.springframework.web.servlet.support.RequestContext
+	 */
+	// TODO how to bridge this properly...
+	//public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherPortlet.class.getName() + ".LOCALE";
 	
 	/**
 	 * Request attribute to hold current portlet application context.
@@ -108,6 +114,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	/** ViewResolver used by this portlet */
 	private ViewResolver viewResolver;
 	
+	/** LocaleResolver used by this portlet */
+	private PortletLocaleResolver localeResolver;
+
 
 	/**
 	 * Overridden method, invoked after any bean properties have been set and the
@@ -116,12 +125,32 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * ViewResolver.
 	 */
 	protected void initFrameworkPortlet() throws PortletException, BeansException {
+		initLocaleResolver();
 	    initPortletControllerMappings();
 	    initPortletControllers();
 	    initPortletControllerExceptionResolvers();
 		initViewResolver();
+		
 	}
 
+	/**
+	 * Initialize the LocaleResolver used by this class.
+	 * If no bean is defined with the given name in the BeanFactory
+	 * for this namespace, we default to AcceptHeaderLocaleResolver.
+	 */
+	private void initLocaleResolver() throws BeansException {
+		try {
+			this.localeResolver = (PortletLocaleResolver) getPortletApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME);
+			logger.info("Using LocaleResolver [" + this.localeResolver + "]");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// we need to use the default
+			this.localeResolver = new RenderRequestLocaleResolver();
+			logger.info("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
+			            "': using default [" + this.localeResolver + "]");
+		}
+	}
+	
 	/**
 	 * Initialize the PortletControllerMappings used by this class.
 	 * If no PortletController beans are defined in the BeanFactory
@@ -321,12 +350,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
         // make framework objects available for controllers
         request.setAttribute(PORTLET_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
+        // TODO how to rectify DispatcherServlet dependency?
+        request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
+        request.setAttribute(this.localeResolver.getLocaleAttribute(), request.getLocale());
         
-        // make Locale available for views
-        //TODO: clean up request.setAttribute(PORTLET_LOCALE_ATTRIBUTE, request.getLocale());
-        request.setAttribute(RequestContextUtils.LOCALE_ATTRIBUTE, request.getLocale());
-        
-
         RenderRequest processedRequest = request;
         PortletControllerExecutionChain mappedController = null;
         int interceptorIndex = -1;
