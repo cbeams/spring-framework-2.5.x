@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc;
 
@@ -39,7 +39,7 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 	 * @param actual the actual number of rows affected
 	 */
 	public JdbcUpdateAffectedIncorrectNumberOfRowsException(String sql, int expected, int actual) {
-		super("SQL update '" + sql + "' affected " + actual + " rows, not " + expected + ", as expected");
+		super("SQL update '" + sql + "' affected " + actual + " rows, not " + expected + " as expected");
 		this.expected = expected;
 		this.actual = actual;
 	}
@@ -52,7 +52,7 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 	}
 	
 	/**
-	 * Return the number of rows that actually were affected.
+	 * Return the number of rows that have actually been affected.
 	 */
 	public int getActualRowsAffected() {
 		return actual;

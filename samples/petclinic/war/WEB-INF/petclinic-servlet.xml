@@ -8,7 +8,11 @@
 
 	<!-- ========================= MESSAGE SOURCE DEFINITION ========================= -->
 
-	<!-- Message source for this context, loaded from localized "messages_xx" files -->
+	<!--
+		- Message source for this context, loaded from localized "messages_xx" files.
+		- Could also reside in the root application context, as it is generic,
+		- but is currently just used within Petclinic's web tier.
+    -->
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basename"><value>messages</value></property>
 	</bean>
@@ -53,13 +57,13 @@
 			<props>
 				<prop key="/welcome.htm">clinicController</prop>
 				<prop key="/vets.htm">clinicController</prop>
-				<prop key="/owner.htm">clinicController</prop>
 				<prop key="/findOwners.htm">findOwnersForm</prop>
-				<prop key="/editOwner.htm">editOwnerForm</prop>
+				<prop key="/owner.htm">clinicController</prop>
 				<prop key="/addOwner.htm">addOwnerForm</prop>
-				<prop key="/addVisit.htm">addVisitForm</prop>
+				<prop key="/editOwner.htm">editOwnerForm</prop>
 				<prop key="/addPet.htm">addPetForm</prop>
 				<prop key="/editPet.htm">editPetForm</prop>
+				<prop key="/addVisit.htm">addVisitForm</prop>
 			</props>
 		</property>
 	</bean>
@@ -124,8 +128,9 @@
 	</bean>
 
 	<!--
-	  - This bean is an implementation of the Validator interface.
-	  - It is used by the "addOwnerForm" and "editOwnerForm" beans.
+		- Validator for owner forms, implementing Spring's Validator interface.
+		- Could also reside in the root application context, as it is generic,
+		- but is currently just used within Petclinic's web tier.
 	  -->
 	<bean id="ownerValidator" class="org.springframework.samples.petclinic.validation.OwnerValidator"/>
 
@@ -152,7 +157,9 @@
 	</bean>
 
 	<!--
-		- Validator for petForm, implementing Spring's Validator interface.
+		- Validator for pet forms, implementing Spring's Validator interface.
+		- Could also reside in the root application context, as it is generic,
+		- but is currently just used within Petclinic's web tier.
  		-->
 	<bean id="petValidator" class="org.springframework.samples.petclinic.validation.PetValidator"/>
 
@@ -168,7 +175,9 @@
 	</bean>
 
 	<!--
-		- Validator for visitForm, implementing Spring's Validator interface.
+		- Validator for visit forms, implementing Spring's Validator interface.
+		- Could also reside in the root application context, as it is generic,
+		- but is currently just used within Petclinic's web tier.
  		-->
 	<bean id="visitValidator" class="org.springframework.samples.petclinic.validation.VisitValidator"/>
 

@@ -56,7 +56,7 @@ import org.springframework.util.NumberUtils;
  * and extract results. This class executes SQL queries or updates, initiating
  * iteration over ResultSets and catching JDBC exceptions and translating
  * them to the generic, more informative exception hierarchy defined in the
- * org.springframework.dao package.
+ * <code>org.springframework.dao</code> package.
  *
  * <p>Code using this class need only implement callback interfaces, giving
  * them a clearly defined contract. The PreparedStatementCreator callback
@@ -561,7 +561,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public int update(PreparedStatementCreator psc) throws DataAccessException {
-		return update(psc, (PreparedStatementSetter)null);
+		return update(psc, (PreparedStatementSetter) null);
 	}
 
 	public int update(final PreparedStatementCreator psc, final KeyHolder generatedKeyHolder)
