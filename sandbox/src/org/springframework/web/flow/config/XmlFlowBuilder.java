@@ -108,10 +108,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected Flow parseFlowDefinition(Document doc) {
 		Element root=doc.getDocumentElement();
 		
-		String name=root.getAttribute("name");
+		String id=root.getAttribute("id");
 		String startStateId=root.getAttribute("start-state");
 		
-		Flow flow=createFlow(name);
+		Flow flow=createFlow(id);
 		
 		NodeList nodeList=root.getChildNodes();
 		for (int i=0; i<nodeList.getLength(); i++) {
@@ -220,10 +220,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 	
 	protected Transition parseTransition(Element element) {
-		String name=element.getAttribute("name");
+		String event=element.getAttribute("event");
 		String to=element.getAttribute("to");
 		
-		return new Transition(name, to);
+		return new Transition(event, to);
 	}
 	
 	protected String parseViewName(Element element) {

@@ -98,7 +98,7 @@ public class XmlFlowBuilderTest extends TestCase {
 		assertNotNull(flow);
 		assertEquals("testFlow", flow.getId());
 		assertEquals("actionState1", flow.getStartState().getId());
-		assertEquals(7, flow.getStateIds().length);
+		assertEquals(9, flow.getStateIds().length);
 		
 		ActionState actionState1=(ActionState)flow.getState("actionState1");
 		assertNotNull(actionState1);
@@ -124,6 +124,14 @@ public class XmlFlowBuilderTest extends TestCase {
 		assertEquals(1, viewState2.getTransitions().length);
 		assertNotNull(viewState2.getTransition("event2"));
 		assertEquals("subFlowState2", viewState2.getTransition("event2").getTargetStateId());
+		
+		ViewState viewState3=(ViewState)flow.getState("viewState3");
+		assertNotNull(viewState3);
+		assertFalse(viewState3.isMarker());
+		assertEquals("viewState3", viewState3.getViewName());
+		assertEquals(1, viewState3.getTransitions().length);
+		assertNotNull(viewState3.getTransition("event3"));
+		assertEquals("endState3", viewState3.getTransition("event3").getTargetStateId());
 		
 		SubFlowState subFlowState1=(SubFlowState)flow.getState("subFlowState1");
 		assertNotNull(subFlowState1);
@@ -152,6 +160,11 @@ public class XmlFlowBuilderTest extends TestCase {
 		assertNotNull(endState2);
 		assertTrue(endState2.isMarker());
 		assertNull(endState2.getViewName());
+		
+		EndState endState3=(EndState)flow.getState("endState3");
+		assertNotNull(endState3);
+		assertFalse(endState3.isMarker());
+		assertEquals("endState3", endState3.getViewName());
 	}
 
 }

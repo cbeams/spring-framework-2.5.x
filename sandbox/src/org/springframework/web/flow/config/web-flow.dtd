@@ -9,7 +9,7 @@
 
 	XML documents that conform to this DTD should declare the following doctype:
 
-	<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD SPRING WEB FLOW//EN"
+	<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
 		"http://www.springframework.org/dtd/web-flow.dtd">
 -->
 
@@ -23,13 +23,13 @@
 )>
 
 <!--
-	Name of the web flow.
+	Unique id of the web flow.
 -->
-<!ATTLIST web-flow name CDATA #REQUIRED>
+<!ATTLIST web-flow id ID #REQUIRED>
 
 <!--
-	Defines the start state of the flow. This identifies the state
-	where flow execution will begin.
+	Identifies the start state of the flow: the state where flow
+	execution will begin.
 -->
 <!ATTLIST web-flow start-state IDREF #REQUIRED>
 
@@ -77,7 +77,7 @@
 
 
 <!--
-	Defines a flow state: a state where another flow is executed. When the
+	Defines a sub flow state: a state where a sub flow is executed. When the
 	sub flow reaches an end state, the corresponding transition in this state
 	is triggered to continue the flow.
 -->
@@ -86,20 +86,18 @@
 )>
 
 <!--
-	Unique id of a flow state.
+	Unique id of a sub flow state.
 -->
 <!ATTLIST sub-flow-state id ID #REQUIRED>
 
 <!--
-	Name of the flow that will be rendered. This is the name of a bean
-	in the application context associated with the flow controller.
+	Name (bean id) of the sub flow that will be executed.
 -->
 <!ATTLIST sub-flow-state flow CDATA #REQUIRED>
 
 <!--
-	Optional name of a mapper that will map model data to and from the sub flow.
-	This is the name of a bean in the application context associated with the
-	flow controller.
+	Optional name (bean id) of a mapper that will map model data to and from
+	the sub flow.
 -->
 <!ATTLIST sub-flow-state attributes-mapper CDATA #IMPLIED>
 
@@ -115,14 +113,15 @@
 <!ATTLIST end-state id ID #REQUIRED>
 
 <!--
-	Name of the view that will be rendered. This is optional. When
-	not present, the view name will default to the id of the view state.
+	Name of the view that will be rendered when this state is reached
+	and when there is no parent flow to continue. This is optional. When
+	not present, the view name will default to the id of the end state.
 -->
 <!ATTLIST end-state view CDATA #IMPLIED>
 
 <!--
-	Indicates whether or not this end state is a marker view state.
-	A marker view state does not actually render a view, but just returns
+	Indicates whether or not this end state is a marker end state.
+	A marker end state does not actually render a view, but just returns
 	controll to the client. Use this when an action has already generated
 	the response.
 -->
@@ -135,17 +134,9 @@
 <!ELEMENT transition EMPTY>
 
 <!--
-	Name of the transition. This name is of the form "[actionId'.']event". So
-	the name of the event that will trigger the transition is prepended with
-	the id of the action that signals the event. Both are concatenated using
-	a dot. So when you have an action with id "myAction" that signals an
-	event "ok", the name of the corresponding transition should be "myAction.ok".
-	
-	For the events signaled by a view state or a subflow state, no action is involved so
-	the transition name is simply the name of the event that triggers the transition
-	("ok" in the previous example).
+	Event that will trigger this transition.
 -->
-<!ATTLIST transition name CDATA #REQUIRED>
+<!ATTLIST transition event CDATA #REQUIRED>
 
 <!--
 	Target state of the transition.
@@ -159,6 +150,6 @@
 <!ELEMENT action EMPTY>
 
 <!--
-	Name of the action.
+	Name (bean id) of the action.
 -->
 <!ATTLIST action name CDATA #REQUIRED>
