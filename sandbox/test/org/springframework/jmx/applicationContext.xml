@@ -19,8 +19,8 @@
 				</entry>
 			</map>
 		</property>    
-		<property name="invoker">
-	        <ref local="cglibInvoker"/>
+		<property name="invokerClass">
+	        <value>org.springframework.jmx.invokers.cglib.CglibMBeanInvoker</value>
 	    </property>    
 	</bean>
 	
@@ -84,10 +84,7 @@
 			<value>100</value>
 		</property>
 	</bean>
-	
-	<bean id="cglibInvoker" class="org.springframework.jmx.invokers.cglib.CglibMBeanInvoker">
-	</bean>
-	
+		
 	<bean id="propertiesNamingStrategy" class="org.springframework.jmx.naming.PropertiesNamingStrategy">
 		<property name="propertiesFile">
 			<value>./sandbox/test/org/springframework/jmx/jmx.names</value>

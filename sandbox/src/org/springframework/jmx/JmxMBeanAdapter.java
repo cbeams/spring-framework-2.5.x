@@ -58,228 +58,238 @@ import org.springframework.jmx.naming.ObjectNamingStrategy;
  * @since 1.2
  */
 public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
-        BeanFactoryAware, BeanFactoryPostProcessor {
+		BeanFactoryAware, BeanFactoryPostProcessor {
 
-    private static final Log log = LogFactory.getLog(JmxMBeanAdapter.class);
+	private static final Log log = LogFactory.getLog(JmxMBeanAdapter.class);
 
-    /**
-     * The beans to be exposed as JMX managed resources.
-     */
-    private Map beans;
+	/**
+	 * The beans to be exposed as JMX managed resources.
+	 */
+	private Map beans;
 
-    /**
-     * Stores the ModelMBeanInfoAssembler to use for this adapter
-     */
-    private ModelMBeanInfoAssembler assembler = new ReflectiveModelMBeanInfoAssembler();
+	/**
+	 * Stores the ModelMBeanInfoAssembler to use for this adapter
+	 */
+	private ModelMBeanInfoAssembler assembler = new ReflectiveModelMBeanInfoAssembler();
 
-    /**
-     * Stores the MBeanInvoker instance responsible for invoking operations on
-     * MBeans
-     */
-    private MBeanInvoker invoker = new ReflectiveMBeanInvoker();
+	/**
+	 * Stores the <tt>Class</tt> of the <tt>MBeanInvoker</tt> implementation
+	 * that will be used when invoking operations on beans.
+	 */
+	private Class invokerClass = ReflectiveMBeanInvoker.class;
 
-    /**
-     * The strategy to use for creating ObjectNames for an object
-     */
-    private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
+	/**
+	 * The strategy to use for creating ObjectNames for an object
+	 */
+	private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
 
-    /**
-     * The MBeanServer instance being used to register beans
-     */
-    private MBeanServer server;
+	/**
+	 * The MBeanServer instance being used to register beans
+	 */
+	private MBeanServer server;
 
-    /**
-     * The beans that have been registered.
-     */
-    private ObjectName[] registeredBeans = null;
+	/**
+	 * The beans that have been registered.
+	 */
+	private ObjectName[] registeredBeans = null;
 
-    /**
-     * Flag indicating whether the platform specific RequiredModelMBean class
-     * should be used or whether the Spring implementation of ModelMBean should
-     * be used.
-     */
-    private boolean useRequiredModelMBean = false;
+	/**
+	 * Flag indicating whether the platform specific RequiredModelMBean class
+	 * should be used or whether the Spring implementation of ModelMBean should
+	 * be used.
+	 */
+	private boolean useRequiredModelMBean = false;
 
-    /**
-     * Stores the BeanFactory for use in autodetection process
-     */
-    private ConfigurableListableBeanFactory beanFactory = null;
+	/**
+	 * Stores the BeanFactory for use in autodetection process
+	 */
+	private ConfigurableListableBeanFactory beanFactory = null;
 
-    public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() throws Exception {
 
-        // the beans property may be null
-        // initially if we are relying solely
-        // on autodetection
-        if (beans == null) {
-            beans = new HashMap();
-        }
+		// the beans property may be null
+		// initially if we are relying solely
+		// on autodetection
+		if (beans == null) {
+			beans = new HashMap();
+		}
 
-        // allow metadata assembler to perform additional
-        //
+		// check to see if the supplied invoker class is valid
+		if (!(MBeanInvoker.class.isAssignableFrom(invokerClass))) {
+			throw new IllegalArgumentException(
+					"The Class supplied for the invokerClass property "
+							+ "must implement the MBeanInvoker intferace");
+		}
 
-        // if no server was provided
-        // then try to load one.
-        // This is useful in environment such as
-        // JBoss where there is already an MBeanServer loaded
-        if (server == null) {
-            log.debug("No MBeanServer provided. Attempting to locate one...");
-            this.server = JmxUtils.locateMBeanServer();
-        }
-    }
+		// if no server was provided
+		// then try to load one.
+		// This is useful in environment such as
+		// JBoss where there is already an MBeanServer loaded
+		if (server == null) {
+			log.debug("No MBeanServer provided. Attempting to locate one...");
+			this.server = JmxUtils.locateMBeanServer();
+		}
+	}
 
-    public void setBeans(Map beans) {
-        this.beans = beans;
-    }
+	public void setBeans(Map beans) {
+		this.beans = beans;
+	}
 
-    public void setAssembler(ModelMBeanInfoAssembler assembler) {
-        this.assembler = assembler;
-    }
+	public void setAssembler(ModelMBeanInfoAssembler assembler) {
+		this.assembler = assembler;
+	}
 
-    public void setInvoker(MBeanInvoker invoker) {
-        this.invoker = invoker;
-    }
+	public void setInvokerClass(Class invokerClass) {
+		this.invokerClass = invokerClass;
+	}
 
-    public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
-        this.namingStrategy = namingStrategy;
-    }
+	public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
+		this.namingStrategy = namingStrategy;
+	}
 
-    public void setServer(MBeanServer server) {
-        this.server = server;
-    }
+	public void setServer(MBeanServer server) {
+		this.server = server;
+	}
 
-    public void setUseRequiredModelMBean(boolean useRequiredModelMBean) {
-        this.useRequiredModelMBean = useRequiredModelMBean;
-    }
+	public void setUseRequiredModelMBean(boolean useRequiredModelMBean) {
+		this.useRequiredModelMBean = useRequiredModelMBean;
+	}
 
-    /**
-     * Register the defined beans with the MBeanServer
-     *  
-     */
-    public void registerBeans() {
+	/**
+	 * Register the defined beans with the MBeanServer
+	 *  
+	 */
+	public void registerBeans() {
 
-        // allow the metadata assembler a chance to
-        // vote for bean inclusion
-        if (assembler instanceof AutodetectCapableModelMBeanInfoAssembler) {
-            autodetectBeans();
-        }
+		// allow the metadata assembler a chance to
+		// vote for bean inclusion
+		if (assembler instanceof AutodetectCapableModelMBeanInfoAssembler) {
+			autodetectBeans();
+		}
 
-        // check we now have at least one bean
-        if (beans.size() < 1) {
-            throw new IllegalArgumentException(
-                    "Must specify at least one bean for registration");
-        }
+		// check we now have at least one bean
+		if (beans.size() < 1) {
+			throw new IllegalArgumentException(
+					"Must specify at least one bean for registration");
+		}
 
-        Object[] keys = beans.keySet().toArray();
-        registeredBeans = new ObjectName[keys.length];
+		Object[] keys = beans.keySet().toArray();
+		registeredBeans = new ObjectName[keys.length];
 
-        try {
-            for (int x = 0; x < keys.length; x++) {
-                String key = (String) keys[x];
+		try {
+			for (int x = 0; x < keys.length; x++) {
+				String key = (String) keys[x];
 
-                Object bean = beans.get(key);
-                ObjectName objectName = namingStrategy.getObjectName(bean, key);
+				Object bean = beans.get(key);
+				ObjectName objectName = namingStrategy.getObjectName(bean, key);
 
-                ModelMBean mbean = getModelMBean();
-                mbean.setManagedResource(bean, "ObjectReference");
-                mbean.setModelMBeanInfo(assembler.getMBeanInfo(bean));
+				ModelMBean mbean = getModelMBean();
+				mbean.setManagedResource(bean, "ObjectReference");
+				mbean.setModelMBeanInfo(assembler.getMBeanInfo(bean));
 
-                log.info("Registering MBean: " + objectName.toString());
+				log.info("Registering MBean: " + objectName.toString());
 
-                server.registerMBean(mbean, objectName);
-                registeredBeans[x] = objectName;
+				server.registerMBean(mbean, objectName);
+				registeredBeans[x] = objectName;
 
-                log.info("Registered MBean: " + objectName.toString());
+				log.info("Registered MBean: " + objectName.toString());
 
-            }
-        } catch (JMException ex) {
-            throw new MBeanAssemblyException(
-                    "A JMX error occured when trying to assemble "
-                            + "the management interface metadata.", ex);
-        } catch (InvalidTargetObjectTypeException ex) {
-            // we should never get this
-            log.warn("Received InvalidTargetObjectTypeException - this should not occur!");
-            throw new MBeanAssemblyException(
-                    "An invalid object type was used when specifying a managed resource. "
-                            + "This is a serious error and points to an error in the Spring JMX Code",
-                    ex);
-        }
-    }
+			}
+		} catch (JMException ex) {
+			throw new MBeanAssemblyException(
+					"A JMX error occured when trying to assemble "
+							+ "the management interface metadata.", ex);
+		} catch (InvalidTargetObjectTypeException ex) {
+			// we should never get this
+			log
+					.warn("Received InvalidTargetObjectTypeException - this should not occur!");
+			throw new MBeanAssemblyException(
+					"An invalid object type was used when specifying a managed resource. "
+							+ "This is a serious error and points to an error in the Spring JMX Code",
+					ex);
+		}
+	}
 
-    /**
-     * Invoked when using an AutodetectCapableModelMBeanInfoAssembler - gives the
-     * assembler the chance to autodetect beans.
-     */
-    private void autodetectBeans() {
-        AutodetectCapableModelMBeanInfoAssembler autodetectAssembler = (AutodetectCapableModelMBeanInfoAssembler) assembler;
+	/**
+	 * Invoked when using an AutodetectCapableModelMBeanInfoAssembler - gives
+	 * the assembler the chance to autodetect beans.
+	 */
+	private void autodetectBeans() {
+		AutodetectCapableModelMBeanInfoAssembler autodetectAssembler = (AutodetectCapableModelMBeanInfoAssembler) assembler;
 
-        String[] beanNames = beanFactory.getBeanDefinitionNames();
+		String[] beanNames = beanFactory.getBeanDefinitionNames();
 
-        for (int x = 0; x < beanNames.length; x++) {
-            String beanName = beanNames[x];
-            Object bean = beanFactory.getBean(beanName);
+		for (int x = 0; x < beanNames.length; x++) {
+			String beanName = beanNames[x];
+			Object bean = beanFactory.getBean(beanName);
 
-            if (!beans.containsValue(bean)) {
-                // not already registered
-                // for JMXification
+			if (!beans.containsValue(bean)) {
+				// not already registered
+				// for JMXification
 
-                if (autodetectAssembler.includeBean(beanName, bean)) {
-                    if (log.isInfoEnabled()) {
-                        log.info("Bean Name: " + beanName
-                                + " has been autodetected for JMXification");
-                    }
-                    beans.put(beanName, bean);
-                }
-            }
-        }
-    }
+				if (autodetectAssembler.includeBean(beanName, bean)) {
+					if (log.isInfoEnabled()) {
+						log.info("Bean Name: " + beanName
+								+ " has been autodetected for JMXification");
+					}
+					beans.put(beanName, bean);
+				}
+			}
+		}
+	}
 
-    /**
-     * Gets an instance of the appropriate ModelMBean implementation.
-     * 
-     * @return
-     */
-    private ModelMBean getModelMBean() throws MBeanException {
-        if (useRequiredModelMBean) {
-            return new RequiredModelMBean();
-        } else {
-            return new ModelMBeanImpl(invoker);
-        }
+	/**
+	 * Gets an instance of the appropriate ModelMBean implementation.
+	 * 
+	 * @return
+	 */
+	private ModelMBean getModelMBean() throws MBeanException {
+		if (useRequiredModelMBean) {
+			return new RequiredModelMBean();
+		} else {
+			try {
+			return new ModelMBeanImpl((MBeanInvoker)invokerClass.newInstance());
+			} catch(Exception ex) {
+				throw new MBeanException(ex, "Unable to create ModelMBeanImpl class - check supplied invokerClass is valid");
+			}
+		}
 
-    }
+	}
 
-    /**
-     * Unregister all the beans
-     */
-    public void destroy() throws Exception {
-        log.info("Unregistering all beans");
+	/**
+	 * Unregister all the beans
+	 */
+	public void destroy() throws Exception {
+		log.info("Unregistering all beans");
 
-        for (int x = 0; x < registeredBeans.length; x++) {
-            server.unregisterMBean(registeredBeans[x]);
-        }
+		for (int x = 0; x < registeredBeans.length; x++) {
+			server.unregisterMBean(registeredBeans[x]);
+		}
 
-        server = null;
-    }
+		server = null;
+	}
 
-    /**
-     * Implemented to grab the BeanFactory to allow for auto detection of
-     * managed bean resources
-     */
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        if (beanFactory instanceof ConfigurableListableBeanFactory) {
-            this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
-        } else {
-            log.info("Not using a ConfigurableListableBeanFactory - auto detection of managed beans is disabled");
-        }
-    }
+	/**
+	 * Implemented to grab the BeanFactory to allow for auto detection of
+	 * managed bean resources
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (beanFactory instanceof ConfigurableListableBeanFactory) {
+			this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		} else {
+			log
+					.info("Not using a ConfigurableListableBeanFactory - auto detection of managed beans is disabled");
+		}
+	}
 
-    /**
-     * Used to invoke the registerBeans() method automatically when running in
-     * an <tt>ApplicationContext</tt> even if the bean is not a singleton
-     */
-    public void postProcessBeanFactory(
-            ConfigurableListableBeanFactory beanFactory) throws BeansException {
+	/**
+	 * Used to invoke the registerBeans() method automatically when running in
+	 * an <tt>ApplicationContext</tt> even if the bean is not a singleton
+	 */
+	public void postProcessBeanFactory(
+			ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
-        // register the beans
-        registerBeans();
-    }
+		// register the beans
+		registerBeans();
+	}
 }

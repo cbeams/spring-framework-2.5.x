@@ -3,6 +3,8 @@
  */
 package org.springframework.jmx;
 
+import org.springframework.jmx.invokers.reflection.ReflectiveMBeanInvoker;
+
 /**
  * @author robh
  *
@@ -17,6 +19,10 @@ public class ReflectiveInvokerTests extends AbstractJmxInvokerTests {
 	
 	protected String getObjectName() {
 		return OBJECT_NAME;
+	}
+	
+	protected MBeanInvoker getInvoker() {
+		return new ReflectiveMBeanInvoker();
 	}
 
 }

@@ -3,6 +3,9 @@
  */
 package org.springframework.jmx;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanException;
@@ -21,6 +24,7 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 	}
 	
 	protected abstract String getObjectName();
+	protected abstract MBeanInvoker getInvoker();
 	
 	public void testGetAttribute() throws Exception {
 		Object value = server.getAttribute(ObjectName.getInstance(getObjectName()),
@@ -113,5 +117,29 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 		} catch(MBeanException ex) {
 			
 		}
+	}
+	
+	public void testMultiBeanRegistration() throws Exception{
+		JmxTestBean bean1 = new JmxTestBean();
+		JmxTestBean bean2 = new JmxTestBean();
+		
+		bean1.setName("Rob Harrop");
+		bean2.setName("Harry Potter");
+		
+		Map beans = new HashMap();
+		beans.put("spring:name=mb1", bean1);
+		beans.put("spring:name=mb2", bean2);
+		
+		JmxMBeanAdapter adaptor = new JmxMBeanAdapter();
+		adaptor.setServer(server);
+		adaptor.setBeans(beans);
+		adaptor.registerBeans();
+		
+		// test the attribute values
+		Object name1 = server.getAttribute(ObjectName.getInstance("spring:name=mb1"), "name");
+		assertEquals("Name is not correct", "Rob Harrop", name1);
+		
+		Object name2 = server.getAttribute(ObjectName.getInstance("spring:name=mb2"), "name");
+		assertEquals("Name is not correct", "Harry Potter", name2);
 	}
 }
