@@ -91,7 +91,7 @@
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource" ref="/WEB-INF/detail-flow.xml"/>
+				<property name="resource" value="/WEB-INF/detail-flow.xml"/>
 			</bean>
 		</property>
 	</bean>
