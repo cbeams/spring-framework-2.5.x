@@ -2,6 +2,7 @@
 package org.springframework.aop.framework.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +15,17 @@ import org.springframework.aop.Pointcut;
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.6 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.7 2003-11-29 21:52:46 johnsonr Exp $
  */
 public class AopUtils {
+	
+	public static boolean isCglibProxy(Object o) {
+		return o.getClass().getName().indexOf("$$") != -1;
+	}
+	
+	public static boolean isJdkDynamicProxy(Object o) {
+		return Proxy.isProxyClass(o.getClass());
+	}
 
 	/**
 	 * Return all interfaces that the given object implements as array,
