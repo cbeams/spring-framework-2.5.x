@@ -32,7 +32,7 @@ import org.jboss.resource.adapter.jdbc.WrappedStatement;
  * Implementation of the NativeJdbcExtractor interface for the JBoss 3.2
  * connection pool. Returns the underlying native Connection, Statement,
  * etc to application code instead of JBoss' wrapper implementations.
- * The returned JDBC classes can then safely be cast, e.g. to OracleResultSet.
+ * The returned JDBC classes can then safely be cast, e.g. to OracleConnection.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
  * a JBoss connection pool: If a given object is not a JBoss wrapper,
@@ -82,7 +82,7 @@ public class JBossNativeJdbcExtractor implements NativeJdbcExtractor {
 	}
 
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
-		if (cs instanceof WrappedStatement) {
+		if (cs instanceof WrappedCallableStatement) {
 			return (CallableStatement) ((WrappedCallableStatement) cs).getUnderlyingStatement();
 		}
 		return cs;
