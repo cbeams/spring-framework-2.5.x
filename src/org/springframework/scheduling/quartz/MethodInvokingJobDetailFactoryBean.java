@@ -165,7 +165,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				this.methodInvoker.invoke();
 			}
 			catch (InvocationTargetException ex) {
-				logger.warn(this.errorMessage + ": " + ex.getTargetException().getMessage());
+				logger.warn(this.errorMessage, ex.getTargetException());
 				if (ex.getTargetException() instanceof JobExecutionException) {
 					throw (JobExecutionException) ex.getTargetException();
 				}
@@ -174,7 +174,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				throw new JobExecutionException(this.errorMessage, jobEx, false);
 			}
 			catch (Exception ex) {
-				logger.warn(this.errorMessage + ": " + ex.getMessage());
+				logger.warn(this.errorMessage, ex);
 				throw new JobExecutionException(this.errorMessage, ex, false);
 			}
 		}
