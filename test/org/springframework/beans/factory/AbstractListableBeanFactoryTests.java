@@ -24,20 +24,25 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	/**
 	 * Subclasses can override
 	 */
-	public void testCount() throws Exception {
+	public void testCount() {
 		assertCount(15);
 	}
 	
-	protected final void assertCount(int count) throws Exception {
+	protected final void assertCount(int count) {
 		String[] defnames = getListableBeanFactory().getBeanDefinitionNames();
 		assertTrue("We should have " + count + " beans, not " + defnames.length, defnames.length == count);
 	}
 
-	public void testGetDefinitionsForClass() throws Exception {
-		String[] defnames = getListableBeanFactory().getBeanDefinitionNames(org.springframework.beans.TestBean.class);
-		assertTrue("We should have 7 beans for class org.springframework.beans.TestBean, not " + defnames.length, defnames.length == 7);
+	public void testTestBeanCount() {
+		assertTestBeanCount(7);
 	}
-	
+
+	public void assertTestBeanCount(int count) {
+		String[] defnames = getListableBeanFactory().getBeanDefinitionNames(org.springframework.beans.TestBean.class);
+		assertTrue("We should have " + count + " beans for class org.springframework.beans.TestBean, not " +
+		           defnames.length, defnames.length == count);
+	}
+
 	public void testGetDefinitionsForNoSuchClass() {
 		String[] defnames = getListableBeanFactory().getBeanDefinitionNames(String.class);
 		assertTrue("No string definitions", defnames.length == 0);

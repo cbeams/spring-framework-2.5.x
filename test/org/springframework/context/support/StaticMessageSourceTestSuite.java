@@ -53,7 +53,7 @@ public class StaticMessageSourceTestSuite
 	}
 
 	/** Overridden */
-	public void testCount() throws Exception {
+	public void testCount() {
 		// These are only checked for current Ctx (not parent ctx)
 		assertCount(16);
 	}

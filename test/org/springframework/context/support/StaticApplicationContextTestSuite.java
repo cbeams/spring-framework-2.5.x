@@ -26,7 +26,7 @@ import org.springframework.context.BeanThatListens;
  * Classname doesn't match XXXXTestSuite pattern, so as to avoid
  * being invoked by Ant JUnit run, as it's abstract
  * @author Rod Johnson
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -52,7 +52,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		sac.registerSingleton("autoProxyTest", TestBean.class, new MutablePropertyValues());
 		sac.registerSingleton("testInterceptorForCreator", TestInterceptor.class, new MutablePropertyValues());
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("beanNames", "autoProxyTest,singletonFac*");
+		pvs.addPropertyValue("beanNames", "autoProxyTest,prototypeFac*");
 		List interceptors = new ManagedList();
 		interceptors.add(new RuntimeBeanReference("testInterceptorForCreator"));
 		pvs.addPropertyValue("interceptors", interceptors);
@@ -70,8 +70,13 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 	}
 
 	/** Overridden */
-	public void testCount() throws Exception {
-		assertCount(17);
+	public void testCount() {
+		assertCount(20);
+	}
+
+	/** Overridden */
+	public void testTestBeanCount() {
+		assertTestBeanCount(8);
 	}
 
 	public void testBeanPostProcessors() {
@@ -82,7 +87,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 				assertTrue("J2SE proxy for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
 				           Proxy.isProxyClass(bean.getClass()));
 			}
-			else if (beanNames[i].equals("singletonFactory")) {
+			else if (beanNames[i].equals("prototypeFactory")) {
 				Object bean = getListableBeanFactory().getBean("&" + beanNames[i]);
 				assertTrue("J2SE proxy for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
 				           Proxy.isProxyClass(bean.getClass()));
