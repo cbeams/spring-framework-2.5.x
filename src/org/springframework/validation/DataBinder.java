@@ -21,12 +21,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.StringUtils;
 
@@ -35,10 +40,31 @@ import org.springframework.util.StringUtils;
  * The binding process can be customized through specifying allowed fields,
  * required fields, and custom editors.
  *
+ * <p>Note that there are potential security implications in failing to set
+ * an array of allowed fields. In the case of HTTP form POST data for example,
+ * malicious clients can attempt to subvert an application by supplying values
+ * for fields or properties that do not exist on the form. In some cases this
+ * could lead to illegal data being set on command objects <i>or their nested
+ * objects</i>. For this reason, it is <b>highly recommended to specify the
+ * {@link #setAllowedFields allowedFields} property</b> on the DataBinder.
+ *
  * <p>The binding results can be examined via the Errors interface,
  * available as BindException instance. Missing field errors and property
  * access exceptions will be converted to FieldErrors, collected in the
- * Errors instance. Custom validation errors can be added afterwards.
+ * Errors instance, with the following error codes:
+ *
+ * <ul>
+ * <li>Missing field error: "required"
+ * <li>Type mismatch error: "typeMismatch"
+ * <li>Method invocation error: "methodInvocation"
+ * </ul>
+ *
+ * <p>Custom validation errors can be added afterwards. You will typically
+ * want to resolve such error codes into proper user-visible error messages;
+ * this can be achieved through resolving each error via a MessageSource.
+ * The list of message codes to try can be customized through the
+ * MessageCodesResolver strategy. DefaultMessageCodesResolver's javadoc
+ * gives details on the default resolution rules.
  *
  * <p>This generic data binder can be used in any sort of environment.
  * It is heavily used by Spring's web binding features, via the subclass
@@ -46,15 +72,48 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #setAllowedFields
+ * @see #setRequiredFields
+ * @see #registerCustomEditor
+ * @see #setMessageCodesResolver
  * @see #bind
  * @see #getErrors
+ * @see DefaultMessageCodesResolver
+ * @see org.springframework.context.MessageSource
  * @see org.springframework.web.bind.ServletRequestDataBinder
  */
 public class DataBinder {
 
+	/**
+	 * Error code that a missing field error (i.e. a required field not
+	 * found in the list of property values) will be registered with:
+	 * "required".
+	 */
 	public static final String MISSING_FIELD_ERROR_CODE = "required";
 
-	private BindException errors;
+	/**
+	 * Error code that a type mismatch error (i.e. a property value not
+	 * matching the type of the target field) will be registered with:
+	 * "typeMismatch".
+	 * @see org.springframework.beans.TypeMismatchException#ERROR_CODE
+	 */
+	public static final String TYPE_MISMATCH_ERROR_CODE = TypeMismatchException.ERROR_CODE;
+
+	/**
+	 * Error code that a type mismatch error (i.e. a property value not
+	 * matching the type of the target field) will be registered with:
+	 * "methodInvocation".
+	 * @see org.springframework.beans.MethodInvocationException#ERROR_CODE
+	 */
+	public static final String METHOD_INVOCATION_ERROR_CODE = MethodInvocationException.ERROR_CODE;
+
+
+	/**
+	 * We'll create a lot of DataBinder instances: Let's use a static logger.
+	 */
+	protected static final Log logger = LogFactory.getLog(DataBinder.class);
+
+	private final BindException errors;
 
 	private String[] allowedFields;
 
@@ -126,6 +185,10 @@ public class DataBinder {
 	 */
 	public void setAllowedFields(String[] allowedFields) {
 		this.allowedFields = allowedFields;
+		if (logger.isDebugEnabled()) {
+			logger.debug("DataBinder restricted to binding allowed fields [" +
+					StringUtils.arrayToCommaDelimitedString(this.allowedFields) + "]");
+		}
 	}
 
 	/**
@@ -142,6 +205,10 @@ public class DataBinder {
 	 */
 	public void setRequiredFields(String[] requiredFields) {
 		this.requiredFields = requiredFields;
+		if (logger.isDebugEnabled()) {
+			logger.debug("DataBinder requires binding of required fields [" +
+					StringUtils.arrayToCommaDelimitedString(this.requiredFields) + "]");
+		}
 	}
 
 	/**
@@ -217,6 +284,11 @@ public class DataBinder {
 			String field = pvArray[i].getName();
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
 				mpvs.removePropertyValue(pvArray[i]);
+				if (logger.isWarnEnabled()) {
+					logger.warn("Field [" + pvArray[i] +  "] has been removed from PropertyValues " +
+							"and will not be bound, because it has not been found in the list of allowed fields " +
+							allowedFieldsList);
+				}
 			}
 		}
 		pvs = mpvs;
