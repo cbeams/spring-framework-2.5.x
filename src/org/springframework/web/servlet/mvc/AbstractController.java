@@ -95,8 +95,10 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 */
 	private Set	supportedMethods;
 	
-	private boolean requireSession;
-	
+	private boolean requireSession = false;
+
+	private boolean synchronizeOnSession = false;
+
 	private int cacheSeconds = -1;
 	
 	/**
@@ -123,13 +125,24 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	}
 	
 	/**
-	 * Is a session required to handle requests?
+	 * Set if a session should be required to handle requests.
 	 */
 	public final void setRequireSession(boolean requireSession) {
 		this.requireSession = requireSession;
 		logger.info("Requires session set to " + requireSession);
 	}
-	
+
+	/**
+	 * Set if controller execution should be synchronized on the session,
+	 * to serialize parallel invocations from the same client.
+	 * <p>More specifically, the execution of the handleRequestInternal
+	 * method will get synchronized if this flag is true.
+	 * @see #handleRequestInternal
+	 */
+	public void setSynchronizeOnSession(boolean synchronizeOnSession) {
+		this.synchronizeOnSession = synchronizeOnSession;
+	}
+
 	/**
 	 * If 0 disable caching, default is no caching header generation.
 	 * Only if this is set to 0 (no cache) or a positive value (cache for this many
@@ -152,20 +165,24 @@ public abstract class AbstractController extends WebContentGenerator implements 
 		}
 		
 		// Check whether session was required
-		if (this.requireSession) {
-			// Don't create a session if none exists
-			HttpSession session = request.getSession(false);
-			if (session == null) {
-				throw new ServletException("This resource requires a pre-existing HttpSession: none was found"); 
-			}
+		HttpSession session = request.getSession(false);
+		if (this.requireSession && session == null) {
+			throw new ServletException("This resource requires a pre-existing HttpSession: none was found");
 		}
-		
+
 		// Do declarative cache control
 		// Revalidate if the controller supports last-modified
 		applyCacheSeconds(response, this.cacheSeconds, this instanceof LastModified);
 
 		// If everything's OK, let subclass do its business
-		return handleRequestInternal(request, response);
+		if (this.synchronizeOnSession && session != null) {
+			synchronized (session) {
+				return handleRequestInternal(request, response);
+			}
+		}
+		else {
+			return handleRequestInternal(request, response);
+		}
 	}
 
 	/**
@@ -173,6 +190,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * The contract is the same as for handleRequest.
 	 * @see #handleRequest
 	 */
-	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
+	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException;
 
 }
