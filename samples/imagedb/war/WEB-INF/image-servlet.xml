@@ -30,12 +30,12 @@
 		<property name="suffix"><value>.vm</value></property>
 	</bean>
 
-	<!-- Simple ViewResolver for FreeMarker, appending ".fm" to logical view names -->
+	<!-- Simple ViewResolver for FreeMarker, appending ".ftl" to logical view names -->
 	<!-- Uncomment this and comment out the above to switch to the FreeMarker view -->
 	<!--
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
 		<property name="viewClass"><value>org.springframework.web.servlet.view.freemarker.FreeMarkerView</value></property>
-		<property name="suffix"><value>.fm</value></property>
+		<property name="suffix"><value>.ftl</value></property>
 	</bean>
 	-->
 
