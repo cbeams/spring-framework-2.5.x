@@ -15,9 +15,15 @@ public class MaxLength extends AbstractPropertyValidationRule {
     }
 
     public boolean validate(Object object, Object value) {
-        Assert.isTrue(object instanceof String);
-        String str = (String)value;
-        return (str.length() <= length ? true : false);
+        if (value != null) {
+            Assert.isTrue(value instanceof String,
+                    "Value must be a instanceof java.lang.String but is a "
+                            + value.getClass());
+            String str = (String)value;
+            return (str.length() <= length ? true : false);
+        } else {
+            return true;
+        }
     }
 
     public Object[] getErrorArguments() {
