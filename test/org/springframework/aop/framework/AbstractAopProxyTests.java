@@ -46,7 +46,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.26 2004-04-01 15:36:03 jhoeller Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.27 2004-04-14 18:55:17 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -618,20 +618,27 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(23, t.getAge());
 		assertEquals(2, di.getCount());
 		
-		Advised config = (Advised) t;
-		assertEquals("Have 1 advisor", 1, config.getAdvisors().length);
-		assertEquals(di, config.getAdvisors()[0].getAdvice());
+		Advised advised = (Advised) t;
+		assertEquals("Have 1 advisor", 1, advised.getAdvisors().length);
+		assertEquals(di, advised.getAdvisors()[0].getAdvice());
 		NopInterceptor di2 = new NopInterceptor();
-		config.addInterceptor(1, di2);
+		advised.addInterceptor(1, di2);
 		t.getName();
 		assertEquals(3, di.getCount());
 		assertEquals(1, di2.getCount());
 		// will remove di
-		config.removeAdvisor(0);
+		advised.removeAdvisor(0);
 		t.getAge();
 		// Unchanged
 		assertEquals(3, di.getCount());
 		assertEquals(2, di2.getCount());
+		
+		CountingBeforeAdvice cba = new CountingBeforeAdvice();
+		assertEquals(0, cba.getCalls());
+		advised.addBeforeAdvice(cba);
+		t.setAge(16);
+		assertEquals(16, t.getAge());
+		assertEquals(2, cba.getCalls());
 	}
 	
 	
@@ -1271,12 +1278,11 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	
 	public void testAfterReturningAdvisorIsNotInvokedOnException() {
 		CountingAfterReturningAdvice car = new CountingAfterReturningAdvice();
-		Advisor advisor = new DefaultPointcutAdvisor(car);
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addInterceptor(new NopInterceptor());
-		pf.addAdvisor(advisor);
-		assertEquals("Advisor was added", advisor, pf.getAdvisors()[1]);
+		pf.addAfterReturningAdvice(car);
+		assertEquals("Advice was wrapped in Advisor and added", car, pf.getAdvisors()[1].getAdvice());
 		ITestBean proxied = (ITestBean) createProxy(pf);
 		assertEquals(0, car.getCalls());
 		int age = 10;

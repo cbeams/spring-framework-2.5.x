@@ -17,9 +17,11 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.Interceptor;
-
 import org.springframework.aop.Advisor;
+import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.ThrowsAdvice;
 
 /**
  * Interface to be implemented by classes that hold the configuration
@@ -31,7 +33,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.11 2004-03-23 20:17:00 jhoeller Exp $
+ * @version $Id: Advised.java,v 1.12 2004-04-14 18:55:18 johnsonr Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
@@ -81,7 +83,7 @@ public interface Advised {
 	boolean isInterfaceProxied(Class intf);
 	
 	/**
-	 * Add the given interceptor to the tail of the advice (interceptor) chain.
+	 * Add the given AOP Alliance interceptor to the tail of the advice (interceptor) chain.
 	 * This will be wrapped in a DefaultPointcutAdvistor with a pointcut that
 	 * always applies, and returned from the getAdvisors() method in this
 	 * wrapped form.
@@ -92,12 +94,36 @@ public interface Advised {
 	void addInterceptor(Interceptor interceptor) throws AopConfigException;
 
 	/**
-	 * Add an interceptor at the specified position in the interceptor chain.
+	 * Add the given AOP Alliance interceptor at the specified position in the interceptor chain.
 	 * @param pos index from 0 (head)
 	 * @param interceptor interceptor to add at the specified position in the
 	 * interceptor chain
 	 */
 	void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException;
+	
+	/**
+	 * Add an AfterReturningAdvice to the tail of the advice chain
+	 * @param afterReturningAdvice AfterReturningAdvice to add
+	 * @throws AopConfigException if the advice cannot be added--for example, because
+	 * the proxy configuration is frozen
+	 */
+	void addAfterReturningAdvice(AfterReturningAdvice afterReturningAdvice) throws AopConfigException;
+	
+	/**
+	 * Add a MethodBeforeAdvice to the tail of the advice chain
+	 * @param beforeAdvice MethodBeforeAdvice to add
+	 * @throws AopConfigException if the advice cannot be added--for example, because
+	 * the proxy configuration is frozen
+	 */		
+	void addBeforeAdvice(MethodBeforeAdvice beforeAdvice) throws AopConfigException;
+	
+	/**
+	 * Add a ThrowsAdvice to the tail of the advice chain
+	 * @param throwsAdvice ThrowsAdvice to add
+	 * @throws AopConfigException if the advice cannot be added--for example, because
+	 * the proxy configuration is frozen
+	 */
+	void addThrowsAdvice(ThrowsAdvice throwsAdvice) throws AopConfigException;
 
 	/** 
 	 * Add an Advisor at the end of the advisor chain.
