@@ -18,11 +18,16 @@ package org.springframework.core.io.support;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,23 +41,36 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * ResourcePatternResolver that applies Ant-style path matching, using Spring's
- * PathMatcher class.
+ * ResourcePatternResolver implementation that applies Ant-style path matching,
+ * using Spring's PathMatcher class.
  *
  * <p>Locations can either be suitable for <code>ResourceLoader.getResource</code>
  * (URLs like "file:C:/context.xml", pseudo-URLs like "classpath:/context.xml",
  * relative file paths like "/WEB-INF/context.xml"), or Ant-style patterns
  * like "/WEB-INF/*-context.xml".
  *
- * <p>In the pattern case, the locations have to be resolvable to java.io.File,
+ * <p>In the pattern case, the location has to be resolvable to <code>java.io.File</code>
+ * or to a "jar:" URL (leading to a <code>java.net.JarURLConnection</code>)
  * to allow for searching though the specified directory tree. In particular,
- * this will neither work with WAR files that are not expanded nor with class
- * path resources in a JAR file.
+ * this is not guaranteed to work with a WAR file that is not expanded.
  *
- * <p>There is special support for retrieving multiple class path resources with
- * the same name, via the "classpath*" prefix. For example, "classpath*:/beans.xml"
+ * <p>There is special support for retrieving multiple class path resources with the
+ * same name, via the "classpath*" prefix. For example, "classpath*:META-INF/beans.xml"
  * will find all beans.xml files in the class path, be it in "classes" directories
- * or in JAR files. This is particularly useful for auto-detecting config files.
+ * or in JAR files. This is particularly useful for auto-detecting config files
+ * of the same name at the same location within each jar file.
+ *
+ * <p>The "classpath*" prefix can also be combined with a PathMatcher pattern, for
+ * example "classpath*:META-INF/*-beans.xml". In this case, all matching resources
+ * in the class path will be found, even if multiple resources of the same name
+ * exist in different jar files. Note that "classpath*:" will only work with at
+ * least one root directory before the pattern starts.
+ *
+ * <p>Warning: Ant-style patterns with "classpath:" resources are not guaranteed to
+ * find matching resources if the root package to search is available in multiple
+ * class path locations. Preferably, use "classpath*:" with the same Ant-style
+ * pattern in such a case, which will search <i>all</i> class path locations that
+ * contain the root package.
  *
  * <p>If neither given a PathMatcher pattern nor a "classpath*:" location, this
  * resolver will return a single resource via the underlying ResourceLoader.
@@ -138,15 +156,24 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	public Resource[] getResources(String locationPattern) throws IOException {
 		if (locationPattern.startsWith(CLASSPATH_URL_PREFIX)) {
 			// a class path resource (multiple resources for same name possible)
-			return findAllClassPathResources(locationPattern.substring(CLASSPATH_URL_PREFIX.length()));
-		}
-		else if (PathMatcher.isPattern(locationPattern)) {
-			// a file pattern
-			return findPathMatchingFileResources(locationPattern);
+			if (PathMatcher.isPattern(locationPattern.substring(CLASSPATH_URL_PREFIX.length()))) {
+				// a class path resource pattern
+				return findPathMatchingResources(locationPattern);
+			}
+			else {
+				// all class path resources with the given name
+				return findAllClassPathResources(locationPattern.substring(CLASSPATH_URL_PREFIX.length()));
+			}
 		}
 		else {
-			// fall back to single resource
-			return new Resource[] {this.resourceLoader.getResource(locationPattern)};
+			if (PathMatcher.isPattern(locationPattern)) {
+				// a file pattern
+				return findPathMatchingResources(locationPattern);
+			}
+			else {
+				// a single resource with the given name
+				return new Resource[] {this.resourceLoader.getResource(locationPattern)};
+			}
 		}
 	}
 
@@ -177,19 +204,30 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	 * Find all file resources that match the given location pattern
-	 * via the Ant-style PathMatcher utility.
+	 * Find all resources that match the given location pattern via the
+	 * Ant-style PathMatcher utility. Supports resources in jar files
+	 * and in the file system.
 	 * @param locationPattern the location pattern to match
 	 * @return the result as Resource array
 	 * @throws IOException in case of I/O errors
+	 * @see #doFindPathMatchingJarResources
 	 * @see #doFindPathMatchingFileResources
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected Resource[] findPathMatchingFileResources(String locationPattern) throws IOException {
+	protected Resource[] findPathMatchingResources(String locationPattern) throws IOException {
 		String rootDirPath = determineRootDir(locationPattern);
 		String subPattern = locationPattern.substring(rootDirPath.length());
-		Resource rootDirResource = this.resourceLoader.getResource(rootDirPath);
-		List result = doFindPathMatchingFileResources(rootDirResource, subPattern);
+		Resource[] rootDirResources = getResources(rootDirPath);
+		List result = new ArrayList();
+		for (int i = 0; i < rootDirResources.length; i++) {
+			Resource rootDirResource = rootDirResources[i];
+			if ("jar".equals(rootDirResource.getURL().getProtocol())) {
+				result.addAll(doFindPathMatchingJarResources(rootDirResource, subPattern));
+			}
+			else {
+				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
+			}
+		}
 		if (logger.isInfoEnabled()) {
 			logger.info("Resolved location pattern [" + locationPattern + "] to resources " + result);
 		}
@@ -197,7 +235,70 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	 * Find all file resources that match the given location pattern
+	 * Determine the root directory for the given location.
+	 * <p>Used for determining the starting point for file matching,
+	 * resolving the root directory location to a java.io.File and
+	 * passing it into <code>retrieveMatchingFiles</code>, with the
+	 * remainder of the location as pattern.
+	 * <p>Will return "/WEB-INF" for the pattern "/WEB-INF/*.xml",
+	 * for example.
+	 * @param location the location to checkn
+	 * @return the part of the location that denotes the root directory
+	 * @see #retrieveMatchingFiles
+	 */
+	protected String determineRootDir(String location) {
+		int patternStart = location.length();
+		int prefixEnd = location.indexOf(":");
+		int asteriskIndex = location.indexOf('*', prefixEnd);
+		int questionMarkIndex = location.indexOf('?', prefixEnd);
+		if (asteriskIndex != -1 || questionMarkIndex != -1) {
+			patternStart = (asteriskIndex > questionMarkIndex ? asteriskIndex : questionMarkIndex);
+		}
+		int rootDirEnd = location.lastIndexOf('/', patternStart);
+		if (rootDirEnd == -1) {
+			rootDirEnd = location.lastIndexOf(":", patternStart) + 1;
+		}
+		return (rootDirEnd != -1 ? location.substring(0, rootDirEnd) : "");
+	}
+
+	/**
+	 * Find all resources in jar files that match the given location pattern
+	 * via the Ant-style PathMatcher utility.
+	 * @param rootDirResource the root directory as Resource
+	 * @param subPattern the sub pattern to match (below the root directory)
+	 * @return the List of matching Resource instances
+	 * @throws IOException in case of I/O errors
+	 * @see java.net.JarURLConnection
+	 * @see org.springframework.util.PathMatcher
+	 */
+	protected List doFindPathMatchingJarResources(Resource rootDirResource, String subPattern) throws IOException {
+		URLConnection con = rootDirResource.getURL().openConnection();
+		if (!(con instanceof JarURLConnection)) {
+			throw new IOException("Cannot perform jar file search for [" + rootDirResource +
+					"]: did not return java.net.JarURLConnection; connection was [" + con + "]");
+		}
+		JarURLConnection jarCon = (JarURLConnection) con;
+		JarFile jarFile = jarCon.getJarFile();
+		URL jarFileUrl = jarCon.getJarFileURL();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking for matching resources in jar file [" + jarFileUrl + "]");
+		}
+		String rootEntryPath = jarCon.getJarEntry().getName();
+		String jarFileUrlPrefix = "jar:" + jarFileUrl.toExternalForm() + "!/";
+		List result = new LinkedList();
+		for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
+			JarEntry entry = (JarEntry) entries.nextElement();
+			String entryPath = entry.getName();
+			if (entryPath.startsWith(rootEntryPath) &&
+					PathMatcher.match(subPattern, entryPath.substring(rootEntryPath.length()))) {
+				result.add(new UrlResource(new URL(jarFileUrlPrefix + entryPath)));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Find all resources in the file system that match the given location pattern
 	 * via the Ant-style PathMatcher utility.
 	 * @param rootDirResource the root directory as Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
@@ -221,32 +322,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	 * Determine the root directory for the given location.
-	 * <p>Used for determining the starting point for file matching,
-	 * resolving the root directory location to a java.io.File and
-	 * passing it into <code>retrieveMatchingFiles</code>, with the
-	 * remainder of the location as pattern.
-	 * <p>Will return "/WEB-INF" for the pattern "/WEB-INF/*.xml",
-	 * for example.
-	 * @param location the location to checkn
-	 * @return the part of the location that denotes the root directory
-	 * @see #retrieveMatchingFiles
-	 */
-	protected String determineRootDir(String location) {
-		int patternStart = location.length();
-		int asteriskIndex = location.indexOf('*');
-		int questionMarkIndex = location.indexOf('?');
-		if (asteriskIndex != -1 || questionMarkIndex != -1) {
-			patternStart = (asteriskIndex > questionMarkIndex ? asteriskIndex : questionMarkIndex);
-		}
-		int rootDirEnd = location.lastIndexOf('/', patternStart);
-		if (rootDirEnd == -1) {
-			rootDirEnd = location.lastIndexOf(":", patternStart) + 1;
-		}
-		return (rootDirEnd != -1 ? location.substring(0, rootDirEnd) : "");
-	}
-
-	/**
 	 * Retrieve files that match the given path pattern,
 	 * checking the given directory and its subdirectories.
 	 * @param rootDir the directory to start from
@@ -264,7 +339,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			fullPattern += "/";
 		}
 		fullPattern = fullPattern + StringUtils.replace(pattern, File.separator, "/");
-		List result = new ArrayList();
+		List result = new LinkedList();
 		doRetrieveMatchingFiles(fullPattern, rootDir, result);
 		return result;
 	}
