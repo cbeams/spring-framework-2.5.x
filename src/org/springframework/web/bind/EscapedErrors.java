@@ -128,9 +128,11 @@ public class EscapedErrors implements Errors {
 			if (value instanceof String) {
 				value = HtmlUtils.htmlEscape((String) fieldError.getRejectedValue());
 			}
-			return new FieldError(fieldError.getObjectName(), fieldError.getField(), value, fieldError.getCode(), fieldError.getArgs(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
+			return new FieldError(fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),
+														fieldError.getCode(), fieldError.getArgs(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
 		}
-		return new ObjectError(source.getObjectName(), source.getCode(), source.getArgs(), HtmlUtils.htmlEscape(source.getDefaultMessage()));
+		return new ObjectError(source.getObjectName(), source.getCode(), source.getArgs(),
+													 HtmlUtils.htmlEscape(source.getDefaultMessage()));
 	}
 
 	private List escapeObjectErrors(List source) {

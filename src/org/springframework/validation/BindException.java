@@ -105,7 +105,7 @@ public class BindException extends Exception implements Errors {
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
 		field = fixedField(field);
 		Object newVal = getBeanWrapper().getPropertyValue(field);
-		FieldError fe = new FieldError(this.objectName, field, newVal, errorCode, errorArgs, defaultMessage);
+		FieldError fe = new FieldError(this.objectName, field, newVal, false, errorCode, errorArgs, defaultMessage);
 		this.errors.add(fe);
 	}
 
@@ -172,7 +172,7 @@ public class BindException extends Exception implements Errors {
 
 	public FieldError getFieldError(String field) {
 		field = fixedField(field);
-		for (Iterator it = errors.iterator(); it.hasNext();) {
+		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			ObjectError fe = (ObjectError) it.next();
 			if (fe instanceof FieldError && field.equals(((FieldError) fe).getField())) {
 				return (FieldError) fe;
@@ -184,20 +184,17 @@ public class BindException extends Exception implements Errors {
 	public Object getFieldValue(String field) {
 		field = fixedField(field);
 		FieldError fe = getFieldError(field);
-		if (fe != null) {
-			return fe.getRejectedValue();
-		}
-		else {
-			Object value = getBeanWrapper().getPropertyValue(field);
-			if (value != null) {
-				PropertyEditor customEditor = getBeanWrapper().findCustomEditor(null, field);
-				if (customEditor != null) {
-					customEditor.setValue(value);
-					return customEditor.getAsText();
-				}
+		// use rejected value in case of error, current bean property value else
+		Object value = (fe != null) ? fe.getRejectedValue() : getBeanWrapper().getPropertyValue(field);
+		// apply custom editor, but not on binding failures like type mismatches
+		if (value != null && (fe == null || !fe.isBindingFailure())) {
+			PropertyEditor customEditor = getBeanWrapper().findCustomEditor(null, field);
+			if (customEditor != null) {
+				customEditor.setValue(value);
+				return customEditor.getAsText();
 			}
-			return value;
 		}
+		return value;
 	}
 
 	public PropertyEditor getCustomEditor(String field) {

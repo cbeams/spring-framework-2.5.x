@@ -10,18 +10,10 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 
 /**
- *
- * @author Rod Johnson, Juergen Hoeller
- * @version $RevisionId$
+ * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class ValidationTestSuite extends TestCase {
-
-	public ValidationTestSuite(String location) {
-		super(location);
-	}
-
-	protected void setUp() throws Exception {
-	}
 
 	public void testBindingNoErrors() throws Exception {
 		TestBean rod = new TestBean();
@@ -69,6 +61,9 @@ public class ValidationTestSuite extends TestCase {
 			assertTrue("Correct number of errors", be.getErrorCount() == 1);
 			assertTrue("Has age errors", be.hasFieldErrors("age"));
 			assertTrue("Correct number of age errors", be.getFieldErrorCount("age") == 1);
+			assertEquals("32x", binder.getErrors().getFieldValue("age"));
+			assertEquals("32x", binder.getErrors().getFieldError("age").getRejectedValue());
+			assertEquals(0, tb.getAge());
 		}
 	}
 
@@ -93,7 +88,7 @@ public class ValidationTestSuite extends TestCase {
 		binder.getErrors().rejectValue("name", "someCode", "someMessage");
 		binder.getErrors().rejectValue("touchy", "someCode", "someMessage");
 
-		assertEquals("prefixvalue", binder.getErrors().getFieldValue("name"));
+		assertEquals("value", binder.getErrors().getFieldValue("name"));
 		assertEquals("prefixvalue", binder.getErrors().getFieldError("name").getRejectedValue());
 		assertEquals("prefixvalue", tb.getName());
 		assertEquals("value", binder.getErrors().getFieldValue("touchy"));
@@ -143,10 +138,10 @@ public class ValidationTestSuite extends TestCase {
 		binder.getErrors().rejectValue("name", "someCode", "someMessage");
 		binder.getErrors().rejectValue("touchy", "someCode", "someMessage");
 
-		assertEquals("prefixvalue", binder.getErrors().getFieldValue("name"));
+		assertEquals("value", binder.getErrors().getFieldValue("name"));
 		assertEquals("prefixvalue", binder.getErrors().getFieldError("name").getRejectedValue());
 		assertEquals("prefixvalue", tb.getName());
-		assertEquals("prefixvalue", binder.getErrors().getFieldValue("touchy"));
+		assertEquals("value", binder.getErrors().getFieldValue("touchy"));
 		assertEquals("prefixvalue", binder.getErrors().getFieldError("touchy").getRejectedValue());
 		assertEquals("prefixvalue", tb.getTouchy());
 	}

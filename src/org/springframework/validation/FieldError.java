@@ -39,28 +39,31 @@ public class FieldError extends ObjectError {
 
 	private final Object rejectedValue;
 
+	private boolean bindingFailure;
+
+	/**
+	 * Create a new FieldError instance, using a default code.
+	 */
+	public FieldError(String objectName, String field, Object rejectedValue, boolean bindingFailure,
+	                  String code, Object[] args, String defaultMessage) {
+		this(objectName, field, rejectedValue, bindingFailure,
+		     new String[] {code + CODE_SEPARATOR + objectName + CODE_SEPARATOR + field,
+		                   code + CODE_SEPARATOR + field,
+		                   code},
+		     args, defaultMessage);
+	}
+
 	/**
 	 * Create a new FieldError instance, using multiple codes.
 	 * <p>This is only meant to be used by subclasses.
 	 * @see org.springframework.context.MessageSourceResolvable#getCodes
 	 */
-	protected FieldError(String objectName, String field, Object rejectedValue,
+	protected FieldError(String objectName, String field, Object rejectedValue, boolean bindingFailure,
 	                     String[] codes, Object[] args, String defaultMessage) {
 		super(objectName, codes, args, defaultMessage);
 		this.field = field;
 		this.rejectedValue = rejectedValue;
-	}
-
-	/**
-	 * Create a new FieldError instance, using a default code.
-	 */
-	public FieldError(String objectName, String field, Object rejectedValue,
-	                  String code, Object[] args, String defaultMessage) {
-		this(objectName, field, rejectedValue,
-		     new String[] {code + CODE_SEPARATOR + objectName + CODE_SEPARATOR + field,
-		                   code + CODE_SEPARATOR + field,
-		                   code},
-		     args, defaultMessage);
+		this.bindingFailure = bindingFailure;
 	}
 
 	public String getField() {
@@ -71,10 +74,13 @@ public class FieldError extends ObjectError {
 		return rejectedValue;
 	}
 
+	public boolean isBindingFailure() {
+		return bindingFailure;
+	}
+
 	public String toString() {
 		return "FieldError occurred in object [" + getObjectName() + "] on [" +
-		    this.field + "]: rejectedValue [" + this.rejectedValue + "]; " +
-		    resolvableToString();
+				this.field + "]: rejectedValue [" + this.rejectedValue + "]; " + resolvableToString();
 	}
 
 }

@@ -16,7 +16,8 @@ import org.springframework.beans.PropertyVetoExceptionsException;
 /**
  * Binder that allows for binding property values to a target object.
  * @author Rod Johnson
- * @version $Id: DataBinder.java,v 1.5 2003-12-10 09:03:12 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: DataBinder.java,v 1.6 2004-01-06 22:18:50 jhoeller Exp $
  */
 public class DataBinder {
 
@@ -73,7 +74,6 @@ public class DataBinder {
 		return requiredFields;
 	}
 
-
 	/**
 	 * Register the given custom property editor for all properties
 	 * of the given type.
@@ -112,14 +112,14 @@ public class DataBinder {
 				if (pv == null || "".equals(pv.getValue())) {
 					// create field error with code "required"
 					this.errors.addFieldError(
-							new FieldError(this.errors.getObjectName(), this.requiredFields[i], "", MISSING_FIELD_ERROR_CODE,
-														 new Object[] {requiredFields[i]}, "Field '" + requiredFields[i] + "' is required"));
+							new FieldError(this.errors.getObjectName(), this.requiredFields[i], "", true, MISSING_FIELD_ERROR_CODE,
+														 new Object[] {this.requiredFields[i]}, "Field '" + this.requiredFields[i] + "' is required"));
 				}
 			}
 		}
 		try {
 			// bind request parameters onto params, ignoring unknown properties
-			this.errors.getBeanWrapper().setPropertyValues(pvs, true, null);
+			this.errors.getBeanWrapper().setPropertyValues(pvs, true);
 		}
 		catch (PropertyVetoExceptionsException ex) {
 			ErrorCodedPropertyVetoException[] exs = ex.getPropertyVetoExceptions();
@@ -127,7 +127,7 @@ public class DataBinder {
 				// create field with the exceptions's code, e.g. "typeMismatch"
 				this.errors.addFieldError(
 						new FieldError(this.errors.getObjectName(), exs[i].getPropertyChangeEvent().getPropertyName(),
-													 exs[i].getPropertyChangeEvent().getNewValue(), exs[i].getErrorCode(), null,
+													 exs[i].getPropertyChangeEvent().getNewValue(), true, exs[i].getErrorCode(), null,
 													 exs[i].getLocalizedMessage()));
 			}
 		}
