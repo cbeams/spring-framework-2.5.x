@@ -17,7 +17,7 @@ import org.springframework.aop.Pointcut;
  * normal pointcuts, but they are useful in some cases.
  * @see org.springframework.aop.support.ControlFlow
  * @author Rod Johnson
- * @version $Id: ControlFlowPointcut.java,v 1.1 2003-12-07 10:18:07 johnsonr Exp $
+ * @version $Id: ControlFlowPointcut.java,v 1.2 2003-12-15 14:39:29 johnsonr Exp $
  */
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher {
 	
@@ -72,7 +72,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 */
 	public boolean matches(Method m, Class targetClass, Object[] args) {
 		++evaluations;
-		ControlFlow cflow = new ControlFlow();
+		ControlFlow cflow = ControlFlowFactory.getInstance().createControlFlow();
 		return (methodName != null) ? cflow.under(clazz, methodName) : cflow.under(clazz);
 	}
 	

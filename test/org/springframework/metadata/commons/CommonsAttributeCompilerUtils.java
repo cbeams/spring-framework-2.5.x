@@ -11,13 +11,13 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Javac;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
-import org.springframework.aop.support.ControlFlow;
+import org.springframework.aop.support.ControlFlowFactory;
 
 /**
  * Programmatic support classes for compiling with Commons Attributes
  * so that tests can run within Eclipse.
  * @author Rod Johnson
- * @version $Id: CommonsAttributeCompilerUtils.java,v 1.1 2003-12-15 12:49:10 johnsonr Exp $
+ * @version $Id: CommonsAttributeCompilerUtils.java,v 1.2 2003-12-15 14:39:29 johnsonr Exp $
  */
 public class CommonsAttributeCompilerUtils {
 
@@ -39,7 +39,7 @@ public class CommonsAttributeCompilerUtils {
 
 	public static boolean inEclipse() {
 		// Use our AOP control flow functionality
-		return new ControlFlow().underToken("eclipse.jdt");
+		return ControlFlowFactory.getInstance().createControlFlow().underToken("eclipse.jdt");
 	}
 
 	public static void ideAttributeCompile(String testWildcards) {
