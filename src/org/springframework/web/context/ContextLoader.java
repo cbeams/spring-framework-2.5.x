@@ -95,20 +95,21 @@ public class ContextLoader {
 			WebApplicationContext wac = createWebApplicationContext(servletContext, parent);
 			logger.info("Using context class [" + wac.getClass().getName() + "] for root WebApplicationContext");
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
-			logger.info(
-				"Published root WebApplicationContext ["
-					+ wac
-					+ "] with ServletContext attribute name '"
-					+ WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
-					+ "'");
+			if (logger.isInfoEnabled()) {
+				logger.info("Published root WebApplicationContext [" + wac +
+										"] as ServletContext attribute with name [" +
+										WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
+			}
 			return wac;
 		}
 		catch (RuntimeException ex) {
 			logger.error("Context initialization failed", ex);
+			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ex);
 			throw ex;
 		}
 		catch (Error err) {
 			logger.error("Context initialization failed", err);
+			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, err);
 			throw err;
 		}
 	}
@@ -148,10 +149,7 @@ public class ContextLoader {
 		if (configLocation != null) {
 			wac.setConfigLocations(
 				StringUtils.tokenizeToStringArray(
-					configLocation,
-					ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS,
-					true,
-					true));
+					configLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS, true, true));
 		}
 		wac.refresh();
 		return wac;
