@@ -46,10 +46,10 @@ import org.springframework.web.context.support.ServletContextResource;
  * resource path of a default URL, to be rendered when the target resource
  * is not found or not specified in the first place.
  *
- * <p>The <code>defaultUrls</code> property can be used to specify a list of
- * target resources to combine. Those resources will be included one by one
- * to build the response. If last-modified determination is active, the
- * newest timestamp among those files will be used.
+ * <p>The "resource" parameter and the <code>defaultUrl</code> property can
+ * also specify a list of target resources to combine. Those resources will be
+ * included one by one to build the response. If last-modified determination
+ * is active, the newest timestamp among those files will be used.
  *
  * <p>The <code>allowedResources</code> property can be set to a URL
  * pattern of resources that should be available via this servlet.
@@ -86,12 +86,13 @@ import org.springframework.web.context.support.ServletContextResource;
  * @author Juergen Hoeller
  * @see #setDefaultUrl
  * @see #setAllowedResources
+ * @see #setApplyLastModified
  */
 public class ResourceServlet extends HttpServletBean {
 
 	/**
 	 * Any number of these characters are considered delimiters
-	 * between multiple resource paths in a single URL.
+	 * between multiple resource paths in a single String value.
 	 */
 	public static final String RESOURCE_URL_DELIMITERS = ",; \t\n";
 

@@ -37,12 +37,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 public interface ConfigurableWebApplicationContext extends WebApplicationContext, ConfigurableApplicationContext {
 
 	/**
-	 * Any number of these characters are considered delimiters
-	 * between multiple context paths in a single-String config location.
+	 * Any number of these characters are considered delimiters between
+	 * multiple context config paths in a single String value.
 	 * @see ContextLoader#CONFIG_LOCATION_PARAM
 	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
 	 */
-	String CONFIG_LOCATION_DELIMITERS = ",; ";
+	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
 
 
 	/**

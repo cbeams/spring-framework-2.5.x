@@ -38,16 +38,16 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  */
 public class JndiBeanFactoryLocator implements BeanFactoryLocator {
 
 	/**
-	 * Any number of these characters are considered delimiters
-	 * between multiple bean factory paths in a single-String value.
+	 * Any number of these characters are considered delimiters between
+	 * multiple bean factory config paths in a single String value.
 	 */
-	public static final String BEAN_FACTORY_PATH_DELIMITERS = ",; ";
+	public static final String BEAN_FACTORY_PATH_DELIMITERS = ",; \t\n";
 
 	protected Log logger = LogFactory.getLog(getClass());
 
