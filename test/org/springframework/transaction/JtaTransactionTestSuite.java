@@ -707,9 +707,9 @@ public class JtaTransactionTestSuite extends TestCase {
 					// something transactional
 				}
 			});
-			fail("Should have thrown TransactionSystemException");
+			fail("Should have thrown CannotCreateTransactionException");
 		}
-		catch (TransactionSystemException ex) {
+		catch (CannotCreateTransactionException ex) {
 			// expected
 		}
 

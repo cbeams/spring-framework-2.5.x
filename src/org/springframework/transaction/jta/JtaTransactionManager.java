@@ -33,6 +33,7 @@ import javax.transaction.UserTransaction;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.HeuristicCompletionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -446,7 +447,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			    "JTA implementation does not support nested transactions", ex);
 		}
 		catch (SystemException ex) {
-			throw new TransactionSystemException("JTA failure on begin", ex);
+			throw new CannotCreateTransactionException("JTA failure on begin", ex);
 		}
 	}
 
