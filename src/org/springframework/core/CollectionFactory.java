@@ -139,10 +139,14 @@ public class CollectionFactory {
 	private static abstract class CommonsCollectionFactory {
 
 		private static Map createCommonsLinkedMap(int initialCapacity) {
+		    // commons collections cannot have init capacity of 0
+			if (initialCapacity == 0) initialCapacity++;
 			return new LinkedMap(initialCapacity);
 		}
 
 		private static Map createCommonsIdentityMap(int initialCapacity) {
+		    // commons collections cannot have init capacity of 0
+			if (initialCapacity == 0) initialCapacity++;
 			return new IdentityMap(initialCapacity);
 		}
 	}
