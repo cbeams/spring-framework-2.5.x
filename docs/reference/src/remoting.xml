@@ -13,23 +13,33 @@
 					<para>
 						<emphasis>Remote Method Invocation (RMI)</emphasis>. Through the use
 						of the <literal>RmiProxyFactoryBean</literal> and the
-						<literal>RmiServiceExporter</literal> Spring supports transparent
-						remoting via RMI and invokers.
+						<literal>RmiServiceExporter</literal> Spring supports both traditional
+						RMI (with java.rmi.Remote interfaces and java.rmi.RemoteException) and
+						transparent remoting via RMI invokers (with any Java interface).
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						<emphasis>Hessian</emphasis>. By using hte 
+						<emphasis>Spring's HTTP invoker</emphasis>. Spring provides a special
+						remoting strategy which allows for Java serialization via HTTP,
+						supporting any Java interface (just like the RMI invoker). The corresponding
+						support classes are <literal>HttpInvokerProxyFactoryBean</literal> and
+						<literal>HttpInvokerServiceExporter</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>Hessian</emphasis>. By using the
 						<literal>HessianProxyFactoryBean</literal>
 						and the <literal>HessianServiceExporter</literal> you can transparently
-						expose your services using the lightweigt binary HTTP-based protocol
+						expose your services using the lightweight binary HTTP-based protocol
 						provided by Caucho.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						<emphasis>Burlap</emphasis>. Burlap is the XML-based
-						alternative for Hessian. Spring provides supporting classes such
+						<emphasis>Burlap</emphasis>. Burlap is Caucho's XML-based
+						alternative for Hessian. Spring provides support classes such
 						as <literal>BurlapProxyFactoryBean</literal> and 
 						<literal>BurlapServiceExporter</literal>.
 					</para>
@@ -81,27 +91,27 @@ public class AccountServiceImpl implements AccountService {
 		<para>
 			We will start exposing the service to a remote client by using RMI and 
 			talk a bit about the drawbacks of using RMI. We'll then continue to show
-			Hessian and Burlap support.
+			an example for Hessian.
 		</para>		
 	</sect1>	
 	<sect1>
 		<title>Exposing services using RMI</title>
 		<para>
-			Using Spring's support for RMI you can transparently expose your services through
-			RMI. After having this set up, you basically have a configuration similar to Enterprise
-			JavaBeans, except for the fact that the security features are missing.
-			Security features are provided by HTTP-based protocols like Hessian and Burlap, but
-			note that those use custom serialization which might result in problems when using
-			complex domain models and other object graphs that need to pass over the wire.
+			Using Spring's support for RMI, you can transparently expose your services through
+			the RMI infrastructure. After having this set up, you basically have a configuration
+			similar to remote EJBs, except for the fact that there is no standard support for
+			security context propagation or remote transaction propagation. Spring does provide
+			hooks for such additional invocation context when using the RMI invoker, so you can
+			for example plug in security frameworks or custom security credentials here.
 		</para>
 		<sect2>
 			<title>Exporting the service using the <literal>RmiServiceExporter</literal></title>
 			<para>
-				Using the <literal>RmiServiceExporter</literal> we can expose the interface
-				of our AccountServer object as RMI object. The interface can be accessed
-				via plain RMI or by using <literal>RmiProxyFactoryBean</literal>.
-				The <literal>RmiServiceExporter</literal> explicitly supports the exposing of 
-				any non-RMI services via RMI invokers.
+				Using the <literal>RmiServiceExporter</literal>, we can expose the interface
+				of our AccountServer object as RMI object. The interface can be accessed by using
+				<literal>RmiProxyFactoryBean</literal>, or via plain RMI in case of a traditional
+				RMI service. The <literal>RmiServiceExporter</literal> explicitly supports the
+				exposing of any non-RMI services via RMI invokers.
 			</para>
 			<para>
 				Of course, we first have to set up our service in the Spring BeanFactory:
@@ -123,7 +133,7 @@ public class AccountServiceImpl implements AccountService {
 	<property name="registryPort"><value>1199</value></property>
 </bean>
 				]]></programlisting>							
-				As you can see, we're overriding the port for the RMI registry. Oftentimes,
+				As you can see, we're overriding the port for the RMI registry. Often,
 				your application server also maintains an RMI registry and it is wise
 				to not interfere with that one.
 				Furthermore, the service name is used to bind the service under. So right now,
@@ -131,7 +141,7 @@ public class AccountServiceImpl implements AccountService {
 				We'll use the URL later on to link in the service at the client side.
 			</para>
 			<para>
-				<emphasis>Note: we've left out one property, i.e. the <literal>servicePort</literal>
+				<emphasis>Note: We've left out one property, i.e. the <literal>servicePort</literal>
 					property, which is 0 by default. This means an anonymous port will be used
 					to communicate with the service. You can specify a different port if you like.</emphasis>
 			</para>
@@ -245,18 +255,21 @@ public class SimpleObject {
 		<sect2>
 			<title>Using Burlap</title>
 			<para>
-				We won't discuss Burlap, the XML based equivalent of Hessian, here since
-				it is configured and set up in exactly the same way as the Hessian variant
-				explained above. Just replace the word <literal>Hessian</literal> with
-				<literal>Burlap</literal> and you're all set to go.
+				We won't discuss Burlap, the XML-based equivalent of Hessian, in detail here,
+				since it is configured and set up in exactly the same way as the Hessian
+				variant explained above. Just replace the word <literal>Hessian</literal>
+				with <literal>Burlap</literal> and you're all set to go.
 			</para>
 		</sect2>
 		<sect2>
-			<title>Applying security to service exposed through Hessian or Burlap</title>
+			<title>Applying HTTP basic authentication to a service exposed through Hessian or Burlap</title>
 			<para>
-				One of the advantages of Hessian and Burlap is that we can easily apply security.
-				This is because both protocols are HTTP-based. Your normal security mechanism 
-				can easily be applied if you're using the <literal>web.xml</literal> security features for example.				
+				One of the advantages of Hessian and Burlap is that we can easily apply HTTP basic
+				authentication, because both protocols are HTTP-based. Your normal HTTP server security
+				mechanism can easily be applied through using the <literal>web.xml</literal> security
+				features, for example. Usually, you don't use per-user security credentials here, but
+				rather shared credentials defined at the Hessian/BurlapProxyFactoryBean level
+				(similar to a JDBC DataSource).
 			</para>
 			<para>
 				<programlisting><![CDATA[
@@ -285,10 +298,12 @@ public class SimpleObject {
 				the beans mentioned in this application context.
 			</para>
 			<para>
-				<emphasis>Note: of course this example doesn't show a flexible kind of security application.
-				For more options as far as security is concerned, have a look
-				at Acegi Security System for Spring to be found at 
-				<ulink url="http://acegisecurity.sourceforge.net"/></emphasis>
+				<emphasis>
+					Note: Of course, this example doesn't show a flexible kind of security
+					infrastructure. For more options as far as security is concerned,
+					have a look at the Acegi Security System for Spring, to be found at
+					<ulink url="http://acegisecurity.sourceforge.net"/>.
+				</emphasis>
 			</para>
 		</sect2>
 	</sect1>
@@ -296,30 +311,37 @@ public class SimpleObject {
 	<sect1>
 		<title>Considerations when choosing a technology</title>
 		<para>
-			Each and every technology presented here has its drawbacks. This doesn't mean
-			you shouldn't use them. You should however carefully consider you needs,
-			the services your exposing and the beans you'll be sending over the wire when
-			choosing a technology.
-		</para>
-		<para>			
-			When using RMI, it's not possible to access the
-			objects through the HTTP protocol, unless you're tunneling the RMI traffic.
-			RMI is a fairly heavy-weight protocol in that it support full-object serialization which 
-			is importing when using a complex data model that needs serializing over the wire.
-			More light-weight protocols like Hessian and/or Burlap might provide significant
-			value when operating in a low-bandwidth environment since they don't support the same
-			full-object serialization. Known problems include the serialization of Hibernate objects
-			in combination with lazily initializing collections. If you have such a data model, consider using
-			RMI instead of Hessian.
+			Each and every technology presented here has its drawbacks. You should carefully
+			consider you needs, the services your exposing and the objects you'll be sending
+			over the wire when choosing a technology.
 		</para>
 		<para>
-			Last but not least, EJB has the advantage over RMI in that it supports 
-			role-based authentication and authorization. It is possible to get RMI to support
-			this as well, although some custom coding has to be done in order to get it to work.
-			If you're in need of code that supports JAAS-based RMI, please ask the people at 
-			the development list. Hessian and Burlap do provide role based authentication. Both
-			protocols are HTTP-based and work using the Spring DispatcherServlet, thus fully
-			support the use of interceptors, etcetera. You've seen an example above.
+			When using RMI, it's not possible to access the objects through the HTTP protocol,
+			unless you're tunneling the RMI traffic. RMI is a fairly heavy-weight protocol
+			in that it support full-object serialization which is important when using a
+			complex data model that needs serialization over the wire. However, RMI-JRMP
+			is tied to Java clients: It is a Java-to-Java remoting solution.
+		</para>
+		<para>
+			Spring's HTTP invoker is a good choice if you need HTTP-based remoting but also
+			rely on Java serialization. It shares the basic infrastructure with RMI invokers,
+			just using HTTP as transport. Note that HTTP invokers are not only limited to
+			Java-to-Java remoting but also to Spring on both the client and server side.
+			(The latter also applies to Spring's RMI invoker for non-RMI interfaces.)
+		</para>
+		<para>
+			Hessian and/or Burlap might provide significant value when operating in a
+			heterogenous environment, because they explicitly allow for non-Java clients.
+			However, non-Java support is still limited. Known problems include the serialization
+			of Hibernate objects in combination with lazily initializing collections. If you
+			have such a data model, consider using RMI or HTTP invokers instead of Hessian.
+		</para>
+		<para>
+			Last but not least, EJB has an advantage over RMI in that it supports standard
+			role-based authentication and authorization and remote transaction propagation.
+			It is possible to get RMI invokers or HTTP invokers to support security context
+			propagation as well, although this is not provided by core Spring: There are
+			just appropriate hooks for plugging in third-party or custom solutions here.
 		</para>
 	</sect1>  		
 </chapter>
