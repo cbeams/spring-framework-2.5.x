@@ -72,7 +72,7 @@ Release contents:
 The "lib" directory is just included in the "-with-dependencies" download. Make sure to download this full
 distribution ZIP file if you want to run the sample applications and/or build the framework yourself.
 Ant build scripts for the framework and the samples are provided. The standard samples can be built with
-the included Ant runtime by invoking the corresponding "ant.bat" files (see samples subdirectories).
+the included Ant runtime by invoking the corresponding "build.bat" files (see samples subdirectories).
 
 Latest info is available at the public website: http://www.springframework.org
 Project info at the SourceForge site: http://sourceforge.net/projects/springframework

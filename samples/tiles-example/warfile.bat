@@ -1,1 +1,1 @@
-ant.bat warfile
+build.bat warfile
