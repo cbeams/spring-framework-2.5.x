@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.1.1.1 2003-08-14 16:14:13 trisberg Exp $
+    $Id: build.xml,v 1.2 2003-08-18 21:23:10 jhoeller Exp $
 
     See page 594 of "Expert One-on-One J2EE" for a description
     of the JAR files produced by this build script, and how
@@ -112,6 +112,7 @@
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/dao/**"/>
+				<include name="org/springframework/ejb/**"/>
 				<include name="org/springframework/jdbc/**"/>
 				<include name="org/springframework/jndi/**"/>
 				<include name="org/springframework/orm/**"/>
