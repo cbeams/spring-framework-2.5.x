@@ -1,7 +1,7 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/validation/commons/taglib/JavascriptValidatorTag.java,v 1.2 2004-04-25 22:46:01 kdonald Exp $
- * $Revision: 1.2 $
- * $Date: 2004-04-25 22:46:01 $
+ * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/validation/commons/taglib/JavascriptValidatorTag.java,v 1.3 2004-08-30 14:35:47 jhoeller Exp $
+ * $Revision: 1.3 $
+ * $Date: 2004-08-30 14:35:47 $
  *
  * ====================================================================
  *
@@ -81,18 +81,19 @@ import org.apache.commons.validator.ValidatorResources;
 import org.apache.commons.validator.ValidatorUtil;
 import org.apache.commons.validator.Var;
 
-import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.validation.commons.Resources;
 import org.springframework.validation.commons.ValidatorFactory;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * Custom tag that generates JavaScript for client side validation based
  * on the validation rules loaded by a <code>ValidatorFactory</code>.
- *
+ * <p/>
  * <p>The validator resources needed for this tag are retrieved from a
  * ValidatorFactory bean defined in the web application context or one
  * of its parent contexts. The bean is resolved by type
@@ -105,8 +106,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 
 	// ----------------------------------------------------------- Properties
 
-    protected RequestContext requestContext;
-    
+	protected RequestContext requestContext;
+
 	/**
 	 * The name of the form that corresponds with the action name
 	 * in struts-config.xml. Specifying a form name places a
@@ -301,6 +302,7 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 
 	/**
 	 * Returns the cdata setting "true" or "false".
+	 *
 	 * @return String - "true" if JavaScript will be hidden in a CDATA section
 	 */
 	public String getCdata() {
@@ -309,6 +311,7 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 
 	/**
 	 * Sets the cdata status.
+	 *
 	 * @param cdata The cdata to set
 	 */
 	public void setCdata(String cdata) {
@@ -336,12 +339,12 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 	/**
 	 * Render the JavaScript for to perform validations based on the form name.
 	 *
-	 * @exception JspException if a JSP exception has occurred
+	 * @throws JspException if a JSP exception has occurred
 	 */
 	public int doStartTag() throws JspException {
 		StringBuffer results = new StringBuffer();
 
-        Locale locale = pageContext.getRequest().getLocale();
+		Locale locale = pageContext.getRequest().getLocale();
 
 		ValidatorResources resources = getValidatorResources();
 
@@ -364,7 +367,6 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 							lActionMethods.add(o);
 						}
 					}
-
 				}
 
 				// Create list of ValidatorActions based on lActionMethods
@@ -374,16 +376,16 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 
 					// throw nicer NPE for easier debugging
 					if (va == null) {
-						throw new NullPointerException(
-								"Depends string \""
-								+ depends
-								+ "\" was not found in validator-rules.xml.");
+						throw new NullPointerException("Depends string \""
+						    + depends
+						    + "\" was not found in validator-rules.xml.");
 					}
 
 					String javascript = va.getJavascript();
 					if (javascript != null && javascript.length() > 0) {
 						lActions.add(va);
-					} else {
+					}
+					else {
 						i.remove();
 					}
 				}
@@ -394,17 +396,20 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 						ValidatorAction va2 = (ValidatorAction) o2;
 
 						if ((va1.getDepends() == null || va1.getDepends().length() == 0)
-						&& (va2.getDepends() == null || va2.getDepends().length() == 0)) {
+						    && (va2.getDepends() == null || va2.getDepends().length() == 0)) {
 							return 0;
-						} else if (
-								(va1.getDepends() != null && va1.getDepends().length() > 0)
-						&& (va2.getDepends() == null || va2.getDepends().length() == 0)) {
+						}
+						else if (
+						    (va1.getDepends() != null && va1.getDepends().length() > 0)
+						    && (va2.getDepends() == null || va2.getDepends().length() == 0)) {
 							return 1;
-						} else if (
-								(va1.getDepends() == null || va1.getDepends().length() == 0)
-						&& (va2.getDepends() != null && va2.getDepends().length() > 0)) {
+						}
+						else if (
+						    (va1.getDepends() == null || va1.getDepends().length() == 0)
+						    && (va2.getDepends() != null && va2.getDepends().length() > 0)) {
 							return -1;
-						} else {
+						}
+						else {
 							return va1.getDependencies().size() - va2.getDependencies().size();
 						}
 					}
@@ -416,7 +421,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 
 					if (methods == null) {
 						methods = va.getMethod() + "(form)";
-					} else {
+					}
+					else {
 						methods += " && " + va.getMethod() + "(form)";
 					}
 				}
@@ -430,7 +436,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 
 					if (va.getJsFunctionName() != null && va.getJsFunctionName().length() > 0) {
 						functionName = va.getJsFunctionName();
-					} else {
+					}
+					else {
 						functionName = va.getName();
 					}
 
@@ -441,8 +448,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 						// Skip indexed fields for now until there is a good way to handle
 						// error messages (and the length of the list (could retrieve from scope?))
 						if (field.isIndexed()
-								|| field.getPage() != page
-								|| !field.isDependency(va.getName())) {
+						    || field.getPage() != page
+						    || !field.isDependency(va.getName())) {
 
 							continue;
 						}
@@ -453,14 +460,13 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 
 						jscriptVar = this.getNextVar(jscriptVar);
 
-						results.append(
-								"     this."
-								+ jscriptVar
-								+ " = new Array(\""
-								+ field.getKey()
-								+ "\", \""
-								+ message
-								+ "\", ");
+						results.append("     this."
+						    + jscriptVar
+						    + " = new Array(\""
+						    + field.getKey()
+						    + "\", \""
+						    + message
+						    + "\", ");
 
 						results.append("new Function (\"varName\", \"");
 
@@ -479,56 +485,50 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 							}
 
 							if (Var.JSTYPE_INT.equalsIgnoreCase(jsType)) {
-								results.append(
-										"this."
-										+ varName
-										+ "="
-										+ ValidatorUtil.replace(
-												varValue,
-												"\\",
-										"\\\\")
-										+ "; ");
-							} else if (Var.JSTYPE_REGEXP.equalsIgnoreCase(jsType)) {
-								results.append(
-										"this."
-										+ varName
-										+ "=/"
-										+ ValidatorUtil.replace(
-												varValue,
-												"\\",
-										"\\\\")
-										+ "/; ");
-							} else if (Var.JSTYPE_STRING.equalsIgnoreCase(jsType)) {
-								results.append(
-										"this."
-										+ varName
-										+ "='"
-										+ ValidatorUtil.replace(
-												varValue,
-												"\\",
-										"\\\\")
-										+ "'; ");
+								results.append("this."
+								    + varName
+								    + "="
+								    + ValidatorUtil.replace(varValue,
+								        "\\",
+								        "\\\\")
+								    + "; ");
+							}
+							else if (Var.JSTYPE_REGEXP.equalsIgnoreCase(jsType)) {
+								results.append("this."
+								    + varName
+								    + "=/"
+								    + ValidatorUtil.replace(varValue,
+								        "\\",
+								        "\\\\")
+								    + "/; ");
+							}
+							else if (Var.JSTYPE_STRING.equalsIgnoreCase(jsType)) {
+								results.append("this."
+								    + varName
+								    + "='"
+								    + ValidatorUtil.replace(varValue,
+								        "\\",
+								        "\\\\")
+								    + "'; ");
 								// So everyone using the latest format doesn't need to change their xml files immediately.
-							} else if ("mask".equalsIgnoreCase(varName)) {
-								results.append(
-										"this."
-										+ varName
-										+ "=/"
-										+ ValidatorUtil.replace(
-												varValue,
-												"\\",
-										"\\\\")
-										+ "/; ");
-							} else {
-								results.append(
-										"this."
-										+ varName
-										+ "='"
-										+ ValidatorUtil.replace(
-												varValue,
-												"\\",
-										"\\\\")
-										+ "'; ");
+							}
+							else if ("mask".equalsIgnoreCase(varName)) {
+								results.append("this."
+								    + varName
+								    + "=/"
+								    + ValidatorUtil.replace(varValue,
+								        "\\",
+								        "\\\\")
+								    + "/; ");
+							}
+							else {
+								results.append("this."
+								    + varName
+								    + "='"
+								    + ValidatorUtil.replace(varValue,
+								        "\\",
+								        "\\\\")
+								    + "'; ");
 							}
 						}
 
@@ -536,7 +536,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 					}
 					results.append("    } \n\n");
 				}
-			} else if ("true".equalsIgnoreCase(staticJavascript)) {
+			}
+			else if ("true".equalsIgnoreCase(staticJavascript)) {
 				results.append(this.getStartElement());
 				if ("true".equalsIgnoreCase(htmlComment)) {
 					results.append(htmlBeginComment);
@@ -549,8 +550,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 		}
 
 		if (form != null
-				&& ("true".equalsIgnoreCase(dynamicJavascript)
-						|| "true".equalsIgnoreCase(staticJavascript))) {
+		    && ("true".equalsIgnoreCase(dynamicJavascript)
+		    || "true".equalsIgnoreCase(staticJavascript))) {
 
 			results.append(getJavascriptEnd());
 		}
@@ -559,7 +560,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 		JspWriter writer = pageContext.getOut();
 		try {
 			writer.print(results.toString());
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new JspException(e.getMessage());
 		}
 
@@ -572,7 +574,7 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 	 */
 	public void release() {
 		super.release();
-//		bundle = Globals.MESSAGES_KEY;
+		//		bundle = Globals.MESSAGES_KEY;
 		formName = null;
 		page = 0;
 		methodName = null;
@@ -589,8 +591,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 	protected String getJavascriptBegin(String methods) {
 		StringBuffer sb = new StringBuffer();
 		String name =
-			formName.substring(0, 1).toUpperCase()
-			+ formName.substring(1, formName.length());
+		    formName.substring(0, 1).toUpperCase()
+		    + formName.substring(1, formName.length());
 
 		sb.append(this.getStartElement());
 
@@ -604,15 +606,14 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 		sb.append("\n     var bCancel = false; \n\n");
 
 		if (methodName == null || methodName.length() == 0) {
-			sb.append(
-					"    function validate"
-					+ name
-					+ "(form) {                                                                   \n");
-		} else {
-			sb.append(
-					"    function "
-					+ methodName
-					+ "(form) {                                                                   \n");
+			sb.append("    function validate"
+			    + name
+			    + "(form) {                                                                   \n");
+		}
+		else {
+			sb.append("    function "
+			    + methodName
+			    + "(form) {                                                                   \n");
 		}
 		sb.append("        if (bCancel) \n");
 		sb.append("      return true; \n");
@@ -621,7 +622,8 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 		// Always return true if there aren't any Javascript validation methods
 		if (methods == null || methods.length() == 0) {
 			sb.append("       return true; \n");
-		} else {
+		}
+		else {
 			sb.append("       return " + methods + "; \n");
 		}
 
@@ -656,7 +658,7 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 		StringBuffer sb = new StringBuffer();
 
 		sb.append("\n");
-		if (!this.isXhtml() && "true".equals(htmlComment)){
+		if (!this.isXhtml() && "true".equals(htmlComment)) {
 			sb.append(htmlEndComment);
 		}
 
@@ -689,12 +691,15 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 			if (c <= 'z') {
 				if (i == 0) {
 					return c + input.substring(pos, input.length());
-				} else if (i == input.length()) {
+				}
+				else if (i == input.length()) {
 					return input.substring(0, pos) + c;
-				} else {
+				}
+				else {
 					return input.substring(0, pos) + c + input.substring(pos, input.length() - 1);
 				}
-			} else {
+			}
+			else {
 				input = replaceChar(input, pos, 'a');
 			}
 
@@ -710,9 +715,11 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 	private String replaceChar(String input, int pos, char c) {
 		if (pos == 0) {
 			return c + input.substring(pos, input.length());
-		} else if (pos == input.length()) {
+		}
+		else if (pos == input.length()) {
 			return input.substring(0, pos) + c;
-		} else {
+		}
+		else {
 			return input.substring(0, pos) + c + input.substring(pos, input.length() - 1);
 		}
 	}
@@ -747,31 +754,34 @@ public class JavascriptValidatorTag extends BodyTagSupport {
 	 * Use the application context itself for default message resolution.
 	 */
 	private MessageSource getMessageSource() {
-        try {
-            this.requestContext =   
-                new RequestContext((HttpServletRequest) this.pageContext.getRequest());
-        }
-        catch (RuntimeException ex) {
-            throw ex;
-        }
-        catch (Exception ex) {
-            pageContext.getServletContext().log("Exception in custom tag", ex);
-        }
-        return requestContext.getWebApplicationContext();
+		try {
+			this.requestContext =
+			    new RequestContext((HttpServletRequest) this.pageContext.getRequest());
+		}
+		catch (RuntimeException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			pageContext.getServletContext().log("Exception in custom tag", ex);
+		}
+		return requestContext.getWebApplicationContext();
 	}
 
 	/**
 	 * Get the validator resources from a ValidatorFactory defined in the
 	 * web application context or one of its parent contexts.
 	 * The bean is resolved by type (org.springframework.validation.commons.ValidatorFactory).
-	 *
-	 * @return ValidatorResources from a ValidatorFactory.
+	 * @return ValidatorResources from a ValidatorFactory
 	 */
 	private ValidatorResources getValidatorResources() {
-		ListableBeanFactory lbf = WebApplicationContextUtils
-            .getRequiredWebApplicationContext(pageContext.getServletContext());
-		ValidatorFactory factory = (ValidatorFactory) BeanFactoryUtils
-				.beanOfTypeIncludingAncestors(lbf, ValidatorFactory.class, true, true);
+		WebApplicationContext ctx = (WebApplicationContext)
+		    pageContext.getRequest().getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		if (ctx == null) {
+			// look in main application context (i.e. applicationContext.xml)
+			ctx = WebApplicationContextUtils.getRequiredWebApplicationContext(pageContext.getServletContext());
+		}
+		ValidatorFactory factory = (ValidatorFactory)
+			    BeanFactoryUtils.beanOfTypeIncludingAncestors(ctx, ValidatorFactory.class, true, true);
 		return factory.getValidatorResources();
 	}
 
