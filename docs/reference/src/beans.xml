@@ -29,7 +29,7 @@
     some of them perhaps more J2EE and enterprise-centric. In general, an
     ApplicationContext is a complete superset of a BeanFactory, and any
     description of BeanFactory capabilities and behavior should be considered
-    to applly to ApplicationContexts as well.</para>
+    to apply to ApplicationContexts as well.</para>
 
     <para>Users are sometimes unsure whether BeanFactory or ApplicationContext
     are best suited for use in a particular situation. Normally when building
@@ -562,7 +562,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       showing the appropriate setters declared. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
     &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
     &lt;property name="beanTwo"&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/property&gt;
-    &lt;property name="integerProperty"&gt;1&lt;/property&gt;
+    &lt;property name="integerProperty"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
