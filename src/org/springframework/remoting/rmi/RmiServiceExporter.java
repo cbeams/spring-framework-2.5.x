@@ -109,9 +109,11 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Set a custom RMI client socket factory to use for exporting.
-	 * If the given object also implement RMIServerSocketFactory,
+	 * <p>If the given object also implements <code>java.rmi.server.RMIServerSocketFactory</code>,
 	 * it will automatically be registered as server socket factory too.
 	 * @see #setServerSocketFactory
+	 * @see java.rmi.server.RMIClientSocketFactory
+	 * @see java.rmi.server.RMIServerSocketFactory
 	 * @see UnicastRemoteObject#exportObject(Remote, int, RMIClientSocketFactory, RMIServerSocketFactory)
 	 */
 	public void setClientSocketFactory(RMIClientSocketFactory clientSocketFactory) {
@@ -120,7 +122,12 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Set a custom RMI server socket factory to use for exporting.
+	 * <p>Only needs to be specified when the client socket factory does not
+	 * implement <code>java.rmi.server.RMIServerSocketFactory</code> already.
 	 * @see #setClientSocketFactory
+	 * @see java.rmi.server.RMIClientSocketFactory
+	 * @see java.rmi.server.RMIServerSocketFactory
+	 * @see UnicastRemoteObject#exportObject(Remote, int, RMIClientSocketFactory, RMIServerSocketFactory)
 	 */
 	public void setServerSocketFactory(RMIServerSocketFactory serverSocketFactory) {
 		this.serverSocketFactory = serverSocketFactory;
@@ -147,7 +154,7 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter
 		Registry registry = getRegistry(this.registryPort);
 		this.exportedObject = getObjectToExport();
 
-		// export remote object and bind it to registry
+		// Export remote object and bind it to RMI registry.
 		if (logger.isInfoEnabled()) {
 			logger.info("Binding RMI service '" + this.serviceName +
 					"' to registry at port '" + this.registryPort + "'");

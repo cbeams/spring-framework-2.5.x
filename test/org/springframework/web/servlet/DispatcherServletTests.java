@@ -85,7 +85,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Correct attribute",
 				(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple").equals(simpleDispatcherServlet.getServletContextAttributeName()));
 		assertTrue("Context published",
-				simpleDispatcherServlet.getWebApplicationContext() == servletConfig.getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple"));
+				simpleDispatcherServlet.getWebApplicationContext() ==
+				servletConfig.getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple"));
 
 		assertTrue("Correct namespace", "test".equals(complexDispatcherServlet.getNamespace()));
 		assertTrue("Correct attribute",
