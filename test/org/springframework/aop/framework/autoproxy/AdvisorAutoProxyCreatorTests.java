@@ -20,18 +20,15 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.CountingTxManager;
 
 /**
- * Abstract tests for EnterpriseServices. Subclasses must
- * load the appropriate bean factory defining the necessary beans
- * and their transaction attributes.
- * See the enterpriseServics.xml file for definitions of beans;
- * define the EnterpriseServices bean in a separate file to
- * change how attributes are source. 
+ * Tests for auto proxy creation by advisor recognition.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.3 2003-12-12 20:52:00 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.4 2003-12-13 21:47:28 johnsonr Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends TestCase {
 	
-	private static final String TXMANAGER_BEAN_NAME = "auto_txManager";
+	private static final String ADVISOR_APC_BEAN_NAME = "aapc";
+	
+	private static final String TXMANAGER_BEAN_NAME = ADVISOR_APC_BEAN_NAME + ".txManager";
 	
 	/**
 	 * Constructor for ProxyFactoryBeanTests.
@@ -51,8 +48,8 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	}
 	
 	public void testDefaultExclusionPrefix() throws Exception {
-		AdvisorAutoProxyCreator aapc = (AdvisorAutoProxyCreator) getBeanFactory().getBean("auto_txPP");
-		assertEquals(AdvisorAutoProxyCreator.DEFAULT_INFRASTRUCTURE_BEAN_NAME_PREFIX, aapc.getInfrastructureBeanNamePrefix());
+		AdvisorAutoProxyCreator aapc = (AdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
+		assertEquals(ADVISOR_APC_BEAN_NAME + AdvisorAutoProxyCreator.SEPARATOR, aapc.getInfrastructureBeanNamePrefix() );
 	}
 	
 	/**

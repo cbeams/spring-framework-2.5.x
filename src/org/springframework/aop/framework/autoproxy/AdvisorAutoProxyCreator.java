@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.BeanFactoryUtils;
 
@@ -21,24 +22,23 @@ import org.springframework.beans.factory.support.BeanFactoryUtils;
  * <br>
  * Note that all beans required to support the auto-proxying infrastructure, such as
  * advisors and all beans they reference, must have names beginning with the prefix
- * <code>auto_</code>. This allows us to avoid circular references, which might otherwise arise when
+ * of the name of the AdvisorAutoProxyCreator followed by a separator, the "." character. 
+ * Thus if the AdvisorAutoProxyCreator bean name is <code>aapc</code>, all its advisors and their
+ * support classes should begin with names of the form <code>aapc_</code>.
+ * This allows us to avoid circular references, which might otherwise arise when
  * a PostProcessor attempted to use an advisor which referenced another bean that
  * was post processed by this post processor.
- * Note that this default value (_auto) can be changed by setting the
- * <code>infrastructureBeanNamePrefix</code> property.
+ * Note that this default prefix can be changed from the bean name by setting the
+ * <code>infrastructureBeanNamePrefix</code> property. The separator (.) will be used.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreator.java,v 1.2 2003-12-12 20:52:01 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreator.java,v 1.3 2003-12-13 21:47:39 johnsonr Exp $
  */
-public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
+public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator implements BeanNameAware {
 
 	public final static int UNORDERED = 100;
-
-	/**
-	 * Prefix for candidate Advice bean names
-	 */	
-	public final static String AUTO_ADVICE_PREFIX = "auto_";
 	
-	public final static String DEFAULT_INFRASTRUCTURE_BEAN_NAME_PREFIX = "auto_";
+	/** Separator between prefix and remainder of bean name */
+	public final static String SEPARATOR = ".";
 	
 	/**
 	 * BeanFactory that owns this post processor
@@ -46,8 +46,9 @@ public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 	private ListableBeanFactory owningFactory;
 	
 	/** Prefix that will screen out auto proxying */
-	private String infrastructureBeanNamePrefix = DEFAULT_INFRASTRUCTURE_BEAN_NAME_PREFIX;
-
+	private String infrastructureBeanNamePrefix;
+	
+	
 	/**
 	 * @return return the prefix for bean names that will cause them not to
 	 * be considered for autoproxying by this object.
@@ -60,11 +61,22 @@ public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * Set the prefix for bean names that will cause them to 
 	 * be excluded for autoproxying by this object. This prefix
 	 * should be set to avoid circular references. Default value is
-	 * <code>_auto</code>.
+	 * the bean name of this object.
 	 * @param infrastructureBeanNamePrefix new exclusion prefix
 	 */
 	public void setInfrastructureBeanNamePrefix(String infrastructureBeanNamePrefix) {
 		this.infrastructureBeanNamePrefix = infrastructureBeanNamePrefix;
+	}
+	
+
+	/**
+	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
+	 */
+	public void setBeanName(String name) {
+		// If no infrastructure bean name prefix has been set, override it
+		if (infrastructureBeanNamePrefix == null) {
+			infrastructureBeanNamePrefix = name + SEPARATOR;
+		}
 	}
 	
 	
@@ -167,6 +179,5 @@ public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 	protected boolean shouldSkip(Object bean, String name) {
 		return name.startsWith(infrastructureBeanNamePrefix);
 	}
-
 	
 }

@@ -7,12 +7,12 @@
 -->
 <beans>
 
-	<bean id="auto_txPP"
+	<bean id="aapc"
 		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">
 	</bean>
 
 
-	<bean id="auto_txManager"
+	<bean id="aapc.txManager"
 		class="org.springframework.transaction.CountingTxManager">
 	</bean>
 	
@@ -27,13 +27,13 @@
 	</bean>
 	
 	
-	<bean id="auto_txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-		<property name="transactionManager"><ref local="auto_txManager"/></property>
+	<bean id="aapc.txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager"><ref local="aapc.txManager"/></property>
 		<property name="transactionAttributeSource"><ref local="tas"/></property>
 	</bean>
 	
 	
-	<bean id="auto_txAdvice"
+	<bean id="aapc.txAdvice"
 		autowire="constructor"
 		class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor">
 	</bean>
