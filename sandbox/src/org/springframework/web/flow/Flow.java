@@ -445,40 +445,81 @@ public class Flow implements FlowEventProcessor, InitializingBean, Serializable 
 	 * @param transition
 	 * @return
 	 */
-	public boolean addSubFlowState(String subFlowStateId, Transition transition) {
-		return add(new SubFlowState(subFlowStateId, transition));
+	public boolean addSubFlowState(String id, Transition[] transitions) {
+		return add(new SubFlowState(id, transitions));
+	}
+
+	/**
+	 * @param subFlow
+	 * @param transition
+	 * @return
+	 */
+	public boolean addSubFlowState(Flow subFlow, Transition[] transitions) {
+		return add(new SubFlowState(subFlow, transitions));
 	}
 
 	/**
 	 * @param subFlowStateId
-	 * @param subFlowAttributesMapperId
+	 * @param transition
+	 * @return
+	 */
+	public boolean addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
+		return add(new SubFlowState(id, subFlow, transitions));
+	}
+
+	/**
+	 * @param id
+	 * @param attributesMapperId
 	 * @param subFlowDefaultFinishStateId
 	 * @return
 	 */
-	public boolean addSubFlowState(String subFlowStateId, String subFlowAttributesMapperId,
+	public boolean addSubFlowState(String id, String attributesMapperId, String subFlowDefaultFinishStateId) {
+		return addSubFlowState(id, attributesMapperId, new Transition[] { onBack(subFlowDefaultFinishStateId),
+				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
+	}
+
+	/**
+	 * @param subFlow
+	 * @param attributesMapper
+	 * @param subFlowDefaultFinishStateId
+	 * @return
+	 */
+	public boolean addSubFlowState(Flow subFlow, FlowAttributesMapper attributesMapper,
 			String subFlowDefaultFinishStateId) {
-		return addSubFlowState(subFlowStateId, subFlowAttributesMapperId, new Transition[] {
-				onBack(subFlowDefaultFinishStateId), onCancel(subFlowDefaultFinishStateId),
-				onFinish(subFlowDefaultFinishStateId) });
+		return addSubFlowState(subFlow, attributesMapper, new Transition[] { onBack(subFlowDefaultFinishStateId),
+				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
 	}
 
 	/**
 	 * @param subFlowStateId
+	 * @param attributesMapperId
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlowState(String subFlowStateId, Transition[] transitions) {
-		return add(new SubFlowState(subFlowStateId, transitions));
+	public boolean addSubFlowState(String id, String attributesMapperId, Transition[] transitions) {
+		return add(new SubFlowState(id, attributesMapperId, transitions));
 	}
 
 	/**
-	 * @param subFlowStateId
-	 * @param subFlowAttributesMapperId
+	 * @param subFlow
+	 * @param attributesMapper
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlowState(String subFlowStateId, String subFlowAttributesMapperId, Transition[] transitions) {
-		return add(new SubFlowState(subFlowStateId, subFlowAttributesMapperId, transitions));
+	public boolean addSubFlowState(Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
+		return add(new SubFlowState(subFlow, attributesMapper, transitions));
+	}
+
+	/**
+	 * @param id
+	 * @param subFlow
+	 * @param attributesMapper
+	 * @param transitions
+	 * @return
+	 */
+	public boolean addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
+			Transition[] transitions) {
+		return add(new SubFlowState(id, subFlow, attributesMapper, transitions));
 	}
 
 	/**

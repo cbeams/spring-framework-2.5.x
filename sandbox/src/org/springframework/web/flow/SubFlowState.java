@@ -38,36 +38,48 @@ public class SubFlowState extends TransitionableState {
 
 	private FlowAttributesMapper attributesMapper;
 
-	public SubFlowState(String subFlowId, Transition transition) {
-		this(subFlowId, subFlowId, null, new Transition[] { transition });
+	public SubFlowState(String id, Transition transition) {
+		this(id, id, null, new Transition[] { transition });
 	}
 
-	public SubFlowState(String subFlowId, Flow subFlow, Transition transition) {
-		this(subFlowId, subFlow, new Transition[] { transition });
+	public SubFlowState(Flow subFlow, Transition transition) {
+		this(subFlow.getId(), subFlow, new Transition[] { transition });
+	}
+
+	public SubFlowState(String id, Flow subFlow, Transition transition) {
+		this(id, subFlow, new Transition[] { transition });
 	}
 
 	public SubFlowState(String subFlowId, Transition[] transitions) {
 		this(subFlowId, subFlowId, null, transitions);
 	}
 
-	public SubFlowState(String subFlowId, Flow subFlow, Transition[] transitions) {
-		this(subFlowId, subFlow, null, transitions);
+	public SubFlowState(Flow subFlow, Transition[] transitions) {
+		this(subFlow.getId(), subFlow, null, transitions);
 	}
 
-	public SubFlowState(String subFlowId, String attributesMapperId, Transition transition) {
-		this(subFlowId, subFlowId, attributesMapperId, new Transition[] { transition });
+	public SubFlowState(String id, Flow subFlow, Transition[] transitions) {
+		this(id, subFlow, null, transitions);
+	}
+
+	public SubFlowState(String id, String attributesMapperId, Transition transition) {
+		this(id, id, attributesMapperId, new Transition[] { transition });
 	}
 
 	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition transition) {
 		this(id, subFlowId, attributesMapperId, new Transition[] { transition });
 	}
 
-	public SubFlowState(String subFlowId, Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition) {
-		this(subFlowId, subFlow, attributesMapper, new Transition[] { transition });
+	public SubFlowState(Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition) {
+		this(subFlow.getId(), subFlow, attributesMapper, new Transition[] { transition });
 	}
 
-	public SubFlowState(String subFlowId, String attributesMapperId, Transition[] transitions) {
-		this(subFlowId, subFlowId, attributesMapperId, transitions);
+	public SubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition) {
+		this(id, subFlow, attributesMapper, new Transition[] { transition });
+	}
+
+	public SubFlowState(String id, String attributesMapperId, Transition[] transitions) {
+		this(id, id, attributesMapperId, transitions);
 	}
 
 	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
@@ -76,6 +88,10 @@ public class SubFlowState extends TransitionableState {
 		this.subFlowId = subFlowId;
 		this.attributesMapperId = attributesMapperId;
 		addAll(transitions);
+	}
+
+	public SubFlowState(Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
+		this(subFlow.getId(), subFlow, attributesMapper, transitions);
 	}
 
 	public SubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
