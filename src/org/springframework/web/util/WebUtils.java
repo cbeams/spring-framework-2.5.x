@@ -37,6 +37,7 @@ public abstract class WebUtils {
 
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
+	
 
 	/**
 	 * Set a system property to the web application root directory.
@@ -130,24 +131,15 @@ public abstract class WebUtils {
 			}
 			catch (InstantiationException ex) {
 				throw new ServletException("Could not instantiate class [" + clazz.getName() +
-																	 "] for session attribute '" + name + "'");
+																	 "] for session attribute '" + name + "'", ex);
 			}
-			catch (IllegalAccessException e) {
+			catch (IllegalAccessException ex) {
 				throw new ServletException("Could not access default constructor of class [" + clazz.getName() +
-																	 "] for session attribute '" + name + "'");
+																	 "] for session attribute '" + name + "'", ex);
 			}
 			request.getSession(true).setAttribute(name, sessionObject);
 		}
 		return sessionObject;
-	}
-
-	/**
-	 * Return the URL of the root of the current application.
-	 * @param request current HTTP request
-	 */
-	public String getUrlToApplication(HttpServletRequest request) {
-		return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() +
-				request.getContextPath() + "/";
 	}
 
 	/**
