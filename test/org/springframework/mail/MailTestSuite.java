@@ -36,13 +36,13 @@ import javax.mail.internet.MimeMessage;
 
 import junit.framework.TestCase;
 
+import org.springframework.mail.cos.CosMailSenderImpl;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailTestSuite.java,v 1.16 2004-06-05 14:41:25 jhoeller Exp $
  */
 public class MailTestSuite extends TestCase {
 
@@ -418,6 +418,23 @@ public class MailTestSuite extends TestCase {
 		}
 	}
 
+	public void testCosMailSenderImplWithSimpleMessageAndBadHostName() throws MailException {
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setFrom("a@a.com");
+		message.setTo("b@b.com");
+		message.setSubject("test");
+		message.setText("another test");
+
+		CosMailSenderImpl sender = new CosMailSenderImpl();
+		sender.setHost("hostxyzdoesnotexist");
+		try {
+			sender.send(message);
+			fail("Should have thrown MailSendException");
+		}
+		catch (Exception ex) {
+			assertTrue(ex instanceof MailSendException);
+		}
+	}
 
 	private static class MockJavaMailSender extends JavaMailSenderImpl {
 
