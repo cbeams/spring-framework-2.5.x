@@ -69,7 +69,7 @@ public class Person implements Serializable {
 		return this.colleagues;
 	}
 
-	public int nrColleagues() {
+	public int getColleagueCount() {
 		return this.colleagues.size();
 	}
 

@@ -25,6 +25,7 @@
 		</property>
 	</bean>
 	-->
+	
 	<!-- java flow builder definition for the search flow -->
 	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">

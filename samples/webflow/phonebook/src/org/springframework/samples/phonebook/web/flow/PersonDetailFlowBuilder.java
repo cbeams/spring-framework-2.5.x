@@ -16,6 +16,7 @@
 package org.springframework.samples.phonebook.web.flow;
 
 import org.springframework.binding.TypeConverters;
+import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.GetPersonAction;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Transition;
@@ -43,18 +44,18 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 		// get the person given a userid as input
 		addGetState(executeAction(GetPersonAction.class));
 
-		String collegueId = "collegueId";
-		String setCollegueId = set(collegueId);
+		String colleagueId = "colleagueId";
+		String setColleagueId = set(colleagueId);
 		// view the person
-		addViewState(new Transition[] { onBackFinish(), onSelect(setCollegueId) });
+		addViewState(new Transition[] { onBackFinish(), onSelect(setColleagueId) });
 
-		String collegueDetail = "collegueDetail";
 		// set the selected collegue (chosen from the person's collegue list)
-		Action setAction = new SetAction(collegueId, TypeConverters.instance().getTypeConverter(Long.class));
-		addActionState(setCollegueId, setAction, onSuccess(collegueDetail));
+		Action setAction = new SetAction(new Mapping("id", colleagueId, TypeConverters.instance().getTypeConverter(
+				Long.class)));
+		addActionState(setColleagueId, setAction, onSuccess(PERSON_DETAIL));
 
 		// spawn subflow to view selected collegue details
-		addSubFlowState(collegueDetail, PersonDetailFlowBuilder.class, useModelMapper(collegueId), new Transition[] {
+		addSubFlowState(PERSON_DETAIL, PersonDetailFlowBuilder.class, useModelMapper(colleagueId), new Transition[] {
 				onFinishGet(), onErrorEnd() });
 
 		// end

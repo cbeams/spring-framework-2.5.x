@@ -39,11 +39,11 @@
 			<B>Colleagues:</B>
 			<BR>
 			<%
-				for (int i=0; i<person.nrColleagues(); i++) {
-					Person colleague=person.getColleague(i);
+				for (int i = 0 ; i < person.getColleagueCount(); i++) {
+					Person colleague = person.getColleague(i);
 			%>
 				<A href="detail.htm?_flowExecutionId=<%=request.getAttribute("flowExecutionId") %>&_eventId=select&id=<%=colleague.getId() %>">
-					<%=colleague.getFirstName() %> <%=colleague.getLastName() %>
+					<%= colleague.getFirstName() %> <%=colleague.getLastName() %>
 				</A>
 				<BR>
 			<%

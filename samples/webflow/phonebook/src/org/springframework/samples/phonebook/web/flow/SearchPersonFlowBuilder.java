@@ -40,6 +40,8 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
 	private static final String RESULTS = SEARCH + ".results";
 
+	private static final String ID = "id";
+
 	protected String flowId() {
 		return SEARCH;
 	}
@@ -56,15 +58,15 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 				onSuccessView(RESULTS) });
 
 		// view results
-		String setUserId = set("userId");
-		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setUserId) });
+		String setId = set(ID);
+		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setId) });
 
 		// set a user id in the model (selected from result list)
-		Action setAction = new SetAction("userId", TypeConverters.instance().getTypeConverter(Long.class));
-		addActionState(setUserId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
+		Action setAction = new SetAction(ID, TypeConverters.instance().getTypeConverter(Long.class));
+		addActionState(setId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
 
 		// view details for selected user id
-		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useModelMapper("userId"), new Transition[] {
+		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useModelMapper(ID), new Transition[] {
 				onFinish(view(RESULTS)), onError("error") });
 
 		// end - an error occured

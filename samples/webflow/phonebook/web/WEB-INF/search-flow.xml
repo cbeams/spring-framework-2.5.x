@@ -22,11 +22,11 @@
 	
 	<view-state id="results.view" view="person.Search.results.view">
 		<transition event="newSearch" to="criteria.view"/>
-		<transition event="select" to="userId.set"/>
+		<transition event="select" to="personId.set"/>
 	</view-state>
 
-	<action-state id="userId.set">
-		<action bean="person.Search.userId.set"/>
+	<action-state id="personId.set">
+		<action bean="person.Search.id.set"/>
 		<transition event="success" to="person.Detail"/>
 		<transition event="error" to="error"/>
 	</action-state>
