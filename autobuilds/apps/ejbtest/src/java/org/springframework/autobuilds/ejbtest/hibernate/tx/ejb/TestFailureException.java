@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.integrationtest.ejbtest.simple.ejb;
-
-import java.rmi.RemoteException;
-
-import javax.ejb.EJBObject;
+package org.springframework.autobuilds.ejbtest.hibernate.tx.ejb;
 
 /**
- * Simple EJB Remote interface
- *
+ * Used as an Ejb Application exception to indicate that a test failed
+ * 
  * @author colin sampaleanu
- * @version $Id: SimpleRemote.java,v 1.1 2004-05-19 12:16:29 colins Exp $
+ * @version $Id: TestFailureException.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
-public interface SimpleRemote extends EJBObject {
+public class TestFailureException extends Exception {
 
-	public String echo(String input) throws RemoteException;
+	public TestFailureException() {
+		super();
+	}
 
+	public TestFailureException(String message) {
+		super(message);
+	}
+
+	public TestFailureException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public TestFailureException(Throwable cause) {
+		super(cause);
+	}
 }

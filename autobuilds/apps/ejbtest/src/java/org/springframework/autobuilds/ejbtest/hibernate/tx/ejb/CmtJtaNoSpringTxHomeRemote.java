@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.integrationtest.ejbtest.simple.ejb;
+package org.springframework.autobuilds.ejbtest.hibernate.tx.ejb;
 
 import java.rmi.RemoteException;
 
@@ -22,14 +22,15 @@ import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 
 /**
- * Simeple EJB remote home interface
+ * CmtJtaNoSpringTx EJB home interface
  *
  * @author colin sampaleanu
- * @version $Id: SimpleHomeRemote.java,v 1.1 2004-05-19 12:16:29 colins Exp $
+ * 
+ * @version $Id: CmtJtaNoSpringTxHomeRemote.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
-public interface SimpleHomeRemote extends EJBHome {
+public interface CmtJtaNoSpringTxHomeRemote extends EJBHome {
 	/**
 	 * @see EJB specifications
 	 */
-	SimpleRemote create() throws RemoteException, CreateException;
+	CmtJtaNoSpringTxRemote create() throws RemoteException, CreateException;
 }

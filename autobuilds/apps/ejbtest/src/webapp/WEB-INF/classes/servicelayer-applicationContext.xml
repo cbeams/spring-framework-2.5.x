@@ -31,7 +31,7 @@
 
 	<!-- JNDI DataSource for J2EE environments -->
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>java:HDefaultDS</value></property>
+		<property name="jndiName"><value>java:DefaultDS</value></property>
 	</bean>
 
 	<!-- Hibernate SessionFactory -->
@@ -62,7 +62,7 @@
 			<value>true</value>
 		</property>
 		<property name="businessInterface">
-			<value>org.springframework.integrationtest.ejbtest.simple.ejb.SimpleService</value>
+			<value>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleService</value>
 		</property>
 	</bean>
 
@@ -75,7 +75,7 @@
 			<value>false</value>
 		</property>
 		<property name="businessInterface">
-			<value>org.springframework.integrationtest.ejbtest.simple.ejb.SimpleService</value>
+			<value>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleService</value>
 		</property>
 	</bean>
 
@@ -85,7 +85,7 @@
 			<value>CmtJtaNoSpringTx</value>
 		</property>
 		<property name="businessInterface">
-			<value>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx</value>
+			<value>org.springframework.autobuilds.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx</value>
 		</property>
 	</bean>
 

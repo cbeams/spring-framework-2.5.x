@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.integrationtest.ejbtest.util.context;
+package org.springframework.autobuilds.ejbtest.util.context;
 
 import javax.servlet.ServletContext;
 

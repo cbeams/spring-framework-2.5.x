@@ -14,14 +14,14 @@
  * the License.
  */
 
-package org.springframework.integrationtest.ejbtest.simple.ejb;
+package org.springframework.autobuilds.ejbtest.simple.ejb;
 
 
 /**
  * <p>Business interface for a simple EJB test.</p>
  * 
  * @author colin sampaleanu
- * @version $Id: SimpleService.java,v 1.1 2004-05-19 12:16:29 colins Exp $
+ * @version $Id: SimpleService.java,v 1.1 2004-07-14 22:55:08 colins Exp $
  */
 public interface SimpleService {
 

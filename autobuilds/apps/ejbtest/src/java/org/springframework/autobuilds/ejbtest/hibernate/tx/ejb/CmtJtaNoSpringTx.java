@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.integrationtest.ejbtest.hibernate.tx.ejb;
+package org.springframework.autobuilds.ejbtest.hibernate.tx.ejb;
 
 import org.springframework.dao.DataAccessException;
 
@@ -30,7 +30,7 @@ import org.springframework.dao.DataAccessException;
  * within the same session (when using HibernateTemplate/SessionFactoryUtils.</p>
  * 
  * @author colin sampaleanu
- * @version $Id: CmtJtaNoSpringTx.java,v 1.2 2004-04-18 03:28:52 colins Exp $
+ * @version $Id: CmtJtaNoSpringTx.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
 public interface CmtJtaNoSpringTx {
 

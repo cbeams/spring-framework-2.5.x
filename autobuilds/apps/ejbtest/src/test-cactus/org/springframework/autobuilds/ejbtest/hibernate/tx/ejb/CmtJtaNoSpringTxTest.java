@@ -14,62 +14,70 @@
  * limitations under the License.
  */
 
-package org.springframework.integrationtest.ejbtest;
+package org.springframework.autobuilds.ejbtest.hibernate.tx.ejb;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 
 import org.apache.cactus.ServletTestSuite;
+import org.springframework.autobuilds.ejbtest.Constants;
+import org.springframework.autobuilds.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx;
+import org.springframework.autobuilds.ejbtest.hibernate.tx.ejb.TestFailureException;
 import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
-import org.springframework.integrationtest.ejbtest.simple.ejb.SimpleService;
 
 /**
- * Test usage of EJB Proxy with and without a cached home. We actually just reuse the
- * EJB used for the test of Hibernate session binding...
+ * Cactus test for CmtJtaNoSpringTx
  * 
  * @author colin sampaleanu
- * @version $Id: CachedHomeTest.java,v 1.2 2004-05-19 15:39:25 colins Exp $
+ * @version $Id: CmtJtaNoSpringTxTest.java,v 1.1 2004-07-14 22:55:28 colins Exp $
  */
-public class CachedHomeTest extends TestCase {
+public class CmtJtaNoSpringTxTest extends TestCase {
 
 	// --- statics
-	public static final String SERVICE_ID_CACHE_ON = "cachedHomeProxy";
-	public static final String SERVICE_ID_CACHE_OFF = "noCachedHomeProxy";
+	public static final String SERVICE_ID = "cmtJtaNoSpringTx";
 
 	// --- attributes
 
 	BeanFactoryReference bfr;
-	
+	CmtJtaNoSpringTx ejb;
+
 	// --- methods
 
 	public static Test suite() {
 		ServletTestSuite suite = new ServletTestSuite();
-		suite.addTestSuite(CachedHomeTest.class);
+		suite.addTestSuite(CmtJtaNoSpringTxTest.class);
 		return suite;
 	}
 
 	protected void setUp() throws Exception {
 		bfr = ContextSingletonBeanFactoryLocator.getInstance().useBeanFactory(
 				Constants.SERVICE_LAYER_CONTEXT_ID);
+
+		ejb = (CmtJtaNoSpringTx) bfr.getFactory().getBean(SERVICE_ID);
 	}
 
 	protected void tearDown() throws Exception {
 		bfr.release();
 	}
 
-	public void testInvocationsWithCache() {
-		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_CACHE_ON);
-		ejb.echo("hello");
-		ejb.echo("hello");
+	public void testMethodInvocation() {
 		ejb.echo("hello");
 	}
 
-	
-	public void testInvocationsWithNoCache() {
-		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_CACHE_OFF);
-		ejb.echo("hello");
-		ejb.echo("hello");
-		ejb.echo("hello");
+	public void testSameSessionReceivedInTwoHibernateCallbacks()
+			throws TestFailureException {
+		ejb.testSameSessionReceivedInTwoHibernateCallbacks();
 	}
+
+	public void testThrowExceptionSoSessionUnbindCanBeVerified() {
+
+		try {
+			ejb.throwExceptionSoSessionUnbindCanBeVerified();
+		} catch (Exception e) {
+			// DataAccessException expected here, inside the container's Remote exception for
+			// remote EJB
+		}
+	}
+
 }

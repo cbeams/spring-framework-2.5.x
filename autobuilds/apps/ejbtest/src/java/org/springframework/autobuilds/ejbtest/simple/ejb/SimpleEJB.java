@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.integrationtest.ejbtest.simple.ejb;
+package org.springframework.autobuilds.ejbtest.simple.ejb;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -24,9 +24,9 @@ import net.sf.hibernate.SessionFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.autobuilds.ejbtest.Constants;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.ejb.support.AbstractStatelessSessionBean;
-import org.springframework.integrationtest.ejbtest.Constants;
 
 /**
  * <p>Simple test EJB.</p>
@@ -43,7 +43,7 @@ import org.springframework.integrationtest.ejbtest.Constants;
  * and then XDoclet will not generate its own.</p>
  * 
  * @author colin sampaleanu
- * @version $Id: SimpleEJB.java,v 1.2 2004-07-12 21:38:16 colins Exp $
+ * @version $Id: SimpleEJB.java,v 1.1 2004-07-14 22:55:08 colins Exp $
  */
 public class SimpleEJB extends AbstractStatelessSessionBean
 		implements SimpleService {
@@ -90,7 +90,7 @@ public class SimpleEJB extends AbstractStatelessSessionBean
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.springframework.integrationtest.ejbtest.hibernate.tx.CmtJtaNoSpringTx#testMethod(java.lang.String)
+	 * @see org.springframework.autobuilds.ejbtest.hibernate.tx.CmtJtaNoSpringTx#testMethod(java.lang.String)
 	 */
 	public String echo(String input) {
 		return "hello " + input;

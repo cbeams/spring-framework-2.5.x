@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.integrationtest.ejbtest;
+package org.springframework.autobuilds.ejbtest.simple.ejb;
+
+import java.rmi.RemoteException;
+
+import javax.ejb.EJBObject;
 
 /**
+ * Simple EJB Remote interface
+ *
  * @author colin sampaleanu
- * @version $Id: Constants.java,v 1.1 2004-04-18 03:28:53 colins Exp $
+ * @version $Id: SimpleRemote.java,v 1.1 2004-07-14 22:55:08 colins Exp $
  */
-public class Constants {
+public interface SimpleRemote extends EJBObject {
 
-	public static final String SERVICE_LAYER_CONTEXT_ID = "servicelayer-context";
+	public String echo(String input) throws RemoteException;
 
 }

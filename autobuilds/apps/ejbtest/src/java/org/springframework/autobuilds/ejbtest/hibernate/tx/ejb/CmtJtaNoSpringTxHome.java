@@ -54,7 +54,7 @@
  * <http://www.apache.org/>.
  *
  */
-package org.springframework.integrationtest.ejbtest.hibernate.tx.ejb;
+package org.springframework.autobuilds.ejbtest.hibernate.tx.ejb;
 
 import java.rmi.RemoteException;
 
@@ -66,7 +66,7 @@ import javax.ejb.EJBHome;
  *
  * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
  * 
- * @version $Id: CmtJtaNoSpringTxHome.java,v 1.1 2004-04-16 23:13:37 colins Exp $
+ * @version $Id: CmtJtaNoSpringTxHome.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
 public interface CmtJtaNoSpringTxHome extends EJBHome
 {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.integrationtest.ejbtest.hibernate.tx.ejb;
+package org.springframework.autobuilds.ejbtest.hibernate.tx.ejb;
 
 import java.rmi.RemoteException;
 
@@ -26,7 +26,7 @@ import org.springframework.dao.DataAccessException;
  * CmtJtaNoSpringTx EJB Remote interface
  *
  * @author colin sampaleanu
- * @version $Id: CmtJtaNoSpringTxRemote.java,v 1.1 2004-04-18 03:28:52 colins Exp $
+ * @version $Id: CmtJtaNoSpringTxRemote.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
 public interface CmtJtaNoSpringTxRemote extends EJBObject {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.integrationtest.ejbtest.util.context;
+package org.springframework.autobuilds.ejbtest.util.context;
 
 /**
  * Subclasses Spring class of same name to use our own {@link ContextLoader}.<br />

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.integrationtest.ejbtest.hibernate.tx.ejb;
+package org.springframework.autobuilds.ejbtest.hibernate.tx.ejb;
 
 import java.sql.SQLException;
 
@@ -28,11 +28,11 @@ import net.sf.hibernate.SessionFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.autobuilds.ejbtest.Constants;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.ejb.support.AbstractStatelessSessionBean;
-import org.springframework.integrationtest.ejbtest.Constants;
 import org.springframework.orm.hibernate.HibernateCallback;
 import org.springframework.orm.hibernate.HibernateTemplate;
 
@@ -56,7 +56,7 @@ import org.springframework.orm.hibernate.HibernateTemplate;
  * </p>
  * 
  * @author colin sampaleanu
- * @version $Id: CmtJtaNoSpringTxEJB.java,v 1.2 2004-04-18 03:28:52 colins Exp $
+ * @version $Id: CmtJtaNoSpringTxEJB.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
 public class CmtJtaNoSpringTxEJB extends AbstractStatelessSessionBean
 		implements
@@ -105,7 +105,7 @@ public class CmtJtaNoSpringTxEJB extends AbstractStatelessSessionBean
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.springframework.integrationtest.ejbtest.hibernate.tx.CmtJtaNoSpringTx#testMethod(java.lang.String)
+	 * @see org.springframework.autobuilds.ejbtest.hibernate.tx.CmtJtaNoSpringTx#testMethod(java.lang.String)
 	 */
 	public String echo(String input) {
 		return "hello " + input;
@@ -114,7 +114,7 @@ public class CmtJtaNoSpringTxEJB extends AbstractStatelessSessionBean
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx#testSaemSessionReceivedInTwoHibernateCallbacks()
+	 * @see org.springframework.autobuilds.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx#testSaemSessionReceivedInTwoHibernateCallbacks()
 	 */
 	public void testSameSessionReceivedInTwoHibernateCallbacks()
 			throws TestFailureException {

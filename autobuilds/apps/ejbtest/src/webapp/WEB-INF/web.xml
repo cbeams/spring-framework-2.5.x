@@ -37,7 +37,7 @@
 	   - servlet initialization as clarified in the Servlet 2.4 spec (most do)
 	 -->
 	<listener>
-		<listener-class>org.springframework.integrationtest.ejbtest.util.context.ContextLoaderListener</listener-class>
+		<listener-class>org.springframework.autobuilds.ejbtest.util.context.ContextLoaderListener</listener-class>
 	</listener>
 
 </web-app>
