@@ -8,10 +8,10 @@ package org.springframework.aop;
 
 /**
  * Advisor that delivers <b>throws</b> advice.
- * Such advice is targeted by a pointcut.
- * Throws advice is less general than around advice. Anything that
+ * Throws advice is targeted by a pointcut.
+ * <p>Throws advice is less general than around advice. Anything that
  * can be done with throws advice can be done with around advice.
- * However, there is still value in offering throws advice, as it
+ * However, there is value in offering throws advice, as it
  * provides a simpler programming model (no need to invoke the next
  * in a chain of interceptors); and strong typing for exceptions.
  * <br>
@@ -22,9 +22,9 @@ package org.springframework.aop;
  * <b>after throwing</b> advice.
  * The advisor re-raises the exception when it's done.
  * @author Rod Johnson
- * @version $Id: ThrowsAdvisor.java,v 1.2 2003-12-11 09:18:48 johnsonr Exp $
+ * @version $Id: ThrowsAdvisor.java,v 1.3 2004-01-14 10:26:35 johnsonr Exp $
  */
-public interface ThrowsAdvisor extends Advisor, PointcutAdvisor {
+public interface ThrowsAdvisor extends PointcutAdvisor {
 	
 	/**
 	 * @return the ThrowsAdvice that should be executed if the pointcut
