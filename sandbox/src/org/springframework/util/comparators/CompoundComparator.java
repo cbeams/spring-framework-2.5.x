@@ -180,7 +180,7 @@ public class CompoundComparator implements Comparator, Serializable {
 
     public int compare(Object o1, Object o2) {
         if (locked == false) {
-            Assert.isTrue(comparators.size() > 0);
+            Assert.isTrue(comparators.size() > 0, "No comparators have yet been added to invoke!");
             locked = true;
         }
         // iterate over all comparators in the chain
