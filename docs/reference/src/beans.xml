@@ -416,7 +416,7 @@
             JavaBeans</emphasis>. Spring generally advocates usage of
             setter-based dependency injection, since a large number of
             constructor arguments can get unwieldy, especially when some
-            properties are optional. </para>
+            properties are optional.</para>
           </listitem>
 
           <listitem>
@@ -640,6 +640,29 @@
       the factory method does not have to be of the same type as the class
       which contains the static factory method, although in this example it
       is.</para>
+    </sect2>
+
+    <sect2 id="beans-factory-nullvalues">
+      <title>Working with non-singleton collaborators</title>
+
+      <para>Most beans in the container will be singletons. It is not
+      necessarilly immediately obvious how to handle the situation where bean
+      A, which may or may not be a singleton, and which comes out of the
+      BeanFactory/ApplicationContext and has its dependencies resolved by the
+      container, needs to work with a Bean B, which itself is not a singleton.
+      If the lifetime of Bean A does not match the lifetime of Bean B, there
+      is a potential problem with the normal mechanism to handle collaboration
+      between two beans, that is to set Bean B as a property of Bean A. If for
+      example Bean A is a singleton, its properties are only set once by the
+      container when it is first created, so it would have no way to be fed a
+      newly created instance of Bean B whenever it needs it.</para>
+
+      <para>The preferred mechanism to deal with this, unless an
+      ApplicationContext can not be used, is <emphasis>Method
+      Injection</emphasis>, as described here . A somewhat less convenient but
+      lower-tech approach (not using bytecode modification), is to use a
+      helper class called <literal>ObjectFactoryCreatingFactoryBean</literal>,
+      described here .</para>
     </sect2>
 
     <sect2 id="beans-factory-nullvalues">
