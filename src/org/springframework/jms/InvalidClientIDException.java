@@ -16,45 +16,15 @@
 
 package org.springframework.jms;
 
-
 /**
- * Spring Framework runtime exception mirroring the JMS
- * {@link javax.jms.InvalidClientIDException}.  This exception is thrown when
- * encountering its JMS counterpart so that Spring Runtime exception
- * behavior is maintained.
- *
- * @see javax.jms.InvalidClientIDException
+ * Runtime exception mirroring the JMS InvalidClientIDException.
  * @author Les Hazlewood
+ * @see javax.jms.InvalidClientIDException
  */
 public class InvalidClientIDException extends JmsException {
 
-    /**
-     * Simple constructor allowing a message that explains the nature of the
-     * exception.
-     * @param s The message that explains the purpose of the exception.
-     */
-    public InvalidClientIDException( String s ) {
-        super( s );
-    }
-
-    /**
-     * Constructor allowing initialization with a message and a cause.
-     * @param s he message that explains the purpose of the exception.
-     * @param ex The cause of the exception
-     */
-    public InvalidClientIDException( String s, Throwable ex ) {
-        super( s, ex );
-    }
-
-    /**
-     * Constructor allowing initialization with a cause.  This constructor is
-     * generally provided as a means for wrapping the actual JMS checked
-     * exception (e.g {@link javax.jms.InvalidClientIDException}) that triggered
-     * this exception.
-     * @param cause the cause of this exception
-     */
-    public InvalidClientIDException( Throwable cause ) {
-        super( cause );
-    }
+	public InvalidClientIDException(javax.jms.InvalidClientIDException cause) {
+		super(cause);
+	}
 
 }

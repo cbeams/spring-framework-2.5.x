@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.springframework.jms.converter;
 
 import javax.jms.Message;
@@ -22,7 +22,7 @@ import javax.jms.Session;
 /**
  * Converter between Java Objects and JMS Messages.
  * @author Mark Pollack
- * 
+ *
  */
 public interface Converter {
 
@@ -31,17 +31,16 @@ public interface Converter {
 	 * the mesage object.
 	 * @param object The object to convert
 	 * @param session The session to use for creating a JMS Message
-	 * @return 
+	 * @return
 	 */
 	Message toMessage(Object object, Session session);
-	
-    /**
-     * Convert from a JMS Message to a Java object.
-     * @param message The message to convert
-     * @return the converter Java object.
-     */
+
+	/**
+	 * Convert from a JMS Message to a Java object.
+	 * @param message The message to convert
+	 * @return the converter Java object.
+	 */
 	Object fromMessage(Message message);
-	
-	
-	
+
+
 }

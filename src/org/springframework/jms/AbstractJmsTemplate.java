@@ -24,8 +24,10 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.jms.Session;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.converter.Converter;
 import org.springframework.util.ClassUtils;
@@ -34,331 +36,281 @@ import org.springframework.util.ClassUtils;
  * Base class for JmsSenders defining commons operations like
  * setting/getting the connection factory, session parameters,
  * and checking that all required bean properites have been set.
- * 
- * Default settings for JMS sessions are transacted and
+ *
+ * <p>Default settings for JMS sessions are transacted and
  * auto acknowledge.  As per section 17.3.5 of the EJB specification,
- * the transaction and acknowledgement parameters are ignored 
+ * the transaction and acknowledgement parameters are ignored
  * when a JMS Session is created inside the container environment.
- * 
- * Default setting for isEnabledDynamicDestinations is false.
- * 
- * Default setting for isSessionTransacted is false.
- * 
- * Default setting for isPubSubDomain is false.  Point-to-Point (Queues)
- * is the default domain.
- * 
+ *
+ * <p>Default setting for isEnabledDynamicDestinations is false.
+ *
+ * <p>Default setting for isSessionTransacted is false.
+ *
+ * <p>Default setting for pubSubDomain is false.
+ * Point-to-Point (Queues) is the default domain.
+ *
  * @author Mark Pollack
- * 
  */
-public abstract class AbstractJmsTemplate
-    implements JmsTemplate, InitializingBean {
+public abstract class AbstractJmsTemplate implements JmsTemplate, InitializingBean {
 
-    /**
-     * Used to obtain JMS connections.
-     */
-    private ConnectionFactory cf;
+	protected final Log logger = LogFactory.getLog(getClass());
 
-    /**
-     * The JMS Converter to use for send(object) methods.
-     */
-    private Converter jmsConverter;
 
-    /**
-     * Default transaction mode for a JMS Session. 
-     */
-    private boolean sessionTransacted = false;
+	/**
+	 * Used to obtain JMS connections.
+	 */
+	private ConnectionFactory connectionFactory;
 
-    /**
-     * Default ack mode for a JMS Session.
-     */
-    private int sessionAcknowledgeMode = Session.AUTO_ACKNOWLEDGE;
+	/**
+	 * Delegate mangement of JNDI lookups and dynamic destination creation to a JmsAdmin implementation.
+	 */
+	private JmsAdmin jmsAdmin;
 
-    /**
-     * The default destination to use on send operations that do not specify an explicit destination.
-     */
-    private Destination defaultDestination;
+	/**
+	 * By default usee the Point-to-Point domain.
+	 */
+	private boolean pubSubDomain = false;
 
-    /**
-     * Delegate mangement of JNDI lookups and dynamic destination creation to a JmsAdmin implementation.
-     */
-    private JmsAdmin jmsAdmin;
+	/**
+	 * The default destination to use on send operations that do not specify an explicit destination.
+	 */
+	private Destination defaultDestination;
 
-    /**
-     * The delivery mode to use when sending a message.  Only used if isExplicitQosEnabled = true.
-     * 
-     */
-    private int deliveryMode;
+	/**
+	 * The converter to use for send(object) methods.
+	 */
+	private Converter converter;
 
-    /**
-     * The priority of the message.  Only used if isExplicitQosEnabled = true.
-     */
-    private int priority;
 
-    /**
-     * The message's lifetime in milliseconds.  Only used if isExplicitQosEnabled = true.
-     */
-    private long timeToLive;
+	/**
+	 * Use the default or explicit QOS parameters.
+	 */
+	private boolean explicitQosEnabled;
 
-    /**
-     * Use the default or explicit QOS parameters.
-     */
-    private boolean explicitQosEnabled;
+	/**
+	 * The delivery mode to use when sending a message. Only used if isExplicitQosEnabled = true.
+	 */
+	private int deliveryMode;
 
-    /**
-     * Enable creation of dynamic destinations.
-     */
-    private boolean dynamicDestinationEnabled = false;
+	/**
+	 * The priority of the message. Only used if isExplicitQosEnabled = true.
+	 */
+	private int priority;
 
-    /**
-     * By default usee the Point-to-Point domain.
-     */
-    private boolean isPubSubDomain = false;
+	/**
+	 * The message's lifetime in milliseconds. Only used if isExplicitQosEnabled = true.
+	 */
+	private long timeToLive;
 
-    protected final Log logger = LogFactory.getLog(getClass());
 
-    /**
-     * Return the connection factory used sending messages.
-     * @return the connection factory.
-     */
-    public ConnectionFactory getConnectionFactory() {
-        return cf;
-    }
+	/**
+	 * Enable creation of dynamic destinations.
+	 */
+	private boolean dynamicDestinationEnabled = false;
 
-    /**
-     * Set the connection factory used for sending messages.
-     * @param c the connection factory.
-     */
-    public void setConnectionFactory(ConnectionFactory c) {
-        cf = c;
-    }
+	/**
+	 * Default ack mode for a JMS Session.
+	 */
+	private int sessionAcknowledgeMode = Session.AUTO_ACKNOWLEDGE;
 
-    /**
-     * Make sure the connection factory has been set.
-     *
-     */
-    public void afterPropertiesSet() {
-        if (cf == null) {
-            throw new IllegalArgumentException("ConnectionFactory is required");
-        }
-    }
+	/**
+	 * Default transaction mode for a JMS Session.
+	 */
+	private boolean sessionTransacted = false;
 
-    protected void createDefaultJmsAdmin() {
-        DefaultJmsAdmin admin = new DefaultJmsAdmin();
-        admin.setJmsTemplate(this);
-        setJmsAdmin(admin);
-    }
 
-    /**
-     * Determine if acknowledgement mode of the JMS session used for sending a message. 
-     * @return The ack mode used for sending a message.
-     */
-    public int getSessionAcknowledgeMode() {
-        return sessionAcknowledgeMode;
-    }
+	public void setConnectionFactory(ConnectionFactory connectionFactory) {
+		this.connectionFactory = connectionFactory;
+	}
 
-    /**
-     * Set the JMS acknowledgement mode that is used when creating a JMS session to send
-     * a message.  Vendor extensions to the acknowledgment mode can be set here as well.
-     * 
-     * Note that that inside an ejb the parameters to 
-     * create<Queue|Topic>Session(boolean transacted, int acknowledgeMode) method are not 
-     * taken into account.  Depending on the tx context in the ejb, the container makes its own
-     * decisions on these values.  See section 17.3.5 of the EJB Spec.
-     *  
-     * @param ackMode The acknowledgement mode.
-     */
-    public void setSessionAcknowledgeMode(int ackMode) {
-        sessionAcknowledgeMode = ackMode;
-    }
+	public ConnectionFactory getConnectionFactory() {
+		return connectionFactory;
+	}
 
-    /**
-     * Determine if the JMS session used for sending a message is transacted.
-     * @return Return true if using a transacted JMS session, false otherwise.
-     */
-    public boolean isSessionTransacted() {
-        return sessionTransacted;
-    }
+	public void setJndiEnvironment(Properties jndiEnvironment) {
+		getJmsAdmin().setJndiEnvironment(jndiEnvironment);
+	}
 
-    /**
-     * Set the transaction mode that is used when creating a JMS session to send a message.
-     * 
-     * Note that that inside an ejb the parameters to 
-     * create<Queue|Topic>Session(boolean transacted, int acknowledgeMode) method are not 
-     * taken into account.  Depending on the tx context in the ejb, the container makes its own
-     * decisions on these values.  See section 17.3.5 of the EJB Spec. 
-     * @param txMode The transaction mode.
-     */
-    public void setSessionTransacted(boolean txMode) {
-        sessionTransacted = txMode;
-    }
+	public void setJmsAdmin(JmsAdmin jmsAdmin) {
+		this.jmsAdmin = jmsAdmin;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public JmsAdmin getJmsAdmin() {
-        return jmsAdmin;
-    }
+	public JmsAdmin getJmsAdmin() {
+		return jmsAdmin;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void setJmsAdmin(JmsAdmin admin) {
-        jmsAdmin = admin;
-    }
+	public void setPubSubDomain(boolean pubSubDomain) {
+		this.pubSubDomain = pubSubDomain;
+	}
 
-    /**
-     * If a destination name is not found in JNDI, then it will
-     * be created dynamically.
-     * @return true if enabled.
-     */
-    public boolean isDynamicDestinationEnabled() {
-        return dynamicDestinationEnabled;
-    }
+	public boolean isPubSubDomain() {
+		return pubSubDomain;
+	}
 
-    /**
-     * Set the ability of JmsTemplate to create dynamic destinations
-     * if the destination name is not found in JNDI.
-     * @param b true to enable.
-     */
-    public void setEnabledDynamicDestinations(boolean b) {
-        dynamicDestinationEnabled = b;
-    }
+	public void setDefaultDestination(Destination destination) {
+		this.defaultDestination = destination;
+	}
 
-    public boolean isPubSubDomain() {
-        return isPubSubDomain;
-    }
+	public Destination getDefaultDestination() {
+		return defaultDestination;
+	}
 
-    public void setPubSubDomain(boolean b) {
-        isPubSubDomain = b;
-    }
+	public void setConverter(Converter converter) {
+		this.converter = converter;
+	}
 
-    public int getDeliveryMode() {
-        return deliveryMode;
-    }
+	public Converter getConverter() {
+		return converter;
+	}
 
-    public boolean isExplicitQosEnabled() {
-        return explicitQosEnabled;
-    }
 
-    public int getPriority() {
-        return priority;
-    }
+	/**
+	 * Set if the QOS values (deliveryMode, priority, timeToLive)
+	 * should be used for sending a message.
+	 */
+	public void setExplicitQosEnabled(boolean explicitQosEnabled) {
+		this.explicitQosEnabled = explicitQosEnabled;
+	}
 
-    public long getTimeToLive() {
-        return timeToLive;
-    }
+	public boolean isExplicitQosEnabled() {
+		return explicitQosEnabled;
+	}
 
-    /**
-     * Set the delivery mode to use.
-     * @param i the delivery mode.
-     */
-    public void setDeliveryMode(int i) {
-        deliveryMode = i;
-    }
+	public void setDeliveryMode(int deliveryMode) {
+		this.deliveryMode = deliveryMode;
+	}
 
-    /**
-     * Set if the QOS values (deliveryMode, priority, timeToLive) should be used for
-     * sending a message.
-     * @param b true to use the values, false not to use.
-     */
-    public void setExplicitQosEnabled(boolean b) {
-        explicitQosEnabled = b;
-    }
+	public int getDeliveryMode() {
+		return deliveryMode;
+	}
 
-    /**
-     * Set the priority of the message to be send.
-     * @param p of the message.
-     */
-    public void setPriority(int p) {
-        priority = p;
-    }
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
 
-    /**
-     * Set the message's lifetime in milliseconds.
-     * @param ttl message's lifetime.
-     */
-    public void setTimeToLive(long ttl) {
-        timeToLive = ttl;
-    }
+	public int getPriority() {
+		return priority;
+	}
 
-    /**
-     * Return the default destination to send message sto when using send methods that do no 
-     * specifiy the destionation.
-     * @return the default destination
-     */
-    public Destination getDefaultDestination() {
-        return defaultDestination;
-    }
+	public void setTimeToLive(long timeToLive) {
+		this.timeToLive = timeToLive;
+	}
 
-    public void setDefaultDestination(Destination destination) {
-        defaultDestination = destination;
-    }
+	public long getTimeToLive() {
+		return timeToLive;
+	}
 
-    /**
-     * Converts the specified checked {@link javax.jms.JMSException JMSException} to
-     * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
-     * equivalent.
-     * @param task readable text describing the task being attempted
-     * @param orig The original checked JMSException to wrap
-     * @return the Spring runtime JmsException wrapping <code>orig</code>.
-     */
-    public final JmsException convertJMSException(
-        String task,
-        JMSException orig) {
 
-        if (logger.isInfoEnabled()) {
-            logger.info(
-                "Translating JMSException with errorCode '"
-                    + orig.getErrorCode()
-                    + "' and message ["
-                    + orig.getMessage()
-                    + "]; for task ["
-                    + task
-                    + "]");
-        }
+	/**
+	 * Set the ability of JmsTemplate to create dynamic destinations
+	 * if the destination name is not found in JNDI.
+	 */
+	public void setDynamicDestinationsEnabled(boolean dynamicDestinationEnabled) {
+		this.dynamicDestinationEnabled = dynamicDestinationEnabled;
+	}
 
-        if (orig instanceof JMSSecurityException) {
-            return new JmsSecurityException(orig);
-        }
+	/**
+	 * If a destination name is not found in JNDI, then it will
+	 * be created dynamically.
+	 */
+	public boolean isDynamicDestinationEnabled() {
+		return dynamicDestinationEnabled;
+	}
 
-        // all other exceptions in our Jms runtime exception hierarchy have the
-        // same unqualified names as their javax.jms counterparts, so just
-        // construct the converted exception dynamically based on name:
-        String shortName = ClassUtils.getShortName(orig.getClass().getName());
+	/**
+	 * Set the JMS acknowledgement mode that is used when creating a JMS session to send
+	 * a message.  Vendor extensions to the acknowledgment mode can be set here as well.
+	 * <p>Note that that inside an EJB the parameters to
+	 * create<Queue|Topic>Session(boolean transacted, int acknowledgeMode) method are not
+	 * taken into account. Depending on the transaction context in the EJB, the container
+	 * makes its own decisions on these values. See section 17.3.5 of the EJB Spec.
+	 * @param sessionAcknowledgeMode the acknowledgement mode
+	 */
+	public void setSessionAcknowledgeMode(int sessionAcknowledgeMode) {
+		this.sessionAcknowledgeMode = sessionAcknowledgeMode;
+	}
 
-        //all JmsException subclasses are in the same package:
-        String longName =
-            JmsException.class.getPackage().getName() + "." + shortName;
+	/**
+	 * Determine if acknowledgement mode of the JMS session used for sending a message.
+	 * @return The ack mode used for sending a message.
+	 */
+	public int getSessionAcknowledgeMode() {
+		return sessionAcknowledgeMode;
+	}
 
-        try {
-            Class clazz = Class.forName(longName);
-            Constructor ctor =
-                clazz.getConstructor(new Class[] { Throwable.class });
-            Object counterpart = ctor.newInstance(new Object[] { orig });
-            return (JmsException) counterpart;
-        } catch (Exception e) {
-            logger.warn(
-                "No direct translation to runtime equivalent.  Wrapping inside JmsException.");
-            return new JmsException(
-                "No translation to runtime equivalent",
-                orig);
-        }
-    }
+	/**
+	 * Set the transaction mode that is used when creating a JMS session to send a message.
+	 * <p>Note that that inside an EJB the parameters to
+	 * create<Queue|Topic>Session(boolean transacted, int acknowledgeMode) method are not
+	 * taken into account. Depending on the transaction context in the EJB, the container
+	 * makes its own decisions on these values. See section 17.3.5 of the EJB Spec.
+	 * @param sessionTransacted the transaction mode
+	 */
+	public void setSessionTransacted(boolean sessionTransacted) {
+		this.sessionTransacted = sessionTransacted;
+	}
 
-    public Converter getJmsConverter() {
-        return jmsConverter;
-    }
+	/**
+	 * Determine if the JMS session used for sending a message is transacted.
+	 * @return Return true if using a transacted JMS session, false otherwise.
+	 */
+	public boolean isSessionTransacted() {
+		return sessionTransacted;
+	}
 
-    /**
-     * Set the converter to use when using the send methods that take a Object parameter.
-     * @param converter The JMS converter
-     */
-    public void setConverter(Converter converter) {
-        jmsConverter = converter;
-    }
 
-    public void setJndiEnvironment(Properties jndiEnvironment) {
-        getJmsAdmin().setJndiEnvironment(jndiEnvironment);
-    }
+	/**
+	 * Make sure the connection factory has been set.
+	 */
+	public void afterPropertiesSet() {
+		if (this.connectionFactory == null) {
+			throw new IllegalArgumentException("connectionFactory is required");
+		}
+	}
+
+
+	protected void createDefaultJmsAdmin() {
+		DefaultJmsAdmin admin = new DefaultJmsAdmin();
+		admin.setJmsTemplate(this);
+		setJmsAdmin(admin);
+	}
+
+	/**
+	 * Converts the specified checked {@link javax.jms.JMSException JMSException} to
+	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
+	 * equivalent.
+	 * @param task readable text describing the task being attempted
+	 * @param orig The original checked JMSException to wrap
+	 * @return the Spring runtime JmsException wrapping <code>orig</code>.
+	 */
+	public final JmsException convertJMSException(String task, JMSException orig) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Translating JMSException with errorCode '" + orig.getErrorCode() +
+			             "' and message [" + orig.getMessage() + "]; for task [" + task + "]");
+		}
+
+		if (orig instanceof JMSSecurityException) {
+			return new JmsSecurityException((JMSSecurityException) orig);
+		}
+
+		// All other exceptions in our Jms runtime exception hierarchy have the
+		// same unqualified names as their javax.jms counterparts, so just
+		// construct the converted exception dynamically based on name.
+		String shortName = ClassUtils.getShortName(orig.getClass().getName());
+
+		// all JmsException subclasses are in the same package:
+		String longName = JmsException.class.getPackage().getName() + "." + shortName;
+
+		try {
+			Class clazz = Class.forName(longName);
+			Constructor ctor = clazz.getConstructor(new Class[]{Throwable.class});
+			Object counterpart = ctor.newInstance(new Object[]{orig});
+			return (JmsException) counterpart;
+		}
+		catch (Exception ex) {
+			logger.info("No direct translation to runtime equivalent - rethrowing as JmsException", ex);
+			return new JmsException("No translation to runtime equivalent", orig);
+		}
+	}
 
 }

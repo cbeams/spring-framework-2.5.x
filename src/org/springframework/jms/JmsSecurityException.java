@@ -16,65 +16,15 @@
 
 package org.springframework.jms;
 
-
 /**
- * Spring Framework runtime exception mirroring the JMS
- * {@link javax.jms.JMSSecurityException}.  This exception is thrown when
- * encountering its JMS counterpart so that Spring Runtime exception
- * behavior is maintained.
- *
- * @see javax.jms.JMSSecurityException
- * 
+ * Runtime exception mirroring the JMS JMSSecurityException.
  * @author Les Hazlewood
- *
+ * @see javax.jms.JMSSecurityException
  */
 public class JmsSecurityException extends JmsException {
 
-    /**
-     * Simple constructor allowing a message that explains the nature of the
-     * exception.
-     *
-     * @param s The message that explains the purpose of the exception.
-     */
-    public JmsSecurityException( String s ) {
-        super( s );
-    }
-
-
-    /**
-     * Constructor allowing initialization with a message and a cause.
-     *
-     * @param s  he message that explains the purpose of the exception.
-     * @param ex The cause of the exception
-     */
-    public JmsSecurityException( String s, Throwable ex ) {
-        super( s, ex );
-    }
-
-
-    /**
-     * Constructor allowing initialization with a cause.  This constructor is
-     * generally provided as a means for wrapping the actual JMS checked
-     * exception (e.g {@link javax.jms.JMSSecurityException}) that triggered
-     * this exception.
-     *
-     * @param cause the cause of this exception
-     */
-    public JmsSecurityException( Throwable cause ) {
-        super( cause );
-    }
+	public JmsSecurityException(javax.jms.JMSSecurityException cause) {
+		super(cause);
+	}
 
 }
-
-
-/*
- * Modification history:
- *
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2004/07/08 13:09:32  markpollack
- * initial import from sandbox
- *
- * Revision 1.1  2004/07/01 18:12:38  markpollack
- * rework QOS support, add Les's ExceptionConversion, add defaultDestination, add ProducerCallback support.
- *
- */

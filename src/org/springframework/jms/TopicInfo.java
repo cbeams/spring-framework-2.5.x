@@ -22,8 +22,7 @@ package org.springframework.jms;
  */
 public class TopicInfo extends DestinationInfo {
 
-	public TopicInfo(String name)
-	{
+	public TopicInfo(String name) {
 		setName(name);
 	}
 }

@@ -34,119 +34,122 @@ import javax.jms.Topic;
  * @author Mark Pollack
  */
 public class JmsConsumerFactoryBean implements FactoryBean, InitializingBean {
-    protected final Log logger = LogFactory.getLog(getClass());
-    private Destination destination;
-    private MessageConsumer messageConsumer;
-    private MessageListener messageListener;
-    private Session session;
-    private String messageSelector;
-    private Boolean noLocal;
-    private boolean isDurableSubscriber = false;
-    private String durableIdentity;
 
-    /**
-     * Set the JMS destination to consume messages from.
-     * @param d JMS destination.
-     */
-    public void setDestination(Destination d) {
-        destination = d;
-    }
+	protected final Log logger = LogFactory.getLog(getClass());
+	private Destination destination;
+	private MessageConsumer messageConsumer;
+	private MessageListener messageListener;
+	private Session session;
+	private String messageSelector;
+	private Boolean noLocal;
+	private boolean isDurableSubscriber = false;
+	private String durableIdentity;
 
-    public Object getObject() throws Exception {
-        return messageConsumer;
-    }
+	/**
+	 * Set the JMS destination to consume messages from.
+	 * @param d JMS destination.
+	 */
+	public void setDestination(Destination d) {
+		destination = d;
+	}
 
-    public Class getObjectType() {
-        return MessageConsumer.class;
-    }
+	public Object getObject() throws Exception {
+		return messageConsumer;
+	}
 
-    public boolean isSingleton() {
-        return false;
-    }
+	public Class getObjectType() {
+		return MessageConsumer.class;
+	}
 
-    public void afterPropertiesSet() throws Exception {
-        if (session == null) {
-            throw new IllegalArgumentException("Did not set required JMS session property");
-        }
+	public boolean isSingleton() {
+		return false;
+	}
 
-        if (destination == null) {
-            throw new IllegalArgumentException("Did not set required JMS destination property");
-        }
+	public void afterPropertiesSet() throws Exception {
+		if (session == null) {
+			throw new IllegalArgumentException("Did not set required JMS session property");
+		}
 
-        logger.info("Creating JMS Consumer");
+		if (destination == null) {
+			throw new IllegalArgumentException("Did not set required JMS destination property");
+		}
 
-        if (isDurableSubscriber) {
-            if ( ! (destination instanceof Topic))
-            {
-                throw new IllegalArgumentException("Destination must be a topic when creating a durable subscriber");
-            }
-            if (durableIdentity == null)
-            {
-                throw new IllegalArgumentException("DurableIdentity is requred when creating a durable subscriber");
-            }
-            if (noLocal == null) {
-                messageConsumer = 
-                    session.createDurableSubscriber((Topic)destination, durableIdentity);
-            } else {
-                messageConsumer = 
-                    session.createDurableSubscriber((Topic)destination, durableIdentity, messageSelector, noLocal.booleanValue());
-            }
-        } else {
+		logger.info("Creating JMS Consumer");
 
-            if (noLocal == null) {
-                messageConsumer =
-                    session.createConsumer(destination, messageSelector);
-            } else {
-                messageConsumer =
-                    session.createConsumer(
-                        destination,
-                        messageSelector,
-                        noLocal.booleanValue());
-            }
-        }
+		if (isDurableSubscriber) {
+			if (!(destination instanceof Topic)) {
+				throw new IllegalArgumentException("Destination must be a topic when creating a durable subscriber");
+			}
+			if (durableIdentity == null) {
+				throw new IllegalArgumentException("DurableIdentity is requred when creating a durable subscriber");
+			}
+			if (noLocal == null) {
+				messageConsumer =
+				    session.createDurableSubscriber((Topic) destination, durableIdentity);
+			}
+			else {
+				messageConsumer =
+				    session.createDurableSubscriber((Topic) destination, durableIdentity, messageSelector, noLocal.booleanValue());
+			}
+		}
+		else {
 
-        if (messageListener != null) {
-            messageConsumer.setMessageListener(messageListener);
-        }
+			if (noLocal == null) {
+				messageConsumer =
+				    session.createConsumer(destination, messageSelector);
+			}
+			else {
+				messageConsumer =
+				    session.createConsumer(
+				        destination,
+				        messageSelector,
+				        noLocal.booleanValue());
+			}
+		}
 
-    }
-    /**
-     * The message listener to use for asynchronous receiving of messages
-     * @param listener The messgae listener.
-     */
-    public void setMessageListener(MessageListener listener) {
-        messageListener = listener;
-    }
+		if (messageListener != null) {
+			messageConsumer.setMessageListener(messageListener);
+		}
 
-    /**
-     * The message selector to apply to the consumer.
-     * @param s message selector
-     */
-    public void setMessageSelector(String s) {
-        messageSelector = s;
-    }
+	}
 
-    /**
-     * Set the nolocal property, used when creating a consumer.
-     * @param b nolocal property.
-     */
-    public void setNoLocal(boolean b) {
-        noLocal = new Boolean(b);
-    }
+	/**
+	 * The message listener to use for asynchronous receiving of messages
+	 * @param listener The messgae listener.
+	 */
+	public void setMessageListener(MessageListener listener) {
+		messageListener = listener;
+	}
 
-    /**
-     * Set the JMS session used to create the Consumer
-     * @param session JMS Session object
-     */
-    public void setSession(Session session) {
-        this.session = session;
-    }
+	/**
+	 * The message selector to apply to the consumer.
+	 * @param s message selector
+	 */
+	public void setMessageSelector(String s) {
+		messageSelector = s;
+	}
 
-    /**
-     * @param string
-     */
-    public void setDurableIdentity(String string) {
-        durableIdentity = string;
-    }
+	/**
+	 * Set the nolocal property, used when creating a consumer.
+	 * @param b nolocal property.
+	 */
+	public void setNoLocal(boolean b) {
+		noLocal = new Boolean(b);
+	}
+
+	/**
+	 * Set the JMS session used to create the Consumer
+	 * @param session JMS Session object
+	 */
+	public void setSession(Session session) {
+		this.session = session;
+	}
+
+	/**
+	 * @param string
+	 */
+	public void setDurableIdentity(String string) {
+		durableIdentity = string;
+	}
 
 }

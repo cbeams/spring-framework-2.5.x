@@ -28,124 +28,124 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * A connection factory that return the same connection and can optionally 
+ * A connection factory that return the same connection and can optionally
  * ignores calls to close.
- * 
+ *
  * @author Mark Pollack
  */
 public class SingleConnectionFactory11 implements ConnectionFactory {
 
 
-    protected final Log logger = LogFactory.getLog(getClass());
-    
-    //The wrapped connection.
-    private Connection connection;
-    
-    //The providers connection factory.
-    private ConnectionFactory connectionFactory;
-    
-    private boolean suppressClose;
+	protected final Log logger = LogFactory.getLog(getClass());
 
-    /**
-     * Constructor for bean style usage.
-     *
-     */
-    public SingleConnectionFactory11() {
-        
-    }
+	//The wrapped connection.
+	private Connection connection;
 
-    public Connection createConnection() throws JMSException {
-        synchronized (this) {
-            if (this.connection == null) {
-                // no underlying connection -> lazy init via DriverManager
-                init(connectionFactory.createConnection());
-            }
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Returning single connection: " + this.connection);
-        }
-        return this.connection;
-    }
+	//The providers connection factory.
+	private ConnectionFactory connectionFactory;
 
+	private boolean suppressClose;
 
-    public Connection createConnection(String username, String password)
-        throws JMSException {
-            synchronized (this) {
-                if (this.connection == null) {
-                    // no underlying connection -> lazy init via DriverManager
-                    init(connectionFactory.createConnection(username, password));
-                }
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Returning single connection: " + this.connection);
-            }
-            return this.connection;
-    }
-    
-    /**
-     * Initialize the underlying connection.
-     * Wraps the connection with a close-suppressing proxy if necessary.
-     * @param source the JDBC Connection to use
-     */
-    protected void init(Connection source) {
-        this.connection = this.suppressClose ? getCloseSuppressingConnectionProxy(source) : source;
-    }
-    
-    /**
-     * Return if the returned connection will be a close-suppressing proxy
-     * or the physical connection.
-     */
-    public boolean isSuppressClose() {
-        return suppressClose;
-    }
-    
-    /**
-     * Wrap the given Connection with a proxy that delegates every method call to it
-     * but suppresses close calls. This is useful for allowing application code to
-     * handle a special framework Connection just like an ordinary Connection from a
-     * JMS ConnectionFactory
-     * @param source original Connection
-     * @return the wrapped Connection
-     */
-    static Connection getCloseSuppressingConnectionProxy(Connection source) {
-        return (Connection) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                                                   new Class[] {Connection.class},
-                                                   new CloseSuppressingInvocationHandler(source));
-    }
+	/**
+	 * Constructor for bean style usage.
+	 *
+	 */
+	public SingleConnectionFactory11() {
+
+	}
+
+	public Connection createConnection() throws JMSException {
+		synchronized (this) {
+			if (this.connection == null) {
+				// no underlying connection -> lazy init via DriverManager
+				init(connectionFactory.createConnection());
+			}
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Returning single connection: " + this.connection);
+		}
+		return this.connection;
+	}
 
 
-    /**
-     * Invocation handler that suppresses close calls on JDBC Connections.
-     * @see #getCloseSuppressingConnectionProxy
-     */
-    private static class CloseSuppressingInvocationHandler implements InvocationHandler {
+	public Connection createConnection(String username, String password)
+	    throws JMSException {
+		synchronized (this) {
+			if (this.connection == null) {
+				// no underlying connection -> lazy init via DriverManager
+				init(connectionFactory.createConnection(username, password));
+			}
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Returning single connection: " + this.connection);
+		}
+		return this.connection;
+	}
 
-        private final Connection source;
+	/**
+	 * Initialize the underlying connection.
+	 * Wraps the connection with a close-suppressing proxy if necessary.
+	 * @param source the JDBC Connection to use
+	 */
+	protected void init(Connection source) {
+		this.connection = this.suppressClose ? getCloseSuppressingConnectionProxy(source) : source;
+	}
 
-        private CloseSuppressingInvocationHandler(Connection source) {
-            this.source = source;
-        }
+	/**
+	 * Return if the returned connection will be a close-suppressing proxy
+	 * or the physical connection.
+	 */
+	public boolean isSuppressClose() {
+		return suppressClose;
+	}
 
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (method.getName().equals("close")) {
-                // Don't pass the call on
-                return null;
-            }
-            try {
-                return method.invoke(this.source, args);
-            }
-            catch (InvocationTargetException ex) {
-                throw ex.getTargetException();
-            }
-        }
-    }
+	/**
+	 * Wrap the given Connection with a proxy that delegates every method call to it
+	 * but suppresses close calls. This is useful for allowing application code to
+	 * handle a special framework Connection just like an ordinary Connection from a
+	 * JMS ConnectionFactory
+	 * @param source original Connection
+	 * @return the wrapped Connection
+	 */
+	static Connection getCloseSuppressingConnectionProxy(Connection source) {
+		return (Connection) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+		                                           new Class[]{Connection.class},
+		                                           new CloseSuppressingInvocationHandler(source));
+	}
 
 
-    /**
-     * @param factory
-     */
-    public void setConnectionFactory(ConnectionFactory factory) {
-        connectionFactory = factory;
-    }
+	/**
+	 * Invocation handler that suppresses close calls on JDBC Connections.
+	 * @see #getCloseSuppressingConnectionProxy
+	 */
+	private static class CloseSuppressingInvocationHandler implements InvocationHandler {
+
+		private final Connection source;
+
+		private CloseSuppressingInvocationHandler(Connection source) {
+			this.source = source;
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if (method.getName().equals("close")) {
+				// Don't pass the call on
+				return null;
+			}
+			try {
+				return method.invoke(this.source, args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		}
+	}
+
+
+	/**
+	 * @param factory
+	 */
+	public void setConnectionFactory(ConnectionFactory factory) {
+		connectionFactory = factory;
+	}
 
 }

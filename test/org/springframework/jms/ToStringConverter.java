@@ -29,19 +29,17 @@ import org.springframework.jms.converter.Converter;
  */
 public class ToStringConverter implements Converter {
 
-    public Message toMessage(Object object, Session session) {
-        try {
-            return session.createTextMessage(object.toString());
-        } catch (JMSException e) {
-            throw new ConversionException(
-                "Could not convert object to mesage",
-                e);
-        }
-    }
+	public Message toMessage(Object object, Session session) {
+		try {
+			return session.createTextMessage(object.toString());
+		}
+		catch (JMSException ex) {
+			throw new ConversionException("Could not convert object to message", ex);
+		}
+	}
 
-    public Object fromMessage(Message message) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	public Object fromMessage(Message message) {
+		return null;
+	}
 
 }

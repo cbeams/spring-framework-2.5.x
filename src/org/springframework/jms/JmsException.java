@@ -18,33 +18,43 @@ package org.springframework.jms;
 
 import javax.jms.JMSException;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * Exception thrown by the framework whenever it encounters a problem related to JMS.
- *
  * @author Andre Biryukov
  * @author Les Hazlewood
  */
-public class JmsException
-    extends org.springframework.core.NestedRuntimeException {
+public class JmsException extends NestedRuntimeException {
 
-    /**
-     * Constructor for JmsException.
-     *
-     * @param s Custom message string
-     * @param ex Original exception
-     */
-    public JmsException(final String s, final Throwable ex) {
-        super(s, ex);
-    }
+	/**
+	 * Constructor that takes a message.
+	 * @param msg the detail message
+	 */
+	public JmsException(String msg) {
+		super(msg);
+	}
 
-    /**
-     * Constructor for JmsException
-     *
-     * @param s Custom message string.
-     */
-    public JmsException(final String s) {
-        super(s);
-    }
+	/**
+	 * Constructor that allows a message and a root cause.
+	 * @param msg the detail message
+	 * @param cause the cause of the exception. This argument is generally
+	 * expected to be a proper subclass of {@link javax.jms.JMSException},
+	 * but can also be a JNDI NamingException or the like.
+	 */
+	public JmsException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
+
+	/**
+	 * Constructor that allows a plain root cause, intended for
+	 * subclasses mirroring respective javax.jms exceptions.
+	 * @param cause the cause of the exception. This argument is generally
+	 * expected to be a proper subclass of {@link javax.jms.JMSException}.
+	 */
+	protected JmsException(Throwable cause) {
+		this(null, cause);
+	}
 
 	/**
 	 * Convenience method to get the vendor specific error code if
@@ -53,24 +63,13 @@ public class JmsException
 	 * the root cause is an instance of JMSException.  Otherwise return
 	 * text indicating the root cause was not an instance of JMSException.
 	 */
-    public String getErrorCode() {
-        if (getCause() instanceof JMSException) {
-			return ((JMSException)getCause()).getErrorCode();
-        } else {
-        	return "Root cause not a JMSException";
-        }
-    }
-
-    /**
-     * Constructor that allows a nested exception.  This is primarily meant to
-     * be a convenience constructor for subclasses mirroring respective
-     * javax.jms Exceptions.
-     * 
-     * @param cause the cause of the exception.  This argument is generally
-     * expected to be a proper subclass of {@link javax.jms.JMSException}
-     */
-    public JmsException(final Throwable cause) {
-        this(null, cause);
-    }
+	public String getErrorCode() {
+		if (getCause() instanceof JMSException) {
+			return ((JMSException) getCause()).getErrorCode();
+		}
+		else {
+			return "Root cause not a JMSException";
+		}
+	}
 
 }

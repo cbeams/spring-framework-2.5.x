@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.springframework.jms;
 
 import javax.jms.JMSException;
@@ -21,19 +21,19 @@ import javax.jms.Session;
 
 /**
  * Callback interface for JMS code.  To be used with JmsTemplate's execute
- * method, often as an anonymous class within a method implementation. 
- * The typical implementatino will perform multiple operations on the 
- * JMS Session 
+ * method, often as an anonymous class within a method implementation.
+ * The typical implementatino will perform multiple operations on the
+ * JMS Session
  *
  * @author Mark Pollack
  */
-public interface SessionCallback
-{
-    /**
-     * Execute operations against a JMS session possibly returning a result.
-     * @param session the JMS session
-     * @return The result object from working with the session.
-     * @throws JMSException JMS provider exception.
-     */
-    Object doInJms(Session session) throws JMSException;
+public interface SessionCallback {
+
+	/**
+	 * Execute operations against a JMS session possibly returning a result.
+	 * @param session the JMS session
+	 * @return The result object from working with the session.
+	 * @throws JMSException JMS provider exception.
+	 */
+	Object doInJms(Session session) throws JMSException;
 }

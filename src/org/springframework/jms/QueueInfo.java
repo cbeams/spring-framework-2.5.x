@@ -22,8 +22,7 @@ package org.springframework.jms;
  */
 public class QueueInfo extends DestinationInfo {
 
-	public QueueInfo(String name)
-	{
+	public QueueInfo(String name) {
 		setName(name);
 	}
 }

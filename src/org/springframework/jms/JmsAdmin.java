@@ -25,64 +25,64 @@ import javax.naming.NamingException;
 
 /**
  * Provides common administration tasks.  Currenlty for centralizing
- * lookups of destinations and creation of dymamic queues.  
+ * lookups of destinations and creation of dymamic queues.
  * Create a vendor specific implementation for you needs if the
  * supplied DefaultJmsAdmin is not sufficient.
- * 
+ *
  * @author Mark Pollack
  */
 public interface JmsAdmin {
 
 	/**
-	 * Create a dynamic JMS queue.  
+	 * Create a dynamic JMS queue.
 	 * @param queueInfo description of the queue to create
 	 * @return description of the queue after creation.
 	 */
 	QueueInfo createQueue(QueueInfo queueInfo);
-	
+
 	/**
 	 * Create a dynamic JMS topic
 	 * @param topicInfo description of the topic to crate.
 	 * @return description of the topic after creation.
 	 */
 	TopicInfo createTopic(TopicInfo topicInfo);
-	
+
 	/**
 	 * Lookup JMS destinations.  If createDynamic is enabled, then
 	 * the lookup will go against a cache of dynamic destination.  The
 	 * last parameter determines what JMS destination type will be
-	 * created.  
+	 * created.
 	 *
 	 * @param destinationName The name of a dynamic destination.
 	 * @param createDynamic If true, create a dynamic destination if not
 	 * found in JNDI.
 	 * @param isPubSubDomain if true, create a Topic for a dynamic destination,
-	 * otherwise create a Queue (point-to-point)   
+	 * otherwise create a Queue (point-to-point)
 	 * @return The JMS destination object.  Null if not found.
 	 */
 	Destination lookup(String destinationName, boolean createDynamic, boolean isPubSubDomain);
-	
+
 	/**
 	 * Perform a JNDI lookup of a JMS destination.
 	 * @param destinationName
-	 * @return The JMS destination object.  
+	 * @return The JMS destination object.
 	 */
 	Destination lookup(String destinationName) throws NamingException;
-	
+
 	/**
-	 * Lookup topics that have been created with JmsAdmin 
+	 * Lookup topics that have been created with JmsAdmin
 	 * @param topicName The name of a dynamic topic
 	 * @return The JMS Topic.  Null if not found.
 	 */
 	Topic lookupDynamicTopic(String topicName);
-	
+
 	/**
 	 * Lookup dynamic queues that have been created with JmsAdmin
 	 * @param queueName The name of a dynamic queue.
 	 * @return the JMS Queue.  Null if not found.
 	 */
 	Queue lookupDynamicQueue(String queueName);
-	
+
 	/**
 	 * Set the JNDI environment to configure the lookup of JNDI
 	 * resources.
@@ -90,6 +90,5 @@ public interface JmsAdmin {
 	 */
 	void setJndiEnvironment(Properties jndiEnvironment);
 
-	
-	
+
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.springframework.jms;
 
 import javax.jms.JMSException;
@@ -23,21 +23,20 @@ import javax.jms.Message;
 /**
  * To be used with JmsTemplate's send method that convert an object to a message.
  * It allows for futher modification of the message after it has been processed
- * by the converter. This is useful for setting of JMS Header and Properties  
- * This often as an anonymous class within a method implementation.  
+ * by the converter. This is useful for setting of JMS Header and Properties
+ * This often as an anonymous class within a method implementation.
  *
  * @author Mark Pollack
  */
-public interface MessagePostProcessor
-{
+public interface MessagePostProcessor {
 
-    /**
-     * Apply a MessagePostProcessor to the message.  The returned message is
-     * typically a modified version of the original
-     * @param message The JMS message from the Converter
-     * @return a modified version of the Message.
-     * @throws JMSException an error occurs modifying the message.
-     */
-    Message postProcess(Message message) throws JMSException;
-    
+	/**
+	 * Apply a MessagePostProcessor to the message.  The returned message is
+	 * typically a modified version of the original
+	 * @param message The JMS message from the Converter
+	 * @return a modified version of the Message.
+	 * @throws JMSException an error occurs modifying the message.
+	 */
+	Message postProcess(Message message) throws JMSException;
+
 }

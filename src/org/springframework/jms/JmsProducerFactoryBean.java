@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.springframework.jms;
 
 import javax.jms.Destination;
@@ -23,140 +23,125 @@ import javax.jms.Session;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Create a JMS Producer from a Session.  It is creates non-singleton/prototype bean.
  * Requires a JMS 1.1 provider.
- * 
+ *
  * @author Mark Pollack
  */
 public class JmsProducerFactoryBean
-    implements FactoryBean, InitializingBean
-{
+    implements FactoryBean, InitializingBean {
 
-    private MessageProducer messageProducer;
-    
-    private Session session;
-    
-    private Destination destination;
-    
-    private int deliveryMode = Message.DEFAULT_DELIVERY_MODE;
-    
-    private int priority = Message.DEFAULT_PRIORITY;
-    
-    private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
-    
-    private boolean disableMessageTimestamp = false;
+	private MessageProducer messageProducer;
 
-    private boolean disableMessageID = false;
-    
-    
-    protected final Log logger = LogFactory.getLog(getClass());
-    
-    public Object getObject() throws Exception
-    {
-        return messageProducer;
-    }
+	private Session session;
 
-    public Class getObjectType()
-    {
-        return MessageProducer.class;
-    }
+	private Destination destination;
 
-    public boolean isSingleton()
-    {
-        return false;
-    }
+	private int deliveryMode = Message.DEFAULT_DELIVERY_MODE;
+
+	private int priority = Message.DEFAULT_PRIORITY;
+
+	private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
+
+	private boolean disableMessageTimestamp = false;
+
+	private boolean disableMessageID = false;
 
 
-    public void afterPropertiesSet() throws Exception
-    {    
-        if (session == null){
-            throw new IllegalArgumentException("Did not set required JMS session property");        
-        }
-        logger.info("Creating JMS Producer");
+	protected final Log logger = LogFactory.getLog(getClass());
 
-        if (destination != null)
-        {
-            messageProducer = session.createProducer(destination);
-        } else
-        {
-            logger.info("Creating a MessageProducer without a destination.  Just specify destination on each " +                "send operation.");
-            messageProducer = session.createProducer(null);
-        }
-  
-        messageProducer.setDeliveryMode(deliveryMode);
-        messageProducer.setPriority(priority);
-        messageProducer.setTimeToLive(timeToLive);
-        messageProducer.setDisableMessageID(disableMessageID);
-        messageProducer.setDisableMessageTimestamp(disableMessageTimestamp);
-        
-        
-     
-    }
+	public Object getObject() throws Exception {
+		return messageProducer;
+	}
+
+	public Class getObjectType() {
+		return MessageProducer.class;
+	}
+
+	public boolean isSingleton() {
+		return false;
+	}
 
 
-    /**
-     * Set the delivery mode for the MessageProducer being created.
-     * @param i
-     */
-    public void setDeliveryMode(int i)
-    {
-        deliveryMode = i;
-    }
+	public void afterPropertiesSet() throws Exception {
+		if (session == null) {
+			throw new IllegalArgumentException("Did not set required JMS session property");
+		}
+		logger.info("Creating JMS Producer");
 
-    /**
-     * @param i
-     */
-    public void setPriority(int i)
-    {
-        priority = i;
-    }
+		if (destination != null) {
+			messageProducer = session.createProducer(destination);
+		}
+		else {
+			logger.info("Creating a MessageProducer without a destination.  Just specify destination on each " +
+			            "send operation.");
+			messageProducer = session.createProducer(null);
+		}
 
-    /**
-     * @param l
-     */
-    public void setTimeToLive(long l)
-    {
-        timeToLive = l;
-    }
-
-    /**
-     * @param s
-     */
-    public void setSession(Session s)
-    {
-        session = s;
-    }
-
-    /**
-     * @param b
-     */
-    public void setDisableMessageID(boolean b)
-    {
-        disableMessageID = b;
-    }
-
-    /**
-     * @param b
-     */
-    public void setDisableMessageTimestamp(boolean b)
-    {
-        disableMessageTimestamp = b;
-    }
-
-    /**
-     * @param d
-     */
-    public void setDestination(Destination d)
-    {
-        destination = d;
-    }
+		messageProducer.setDeliveryMode(deliveryMode);
+		messageProducer.setPriority(priority);
+		messageProducer.setTimeToLive(timeToLive);
+		messageProducer.setDisableMessageID(disableMessageID);
+		messageProducer.setDisableMessageTimestamp(disableMessageTimestamp);
 
 
+	}
 
+
+	/**
+	 * Set the delivery mode for the MessageProducer being created.
+	 * @param i
+	 */
+	public void setDeliveryMode(int i) {
+		deliveryMode = i;
+	}
+
+	/**
+	 * @param i
+	 */
+	public void setPriority(int i) {
+		priority = i;
+	}
+
+	/**
+	 * @param l
+	 */
+	public void setTimeToLive(long l) {
+		timeToLive = l;
+	}
+
+	/**
+	 * @param s
+	 */
+	public void setSession(Session s) {
+		session = s;
+	}
+
+	/**
+	 * @param b
+	 */
+	public void setDisableMessageID(boolean b) {
+		disableMessageID = b;
+	}
+
+	/**
+	 * @param b
+	 */
+	public void setDisableMessageTimestamp(boolean b) {
+		disableMessageTimestamp = b;
+	}
+
+	/**
+	 * @param d
+	 */
+	public void setDestination(Destination d) {
+		destination = d;
+	}
 
 
 }

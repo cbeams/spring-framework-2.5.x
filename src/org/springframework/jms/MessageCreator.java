@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.springframework.jms;
 
 import javax.jms.JMSException;
@@ -23,16 +23,16 @@ import javax.jms.Session;
 /**
  * The callback interface used by JmsTemplate.
  * This interface creates a JMS message given a session, provided
- * by the JmsTemplate.  
+ * by the JmsTemplate.
  *
  * <p>Implementations <i>do not</i> need to concern themselves with
- * checked JMSException (from javax.jms) that may be thrown from 
- * operations they attempt.  The JmsTemplate will catch and handle 
+ * checked JMSException (from javax.jms) that may be thrown from
+ * operations they attempt.  The JmsTemplate will catch and handle
  * these JMSExceptions appropriately.
  *
  * If extra parameters need to be set, such as the delivery mode, priority or time
  * to live, override any of the getters with your own implementation.
- * 
+ *
  * @author Mark Pollack
  */
 public interface MessageCreator {
