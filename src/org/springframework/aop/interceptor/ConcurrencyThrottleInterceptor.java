@@ -16,6 +16,8 @@
 
 package org.springframework.aop.interceptor;
 
+import java.io.Serializable;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -33,9 +35,12 @@ import org.apache.commons.logging.LogFactory;
  * @author Juergen Hoeller
  * @since 11.02.2004
  */
-public class ConcurrencyThrottleInterceptor implements MethodInterceptor {
+public class ConcurrencyThrottleInterceptor implements MethodInterceptor, Serializable {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Static to avoid serializing the logger
+	 */
+	protected static final Log logger = LogFactory.getLog(ConcurrencyThrottleInterceptor.class);
 
 	private int concurrencyLimit = 1;
 

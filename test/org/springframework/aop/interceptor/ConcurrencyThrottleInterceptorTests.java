@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Juergen Hoeller
@@ -19,6 +20,11 @@ public class ConcurrencyThrottleInterceptorTests extends TestCase {
 	public static final int NR_OF_THREADS = 100;
 
 	public static final int NR_OF_ITERATIONS = 1000;
+	
+	public void testSerializable() throws Exception {
+		ConcurrencyThrottleInterceptor cti = new ConcurrencyThrottleInterceptor();
+		SerializationTestUtils.testSerialization(cti);
+	}
 
 	public void testMultipleThreadsWithLimit1() {
 		testMultipleThreads(1);

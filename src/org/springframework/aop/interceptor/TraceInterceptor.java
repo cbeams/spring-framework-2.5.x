@@ -9,6 +9,8 @@
 
 package org.springframework.aop.interceptor;
 
+import java.io.Serializable;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -19,11 +21,14 @@ import org.apache.commons.logging.LogFactory;
  * intercepted method invocations with method entry and method exit info using Commons Logging at DEBUG level. *
  * 
  * @author Dmitriy Kopylenko
- * @version $Id: TraceInterceptor.java,v 1.3 2004-07-12 15:23:02 dkopylenko Exp $
+ * @version $Id: TraceInterceptor.java,v 1.4 2004-07-24 18:56:51 johnsonr Exp $
  */
-public class TraceInterceptor implements MethodInterceptor {
+public class TraceInterceptor implements MethodInterceptor, Serializable {
 
-    protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Static to avoid serializing the logger
+	 */
+	protected static final Log logger = LogFactory.getLog(TraceInterceptor.class);
 
     /**
      * @see org.aopalliance.intercept.MethodInterceptor#invoke(MethodInvocation)
