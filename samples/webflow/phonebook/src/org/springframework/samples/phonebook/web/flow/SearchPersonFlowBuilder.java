@@ -9,13 +9,12 @@ import org.springframework.web.flow.config.FlowBuilderException;
 /**
  * @author Keith Donald
  */
-public class DetailFlowBuilder extends AbstractFlowBuilder {
+public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
 	protected String flowId() {
-		return null;
+		return "person.Search";
 	}
 
 	public void buildStates() throws FlowBuilderException {
 	}
-
 }

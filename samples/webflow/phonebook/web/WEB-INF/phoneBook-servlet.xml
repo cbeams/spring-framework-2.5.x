@@ -27,12 +27,11 @@
 		<property name="formObjectName"><value>query</value></property>
 		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.PhoneBookQuery</value></property>
 		<property name="validator">
-			<bean id="queryValidator" class="org.springframework.samples.phonebook.web.flow.PhoneBookQueryValidator">
-			</bean>
+			<bean id="queryValidator" class="org.springframework.samples.phonebook.domain.PhoneBookQueryValidator"/>
 		</property>
 	</bean>
 
-	<bean id="person.Search.query" class="org.springframework.samples.phonebook.web.flow.QueryAction">
+	<bean id="person.Search.query" class="org.springframework.samples.phonebook.web.flow.action.QueryAction">
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
@@ -59,12 +58,14 @@
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource"><value>/WEB-INF/detail-flow.xml</value></property>
+				<property name="resource">
+					<value>/WEB-INF/detail-flow.xml</value>
+				</property>
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.GetPersonAction">
+	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction">
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
