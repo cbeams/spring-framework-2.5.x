@@ -260,7 +260,7 @@ public class ActionState extends TransitionableState {
 	 * Returns the logical name associated with an action instance executed by
 	 * this action state.
 	 * @param action The action for which the name should be looked up
-	 * @return The name of given action or <code>null</code> O if the action
+	 * @return The name of given action or <code>null</code> if the action
 	 *         does not have a name
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
