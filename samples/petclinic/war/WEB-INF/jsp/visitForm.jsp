@@ -35,7 +35,7 @@
     <FONT color="red">
       <B><c:out value="${status.errorMessage}"/></B>
     </FONT>
-    <BR><TEXTAREA rows="10" cols="25" name="description" value="<c:out value="${status.value}"/>" ></TEXTAREA>
+    <BR><TEXTAREA rows="10" cols="25" name="description"><c:out value="${status.value}"/></TEXTAREA>
   </spring:bind>
   <P>
   <INPUT type="hidden" name="petId" value="<c:out value="${command.pet.id}"/>"/>
