@@ -761,7 +761,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	protected void fireStarted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow started event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+			logger.debug("Publishing flow started event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
 		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
@@ -779,7 +779,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	protected void fireEventSignaled(final String eventId, final TransitionableState fromState,
 			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow event signaled event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+			logger.debug("Publishing flow event signaled event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
 		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
@@ -797,7 +797,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	protected void fireEventProcessed(final String eventId, final TransitionableState fromState,
 			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow event processed event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+			logger.debug("Publishing flow event processed event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
 		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
@@ -815,7 +815,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	protected void fireStateTransitioned(final AbstractState oldState, final AbstractState newState,
 			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow state transitioned event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+			logger.debug("Publishing flow state transitioned event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
 		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
@@ -833,7 +833,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	protected void fireEnded(final FlowSession endingFlowSession, final FlowSessionExecution sessionExecution,
 			final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow ended event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+			logger.debug("Publishing flow ended event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
 		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
