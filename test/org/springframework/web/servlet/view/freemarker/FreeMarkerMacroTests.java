@@ -155,16 +155,16 @@ public class FreeMarkerMacroTests extends TestCase {
 			if (tokens[i].equals("MESSAGE")) assertEquals("Howdy Mundo", tokens[i + 1]);
 			if (tokens[i].equals("DEFAULTMESSAGE")) assertEquals("hi planet", tokens[i + 1]);
 			if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i + 1]);
-			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\"", tokens[i+1]);
-			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" class=\"myCssClass\"", tokens[i+1]);
+			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" class=\"myCssClass\"", tokens[i + 1]);
 			if (tokens[i].equals("FORM3")) assertEquals("<textarea name=\"name\" >Darren</textarea>", tokens[i + 1]);
 			if (tokens[i].equals("FORM4")) assertEquals("<textarea name=\"name\" rows=10 cols=30>Darren</textarea>", tokens[i + 1]);
 			//TODO verify remaining output (fix whitespace)
-            if (tokens[i].equals("FORM9")) assertEquals("<input type=\"password\" name=\"name\" value=\"\"", tokens[i+1]);
-            if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" name=\"name\" value=\"Darren\"", tokens[i+1]);
-            if (tokens[i].equals("FORM11")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\"", tokens[i+1]);
-            if (tokens[i].equals("FORM12")) assertEquals("<input type=\"hidden\" name=\"name\" value=\"Darren\"", tokens[i+1]);
-            if (tokens[i].equals("FORM13")) assertEquals("<input type=\"password\" name=\"name\" value=\"\"", tokens[i+1]);
+			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"password\" name=\"name\" value=\"\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM11")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM12")) assertEquals("<input type=\"hidden\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM13")) assertEquals("<input type=\"password\" name=\"name\" value=\"\"", tokens[i + 1]);
 		}
 	}
 
