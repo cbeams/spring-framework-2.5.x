@@ -47,6 +47,8 @@ import org.springframework.context.support.StaticMessageSource;
  */
 public class AutoProxyCreatorTests extends TestCase {
 
+	private static final String TEST_INTERCEPTOR_FOR_CREATOR_BEAN_NAME = "testInterceptorForCreator";
+	
 	protected StaticApplicationContext sac;
 
 	protected void setUp() throws Exception {
@@ -75,12 +77,12 @@ public class AutoProxyCreatorTests extends TestCase {
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("autoProxyTest", bd);
 
 		sac.registerSingleton("autoProxyTest2", IndexedTestBean.class, new MutablePropertyValues());
-		sac.registerSingleton("testInterceptorForCreator", TestInterceptor.class, new MutablePropertyValues());
+		sac.registerSingleton(TEST_INTERCEPTOR_FOR_CREATOR_BEAN_NAME, TestInterceptor.class, new MutablePropertyValues());
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("beanNames", "autoProxyTest,autoProxyTest2,prototypeFac*,innerBean");
 		List interceptors = new LinkedList();
-		interceptors.add("testInterceptorForCreator");
+		interceptors.add(TEST_INTERCEPTOR_FOR_CREATOR_BEAN_NAME);
 		pvs.addPropertyValue("interceptorNames", interceptors);
 		sac.registerSingleton("beanNameAutoProxyCreator", BeanNameAutoProxyCreator.class, pvs);
 
@@ -119,7 +121,7 @@ public class AutoProxyCreatorTests extends TestCase {
 		aca.getApplicationContext();
 		ACATest acaPr = (ACATest) sac.getBean("aca-prototype");
 		acaPr.getApplicationContext();
-		TestInterceptor ti = (TestInterceptor) sac.getBean("testInterceptorForCreator");
+		TestInterceptor ti = (TestInterceptor) sac.getBean(TEST_INTERCEPTOR_FOR_CREATOR_BEAN_NAME);
 		assertEquals(11, ti.nrOfInvocations);
 		TestAutoProxyCreator tapc = (TestAutoProxyCreator) sac.getBean("testAutoProxyCreator");
 		assertEquals(3, tapc.testInterceptor.nrOfInvocations);
@@ -149,6 +151,9 @@ public class AutoProxyCreatorTests extends TestCase {
 	}
 
 
+	/**
+	 * Interceptor that counts the number of non-finalize method calls.
+	 */
 	public static class TestInterceptor implements MethodInterceptor {
 
 		public int nrOfInvocations = 0;
