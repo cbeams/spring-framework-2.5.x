@@ -1,6 +1,7 @@
 
 package org.springframework.aop.framework.support;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.1 2003-10-13 16:06:07 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.2 2003-10-13 16:51:35 johnsonr Exp $
  */
 public class AopUtils {
 
@@ -40,6 +41,31 @@ public class AopUtils {
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
+	}
+	
+	/**
+	 * Is the given method declared on one of these interfaces?
+	 * @param m method to check
+	 * @param interfaces array of interfaces we want to check
+	 * @return whether the method is declared on one of these interfaces
+	 */
+	public static boolean methodIsOnOneOfTheseInterfaces(Method m, Class[] interfaces) {
+		if (interfaces == null)
+			return false;
+			
+		for (int i = 0; i < interfaces.length; i++) {
+			if (!interfaces[i].isInterface())
+				throw new IllegalArgumentException(interfaces[i].getName() + " is not an interface");
+			// TODO check that the method with this name actually comes from the interface?
+			try {
+				interfaces[i].getDeclaredMethod(m.getName(), m.getParameterTypes());
+				return true;
+			}
+			catch (NoSuchMethodException ex) {
+				// Didn't find it...keep going
+			}
+		}	// for
+		return false;
 	}
 
 }
