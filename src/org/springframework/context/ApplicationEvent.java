@@ -27,7 +27,7 @@ import java.util.EventObject;
 public abstract class ApplicationEvent extends EventObject {
 
 	/** System time when the event happened */
-	private long timestamp;
+	private final long timestamp;
 
 	/**
 	 * Creates a new ApplicationEvent.
@@ -35,12 +35,11 @@ public abstract class ApplicationEvent extends EventObject {
 	 */
 	public ApplicationEvent(Object source) {
 		super(source);
-		timestamp = System.currentTimeMillis();
+		this.timestamp = System.currentTimeMillis();
 	}
 
 	/**
 	 * Return the system time in milliseconds when the event happened.
-	 * @return the system time in milliseconds when the event happened
 	 */
 	public long getTimestamp() {
 		return timestamp;

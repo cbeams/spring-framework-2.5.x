@@ -26,14 +26,14 @@ import org.springframework.context.ApplicationListener;
 public interface ApplicationEventMulticaster extends ApplicationListener {
 
 	/**
-	 * Add a listener to be notified of all events
-	 * @param listener listener to add
+	 * Add a listener to be notified of all events.
+	 * @param listener the listener to add
 	 */
 	void addApplicationListener(ApplicationListener listener);
 
 	/**
-	 * Remove a listener in the notification list]
-	 * @param listener listener to remove
+	 * Remove a listener from the notification list.
+	 * @param listener the listener to remove
 	 */
 	void removeApplicationListener(ApplicationListener listener);
 
@@ -45,4 +45,3 @@ public interface ApplicationEventMulticaster extends ApplicationListener {
 	void removeAllListeners();
 
 }
-

@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.context.event;
 
@@ -24,8 +24,10 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
 /**
- * Concrete implementation of ApplicationEventMulticaster
- * Doesn't permit multiple instances of the same listener.
+ * Simple implementation of the ApplicationEventMulticaster interface.
+ *
+ * <p>Doesn't permit multiple instances of the same listener, as it keeps
+ * listeners in a HashSet.
  *
  * <p>Note that this class doesn't try to do anything clever to ensure thread
  * safety if listeners are added or removed at runtime. A technique such as
@@ -39,30 +41,31 @@ import org.springframework.context.ApplicationListener;
  * <p>An alternative implementation could be more sophisticated in both these respects.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class ApplicationEventMulticasterImpl implements ApplicationEventMulticaster {
 
 	/** Set of listeners */
-	private Set eventListeners = new HashSet();
+	private final Set applicationListeners = new HashSet();
 
-	public void addApplicationListener(ApplicationListener l) {
-		eventListeners.add(l);
+	public void addApplicationListener(ApplicationListener listener) {
+		this.applicationListeners.add(listener);
 	}
 
-	public void removeApplicationListener(ApplicationListener l) {
-		eventListeners.remove(l);
+	public void removeApplicationListener(ApplicationListener listener) {
+		this.applicationListeners.remove(listener);
 	}
 
-	public void onApplicationEvent(ApplicationEvent e) {
-		Iterator i = eventListeners.iterator();
-		while (i.hasNext()) {
-			ApplicationListener l = (ApplicationListener) i.next();
-			l.onApplicationEvent(e);
+	public void onApplicationEvent(ApplicationEvent event) {
+		Iterator it = this.applicationListeners.iterator();
+		while (it.hasNext()) {
+			ApplicationListener listener = (ApplicationListener) it.next();
+			listener.onApplicationEvent(event);
 		}
 	}
 
 	public void removeAllListeners() {
-		eventListeners.clear();
+		this.applicationListeners.clear();
 	}
 
 }

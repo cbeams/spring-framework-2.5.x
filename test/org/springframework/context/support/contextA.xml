@@ -4,42 +4,39 @@
 <beans>
 
 	<bean name="service" class="org.springframework.context.support.Service"/>
-	
+
 	<bean name="assemblerOne" class="org.springframework.context.support.Assembler">
 		<property name="service"><ref bean="service"/></property>
 		<property name="logic"><ref bean="logicOne"/></property>
 	</bean>
-	
+
 	<bean name="assemblerTwo" class="org.springframework.context.support.Assembler">
 		<property name="service"><ref bean="service"/></property>
 		<property name="logic"><ref bean="logicTwo"/></property>
-	</bean>	
-	
-    <bean name="transactionManager" class="org.springframework.transaction.CountingTxManager">
-    </bean>
-	
-    <bean name="wrappedAssemblerOne" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-    	<property name="transactionManager"><ref bean="transactionManager"/></property>
-        <property name="target"><ref bean="assemblerOne"/></property>
-        <property name="proxyTargetClass"><value>true</value></property>
-        <property name="transactionAttributes">
-            <props>
-                <prop key="test">PROPAGATION_REQUIRED</prop>
-            </props>
-        </property>
-    </bean>
-    
-    <bean name="wrappedAssemblerTwo" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-    	<property name="transactionManager"><ref bean="transactionManager"/></property>
-        <property name="target"><ref bean="assemblerTwo"/></property>
-        <property name="proxyTargetClass"><value>true</value></property>
-        <property name="transactionAttributes">
-            <props>
-                <prop key="test">PROPAGATION_REQUIRED</prop>
-            </props>
-        </property>
-    </bean>
+	</bean>
 
+	<bean name="transactionManager" class="org.springframework.transaction.CountingTxManager"/>
 
+	<bean name="wrappedAssemblerOne" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref bean="transactionManager"/></property>
+			<property name="target"><ref bean="assemblerOne"/></property>
+			<property name="proxyTargetClass"><value>true</value></property>
+			<property name="transactionAttributes">
+				<props>
+					<prop key="test">PROPAGATION_REQUIRED</prop>
+				</props>
+			</property>
+	</bean>
+
+	<bean name="wrappedAssemblerTwo" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref bean="transactionManager"/></property>
+			<property name="target"><ref bean="assemblerTwo"/></property>
+			<property name="proxyTargetClass"><value>true</value></property>
+			<property name="transactionAttributes">
+				<props>
+					<prop key="test">PROPAGATION_REQUIRED</prop>
+				</props>
+			</property>
+	</bean>
 
 </beans>

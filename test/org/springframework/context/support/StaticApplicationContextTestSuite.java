@@ -32,7 +32,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.26 2004-03-18 03:01:15 trisberg Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.27 2004-05-29 21:27:12 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -41,25 +41,25 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 	/** Run for each test */
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
-		parent.addListener(parentListener) ;
 		Map m = new HashMap();
 		m.put("name", "Roderick");
 		parent.registerPrototype("rod", TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
 		parent.registerPrototype("father", TestBean.class, new MutablePropertyValues(m));
 		parent.refresh();
+		parent.addListener(parentListener) ;
 
 		StaticMessageSource parentMessageSource = (StaticMessageSource) parent.getBean("messageSource");
 		parentMessageSource.addMessage("code1", Locale.getDefault(), "message1");
 
 		this.sac = new StaticApplicationContext(parent);
-		sac.addListener(listener);
 		sac.registerSingleton("beanThatListens", BeanThatListens.class, new MutablePropertyValues());
 		sac.registerSingleton("aca", ACATest.class, new MutablePropertyValues());
 		sac.registerPrototype("aca-prototype", ACATest.class, new MutablePropertyValues());
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
 		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
 		sac.refresh();
+		sac.addListener(listener);
 
 		StaticMessageSource sacMessageSource = (StaticMessageSource) sac.getBean("messageSource");
 		sacMessageSource.addMessage("code2", Locale.getDefault(), "message2");

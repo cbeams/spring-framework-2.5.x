@@ -78,7 +78,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -98,7 +98,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	// Instance data
 	//---------------------------------------------------------------------
 
-	/** Log4j logger used by this class. Available to subclasses. */
+	/** Logger used by this class. Available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Parent context */
@@ -113,11 +113,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** System time in milliseconds when this context started */
 	private long startupTime;
 
-	/** MessageSource helper we delegate our implementation of this interface to */
+	/** MessageSource we delegate our implementation of this interface to */
 	private MessageSource messageSource;
 
 	/** Helper class used in event publishing */
-	private final ApplicationEventMulticaster eventMulticaster = new ApplicationEventMulticasterImpl();
+	private final ApplicationEventMulticaster applicationEventMulticaster = new ApplicationEventMulticasterImpl();
 
 
 	//---------------------------------------------------------------------
@@ -185,9 +185,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event.toString());
 		}
-		this.eventMulticaster.onApplicationEvent(event);
+		this.applicationEventMulticaster.onApplicationEvent(event);
 		if (this.parent != null) {
-			parent.publishEvent(event);
+			this.parent.publishEvent(event);
 		}
 	}
 
@@ -232,6 +232,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		beanFactory.ignoreDependencyType(ResourceLoader.class);
 		beanFactory.ignoreDependencyType(ApplicationContext.class);
+
+		// allows post-processing of the bean factory in context subclasses
 		postProcessBeanFactory(beanFactory);
 
 		// invoke factory processors registered with the context instance
@@ -332,7 +334,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No MessageSource found for [" + getDisplayName() + "]: using empty StaticMessageSource");
+			logger.info("No MessageSource found for context [" + getDisplayName() + "]: using empty StaticMessageSource");
 			// use empty message source to be able to accept getMessage calls
 			this.messageSource = new StaticMessageSource();
 		}
@@ -359,7 +361,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		for (Iterator it = listeners.iterator(); it.hasNext();) {
 			ApplicationListener listener = (ApplicationListener) it.next();
 			addListener(listener);
-			logger.info("Application listener [" + listener + "] added");
+			if (logger.isInfoEnabled()) {
+				logger.info("Application listener [" + listener + "] added");
+			}
 		}
 	}
 
@@ -369,7 +373,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param listener the listener to register
 	 */
 	protected void addListener(ApplicationListener listener) {
-		this.eventMulticaster.addApplicationListener(listener);
+		this.applicationEventMulticaster.addApplicationListener(listener);
 	}
 
 	/**

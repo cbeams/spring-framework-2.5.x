@@ -199,7 +199,6 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 	/** Run for each test */
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
-		parent.addListener(parentListener);
 
 		Map m = new HashMap();
 		m.put("name", "Roderick");
@@ -210,9 +209,9 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 		                         new MutablePropertyValues(m));
 
 		parent.refresh();
+		parent.addListener(parentListener);
 
 		this.sac = new StaticApplicationContext(parent);
-		sac.addListener(listener);
 
 		sac.registerSingleton("beanThatListens", BeanThatListens.class,
 		                      new MutablePropertyValues());
@@ -226,6 +225,7 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
 		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
 		sac.refresh();
+		sac.addListener(listener);
 
 		StaticMessageSource staticMsgSrc = (StaticMessageSource) sac.getBean(
 		    AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME);
