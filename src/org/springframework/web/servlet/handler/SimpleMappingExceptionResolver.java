@@ -16,10 +16,8 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
@@ -52,7 +50,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
-	private Map exceptionMappings;
+	private Properties exceptionMappings;
 
 	private String defaultErrorView;
 
@@ -72,19 +70,25 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	/**
-	 * Set the mappings between exception class names and view names.
-	 * @param mappings fully qualified exception class names as keys,
-	 * and view names as values
+	 * Set the mappings between exception class names and error view names.
+	 * The exception class name can be a substring, with no wildcard support
+	 * at present. A value of "ServletException" would match
+	 * <code>javax.servlet.ServletException</code> and subclasses, for example.
+	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and whether
+	 * to include package information (which isn't mandatory). For example,
+	 * "Exception" will match nearly anything, and will probably hide other rules.
+	 * "java.lang.Exception" would be correct if "Exception" was meant to define
+	 * a rule for all checked exceptions. With more unusual exception names such
+	 * as "BaseBusinessException" there's no need to use a FQN.
+	 * <p>Follows the same matching algorithm as RuleBasedTransactionAttribute
+	 * and RollbackRuleAttribute.
+	 * @param mappings exception patterns (can also be fully qualified class names)
+	 * as keys, and error view names as values
+	 * @see org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
+	 * @see org.springframework.transaction.interceptor.RollbackRuleAttribute
 	 */
-	public void setExceptionMappings(Properties mappings) throws ClassNotFoundException {
-		this.exceptionMappings = new HashMap(mappings.size());
-		for (Iterator it = mappings.keySet().iterator(); it.hasNext();) {
-			String exceptionClassName = (String) it.next();
-			String viewName = mappings.getProperty(exceptionClassName);
-			Class exceptionClass =
-			    Class.forName(exceptionClassName, true, Thread.currentThread().getContextClassLoader());
-			this.exceptionMappings.put(exceptionClass, viewName);
-		}
+	public void setExceptionMappings(Properties mappings) {
+		this.exceptionMappings = mappings;
 	}
 
 	/**
@@ -101,8 +105,12 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	/**
 	 * Set the list of handlers that this exception resolver should map.
-	 * The exception mappings will only apply to those handlers.
-	 * If none set, the exception mappings will apply to all handlers.
+	 * The exception mappings and the default error view will only apply
+	 * to the specified handlers.
+	 * <p>If no handlers set, both the exception mappings and the default error
+	 * view will apply to all handlers. This means that a specified default
+	 * error view will be used as fallback for all exceptions; any further
+	 * HandlerExceptionResolvers in the chain will be ignored in this case.
 	 */
 	public void setMappedHandlers(List mappedHandlers) {
 		this.mappedHandlers = mappedHandlers;
@@ -136,26 +144,33 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	public ModelAndView resolveException(
 	    HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
+		// Check whether we're supposed to apply to the given handler.
+		if (this.mappedHandlers != null && !this.mappedHandlers.contains(handler)) {
+			return null;
+		}
+
 		String viewName = null;
 
-		// check for specific mappings
-		if (this.exceptionMappings != null &&
-		    (this.mappedHandlers == null || this.mappedHandlers.contains(handler))) {
-			for (Iterator it = this.exceptionMappings.keySet().iterator(); it.hasNext();) {
-				Class exceptionClass = (Class) it.next();
-				if (exceptionClass.isInstance(ex)) {
-					viewName = (String) this.exceptionMappings.get(exceptionClass);
+		// Check for specific exception mappings.
+		if (this.exceptionMappings != null) {
+			int deepest = Integer.MAX_VALUE;
+			for (Enumeration names = this.exceptionMappings.propertyNames(); names.hasMoreElements();) {
+				String exceptionMapping = (String) names.nextElement();
+				int depth = getDepth(exceptionMapping, ex);
+				if (depth >= 0 && depth < deepest) {
+					deepest = depth;
+					viewName = this.exceptionMappings.getProperty(exceptionMapping);
 				}
 			}
 		}
 
-		// return default error view else, if defined
+		// Return default error view else, if defined.
 		if (viewName == null && this.defaultErrorView != null) {
 			viewName = this.defaultErrorView;
 		}
 
 		if (viewName != null) {
-			// apply HTTP status code for error views, if specified
+			// Apply HTTP status code for error views, if specified.
 			if (this.defaultStatusCode != null) {
 				response.setStatus(this.defaultStatusCode.intValue());
 			}
@@ -164,6 +179,29 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		else {
 			return null;
 		}
+	}
+
+	/**
+	 * Return the depth to the superclass matching.
+	 * 0 means ex matches exactly. Returns -1 if there's no match.
+	 * Otherwise, returns depth. Lowest depth wins.
+	 * <p>Follows the same algorithm as RollbackRuleAttribute.
+	 * @see org.springframework.transaction.interceptor.RollbackRuleAttribute
+	 */
+	public int getDepth(String exceptionMapping, Exception ex) {
+		return getDepth(exceptionMapping, ex.getClass(), 0);
+	}
+
+	private int getDepth(String exceptionMapping, Class exceptionClass, int depth) {
+		if (exceptionClass.getName().indexOf(exceptionMapping) != -1) {
+			// Found it!
+			return depth;
+		}
+		// If we've gone as far as we can go and haven't found it...
+		if (exceptionClass.equals(Throwable.class)) {
+			return -1;
+		}
+		return getDepth(exceptionMapping, exceptionClass.getSuperclass(), depth + 1);
 	}
 
 	/**
