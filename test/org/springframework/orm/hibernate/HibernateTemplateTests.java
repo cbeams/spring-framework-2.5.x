@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate;
 
@@ -877,7 +877,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQuery("some query name", "myvalue", Hibernate.STRING);
+		List result = ht.findByNamedQuery("some query name", (Object) "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
 		sfControl.verify();
 		sessionControl.verify();
@@ -965,6 +965,141 @@ public class HibernateTemplateTests extends TestCase {
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
+	}
+
+	public void testFindByNamedQueryWithNamedParameter() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter("myparam", "myvalue");
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name", "myparam", "myvalue");
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithNamedParameterAndType() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter("myparam", "myvalue", Hibernate.STRING);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name", "myparam", "myvalue", Hibernate.STRING);
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithNamedParameters() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter("myparam1", "myvalue1");
+		queryControl.setReturnValue(query, 1);
+		query.setParameter("myparam2", new Integer(2));
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name", new String[] {"myparam1", "myparam2"}, new Object[] {"myvalue1", new Integer(2)});
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithNamedParametersAndTypes() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter("myparam1", "myvalue1", Hibernate.STRING);
+		queryControl.setReturnValue(query, 1);
+		query.setParameter("myparam2", new Integer(2), Hibernate.INTEGER);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name",
+							new String[] {"myparam1", "myparam2"},
+							new Object[] {"myvalue1", new Integer(2)},
+							new Type[] {Hibernate.STRING, Hibernate.INTEGER});
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryAndValueBean() throws HibernateException {

@@ -457,6 +457,65 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
+	public List findByNamedQuery(final String queryName, final String paramName, final Object value)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				queryObject.setParameter(paramName, value);
+				return queryObject.list();
+			}
+		});
+	}
+
+	public List findByNamedQuery(final String queryName, final String paramName, final Object value, final Type type)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				queryObject.setParameter(paramName, value, type);
+				return queryObject.list();
+			}
+		});
+	}
+
+	public List findByNamedQuery(final String queryName, final String[] paramNames, final Object[] values)
+			throws DataAccessException {
+		if (paramNames.length != values.length) {
+			throw new IllegalArgumentException("Length of parmNames array must match length of values array");
+		}
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				for (int i = 0; i < values.length; i++) {
+					Object value = values[i];
+					queryObject.setParameter(paramNames[i], value);
+				}
+				return queryObject.list();
+			}
+		});
+	}
+
+	public List findByNamedQuery(final String queryName, final String[] paramNames, final Object[] values,
+															 final Type[] types) throws DataAccessException {
+		if (paramNames.length != values.length) {
+			throw new IllegalArgumentException("Length of parmNames array must match length of values array");
+		}
+		if (values.length != types.length) {
+			throw new IllegalArgumentException("Length of values array must match length of types array");
+		}
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				for (int i = 0; i < values.length; i++) {
+					Object value = values[i];
+					queryObject.setParameter(paramNames[i], value, types[i]);
+				}
+				return queryObject.list();
+			}
+		});
+	}
+
 	public List findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
 			throws DataAccessException {
 		return executeFind(new HibernateCallback() {

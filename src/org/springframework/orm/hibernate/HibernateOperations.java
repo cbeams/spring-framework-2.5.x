@@ -394,8 +394,69 @@ public interface HibernateOperations {
 			throws DataAccessException;
 
 	/**
+	* Execute a named query for persistent instances, binding
+	* one value to a ":" named parameter in the query string.
+	* A named query is defined in a Hibernate mapping file.
+	* @param queryName the name of a Hibernate query in a mapping file
+	* @param paramName the name of parameter
+	* @param value the value of the parameter
+	* @return a List containing 0 or more persistent instances
+	* @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	* @see net.sf.hibernate.Session#find(String)
+	* @see net.sf.hibernate.Session#getNamedQuery(String)
+	*/
+	List findByNamedQuery(final String queryName, final String paramName, final Object value)
+			throws DataAccessException;
+
+	/**
+	* Execute a named query for persistent instances, binding
+	* one value to a ":" named parameter in the query string.
+	* A named query is defined in a Hibernate mapping file.
+	* @param queryName the name of a Hibernate query in a mapping file
+	* @param paramName the name of the parameter
+	* @param value the value of the parameter
+	* @param type Hibernate type of the parameter
+	* @return a List containing 0 or more persistent instances
+	* @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	* @see net.sf.hibernate.Session#find(String)
+	* @see net.sf.hibernate.Session#getNamedQuery(String)
+	*/
+	List findByNamedQuery(final String queryName, final String paramName, final Object value, final Type type)
+			throws DataAccessException;
+
+	/**
+	* Execute a named query for persistent instances, binding a
+	* number of values to ":" named parameters in the query string.
+	* A named query is defined in a Hibernate mapping file.
+	* @param queryName the name of a Hibernate query in a mapping file
+	* @param paramNames the names of the parameters
+	* @param values the values of the parameters
+	* @return a List containing 0 or more persistent instances
+	* @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	* @see net.sf.hibernate.Session#find(String)
+	* @see net.sf.hibernate.Session#getNamedQuery(String)
+	*/
+	List findByNamedQuery(final String queryName, final String[] paramNames, final Object[] values)
+			throws DataAccessException;
+
+	/**
+	* Execute a named query for persistent instances, binding a
+	* number of values to ":" named parameters in the query string.
+	* A named query is defined in a Hibernate mapping file.
+	* @param queryName the name of a Hibernate query in a mapping file
+	* @param paramNames the names of the parameters
+	* @param values the values of the parameters
+	* @param types Hibernate types of the parameters
+	* @return a List containing 0 or more persistent instances
+	* @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	* @see net.sf.hibernate.Session#find(String)
+	* @see net.sf.hibernate.Session#getNamedQuery(String)
+	*/
+	List findByNamedQuery(final String queryName, final String[] paramNames, final Object[] values, final Type[] types)
+			throws DataAccessException;
+	/**
 	 * Execute a named query for persistent instances, binding the properties
-	 * of the given bean to <i>named</i> parameters in the query string.
+	 * of the given bean to ":" named parameters in the query string.
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param valueBean the values of the parameters
