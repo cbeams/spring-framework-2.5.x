@@ -24,7 +24,7 @@ import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException
  *
  * @author Rod Johnson
  * @author Isabelle Muszynski
- * @version $Id: SqlUpdate.java,v 1.3 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: SqlUpdate.java,v 1.4 2004-01-04 21:33:57 jhoeller Exp $
  */
 public class SqlUpdate extends SqlOperation {
 
@@ -122,18 +122,17 @@ public class SqlUpdate extends SqlOperation {
 	public int update(Object[] args) throws InvalidDataAccessApiUsageException {
 		validateParameters(args);
 
-		//PreparedStatementCreator psc = new DefaultPreparedStatementCreator(getSql(), getDeclaredParameters(), args);
 		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args));
 		logger.debug("Executing update statement: " + getSql());
 
-		if (maxRowsAffected != 0 && rowsAffected > maxRowsAffected) {
-			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(getSql(), maxRowsAffected, rowsAffected);
+		if (this.maxRowsAffected != 0 && rowsAffected > this.maxRowsAffected) {
+			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(getSql(), this.maxRowsAffected, rowsAffected);
 		}
-		if (requiredRowsAffected != 0 && rowsAffected != requiredRowsAffected) {
-			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(getSql(), requiredRowsAffected, rowsAffected);
+		if (this.requiredRowsAffected != 0 && rowsAffected != this.requiredRowsAffected) {
+			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(getSql(), this.requiredRowsAffected, rowsAffected);
 		}
 
-		logger.info(rowsAffected + " rows affected by SQL update [" + getSql() + "]");
+		logger.debug(rowsAffected + " rows affected by SQL update [" + getSql() + "]");
 		return rowsAffected;
 	}
 
