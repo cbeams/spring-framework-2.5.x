@@ -25,8 +25,8 @@ import org.springframework.web.flow.Flow;
  * built in Java code, or a generic flow builder strategy, like the
  * <code>XmlFlowBuilder</code>, for building flows from an XML-definition.
  * <p>
- * Flow builders are executed by the FlowFactoryBean, which acts as an assembler
- * (director). This is the classic GoF Builder pattern.
+ * Flow builders are executed by the <code>FlowFactoryBean</code>, which acts
+ * as an assembler (director). This is the classic GoF Builder pattern.
  * 
  * @see org.springframework.web.flow.config.AbstractFlowBuilder
  * @see org.springframework.web.flow.config.XmlFlowBuilder
@@ -73,4 +73,10 @@ public interface FlowBuilder {
 	 */
 	public Flow getResult();
 
+	/**
+	 * Shutdown the builder, releasing any resources it holds. A new flow
+	 * construction process should start with another call to the
+	 * <code>init()</code> method.
+	 */
+	public void shutdown();
 }

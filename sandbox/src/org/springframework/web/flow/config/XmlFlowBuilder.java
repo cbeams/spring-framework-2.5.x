@@ -260,6 +260,11 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	public void buildStates() throws FlowBuilderException {
 		parseStateDefinitions();
 	}
+	
+	public void shutdown() {
+		setFlow(null);
+		doc=null;
+	}
 
 	/**
 	 * Load the flow definition from the configured resource.

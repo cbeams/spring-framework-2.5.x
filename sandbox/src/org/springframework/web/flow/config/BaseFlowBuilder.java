@@ -52,14 +52,14 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	private Collection flowExecutionListeners = new ArrayList(3);
 
 	/**
-	 * The <code>Flow</code> produced by this builder.
-	 */
-	private Flow flow;
-
-	/**
 	 * An abstract factory for flow creation.
 	 */
 	private FlowCreator flowCreator = new DefaultFlowCreator();
+	
+	/**
+	 * The <code>Flow</code> produced by this builder.
+	 */
+	private Flow flow;
 
 	/**
 	 * Default constructor for subclassing.
@@ -86,20 +86,6 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	protected BaseFlowBuilder(FlowServiceLocator flowServiceLocator, FlowCreator flowCreator) {
 		setFlowServiceLocator(flowServiceLocator);
 		setFlowCreator(flowCreator);
-	}
-
-	/**
-	 * The default FlowCreator implementation. This just instantiates the
-	 * <code>Flow</code> class. If you need a custom <code>Flow</code>
-	 * implementation, configure the BaseFlowBuilder with a custom
-	 * <code>FlowCreator</code> factory.
-	 * 
-	 * @see org.springframework.web.flow.Flow
-	 */
-	public static class DefaultFlowCreator implements FlowCreator {
-		public Flow createFlow(String flowId) {
-			return new Flow(flowId);
-		}
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -179,8 +165,6 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 		return getFlow();
 	}
 
-	// hooks for subclassing
-
 	/**
 	 * Create the instance of the Flow built by this builder. Subclasses may
 	 * override to return a custom Flow implementation, or simply pass in a
@@ -191,5 +175,19 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	 */
 	protected Flow createFlow(String id) {
 		return this.flowCreator.createFlow(id);
+	}
+	
+	/**
+	 * The default FlowCreator implementation. This just instantiates the
+	 * <code>Flow</code> class. If you need a custom <code>Flow</code>
+	 * implementation, configure the BaseFlowBuilder with a custom
+	 * <code>FlowCreator</code> factory.
+	 * 
+	 * @see org.springframework.web.flow.Flow
+	 */
+	public static class DefaultFlowCreator implements FlowCreator {
+		public Flow createFlow(String flowId) {
+			return new Flow(flowId);
+		}
 	}
 }

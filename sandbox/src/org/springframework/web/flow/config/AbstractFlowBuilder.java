@@ -171,6 +171,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		setFlow(createFlow(flowId()));
 		return getFlow();
 	}
+	
+	public void shutdown() {
+		setFlow(null);
+	}
 
 	/**
 	 * Returns the id (name) of the flow built by this builder. Subclasses

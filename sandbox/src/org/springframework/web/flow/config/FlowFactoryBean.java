@@ -161,6 +161,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 			this.flowBuilder.buildStates();
 			this.flowBuilder.buildExecutionListeners();
 			this.flow = this.flowBuilder.getResult();
+			this.flowBuilder.shutdown();
 		}
 		return this.flow;
 	}
