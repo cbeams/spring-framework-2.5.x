@@ -36,6 +36,8 @@ public class BufferedValueModel extends AbstractValueModel implements
 
     private ValueListener committer;
 
+    private boolean committing = false;
+
     public BufferedValueModel(ValueModel wrappedModel) {
         this(wrappedModel, null);
     }
@@ -50,7 +52,9 @@ public class BufferedValueModel extends AbstractValueModel implements
                                     + BufferedValueModel.this.wrappedModel
                                             .get() + "']");
                 }
-                onWrappedValueChanged();
+                if (!committing) {
+                    onWrappedValueChanged();
+                }
             }
         });
         setCommitTrigger(commitTrigger);
@@ -107,8 +111,14 @@ public class BufferedValueModel extends AbstractValueModel implements
                 logger.debug("[Committing buffered value '" + get()
                         + "' to wrapped value model " + wrappedModel + "]");
             }
-            doBufferedValueCommit(bufferedValue);
-            this.bufferedValue = NO_VALUE;
+            try {
+                committing = true;
+                doBufferedValueCommit(bufferedValue);
+                this.bufferedValue = NO_VALUE;
+            }
+            finally {
+                committing = false;
+            }
         }
         else {
             if (logger.isDebugEnabled()) {
@@ -116,7 +126,7 @@ public class BufferedValueModel extends AbstractValueModel implements
             }
         }
     }
-    
+
     protected void doBufferedValueCommit(Object bufferedValue) {
         wrappedModel.set(bufferedValue);
     }
