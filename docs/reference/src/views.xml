@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.28 2005-01-01 20:04:48 colins Exp $-->
+<!--$Id: views.xml,v 1.29 2005-01-15 13:52:45 robharrop Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -1898,6 +1898,66 @@ simpleReport.reportDataKey=myBeanData
               or <literal>Collection</literal> that it encounters. If you need to place multiple instances of <literal>JRDataSource</literal> or
               <literal>Collection</literal> into the model then you need to use the second approach.
           </para>
+      </sect2>
+		<sect2 id="view-jasper-reports-subreports">
+          <title>Working with Sub-Reports</title>
+          <para>JasperReports provides support for embedded sub-reports within your master report files.
+                There are a wide variety of mechanisms for including sub-reports in your report files. The
+                easiest way is to hard code the report path and the SQL query for the sub report into your
+                design files. The drawback of this approach is obvious - the values are hard-coded into your report files
+                reducing reusability and making it harder to modify and update report designs. To overcome this you
+                can configure sub-reports declaratively and you can include additional data for these sub-reports directly
+                from your controllers.</para>
+          <sect3 id="view-jasper-reports-subreports-config-reports">
+              <title>Configuring Sub-Report Files</title>
+              <para>To control which sub-report files are included in a master report using Spring, your report file
+                    must be configured to accept sub-reports from an external source. To do this you declare a parameter
+                    in your report file like this:
+              <programlisting>&lt;parameter name=&quot;ProductsSubReport&quot; class=&quot;net.sf.jasperreports.engine.JasperReport&quot;/&gt;</programlisting>
+                    Then, you define your sub-report to use this sub-report parameter:
+              <programlisting>&lt;subreport&gt;
+    &lt;reportElement isPrintRepeatedValues=&quot;false&quot; x=&quot;5&quot; y=&quot;25&quot; width=&quot;325&quot;
+        height=&quot;20&quot; isRemoveLineWhenBlank=&quot;true&quot; backcolor=&quot;#ffcc99&quot;/&gt;
+    &lt;subreportParameter name=&quot;City&quot;&gt;
+        &lt;subreportParameterExpression&gt;&lt;![CDATA[$F{city}]]&gt;&lt;/subreportParameterExpression&gt;
+    &lt;/subreportParameter&gt;
+    &lt;dataSourceExpression&gt;&lt;![CDATA[$P{SubReportData}]]&gt;&lt;/dataSourceExpression&gt;
+    &lt;subreportExpression class=&quot;net.sf.jasperreports.engine.JasperReport&quot;&gt;
+                  &lt;![CDATA[$P{ProductsSubReport}]]&gt;&lt;/subreportExpression&gt;
+&lt;/subreport&gt;</programlisting>
+                  This defines a master report file that expects the sub-report to be passed in as an instance of
+                  <literal>net.sf.jasperreports.engine.JasperReports</literal> under the parameter
+                  <literal>ProductsSubReport</literal>. When configuring your Jasper view class, you can instruct Spring
+                  to load a report file and pass into the JasperReports engine as a sub-report using the
+                  <literal>subReportUrls</literal> property:
+                  <programlisting>&lt;property name=&quot;subReportUrls&quot;&gt;
+    &lt;map&gt;
+        &lt;entry key=&quot;ProductsSubReport&quot;&gt;
+            &lt;value&gt;/WEB-INF/reports/subReportChild.jrxml&lt;/value&gt;
+        &lt;/entry&gt;
+    &lt;/map&gt;
+&lt;/property&gt;</programlisting>
+                  Here, the key of the <literal>Map</literal> corresponds to the name of the sub-report parameter in th
+                  report design file, and the entry is the URL of the report file. Spring will load this report file,
+                  compiling it if necessary, and will pass into the JasperReports engine under the given key.
+              </para>
+          </sect3>
+          <sect3 id="view-jasper-reports-subreports-config-datasources">
+              <title>Configuring Sub-Report Data Sources</title>
+              <para>
+                  This step is entirely optional when using Spring configure your sub-reports. If you wish, you can
+                  still configure the data source for your sub-reports using static queries. However, if you want Spring
+                  to convert data returned in your <literal>ModelAndView</literal> into instances of
+                  <literal>JRDataSource</literal> then you need to specify which of the parameters in your
+                  <literal>ModelAndView</literal> Spring should convert. To do this configure the list of parameter
+                  names using the <literal>subReportDataKeys</literal> property of the your chosen view class:
+                  <programlisting>&lt;property name=&quot;subReportDataKeys&quot;&gt;
+    &lt;value&gt;SubReportData&lt;/value&gt;
+&lt;/property&gt;</programlisting>
+                  Here, the key you supply MUST correspond to both the key used in your <literal>ModelAndView</literal>
+                  and the key used in your report design file.
+              </para>
+          </sect3>
       </sect2>
   </sect1>
 </chapter>
