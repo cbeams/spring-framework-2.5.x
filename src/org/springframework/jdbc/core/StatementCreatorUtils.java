@@ -156,7 +156,7 @@ public class StatementCreatorUtils {
 				}
 			}
 			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
-				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date)) {
+				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date || inValue instanceof java.sql.Timestamp || inValue instanceof java.sql.Time)) {
 					ps.setObject(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
 				}
 				else if (inValue instanceof java.util.Calendar) {
