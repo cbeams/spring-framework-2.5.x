@@ -11,15 +11,21 @@ import org.apache.struts.tiles.ComponentDefinition;
 import org.apache.struts.tiles.Controller;
 import org.apache.struts.tiles.DefinitionsFactory;
 import org.apache.struts.tiles.TilesUtilImpl;
+
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.view.InternalResourceView;
 
 /**
- * TilesView retrieves a Tiles definition.
+ * View implementation that retrieves a Tiles definition.
  * The "url" property is interpreted as name of a Tiles definition.
  *
  * <p>TilesJstlView with JSTL support is a separate class,
  * mainly to avoid JSTL dependencies in this class.
+ *
+ * <p>Depends on a Tiles DefinitionsFactory which must be available
+ * in the ServletContext. This factory is typically set up via a
+ * TilesConfigurer bean definition in the application context.
  *
  * <p>A component controller specified in the Tiles definition will receive
  * a reference to the current Spring ApplicationContext if it implements
@@ -29,12 +35,24 @@ import org.springframework.web.servlet.view.InternalResourceView;
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @see #setUrl
- * @see TilesConfigurer
  * @see TilesJstlView
+ * @see TilesConfigurer
  * @see ComponentControllerSupport
  * @see org.springframework.context.ApplicationContextAware
  */
 public class TilesView extends InternalResourceView {
+
+	private DefinitionsFactory definitionsFactory;
+
+	protected void initApplicationContext() throws ApplicationContextException {
+		super.initApplicationContext();
+		// get definitions factory
+		this.definitionsFactory = (DefinitionsFactory)
+		    getWebApplicationContext().getServletContext().getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
+		if (this.definitionsFactory == null) {
+			throw new ApplicationContextException("Tiles definitions factory not found: TilesConfigurer not defined?");
+		}
+	}
 
 	/**
 	 * The actual rendering of the Tiles definition.
@@ -44,18 +62,10 @@ public class TilesView extends InternalResourceView {
 		if (!response.isCommitted()) {
 			response.setContentType(getContentType());
 		}
-		
-		// get definitions factory
-		DefinitionsFactory factory = (DefinitionsFactory)
-			getWebApplicationContext().getServletContext().
-			getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
-		if (factory == null) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-												 "Tiles definitions factory not found: TilesConfigurer not defined?");
-		}
 
 		// get component definition
-		ComponentDefinition definition = factory.getDefinition(getUrl(), request, getServletContext());
+		ComponentDefinition definition = this.definitionsFactory.getDefinition(getUrl(), request,
+		                                                                       getServletContext());
 		if (definition == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND,
 												 "Tile with name '" + getBeanName() + "' not found");
