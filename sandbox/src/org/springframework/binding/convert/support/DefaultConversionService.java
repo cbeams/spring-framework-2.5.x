@@ -24,14 +24,18 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.binding.convert.Converter;
 import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.ConversionService;
+import org.springframework.binding.convert.Converter;
 import org.springframework.binding.format.FormatterLocator;
 import org.springframework.binding.support.TextToMappingConverter;
 
 /**
- * Specialized registry for type converters.
+ * Default, local implementation of a conversion service.
+ * <p>
+ * Acts as bean factory post processor, registering property editor adapters for
+ * each supported <i>source String</i> conversion. This makes for very
+ * convenient use with the Spring container.
  * @author Keith Donald
  */
 public class DefaultConversionService implements ConversionService, BeanFactoryPostProcessor, InitializingBean {

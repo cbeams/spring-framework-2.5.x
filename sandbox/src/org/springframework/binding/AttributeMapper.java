@@ -16,7 +16,11 @@
 package org.springframework.binding;
 
 /**
- * A lightweight interface for mapping between two attribute maps.
+ * A lightweight service interface for mapping between two attribute maps.
+ * <p>
+ * Implementations of this interface are expected to encapsulating the mapping
+ * configuration information as well as the logic to act on it to perform
+ * mapping between a given source and target map.
  * @author Keith Donald
  */
 public interface AttributeMapper {

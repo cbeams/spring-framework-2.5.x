@@ -15,6 +15,15 @@
  */
 package org.springframework.binding.thread;
 
+/**
+ * Listener interface that receives a callback when it should perform
+ * thread-local storage cleanup.
+ * @author Keith Donald
+ */
 public interface ThreadCleanupListener {
+	
+	/**
+	 * The thread cleanup event was signaled; do your cleanup.
+	 */
 	public void onCleanup();
 }

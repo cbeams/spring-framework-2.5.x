@@ -4,6 +4,7 @@
 package org.springframework.binding.convert;
 
 /**
+ * Base class for exceptions thrown by the type conversion system.
  * @author Keith Donald
  */
 public class ConversionException extends RuntimeException {

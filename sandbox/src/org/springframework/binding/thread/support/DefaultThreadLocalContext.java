@@ -24,6 +24,14 @@ import org.springframework.binding.thread.ThreadCleanupBroadcaster;
 import org.springframework.binding.thread.ThreadCleanupListener;
 import org.springframework.binding.thread.ThreadLocalContext;
 
+/**
+ * The default thread-local storage context implementation.
+ * <p>
+ * If the <code>ThreadCleanupBroadcaster</code> property is set, this context
+ * will register as a cleanup listener for lifecycle callbacks indicating when
+ * it should clear its storage.
+ * @author Keith Donald
+ */
 public class DefaultThreadLocalContext implements ThreadLocalContext, ThreadCleanupListener, AttributeAccessor,
 		AttributeSetter {
 

@@ -22,6 +22,11 @@ import org.springframework.binding.thread.ThreadCleanupBroadcaster;
 import org.springframework.binding.thread.ThreadCleanupListener;
 import org.springframework.util.EventListenerListHelper;
 
+/**
+ * Default thread cleanup broadcaster that broadcast cleanup events to all
+ * registered listeners when requested by a calling thread.
+ * @author Keith Donald
+ */
 public class DefaultThreadCleanupBroadcaster implements ThreadCleanupBroadcaster, DisposableBean {
 	private EventListenerListHelper listenerList = new EventListenerListHelper(ThreadCleanupListener.class);
 

@@ -17,6 +17,10 @@ package org.springframework.binding.format;
 
 import org.springframework.enums.ShortCodedEnum;
 
+/**
+ * Format styles.
+ * @author Keith Donald
+ */
 public class Style extends ShortCodedEnum {
 	public static final Style FULL = new Style(0, "Short");
 

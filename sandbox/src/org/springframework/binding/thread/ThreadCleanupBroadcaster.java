@@ -15,10 +15,28 @@
  */
 package org.springframework.binding.thread;
 
+/**
+ * Service that publishes events to <code>ThreadCleanupListeners</code>
+ * notifying them they should cleanup their thread specific storage.
+ * @author Keith Donald
+ */
 public interface ThreadCleanupBroadcaster {
+
+	/**
+	 * Add a listener
+	 * @param listener
+	 */
 	public void addThreadCleanupListener(ThreadCleanupListener listener);
 
+	/**
+	 * Remove the listener
+	 * @param listener
+	 */
 	public void removeThreadCleanupListener(ThreadCleanupListener listener);
 
+	/**
+	 * Notify all listeners to cleanup. Typically called after processing a
+	 * transaction; sometimes called when the app is shutdown.
+	 */
 	public void fireCleanupEvent();
 }

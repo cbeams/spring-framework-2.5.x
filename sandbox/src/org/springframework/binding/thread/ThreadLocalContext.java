@@ -15,8 +15,11 @@
  */
 package org.springframework.binding.thread;
 
+/**
+ * Service interface for access to thread local storage.
+ * @author Keith Donald
+ */
 public interface ThreadLocalContext {
-
 	public Object get(Object key);
 
 	public void put(Object key, Object value);

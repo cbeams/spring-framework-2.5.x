@@ -22,6 +22,11 @@ import org.springframework.enums.CodedEnumResolver;
 import org.springframework.enums.support.StaticCodedEnumResolver;
 import org.springframework.util.StringUtils;
 
+/**
+ * Converts textual representations of <coded>CodedEnum</code> instances to a
+ * specific instance of <code>CodedEnum</code>
+ * @author Keith Donal
+ */
 public class TextToCodedEnumConverter extends AbstractConverter {
 
 	private CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();

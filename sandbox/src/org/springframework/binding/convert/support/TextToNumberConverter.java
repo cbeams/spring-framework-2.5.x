@@ -8,6 +8,11 @@ import java.math.BigInteger;
 
 import org.springframework.binding.format.FormatterLocator;
 
+/**
+ * Converts textual representations of numbers to a <code>Number</code>
+ * specialization. Delegates to a synchronized formatter to parse text strings.
+ * @author Keith Donald
+ */
 public class TextToNumberConverter extends AbstractFormattingConverter {
 
 	public TextToNumberConverter(FormatterLocator locator) {

@@ -19,6 +19,10 @@ import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.Converter;
 import org.springframework.util.closure.Closure;
 
+/**
+ * Adapts a Formatter to the Converter interface.
+ * @author Keith Donald
+ */
 public class FormatterConverterAdapter implements Converter, Closure {
 	private Formatter formatter;
 

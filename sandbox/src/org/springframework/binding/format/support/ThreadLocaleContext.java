@@ -19,6 +19,10 @@ import java.util.Locale;
 
 import org.springframework.binding.format.LocaleContext;
 
+/**
+ * Thread-specific storage for the current locale.
+ * @author Keith Donald
+ */
 public class ThreadLocaleContext implements LocaleContext {
 	private static ThreadLocal localeHolder = new LocaleThreadLocal();
 
@@ -35,5 +39,4 @@ public class ThreadLocaleContext implements LocaleContext {
 	public void setLocale(Locale locale) {
 		localeHolder.set(locale);
 	}
-
 }

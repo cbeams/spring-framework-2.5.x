@@ -16,9 +16,12 @@
 package org.springframework.binding;
 
 /**
- * Generic, lightweight interface for accessing a collection of
- * attributes. Useful for hiding the structure or source of the underlying
+ * Generic, lightweight interface for accessing a collection of attributes.
+ * Useful for hiding the structure or source of the underlying attribute
  * collection.
+ * <p>
+ * For example, the backing collection might be a javabean, a http request, a
+ * http session, a map, a mbean, or some other attribute holder.
  * @author Keith Donald
  */
 public interface AttributeAccessor {

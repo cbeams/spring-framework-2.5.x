@@ -4,7 +4,8 @@
 package org.springframework.binding.convert;
 
 /**
- * A service locator that provides access to a registry of type converters.
+ * A service interface for retrieving type conversion executors. The returned
+ * command object is thread-safe.
  * @author Keith Donald
  */
 public interface ConversionService {

@@ -29,6 +29,10 @@ import org.springframework.binding.format.Style;
 import org.springframework.binding.thread.ThreadCleanupBroadcaster;
 import org.springframework.binding.thread.support.DefaultThreadLocalContext;
 
+/**
+ * FormatterLocator that caches Formatters in thread-local storage.
+ * @author Keith Donald
+ */
 public class ThreadLocalFormatterLocator implements FormatterLocator {
 
 	private static final String DEFAULT_DATE_FORMATTER_KEY = "dateFormatter";
