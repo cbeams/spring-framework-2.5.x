@@ -16,12 +16,15 @@
 
 package org.springframework.jdbc.support;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * JavaBean for holding JDBC Error Codes for a particular database.
  * Normally loaded through a BeanFactory
  * implementation. Used by the SQLErrorCodeSQLExceptionTranslator.
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodes.java,v 1.5 2004-04-13 12:21:46 trisberg Exp $
+ * @version $Id: SQLErrorCodes.java,v 1.6 2004-06-30 12:54:27 trisberg Exp $
  */
 public class SQLErrorCodes {
 
@@ -38,6 +41,8 @@ public class SQLErrorCodes {
 	private String[] optimisticLockingFailureCodes = new String[0];
 	
 	private String[] dataAccessResourceFailureCodes = new String[0];
+	
+	private List customTranslations = new LinkedList();
 
 	/**
 	 * Sets the badSqlGrammarCodes.
@@ -142,4 +147,16 @@ public class SQLErrorCodes {
 		this.useSqlStateForTranslation = useStateCodeForTranslation;
 	}
 
+	/**
+	 * @return Returns the customTranslations.
+	 */
+	public List getCustomTranslations() {
+		return customTranslations;
+	}
+	/**
+	 * @param customExceptions The customTranslations to set.
+	 */
+	public void setCustomTranslations(List customExceptions) {
+		this.customTranslations = customExceptions;
+	}
 }

@@ -20,13 +20,13 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -45,7 +45,7 @@ import org.springframework.core.io.Resource;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SQLErrorCodesFactory.java,v 1.15 2004-05-30 15:14:26 jhoeller Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.16 2004-06-30 12:54:27 trisberg Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -126,6 +126,32 @@ public class SQLErrorCodesFactory {
 				else {
 					Arrays.sort(ec.getDataIntegrityViolationCodes());
 				}
+				if (ec.getDataRetrievalFailureCodes() == null) {
+					ec.setDataRetrievalFailureCodes(new String[0]);
+				}
+				else {
+					Arrays.sort(ec.getDataRetrievalFailureCodes());
+				}
+				if (ec.getOptimisticLockingFailureCodes() == null) {
+					ec.setOptimisticLockingFailureCodes(new String[0]);
+				}
+				else {
+					Arrays.sort(ec.getOptimisticLockingFailureCodes());
+				}
+				if (ec.getDataAccessResourceFailureCodes() == null) {
+					ec.setDataAccessResourceFailureCodes(new String[0]);
+				}
+				else {
+					Arrays.sort(ec.getDataAccessResourceFailureCodes());
+				}
+				if (!ec.getCustomTranslations().isEmpty()) {
+					Iterator customIter = ec.getCustomTranslations().iterator();
+					while (customIter.hasNext()) {
+						CustomSQLErrorCodesTranslation customCode = (CustomSQLErrorCodesTranslation) customIter.next();
+						Arrays.sort(customCode.getErrorCodes());
+					}
+				}
+
 				if (ec.getDatabaseProductName() == null) {
 					errorCodes.put(rdbmsNames[i], ec);
 				}

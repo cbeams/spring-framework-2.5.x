@@ -1,0 +1,25 @@
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+	
+<beans>
+
+	<!--
+		Whacky error codes for testing
+		-->
+
+
+  <bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="badSqlGrammarCodes"><value>1,2</value></property>
+    <property name="dataIntegrityViolationCodes"><value>1,1400,1722</value></property>
+    <property name="customTranslations">
+      <list>
+        <bean class="org.springframework.jdbc.support.CustomSQLErrorCodesTranslation">
+          <property name="errorCodes"><value>999</value></property>
+          <property name="exceptionClass">
+            <value>org.springframework.jdbc.support.CustomErrorCodeException</value>
+          </property>
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+</beans>

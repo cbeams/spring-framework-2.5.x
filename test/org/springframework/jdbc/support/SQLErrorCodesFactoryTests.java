@@ -106,9 +106,9 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	}
 	
 	/**
-	 * Check that custom error codes take precedence.
+	 * Check that user defined error codes take precedence.
 	 */
-	public void testFindCustomCodes() {
+	public void testFindUserDefinedCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			protected Resource loadResource(String path) {
 				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
@@ -116,14 +116,14 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 			}
 		}
 	
-		// Should have failed to load without error
+		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertTrue(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0);
 		assertEquals(2, sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length);
 		assertEquals("1", sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[0]);
 	}
 	
-	public void testInvalidCustomCodeFormat() {
+	public void testInvalidUserDefinedCodeFormat() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			protected Resource loadResource(String path) {
 				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
@@ -138,6 +138,25 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertEquals(0, sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length);
 	}
 	
+	/**
+	 * Check that custom error codes take precedence.
+	 */
+	public void testFindCustomCodes() {
+		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			protected Resource loadResource(String path) {
+				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
+				return new ClassPathResource("custom-error-codes.xml", SQLErrorCodesFactoryTests.class);
+			}
+		}
+	
+		// Should have loaded without error
+		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
+		assertEquals(1, sf.getErrorCodes("Oracle").getCustomTranslations().size());
+		assertEquals("org.springframework.jdbc.support.CustomErrorCodeException", 
+				((CustomSQLErrorCodesTranslation)sf.getErrorCodes("Oracle").getCustomTranslations().get(0)).getExceptionClass());
+		assertEquals(1,
+				((CustomSQLErrorCodesTranslation)sf.getErrorCodes("Oracle").getCustomTranslations().get(0)).getErrorCodes().length);
+	}
 	
 	public void testDataSourceWithNullMetadata() throws Exception {
 		
