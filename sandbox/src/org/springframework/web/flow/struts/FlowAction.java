@@ -40,10 +40,10 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Struts Action that acts a front controller entry point into the web flow
- * system. Typically, a FlowAction exists per top-level (root) flow definition
- * in the application. Alternatively, a single FlowAction may manage all flow
+ * system. Typically, a single FlowAction manages all flow
  * executions by parameterization with the appropriate <code>flowId</code> in
- * views that start new flow executions.
+ * views that start new flow executions. Alternatively, a FlowAction may exist
+ * per top-level (root) flow definition in the application.
  * <p>
  * Requests are managed by and delegated to a
  * {@link HttpServletFlowExecutionManager}, allowing reuse of common front flow

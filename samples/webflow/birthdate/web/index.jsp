@@ -16,10 +16,14 @@
 			</P>
 			
 			<P>
-				This sample application demonstrates the use of the FormAction: a multi-action
-				that allows you to mimic the exact behaviour of the SimpleFormController in a flow.
+				This sample application demonstrates the use of the FormAction: a multi-action.
 				It also shows you how to use a multi-action to group all actions executed by a flow
-				in single class! Finally, the sample also uses JSTL in conjunction with flows.
+				in single class!
+			</P>
+			<P>
+				This sample also demonstrates Spring Web Flow's Struts integration</P>
+			<P>
+				Finally, the sample also uses JSTL in conjunction with flows.
 			</P>
 		</DIV>
 		
