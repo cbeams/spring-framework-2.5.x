@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+	Get attributes from source-level metadata.
+	WILL NOT WORK without metadata compile.
+-->
+
+<beans>
+
+	<!-- 
+		Rely on default attribute source (BCEL)
+	-->
+	<bean id="enterpriseServices" 
+		class="org.springframework.enterpriseservices.EnterpriseServices">	
+	</bean>
+
+</beans>		
+	
+	
