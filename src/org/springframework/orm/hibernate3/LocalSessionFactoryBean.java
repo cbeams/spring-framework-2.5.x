@@ -26,6 +26,8 @@ import java.util.Properties;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
@@ -35,9 +37,8 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -142,6 +143,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private Class configurationClass = Configuration.class;
+
 	private Resource configLocation;
 
 	private Resource[] mappingLocations;
@@ -170,6 +173,29 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private SessionFactory sessionFactory;
 
+
+	/**
+	 * Specify the Hibernate Configuration class to use.
+	 * Default is "org.hibernate.cfg.Configuration"; any subclass of
+	 * this default Hibernate Configuration class can be specified.
+	 * <p>Can be set to "org.hibernate.cfg.AnnotationConfiguration" for
+	 * using Hibernate3 annotation support (initially only available as
+	 * alpha download separate from the main Hibernate3 distribution).
+	 * <p>Annotated packages and annotated classes can be specified via the
+	 * corresponding tags in "hibernate.cfg.xml" then, so this will usually
+	 * be combined with a "configLocation" property that points at such a
+	 * standard Hibernate configuration file.
+	 * @see #setConfigLocation
+	 * @see org.hibernate.cfg.Configuration
+	 * @see org.hibernate.cfg.AnnotationConfiguration
+	 */
+	public void setConfigurationClass(Class configurationClass) {
+		if (!Configuration.class.isAssignableFrom(configurationClass)) {
+			throw new IllegalArgumentException(
+					"configurationClass needs to be assignable to [org.hibernate.cfg.Configuration]");
+		}
+		this.configurationClass = configurationClass;
+	}
 
 	/**
 	 * Set the location of the Hibernate XML config file, for example as
@@ -331,7 +357,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Set the LobHandler to be used by the SessionFactory.
 	 * Will be exposed at config time for UserType implementations.
 	 * @see #getConfigTimeLobHandler
-	 * @see org.hibernate.UserType
+	 * @see org.hibernate.usertype.UserType
 	 * @see org.springframework.orm.hibernate3.support.ClobStringType
 	 * @see org.springframework.orm.hibernate3.support.BlobByteArrayType
 	 * @see org.springframework.orm.hibernate3.support.BlobSerializableType
@@ -513,7 +539,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @see org.hibernate.cfg.Configuration#Configuration()
 	 */
 	protected Configuration newConfiguration() throws HibernateException {
-		return new Configuration();
+		return (Configuration) BeanUtils.instantiateClass(this.configurationClass);
 	}
 
 	/**
