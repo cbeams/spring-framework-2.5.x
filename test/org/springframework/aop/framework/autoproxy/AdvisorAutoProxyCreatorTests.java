@@ -14,6 +14,8 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.target.CommonsPoolTargetSource;
+import org.springframework.aop.target.PrototypeTargetSource;
+import org.springframework.aop.target.ThreadLocalTargetSource;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -22,7 +24,7 @@ import org.springframework.transaction.CountingTxManager;
 /**
  * Tests for auto proxy creation by advisor recognition.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.4 2003-12-13 21:47:28 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.5 2003-12-14 16:11:03 johnsonr Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends TestCase {
 	
@@ -77,6 +79,49 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		assertEquals("Rod", test.getName());
 		// Check that references survived pooling
 		assertEquals("Kerry", test.getSpouse().getName());
+	}
+	
+	public void testQuickTargetSourceCreator() throws Exception {
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/quickTargetSource.xml");
+		ITestBean test = (ITestBean) bf.getBean("test");
+		assertFalse(AopUtils.isAopProxy(test));
+		assertEquals("Rod", test.getName());
+		// Check that references survived pooling
+		assertEquals("Kerry", test.getSpouse().getName());
+	
+		// Now test the pooled one
+		test = (ITestBean) bf.getBean(":test");
+		assertTrue(AopUtils.isAopProxy(test));
+		Advised advised = (Advised) test;
+		assertTrue(advised.getTargetSource() instanceof CommonsPoolTargetSource);
+		assertEquals("Rod", test.getName());
+		// Check that references survived pooling
+		assertEquals("Kerry", test.getSpouse().getName());
+		
+		// Now test the ThreadLocal one
+		test = (ITestBean) bf.getBean("%test");
+		assertTrue(AopUtils.isAopProxy(test));
+		advised = (Advised) test;
+		assertTrue(advised.getTargetSource() instanceof ThreadLocalTargetSource);
+		assertEquals("Rod", test.getName());
+		// Check that references survived pooling
+		assertEquals("Kerry", test.getSpouse().getName());
+		
+		// Now test the Prototype TargetSource
+		 test = (ITestBean) bf.getBean("!test");
+		 assertTrue(AopUtils.isAopProxy(test));
+		 advised = (Advised) test;
+		 assertTrue(advised.getTargetSource() instanceof PrototypeTargetSource);
+		 assertEquals("Rod", test.getName());
+		 // Check that references survived pooling
+		 assertEquals("Kerry", test.getSpouse().getName());
+		 
+		 
+		 ITestBean test2 = (ITestBean) bf.getBean("!test");
+		 assertFalse("Prototypes cannot be the same object", test == test2);
+		assertEquals("Rod", test2.getName());
+		assertEquals("Kerry", test2.getSpouse().getName());
+		bf.close();
 	}
 	
 	/*
