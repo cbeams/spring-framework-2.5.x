@@ -30,6 +30,7 @@ import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.engine.SessionFactoryImplementor;
+import net.sf.hibernate.engine.SessionImplementor;
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
@@ -256,7 +257,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 			ut.commit();
 			utControl.setVoidCallable(1);
 		}
-		utControl.replay();
 
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
@@ -268,8 +268,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
-		final MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(SessionImplementor.class);
+		final SessionImplementor session = (SessionImplementor) sessionControl.getMock();
 		sf.getConnectionProvider();
 		sfControl.setReturnValue(null, 2);
 		sf.getTransactionManager();
@@ -277,6 +277,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 
+		utControl.replay();
 		tmControl.replay();
 		sfControl.replay();
 		sessionControl.replay();
@@ -500,14 +501,22 @@ public class HibernateJtaTransactionTests extends TestCase {
 	}
 
 	public void testJtaTransactionCommitWithPreBound() throws Exception {
-		doTestJtaTransactionCommitWithPreBound(false);
+		doTestJtaTransactionCommitWithPreBound(false, false);
 	}
 
 	public void testJtaTransactionCommitWithPreBoundAndFlushModeNever() throws Exception {
-		doTestJtaTransactionCommitWithPreBound(true);
+		doTestJtaTransactionCommitWithPreBound(false, true);
 	}
 
-	protected void doTestJtaTransactionCommitWithPreBound(final boolean flushNever) throws Exception {
+	public void testJtaTransactionCommitWithJtaTmAndPreBound() throws Exception {
+		doTestJtaTransactionCommitWithPreBound(true, false);
+	}
+
+	public void testJtaTransactionCommitWithJtaTmAndPreBoundAndFlushModeNever() throws Exception {
+		doTestJtaTransactionCommitWithPreBound(true, true);
+	}
+
+	protected void doTestJtaTransactionCommitWithPreBound(boolean jtaTm, final boolean flushNever) throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
@@ -518,14 +527,25 @@ public class HibernateJtaTransactionTests extends TestCase {
 		utControl.setVoidCallable(1);
 		ut.commit();
 		utControl.setVoidCallable(1);
-		utControl.replay();
 
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		final MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		if (jtaTm) {
+			MockJtaTransaction transaction = new MockJtaTransaction();
+			tm.getStatus();
+			tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+			tm.getTransaction();
+			tmControl.setReturnValue(transaction, 1);
+		}
+
+		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
+		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(SessionImplementor.class);
+		final SessionImplementor session = (SessionImplementor) sessionControl.getMock();
+		sf.getConnectionProvider();
+		sfControl.setReturnValue(null, 1);
+		sf.getTransactionManager();
+		sfControl.setReturnValue((jtaTm ? tm : null), 1);
 		session.getFlushMode();
 		if (flushNever) {
 			sessionControl.setReturnValue(FlushMode.NEVER, 1);
@@ -535,6 +555,9 @@ public class HibernateJtaTransactionTests extends TestCase {
 		else {
 			sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		}
+
+		utControl.replay();
+		tmControl.replay();
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -576,6 +599,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 								session.setFlushMode(FlushMode.NEVER);
 								sessionControl.setVoidCallable(1);
 							}
+							session.afterTransactionCompletion(true);
+							sessionControl.setVoidCallable(1);
 						}
 						catch (HibernateException e) {
 						}
@@ -598,6 +623,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		}
 
 		utControl.verify();
+		tmControl.verify();
 		sfControl.verify();
 		sessionControl.verify();
 	}
