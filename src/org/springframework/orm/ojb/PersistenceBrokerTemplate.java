@@ -77,7 +77,7 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 
 
 	public Object execute(PersistenceBrokerCallback action) throws DataAccessException {
-		PersistenceBroker pb = OjbFactoryUtils.getPersistenceBroker(getPbKey());
+		PersistenceBroker pb = getPersistenceBroker();
 		try {
 			return action.doInPersistenceBroker(pb);
 		}
@@ -95,7 +95,7 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 			throw ex;
 		}
 		finally {
-			OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, getPbKey());
+			closePersistenceBrokerIfNecessary(pb);
 		}
 	}
 

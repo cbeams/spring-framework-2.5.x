@@ -133,6 +133,34 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	}
 
 
+	/**
+	 * Get an OJB PersistenceBroker for the PBKey of this transaction manager.
+	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * Can be overridden in subclasses, e.g. for testing purposes.
+	 * @return the PersistenceBroker
+	 * @see #setJcdAlias
+	 * @see #setPbKey
+	 * @see OjbFactoryUtils#getPersistenceBroker
+	 */
+	protected PersistenceBroker getPersistenceBroker() {
+		return OjbFactoryUtils.getPersistenceBroker(getPbKey());
+	}
+
+	/**
+	 * Close the given PersistenceBroker, created for the PBKey of this
+	 * transaction manager, if it isn't bound to the thread.
+	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * Can be overridden in subclasses, e.g. for testing purposes.
+	 * @param pb PersistenceBroker to close
+	 * @see #setJcdAlias
+	 * @see #setPbKey
+	 * @see OjbFactoryUtils#closePersistenceBrokerIfNecessary
+	 */
+	protected void closePersistenceBrokerIfNecessary(PersistenceBroker pb) {
+		OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, getPbKey());
+	}
+
+
 	protected Object doGetTransaction() {
 		PersistenceBrokerTransactionObject txObject = new PersistenceBrokerTransactionObject();
 		PersistenceBrokerHolder pbHolder =
@@ -148,7 +176,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) transaction;
 
-		PersistenceBroker pb = OjbFactoryUtils.getPersistenceBroker(getPbKey());
+		PersistenceBroker pb = getPersistenceBroker();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Opened new persistence broker [" + pb + "] for OJB transaction");
 		}
@@ -179,7 +207,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		}
 
 		catch (Exception ex) {
-			OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, getPbKey());
+			closePersistenceBrokerIfNecessary(pb);
 			throw new CannotCreateTransactionException("Could not create OJB transaction", ex);
 		}
 	}
@@ -270,7 +298,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing OJB persistence broker [" + pb + "] after transaction");
 		}
-		OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, getPbKey());
+		closePersistenceBrokerIfNecessary(pb);
 	}
 
 
