@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,9 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		"select forename from custmr WHERE 1 = 2";
 	private static final String SELECT_ID_FORENAME_WHERE =
 		"select id, forename from custmr where forename = ?";
-
+	private static final String SELECT_ID_FORENAME_WHERE_ID =
+		"select id, forename from custmr where id <= ?";
+	
 	private static final String[] COLUMN_NAMES =
 		new String[] { "id", "forename" };
 	private static final int[] COLUMN_TYPES =
@@ -874,6 +877,68 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		}
 	}
 
+	public void testUpdateCustomers() {
+		try {
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(true);
+			mockResultSet.getInt("id");
+			ctrlResultSet.setReturnValue(1);
+			mockResultSet.updateString(2, "Rod");
+			ctrlResultSet.setVoidCallable();
+			mockResultSet.updateRow();
+			ctrlResultSet.setVoidCallable();
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(true);
+			mockResultSet.getInt("id");
+			ctrlResultSet.setReturnValue(2);
+			mockResultSet.updateString(2, "Thomas");
+			ctrlResultSet.setVoidCallable();
+			mockResultSet.updateRow();
+			ctrlResultSet.setVoidCallable();
+			mockResultSet.next();
+			ctrlResultSet.setReturnValue(false);
+			mockResultSet.close();
+			ctrlResultSet.setVoidCallable();
+
+			mockPreparedStatement.setObject(1, new Integer(2), Types.NUMERIC);
+			ctrlPreparedStatement.setVoidCallable();
+			mockPreparedStatement.executeQuery();
+			ctrlPreparedStatement.setReturnValue(mockResultSet);
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+			mockPreparedStatement.close();
+			ctrlPreparedStatement.setVoidCallable();
+
+			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			ctrlConnection.setReturnValue(mockPreparedStatement);
+			
+		} catch (SQLException sex) {
+			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
+		}
+
+		replay();
+
+		class CustomerUpdateQuery extends UpdatableSqlQuery {
+
+			public CustomerUpdateQuery(DataSource ds) {
+				super(ds, SELECT_ID_FORENAME_WHERE_ID);
+				declareParameter(new SqlParameter(Types.NUMERIC));
+				compile();
+			}
+
+			protected Object updateRow(ResultSet rs, int rownum, Map context)
+			throws SQLException {
+				rs.updateString(2, "" + context.get(new Integer(rs.getInt(COLUMN_NAMES[0]))));
+				return null;
+			}
+		};
+		CustomerUpdateQuery query = new CustomerUpdateQuery(mockDataSource);
+		Map values = new HashMap(2);
+		values.put(new Integer(1), "Rod");
+		values.put(new Integer(2), "Thomas");
+		List customers = query.execute(2, values);
+	}
+	
 	private static class Customer {
 
 		private int id;

@@ -2,6 +2,7 @@ package org.springframework.jdbc.core;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.4 2003-12-05 17:03:13 jhoeller Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.5 2003-12-15 13:37:50 trisberg Exp $
  */
 public class PreparedStatementCreatorFactory { 
 
@@ -27,6 +28,12 @@ public class PreparedStatementCreatorFactory {
 	/** The Sql, which won't change when the parameters change. */
 	private String sql;
 
+	/**
+	 * Boolean to indicate whether the prepared statement created is capable
+	 * of returning updatable resultsets.
+	 */
+	private boolean updatableResults = false;
+	
 	/**
 	 * Create a new factory. Will need to add parameters
 	 * via the addParameter() method or have no parameters
@@ -50,8 +57,32 @@ public class PreparedStatementCreatorFactory {
 	 * @param declaredParameters list of SqlParameter objects
 	 */
 	public PreparedStatementCreatorFactory(String sql, List declaredParameters) {
+		this(sql, declaredParameters, false);
+	}
+
+	/**
+	 * Create a new factory with sql and parameters with the given JDBC types
+	 * @param sql SQL to execute
+	 * @param types int array of JDBC types
+	 * @param updatableResults boolean to indicate that the prepared statement should return
+	 *  updatable result sets
+	 */
+	public PreparedStatementCreatorFactory(String sql, int[] types, boolean updatableResults) {
+		this(sql, SqlParameter.sqlTypesToAnonymousParameterList(types), updatableResults);
+	}
+
+	/**
+	 * Create a new factory with sql and the given parameters and set the 
+	 * updatableResults flag
+	 * @param sql SQL
+	 * @param declaredParameters list of SqlParameter objects
+	 * @param updatableResults boolean to indicate that the prepared statement should return
+	 *  updatable result sets
+	 */
+	public PreparedStatementCreatorFactory(String sql, List declaredParameters, boolean updatableResults) {
 		this.sql = sql;
 		this.declaredParameters = declaredParameters;
+		this.updatableResults = updatableResults;
 	}
 
 	/**
@@ -96,7 +127,13 @@ public class PreparedStatementCreatorFactory {
 		}
 		
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-			PreparedStatement ps = con.prepareStatement(sql);
+			PreparedStatement ps = null;
+			if (updatableResults) {
+				ps = con.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			}
+			else {
+				ps = con.prepareStatement(sql);
+			}
 
 			// Set arguments: does nothing if there are no parameters
 			for (int i = 0; i < parameters.size(); i++) {

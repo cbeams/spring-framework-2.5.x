@@ -18,7 +18,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * parameters.
  *
  * @author Rod Johnson
- * @version $Id: SqlOperation.java,v 1.5 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: SqlOperation.java,v 1.6 2003-12-15 13:37:30 trisberg Exp $
  */
 public abstract class SqlOperation extends RdbmsOperation {
 
@@ -28,7 +28,13 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 */
 	private PreparedStatementCreatorFactory preparedStatementFactory;
 
-
+	/**
+	 * Boolean enabling us to create PreparedStatementCreators
+	 * that can return prepared statements capable of returning
+	 * updatable result sets.
+	 */
+	private boolean updatableResults;
+	
 	/**
 	 * Return a PreparedStatementCreator to perform an operation
 	 * with this parameters.
@@ -58,7 +64,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 			throw new InvalidDataAccessApiUsageException("SQL '" + getSql() + "' requires " + bindVarCount +
 			                                             " bind variables, but " + getDeclaredParameters().size() + " variables were declared for this object");
 
-		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
+		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters(), updatableResults);
 		onCompileInternal();
 	}
 
@@ -67,6 +73,20 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * This implementation does nothing.
 	 */
 	protected void onCompileInternal() {
+	}
+
+	/**
+	 * @return Returns the updatableResults flag.
+	 */
+	protected boolean isUpdatableResults() {
+		return updatableResults;
+	}
+
+	/**
+	 * @param updatable The updatableResults flag to set.
+	 */
+	protected void setUpdatableResults(boolean updatableResults) {
+		this.updatableResults = updatableResults;
 	}
 
 }
