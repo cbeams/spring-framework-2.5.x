@@ -56,6 +56,13 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	}
 
 	protected final void refreshBeanFactory() throws BeansException {
+		// Shut down previous bean factory, if any.
+		if (this.beanFactory != null) {
+			this.beanFactory.destroySingletons();
+			this.beanFactory = null;
+		}
+
+		// Initialize fresh bean factory.
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
