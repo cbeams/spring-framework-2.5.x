@@ -172,11 +172,11 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	//methods implementing AttributesAccessor
 
 	/**
-	 * @return Map of all model attributes in this flow session; should NOT be
-	 *         modified
+	 * Note: the map returned is unmodifiable
+	 * @return Map of all model attributes in this flow session
 	 */
 	public Map getAttributes() {
-		return attributes;
+		return Collections.unmodifiableMap(attributes);
 	}
 
 	public Object getAttribute(String attributeName) {
