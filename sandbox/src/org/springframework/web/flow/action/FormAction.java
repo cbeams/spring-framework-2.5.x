@@ -111,7 +111,8 @@ import org.springframework.web.flow.ScopeType;
  * <td>propertyEditorRegistrar</td>
  * <td>null</td>
  * <td> The strategy used to register custom property editors with the data
- * binder. </td>
+ * binder. This is an alternative to overriding the
+ * {@link #initBinder(RequestContext, DataBinder) initBinder} hook method. </td>
  * </tr>
  * <tr>
  * <td>validator(s)</td>
@@ -251,7 +252,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 
 	/**
 	 * Set a property editor registration strategy for this action's data
-	 * binders.
+	 * binders. This is an alternative to overriding the initBinder() method.
 	 */
 	public void setPropertyEditorRegistrar(PropertyEditorRegistrar propertyEditorRegistrar) {
 		this.propertyEditorRegistrar = propertyEditorRegistrar;
@@ -368,23 +369,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *         checked or unchecked
 	 */
 	public Event setupForm(RequestContext context) throws Exception {
-		Event result = doFormObjectProcessing(context, false);
-		setupFormReferenceData(context);
-		return result;
-	}
-
-	/**
-	 * Hook method subclasses may override to prepares supporting reference data
-	 * needed for rendering the form. This is typically used to retrieve model
-	 * data from a backing service to populate drop down boxes.
-	 * <p>
-	 * @param context the action execution context, for accessing and setting
-	 *        data in "flow scope" or "request scope"
-	 * @throws Exception an <b>unrecoverable</b> exception occured, either
-	 *         checked or unchecked
-	 */
-	protected void setupFormReferenceData(RequestContext context) throws Exception {
-
+		return doFormObjectProcessing(context, false);
 	}
 
 	/**
@@ -414,6 +399,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *         checked or unchecked
 	 */
 	protected Event doFormObjectProcessing(RequestContext context, boolean forceBindAndValidate) throws Exception {
+		setupFormReferenceData(context);
 		Object formObject = loadFormObject(context);
 		DataBinder binder = createBinder(context, formObject);
 		Event result = null;
@@ -546,7 +532,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 			logger.debug("Binding completed for object '" + binder.getObjectName() + "', details='"
 					+ binder.getTarget() + "'");
 		}
-		if (getValidators() != null && isValidateOnBinding()) {
+		if (getValidators() != null && isValidateOnBinding() && !suppressValidation(context)) {
 			for (int i = 0; i < getValidators().length; i++) {
 				ValidationUtils.invokeValidator(getValidators()[i], binder.getTarget(), binder.getErrors());
 			}
@@ -582,6 +568,33 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	// subclassing hook methods
+
+	/**
+	 * Hook method subclasses may override to prepare supporting reference data
+	 * needed for rendering the form. This is typically used to retrieve model
+	 * data from a backing service to populate drop down boxes.
+	 * @param context the action execution context, for accessing and setting
+	 *        data in "flow scope" or "request scope"
+	 * @throws Exception an <b>unrecoverable</b> exception occured, either
+	 *         checked or unchecked
+	 */
+	protected void setupFormReferenceData(RequestContext context) throws Exception {
+	}
+	
+	/**
+	 * Return whether to suppress validation for the given action execution
+	 * context.
+	 * <p>
+	 * Default implementation always returns false. Can be overridden
+	 * in subclasses to suppress validation, for example, if a special
+	 * event parameter is set.
+	 * @param context the action execution context, for accessing and setting
+	 *        data in "flow scope" or "request scope"
+	 * @return whether or not to suppress validation
+	 */
+	protected boolean suppressValidation(RequestContext context) {
+		return false;
+	}
 
 	/**
 	 * Callback for custom post-processing in terms of binding. Called on each
