@@ -144,6 +144,10 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
         return createFormObjectPerRequest;
     }
 
+    /**
+     * Set if we create a new form object instance everytime this action is invoked.
+     * @param createNewFormObjectPerRequest
+     */
     public final void setCreateFormObjectPerRequest(boolean createNewFormObjectPerRequest) {
         this.createFormObjectPerRequest = createNewFormObjectPerRequest;
     }
@@ -181,7 +185,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
             MutableAttributesAccessor model) throws ObjectRetrievalFailureException, IllegalStateException {
         Object formObject = loadRequiredFormObject(request, model);
         ServletRequestDataBinder binder = createBinder(request, formObject, model);
-        bindAndValidate(request, binder);
+        bindAndValidate(request, model, binder);
         exportErrors(binder.getErrors(), model);
         return binder.getErrors().hasErrors() ? error() : success();
     }
@@ -269,7 +273,8 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
      *         validation
      * @throws Exception in case of invalid state or arguments
      */
-    protected final ServletRequestDataBinder bindAndValidate(HttpServletRequest request, ServletRequestDataBinder binder) {
+    protected final ServletRequestDataBinder bindAndValidate(HttpServletRequest request,
+            MutableAttributesAccessor model, ServletRequestDataBinder binder) {
         if (logger.isDebugEnabled()) {
             logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
                     + "', details='" + binder.getTarget() + "'");
@@ -278,13 +283,13 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
         if (logger.isDebugEnabled()) {
             logger.debug("After bind of object '" + binder.getObjectName() + "', details='" + binder.getTarget() + "'");
         }
-        onBind(request, binder.getTarget(), binder.getErrors());
+        onBind(request, model, binder.getTarget(), binder.getErrors());
         if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
             for (int i = 0; i < this.validators.length; i++) {
                 ValidationUtils.invokeValidator(this.validators[i], binder.getTarget(), binder.getErrors());
             }
         }
-        onBindAndValidate(request, binder.getTarget(), binder.getErrors());
+        onBindAndValidate(request, model, binder.getTarget(), binder.getErrors());
         return binder;
     }
 
@@ -356,6 +361,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
      * <p>
      * Default implementation delegates to onBind(request, formObject).
      * @param request current HTTP request
+     * @param the flow model
      * @param formObject the formObject object to perform further binding on
      * @param errors validation errors holder, allowing for additional custom
      *        registration of binding errors
@@ -363,8 +369,9 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
      * @see #bindAndValidate
      * @see #onBind(HttpServletRequest, Object)
      */
-    protected void onBind(HttpServletRequest request, Object formObject, BindException errors) {
-        onBind(request, formObject);
+    protected void onBind(HttpServletRequest request, MutableAttributesAccessor model, Object formObject,
+            BindException errors) {
+        onBind(request, model, formObject);
     }
 
     /**
@@ -374,11 +381,12 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
      * <p>
      * Default implementation is empty.
      * @param request current HTTP request
+     * @param the flow model
      * @param formObject the formObject object to perform further binding on
      * @throws Exception in case of invalid state or arguments
      * @see #onBind(HttpServletRequest, Object, BindException)
      */
-    protected void onBind(HttpServletRequest request, Object formObject) {
+    protected void onBind(HttpServletRequest request, MutableAttributesAccessor model, Object formObject) {
     }
 
     /**
@@ -406,7 +414,16 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
      * @see #bindAndValidate
      * @see org.springframework.validation.Errors
      */
-    protected void onBindAndValidate(HttpServletRequest request, Object formObject, BindException errors) {
+    protected void onBindAndValidate(HttpServletRequest request, MutableAttributesAccessor model, Object formObject,
+            BindException errors) {
+        if (!errors.hasErrors()) {
+            onSuccessfulBindAndValidate(request, model, formObject);
+        }
+    }
+
+    protected void onSuccessfulBindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
+            Object formObject) {
+
     }
 
 }
