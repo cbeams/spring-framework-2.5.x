@@ -138,27 +138,50 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 																	FilterChain filterChain) throws ServletException, IOException {
+
 		SessionFactory sessionFactory = lookupSessionFactory();
 		Session session = null;
+		boolean participate = false;
+
 		if (isSingleSession()) {
-			logger.debug("Opening single Hibernate session in OpenSessionInViewFilter");
-			session = getSession(sessionFactory);
-			TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
+			// single session mode
+			if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
+				// do not modify the Session: just set the participate flag
+				participate = true;
+			}
+			else {
+				logger.debug("Opening single Hibernate session in OpenSessionInViewFilter");
+				session = getSession(sessionFactory);
+				TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
+			}
 		}
 		else {
-			SessionFactoryUtils.initDeferredClose(sessionFactory);
+			// deferred close mode
+			if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
+				// do not modify deferred close: just set the participate flag
+				participate = true;
+			}
+			else {
+				SessionFactoryUtils.initDeferredClose(sessionFactory);
+			}
 		}
+
 		try {
 			filterChain.doFilter(request, response);
 		}
+
 		finally {
-			if (isSingleSession()) {
-				TransactionSynchronizationManager.unbindResource(sessionFactory);
-				logger.debug("Closing single Hibernate session in OpenSessionInViewFilter");
-				closeSession(session, sessionFactory);
-			}
-			else {
-				SessionFactoryUtils.processDeferredClose(sessionFactory);
+			if (!participate) {
+				if (isSingleSession()) {
+					// single session mode
+					TransactionSynchronizationManager.unbindResource(sessionFactory);
+					logger.debug("Closing single Hibernate session in OpenSessionInViewFilter");
+					closeSession(session, sessionFactory);
+				}
+				else {
+					// deferred close mode
+					SessionFactoryUtils.processDeferredClose(sessionFactory);
+				}
 			}
 		}
 	}

@@ -57,9 +57,19 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  */
 public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorAdapter {
 
+	/**
+	 * Suffix that gets appended to the PersistenceManagerFactory toString
+	 * representation for the "participate in existing persistence manager
+	 * handling" request attribute.
+	 * @see #getParticipateAttributeName
+	 */
+	public static final String PARTICIPATE_SUFFIX = ".PARTICIPATE";
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private PersistenceManagerFactory persistenceManagerFactory;
+
 
 	/**
 	 * Set the JDO PersistenceManagerFactory that should be used to create
@@ -77,21 +87,61 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 		return persistenceManagerFactory;
 	}
 
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-													 Object handler) throws DataAccessException {
-		logger.debug("Opening JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
-		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true);
-		TransactionSynchronizationManager.bindResource(getPersistenceManagerFactory(), new PersistenceManagerHolder(pm));
+
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+	    throws DataAccessException {
+
+		if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
+			// do not modify the PersistenceManager: just mark the request accordingly
+			String participateAttributeName = getParticipateAttributeName();
+			Integer count = (Integer) request.getAttribute(participateAttributeName);
+			int newCount = (count != null) ? count.intValue() + 1 : 1;
+			request.setAttribute(getParticipateAttributeName(), new Integer(newCount));
+		}
+
+		else {
+			logger.debug("Opening JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
+			PersistenceManager pm =
+					PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true);
+			TransactionSynchronizationManager.bindResource(
+					getPersistenceManagerFactory(), new PersistenceManagerHolder(pm));
+		}
+
 		return true;
 	}
 
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-															Object handler, Exception ex) throws DataAccessException {
-		PersistenceManagerHolder pmHolder =
-				(PersistenceManagerHolder) TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
-		logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
-		PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pmHolder.getPersistenceManager(),
-																																			getPersistenceManagerFactory());
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+	    Exception ex) throws DataAccessException {
+
+		String participateAttributeName = getParticipateAttributeName();
+		Integer count = (Integer) request.getAttribute(participateAttributeName);
+		if (count != null) {
+			// do not modify the PersistenceManager: just clear the marker
+			if (count.intValue() > 1) {
+				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1));
+			}
+			else {
+				request.removeAttribute(participateAttributeName);
+			}
+		}
+
+		else {
+			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
+					TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
+			logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
+			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(
+					pmHolder.getPersistenceManager(), getPersistenceManagerFactory());
+		}
+	}
+
+	/**
+	 * Return the name of the request attribute that identifies that a request is
+	 * already filtered. Default implementation takes the toString representation
+	 * of the PersistenceManagerFactory instance and appends ".FILTERED".
+	 * @see #PARTICIPATE_SUFFIX
+	 */
+	protected String getParticipateAttributeName() {
+		return getPersistenceManagerFactory().toString() + PARTICIPATE_SUFFIX;
 	}
 
 }

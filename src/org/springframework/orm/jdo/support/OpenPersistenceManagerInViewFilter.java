@@ -65,6 +65,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 
 	private String persistenceManagerFactoryBeanName = DEFAULT_PERSISTENCE_MANAGER_FACTORY_BEAN_NAME;
 
+
 	/**
 	 * Set the bean name of the PersistenceManagerFactory to fetch from Spring's
 	 * root application context. Default is "persistenceManagerFactory".
@@ -82,19 +83,34 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 		return persistenceManagerFactoryBeanName;
 	}
 
+
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 																	FilterChain filterChain) throws ServletException, IOException {
+
 		PersistenceManagerFactory pmf = lookupPersistenceManagerFactory();
-		logger.debug("Opening JDO persistence manager in OpenPersistenceManagerInViewFilter");
-		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(pmf, true);
-		TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
+		PersistenceManager pm = null;
+		boolean participate = false;
+
+		if (TransactionSynchronizationManager.hasResource(pmf)) {
+			// do not modify the Session: just set the participate flag
+			participate = true;
+		}
+		else {
+			logger.debug("Opening JDO persistence manager in OpenPersistenceManagerInViewFilter");
+			pm = PersistenceManagerFactoryUtils.getPersistenceManager(pmf, true);
+			TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
+		}
+
 		try {
 			filterChain.doFilter(request, response);
 		}
+
 		finally {
-			TransactionSynchronizationManager.unbindResource(pmf);
-			logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewFilter");
-			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, pmf);
+			if (!participate) {
+				TransactionSynchronizationManager.unbindResource(pmf);
+				logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewFilter");
+				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, pmf);
+			}
 		}
 	}
 

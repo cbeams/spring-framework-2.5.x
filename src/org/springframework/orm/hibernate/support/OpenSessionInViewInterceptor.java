@@ -91,6 +91,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 */
 	public static final String PARTICIPATE_SUFFIX = ".PARTICIPATE";
 
+
 	private boolean singleSession = true;
 
 
@@ -130,15 +131,21 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-													 Object handler) throws DataAccessException {
-		if (isSingleSession()) {
-			// single session mode
-			if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
-				// do not modify the Session: just mark the request accordingly
-				request.setAttribute(getParticipateAttributeName(), Boolean.TRUE);
-			}
-			else {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+	    throws DataAccessException {
+
+		if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) ||
+		    SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
+			// do not modify the Session: just mark the request accordingly
+			String participateAttributeName = getParticipateAttributeName();
+			Integer count = (Integer) request.getAttribute(participateAttributeName);
+			int newCount = (count != null) ? count.intValue() + 1 : 1;
+			request.setAttribute(getParticipateAttributeName(), new Integer(newCount));
+		}
+
+		else {
+			if (isSingleSession()) {
+				// single session mode
 				logger.debug("Opening single Hibernate session in OpenSessionInViewInterceptor");
 				Session session = SessionFactoryUtils.getSession(
 						getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
@@ -147,17 +154,12 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 				}
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
 			}
-		}
-		else {
-			// deferred close mode
-			if (SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
-				// do not modify the Session: just mark the request accordingly
-				request.setAttribute(getParticipateAttributeName(), Boolean.TRUE);
-			}
 			else {
+				// deferred close mode
 				SessionFactoryUtils.initDeferredClose(getSessionFactory());
 			}
 		}
+
 		return true;
 	}
 
@@ -168,8 +170,8 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * middle tier transactions have flushed their changes on commit.
 	 * @see #setFlushMode
 	 */
-	public void postHandle(HttpServletRequest request, HttpServletResponse response,
-												 Object handler, ModelAndView modelAndView) throws DataAccessException {
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+	    ModelAndView modelAndView) throws DataAccessException {
 		if (isSingleSession()) {
 			// only potentially flush in single session mode
 			SessionHolder sessionHolder =
@@ -191,13 +193,21 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#closeSessionIfNecessary
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-															Object handler, Exception ex) throws DataAccessException {
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+	    Exception ex) throws DataAccessException {
+
 		String participateAttributeName = getParticipateAttributeName();
-		if (request.getAttribute(participateAttributeName) != null) {
-			// do not modify the Session: just remove the marker attribute
-			request.removeAttribute(participateAttributeName);
+		Integer count = (Integer) request.getAttribute(participateAttributeName);
+		if (count != null) {
+			// do not modify the Session: just clear the marker
+			if (count.intValue() > 1) {
+				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1));
+			}
+			else {
+				request.removeAttribute(participateAttributeName);
+			}
 		}
+
 		else {
 			if (isSingleSession()) {
 				// single session mode
@@ -214,9 +224,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	}
 
 	/**
-	 * Return the name of the request attribute that identifies that a request
-	 * is already filtered. Default implementation takes the configured name
-	 * of the concrete filter instance and appends ".FILTERED".
+	 * Return the name of the request attribute that identifies that a request is
+	 * already filtered. Default implementation takes the toString representation
+	 * of the SessionFactory instance and appends ".FILTERED".
 	 * @see #PARTICIPATE_SUFFIX
 	 */
 	protected String getParticipateAttributeName() {

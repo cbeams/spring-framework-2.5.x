@@ -60,6 +60,21 @@ public class OpenPersistenceManagerInViewTests extends TestCase {
 		pmControl.replay();
 		interceptor.preHandle(request, response, "handler");
 		assertTrue(TransactionSynchronizationManager.hasResource(pmf));
+
+		// check that further invocations simply participate
+		interceptor.preHandle(request, response, "handler");
+
+		interceptor.preHandle(request, response, "handler");
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
+
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
+
+		interceptor.preHandle(request, response, "handler");
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
+
 		pmfControl.verify();
 		pmControl.verify();
 
