@@ -688,7 +688,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       the factory method does not have to be of the same type as the class
       which contains the static factory method, although in this example it
       is. An instance (non-static) factory method, mentioned previously, would
-      be used in an essentially idential fashion (aside from the use of the
+      be used in an essentially identical fashion (aside from the use of the
       <literal>factory-bean</literal> attribute instead of the
       <literal>class</literal> attribute), so will not be detailed
       here.</para>
