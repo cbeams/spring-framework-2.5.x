@@ -172,9 +172,10 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 			throw new IllegalArgumentException("transactionManager is required");
 		}
 		if (this.transactionAttributeSource == null) {
-			throw new IllegalArgumentException("Either 'transactionAttributeSource' or 'transactionAttributes' " +
-			                                   "is required: If there are no transactional methods, don't use " +
-			                                   "a TransactionInterceptor respectively a transactional proxy.");
+			throw new IllegalArgumentException(
+					"Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
+					"If there are no transactional methods, don't use a TransactionInterceptor " +
+					"respectively a transactional proxy.");
 		}
 	}
 
@@ -205,7 +206,7 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 			// the ThreadLocal stack maintained in this class.
 			if (logger.isDebugEnabled())
 				logger.debug("Don't need to create transaction for " + methodIdentification(method) +
-				             ": this method isn't transactional");
+						": this method isn't transactional");
 		}
 
 		// We always bind the TransactionInfo to the thread, even if
@@ -253,7 +254,7 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 			if (txInfo.transactionAttribute.rollbackOn(ex)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Invoking rollback for transaction on " + txInfo.joinpointIdentification() +
-					            " due to throwable [" + ex + "]");
+							" due to throwable [" + ex + "]");
 				}
 				try {
 					this.transactionManager.rollback(txInfo.getTransactionStatus());
@@ -271,9 +272,9 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 				// we don't roll back on this exception
 				if (logger.isDebugEnabled()) {
 					logger.debug(txInfo.joinpointIdentification() + " threw throwable [" + ex +
-					             "] but this does not force transaction rollback");
+							"] but this does not force transaction rollback");
 				}
-				// will still roll back if rollbackOnly is true
+				// will still roll back if TransactionStatus.rollbackOnly is true
 				this.transactionManager.commit(txInfo.getTransactionStatus());
 			}
 		}
@@ -296,7 +297,7 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	//---------------------------------------------------------------------
 	
 	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization
+		// Rely on default serialization, just initialize state after deserialization.
 		try {
 			ois.defaultReadObject();
 		}

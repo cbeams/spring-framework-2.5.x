@@ -31,9 +31,10 @@ import org.springframework.orm.ObjectRetrievalFailureException;
 public class JdoObjectRetrievalFailureException extends ObjectRetrievalFailureException {
 
 	public JdoObjectRetrievalFailureException(JDOObjectNotFoundException ex) {
+		// extract information about the failed object from the JDOException, if available
 		super((ex.getFailedObject() != null ? ex.getFailedObject().getClass() : null),
-					(ex.getFailedObject() != null ? JDOHelper.getObjectId(ex.getFailedObject()) : null),
-					ex.getMessage(), ex);
+				(ex.getFailedObject() != null ? JDOHelper.getObjectId(ex.getFailedObject()) : null),
+				ex.getMessage(), ex);
 	}
 
 }
