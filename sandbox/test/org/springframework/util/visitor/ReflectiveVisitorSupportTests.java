@@ -113,10 +113,10 @@ public class ReflectiveVisitorSupportTests extends TestCase {
     }
 
     public class DirectMockVisitor extends AbstractMockVisitor {
-        public void visitArrayList(ArrayList value) {
+        public void visit(ArrayList value) {
             visited = true;
         }
-        public void visitMapEntry(Map.Entry entry) {
+        public void visit(Map.Entry entry) {
             visited = true;
         }
     }
@@ -130,12 +130,12 @@ public class ReflectiveVisitorSupportTests extends TestCase {
     */
 
     public class SuperclassMockVisitor extends AbstractMockVisitor {
-        public void visitAbstractList(AbstractList value) {
+        public void visit(AbstractList value) {
             visited = true;
         }
     }
     public class InterfaceMockVisitor extends AbstractMockVisitor {
-        public void visitList(List value) {
+        public void visit(List value) {
             visited = true;
         }
     }
@@ -147,7 +147,7 @@ public class ReflectiveVisitorSupportTests extends TestCase {
     }
 
     private class InvisibleClassVisitor extends AbstractMockVisitor {
-        public void visitArrayList(ArrayList list) {
+        public void visit(ArrayList list) {
             visited = true;
         }
     }
