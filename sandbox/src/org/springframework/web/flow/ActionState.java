@@ -23,12 +23,14 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * A state that executes one or more action beans when entered.
+ * A transitionable state that executes one or more actions when entered.
  * @author Keith Donald
  */
 public class ActionState extends TransitionableState {
@@ -40,9 +42,19 @@ public class ActionState extends TransitionableState {
 		addAction(action);
 	}
 
+	public ActionState(Flow flow, String id, String actionName, Action action, Transition transition) {
+		super(flow, id, transition);
+		addAction(actionName, action);
+	}
+
 	public ActionState(Flow flow, String id, Action action, Transition[] transitions) {
 		super(flow, id, transitions);
 		addAction(action);
+	}
+
+	public ActionState(Flow flow, String id, String actionName, Action action, Transition[] transitions) {
+		super(flow, id, transitions);
+		addAction(actionName, action);
 	}
 
 	public ActionState(Flow flow, String id, Action[] actions, Transition[] transitions) {
@@ -50,13 +62,105 @@ public class ActionState extends TransitionableState {
 		addActions(actions);
 	}
 
+	public ActionState(Flow flow, String id, String[] actionNames, Action[] actions, Transition[] transitions) {
+		super(flow, id, transitions);
+		addActions(actionNames, actions);
+	}
+
+	public boolean isActionState() {
+		return true;
+	}
+
+	protected void addAction(Action action) {
+		this.namedActions.add(createNamedAction(null, action));
+	}
+
+	protected void addAction(String actionName, Action action) {
+		this.namedActions.add(createNamedAction(actionName, action));
+	}
+
+	protected void addActions(Action[] actions) {
+		Assert.notEmpty(actions, "You must add at least one action");
+		for (int i = 0; i < actions.length; i++) {
+			addAction(actions[i]);
+		}
+	}
+
+	protected void addActions(String[] names, Action[] actions) {
+		Assert.notEmpty(names, "You must add at least one action");
+		Assert.notEmpty(actions, "You must add at least one action");
+		Assert.isTrue(names.length == actions.length, "The name->action arrays must be equal in length");
+		for (int i = 0; i < actions.length; i++) {
+			addAction(names[i], actions[i]);
+		}
+	}
+
+	protected NamedAction createNamedAction(String actionName, Action action) {
+		return new NamedAction(this, actionName, action);
+	}
+
+	/**
+	 * @return An iterator that returns the set of actions to execute for this
+	 *         state.
+	 */
+	protected Iterator namedActionIterator() {
+		return this.namedActions.iterator();
+	}
+
+	/**
+	 * Hook method implementation that initiates state processing.
+	 * 
+	 * This implementation iterators over each configured Action for this state
+	 * and executes it.
+	 */
+	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
+			HttpServletResponse response) {
+		Iterator it = namedActionIterator();
+		int executionCount = 0;
+		while (it.hasNext()) {
+			NamedAction namedAction = (NamedAction)it.next();
+			ActionResult result = namedAction.execute(request, response, flowExecution);
+			executionCount++;
+			String eventId = namedAction.getEventId(result);
+			Transition transition = getTransition(eventId);
+			if (transition != null) {
+				flowExecution.setLastEventId(eventId);
+				return transition.execute(flowExecution, request, response);
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+							+ eventId + "' - " + "I will proceed to the next action in the chain");
+				}
+			}
+		}
+		if (executionCount > 0) {
+			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
+					"No supported event was signaled by any of the " + executionCount
+							+ " actions that executed in this action state '" + getId() + "' of flow '"
+							+ getFlow().getId() + "' -- programmer error?"));
+		}
+		else {
+			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
+					"No actions were executed, thus I cannot execute any state transition "
+							+ "-- programmer configuration error; "
+							+ "make sure you add at least one action bean to this state"));
+		}
+	}
+
 	protected static class NamedAction implements Serializable {
+		protected static final Log logger = LogFactory.getLog(NamedAction.class);
+
+		private ActionState actionState;
+
 		private String name;
 
 		private Action action;
 
-		public NamedAction(String name, Action action) {
+		public NamedAction(ActionState actionState, String name, Action action) {
+			Assert.notNull(actionState, "The owning action state is required");
 			Assert.notNull(action, "The action is required");
+			this.actionState = actionState;
 			this.name = name;
 			this.action = action;
 		}
@@ -90,96 +194,21 @@ public class ActionState extends TransitionableState {
 			}
 		}
 
-		public String toString() {
-			return getCaption();
-		}
-	}
-
-	public boolean isActionState() {
-		return true;
-	}
-
-	protected void addAction(Action action) {
-		this.namedActions.add(createNamedAction(null, action));
-	}
-
-	protected void addAction(String actionName, Action action) {
-		this.namedActions.add(createNamedAction(actionName, action));
-	}
-
-	protected void addActions(Action[] actions) {
-		for (int i = 0; i < actions.length; i++) {
-			addAction(actions[i]);
-		}
-	}
-
-	protected void addActions(String[] names, Action[] actions) {
-		for (int i = 0; i < actions.length; i++) {
-			addAction(names[i], actions[i]);
-		}
-	}
-
-	protected NamedAction createNamedAction(String actionName, Action action) {
-		return new NamedAction(actionName, action);
-	}
-
-	/**
-	 * @return An iterator that returns the set of action beans to execute for
-	 *         this state.
-	 */
-	protected Iterator namedActionIterator() {
-		return this.namedActions.iterator();
-	}
-
-	/**
-	 * Hook method implementation that initiates state processing.
-	 * 
-	 * This implementation iterators over each configured ActionBean for this
-	 * state and executes it. If the <code>actionName</code> is provided and
-	 * not the ActionBean instance, the instance is retrieved from the
-	 * <code>FlowServiceLocator</code>
-	 */
-	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response) {
-		Iterator it = namedActionIterator();
-		int executionCount = 0;
-		while (it.hasNext()) {
-			NamedAction namedAction = (NamedAction)it.next();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Executing action '" + namedAction.getCaption() + "'");
-			}
-			ActionResult result;
+		protected ActionResult execute(HttpServletRequest request, HttpServletResponse response,
+				FlowExecutionStack flowExecution) {
 			try {
-				result = namedAction.action.execute(request, response, flowExecution);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Executing action '" + getCaption() + "'");
+				}
+				return action.execute(request, response, flowExecution);
 			}
 			catch (Exception e) {
-				throw new ActionExecutionException(this, namedAction, e);
-			}
-			executionCount++;
-			String eventId = namedAction.getEventId(result);
-			Transition transition = getTransition(eventId);
-			if (transition != null) {
-				flowExecution.setLastEventId(eventId);
-				return transition.execute(flowExecution, request, response);
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-							+ eventId + "' - " + "I will proceed to the next action in the chain");
-				}
+				throw new ActionExecutionException(actionState, this, e);
 			}
 		}
-		if (executionCount > 0) {
-			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
-					"No supported event was signaled by any of the " + executionCount
-							+ " actions that executed in this action state '" + getId() + "' of flow '"
-							+ getFlow().getId() + "' -- programmer error?"));
-		}
-		else {
-			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
-					"No actions were executed, thus I cannot execute any state transition "
-							+ "-- programmer configuration error; "
-							+ "make sure you add at least one action bean to this state"));
+
+		public String toString() {
+			return getCaption();
 		}
 	}
 }
