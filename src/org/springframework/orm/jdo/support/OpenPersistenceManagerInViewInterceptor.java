@@ -110,8 +110,9 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 		return true;
 	}
 
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
-	    Exception ex) throws DataAccessException {
+	public void afterCompletion(
+			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+			throws DataAccessException {
 
 		String participateAttributeName = getParticipateAttributeName();
 		Integer count = (Integer) request.getAttribute(participateAttributeName);

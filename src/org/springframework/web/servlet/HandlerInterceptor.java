@@ -96,22 +96,26 @@ public interface HandlerInterceptor {
 	 * @param modelAndView the ModelAndView that the handler returned, can also be null
 	 * @throws Exception in case of errors
 	 */
-	void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-	    ModelAndView modelAndView) throws Exception;
+	void postHandle(
+			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+			throws Exception;
 
 	/**
-	 * Callback after completion of request processing, i.e. after rendering the view.
-	 * Will be called on any outcome of handler execution, thus allows for proper
-	 * resource cleanup.
-	 * <p>Note: Will only be called if this interceptor's preHandle method has
-	 * successfully completed and returned true!
+	 * Callback after completion of request processing, that is, after rendering
+	 * the view. Will be called on any outcome of handler execution, thus allows
+	 * for proper resource cleanup.
+	 * <p>Note: Will only be called if this interceptor's <code>preHandle</code>
+	 * method has successfully completed and returned true!
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance examination
-	 * @param ex exception thrown on handler execution
+	 * @param ex exception thrown on handler execution, if any (only included as
+	 * additional context information for the case where a handler threw an exception;
+	 * request execution may have failed even when this argument is null)
 	 * @throws Exception in case of errors
 	 */
-	void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
-	    Exception ex) throws Exception;
+	void afterCompletion(
+			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+			throws Exception;
 
 }

@@ -416,9 +416,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Subclasses must implement this method to do the work of request handling.
 	 * The contract is the same as that for the doGet or doPost methods of HttpServlet.
 	 * This class intercepts calls to ensure that event publication takes place.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @throws Exception in case of any kind of processing failure
 	 * @see javax.servlet.http.HttpServlet#doGet
 	 * @see javax.servlet.http.HttpServlet#doPost
-	 * @throws Exception in case of any kind of processing failure
 	 */
 	protected abstract void doService(HttpServletRequest request, HttpServletResponse response)
 	    throws Exception;

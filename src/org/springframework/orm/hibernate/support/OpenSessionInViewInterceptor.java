@@ -170,8 +170,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * middle tier transactions have flushed their changes on commit.
 	 * @see #setFlushMode
 	 */
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-	    ModelAndView modelAndView) throws DataAccessException {
+	public void postHandle(
+			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+			throws DataAccessException {
 		if (isSingleSession()) {
 			// only potentially flush in single session mode
 			SessionHolder sessionHolder =
@@ -193,13 +194,14 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#closeSessionIfNecessary
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
-	    Exception ex) throws DataAccessException {
+	public void afterCompletion(
+			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+			throws DataAccessException {
 
 		String participateAttributeName = getParticipateAttributeName();
 		Integer count = (Integer) request.getAttribute(participateAttributeName);
 		if (count != null) {
-			// do not modify the Session: just clear the marker
+			// Do not modify the Session: just clear the marker.
 			if (count.intValue() > 1) {
 				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1));
 			}
@@ -226,7 +228,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	/**
 	 * Return the name of the request attribute that identifies that a request is
 	 * already filtered. Default implementation takes the toString representation
-	 * of the SessionFactory instance and appends ".FILTERED".
+	 * of the SessionFactory instance and appends ".PARTICIPATE".
 	 * @see #PARTICIPATE_SUFFIX
 	 */
 	protected String getParticipateAttributeName() {
