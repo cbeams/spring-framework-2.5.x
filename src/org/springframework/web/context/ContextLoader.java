@@ -4,8 +4,8 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -19,6 +19,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * falling back to the default context class (XmlWebApplicationContext) if not found.
  *
  * @author Juergen Hoeller
+ * @author Colin Sampaleanu
  * @since 17.02.2003
  * @see ContextLoaderListener
  * @see ContextLoaderServlet
@@ -38,10 +39,14 @@ public class ContextLoader {
 	 */
 	public static final Class DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
 
-
 	private final Log logger = LogFactory.getLog(ContextLoader.class);
 
-
+	/**
+	 * Parent context to web application context, which may optionally be
+	 * loaded/initialized by the loadParentContext() template method 
+	 */
+	protected ApplicationContext parentContext;
+	
 	/**
 	 * Initialize Spring's web application context for the given servlet context,
 	 * regarding the "contextClass" servlet context init parameter.
@@ -68,16 +73,19 @@ public class ContextLoader {
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected WebApplicationContext createContext(ServletContext servletContext) throws BeansException {
+
 		String contextClass = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		RootWebApplicationContext wac = null;
 		try {
+			loadParentContext(servletContext);
+			
 			ClassLoader cl = Thread.currentThread().getContextClassLoader();
 			Class clazz = (contextClass != null ? Class.forName(contextClass, true, cl) : DEFAULT_CONTEXT_CLASS);
 			if (!RootWebApplicationContext.class.isAssignableFrom(clazz)) {
-				throw new ApplicationContextException("Context class [" + contextClass + "] is no RootWebApplicationContext");
+				throw new ApplicationContextException("Context class [" + contextClass + "] is not RootWebApplicationContext");
 			}
 			wac = (RootWebApplicationContext) clazz.newInstance();
-			wac.initRootContext(servletContext);
+			wac.initRootContext(servletContext, this.parentContext);
 		}
 		catch (BeansException ex) {
 			handleException("Failed to initialize application context", ex);
@@ -97,19 +105,6 @@ public class ContextLoader {
 	}
 
 	/**
-	 * Log and throw an appropriate exception.
-	 */
-	private void handleException(String msg, Throwable ex) throws BeansException {
-		logger.error(msg, ex);
-		if (ex instanceof BeansException) {
-			throw (BeansException) ex;
-		}
-		else {
-			throw new ApplicationContextException(msg, ex);
-		}
-	}
-
-	/**
 	 * Close Spring's web application context for the given servlet context.
 	 * @param servletContext current servlet context
 	 */
@@ -118,6 +113,32 @@ public class ContextLoader {
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 		if (wac instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) wac).close();
+		}
+	}
+	
+	/**
+	 * Template method which may be overriden by a subclass to load or obtain
+	 * an ApplicationContext instance which will be used as the parent context
+	 * of the WebApplicationContext if it is not null. This method should set
+	 * the parentContext field.
+	 * 
+	 * @param servletContext
+	 * @throws BeansException if the context couldn't be initialized
+	 */
+	protected void loadParentContext(ServletContext servletContext) throws BeansException {
+		// empty default impl.
+	}
+	
+	/**
+	 * Log and throw an appropriate exception.
+	 */
+	protected void handleException(String msg, Throwable ex) throws BeansException {
+		logger.error(msg, ex);
+		if (ex instanceof BeansException) {
+			throw (BeansException) ex;
+		}
+		else {
+			throw new ApplicationContextException(msg, ex);
 		}
 	}
 
