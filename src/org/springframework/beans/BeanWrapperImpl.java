@@ -249,27 +249,14 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	public void registerCustomEditor(Class requiredType, String propertyPath, PropertyEditor propertyEditor) {
-		if (propertyPath != null) {
-			List bws = getBeanWrappersForPropertyPath(propertyPath);
-			for (Iterator it = bws.iterator(); it.hasNext();) {
-				BeanWrapperImpl bw = (BeanWrapperImpl) it.next();
-				bw.doRegisterCustomEditor(requiredType, getFinalPath(bw, propertyPath), propertyEditor);
-			}
-		}
-		else {
-			doRegisterCustomEditor(requiredType, propertyPath, propertyEditor);
-		}
-	}
-
-	private void doRegisterCustomEditor(Class requiredType, String propertyName, PropertyEditor propertyEditor) {
-		if (requiredType == null && propertyName == null) {
-			throw new IllegalArgumentException("No propertyName and no registeredType specified");
+		if (requiredType == null && propertyPath == null) {
+			throw new IllegalArgumentException("Either requiredType or propertyPath is required");
 		}
 		if (this.customEditors == null) {
 			this.customEditors = new HashMap();
 		}
-		if (propertyName != null) {
-			this.customEditors.put(propertyName, new CustomEditorHolder(propertyEditor, requiredType));
+		if (propertyPath != null) {
+			this.customEditors.put(propertyPath, new CustomEditorHolder(propertyEditor, requiredType));
 		}
 		else {
 			this.customEditors.put(requiredType, propertyEditor);
@@ -277,33 +264,23 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
-		if (propertyPath != null) {
-			BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyPath);
-			return nestedBw.doFindCustomEditor(requiredType, getFinalPath(nestedBw, propertyPath));
-		}
-		else {
-			return doFindCustomEditor(requiredType, propertyPath);
-		}
-	}
-
-	private PropertyEditor doFindCustomEditor(Class requiredType, String propertyName) {
 		if (this.customEditors == null) {
 			return null;
 		}
-		if (propertyName != null) {
+		if (propertyPath != null) {
 			// check property-specific editor first
-			PropertyEditor editor = getCustomEditor(propertyName, requiredType);
+			PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
 			if (editor == null) {
-				int keyIndex = propertyName.indexOf(PROPERTY_KEY_PREFIX);
+				int keyIndex = propertyPath.indexOf(PROPERTY_KEY_PREFIX);
 				if (keyIndex != -1) {
-					editor = getCustomEditor(propertyName.substring(0, keyIndex), requiredType);
+					editor = getCustomEditor(propertyPath.substring(0, keyIndex), requiredType);
 				}
 			}
 			if (editor != null) {
 				return editor;
 			}
 			else if (requiredType == null) {
-				requiredType = getPropertyType(propertyName);
+				requiredType = getPropertyType(propertyPath);
 			}
 		}
 		// no property-specific editor -> check type-specific editor
@@ -402,64 +379,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	/**
-	 * Recursively navigate to return a BeanWrapper for the nested property path.
-	 * In case of an indexed or mapped property, all BeanWrappers that apply will
-	 * be returned.
-	 * @param propertyPath property property path, which may be nested
-	 * @return a BeanWrapper for the target bean
-	 */
-	protected List getBeanWrappersForPropertyPath(String propertyPath) throws BeansException {
-		List beanWrappers = new ArrayList();
-		int pos = getNestedPropertySeparatorIndex(propertyPath, false);
-		// handle nested properties recursively
-		if (pos > -1) {
-			String nestedProperty = propertyPath.substring(0, pos);
-			String nestedPath = propertyPath.substring(pos + 1);
-			if (nestedProperty.indexOf(PROPERTY_KEY_PREFIX) == -1) {
-				Class propertyType = getPropertyDescriptor(nestedProperty).getPropertyType();
-				if (propertyType.isArray()) {
-					Object[] array = (Object[]) getPropertyValue(nestedProperty);
-					for (int i = 0; i < array.length; i++) {
-						beanWrappers.addAll(
-								getBeanWrappersForNestedProperty(
-										nestedProperty + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX, nestedPath));
-					}
-					return beanWrappers;
-				}
-				else if (List.class.isAssignableFrom(propertyType)) {
-					List list = (List) getPropertyValue(nestedProperty);
-					for (int i = 0; i < list.size(); i++) {
-						beanWrappers.addAll(
-								getBeanWrappersForNestedProperty(
-										nestedProperty + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX, nestedPath));
-					}
-					return beanWrappers;
-				}
-				else if (Map.class.isAssignableFrom(propertyType)) {
-					Map map = (Map) getPropertyValue(nestedProperty);
-					for (Iterator it = map.keySet().iterator(); it.hasNext();) {
-						beanWrappers.addAll(
-								getBeanWrappersForNestedProperty(
-										nestedProperty + PROPERTY_KEY_PREFIX + it.next() + PROPERTY_KEY_SUFFIX, nestedPath));
-					}
-					return beanWrappers;
-				}
-			}
-			beanWrappers.addAll(getBeanWrappersForNestedProperty(nestedProperty, nestedPath));
-			return beanWrappers;
-		}
-		else {
-			beanWrappers.add(this);
-			return beanWrappers;
-		}
-	}
-
-	private List getBeanWrappersForNestedProperty(String nestedProperty, String nestedPath) throws BeansException {
-		BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
-		return nestedBw.getBeanWrappersForPropertyPath(nestedPath);
-	}
-
-	/**
 	 * Retrieve a BeanWrapper for the given nested property.
 	 * Create a new one if not found in the cache.
 	 * <p>Note: Caching nested BeanWrappers is necessary now,
@@ -475,6 +394,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		String[] tokens = getPropertyNameTokens(nestedProperty);
 		Object propertyValue = getPropertyValue(tokens[0], tokens[1], tokens[2]);
 		String canonicalName = tokens[0];
+		String propertyName = tokens[1];
 		if (propertyValue == null) {
 			throw new NullValueInNestedPathException(getWrappedClass(), this.nestedPath + canonicalName);
 		}
@@ -485,16 +405,29 @@ public class BeanWrapperImpl implements BeanWrapper {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
 			}
-			nestedBw = new BeanWrapperImpl(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR,
-																		 this);
+			nestedBw = new BeanWrapperImpl(
+					propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR, this);
 			// inherit all type-specific PropertyEditors
 			if (this.customEditors != null) {
-				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
-					Object key = it.next();
-					if (key instanceof Class) {
-						Class requiredType = (Class) key;
-						PropertyEditor editor = (PropertyEditor) this.customEditors.get(key);
+				for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					if (entry.getKey() instanceof Class) {
+						Class requiredType = (Class) entry.getKey();
+						PropertyEditor editor = (PropertyEditor) entry.getValue();
 						nestedBw.registerCustomEditor(requiredType, editor);
+					}
+					else if (entry.getKey() instanceof String) {
+						String editorPath = (String) entry.getKey();
+						int pos = getNestedPropertySeparatorIndex(editorPath, false);
+						if (pos != -1) {
+							String editorNestedProperty = editorPath.substring(0, pos);
+							String editorNestedPath = editorPath.substring(pos + 1);
+							if (editorNestedProperty.equals(canonicalName) || editorNestedProperty.equals(propertyName)) {
+								CustomEditorHolder editorHolder = (CustomEditorHolder) entry.getValue();
+								nestedBw.registerCustomEditor(
+										editorHolder.getRegisteredType(), editorNestedPath, editorHolder.getPropertyEditor());
+							}
+						}
 					}
 				}
 			}
@@ -1090,6 +1023,14 @@ public class BeanWrapperImpl implements BeanWrapper {
 		private CustomEditorHolder(PropertyEditor propertyEditor, Class registeredType) {
 			this.propertyEditor = propertyEditor;
 			this.registeredType = registeredType;
+		}
+
+		private PropertyEditor getPropertyEditor() {
+			return propertyEditor;
+		}
+
+		private Class getRegisteredType() {
+			return registeredType;
 		}
 
 		private PropertyEditor getPropertyEditor(Class requiredType) {

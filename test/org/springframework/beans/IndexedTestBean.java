@@ -38,6 +38,16 @@ public class IndexedTestBean {
 	private Map map;
 
 	public IndexedTestBean() {
+		this(true);
+	}
+
+	public IndexedTestBean(boolean populate) {
+		if (populate) {
+			populate();
+		}
+	}
+
+	public void populate() {
 		TestBean tb0 = new TestBean("name0", 0);
 		TestBean tb1 = new TestBean("name1", 0);
 		TestBean tb2 = new TestBean("name2", 0);

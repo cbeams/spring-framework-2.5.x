@@ -799,7 +799,7 @@ public class BeanWrapperTestSuite extends TestCase {
 	}
 
 	public void testIndexedPropertiesWithCustomEditorForProperty() {
-		IndexedTestBean bean = new IndexedTestBean();
+		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, "array.name", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
@@ -816,6 +816,8 @@ public class BeanWrapperTestSuite extends TestCase {
 				setValue("map" + text);
 			}
 		});
+		bean.populate();
+
 		TestBean tb0 = bean.getArray()[0];
 		TestBean tb1 = bean.getArray()[1];
 		TestBean tb2 = ((TestBean) bean.getList().get(0));
@@ -860,7 +862,7 @@ public class BeanWrapperTestSuite extends TestCase {
 	}
 
 	public void testIndexedPropertiesWithIndividualCustomEditorForProperty() {
-		IndexedTestBean bean = new IndexedTestBean();
+		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, "array[0].name", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
@@ -892,6 +894,8 @@ public class BeanWrapperTestSuite extends TestCase {
 				setValue("mapkey2" + text);
 			}
 		});
+		bean.populate();
+
 		TestBean tb0 = bean.getArray()[0];
 		TestBean tb1 = bean.getArray()[1];
 		TestBean tb2 = ((TestBean) bean.getList().get(0));
