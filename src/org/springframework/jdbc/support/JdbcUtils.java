@@ -16,7 +16,10 @@
 
 package org.springframework.jdbc.support;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -27,7 +30,6 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
@@ -74,7 +76,7 @@ public class JdbcUtils {
 	}
 
 	/**
-	 * Extract database meta data.
+	 * Extract database meta data via the given DatabaseMetaDataCallback.
 	 * <p>This method will open a connection to the database and retrieve the database metadata.
 	 * Since this method is called before the exception translation feature is configured for
 	 * a datasource, this method can not rely on the SQLException translation functionality.
@@ -82,37 +84,79 @@ public class JdbcUtils {
 	 * and any calling code should catch and handle this exception. You can just log the
 	 * error and hope for the best, but there is probably a more serious error that will
 	 * reappear when you try to access the database again.
-	 * @param dataSource the DataSource to use
+	 * @param dataSource the DataSource to extract metadata for
 	 * @param action callback that will do the actual work
-	 * @return object containing the extracted information
+	 * @return object containing the extracted information, as returned by
+	 * the DatabaseMetaDataCallback's <code>processMetaData</code> method
+	 * @throws MetaDataAccessException if meta data access failed
 	 */
 	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback action)
 			throws MetaDataAccessException {
 		Connection con = null;
 		try {
 			con = DataSourceUtils.getConnection(dataSource);
-			if (con != null) {
-				return action.processMetaData(con.getMetaData());
+			if (con == null) {
+				// should only happen in test environments
+				throw new MetaDataAccessException("Connection returned by DataSource [" + dataSource + "] was null");
 			}
-			else {
-				throw new MetaDataAccessException("Error while getting connection");
+			DatabaseMetaData metaData = con.getMetaData();
+			if (metaData == null) {
+				// should only happen in test environments
+				throw new MetaDataAccessException("DatabaseMetaData returned by Connection [" + con + "] was null");
 			}
+			return action.processMetaData(metaData);
 		}
 		catch (CannotGetJdbcConnectionException ex) {
-			//throw checked exception - we don't want this to be fatal?
-			throw new MetaDataAccessException("Error while getting connection",ex);
-		}
-		catch (DataAccessException ex) {
-			//throw checked exception - we don't want this to be fatal?
-			throw new MetaDataAccessException("Error while extracting DatabaseMetaData",ex);
+			throw new MetaDataAccessException("Could not get Connection for extracting meta data", ex);
 		}
 		catch (SQLException ex) {
-			//throw checked exception - we don't want this to be fatal?
-			throw new MetaDataAccessException("Error while extracting DatabaseMetaData",ex);
+			throw new MetaDataAccessException("Error while extracting DatabaseMetaData", ex);
+		}
+		catch (AbstractMethodError err) {
+			throw new MetaDataAccessException(
+					"JDBC DatabaseMetaData method not implemented by JDBC driver - upgrade your driver", err);
 		}
 		finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, dataSource);
 		}
+	}
+
+	/**
+	 * Call the specified method on DatabaseMetaData for the given DataSource,
+	 * and extract the invocation result.
+	 * @param dataSource the DataSource to extract meta data for
+	 * @param metaDataMethodName the name of the DatabaseMetaData method to call
+	 * @return the object returned by the specified DatabaseMetaData method
+	 * @throws MetaDataAccessException if we couldn't access the DatabaseMetaData
+	 * or failed to invoke the specified method
+	 * @see java.sql.DatabaseMetaData
+	 */
+	public static Object extractDatabaseMetaData(DataSource dataSource, final String metaDataMethodName)
+			throws MetaDataAccessException {
+		return JdbcUtils.extractDatabaseMetaData(dataSource,
+				new DatabaseMetaDataCallback() {
+					public Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException {
+						try {
+							Method method = dbmd.getClass().getMethod(metaDataMethodName, (Class[]) null);
+							return method.invoke(dbmd, (Object[]) null);
+						}
+						catch (NoSuchMethodException ex) {
+							throw new MetaDataAccessException("No method named '" + metaDataMethodName +
+									"' found on DatabaseMetaData instance [" + dbmd + "]", ex);
+						}
+						catch (IllegalAccessException ex) {
+							throw new MetaDataAccessException(
+									"Could not access DatabaseMetaData method '" + metaDataMethodName + "'", ex);
+						}
+						catch (InvocationTargetException ex) {
+							if (ex.getTargetException() instanceof SQLException) {
+								throw (SQLException) ex.getTargetException();
+							}
+							throw new MetaDataAccessException(
+									"Invocation of DatabaseMetaData method '" + metaDataMethodName + "' failed", ex);
+						}
+					}
+				});
 	}
 
 	/**
@@ -153,7 +197,7 @@ public class JdbcUtils {
 				if (!insideLiteral)
 					count++;
 			}
-			else {
+ 			else {
 				if (delimiters.indexOf(str.charAt(i)) > -1) {
 					if (!insideLiteral) {
 						insideLiteral = true;

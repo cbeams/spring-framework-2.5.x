@@ -16,8 +16,6 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -198,16 +196,16 @@ public class SQLErrorCodesFactory {
 	 * or an empty error codes instance if no SQLErrorCodes were found.
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName
 	 */
-	public SQLErrorCodes getErrorCodes(DataSource ds) {
+	public SQLErrorCodes getErrorCodes(DataSource dataSource) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Looking up default SQLErrorCodes for DataSource [" + ds + "]");
+			logger.debug("Looking up default SQLErrorCodes for DataSource [" + dataSource + "]");
 		}
 
 		// Let's avoid looking up database product info if we can.
-		String dataSourceDbName = (String) this.dataSourceProductNames.get(ds);
+		String dataSourceDbName = (String) this.dataSourceProductNames.get(dataSource);
 		if (dataSourceDbName != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Database product name found in cache for DataSource [" + ds +
+				logger.debug("Database product name found in cache for DataSource [" + dataSource +
 				    "]: name is '" + dataSourceDbName + "'");
 			}
 			return getErrorCodes(dataSourceDbName);
@@ -215,17 +213,8 @@ public class SQLErrorCodesFactory {
 
 		// We could not find it - got to look it up.
 		try {
-			String dbName = (String) JdbcUtils.extractDatabaseMetaData(ds,
-					new DatabaseMetaDataCallback() {
-						public Object processMetaData(DatabaseMetaData dbmd) throws SQLException {
-							if (dbmd == null) {
-								// should only happen in test environments
-								return null;
-							}
-							return dbmd.getDatabaseProductName();
-						}
-					}
-			);
+			String dbName = (String)
+					JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
 
 			if (dbName != null) {
 				// Special check for DB2 -- !!! DEPRECATED AS OF Spring 1.1 !!!
@@ -262,16 +251,16 @@ public class SQLErrorCodesFactory {
 					}
 				}
 
-				this.dataSourceProductNames.put(ds, dbName);
+				this.dataSourceProductNames.put(dataSource, dbName);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Database product name cached for DataSource [" + ds +
-					    "]: name is '" + dbName + "'");
+					logger.debug("Database product name cached for DataSource [" + dataSource +
+							"]: name is '" + dbName + "'");
 				}
 				return getErrorCodes(dbName);
 			}
 		}
 		catch (MetaDataAccessException ex) {
-			logger.warn("Error while getting database metadata", ex);
+			logger.warn("Error while extracting database product name - falling back to empty error codes");
 		}
 
 		// fallback is to return an empty ErrorCodes instance
