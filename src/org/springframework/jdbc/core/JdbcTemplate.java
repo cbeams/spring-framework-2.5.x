@@ -560,7 +560,26 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				int batchSize = pss.getBatchSize();
 				DatabaseMetaData dbmd = ps.getConnection().getMetaData();
 				try {
-					if (dbmd != null && dbmd.supportsBatchUpdates()) {
+					boolean supportsBatchUpdates = false;
+					try {
+						if (dbmd != null) {
+							if (dbmd.supportsBatchUpdates()) {
+								if (logger.isDebugEnabled()) {
+									logger.debug("Batch Updates supported for [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "]");
+								}
+								supportsBatchUpdates = true;
+							}
+							else {
+								if (logger.isDebugEnabled()) {
+									logger.debug("Batch Updates are not supported for [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "]");
+								}
+							}
+						}
+					}
+					catch (AbstractMethodError ame) {
+						logger.warn("Driver does not support JDBC 2.0 method supportsBatchUpdatres [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "]");
+					}
+					if (supportsBatchUpdates) {
 						for (int i = 0; i < batchSize; i++) {
 							pss.setValues(ps, i);
 							ps.addBatch();
