@@ -24,10 +24,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.enum.CodedEnum;
 
 /**
- * Aspect access strategy that accesses bean property values.  An "aspect"
- * in this case is a single bean property.
+ * Aspect access strategy that accesses bean property values. An "aspect" in
+ * this case is a single bean property.
  * 
  * @author Keith Donald
  */
@@ -40,6 +41,8 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     private ValueModel beanHolder;
 
     private BeanWrapper beanWrapper;
+
+    private MetaAspectAccessStrategy metaAspectAccessor;
 
     public BeanPropertyAccessStrategy(Object bean) {
         this.beanWrapper = new BeanWrapperImpl(bean);
@@ -107,11 +110,47 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
         }
         this.beanWrapper.setPropertyValue(aspect, value);
     }
-    
+
+    public MetaAspectAccessStrategy getMetaAspectAccessor() {
+        if (metaAspectAccessor == null) {
+            this.metaAspectAccessor = new BeanPropertyMetaAspectAccessor(
+                    beanWrapper);
+        }
+        return metaAspectAccessor;
+    }
+
+    private static class BeanPropertyMetaAspectAccessor implements
+            MetaAspectAccessStrategy {
+
+        private BeanWrapper beanWrapper;
+
+        public BeanPropertyMetaAspectAccessor(BeanWrapper beanWrapper) {
+            this.beanWrapper = beanWrapper;
+        }
+
+        public Class getAspectClass(String aspect) {
+            return beanWrapper.getPropertyDescriptor(aspect).getPropertyType();
+        }
+
+        public boolean isEnumeration(String aspect) {
+            return CodedEnum.class.isAssignableFrom(beanWrapper
+                    .getPropertyDescriptor(aspect).getPropertyType());
+        }
+
+        public boolean isReadable(String aspect) {
+            return beanWrapper.isReadableProperty(aspect);
+        }
+
+        public boolean isWriteable(String aspect) {
+            return beanWrapper.isWritableProperty(aspect);
+        }
+
+    }
+
     public Object getDomainObject() {
         return beanHolder.get();
     }
-    
+
     public ValueModel getDomainObjectHolder() {
         return beanHolder;
     }

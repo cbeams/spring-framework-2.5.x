@@ -20,6 +20,8 @@ package org.springframework.rules.values;
  * @author Keith Donald
  */
 public interface MutableFormModel extends FormModel {
+    public MetaAspectAccessStrategy getMetaAspectAccessor();
+    
     public void setFormProperties(String[] domainObjectProperties);
 
     public ValueModel add(String domainObjectProperty);

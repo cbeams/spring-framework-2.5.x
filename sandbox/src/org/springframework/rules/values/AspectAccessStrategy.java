@@ -20,6 +20,7 @@ package org.springframework.rules.values;
  * @author Keith Donald
  */
 public interface AspectAccessStrategy {
+    public MetaAspectAccessStrategy getMetaAspectAccessor();
     public Object getValue(String aspect);
     public Object getDomainObject();
 }

@@ -65,6 +65,10 @@ public class ValidatingFormModel extends DefaultFormModel implements
         return getValueModel(aspect).get();
     }
 
+    public MetaAspectAccessStrategy getMetaAspectAccessor() {
+        return getAccessStrategy().getMetaAspectAccessor();
+    }
+    
     public Object getDomainObject() {
         return this;
     }
