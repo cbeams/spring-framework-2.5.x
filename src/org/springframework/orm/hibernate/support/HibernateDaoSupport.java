@@ -56,6 +56,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private HibernateTemplate hibernateTemplate;
+	
 
 	/**
 	 * Set the Hibernate SessionFactory to be used by this DAO.
@@ -68,7 +69,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 * Return the Hibernate SessionFactory used by this DAO.
 	 */
 	public final SessionFactory getSessionFactory() {
-		return hibernateTemplate.getSessionFactory();
+		return (this.hibernateTemplate != null ? this.hibernateTemplate.getSessionFactory() : null);
 	}
 
 	/**

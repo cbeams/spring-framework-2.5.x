@@ -50,6 +50,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 
 	private JdbcTemplate jdbcTemplate;
 
+
 	/**
 	 * Set the JDBC DataSource to be used by this DAO.
 	 */
@@ -61,7 +62,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 * Return the JDBC DataSource used by this DAO.
 	 */
 	public final DataSource getDataSource() {
-		return jdbcTemplate.getDataSource();
+		return (this.jdbcTemplate != null ? this.jdbcTemplate.getDataSource() : null);
 	}
 
 	/**

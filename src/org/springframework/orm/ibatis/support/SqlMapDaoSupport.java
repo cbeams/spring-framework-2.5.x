@@ -38,6 +38,7 @@ public class SqlMapDaoSupport {
 
 	private SqlMapTemplate sqlMapTemplate = new SqlMapTemplate();
 
+
 	/**
 	 * Set the JDBC DataSource to be used by this DAO.
 	 */
@@ -49,7 +50,7 @@ public class SqlMapDaoSupport {
 	 * Return the JDBC DataSource used by this DAO.
 	 */
 	public final DataSource getDataSource() {
-		return sqlMapTemplate.getDataSource();
+		return (this.sqlMapTemplate != null ? this.sqlMapTemplate.getDataSource() : null);
 	}
 
 	/**

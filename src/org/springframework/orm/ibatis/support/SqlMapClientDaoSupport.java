@@ -39,6 +39,7 @@ public class SqlMapClientDaoSupport implements InitializingBean {
 
 	private SqlMapClientTemplate sqlMapClientTemplate = new SqlMapClientTemplate();
 
+
 	/**
 	 * Set the JDBC DataSource to be used by this DAO.
 	 */
@@ -50,7 +51,7 @@ public class SqlMapClientDaoSupport implements InitializingBean {
 	 * Return the JDBC DataSource used by this DAO.
 	 */
 	public final DataSource getDataSource() {
-		return sqlMapClientTemplate.getDataSource();
+		return (this.sqlMapClientTemplate != null ? this.sqlMapClientTemplate.getDataSource() : null);
 	}
 
 	/**

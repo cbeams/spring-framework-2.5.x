@@ -57,6 +57,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private JdoTemplate jdoTemplate;
+	
 
 	/**
 	 * Set the JDO PersistenceManagerFactory to be used by this DAO.
@@ -69,7 +70,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	 * Return the JDO PersistenceManagerFactory used by this DAO.
 	 */
 	public final PersistenceManagerFactory getPersistenceManagerFactory() {
-		return jdoTemplate.getPersistenceManagerFactory();
+		return (this.jdoTemplate != null ? this.jdoTemplate.getPersistenceManagerFactory() : null);
 	}
 
 	/**
