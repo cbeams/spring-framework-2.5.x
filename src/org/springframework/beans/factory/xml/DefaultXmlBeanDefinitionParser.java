@@ -46,14 +46,12 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
-import org.springframework.beans.factory.support.ManagedLinkedMap;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -607,15 +605,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	protected Map getMap(Element mapEle, String beanName) {
 		List list = getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
-		Map map = null;
-		// A LinkedHashMap will preserve insertion order, but is not available pre-1.4.
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			map = ManagedLinkedMapCreator.createManagedLinkedMap(list.size());
-			// ManagedLinkedMap = a tag subclass of java.util.LinkedHashMap
-		}
-		else {
-			map = new ManagedMap(list.size());  // a tag subclass of java.util.HashMap
-		}
+		Map map = new ManagedMap(list.size());
 		for (int i = 0; i < list.size(); i++) {
 			Element entryEle = (Element) list.get(i);
 			String key = entryEle.getAttribute(KEY_ATTRIBUTE);
@@ -710,18 +700,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		// else leave default value
 		return autowire;
-	}
-
-
-	/**
-	 * Actual creation of a ManagedLinkedMap.
-	 * In separate inner class to avoid runtime dependency on JDK 1.4.
-	 */
-	private static abstract class ManagedLinkedMapCreator {
-
-		private static Map createManagedLinkedMap(int capacity) {
-			return new ManagedLinkedMap(capacity);
-		}
 	}
 
 }

@@ -29,7 +29,6 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.JdkVersion;
+import org.springframework.core.CollectionFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -958,14 +957,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			int numberOfColumns = rsmd.getColumnCount();
 			List listOfRows = new ArrayList();
 			while (rs.next()) {
-				Map mapOfColValues = null;
-				// A LinkedHashMap will preserve column order, but is not available pre-1.4.
-				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-					mapOfColValues = LinkedHashMapCreator.createLinkedHashMap(numberOfColumns);
-				}
-				else {
-					mapOfColValues = new HashMap(numberOfColumns);
-				}
+				Map mapOfColValues = CollectionFactory.createLinkedMapIfPossible(numberOfColumns);
 				for (int i = 1; i <= numberOfColumns; i++) {
 					mapOfColValues.put(rsmd.getColumnName(i), rs.getObject(i));
 				}
@@ -991,8 +983,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int nrOfColumns = rsmd.getColumnCount();
 			if (nrOfColumns != 1) {
-				throw new IncorrectResultSizeDataAccessException("Expected single column but found " + nrOfColumns,
-																												 1, nrOfColumns);
+				throw new IncorrectResultSizeDataAccessException(
+						"Expected single column but found " + nrOfColumns, 1, nrOfColumns);
 			}
 			if (!rs.next()) {
 				throw new IncorrectResultSizeDataAccessException("Expected single row but found none", 1, 0);
@@ -1001,39 +993,39 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (rs.next()) {
 				throw new IncorrectResultSizeDataAccessException("Expected single row but found more than one", 1, -1);
 			}
-			if (result != null && this.requiredType != null
-					&& !this.requiredType.isInstance(result)) {
-				if (String.class == requiredType) {
+			if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
+				if (String.class == this.requiredType) {
 					result = result.toString();
 				} 
-				else if (Number.class.isAssignableFrom(requiredType) && Number.class.isInstance(result)) {
+				else if (Number.class.isAssignableFrom(this.requiredType) && Number.class.isInstance(result)) {
 					try {
-						if (Byte.class.isAssignableFrom(requiredType)) {
-							result = new Byte(((Number)result).byteValue());
+						if (Byte.class.isAssignableFrom(this.requiredType)) {
+							result = new Byte(((Number) result).byteValue());
 						}
-						else if (Short.class.isAssignableFrom(requiredType)) {
-							result = new Short(((Number)result).shortValue());
+						else if (Short.class.isAssignableFrom(this.requiredType)) {
+							result = new Short(((Number) result).shortValue());
 						}
-						else if (Integer.class.isAssignableFrom(requiredType)) {
-							result = new Integer(((Number)result).intValue());
+						else if (Integer.class.isAssignableFrom(this.requiredType)) {
+							result = new Integer(((Number) result).intValue());
 						}
-						else if (Long.class.isAssignableFrom(requiredType)) {
-							result = new Long(((Number)result).longValue());
+						else if (Long.class.isAssignableFrom(this.requiredType)) {
+							result = new Long(((Number) result).longValue());
 						}
-						else if (Float.class.isAssignableFrom(requiredType)) {
-							result = new Float(((Number)result).floatValue());
+						else if (Float.class.isAssignableFrom(this.requiredType)) {
+							result = new Float(((Number) result).floatValue());
 						}
-						else if (Double.class.isAssignableFrom(requiredType)) {
-							result = new Double(((Number)result).doubleValue());
+						else if (Double.class.isAssignableFrom(this.requiredType)) {
+							result = new Double(((Number) result).doubleValue());
 						}
-						else if (BigDecimal.class.isAssignableFrom(requiredType)) {
-							result = new BigDecimal(((Number)result).doubleValue());
+						else if (BigDecimal.class.isAssignableFrom(this.requiredType)) {
+							result = new BigDecimal(((Number) result).doubleValue());
 						}
-						else if (BigInteger.class.isAssignableFrom(requiredType)) {
-							result = new BigInteger(((Number)result).toString());
+						else if (BigInteger.class.isAssignableFrom(this.requiredType)) {
+							result = new BigInteger(result.toString());
 						}
 						else {
-							throw new NumberFormatException();
+							throw new NumberFormatException(
+									"Could not convert [" + result + "] to required type [" + this.requiredType.getName() + "]");
 						}
 					}
 					catch (NumberFormatException ne) {
@@ -1055,18 +1047,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				}
 			}
 			return result;
-		}
-	}
-
-
-	/**
-	 * Actual creation of a java.util.LinkedHashMap.
-	 * In separate inner class to avoid runtime dependency on JDK 1.4.
-	 */
-	private static abstract class LinkedHashMapCreator {
-
-		private static Map createLinkedHashMap(int capacity) {
-			return new LinkedHashMap(capacity);
 		}
 	}
 

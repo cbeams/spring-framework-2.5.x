@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +57,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.core.JdkVersion;
+import org.springframework.core.CollectionFactory;
 
 /**
  * Abstract bean factory superclass that implements default bean creation.
@@ -79,9 +78,6 @@ import org.springframework.core.JdkVersion;
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
     implements AutowireCapableBeanFactory {
-
-	private static final String MANAGED_LINKED_MAP_CLASS_NAME =
-	    "org.springframework.beans.factory.support.ManagedLinkedMap";
 
 	static {
 		// Eagerly load the DisposableBean and DestructionAwareBeanPostProcessor
@@ -902,8 +898,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// contain runtime bean references. May need to resolve references.
 			return resolveManagedSet(beanName, mergedBeanDefinition, argName, (Set) value);
 		}
-		else if (value instanceof ManagedMap ||
-		    (value != null && MANAGED_LINKED_MAP_CLASS_NAME.equals(value.getClass().getName()))) {
+		else if (value instanceof ManagedMap) {
 			// Convert from managed map. This is a special container that may
 			// contain runtime bean references. May need to resolve references.
 			return resolveManagedMap(beanName, mergedBeanDefinition, argName, (Map) value);
@@ -1012,14 +1007,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			String beanName, RootBeanDefinition mergedBeanDefinition, String argName, Map mm)
 			throws BeansException {
 
-		Map resolved = null;
-		// A LinkedHashMap will preserve insertion order, but is not available pre-1.4.
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			resolved = LinkedHashMapCreator.createLinkedHashMap(mm.size());
-		}
-		else {
-			resolved = new HashMap(mm.size());
-		}
+		Map resolved = CollectionFactory.createLinkedMapIfPossible(mm.size());
 		Iterator keys = mm.keySet().iterator();
 		while (keys.hasNext()) {
 			Object key = keys.next();
@@ -1251,17 +1239,5 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #autowireConstructor
 	 */
 	protected abstract Map findMatchingBeans(Class requiredType) throws BeansException;
-
-
-	/**
-	 * Actual creation of a java.util.LinkedHashMap.
-	 * In separate inner class to avoid runtime dependency on JDK 1.4.
-	 */
-	private static abstract class LinkedHashMapCreator {
-
-		private static Map createLinkedHashMap(int capacity) {
-			return new LinkedHashMap(capacity);
-		}
-	}
 
 }

@@ -16,27 +16,85 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.core.CollectionFactory;
 
 /**
  * Tag subclass used to hold managed Map values, which may
  * include runtime bean references.
  *
- * <p>Just used on JDK < 1.4, as java.util.LinkedHashMap -
- * which preserves key order - is preferred when it is available. 
+ * <p>Wraps a target Map, which will be a linked map if possible
+ * (that is, if running on JDK 1.4 or if Commons Collections 3.x is available).
  *
- * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 27-May-2003
- * @see ManagedLinkedMap
- * @see java.util.LinkedHashMap
+ * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
  */
-public class ManagedMap extends HashMap {
+public class ManagedMap implements Map {
+
+	private final Map targetMap;
 
 	public ManagedMap() {
+		this(16);
 	}
 
 	public ManagedMap(int initialCapacity) {
-		super(initialCapacity);
+		this.targetMap = CollectionFactory.createLinkedMapIfPossible(initialCapacity);
+	}
+
+	public ManagedMap(Map targetMap) {
+		this.targetMap = targetMap;
+	}
+
+	public int size() {
+		return this.targetMap.size();
+	}
+
+	public boolean isEmpty() {
+		return this.targetMap.isEmpty();
+	}
+
+	public boolean containsKey(Object key) {
+		return this.targetMap.containsKey(key);
+	}
+
+	public boolean containsValue(Object value) {
+		return this.targetMap.containsValue(value);
+	}
+
+	public Object get(Object key) {
+		return this.targetMap.get(key);
+	}
+
+	public Object put(Object key, Object value) {
+		return this.targetMap.put(key, value);
+	}
+
+	public Object remove(Object key) {
+		return this.targetMap.remove(key);
+	}
+
+	public void putAll(Map t) {
+		this.targetMap.putAll(t);
+	}
+
+	public void clear() {
+		this.targetMap.clear();
+	}
+
+	public Set keySet() {
+		return this.targetMap.keySet();
+	}
+
+	public Collection values() {
+		return this.targetMap.values();
+	}
+
+	public Set entrySet() {
+		return this.targetMap.entrySet();
 	}
 
 }
