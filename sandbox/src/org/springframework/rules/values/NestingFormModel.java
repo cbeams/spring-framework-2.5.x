@@ -38,10 +38,23 @@ public interface NestingFormModel extends FormModel {
      * provided name. The form object associated with the created child model is
      * the value model at the specified parent property path.
      * 
-     * @param childPageName
+     * @param childFormModelName
      * @param parentPropertyFormObjectPath
      * @return The child form model
      */
-    public MutableFormModel createChild(String childPageName,
+    public MutableFormModel createChild(String childFormModelName,
             String parentPropertyFormObjectPath);
+
+    /**
+     * Create a child form model nested by this form model identified by the
+     * provided name. The form object associated with the created child model is
+     * accessed via the provided value model.
+     * 
+     * @param childFormModelName
+     * @param childFormObjectHolder
+     * @return The child form model
+     */
+    public MutableFormModel createChild(String childFormModelName,
+            ValueModel childFormObjectHolder);
+
 }

@@ -58,6 +58,12 @@ public class DefaultFormModel implements MutableFormModel {
             boolean bufferChanges) {
         this.domainObjectAccessStrategy = domainObjectAccessStrategy;
         this.commitTrigger = new ValueHolder(null);
+        // @TODO this seems kind of hacky - does it make sense to always commit
+        // the form object value model if it is buffered? or is that the responsiblity
+        // of a higher-level object?
+        if (getFormObjectHolder() instanceof BufferedValueModel) {
+            ((BufferedValueModel)getFormObjectHolder()).setCommitTrigger(commitTrigger);
+        }
         setBufferChangesDefault(bufferChanges);
     }
 

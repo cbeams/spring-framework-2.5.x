@@ -28,6 +28,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.enums.CodedEnum;
+import org.springframework.util.Assert;
 
 /**
  * Aspect access strategy that accesses bean property values. An "aspect" in
@@ -55,6 +56,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     }
 
     public BeanPropertyAccessStrategy(final ValueModel beanHolder) {
+        Assert.notNull(beanHolder);
         if (beanHolder.get() != null) {
             this.beanWrapper = new BeanWrapperImpl(beanHolder.get());
         }
@@ -142,8 +144,10 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     }
 
     public void setValue(String aspect, Object value) {
-        if (beanHolder.get() == null) { throw new IllegalStateException(
-                "Attempt to set property on null reference"); }
+        if (beanHolder.get() == null) {
+            logger.warn("Attempt to set property on null reference; doing nothing...");
+            return;
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Setting aspect '" + aspect + "' = " + value);
         }
@@ -217,8 +221,8 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     }
 
     public MutableAspectAccessStrategy newNestedAccessor(
-            ValueModel parentValueHolder) {
-        return new BeanPropertyAccessStrategy(parentValueHolder);
+            ValueModel childValueHolder) {
+        return new BeanPropertyAccessStrategy(childValueHolder);
     }
 
 }

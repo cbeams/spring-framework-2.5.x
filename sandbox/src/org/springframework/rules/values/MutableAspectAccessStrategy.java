@@ -34,7 +34,7 @@ public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
     public void setValue(String aspect, Object value);
 
     public MutableAspectAccessStrategy newNestedAccessor(
-            ValueModel parentValueHolder);
+            ValueModel childValueHolder);
 
     public ValueModel getDomainObjectHolder();
 

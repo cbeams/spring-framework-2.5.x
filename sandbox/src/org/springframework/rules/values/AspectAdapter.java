@@ -30,15 +30,19 @@ public class AspectAdapter extends AbstractValueModel {
             String aspect) {
         if (aspectAccessStrategy.getDomainObjectHolder() != null) {
             if (logger.isDebugEnabled()) {
-                logger
-                        .debug("[Aspect Adapter for aspect '" + aspect + "' attaching to mutable domain object holder.]");
+                logger.debug("[Aspect Adapter for aspect '" + aspect
+                        + "' attaching to mutable domain object holder.]");
             }
             aspectAccessStrategy.getDomainObjectHolder().addValueListener(
                     new ValueListener() {
                         public void valueChanged() {
                             if (logger.isDebugEnabled()) {
                                 logger
-                                        .debug("[Notifying any dependents the '" + AspectAdapter.this.aspect + "' aspect value may have changed; target object changed]");
+                                        .debug("[Notifying any dependents for '"
+                                                + AspectAdapter.this.aspect
+                                                + "' the '"
+                                                + AspectAdapter.this.aspect
+                                                + "' aspect value may have changed; target domain object changed]");
                             }
                             AspectAdapter.this.fireValueChanged();
                         }

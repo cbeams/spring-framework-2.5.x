@@ -20,6 +20,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.rules.Algorithms;
 import org.springframework.rules.RulesSource;
@@ -31,6 +33,8 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public class CompoundFormModel implements FormModel, NestingFormModel {
+    private static final Log logger = LogFactory
+            .getLog(CompoundFormModel.class);
 
     private MutableAspectAccessStrategy domainObjectAccessStrategy;
 
@@ -69,9 +73,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     }
 
     public MutableFormModel createChild(String childFormModelName) {
-        Assert.isTrue(getChildFormModel(childFormModelName) == null,
-                "Child model by name '" + childFormModelName
-                        + "' already exists");
         ValidatingFormModel childModel = new ValidatingFormModel(
                 domainObjectAccessStrategy, bufferChanges);
         childModel.setRulesSource(rulesSource);
@@ -81,28 +82,39 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public MutableFormModel createChild(String childFormModelName,
             String parentPropertyFormObjectPath) {
-        Assert.isTrue(getChildFormModel(childFormModelName) == null,
-                "Child model by name '" + childFormModelName
-                        + "' already exists");
-        AspectAdapter valueHolder = new AspectAdapter(
-                domainObjectAccessStrategy, parentPropertyFormObjectPath);
+        ValueModel valueHolder = new AspectAdapter(domainObjectAccessStrategy,
+                parentPropertyFormObjectPath);
+        if (bufferChanges) {
+            valueHolder = new BufferedValueModel(valueHolder);
+        }
         if (valueHolder.get() == null) {
             valueHolder.set(BeanUtils
                     .instantiateClass(domainObjectAccessStrategy
                             .getMetaAspectAccessor().getAspectClass(
                                     parentPropertyFormObjectPath)));
         }
-        ValidatingFormModel childModel = new ValidatingFormModel(valueHolder);
+        return createChild(childFormModelName, valueHolder);
+    }
+
+    public MutableFormModel createChild(String childFormModelName,
+            ValueModel childFormObjectHolder) {
+        MutableAspectAccessStrategy childObjectAccessStrategy = domainObjectAccessStrategy
+                .newNestedAccessor(childFormObjectHolder);
+        ValidatingFormModel childModel = new ValidatingFormModel(
+                childObjectAccessStrategy);
         childModel.setBufferChangesDefault(bufferChanges);
         childModel.setRulesSource(rulesSource);
         addChildModel(childFormModelName, childModel);
         return childModel;
     }
 
-    public NestableFormModel addChildModel(String childModelName,
+    public NestableFormModel addChildModel(String childFormModelName,
             NestableFormModel childModel) {
+        Assert.isTrue(getChildFormModel(childFormModelName) == null,
+                "Child model by name '" + childFormModelName
+                        + "' already exists");
         childModel.setParent(this);
-        formModels.put(childModelName, childModel);
+        formModels.put(childFormModelName, childModel);
         return childModel;
     }
 
@@ -201,6 +213,8 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                     domainObjectProperty, false);
             if (valueModel != null) { return valueModel; }
         }
+        logger.warn("No value model by name '" + domainObjectProperty
+                + "' found on any nested form models... returning [null]");
         return null;
     }
 
