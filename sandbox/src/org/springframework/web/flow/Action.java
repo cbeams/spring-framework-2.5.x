@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
+ * @see org.springframework.web.flow.ActionState
  */
 public interface Action {
 
@@ -50,19 +51,21 @@ public interface Action {
 	 * used as grounds for a transition in the calling action state.
 	 * <p>
 	 * Note: The <code>FlowModel</code> argument to this method provides
-	 * access to the <b>data model </b> of the active flow session. All
-	 * attributes in the flow model are considered in "flow scope"; that is,
-	 * they exist for the life of the flow session and will be cleaned up when
-	 * the flow session ends. All attributes in the flow model are automatically
-	 * exported for convenient access by the views when a <code>ViewState</code>
-	 * is entered.
+	 * access to the <b>data model </b> of the active flow session. This allows
+	 * this Action to access model data set by other Actions, as well as set its
+	 * own attributes it wishes to expose. All attributes in the flow model are
+	 * considered in "flow scope"; that is, they exist for the life of the flow
+	 * session and will be cleaned up when the flow session ends. All attributes
+	 * in the flow model are automatically exported for convenient access by the
+	 * views when a <code>ViewState</code> is entered, using a standard Spring
+	 * <code>ModelAndView</code> descriptor.
 	 * <p>
-	 * Note: The flow model should not be used as a general purpose cache; but
+	 * Note: The flow model should not be used as a general purpose cache, but
 	 * rather as a context for data needed locally by the flows this action
 	 * participates in. For example, it would be inappropriate to stuff large
 	 * collections of objects (like those returned to support a search results
 	 * view) into the flow model. Instead, put such result collections in the
-	 * request, and ensure you execute the action again each time you wish to
+	 * request, and ensure you execute this action again each time you wish to
 	 * view those results. 2nd level caches are much better cache solutions.
 	 * 
 	 * @param request The current http request, enabling access to request
@@ -76,6 +79,8 @@ public interface Action {
 	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked; note: any recoverable exceptions should be
 	 *         caught and an appropriate result outcome returned.
+	 * @see org.springframework.web.flow.ViewState
+	 * @see org.springframework.web.servlet.ModelAndView
 	 */
 	public String execute(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
 			throws Exception;
