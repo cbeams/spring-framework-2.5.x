@@ -8,10 +8,10 @@ package org.springframework.transaction.interceptor;
 import java.beans.PropertyEditorSupport;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 
 /**
@@ -32,7 +32,7 @@ import org.springframework.beans.propertyeditors.PropertiesEditor;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 26-Apr-2003
- * @version $Id: TransactionAttributeSourceEditor.java,v 1.1.1.1 2003-08-14 16:20:40 trisberg Exp $
+ * @version $Id: TransactionAttributeSourceEditor.java,v 1.2 2003-08-21 15:45:50 jhoeller Exp $
  * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
  */
 public class TransactionAttributeSourceEditor extends PropertyEditorSupport {
@@ -40,7 +40,7 @@ public class TransactionAttributeSourceEditor extends PropertyEditorSupport {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	public void setAsText(String s) throws IllegalArgumentException {
-		MapTransactionAttributeSource source = new MapTransactionAttributeSource();
+		MethodMapTransactionAttributeSource source = new MethodMapTransactionAttributeSource();
 		if (s == null || "".equals(s)) {
 			// Leave value in property editor null
 		}
@@ -48,42 +48,23 @@ public class TransactionAttributeSourceEditor extends PropertyEditorSupport {
 			// Use properties editor to tokenize the hold string
 			PropertiesEditor propertiesEditor = new PropertiesEditor();
 			propertiesEditor.setAsText(s);
-			Properties p = (Properties) propertiesEditor.getValue();
+			Properties props = (Properties) propertiesEditor.getValue();
 
 			// Now we have properties, process each one individually
-			Set keys = p.keySet();
-			for (Iterator iter = keys.iterator(); iter.hasNext();) {
+			TransactionAttributeEditor tae = new TransactionAttributeEditor();
+			for (Iterator iter = props.keySet().iterator(); iter.hasNext();) {
 				String name = (String) iter.next();
-				String value = p.getProperty(name);
-				parseMethodDescriptor(name, value, source);
+				String value = props.getProperty(name);
+
+				// Convert value to a transaction attribute
+				tae.setAsText(value);
+				TransactionAttribute attr = (TransactionAttribute) tae.getValue();
+
+				// Register name and attribute
+				source.addTransactionalMethod(name, attr);
 			}
 		}
 		setValue(source);
-	}
-
-	/**
-	 * Handle a given property describing one transactional method.
-	 * @param name name of the property. Contains class and method name.
-	 * @param value value, which should be a string representation of a TransactionAttribute
-	 * @param source private TransactionAttributeSource implementation that this
-	 * method can continue to configure
-	 */
-	private void parseMethodDescriptor(String name, String value, MapTransactionAttributeSource source) {
-		// Convert value to a transaction attribute
-		TransactionAttributeEditor pe = newTransactionAttributeEditor();
-		pe.setAsText(value);
-		TransactionAttribute attr = (TransactionAttribute) pe.getValue();
-		// Register name and attribute
-		source.addTransactionalMethod(name, attr);
-	}
-
-	/**
-	 * Getting a TransactionAttributeEditor is in a separate
-	 * protected method to allow for effective unit testing.
-	 * @return a new TransactionAttributeEditor instance
-	 */
-	protected TransactionAttributeEditor newTransactionAttributeEditor() {
-		return new TransactionAttributeEditor();
 	}
 
 }

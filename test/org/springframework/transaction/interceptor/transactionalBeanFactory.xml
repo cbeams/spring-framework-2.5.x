@@ -9,14 +9,10 @@
 		<property name="age"><value>666</value></property>
 	</bean>
 	
+	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 
-	
-	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor">
-	</bean>
-	
-	<bean id="mockMan" class="org.springframework.transaction.interceptor.PlatformTransactionManagerFacade">
-	</bean>
-	
+	<bean id="mockMan" class="org.springframework.transaction.interceptor.PlatformTransactionManagerFacade"/>
+
 	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
 		<property name="transactionManager"><ref bean="mockMan"/></property>
 		<property name="transactionAttributeSource">
@@ -24,15 +20,10 @@
 		</property>
 	</bean>
 	
-	<bean id="txtest" 
-			class="org.springframework.aop.framework.ProxyFactoryBean"
-	>	
+	<bean id="proxyFactory1" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces">
-			<list>
-				<value>org.springframework.beans.ITestBean</value>
-			</list>
-		</property>		
-
+			<value>org.springframework.beans.ITestBean</value>
+		</property>
 		<property name="interceptorNames">
 			<list>
 				<value>txInterceptor</value>
@@ -42,6 +33,27 @@
 	</bean>
 	
 
-</beans>		
+	<bean id="proxyFactory2" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref bean="mockMan"/></property>
+		<property name="target"><ref bean="target"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="setAge">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="proxyFactory3" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref bean="mockMan"/></property>
+		<property name="target"><ref bean="target"/></property>
+		<property name="proxyInterfacesOnly"><value>false</value></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="setAge">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>
 	
 	

@@ -9,12 +9,11 @@ import java.io.InputStream;
 import java.lang.reflect.Proxy;
 
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
-
 import org.easymock.EasyMock;
 import org.easymock.MockControl;
+
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -25,7 +24,7 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.2 2003-08-18 16:29:58 jhoeller Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.3 2003-08-21 15:46:08 jhoeller Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 	
@@ -34,14 +33,29 @@ public class BeanFactoryTransactionTests extends TestCase {
 	public void setUp() {
 		InputStream is = getClass().getResourceAsStream("transactionalBeanFactory.xml");
 		this.factory = new XmlBeanFactory(is, null);
-		ITestBean test1 = (ITestBean) factory.getBean("target");
-		test1.setAge(666);
+		ITestBean testBean = (ITestBean) factory.getBean("target");
+		testBean.setAge(666);
 	}
 
-	public void testGetsAreNotTransactional() throws NoSuchMethodException {
-		ITestBean test1 = (ITestBean) factory.getBean("txtest");
-		assertTrue("test1 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
-		
+	public void testGetsAreNotTransactionalWithProxyFactory1() throws NoSuchMethodException {
+		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory1");
+		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
+		executeGetsAreNotTransactional(testBean);
+	}
+
+	public void testGetsAreNotTransactionalWithProxyFactory2() throws NoSuchMethodException {
+		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2");
+		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
+		executeGetsAreNotTransactional(testBean);
+	}
+
+	public void testGetsAreNotTransactionalWithProxyFactory3() throws NoSuchMethodException {
+		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory3");
+		assertTrue("testBean is a full proxy", testBean instanceof TestBean);
+		executeGetsAreNotTransactional(testBean);
+	}
+
+	public void executeGetsAreNotTransactional(ITestBean testBean) throws NoSuchMethodException {
 		// Install facade
 		MockControl ptmControl = EasyMock.controlFor(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
@@ -49,8 +63,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		ptmControl.activate();
 		PlatformTransactionManagerFacade.delegate = ptm;
 		
-		assertTrue("Age should not be " + test1.getAge(), test1.getAge() == 666);
-		
+		assertTrue("Age should not be " + testBean.getAge(), testBean.getAge() == 666);
 		// Check no calls
 		ptmControl.verify();
 		
@@ -59,7 +72,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		ptm = (PlatformTransactionManager) ptmControl.getMock();
 		TransactionStatus txStatus = new TransactionStatus(null, true);
 		TransactionInterceptor txInterceptor = (TransactionInterceptor) factory.getBean("txInterceptor");
-		MapTransactionAttributeSource txAttSrc = (MapTransactionAttributeSource) txInterceptor.getTransactionAttributeSource();
+		MethodMapTransactionAttributeSource txAttSrc = (MethodMapTransactionAttributeSource) txInterceptor.getTransactionAttributeSource();
 		ptm.getTransaction((TransactionDefinition) txAttSrc.methodMap.values().iterator().next());
 		//ptm.getTransaction(null);
 		ptmControl.setReturnValue(txStatus);
@@ -70,10 +83,10 @@ public class BeanFactoryTransactionTests extends TestCase {
 		
 		// TODO same as old age to avoid ordering effect for now
 		int age = 666;
-		test1.setAge(age);
+		testBean.setAge(age);
 		ptmControl.verify();
 		
-		assertTrue(test1.getAge() == age);
+		assertTrue(testBean.getAge() == age);
 	}
 
 }
