@@ -3,6 +3,29 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.1 final (31.8.2004)
+----------------------------------------
+
+Package org.springframework.beans
+* reworked BeanWrapperImpl's property-specific custom editor handling to allow registration for uninitialized subpaths
+
+Package org.springframework.orm
+* fixed SessionFactoryUtils' synchronization for JtaTransasctionManager with a Hibernate TransactionManagerLookup
+
+Package org.springframework.jndi
+* added "rebind" operation to JndiTemplate, analogous to the existing "lookup", "bind" and "unbind" operations
+* factored out JndiAccessor base class from JndiLocatorSupport, holding "jndiTemplate" and "jndiEnvironment" properties
+
+Package org.springframework.remoting
+* changed RemoteInvocationResult's exception holder to Throwable, to also transport errors thrown during reflection
+* factored out RMI invocation logic into RmiClientInterceptorUtils, handling both RMI and non-RMI service interfaces
+* added JndiRmiServiceExporter, for exposing PortableRemoteObject RMI services to JNDI (e.g. RMI-IIOP resp. CORBA)
+* added JndiRmiClientInterceptor and JndiRmiProxyFactoryBean, for fetching PortableRemoteObject RMI services from JNDI
+
+Package org.springframework.validation
+* fixed BindException to also apply getAsText of a custom PropertyEditor in case of a null value
+
+
 Changes in version 1.1 RC2 (19.8.2004)
 --------------------------------------
 
