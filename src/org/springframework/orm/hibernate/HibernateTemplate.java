@@ -1191,7 +1191,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				return null;
 			}
 
-			// Invoke method on target connection.
+			// Invoke method on target Session.
 			try {
 				Object retVal = method.invoke(this.target, args);
 
