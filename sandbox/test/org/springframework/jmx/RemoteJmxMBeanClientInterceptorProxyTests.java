@@ -16,7 +16,7 @@ import javax.management.remote.JMXServiceURL;
  * @author robh
  *  
  */
-public class RemoteJdkProxyTests extends JdkProxyTests {
+public class RemoteJmxMBeanClientInterceptorProxyTests extends JmxMBeanClientInterceptorProxyTests {
 
 	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
 
@@ -24,7 +24,7 @@ public class RemoteJdkProxyTests extends JdkProxyTests {
 
 	private JMXConnector connector;
 
-	public RemoteJdkProxyTests(String name) {
+	public RemoteJmxMBeanClientInterceptorProxyTests(String name) {
 		super(name);
 
 	}

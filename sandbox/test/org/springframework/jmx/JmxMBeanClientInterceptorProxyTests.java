@@ -1,21 +1,21 @@
 /*
- * Created on Aug 10, 2004
+ * Created on 17-Nov-2004
  */
 package org.springframework.jmx;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
-import org.springframework.jmx.proxy.JdkJmxObjectProxyFactory;
+import org.springframework.jmx.proxy.JmxMBeanClientInterceptor;
 import org.springframework.jmx.proxy.JmxObjectProxyFactory;
 
 /**
  * @author robh
  */
-public class JdkProxyTests extends AbstractProxyTests {
+public class JmxMBeanClientInterceptorProxyTests extends AbstractProxyTests {
 
 
-    public JdkProxyTests(String name) {
+    public JmxMBeanClientInterceptorProxyTests(String name) {
         super(name);
     }
 
@@ -23,13 +23,13 @@ public class JdkProxyTests extends AbstractProxyTests {
         return ObjectNameManager.getInstance("bean:name=testBean3");
     }
 
-
     protected JmxObjectProxyFactory getProxyFactory() throws Exception {
-        return new JdkJmxObjectProxyFactory();
+        return new JmxMBeanClientInterceptor();
     }
 
-	protected MBeanServerConnection getServerConnection() throws Exception {
-		return server;
-	}
+
+    protected MBeanServerConnection getServerConnection() throws Exception {
+        return server;
+    }
 
 }

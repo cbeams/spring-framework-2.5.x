@@ -9,7 +9,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.jmx.exceptions.ProxyCreationException;
-import org.springframework.jmx.proxy.JdkJmxObjectProxyFactory;
+import org.springframework.jmx.proxy.JmxMBeanClientInterceptor;
 import org.springframework.jmx.proxy.JmxProxyFactoryBean;
 
 /**
@@ -29,7 +29,7 @@ public class JmxProxyFactoryBeanTests extends AbstractJmxTests {
 
     public void testWithJdkProxyFactory() throws Exception {
         JmxProxyFactoryBean fb = getProxyFactory();
-        fb.setImplementationClass(JdkJmxObjectProxyFactory.class);
+        fb.setImplementationClass(JmxMBeanClientInterceptor.class);
         fb.setProxyInterfaces(new Class[] { IJmxTestBean.class });
         fb.afterPropertiesSet();
 
@@ -39,7 +39,7 @@ public class JmxProxyFactoryBeanTests extends AbstractJmxTests {
 
     public void testInvalidJdkProxy() throws Exception {
         JmxProxyFactoryBean fb = getProxyFactory();
-        fb.setImplementationClass(JdkJmxObjectProxyFactory.class);
+        fb.setImplementationClass(JmxMBeanClientInterceptor.class);
         fb.afterPropertiesSet();
 
         try {
