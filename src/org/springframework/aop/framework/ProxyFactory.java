@@ -7,7 +7,7 @@ package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.framework.support.AopUtils;
-import org.springframework.aop.interceptor.*;
+import org.springframework.aop.target.SingletonTargetSource;
 
 
 /**
@@ -16,7 +16,7 @@ import org.springframework.aop.interceptor.*;
  * AOP proxies in code.
  * @since 14-Mar-2003
  * @author Rod Johnson
- * @version $Id: ProxyFactory.java,v 1.8 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: ProxyFactory.java,v 1.9 2003-11-30 17:17:34 johnsonr Exp $
  */
 public class ProxyFactory extends AdvisedSupport {
 
@@ -31,7 +31,7 @@ public class ProxyFactory extends AdvisedSupport {
 			throw new AopConfigException("Can't proxy null object");
 		}
 		setInterfaces(AopUtils.getAllInterfaces(target));
-		addInterceptor(new InvokerInterceptor(target));
+		setTargetSource(new SingletonTargetSource(target));
 	}
 	
 	/**

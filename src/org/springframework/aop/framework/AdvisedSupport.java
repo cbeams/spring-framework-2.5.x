@@ -15,13 +15,13 @@ import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
-import org.springframework.aop.ProxyInterceptor;
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.6 2003-11-28 12:44:44 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.7 2003-11-30 17:17:34 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport implements Advised {
@@ -56,10 +56,7 @@ public class AdvisedSupport implements Advised {
 	/** Interfaces to be implemented by the proxy */
 	private Set interfaces = new HashSet();
 
-	/**
-	 * May be null. Reassessed on adding an interceptor.
-	 */
-	private Object target;
+	private TargetSource targetSource;
 
 	/**
 	 * Should proxies obtained from this configuration expose
@@ -99,9 +96,27 @@ public class AdvisedSupport implements Advised {
 		setMethodInvocationFactory(methodInvocationFactory);
 		setAdvisorChainFactory(advisorChainFactory);
 	}
+	
+	/**
+	 * Create a DefaultProxyConfig with the given parameters.
+	 * @param interfaces the proxied interfaces
+	 */
+	public AdvisedSupport(Class[] interfaces) {
+		// Make sure we get default advisor chain and method invocation factories
+		this();
+		setInterfaces(interfaces);
+	}
 
 	public void setAdvisorChainFactory(AdvisorChainFactory methodInvocationFactory) {
 		this.advisorChainFactory = methodInvocationFactory;
+	}
+	
+	public void setTargetSource(TargetSource ts) {
+		this.targetSource = ts;
+	}
+	
+	public void setTarget(Object target) {
+		setTargetSource(new SingletonTargetSource(target));
 	}
 	
 	/**
@@ -135,7 +150,8 @@ public class AdvisedSupport implements Advised {
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
 		this.exposeInvocation = other.exposeInvocation;
-		
+		this.targetSource = other.targetSource;
+		this.exposeProxy = other.exposeProxy;
 		setInterfaces((Class[]) other.interfaces.toArray(new Class[other.interfaces.size()]));
 		this.advisors = new LinkedList();
 		for (int i = 0; i < other.advisors.size(); i++) {
@@ -144,15 +160,6 @@ public class AdvisedSupport implements Advised {
 		}
 	}
 
-	/**
-	 * Create a DefaultProxyConfig with the given parameters.
-	 * @param interfaces the proxied interfaces
-	 */
-	public AdvisedSupport(Class[] interfaces) {
-		// Make sure we get default advisor chain and method invocation factories
-		this();
-		setInterfaces(interfaces);
-	}
 
 	/**
 	 * Set whether the AopContext class will be usable by target objects.
@@ -289,16 +296,11 @@ public class AdvisedSupport implements Advised {
 		return classes;
 	}
 
-	public Object getTarget() {
-		return this.target;
+	public TargetSource getTargetSource() {
+		return this.targetSource;
 	}
 
 	public void addAdvisor(int pos, InterceptionAroundAdvisor advice) throws AopConfigException {
-		if (advice.getInterceptor() instanceof ProxyInterceptor) {
-			if (pos == this.advisors.size()) {
-				this.target = ((ProxyInterceptor) advice.getInterceptor()).getTarget();
-			}
-		}
 		addAdviceInternal(pos, advice);
 	}
 
@@ -457,7 +459,7 @@ public class AdvisedSupport implements Advised {
 		StringBuffer sb = new StringBuffer(getClass().getName() + ": ");
 		sb.append(this.interfaces.size() + " interfaces=[" + StringUtils.collectionToCommaDelimitedString(this.interfaces) + "]; ");
 		sb.append(this.advisors.size() + " pointcuts=[" + StringUtils.collectionToCommaDelimitedString(this.advisors) + "]; ");
-		sb.append("target=[" + this.target + "]; ");
+		sb.append("targetSource=[" + this.targetSource + "]; ");
 		sb.append("exposeInvocation=" + exposeInvocation + "; ");
 		sb.append("methodInvocationFactory=" + this.advisorChainFactory);
 		return sb.toString();

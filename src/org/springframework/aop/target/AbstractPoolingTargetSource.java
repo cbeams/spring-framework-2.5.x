@@ -3,14 +3,8 @@
  * of the Apache Software License.
  */
  
-package org.springframework.aop.interceptor;
+package org.springframework.aop.target;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.aopalliance.intercept.AspectException;
-import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.aop.framework.MethodInvocationImpl;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.beans.BeansException;
@@ -30,11 +24,13 @@ import org.springframework.beans.factory.DisposableBean;
  *
  * <p>This class implements DisposableBean to force subclasses to implement
  * a destroy() method to close down their pool.
+ * 
+ * TODO inheritance is messy
  *
  * @author Rod Johnson
- * @version $Id: AbstractPoolingInvokerInterceptor.java,v 1.4 2003-11-24 21:48:06 jhoeller Exp $
+ * @version $Id: AbstractPoolingTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
  */
-public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvokerInterceptor implements PoolingConfig, DisposableBean {
+public abstract class AbstractPoolingTargetSource extends PrototypeTargetSource implements PoolingConfig, DisposableBean {
 	
 	/** The size of the pool */
 	private int maxSize;
@@ -61,7 +57,7 @@ public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvoker
 	 * Create a new target object that can be added to the pool
 	 * @return a new target
 	 */
-	protected Object createTarget() {
+	protected Object createTarget() throws Exception {
 		return super.getTarget();
 	}
 	
@@ -94,7 +90,7 @@ public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvoker
 	 * APIs, so we're forgiving with our exception signature,
 	 * although we don't like APIs that throw Exception
 	 */
-	protected abstract Object acquireTarget() throws Exception;
+	public abstract Object getTarget() throws Exception;
 	
 	/**
 	 * Return the given object to the pool.
@@ -102,44 +98,16 @@ public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvoker
 	 * via a call to acquireTarget()
 	 * @throws Exception to allow pooling APIs to throw exception
 	 */
-	protected abstract void releaseTarget(Object target) throws Exception; 
+	public abstract void releaseTarget(Object target) throws Exception; 
 	
 	/**
 	 * @see org.springframework.aop.interceptor.PoolingConfig#getInvocations()
 	 */
 	public int getInvocations() {
-		return this.invocations;
+		throw new UnsupportedOperationException();
 	}
 	
-	
-	/**
-	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(MethodInvocation)
-	 */
-	public Object invoke(MethodInvocation invocation) throws Throwable {
-		Object target = acquireTarget();
-		++invocations;
-		
-		// Set the target on the invocation
-		if (invocation instanceof MethodInvocationImpl) {
-			((MethodInvocationImpl) invocation).setTarget(target);
-		}
-	
-		// Use reflection to invoke the method
-		try {
-			return invocation.getMethod().invoke(target, invocation.getArguments());
-		}
-		catch (InvocationTargetException ex) {
-			// Invoked method threw a checked exception. 
-			// We must rethrow it. The client won't see the interceptor
-			throw ex.getTargetException();
-		}
-		catch (IllegalAccessException ex) {
-			throw new AspectException("Couldn't access method " + invocation.getMethod() + ", ", ex);
-		}
-		finally {
-			releaseTarget(target);
-		}
-	}
+
 	
 	
 	public SimpleIntroductionAdvice getPoolingConfigMixin() {

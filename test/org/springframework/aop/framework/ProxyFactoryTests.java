@@ -9,8 +9,7 @@ import junit.framework.TestCase;
 
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.interceptor.AbstractQaInterceptor;
-import org.springframework.aop.interceptor.DebugInterceptor;
-import org.springframework.aop.interceptor.InvokerInterceptor;
+import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
@@ -19,10 +18,10 @@ import org.springframework.core.TimeStamped;
 import org.springframework.util.StringUtils;
 
 /**
- * Also tests DefaultProxyConfig superclass
+ * Also tests AdvisedSupport superclass.
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.5 $
+ * @version $Id: ProxyFactoryTests.java,v 1.6 2003-11-30 17:17:33 johnsonr Exp $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -98,7 +97,7 @@ public class ProxyFactoryTests extends TestCase {
 	
 	public void testCanOnlyAddMethodInterceptors() {
 		ProxyFactory factory = new ProxyFactory(new TestBean());
-		factory.addInterceptor(0, new DebugInterceptor());
+		factory.addInterceptor(0, new NopInterceptor());
 		try {
 			factory.addInterceptor(0, new Interceptor() {
 			});
@@ -113,38 +112,19 @@ public class ProxyFactoryTests extends TestCase {
 	}
 	
 	public void testInterceptorInclusionMethods() {
-		DebugInterceptor di = new DebugInterceptor();
-		DebugInterceptor diUnused = new DebugInterceptor();
+		NopInterceptor di = new NopInterceptor();
+		NopInterceptor diUnused = new NopInterceptor();
 		ProxyFactory factory = new ProxyFactory(new TestBean());
 		factory.addInterceptor(0, di);
-		//factory.addInterceptor(new InvokerInterceptor());
 		ITestBean tb = (ITestBean) factory.getProxy();
 		assertTrue(factory.interceptorIncluded(di));
 		assertTrue(!factory.interceptorIncluded(diUnused));
-		assertTrue(factory.countInterceptorsOfType(DebugInterceptor.class) == 1);
-		assertTrue(factory.countInterceptorsOfType(InvokerInterceptor.class) == 1);
+		assertTrue(factory.countInterceptorsOfType(NopInterceptor.class) == 1);
 		assertTrue(factory.countInterceptorsOfType(AbstractQaInterceptor.class) == 0);
 	
 		factory.addInterceptor(0, diUnused);
 		assertTrue(factory.interceptorIncluded(diUnused));
-		assertTrue(factory.countInterceptorsOfType(DebugInterceptor.class) == 2);
+		assertTrue(factory.countInterceptorsOfType(NopInterceptor.class) == 2);
 	}
-
-	/**
-	 * Used for profiling
-	 *
-	 */
-//	public void testManyInvocations() {
-//		ProxyFactory factory = new ProxyFactory(new TestBean());
-//
-//		IOther other = (IOther) factory.getProxy();
-//		for (int i = 0; i < 100000; i++) {
-//			other.absquatulate();
-//		}
-//	}
-//
-//	public static void main(String[] args) {
-//		TestRunner.run(new TestSuite(ProxyFactoryTests.class));
-//	}
 
 }

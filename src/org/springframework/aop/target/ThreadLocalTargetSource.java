@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
  
-package org.springframework.aop.interceptor;
+package org.springframework.aop.target;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,9 +31,9 @@ import org.springframework.beans.factory.DisposableBean;
  * tested in production.</b>
  *
  * @author Rod Johnson
- * @version $Id: ThreadLocalInvokerInterceptor.java,v 1.2 2003-11-24 21:48:06 jhoeller Exp $
+ * @version $Id: ThreadLocalTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
  */
-public class ThreadLocalInvokerInterceptor extends PrototypeInvokerInterceptor implements ThreadLocalInvokerStats, DisposableBean {
+public class ThreadLocalTargetSource extends PrototypeTargetSource implements ThreadLocalTargetSourceStats, DisposableBean {
 	
 	/**
 	 * ThreadLocal holding the target associated with the current
@@ -69,7 +69,7 @@ public class ThreadLocalInvokerInterceptor extends PrototypeInvokerInterceptor i
 	 * we don't find one, we create one and bind it to the thread.
 	 * No synchronization is required.
 	 */
-	public Object getTarget() {
+	public Object getTarget() throws Exception {
 		++invocations;
 		Holder targetHolder = (Holder) holders.get();
 		if (targetHolder == null || targetHolder.target == null) {
@@ -85,6 +85,10 @@ public class ThreadLocalInvokerInterceptor extends PrototypeInvokerInterceptor i
 		}
 		
 		return targetHolder.target;
+	}
+	
+	public void releaseTarget(Object o) {
+		
 	}
 
 	/**
@@ -129,7 +133,7 @@ public class ThreadLocalInvokerInterceptor extends PrototypeInvokerInterceptor i
 	 */
 	public InterceptionIntroductionAdvisor getStatsMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
-		return new SimpleIntroductionAdvice(dii, ThreadLocalInvokerStats.class);
+		return new SimpleIntroductionAdvice(dii, ThreadLocalTargetSourceStats.class);
 	}
 
 }

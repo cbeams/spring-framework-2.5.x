@@ -8,7 +8,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.interceptor.DebugInterceptor;
+import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.beans.DerivedTestBean;
@@ -76,8 +76,8 @@ public class AopUtilsTests extends TestCase {
 	}
 
 	public void testPointcutAlwaysApplies() {
-		assertTrue(AopUtils.canApply(new DefaultInterceptionAroundAdvisor(new DebugInterceptor()), Object.class, null));
-		assertTrue(AopUtils.canApply(new DefaultInterceptionAroundAdvisor(new DebugInterceptor()), TestBean.class, new Class[] { ITestBean.class }));
+		assertTrue(AopUtils.canApply(new DefaultInterceptionAroundAdvisor(new NopInterceptor()), Object.class, null));
+		assertTrue(AopUtils.canApply(new DefaultInterceptionAroundAdvisor(new NopInterceptor()), TestBean.class, new Class[] { ITestBean.class }));
 	}
 
 	public void testPointcutAppliesToOneMethodOnObject() {

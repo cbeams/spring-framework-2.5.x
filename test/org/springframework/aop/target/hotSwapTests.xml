@@ -18,8 +18,8 @@
 		Invoker interceptor. Not required: can be added by 
 		default
 	-->
-	<bean id="invokerInterceptor" 
-		class="org.springframework.aop.interceptor.HotSwappableInvokerInterceptor">	
+	<bean id="swapper" 
+		class="org.springframework.aop.target.HotSwappableTargetSource">	
 		<property name="initialTarget"><ref local="target1"/></property>
 	</bean>
 	
@@ -28,7 +28,8 @@
 	<bean id="swappable" 
 			class="org.springframework.aop.framework.ProxyFactoryBean"
 	>	
-		<property name="interceptorNames"><value>invokerInterceptor</value></property>		
+				
+		<property name="targetSource"><ref local="swapper"/></property>
 		
 	</bean>
 	

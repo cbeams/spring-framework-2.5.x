@@ -5,14 +5,14 @@ import java.util.Properties;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.support.AopUtils;
-import org.springframework.aop.interceptor.InvokerInterceptor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -44,7 +44,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.12 2003-11-28 11:57:28 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.13 2003-11-30 17:17:34 johnsonr Exp $
  */
 public class TransactionProxyFactoryBean implements FactoryBean, InitializingBean {
 
@@ -211,7 +211,7 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 			}
 		}
 
-		proxyFactory.addInterceptor(createInvokerInterceptor(this.target));
+		proxyFactory.setTargetSource(createTargetSource(this.target));
 		if (this.interfaces != null) {
 			proxyFactory.setInterfaces(this.interfaces);
 		}
@@ -224,22 +224,18 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 
 	
 	/**
-	 * Get the final interceptor in the chain from the target object
-	 * @param pTarget target object
-	 * @return an interceptor
+	 * Set the target or TargetSource
+	 * @param pTarget target. If this is an implementation of TargetSource it
+     * is used as our TargetSource; otherwise it is wrapped
+     * in a SingletonTargetSource.
+	 * @return a TargetSource for this object
 	 */
-	protected MethodInterceptor createInvokerInterceptor(Object pTarget) {
-		if (pTarget instanceof MethodInterceptor) {
-			// The user hopefully knows what they're doing...
-			// Maybe they want to set a prototype interceptor etc
-			if (this.interfaces == null) {
-				throw new AspectException("Cannot use custom invoker interceptor without setting interfaces to proxy " +
-						"using the 'proxyInterfaces' property");
-			}
-			return (MethodInterceptor) pTarget;
+	protected TargetSource createTargetSource(Object pTarget) {
+		if (pTarget instanceof TargetSource) {
+			return (TargetSource) pTarget;
 		}
 		else {
-			return new InvokerInterceptor(pTarget);
+			return new SingletonTargetSource(pTarget);
 		}
 	}
 

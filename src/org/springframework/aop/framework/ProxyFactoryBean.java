@@ -15,10 +15,10 @@ import java.util.Map;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
-
 import org.springframework.aop.Advisor;
-import org.springframework.aop.interceptor.*;
-import org.springframework.aop.support.*;
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -61,7 +61,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.13 2003-11-18 16:32:05 colins Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.14 2003-11-30 17:17:34 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -96,6 +96,8 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 * Default is for globals expansion only.
 	 */
 	private String[] interceptorNames = null;
+	
+	private String targetName = null;
 
 
 	/**
@@ -138,8 +140,10 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 */
 	private void createAdvisorChain() throws AopConfigException, BeansException {
 		if (this.interceptorNames == null || this.interceptorNames.length == 0) {
-			throw new AopConfigException("Interceptor names are required");
+			//throw new AopConfigException("Interceptor names are required");
+			return;
 		}
+		
 		// Globals can't be last
 		if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX)) {
 			throw new AopConfigException("Target required after globals");
@@ -183,9 +187,15 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 
 				Object bean = this.beanFactory.getBean(beanName);
 
-				Advisor refreshedAdvisor = objectToAdvisor(bean);
-				// What about aspect interfaces!? we're only updating
-				replaceAdvice(advisors[i], refreshedAdvisor);
+				Object refreshedAdvisor = namedBeanToAdvisorOrTargetSource(bean);
+				// Might have just refreshed target source
+				if (refreshedAdvisor instanceof Advisor) {
+					// What about aspect interfaces!? we're only updating
+					replaceAdvice(advisors[i], (Advisor) refreshedAdvisor);
+				}
+				else {
+					setTargetSource((TargetSource) refreshedAdvisor);
+				}
 				// Keep name mapping up to date
 				sourceMap.put(refreshedAdvisor, beanName);
 			}
@@ -237,35 +247,56 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 * bean factory.
 	 */
 	private void addAdvisor(Object next, String name) {
-		logger.debug("Adding advisor or interceptor [" + next + "] with name [" + name + "]");
+		logger.debug("Adding advisor or TargetSource [" + next + "] with name [" + name + "]");
 		// We need to add a method pointcut so that our source reference matches
 		// what we find from superclass interceptors
-		Advisor advisor = objectToAdvisor(next);
-		addAdvisor(advisor);
-		// Record the pointcut as descended from the given bean name.
-		// This allows us to refresh the interceptor list, which we'll need to
-		// do if we have to create a new prototype instance. Otherwise the new
-		// prototype instance wouldn't be truly independent, because it might reference
-		// the original instances of prototype interceptors.
-		this.sourceMap.put(advisor, name);
+		Object advisor = namedBeanToAdvisorOrTargetSource(next);
+		if (advisor instanceof Advisor) {
+			// If it wasn't just updating the TargetSource
+			logger.debug("Adding advisor with name [" + name + "]");
+			addAdvisor((Advisor) advisor);
+			//			Record the pointcut as descended from the given bean name.
+			 // This allows us to refresh the interceptor list, which we'll need to
+			 // do if we have to create a new prototype instance. Otherwise the new
+			 // prototype instance wouldn't be truly independent, because it might reference
+			 // the original instances of prototype interceptors.
+			 this.sourceMap.put(advisor, name);
+		}
+		else {
+			logger.debug("Adding TargetSource [" + advisor + "] with name [" + name + "]");
+			setTargetSource((TargetSource) advisor);
+			// Save target name
+			targetName = name;
+		}
+	}
+	
+	private void refreshTarget() {
+		logger.debug("Refreshing target with name '" + targetName + "'");
+		if (targetName == null)
+			throw new AopConfigException("Target name cannot be null when refreshing!");
+		Object target = beanFactory.getBean(targetName);
+		setTarget(target);
 	}
 
-	private Advisor objectToAdvisor(Object next) {
-		Advisor advisor;
+	/**
+	 * Return Advisor or TargetSource
+	 */
+	private Object namedBeanToAdvisorOrTargetSource(Object next) {
 		if (next instanceof Advisor) {
-			advisor = (Advisor) next;
+			return (Advisor) next;
 		}
 		else if (next instanceof MethodInterceptor) {
-			advisor = new DefaultInterceptionAroundAdvisor((MethodInterceptor) next);
+			return new DefaultInterceptionAroundAdvisor((MethodInterceptor) next);
+		}
+		else if (next instanceof TargetSource) {
+			return (TargetSource) next;
 		}
 		else {
 			// It's not a pointcut or interceptor.
 			// It's a bean that needs an invoker around it.
-			InvokerInterceptor ii = new InvokerInterceptor(next);
-			advisor = new DefaultInterceptionAroundAdvisor(ii);
+			return new SingletonTargetSource(next);
 			//throw new AopConfigException("Illegal type: bean '" + name + "' must be of type MethodPointcut or Interceptor");
 		}
-		return advisor;
 	}
 
 	/**
@@ -289,16 +320,20 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 		if (this.singleton) {
 			// This object can configure the proxy directly if it's
 			// being used as a singleton
+			// TODO could always returned cached instance?
 			proxy = createAopProxy();
 		}
 		else {
 			refreshAdvisorChain();
+			refreshTarget();
 			// In the case of a prototype, we need to give the proxy
 			// an independent instance of the configuration
 			if (logger.isDebugEnabled())
 				logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
 			AdvisedSupport copy = new AdvisedSupport();
 			copy.copyConfigurationFrom(this);
+			if (logger.isDebugEnabled())
+				logger.debug("Copy has config: " + copy);
 			proxy = copy.createAopProxy();
 		}
 		return proxy.getProxy();
@@ -308,7 +343,7 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
 	public Class getObjectType() {
-		return (getTarget() != null) ? this.getTarget().getClass() : null;
+		return getTargetSource().getClass();
 	}
 
 	/**

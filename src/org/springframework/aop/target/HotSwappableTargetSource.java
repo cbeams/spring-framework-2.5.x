@@ -3,8 +3,9 @@
  * of the Apache Software License.
  */
 
-package org.springframework.aop.interceptor;
+package org.springframework.aop.target;
 
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopConfigException;
 
 /**
@@ -16,9 +17,9 @@ import org.springframework.aop.framework.AopConfigException;
  * It does not invoke proceed() on the MethodInvocation.
  *
  * @author Rod Johnson
- * @version $Id: HotSwappableInvokerInterceptor.java,v 1.2 2003-11-28 16:39:36 jhoeller Exp $
+ * @version $Id: HotSwappableTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
  */
-public class HotSwappableInvokerInterceptor extends AbstractReflectionInvokerInterceptor {
+public class HotSwappableTargetSource implements TargetSource {
 
 	/** Target cached and invoked using reflection */
 	private Object target;
@@ -27,10 +28,10 @@ public class HotSwappableInvokerInterceptor extends AbstractReflectionInvokerInt
 	 * JavaBean constructor.
 	 * Set the initialTarget property before use.
 	 */
-	public HotSwappableInvokerInterceptor() {
+	public HotSwappableTargetSource() {
 	}
 
-	public HotSwappableInvokerInterceptor(Object initialTarget) {
+	public HotSwappableTargetSource(Object initialTarget) {
 		this.target = initialTarget;
 	}
 
@@ -39,6 +40,10 @@ public class HotSwappableInvokerInterceptor extends AbstractReflectionInvokerInt
 	 */
 	public void setInitialTarget(Object target) {
 		this.target = target;
+	}
+	
+	public Class getTargetClass() {
+		return target.getClass();
 	}
 
 	/**
@@ -64,15 +69,19 @@ public class HotSwappableInvokerInterceptor extends AbstractReflectionInvokerInt
 	public synchronized Object getTarget() {
 		return this.target;
 	}
+	
+	public void releaseTarget(Object o) {
+		
+	}
 
 	/**
 	 * Two invoker interceptors are equal if they have the same target or if the targets
 	 * are equal.
 	 */
 	public boolean equals(Object other) {
-		if (!(other instanceof HotSwappableInvokerInterceptor))
+		if (!(other instanceof HotSwappableTargetSource))
 			return false;
-		HotSwappableInvokerInterceptor otherII = (HotSwappableInvokerInterceptor) other;
+		HotSwappableTargetSource otherII = (HotSwappableTargetSource) other;
 		return otherII.target == this.target || otherII.target.equals(this.target);
 	}
 

@@ -21,7 +21,6 @@ import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.interceptor.InvokerInterceptor;
 
 /**
  * InvocationHandler implementation for the Spring AOP framework,
@@ -41,7 +40,7 @@ import org.springframework.aop.interceptor.InvokerInterceptor;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.13 2003-11-29 13:36:33 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.14 2003-11-30 17:17:34 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -59,6 +58,31 @@ public class AopProxy implements InvocationHandler {
 		} 
 	}
 	
+	
+	/**
+	 * Invoke the target directly via reflection
+	 * @return
+	 */
+	public static Object invokeJoinpointUsingReflection(Object target, Method m, Object[] args) throws Throwable {
+		//	Use reflection to invoke the method
+		 try {
+			 Object rval = m.invoke(target, args);
+			 return rval;
+		 }
+		 catch (InvocationTargetException ex) {
+			 // Invoked method threw a checked exception. 
+			 // We must rethrow it. The client won't see the interceptor
+			 Throwable t = ex.getTargetException();
+			 throw t;
+		 }
+		 catch (IllegalArgumentException ex) {
+			throw new AspectException("AOP configuration seems to be invalid: tried calling " + m + " on [" + target + "]: " +  ex);
+		 }
+		 catch (IllegalAccessException ex) {
+			 throw new AspectException("Couldn't access method " + m, ex);
+		 }
+	}
+	
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Config used to configure this proxy */
@@ -73,8 +97,8 @@ public class AopProxy implements InvocationHandler {
 	public AopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null)
 			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
-		if (config.getAdvisors().length == 0)
-			throw new AopConfigException("Cannot create AopProxy with null interceptors");
+		if (config.getAdvisors().length == 0 && config.getTargetSource() == null)
+			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
 		this.advised = config;
 	}
 	
@@ -91,6 +115,8 @@ public class AopProxy implements InvocationHandler {
 		Object oldProxy = null;
 		boolean setInvocationContext = false;
 		boolean setProxyContext = false;
+		Object target = null;
+		Class targetClass = null;
 		
 		try {
 			// Try special rules for equals() method and implementation of the
@@ -108,23 +134,29 @@ public class AopProxy implements InvocationHandler {
 			
 			Object retVal = null;
 			
-			Class targetClass = advised.getTarget() != null ? advised.getTarget().getClass() : method.getDeclaringClass();
+			if (advised.getTargetSource() != null) {
+				targetClass = advised.getTargetSource().getTargetClass();
+				// TODO optimize out all those method calls?
+				target = advised.getTargetSource().getTarget();
+			}
 		
 			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
+			
 			
 			// Check whether we only have one InvokerInterceptor: that is, no real advice,
 			// but just reflective invocation of the target.
 			// We can only do this if the Advised config object lets us.
 			if (advised.canOptimizeOutEmptyAdviceChain() && 
-					chain.size() == 1 && chain.get(0).getClass() == InvokerInterceptor.class) {
+					chain.isEmpty()) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
-				retVal = directInvoke(advised.getTarget(), method, args);
+				retVal = invokeJoinpointUsingReflection(target, method, args);
+				// TODO return CGLIB optimization
 			}
 			else {
 				// We need to create a method invocation...
-				invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, advised.getTarget(), args, chain, advised);
+				invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, target, args, chain, advised);
 			
 				if (this.advised.getExposeInvocation()) {
 					// Make invocation available if necessary.
@@ -145,10 +177,11 @@ public class AopProxy implements InvocationHandler {
 				
 				// If we get here, we need to create a MethodInvocation
 				retVal = invocation.proceed();
+				
 			}
 			
 			// Massage return value if necessary
-			if (retVal != null && retVal == advised.getTarget()) {
+			if (retVal != null && retVal == target) {
 				// Special case: it returned "this"
 				// Note that we can't help if the target sets
 				// a reference to itself in another returned object
@@ -157,6 +190,11 @@ public class AopProxy implements InvocationHandler {
 			return retVal;
 		}
 		finally {
+			if (target != null) {
+				// Must have come from TargetSource
+				advised.getTargetSource().releaseTarget(target);
+			}
+			
 			if (setInvocationContext) {
 				// Restore old invocation, which may be null
 				AopContext.setCurrentInvocation(oldInvocation);
@@ -172,27 +210,6 @@ public class AopProxy implements InvocationHandler {
 		}
 	}
 	
-	
-	/**
-	 * Invoke the target directly via reflection
-	 * @return
-	 */
-	private Object directInvoke(Object target, Method m, Object[] args) throws Throwable {
-		//		Use reflection to invoke the method
-		 try {
-			 Object rval = m.invoke(target, args);
-			 return rval;
-		 }
-		 catch (InvocationTargetException ex) {
-			 // Invoked method threw a checked exception. 
-			 // We must rethrow it. The client won't see the interceptor
-			 Throwable t = ex.getTargetException();
-			 throw t;
-		 }
-		 catch (IllegalAccessException ex) {
-			 throw new AspectException("Couldn't access method " + m, ex);
-		 }
-	}
 
 	/**
 	 * Creates a new Proxy object for the given object, proxying
@@ -210,18 +227,18 @@ public class AopProxy implements InvocationHandler {
 		if (!this.advised.getProxyTargetClass() && this.advised.getProxiedInterfaces() != null && this.advised.getProxiedInterfaces().length > 0) {
 			// Proxy specific interfaces: J2SE dynamic proxy is sufficient
 			if (logger.isInfoEnabled())
-				logger.info("Creating J2SE proxy for [" + this.advised.getTarget() + "]");
+				logger.info("Creating J2SE proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
 			Class[] proxiedInterfaces = completeProxiedInterfaces();
 			return Proxy.newProxyInstance(cl, proxiedInterfaces, this);
 		}
 		else {
 			// Use CGLIB
-			if (this.advised.getTarget() == null) {
+			if (this.advised.getTargetSource().getTargetClass() == null) {
 				throw new IllegalArgumentException("Either an interface or a target is required for proxy creation");
 			}
 			// proxy the given class itself: CGLIB necessary
 			if (logger.isInfoEnabled())
-				logger.info("Creating CGLIB proxy for [" + this.advised.getTarget() + "]");
+				logger.info("Creating CGLIB proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
 			// delegate to inner class to avoid AopProxy runtime dependency on CGLIB
 			// --> J2SE proxies work without cglib.jar then
 			return (new CglibProxyFactory()).createProxy();
@@ -300,7 +317,7 @@ public class AopProxy implements InvocationHandler {
 
 		private Object createProxy() {
 			try {
-				return Enhancer.enhance(advised.getTarget().getClass(), completeProxiedInterfaces(),
+				return Enhancer.enhance(advised.getTargetSource().getTargetClass(), completeProxiedInterfaces(),
 					new MethodInterceptor() {
 						public Object intercept(Object handler, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
 							return invoke(handler, method, objects);
@@ -309,7 +326,7 @@ public class AopProxy implements InvocationHandler {
 				);
 			}
 			catch (CodeGenerationException ex) {
-				throw new AspectException("Couldn't generate CGLIB subclass of class '" + advised.getTarget().getClass() + "': " +
+				throw new AspectException("Couldn't generate CGLIB subclass of class '" + advised.getTargetSource().getTargetClass() + "': " +
 						"Common causes of this problem include using a final class, or a non-visible class", ex);
 			}
 		}

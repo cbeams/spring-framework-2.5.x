@@ -14,7 +14,7 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.interceptor.InvokerInterceptor;
+import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.beans.TestBean;
 
@@ -22,7 +22,7 @@ import org.springframework.beans.TestBean;
  * TODO COULD REFACTOR TO BE GENERIC
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class MethodInvocationTests extends TestCase {
 	
@@ -90,23 +90,20 @@ new Attrib4jAttributeRegistry());
 	public void testLimits() throws Throwable {
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
-		final Object returnValue = new Object();
 		List is = new LinkedList();
-		MethodInterceptor interceptor = new MethodInterceptor() {
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return returnValue;
-			}
-		};
-		is.add(interceptor);
+		
+		is.add(new NopInterceptor());
+		
+		Object target = new Object();
 
-			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
+			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, target, m.getDeclaringClass(), //?
 		m, null, null, is // list
 	);
 		assertTrue(invocation.getArgumentCount() == 0);
 		//assertTrue(invocation.getCurrentInterceptorIndex() == 0);
 		//assertTrue(invocation.getInterceptor(0) == interceptor);
 		Object rv = invocation.proceed();
-		assertTrue("correct response", rv == returnValue);
+		assertEquals("correct response", new Integer(target.hashCode()), rv);
 
 		//assertTrue(invocation.getCurrentInterceptorIndex() == 0);
 		//assertTrue(invocation.getNumberOfInterceptors() == 1);
@@ -167,7 +164,6 @@ new Attrib4jAttributeRegistry());
 		};
 		final Object returnValue = new Object();
 		List is = new LinkedList();
-		is.add(new DefaultInterceptionAroundAdvisor(new InvokerInterceptor(target)));
 
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();

@@ -9,15 +9,9 @@
 		<property name="age"><value>666</value></property>
 	</bean>
 	
-	<!-- 
-		Invoker interceptor. Not required: can be added by 
-		default
-	-->
-	<bean id="invokerInterceptor" class="org.springframework.aop.interceptor.InvokerInterceptor">	
-		<property name="target"><ref local="test"/></property>
-	</bean>
+
 	
-	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor">
+	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.NopInterceptor">
 	</bean>
 	
 	<bean id="test1" 
@@ -25,7 +19,8 @@
 	>	
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
 		
-		<property name="interceptorNames"><value>debugInterceptor,invokerInterceptor</value></property>		
+		<property name="target"><ref local="test"/></property>	
+		<property name="interceptorNames"><value>debugInterceptor</value></property>		
 		
 	</bean>
 	
@@ -57,7 +52,7 @@
 		
 		<property name="singleton"><value>false</value></property>
 		
-		<property name="interceptorNames"><value>invokerInterceptor</value></property>		
+		<property name="interceptorNames"><value>test</value></property>		
 		
 	</bean>
 	
@@ -68,7 +63,7 @@
 		
 		<property name="singleton"><value>false</value></property>
 		
-		<property name="interceptorNames"><value>invokerInterceptor</value></property>		
+		<property name="interceptorNames"><value>test</value></property>		
 		
 	</bean>
 	
@@ -77,7 +72,7 @@
 	>	
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
 		
-		<property name="interceptorNames"><value>pointcutForVoid,invokerInterceptor</value></property>		
+		<property name="interceptorNames"><value>pointcutForVoid,test</value></property>		
 		
 	</bean>
 	
@@ -90,12 +85,22 @@
 		Invalid test for global pointcuts.
 		Must have target because there are no interceptors.
 	-->
-	<bean id="noInterceptorNames" 
+	<!--
+	<bean id="noInterceptorNamesWithoutTarget" 
 			class="org.springframework.aop.framework.ProxyFactoryBean"
 	>	
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>			
 		
 	</bean>
+	
+	<bean id="noInterceptorNamesWithTarget" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>	
+		<property name="target"><ref local="test"/></property>					
+		
+	</bean>
+	-->
 	
 	<!-- Same effect as noInterceptor names: also invalid -->
 	<bean id="emptyInterceptorNames" 

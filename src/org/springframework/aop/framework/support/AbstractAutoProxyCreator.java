@@ -10,8 +10,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.interceptor.InvokerInterceptor;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
@@ -37,7 +38,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.17 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.18 2003-11-30 17:17:34 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
 
@@ -144,7 +145,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 					proxyFactory.addInterceptor((Interceptor) interceptorOrAdvice);
 				}
 			}
-			proxyFactory.addInterceptor(createInvokerInterceptor(bean, name));
+			proxyFactory.setTargetSource(getTargetSource(bean, name));
 			if (this.proxyInterfacesOnly) {
 				// Must allow for introductions; can't just set interfaces to
 				// the target's interfaces only
@@ -174,16 +175,16 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	}
 
 	/**
-	 * Create an invoker interceptor to wrap the bean.
-	 * Subclasses can override this if they want to use a custom invoker,
-	 * such as a pooling interceptor.
+	 * Create a target source to source instances.
+	 * Subclasses can override this if they want to use a custom target source,
+	 * such as a pooling strategy.
 	 * @param bean bean to intercept
 	 * @param beanName name of the bean
 	 * @return an invoker interceptor wrapping this bean.
 	 * This implementation returns a straight reflection InvokerInterceptor
 	 */
-	protected Interceptor createInvokerInterceptor(Object bean, String beanName) {
-		return new InvokerInterceptor(bean);
+	protected TargetSource getTargetSource(Object bean, String beanName) {
+		return new SingletonTargetSource(bean);
 	}
 
 	/**

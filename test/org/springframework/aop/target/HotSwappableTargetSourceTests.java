@@ -3,28 +3,29 @@
  * of the Apache Software License.
  */
 
-package org.springframework.aop.interceptor;
+package org.springframework.aop.target;
 
 import java.io.InputStream;
 
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: HotSwappableInvokerInterceptorTests.java,v 1.2 2003-11-29 13:35:31 johnsonr Exp $
+ * @version $Id: HotSwappableTargetSourceTests.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
  */
-public class HotSwappableInvokerInterceptorTests extends TestCase {
+public class HotSwappableTargetSourceTests extends TestCase {
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
 	private XmlBeanFactory beanFactory;
 	
-	public HotSwappableInvokerInterceptorTests(String s) {
+	public HotSwappableTargetSourceTests(String s) {
 		super(s);
 	}
 
@@ -33,7 +34,7 @@ public class HotSwappableInvokerInterceptorTests extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		// Load from classpath, NOT a file path
-		InputStream is = getClass().getResourceAsStream("hotSwapInvokerTests.xml");
+		InputStream is = getClass().getResourceAsStream("hotSwapTests.xml");
 		this.beanFactory = new XmlBeanFactory(is);
 	}
 	
@@ -73,7 +74,7 @@ public class HotSwappableInvokerInterceptorTests extends TestCase {
 		proxied.doWork();
 		assertEquals(INITIAL_COUNT + 1, proxied.getCount() );
 	
-		HotSwappableInvokerInterceptor swapper = (HotSwappableInvokerInterceptor) beanFactory.getBean("invokerInterceptor");
+		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 		Object old = swapper.swap(target2);
 		assertEquals("Correct old target was returned", target1, old);
 		
@@ -97,7 +98,7 @@ public class HotSwappableInvokerInterceptorTests extends TestCase {
 	 * @return the message
 	 */
 	private AopConfigException testRejectsSwapToInvalidValue(Object invalid) {
-		HotSwappableInvokerInterceptor swapper = (HotSwappableInvokerInterceptor) beanFactory.getBean("invokerInterceptor");
+		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 		AopConfigException aopex = null;
 		try {
 			swapper.swap(invalid);

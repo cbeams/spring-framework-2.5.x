@@ -3,28 +3,29 @@
  * of the Apache Software License.
  */
  
-package org.springframework.aop.interceptor;
+package org.springframework.aop.target;
 
 import java.io.InputStream;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: PrototypeInvokerInterceptorTests.java,v 1.2 2003-10-06 17:29:48 johnsonr Exp $
+ * @version $Id: PrototypeTargetSourceTests.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
  */
-public class PrototypeInvokerInterceptorTests extends TestCase {
+public class PrototypeTargetSourceTests extends TestCase {
 	
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 	
 	private BeanFactory beanFactory;
 	
-	public PrototypeInvokerInterceptorTests(String s) {
+	public PrototypeTargetSourceTests(String s) {
 		super(s);
 	}
 	
@@ -33,7 +34,7 @@ public class PrototypeInvokerInterceptorTests extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		// Load from classpath, NOT a file path
-		InputStream is = getClass().getResourceAsStream("prototypeInvokerTests.xml");
+		InputStream is = getClass().getResourceAsStream("prototypeTests.xml");
 		this.beanFactory = new XmlBeanFactory(is);
 	}
 	

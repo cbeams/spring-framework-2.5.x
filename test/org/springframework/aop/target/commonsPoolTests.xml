@@ -9,16 +9,18 @@
 		<property name="count"><value>10</value></property>
 	</bean>
 	
-	<bean id="poolingInvokerInterceptor" class="org.springframework.aop.interceptor.CommonsPoolingInvokerInterceptor">	
+	<bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPoolTargetSource">	
 		<property name="targetBeanName"><value>prototypeTest</value></property>
 		<property name="maxSize"><value>25</value></property>
 	</bean>
 	
 	
 	<bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="target"><ref local="poolingInvokerInterceptor" /></property>
+		<property name="target"><ref local="poolTargetSource" /></property>
 		<property name="targetMethod"><value>getPoolingConfigMixin</value></property>
 	</bean>
+	
+	<bean id="nop" class="org.springframework.aop.interceptor.NopInterceptor" />
 	
 	<!--
 		This will create a bean for each thread ("apartment")
@@ -26,14 +28,25 @@
 	<bean id="pooled" 
 			class="org.springframework.aop.framework.ProxyFactoryBean"
 	>	
-		<property name="interceptorNames"><value>poolingInvokerInterceptor</value></property>
+		<property name="targetSource"><ref local="poolTargetSource"/></property>
+		<property name="interceptorNames"><value>nop</value></property>
+		
+	</bean>
+	
+	<bean id="pooledNoInterceptors" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		<property name="targetSource"><ref local="poolTargetSource"/></property>
 		
 	</bean>
 	
 	<bean id="pooledWithMixin" 
 			class="org.springframework.aop.framework.ProxyFactoryBean"
 	>	
-		<property name="interceptorNames"><value>poolConfigAdvisor,poolingInvokerInterceptor</value></property>
+		<property name="targetSource"><ref local="poolTargetSource"/></property>
+		
+		<property name="interceptorNames"><value>poolConfigAdvisor</value></property>
+		
 		<!-- Necessary as have a mixin and want to avoid losing the class,
 			 because there's no target interface -->
 		<property name="proxyTargetClass"><value>true</value></property>

@@ -19,7 +19,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface 
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.9 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: MethodInvocationImpl.java,v 1.10 2003-11-30 17:17:34 johnsonr Exp $
  */
 public class MethodInvocationImpl implements MethodInvocation {
 	
@@ -47,6 +47,8 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 * Lazily initialized for efficiency.
 	 */
 	private HashMap resources;
+	
+	private boolean exhausted;
 	
 	
 	/**
@@ -191,8 +193,13 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 * @see org.aopalliance.intercept.Invocation#proceed
 	 */
 	public Object proceed() throws Throwable {
-		if (this.currentInterceptor >= this.interceptorsAndDynamicMethodMatchers.size() - 1)
+		if (exhausted)
 			throw new AspectException("All interceptors have already been invoked");
+		
+		if (this.currentInterceptor == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
+			exhausted = true;
+			return AopProxy.invokeJoinpointUsingReflection(target, method, arguments);
+		}
 		
 		// We begin with -1 and increment early
 
@@ -217,6 +224,7 @@ public class MethodInvocationImpl implements MethodInvocation {
 		}
 	}
 
+
 	/**
 	 * @see org.aopalliance.intercept.Invocation#cloneInstance
 	 */
@@ -229,10 +237,6 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 */
 	public AttributeRegistry getAttributeRegistry() {
 		throw new UnsupportedOperationException("Likely to be removed from AOP Alliance API");
-	}
-
-	public void setTarget(Object object) {
-		this.target = object;
 	}
 
 	/**

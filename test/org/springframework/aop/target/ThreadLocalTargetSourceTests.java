@@ -3,27 +3,28 @@
  * of the Apache Software License.
  */
 
-package org.springframework.aop.interceptor;
+package org.springframework.aop.target;
 
 import java.io.InputStream;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ThreadLocalInvokerInterceptorTests.java,v 1.1 2003-11-24 20:45:06 johnsonr Exp $
+ * @version $Id: ThreadLocalTargetSourceTests.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
  */
-public class ThreadLocalInvokerInterceptorTests extends TestCase {
+public class ThreadLocalTargetSourceTests extends TestCase {
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
 	private XmlBeanFactory beanFactory;
 	
-	public ThreadLocalInvokerInterceptorTests(String s) {
+	public ThreadLocalTargetSourceTests(String s) {
 		super(s);
 	}
 
@@ -32,7 +33,7 @@ public class ThreadLocalInvokerInterceptorTests extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		// Load from classpath, NOT a file path
-		InputStream is = getClass().getResourceAsStream("threadLocalInvokerTests.xml");
+		InputStream is = getClass().getResourceAsStream("threadLocalTests.xml");
 		this.beanFactory = new XmlBeanFactory(is);
 	}
 	
@@ -60,16 +61,18 @@ public class ThreadLocalInvokerInterceptorTests extends TestCase {
 	 *
 	 */
 	public void testCanGetStatsViaMixin() {
-		ThreadLocalInvokerStats stats = (ThreadLocalInvokerStats) beanFactory.getBean("apartment");
-		// TODO dodgy: effect of advice creation
+		ThreadLocalTargetSourceStats stats = (ThreadLocalTargetSourceStats) beanFactory.getBean("apartment");
+		// +1 because creating target for stats call counts
 		assertEquals(1, stats.getInvocations());
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		apartment.doWork();
-		assertEquals(2, stats.getInvocations());
-		assertEquals(1, stats.getHits());
-		apartment.doWork();
+		// +1 again
 		assertEquals(3, stats.getInvocations());
-		assertEquals(2, stats.getHits());
+		// + 1 for states call!
+		assertEquals(3, stats.getHits());
+		apartment.doWork();
+		assertEquals(6, stats.getInvocations());
+		assertEquals(6, stats.getHits());
 		// Only one thread so only one object can have been bound
 		assertEquals(1, stats.getObjects());
 	}
@@ -107,7 +110,7 @@ public class ThreadLocalInvokerInterceptorTests extends TestCase {
 		assertEquals(INITIAL_COUNT + 3, r.mine.getCount() );
 		
 		// Bound to two threads
-		assertEquals(2, ((ThreadLocalInvokerStats) apartment).getObjects());
+		assertEquals(2, ((ThreadLocalTargetSourceStats) apartment).getObjects());
 	}
 
 }
