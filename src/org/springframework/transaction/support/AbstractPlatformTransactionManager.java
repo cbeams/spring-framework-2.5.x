@@ -47,7 +47,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.21 2004-02-11 11:00:02 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.22 2004-03-12 14:39:08 jhoeller Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -295,37 +295,39 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		else {
 			try {
-				triggerBeforeCommit(defStatus);
-				triggerBeforeCompletion(defStatus);
-				if (status.isNewTransaction()) {
-					logger.info("Initiating transaction commit");
-					doCommit(defStatus);
+				try {
+					triggerBeforeCommit(defStatus);
+					triggerBeforeCompletion(defStatus);
+					if (status.isNewTransaction()) {
+						logger.info("Initiating transaction commit");
+						doCommit(defStatus);
+					}
 				}
-				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_COMMITTED, null);
-			}
-			catch (UnexpectedRollbackException ex) {
-				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
-				throw ex;
-			}
-			catch (TransactionException ex) {
-				if (this.rollbackOnCommitFailure) {
+				catch (UnexpectedRollbackException ex) {
+					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
+					throw ex;
+				}
+				catch (TransactionException ex) {
+					if (this.rollbackOnCommitFailure) {
+						doRollbackOnCommitException(defStatus, ex);
+						triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
+					}
+					else {
+						triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, ex);
+					}
+					throw ex;
+				}
+				catch (RuntimeException ex) {
 					doRollbackOnCommitException(defStatus, ex);
 					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
+					throw ex;
 				}
-				else {
-					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, ex);
+				catch (Error err) {
+					doRollbackOnCommitException(defStatus, err);
+					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, err);
+					throw err;
 				}
-				throw ex;
-			}
-			catch (RuntimeException ex) {
-				doRollbackOnCommitException(defStatus, ex);
-				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
-				throw ex;
-			}
-			catch (Error err) {
-				doRollbackOnCommitException(defStatus, err);
-				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, err);
-				throw err;
+				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_COMMITTED, null);
 			}
 			finally {
 				cleanupAfterCompletion(defStatus);
@@ -342,25 +344,27 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	public final void rollback(TransactionStatus status) throws TransactionException {
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
 		try {
-			triggerBeforeCompletion(defStatus);
-			if (status.isNewTransaction()) {
-				logger.info("Initiating transaction rollback");
-				doRollback(defStatus);
-			}
-			else if (defStatus.getTransaction() != null) {
-				if (defStatus.isDebug()) {
-					logger.debug("Setting existing transaction rollback-only");
+			try {
+				triggerBeforeCompletion(defStatus);
+				if (status.isNewTransaction()) {
+					logger.info("Initiating transaction rollback");
+					doRollback(defStatus);
 				}
-				doSetRollbackOnly(defStatus);
+				else if (defStatus.getTransaction() != null) {
+					if (defStatus.isDebug()) {
+						logger.debug("Setting existing transaction rollback-only");
+					}
+					doSetRollbackOnly(defStatus);
+				}
+				else {
+					logger.info("Should roll back transaction but cannot - no transaction available");
+				}
 			}
-			else {
-				logger.info("Should roll back transaction but cannot - no transaction available");
+			catch (TransactionException ex) {
+				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, ex);
+				throw ex;
 			}
 			triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, null);
-		}
-		catch (TransactionException ex) {
-			triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, ex);
-			throw ex;
 		}
 		finally {
 			cleanupAfterCompletion(defStatus);
