@@ -370,7 +370,7 @@
 	</target>
 
 
-	<target name="release" depends="alljars,javadoc" description="Generate release zip file">
+	<target name="release" depends="alljars,javadoc,refdoc" description="Generate release zip file">
 
 		<mkdir dir="${target.release.dir}"/>
 
@@ -384,7 +384,13 @@
 			<include name="dist/*.vm"/>
 			<include name="dist/*.ftl"/>
 			<include name="docs/**"/>
-			<exclude name="docs/reference/**"/>
+			<exclude name="docs/reference/html/**"/>
+			<exclude name="docs/reference/images/**"/>
+			<exclude name="docs/reference/lib/**"/>
+			<exclude name="docs/reference/src/**"/>
+			<exclude name="docs/reference/styles/**"/>
+			<exclude name="docs/reference/.cvsignore"/>
+			<exclude name="docs/reference/readme.txt"/>
 			<include name="samples/countries/**"/>
 			<include name="samples/imagedb/**"/>
 			<include name="samples/jpetstore/**"/>
@@ -688,6 +694,15 @@
 
 
 	<target name="preparedocs" description="Extra preparation for the documentation">
+
+		<fail message="XSLT supporting lib not installed. Please see docs/reference/readme.txt for instructions.">
+			<condition>
+				<not>
+					<available file="${basedir}/${doc.ref.dir}/lib"/>
+				</not>
+			</condition>
+		</fail>
+
 		<!-- For now, no dynamic inclusion of the DTD since it looks ugly because of
 		     all the extra newlines the replace is mysteriously adding.
 		     I'll figure something out for that later on
