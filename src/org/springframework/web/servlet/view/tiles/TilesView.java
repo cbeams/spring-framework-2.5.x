@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.tiles;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -58,6 +59,25 @@ import org.springframework.web.servlet.view.InternalResourceView;
  */
 public class TilesView extends InternalResourceView {
 
+	/**
+	 * Name of the attribute that will override the path of the layout page
+	 * to render. A Tiles component controller can set such an attribute
+	 * to dynamically switch the look and feel of a Tiles page.
+	 * @see #setPath
+	 */
+	public static final String PATH_ATTRIBUTE = TilesView.class.getName() + ".PATH";
+
+	/**
+	 * Set the path of the layout page to render.
+	 * @param request current HTTP request
+	 * @param path the path of the layout page
+	 * @see #PATH_ATTRIBUTE
+	 */
+	public static void setPath(HttpServletRequest request, String path) {
+		request.setAttribute(PATH_ATTRIBUTE, path);
+	}
+
+
 	private DefinitionsFactory definitionsFactory;
 
 	protected void initApplicationContext() throws ApplicationContextException {
@@ -75,6 +95,7 @@ public class TilesView extends InternalResourceView {
 	 */
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request,
 	                                       HttpServletResponse response) throws Exception {
+
 		if (!response.isCommitted()) {
 			response.setContentType(getContentType());
 		}
@@ -83,42 +104,83 @@ public class TilesView extends InternalResourceView {
 		ComponentDefinition definition = this.definitionsFactory.getDefinition(getUrl(), request,
 		                                                                       getServletContext());
 		if (definition == null) {
-			response.sendError(HttpServletResponse.SC_NOT_FOUND,
-												 "Tile with name '" + getBeanName() + "' not found");
-			return;
+			throw new ServletException("Tile with name '" + getBeanName() + "' not found");
 		}
 
+		// expose model
 		exposeModelAsRequestAttributes(model, request);
 
-		// get current tile context
-		ComponentContext tileContext = ComponentContext.getContext(request);
-		if (tileContext == null) {
-			tileContext = new ComponentContext(definition.getAttributes());
-			ComponentContext.setContext(tileContext, request);
-		}
-		else {
-			tileContext.addMissing(definition.getAttributes());
+		// get current component context
+		ComponentContext context = getComponentContext(request, definition);
+
+		// execute component controller associated with definition, if any
+		Controller controller = getController(request, definition);
+		if (controller != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing Tiles controller [" + controller + "]");
+			}
+			controller.perform(context, request, response, getServletContext());
 		}
 
-		// execute controller associated to definition, if any
+		// determine the path of the definition
+		String path = getPath(request, definition);
+		if (path == null) {
+			throw new ServletException("Could not determine a path for Tiles definition '" + definition.getName() + "'");
+		}
+
+		// process the definition
+		RequestDispatcher rd = request.getRequestDispatcher(path);
+		if (rd == null) {
+			throw new ServletException("Could not get RequestDispatcher for [" + getUrl() +
+			                           "]: check that this file exists within your WAR");
+		}
+		rd.include(request, response);
+	}
+
+	/**
+	 * Determine the Tiles component context for the given Tiles definition.
+	 * @param request current HTTP request
+	 * @param definition the Tiles definition to render
+	 * @return the component context
+	 */
+	protected ComponentContext getComponentContext(HttpServletRequest request, ComponentDefinition definition) {
+		ComponentContext context = ComponentContext.getContext(request);
+		if (context == null) {
+			context = new ComponentContext(definition.getAttributes());
+			ComponentContext.setContext(context, request);
+		}
+		else {
+			context.addMissing(definition.getAttributes());
+		}
+		return context;
+	}
+
+	/**
+	 * Determine and initialize the Tiles component controller for the
+	 * given Tiles definition, if any.
+	 * @param request current HTTP request
+	 * @param definition the Tiles definition to render
+	 * @return the component controller to execute, or null if none
+	 */
+	protected Controller getController(HttpServletRequest request, ComponentDefinition definition)
+			throws InstantiationException {
 		Controller controller = definition.getOrCreateController();
 		if (controller instanceof ApplicationContextAware) {
 			((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
 		}
-		if (controller != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Executing controller [" + controller + "]");
-			}
-			controller.perform(tileContext, request, response, getServletContext());
-		}
+		return controller;
+	}
 
-		// process the definition
-		RequestDispatcher rd = request.getRequestDispatcher(definition.getPath());
-		if (rd == null) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			return;
-		}
-		rd.include(request, response);
+	/**
+	 * Determine the path for the given Tiles definition,
+	 * i.e. the layout page to render.
+	 * @param request current HTTP request
+	 * @param definition the Tiles definition to render
+	 * @return the path of the layout page to render
+	 */
+	protected String getPath(HttpServletRequest request, ComponentDefinition definition) {
+		Object pathAttr = request.getAttribute(PATH_ATTRIBUTE);
+		return (pathAttr != null ? pathAttr.toString() : definition.getPath());
 	}
 
 }

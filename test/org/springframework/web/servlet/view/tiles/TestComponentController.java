@@ -29,6 +29,7 @@ public class TestComponentController extends ComponentControllerSupport {
 
 	protected void doPerform(ComponentContext componentContext, HttpServletRequest request, HttpServletResponse response) {
 		request.setAttribute("testAttr", "testVal");
+		TilesView.setPath(request, "/WEB-INF/jsp/layout.jsp");
 	}
 
 }
