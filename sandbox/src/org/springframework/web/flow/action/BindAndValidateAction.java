@@ -239,6 +239,10 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 		model.setAttributes(errors.getModel());
 	}
 
+	public static void exportErrors(String formObjectName, Object formObject, MutableAttributesAccessor model) {
+		exportErrors(new BindException(formObject, formObjectName), model);
+	}
+
 	protected final Object loadRequiredFormObject(HttpServletRequest request, AttributesAccessor model) {
 		try {
 			// get the form object
