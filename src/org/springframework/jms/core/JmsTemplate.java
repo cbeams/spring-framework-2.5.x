@@ -24,6 +24,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
+import javax.jms.TransactionInProgressException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -511,12 +512,21 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 
-	/**
-	 * Make sure the connection factory has been set.
-	 */
 	public void afterPropertiesSet() {
 		if (this.connectionFactory == null) {
 			throw new IllegalArgumentException("connectionFactory is required");
+		}
+	}
+
+	private void checkDefaultDestination() throws IllegalStateException {
+		if (getDefaultDestination() == null) {
+			throw new IllegalStateException("No defaultDestination specified. Check configuration of JmsTemplate.");
+		}
+	}
+
+	private void checkMessageConverter() throws IllegalStateException {
+		if (getMessageConverter() == null) {
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
 		}
 	}
 
@@ -639,6 +649,18 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		}
 	}
 
+	private void commitIfNecessary(Session session) throws JMSException {
+		try {
+			session.commit();
+		}
+		catch (TransactionInProgressException ex) {
+			// Ignore -> can only happen in case of a JTA transaction.
+		}
+		catch (javax.jms.IllegalStateException ex) {
+			// Ignore -> can only happen in case of a JTA transaction.
+		}
+	}
+
 
 	/**
 	 * Execute the action specified by the given action object within a
@@ -707,9 +729,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 
 	public void send(MessageCreator messageCreator) throws JmsException {
-		if (getDefaultDestination() == null) {
-			throw new IllegalStateException("No defaultDestination specified. Check configuration of JmsTemplate.");
-		}
+		checkDefaultDestination();
 		send(getDefaultDestination(), messageCreator);
 	}
 
@@ -740,9 +760,11 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 			logger.debug("Sending created message [" + message + "]");
 		}
 		doSend(producer, message);
-		if (session.getTransacted() && !TransactionSynchronizationManager.hasResource(getConnectionFactory())) {
-			// transacted session created by this template -> commit
-			session.commit();
+		// Check commit - avoid commit call within a JTA transaction.
+		if (session.getTransacted() && isSessionTransacted() &&
+				!TransactionSynchronizationManager.hasResource(getConnectionFactory())) {
+			// Transacted session created by this template -> commit.
+			commitIfNecessary(session);
 		}
 	}
 
@@ -757,16 +779,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 
 	public void convertAndSend(Object message) throws JmsException {
-		if (getDefaultDestination() == null) {
-			throw new IllegalStateException("No defaultDestination specified. Check configuration of JmsTemplate.");
-		}
+		checkDefaultDestination();
 		convertAndSend(getDefaultDestination(), message);
 	}
 
 	public void convertAndSend(Destination destination, final Object message) throws JmsException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		send(destination, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
 				return getMessageConverter().toMessage(message, session);
@@ -775,9 +793,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 	public void convertAndSend(String destinationName, final Object message) throws JmsException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
 				return getMessageConverter().toMessage(message, session);
@@ -786,19 +802,14 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 	public void convertAndSend(Object message, MessagePostProcessor postProcessor) throws JmsException {
-		if (getDefaultDestination() == null) {
-			throw new IllegalStateException("No defaultDestination specified. Check configuration of JmsTemplate.");
-		}
+		checkDefaultDestination();
 		convertAndSend(getDefaultDestination(), message, postProcessor);
 	}
 
 	public void convertAndSend(
 			Destination destination, final Object message, final MessagePostProcessor postProcessor)
 			throws JmsException {
-
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		send(destination, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
 				Message msg = getMessageConverter().toMessage(message, session);
@@ -810,10 +821,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	public void convertAndSend(
 			String destinationName, final Object message, final MessagePostProcessor postProcessor)
 	    throws JmsException {
-
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
 				Message msg = getMessageConverter().toMessage(message, session);
@@ -824,9 +832,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 
 	public Message receive() throws JmsException {
-		if (getDefaultDestination() == null) {
-			throw new IllegalStateException("No defaultDestination specified. Check configuration of JmsTemplate.");
-		}
+		checkDefaultDestination();
 		return receive(getDefaultDestination());
 	}
 
@@ -848,9 +854,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 	public Message receiveSelected(String messageSelector) throws JmsException {
-		if (getDefaultDestination() == null) {
-			throw new IllegalStateException("No defaultDestination specified. Check configuration of JmsTemplate.");
-		}
+		checkDefaultDestination();
 		return receiveSelected(getDefaultDestination(), messageSelector);
 	}
 
@@ -892,13 +896,17 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 			Message message = (timeout >= 0) ?
 					consumer.receive(timeout) : consumer.receive();
 			if (session.getTransacted()) {
-				if (conHolder == null) {
+				// Commit necessary - but avoid commit call within a JTA transaction.
+				if (isSessionTransacted() && conHolder == null) {
 					// Transacted session created by this template -> commit.
-					session.commit();
+					commitIfNecessary(session);
 				}
 			}
-			else if (message != null && isClientAcknowledge(session)) {
-				message.acknowledge();
+			else if (isClientAcknowledge(session)) {
+				// Manually acknowledge message, if any.
+				if (message != null) {
+					message.acknowledge();
+				}
 			}
 			return message;
 		}
@@ -913,44 +921,32 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 
 	public Object receiveAndConvert() throws JmsException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		return doConvertFromMessage(receive());
 	}
 
 	public Object receiveAndConvert(Destination destination) throws JmsException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		return doConvertFromMessage(receive(destination));
 	}
 
 	public Object receiveAndConvert(String destinationName) throws JmsException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		return doConvertFromMessage(receive(destinationName));
 	}
 
 	public Object receiveSelectedAndConvert(String messageSelector) throws JmsException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		return doConvertFromMessage(receiveSelected(messageSelector));
 	}
 
 	public Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		return doConvertFromMessage(receiveSelected(destination, messageSelector));
 	}
 
 	public Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
+		checkMessageConverter();
 		return doConvertFromMessage(receiveSelected(destinationName, messageSelector));
 	}
 
