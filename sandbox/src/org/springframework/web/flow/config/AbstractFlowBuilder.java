@@ -137,11 +137,6 @@ import org.springframework.web.flow.ViewState;
 public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
-	 * The default attribute mapper ID suffix ("attributeMapper").
-	 */
-	public static final String ATTRIBUTE_MAPPER_ID_SUFFIX = "attributeMapper";
-
-	/**
 	 * Create an instance of a abstract flow builder; default constructor.
 	 */
 	protected AbstractFlowBuilder() {
