@@ -146,7 +146,7 @@ public class LocalJaxRpcServiceFactory {
 	 * @see #setNamespaceUri
 	 */
 	public QName getQName(String name) {
-		return (this.namespaceUri != null) ? new QName(this.namespaceUri, name) : new QName(this.serviceName);
+		return (this.namespaceUri != null) ? new QName(this.namespaceUri, name) : new QName(name);
 	}
 
 	/**
