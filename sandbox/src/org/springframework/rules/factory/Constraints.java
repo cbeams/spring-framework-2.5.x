@@ -15,6 +15,8 @@
  */
 package org.springframework.rules.factory;
 
+import java.util.Set;
+
 import org.springframework.rules.BinaryFunction;
 import org.springframework.rules.BinaryPredicate;
 import org.springframework.rules.RelationalOperator;
@@ -25,8 +27,10 @@ import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.EqualTo;
 import org.springframework.rules.predicates.GreaterThan;
 import org.springframework.rules.predicates.GreaterThanEqualTo;
+import org.springframework.rules.predicates.InGroup;
 import org.springframework.rules.predicates.LessThan;
 import org.springframework.rules.predicates.LessThanEqualTo;
+import org.springframework.rules.predicates.Like;
 import org.springframework.rules.predicates.ParameterizedBinaryPredicate;
 import org.springframework.rules.predicates.Range;
 import org.springframework.rules.predicates.Required;
@@ -150,7 +154,7 @@ public class Constraints {
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public UnaryPredicate onResult(UnaryFunction function,
+    public UnaryPredicate testResultOf(UnaryFunction function,
             UnaryPredicate constraint) {
         return new UnaryFunctionResultConstraint(function, constraint);
     }
@@ -167,7 +171,7 @@ public class Constraints {
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public BinaryPredicate onResult(BinaryFunction function,
+    public BinaryPredicate testResultOf(BinaryFunction function,
             UnaryPredicate constraint) {
         return new BinaryFunctionResultConstraint(function, constraint);
     }
@@ -255,6 +259,40 @@ public class Constraints {
     public UnaryOr disjunction() {
         return new UnaryOr();
     }
+
+    /**
+     * Returns a 'in' group (or set) predicate.
+     * 
+     * @param group
+     *            the group items
+     * @return The InGroup predicate.
+     */
+    public UnaryPredicate inGroup(Object[] group) {
+        return new InGroup(group);
+    }
+
+    /**
+     * Returns a 'like' predicate.
+     * 
+     * @param likeString
+     *            the likeString
+     * @return The Like predicate.
+     */
+    public UnaryPredicate like(String likeString) {
+        return new Like(likeString);
+    }
+
+    /**
+     * Returns a 'in' group (or set) predicate.
+     * 
+     * @param group
+     *            the group items
+     * @return The InGroup predicate
+     */
+    public UnaryPredicate inGroup(Set group) {
+        return new InGroup(group);
+    }
+
 
     /**
      * Returns a required predicate.

@@ -2,16 +2,16 @@
  * Copyright 2002-2004 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy
- * of the License at
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.rules;
 
@@ -73,8 +73,7 @@ public class Rules implements UnaryPredicate, Validator {
             } else {
                 UnaryPredicate p = (UnaryPredicate)val;
                 if (p instanceof CompoundUnaryPredicate) {
-                    e =
-                        new CompoundBeanPropertyExpression(
+                    e = new CompoundBeanPropertyExpression(
                             (CompoundUnaryPredicate)p);
                 } else if (p instanceof BeanPropertyExpression) {
                     e = (BeanPropertyExpression)p;
@@ -90,16 +89,11 @@ public class Rules implements UnaryPredicate, Validator {
         UnaryAnd and = new UnaryAnd();
         and.add(e);
         if (logger.isDebugEnabled()) {
-            logger.debug(
-                "Configuring rules for property '"
-                    + e.getPropertyName()
-                    + "', rules -> ["
-                    + e
-                    + "]");
+            logger.debug("Configuring rules for property '"
+                    + e.getPropertyName() + "', rules -> [" + e + "]");
         }
-        propertyRules.put(
-            e.getPropertyName(),
-            new CompoundBeanPropertyExpression(and));
+        propertyRules.put(e.getPropertyName(),
+                new CompoundBeanPropertyExpression(and));
     }
 
     public BeanPropertyExpression getRules(String property) {
@@ -111,7 +105,7 @@ public class Rules implements UnaryPredicate, Validator {
     }
 
     /**
-     * Still a work in progress!
+     * Factory method that creates a rules instance for a given java bean type.
      * 
      * @param propertyName
      * @return A rule for a given property.
@@ -129,9 +123,8 @@ public class Rules implements UnaryPredicate, Validator {
      * @return this, to support chaining.
      */
     public Rules add(BeanPropertyExpression expression) {
-        CompoundBeanPropertyExpression and =
-            (CompoundBeanPropertyExpression)propertyRules.get(
-                expression.getPropertyName());
+        CompoundBeanPropertyExpression and = (CompoundBeanPropertyExpression)propertyRules
+                .get(expression.getPropertyName());
         if (and == null) {
             internalSetRules(expression);
         } else {
@@ -159,11 +152,11 @@ public class Rules implements UnaryPredicate, Validator {
      * @param compoundPredicate
      */
     public void add(UnaryPredicate compoundPredicate) {
-        Assert.isTrue(
-            compoundPredicate instanceof CompoundUnaryPredicate,
-            "Argument must be a compound predicate composed of BeanPropertyExpression objects.");
-        add(
-            new CompoundBeanPropertyExpression(
+        Assert
+                .isTrue(
+                        compoundPredicate instanceof CompoundUnaryPredicate,
+                        "Argument must be a compound predicate composed of BeanPropertyExpression objects.");
+        add(new CompoundBeanPropertyExpression(
                 (CompoundUnaryPredicate)compoundPredicate));
     }
 
@@ -196,10 +189,8 @@ public class Rules implements UnaryPredicate, Validator {
     }
 
     public String toString() {
-        return new ToStringBuilder(this)
-            .append("beanClass", beanClass)
-            .append("propertyRules", propertyRules)
-            .toString();
+        return new ToStringBuilder(this).append("beanClass", beanClass).append(
+                "propertyRules", propertyRules).toString();
     }
 
 }

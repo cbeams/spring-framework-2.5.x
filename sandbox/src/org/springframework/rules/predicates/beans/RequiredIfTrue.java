@@ -47,6 +47,10 @@ public class RequiredIfTrue extends AbstractBeanPropertyExpression implements
         super(propertyName);
     }
 
+    public UnaryPredicate getPredicate() {
+        return predicate;
+    }
+    
     protected void setPredicate(UnaryPredicate predicate) {
         Assert.notNull(predicate);
         this.predicate = predicate;

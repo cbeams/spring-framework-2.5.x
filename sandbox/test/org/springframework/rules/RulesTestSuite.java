@@ -4,6 +4,9 @@
  */
 package org.springframework.rules;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import junit.framework.TestCase;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -82,6 +85,50 @@ public class RulesTestSuite extends TestCase {
         assertFalse(p.test("1234567"));
     }
 
+    public void testInGroup() {
+        String o1 = "o1";
+        String o2 = "o2";
+        String o3 = "o3";
+        Set group = new HashSet();
+        group.add(o1);
+        group.add(o2);
+        group.add(o3);
+        UnaryPredicate p = constraints.inGroup(group);
+        assertTrue(p.test("o1"));
+        assertTrue(p.test(o1));
+        assertFalse(p.test("o4"));
+        p = constraints.inGroup(new Object[] { o1, o2, o1, o3 } );
+        assertTrue(p.test("o1"));
+        assertTrue(p.test(o1));
+        assertFalse(p.test("o4"));
+    }
+    
+    public void testLike() {
+        String keithDonald = "keith donald";
+        String keith = "keith";
+        String donald = "donald";
+        UnaryPredicate p = constraints.like(keithDonald);
+        assertTrue(p.test("keith donald"));
+        assertFalse(p.test("Keith Donald"));
+
+        p = constraints.like("%keith donald%");
+        assertTrue(p.test("keith donald"));
+        assertFalse(p.test("Keith Donald"));
+        
+        p = constraints.like("keith%");
+        assertTrue(p.test(keithDonald));
+        assertTrue(p.test(keith));
+        assertFalse(p.test(donald));
+
+        p = constraints.like("%donald");
+        assertTrue(p.test(keithDonald));
+        assertTrue(p.test(donald));
+        assertFalse(p.test(keith));
+        
+        
+        
+    }
+    
     public void testRequired() {
         UnaryPredicate req = Required.instance();
         assertFalse(req.test(""));

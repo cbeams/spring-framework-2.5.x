@@ -46,10 +46,6 @@ public class BeanPropertyValueConstraint extends AbstractBeanPropertyExpression
         this.valueConstraint = valueConstraint;
     }
 
-    public UnaryPredicate getPredicate() {
-        return valueConstraint;
-    }
-
     /**
      * Tests the value of the configured propertyName for this bean against the
      * configured predicate constraint.
@@ -59,6 +55,10 @@ public class BeanPropertyValueConstraint extends AbstractBeanPropertyExpression
     public boolean test(Object bean) {
         GetProperty getProperty = new GetProperty(bean);
         return valueConstraint.test(getProperty.evaluate(getPropertyName()));
+    }
+
+    public UnaryPredicate getPredicate() {
+        return valueConstraint;
     }
 
     public String toString() {
