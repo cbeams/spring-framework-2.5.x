@@ -16,7 +16,7 @@ import java.util.List;
  * Provides method for instantiating beans and copying bean properties.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.12 2004-01-14 22:13:12 jhoeller Exp $
+ * @version $Id: BeanUtils.java,v 1.13 2004-02-22 21:53:37 jhoeller Exp $
  */
 public abstract class BeanUtils {
 
@@ -72,7 +72,7 @@ public abstract class BeanUtils {
 	 * i.e. a primitive, a String, a Class, or a corresponding array.
 	 * Used to determine properties to check for a "simple" dependency-check.
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
-	 * @see org.springframework.beans.factory.support.AbstractBeanFactory#dependencyCheck
+	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#dependencyCheck
 	 */
 	public static boolean isSimpleProperty(Class clazz) {
 		return clazz.isPrimitive() || isPrimitiveArray(clazz) || isPrimitiveWrapperArray(clazz) ||
