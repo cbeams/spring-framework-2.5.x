@@ -6,14 +6,30 @@
 		
 		<title>Introduction</title>
 
-		<para>			
-			Spring is an application framework for all layers: It offers a bean configuration foundation, AOP support, a JDBC abstraction framework, abstract transaction support, etc. It is a very non-intrusive effort: Your application classes do not need to depend on any Spring classes if not necessary, and you can reuse every part on its own if you like to. From its very design, the framework encourages clean separation of tiers, most importantly web tier and business logic: e.g. the validation framework does not depend on web controllers. Major goals are reusability and testability: Unnecessary container or framework dependencies can be considered avoidable evils.
-		</para>
+		<para> 
+            Spring is an application framework for all layers: It offers a
+			bean configuration foundation, AOP support, a JDBC abstraction
+			framework, abstract transaction support, etc. It is a very
+			non-intrusive effort: Your application classes do not need to
+			depend on any Spring classes if not necessary, and you can reuse
+			every part on its own if you like to. From its very design, the
+			framework encourages clean separation of tiers, most importantly
+			web tier and business logic: e.g. the validation framework does
+			not depend on web controllers. Major goals are reusability and
+			testability: Unnecessary container or framework dependencies can
+			be considered avoidable evils.  
+        </para>
 
 		<para>
-			Spring is potentially a one-stop shop, addressing most infrastructure concerns of typical applications. It also goes places other frameworks don't. However, if you like to use other technologies for certain layers in your application			(e.g. the web layer or the persistence layer),
-			Spring allows you to replace whatever solution it has for that			specific layer, with any other solution. Spring provides a couple of pre-integrated technologies. These are described			in this chapter.
-		</para>
+			Spring is potentially a one-stop shop, addressing most
+			infrastructure concerns of typical applications. It also goes
+			places other frameworks don't. However, if you like to use other
+			technologies for certain layers in your application (e.g. the web
+			layer or the persistence layer), Spring allows you to replace
+			whatever solution it has for that specific layer, with any other
+			solution. Spring provides a couple of pre-integrated
+			technologies. These are described in this chapter.  
+        </para>
 		
 	</sect1>
 	
@@ -22,28 +38,47 @@
 		<title>Integrating Velocity</title>
 		
 		<para>
-			Velocity is a view technology developed the Jakarta Project. More information about Velocity can be found at http://jakarta.apache.org/velocity. This chapter describes how to integrate the Velocity view technology for use with Spring.
+		    Velocity is a view technology developed the Jakarta Project. More
+		    information about Velocity can be found at
+		    http://jakarta.apache.org/velocity. This chapter describes how to
+		    integrate the Velocity view technology for use with Spring.
 		</para>
 		
 		<sect2 id="integration-velocity-dependencies">
 		
-			<title>Dependencies</title>
-			<para>
-				There is one dependency that your web application will need to satisfy before working with Velocity, namely that velocity-1.x.x.jar needs to be available. Typically this is included in the WEB-INF/lib folder where it is guaranteed to be found by a J2EE server and added to the classpath for your application. It is of course assumed that you already have the spring-full.jar (or equivalent) in your WEB-INF/lib folder too! The latest stable velocity jar is normally supplied as part of the Spring framework and can be copied from there. 
-			</para>
+			<title>Dependencies</title> 
+
+            <para>
+                There is one dependency that your web application will need to
+     			satisfy before working with Velocity, namely that
+     			velocity-1.x.x.jar needs to be available. Typically this is
+     			included in the WEB-INF/lib folder where it is guaranteed to
+     			be found by a J2EE server and added to the classpath for your
+     			application. It is of course assumed that you already have the
+     			spring-full.jar (or equivalent) in your WEB-INF/lib folder
+     			too! The latest stable velocity jar is supplied with the
+     			Spring framework and can be copied from the /lib/velocity
+     			directory.
+            </para>
 			
 		</sect2>
 		
 		<sect2 id="integration-velocity-configuration-dispatcher">
 
 			<title>Dispatcher Servlet Context</title>
-			<para>
-				The configuration file for your Spring dispatcher servlet (usually WEB-INF/[servletname]-servlet.xml) should already contain a bean definition for the view resolver. We'll also add a bean here to configure the Velocity environment. I've chosen to call my dispatcher 'frontcontroller' so my config file names reflect this. 
-			</para>
+			<para>				
+                The configuration file for your Spring dispatcher servlet
+			    (usually WEB-INF/[servletname]-servlet.xml) should already
+			    contain a bean definition for the view resolver. We'll also
+			    add a bean here to configure the Velocity environment. I've
+			    chosen to call my dispatcher 'frontcontroller' so my config
+			    file names reflect this.  
+            </para>
 
 			<para>
-				The following code examples show the various configuration files with appropriate comments. 
-			</para>
+				The following code examples show the various configuration
+			    files with appropriate comments.
+            </para>
 
 			<programlisting><![CDATA[		        
 <!-- ===========================================================-->
@@ -86,16 +121,42 @@
 			<title>Velocity.properties</title>
 
 			<para>
-				This file contains the values that are passed to the Velocity runtime in order to configure velocity itself. Only a few properties are actually required, but many more optional properties are available - see the Velocity docs for more information. Here, I'm just demonstrating the bare minimum to get Velocity up and running in your Spring MVC application. 
+				This file contains the values that are passed to the Velocity
+			    runtime in order to configure velocity itself. Only a few
+			    properties are actually required, but many more optional
+			    properties are available - see the Velocity docs for more
+			    information. Here, I'm just demonstrating the bare minimum to
+			    get Velocity up and running in your Spring MVC application.
 			</para>
 
 			<para>
-				The main property values concern the location of the Velocity templates themselves. Velocity templates can be loaded from the classpath or the file system and there are pros and cons for both. Loading from the classpath is entirely portable and will work on all target servers, but you may find that the templates clutter your java packages (unless you create a new source tree for them). A further downside of classpath storage is that during development, changing anything in the source tree often causes a refresh of the resource in the WEB-INF/classes tree and this in turn may cause your development server to restart the application (hot-deploying of code). This can be irritating. Once most of the development is complete though, you could store the templates in a jar file which would make them available to the application if this were placed in WEB-INF/lib. 
-			</para>
+				The main property values concern the location of the Velocity
+			    templates themselves. Velocity templates can be loaded from
+			    the classpath or the file system and there are pros and cons
+			    for both. Loading from the classpath is entirely portable and
+			    will work on all target servers, but you may find that the
+			    templates clutter your java packages (unless you create a new
+			    source tree for them). A further downside of classpath storage
+			    is that during development, changing anything in the source
+			    tree often causes a refresh of the resource in the
+			    WEB-INF/classes tree and this in turn may cause your
+			    development server to restart the application (hot-deploying
+			    of code). This can be irritating. Once most of the development
+			    is complete though, you could store the templates in a jar
+			    file which would make them available to the application if
+			    this were placed in WEB-INF/lib.  
+            </para>
 
-			<para>		
-				This example stores velocity templates on the file system somewhere under WEB-INF so that they are not directly available to the client browsers, but don't cause an application restart in development every time I change one. The downside is that the target server may not be able to resolve the path to these files correctly, particularly if the target server doesn't explode WAR modules on the file system. The file method works fine for Tomcat 4.1.x, WebSphere 4.x and WebSphere 5.x. Your mileage may vary. 
-			</para>
+			<para> This example stores velocity templates on the file system
+                somewhere under WEB-INF so that they are not directly
+                available to the client browsers, but don't cause an
+                application restart in development every time you change
+                one. The downside is that the target server may not be able to
+                resolve the path to these files correctly, particularly if the
+                target server doesn't explode WAR modules on the file
+                system. The file method works fine for Tomcat 4.1.x/5.x,
+                WebSphere 4.x and WebSphere 5.x. Your mileage may vary.
+            </para>
 
 			<programlisting><![CDATA[
 #
@@ -104,7 +165,7 @@
 
 
 # uncomment the next two lines to load templates from the 
-# classpath (WEB-INF/classes)
+# classpath (i.e. WEB-INF/classes)
 #resource.loader=class
 #class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
 
@@ -133,17 +194,68 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 			]]></programlisting>		
 		        
 			<para>
-				The file resource loader configuration above uses a marker to denote the root of the web application on the file system ${webapp.root}. This marker will be translated into the actual OS-specific path by the Spring code prior to supplying the properties to Velocity. This is what makes the file resource loader non-portable in some servers. The actual name of the marker itself can be changed if you consider it important by defining a different "appRootMarker" for VelocityConfigurer. See the Spring documentation for details on how to do this. 
+				The file resource loader configuration above uses a marker to
+			    denote the root of the web application on the file system
+			    ${webapp.root}. This marker will be translated into the actual
+			    OS-specific path by the Spring code prior to supplying the
+			    properties to Velocity. This is what makes the file resource
+			    loader non-portable in some servers. The actual name of the
+			    marker itself can be changed if you consider it important by
+			    defining a different "appRootMarker" for
+			    VelocityConfigurer. See the Spring documentation for details
+			    on how to do this.  
+            </para>
+
+            <para>
+
+			    Alternatively, you can specify velocity properties directly in
+				the bean definition for the Velocity config bean by replacing
+				the "configLocation" property with the following inline
+				properties..
+
 			</para>
-		</sect2>
+
+			<programlisting><![CDATA[
+<property name="velocityProperties">
+   	<props>
+   		<prop key="resource.loader">file</prop>
+   		<prop key="file.resource.loader.class">org.apache.velocity.runtime.resource.loader.FileResourceLoader</prop>
+   		<prop key="file.resource.loader.path">${webapp.root}/WEB-INF/velocity</prop>
+   		<prop key="file.resource.loader.cache">false</prop>
+   	</props>
+</property>
+			]]></programlisting>		
+
+            <para>
+
+                Note that as of Spring version 1.0-m4 you can avoid using a
+                properties file or inline properties to define file system
+                loading of templates by putting the following property in the
+                Velocity config bean which will cause the other values to be 
+				figured out.
+
+            </para>
+
+			<programlisting><![CDATA[
+<property name="resourceLoaderPath"><value>/WEB-INF/velocity/</value></property>
+			]]></programlisting>		
+            
+        </sect2>
 			
 		<sect2 id="integration-velocity-configuration-viewconfig">
 			
 			<title>View configuration</title>
 
 			<para>
-				The last step in configuration is to define some views that will be rendered with velocity templates. Views are always defined in a consistent manner in Spring context files. As noted earlier, this example uses an XML file to define view beans, but a properties file (ResourceBundle) can also be used. The name of the view definition file was defined earlier in our ViewResolver bean - part of the WEB-INF/frontcontroller-servlet.xml file. 
-			</para>
+				The last step in configuration is to define some views that
+			    will be rendered with velocity templates. Views are always
+			    defined in a consistent manner in Spring context files. As
+			    noted earlier, this example uses an XML file to define view
+			    beans, but a properties file (ResourceBundle) can also be
+			    used. The name of the view definition file was defined earlier
+			    in our ViewResolver bean - part of the
+			    WEB-INF/frontcontroller-servlet.xml file.  
+            </para>
 
 			<programlisting><![CDATA[
 <!--
@@ -185,9 +297,16 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 			<title>Create templates and test</title>
 
 			<para>
-				Finally, you simply need to create the actual velocity templates. We have defined views that reference two templates, mainTemplate.vm and secondaryTemplate.vm Both of these files will live in WEB-INF/velocity/ as noted in the velocity.properties file above. If you chose a classpath loader in velocity.properties, these files would live in the default package (WEB-INF/classes), or in a jar file under WEB-INF/lib. 		
-				Here's what our 'secondaryView' might look like (simplified HTML) 
-			</para>
+				Finally, you simply need to create the actual velocity
+				templates. We have defined views that reference two templates,
+				mainTemplate.vm and secondaryTemplate.vm Both of these files
+				will live in WEB-INF/velocity/ as noted in the
+				velocity.properties file above. If you chose a classpath
+				loader in velocity.properties, these files would live in the
+				default package (WEB-INF/classes), or in a jar file under
+				WEB-INF/lib.  Here's what our 'secondaryView' might look like
+				(simplified HTML) 
+            </para>
 
 			<programlisting><![CDATA[
 ## $title is set in the view definition file for this view.
@@ -199,10 +318,25 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 </html>
 			]]></programlisting>
 
-				Now, when your controllers return a ModelAndView with the "secondaryView" set as the view to render, Velocity should kick in with the above page. 
+                <para>
+				    Now, when your controllers return a ModelAndView with the
+				    "secondaryView" set as the view to render, Velocity should
+				    kick in with the above page.
+                </para>
 
-				Summary
-				To summarize, this is the tree structure of files discussed in the example above. Only a partial tree is shown, some required directories are not highlighted here. Incorrect file locations are probably the major reason for velocity views not working, with incorrect properties in the view definitions a close second. 
+		</sect2>
+		
+    		<sect2 id="integration-velocity-summary">
+				<title>Summary</title> 
+
+                <para>
+                    To summarize, this is the tree structure of files
+				    discussed in the example above. Only a partial tree is
+				    shown, some required directories are not highlighted
+				    here. Incorrect file locations are probably the major
+				    reason for velocity views not working, with incorrect
+				    properties in the view definitions a close second.
+                </para>
 
 				<programlisting><![CDATA[
 ProjectRoot
@@ -214,7 +348,7 @@ ProjectRoot
 			  +- lib
 			  |    |
 			  |    +- velocity-1.3.1.jar
-			  |    +- spring-full-1.0M1.jar
+			  |    +- spring.jar
 			  |
 			  +- velocity
 			  |    |
