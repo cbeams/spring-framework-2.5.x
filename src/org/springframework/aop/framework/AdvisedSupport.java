@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * methods, which are provided by subclasses.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.25 2004-03-12 02:58:08 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.26 2004-03-12 03:16:02 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -81,9 +81,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	
 	private MethodInvocationFactory methodInvocationFactory;
-	
-	/** Default AopProxyFactory is this */
-	private AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
 	
 	/**
 	 * Set to true when the first AOP proxy has been created, meaning that we must
@@ -146,18 +143,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addListener(advisorChainFactory);
 	}
 	
-	/**
-	 * Customise the AopProxyFactory, allowing different strategies
-	 * to be dropped in without changing the core framework.
-	 * For example, an AopProxyFactory could return an AopProxy using
-	 * dynamic proxies, CGLIB or code generation strategy. 
-	 * @param apf AopProxyFactory to use. The default uses dynamic
-	 * proxies or CGLIB.
-	 */
-	public void setAopProxyFactory(AopProxyFactory apf) {
-		this.aopProxyFactory = apf;
-	}
-
 	/**
 	 * Return the AdvisorChainFactory associated with this ProxyConfig.
 	 */
@@ -471,7 +456,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			activate();
 		}
 		
-		return this.aopProxyFactory.createAopProxy(this);
+		return getAopProxyFactory().createAopProxy(this);
 	}
 	
 	/**

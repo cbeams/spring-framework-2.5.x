@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
  * If it's absolutely necessary to expose the MethodInvocation, use an
  * interceptor to do so.
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.7 2004-03-12 02:55:31 johnsonr Exp $
+ * @version $Id: ProxyConfig.java,v 1.8 2004-03-12 03:16:02 johnsonr Exp $
  */
 public class ProxyConfig {
 	
@@ -43,6 +43,10 @@ public class ProxyConfig {
 	 */
 	private boolean frozen;
 	
+	/** Factory used to create AopProxy's. */
+	private AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
+
+	
 	/**
 	 * Should proxies obtained from this configuration expose
 	 * the AOP proxy for the AopContext class to retrieve for targets?
@@ -64,6 +68,7 @@ public class ProxyConfig {
 		this.proxyTargetClass = other.proxyTargetClass;
 		this.exposeProxy = other.exposeProxy;
 		this.frozen = other.frozen;
+		this.aopProxyFactory = other.aopProxyFactory;
 	}
 
 	public boolean getProxyTargetClass() {
@@ -131,6 +136,23 @@ public class ProxyConfig {
 		this.exposeProxy = exposeProxy;
 	}
 	
+	
+	/**
+	 * Customise the AopProxyFactory, allowing different strategies
+	 * to be dropped in without changing the core framework.
+	 * For example, an AopProxyFactory could return an AopProxy using
+	 * dynamic proxies, CGLIB or code generation strategy. 
+	 * @param apf AopProxyFactory to use. The default uses dynamic
+	 * proxies or CGLIB.
+	 */
+	public void setAopProxyFactory(AopProxyFactory apf) {
+		this.aopProxyFactory = apf;
+	}
+	
+	public AopProxyFactory getAopProxyFactory() {
+		return this.aopProxyFactory;
+	}
+	
 
 	/**
 	 * @return whether the config is frozen, and no
@@ -157,6 +179,7 @@ public class ProxyConfig {
 		sb.append("exposeProxy=" + exposeProxy + "; ");
 		sb.append("frozen=" + frozen + "; ");
 		sb.append("enableCglibSubclassOptimizations=" + optimize + "; ");
+		sb.append("aopProxyFactory=" + aopProxyFactory + "; ");
 		return sb.toString();
 	}
 
