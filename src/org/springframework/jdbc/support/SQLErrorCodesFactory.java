@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -108,12 +107,15 @@ public class SQLErrorCodesFactory {
 							"Unable to locate file [" + SQL_ERROR_CODE_DEFAULT_PATH  + "]");
 				}
 			}
-			ListableBeanFactory bf = new XmlBeanFactory(resource);
-			String[] rdbmsNames = bf.getBeanDefinitionNames(SQLErrorCodes.class);
-			errorCodes = new HashMap(rdbmsNames.length);
+			XmlBeanFactory bf = new XmlBeanFactory(resource);
+			Map errorCodeBeans = bf.getBeansOfType(SQLErrorCodes.class, true, false);
+			errorCodes = new HashMap(errorCodeBeans.size());
 
-			for (int i = 0; i < rdbmsNames.length; i++) {
-				SQLErrorCodes ec = (SQLErrorCodes) bf.getBean(rdbmsNames[i]);
+			for (Iterator it = errorCodeBeans.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String rdbmsName = (String) entry.getKey();
+				SQLErrorCodes ec = (SQLErrorCodes) entry.getValue();
+
 				if (ec.getBadSqlGrammarCodes() == null) {
 					ec.setBadSqlGrammarCodes(new String[0]);
 				}
@@ -159,7 +161,7 @@ public class SQLErrorCodesFactory {
 				}
 
 				if (ec.getDatabaseProductName() == null) {
-					errorCodes.put(rdbmsNames[i], ec);
+					errorCodes.put(rdbmsName, ec);
 				}
 				else {
 					errorCodes.put(ec.getDatabaseProductName(), ec);

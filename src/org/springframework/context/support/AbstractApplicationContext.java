@@ -19,7 +19,6 @@ package org.springframework.context.support;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -304,14 +303,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Must be called before singleton instantiation.
 	 */
 	private void invokeBeanFactoryPostProcessors() throws BeansException {
-		String[] beanNames = getBeanDefinitionNames(BeanFactoryPostProcessor.class);
-		BeanFactoryPostProcessor[] factoryProcessors = new BeanFactoryPostProcessor[beanNames.length];
-		for (int i = 0; i < beanNames.length; i++) {
-			factoryProcessors[i] = (BeanFactoryPostProcessor) getBean(beanNames[i]);
-		}
-		Arrays.sort(factoryProcessors, new OrderComparator());
-		for (int i = 0; i < factoryProcessors.length; i++) {
-			BeanFactoryPostProcessor factoryProcessor = factoryProcessors[i];
+		Map factoryProcessorMap = getBeansOfType(BeanFactoryPostProcessor.class, true, false);
+		List factoryProcessors = new ArrayList(factoryProcessorMap.values());
+		Collections.sort(factoryProcessors, new OrderComparator());
+		for (Iterator it = factoryProcessors.iterator(); it.hasNext();) {
+			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
 			factoryProcessor.postProcessBeanFactory(getBeanFactory());
 		}
 	}
@@ -322,16 +318,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before any instantiation of application beans.
 	 */
 	private void registerBeanPostProcessors() throws BeansException {
-		String[] beanNames = getBeanDefinitionNames(BeanPostProcessor.class);
-		if (beanNames.length > 0) {
-			List beanProcessors = new ArrayList();
-			for (int i = 0; i < beanNames.length; i++) {
-				beanProcessors.add(getBean(beanNames[i]));
-			}
-			Collections.sort(beanProcessors, new OrderComparator());
-			for (Iterator it = beanProcessors.iterator(); it.hasNext();) {
-				getBeanFactory().addBeanPostProcessor((BeanPostProcessor) it.next());
-			}
+		Map beanProcessorMap = getBeansOfType(BeanPostProcessor.class, true, false);
+		List beanProcessors = new ArrayList(beanProcessorMap.values());
+		Collections.sort(beanProcessors, new OrderComparator());
+		for (Iterator it = beanProcessors.iterator(); it.hasNext();) {
+			getBeanFactory().addBeanPostProcessor((BeanPostProcessor) it.next());
 		}
 	}
 
