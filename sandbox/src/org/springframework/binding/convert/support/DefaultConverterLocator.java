@@ -41,15 +41,15 @@ public class DefaultConverterLocator implements ConverterLocator, InitializingBe
 	public void addConverter(Converter converter) {
 		Class[] sourceClasses = converter.getSourceClasses();
 		Class[] targetClasses = converter.getTargetClasses();
-		for (int j = 0; j < sourceClasses.length; j++) {
-			Class sourceClass = sourceClasses[j];
+		for (int i = 0; i < sourceClasses.length; i++) {
+			Class sourceClass = sourceClasses[i];
 			Map sourceMap = (Map)this.sourceClassConverters.get(sourceClass);
 			if (sourceMap == null) {
 				sourceMap = new HashMap();
 				this.sourceClassConverters.put(sourceClass, sourceMap);
 			}
-			for (int k = 0; k < targetClasses.length; j++) {
-				Class targetClass = targetClasses[k];
+			for (int j = 0; j < targetClasses.length; j++) {
+				Class targetClass = targetClasses[j];
 				sourceMap.put(targetClass, converter);
 			}
 		}
