@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -198,18 +198,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 			bean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
-
-			invokeInitMethods(bean, beanName, mergedBeanDefinition, instanceWrapper);
-
+			invokeInitMethods(bean, beanName, mergedBeanDefinition);
 			bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 		}
-		catch (MethodInvocationException ex) {
+		catch (InvocationTargetException ex) {
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-																			"Initialization method of bean failed", ex.getCause());
+																			"Initialization of bean failed", ex.getTargetException());
 		}
 		catch (Exception ex) {
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-																			"Initialization method of bean failed", ex);
+																			"Initialization of bean failed", ex);
 		}
 		return bean;
 	}
@@ -696,8 +694,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bean new bean instance we may need to initialize
 	 * @param beanName the bean has in the factory. Used for debug output.
 	 */
-	protected void invokeInitMethods(Object bean, String beanName, RootBeanDefinition mergedBeanDefinition,
-																	 BeanWrapper bw) throws Exception {
+	protected void invokeInitMethods(Object bean, String beanName, RootBeanDefinition mergedBeanDefinition)
+			throws Exception {
 		if (bean instanceof InitializingBean) {
 			logger.debug("Calling afterPropertiesSet() on bean with beanName '" + beanName + "'");
 			((InitializingBean) bean).afterPropertiesSet();
@@ -706,8 +704,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (mergedBeanDefinition.getInitMethodName() != null) {
 			logger.debug("Calling custom init method '" + mergedBeanDefinition.getInitMethodName() +
 									 "' on bean with beanName '" + beanName + "'");
-			bw.invoke(mergedBeanDefinition.getInitMethodName(), null);
-			// can throw MethodInvocationException
+			bean.getClass().getMethod(mergedBeanDefinition.getInitMethodName(), null).invoke(bean, null);
 		}
 	}
 
@@ -794,6 +791,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				try {
 					targetMethod.invoke(bean, args);
+				}
+				catch (InvocationTargetException ex) {
+					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
+											 "' of bean with name '" + beanName + "'", ex.getTargetException());
 				}
 				catch (Exception ex) {
 					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
