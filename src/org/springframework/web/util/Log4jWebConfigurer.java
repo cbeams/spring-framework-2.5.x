@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import javax.servlet.ServletContext;
 
 import org.springframework.util.Log4jConfigurer;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Convenience class that performs custom Log4J initialization for web environments,
@@ -34,18 +35,24 @@ import org.springframework.util.Log4jConfigurer;
  * Log4jConfigServlet). Instead, use a global, VM-wide Log4J setup (for example,
  * in JBoss) or JDK 1.4's <code>java.util.logging</code> (which is global too).
  *
- * <p>Supports two init parameters at the servlet context level (i.e. context-param
- * in web.xml):
+ * <p>Supports three init parameters at the servlet context level (that is,
+ * context-param entries in web.xml):
  *
  * <ul>
  * <li><i>"log4jConfigLocation":</i><br>
- * Name of the Log4J config file; relative to the web application root directory, e.g.
- * "/WEB-INF/log4j.properties", or an absolute file URL, e.g. "file:C:/log4j.properties).
- * If not specified, default Log4J initialization will apply (from "log4j.properties"
- * in the class path; see Log4J documentation for details).
+ * Location of the Log4J config file; either a "classpath:" location (e.g.
+ * "classpath:myLog4j.properties"), an absolute file URL (e.g. "file:C:/log4j.properties),
+ * or a plain path relative to the web application root directory (e.g.
+ * "/WEB-INF/log4j.properties"). If not specified, default Log4J initialization will
+ * apply ("log4j.properties" in the class path; see Log4J documentation for details).
  * <li><i>"log4jRefreshInterval":</i><br>
  * Interval between config file refresh checks, in milliseconds. If not specified,
  * no refresh checks will happen, which avoids starting Log4J's watchdog thread.
+ * <li><i>"log4jExposeWebAppRoot":</i><br>
+ * Whether the web app root system property should be exposed, allowing for log
+ * file paths relative to the web application root directory. Default is "true";
+ * specify "false" to suppress expose of the web app root system property. See
+ * below for details on how to use this system property in log file locations.
  * </ul>
  *
  * <p>Note: <code>initLogging</code> should be called before any other Spring activity
@@ -61,8 +68,9 @@ import org.springframework.util.Log4jConfigurer;
  * recommended to <i>not</i> use config file refreshing in a production J2EE
  * environment; the watchdog thread would not stop on application shutdown there.
  *
- * <p>This configurer automatically sets the web app root system property, for
- * "${key}" substitutions within log file locations in the Log4J config file.
+ * <p>By default, this configurer automatically sets the web app root system property,
+ * for "${key}" substitutions within log file locations in the Log4J config file,
+ * allowing for log file paths relative to the web application root directory.
  * The default system property key is "webapp.root", to be used in a Log4J config
  * file like as follows:
  *
@@ -93,7 +101,8 @@ public abstract class Log4jWebConfigurer {
 	/** Parameter specifying the refresh interval for checking the Log4J config file */
 	public static final String REFRESH_INTERVAL_PARAM = "log4jRefreshInterval";
 
-	public static final String FILE_URL_PREFIX = "file:";
+	/** Parameter specifying whether to expose the web app root system property */
+	public static final String EXPOSE_WEB_APP_ROOT_PARAM = "log4jExposeWebAppRoot";
 
 
 	/**
@@ -102,8 +111,10 @@ public abstract class Log4jWebConfigurer {
 	 * @see WebUtils#setWebAppRootSystemProperty
 	 */
 	public static void initLogging(ServletContext servletContext) {
-		// Set the web app root system property.
-		WebUtils.setWebAppRootSystemProperty(servletContext);
+		// Expose the web app root system property.
+		if (exposeWebAppRoot(servletContext)) {
+			WebUtils.setWebAppRootSystemProperty(servletContext);
+		}
 
 		// Only perform custom Log4J initialization in case of a config file.
 		String location = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
@@ -114,7 +125,11 @@ public abstract class Log4jWebConfigurer {
 
 			// Perform actual Log4J initialization.
 			try {
-				String filePath = getFilePath(location, servletContext);
+				// Return a URL (e.g. "classpath:" or "file:") as-is;
+				// consider a plain file path as relative to the web application root directory.
+				if (!ResourceUtils.isUrl(location)) {
+					location = WebUtils.getRealPath(servletContext, location);
+				}
 
 				// Check whether refresh interval was specified.
 				String intervalString = servletContext.getInitParameter(REFRESH_INTERVAL_PARAM);
@@ -123,7 +138,7 @@ public abstract class Log4jWebConfigurer {
 					// checking the file in the background.
 					try {
 						long refreshInterval = Long.parseLong(intervalString);
-						Log4jConfigurer.initLogging(filePath, refreshInterval);
+						Log4jConfigurer.initLogging(location, refreshInterval);
 					}
 					catch (NumberFormatException ex) {
 						throw new IllegalArgumentException("Invalid 'log4jRefreshInterval' parameter: " + ex.getMessage());
@@ -131,38 +146,13 @@ public abstract class Log4jWebConfigurer {
 				}
 				else {
 					// Initialize without refresh check, i.e. without Log4J's watchdog thread.
-					Log4jConfigurer.initLogging(filePath);
+					Log4jConfigurer.initLogging(location);
 				}
 			}
 			catch (FileNotFoundException ex) {
 				throw new IllegalArgumentException("Invalid 'log4jConfigLocation' parameter: " + ex.getMessage());
 			}
 		}
-	}
-
-	/**
-	 * Turn the given location into an absolute file path in the file system.
-	 * @param location the Log4J config location
-	 * @param servletContext the current ServletContext
-	 * @return the absolute file path
-	 * @throws FileNotFoundException if the location cannot be resolved as file path
-	 */
-	private static String getFilePath(String location, ServletContext servletContext) throws FileNotFoundException {
-		// Check for "file:" URL.
-		if (location.startsWith(FILE_URL_PREFIX)) {
-			return location.substring(FILE_URL_PREFIX.length());
-		}
-		// Interpret location as relative to the web application root directory.
-		if (!location.startsWith("/")) {
-			location = "/" + location;
-		}
-		String realPath = servletContext.getRealPath(location);
-		if (realPath == null) {
-			throw new FileNotFoundException(
-					"ServletContext resource [" + location + "] cannot be resolved to absolute file path - " +
-					"web application archive not expanded?");
-		}
-		return realPath;
 	}
 
 	/**
@@ -177,8 +167,21 @@ public abstract class Log4jWebConfigurer {
 			Log4jConfigurer.shutdownLogging();
 		}
 		finally {
-			WebUtils.removeWebAppRootSystemProperty(servletContext);
+			// Remove the web app root system property.
+			if (exposeWebAppRoot(servletContext)) {
+				WebUtils.removeWebAppRootSystemProperty(servletContext);
+			}
 		}
+	}
+
+	/**
+	 * Return whether to expose the web app root system property,
+	 * checking the corresponding ServletContext init parameter.
+	 * @see #EXPOSE_WEB_APP_ROOT_PARAM
+	 */
+	private static boolean exposeWebAppRoot(ServletContext servletContext) {
+		String exposeWebAppRootParam = servletContext.getInitParameter(EXPOSE_WEB_APP_ROOT_PARAM);
+		return (exposeWebAppRootParam == null || Boolean.valueOf(exposeWebAppRootParam).booleanValue());
 	}
 
 }
