@@ -20,13 +20,17 @@ import org.springframework.beans.TestBean;
 
 /**
  * @author Rod Johnson
- * @version $Id: OverrideOneMethod.java,v 1.2 2004-06-24 08:45:20 jhoeller Exp $
+ * @version $Id: OverrideOneMethod.java,v 1.3 2004-06-25 06:44:48 johnsonr Exp $
  */
 public abstract class OverrideOneMethod {
 	
 	public abstract TestBean getPrototypeDependency();
 	
 	protected abstract TestBean protectedOverrideSingleton();
+	
+	public TestBean invokesOverridenMethodOnSelf() {
+		return getPrototypeDependency();
+	}
 	
 	public String echo(String echo) {
 		return echo;
