@@ -133,7 +133,7 @@
 	sub flow reaches an end state, the corresponding transition in this state
 	is triggered to continue the flow.
 -->
-<!ELEMENT subflow-state ( transition+ )>
+<!ELEMENT subflow-state ( attribute-mapper?, transition+ )>
 
 <!--
 	Unique id of a sub flow state.
@@ -146,17 +146,37 @@
 <!ATTLIST subflow-state flow CDATA #REQUIRED>
 
 <!--
-	Optional indentifier of a FlowAttributeMapper that will map data to and from
+	Defines an optional FlowAttributeMapper that will map data to and from
 	the spawned sub flow.
 -->
-<!ATTLIST subflow-state attribute-mapper CDATA #IMPLIED>
+<!ELEMENT attribute-mapper EMPTY>
 
 <!--
-	Optional FlowAttributeMapper implementation class that will map data to and from
-	the spawned sub flow. For "by type" mapper lookup to work, there must be exactly
-    one attribute mapper implementation exported of that type.
+	Identifier of the flow attribute mapper implementation exported in the
+	configured registry. This is similar to the <ref bean="myBean"/>
+	notation of the Spring beans DTD.
 -->
-<!ATTLIST subflow-state attribute-mapper-class CDATA #IMPLIED>
+<!ATTLIST attribute-mapper bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the flow attribute mapper implementation. An
+	instance of the class will be instantiated and possibly auto-wired
+	depending on the value of the autowire attribute.
+-->
+<!ATTLIST attribute-mapper class CDATA #IMPLIED>
+	
+<!--
+	Autowiring options for use when instantiating the flow attribute mapper
+	implementation with the class attribute.
+-->
+<!ATTLIST attribute-mapper autowire (no | byName | byType | constructor | autodetect | default) "default">
+
+<!--
+	Fully qualified implementation class of the flow attribute mapper exported
+	in the configured registry. For "by type" mapper lookup to work, there must
+	be exactly one mapper implementation exported of that type.
+-->
+<!ATTLIST attribute-mapper classref CDATA #IMPLIED>
 
 <!--
 	Defines an end state: a state that terminates the flow.

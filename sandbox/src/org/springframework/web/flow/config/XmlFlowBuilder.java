@@ -29,6 +29,7 @@ import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
@@ -135,9 +136,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String FLOW_ATTRIBUTE = "flow";
 
-	private static final String ATTRIBUTE_MAPPER_ATTRIBUTE = "attribute-mapper";
-
-    private static final String ATTRIBUTE_MAPPER_CLASS_ATTRIBUTE = "attribute-mapper-class"; 
+	private static final String ATTRIBUTE_MAPPER_ELEMENT = "attribute-mapper";
 
 	private static final String END_STATE_ELEMENT = "end-state";
 
@@ -432,47 +431,11 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			if (childNode instanceof Element) {
 				Element childElement = (Element)childNode;
 				if (ACTION_ELEMENT.equals(childElement.getNodeName())) {
-					actions.add(parseAction(childElement));
+					actions.add(parseFlowService(childElement, Action.class));
 				}
 			}
 		}
 		return (Action[])actions.toArray(new Action[actions.size()]);
-	}
-
-	/**
-	 * Parse given action definition and return a corresponding Action object.
-	 */
-	protected Action parseAction(Element element) {
-		String actionId = element.getAttribute(BEAN_ATTRIBUTE);
-		if (StringUtils.hasText(actionId)) {
-			// an explicit bean reference was specified
-			return getFlowServiceLocator().getAction(actionId);
-		}
-		else {
-			String actionClassName = element.getAttribute(CLASS_ATTRIBUTE);
-			if (StringUtils.hasText(actionClassName)) {
-				// instantiate the action ourselves and wire it using specified
-				// autowire mode
-				String autowireLabel = element.getAttribute(AUTOWIRE_ATTRIBUTE);
-				try {
-					AutowireMode autowireMode =
-						(AutowireMode)new LabeledEnumFormatter(AutowireMode.class).parseValue(autowireLabel);
-					Class actionClass = (Class)new TextToClassConverter().convert(actionClassName);
-					return getFlowServiceLocator().createAction(actionClass, autowireMode);
-				}
-				catch (InvalidFormatException e) {
-					throw new FlowBuilderException("Unsupported autowire mode '" + autowireLabel + "'", e);
-				}
-			}
-			else {
-				// try action lookup by type
-				actionClassName = element.getAttribute(CLASSREF_ATTRIBUTE);
-				Assert.hasText(actionClassName, "Exactly one of the action bean, class, or classref attributes "
-						+ "are required for an action definition");
-				Class actionClass = (Class)new TextToClassConverter().convert(actionClassName);				
-				return getFlowServiceLocator().getAction(actionClass);
-			}
-		}
 	}
 
 	/**
@@ -505,22 +468,83 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 
     /**
-     * Obtain an attribute mapper reference from given element and return the
-     * identified mapper, or null if no mapper is referenced.
+     * Obtain an attribute mapper reference from given sub flow definition
+     * element and return the identified mapper, or null if no mapper is referenced.
      */
     protected FlowAttributeMapper parseAttributeMapper(Element element) {
-        String mapperId = element.getAttribute(ATTRIBUTE_MAPPER_ATTRIBUTE);
-        if (StringUtils.hasText(mapperId)) {
-            // mapper id specified
-            return getFlowServiceLocator().getFlowAttributeMapper(mapperId);
-        }
-        else {
-            // try lookup by type
-            String mapperClassName = element.getAttribute(ATTRIBUTE_MAPPER_CLASS_ATTRIBUTE);
-            if (StringUtils.hasText(mapperClassName)) {
-                return getFlowServiceLocator().getFlowAttributeMapper(mapperClassName);
-            }
-        }
-        return null;
+    	Element attributeMapperElement = null;
+		NodeList childNodeList = element.getChildNodes();
+		for (int i = 0; i < childNodeList.getLength(); i++) {
+			Node childNode = childNodeList.item(i);
+			if (childNode instanceof Element) {
+				Element childElement = (Element)childNode;
+				if (ATTRIBUTE_MAPPER_ELEMENT.equals(childElement.getNodeName())) {
+					attributeMapperElement = childElement;
+				}
+			}
+		}
+		
+		if (attributeMapperElement !=  null) {
+			return (FlowAttributeMapper)parseFlowService(attributeMapperElement, FlowAttributeMapper.class);
+		}
+    	else {
+    		return null;
+    	}
+    }
+    
+    /**
+     * Parse a flow service definition contained in given element.
+     * @param element the definition element
+     * @param serviceType type of the flow service to parse (Action, FlowAttributeMapper)
+     * @return the flow service
+     * @throws FlowBuilderException when the service definition cannot be parsed
+     */
+    protected Object parseFlowService(Element element, Class serviceType) throws FlowBuilderException {
+		String serviceId = element.getAttribute(BEAN_ATTRIBUTE);
+		if (StringUtils.hasText(serviceId)) {
+			// an explicit bean reference was specified
+			if (Action.class.equals(serviceType)) {
+				return getFlowServiceLocator().getAction(serviceId);
+			}
+			else if (FlowAttributeMapper.class.equals(serviceType)) {
+				return getFlowServiceLocator().getFlowAttributeMapper(serviceId);
+			}
+		}
+		else {
+			String serviceClassName = element.getAttribute(CLASS_ATTRIBUTE);
+			if (StringUtils.hasText(serviceClassName)) {
+				// instantiate the service ourselves and wire it using specified
+				// autowire mode
+				String autowireLabel = element.getAttribute(AUTOWIRE_ATTRIBUTE);
+				try {
+					AutowireMode autowireMode =
+						(AutowireMode)new LabeledEnumFormatter(AutowireMode.class).parseValue(autowireLabel);
+					Class serviceClass = (Class)new TextToClassConverter().convert(serviceClassName);
+					if (Action.class.equals(serviceType)) {
+						return getFlowServiceLocator().createAction(serviceClass, autowireMode);						
+					}
+					else if (FlowAttributeMapper.class.equals(serviceType)) {
+						return getFlowServiceLocator().createFlowAttributeMapper(serviceClass, autowireMode);
+					}
+				}
+				catch (InvalidFormatException e) {
+					throw new FlowBuilderException("Unsupported autowire mode '" + autowireLabel + "'", e);
+				}
+			}
+			else {
+				// try service lookup by type
+				serviceClassName = element.getAttribute(CLASSREF_ATTRIBUTE);
+				Assert.hasText(serviceClassName, "Exactly one of the bean, class, or classref attributes "
+						+ "are required for a '" + ClassUtils.getShortName(serviceType) + "' service definition");
+				Class serviceClass = (Class)new TextToClassConverter().convert(serviceClassName);
+				if (Action.class.equals(serviceType)) {
+					return getFlowServiceLocator().getAction(serviceClass);					
+				}
+				else {
+					return getFlowServiceLocator().getFlowAttributeMapper(serviceClass);
+				}
+			}
+		}
+		throw new FlowBuilderException("Illegal service definition for service of type '" + ClassUtils.getShortName(serviceType) + "'");
     }
 }

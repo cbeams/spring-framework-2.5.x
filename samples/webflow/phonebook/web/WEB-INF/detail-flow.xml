@@ -22,7 +22,8 @@
 		<transition on="error" to="error"/>
 	</action-state>
 	
-	<subflow-state id="colleague.Detail" flow="person.Detail" attribute-mapper="colleagueId.attributeMapper">
+	<subflow-state id="colleague.Detail" flow="person.Detail">
+		<attribute-mapper bean="colleagueId.attributeMapper"/>
 		<transition on="finish" to="detail.get"/>
 		<transition on="error" to="error"/>
 	</subflow-state>

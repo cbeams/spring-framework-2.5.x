@@ -30,7 +30,8 @@
 		<transition on="error" to="error"/>
 	</action-state>
 	
-	<subflow-state id="person.Detail" flow="person.Detail" attribute-mapper="id.attributeMapper">
+	<subflow-state id="person.Detail" flow="person.Detail">
+		<attribute-mapper bean="id.attributeMapper"/>
 		<transition on="finish" to="executeQuery"/>
 		<transition on="error" to="error"/>
 	</subflow-state>

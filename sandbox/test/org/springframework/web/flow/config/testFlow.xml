@@ -23,7 +23,8 @@
 		<transition on="event2" to="subFlowState2"/>
 	</view-state>
 
-	<subflow-state id="subFlowState1" flow="subFlow1" attribute-mapper="attributeMapper1">
+	<subflow-state id="subFlowState1" flow="subFlow1">
+		<attribute-mapper bean="attributeMapper1"/>
 		<transition on="event1" to="endState1"/>
 	</subflow-state>
 
