@@ -26,25 +26,21 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
- * Web controller for the Spring MVC framework that handles requests using a web
+ * Web controller for the Spring web MVC framework that handles requests using a web
  * flow. Requests are managed using an {@link HttpServletFlowExecutionManager}.
  * Consult the JavaDoc of that class for more information on how requests are
  * processed.
  * <p>
- * This controller requires sessions to keep track of flow state, so it will
- * force the "requireSession" attribute defined by the AbstractController to
- * true.
- * <p>
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
  * <tr>
- * <td><b>name </b></td>
- * <td><b>default </b></td>
- * <td><b>description </b></td>
+ * <td><b>name</b></td>
+ * <td><b>description</b></td>
  * </tr>
  * <tr>
  * <td>flowExecutionManager</td>
- * <td>Configures the http servlet flow execution manager implementation to use.</td>
+ * <td>Configures the http servlet flow execution manager implementation to use.
+ * This is a required property.</td>
  * </tr>
  * </table>
  * 
@@ -56,7 +52,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
 public class FlowController extends AbstractController implements InitializingBean {
 
 	/**
-	 * The HTTP servlet-basebased manager flow executions.
+	 * The HTTP servlet-based manager for flow executions.
 	 */
 	private HttpServletFlowExecutionManager flowExecutionManager;
 
@@ -85,33 +81,27 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * Set default properties for this controller.
 	 */
 	protected void initDefaults() {
-		setRequireSession(true);
 		setCacheSeconds(0);
 	}
 
-	/**
-	 * Configures the flow execution manager implementation to use
-	 * @param manager the flow execution manager.
-	 */
-	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
-		this.flowExecutionManager = manager;
-		assertManagerSet();
-	}
-
-	private void assertManagerSet() {
-		Assert.notNull(this.flowExecutionManager, "The http servlet flow execution manager is required");
-	}
-
 	public void afterPropertiesSet() throws Exception {
-		assertManagerSet();
+		Assert.notNull(this.flowExecutionManager, "The http servlet flow execution manager is required");
 	}
 
 	/**
 	 * Returns the flow execution manager used by this controller.
-	 * @return the http flow execution manager
+	 * @return the HTTP flow execution manager
 	 */
 	protected HttpServletFlowExecutionManager getFlowExecutionManager() {
 		return flowExecutionManager;
+	}
+
+	/**
+	 * Configures the flow execution manager implementation to use.
+	 * @param manager the flow execution manager.
+	 */
+	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
+		this.flowExecutionManager = manager;
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
