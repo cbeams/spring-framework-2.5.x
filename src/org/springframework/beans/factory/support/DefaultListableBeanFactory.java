@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -154,26 +155,39 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		while (it.hasNext()) {
 			String beanName = (String) it.next();
 			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
-
-			// Only check bean definition if it is complete.
-			if (!rbd.isAbstract() && rbd.hasBeanClass()) {
-				// In case of FactoryBean, match object created by FactoryBean.
-				if (FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) {
-					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
-					    isBeanTypeMatch(beanName, type)) {
-						addBeanToResultMap(beanName, result);
+			try {
+				// Only check bean definition if it is complete.
+				if (!rbd.isAbstract() && rbd.hasBeanClass()) {
+					// In case of FactoryBean, match object created by FactoryBean.
+					if (FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) {
+						if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
+								isBeanTypeMatch(beanName, type)) {
+							result.put(beanName, getBean(beanName));
+						}
+					}
+					else {
+						// If type to match is FactoryBean, match FactoryBean itself.
+						// Else, match bean instance.
+						if (isFactoryType) {
+							beanName = FACTORY_BEAN_PREFIX + beanName;
+						}
+						if ((includePrototypes || rbd.isSingleton()) &&
+								(type == null || type.isAssignableFrom(rbd.getBeanClass()))) {
+							result.put(beanName, getBean(beanName));
+						}
 					}
 				}
+			}
+			catch (BeanCreationException ex) {
+				if (ex.contains(BeanCurrentlyInCreationException.class)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring match to currently created bean '" + beanName + "'", ex);
+					}
+					// Ignore: indicates a circular reference when autowiring constructors.
+					// We want to find matches other than the currently created bean itself.
+				}
 				else {
-					// If type to match is FactoryBean, match FactoryBean itself.
-					// Else, match bean instance.
-					if (isFactoryType) {
-						beanName = FACTORY_BEAN_PREFIX + beanName;
-					}
-					if ((includePrototypes || rbd.isSingleton()) &&
-					    (type == null || type.isAssignableFrom(rbd.getBeanClass()))) {
-						addBeanToResultMap(beanName, result);
-					}
+					throw ex;
 				}
 			}
 		}
@@ -182,14 +196,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		String[] singletonNames = getSingletonNames();
 		for (int i = 0; i < singletonNames.length; i++) {
 			String beanName = singletonNames[i];
-
 			// Only check if manually registered.
 			if (!containsBeanDefinition(beanName)) {
 				// In case of FactoryBean, match object created by FactoryBean.
 				if (isFactoryBean(beanName) && !isFactoryType) {
 					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
-					    isBeanTypeMatch(beanName, type)) {
-						addBeanToResultMap(beanName, result);
+							isBeanTypeMatch(beanName, type)) {
+						result.put(beanName, getBean(beanName));
 					}
 				}
 				else {
@@ -199,7 +212,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						beanName = FACTORY_BEAN_PREFIX + beanName;
 					}
 					if (isBeanTypeMatch(beanName, type)) {
-						addBeanToResultMap(beanName, result);
+						result.put(beanName, getBean(beanName));
 					}
 				}
 			}
@@ -221,23 +234,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		Class beanType = getType(beanName);
 		return (beanType != null && type.isAssignableFrom(beanType));
-	}
-
-	/**
-	 * Add the bean instance with the given name to the given result map.
-	 * @param result the result map to add to
-	 * @param beanName the name of the bean
-	 */
-	private void addBeanToResultMap(String beanName, Map result) {
-		try {
-			result.put(beanName, getBean(beanName));
-		}
-		catch (BeanCurrentlyInCreationException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Ignoring match to currently created bean '" + beanName + "'");
-			}
-			// ignore
-		}
 	}
 
 

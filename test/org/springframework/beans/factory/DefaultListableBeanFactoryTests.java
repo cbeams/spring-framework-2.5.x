@@ -661,6 +661,15 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 	}
 
+	public void testAvoidCircularReferenceThroughAutowiring() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(
+				ConstructorDependencyFactoryBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
+		lbf.registerBeanDefinition("string",
+				new RootBeanDefinition(String.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
+		lbf.preInstantiateSingletons();
+	}
+
 	public void testApplyPropertyValues() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
