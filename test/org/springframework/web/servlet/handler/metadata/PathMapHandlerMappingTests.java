@@ -20,31 +20,20 @@ import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.servlet.HandlerExecutionChain;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: PathMapHandlerMappingTests.java,v 1.1 2003-12-25 08:56:13 johnsonr Exp $
+ * @version $Id: PathMapHandlerMappingTests.java,v 1.2 2003-12-30 01:16:35 jhoeller Exp $
  */
 public class PathMapHandlerMappingTests extends TestCase {
 	
-	public PathMapHandlerMappingTests(String s) {
-		super(s);
-	}
-	
-	
-	/**
-	 * No beans in the application context
-	 *
-	 */
 	public void testSatisfiedConstructorDependency() throws Exception {
 		String path = "/Constructor.htm";
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("test", TestBean.class, new MutablePropertyValues());
 		int oldCount = wac.getBeanDefinitionCount();
-		
+
 		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
 		hm.register(ConstructorController.class, new PathMap(path));
 		hm.setApplicationContext(wac);
-		assertEquals(oldCount + 1, wac.getBeanDefinitionCount());
 		ConstructorController cc = (ConstructorController) wac.getBean(ConstructorController.class.getName());
 		assertSame(wac.getBean("test"), cc.testBean);
 		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest(null, "GET", path));
@@ -52,13 +41,13 @@ public class PathMapHandlerMappingTests extends TestCase {
 		chain = hm.getHandler(new MockHttpServletRequest(null, "GET", "completeRubbish.html"));
 		assertNull("Don't know anything about this path", chain);
 	}
-	
+
 	public void testUnsatisfiedConstructorDependency() throws Exception {
 		String path = "/Constructor.htm";
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		// No registration of a TestBean
 		//wac.registerSingleton("test", TestBean.class, new MutablePropertyValues());
-		
+
 		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
 		hm.register(ConstructorController.class, new PathMap(path));
 		try {
@@ -69,18 +58,17 @@ public class PathMapHandlerMappingTests extends TestCase {
 			// Ok
 		}
 	}
-	
+
 	public void testMultiplePaths() throws Exception {
 		String path1 = "/Constructor.htm";
 		String path2 = "path2.cgi";
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("test", TestBean.class, new MutablePropertyValues());
 		int oldCount = wac.getBeanDefinitionCount();
-		
+
 		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
 		hm.register(ConstructorController.class, new PathMap[] { new PathMap(path1), new PathMap(path2) });
 		hm.setApplicationContext(wac);
-		assertEquals(oldCount + 1, wac.getBeanDefinitionCount());
 		ConstructorController cc = (ConstructorController) wac.getBean(ConstructorController.class.getName());
 		assertSame(wac.getBean("test"), cc.testBean);
 		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest(null, "GET", path1));
@@ -93,16 +81,17 @@ public class PathMapHandlerMappingTests extends TestCase {
 
 	
 	private static class HashUrlMapHandlerMapping extends AbstractPathMapHandlerMapping {
+
 		private HashMap classToPathMaps = new HashMap();
+
 		public void register(Class clazz, PathMap pm) {
 			classToPathMaps.put(clazz, new PathMap[] { pm });
 		}
+
 		public void register(Class clazz, PathMap[] pms) {
 			classToPathMaps.put(clazz, pms);
 		}
-		/**
-		 * @see org.springframework.web.servlet.handler.metadata.CommonsPathMapHandlerMapping#getClassNamesWithPathMapAttributes()
-		 */
+
 		protected Collection getClassNamesWithPathMapAttributes() {
 			Collection names = new ArrayList(classToPathMaps.size());
 			for (Iterator itr = classToPathMaps.keySet().iterator(); itr.hasNext(); ) {
@@ -111,11 +100,10 @@ public class PathMapHandlerMappingTests extends TestCase {
 			}
 			return names;
 		}
-		/**
-		 * @see org.springframework.web.servlet.handler.metadata.CommonsPathMapHandlerMapping#getPathMapAttributes(java.lang.Class)
-		 */
+
 		protected PathMap[] getPathMapAttributes(Class handlerClass) {
 			return (PathMap[]) classToPathMaps.get(handlerClass);
 		}
 	}
+
 }

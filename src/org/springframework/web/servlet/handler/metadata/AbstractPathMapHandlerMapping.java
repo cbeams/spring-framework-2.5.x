@@ -8,27 +8,32 @@ package org.springframework.web.servlet.handler.metadata;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 
 /**
  * Abstract mplementation of the HandlerMapping interface that recognizes 
  * metadata attributes of type PathMap on application Controllers and automatically
  * wires them into the current servlet's WebApplicationContext.
- * <p>
- * <br>The path must be mapped to the relevant Spring DispatcherServlet in /WEB-INF/web.xml.
+ *
+ * <p>The path must be mapped to the relevant Spring DispatcherServlet in /WEB-INF/web.xml.
  * It's possible to have multiple PathMap attributes on the one controller class.
+ *
  * <p>Controllers instantiated by this class may have dependencies on middle tier
  * objects, expressed via JavaBean properties or constructor arguments. These will
  * be resolved automatically.
- * <p>You will normally use this HandlerMapping with at most one DispatcherServlet in your web 
- * application. Otherwise you'll end with one instance of the mapped controller for
- * each DispatcherServlet's context. You <i>might</i> want this--for example, if
+ *
+ * <p>You will normally use this HandlerMapping with at most one DispatcherServlet in your
+ * web application. Otherwise you'll end with one instance of the mapped controller for
+ * each DispatcherServlet's context. You <i>might</i> want this -- for example, if
  * one's using a .pdf mapping and a PDF view, and another a JSP view, or if
  * using different middle tier objects, but should understand the implications. All
  * Controllers with attributes will be picked up by each DispatcherServlet's context.
+ *
  * @author Rod Johnson
- * @version $Id: AbstractPathMapHandlerMapping.java,v 1.1 2003-12-25 08:56:12 johnsonr Exp $
+ * @version $Id: AbstractPathMapHandlerMapping.java,v 1.2 2003-12-30 01:16:35 jhoeller Exp $
  */
 public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMapping {
 	
@@ -49,10 +54,13 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 			for (Iterator itr = names.iterator(); itr.hasNext();) {
 				String handlerClassName = (String) itr.next();
 				Class handlerClass = Class.forName(handlerClassName);
-				
-				String beanName = handlerClass.getName();
-				Object handler = getApplicationContext().registerBeanOfClass(beanName, handlerClass, true);
-				
+				Object handler = getApplicationContext().autowire(handlerClass);
+				if (getApplicationContext() instanceof ConfigurableApplicationContext) {
+					ConfigurableListableBeanFactory beanFactory =
+							((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory();
+					beanFactory.registerSingleton(handlerClassName, handler);
+				}
+
 				// There may be multiple paths mapped to this class
 				PathMap[] pathMaps = getPathMapAttributes(handlerClass);
 				for (int i = 0; i < pathMaps.length; i++) {				
@@ -78,10 +86,12 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 	 * classes with the required PathMap attribute.
 	 */
 	protected abstract Collection getClassNamesWithPathMapAttributes();
+
 	/**
 	 * Use Attributes API to find PathMap attributes for the given class.
 	 * We know there's at least one, as the getClassNamesWithPathMapAttributes
 	 * method return this class name.
 	 */
 	protected abstract PathMap[] getPathMapAttributes(Class handlerClass);
+
 }

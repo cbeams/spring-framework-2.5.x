@@ -13,16 +13,28 @@ public interface AutowireCapableBeanFactory extends ListableBeanFactory {
 
 	/**
 	 * Constant that indicates autowiring by name.
-	 * @see #autowireExistingBean
+	 * @see #autowireBeanProperties
 	 */
 	int AUTOWIRE_BY_NAME = 1;
 
 	/**
 	 * Constant that indicates autowiring by type.
-	 * @see #autowireExistingBean
+	 * @see #autowireBeanProperties
 	 */
 	int AUTOWIRE_BY_TYPE = 2;
 
+
+	/**
+	 * Create a new bean instance of the given class by guessing the
+	 * appropriate autowiring strategy: if there is a no-arg constructor,
+	 * autowire by type, else autowire a constructor.
+	 * @param beanClass the class of the bean to instantiate
+	 * @return the new bean instance
+	 * @throws BeansException if instantiation respectively wiring failed
+	 * @see #autowireConstructor
+	 * @see #autowireBeanProperties
+	 */
+	Object autowire(Class beanClass) throws BeansException;
 
 	/**
 	 * Create a new bean instance of the given class by autowiring
@@ -34,7 +46,7 @@ public interface AutowireCapableBeanFactory extends ListableBeanFactory {
 	Object autowireConstructor(Class beanClass) throws BeansException;
 
 	/**
-	 * Autowire the given existing bean instance by name or type.
+	 * Autowire the bean properties of the given bean instance by name or type.
 	 * @param existingBean the existing bean instance
 	 * @param autowireMode by name or type, using the constants in this interface
 	 * @param dependencyCheck whether to perform a dependency check for object
@@ -42,7 +54,7 @@ public interface AutowireCapableBeanFactory extends ListableBeanFactory {
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_BY_TYPE
 	 */
-	void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck)
+	void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
 			throws BeansException;
 
 	/**
@@ -59,19 +71,5 @@ public interface AutowireCapableBeanFactory extends ListableBeanFactory {
 	 * @see BeanFactoryAware
 	 */
 	Object applyBeanPostProcessors(Object existingBean, String name) throws BeansException;
-	
-	/**
-	 * Register a singleton instance of the given class, with autowiring via constructor
-	 * or bean properties if possible.
-	 * This is useful when we have a bean class, and want to add a bean of that class
-	 * to an existing factory, benefiting from autowiring.
-	 * <br>Unlike other autowire methods, the instance is added to this factory.
-	 * @param beanName name of the registered bean
-	 * @param beanClass class of bean to add to context
-	 * @param dependencyCheck whether dependency check should be performed for objects.
-	 * Dependency check for simple parameters is impossible.
-	 * @return the configured bean if successful
-	 */
-	Object registerBeanOfClass(String beanName, Class beanClass, boolean dependencyCheck) throws BeansException;
 
 }

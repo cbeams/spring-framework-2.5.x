@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  * or as a superclass for custom bean factories.
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.11 2003-12-24 14:13:41 johnsonr Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.12 2003-12-30 01:16:35 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -148,13 +148,28 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 	// Implementation of AutowireCapableBeanFactory
 	//---------------------------------------------------------------------
 
+	public Object autowire(Class beanClass) throws BeansException {
+		// Work out whether this is a Type 2 (JavaBean) or Type 3 (constructor) object.
+		// If it has a no-args constructor it's deemed to be Type 2, otherwise
+		// we try Type 3 autowiring.
+		Constructor[] constructors = beanClass.getConstructors();
+		for (int i = 0; i < constructors.length; i++) {
+			if (constructors[i].getParameterTypes().length == 0) {
+				Object bean = BeanUtils.instantiateClass(beanClass);
+				autowireBeanProperties(bean, AUTOWIRE_BY_TYPE, true);
+				return bean;
+			}
+		}
+		return autowireConstructor(beanClass);
+	}
+
 	public Object autowireConstructor(Class beanClass) {
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, null);
 		bd.setAutowire(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		return autowireConstructor(beanClass.getName(), bd).getWrappedInstance();
 	}
 
-	public void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck)
+	public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
 			throws BeansException {
 		if (autowireMode != AUTOWIRE_BY_NAME && autowireMode != AUTOWIRE_BY_TYPE) {
 			throw new IllegalArgumentException("Just constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE allowed");
@@ -200,32 +215,6 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 		}
 	}
 	
-	
-	/**
-	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#registerBeanOfClass(java.lang.String, java.lang.Class, boolean)
-	 */
-	public Object registerBeanOfClass(String beanName, Class beanClass, boolean dependencyCheck) throws BeansException {
-		int dependencyCheckCode = dependencyCheck ? 
-										RootBeanDefinition.DEPENDENCY_CHECK_NONE :
-										RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
-		int autowire = RootBeanDefinition.AUTOWIRE_CONSTRUCTOR;
-
-		// Work out whether this is a Type 2 (JavaBean) or Type 3 (constructor) object.
-		// If it has a no-args constructor it's deemed to be Type 2, otherwise
-		// we try Type 3 autowiring.
-		Constructor[] constructors = beanClass.getConstructors();
-		for (int i = 0; i < constructors.length; i++) {
-			if (constructors[i].getParameterTypes().length == 0) {
-				autowire = RootBeanDefinition.AUTOWIRE_BY_TYPE;
-			}
-		}
-		
-		RootBeanDefinition rbd = new RootBeanDefinition(beanClass, new MutablePropertyValues(), true, 
-				dependencyCheckCode, autowire);
-		registerBeanDefinition(beanName, rbd);
-		return getBean(beanName);
-	}
-
 
 	//---------------------------------------------------------------------
 	// Implementation of BeanDefinitionRegistry
