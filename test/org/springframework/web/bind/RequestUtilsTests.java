@@ -98,7 +98,7 @@ public class RequestUtilsTests extends TestCase {
 		}
 
 		try {
-			RequestUtils.getRequiredIntParameter(request, "param2");
+			RequestUtils.getRequiredIntParameters(request, "param2");
 			fail("Should have thrown ServletRequestBindingException");
 		}
 		catch (ServletRequestBindingException ex) {
@@ -158,7 +158,7 @@ public class RequestUtilsTests extends TestCase {
 		}
 
 		try {
-			RequestUtils.getRequiredLongParameter(request, "param2");
+			RequestUtils.getRequiredLongParameters(request, "param2");
 			fail("Should have thrown ServletRequestBindingException");
 		}
 		catch (ServletRequestBindingException ex) {
@@ -217,7 +217,7 @@ public class RequestUtilsTests extends TestCase {
 		}
 
 		try {
-			RequestUtils.getRequiredDoubleParameter(request, "param2");
+			RequestUtils.getRequiredDoubleParameters(request, "param2");
 			fail("Should have thrown ServletRequestBindingException");
 		}
 		catch (ServletRequestBindingException ex) {
@@ -276,7 +276,7 @@ public class RequestUtilsTests extends TestCase {
 		}
 
 		try {
-			RequestUtils.getRequiredFloatParameter(request, "param2");
+			RequestUtils.getRequiredFloatParameters(request, "param2");
 			fail("Should have thrown ServletRequestBindingException");
 		}
 		catch (ServletRequestBindingException ex) {

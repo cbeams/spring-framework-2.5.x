@@ -27,7 +27,6 @@ import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -228,23 +227,36 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 		}
 	}
 
+	/**
+	 * Add a single value for an HTTP parameter.
+	 * <p>If there are already one or more values registered for the given
+	 * parameter name, the given value will be added to the end of the list.
+	 */
 	public void addParameter(String name, String value) {
-		this.parameters.put(name, value);
+		addParameter(name, new String[] {value});
 	}
 
+	/**
+	 * Add an array of values for an HTTP parameter.
+	 * <p>If there are already one or more values registered for the given
+	 * parameter name, the given values will be added to the end of the list.
+	 */
 	public void addParameter(String name, String[] values) {
-		this.parameters.put(name, values);
+		if (!this.parameters.containsKey(name)) {
+			this.parameters.put(name, values);
+		}
+		else {
+			String[] arr = (String[]) this.parameters.get(name);
+			String[] newArr = new String[arr.length + values.length];
+			System.arraycopy(arr, 0, newArr, 0, arr.length);
+			System.arraycopy(values, 0, newArr, arr.length, values.length);
+			this.parameters.put(name, newArr);
+		}
 	}
 
 	public String getParameter(String name) {
-		Object obj = this.parameters.get(name);
-		if (obj instanceof String[]) {
-			String[] arr = ((String[]) obj);
-			return (arr.length > 0 ? arr[0] : null);
-		}
-		else {
-			return (obj != null ? obj.toString() : null);
-		}
+		String[] arr = (String[]) this.parameters.get(name);
+		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
 	public Enumeration getParameterNames() {
@@ -252,17 +264,11 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	}
 
 	public String[] getParameterValues(String name) {
-		Object obj = this.parameters.get(name);
-		if (obj instanceof String[]) {
-			return (String[]) obj;
-		}
-		else {
-			return (obj != null ? new String[] {obj.toString()} : null);
-		}
+		return (String[]) this.parameters.get(name);
 	}
 
 	public Map getParameterMap() {
-		return new HashMap(this.parameters);
+		return Collections.unmodifiableMap(this.parameters);
 	}
 
 	public void setProtocol(String protocol) {
