@@ -8,6 +8,8 @@ import org.springframework.rules.BeanPropertyExpression;
 import org.springframework.util.Assert;
 
 /**
+ * Convenience superclass for bean property expressions.
+ * 
  * @author Keith Donald
  */
 public abstract class AbstractBeanPropertyExpression implements
@@ -18,6 +20,9 @@ public abstract class AbstractBeanPropertyExpression implements
         setPropertyName(propertyName);
     }
 
+    /**
+     * @see org.springframework.rules.BeanPropertyExpression#getPropertyName()
+     */
     public String getPropertyName() {
         return propertyName;
     }

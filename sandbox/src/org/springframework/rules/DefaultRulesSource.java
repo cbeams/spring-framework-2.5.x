@@ -25,6 +25,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.ToStringBuilder;
 
 /**
+ * A default rules source implementation which is simply a in-memory registry
+ * for bean validation rules backed by a map.
+ * 
  * @author Keith Donald
  */
 public class DefaultRulesSource implements RulesSource {
@@ -32,10 +35,24 @@ public class DefaultRulesSource implements RulesSource {
             .getLog(DefaultRulesSource.class);
     private Map rules = new HashMap();
 
+    /**
+     * Add or update the rules for a single bean class.
+     * 
+     * @param rules
+     *            The rules.
+     */
     public void addRules(Rules rules) {
         this.rules.put(rules.getBeanClass(), rules);
     }
 
+    /**
+     * Set the list of rules retrievable by this source, where each item in the
+     * list is a <code>Rules</code> object which maintains validation rules
+     * for a bean class.
+     * 
+     * @param rules
+     *            The list of rules.
+     */
     public void setBeanRules(List rules) {
         rules.clear();
         for (Iterator i = rules.iterator(); i.hasNext();) {
@@ -66,7 +83,7 @@ public class DefaultRulesSource implements RulesSource {
             return null;
         }
     }
-    
+
     public String toString() {
         return new ToStringBuilder(this).append("rules", rules).toString();
     }

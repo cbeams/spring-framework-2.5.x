@@ -15,6 +15,7 @@
  */
 package org.springframework.rules.predicates;
 
+import org.springframework.rules.BeanPropertyExpression;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.util.Assert;
@@ -42,7 +43,7 @@ public class BeanPropertyValueConstraint extends AbstractBeanPropertyExpression
             UnaryPredicate valueConstraint) {
         super(propertyName);
         Assert.notNull(valueConstraint);
-        Assert.isTrue(valueConstraint.getClass() != this.getClass());
+        Assert.isTrue(!(valueConstraint instanceof BeanPropertyExpression));
         this.valueConstraint = valueConstraint;
     }
 
@@ -63,4 +64,5 @@ public class BeanPropertyValueConstraint extends AbstractBeanPropertyExpression
 
     public String toString() {
         return super.toString() + " must be " + valueConstraint.toString();
-    }}
+    }
+}

@@ -17,6 +17,7 @@ package org.springframework.rules;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -61,15 +62,22 @@ public class Rules implements UnaryPredicate, Validator {
         for (Iterator i = propertyRules.entrySet().iterator(); i.hasNext();) {
             Map.Entry entry = (Map.Entry)i.next();
             String propertyName = (String)entry.getKey();
-            UnaryPredicate p = (UnaryPredicate)entry.getValue();
+            Object val = entry.getValue();
             BeanPropertyExpression e;
-            if (p instanceof CompoundUnaryPredicate) {
-                e = new CompoundBeanPropertyExpression(
-                        (CompoundUnaryPredicate)p);
-            } else if (p instanceof BeanPropertyExpression) {
-                e = (BeanPropertyExpression)p;
+            if (val instanceof List) {
+                UnaryAnd and = new UnaryAnd();
+                and.addAll((List)val);
+                e = new BeanPropertyValueConstraint(propertyName, and);
             } else {
-                e = new BeanPropertyValueConstraint(propertyName, p);
+                UnaryPredicate p = (UnaryPredicate)val;
+                if (p instanceof CompoundUnaryPredicate) {
+                    e = new CompoundBeanPropertyExpression(
+                            (CompoundUnaryPredicate)p);
+                } else if (p instanceof BeanPropertyExpression) {
+                    e = (BeanPropertyExpression)p;
+                } else {
+                    e = new BeanPropertyValueConstraint(propertyName, p);
+                }
             }
             internalSetRules(e);
         }

@@ -18,10 +18,12 @@ package org.springframework.rules.predicates;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.rules.Algorithms;
 import org.springframework.rules.UnaryPredicate;
+import org.springframework.rules.UnaryProcedure;
 import org.springframework.util.Assert;
 
 /**
@@ -77,6 +79,24 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
         this.predicates.add(predicate);
         return this;
     }
+
+    /**
+     * Add the list of predicates to the set of predicates aggregated by this
+     * compound predicate.
+     * 
+     * @param predicates
+     *            the list of predicates to add
+     * @return A reference to this, to support chaining.
+     */
+    public CompoundUnaryPredicate addAll(List predicates) {
+        Algorithms.forEach(predicates, new UnaryProcedure() {
+            public void run(Object o) {
+                add((UnaryPredicate)o);
+            }
+        });
+        return this;
+    }
+
 
     /**
      * Return an iterator over the aggregated predicates.
