@@ -125,7 +125,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String FLOW_ATTRIBUTE = "flow";
 
-	private static final String ATTRIBUTES_MAPPER_ATTRIBUTE = "attributes-mapper";
+	private static final String MODEL_MAPPER_ATTRIBUTE = "model-mapper";
 
 	private static final String END_STATE_ELEMENT = "end-state";
 
@@ -335,8 +335,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String flowName = element.getAttribute(FLOW_ATTRIBUTE);
 		Flow subFlow = getFlowServiceLocator().getFlow(flowName);
 		FlowModelMapper mapper = null;
-		if (element.hasAttribute(ATTRIBUTES_MAPPER_ATTRIBUTE)) {
-			mapper = getFlowServiceLocator().getFlowModelMapper(element.getAttribute(ATTRIBUTES_MAPPER_ATTRIBUTE));
+		if (element.hasAttribute(MODEL_MAPPER_ATTRIBUTE)) {
+			mapper = getFlowServiceLocator().getFlowModelMapper(element.getAttribute(MODEL_MAPPER_ATTRIBUTE));
 		}
 		Transition[] transitions = parseTransitions(element);
 		new SubFlowState(flow, id, subFlow, mapper, transitions);

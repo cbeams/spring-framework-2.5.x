@@ -153,7 +153,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public FlowModelMapper getFlowModelMapper(Class flowModelMapperImplementationClass)
 			throws ServiceLookupException {
 		if (!FlowModelMapper.class.isAssignableFrom(flowModelMapperImplementationClass)) {
-			throw new IllegalArgumentException("Your attributes mapper implementation '"
+			throw new IllegalArgumentException("Your model mapper implementation '"
 					+ flowModelMapperImplementationClass + "' must implement the '"
 					+ FlowModelMapper.class.getName() + "' interface");
 

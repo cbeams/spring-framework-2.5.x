@@ -393,10 +393,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the model attribute mapper with the specified name prefix be
+	 * Request that the model mapper with the specified name prefix be
 	 * used to map attributes between a parent flow and a spawning subflow when
 	 * the subflow state being constructed is entered.
-	 * @param modelMapperIdPrefix The attribute mapper prefix
+	 * @param modelMapperIdPrefix The model mapper prefix
 	 * @return The model mapper
 	 */
 	protected FlowModelMapper useModelMapper(String modelMapperIdPrefix) throws NoSuchFlowModelMapperException {
@@ -407,15 +407,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the attribute mapper of the specified implementation be used
+	 * Request that the mapper of the specified implementation be used
 	 * to map attributes between a parent flow and a spawning subflow when the
 	 * subflow state being constructed is entered.
-	 * @param flowAttributesMapperImplementationClass
+	 * @param flowModelMapperImplementationClass
 	 * @return The model mapper
 	 */
-	protected FlowModelMapper useAttributesMapper(Class flowAttributesMapperImplementationClass)
+	protected FlowModelMapper useModelMapper(Class flowModelMapperImplementationClass)
 			throws NoSuchFlowModelMapperException {
-		return getFlowServiceLocator().getFlowModelMapper(flowAttributesMapperImplementationClass);
+		return getFlowServiceLocator().getFlowModelMapper(flowModelMapperImplementationClass);
 	}
 
 	/**

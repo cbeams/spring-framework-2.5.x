@@ -18,7 +18,7 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
- * Thrown when a flow model attributes mapper service cannot be found.
+ * Thrown when a flow model mapper service cannot be found.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -26,7 +26,7 @@ import org.springframework.web.flow.ServiceLookupException;
 public class NoSuchFlowModelMapperException extends ServiceLookupException {
 
 	/**
-	 * Create a new flow attributes mapper lookup exception.
+	 * Create a new flow model mapper lookup exception.
 	 * @param serviceImplementationClass The required implementation class of
 	 *        the service that cannot be found
 	 */
@@ -35,7 +35,7 @@ public class NoSuchFlowModelMapperException extends ServiceLookupException {
 	}
 
 	/**
-	 * Create a new flow attributes mapper lookup exception.
+	 * Create a new flow model mapper lookup exception.
 	 * @param serviceImplementationClass The required implementation class of
 	 *        the service that cannot be found
 	 * @param cause The underlying cause of this exception
@@ -45,7 +45,7 @@ public class NoSuchFlowModelMapperException extends ServiceLookupException {
 	}
 
 	/**
-	 * Create a new flow attributes mapper lookup exception.
+	 * Create a new flow model mapper lookup exception.
 	 * @param serviceId The id of the service that cannot be found
 	 */
 	public NoSuchFlowModelMapperException(String serviceId) {
@@ -53,7 +53,7 @@ public class NoSuchFlowModelMapperException extends ServiceLookupException {
 	}
 
 	/**
-	 * Create a new flow attributes mapper lookup exception.
+	 * Create a new flow model mapper lookup exception.
 	 * @param serviceId The id of the service that cannot be found
 	 * @param cause The underlying cause of this exception
 	 */

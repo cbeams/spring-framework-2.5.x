@@ -50,21 +50,19 @@ public interface FlowServiceLocator extends FlowLocator {
 	public Action getAction(Class actionImplementationClass) throws ServiceLookupException;
 
 	/**
-	 * Lookup a flow model attributes mapper with specified id.
-	 * @param flowAttributesMapperId The flow attributes mapper id
-	 * @return The flow model attributes mapper
-	 * @throws ServiceLookupException When the flow model attributes mapper
-	 *         cannot be found
+	 * Lookup a flow model mapper with specified id.
+	 * @param flowModelMapperId The flow model mapper id
+	 * @return The flow model mapper
+	 * @throws ServiceLookupException When the flow model mapper cannot be found
 	 */
 	public FlowModelMapper getFlowModelMapper(String flowModelMapperId) throws ServiceLookupException;
 
 	/**
-	 * Lookup a flow model attributes mapper of specified implementation class.
-	 * @param flowAttributesMapperImplementationClass The required
+	 * Lookup a flow model mapper of specified implementation class.
+	 * @param flowModelMapperImplementationClass The required
 	 *        implementation class
-	 * @return The flow model attributes mapper
-	 * @throws ServiceLookupException When the flow model attributes mapper
-	 *         cannot be found
+	 * @return The flow model mapper
+	 * @throws ServiceLookupException When the flow model mapper cannot be found
 	 */
 	public FlowModelMapper getFlowModelMapper(Class flowModelMapperImplementationClass) throws ServiceLookupException;
 

@@ -56,7 +56,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 
 	/**
 	 * Create a base flow builder which will pull services (other flow defs,
-	 * actions, attribute mappers, etc.) from the service locator.
+	 * actions, model mappers, etc.) from the service locator.
 	 * @param flowServiceLocator the locator
 	 */
 	protected BaseFlowBuilder(FlowServiceLocator flowServiceLocator) {

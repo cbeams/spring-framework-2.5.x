@@ -95,7 +95,7 @@
 	Optional name (bean id) of a mapper that will map model data to and from
 	the sub flow.
 -->
-<!ATTLIST sub-flow-state attributes-mapper CDATA #IMPLIED>
+<!ATTLIST sub-flow-state model-mapper CDATA #IMPLIED>
 
 <!--
 	Defines an end state: a state that terminates the flow.
