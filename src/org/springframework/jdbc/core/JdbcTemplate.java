@@ -27,7 +27,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
- * <b>This is the central class in this package.</b>
+ * <b>This is the central class in the JDBC core package.</b>
  * It simplifies the use of JDBC and helps to avoid common errors. It executes
  * core JDBC workflow, leaving application code to provide SQL and extract results.
  * This class executes SQL queries or updates, initating iteration over
@@ -44,12 +44,12 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * <p>Can be used within a service implementation via direct instantiation
  * with a DataSource reference, or get prepared in an application context
  * and given to services as bean reference. Note: The DataSource should
- * always be configured as bean in the application context, in the first case
+ * always be configured as a bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
  * <p>The motivation and design of this class is discussed
  * in detail in
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
+ * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson (Wrox, 2002).
  *
  * <p>Because this class is parameterizable by the callback interfaces and the
@@ -61,7 +61,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.9 2003-10-31 17:06:27 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.10 2003-11-03 09:27:46 johnsonr Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -93,8 +93,11 @@ public class JdbcTemplate implements InitializingBean {
 	/** Helper to translate SQL exceptions to DataAccessExceptions */
 	private SQLExceptionTranslator exceptionTranslator;
 
-	/** Custom query executor */
-	private QueryExecutor queryExecutor;
+	/** 
+	 * Custom query executor. This default may be overridden by a JavaBean property
+	 * if desired.
+	 */
+	private QueryExecutor queryExecutor = new DefaultQueryExecutor();
 
 	/** If this variable is false, we will throw exceptions on SQL warnings */
 	private boolean ignoreWarnings = true;
@@ -164,17 +167,6 @@ public class JdbcTemplate implements InitializingBean {
 	}
 
 	/**
-	 * Return the QueryExecutor implementation for this instance.
-	 * Creates a default one in none set.
-	 */
-	public synchronized QueryExecutor getQueryExecutor() {
-		if (this.queryExecutor == null) {
-			this.queryExecutor = new DefaultQueryExecutor();
-		}
-		return queryExecutor;
-	}
-
-	/**
 	 * Set whether or not we want to ignore SQLWarnings.
 	 * Default is true.
 	 */
@@ -199,7 +191,6 @@ public class JdbcTemplate implements InitializingBean {
 			throw new IllegalArgumentException("dataSource is required");
 		}
 		getExceptionTranslator();
-		getQueryExecutor();
 	}
 
 
@@ -254,7 +245,7 @@ public class JdbcTemplate implements InitializingBean {
 			if (logger.isDebugEnabled())
 				logger.debug("Executing static SQL query [" + sql + "] using a java.sql.Statement");
 
-			rs = getQueryExecutor().executeQuery(stmt, sql);
+			rs = this.queryExecutor.executeQuery(stmt, sql);
 			rse.extractData(rs);
 
 			SQLWarning warning = stmt.getWarnings();
@@ -315,7 +306,7 @@ public class JdbcTemplate implements InitializingBean {
 			if (logger.isDebugEnabled())
 				logger.debug("Executing SQL query using PreparedStatement [" + psc + "]");
 
-			rs = getQueryExecutor().executeQuery(ps);
+			rs = this.queryExecutor.executeQuery(ps);
 			rse.extractData(rs);
 
 			SQLWarning warning = ps.getWarnings();
@@ -726,4 +717,4 @@ public class JdbcTemplate implements InitializingBean {
 		}
 	}
 
-}
+}	// class JdbcTemplate
