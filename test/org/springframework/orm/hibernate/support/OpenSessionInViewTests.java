@@ -21,8 +21,8 @@ import org.easymock.MockControl;
 
 import org.springframework.orm.hibernate.HibernateAccessor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockServletContext;
@@ -157,7 +157,7 @@ public class OpenSessionInViewTests extends TestCase {
 		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory", sf);
 		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactory", sf2);
 		wac.refresh();
-		WebApplicationContextUtils.publishWebApplicationContext(wac);
+		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
