@@ -124,6 +124,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 		return viewName;
 	}
 
+	protected void initApplicationContext() {
+		super.initApplicationContext();
+		if (this.viewClass == null) {
+			throw new IllegalArgumentException("viewClass is required");
+		}
+	}
+
 	protected View loadView(String viewName, Locale locale) {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(this.viewClass);
 		view.setBeanName(viewName);
