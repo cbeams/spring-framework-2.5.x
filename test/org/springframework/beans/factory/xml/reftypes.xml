@@ -38,6 +38,35 @@
 		<property name="spouse"><ref local="ego"/></property>
 	</bean>
 
+	<bean id="hasInnerBeans" class="org.springframework.beans.TestBean">
+		<property name="name"><value>hasInner</value></property>
+		<property name="age"><value>5</value></property>
+		<property name="spouse">
+			<bean id="innerBean" class="org.springframework.beans.TestBean">
+				<property name="name"><value>inner1</value></property>
+				<property name="age"><value>6</value></property>
+			</bean>
+		</property>
+		<property name="friends">
+			<list>
+				<bean id="innerBean" class="org.springframework.beans.TestBean">
+					<property name="name"><value>inner2</value></property>
+					<property name="age"><value>7</value></property>
+				</bean>
+			</list>
+		</property>
+		<property name="someMap">
+			<map>
+				<entry key="someKey">
+					<bean class="org.springframework.beans.TestBean">
+						<property name="name"><value>inner3</value></property>
+						<property name="age"><value>8</value></property>
+					</bean>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
 </bones>
 	
 	

@@ -12,7 +12,7 @@ import java.io.InputStream;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.xml.AbstractXmlBeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -111,7 +111,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 	 * Initialize the config locations for the current namespace.
 	 * This can be overridden in subclasses for custom config lookup.
 	 */
-	protected void loadBeanDefinitions(AbstractXmlBeanDefinitionReader reader) throws BeansException, IOException {
+	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
 		for (int i = 0; i < this.configLocations.length; i++) {
 			reader.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
 		}

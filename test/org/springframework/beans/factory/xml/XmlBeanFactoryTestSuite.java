@@ -32,14 +32,14 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.24 2003-12-09 11:16:57 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.25 2003-12-18 18:56:49 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 	
 	public void testDescriptionButNoProperties() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(xbf);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
 		reader.loadBeanDefinitions(is);
 		TestBean validEmpty = (TestBean) xbf.getBean("validEmptyWithDescription");
@@ -50,10 +50,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	public void testRefToSeparatePrototypeInstances() throws Exception {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(xbf);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
 		reader.loadBeanDefinitions(is);
-		assertTrue("6 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 6);
+		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean emma = (TestBean) xbf.getBean("emma");
 		TestBean georgia = (TestBean) xbf.getBean("georgia");
 		ITestBean emmasJenks = emma.getSpouse();
@@ -69,10 +69,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	public void testRefToSingleton() throws Exception {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(xbf);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
 		reader.loadBeanDefinitions(is);
-		assertTrue("6 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 6);
+		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
 		TestBean jenks = (TestBean) xbf.getBean("jenks");
@@ -80,6 +80,29 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		ITestBean jenksJen = jenks.getSpouse();
 		assertTrue("1 jen instance", davesJen == jenksJen);
 		assertTrue("1 jen instance", davesJen == jen);
+	}
+
+	public void testInnerBeans() {
+		InputStream is = getClass().getResourceAsStream("reftypes.xml");
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(false);
+		reader.loadBeanDefinitions(is);
+		TestBean hasInnerBeans = (TestBean) xbf.getBean("hasInnerBeans");
+		assertEquals(5, hasInnerBeans.getAge());
+		assertNotNull(hasInnerBeans.getSpouse());
+		assertEquals("inner1", hasInnerBeans.getSpouse().getName());
+		assertEquals(6, hasInnerBeans.getSpouse().getAge());
+		assertNotNull(hasInnerBeans.getFriends());
+		assertFalse(hasInnerBeans.getFriends().isEmpty());
+		TestBean inner2 = (TestBean) hasInnerBeans.getFriends().iterator().next();
+		assertEquals("inner2", inner2.getName());
+		assertEquals(7, inner2.getAge());
+		assertNotNull(hasInnerBeans.getSomeMap());
+		assertFalse(hasInnerBeans.getSomeMap().isEmpty());
+		TestBean inner3 = (TestBean) hasInnerBeans.getSomeMap().get("someKey");
+		assertEquals("inner3", inner3.getName());
+		assertEquals(8, inner3.getAge());
 	}
 
 	public void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
@@ -185,7 +208,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	public void testCircularReferences() {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(xbf);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
 		reader.loadBeanDefinitions(is);
 		TestBean jenny = (TestBean) xbf.getBean("jenny");

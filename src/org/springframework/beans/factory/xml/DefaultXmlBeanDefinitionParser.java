@@ -7,50 +7,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+import org.w3c.dom.Document;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.StringUtils;
 
 /**
- * Bean definition reader for Spring's default XML bean definition format.
- * Typically applied to a DefaultListableBeanFactory.
- *
- * <p>The structure, element and attribute names of the required XML document
- * are hard-coded in this class. (Of course a transform could be run if necessary
- * to produce this format). "beans" doesn't need to be the root element of the XML
- * document: This class will parse all bean definition elements in the XML file.
- *
- * <p>This class registers each bean definition with the DefaultListableBeanFactory
- * superclass, and relies on the latter's implementation of the BeanFactory
- * interface. It supports singletons, prototypes and references to either of
- * these kinds of bean.
-
+ * Default implementation of the XmlBeanDefinitionParser interface.
+ * Parses bean definitions according to the "spring-beans" DTD. 
  * @author Juergen Hoeller
- * @author Rod Johnson
- * @since 26.11.2003
- * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
- * @version $Id: DefaultXmlBeanDefinitionReader.java,v 1.4 2003-12-12 18:47:28 jhoeller Exp $
+ * @since 18.12.2003
  */
-public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionReader {
+public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	public static final String BEAN_NAME_DELIMITERS = ",; ";
 
@@ -60,6 +47,10 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	 */
 	private static final String TRUE_VALUE = "true";
 	private static final String DEFAULT_VALUE = "default";
+
+	private static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
+	private static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
+	private static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
 
 	private static final String BEAN_ELEMENT = "bean";
 	private static final String DESCRIPTION_ELEMENT = "description";
@@ -87,46 +78,78 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	private static final String PROP_ELEMENT = "prop";
 
 	private static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
-	private static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
 
 	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
-	private static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
 	private static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
 	private static final String DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE = "simple";
 	private static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
 
-	private static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
 	private static final String AUTOWIRE_BY_NAME_VALUE = "byName";
 	private static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
 	private static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
 
 
-	/**
-	 * Create new DefaultXmlBeanDefinitionReader for the given bean factory.
-	 */
-	public DefaultXmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
-		super(beanFactory);
-	}
+	protected final Log logger = LogFactory.getLog(getClass());
 
-	public void loadBeanDefinitions(Document doc) throws BeansException {
+	private BeanDefinitionRegistry beanFactory;
+
+	private ClassLoader beanClassLoader;
+
+	private String defaultLazyInit;
+
+	private String defaultDependencyCheck;
+
+	private String defaultAutowire;
+
+
+	public void loadBeanDefinitions(BeanDefinitionRegistry beanFactory, ClassLoader beanClassLoader,
+	                                Document doc) {
+		this.beanFactory = beanFactory;
+		this.beanClassLoader = beanClassLoader;
+
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
 
-		String defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
+		this.defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
 		logger.debug("Default lazy init '" + defaultLazyInit + "'");
-		String defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
+		this.defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
 		logger.debug("Default dependency check '" + defaultDependencyCheck + "'");
-		String defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
+		this.defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
 		logger.debug("Default autowire '" + defaultAutowire + "'");
 
-		NodeList nl = root.getElementsByTagName(BEAN_ELEMENT);
-		logger.debug("Found " + nl.getLength() + " <" + BEAN_ELEMENT + "> elements defining beans");
+		NodeList nl = root.getChildNodes();
+		int beanDefinitionCounter = 0;
 		for (int i = 0; i < nl.getLength(); i++) {
-			Node n = nl.item(i);
-			loadBeanDefinition((Element) n, defaultLazyInit, defaultDependencyCheck, defaultAutowire);
+			Node node = nl.item(i);
+			if (node instanceof Element && BEAN_ELEMENT.equals(node.getNodeName())) {
+				beanDefinitionCounter++;
+				loadBeanDefinition((Element) node);
+			}
 		}
+		logger.debug("Found " + beanDefinitionCounter + " <" + BEAN_ELEMENT + "> elements defining beans");
 	}
+
+	protected BeanDefinitionRegistry getBeanFactory() {
+		return beanFactory;
+	}
+
+	protected ClassLoader getBeanClassLoader() {
+		return beanClassLoader;
+	}
+
+	protected String getDefaultLazyInit() {
+		return defaultLazyInit;
+	}
+
+	protected String getDefaultDependencyCheck() {
+		return defaultDependencyCheck;
+	}
+
+	protected String getDefaultAutowire() {
+		return defaultAutowire;
+	}
+
 
 	/**
 	 * Parse an element definition: We know this is a BEAN element.
@@ -135,16 +158,14 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	 * If no id specified, use the first name in the name attribute as
 	 * canonical name, registering all others as aliases.
 	 */
-	private void loadBeanDefinition(Element ele, String defaultLazyInit, String defaultDependencyCheck,
-	                                String defaultAutowire) {
+	protected void loadBeanDefinition(Element ele) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 		List aliases = new ArrayList();
 		if (nameAttr != null && !"".equals(nameAttr)) {
 			aliases.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true)));
 		}
-		AbstractBeanDefinition beanDefinition = parseBeanDefinition(ele, id, defaultLazyInit,
-		                                                            defaultDependencyCheck, defaultAutowire);
+		AbstractBeanDefinition beanDefinition = parseBeanDefinition(ele, id);
 
 		if (id == null || "".equals(id)) {
 			if (!aliases.isEmpty()) {
@@ -161,17 +182,16 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 		}
 
 		logger.debug("Registering bean definition with id '" + id + "'");
-		getBeanFactory().registerBeanDefinition(id, beanDefinition);
+		this.beanFactory.registerBeanDefinition(id, beanDefinition);
 		for (Iterator it = aliases.iterator(); it.hasNext();) {
-			getBeanFactory().registerAlias(id, (String) it.next());
+			this.beanFactory.registerAlias(id, (String) it.next());
 		}
 	}
 
 	/**
 	 * Parse a standard bean definition.
 	 */
-	private AbstractBeanDefinition parseBeanDefinition(Element ele, String beanName, String defaultLazyInit,
-	                                                   String defaultDependencyCheck, String defaultAutowire) {
+	protected AbstractBeanDefinition parseBeanDefinition(Element ele, String beanName) {
 		try {
 			String className = null;
 			if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
@@ -189,7 +209,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 			PropertyValues pvs = getPropertyValueSubElements(ele);
 
 			if (className != null) {
-				Class clazz = Class.forName(className, true, getBeanClassLoader());
+				Class clazz = Class.forName(className, true, this.beanClassLoader);
 				ConstructorArgumentValues cargs = getConstructorArgSubElements(ele);
 				RootBeanDefinition rbd = new RootBeanDefinition(clazz, cargs, pvs);
 
@@ -200,13 +220,13 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 
 				String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 				if (DEFAULT_VALUE.equals(dependencyCheck)) {
-					dependencyCheck = defaultDependencyCheck;
+					dependencyCheck = this.defaultDependencyCheck;
 				}
 				rbd.setDependencyCheck(getDependencyCheck(dependencyCheck));
 
 				String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
 				if (DEFAULT_VALUE.equals(autowire)) {
-					autowire = defaultAutowire;
+					autowire = this.defaultAutowire;
 				}
 				rbd.setAutowire(getAutowire(autowire));
 
@@ -231,7 +251,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 
 			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(lazyInit)) {
-				lazyInit = defaultLazyInit;
+				lazyInit = this.defaultLazyInit;
 			}
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
 
@@ -245,7 +265,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	/**
 	 * Parse constructor argument subelements of the given bean element.
 	 */
-	private ConstructorArgumentValues getConstructorArgSubElements(Element beanEle) {
+	protected ConstructorArgumentValues getConstructorArgSubElements(Element beanEle) {
 		NodeList nl = beanEle.getElementsByTagName(CONSTRUCTOR_ARG_ELEMENT);
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -258,12 +278,14 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	/**
 	 * Parse property value subelements of the given bean element.
 	 */
-	private PropertyValues getPropertyValueSubElements(Element beanEle) {
-		NodeList nl = beanEle.getElementsByTagName(PROPERTY_ELEMENT);
+	protected PropertyValues getPropertyValueSubElements(Element beanEle) {
+		NodeList nl = beanEle.getChildNodes();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
-			Element propEle = (Element) nl.item(i);
-			parsePropertyElement(pvs, propEle);
+			Node node = nl.item(i);
+			if (node instanceof Element && PROPERTY_ELEMENT.equals(node.getNodeName())) {
+				parsePropertyElement(pvs, (Element) node);
+			}
 		}
 		return pvs;
 	}
@@ -271,7 +293,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	/**
 	 * Parse a constructor-arg element.
 	 */
-	private void parseConstructorArgElement(ConstructorArgumentValues cargs, Element ele) throws DOMException {
+	protected void parseConstructorArgElement(ConstructorArgumentValues cargs, Element ele) throws DOMException {
 		Object val = getPropertyValue(ele);
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
 		if (!"".equals(indexAttr)) {
@@ -294,12 +316,12 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	/**
 	 * Parse a property element.
 	 */
-	private void parsePropertyElement(MutablePropertyValues pvs, Element e) throws DOMException {
-		String propertyName = e.getAttribute(NAME_ATTRIBUTE);
+	protected void parsePropertyElement(MutablePropertyValues pvs, Element ele) throws DOMException {
+		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
 		if ("".equals(propertyName)) {
 			throw new BeanDefinitionStoreException("Tag 'property' must have a 'name' attribute");
 		}
-		Object val = getPropertyValue(e);
+		Object val = getPropertyValue(ele);
 		pvs.addPropertyValue(new PropertyValue(propertyName, val));
 	}
 
@@ -307,25 +329,24 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	 * Get the value of a property element. May be a list.
 	 * @param ele property element
 	 */
-	private Object getPropertyValue(Element ele) {
-		// Can only have one element child:
-		// value, ref, collection
+	protected Object getPropertyValue(Element ele) {
+		// should only have one element child: value, ref, collection
 		NodeList nl = ele.getChildNodes();
 		Element valueRefOrCollectionElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
-			if ( nl.item(i) instanceof Element) {
+			if (nl.item(i) instanceof Element) {
 				Element candidateEle = (Element) nl.item(i);
 				if (DESCRIPTION_ELEMENT.equals(candidateEle.getTagName())) {
-					// Keep going: we don't use this value for now
+					// keep going: we don't use this value for now
 				}
 				else {
-					// Child element is what we're looking for
+					// child element is what we're looking for
 					valueRefOrCollectionElement = candidateEle;
-				}				
+				}
 			}
 		}
 		if (valueRefOrCollectionElement == null) {
-			throw new BeanDefinitionStoreException("<property> element must have a value ref or collection subelement");
+			throw new BeanDefinitionStoreException("<property> element must have a value, ref, or collection subelement");
 		}
 		return parsePropertySubelement(valueRefOrCollectionElement);
 	}
@@ -334,8 +355,11 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	 * Parse a value, ref or collection subelement of a property element
 	 * @param ele subelement of property element; we don't know which yet
 	 */
-	private Object parsePropertySubelement(Element ele) {
-		if (ele.getTagName().equals(REF_ELEMENT)) {
+	protected Object parsePropertySubelement(Element ele) {
+		if (ele.getTagName().equals(BEAN_ELEMENT)) {
+			return parseBeanDefinition(ele, "(inner bean definition)");
+		}
+		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// a generic reference to any name of any bean
 			String beanName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			if ("".equals(beanName)) {
@@ -352,7 +376,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 			return new RuntimeBeanReference(beanName);
 		}
 		else if (ele.getTagName().equals(VALUE_ELEMENT)) {
-			// It's a literal value
+			// it's a literal value
 			return getTextValue(ele);
 		}
 		else if (ele.getTagName().equals(LIST_ELEMENT)) {
@@ -370,7 +394,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	/**
 	 * Return list of collection.
 	 */
-	private List getList(Element collectionEle) {
+	protected List getList(Element collectionEle) {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList l = new ManagedList();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -382,7 +406,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 		return l;
 	}
 
-	private Map getMap(Element mapEle) {
+	protected Map getMap(Element mapEle) {
 		ManagedMap m = new ManagedMap();
 		List l = getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
 		for (int i = 0; i < l.size(); i++) {
@@ -399,7 +423,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	 * Don't use the horrible DOM API to get child elements:
 	 * Get an element's children with a given element name
 	 */
-	private List getChildElementsByTagName(Element mapEle, String elementName) {
+	protected List getChildElementsByTagName(Element mapEle, String elementName) {
 		NodeList nl = mapEle.getChildNodes();
 		List nodes = new ArrayList();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -411,7 +435,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 		return nodes;
 	}
 
-	private Properties getProps(Element propsEle) {
+	protected Properties getProps(Element propsEle) {
 		Properties p = new Properties();
 		NodeList nl = propsEle.getElementsByTagName(PROP_ELEMENT);
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -427,22 +451,22 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	 * Make the horrible DOM API slightly more bearable:
 	 * get the text value we know this element contains
 	 */
-	private String getTextValue(Element e) {
-		NodeList nl = e.getChildNodes();
+	protected String getTextValue(Element ele) {
+		NodeList nl = ele.getChildNodes();
 		if (nl.item(0) == null) {
 			// treat empty value as empty String
 			return "";
 		}
 		if (nl.getLength() != 1 || !(nl.item(0) instanceof Text)) {
 			throw new FatalBeanException("Unexpected element or type mismatch: expected single node of " +
-			                             nl.item(0).getClass() + " to be of type Text: " + "found " + e, null);
+																	 nl.item(0).getClass() + " to be of type Text: " + "found " + ele, null);
 		}
 		Text t = (Text) nl.item(0);
 		// This will be a String
 		return t.getData();
 	}
 
-	private int getDependencyCheck(String att) {
+	protected int getDependencyCheck(String att) {
 		int dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_NONE;
 		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
 			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_ALL;
@@ -457,7 +481,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 		return dependencyCheckCode;
 	}
 
-	private int getAutowire(String att) {
+	protected int getAutowire(String att) {
 		int autowire = RootBeanDefinition.AUTOWIRE_NO;
 		if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
 			autowire = RootBeanDefinition.AUTOWIRE_BY_NAME;

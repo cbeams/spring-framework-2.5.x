@@ -16,6 +16,7 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -23,12 +24,23 @@ import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
- * Abstract base class for XML-based bean definition readers.
- * Provides common properties and various overridden load methods. 
+ * Bean definition reader for Spring's default XML bean definition format.
+ * Typically applied to a DefaultListableBeanFactory.
+ *
+ * <p>The structure, element and attribute names of the required XML document
+ * are hard-coded in this class. (Of course a transform could be run if necessary
+ * to produce this format). "beans" doesn't need to be the root element of the XML
+ * document: This class will parse all bean definition elements in the XML file.
+ *
+ * <p>This class registers each bean definition with the given bean factory superclass,
+ * and relies on the latter's implementation of the BeanDefinitionRegistry interface.
+ * It supports singletons, prototypes, and references to either of these kinds of bean.
+
  * @author Juergen Hoeller
  * @since 26.11.2003
+ * @see #setParserClass
  */
-public abstract class AbstractXmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
+public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -36,11 +48,13 @@ public abstract class AbstractXmlBeanDefinitionReader extends AbstractBeanDefini
 
 	private EntityResolver entityResolver;
 
+	private Class parserClass = DefaultXmlBeanDefinitionParser.class;
+
 
 	/**
-	 * Create new AbstractXmlBeanDefinitionReader for the given bean factory.
+	 * Create new XmlBeanDefinitionReader for the given bean factory.
 	 */
-	protected AbstractXmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
+	public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
 		super(beanFactory);
 	}
 
@@ -61,6 +75,18 @@ public abstract class AbstractXmlBeanDefinitionReader extends AbstractBeanDefini
 		this.entityResolver = entityResolver;
 	}
 
+	/**
+	 * Set the XmlBeanDefinitionParser implementation to use.
+	 * Default is DefaultXmlBeanDefinitionParser.
+	 * @see XmlBeanDefinitionParser
+	 * @see DefaultXmlBeanDefinitionParser
+	 */
+	public void setParserClass(Class parserClass) {
+		if (this.parserClass == null || !XmlBeanDefinitionParser.class.isAssignableFrom(parserClass)) {
+			throw new IllegalArgumentException("parserClass must be a XmlBeanDefinitionParser");
+		}
+		this.parserClass = parserClass;
+	}
 
 	/**
 	 * Load definitions from the given file.
@@ -123,7 +149,10 @@ public abstract class AbstractXmlBeanDefinitionReader extends AbstractBeanDefini
 	 * All calls go through this.
 	 * @param doc the DOM document
 	 */
-	public abstract void loadBeanDefinitions(Document doc) throws BeansException;
+	public void loadBeanDefinitions(Document doc) throws BeansException {
+		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
+		parser.loadBeanDefinitions(getBeanFactory(), getBeanClassLoader(), doc);
+	}
 
 
 	/**

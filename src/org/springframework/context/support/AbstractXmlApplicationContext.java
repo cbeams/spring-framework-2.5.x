@@ -10,8 +10,7 @@ import java.io.IOException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.AbstractXmlBeanDefinitionReader;
-import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
  
@@ -20,7 +19,7 @@ import org.springframework.context.ApplicationContextException;
  * drawing their configuration from XML documents containing bean definitions
  * understood by an DefaultXmlBeanDefinitionReader.
  * @author Rod Johnson
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see org.springframework.beans.factory.xml.XmlBeanFactory
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
@@ -53,7 +52,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		String identifier = "application context [" + getDisplayName() + "]";
 		try {
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(getParent());
-			DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(beanFactory);
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
 			reader.setEntityResolver(new ResourceBaseEntityResolver(this));
 			loadBeanDefinitions(reader);
 			this.beanFactory = beanFactory;
@@ -75,6 +74,6 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	 * @throws IOException if the required XML document isn't found
 	 * @see #refreshBeanFactory
 	 */
-	protected abstract void loadBeanDefinitions(AbstractXmlBeanDefinitionReader reader) throws BeansException, IOException;
+	protected abstract void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException;
 	
 }

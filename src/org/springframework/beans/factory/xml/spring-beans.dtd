@@ -13,11 +13,15 @@
 	Each <bean> element in this document defines a JavaBean.
 	Typically the bean class is specified, along with JavaBean properties.
 
-	References among beans are supported (setting a JavaBean
-	property to refer to another bean in the same factory).
+	Bean instances can be "singletons" (shared instances) or "prototypes"
+	(independent instances).
 
-	Bean instances can be "singletons" (shared instances)
-	or "prototypes" (independent instances).
+	References among beans are supported, i.e. setting a JavaBean property
+	to refer to another bean in the same factory or an ancestor factory.
+
+	As alternative to bean references, "inner bean definitions" can be used.
+	Singleton flags and names of such "inner beans" are always ignored:
+	Inner beans are anonymous prototypes.
 
 	There is also support for lists, maps, and java.util.Properties types.
 
@@ -27,7 +31,7 @@
   XML documents that conform to this DTD should declare the following doctype:
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.15 2003-12-09 11:17:55 johnsonr Exp $
+	$Id: spring-beans.dtd,v 1.16 2003-12-18 18:56:49 jhoeller Exp $
 -->
 
 <!--
@@ -184,8 +188,8 @@
 	This is an alternative to "autowire constructor".
 -->
 <!ELEMENT constructor-arg (
-	description?,
-    (value | ref | list | map | props)
+        description?,
+        (bean | ref | list | map | props | value)
 )>
 
 <!--
@@ -202,8 +206,8 @@
 	beans in the same or related factories, lists, maps and properties.
 -->
 <!ELEMENT property (
-	description?,
-   (value | ref | list | map | props)
+        description?,
+        (bean | ref | list | map | props | value)
 )>
 
 <!--
@@ -218,20 +222,6 @@
 	factory (parent or included factory). 
 -->
 <!ELEMENT ref EMPTY>
-
-<!--
-	Contains a string representation of a property value.
-	The property may be a string, or may be converted to the
-	required type using the JavaBeans PropertyEditor
-	machinery. This makes it possible for application developers
-	to write custom PropertyEditor implementations that can
-	convert strings to objects. 
-	
-	Note that this is recommended for simple objects only.
-	Configure more complex objects by setting JavaBean
-	properties to references to other beans.
--->
-<!ELEMENT value (#PCDATA)>
 
 <!--
 	References must specify a name of the target bean.
@@ -249,14 +239,14 @@
 <!ATTLIST ref external CDATA #IMPLIED>
 
 <!--
-	A list can contain multiple value and/or ref elements.
-	Java lists are untyped, pending generics support in Java 1.5. 
+	A list can contain multiple inner bean, ref, collection, or value elements.
+	Java lists are untyped, pending generics support in Java 1.5,
 	although references will be strongly typed. 
 	A list can also map to an array type. The necessary conversion
-	is automatically performed by the Spring AbstractBeanFactory. 
+	is automatically performed by AbstractBeanFactory. 
 -->
 <!ELEMENT list (
-        (value | ref | list | map)*
+        (bean | ref | list | map | props | value)*
 )>
 
 <!--
@@ -268,11 +258,11 @@
 )>
 
 <!--
-	A map entry can be a value, ref or list
+	A map entry can be an inner bean, ref, collection, or value.
 	The name of the property is given by the "key" attribute.
 -->
 <!ELEMENT entry (
-        (value | ref | list | map)*
+        (bean | ref | list | map | props | value)
 )>
 
 <!ATTLIST entry key CDATA #REQUIRED>
@@ -298,3 +288,17 @@
 	is the element content.
 -->
 <!ATTLIST prop key CDATA #REQUIRED>
+
+<!--
+	Contains a string representation of a property value.
+	The property may be a string, or may be converted to the
+	required type using the JavaBeans PropertyEditor
+	machinery. This makes it possible for application developers
+	to write custom PropertyEditor implementations that can
+	convert strings to objects.
+
+	Note that this is recommended for simple objects only.
+	Configure more complex objects by setting JavaBean
+	properties to references to other beans.
+-->
+<!ELEMENT value (#PCDATA)>

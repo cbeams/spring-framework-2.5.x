@@ -62,9 +62,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * It also allows for management of a bean factory hierarchy,
  * implementing the HierarchicalBeanFactory interface.
  *
+ * <p>Supports "inner bean definitions": Singleton flags and names of such
+ * "inner beans" are always ignored: Inner beans are anonymous prototypes.
+ *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.34 2003-12-13 00:35:09 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.35 2003-12-18 18:56:49 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -416,7 +419,19 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	public RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
 	    throws BeansException {
 		try {
-			AbstractBeanDefinition bd = getBeanDefinition(beanName);
+			return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			if (includingAncestors && this.parentBeanFactory instanceof AbstractBeanFactory) {
+				return ((AbstractBeanFactory) this.parentBeanFactory).getMergedBeanDefinition(beanName, true);
+			}
+			else {
+				throw ex;
+			}
+		}
+	}
+
+	protected RootBeanDefinition getMergedBeanDefinition(String beanName, AbstractBeanDefinition bd) {
 			if (bd instanceof RootBeanDefinition) {
 				return (RootBeanDefinition) bd;
 			}
@@ -437,15 +452,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 				throw new FatalBeanException("BeanDefinition for '" + beanName +
 				                             "' is neither a RootBeanDefinition or ChildBeanDefinition");
 			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			if (includingAncestors && this.parentBeanFactory instanceof AbstractBeanFactory) {
-				return ((AbstractBeanFactory) this.parentBeanFactory).getMergedBeanDefinition(beanName, true);
-			}
-			else {
-				throw ex;
-			}
-		}
 	}
 
 	/**
@@ -889,7 +895,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @param bw BeanWrapper wrapping the target object
 	 * @param pvs new property values
 	 */
-	private void applyPropertyValues(String beanName, BeanWrapper bw, PropertyValues pvs) throws BeansException {
+	protected void applyPropertyValues(String beanName, BeanWrapper bw, PropertyValues pvs) throws BeansException {
 		if (pvs == null)
 			return;
 
@@ -916,20 +922,29 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	/**
 	 * Given a PropertyValue, return a value, resolving any references to other
 	 * beans in the factory if necessary. The value could be:
-	 * <li>An ordinary object or null, in which case it's left alone
-	 * <li>A RuntimeBeanReference, which must be resolved
+	 * <li>An AbstractBeanDefinition, which leads to the creation of a
+	 * corresponding new bean instance. Singleton flags and names of such
+	 * "inner beans" are always ignored: Inner beans are anonymous prototypes.
+	 * <li>A RuntimeBeanReference, which must be resolved.
 	 * <li>A ManagedList. This is a special collection that may contain
 	 * RuntimeBeanReferences that will need to be resolved.
-	 * <li>A ManagedMap. In this case the value may be a reference that
-	 * must be resolved.
+	 * <li>A ManagedMap. In this case the value may be a reference that must
+	 * be resolved.
+	 * <li>An ordinary object or null, in which case it's left alone.
 	 * If the value is a simple object, but the property takes a Collection type,
 	 * the value must be placed in a list.
 	 */
-	private Object resolveValueIfNecessary(String beanName, String argName, Object value) throws BeansException {
+	protected Object resolveValueIfNecessary(String beanName, String argName, Object value) throws BeansException {
 		// We must check each PropertyValue to see whether it
 		// requires a runtime reference to another bean to be resolved.
 		// If it does, we'll attempt to instantiate the bean and set the reference.
-		if (value instanceof RuntimeBeanReference) {
+		if (value instanceof AbstractBeanDefinition) {
+			AbstractBeanDefinition bd = (AbstractBeanDefinition) value;
+			bd.setSingleton(false);  // inner beans should never be cached as singleton
+			String innerBeanName = "(inner bean for property '" + beanName + "." + argName + "')";
+			return createBean(innerBeanName, getMergedBeanDefinition(innerBeanName, bd));
+		}
+		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
 			return resolveReference(beanName, argName, ref);
 		}
@@ -955,7 +970,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	/**
 	 * Resolve a reference to another bean in the factory.
 	 */
-	private Object resolveReference(String beanName, String argName, RuntimeBeanReference ref) throws BeansException {
+	protected Object resolveReference(String beanName, String argName, RuntimeBeanReference ref) throws BeansException {
 		try {
 			logger.debug("Resolving reference from property '" + argName + "' in bean '" +
 			             beanName + "' to bean '" + ref.getBeanName() + "'");
@@ -970,7 +985,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private List resolveManagedList(String beanName, String argName, ManagedList ml) throws BeansException {
+	protected List resolveManagedList(String beanName, String argName, ManagedList ml) throws BeansException {
 		List resolved = new ArrayList();
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(resolveValueIfNecessary(beanName, argName + "[" + i + "]", ml.get(i)));
@@ -981,7 +996,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	/**
 	 * For each element in the ManagedMap, resolve reference if necessary.
 	 */
-	private Map resolveManagedMap(String beanName, String argName, ManagedMap mm) throws BeansException {
+	protected Map resolveManagedMap(String beanName, String argName, ManagedMap mm) throws BeansException {
 		Map resolved = new HashMap();
 		Iterator keys = mm.keySet().iterator();
 		while (keys.hasNext()) {
@@ -999,7 +1014,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @param bean new bean instance we may need to initialize
 	 * @param name the bean has in the factory. Used for debug output.
 	 */
-	private void callLifecycleMethodsIfNecessary(Object bean, String name, RootBeanDefinition rbd, BeanWrapper bw)
+	protected void callLifecycleMethodsIfNecessary(Object bean, String name, RootBeanDefinition rbd, BeanWrapper bw)
 	    throws BeansException {
 
 		if (bean instanceof InitializingBean) {

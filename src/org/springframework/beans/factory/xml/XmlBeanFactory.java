@@ -29,11 +29,11 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.20 2003-11-28 16:51:09 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.21 2003-12-18 18:56:49 jhoeller Exp $
  */
 public class XmlBeanFactory extends DefaultListableBeanFactory {
 
-	private final DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(this);
+	private final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this);
 
 	/**
 	 * Create new XmlBeanFactory using java.io to read the XML document
