@@ -54,15 +54,15 @@ public class BindStatus {
 
 	private final String expression;
 
+	private final Errors errors;
+
+	private PropertyEditor editor;
+
 	private Object value;
 
 	private final String[] errorCodes;
 
 	private final String[] errorMessages;
-
-	private final Errors errors;
-
-	private PropertyEditor editor;
 
 
 	/**
@@ -111,12 +111,12 @@ public class BindStatus {
 				}
 				else {
 					objectErrors = this.errors.getFieldErrors(this.expression);
-					this.value = this.errors.getFieldValue(this.expression);
 					if (this.errors instanceof BindException) {
 						this.editor = ((BindException) this.errors).getCustomEditor(this.expression);
 					}
-					if (htmlEscape && this.value instanceof String) {
-						this.value = HtmlUtils.htmlEscape((String) this.value);
+					this.value = this.errors.getFieldValue(this.expression);
+					if (htmlEscape && this.value != null) {
+						this.value = HtmlUtils.htmlEscape(this.value.toString());
 					}
 				}
 			}
@@ -202,11 +202,11 @@ public class BindStatus {
 	}
 
 	/**
-	 * Return a suitable display value for the field, i.e. empty string
-	 * instead of a null value, or null if not field-specific.
+	 * Return a suitable display value for the field, i.e. the stringified
+	 * value if not null, and an empty string in case of a null value.
 	 */
 	public String getDisplayValue() {
-		return (this.value != null) ? this.value.toString() : "";
+		return (this.value != null ? this.value.toString() : "");
 	}
 
 	/**

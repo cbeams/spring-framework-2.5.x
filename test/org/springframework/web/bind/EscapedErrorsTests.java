@@ -68,7 +68,7 @@ public class EscapedErrorsTests extends TestCase {
 		FieldError ageError = errors.getFieldError("age");
 		assertTrue("Age error message escaped", "message: &#60;tag&#62;".equals(ageError.getDefaultMessage()));
 		assertTrue("Age error code not escaped", "AGE_NOT_SET <tag>".equals(ageError.getCode()));
-		assertTrue("Age value not escaped", (new Integer(0)).equals(errors.getFieldValue("age")));
+		assertTrue("Age value escaped", "0".equals(errors.getFieldValue("age")));
 		FieldError ageErrorInList = (FieldError) errors.getFieldErrors("age").get(0);
 		assertTrue("Same name error in list", ageError.getDefaultMessage().equals(ageErrorInList.getDefaultMessage()));
 		FieldError ageError2 = (FieldError) errors.getFieldErrors("age").get(1);
