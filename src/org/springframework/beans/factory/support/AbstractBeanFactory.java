@@ -341,6 +341,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 			throw ex;
 		}
+		catch (BeanCreationException ex) {
+			// Can only happen when checking FactoryBean.
+			logger.debug("Ignoring BeanCreationException on FactoryBean type check", ex);
+			return null;
+		}
 	}
 
 	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
