@@ -16,9 +16,7 @@
 
 package org.springframework.aop.framework;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.io.ObjectStreamException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -26,11 +24,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.aopalliance.aop.Advice;
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -57,10 +53,10 @@ import org.springframework.util.StringUtils;
  * This class is used to hold snapshots of proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.35 2004-07-27 10:22:22 jhoeller Exp $
+ * @version $Id: AdvisedSupport.java,v 1.36 2004-07-27 15:52:25 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
-public class AdvisedSupport extends ProxyConfig implements Advised, Serializable {
+public class AdvisedSupport extends ProxyConfig implements Advised {
 	
 	/**
 	 * Canonical TargetSource when there's no target, and behavior is
@@ -552,21 +548,37 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	// Serialization support
 	//---------------------------------------------------------------------
 	
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// rely on default serialization, just initialize state after deserialization
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize Spring AOP proxy:" +
-					"Check that Spring AOP libraries are available on the client side");
-		}
-		
-		// initialize transient fields
+	/**
+	 * Serialize a copy of the state of this class, ignoring
+	 * subclass state.
+	 */
+	protected Object writeReplace() throws ObjectStreamException {
+		logger.info("Disconnecting AdvisedSupport " + this);
+		// Copy state to avoid dependencies
+        // on BeanFactories etc. that subclasses may have
+        AdvisedSupport copy = this;
+        
+        // If we're in a non-serializable subclass,
+        // copy into an AdvisedSupport object.
+        if (getClass() != AdvisedSupport.class) {
+        	copy = new AdvisedSupport();
+        	copy.copyConfigurationFrom(this);
+        }
+        
+        // May return this
+        return copy;
+    }
+	 
+	/**
+	 * Used to initialize transient state
+	 */
+	protected Object readResolve() throws ObjectStreamException {
+		// Initialize transient fields
 		this.logger = LogFactory.getLog(getClass());
 		this.isActive = true;
 		this.listeners = new LinkedList();
 		initDefaultAdvisorChainFactory();
+		return this;
 	}
 	
 	
@@ -581,11 +593,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 		StringBuffer sb = new StringBuffer(getClass().getName() + ": ");
 		sb.append(this.interfaces.size()).append(" interfaces=[");
 		sb.append(StringUtils.collectionToCommaDelimitedString(this.interfaces)).append("]; ");
-		sb.append(this.advisors.size()).append(" pointcuts=[");
+		sb.append(this.advisors.size()).append(" advisors=[");
 		sb.append(StringUtils.collectionToCommaDelimitedString(this.advisors)).append("]; ");
 		sb.append("targetSource=[").append(this.targetSource).append("]; ");
 		sb.append("advisorChainFactory=").append(this.advisorChainFactory);
-		sb.append(super.toString());
+		sb.append(" " + super.toString());
 		return sb.toString();
 	}
 

@@ -16,9 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -55,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author Rod Johnson
  * @author Rob Harrop
- * @version $Id: Cglib2AopProxy.java,v 1.12 2004-07-25 14:03:13 johnsonr Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.13 2004-07-27 15:52:25 johnsonr Exp $
  */
 public class Cglib2AopProxy implements AopProxy, Serializable {
 
@@ -72,16 +69,19 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 	private static final int INVOKE_EQUALS = 5;
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Static to optimize serialization
+	 */
+	protected final static Log logger = LogFactory.getLog(Cglib2AopProxy.class);
 
 	/**
      * Dispatcher used for methods on <code>Advised</code>
      */
-	private final AdvisedDispatcher advisedDispatcher = new AdvisedDispatcher();
+	private final transient AdvisedDispatcher advisedDispatcher = new AdvisedDispatcher();
 
-	private int fixedInterceptorOffset;
+	private transient int fixedInterceptorOffset;
 
-	private Map fixedInterceptorMap;
+	private transient Map fixedInterceptorMap;
 
 	/** Config used to configure this proxy */
 	protected AdvisedSupport advised;
@@ -313,23 +313,6 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		return 0;
 	}
     
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        // Copy the AdvisedSupport object to avoid dependencies
-        // on BeanFactories etc. that subclasses may have
-        AdvisedSupport copy = new AdvisedSupport();
-        copy.copyConfigurationFrom(advised);
-        oos.writeObject(copy);
-    }
-    
-    private void readObject(ObjectInputStream ois) throws IOException {
-        try {
-            advised = (AdvisedSupport) ois.readObject();
-        }
-        catch (ClassNotFoundException ex) {
-            throw new AopConfigException(AdvisedSupport.class + " missing attempting to deserialize an AOP proxy: " +
-                    "Are the Spring AOP libraries available on the client side?", ex);
-        }
-    }
 
 	/**
      * Method interceptor used for static targets with no advice chain. The call
