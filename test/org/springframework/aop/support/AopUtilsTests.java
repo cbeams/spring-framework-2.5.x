@@ -23,18 +23,21 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.aop.support.StaticMethodMatcherPointcut;
-import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
+ * @version $Id: AopUtilsTests.java,v 1.3 2004-07-25 16:08:51 johnsonr Exp $
  */
 public class AopUtilsTests extends TestCase {
 
@@ -125,6 +128,21 @@ public class AopUtilsTests extends TestCase {
 	
 		// Will return true if we're proxying interfaces including ITestBean 
 		assertFalse(AopUtils.canApply(pc, TestBean.class, new Class[] { Comparable.class }));
+	}
+	
+	/**
+	 * Test that when we serialize and deserialize various
+	 * canonical instances of AOP classes, they return the same instance,
+	 * not a new instance that's subverted the singleton construction
+	 * limitation.
+	 * @throws Exception
+	 */
+	public void testCanonicalFrameworkClassesStillCanonicalOnDeserialization() throws Exception {
+		assertSame(MethodMatcher.TRUE, SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE));
+		assertSame(ClassFilter.TRUE, SerializationTestUtils.serializeAndDeserialize(ClassFilter.TRUE));
+		assertSame(Pointcut.TRUE, SerializationTestUtils.serializeAndDeserialize(Pointcut.TRUE));
+		assertSame(EmptyTargetSource.INSTANCE, SerializationTestUtils.serializeAndDeserialize(EmptyTargetSource.INSTANCE));
+		assertSame(ExposeInvocationInterceptor.INSTANCE, SerializationTestUtils.serializeAndDeserialize(ExposeInvocationInterceptor.INSTANCE));
 	}
 
 }
