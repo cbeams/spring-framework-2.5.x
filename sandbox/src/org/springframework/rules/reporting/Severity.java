@@ -17,10 +17,10 @@ package org.springframework.rules.reporting;
 
 import javax.swing.Icon;
 
-import org.springframework.util.enums.support.ShortEnum;
-import org.springframework.util.enums.support.StaticEnumResolver;
+import org.springframework.util.enums.support.ShortCodedLabeledEnum;
+import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
-public class Severity extends ShortEnum {
+public class Severity extends ShortCodedLabeledEnum {
 
 	public static final Severity INFO = new Severity(0, "Info");
 
@@ -39,6 +39,6 @@ public class Severity extends ShortEnum {
 	}
 	
 	static {
-		StaticEnumResolver.instance().registerStaticEnums(Severity.class);
+		StaticLabeledEnumResolver.instance().registerStaticEnums(Severity.class);
 	}
 }

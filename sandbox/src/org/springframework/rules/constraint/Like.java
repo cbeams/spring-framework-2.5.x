@@ -17,7 +17,7 @@ package org.springframework.rules.constraint;
 
 import org.springframework.util.StringUtils;
 import org.springframework.util.closure.Constraint;
-import org.springframework.util.enums.support.StringEnum;
+import org.springframework.util.enums.support.StringCodedLabeledEnum;
 
 /**
  * A like constraint, supporting "starts with%", "%ends with", and "%contains%".
@@ -26,7 +26,7 @@ import org.springframework.util.enums.support.StringEnum;
  */
 public class Like implements Constraint {
 
-	public static class LikeType extends StringEnum {
+	public static class LikeType extends StringCodedLabeledEnum {
 		private LikeType(String code) {
 			super(code);
 		}

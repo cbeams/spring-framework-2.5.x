@@ -17,7 +17,6 @@ package org.springframework.util.enums;
 
 import java.util.Comparator;
 
-import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.comparator.ComparableComparator;
 import org.springframework.util.comparator.CompoundComparator;
 import org.springframework.util.comparator.NullSafeComparator;
@@ -40,15 +39,15 @@ import org.springframework.util.comparator.NullSafeComparator;
  * <code>com.mycompany.util.FileFormat.CSV</code>.
  * @author Keith Donald
  */
-public interface Enum extends MessageSourceResolvable, Comparable {
+public interface LabeledEnum extends Comparable {
 
 	/**
 	 * Comparator that sorts enumerations by <code>CODE_ORDER</code>
 	 */
 	public static final Comparator CODE_ORDER = new Comparator() {
 		public int compare(Object o1, Object o2) {
-			Object c1 = ((Enum)o1).getCode();
-			Object c2 = ((Enum)o2).getCode();
+			Object c1 = ((LabeledEnum)o1).getCode();
+			Object c2 = ((LabeledEnum)o2).getCode();
 			return ComparableComparator.instance().compare(c1, c2);
 		}
 	};
@@ -58,8 +57,8 @@ public interface Enum extends MessageSourceResolvable, Comparable {
 	 */
 	public static final Comparator LABEL_ORDER = new Comparator() {
 		public int compare(Object o1, Object o2) {
-			Enum e1 = (Enum)o1;
-			Enum e2 = (Enum)o2;
+			LabeledEnum e1 = (LabeledEnum)o1;
+			LabeledEnum e2 = (LabeledEnum)o2;
 			Comparator c = new NullSafeComparator(String.CASE_INSENSITIVE_ORDER);
 			return c.compare(e1.getLabel(), e2.getLabel());
 		}

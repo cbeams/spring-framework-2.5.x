@@ -15,13 +15,13 @@
  */
 package org.springframework.binding.format;
 
-import org.springframework.util.enums.support.ShortEnum;
+import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 
 /**
  * Format styles.
  * @author Keith Donald
  */
-public class Style extends ShortEnum {
+public class Style extends ShortCodedLabeledEnum {
 	public static final Style FULL = new Style(0, "Short");
 
 	public static final Style LONG = new Style(1, "Long");

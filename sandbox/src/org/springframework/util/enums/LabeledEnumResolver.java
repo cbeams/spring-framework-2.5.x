@@ -20,16 +20,16 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Interface for looking up <code>CodedEnum</code> instances. If you require
+ * Interface for looking up <code>LabeledEnum</code> instances. If you require
  * localized enumerations, use the Locale parameter to specify the locale to
  * use.
  * @author Keith Donald
  */
-public interface EnumResolver {
+public interface LabeledEnumResolver {
 
 	/**
 	 * Returns a set of enumerations of a particular type. Each element in the
-	 * list should be an instance of CodedEnum.
+	 * list should be an instance of LabeledEnum.
 	 * @param type the enum type
 	 * @param locale the locale
 	 * @return A list of localized enumeration instances for the provided type.
@@ -39,7 +39,7 @@ public interface EnumResolver {
 	/**
 	 * Returns a map of enumerations of a particular type. Each element in the
 	 * map should be a key->value pair, where the key is the enum code, and the
-	 * value is the <code>CodedEnum</code> instance.
+	 * value is the <code>LabeledEnum</code> instance.
 	 * @param type the enum type
 	 * @param locale the locale
 	 * @return A map of localized enumeration instances.
@@ -47,11 +47,11 @@ public interface EnumResolver {
 	public Map getEnumsAsMap(String type, Locale locale);
 
 	/**
-	 * Resolves a single <code>CodedEnum</code> by its identifying code.
+	 * Resolves a single <code>LabeledEnum</code> by its identifying code.
 	 * @param type the enum type
 	 * @param code the enum code
 	 * @param locale the locale
 	 * @return The enum, or <code>null</code> if not found.
 	 */
-	public Enum getEnum(String type, Comparable code, Locale locale);
+	public LabeledEnum getEnum(String type, Comparable code, Locale locale);
 }

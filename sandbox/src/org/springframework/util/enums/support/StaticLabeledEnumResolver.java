@@ -24,24 +24,22 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.Closure;
 import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.Block;
-import org.springframework.util.enums.Enum;
+import org.springframework.util.enums.LabeledEnum;
 
 /**
  * Resolves statically (in Java code) defined enumerations.
  * @author Keith Donald
  */
-public class StaticEnumResolver extends AbstractEnumResolver {
+public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 
-	private static final StaticEnumResolver INSTANCE = new StaticEnumResolver();
+	private static final StaticLabeledEnumResolver INSTANCE = new StaticLabeledEnumResolver();
 
-	public static StaticEnumResolver instance() {
+	public static StaticLabeledEnumResolver instance() {
 		return INSTANCE;
 	}
 
@@ -50,7 +48,7 @@ public class StaticEnumResolver extends AbstractEnumResolver {
 		try {
 			new CodedEnumFieldValueGenerator(ClassUtils.forName(type)).run(new Block() {
 				protected void handle(Object value) {
-					Enum e = (Enum) value;
+					LabeledEnum e = (LabeledEnum)value;
 					enums.put(e.getCode(), e);
 				}
 			});
@@ -69,7 +67,7 @@ public class StaticEnumResolver extends AbstractEnumResolver {
 	 * <p>
 	 * Iterates over the static fields of the class and adds all instances of
 	 * <code>CodedEnum</code> to the list resolvable by this resolver.
-	 *
+	 * 
 	 * @param clazz The enum class.
 	 */
 	public void registerStaticEnums(final Class clazz) {
@@ -78,7 +76,7 @@ public class StaticEnumResolver extends AbstractEnumResolver {
 		}
 		new CodedEnumFieldValueGenerator(clazz).run(new Block() {
 			protected void handle(Object value) {
-				add((Enum) value);
+				add((LabeledEnum)value);
 			}
 		});
 	}
@@ -106,7 +104,7 @@ public class StaticEnumResolver extends AbstractEnumResolver {
 					if (clazz.isAssignableFrom(field.getType())) {
 						try {
 							Object value = field.get(null);
-							Assert.isTrue(Enum.class.isInstance(value),
+							Assert.isTrue(LabeledEnum.class.isInstance(value),
 									"Field value must be a CodedEnum instance.");
 							fieldValueCallback.call(value);
 						}
@@ -119,11 +117,11 @@ public class StaticEnumResolver extends AbstractEnumResolver {
 		}
 	}
 
-	public Enum getEnum(Class type, Comparable code) {
+	public LabeledEnum getEnum(Class type, Comparable code) {
 		return getEnum(type.getName(), code, null);
 	}
 
-	public Enum getRequiredEnum(Class type, Comparable code) throws ObjectRetrievalFailureException {
+	public LabeledEnum getRequiredEnum(Class type, Comparable code) {
 		return getRequiredEnum(type.getName(), code, null);
 	}
 

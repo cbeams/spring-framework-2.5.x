@@ -19,26 +19,25 @@ package org.springframework.util.enums.support;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of CodedEnum which uses a letter as the code type.
- * </p>
+ * Implementation of LabeledEnum which uses a letter as the code type.
  * <p>
  * Should almsot always be subclassed, but for some simple situations it may be
  * used directly. Note that you will not be able to use unique type based
  * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.
  * @author Keith Donald
  */
-public class LetterEnum extends AbstractEnum {
+public class LetterCodedLabeledEnum extends AbstractLabeledEnum {
 	private Character code;
 
-	protected LetterEnum() {
+	protected LetterCodedLabeledEnum() {
 		super();
 	}
 
-	protected LetterEnum(char code) {
+	protected LetterCodedLabeledEnum(char code) {
 		this(code, null);
 	}
 
-	protected LetterEnum(char code, String label) {
+	protected LetterCodedLabeledEnum(char code, String label) {
 		super(label);
 		Assert.isTrue(Character.isLetter(code), "The code " + code + " is invalid; it must be a letter.");
 	}

@@ -19,20 +19,20 @@ import java.io.Serializable;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
-import org.springframework.util.enums.Enum;
+import org.springframework.util.enums.LabeledEnum;
 
 /**
  * Abstract base superclass for CodedEnum implementations.
  * @author Keith Donald
  */
-public abstract class AbstractEnum implements Enum, MessageSourceResolvable, Comparable, Serializable {
+public abstract class AbstractLabeledEnum implements LabeledEnum, MessageSourceResolvable, Serializable {
 
 	private String label;
 
-	protected AbstractEnum() {
+	protected AbstractLabeledEnum() {
 	}
 
-	protected AbstractEnum(String label) {
+	protected AbstractLabeledEnum(String label) {
 		setLabel(label);
 	}
 
@@ -42,24 +42,28 @@ public abstract class AbstractEnum implements Enum, MessageSourceResolvable, Com
 		this.label = label;
 	}
 
-	public String getKey() {
-		return getType() + "." + getCode();
-	}
-
 	public String getLabel() {
 		return label;
 	}
 
+	public String getType() {
+		return getClass().getName();
+	}
+
+	public String getKey() {
+		return getType() + "." + getCode();
+	}
+
 	public boolean equals(Object o) {
-		if (!(o instanceof AbstractEnum)) {
+		if (!(o instanceof AbstractLabeledEnum)) {
 			return false;
 		}
-		AbstractEnum e = (AbstractEnum)o;
+		AbstractLabeledEnum e = (AbstractLabeledEnum)o;
 		return this.getCode().equals(e.getCode()) && this.getType().equals(e.getType());
 	}
 
 	public int compareTo(Object o) {
-		AbstractEnum e = (AbstractEnum)o;
+		AbstractLabeledEnum e = (AbstractLabeledEnum)o;
 		Assert.isTrue(getType().equals(e.getType()), "You may only compare enumerations of the same type.");
 		return getCode().compareTo(e.getCode());
 	}
@@ -81,10 +85,6 @@ public abstract class AbstractEnum implements Enum, MessageSourceResolvable, Com
 		return null;
 	}
 
-	public String getType() {
-		return getClass().getName();
-	}
-
 	public String getDefaultMessage() {
 		if (label != null) {
 			return getLabel();
@@ -94,8 +94,8 @@ public abstract class AbstractEnum implements Enum, MessageSourceResolvable, Com
 		}
 	}
 
-	protected StaticEnumResolver getStaticEnumResolver() {
-		return StaticEnumResolver.instance();
+	protected StaticLabeledEnumResolver getStaticEnumResolver() {
+		return StaticLabeledEnumResolver.instance();
 	}
 
 	public String toString() {

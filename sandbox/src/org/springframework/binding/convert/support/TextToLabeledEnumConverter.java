@@ -18,20 +18,20 @@ package org.springframework.binding.convert.support;
 import java.util.Locale;
 
 import org.springframework.util.StringUtils;
-import org.springframework.util.enums.Enum;
-import org.springframework.util.enums.EnumResolver;
-import org.springframework.util.enums.support.StaticEnumResolver;
+import org.springframework.util.enums.LabeledEnum;
+import org.springframework.util.enums.LabeledEnumResolver;
+import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
 /**
  * Converts textual representations of <coded>CodedEnum</code> instances to a
  * specific instance of <code>CodedEnum</code>
  * @author Keith Donal
  */
-public class TextToEnumConverter extends AbstractConverter {
+public class TextToLabeledEnumConverter extends AbstractConverter {
 
-	private EnumResolver enumResolver = StaticEnumResolver.instance();
+	private LabeledEnumResolver enumResolver = StaticLabeledEnumResolver.instance();
 
-	public void setEnumResolver(EnumResolver enumResolver) {
+	public void setEnumResolver(LabeledEnumResolver enumResolver) {
 		this.enumResolver = enumResolver;
 	}
 
@@ -40,7 +40,7 @@ public class TextToEnumConverter extends AbstractConverter {
 	}
 
 	public Class[] getTargetClasses() {
-		return new Class[] { Enum.class };
+		return new Class[] { LabeledEnum.class };
 	}
 
 	protected Locale getLocale() {

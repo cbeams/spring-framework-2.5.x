@@ -29,30 +29,30 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.enums.Enum;
-import org.springframework.util.enums.EnumResolver;
-import org.springframework.util.enums.support.LetterEnum;
-import org.springframework.util.enums.support.ShortEnum;
-import org.springframework.util.enums.support.StaticEnumResolver;
+import org.springframework.util.enums.LabeledEnum;
+import org.springframework.util.enums.LabeledEnumResolver;
+import org.springframework.util.enums.support.LetterCodedLabeledEnum;
+import org.springframework.util.enums.support.ShortCodedLabeledEnum;
+import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
 /**
  * A Hibernate user type for <code>CodedEnum</code> instances.
  * @author Keith Donald
  */
-public abstract class AbstractEnumUserType implements UserType, Serializable {
+public abstract class AbstractLabeledEnumUserType implements UserType, Serializable {
 
 	private transient final Log logger = LogFactory.getLog(getClass());
 
-	private transient EnumResolver enumResolver = StaticEnumResolver.instance();
+	private transient LabeledEnumResolver enumResolver = StaticLabeledEnumResolver.instance();
 
-	protected EnumResolver getEnumResolver() {
+	protected LabeledEnumResolver getEnumResolver() {
 		if (enumResolver == null) {
-			return StaticEnumResolver.instance();
+			return StaticLabeledEnumResolver.instance();
 		}
 		return enumResolver;
 	}
 
-	public void setEnumResolver(EnumResolver resolver) {
+	public void setEnumResolver(LabeledEnumResolver resolver) {
 		this.enumResolver = resolver;
 	}
 
@@ -69,10 +69,10 @@ public abstract class AbstractEnumUserType implements UserType, Serializable {
 	}
 
 	protected NullableType persistentType() {
-		if (ShortEnum.class.isAssignableFrom(returnedClass())) {
+		if (ShortCodedLabeledEnum.class.isAssignableFrom(returnedClass())) {
 			return Hibernate.SHORT;
 		}
-		else if (LetterEnum.class.isAssignableFrom(returnedClass())) {
+		else if (LetterCodedLabeledEnum.class.isAssignableFrom(returnedClass())) {
 			return Hibernate.CHARACTER;
 		}
 		else {
@@ -85,7 +85,7 @@ public abstract class AbstractEnumUserType implements UserType, Serializable {
 		if (code == null) {
 			return null;
 		}
-		Enum e = enumResolver.getEnum(enumType(), code, null);
+		LabeledEnum e = enumResolver.getEnum(enumType(), code, null);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolved enum '" + e + "' of type '" + enumType() + "' from persisted code " + code);
 		}
@@ -97,7 +97,7 @@ public abstract class AbstractEnumUserType implements UserType, Serializable {
 			throw new IllegalArgumentException("Received value is not a [" + returnedClass().getName() + "] but ["
 					+ value.getClass() + "]");
 		}
-		Enum codedEnum = (Enum)value;
+		LabeledEnum codedEnum = (LabeledEnum)value;
 		Comparable code = null;
 		if (codedEnum != null) {
 			code = codedEnum.getCode();

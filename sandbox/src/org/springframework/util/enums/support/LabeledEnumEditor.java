@@ -21,19 +21,19 @@ import java.util.Locale;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.util.enums.Enum;
-import org.springframework.util.enums.EnumResolver;
+import org.springframework.util.enums.LabeledEnum;
+import org.springframework.util.enums.LabeledEnumResolver;
 
 /**
  * Property Editor converts the string form of a CodedEnum into a CodedEnum
  * instance using a CodedEnumResolver.
  * @author Keith Donald
  */
-public class EnumEditor extends PropertyEditorSupport {
+public class LabeledEnumEditor extends PropertyEditorSupport {
 
 	private Locale locale = Locale.getDefault();
 
-	private EnumResolver enumResolver = StaticEnumResolver.instance();
+	private LabeledEnumResolver enumResolver = StaticLabeledEnumResolver.instance();
 
 	private boolean allowsEmpty = true;
 
@@ -41,19 +41,19 @@ public class EnumEditor extends PropertyEditorSupport {
 
 	private PropertyEditor codeConverter;
 
-	public EnumEditor() {
+	public LabeledEnumEditor() {
 	}
 
-	public EnumEditor(Class type) {
+	public LabeledEnumEditor(Class type) {
 		setEnumClass(type);
 	}
 
-	public EnumEditor(Class type, EnumResolver enumResolver) {
+	public LabeledEnumEditor(Class type, LabeledEnumResolver enumResolver) {
 		setEnumClass(type);
 		setEnumResolver(enumResolver);
 	}
 
-	public EnumEditor(Class type, EnumResolver enumResolver, PropertyEditor codeConverter) {
+	public LabeledEnumEditor(Class type, LabeledEnumResolver enumResolver, PropertyEditor codeConverter) {
 		setEnumClass(type);
 		setEnumResolver(enumResolver);
 		setCodeConverter(codeConverter);
@@ -68,7 +68,7 @@ public class EnumEditor extends PropertyEditorSupport {
 	 * 
 	 * @param resolver the coded enum resolver
 	 */
-	public void setEnumResolver(EnumResolver resolver) {
+	public void setEnumResolver(LabeledEnumResolver resolver) {
 		Assert.notNull(resolver, "The enum resolver is required");
 		this.enumResolver = resolver;
 	}
@@ -112,13 +112,13 @@ public class EnumEditor extends PropertyEditorSupport {
 		}
 		else {
 			type = this.enumClass.getName();
-			if (ShortEnum.class.isAssignableFrom(this.enumClass)) {
+			if (ShortCodedLabeledEnum.class.isAssignableFrom(this.enumClass)) {
 				code = doShortConversion(encodedCode);
 			}
-			else if (LetterEnum.class.isAssignableFrom(this.enumClass)) {
+			else if (LetterCodedLabeledEnum.class.isAssignableFrom(this.enumClass)) {
 				code = doLetterConversion(encodedCode);
 			}
-			else if (StringEnum.class.isAssignableFrom(this.enumClass)) {
+			else if (StringCodedLabeledEnum.class.isAssignableFrom(this.enumClass)) {
 				code = encodedCode;
 			}
 			else {
@@ -131,7 +131,7 @@ public class EnumEditor extends PropertyEditorSupport {
 				}
 			}
 		}
-		Enum ce = this.enumResolver.getEnum(type, code, getLocale());
+		LabeledEnum ce = this.enumResolver.getEnum(type, code, getLocale());
 		if (!allowsEmpty) {
 			Assert.notNull(ce, "The encoded code '" + encodedCode + "' did not map to a valid enum instance for type "
 					+ type);
@@ -186,7 +186,7 @@ public class EnumEditor extends PropertyEditorSupport {
 	}
 
 	public String getAsText() {
-		Enum e = (Enum)getValue();
+		LabeledEnum e = (LabeledEnum)getValue();
 		return (e != null ? e.getLabel() : "");
 	}
 
