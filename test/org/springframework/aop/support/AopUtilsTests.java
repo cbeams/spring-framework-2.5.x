@@ -23,6 +23,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -37,7 +38,7 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
- * @version $Id: AopUtilsTests.java,v 1.4 2004-07-26 14:26:33 johnsonr Exp $
+ * @version $Id: AopUtilsTests.java,v 1.5 2004-07-28 17:00:36 johnsonr Exp $
  */
 public class AopUtilsTests extends TestCase {
 
@@ -145,6 +146,29 @@ public class AopUtilsTests extends TestCase {
 		assertSame(Pointcuts.SETTERS, SerializationTestUtils.serializeAndDeserialize(Pointcuts.SETTERS));
 		assertSame(Pointcuts.GETTERS, SerializationTestUtils.serializeAndDeserialize(Pointcuts.GETTERS));
 		assertSame(ExposeInvocationInterceptor.INSTANCE, SerializationTestUtils.serializeAndDeserialize(ExposeInvocationInterceptor.INSTANCE));
+	}
+	
+
+	public void testDynamicSuperclasses() {
+		DynamicMethodMatcherPointcut mmpc = new DynamicMethodMatcherPointcut() {
+			public boolean matches(Method m, Class targetClass, Object[] args) {
+				throw new UnsupportedOperationException();
+			}
+		};
+		assertSame(mmpc, mmpc.getMethodMatcher());
+		assertSame(ClassFilter.TRUE, mmpc.getClassFilter());
+		
+		DynamicMethodMatcherPointcutAdvisor a = new DynamicMethodMatcherPointcutAdvisor() {
+			public boolean matches(Method m, Class targetClass, Object[] args) {
+				throw new UnsupportedOperationException();
+			}
+		};
+		Advice advice = new NopInterceptor();
+		a.setAdvice(advice);
+		assertSame(a, a.getMethodMatcher());
+		assertSame(ClassFilter.TRUE, a.getClassFilter());
+		assertSame(a, a.getPointcut());
+		assertSame(advice, a.getAdvice());
 	}
 
 }
