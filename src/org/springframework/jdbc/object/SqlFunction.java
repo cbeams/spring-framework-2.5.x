@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.object;
 
@@ -56,46 +56,13 @@ public class SqlFunction extends MappingSqlQuery {
 
 	/**
 	 * Constructor to allow use as a JavaBean.
-	 * A DataSource, SQL and any parameters must be supplied
-	 * before invoking the compile() method and using this object.
+	 * A DataSource, SQL and any parameters must be supplied before
+	 * invoking the <code>compile</code> method and using this object.
+	 * @see #setDataSource
+	 * @see #setSql
+	 * @see #compile
 	 */
 	public SqlFunction() {
-	}
-
-	/**
-	 * Create a new SQLFunction object with SQL and parameters.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
-	 * @param types SQL types of the parameters, as defined
-	 * in the java.sql.Types class
-	 */
-	public SqlFunction(DataSource ds, String sql, int[] types) {
-		setDataSource(ds);
-		setSql(sql);
-		setTypes(types);
-		this.retType = Types.INTEGER;
-		setRowsExpected(1);
-	}
-
-	/**
-	 * Create a new SQLFunction object with SQL, parameters and a
-	 * return type
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
-	 * @param types SQL types of the parameters, as defined
-	 * in the java.sql.Types class
-	 * @param retType SQL type of the return value, as defined
-	 * in the java.sql.Types class
-	 * @exception InvalidDataAccessApiUsageException is thrown if the return
-	 * type is not numeric or char
-	 */
-	public SqlFunction(DataSource ds, String sql, int[] types, int retType)
-	    throws InvalidDataAccessApiUsageException {
-		setDataSource(ds);
-		setSql(sql);
-		setTypes(types);
-		this.retType = JdbcUtils.translateType(retType);
-		setRowsExpected(1);
 	}
 
 	/**
@@ -112,16 +79,55 @@ public class SqlFunction extends MappingSqlQuery {
 	}
 
 	/**
-	 * Create a new SQLFunction object with SQL and return type, but without parameters.
-	 * Must add parameters or settle with none.
+	 * Create a new SQLFunction object with SQL and parameters.
+	 * @param ds DataSource to obtain connections from
+	 * @param sql SQL to execute
+	 * @param types SQL types of the parameters, as defined
+	 * in the <code>java.sql.Types</code> class
+	 * @see java.sql.Types
+	 */
+	public SqlFunction(DataSource ds, String sql, int[] types) {
+		setDataSource(ds);
+		setSql(sql);
+		setTypes(types);
+		this.retType = Types.INTEGER;
+		setRowsExpected(1);
+	}
+
+	/**
+	 * Create a new SQLFunction object with SQL and return type, but without
+	 * parameters. Must add parameters or settle with none.
 	 * @param ds DataSource to obtain connections from
 	 * @param sql SQL to execute
 	 * @param retType SQL type of the return value, as defined
-	 * in the java.sql.Types class
+	 * in the <code>java.sql.Types</code> class
+	 * @see java.sql.Types
 	 */
 	public SqlFunction(DataSource ds, String sql, int retType) {
 		setDataSource(ds);
 		setSql(sql);
+		this.retType = JdbcUtils.translateType(retType);
+		setRowsExpected(1);
+	}
+
+	/**
+	 * Create a new SQLFunction object with SQL, parameters and a
+	 * return type
+	 * @param ds DataSource to obtain connections from
+	 * @param sql SQL to execute
+	 * @param types SQL types of the parameters, as defined
+	 * in the java.sql.Types class
+	 * @param retType SQL type of the return value, as defined
+	 * in the <code>java.sql.Types</code> class
+	 * @exception InvalidDataAccessApiUsageException is thrown if the return
+	 * type is not numeric or char
+	 * @see java.sql.Types
+	 */
+	public SqlFunction(DataSource ds, String sql, int[] types, int retType)
+	    throws InvalidDataAccessApiUsageException {
+		setDataSource(ds);
+		setSql(sql);
+		setTypes(types);
 		this.retType = JdbcUtils.translateType(retType);
 		setRowsExpected(1);
 	}
@@ -133,7 +139,8 @@ public class SqlFunction extends MappingSqlQuery {
 	 */
 	protected Object mapRow(ResultSet rs, int rowNum) throws SQLException, InvalidDataAccessApiUsageException {
 		if (rowNum != 0) {
-			throw new InvalidDataAccessApiUsageException("SQL function '" + getSql() + "' can't return more than one row");
+			throw new InvalidDataAccessApiUsageException(
+					"SQL function [" + getSql() + "] can't return more than one row");
 		}
 		Object obj = null;
 		switch (this.retType) {
@@ -143,11 +150,11 @@ public class SqlFunction extends MappingSqlQuery {
 			case Types.NUMERIC:
 				obj = new Double(rs.getDouble(1));
 				break;
-			case Types.VARCHAR:
-				obj = new String(rs.getString(1));
-				break;
 			case Types.BIGINT:
 				obj = new Long(rs.getLong(1));
+				break;
+			case Types.VARCHAR:
+				obj = rs.getString(1);
 				break;
 			default:
 				obj = rs.getObject(1);
