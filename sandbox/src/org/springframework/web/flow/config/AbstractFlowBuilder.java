@@ -46,10 +46,6 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		this.flowExecutionListeners.addAll(Arrays.asList(listeners));
 	}
 
-	public Flow getResult() {
-		return flow;
-	}
-
 	public final void init() {
 		this.flow = createFlow();
 	}
@@ -70,6 +66,14 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		}
 	}
 
+	public Flow getResult() {
+		return getFlow();
+	}
+
+	protected Flow getFlow() {
+		return flow;
+	}
+	
 	protected void addSubFlowState(String id, String subFlowId, Transition[] transitions) {
 		addSubFlowState(id, spawnFlow(subFlowId), transitions);
 	}
