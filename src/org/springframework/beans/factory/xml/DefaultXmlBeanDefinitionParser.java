@@ -251,7 +251,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 
 			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
-			if (DEFAULT_VALUE.equals(lazyInit)) {
+			if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
+				// just apply default to singletons, as lazy-init has no meaning for prototypes
 				lazyInit = this.defaultLazyInit;
 			}
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
@@ -260,7 +261,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		catch (ClassNotFoundException ex) {
 			throw new FatalBeanException("Error creating bean with name '" + beanName + "'; " +
-					"classname was '" + className + "'", ex);
+					"class name was [" + className + "]", ex);
 		}
 	}
 

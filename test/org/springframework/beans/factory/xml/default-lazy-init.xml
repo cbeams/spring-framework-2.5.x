@@ -15,4 +15,6 @@
 		destroy-method="customDestroy"
 	/>
 
+	<bean id="prototype" class="org.springframework.beans.TestBean" singleton="false"/>
+
 </beans>
