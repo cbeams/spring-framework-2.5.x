@@ -427,17 +427,17 @@ public class DispatcherServletTestSuite extends TestCase {
 
 		try {
 			RequestContextUtils.getWebApplicationContext(request);
-			fail("Should have thrown ServletException");
+			fail("Should have thrown IllegalStateException");
 		}
-		catch (ServletException ex) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 
 		try {
 			RequestContextUtils.getWebApplicationContext(request, servletContext);
-			fail("Should have thrown ServletException");
+			fail("Should have thrown IllegalStateException");
 		}
-		catch (ServletException ex) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 
@@ -445,8 +445,8 @@ public class DispatcherServletTestSuite extends TestCase {
 		try {
 			RequestContextUtils.getWebApplicationContext(request, servletContext);
 		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
+		catch (IllegalStateException ex) {
+			fail("Should not have thrown IllegalStateException: " + ex.getMessage());
 		}
 	}
 
