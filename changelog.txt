@@ -14,6 +14,8 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * ClassEditor trims class name strings and converts empty strings into null values
+* added "getBeanNamesForType" method to ListableBeanFactory interface, also checking FactoryBeans and manual singletons
+* added "beanNamesForTypeIncludingAncestors" method to BeanFactoryUtils, corresponding to "getBeanNamesForType"
 * renamed FactoryBeanCircularReferenceException to FactoryBeanNotInitializedException, reflecting general causes
 
 Package org.springframework.context
@@ -28,6 +30,10 @@ Package org.springframework.jdbc
 * added C3P0NativeJdbcExtractor for C3P0 0.8.5 or later (for earlier C3P0 versions, use SimpleNativeJdbcExtractor)
 * added "maxRows" bean property to JdbcTemplate, allowing to specify the maximum number of rows to be fetched
 * added "fetchSize" and "maxRows" bean properties to RdbmsOperation, passing the values to the internal JdbcTemplate
+
+Package org.springframework.mail
+* introduced MailMessage interface as common interface for SimpleMailMessage and JavaMail MIME messages
+* added MimeMailMessage implementation of MailMessage interface, as adapter for a MimeMessageHelper or a MimeMessage
 
 Package org.springframework.mock
 * upgraded MockHttpServletRequest to Servlet API 2.4 (added getRemotePort, getLocalName, getLocalAddr, getLocalPort)
