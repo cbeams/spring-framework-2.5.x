@@ -48,8 +48,8 @@ import org.springframework.aop.support.AopUtils;
  * by a AdvisedSupport implementation. This class is internal to the Spring
  * framework and need not be used directly by client code.
  *
- * <p>Proxies created using this class are threadsafe if the underlying (target)
- * class is threadsafe.
+ * <p>Proxies created using this class are thread-safe if the underlying (target)
+ * class is thread-safe.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -135,11 +135,13 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		try {
 			Class rootClass = this.advised.getTargetSource().getTargetClass();
 
-            if(AopUtils.isCglibProxyClass(rootClass)) {
-                enhancer.setSuperclass(rootClass.getSuperclass());
-            } else {
-                enhancer.setSuperclass(rootClass);
-            }
+			if (AopUtils.isCglibProxyClass(rootClass)) {
+				enhancer.setSuperclass(rootClass.getSuperclass());
+			}
+			else {
+				enhancer.setSuperclass(rootClass);
+			}
+
 			enhancer.setCallbackFilter(new ProxyCallbackFilter(this.advised));
 			enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));

@@ -6,7 +6,7 @@
 
 	This defines a simple and consistent way of creating a namespace
 	of JavaBeans objects, configured by a Spring BeanFactory, read by
-	a DefaultXmlBeanDefinitionReader.
+	XmlBeanDefinitionReader (with DefaultXmlBeanDefinitionParser).
 
 	This document type is used by most Spring functionality, including
 	web application contexts, which are based on bean factories.
@@ -37,8 +37,6 @@
 
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
-
-	$Id: spring-beans.dtd,v 1.42 2004-10-19 16:42:01 jhoeller Exp $
 -->
 
 

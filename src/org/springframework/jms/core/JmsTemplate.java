@@ -41,7 +41,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Helper class that simplifies JMS access code. This class requires a
- * JMS 1.1 provider, because it builds on the new domain-independent API.
+ * JMS >= 1.1 provider, because it builds on the domain-independent API.
  * <b>Use the {@link JmsTemplate102 JmsTemplate102} subclass for
  * JMS 1.0.2 providers.</b>
  *
@@ -543,7 +543,8 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 				sessionToUse = session;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing callback on JMS session [" + sessionToUse + "] from connection [" + conToUse + "]");
+				logger.debug("Executing callback on JMS session [" + sessionToUse +
+						"] from connection [" + conToUse + "]");
 			}
 			return action.doInJms(sessionToUse);
 		}
@@ -629,7 +630,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	public void convertAndSend(Destination destination, final Object message) throws JmsException {
 		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No MessageConverter registered. Check configuration of JmsTemplate.");
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
 		}
 		send(destination, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
@@ -640,7 +641,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	public void convertAndSend(String destinationName, final Object message) throws JmsException {
 		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No MessageConverter registered. Check configuration of JmsTemplate.");
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
 		}
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
@@ -656,10 +657,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		convertAndSend(getDefaultDestination(), message, postProcessor);
 	}
 
-	public void convertAndSend(Destination destination, final Object message,
-	                           final MessagePostProcessor postProcessor) throws JmsException {
+	public void convertAndSend(
+			Destination destination, final Object message, final MessagePostProcessor postProcessor)
+			throws JmsException {
+
 		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No MessageConverter registered. Check configuration of JmsTemplate.");
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
 		}
 		send(destination, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
@@ -669,10 +672,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		});
 	}
 
-	public void convertAndSend(String destinationName, final Object message, final MessagePostProcessor postProcessor)
+	public void convertAndSend(
+			String destinationName, final Object message, final MessagePostProcessor postProcessor)
 	    throws JmsException {
+
 		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No MessageConverter registered. Check configuration of JmsTemplate.");
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
 		}
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
@@ -742,21 +747,21 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	public Object receiveAndConvert() throws JmsException {
 		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No MessageConverter registered. Check configuration of JmsTemplate.");
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
 		}
 		return doConvertFromMessage(receive());
 	}
 
 	public Object receiveAndConvert(Destination destination) throws JmsException {
 		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No MessageConverter registered. Check configuration of JmsTemplate.");
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
 		}
 		return doConvertFromMessage(receive(destination));
 	}
 
 	public Object receiveAndConvert(String destinationName) throws JmsException {
 		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No MessageConverter registered. Check configuration of JmsTemplate.");
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
 		}
 		return doConvertFromMessage(receive(destinationName));
 	}
