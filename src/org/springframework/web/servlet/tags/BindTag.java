@@ -21,7 +21,7 @@ import org.springframework.web.util.HtmlUtils;
  * use the exposed properties
  *
  * <p>Discussed in Chapter 12 of
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
+ * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson.
  *
  * @author Rod Johnson

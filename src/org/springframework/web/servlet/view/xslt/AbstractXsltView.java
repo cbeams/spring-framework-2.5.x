@@ -1,12 +1,6 @@
 /*
- * Generic framework code included with 
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). 
- * This code is free to use and modify. However, please
- * acknowledge the source and include the above URL in each
- * class using or derived from this code. 
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
  
 package org.springframework.web.servlet.view.xslt;
@@ -54,7 +48,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * affect performance in production and isn't threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: AbstractXsltView.java,v 1.2 2003-08-28 15:23:32 jhoeller Exp $
+ * @version $Id: AbstractXsltView.java,v 1.3 2003-11-02 13:07:02 johnsonr Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
