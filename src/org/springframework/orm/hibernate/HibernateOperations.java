@@ -15,7 +15,7 @@ import org.springframework.dao.DataAccessException;
  * to enhance testability, as it can easily be mocked or stubbed.
  *
  * <p>Provides HibernateTemplate's convenience methods that mirror
- * various Session methods. 
+ * various Session methods.
  *
  * @author Juergen Hoeller
  * @since 05.02.2004
@@ -77,18 +77,17 @@ public interface HibernateOperations {
 	 */
 	Object load(final Class entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException;
-	
+
 	/**
-	 * Return all persistent instances of the given entity class, as a List.<br/>
-	 * Implemented with a query as follows: <code>find("from " + entityClass.getName())
-	 * </code><br/>
-	 *
+	 * Return all persistent instances of the given entity class.
+	 * Note: Use queries or criteria for retrieving a specific subset. 
 	 * @param entityClass a persistent class
 	 * @return a List containing 0 or more persistent instances
 	 * @throws DataAccessException if there is a Hibernate error
+	 * @see net.sf.hibernate.Session#createCriteria
 	 */
 	public List loadAll(final Class entityClass) throws DataAccessException;
-	
+
 	/**
 	 * Remove the given object from the Session cache.
 	 * @param entity the persistent instance to lock
@@ -208,7 +207,7 @@ public interface HibernateOperations {
 	/**
 	 * Execute a query for persistent instances.
 	 * @param queryString a query expressed in Hibernate's query language
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -220,7 +219,7 @@ public interface HibernateOperations {
 	 * one value to a "?" parameter in the query string.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -233,7 +232,7 @@ public interface HibernateOperations {
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
 	 * @param type Hibernate type of the parameter
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -246,7 +245,7 @@ public interface HibernateOperations {
 	 * number of values to "?" parameters in the query string.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -259,7 +258,7 @@ public interface HibernateOperations {
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
 	 * @param types Hibernate types of the parameters
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -272,7 +271,7 @@ public interface HibernateOperations {
 	 * of the given bean to <i>named</i> parameters in the query string.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param valueBean the values of the parameters
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -285,7 +284,7 @@ public interface HibernateOperations {
 	 * Execute a named query for persistent instances.
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
@@ -297,7 +296,7 @@ public interface HibernateOperations {
 	 * one value to a "?" parameter in the query string.
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
@@ -311,7 +310,7 @@ public interface HibernateOperations {
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param type Hibernate type of the parameter
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
@@ -325,7 +324,7 @@ public interface HibernateOperations {
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param values the values of the parameters
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
@@ -340,7 +339,7 @@ public interface HibernateOperations {
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param values the values of the parameters
 	 * @param types Hibernate types of the parameters
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
@@ -354,7 +353,7 @@ public interface HibernateOperations {
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param valueBean the values of the parameters
-	 * @return the List of persistent instances
+	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
