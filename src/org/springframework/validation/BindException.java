@@ -204,8 +204,11 @@ public class BindException extends Exception implements Errors {
 	}
 
 	/**
-	 * Return a model Map for the contained state, exposing an Errors
-	 * instance as ERROR_KEY_PREFIX + object name, and the object itself.
+	 * Return a model Map for the ocntained state, exposing an Errors
+	 * instance as '{@link #ERROR_KEY_PREFIX ERROR_KEY_PREFIX} + objectname'
+	 * and the object itself.<br>
+	 * Note that the Map is constructed each time you're calling this method,
+	 * adding things to the map and then re-calling it will not do...
 	 * @see #ERROR_KEY_PREFIX
 	 */
 	public final Map getModel() {
