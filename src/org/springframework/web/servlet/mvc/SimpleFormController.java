@@ -47,11 +47,12 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>If errors occured, the controller will return the configured formView,
  *      showing the form again (possibly rendering according error messages).</li>
  *  <li>If no errors occurred, the controller will call
- *      {@link #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException) onSubmit()}
- *      using all parameters, which in case of the default implementation
- *      delegates to {@link #onSubmit(Object, BindException) onSubmit()}
- *      with just the command object. The default implementation of the latter
- *      method will return the configured successView.</li>
+ *      {@link #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException) onSubmit}
+ *      using all parameters, which in case of the default implementation delegates to
+ *      {@link #onSubmit(Object, BindException) onSubmit} with just the command object.
+ *      The default implementation of the latter method will return the configured
+ *      successView. Consider implementing {@link #doSubmitAction} doSubmitAction
+ *      for simply performing a submit action and rendering the success view.</li>
  *  </ol>
  * </p>
  *
@@ -206,6 +207,8 @@ public class SimpleFormController extends AbstractFormController {
 	 * Submit callback with all parameters. Called in case of submit without errors
 	 * reported by the registered validator respectively on every submit if no validator.
 	 * <p>Default implementation delegates to onSubmit(Object, BindException).
+	 * For simply performing a submit action and rendering the specified success view,
+	 * consider implementing doSubmitAction rather than an onSubmit version.
 	 * <p>Subclasses can override this to provide custom submission handling like storing
 	 * the object to the database. Implementations can also perform custom validation and
 	 * call showForm to return to the form. Do <i>not</i> implement multiple onSubmit
@@ -220,6 +223,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
 	 * @see #onSubmit(Object, BindException)
+	 * @see #doSubmitAction
 	 * @see #showForm
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
@@ -246,6 +250,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @throws Exception in case of errors
 	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
 	 * @see #onSubmit(Object)
+	 * @see #setSuccessView
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
@@ -267,17 +272,34 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * Simplest onSubmit version. Called by the default implementation of the onSubmit
 	 * version with command and BindException parameters.
-	 * <p>This implementation returns null, making the calling onSubmit method perform
-	 * its default rendering of the success view.
+	 * <p>This implementation calls doSubmitAction and returns null as ModelAndView, making
+	 * the calling onSubmit method perform its default rendering of the success view.
 	 * <p>Subclasses can override this to provide custom submission handling that
 	 * just needs the command object.
 	 * @param command form object with request parameters bound onto it
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
 	 * @see #onSubmit(Object, BindException)
+	 * @see #doSubmitAction
 	 */
 	protected ModelAndView onSubmit(Object command) throws Exception {
+		doSubmitAction(command);
 		return null;
+	}
+
+	/**
+	 * Template method for submit actions. Called by the default implementation
+	 * of the simplest onSubmit version.
+	 * <p><b>This is the preferred submit callback to implement if you want to
+	 * perform an action (like storing changes to the database) and then render
+	 * the success view with the command and Errors instance as model.</b>
+	 * You don't need to care about the success ModelAndView here.
+	 * @param command form object with request parameters bound onto it
+	 * @throws Exception in case of errors
+	 * @see #onSubmit(Object)
+	 * @see #setSuccessView
+	 */
+	protected void doSubmitAction(Object command) throws Exception {
 	}
 
 }
