@@ -253,7 +253,8 @@ public interface JdbcOperations {
 	 * sub-interface that provides a result List).
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
-	 * @param argTypes SQL types of the arguments (constants from java.sql.Types)
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
 	 * @param rse object that will extract results
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
@@ -316,7 +317,8 @@ public interface JdbcOperations {
 	 * sub-interface that provides a result List).
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
-	 * @param argTypes SQL types of the arguments (constants from java.sql.Types)
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
@@ -375,7 +377,8 @@ public interface JdbcOperations {
 	 * via a RowMapper.
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
-	 * @param argTypes SQL types of the arguments (constants from java.sql.Types)
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
 	 * @param rowMapper object that will map one object per row
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
@@ -407,11 +410,49 @@ public interface JdbcOperations {
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
+	 * @return an ArrayList that contains a HashMap per row
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForList(String)
+	 * @see java.sql.Types
+	 */
+	List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result list.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The results will be mapped to an ArrayList (one entry for each row) of
+	 * HashMaps (one entry for each column using the column name as the key).
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
 	 * @return an ArrayList that contains a HashMap per row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForList(String)
 	 */
 	List queryForList(String sql, Object[] args) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result object.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query; the returned
+	 * result will be directly mapped to the corresponding object type.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
+	 * @param requiredType the type that the result object is expected to match
+	 * @return the result object of the required type, or null in case of SQL NULL
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForObject(String, Class)
+	 * @see java.sql.Types
+	 */
+	Object queryForObject(String sql, Object[] args, int[] argTypes, Class requiredType)
+	    throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -439,11 +480,47 @@ public interface JdbcOperations {
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
+	 * @return the long value, or 0 in case of SQL NULL
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForLong(String)
+	 * @see java.sql.Types
+	 */
+	long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, resulting in a long value.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query that results
+	 * in a long value.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
 	 * @return the long value, or 0 in case of SQL NULL
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForLong(String)
 	 */
 	long queryForLong(String sql, Object[] args) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, resulting in an int value.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query that results
+	 * in an int value.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
+	 * @return the int value, or 0 in case of SQL NULL
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForInt(String)
+	 * @see java.sql.Types
+	 */
+	int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -496,9 +573,11 @@ public interface JdbcOperations {
 	 * Issue an update via a prepared statement, binding the given arguments.
 	 * @param sql SQL, containing bind parameters
 	 * @param args arguments to bind to the query
-	 * @param argTypes SQL types of the arguments (constants from java.sql.Types)
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
+	 * @see java.sql.Types
 	 */
 	int update(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 

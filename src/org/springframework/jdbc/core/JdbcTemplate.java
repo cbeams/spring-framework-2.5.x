@@ -487,10 +487,23 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return query(sql, args, new RowMapperResultReader(rowMapper));
 	}
 
+	public List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException {
+		return (List) query(sql,
+				new ArgTypePreparedStatementSetter(args, argTypes),
+				new ListResultSetExtractor());
+	}
+
 	public List queryForList(String sql, final Object[] args) throws DataAccessException {
 		return (List) query(sql,
 				new ArgPreparedStatementSetter(args),
 				new ListResultSetExtractor());
+	}
+
+	public Object queryForObject(String sql, Object[] args, int[] argTypes, Class requiredType)
+			throws DataAccessException {
+		return query(sql,
+				new ArgTypePreparedStatementSetter(args, argTypes),
+				new ObjectResultSetExtractor(requiredType));
 	}
 
 	public Object queryForObject(String sql, Object[] args, Class requiredType) throws DataAccessException {
@@ -499,9 +512,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				new ObjectResultSetExtractor(requiredType));
 	}
 
+	public long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException {
+		Number number = (Number) queryForObject(sql, args, argTypes, Number.class);
+		return (number != null ? number.longValue() : 0);
+	}
+
 	public long queryForLong(String sql, final Object[] args) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, args, Number.class);
 		return (number != null ? number.longValue() : 0);
+	}
+
+	public int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException {
+		Number number = (Number) queryForObject(sql, args, argTypes, Number.class);
+		return (number != null ? number.intValue() : 0);
 	}
 
 	public int queryForInt(String sql, final Object[] args) throws DataAccessException {
