@@ -10,16 +10,15 @@ import javax.naming.NamingException;
 import org.springframework.jndi.JndiTemplate;
 
 /**
- * Simple implementation of JndiTemplate interface that always
- * returns a given object. Very useful for testing.
- * Effectively a mock object.
+ * Simple implementation of JndiTemplate interface that always returns
+ * a given object. Very useful for testing. Effectively a mock object.
  * @author Rod Johnson
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
- * @version $Id: ExpectedLookupTemplate.java,v 1.2 2003-08-22 12:20:45 jhoeller Exp $
+ * @version $Id: ExpectedLookupTemplate.java,v 1.3 2004-02-09 10:46:58 jhoeller Exp $
  */
 public class ExpectedLookupTemplate extends JndiTemplate {
 
-	private final String jndiName;
+	private final String name;
 
 	private final Object object;
 
@@ -30,7 +29,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	 * @param object the object that will be returned
 	 */
 	public ExpectedLookupTemplate(String name, Object object) {
-		this.jndiName = name;
+		this.name = name;
 		this.object = object;
 	}
 
@@ -40,9 +39,10 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	 * unexpected, a respective NamingException gets thrown.
 	 */
 	public Object lookup(String name) throws NamingException {
-		if (!name.equals(jndiName))
-			throw new NamingException("unexpected JNDI name");
-		return object;
+		if (!name.equals(this.name)) {
+			throw new NamingException("Unexpected JNDI name '" + name + "' - expecting '" + this.name + "'");
+		}
+		return this.object;
 	}
 
 }
