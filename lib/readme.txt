@@ -74,8 +74,8 @@ distribution/website before using any of them in your own applications.
 - ibatis-sqlmap-2.jar is required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
-* itext/itext-1.02b.jar
-- iText PDF 1.02 (http://www.lowagie.com/itext)
+* itext/itext-1.1.4.jar
+- iText PDF 1.1.4 (http://www.lowagie.com/itext)
 - required for building the framework
 - required at runtime when using Spring's AbstractPdfView
 
@@ -198,8 +198,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-0.6.2.jar
-- JasperReports 0.6.2 (http://www.jasperreports.org)
+* jasperreports/jasperreports-0.6.3.jar
+- JasperReports 0.6.3 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
