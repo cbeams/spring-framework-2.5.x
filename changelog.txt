@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.173 2004-06-25 05:02:48 trisberg Exp $
+$Id: changelog.txt,v 1.174 2004-06-25 10:01:30 jhoeller Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -44,13 +44,13 @@ Package org.springframework.dao
 * fixed DataAccessUtils' "requiredUniqueResult" method, to correctly throw an IncorrectResultSizeDataAccessException
 
 Package org.springframework.jdbc
-* added a new SqlTypeValue abstract class with a callback method "setTypeValue" that will handle all database specific code
 * DataSourceUtils' "closeConnectionIfNecessary" logs error on SQLException rather than rethrowing an exception
 * removed CannotCloseJdbcConnectionException, as it is not used anymore
 * DataSourceTransactionManager closes JDBC Connection if "doBegin" fails
 * DataSourceTransactionManager manages nested transactions via JDBC 3.0 Savepoints
 * DataSourceTransactionObject implements SavepointManager to allow for savepoint management via TransactionStatus
 * refactored Prepared/CallableStatement.setXxx method invocations into JdbcUtils.setParameters utility method
+* added SqlTypeValue abstract class with callback method "setTypeValue" that will handle all database specific code
 * JdbcTemplate always passes SQL string to SQLExceptionTranslator, even for static queries and updates
 * added support for BLOB/CLOB parameters to SqlUpdate and StoredProcedure
 * added BatchSqlUpdate class to jdbc.object package, for convenient execution of batch updates
@@ -112,7 +112,7 @@ Package org.springframework.web
 * added "getContextLoader" accessor to ContextLoaderListener and ContextLoaderServlet
 * deprecated RequestHandledEvent's getURL/getTimeMillis/getIpAddress -> getRequestUrl/getProcessingTime/getClientAddress
 * added optional "sessionId" and "userName" fields to RequestHandledEvent, for easier session and user tracking
-* added "resetEmptyFields" flag to ServletRequestDataBinder, detecting "_FIELD" marker parameters without field values
+* added "fieldMarkerPrefix" support to ServletRequestDataBinder, for auto-resetting via "_FIELD" marker parameters
 * support multiple delimited URLs in ResourceServlet, including them one by one (and taking the latest file timestamp)
 * added FixedLocaleResolver implementation, returning a given "defaultLocale" for any request
 * removed unused (and misleading) "makeThemeNameAvailable" method from AbstractThemeResolver
