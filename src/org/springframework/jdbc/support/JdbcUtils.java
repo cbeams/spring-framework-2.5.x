@@ -42,7 +42,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.11 2004-06-10 17:17:05 trisberg Exp $
+ * @version $Id: JdbcUtils.java,v 1.12 2004-06-18 22:04:09 kdonald Exp $
  */
 public class JdbcUtils {
 
@@ -166,7 +166,11 @@ public class JdbcUtils {
 	 * @throws SQLException
 	 */
 	public static void setParameterValue(PreparedStatement ps, int sqlColIndx, SqlParameter declaredParameter, Object inValue) throws SQLException {
-		LobHandler lh;
+	    if (logger.isDebugEnabled()) {
+	        logger.debug("Setting SQL statement parameter value; columnIndex=" + sqlColIndx +
+	                ", parameter value='" + inValue + "', valueClass=" + (inValue != null ? inValue.getClass().getName() : "null") + ", sqlType=" + declaredParameter.getSqlType());
+	    }
+	    LobHandler lh;
 		// input parameters must be supplied
 		if (inValue == null && declaredParameter.getTypeName() != null) {
 			ps.setNull(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getTypeName());
