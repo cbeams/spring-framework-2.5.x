@@ -23,14 +23,15 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.Assert;
 
 /**
  * @author Keith Donald
  */
 public class ActionState extends TransitionableState {
-    
-    public static final String STATE_ID_ATTRIBUTE = "_stateId";
+
+	public static final String STATE_ID_ATTRIBUTE = "_stateId";
 
 	private Set actionBeanNames;
 
@@ -72,7 +73,7 @@ public class ActionState extends TransitionableState {
 		// do nothing, subclasses may override
 		return stateId;
 	}
-	
+
 	protected Set getActionBeanNames() {
 		return actionBeanNames;
 	}
@@ -87,13 +88,20 @@ public class ActionState extends TransitionableState {
 		Iterator it = this.actionBeanNames.iterator();
 		while (it.hasNext()) {
 			String actionBeanName = (String)it.next();
-			ActionBean actionBean = (ActionBean)flow.getFlowDao().getActionBean(actionBeanName);
+			ActionBean actionBean = null;
+			try {
+				actionBean = (ActionBean)flow.getFlowDao().getActionBean(actionBeanName);
+				Assert.notNull(actionBean, "The action bean retrieved cannot be null");
+			}
+			catch (NoSuchBeanDefinitionException e) {
+				throw new NoSuchActionBeanException(flow, this, e);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing action bean with name '" + actionBeanName + "'");
 			}
 			sessionExecutionStack.setAttribute(STATE_ID_ATTRIBUTE, getId());
-            ActionBeanEvent event = actionBean.execute(request, response, sessionExecutionStack);
-            sessionExecutionStack.removeAttribute(STATE_ID_ATTRIBUTE);
+			ActionBeanEvent event = actionBean.execute(request, response, sessionExecutionStack);
+			sessionExecutionStack.removeAttribute(STATE_ID_ATTRIBUTE);
 			if (triggersTransition(event, flow)) {
 				return getTransition(event, flow).execute(flow, sessionExecutionStack, request, response);
 			}

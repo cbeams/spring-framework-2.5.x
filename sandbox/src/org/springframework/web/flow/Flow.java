@@ -68,7 +68,7 @@ import org.springframework.util.closure.support.AbstractConstraint;
  *   protected void init() {
  *      add(createGetState(PERSON_DETAILS));
  *      add(createViewState(PERSON_DETAILS));
- *      add(createSubmitState(PERSON_DETAILS, getDefaultSubmitActionBeanName()));
+ *      add(createSubmitState(PERSON_DETAILS));
  *      add(createDefaultEndState());
  *   }
  * </pre>
@@ -77,40 +77,40 @@ import org.springframework.util.closure.support.AbstractConstraint;
  * state (the start state), a "view" state, a "submit action" state, and a end
  * marker state.
  * 
- * The first state, an action state, will be indentified as 'getPersonDetails'.
+ * The first state, an action state, will be indentified as 'personDetails.get'.
  * This action state will automatically be configured with the following
  * defaults:
  * <ol>
- * <li>A action bean named 'getPersonDetailsAction' - this is the name of the
+ * <li>A action bean named 'personDetails.get' - this is the name of the
  * <code>ActionBean</code> instance that will execute when this state is
  * entered. In this example, the <code>ActionBean</code> will go out to the DB ,
  * load the Person, and put it in the Flow's data model.
  * <li>An "success" transition to a default view state, called
- * 'viewPersonDetails'. This means if the <code>ActionBean</code> returns a
+ * 'personDetails.view'. This means if the <code>ActionBean</code> returns a
  * "success" event, the 'viewPersonDetails' state will be transitioned to.
  * <li>It will act as the start state for this flow.
  * </ol>
  * 
- * The second state, a view state, will be identified as 'viewPersonDetails'.
+ * The second state, a view state, will be identified as 'personDetails.view'.
  * This view state will automatically be configured with the following defaults:
  * <ol>
  * <li>A view name called 'viewPersonDetails' - this is the logical name of a
  * view resource. This logical view name gets mapped to a physical view resource
  * (jsp, etc.) by the calling front controller.
  * <li>A "submit" transition to a submit action state, indentified by the
- * default ID 'submitAction'. This means when a 'submit' event is signaled by
+ * default ID 'personDetails.submit'. This means when a 'submit' event is signaled by
  * the view (for example, on a submit button click), the submit action state
- * will be entered and the <code>submitAction</code> <code>ActionBean</code>
- * will be executed. This example assumes 'submitAction' is a generic
+ * will be entered and the <code>personDetails.submit</code> <code>ActionBean</code>
+ * will be executed. This example assumes personDetails.submit is an 
  * <code>ActionBean</code> that does data binding, validation, and save/update
  * DAO invocation.
  * </ol>
  * 
  * The third state, an action state, will be indentified as
- * 'submitPersonDetails'. This action state will automatically be configured
+ * 'personDetails.submit'. This action state will automatically be configured
  * with the following defaults:
  * <ol>
- * <li>A action bean named 'submitAction' - this is the name of the
+ * <li>A action bean named 'personDetails.submit' - this is the name of the
  * <code>ActionBean</code> instance that will execute when this state is
  * entered. In this example, the <code>ActionBean</code> will bind form input
  * to a backing Person form object, validate it, and update the DB.
@@ -176,6 +176,11 @@ public class Flow implements FlowEventProcessor, Serializable {
      * The <code>GET</code> action state/event identifier.
      */
     public static final String GET = "get";
+    /**
+     * The <code>FIND</code> action state/event identifier.
+     */
+    public static final String FIND = "find";
+
     /**
      * The <code>LINK</code> action state/event identifier.
      */
