@@ -45,7 +45,7 @@ import org.springframework.orm.ojb.PersistenceBrokerTemplate;
  * used through overriding <code>createHibernateTemplate</code>.
  *
  * @author Juergen Hoeller
- * @since 02.07.2004
+ * @since 1.1
  * @see #setJcdAlias
  * @see #setPersistenceBrokerTemplate
  * @see #createPersistenceBrokerTemplate
