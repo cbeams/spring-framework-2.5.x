@@ -274,6 +274,11 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	protected void tearDown() {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+	}
+
 
 	private static class TestInvocation implements MethodInvocation {
 
@@ -289,7 +294,6 @@ public class HibernateInterceptorTests extends TestCase {
 			}
 			return null;
 		}
-
 
 		public int getCurrentInterceptorIndex() {
 			return 0;

@@ -2144,6 +2144,8 @@ public class HibernateTemplateTests extends TestCase {
 		catch (IllegalStateException ex) {
 			// ignore: test method didn't call replay
 		}
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }
