@@ -48,7 +48,7 @@ import org.springframework.web.servlet.view.AbstractView;
 public abstract class AbstractPdfView extends AbstractView {
 	
 	/**
-	 * Sets the appropriate content type.
+	 * This constructor sets the appropriate content type "application/pdf".
 	 * Note that IE won't take much notice of this, but there's not a lot we
 	 * can do about this. Generated documents should have a ".pdf" extension.
 	 */
@@ -58,8 +58,6 @@ public abstract class AbstractPdfView extends AbstractView {
 	
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-		Document document = getDocument();
 
 		// The following simple method doesn't work in IE, which
 		// needs to know the content length.
@@ -72,39 +70,54 @@ public abstract class AbstractPdfView extends AbstractView {
 		// See http://www.lowagie.com/iText/faq.html#msie
 		// for an explanation of why we can't use the obvious form above.
 
-		// IE workaround
+		// IE workaround: write into byte array first.
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		Document document = getDocument();
 		PdfWriter writer = PdfWriter.getInstance(document, baos);
 
+		// apply preferences and build metadata
 		writer.setViewerPreferences(getViewerPreferences());
 		buildPdfMetadata(model, document, request);
 
+		// build document
 		document.open();
 		buildPdfDocument(model, document, writer, request, response);
 		document.close();
 
-		response.setContentLength(baos.size());
+		// write content type and also length (determined via byte array)
 		response.setContentType(getContentType());
+		response.setContentLength(baos.size());
+
+		// flush byte array to servlet output stream
 		ServletOutputStream out = response.getOutputStream();
 		baos.writeTo(out);
 		out.flush();
 	}
 
 	/**
-	 * Return a new document.
-	 * <p>By default returns an A4 document, but the subclass can specify any
-	 * Document, possibly parameterized via bean properties defined on the View.
-	 * @return the new created Document
-	 * @see com.lowagie.text.Document
+	 * @deprecated in favor of newDocument
+	 * @see #newDocument
 	 */
 	protected Document getDocument() {
+		return newDocument();
+	}
+
+	/**
+	 * Create a new document to hold the PDF contents.
+	 * <p>By default returns an A4 document, but the subclass can specify any
+	 * Document, possibly parameterized via bean properties defined on the View.
+	 * @return the newly created iText Document
+	 * @see com.lowagie.text.Document#Document(com.lowagie.text.Rectangle)
+	 */
+	protected Document newDocument() {
 		return new Document(PageSize.A4);
 	}
 
 	/**
-	 * Return the viewer preferences.
-	 * <p>By default returns AllowPrinting and PageLayoutSinglePage, but can be
-	 * subclassed. The subclass can either have fixed preferences or retrieve
+	 * Return the viewer preferences for the PDF file.
+	 * <p>By default returns <code>AllowPrinting</code> and
+	 * <code>PageLayoutSinglePage</code>, but can be subclassed.
+	 * The subclass can either have fixed preferences or retrieve
 	 * them from bean properties defined on the View.
 	 * @return an int containing the bits information against PdfWriter definitions
 	 * @see com.lowagie.text.pdf.PdfWriter#AllowPrinting
