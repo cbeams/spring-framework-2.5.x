@@ -110,7 +110,8 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     }
 
     public String getType() {
-        String classNameAsProperty = ClassUtils.getShortNameAsProperty(getClass());
+        String classNameAsProperty = ClassUtils
+                .getShortNameAsProperty(getClass());
         // unqualify inner class dot separator - leaving class name
         return StringUtils.delimitedListToStringArray(classNameAsProperty, ".")[0];
     }
@@ -125,7 +126,9 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     }
 
     public String toString() {
-        return getKey();
+        String enumStr = (label != null ? (getLabel() + "(" + getCode() + ")")
+                : String.valueOf(getCode()));
+        return getType() + "." + enumStr;
     }
 
 }

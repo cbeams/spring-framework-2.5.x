@@ -29,6 +29,7 @@ import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
 import org.springframework.rules.reporting.PropertyResults;
 import org.springframework.rules.reporting.TypeResolvable;
+import org.springframework.util.DefaultObjectStyler;
 
 /**
  * @author Keith Donald
@@ -306,7 +307,8 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Number of errors on form is now "
-                    + validationErrors.size());
+                    + validationErrors.size() + "; errors="
+                    + DefaultObjectStyler.evaluate(validationErrors));
         }
     }
 
@@ -331,7 +333,8 @@ public class ValidatingFormModel extends DefaultFormModel implements
         fireConstraintViolated(exp, results);
         if (logger.isDebugEnabled()) {
             logger.debug("Number of errors on form is now "
-                    + validationErrors.size());
+                    + validationErrors.size() + "; errors="
+                    + DefaultObjectStyler.evaluate(validationErrors));
         }
     }
 

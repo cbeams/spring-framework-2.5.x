@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import org.springframework.context.MessageSource;
 import org.springframework.rules.UnaryPredicate;
+import org.springframework.util.ToStringBuilder;
 
 /**
  * @author Keith Donald
@@ -59,6 +60,10 @@ public class PropertyResults implements ValidationResults {
 
     public Severity getSeverity() {
         return severity;
+    }
+    
+    public String toString() {
+        return new ToStringBuilder(this).appendProperties().toString();
     }
 
 }

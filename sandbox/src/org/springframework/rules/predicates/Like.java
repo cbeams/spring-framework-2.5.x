@@ -15,6 +15,7 @@
  */
 package org.springframework.rules.predicates;
 
+import org.springframework.enums.StringCodedEnum;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.util.StringUtils;
 
@@ -24,43 +25,60 @@ import org.springframework.util.StringUtils;
  * @author Keith Donald
  */
 public class Like implements UnaryPredicate {
-    public static final String STARTS_WITH = "like.startsWith";
-    public static final String ENDS_WITH = "like.endsWith";
-    public static final String CONTAINS = "like.contains";
-    private String type;
+    public static class LikeType extends StringCodedEnum {
+        private LikeType(String code) {
+            super(code);
+        }
+    };
+
+    public static final LikeType STARTS_WITH = new LikeType("startsWith");
+
+    public static final LikeType ENDS_WITH = new LikeType("endsWith");
+
+    public static final LikeType CONTAINS = new LikeType("contains");
+
+    private LikeType type;
+
     private String stringToMatch;
 
-    public Like(String likeString) {
-        if (likeString.startsWith("%")) {
-            if (likeString.endsWith("%")) {
-                this.type = CONTAINS;
-            } else {
-                this.type = ENDS_WITH;
-            }
-        } else if (likeString.endsWith("%")) {
-            this.type = STARTS_WITH;
-        } else {
-            this.type = CONTAINS;
-        }
-        stringToMatch = StringUtils.deleteAny(likeString, "%");
+    public Like(LikeType type, String likeString) {
+        this.type = type;
+        this.stringToMatch = likeString;
     }
 
-    /**
-     * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
-     */
+    public Like(String encodedLikeString) {
+        if (encodedLikeString.startsWith("%")) {
+            if (encodedLikeString.endsWith("%")) {
+                this.type = CONTAINS;
+            }
+            else {
+                this.type = ENDS_WITH;
+            }
+        }
+        else if (encodedLikeString.endsWith("%")) {
+            this.type = STARTS_WITH;
+        }
+        else {
+            this.type = CONTAINS;
+        }
+        stringToMatch = StringUtils.deleteAny(encodedLikeString, "%");
+    }
+
     public boolean test(Object argument) {
         String value = String.valueOf(argument);
         if (type == STARTS_WITH) {
             return value.startsWith(stringToMatch);
-        } else if (type == ENDS_WITH) {
+        }
+        else if (type == ENDS_WITH) {
             return value.endsWith(stringToMatch);
-        } else {
+        }
+        else {
             return value.indexOf(stringToMatch) != -1;
         }
     }
 
     public String getType() {
-        return type;
+        return type.getKey();
     }
 
     public String getString() {

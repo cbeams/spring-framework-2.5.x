@@ -41,6 +41,7 @@ import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
+import org.springframework.rules.predicates.Like.LikeType;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
@@ -248,7 +249,8 @@ public class Constraints {
     public UnaryPredicate not(UnaryPredicate predicate) {
         if (!(predicate instanceof UnaryNot)) {
             return new UnaryNot(predicate);
-        } else {
+        }
+        else {
             return ((UnaryNot)predicate).getPredicate();
         }
     }
@@ -268,21 +270,10 @@ public class Constraints {
      * 
      * @param group
      *            the group items
-     * @return The InGroup predicate.
+     * @return The InGroup predicate
      */
-    public UnaryPredicate inGroup(Object[] group) {
+    public UnaryPredicate inGroup(Set group) {
         return new InGroup(group);
-    }
-
-    /**
-     * Returns a 'like' predicate.
-     * 
-     * @param likeString
-     *            the likeString
-     * @return The Like predicate.
-     */
-    public UnaryPredicate like(String likeString) {
-        return new Like(likeString);
     }
 
     /**
@@ -290,10 +281,51 @@ public class Constraints {
      * 
      * @param group
      *            the group items
-     * @return The InGroup predicate
+     * @return The InGroup predicate.
      */
-    public UnaryPredicate inGroup(Set group) {
+    public UnaryPredicate inGroup(Object[] group) {
         return new InGroup(group);
+    }
+
+    /**
+     * Returns a 'in' group (or set) predicate appled to the provided property.
+     * 
+     * @param propertyName
+     *            the property
+     * @param group
+     *            the group items
+     * @return The InGroup predicate.
+     */
+    public BeanPropertyExpression inGroup(String propertyName, Object[] group) {
+        return value(propertyName, new InGroup(group));
+    }
+
+    /**
+     * Returns a 'like' predicate.
+     * 
+     * @param encodedLikeString
+     *            the likeString
+     * @return The Like predicate.
+     */
+    public UnaryPredicate like(String encodedLikeString) {
+        return new Like(encodedLikeString);
+    }
+
+    /**
+     * Return a 'like' predicate applied as a value constraint to the provided
+     * property.
+     * 
+     * @param property
+     *            The property to constrain
+     * @param likeType
+     *            The like type
+     * @param value
+     *            The like string value to match
+     * @return The Like predicate
+     */
+    public BeanPropertyExpression like(String property, LikeType likeType,
+            String value) {
+        return value(property, new Like(likeType, value));
     }
 
     /**
@@ -303,6 +335,15 @@ public class Constraints {
      */
     public UnaryPredicate required() {
         return Required.instance();
+    }
+
+    /**
+     * Returns a required bean property expression.
+     * 
+     * @return The required predicate instance.
+     */
+    public BeanPropertyExpression required(String property) {
+        return value(property, required());
     }
 
     /**

@@ -22,7 +22,11 @@ public abstract class StringCodedEnum extends AbstractCodedEnum {
     protected StringCodedEnum(String code) {
         super(code);
     }
-    
+
+    protected StringCodedEnum(String code, String label) {
+        super(code, label);
+    }
+
     public String getStringCode() {
         return (String)getCode();
     }
