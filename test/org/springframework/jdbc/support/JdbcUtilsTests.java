@@ -14,7 +14,7 @@ import junit.framework.TestCase;
  * and it appears that JdbcUtils doesn't work exactly as documented.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdbcUtilsTests.java,v 1.1 2003-12-05 17:03:16 jhoeller Exp $
+ * @version $Id: JdbcUtilsTests.java,v 1.2 2003-12-08 12:56:36 trisberg Exp $
  */
 public class JdbcUtilsTests extends TestCase {
 
@@ -27,21 +27,19 @@ public class JdbcUtilsTests extends TestCase {
 	}
 
 	/**
-	 * Examples : if the delimiter is the single quote, and the character to count the 
-     * occurrences of is the question mark, then
-     * <p>
-     * <code>The big ? 'bad wolf'</code> gives a count of one
-     * <code>The big ?? bad wolf</code> gives a count of zero
-     * <code>The big  'ba''ad' ? wolf</code> gives a count of one
 	 */
 	public void testCountParameterPlaceholders() {
+		assertTrue(JdbcUtils.countParameterPlaceholders(null, '?', '\'') == 0);
+
+		assertTrue(JdbcUtils.countParameterPlaceholders("", '?', '\'') == 0);
+
+		assertTrue(JdbcUtils.countParameterPlaceholders("?", '?', '\'') == 1);
+
 		assertTrue(JdbcUtils.countParameterPlaceholders("The big ? 'bad wolf'", '?', '\'') == 1);
 		
-		// TODO check why this gives invalid string
-		//assertTrue(JdbcUtils.countParameterPlaceholders("The big ?? bad wolf", '?', '\'') == 0);
+		assertTrue(JdbcUtils.countParameterPlaceholders("The big ?? bad wolf", '?', '\'') == 2);
 		
-		// ALSO doesn't work as documented
-		//assertTrue(JdbcUtils.countParameterPlaceholders("The big  'ba''ad' ? wolf", '?', '\'') == 1);
+		assertTrue(JdbcUtils.countParameterPlaceholders("The big 'ba''ad?' ? wolf", '?', '\'') == 1);
 	}
 
 	public void testIsNumeric() {

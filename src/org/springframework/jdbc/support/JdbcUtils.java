@@ -7,118 +7,49 @@ package org.springframework.jdbc.support;
 
 import java.sql.Types;
 
-import org.springframework.core.InternalErrorException;
-
 /**
  * Utility methods for SQL statements.
  * @author Isabelle Muszynski
- * @version $Id: JdbcUtils.java,v 1.1 2003-12-05 17:03:14 jhoeller Exp $
+ * @author Thomas Risberg
+ * @version $Id: JdbcUtils.java,v 1.2 2003-12-08 12:56:11 trisberg Exp $
  */
 public class JdbcUtils {
 
 	/**
-	 * Count the occurrences of the character <code>marker</code> in a SQL string <code>str</code>.
-	 * Any two consecutive nested occurrences of <code>delimiter</code> inside a substring of the string 
-	 * delimited by <code>delimiter</code> is ignored. Example :
-	 * <code>
-	 * select pet_owner from pet, owner where pet_name = 'bodo''ke' and owner.pet_id = pet.pet_id;
-	 * </code>
-	 * In this case the pet's name is "bodo'ke".
+	 * Count the occurrences of the character <code>placeholder</code> in an SQL string <code>str</code>.
 	 * <p>
-	 * The character <code>marker</code> is not counted if it appears withing character <code>delimiter</code>.
-	 * It is also not counted if it is not followed by whitespace (unless it is just before the closing
-	 * delimiter)
+	 * The character <code>placeholder</code> is not counted if it appears within a literal as determined
+	 * by the <code>delim</code> that is passed in.
 	 * <p>
 	 * Examples : if the delimiter is the single quote, and the character to count the 
 	 * occurrences of is the question mark, then
 	 * <p>
-	 * <code>The big ? 'bad wolf'</code> gives a count of one
-	 * <code>The big ?? bad wolf</code> gives a count of zero
-	 * <code>The big  'ba''ad' ? wolf</code> gives a count of one
+	 * <code>The big ? 'bad wolf?'</code> gives a count of one
+	 * <code>The big ?? bad wolf</code> gives a count of two
+	 * <code>The big  'ba''ad?' ? wolf</code> gives a count of one
 	 * <p>
 	 * The grammar of the string passed in should obey the rules
-	 * string = (marker | stringPart)*
-	 * stringPart = character | nestedStringPart
-	 * nestedStringPart = delimiter (character | nestedDelimiter | marker)*
-	 * delimiter = the delimiter character (normally the apostrophe for SQL strings)
-	 * nestedDelimiter = 2 consecutive delimiters
-	 * marker = the character to count the occurrences of
-	 * character = all other characters
+	 * of the JDBC spec which is close to no rules at all.  One placeholder
+	 * per parameter and it should be valid SQL for the target database.
 	 * <p>
 	 * @param str string to search in. Returns 0 if this is null
-	 * @param marker the character to search for.
-	 * @param delim the delimiter.
+	 * @param placeholder the character to search for and count.
+	 * @param delim the delimiter for character literals.
 	 */
-	public static int countParameterPlaceholders(String str, char marker, char delim) {
+	public static int countParameterPlaceholders(String str, char placeholder, char delim) {
 		int count = 0;
-		if (str == null || "".equals(str) || '\0' == marker || '\0' == delim)
-			return count;
-
-		// The states of the finite state machine
-		final int stateStart = 0;
-		final int stateNormalChar = 1;
-		final int stateMarker = 2;
-		final int stateInDelim = 3;
-		final int stateError = 4;
-
-		int len = str.length();
-		int index = 0;
-		char ch;
-		// Because we have to skip over nested consecutive markers, we need one character of lookahead
-		char lookahead = 0;
-
-		// We start in stateStart
-		int state = stateStart;
-		while (index < len) {
-			ch = 0 == index ? str.charAt(0) : index < len - 1 ? lookahead : str.charAt(index);
-			lookahead = index < len - 1 ? str.charAt(index + 1) : 0;
-			switch (state) {
-				case stateStart :
-					if (ch == delim)
-						state = stateInDelim;
-					else if (ch == marker && (index == len - 1 || Character.isWhitespace(str.charAt(index + 1)))) {
-						state = stateMarker;
-					}
-					else
-						state = stateNormalChar;
-					break;
-				case stateNormalChar :
-					if (ch == delim) {
-						state = stateInDelim;
-					}
-					else if (index < len - 1 && lookahead == marker) {
-						state = stateMarker;
-					}
-					break;
-				case stateMarker :
-					++count;
-					if (index < len - 1 && !Character.isWhitespace(lookahead) && lookahead != ',' && lookahead != ')')
-						state = stateError;
-					else
-						state = stateNormalChar;
-					break;
-				case stateInDelim :
-					if (index == len - 1)
-						state = stateError;
-					else if (ch == delim) {
-						if (index < len - 1 && delim == lookahead) {
-							// Eat delimiters and stay in same state
-							if (index > len - 2)
-								throw new IllegalArgumentException("Invalid nested delimiters : " + str);
-							else {
-								index += 1;
-							}
-						}
-						else // seen end delimiter
-							state = stateNormalChar;
-					}
-					break;
-				case stateError :
-					throw new IllegalArgumentException("Invalid string : " + str);
-				default :
-					throw new InternalErrorException("default case reached");
+		boolean insideLiteral = false;
+		
+		for (int i = 0; str != null && i < str.length(); i++) {
+			if (str.charAt(i) == placeholder) {
+				if (!insideLiteral)
+					count++;
 			}
-			++index;
+			else {
+				if (str.charAt(i) == delim) {
+					insideLiteral = insideLiteral ^ true;
+				}
+			}
 		}
 
 		return count;
