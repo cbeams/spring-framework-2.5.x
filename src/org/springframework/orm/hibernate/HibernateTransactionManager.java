@@ -379,6 +379,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		else {
 			logger.debug("Not closing pre-bound Hibernate session after transaction");
+			txObject.getSessionHolder().setTransaction(null);
 			if (txObject.getPreviousFlushMode() != null) {
 				txObject.getSessionHolder().getSession().setFlushMode(txObject.getPreviousFlushMode());
 			}
