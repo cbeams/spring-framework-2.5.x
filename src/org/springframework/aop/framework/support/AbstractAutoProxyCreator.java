@@ -144,7 +144,12 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 			}
 			proxyFactory.addInterceptor(createInvokerInterceptor(bean, name));
 			if (this.proxyInterfacesOnly) {
-				proxyFactory.setInterfaces(AopUtils.getAllInterfaces(bean));
+				// Must allow for introductions; can't just set interfaces to
+				// the target's interfaces only
+				Class[] targetsInterfaces = AopUtils.getAllInterfaces(bean);
+				for (int i = 0; i < targetsInterfaces.length; i++) {
+					proxyFactory.addInterface(targetsInterfaces[i]);
+				}
 			}
 			
 			// Transaction and other APIs might require this
