@@ -99,8 +99,8 @@
 		</para>
 		<para>
 			Spring's <emphasis>AOP</emphasis> package provides an 
-			<emphasis>Aop Alliance</emphasis> compliant aspect-oriented
-			programming implementing allowing you to define, for example,
+			<emphasis>AOP Alliance</emphasis> compliant aspect-oriented
+			programming implemention allowing you to define, for example,
 			method-interceptors and pointcuts to cleanly decouple code
 			implementing functionality that should logically speaking be separated.
 			Using source-level metadata functionality you can 
