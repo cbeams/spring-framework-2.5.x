@@ -47,18 +47,18 @@ public class ActionServletAwareProcessor implements DestructionAwareBeanPostProc
 		this.actionServlet = actionServlet;
 	}
 
-	public Object postProcessBeforeInitialization(Object bean, String name) {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		if (bean instanceof Action) {
 			((Action) bean).setServlet(this.actionServlet);
 		}
 		return bean;
 	}
 
-	public Object postProcessAfterInitialization(Object bean, String name) {
+	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
-	public void postProcessBeforeDestruction(Object bean, String name) {
+	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		if (bean instanceof Action) {
 			((Action) bean).setServlet(null);
 		}

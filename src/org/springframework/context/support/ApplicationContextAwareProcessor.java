@@ -53,28 +53,29 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		this.applicationContext = applicationContext;
 	}
 
-	public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof ResourceLoaderAware) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setResourceLoader on ResourceLoaderAware bean '" + name + "'");
+				logger.debug("Invoking setResourceLoader on ResourceLoaderAware bean '" + beanName + "'");
 			}
 			((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
 		}
 		if (bean instanceof ApplicationEventPublisherAware) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setApplicationEventPublisher on ApplicationEventPublisherAware bean '" + name + "'");
+				logger.debug("Invoking setApplicationEventPublisher on ApplicationEventPublisherAware bean '" +
+						beanName + "'");
 			}
 			((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
 		}
 		if (bean instanceof MessageSourceAware) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setMessageSource on MessageSourceAware bean '" + name + "'");
+				logger.debug("Invoking setMessageSource on MessageSourceAware bean '" + beanName + "'");
 			}
 			((MessageSourceAware) bean).setMessageSource(this.applicationContext);
 		}
 		if (bean instanceof ApplicationContextAware) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setApplicationContext on ApplicationContextAware bean '" + name + "'");
+				logger.debug("Invoking setApplicationContext on ApplicationContextAware bean '" + beanName + "'");
 			}
 			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 		}
