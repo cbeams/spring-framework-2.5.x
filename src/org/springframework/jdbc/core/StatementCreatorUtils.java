@@ -80,10 +80,10 @@ public class StatementCreatorUtils {
 	    throws SQLException {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting SQL statement parameter value; columnIndex=" + paramIndex +
-					", parameter value='" + inValue +
-					"', valueClass=" + (inValue != null ? inValue.getClass().getName() : "null") +
-					", sqlType=" + (sqlType == SqlTypeValue.TYPE_UNKNOWN ? "unknown" : Integer.toString(sqlType)));
+			logger.debug("Setting SQL statement parameter value: columnIndex " + paramIndex +
+					", parameter value [" + inValue +
+					"], valueClass [" + (inValue != null ? inValue.getClass().getName() : "null") +
+					"], sqlType " + (sqlType == SqlTypeValue.TYPE_UNKNOWN ? "unknown" : Integer.toString(sqlType)));
 		}
 
 		if (inValue == null) {

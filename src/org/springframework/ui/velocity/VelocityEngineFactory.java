@@ -105,7 +105,7 @@ public class VelocityEngineFactory {
 	 * @see #setResourceLoaderPath
 	 */
 	public void setVelocityProperties(Properties velocityProperties) {
-		this.velocityProperties.putAll(velocityProperties);
+		setVelocityPropertiesMap(velocityProperties);
 	}
 
 	/**
@@ -114,7 +114,9 @@ public class VelocityEngineFactory {
 	 * @see #setVelocityProperties
 	 */
 	public void setVelocityPropertiesMap(Map velocityPropertiesMap) {
-		this.velocityProperties.putAll(velocityPropertiesMap);
+		if (velocityPropertiesMap != null) {
+			this.velocityProperties.putAll(velocityPropertiesMap);
+		}
 	}
 
 	/**
@@ -256,9 +258,13 @@ public class VelocityEngineFactory {
 		}
 
 		// Apply properties to VelocityEngine.
-		for (Iterator it = props.keySet().iterator(); it.hasNext();) {
-			String key = (String) it.next();
-			velocityEngine.setProperty(key, props.get(key));
+		for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			if (!(entry.getKey() instanceof String)) {
+				throw new IllegalArgumentException(
+						"Illegal property key [" + entry.getKey() + "]: only Strings allowed");
+			}
+			velocityEngine.setProperty((String) entry.getKey(), entry.getValue());
 		}
 
 		postProcessVelocityEngine(velocityEngine);

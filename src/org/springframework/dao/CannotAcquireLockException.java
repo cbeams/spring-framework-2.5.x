@@ -12,13 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.dao;
 
 /**
- * Exception thrown on failure to aquire a lock during an update i.e select for update statement. 
- * This exception will be thrown either by O/R mapping tools or by custom DAO implementations.
+ * Exception thrown on failure to aquire a lock during an update,
+ * for example during a "select for update" statement.
+ *
+ * <p>This exception will be thrown either by O/R mapping tools or
+ * by custom DAO implementations.
+ *
  * @author Rod Johnson
  */
 public class CannotAcquireLockException extends ConcurrencyFailureException {

@@ -56,6 +56,8 @@ public class SqlUpdate extends SqlOperation {
 	/**
 	 * Constructor to allow use as a JavaBean. DataSource and SQL
 	 * must be supplied before compilation and use.
+	 * @see #setDataSource
+	 * @see #setSql
 	 */
 	public SqlUpdate() {
 	}
