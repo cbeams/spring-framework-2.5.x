@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.7 2003-10-21 08:05:45 jhoeller Exp $
+    $Id: build.xml,v 1.8 2003-10-22 17:10:06 jhoeller Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -158,6 +158,8 @@
 		<jar jarfile="${dist.dir}/${spring.jar}">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/**"/>
+				<exclude name="org/springframework/enterpriseservices/**"/>
+				<exclude name="org/springframework/metadata/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Spring-Version" value="${spring-version}"/>
@@ -173,7 +175,9 @@
 
 		<zip zipfile="${dist.dir}/${spring-src.zip}">
 			<fileset dir="${src.dir}">
-				<include name="**"/>
+				<include name="org/springframework/**"/>
+				<exclude name="org/springframework/enterpriseservices/**"/>
+				<exclude name="org/springframework/metadata/**"/>
 			</fileset>
 		</zip>
 
@@ -193,12 +197,16 @@
 
 		<mkdir dir="${docs.dir}"/>
 
-		<javadoc packagenames="org.springframework.*" sourcepath="src" defaultexcludes="yes"
-			destdir="${docs.dir}" author="true" version="true" use="true"
-			windowtitle="Spring Framework">
+		<javadoc sourcepath="src" destdir="${docs.dir}" windowtitle="Spring Framework"
+			defaultexcludes="yes"	author="true" version="true" use="true">
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Rod Johnson and Spring contributors 2001-2003.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
+			<packageset dir="${src.dir}">
+				<include name="org/springframework/**"/>
+				<exclude name="org/springframework/enterpriseservices/**"/>
+				<exclude name="org/springframework/metadata/**"/>
+			</packageset>
 		</javadoc>
 
 	</target>
@@ -216,6 +224,8 @@
 				<include name="dist/*.tld"/>
 				<include name="docs/**"/>
 				<include name="src/**"/>
+				<exclude name="src/org/springframework/enterpriseservices/**"/>
+				<exclude name="src/org/springframework/metadata/**"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/aop-alliance/**"/>
 				<include name="lib/cglib/cglib-asm.jar"/>
@@ -229,12 +239,12 @@
 				<include name="lib/itext-pdf/**"/>
 				<include name="lib/jstl/**"/>
 				<include name="lib/junit/**"/>
-				<include name="lib/log4j/**"/>
 				<include name="lib/poi/**"/>
-				<include name="samples/skeletons/**"/>
 				<include name="samples/countries/**"/>
 				<include name="samples/petclinic/**"/>
 				<include name="samples/tiles-example/**"/>
+				<include name="samples/webapp-minimal/**"/>
+				<include name="samples/webapp-typical/**"/>
 				<include name="*.txt"/>
 			</zipfileset>
 		</zip>
