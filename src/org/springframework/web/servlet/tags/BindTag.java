@@ -40,10 +40,16 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  */
 public class BindTag extends HtmlEscapingAwareTag {
 
+	/**
+	 * Name of the exposed variable within the scope of this tag: "status".
+	 */
 	public static final String STATUS_VARIABLE_NAME = "status";
 
+
 	private String path;
-	
+
+	private boolean ignoreNestedPath = false;
+
 	private BindStatus status;
 
 
@@ -61,18 +67,38 @@ public class BindTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Retrieve the path that this tag applies to.
-	 * @return the path that this tag applies to,
-	 * or <code>null</code> if none
+	 * Return the path that this tag applies to.
 	 */
 	public String getPath() {
 		return path;
 	}
 
+	/**
+	 * Set whether to ignore a nested path, if any.
+	 * Default is to not ignore.
+	 */
+	public void setIgnoreNestedPath(boolean ignoreNestedPath) {
+	  this.ignoreNestedPath = ignoreNestedPath;
+	}
+
+	/**
+	 * Return whether to ignore a nested path, if any.
+	 */
+	public boolean isIgnoreNestedPath() {
+	  return ignoreNestedPath;
+	}
+
 
 	protected final int doStartTagInternal() throws Exception {
-		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", this.path, pageContext);
-		
+		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", getPath(), pageContext);
+
+		if (!isIgnoreNestedPath()) {
+			String nestedPath = (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME);
+			if (nestedPath != null) {
+				resolvedPath = nestedPath + resolvedPath;
+			}
+		}
+
 		try {
 			this.status = new BindStatus(getRequestContext(), resolvedPath, isHtmlEscape());
 		}
@@ -81,8 +107,13 @@ public class BindTag extends HtmlEscapingAwareTag {
 		}
 		
 		// create the status object
-		this.pageContext.setAttribute(STATUS_VARIABLE_NAME, status);
+		this.pageContext.setAttribute(STATUS_VARIABLE_NAME, this.status);
 		return EVAL_BODY_INCLUDE;
+	}
+
+	public int doEndTag() {
+		pageContext.removeAttribute(STATUS_VARIABLE_NAME);
+		return EVAL_PAGE;
 	}
 
 
@@ -113,12 +144,6 @@ public class BindTag extends HtmlEscapingAwareTag {
 	 */
 	public final PropertyEditor getEditor() {
 		return this.status.getEditor();
-	}
-
-
-	public void doFinally() {
-		super.doFinally();
-		this.path = null;
 	}
 
 }

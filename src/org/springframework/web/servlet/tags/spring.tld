@@ -3,7 +3,7 @@
 
 <taglib>
 
-	<tlib-version>1.0.1</tlib-version>
+	<tlib-version>1.1</tlib-version>
 
 	<jsp-version>1.2</jsp-version>
 
@@ -141,13 +141,11 @@
 			Provides Errors instance in case of bind errors.
 		</description>
 
-		<!-- Note: Was "Integer count" in earlier version -->
 		<variable>
 			<name-given>errors</name-given>
 			<variable-class>org.springframework.validation.Errors</variable-class>
 		</variable>
 
-		<!-- Note: Now one Errors instance per bind object -> name of object needed -->
 		<attribute>
 			<name>name</name>
 			<required>true</required>
@@ -165,6 +163,30 @@
 
 	<tag>
 
+		<name>nestedPath</name>
+		<tag-class>org.springframework.web.servlet.tags.NestedPathTag</tag-class>
+		<body-content>JSP</body-content>
+
+		<description>
+			Sets a nested path to be used by the bind tag's path.
+		</description>
+
+		<variable>
+			<name-given>nestedPath</name-given>
+			<variable-class>java.lang.String</variable-class>
+		</variable>
+
+		<attribute>
+			<name>path</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+	</tag>
+
+
+	<tag>
+
 		<name>bind</name>
 		<tag-class>org.springframework.web.servlet.tags.BindTag</tag-class>
 		<body-content>JSP</body-content>
@@ -173,16 +195,20 @@
 			Provides BindStatus object for the given bind path.
 		</description>
 
-		<!-- Note: Was "bind" in earlier version -->
 		<variable>
 			<name-given>status</name-given>
 			<variable-class>org.springframework.web.servlet.support.BindStatus</variable-class>
 		</variable>
 
-		<!-- Note: Was "value" in earlier version -->
 		<attribute>
 			<name>path</name>
 			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>ignoreNestedPath</name>
+			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
