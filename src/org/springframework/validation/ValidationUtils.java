@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
  * @see Validator
  * @see Errors
  * @see org.springframework.web.bind.BindUtils#bindAndValidate
+ * @version $Id: ValidationUtils.java,v 1.2 2003-12-05 02:24:36 dkopylenko Exp $
  */
 public abstract class ValidationUtils {
 
@@ -35,5 +36,18 @@ public abstract class ValidationUtils {
 				logger.debug("Validator found no errors");
 		}
 	}
-
+	
+	/**
+	 * Reject field if the value is empty
+	 * @param errors Errors instance containing bound fields
+	 * @param field field name to check
+	 * @param errorCode to reject with
+	 * @param defaultMessage to reject with
+	 */
+	public static void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage) {
+		Object fieldValue = errors.getFieldValue(field);
+		if (fieldValue == null || fieldValue.toString().length() == 0) {
+			errors.rejectValue(field, errorCode, defaultMessage);
+		}
+	}
 }
