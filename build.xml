@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.11 2003-11-13 17:43:53 colins Exp $
+    $Id: build.xml,v 1.12 2003-11-16 17:19:41 aarendsen Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -443,6 +443,103 @@
 			</manifest>
 		</jar>
 
+	</target>
+	
+	<property name="doc.dir" value="docs"/>
+	<property name="doc.ref.dir" value="docs/reference"/>
+	<property name="dist.ref.dir" value="docs/reference"/>
+
+	<target name="docclean" description="Delete temporary and distribution directories for docs">
+		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/pdf"/>
+		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html_single"/>
+		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html"/>
+	</target>
+		
+	<target name="docpdf" description="Compile reference documentation to pdf">
+		<mkdir dir="${basedir}/${dist.ref.dir}/pdf/images"/>
+		<copy todir="${basedir}/${dist.ref.dir}/pdf/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+			</fileset>
+		</copy>
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
+		</java>
+		<java classname="org.apache.fop.apps.Fop" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/spring-reference.pdf"/>
+		</java>
+		<!--<delete file="${dist.ref.dir}/pdf/docbook_fop.tmp"/>-->
+	</target>
+
+	<target name="dochtml" description="Compile reference documentation to chunked html">
+		<mkdir dir="${dist.ref.dir}/html/images"/>
+		<copy todir="${basedir}/${dist.ref.dir}/html/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+			</fileset>
+		</copy>
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.ref.dir}/html/">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
+		</java>
+	</target>
+
+	<target name="dochtmlsingle" description="Compile reference documentation to single html">
+		<mkdir dir="${dist.ref.dir}/html_single/images"/>
+		<copy todir="${basedir}/${dist.ref.dir}/html_single/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+			</fileset>
+		</copy>
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.dir}/reference/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.ref.dir}/html_single/index.html"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
+		</java>
+	</target>
+
+	<target name="refdoc" 
+		depends="dochtml,dochtmlsingle,docpdf" 
+		description="Generate and copy reference documentation">
+		<!--<copy todir="${dist.ref.dir}">
+			<fileset dir="${doc.ref.dir}">
+				<patternset refid="refdoc.files"/>
+			</fileset>
+		</copy>
+		<mkdir dir="${dist.doc.dir}/other"/>
+		<copy file="${doc.dir}/other/hibernate-quickref.pdf" todir="${dist.doc.dir}/other"/>
+		-->
 	</target>
 
 </project>
