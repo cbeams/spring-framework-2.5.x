@@ -16,9 +16,11 @@
 
 package org.springframework.remoting.rmi;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
@@ -59,7 +61,7 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 
 	private Remote rmiProxy;
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() throws IOException, NotBoundException {
 		if (getServiceUrl() == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
@@ -80,7 +82,7 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 	 * via java.rmi.Naming. Can be overridden in subclasses.
 	 * @see java.rmi.Naming#lookup
 	 */
-	protected Remote createRmiProxy() throws Exception {
+	protected Remote createRmiProxy() throws IOException, NotBoundException {
 		return Naming.lookup(getServiceUrl());
 	}
 

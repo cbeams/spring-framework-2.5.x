@@ -16,6 +16,9 @@
 
 package org.springframework.remoting.rmi;
 
+import java.io.IOException;
+import java.rmi.NotBoundException;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
@@ -55,7 +58,7 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 
 	private Object serviceProxy;
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() throws IOException, NotBoundException {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("serviceInterface is required");

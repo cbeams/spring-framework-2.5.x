@@ -43,7 +43,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBean() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote createRmiProxy() throws Exception {
+			protected Remote createRmiProxy() {
 				return new RemoteBean();
 			}
 		};
@@ -59,7 +59,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithRemoteException() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote createRmiProxy() throws Exception {
+			protected Remote createRmiProxy() {
 				return new RemoteBean();
 			}
 		};
@@ -79,7 +79,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithBusinessInterface() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote createRmiProxy() throws Exception {
+			protected Remote createRmiProxy() {
 				return new RemoteBean();
 			}
 		};
@@ -95,7 +95,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndRemoteException() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote createRmiProxy() throws Exception {
+			protected Remote createRmiProxy() {
 				return new RemoteBean();
 			}
 		};
@@ -217,12 +217,10 @@ public class RemotingTestSuite extends TestCase {
 
 	public static class RemoteBean implements IRemoteBean, Stub {
 
-		private static RemoteBean singleton;
 		private static String name;
 		private static Map properties;
 
 		public RemoteBean() {
-			singleton = this;
 			properties = new HashMap();
 		}
 
