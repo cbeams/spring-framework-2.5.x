@@ -21,9 +21,6 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 	
 	private WebApplicationContext root;
 
-	public WebApplicationContextTestSuite() throws Exception {
-	}
-
 	protected ApplicationContext createContext() throws Exception {
 		root = new XmlWebApplicationContext();
 		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
