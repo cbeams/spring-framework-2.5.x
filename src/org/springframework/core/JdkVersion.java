@@ -21,7 +21,7 @@ package org.springframework.core;
  * Usually we want to find if we're in a 1.4 or higher JVM.
  * (Spring does not support 1.2 JVMs.)
  * @author Rod Johnson
- * @version $Id: JdkVersion.java,v 1.3 2004-06-02 17:12:30 jhoeller Exp $
+ * @version $Id: JdkVersion.java,v 1.4 2004-07-26 16:17:38 jhoeller Exp $
  */
 public class JdkVersion {
 	
@@ -30,11 +30,13 @@ public class JdkVersion {
 	public static final int JAVA_14 = 1;
 	
 	public static final int JAVA_15 = 2;
-	
+
+	private static String javaVersion;
+
 	private static int majorJavaVersion = JAVA_13;
 	
 	static {
-		String javaVersion = System.getProperty("java.version");
+		javaVersion = System.getProperty("java.version");
 		// should look like "1.4.1_02"
 		if (javaVersion.indexOf("1.4") != -1) {
 			majorJavaVersion = JAVA_14;
@@ -44,7 +46,15 @@ public class JdkVersion {
 		}
 		// else leave as 1.3 default
 	}
-	
+
+	/**
+	 * Return the full Java version string, as returned by
+	 * <code>System.getProperty("java.version")</code>.
+	 */
+	public static String getJavaVersion() {
+		return javaVersion;
+	}
+
 	/**
 	 * Get the major version code. This means we can do things like
 	 * <code>if getMajorJavaVersion() < JAVA_14</code>.
