@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.1.1.1 2003-08-14 16:20:12 trisberg Exp $
+ * @version $Id: AopProxy.java,v 1.2 2003-11-04 18:01:43 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -93,10 +93,17 @@ public class AopProxy implements InvocationHandler {
 		}
 		
 		try {
+			// Try special rules for equals() method and implementation of the
+			// ProxyConfig AOP configuration interface
 			if (EQUALS_METHOD.equals(invocation.getMethod())) {
 				// What if equals throws exception!?
 				logger.debug("Intercepting equals() method in proxy");
+				// This class implements the equals() method itself
 				return invocation.getMethod().invoke(this, invocation.getArguments());
+			}
+			else if (ProxyConfig.class.equals(invocation.getMethod().getDeclaringClass())) {
+				// Service invocations on ProxyConfig with the proxy config
+				return invocation.getMethod().invoke(this.config, invocation.getArguments());
 			}
 			
 			Object retVal = invocation.proceed();
@@ -129,12 +136,14 @@ public class AopProxy implements InvocationHandler {
 	 * the given interface. Uses the given class loader.
 	 */
 	public Object getProxy(ClassLoader cl) {
-		if (this.config.getProxiedInterfaces() != null && this.config.getProxiedInterfaces().length > 0) {
-			// proxy specific interfaces: J2SE Proxy is sufficient
+		if (!this.config.getProxyTargetClass() && this.config.getProxiedInterfaces() != null && this.config.getProxiedInterfaces().length > 0) {
+			// Proxy specific interfaces: J2SE dynamic proxy is sufficient
 			logger.info("Creating J2SE proxy for [" + this.config.getTarget() + "]");
-			return Proxy.newProxyInstance(cl, this.config.getProxiedInterfaces(), this);
+			Class[] proxiedInterfaces = completeProxiedInterfaces();
+			return Proxy.newProxyInstance(cl, proxiedInterfaces, this);
 		}
 		else {
+			// Use CGLIB
 			if (this.config.getTarget() == null) {
 				throw new IllegalArgumentException("Either an interface or a target is required for proxy creation");
 			}
@@ -144,6 +153,27 @@ public class AopProxy implements InvocationHandler {
 			// --> J2SE proxies work without cglib.jar then
 			return (new CglibProxyFactory()).createProxy();
 		}
+	}
+	
+	/**
+	 * Get complete set of interfaces to proxy. This will always add the ProxyConfig interface.
+	 * @return the complete set of interfaces to proxy
+	 */
+	private Class[] completeProxiedInterfaces() {
+		Class[] proxiedInterfaces = this.config.getProxiedInterfaces();
+		if (proxiedInterfaces == null ||proxiedInterfaces.length == 0) {
+			proxiedInterfaces = new Class[1];
+			proxiedInterfaces[0] = ProxyConfig.class;
+		}
+		else {
+			// Don't add the interface twice if it's already there
+			if (!this.config.isInterfaceProxied(ProxyConfig.class)) {
+				proxiedInterfaces = new Class[this.config.getProxiedInterfaces().length + 1];
+				proxiedInterfaces[0] = ProxyConfig.class;
+				System.arraycopy(this.config.getProxiedInterfaces(), 0, proxiedInterfaces, 1, this.config.getProxiedInterfaces().length);
+			}
+		}
+		return proxiedInterfaces;
 	}
 
 	/**
@@ -197,7 +227,7 @@ public class AopProxy implements InvocationHandler {
 	private class CglibProxyFactory {
 
 		private Object createProxy() {
-			return Enhancer.enhance(config.getTarget().getClass(), config.getProxiedInterfaces(),
+			return Enhancer.enhance(config.getTarget().getClass(), completeProxiedInterfaces(),
 				new MethodInterceptor() {
 					public Object intercept(Object handler, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
 						return invoke(handler, method, objects);

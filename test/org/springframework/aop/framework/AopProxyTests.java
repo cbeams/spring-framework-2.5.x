@@ -20,12 +20,13 @@ import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.core.TimeStamped;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AopProxyTests extends TestCase {
 
@@ -345,6 +346,91 @@ public class AopProxyTests extends TestCase {
 		t.setName(null);
 		// Null replacement magic should work
 		assertTrue(t.getName().equals(""));
+	}
+	
+	public void testCanCastJdkProxyToProxyConfig() throws Throwable {
+		TestBean tb = new TestBean();
+		ProxyFactory pc = new ProxyFactory(tb);
+		DebugInterceptor di = new DebugInterceptor();
+		pc.addInterceptor(0, di);
+
+		ITestBean t = (ITestBean) pc.getProxy();
+		assertEquals(0, di.getCount());
+		t.setAge(23);
+		assertEquals(23, t.getAge());
+		assertEquals(2, di.getCount());
+		
+		ProxyConfig config = (ProxyConfig) t;
+		assertEquals(2, config.getMethodPointcuts().size());
+		assertEquals(di, ((MethodPointcut) config.getMethodPointcuts().get(0)).getInterceptor());
+		DebugInterceptor di2 = new DebugInterceptor();
+		config.addInterceptor(1, di2);
+		t.getName();
+		assertEquals(3, di.getCount());
+		assertEquals(1, di2.getCount());
+		config.removeInterceptor(di);
+		t.getAge();
+		// Unchanged
+		assertEquals(3, di.getCount());
+		assertEquals(2, di2.getCount());
+	}
+	
+	
+	public static class NoInterfaces {
+		private int age;
+		public int getAge() { 
+			return age;
+		}
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+	
+	public void testCanCastCglibProxyToProxyConfig() throws Throwable {
+		NoInterfaces target = new NoInterfaces();
+		ProxyFactory pc = new ProxyFactory(target);
+		DebugInterceptor di = new DebugInterceptor();
+		pc.addInterceptor(0, di);
+
+		NoInterfaces t = (NoInterfaces) pc.getProxy();
+		assertEquals(0, di.getCount());
+		t.setAge(23);
+		assertEquals(23, t.getAge());
+		assertEquals(2, di.getCount());
+	
+		ProxyConfig config = (ProxyConfig) t;
+		assertEquals(2, config.getMethodPointcuts().size());
+		assertEquals(di, ((MethodPointcut) config.getMethodPointcuts().get(0)).getInterceptor());
+		DebugInterceptor di2 = new DebugInterceptor();
+		config.addInterceptor(1, di2);
+		t.getAge();
+		assertEquals(3, di.getCount());
+		assertEquals(1, di2.getCount());
+		config.removeInterceptor(di);
+		t.getAge();
+		// Unchanged
+		assertEquals(3, di.getCount());
+		assertEquals(2, di2.getCount());
+	}
+	
+	public void testIntroductionWithCglibProxy() throws Throwable {
+		NoInterfaces target = new NoInterfaces();
+		ProxyFactory pc = new ProxyFactory(target);
+		// Override default behaviour to force use of CGLIB
+		pc.setProxyTargetClass(true);
+		DebugInterceptor di = new DebugInterceptor();
+		pc.addInterceptor(0, di);
+		long time = 2222;
+		TimestampIntroductionInterceptor tii = new TimestampIntroductionInterceptor(time);
+		pc.addInterceptor(0, tii);
+		
+		TimeStamped ts = (TimeStamped) pc.getProxy();
+		assertEquals(time, ts.getTimeStamp());
+		assertTrue(ts.getClass().getName() + "should be a CGLIB subclass of NoInterfaces class", ts instanceof NoInterfaces);
+		
+		NoInterfaces proxied = (NoInterfaces) pc.getProxy();
+		proxied.setAge(25);
+		assertEquals(25, proxied.getAge());
 	}
 	
 	/**

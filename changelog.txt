@@ -1,9 +1,12 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.35 2003-11-03 17:10:56 johnsonr Exp $
+$Id: changelog.txt,v 1.36 2003-11-04 18:02:49 johnsonr Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
+* can now cast any AOP proxy to ProxyConfig to manipulate it
+* can force CGLIB proxying using new proxyTargetClass property on DefaultProxyConfig
+* CGLIB proxies support introductions
 * refactored JDBC core package so that SQLErrorCodeExceptionTranslator can be subclassed by users and passed into JdbcTemplate
 * refactored JDBC object package so that JdbcTemplate is now in root RdbmsOperation class, and one JdbcTemplate can be used to configure multiple RdbmsOperations
 * added "default-dependency-check" and "default-autowire" attributes to root tag in XML bean definitions

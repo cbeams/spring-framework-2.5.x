@@ -33,7 +33,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.3 2003-11-04 13:41:57 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.4 2003-11-04 18:02:21 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -301,6 +301,25 @@ public class ProxyFactoryBeanTests extends TestCase {
 		catch (AopConfigException ex) {
 			// Ok
 		}
+	}
+	
+	
+	/**
+	 * Note that we can't add or remove interfaces without reconfiguring the
+	 * singleton. 
+	 * TODO address this?
+	 *
+	 */
+	public void testCanAddAndRemoveAspectInterfacesOnSingletonByCasting() {
+		ITestBean it = (ITestBean) factory.getBean("test1");
+		ProxyConfig pc = (ProxyConfig) it;
+		it.getAge();
+		DebugInterceptor di = new DebugInterceptor();
+		pc.addInterceptor(0, di);
+		assertEquals(0, di.getCount());
+		it.setAge(25);
+		assertEquals(25, it.getAge());
+		assertEquals(2, di.getCount());
 	}
 	
 	
