@@ -36,7 +36,7 @@
 	<bean id="sellItem" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource" value="/WEB-INF/sellitem-flow.xml"/>
+				<property name="resource" value="/WEB-INF/sellItem-flow.xml"/>
 			</bean>
 		</property>
 	</bean>

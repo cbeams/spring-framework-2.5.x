@@ -11,7 +11,11 @@
 	<bean id="frontController" name="/itemList.htm" class="org.springframework.web.flow.mvc.FlowController">
 		 <!-- serialize all operations within a session -->
 		<property name="synchronizeOnSession"><value>true</value></property>
-		<property name="flow"><ref bean="ItemList"/></property>
+		<property name="flowExecutionManager">
+			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
+				<property name="flow"><ref bean="ItemList"/></property>
+			</bean>
+		</property>
 	</bean>
 	
 	<bean id="ItemList" class="org.springframework.web.flow.config.FlowFactoryBean">

@@ -15,7 +15,11 @@
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
 	<bean id="frontController" name="/upload.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flow"><ref bean="Upload"/></property>
+		<property name="flowExecutionManager">
+			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
+				<property name="flow"><ref bean="Upload"/></property>
+			</bean>
+		</property>
 	</bean>
 	
 	<bean id="Upload" class="org.springframework.web.flow.config.FlowFactoryBean">

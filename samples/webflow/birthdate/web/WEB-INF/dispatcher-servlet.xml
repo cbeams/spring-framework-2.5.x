@@ -9,7 +9,11 @@
 	</bean>
 
 	<bean id="birthDate" name="/birthDate.do" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flow"><ref bean="BirthDate"/></property>
+		<property name="flowExecutionManager">
+			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
+				<property name="flow"><ref bean="BirthDate"/></property>
+			</bean>
+		</property>
 	</bean>
 	
 	<bean id="BirthDate" class="org.springframework.web.flow.config.FlowFactoryBean">
