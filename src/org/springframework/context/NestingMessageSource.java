@@ -6,10 +6,9 @@
 package org.springframework.context;
 
 /**
- * Subinterface of MessageSource to be implemented by objects that
+ * Sub-interface of MessageSource to be implemented by objects that
  * can resolve messages hierarchically.
  * @author Rod Johnson
- * @version $RevisionId$
  */
 public interface NestingMessageSource extends MessageSource {		
 	
@@ -21,5 +20,5 @@ public interface NestingMessageSource extends MessageSource {
 	 * May be null, in which case no further resolution is possible.
 	 */
 	void setParent(MessageSource parent);
-}
 
+}
