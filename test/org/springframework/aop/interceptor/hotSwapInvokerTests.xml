@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- Simple target -->
+	<bean id="target1" class="org.springframework.aop.interceptor.SideEffectBean">	
+		<property name="count"><value>10</value></property>
+	</bean>
+	
+	
+	<bean id="target2" class="org.springframework.aop.interceptor.SideEffectBean" 
+		singleton="true">	
+		<property name="count"><value>20</value></property>
+	</bean>
+	
+	<!-- 
+		Invoker interceptor. Not required: can be added by 
+		default
+	-->
+	<bean id="invokerInterceptor" 
+		class="org.springframework.aop.interceptor.HotSwappableInvokerInterceptor">	
+		<property name="initialTarget"><ref local="target1"/></property>
+	</bean>
+	
+	
+	
+	<bean id="swappable" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		<property name="interceptorNames"><value>invokerInterceptor</value></property>		
+		
+	</bean>
+	
+	
+
+</beans>		
+	
+	
