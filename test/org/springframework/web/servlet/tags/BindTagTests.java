@@ -488,10 +488,10 @@ public class BindTagTests extends AbstractTagTests {
 		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 
-		NestedPathTag tag = new NestedPathTag();
-		tag.setPath("tb");
-		tag.setPageContext(pc);
-		tag.doStartTag();
+		NestedPathTag nestedPathTag = new NestedPathTag();
+		nestedPathTag.setPath("tb");
+		nestedPathTag.setPageContext(pc);
+		nestedPathTag.doStartTag();
 
 		BindTag bindTag = new BindTag();
 		bindTag.setPageContext(pc);
@@ -501,6 +501,27 @@ public class BindTagTests extends AbstractTagTests {
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertTrue("Has status variable", status != null);
 		assertEquals("tb.name", status.getPath());
+		assertEquals("Correct field value", "", status.getDisplayValue());
+
+		BindTag bindTag2 = new BindTag();
+		bindTag2.setPageContext(pc);
+		bindTag2.setPath("age");
+
+		assertTrue("Correct doStartTag return value", bindTag2.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		BindStatus status2 = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status2 != null);
+		assertEquals("tb.age", status2.getPath());
+		assertEquals("Correct field value", "0", status2.getDisplayValue());
+
+		bindTag2.doEndTag();
+
+		BindStatus status3 = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertSame("Status matches previous status", status, status3);
+		assertEquals("tb.name", status.getPath());
+		assertEquals("Correct field value", "", status.getDisplayValue());
+
+		bindTag.doEndTag();
+		nestedPathTag.doEndTag();
 	}
 
 	public void testNestedPathWithBindTagWithIgnoreNestedPath() throws JspException {
