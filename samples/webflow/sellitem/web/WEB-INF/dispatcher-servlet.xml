@@ -3,16 +3,12 @@
 
 <beans>
 
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix" value="/WEB-INF/jsp/"/>
-		<property name="suffix" value=".jsp"/>
-	</bean>
-
 	<!--
-		A general purpose FlowController. Note that there is no default top-level flow configured.
+		A general purpose FlowController for the entire "Point of Sale (POS)" application.
+		Note that there is no default top-level flow configured.
 		The flow id of the flow to start should be passed in using the "_flowId" request parameter.
 	-->
-	<bean id="frontController" name="/sellitem.htm" class="org.springframework.web.flow.mvc.FlowController">
+	<bean id="frontController" name="/pos.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="flowExecutionManager" ref="flowExecutionManager"/>
 	</bean>
 
@@ -49,5 +45,10 @@
 	</bean>
 	
 	<bean id="sellItemAction" class="org.springframework.samples.sellitem.web.flow.action.SellItemAction"/>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
 
 </beans>
