@@ -26,14 +26,34 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * View that redirects to an internal or external URL,
- * exposing all model attributes as HTTP query parameters.
+ * <p>View that redirects to an absolute, context relative, or current
+ * request relative URL, exposing all model attributes as HTTP query
+ * parameters.</p>
  *
  * <p>A URL for this view is supposed to be a HTTP redirect URL,
- * i.e. suitable for HttpServletResponse's sendRedirect method.
- *
+ * i.e. suitable for HttpServletResponse's sendRedirect method, which
+ * is what actually does the redirect if the HTTP 1.0 flag is on, or via
+ * sending back an HTTP 303 code, if the HTTP 1.0 compatibility flag is
+ * off.</p>
+ * 
+ * <p>Note that while the default value for the contextRelative flag is
+ * off, you will probably want to almost always set it to true. With
+ * the flag off, urls starting with / are considered relative to the
+ * servlet container root, while with the flag on, they are considered
+ * relative to the web app context root. Since most web apps will never
+ * know or care what their context path actually is, they are much
+ * better off setting this flag to true, and submitting paths which are
+ * to be considered relative to the context root.
+ * 
+ * Note that in a Servlets 2.2 environment, which is only compliant to
+ * the limits of the spec, this class will probably fail when feeding in
+ * URLs which are not fully absolute, or relative to the current request
+ * (no leading /), as these are the only two URL types that sendRedirect
+ * supports in a 2.2 environment. 
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Colin Sampaleanu
  * @see javax.servlet.http.HttpServletResponse#sendRedirect
  */
 public class RedirectView extends AbstractUrlBasedView {
