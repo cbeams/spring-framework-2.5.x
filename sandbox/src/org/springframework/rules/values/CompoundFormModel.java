@@ -82,20 +82,41 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public MutableFormModel createChild(String childFormModelName,
             String parentPropertyFormObjectPath) {
-        ValueModel valueHolder = new PropertyAdapter(domainObjectAccessStrategy,
-                parentPropertyFormObjectPath);
+        ValueModel valueHolder = new PropertyAdapter(
+                domainObjectAccessStrategy, parentPropertyFormObjectPath);
         if (bufferChanges) {
             valueHolder = new BufferedValueModel(valueHolder);
         }
-        if (valueHolder.get() == null) {
-            valueHolder.set(BeanUtils
-                    .instantiateClass(domainObjectAccessStrategy
-                            .getMetadataAccessStrategy().getPropertyType(
-                                    parentPropertyFormObjectPath)));
-            return createChild(childFormModelName, valueHolder, false);
+        boolean enabledDefault = valueHolder.get() != null;
+        Class valueClass = domainObjectAccessStrategy
+                .getMetadataAccessStrategy().getPropertyType(
+                        parentPropertyFormObjectPath);
+        new ChildFormObjectSetter(valueHolder, valueClass);
+        return createChild(childFormModelName, valueHolder, enabledDefault);
+    }
+
+    private static class ChildFormObjectSetter implements ValueListener {
+        private ValueModel formObjectHolder;
+
+        private Class formObjectClass;
+
+        public ChildFormObjectSetter(ValueModel formObjectHolder,
+                Class formObjectClass) {
+            this.formObjectHolder = formObjectHolder;
+            this.formObjectClass = formObjectClass;
+            this.formObjectHolder.addValueListener(this);
+            setIfNull();
         }
-        else {
-            return createChild(childFormModelName, valueHolder, true);
+
+        public void valueChanged() {
+            setIfNull();
+        }
+
+        public void setIfNull() {
+            if (formObjectHolder.get() == null) {
+                formObjectHolder.set(BeanUtils
+                        .instantiateClass(formObjectClass));
+            }
         }
     }
 

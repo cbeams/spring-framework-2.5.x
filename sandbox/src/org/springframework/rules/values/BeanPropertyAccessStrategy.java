@@ -29,6 +29,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.enums.CodedEnum;
 import org.springframework.util.Assert;
+import org.springframework.util.ToStringBuilder;
 
 /**
  * Aspect access strategy that accesses bean property values. An "aspect" in
@@ -227,6 +228,10 @@ public class BeanPropertyAccessStrategy implements
     public MutablePropertyAccessStrategy newNestedAccessor(
             ValueModel childValueHolder) {
         return new BeanPropertyAccessStrategy(childValueHolder);
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this).append("beanHolder", beanHolder).toString();
     }
 
 }

@@ -326,7 +326,7 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
 
     public void commit() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Commit requested for this form model: " + this);
+            logger.debug("Commit requested for this form model " + this);
         }
         if (getFormObject() == null) {
             if (logger.isDebugEnabled()) {
@@ -336,7 +336,7 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
         }
         if (!enabled) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Form object is not enabled; commiting null value.");
+                logger.debug("Form is not enabled; commiting null value.");
             }
             getFormObjectHolder().set(null);
             if (getFormObjectHolder() instanceof BufferedValueModel) {

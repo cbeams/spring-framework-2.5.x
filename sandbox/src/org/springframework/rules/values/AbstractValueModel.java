@@ -29,22 +29,30 @@ import org.springframework.util.DefaultObjectStyler;
  * @author Keith Donald
  */
 public abstract class AbstractValueModel implements ValueModel {
-    protected Log logger = LogFactory.getLog(getClass());
+    protected static final Log logger = LogFactory
+            .getLog(AbstractValueModel.class);
 
-    private List listeners = new ArrayList();
+    private List listeners;
 
     public void addValueListener(ValueListener l) {
         if (logger.isDebugEnabled()) {
             logger.debug("[Adding value listener " + l + "]");
         }
-        listeners.add(l);
+        getOrCreateListenerList().add(l);
     }
 
     public void removeValueListener(ValueListener l) {
         if (logger.isDebugEnabled()) {
             logger.debug("[Removing value listener " + l + "]");
         }
-        listeners.remove(l);
+        getOrCreateListenerList().remove(l);
+    }
+
+    private List getOrCreateListenerList() {
+        if (listeners == null) {
+            listeners = new ArrayList(6);
+        }
+        return listeners;
     }
 
     protected void fireValueChanged() {
