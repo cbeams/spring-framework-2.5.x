@@ -1,17 +1,19 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.129 2004-04-20 22:04:43 jhoeller Exp $
+$Id: changelog.txt,v 1.130 2004-04-21 18:48:43 jhoeller Exp $
 
 
-Changes in version 1.0.1 (20.4.2003)
+Changes in version 1.0.1 (21.4.2003)
 ------------------------------------
 
 Package org.springframework.aop
-* added "addBeforeAdvice", "addAfterReturningAdvice", "addThrowsAdvice" methods to Advised, available on all AOP proxies
+* added "addBeforeAdvice"/"addAfterReturningAdvice"/"addThrowsAdvice" methods to Advised, available on all AOP proxies
 * added "addAfterReturningAdvice" method to AdvisedSupport
 * refined usage of AopConfigException, to avoid cyclic dependencies between org.springframework.aop subpackages
 * moved internal class AopUtils from package aop.framework.support to aop.support, to avoid cyclic package dependencies
 * renamed AbstractPrototypeTargetSource to AbstractPrototypeBasedTargetSource
+* renamed AbstractPrototypeTargetSourceCreator to AbstractPrototypeBasedTargetSourceCreator
+* fixed interface implementation check in DelegatingIntroductionInterceptor to also detect super-interfaces
 
 Package org.springframework.beans
 * added "getPropertyType" method to BeanWrapper/BeanWrapperImpl, capable of checking indexed/mapped elements
@@ -81,6 +83,8 @@ Package org.springframework.web
 * added overloaded "onBind" method with an additional BindException parameter to BaseCommandController
 * added overloaded "onSubmit" method with just command and BindException parameters to SimpleFormController
 * added "getThemeMessage" methods to RequestContext, for easy access to theme-specific messages in non-JSP views
+* added "arguments" property to MessageTag, allowing to specify a comma-delimited list of String message arguments
+* activated MessageTag's and ThemeTag's "var" and "scope" properties in Tag Library Descriptor (spring.tld)
 * reworked ComponentControllerSupport class for Tiles to be compatible with both Struts 1.1 and Struts 1.2
 * added Struts ActionSupport and DispatchActionSupport base classes, for easy access to a Spring context from Actions
 * added Struts ContextLoaderPlugIn and DelegatingActionProxy, superseding Don Brown's Spring Struts Plugin
