@@ -75,20 +75,20 @@ public abstract class AbstractPdfView extends AbstractView {
 		Document document = getDocument();
 		PdfWriter writer = PdfWriter.getInstance(document, baos);
 
-		// apply preferences and build metadata
+		// Apply preferences and build metadata.
 		writer.setViewerPreferences(getViewerPreferences());
 		buildPdfMetadata(model, document, request);
 
-		// build document
+		// Build PDF document.
 		document.open();
 		buildPdfDocument(model, document, writer, request, response);
 		document.close();
 
-		// write content type and also length (determined via byte array)
+		// Write content type and also length (determined via byte array).
 		response.setContentType(getContentType());
 		response.setContentLength(baos.size());
 
-		// flush byte array to servlet output stream
+		// Flush byte array to servlet output stream.
 		ServletOutputStream out = response.getOutputStream();
 		baos.writeTo(out);
 		out.flush();

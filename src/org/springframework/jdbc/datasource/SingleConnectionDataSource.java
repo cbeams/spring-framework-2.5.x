@@ -206,18 +206,24 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 
 		private final Connection target;
 
-		private CloseSuppressingInvocationHandler(Connection target) {
+		public CloseSuppressingInvocationHandler(Connection target) {
 			this.target = target;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// Invocation on ConnectionProxy interface coming in...
+
+			// Handle getTargetConnection method: return underlying connection.
 			if (method.getName().equals(GET_TARGET_CONNECTION_METHOD_NAME)) {
 				return this.target;
 			}
+
+			// Handle close method: don't pass the call on.
 			if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
-				// don't pass the call on
 				return null;
 			}
+
+			// Invoke method on target connection.
 			try {
 				return method.invoke(this.target, args);
 			}

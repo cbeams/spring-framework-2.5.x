@@ -466,6 +466,7 @@ public abstract class SessionFactoryUtils {
 	 * Hibernate Query object.
 	 * @param query the Hibernate Query object
 	 * @param sessionFactory Hibernate SessionFactory that the Query was created for
+	 * @see net.sf.hibernate.Query#setTimeout
 	 */
 	public static void applyTransactionTimeout(Query query, SessionFactory sessionFactory) {
 		Assert.notNull(query, "No Query object specified");
@@ -481,6 +482,7 @@ public abstract class SessionFactoryUtils {
 	 * Hibernate Criteria object.
 	 * @param criteria the Hibernate Criteria object
 	 * @param sessionFactory Hibernate SessionFactory that the Criteria was created for
+	 * @see net.sf.hibernate.Criteria#setTimeout
 	 */
 	public static void applyTransactionTimeout(Criteria criteria, SessionFactory sessionFactory) {
 		Assert.notNull(criteria, "No Criteria object specified");

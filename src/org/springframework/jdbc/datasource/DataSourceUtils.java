@@ -263,6 +263,7 @@ public abstract class DataSourceUtils {
 	 * to the given JDBC Statement object.
 	 * @param stmt the JDBC Statement object
 	 * @param dataSource DataSource that the Connection came from
+	 * @see java.sql.Statement#setQueryTimeout
 	 */
 	public static void applyTransactionTimeout(Statement stmt, DataSource dataSource) throws SQLException {
 		Assert.notNull(stmt, "No Statement specified");
