@@ -79,7 +79,7 @@ The "dist" directory contains the following (overlapping) jar files for use in a
 - Contents: bean container, utilities, AOP framework, transaction framework, JDBC support, O/R Mapping support, EJB access and support, application context, web application context, validation framework, web MVC framework, remoting support
 - Dependencies: Commons Logging, AOP Alliance (Log4J, CGLIB; JTA, Hibernate, JDO, EJB 2.0; Servlet 2.3, JSP 1.2, JSTL, Velocity, iText, POI, Hessian, Burlap)
 
-Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like Xerces and the JDBC 2.0 standard extension interfaces have to be added when using XML bean definitions and JDBC DataSource setup, respectively.
+Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like Xerces, the JDBC 2.0 standard extension interfaces, and JNDI have to be added when using XML bean definitions, JDBC DataSource setup, and JNDI lookups, respectively.
 
 Note: To use the JSP expression language for arguments of Spring's web MVC tags, the Jakarta implementation of the JSTL (standard.jar) has to be available in the class path. Else, any JSTL implementation will do.
 
