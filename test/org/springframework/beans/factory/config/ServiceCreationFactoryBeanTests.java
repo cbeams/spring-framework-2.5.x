@@ -79,11 +79,9 @@ public class ServiceCreationFactoryBeanTests extends TestCase {
 
 	public void testWithClassAsServiceCreatorInterface() throws Exception {
 		ServiceCreationFactoryBean scfb = new ServiceCreationFactoryBean();
-		scfb.setServiceCreatorInterface(TestServiceBean.class);
-		scfb.setServiceImplementationType(TestServiceBean.class);
 
 		try {
-			scfb.afterPropertiesSet();
+			scfb.setServiceCreatorInterface(TestServiceBean.class);
 			fail("Using a class for service creator interface should raise a FatalBeanException");
 		}
 		catch (FatalBeanException ex) {
@@ -106,11 +104,9 @@ public class ServiceCreationFactoryBeanTests extends TestCase {
 
 	public void testWithInterfaceAsServiceImplementationType() throws Exception {
 		ServiceCreationFactoryBean scfb = new ServiceCreationFactoryBean();
-		scfb.setServiceCreatorInterface(SingleMethodCreationInterface.class);
-		scfb.setServiceImplementationType(SingleMethodCreationInterface.class);
 
 		try {
-			scfb.afterPropertiesSet();
+			scfb.setServiceImplementationType(SingleMethodCreationInterface.class);
 			fail("Using an interface for service implementation type should raise a FatalBeanException");
 		}
 		catch (FatalBeanException ex) {

@@ -46,7 +46,7 @@ public interface JmxAttributeSource {
 	 * @return the attribute, or null if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
-	ManagedAttribute getManagedAttribute(Method method) throws org.springframework.jmx.export.metadata.InvalidMetadataException;
+	ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException;
 
 	/**
 	 * Sub-class should return an instance of <code>ManagedOperation</code> if
@@ -57,5 +57,15 @@ public interface JmxAttributeSource {
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
 	ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException;
+
+	/**
+	 * Sub-class should return an array of <code>ManagedOperationParameter</code> if
+	 * the supplied <code>Method</code> has the corresponding metadata. Otherwise
+	 * should return an empty array if no metadata is found.
+	 * @param method the <code>Method</code> to read the metadata from.
+	 * @return the parameter information.
+	 * @throws InvalidMetadataException in the case of invalid attributes.
+	 */
+	ManagedOperationParameter[] getManagedOperationParameters(Method method) throws InvalidMetadataException;
 
 }

@@ -21,8 +21,10 @@ import java.util.Map;
 
 import javax.management.Descriptor;
 import javax.management.MBeanInfo;
+import javax.management.MBeanParameterInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
+import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.NopInterceptor;
@@ -144,6 +146,21 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 		assertEquals("Currency Time Limit should be 30", "30", desc.getFieldValue("currencyTimeLimit"));
 		assertEquals("Role should be \"operation\"", "operation", desc.getFieldValue("role"));
+	}
+
+	public void testOperationParameterMetadata() throws Exception {
+		ModelMBeanInfo info = getMBeanInfoFromAssembler();
+
+		ModelMBeanOperationInfo oper = info.getOperation("add");
+
+		MBeanParameterInfo[] params = oper.getSignature();
+
+		assertEquals("Invalid number of params", 2, params.length);
+		assertEquals("Incorrect name for x param", "x", params[0].getName());
+		assertEquals("Incorrect type for x param", int.class.getName(), params[0].getType());
+		
+		assertEquals("Incorrect name for y param", "y", params[1].getName());
+		assertEquals("Incorrect type for y param", int.class.getName(), params[1].getType());
 	}
 
 	public void testWithProxy() throws Exception {

@@ -100,6 +100,8 @@ public class JmxTestBean implements IJmxTestBean {
 	 * @@org.springframework.jmx.export.metadata.ManagedOperation(description="Add Two
 	 *                                                                              Numbers
 	 *                                                                              Together")
+	 * @@org.springframework.jmx.export.metadata.ManagedOperationParameter(name="x", description="Left operand")
+	 * @@org.springframework.jmx.export.metadata.ManagedOperationParameter(name="y", description="Right operand")
 	 */
 	public int add(int x, int y) {
 		return x + y;

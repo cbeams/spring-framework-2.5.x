@@ -21,27 +21,27 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.jmx.export.metadata.InvalidMetadataException;
-import org.springframework.jmx.export.metadata.JmxAttributeSource;
+import org.springframework.jmx.export.metadata.*;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedResource;
+import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 
 /**
  * Implementation of the <code>JmxAttributeSource</code> interface that
  * reads JDK 1.5+ annotations and exposes the corresponding attributes.
- *
+ * <p/>
  * <p>This is a direct alternative to <code>AttributesJmxAttributeSource</code>,
  * which is able to read in source-level attributes via Commons Attributes.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 1.2
  * @see org.springframework.jmx.export.annotation.ManagedResource
  * @see org.springframework.jmx.export.annotation.ManagedAttribute
  * @see org.springframework.jmx.export.annotation.ManagedOperation
  * @see org.springframework.jmx.export.metadata.AttributesJmxAttributeSource
  * @see org.springframework.metadata.commons.CommonsAttributes
+ * @since 1.2
  */
 public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 
@@ -86,8 +86,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 	public ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
-			throw new InvalidMetadataException(
-					"The ManagedOperation attribute is not valid for JavaBean properties. Use ManagedAttribute instead.");
+			throw new InvalidMetadataException("The ManagedOperation attribute is not valid for JavaBean properties. Use ManagedAttribute instead.");
 		}
 
 		Annotation ann = method.getAnnotation(org.springframework.jmx.export.annotation.ManagedOperation.class);
@@ -100,6 +99,30 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 		op.setDescription(mo.description());
 		op.setCurrencyTimeLimit(mo.currencyTimeLimit());
 		return op;
+	}
+
+	public ManagedOperationParameter[] getManagedOperationParameters(Method method) throws InvalidMetadataException {
+		ManagedOperationParameters params = method.getAnnotation(ManagedOperationParameters.class);
+
+		ManagedOperationParameter[] result = null;
+		if (params == null) {
+			result = new ManagedOperationParameter[0];
+		}
+		else {
+			org.springframework.jmx.export.annotation.ManagedOperationParameter[] paramData = params.value();
+			result = new ManagedOperationParameter[paramData.length];
+
+			for (int i = 0; i < paramData.length; i++) {
+				org.springframework.jmx.export.annotation.ManagedOperationParameter managedOperationParameter = paramData[i];
+
+				ManagedOperationParameter param = new ManagedOperationParameter();
+				param.setName(managedOperationParameter.name());
+				param.setDescription(managedOperationParameter.description());
+				result[i] = param;
+			}
+		}
+
+		return result;
 	}
 
 }

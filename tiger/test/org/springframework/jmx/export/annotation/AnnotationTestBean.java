@@ -27,7 +27,7 @@ import org.springframework.jmx.IJmxTestBean;
 @ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
 		logFile = "jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
-public class AnnotationTestBean implements IJmxTestBean {
+		public class AnnotationTestBean implements IJmxTestBean {
 
 	private String name;
 
@@ -87,7 +87,9 @@ public class AnnotationTestBean implements IJmxTestBean {
 	}
 
 	@org.springframework.jmx.export.annotation.ManagedOperation(description = "Add Two Numbers Together")
-			public int add(int x, int y) {
+	@ManagedOperationParameters({@ManagedOperationParameter(name="x", description="Left operand"),
+			@ManagedOperationParameter(name="y", description="Right operand")})
+	public int add(int x, int y) {
 		return x + y;
 	}
 
