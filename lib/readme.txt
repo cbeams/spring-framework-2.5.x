@@ -185,11 +185,6 @@ distribution/website before using any of them in your own applications.
 - Jakarta's JSTL implementation 1.0.5 (http://jakarta.apache.org/taglibs)
 - required for running JPetStore, Petclinic, Countries, and Tiles Example
 
-* jboss/jboss-common-jdbc-wrapper.jar
-- JBoss connection pool classes (http://www.jboss.org)
-- required for building the framework
-- required at runtime when using Spring's JBossNativeJdbcExtractor
-
 * jdo/jdo.jar
 - JDO API 1.0.1 (http://access1.sun.com/jdo)
 - required for building the framework
