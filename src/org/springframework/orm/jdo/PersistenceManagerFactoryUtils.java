@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -46,6 +46,12 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
 	    throws DataAccessResourceFailureException {
+		return getPersistenceManager(pmf, allowCreate, true);
+	}
+
+	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate,
+	                                                       boolean allowSynchronization)
+	    throws DataAccessResourceFailureException {
 		PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
 		if (pmHolder != null) {
 			return pmHolder.getPersistenceManager();
@@ -56,12 +62,14 @@ public abstract class PersistenceManagerFactoryUtils {
 		logger.debug("Opening JDO persistence manager");
 		try {
 			PersistenceManager pm = pmf.getPersistenceManager();
-			if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
 				logger.debug("Registering transaction synchronization for JDO persistence manager");
 				// use same PersistenceManager for further JDO actions within the transaction
 				// thread object will get removed by synchronization at transaction completion
-				TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
-				TransactionSynchronizationManager.registerSynchronization(new PersistenceManagerSynchronization(pm, pmf));
+				pmHolder = new PersistenceManagerHolder(pm);
+				TransactionSynchronizationManager.bindResource(pmf, pmHolder);
+				TransactionSynchronizationManager.registerSynchronization(
+				    new PersistenceManagerSynchronization(pmHolder, pmf));
 			}
 			return pm;
 		}
@@ -115,26 +123,29 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * Callback for resource cleanup at the end of a non-JDO transaction
 	 * (e.g. when participating in a JTA transaction).
 	 */
-	private static class PersistenceManagerSynchronization implements TransactionSynchronization {
+	private static class PersistenceManagerSynchronization extends TransactionSynchronizationAdapter {
 
-		private PersistenceManager persistenceManager;
+		private PersistenceManagerHolder persistenceManagerHolder;
 
 		private PersistenceManagerFactory persistenceManagerFactory;
 
-		public PersistenceManagerSynchronization(PersistenceManager pm, PersistenceManagerFactory pmf) {
-			this.persistenceManager = pm;
+		private PersistenceManagerSynchronization(PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf) {
+			this.persistenceManagerHolder = pmHolder;
 			this.persistenceManagerFactory = pmf;
 		}
 
-		public void beforeCommit() {
+		public void suspend() {
+			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
+		}
+
+		public void resume() {
+			TransactionSynchronizationManager.bindResource(this.persistenceManagerFactory, this.persistenceManagerHolder);
 		}
 
 		public void beforeCompletion() throws CleanupFailureDataAccessException {
 			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
-			closePersistenceManagerIfNecessary(this.persistenceManager, this.persistenceManagerFactory);
-		}
-
-		public void afterCompletion(int status) {
+			closePersistenceManagerIfNecessary(this.persistenceManagerHolder.getPersistenceManager(),
+			                                   this.persistenceManagerFactory);
 		}
 	}
 

@@ -7,9 +7,9 @@ package org.springframework.transaction;
  * @author Juergen Hoeller
  * @since 12.05.2003
  */
-public class InvalidIsolationException extends TransactionUsageException {
+public class InvalidIsolationLevelException extends TransactionUsageException {
 
-	public InvalidIsolationException(String msg) {
+	public InvalidIsolationLevelException(String msg) {
 		super(msg);
 	}
 

@@ -47,6 +47,18 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.begin = true;
 	}
 
+	protected Object doSuspend(Object transaction) throws TransactionException {
+		return null;
+	}
+
+	protected void doResume(Object transaction, Object suspendedResources)
+	    throws TransactionException {
+	}
+
+	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
+		return false;
+	}
+
 	protected void doCommit(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
@@ -66,6 +78,9 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 			throw new IllegalArgumentException("Not the same transaction object");
 		}
 		this.rollbackOnly = true;
+	}
+
+	protected void doCleanupAfterCompletion(Object transaction) {
 	}
 
 }

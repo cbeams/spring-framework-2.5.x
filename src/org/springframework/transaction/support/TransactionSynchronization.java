@@ -24,6 +24,19 @@ public interface TransactionSynchronization {
 	 * Status in case of heuristic mixed completion or system errors
 	 */
 	int STATUS_UNKNOWN = 2;
+	
+
+	/**
+	 * Suspend this synchronization. Supposed to unbind resources
+	 * from TransactionSynchronizationManager if managing any.
+	 */
+	void suspend();
+
+	/**
+	 * Resume this synchronization. Supposed to rebind resources
+	 * to TransactionSynchronizationManager if managing any.
+	 */
+	void resume();
 
 	/**
 	 * Invoked before transaction commit (before "beforeCompletion").
@@ -32,7 +45,7 @@ public interface TransactionSynchronization {
 	 * and cause a rollback of the transaction.
 	 * @throws RuntimeException in case of errors
 	 */
-	void beforeCommit() throws RuntimeException;
+	void beforeCommit();
 
 	/**
 	 * Invoked before transaction commit/rollback (after "beforeCommit").
@@ -41,7 +54,7 @@ public interface TransactionSynchronization {
 	 * and cause a rollback of the transaction.
 	 * @throws RuntimeException in case of errors
 	 */
-	void beforeCompletion() throws RuntimeException;
+	void beforeCompletion();
 
 	/**
 	 * Invoked after transaction commit/rollback.
@@ -54,6 +67,6 @@ public interface TransactionSynchronization {
 	 * @see #STATUS_ROLLED_BACK
 	 * @see #STATUS_UNKNOWN
 	 */
-	void afterCompletion(int status) throws RuntimeException;
+	void afterCompletion(int status);
 
 }

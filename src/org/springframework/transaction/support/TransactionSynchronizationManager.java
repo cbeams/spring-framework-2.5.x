@@ -1,8 +1,8 @@
 package org.springframework.transaction.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -149,7 +149,7 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
-	 * Register a new JTA synchronization for the current thread.
+	 * Register a new transaction synchronization for the current thread.
 	 * Called by resource management code.
 	 * @throws IllegalStateException if synchronization is not active
 	 */
@@ -162,55 +162,17 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
-	 * Trigger beforeCommit calls for the current thread.
-	 * Called by transaction manager before transaction commit.
+	 * Return an unmodifiable list of all registered synchronizations
+	 * for the current thread.
+	 * @return unmodifiable List of TransactionSynchronization instances
 	 * @throws IllegalStateException if synchronization is not active
-	 * @see TransactionSynchronization#beforeCommit
+	 * @see TransactionSynchronization
 	 */
-	public static void triggerBeforeCommit() throws IllegalStateException {
+	public static List getSynchronizations() {
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
-		logger.debug("Triggering beforeCommit synchronization");
-		for (Iterator it = ((List) synchronizations.get()).iterator(); it.hasNext();) {
-			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-			synchronization.beforeCommit();
-		}
-	}
-
-	/**
-	 * Trigger beforeCompletion calls for the current thread.
-	 * Called by transaction manager before transaction commit/rollback.
-	 * @throws IllegalStateException if synchronization is not active
-	 * @see TransactionSynchronization#beforeCommit
-	 */
-	public static void triggerBeforeCompletion() throws IllegalStateException {
-		if (!isSynchronizationActive()) {
-			throw new IllegalStateException("Transaction synchronization is not active");
-		}
-		logger.debug("Triggering beforeCompletion synchronization");
-		for (Iterator it = ((List) synchronizations.get()).iterator(); it.hasNext();) {
-			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-			synchronization.beforeCompletion();
-		}
-	}
-
-	/**
-	 * Trigger afterCompletion calls for the current thread.
-	 * Called by transaction manager after transaction commit/rollback.
-	 * @param status completion status according to TransactionSynchronization constants
-	 * @throws IllegalStateException if synchronization is not active
-	 * @see TransactionSynchronization#afterCompletion
-	 */
-	public static void triggerAfterCompletion(int status) throws IllegalStateException {
-		if (!isSynchronizationActive()) {
-			throw new IllegalStateException("Transaction synchronization is not active");
-		}
-		logger.debug("Triggering afterCompletion synchronization");
-		for (Iterator it = ((List) synchronizations.get()).iterator(); it.hasNext();) {
-			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-			synchronization.afterCompletion(status);
-		}
+		return Collections.unmodifiableList((List) synchronizations.get());
 	}
 
 	/**

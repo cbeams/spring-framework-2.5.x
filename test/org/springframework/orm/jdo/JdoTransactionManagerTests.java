@@ -14,7 +14,7 @@ import javax.transaction.UserTransaction;
 import junit.framework.TestCase;
 
 import org.easymock.MockControl;
-import org.springframework.transaction.InvalidIsolationException;
+import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.JtaTransactionTestSuite;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -335,11 +335,68 @@ public class JdoTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
+	public void testNestedTransactionWithRequiresNew() {
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
+		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
+		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		final MockControl txControl = MockControl.createControl(Transaction.class);
+		final Transaction tx = (Transaction) txControl.getMock();
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm, 2);
+		pm.currentTransaction();
+		pmControl.setReturnValue(tx, 5);
+		tx.begin();
+		txControl.setVoidCallable(1);
+		pm.close();
+		pmControl.setVoidCallable(2);
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
+
+		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		final List l = new ArrayList();
+		l.add("test");
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				txControl.reset();
+				tx.isActive();
+				txControl.setReturnValue(true, 1);
+				tx.begin();
+				txControl.setVoidCallable(1);
+				tx.commit();
+				txControl.setVoidCallable(2);
+				txControl.replay();
+
+				return tt.execute(new TransactionCallback() {
+					public Object doInTransaction(TransactionStatus status) {
+						JdoTemplate jt = new JdoTemplate(pmf);
+						return jt.execute(new JdoCallback() {
+							public Object doInJdo(PersistenceManager pm) {
+								return l;
+							}
+						});
+					}
+				});
+			}
+		});
+		assertTrue("Correct result list", result == l);
+
+		pmfControl.verify();
+		pmControl.verify();
+		txControl.verify();
+	}
+
 	public void testJtaTransactionCommit() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -446,9 +503,9 @@ public class JdoTransactionManagerTests extends TestCase {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 				}
 			});
-			fail("Should have thrown InvalidIsolationException");
+			fail("Should have thrown InvalidIsolationLevelException");
 		}
-		catch (InvalidIsolationException ex) {
+		catch (InvalidIsolationLevelException ex) {
 			// expected
 		}
 

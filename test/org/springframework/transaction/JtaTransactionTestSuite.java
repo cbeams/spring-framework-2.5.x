@@ -20,6 +20,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -54,6 +55,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -91,6 +94,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -128,6 +133,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -486,9 +493,9 @@ public class JtaTransactionTestSuite extends TestCase {
 					// something transactional
 				}
 			});
-			fail("Should have thrown InvalidIsolationException");
+			fail("Should have thrown InvalidIsolationLevelException");
 		}
-		catch (InvalidIsolationException ex) {
+		catch (InvalidIsolationLevelException ex) {
 			// expected
 		}
 
@@ -545,9 +552,9 @@ public class JtaTransactionTestSuite extends TestCase {
 					// something transactional
 				}
 			});
-			fail("Should have thrown NestedTransactionNotPermittedException");
+			fail("Should have thrown IllegalTransactionStateException");
 		}
-		catch (NestedTransactionNotPermittedException ex) {
+		catch (IllegalTransactionStateException ex) {
 			// expected
 		}
 
@@ -570,9 +577,9 @@ public class JtaTransactionTestSuite extends TestCase {
 					// something transactional
 				}
 			});
-			fail("Should have thrown NestedTransactionNotPermittedException");
+			fail("Should have thrown IllegalTransactionStateException");
 		}
-		catch (NestedTransactionNotPermittedException ex) {
+		catch (IllegalTransactionStateException ex) {
 			// expected
 		}
 
@@ -609,6 +616,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -620,11 +629,7 @@ public class JtaTransactionTestSuite extends TestCase {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-						public void beforeCommit() {
-						}
-						public void beforeCompletion() {
-						}
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 						public void afterCompletion(int status) {
 							assertTrue("Correct completion status", status == TransactionSynchronization.STATUS_ROLLED_BACK);
 						}
@@ -645,6 +650,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -656,11 +663,7 @@ public class JtaTransactionTestSuite extends TestCase {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-						public void beforeCommit() {
-						}
-						public void beforeCompletion() {
-						}
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 						public void afterCompletion(int status) {
 							assertTrue("Correct completion status", status == TransactionSynchronization.STATUS_UNKNOWN);
 						}
@@ -682,6 +685,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -693,11 +698,7 @@ public class JtaTransactionTestSuite extends TestCase {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-						public void beforeCommit() {
-						}
-						public void beforeCompletion() {
-						}
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 						public void afterCompletion(int status) {
 							assertTrue("Correct completion status", status == TransactionSynchronization.STATUS_UNKNOWN);
 						}
@@ -719,6 +720,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -730,11 +733,7 @@ public class JtaTransactionTestSuite extends TestCase {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-						public void beforeCommit() {
-						}
-						public void beforeCompletion() {
-						}
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 						public void afterCompletion(int status) {
 							assertTrue("Correct completion status", status == TransactionSynchronization.STATUS_UNKNOWN);
 						}
@@ -765,11 +764,7 @@ public class JtaTransactionTestSuite extends TestCase {
 			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-						public void beforeCommit() {
-						}
-						public void beforeCompletion() {
-						}
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 						public void afterCompletion(int status) {
 							assertTrue("Correct completion status", status == TransactionSynchronization.STATUS_UNKNOWN);
 						}
@@ -825,11 +820,7 @@ public class JtaTransactionTestSuite extends TestCase {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					status.setRollbackOnly();
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-						public void beforeCommit() {
-						}
-						public void beforeCompletion() {
-						}
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 						public void afterCompletion(int status) {
 							assertTrue("Correct completion status", status == TransactionSynchronization.STATUS_UNKNOWN);
 						}

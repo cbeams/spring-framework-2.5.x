@@ -33,7 +33,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.17 2004-01-20 10:41:10 jhoeller Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.18 2004-01-26 18:03:46 jhoeller Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
@@ -86,7 +86,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		ptmControl.verify();
 
 		// Install facade expecting a call
-		final TransactionStatus ts = new DefaultTransactionStatus(null, true, false, false);
+		final TransactionStatus ts = new DefaultTransactionStatus(null, true, false, false, null);
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
 			public TransactionStatus getTransaction(TransactionDefinition definition)

@@ -10,7 +10,7 @@ package org.springframework.jdbc.datasource;
  * @since 02.05.2003
  * @see DataSourceTransactionManager
  * @see ConnectionHolder
- * @version $Id: DataSourceTransactionObject.java,v 1.4 2003-12-30 01:02:44 jhoeller Exp $
+ * @version $Id: DataSourceTransactionObject.java,v 1.5 2004-01-26 18:03:42 jhoeller Exp $
  */
 public class DataSourceTransactionObject {
 
@@ -23,7 +23,7 @@ public class DataSourceTransactionObject {
 	/**
 	 * Create DataSourceTransactionObject for new ConnectionHolder.
 	 */
-	public DataSourceTransactionObject() {
+	protected DataSourceTransactionObject() {
 	}
 
 	/**

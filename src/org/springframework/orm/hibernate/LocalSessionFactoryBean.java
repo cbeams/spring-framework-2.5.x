@@ -23,6 +23,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.transaction.jta.JtaDialect;
 
 /**
  * FactoryBean that creates a local Hibernate SessionFactory instance.
@@ -104,6 +105,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private DataSource dataSource;
 
+	private JtaDialect jtaDialect;
+
 	private LobHandler lobHandler;
 
 	private Interceptor entityInterceptor;
@@ -111,6 +114,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	private boolean schemaUpdate = false;
 
 	private SessionFactory sessionFactory;
+
 
 	/**
 	 * Set the location of the Hibernate XML config file as class path resource.
@@ -158,12 +162,25 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Set the DataSource to be used by the SessionFactory.
-	 * If set, this will override any setting in the Hibernate properties.
+	 * If set, this will override corresponding settings in Hibernate properties.
 	 * <p>Note: If this is set, the Hibernate settings should not define
 	 * a connection provider to avoid meaningless double configuration.
+	 * @see LocalDataSourceConnectionProvider
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Set the JTA dialect to be used for Hibernate's TransactionManagerLookup.
+	 * If set, this will override corresponding settings in Hibernate properties.
+	 * Allows to use Spring's JTA dialect for Hibernate's cache synchronization.
+	 * <p>Note: If this is set, the Hibernate settings should not define a
+	 * transaction manager lookup to avoid meaningless double configuration.
+	 * @see JtaDialectTransactionManagerLookup
+	 */
+	public void setJtaDialect(JtaDialect jtaDialect) {
+		this.jtaDialect = jtaDialect;
 	}
 
 	/**
@@ -205,6 +222,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	public void setSchemaUpdate(boolean schemaUpdate) {
 		this.schemaUpdate = schemaUpdate;
 	}
+
 
 	/**
 	 * Initialize the SessionFactory for the given or the default location.
@@ -266,6 +284,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			LocalDataSourceConnectionProvider.configTimeDataSourceHolder.set(this.dataSource);
 		}
 
+		if (this.jtaDialect != null) {
+			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, JtaDialectTransactionManagerLookup.class.getName());
+			JtaDialectTransactionManagerLookup.configTimeJtaDialectHolder.set(this.jtaDialect);
+		}
+
 		if (this.entityInterceptor != null) {
 			// set given entity interceptor at SessionFactory level
 			config.setInterceptor(this.entityInterceptor);
@@ -277,6 +300,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		// build SessionFactory instance
 		logger.info("Building new Hibernate SessionFactory");
 		this.sessionFactory = newSessionFactory(config);
+
+		if (this.jtaDialect != null) {
+			// reset JtaDialect holder
+			JtaDialectTransactionManagerLookup.configTimeJtaDialectHolder.set(null);
+		}
 
 		if (this.dataSource != null) {
 			// reset DataSource holder

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.InvalidIsolationException;
+import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
@@ -101,7 +101,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Set the JDO dialect to use for this transaction manager.
-	 * <p>The dialect object can be used to retrieve the underlying JDBC connection
+	 * <p>The dialect object can be used to retrieve the underlying JDBC connectionHolder
 	 * and thus allows for exposing JDO transactions as JDBC transactions.
 	 */
 	public void setJdoDialect(JdoDialect jdoDialect) {
@@ -141,7 +141,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			throw new InvalidIsolationException("JdoTransactionManager does not support custom isolation levels");
+			throw new InvalidIsolationLevelException("JdoTransactionManager does not support custom isolation levels");
 		}
 		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 			throw new InvalidTimeoutException("JdoTransactionManager does not support timeouts", definition.getTimeout());
@@ -153,7 +153,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
 		if (txObject.getPersistenceManagerHolder() == null) {
 			logger.debug("Opening new persistence manager for JDO transaction");
-			PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory, true);
+			PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory,
+			                                                                             true, false);
 			txObject.setPersistenceManagerHolder(new PersistenceManagerHolder(pm));
 		}
 
@@ -179,6 +180,26 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+	protected Object doSuspend(Object transaction) {
+		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
+		txObject.setPersistenceManagerHolder(null);
+		PersistenceManagerHolder persistenceManagerHolder =
+		    (PersistenceManagerHolder) TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
+		ConnectionHolder connectionHolder = null;
+		if (this.dataSource != null) {
+			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(this.dataSource);
+		}
+		return new SuspendedResourcesHolder(persistenceManagerHolder, connectionHolder);
+	}
+
+	protected void doResume(Object transaction, Object suspendedResources) {
+		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
+		TransactionSynchronizationManager.bindResource(this.persistenceManagerFactory, resourcesHolder.getPersistenceManagerHolder());
+		if (this.dataSource != null) {
+			TransactionSynchronizationManager.bindResource(this.dataSource, resourcesHolder.getConnectionHolder());
+		}
+	}
+
 	protected boolean isRollbackOnly(Object transaction) {
 		return ((JdoTransactionObject) transaction).getPersistenceManagerHolder().isRollbackOnly();
 	}
@@ -190,7 +211,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().commit();
 		}
 		catch (JDOFatalException ex) {
-			// assumably from commit call to underlying JDBC connection
+			// assumably from commit call to underlying JDBC connectionHolder
 			throw new TransactionSystemException("Could not commit JDO transaction", ex);
 		}
 		catch (JDOException ex) {
@@ -216,10 +237,10 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		txObject.getPersistenceManagerHolder().setRollbackOnly();
 	}
 
-	protected void cleanupAfterCompletion(Object transaction) {
+	protected void doCleanupAfterCompletion(Object transaction) {
 		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
 
-		// remove the JDBC connection holder from the thread, if set
+		// remove the JDBC connectionHolder holder from the thread, if set
 		if (this.dataSource != null) {
 			TransactionSynchronizationManager.unbindResource(this.dataSource);
 		}
@@ -238,6 +259,34 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 		else {
 			logger.debug("Not closing pre-bound JDO persistence manager after transaction");
+		}
+	}
+
+
+	/**
+	 * Holder for suspended resources.
+	 * Used internally by doSuspend and doResume.
+	 * @see #doSuspend
+	 * @see #doResume
+	 */
+	private static class SuspendedResourcesHolder {
+
+		private final PersistenceManagerHolder persistenceManagerHolder;
+
+		private final ConnectionHolder connectionHolder;
+
+		private SuspendedResourcesHolder(PersistenceManagerHolder persistenceManagerHolder,
+		                                 ConnectionHolder connectionHolder) {
+			this.persistenceManagerHolder = persistenceManagerHolder;
+			this.connectionHolder = connectionHolder;
+		}
+
+		private PersistenceManagerHolder getPersistenceManagerHolder() {
+			return persistenceManagerHolder;
+		}
+
+		private ConnectionHolder getConnectionHolder() {
+			return connectionHolder;
 		}
 	}
 

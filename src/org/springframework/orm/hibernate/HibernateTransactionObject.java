@@ -45,11 +45,8 @@ public class HibernateTransactionObject {
 	 * Set new SessionHolder.
 	 */
 	protected void setSessionHolder(SessionHolder sessionHolder) {
-		if (this.sessionHolder != null) {
-			throw new IllegalStateException("Already initialized with an existing SessionHolder");
-		}
 		this.sessionHolder = sessionHolder;
-		this.newSessionHolder = true;
+		this.newSessionHolder = (sessionHolder != null);
 	}
 
 	public SessionHolder getSessionHolder() {

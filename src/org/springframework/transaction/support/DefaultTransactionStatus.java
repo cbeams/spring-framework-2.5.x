@@ -24,6 +24,8 @@ public class DefaultTransactionStatus implements TransactionStatus {
 
 	private boolean debug;
 
+	private Object suspendedResources;
+
 	private boolean rollbackOnly;
 
 	/**
@@ -39,11 +41,13 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	 * debug logging should be enabled.
 	 */
 	public DefaultTransactionStatus(Object transaction, boolean newTransaction,
-																	boolean newSynchronization, boolean debug) {
+																	boolean newSynchronization, boolean debug,
+	                                Object suspendedResources) {
 		this.transaction = transaction;
 		this.newTransaction = newTransaction;
 		this.newSynchronization = newSynchronization;
 		this.debug = debug;
+		this.suspendedResources = suspendedResources;
 	}
 
 	/**
@@ -75,6 +79,10 @@ public class DefaultTransactionStatus implements TransactionStatus {
 		// on behalf of clients, as well as for the present efficiency concern. Could
 		// also even provide a transaction log, to ensure that output all appeared together.
 		return debug;
+	}
+
+	public Object getSuspendedResources() {
+		return suspendedResources;
 	}
 
 	public void setRollbackOnly() {

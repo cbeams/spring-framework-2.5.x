@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jndi.AbstractJndiLocator;
 import org.springframework.jndi.JndiTemplate;
-import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
  
 /**
@@ -37,7 +37,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.5 2003-11-13 11:48:15 jhoeller Exp $
+ * @version $Id: DataSourceUtils.java,v 1.6 2004-01-26 18:03:42 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -100,19 +100,25 @@ public abstract class DataSourceUtils {
 	 * @see DataSourceTransactionManager
 	 */
 	public static Connection getConnection(DataSource ds) throws CannotGetJdbcConnectionException {
-		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
-		if (holder != null) {
-			return holder.getConnection();
+		return getConnection(ds, true);
+	}
+
+	public static Connection getConnection(DataSource ds, boolean allowSynchronization)
+	    throws CannotGetJdbcConnectionException {
+		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
+		if (conHolder != null) {
+			return conHolder.getConnection();
 		}
 		else {
 			try {
 				Connection con = ds.getConnection();
-				if (TransactionSynchronizationManager.isSynchronizationActive()) {
+				if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
 					logger.debug("Registering transaction synchronization for JDBC connection");
 					// use same Connection for further JDBC actions within the transaction
 					// thread object will get removed by synchronization at transaction completion
-					TransactionSynchronizationManager.bindResource(ds, new ConnectionHolder(con));
-					TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(con, ds));
+					conHolder = new ConnectionHolder(con);
+					TransactionSynchronizationManager.bindResource(ds, conHolder);
+					TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, ds));
 				}
 				return con;
 			}
@@ -207,26 +213,28 @@ public abstract class DataSourceUtils {
 	 * Callback for resource cleanup at the end of a non-native-JDBC transaction
 	 * (e.g. when participating in a JTA transaction).
 	 */
-	private static class ConnectionSynchronization implements TransactionSynchronization {
+	private static class ConnectionSynchronization extends TransactionSynchronizationAdapter {
 
-		private Connection connection;
+		private ConnectionHolder connectionHolder;
 
 		private DataSource dataSource;
 
-		public ConnectionSynchronization(Connection connection, DataSource dataSource) {
-			this.connection = connection;
+		private ConnectionSynchronization(ConnectionHolder connectionHolder, DataSource dataSource) {
+			this.connectionHolder = connectionHolder;
 			this.dataSource = dataSource;
 		}
 
-		public void beforeCommit() {
+		public void suspend() {
+			TransactionSynchronizationManager.unbindResource(this.dataSource);
+		}
+
+		public void resume() {
+			TransactionSynchronizationManager.bindResource(this.dataSource, this.connectionHolder);
 		}
 
 		public void beforeCompletion() throws CannotCloseJdbcConnectionException {
 			TransactionSynchronizationManager.unbindResource(this.dataSource);
-			closeConnectionIfNecessary(this.connection, this.dataSource);
-		}
-
-		public void afterCompletion(int status) {
+			closeConnectionIfNecessary(this.connectionHolder.getConnection(), this.dataSource);
 		}
 	}
 

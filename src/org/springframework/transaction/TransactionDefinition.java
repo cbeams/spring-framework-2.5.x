@@ -24,6 +24,7 @@ public interface TransactionDefinition {
 
 	String ISOLATION_CONSTANT_PREFIX = "ISOLATION";
 
+
 	/**
 	 * Support a current transaction, create a new one if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
@@ -44,6 +45,25 @@ public interface TransactionDefinition {
 	int PROPAGATION_MANDATORY = 2;
 
 	/**
+	 * Create a new transaction, suspending the current one if one exists.
+	 * Analogous to EJB transaction attribute of the same name.
+	 */
+	int PROPAGATION_REQUIRES_NEW = 3;
+
+	/**
+	 * Execute non-transactional, suspending the current one if one exists.
+	 * Analogous to EJB transaction attribute of the same name.
+	 */
+	int PROPAGATION_NOT_SUPPORTED = 4;
+
+	/**
+	 * Execute non-transactional, throw an exception if a transaction exists.
+	 * Analogous to EJB transaction attribute of the same name.
+	 */
+	int PROPAGATION_NEVER = 5;
+
+
+	/**
 	 * Use the default isolation level of the underlying datastore.
 	 * All other levels correspond to the JDBC isolation levels.
 	 * @see java.sql.Connection
@@ -58,11 +78,13 @@ public interface TransactionDefinition {
 
 	int ISOLATION_SERIALIZABLE     = Connection.TRANSACTION_SERIALIZABLE;
 
+
 	/**
 	 * Use the default timeout of the underlying transaction system,
 	 * respectively none if timeouts are not supported. 
 	 */
 	int TIMEOUT_DEFAULT = -1;
+
 
 	/**
 	 * Return the propagation behavior.

@@ -378,6 +378,121 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
+	public void testNestedTransactionWithRequiresNew() throws HibernateException, SQLException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 2);
+		session.beginTransaction();
+		sessionControl.setReturnValue(tx, 2);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 2);
+		tx.commit();
+		txControl.setVoidCallable(2);
+		session.connection();
+		sessionControl.setReturnValue(con, 2);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 2);
+		sfControl.replay();
+		sessionControl.replay();
+		conControl.replay();
+		txControl.replay();
+
+		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		final List l = new ArrayList();
+		l.add("test");
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				return tt.execute(new TransactionCallback() {
+					public Object doInTransaction(TransactionStatus status) {
+						HibernateTemplate ht = new HibernateTemplate(sf);
+						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+						return ht.executeFind(new HibernateCallback() {
+							public Object doInHibernate(Session session) {
+								return l;
+							}
+						});
+					}
+				});
+			}
+		});
+		assertTrue("Correct result list", result == l);
+
+		sfControl.verify();
+		sessionControl.verify();
+		txControl.verify();
+	}
+
+	public void testNestedTransactionWithNotSupported() throws HibernateException, SQLException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 2);
+		session.beginTransaction();
+		sessionControl.setReturnValue(tx, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 1);
+		session.flush();
+		sessionControl.setVoidCallable(2);
+		session.close();
+		sessionControl.setReturnValue(null, 2);
+		tx.commit();
+		txControl.setVoidCallable(1);
+		session.connection();
+		sessionControl.setReturnValue(con, 1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		conControl.replay();
+		txControl.replay();
+
+		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		final List l = new ArrayList();
+		l.add("test");
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+				return tt.execute(new TransactionCallback() {
+					public Object doInTransaction(TransactionStatus status) {
+						HibernateTemplate ht = new HibernateTemplate(sf);
+						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+						return ht.executeFind(new HibernateCallback() {
+							public Object doInHibernate(Session session) {
+								return l;
+							}
+						});
+					}
+				});
+			}
+		});
+		assertTrue("Correct result list", result == l);
+
+		sfControl.verify();
+		sessionControl.verify();
+		txControl.verify();
+	}
+
 	public void testJtaTransactionCommit() throws Exception {
 		doTestJtaTransactionCommit(Status.STATUS_NO_TRANSACTION);
 	}
@@ -391,6 +506,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(status, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		if (status == Status.STATUS_NO_TRANSACTION) {
 			ut.begin();
 			utControl.setVoidCallable(1);
@@ -680,6 +797,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		tm.setEntityInterceptor(entityInterceptor);
 		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		final List l = new ArrayList();
 		l.add("test");
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
@@ -829,7 +947,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 	}
 
 	protected void tearDown() {
-		//assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 

@@ -65,7 +65,7 @@ public abstract class SessionFactoryUtils {
 		if (!TransactionSynchronizationManager.hasResource(sessionFactory) && !allowCreate) {
 			throw new IllegalStateException("Not allowed to create new Hibernate session");
 		}
-		return getSession(sessionFactory, null, null);
+		return getSession(sessionFactory, null, null, true);
 	}
 
 	/**
@@ -86,23 +86,29 @@ public abstract class SessionFactoryUtils {
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public static Session getSession(SessionFactory sessionFactory, Interceptor entityInterceptor,
-																	 SQLExceptionTranslator jdbcExceptionTranslator)
+																	 SQLExceptionTranslator jdbcExceptionTranslator) {
+		return getSession(sessionFactory, entityInterceptor, jdbcExceptionTranslator, true);
+	}
+
+	public static Session getSession(SessionFactory sessionFactory, Interceptor entityInterceptor,
+																	 SQLExceptionTranslator jdbcExceptionTranslator, boolean allowSynchronization)
 			throws DataAccessResourceFailureException {
-		SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (holder != null) {
-			return holder.getSession();
+		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		if (sessionHolder != null) {
+			return sessionHolder.getSession();
 		}
 		try {
 			logger.debug("Opening Hibernate session");
 			Session session = (entityInterceptor != null ?
 			    sessionFactory.openSession(entityInterceptor) : sessionFactory.openSession());
-			if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
 				logger.debug("Registering transaction synchronization for Hibernate session");
 				// use same Session for further Hibernate actions within the transaction
 				// thread object will get removed by synchronization at transaction completion
-				TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
+				sessionHolder = new SessionHolder(session);
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 				TransactionSynchronizationManager.registerSynchronization(
-						new SessionSynchronization(session, sessionFactory, jdbcExceptionTranslator));
+						new SessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator));
 			}
 			return session;
 		}
@@ -201,7 +207,7 @@ public abstract class SessionFactoryUtils {
 	 */
 	private static class SessionSynchronization implements TransactionSynchronization {
 
-		private Session session;
+		private SessionHolder sessionHolder;
 		
 		private SessionFactory sessionFactory;
 
@@ -213,9 +219,9 @@ public abstract class SessionFactoryUtils {
 		 */
 		private boolean hibernateTransactionCompletion;
 
-		private SessionSynchronization(Session session, SessionFactory sessionFactory,
-																	SQLExceptionTranslator jdbcExceptionTranslator) {
-			this.session = session;
+		private SessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory,
+		                               SQLExceptionTranslator jdbcExceptionTranslator) {
+			this.sessionHolder = sessionHolder;
 			this.sessionFactory = sessionFactory;
 			this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 			// check whether the SessionFactory has a looked-up JTA TransactionManager
@@ -224,11 +230,19 @@ public abstract class SessionFactoryUtils {
 					 ((SessionFactoryImplementor) sessionFactory).getTransactionManager() != null);
 		}
 
+		public void suspend() {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+		}
+
+		public void resume() {
+			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
+		}
+
 		public void beforeCommit() throws DataAccessException {
-			if (!this.session.getFlushMode().equals(FlushMode.NEVER)) {
+			if (!this.sessionHolder.getSession().getFlushMode().equals(FlushMode.NEVER)) {
 				logger.debug("Flushing Hibernate session on transaction synchronization");
 				try {
-					this.session.flush();
+					this.sessionHolder.getSession().flush();
 				}
 				catch (JDBCException ex) {
 					if (this.jdbcExceptionTranslator != null) {
@@ -247,16 +261,17 @@ public abstract class SessionFactoryUtils {
 		public void beforeCompletion() throws CleanupFailureDataAccessException {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 			if (this.hibernateTransactionCompletion) {
-				closeSessionIfNecessary(this.session, this.sessionFactory);
+				closeSessionIfNecessary(this.sessionHolder.getSession(), this.sessionFactory);
 			}
 		}
 
 		public void afterCompletion(int status) {
 			if (!this.hibernateTransactionCompletion) {
-				if (this.session instanceof SessionImplementor) {
-					((SessionImplementor) this.session).afterTransactionCompletion(status == STATUS_COMMITTED);
+				Session session = sessionHolder.getSession();
+				if (session instanceof SessionImplementor) {
+					((SessionImplementor) session).afterTransactionCompletion(status == STATUS_COMMITTED);
 				}
-				closeSessionIfNecessary(this.session, this.sessionFactory);
+				closeSessionIfNecessary(session, this.sessionFactory);
 			}
 		}
 	}

@@ -29,7 +29,7 @@ public class TransactionTestSuite extends TestCase {
 			tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
 			fail("Should not have thrown NoTransactionException");
 		}
-		catch (NoTransactionException ex) {
+		catch (IllegalTransactionStateException ex) {
 			// expected
 		}
 	}

@@ -22,7 +22,7 @@ public class JdoTransactionObject {
 	/**
 	 * Create JdoTransactionObject for new PersistenceManagerHolder.
 	 */
-	public JdoTransactionObject() {
+	protected JdoTransactionObject() {
 	}
 
 	/**
@@ -37,11 +37,8 @@ public class JdoTransactionObject {
 	 * Set new PersistenceManagerHolder.
 	 */
 	protected void setPersistenceManagerHolder(PersistenceManagerHolder persistenceManagerHolder) {
-		if (this.persistenceManagerHolder != null) {
-			throw new IllegalStateException("Already initialized with an existing PersistenceManagerHolder");
-		}
 		this.persistenceManagerHolder = persistenceManagerHolder;
-		this.newPersistenceManagerHolder = true;
+		this.newPersistenceManagerHolder = (persistenceManagerHolder != null);
 	}
 
 	public PersistenceManagerHolder getPersistenceManagerHolder() {

@@ -28,7 +28,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.15 2004-01-20 10:41:09 jhoeller Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.16 2004-01-26 18:03:44 jhoeller Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -49,8 +49,9 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	public static TransactionStatus currentTransactionStatus() throws AspectException {
 		TransactionStatus status = (TransactionStatus) currentTransactionStatus.get();
-		if (status == null)
-			throw new NoTransactionException("No transaction status in scope");
+		if (status == null) {
+			throw new NoTransactionException("No TransactionInterceptor-managed TransactionStatus in scope");
+		}
 		return status;
 	}
 
@@ -180,7 +181,8 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	 * Handle a throwable.
 	 * We may commit or roll back, depending on our configuration.
 	 */
-	private void onThrowable(MethodInvocation invocation, TransactionAttribute txAtt, TransactionStatus status, Throwable ex) {
+	private void onThrowable(MethodInvocation invocation, TransactionAttribute txAtt,
+	                         TransactionStatus status, Throwable ex) {
 		if (txAtt.rollbackOn(ex)) {
 			logger.info("Invoking rollback for transaction on method '" + invocation.getMethod().getName() +
 									"' due to throwable [" + ex + "]");

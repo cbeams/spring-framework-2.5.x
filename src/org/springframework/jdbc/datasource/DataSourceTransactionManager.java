@@ -45,7 +45,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.12 2004-01-20 10:41:09 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.13 2004-01-26 18:03:42 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -116,7 +116,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			if (debugEnabled) {
 				logger.debug("Opening new connection for JDBC transaction");
 			}
-			Connection con = DataSourceUtils.getConnection(this.dataSource);
+			Connection con = DataSourceUtils.getConnection(this.dataSource, false);
 			txObject.setConnectionHolder(new ConnectionHolder(con));
 		}
 
@@ -170,6 +170,17 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 	}
 
+	protected Object doSuspend(Object transaction) {
+		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
+		txObject.setConnectionHolder(null);
+		return TransactionSynchronizationManager.unbindResource(this.dataSource);
+	}
+
+	protected void doResume(Object transaction, Object suspendedResources) {
+		ConnectionHolder conHolder = (ConnectionHolder) suspendedResources;
+		TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
+	}
+
 	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 		return txObject.getConnectionHolder().isRollbackOnly();
@@ -209,7 +220,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		txObject.getConnectionHolder().setRollbackOnly();
 	}
 
-	protected void cleanupAfterCompletion(Object transaction) {
+	protected void doCleanupAfterCompletion(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 
 		// remove the connection holder from the thread

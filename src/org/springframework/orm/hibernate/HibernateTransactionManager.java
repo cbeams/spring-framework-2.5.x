@@ -220,7 +220,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		if (txObject.getSessionHolder() == null) {
 			Session session = SessionFactoryUtils.getSession(this.sessionFactory, this.entityInterceptor,
-																											 this.jdbcExceptionTranslator);
+																											 this.jdbcExceptionTranslator, false);
 			if (debugEnabled) {
 				logger.debug("Opened new session [" + session + "] for Hibernate transaction");
 			}
@@ -253,8 +253,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 			else if (!txObject.isNewSessionHolder()) {
 				// we need AUTO for a non-read-only transaction
-				txObject.setPreviousFlushMode(session.getFlushMode());
-				session.setFlushMode(FlushMode.AUTO);
+				FlushMode flushMode = session.getFlushMode();
+				if (!FlushMode.AUTO.equals(flushMode)) {
+					txObject.setPreviousFlushMode(flushMode);
+					session.setFlushMode(FlushMode.AUTO);
+				}
 			}
 
 			// apply isolation level
@@ -295,6 +298,30 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		catch (HibernateException ex) {
 			throw new CannotCreateTransactionException("Could not create Hibernate transaction", ex);
+		}
+	}
+
+	protected Object doSuspend(Object transaction) {
+		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
+		txObject.setSessionHolder(null);
+		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+		ConnectionHolder connectionHolder = null;
+		if (this.dataSource != null) {
+			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(this.dataSource);
+		}
+		return new SuspendedResourcesHolder(sessionHolder, connectionHolder);
+	}
+
+	protected void doResume(Object transaction, Object suspendedResources) {
+		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
+		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
+			// from non-transactional code running in active transaction synchronization
+			// -> can be safely removed, will be closed on transaction completion
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+		}
+		TransactionSynchronizationManager.bindResource(this.sessionFactory, resourcesHolder.getSessionHolder());
+		if (this.dataSource != null) {
+			TransactionSynchronizationManager.bindResource(this.dataSource, resourcesHolder.getConnectionHolder());
 		}
 	}
 
@@ -356,7 +383,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		txObject.getSessionHolder().setRollbackOnly();
 	}
 
-	protected void cleanupAfterCompletion(Object transaction) {
+	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
 		// remove the JDBC connection holder from the thread, if set
@@ -443,6 +470,33 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		else {
 			return new HibernateJdbcException(ex);
+		}
+	}
+
+
+	/**
+	 * Holder for suspended resources.
+	 * Used internally by doSuspend and doResume.
+	 * @see #doSuspend
+	 * @see #doResume
+	 */
+	private static class SuspendedResourcesHolder {
+
+		private final SessionHolder sessionHolder;
+
+		private final ConnectionHolder connectionHolder;
+
+		private SuspendedResourcesHolder(SessionHolder sessionHolder, ConnectionHolder connectionHolder) {
+			this.sessionHolder = sessionHolder;
+			this.connectionHolder = connectionHolder;
+		}
+
+		private SessionHolder getSessionHolder() {
+			return sessionHolder;
+		}
+
+		private ConnectionHolder getConnectionHolder() {
+			return connectionHolder;
 		}
 	}
 
