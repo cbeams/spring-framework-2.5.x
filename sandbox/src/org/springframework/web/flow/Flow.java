@@ -403,14 +403,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param subFlowIdSuffix
+	 * @param subFlowStateId
 	 * @param subFlowAttributesMapperId
 	 * @param subFlowDefaultFinishStateId
 	 * @return
 	 */
-	public boolean addSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
+	public boolean addSubFlow(String subFlowStateId, String subFlowAttributesMapperId,
 			String subFlowDefaultFinishStateId) {
-		return addSubFlow(subFlowIdSuffix, subFlowAttributesMapperId, new Transition[] {
+		return addSubFlow(subFlowStateId, subFlowAttributesMapperId, new Transition[] {
 				onBack(subFlowDefaultFinishStateId), onCancel(subFlowDefaultFinishStateId),
 				onFinish(subFlowDefaultFinishStateId) });
 	}
@@ -449,9 +449,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowDefaultFinishStateId
 	 * @return
 	 */
-	public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
+	public boolean addEditSubFlow(String editSubFlowIdSuffix, String subFlowAttributesMapperId,
 			String subFlowDefaultFinishStateId) {
-		return addSubFlow(buildEditFlowId(subFlowIdSuffix), subFlowAttributesMapperId, subFlowDefaultFinishStateId);
+		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), subFlowAttributesMapperId, subFlowDefaultFinishStateId);
 	}
 
 	/**
@@ -459,8 +459,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addEditSubFlow(String subFlowIdSuffix, Transition[] transitions) {
-		return addSubFlow(buildEditFlowId(subFlowIdSuffix), transitions);
+	public boolean addEditSubFlow(String editSubFlowIdSuffix, Transition[] transitions) {
+		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), transitions);
 	}
 
 	/**
@@ -469,8 +469,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId, Transition[] transitions) {
-		return addSubFlow(buildEditFlowId(subFlowIdSuffix), subFlowAttributesMapperId, transitions);
+	public boolean addEditSubFlow(String editSubFlowIdSuffix, String subFlowAttributesMapperId, Transition[] transitions) {
+		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), subFlowAttributesMapperId, transitions);
 	}
 
 	/**
@@ -1119,14 +1119,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param editSubFlowStateIdPrefix
-	 * @return
-	 */
-	public Transition onSuccessEdit(String editSubFlowStateIdPrefix) {
-		return onSuccess(edit(editSubFlowStateIdPrefix));
-	}
-
-	/**
 	 * @param viewStateIdPrefix
 	 * @return
 	 */
@@ -1158,14 +1150,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param editSubFlowStateIdPrefix
-	 * @return
-	 */
-	public Transition onEditEdit(String editSubFlowStateIdPrefix) {
-		return onEvent(EDIT, edit(editSubFlowStateIdPrefix));
-	}
-
-	/**
 	 * @param submitActionStateId
 	 * @return
 	 */
@@ -1186,14 +1170,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public Transition onSubmitBindAndValidate(String bindAndValidateStateIdPrefix) {
 		return onSubmit(bindAndValidate(bindAndValidateStateIdPrefix));
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @return
-	 */
-	public Transition onSubmitEdit(String stateIdPrefix) {
-		return onSubmit(edit(stateIdPrefix));
 	}
 
 	/**
@@ -1255,14 +1231,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public Transition onBackView(String viewActionStateIdPrefix) {
 		return onBack(view(viewActionStateIdPrefix));
-	}
-
-	/**
-	 * @param editSubFlowStateIdPrefix
-	 * @return
-	 */
-	public Transition onBackEdit(String editSubFlowStateIdPrefix) {
-		return onBack(edit(editSubFlowStateIdPrefix));
 	}
 
 	/**
@@ -1369,14 +1337,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param editSubFlowStateIdPrefix
-	 * @return
-	 */
-	public Transition onFinishEdit(String editSubFlowStateIdPrefix) {
-		return onFinish(edit(editSubFlowStateIdPrefix));
-	}
-
-	/**
 	 * @param errorStateIdPrefix
 	 * @return
 	 */
@@ -1469,14 +1429,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public String delete(String deleteActionStateIdPrefix) {
 		return buildStateId(deleteActionStateIdPrefix, DELETE);
-	}
-
-	/**
-	 * @param editActionStateIdPrefix
-	 * @return
-	 */
-	public String edit(String editActionStateIdPrefix) {
-		return buildStateId(editActionStateIdPrefix, EDIT);
 	}
 
 	/**
