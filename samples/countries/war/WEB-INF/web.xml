@@ -40,7 +40,7 @@
 	  - directory of this web app, for usage in log file paths.
 	  - This web app specifies "countries.root" (see log4j.properties file).
 	  -->
-	<!-- Uncomment if you use any other server than JBoss -->
+	<!-- Leave the listener commented if using JBoss -->
 	<!--
 	<listener>
 		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
@@ -116,19 +116,23 @@
 	</welcome-file-list>
 
 	<!--
-	  - Errors pages
+	  - Error page
 	  -->
 	<error-page>
 		<error-code>404</error-code>
 		<location>/notfound.htm</location>
 	</error-page>
 
+	<!--
+		- Reference to Countries database.
+		- Only needed if not using a local DataSource.
+		-->
+	<!--
 	<resource-ref>
-		<description>Resource reference to RDBMS</description>
-		<res-ref-name>jdbc/countries-ds</res-ref-name>
+		<res-ref-name>jdbc/countries</res-ref-name>
 		<res-type>javax.sql.DataSource</res-type>
 		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
 	</resource-ref>
+	-->
 
 </web-app>

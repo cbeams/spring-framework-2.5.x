@@ -6,9 +6,9 @@
 
 <web-app>
 
-	<display-name>Petclinic</display-name>
+	<display-name>Spring Petclinic</display-name>
 
-	<description>Petclinic sample application</description>
+	<description>Spring Petclinic sample application</description>
 
 	<!--
 	  - Key of the system property that should specify the root directory of this
@@ -55,7 +55,7 @@
 	  - directory of this web app, for usage in log file paths.
 	  - This web app specifies "petclinic.root" (see log4j.properties file).
 	  -->
-	<!-- Comment the listener if using JBoss -->
+	<!-- Leave the listener commented if using JBoss -->
 	<!--
 	<listener>
 		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
@@ -124,20 +124,16 @@
 		<location>/WEB-INF/jsp/uncaughtException.jsp</location>
 	</error-page>
 
+	<!--
+		- Reference to Petclinic database.
+		- Only needed if not using a local DataSource.
+		-->
+	<!--
 	<resource-ref>
-		<description>Resource reference to RDBMS</description>
-		<res-ref-name>jdbc/petclinicHSQL</res-ref-name>
+		<res-ref-name>jdbc/petclinic</res-ref-name>
 		<res-type>javax.sql.DataSource</res-type>
 		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
 	</resource-ref>
-
-	<resource-ref>
-		<description>Resource reference to RDBMS</description>
-		<res-ref-name>jdbc/petclinicMYSQL</res-ref-name>
-		<res-type>javax.sql.DataSource</res-type>
-		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>
+	-->
 
 </web-app>
