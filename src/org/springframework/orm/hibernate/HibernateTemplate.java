@@ -1,16 +1,16 @@
 package org.springframework.orm.hibernate;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
 
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.ObjectNotFoundException;
+import net.sf.hibernate.Query;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
-import net.sf.hibernate.Query;
 import net.sf.hibernate.type.Type;
-
 import org.springframework.dao.DataAccessException;
 
 /**
@@ -248,6 +248,27 @@ public class HibernateTemplate extends HibernateAccessor {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.delete(entity);
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * Delete all given persistent instances.
+	 * This can be combined with any of the find methods to delete by query
+	 * in two lines of code, similar to Session's delete by query methods.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.delete.
+	 * @param entities the persistent instances to delete
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#delete(String)
+	 */
+	public void deleteAll(final List entities) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				for (Iterator it = entities.iterator(); it.hasNext();) {
+					session.delete(it.next());
+				}
 				return null;
 			}
 		});
@@ -573,12 +594,13 @@ public class HibernateTemplate extends HibernateAccessor {
 
 	/**
 	 * Create a Query object for the given Session and the given query string.
+	 * Applies a transaction timeout, if any.
 	 * @param session current Hibernate Session
 	 * @param queryString the HQL query string
 	 * @return the Query object
 	 * @throws HibernateException if the query could not be created
 	 */
-	private Query createQuery(Session session, String queryString) throws HibernateException {
+	public Query createQuery(Session session, String queryString) throws HibernateException {
 		Query queryObject = session.createQuery(queryString);
 		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
 		return queryObject;
@@ -586,12 +608,13 @@ public class HibernateTemplate extends HibernateAccessor {
 
 	/**
 	 * Create a named Query object for the given Session and the given query name.
+	 * Applies a transaction timeout, if any.
 	 * @param session current Hibernate Session
 	 * @param queryName the name of the query in the Hibernate mapping file
 	 * @return the Query object
 	 * @throws HibernateException if the query could not be created
 	 */
-	private Query getNamedQuery(Session session, String queryName) throws HibernateException {
+	public Query getNamedQuery(Session session, String queryName) throws HibernateException {
 		Query queryObject = session.getNamedQuery(queryName);
 		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
 		return queryObject;

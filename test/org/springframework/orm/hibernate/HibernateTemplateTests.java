@@ -335,6 +335,35 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testDeleteAll() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb1 = new TestBean();
+		TestBean tb2 = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.delete(tb1);
+		sessionControl.setVoidCallable(1);
+		session.delete(tb2);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+			sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List tbs = new ArrayList();
+		tbs.add(tb1);
+		tbs.add(tb2);
+		ht.deleteAll(tbs);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testFind() throws HibernateException {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
