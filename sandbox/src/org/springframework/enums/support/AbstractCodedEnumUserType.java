@@ -31,7 +31,6 @@ import org.springframework.enums.CodedEnum;
 import org.springframework.enums.CodedEnumResolver;
 import org.springframework.enums.ShortCodedEnum;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -42,8 +41,6 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
     private transient final Log logger = LogFactory.getLog(getClass());
 
     private transient CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
-
-    private NullableType codePersistentType;
 
     protected CodedEnumResolver getEnumResolver() {
         if (enumResolver == null) {
@@ -57,11 +54,11 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
     }
 
     public int[] sqlTypes() {
-        return codePersistentType.sqlTypes(null);
+        return persistentType().sqlTypes(null);
     }
 
     protected String enumType() {
-        return ClassUtils.getShortNameAsProperty(returnedClass());
+        return returnedClass().getName();
     }
 
     public boolean equals(Object o1, Object o2) throws HibernateException {
@@ -82,7 +79,6 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
 
     public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
         Object code;
-        Assert.notNull(codePersistentType, "The enum code's persistent type must be set");
         code = persistentType().nullSafeGet(rs, names[0]);
         if (code == null) {
             return null;
