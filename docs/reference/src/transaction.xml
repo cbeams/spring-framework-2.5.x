@@ -6,20 +6,75 @@
     <title>The Spring transaction abstraction</title>
 
     <para>Spring provides a consistent abstraction for transaction management.
-    This abstraction delivers the following benefits:<itemizedlist><listitem><para>Provides
+    This abstraction is one of the most important of Spring&#39;s
+    abstractiions, and delivers the following benefits:<itemizedlist><listitem><para>Provides
     a consistent programming model across different transaction APIs such as
-    JTA, JDBC, Hibernate, iBATIS Database Layer and JDO</para></listitem><listitem><para>Provides
-    a simpler, easier to use API for programmatic transaction management than
-    most of these transaction APIs</para></listitem><listitem><para>Supports
+    JTA, JDBC, Hibernate, iBATIS Database Layer and JDO.</para></listitem><listitem><para>Provides
+    a simpler, easier to use, API for programmatic transaction management than
+    most of these transaction APIs</para></listitem><listitem><para>Integrates
+    with the Spring data access abstraction</para></listitem><listitem><para>Supports
     Spring declarative transaction management</para></listitem></itemizedlist></para>
 
-    <para>Spring provides this consistent model through the PTM </para>
+    <para>Traditionally, J2EE developers have had two choices for transaction
+    management: to use <emphasis>global</emphasis> or <emphasis>local</emphasis>
+    transactions. Global transactions are managed by the application server,
+    using JTA. Local transactions are resource-specific: for example, a
+    transaction associated with a JDBC connection. This choice had profound
+    implications. Global transactions provide the ability to work with
+    multiple transactional resources. With local transactions, the application
+    server is not involved in transaction management, and cannot help ensure
+    correctness across multiple resources.</para>
+
+    <para>Global transactions have a significant downside. Code needs to use
+    JTA: a cumbersome API to use (partly due to its exception model).
+    Furthermore, a JTA <literal>UserTransaction</literal> normally needs to be
+    obtained from JNDI: meaning that we need to use <emphasis>both</emphasis>
+    JNDI and JTA to use JTA. Obviously all use of global transactions limits
+    the reusability of application code, as JTA is normally only available in
+    an application server environment.</para>
+
+    <para>The preferred way to use global transactions was via EJB
+    <emphasis>CMT</emphasis> (<emphasis>Container Managed Transaction</emphasis>):
+    a form of <emphasis role="bold">declarative transaction management</emphasis>
+    (as distinguished from <emphasis role="bold">programmatic transaction
+    management</emphasis>). EJB CMT removes the need for JNDI lookups. It
+    removes most--not all--need to write Java code to control transactions.
+    The significant downside is that CMT is (obviously) tied to JTA and an
+    application server environment; and that it&#39;s only available if we
+    choose to implement business logic in EJBs, or at least behind a
+    transactional EJB facade. The negatives around EJB are so great that this
+    is not an attractive proposition, when there are alternatives for
+    declarative transaction management.</para>
+
+    <para>Local transactions may be easier to use, but also have significant
+    disadvantages: they cannot work across multiple transactional resources,
+    and tend to invade the programming model. For example, code that manages
+    transactions using a JDBC connection cannot run within a global JTA
+    transaction.</para>
+
+    <para>Spring resolves these problems. It enables application developers to
+    use a consistent programming model <emphasis>in any environment</emphasis>.
+    You write your code once, and it can benefit from different transaction
+    management strategies in different environments. Spring provides both
+    declarative and programmatic transaction management, although declarative
+    transaction management is preferred by most users, and recommended in most
+    cases.</para>
+
+    <para>With programmatic transaction management developers work with the
+    Spring transaction abstraction, which can run over any underlying
+    transaction infrastructure. With the preferred, declarative, model,
+    developers typically write little or no code related to transaction
+    management, and hence don&#39;t depend on Spring&#39;s or any other
+    transaction API.</para>
   </sect1>
 
   <sect1>
     <title>Transaction strategies</title>
 
-    <para>Spring provides</para>
+    <para>The key to the Spring transaction abstraction is the notion of a
+    <emphasis>transaction strategy</emphasis>.</para>
+
+    <para>Show API</para>
   </sect1>
 
   <sect1>
@@ -37,15 +92,61 @@
   <sect1>
     <title>Declarative transaction management</title>
 
-    <para>Spring also offers declarative transaction management. This is based
-    on Spring AOP.</para>
+    <para>Spring also offers declarative transaction management. This is
+    enabled by Spring AOP.</para>
 
-    <para>Spring declarative transaction management is most similar to EJB
-    CMT.</para>
+    <para>It may be helpful to begin by considering EJB CMT and explaining the
+    similarities and differences with Spring declarative transaction
+    management. The basic approach is similar: it&#39;s possible to specify
+    transaction behaviour (or lack of it) down to individual methods. It&#39;s
+    possible to make a setRollbackOnly() call within a transaction context if
+    necessary. The differences are:</para>
 
-    <para></para>
+    <itemizedlist>
+      <listitem>
+        <para>Unlike EJB CMT, which is tied to JTA, Spring declarative
+        transaction management works in any environment. It can work with
+        JDBC, JDO, Hibernate or other transactions under the covers, with
+        configuration changes only.</para>
+      </listitem>
 
-    <para></para>
+      <listitem>
+        <para>Spring enables declarative transaction management to be applied
+        to any POJO, not just special classes such as EJBs.</para>
+      </listitem>
+
+      <listitem>
+        <para>Spring offers declarative <emphasis>rollback rules</emphasis>: a
+        feature with no EJB equivalent, which we&#39;ll discuss below.</para>
+      </listitem>
+
+      <listitem>
+        <para></para>
+      </listitem>
+
+      <listitem>
+        <para>Spring does not support propagation of transaction contexts
+        across remote calls, as do high-end application servers. If you need
+        this feature, we recommend that you use EJB. However, don&#39;t use
+        this feature lightly. Normally we don&#39;t want transactions to span
+        remote calls.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>RR HEADING</para>
+
+    <para>While the EJB default behaviour is the for the EJB container to
+    automatically roll back the transaction on a <emphasis>system exception</emphasis>
+    (usually a runtime exception), EJB CMT does not roll back the transaction
+    automatically on an <emphasis>application exception</emphasis> (checked
+    exception other than <literal>java.rmi.RemoteException</literal>). </para>
+
+    <para>The performance of Spring declarative transaction management exceeds
+    that of EJB CMT, in benchmarks we have run.</para>
+
+    <para>ConFIGURATION</para>
+
+    <para>AUTOPROXYING</para>
   </sect1>
 
   <sect1></sect1>
