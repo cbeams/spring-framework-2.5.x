@@ -114,8 +114,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 		if (this.proxyInterface != null) {
 			// We need a proxy and a JndiObjectTargetSource.
-			this.jndiObject =
-			    JndiObjectProxyFactory.createJndiObjectProxy(this);
+			this.jndiObject = JndiObjectProxyFactory.createJndiObjectProxy(this);
 		}
 		else {
 			if (!this.lookupOnStartup || !this.cache) {
@@ -135,7 +134,15 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	}
 
 	public Class getObjectType() {
-		return (this.jndiObject != null) ? this.jndiObject.getClass() : null;
+		if (this.jndiObject != null) {
+			return this.jndiObject.getClass();
+		}
+		else if (this.proxyInterface != null) {
+			return this.proxyInterface;
+		}
+		else {
+			return null;
+		}
 	}
 
 	public boolean isSingleton() {

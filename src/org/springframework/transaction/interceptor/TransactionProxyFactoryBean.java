@@ -187,7 +187,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	}
 
 
-	public void afterPropertiesSet() throws AopConfigException {
+	public void afterPropertiesSet() {
 		this.transactionInterceptor.afterPropertiesSet();
 
 		if (this.target == null) {
@@ -209,7 +209,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		else {
 			// rely on default pointcut
 			proxyFactory.addAdvisor(new TransactionAttributeSourceAdvisor(this.transactionInterceptor));
-			// could just do the following, but it's usually less efficient because of AOP advice chain caching
+			// Could just do the following, but it's usually less efficient because of AOP advice chain caching.
 			// proxyFactory.addInterceptor(transactionInterceptor);
 		}
 
@@ -227,10 +227,11 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		}
 		else if (!isProxyTargetClass()) {
 			if (this.target instanceof TargetSource) {
-				throw new AopConfigException("Either 'proxyInterfaces' or 'proxyTargetClass' is required " +
-				                             "when using a TargetSource as 'target");
+				throw new AopConfigException(
+						"Either 'proxyInterfaces' or 'proxyTargetClass' is required " +
+						"when using a TargetSource as 'target");
 			}
-			// rely on AOP infrastructure to tell us what interfaces to proxy
+			// Rely on AOP infrastructure to tell us what interfaces to proxy.
 			proxyFactory.setInterfaces(AopUtils.getAllInterfaces(this.target));
 		}
 		this.proxy = proxyFactory.getProxy();
@@ -259,7 +260,13 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		if (this.proxy != null) {
 			return this.proxy.getClass();
 		}
-		else if (this.target != null && this.target instanceof TargetSource) {
+		else if (this.proxyInterfaces != null && this.proxyInterfaces.length == 1) {
+			return this.proxyInterfaces[0];
+		}
+		else if (this.target instanceof TargetSource) {
+			return ((TargetSource) this.target).getTargetClass();
+		}
+		else if (this.target != null) {
 			return this.target.getClass();
 		}
 		else {
