@@ -39,7 +39,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	/* Return single key value
 	 * @see org.springframework.jdbc.core.support.KeyHolder#getKey()
 	 */
-	public Object getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
+	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
 		if (keyList.size() == 0)
 			return null;
 		if (keyList.size() > 1 || ((Map)keyList.get(0)).size() > 1)
@@ -49,7 +49,12 @@ public class GeneratedKeyHolder implements KeyHolder {
 						keyList);
 		Iterator keyIter = ((Map)keyList.get(0)).values().iterator();
 		if (keyIter.hasNext()) {
-			return keyIter.next();
+			Object key = keyIter.next();
+			if (!(key instanceof Number)) {
+				throw new DataRetrievalFailureException("The generated key is not of a supported numeric type. " +"" +
+						"Unable to cast " + key.getClass().getName() + " to " + Number.class.getName() );
+			}
+			return (Number)key;
 		}
 		else {
 			throw new DataRetrievalFailureException("Unable to retrieve the generated key.  Check that the table has the an identity column enabled");

@@ -47,7 +47,7 @@ public interface KeyHolder {
 	 * @return the generated key
 	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered.
 	 */
-	Object getKey() throws InvalidDataAccessApiUsageException; 
+	Number getKey() throws InvalidDataAccessApiUsageException; 
 
 	/** 
 	 * Implementations must implement this method to retrieve the first map of
