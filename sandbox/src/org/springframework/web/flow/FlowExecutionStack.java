@@ -513,7 +513,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	//methods implementing MutableAttributesAccessor
 
 	public void setAttribute(String attributeName, Object attributeValue) {
-		if (ATTRIBUTE_NAME.equals(getFlowExecutionAttributeName())) {
+		if (getFlowExecutionAttributeName().equals(attributeName)) {
 			throw new IllegalArgumentException("Attribute name '" + getFlowExecutionAttributeName()
 					+ "' is reserved for internal use only");
 		}
