@@ -19,10 +19,11 @@ import javax.servlet.http.HttpServlet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.BeansException;
 
 /**
  * Simple extension of javax.servlet.http.HttpServlet that treats its config
@@ -34,7 +35,7 @@ import org.springframework.beans.PropertyValues;
  * However, it does use Java 1.4 logging emulation, which must have been
  * configured by another component.
  * @author Rod Johnson
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class HttpServletBean extends HttpServlet {
 	
@@ -46,21 +47,7 @@ public class HttpServletBean extends HttpServlet {
 	 */
 	private List requiredProperties = new LinkedList();
 	
-	/** Holds name info: useful for logging */
-	private String identifier;
-	
-	
-	//---------------------------------------------------------------------
-	// Constructors
-	//---------------------------------------------------------------------
-
 	/**
-	 * Construct a new HttpServletBean
-	 */
-	public HttpServletBean() {
-	}
-	
-	/** 
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
 	 * and must be supplied as a config parameter.
@@ -77,32 +64,23 @@ public class HttpServletBean extends HttpServlet {
 	 * are missing), or if subclass initialization fails.
 	 */
 	public final void init() throws ServletException {
-		this.identifier = "Servlet with name '" + getServletConfig().getServletName() + "' ";
-		 
-		logger.info(getIdentifier() + "entering init...");
-		
+		logger.info("Initializing servlet '" + getServletName() + "' ");
+
 		// Set bean properties
 		try {
-			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), requiredProperties);
+			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 			BeanWrapper bw = new BeanWrapperImpl(this);
 			bw.setPropertyValues(pvs);
-			logger.debug(getIdentifier() + "properties bound OK");
-			
-			// Let subclasses do whatever initialization they like
-			initServletBean();
-			logger.info(getIdentifier() + "configured successfully");
 		}
 		catch (BeansException ex) {
-			String mesg = getIdentifier() + ": error setting properties from ServletConfig";
-			logger.error(mesg, ex);
-			throw new ServletException(mesg, ex);
+			String msg = "Failed to set bean properties on servlet '" + getServletName() + "': " + ex.getMessage();
+			logger.error(msg, ex);
+			throw new ServletException(msg, ex);
 		}
-		catch (Throwable t) {
-			// Let subclasses throw unchecked exceptions
-			String mesg = getIdentifier() + ": initialization error";
-			logger.error(mesg, t);
-			throw new ServletException(mesg, t);
-		}
+
+		// Let subclasses do whatever initialization they like
+		initServletBean();
+		logger.info("Servlet '" + getServletName() + "' configured successfully");
 	}
 	
 	/**
@@ -112,20 +90,6 @@ public class HttpServletBean extends HttpServlet {
 	 * @throws ServletException if subclass initialization fails
 	 */
 	protected void initServletBean() throws ServletException {
-		logger.debug(getIdentifier() + "NOP default implementation of initServletBean");
-	}
-	
-	/** 
-	 * Return the name of this servlet:
-	 * handy to include in log messages. Subclasses may override it if
-	 * necessary to include additional information. Use like this: 
-	 * <code>
-	 * Category.getInstance(getClass()).debug(getIdentifier() + "body of message");
-	 * </code>
-	 * @return the name of this servlet
-	 */
-	protected String getIdentifier() {
-		return this.identifier;
 	}
 	
 }

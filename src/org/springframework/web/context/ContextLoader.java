@@ -33,8 +33,8 @@ public class ContextLoader {
 	private static final Log logger = LogFactory.getLog(ContextLoader.class);
 
 	/**
-	 * Initializes Spring's web application context for the given servlet context,
-	 * solely regarding the servlet context init parameter.
+	 * Initialize Spring's web application context for the given servlet context,
+	 * regarding the "contextClass" servlet context init parameter.
 	 * @param servletContext current servlet context
 	 * @return the new WebApplicationContext
 	 */
@@ -48,39 +48,41 @@ public class ContextLoader {
 		try {
 			Class clazz = (contextClass != null ? Class.forName(contextClass) : DEFAULT_CONTEXT_CLASS);
 			logger.info("Loading root WebApplicationContext: using context class '" + clazz.getName() + "'");
-
 			if (!WebApplicationContext.class.isAssignableFrom(clazz)) {
 				throw new ApplicationContextException("Context class is no WebApplicationContext: " + contextClass);
 			}
-
 			WebApplicationContext webApplicationContext = (WebApplicationContext) clazz.newInstance();
 			webApplicationContext.setServletContext(servletContext);
 			return webApplicationContext;
-
-		} catch (ApplicationContextException ex) {
+		}
+		catch (ApplicationContextException ex) {
 			handleException("Failed to initialize application context", ex);
-
-		} catch (BeansException ex) {
+		}
+		catch (BeansException ex) {
 			handleException("Failed to initialize beans in application context", ex);
-
-		} catch (ClassNotFoundException ex) {
+		}
+		catch (ClassNotFoundException ex) {
 			handleException("Failed to load config class '" + contextClass + "'", ex);
-
-		} catch (InstantiationException ex) {
+		}
+		catch (InstantiationException ex) {
 			handleException("Failed to instantiate config class '" + contextClass + "': does it have a public no arg constructor?", ex);
-
-		} catch (IllegalAccessException ex) {
+		}
+		catch (IllegalAccessException ex) {
 			handleException("Illegal access while finding or instantiating config class '" + contextClass + "': does it have a public no arg constructor?", ex);
-
-		} catch (Throwable ex) {
+		}
+		catch (Throwable ex) {
 			handleException("Unexpected error loading context configuration", ex);
 		}
 
 		return null;
 	}
 
+	/**
+	 * Log and throw an appropriate exception.
+	 */
 	private static void handleException(String msg, Throwable ex) throws ApplicationContextException {
-		logger.error(msg, ex);
+		String thrownMsg = msg + ": " + ex.getMessage();
+		logger.error(thrownMsg, ex);
 		if (ex instanceof Error) {
 			throw (Error) ex;
 		}
@@ -88,10 +90,14 @@ public class ContextLoader {
 			throw (ApplicationContextException) ex;
 		}
 		else {
-			throw new ApplicationContextException(msg, ex);
+			throw new ApplicationContextException(thrownMsg, ex);
 		}
 	}
 
+	/**
+	 * Close Spring's web application context for the given servlet context.
+	 * @param servletContext current servlet context
+	 */
 	public static void closeContext(ServletContext servletContext) {
 		servletContext.log("Closing root WebApplicationContext");
 		WebApplicationContextUtils.getWebApplicationContext(servletContext).close();

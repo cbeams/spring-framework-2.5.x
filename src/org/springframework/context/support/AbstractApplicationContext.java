@@ -59,7 +59,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -145,15 +145,6 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Return the parent context, or null if there is no parent,
-	 * and this is the root of the context hierarchy.
-	 * @return the parent context, or null if there is no parent
-	 */
-	public ApplicationContext getParent() {
-		return parent;
-	}
-
-	/**
 	 * Subclasses may call this to set parent after constructor.
 	 * Note that parent shouldn't be changed: it should only be
 	 * set later if it isn't available when an object of this
@@ -165,11 +156,12 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	}
 
 	/**
-	 * Return a friendly name for context
-	 * @return a display name for the context
+	 * Return the parent context, or null if there is no parent,
+	 * and this is the root of the context hierarchy.
+	 * @return the parent context, or null if there is no parent
 	 */
-	public String getDisplayName() {
-		return displayName;
+	public ApplicationContext getParent() {
+		return parent;
 	}
 
 	/**
@@ -178,6 +170,14 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 */
 	protected void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+
+	/**
+	 * Return a friendly name for context
+	 * @return a display name for the context
+	 */
+	public String getDisplayName() {
+		return displayName;
 	}
 
 	/**
@@ -200,8 +200,9 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 * Load or reload configuration.
 	 * @throws ApplicationContextException if the configuration was invalid or couldn't
 	 * be found, or if configuration has already been loaded and reloading is forbidden
+	 * @throws BeansException if the bean factory could not be initialized
 	 */
-	public final void refresh() throws ApplicationContextException {
+	public final void refresh() throws ApplicationContextException, BeansException {
 		if (this.contextOptions != null && !this.contextOptions.isReloadable())
 			throw new ApplicationContextException("Forbidden to reload config");
 
@@ -539,7 +540,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 * The method is invoked by refresh before any other initialization work.
 	 * @see #refresh
 	 */
-	protected abstract void refreshBeanFactory() throws ApplicationContextException;
+	protected abstract void refreshBeanFactory() throws ApplicationContextException, BeansException;
 
 	/**
 	 * Subclasses must return their internal bean factory here.

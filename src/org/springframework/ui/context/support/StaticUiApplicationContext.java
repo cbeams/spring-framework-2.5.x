@@ -1,14 +1,13 @@
 package org.springframework.ui.context.support;
 
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 
 /**
- * Adds theme capabilities for UI contexts.
+ * Static ApplicationContext implementation that adds theme capabilities
+ * for UI contexts.
  * @author Jean-Pierre Pawlak
  */
 public class StaticUiApplicationContext extends StaticApplicationContext implements ThemeSource {
@@ -18,14 +17,14 @@ public class StaticUiApplicationContext extends StaticApplicationContext impleme
 	/**
 	 * Standard constructor.
 	 */
-	public StaticUiApplicationContext()	throws BeansException, ApplicationContextException {
+	public StaticUiApplicationContext()	{
 		super();
 	}
 
 	/**
 	 * Constructor with parent context.
 	 */
-	public StaticUiApplicationContext(ApplicationContext parent) throws BeansException, ApplicationContextException {
+	public StaticUiApplicationContext(ApplicationContext parent) {
 		super(parent);
 	}
 

@@ -21,11 +21,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.util.WebUtils;
+import org.springframework.beans.BeansException;
 
 /**
  * Base servlet for servlets within the web framework. Allows integration
@@ -45,7 +47,7 @@ import org.springframework.web.util.WebUtils;
  * onto it. Subclasses can override initFrameworkServlet() for custom initialization.
   *
  * @author Rod Johnson
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  * @see #doService
  * @see #initFrameworkServlet
  */
@@ -157,19 +159,27 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(sc);
 		String namespace = getNamespace();
 
-		WebApplicationContext waca = (this.contextClass != null) ?
+		WebApplicationContext wac = (this.contextClass != null) ?
 				instantiateCustomWebApplicationContext(this.contextClass, parent, namespace) :
 				new XmlWebApplicationContext(parent, namespace);
-		logger.info("Loading WebApplicationContext for servlet '" + getServletName() + "': using context class '" + waca.getClass().getName() + "'");
-		waca.setServletContext(sc);
+		logger.info("Loading WebApplicationContext for servlet '" + getServletName() + "': using context class '" + wac.getClass().getName() + "'");
+		try {
+			wac.setServletContext(sc);
+		}
+		catch (ApplicationContextException ex) {
+			handleException("Failed to initialize application context", ex);
+		}
+		catch (BeansException ex) {
+			handleException("Failed to initialize beans in application context", ex);
+		}
 
 		if (this.publishContext) {
 			// Publish the context as a servlet context attribute
 			String attName = getServletContextAttributeName();
-			sc.setAttribute(attName, waca);
+			sc.setAttribute(attName, wac);
 			logger.info("Bound context of servlet '" + getServletName() + "' in global ServletContext with name '" + attName + "'");
 		}
-		return waca;
+		return wac;
 	}
 
 	/**
@@ -178,27 +188,44 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	private WebApplicationContext instantiateCustomWebApplicationContext(String className, WebApplicationContext parent, String namespace) throws ServletException {
 		logger.info("Servlet with name '" + getServletName() + "' will try to create custom WebApplicationContext context of class '" + className + "'");
+		WebApplicationContext wac = null;
 		try {
 			Class clazz = Class.forName(className);
-			if (!WebApplicationContext.class.isAssignableFrom(clazz))
+			if (!WebApplicationContext.class.isAssignableFrom(clazz)) {
 				throw new ServletException("Fatal initialization error in servlet with name '" + getServletName() + "': custom WebApplicationContext class '" + className + "' must implement WebApplicationContext");
+			}
 			Constructor constructor = clazz.getConstructor( new Class[] { ApplicationContext.class, String.class} );
-			return (WebApplicationContext) constructor.newInstance(new Object[] { parent, namespace} );
+			wac = (WebApplicationContext) constructor.newInstance(new Object[] { parent, namespace} );
 		}
 		catch (ClassNotFoundException ex) {
-			throw new ServletException("Fatal initialization error in servlet with name '" + getServletName() + "': can't load custom WebApplicationContext class '" + className + "'", ex);
-		}
-		catch (NoSuchMethodException ex) {
-			throw new ServletException("Fatal initialization error in servlet with name '" + getServletName() + "': custom WebApplicationContext class '" + className + "' must define a constructor taking ApplicationContext (parent) and String (namespace)", ex);
-		}
-		catch (InvocationTargetException ex) {
-			throw new ServletException("Fatal initialization error in servlet with name '" + getServletName() + "': custom WebApplicationContext class '" + className + "' : constructor threw exception", ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new ServletException("Fatal initialization error in servlet with name '" + getServletName() + "': custom WebApplicationContext class '" + className + "' : no permission to invoke constructor", ex);
+			handleException("Failed to find custom context class", ex);
 		}
 		catch (InstantiationException ex) {
-			throw new ServletException("Fatal initialization error in servlet with name '" + getServletName() + "': custom WebApplicationContext class '" + className + "' : failed to instantiate", ex);
+			handleException("Failed to instantiate custom context", ex);
+		}
+		catch (NoSuchMethodException ex) {
+			handleException("Failed to find constructor for custom context (must define a constructor taking ApplicationContext parent and String namespace)", ex);
+		}
+		catch (InvocationTargetException ex) {
+			handleException("Failed to invoke constructor for custom context", ex);
+		}
+		catch (IllegalAccessException ex) {
+			handleException("Failed to access constructor for custom context", ex);
+		}
+		return wac;
+	}
+
+	/**
+	 * Log and throw an appropriate exception.
+	 */
+	private void handleException(String msg, Throwable ex) throws ServletException {
+		String thrownMsg = msg + " for servlet '" + getServletName() + "': " + ex.getMessage();
+		logger.error(thrownMsg, ex);
+		if (ex instanceof Error) {
+			throw (Error) ex;
+		}
+		else {
+			throw new ServletException(thrownMsg, ex);
 		}
 	}
 

@@ -17,6 +17,7 @@ import java.io.InputStream;
 
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
@@ -39,7 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  * @see org.springframework.web.context.ContextLoader#initContext
  * @see org.springframework.web.servlet.FrameworkServlet#getNamespace
  */
@@ -113,7 +114,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	 * @param servletContext ServletContext to use to load configuration,
 	 * and in which this web application context should be set as an attribute.
 	 */
-	public void setServletContext(ServletContext servletContext) throws ApplicationContextException {
+	public void setServletContext(ServletContext servletContext) throws ApplicationContextException, BeansException {
 		this.servletContext = servletContext;
 		this.configLocation = initConfigLocation();
 		logger.info("Using config location '" + this.configLocation + "'");

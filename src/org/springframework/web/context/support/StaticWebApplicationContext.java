@@ -9,7 +9,7 @@ import org.springframework.ui.context.support.StaticUiApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * WebApplicationContext implementation for testing.
+ * Static WebApplicationContext implementation for testing.
  * Not for use in production applications.
  */
 public class StaticWebApplicationContext extends StaticUiApplicationContext implements WebApplicationContext {
@@ -21,8 +21,7 @@ public class StaticWebApplicationContext extends StaticUiApplicationContext impl
 	public StaticWebApplicationContext() {
 	}
 
-	public StaticWebApplicationContext(ApplicationContext parent, String namespace)
-	    throws BeansException, ApplicationContextException {
+	public StaticWebApplicationContext(ApplicationContext parent, String namespace) {
 		super(parent);
 		this.namespace = namespace;
 	}
@@ -35,7 +34,7 @@ public class StaticWebApplicationContext extends StaticUiApplicationContext impl
 	 * Normally this would cause loading, but this class doesn't rely on loading.
 	 * @see WebApplicationContext#setServletContext(ServletContext)
 	 */
-	public void setServletContext(ServletContext servletContext) {
+	public void setServletContext(ServletContext servletContext) throws ApplicationContextException, BeansException {
 		this.servletContext = servletContext;
 		refresh();
 		WebApplicationContextUtils.publishConfigObjects(this);

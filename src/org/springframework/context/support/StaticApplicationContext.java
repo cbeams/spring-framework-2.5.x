@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationContextException;
  * in code, rather than from external configuration sources.
  * Mainly useful for testing.
  * @author Rod Johnson
- * @version $RevisionId$
  */
 public class StaticApplicationContext extends AbstractApplicationContext {
 
@@ -26,11 +25,11 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	/** Namespace --> name */
 	private Map beanFactoryHash = new HashMap();
 
-	public StaticApplicationContext() throws BeansException, ApplicationContextException {
+	public StaticApplicationContext() {
 		this(null);
 	}
 
-	public StaticApplicationContext(ApplicationContext parent) throws BeansException, ApplicationContextException {
+	public StaticApplicationContext(ApplicationContext parent) {
 		super(parent);
 
 		// create bean factory with parent
@@ -39,32 +38,31 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 		// Register the message source bean
 		defaultBeanFactory.registerBeanDefinition(MESSAGE_SOURCE_BEAN_NAME,
 			new RootBeanDefinition(StaticMessageSource.class, null, true));
-
-		//refresh();
 	}
 
 	/**
-	 * Must invoke when finished
+	 * Must invoke when finished.
 	 */
-	public void rebuild() throws ApplicationContextException {
+	public void rebuild() throws ApplicationContextException, BeansException {
 		refresh();
 	}
 
 	/**
-	 * Return the BeanFactory for this namespace
+	 * Return the BeanFactory for this namespace.
 	 */
 	protected BeanFactory loadBeanFactory(String namespace) throws ApplicationContextException {
 		BeanFactory bf = (BeanFactory) beanFactoryHash.get(namespace);
-		if (bf == null)
+		if (bf == null) {
 			// No one's created it yet
 			throw new ApplicationContextException("Unknown namespace '" + namespace + "'");
+		}
 		return bf;
 	}
 
 	/**
-	 * Do nothing: we rely on callers to update our public methods
+	 * Do nothing: We rely on callers to update our public methods.
 	 */
-	protected void refreshBeanFactory() throws ApplicationContextException {
+	protected void refreshBeanFactory() {
 	}
 
 	protected ListableBeanFactoryImpl getBeanFactory() {
@@ -72,7 +70,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	}
 
 	/**
-	 * Register a bean with the default bean factory
+	 * Register a bean with the default bean factory.
 	 */
 	public void registerSingleton(String name, Class clazz, PropertyValues pvs) throws BeansException {
 		defaultBeanFactory.registerBeanDefinition(name,

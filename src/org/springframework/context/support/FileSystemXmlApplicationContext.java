@@ -3,6 +3,7 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
@@ -24,8 +25,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * location is the one of this context.
 	 * @param locations comma-delimited String consisting of locations
 	 */
-	public FileSystemXmlApplicationContext(String locations)
-	    throws ApplicationContextException, IOException {
+	public FileSystemXmlApplicationContext(String locations) throws ApplicationContextException, BeansException, IOException {
 		this(StringUtils.commaDelimitedListToStringArray(locations));
 	}
 
@@ -35,8 +35,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * location is the one of this context.
 	 * @param locations String array consisting of locations
 	 */
-	public FileSystemXmlApplicationContext(String[] locations)
-	    throws ApplicationContextException, IOException {
+	public FileSystemXmlApplicationContext(String[] locations) throws ApplicationContextException, BeansException, IOException {
 		if (locations.length == 0) {
 			throw new ApplicationContextException("At least 1 config location required");
 		}
@@ -57,10 +56,13 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 			setParent(parent);
 		}
 
-		// initialize this context
+		// Initialize this context
 		refresh();
 	}
-	
+
+	/**
+	 * Create parent context for the given remaining locations.
+	 */
 	protected ApplicationContext createParentContext(String[] locations) throws IOException {
 		return new FileSystemXmlApplicationContext(locations);
 	}

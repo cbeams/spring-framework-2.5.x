@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -20,7 +19,7 @@ import org.springframework.context.ApplicationContextException;
  * drawing their configuration from XML documents containing bean definitions
  * understood by an XMLBeanFactory.
  * @author Rod Johnson
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  * @see org.springframework.beans.factory.xml.XmlBeanFactory
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
@@ -42,8 +41,8 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		super(parent);
 	}
 	
-	protected void refreshBeanFactory() throws ApplicationContextException {
-		String identifier = "application context with display name [" + getDisplayName() + "]";
+	protected void refreshBeanFactory() throws ApplicationContextException, BeansException {
+		String identifier = "application context [" + getDisplayName() + "]";
 		InputStream is = null;
 		try {
 			// Supports remote as well as local URLs
@@ -58,12 +57,6 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		catch (IOException ex) {
 			throw new ApplicationContextException("IOException parsing XML document for " + identifier, ex);
 		} 
-		catch (NoSuchBeanDefinitionException ex) {
-			throw new ApplicationContextException("Cannot load configuration: missing bean definition [" + ex.getBeanName() + "]", ex);
-		}
-		catch (BeansException ex) {
-			throw new ApplicationContextException("Cannot load configuration: problem instantiating or initializing beans", ex);
-		}
 		finally {
 			try {
 				if (is != null)
