@@ -29,26 +29,25 @@ import org.springframework.util.Styler;
 /**
  * A transitionable state that executes one or more actions when entered. If
  * more than one action is specified, they are executed in an ordered chain
- * until one returns a result event that matches a valid state transition for
+ * until one returns a result event that matches a valid state transition out of
  * this state. This is a form of the Chain of Responsibility (CoR) pattern.
  * <p>
- * The results of action execution are used as contributing criteria for a state
- * transition out of this state. Specifically, action execution will continue
- * until a result event triggers a valid state transition in the current request
- * context, or until the list of actions is exhausted and an exception is
- * thrown.
+ * As mentioned, the result of an action's execution is typically treated as a
+ * contributing criterion for a state transition. In addition, anything else in
+ * the Flow's <code>RequestContext</code> may be tested as part of custom
+ * transitional criteria.
  * <p>
  * Each action executed by this action state may be qualified with a set of
  * arbitrary properties. For example, an identifying name and description.
  * <p>
- * By default, the name property is used as a qualifier for a given action
+ * By default, the 'name' property is used as a qualifier for a given action
  * result event. For example, if an action named <code>myAction</code> returns
  * a <code>success</code> result, a transition for event
  * <code>myAction.success</code> will be searched, and if found, executed. If
  * the action is not named, a transition for the base <code>success</code>
  * event will be searched, and if found, executed.
  * <p>
- * The name property is also used by the <code>MultiAction</code>
+ * By default, the 'executeMethodProperty' used by the <code>MultiAction</code>
  * implementation to dispatch calls on a target action instance to a particular
  * handler method. In this case the value of the name property will map to the
  * method name on the target action instance.
@@ -326,9 +325,10 @@ public class ActionState extends TransitionableState {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-								+ eventIds[executionCount] + "' -- "
-								+ "I will proceed to the next action in the chain");
+						logger
+								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+										+ eventIds[executionCount] + "' -- "
+										+ "I will proceed to the next action in the chain");
 					}
 				}
 			}
@@ -349,8 +349,8 @@ public class ActionState extends TransitionableState {
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
 					"No actions were executed, thus I cannot execute any state transition "
-						+ "-- programmer configuration error; "
-						+ "make sure you add at least one action to this state"));
+							+ "-- programmer configuration error; "
+							+ "make sure you add at least one action to this state"));
 		}
 	}
 
