@@ -18,6 +18,7 @@ package org.springframework.transaction.jta;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 
 import javax.naming.NamingException;
 import javax.transaction.HeuristicMixedException;
@@ -77,7 +78,6 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * before passing transaction control back to the J2EE container. In this case, a
  * container-specific Hibernate TransactionManagerLookup is the only way to achieve
  * exact afterCompletion callbacks for transactional cache handling with Hibernate.
- * In such a scenario, use Hibernate >=2.1 which features automatic JTA detection.
  *
  * <p><b>For typical JTA transactions (REQUIRED, SUPPORTS, MANDATORY, NEVER), a plain
  * JtaTransactionManager definition is all you need, completely portable across all
@@ -127,7 +127,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * <p>The JTA TransactionManager can also be used to register custom synchronizations
  * with the JTA transaction itself instead of Spring's transaction manager. This is
- * particularly useful for closing resources with rigid JTA implementations like
+ * particularly useful for closing resources with strict JTA implementations such as
  * Weblogic's or WebSphere's that do not allow any access to resources after transaction
  * completion, not even for cleanup. For example, Hibernate access is affected by this
  * issue, as outlined above in the discussion of transaction synchronization.
@@ -141,12 +141,13 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * properties (see Hibernate docs for details).
  *
  * <p>JtaTransactionManager supports timeouts but not custom isolation levels.
- * Custom subclasses can override applyIsolationLevel for specific JTA
+ * Custom subclasses can override <code>applyIsolationLevel</code> for specific JTA
  * implementations. Note that some resource-specific transaction managers like
  * DataSourceTransactionManager and HibernateTransactionManager do support timeouts,
  * custom isolation levels, and transaction suspension without JTA's restrictions.
  *
- * <p>This class is serializable. Active synchronizations do not survive serialization.
+ * <p>This class is serializable. Active synchronizations do not survive
+ * serialization, though.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
@@ -163,7 +164,8 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  */
-public class JtaTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
+public class JtaTransactionManager extends AbstractPlatformTransactionManager
+		implements InitializingBean, Serializable {
 
 	public static final String DEFAULT_USER_TRANSACTION_NAME = "java:comp/UserTransaction";
 
