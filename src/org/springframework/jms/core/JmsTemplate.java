@@ -69,6 +69,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see #setMessageConverter
  * @see org.springframework.jms.support.destination.DynamicDestinationResolver
  * @see org.springframework.jms.support.converter.SimpleMessageConverter
+ * @see javax.jms.Destination
+ * @see javax.jms.Session
+ * @see javax.jms.MessageProducer
+ * @see javax.jms.MessageConsumer
  */
 public class JmsTemplate implements JmsOperations, InitializingBean {
 
@@ -121,6 +125,22 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 */
 	private MessageConverter messageConverter;
 
+
+	/**
+	 * Whether message IDs are enabled on producers.
+	 */
+	private boolean messageIdEnabled = true;
+
+	/**
+	 * Whether message timestamps are enabled on producers.
+	 */
+	private boolean messageTimestampEnabled = true;
+
+	/**
+	 * Whether to inhibit the delivery of messages published by its own connection.
+	 */
+	private boolean pubSubNoLocal = false;
+
 	/**
 	 * The timeout to use for receive operations.
 	 */
@@ -130,22 +150,22 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	/**
 	 * Use the default or explicit QOS parameters.
 	 */
-	private boolean explicitQosEnabled;
+	private boolean explicitQosEnabled = false;
 
 	/**
 	 * The delivery mode to use when sending a message. Only used if isExplicitQosEnabled = true.
 	 */
-	private int deliveryMode;
+	private int deliveryMode = Message.DEFAULT_DELIVERY_MODE;
 
 	/**
 	 * The priority of the message. Only used if isExplicitQosEnabled = true.
 	 */
-	private int priority;
+	private int priority = Message.DEFAULT_PRIORITY;
 
 	/**
 	 * The message's lifetime in milliseconds. Only used if isExplicitQosEnabled = true.
 	 */
-	private long timeToLive;
+	private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
 
 
 	/**
@@ -227,6 +247,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * taken into account. Depending on the J2EE transaction context, the container
 	 * makes its own decisions on these values. See section 17.3.5 of the EJB Spec.
 	 * @param sessionTransacted the transaction mode
+	 * @see javax.jms.Connection#createSession
 	 */
 	public void setSessionTransacted(boolean sessionTransacted) {
 		this.sessionTransacted = sessionTransacted;
@@ -246,6 +267,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
 	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see javax.jms.Connection#createSession
 	 */
 	public void setSessionAcknowledgeModeName(String constantName) {
 		setSessionAcknowledgeMode(constants.asNumber(constantName).intValue());
@@ -255,10 +277,14 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * Set the JMS acknowledgement mode that is used when creating a JMS session to send
 	 * a message. Vendor extensions to the acknowledgment mode can be set here as well.
 	 * <p>Note that that inside an EJB the parameters to
-	 * create<Queue|Topic>Session(boolean transacted, int acknowledgeMode) method are not
+	 * create(Queue|Topic)Session(boolean transacted, int acknowledgeMode) method are not
 	 * taken into account. Depending on the transaction context in the EJB, the container
 	 * makes its own decisions on these values. See section 17.3.5 of the EJB Spec.
 	 * @param sessionAcknowledgeMode the acknowledgement mode
+	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
+	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
+	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see javax.jms.Connection#createSession
 	 */
 	public void setSessionAcknowledgeMode(int sessionAcknowledgeMode) {
 		this.sessionAcknowledgeMode = sessionAcknowledgeMode;
@@ -331,6 +357,57 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		return messageConverter;
 	}
 
+
+	/**
+	 * Set whether message IDs are enabled. Default is true.
+	 * <p>This is only a hint to the JMS producer.
+	 * See the JMS javadocs for details.
+	 * @see javax.jms.MessageProducer#setDisableMessageID
+	 */
+	public void setMessageIdEnabled(boolean messageIdEnabled) {
+		this.messageIdEnabled = messageIdEnabled;
+	}
+
+	/**
+	 * Return whether message IDs are enabled.
+	 */
+	public boolean isMessageIdEnabled() {
+		return messageIdEnabled;
+	}
+
+	/**
+	 * Set whether message timestamps are enabled. Default is true.
+	 * <p>This is only a hint to the JMS producer.
+	 * See the JMS javadocs for details.
+	 * @see javax.jms.MessageProducer#setDisableMessageTimestamp
+	 */
+	public void setMessageTimestampEnabled(boolean messageTimestampEnabled) {
+		this.messageTimestampEnabled = messageTimestampEnabled;
+	}
+
+	/**
+	 * Return whether message timestamps are enabled.
+	 */
+	public boolean isMessageTimestampEnabled() {
+		return messageTimestampEnabled;
+	}
+
+	/**
+	 * Set whether to inhibit the delivery of messages published by its own connection.
+	 * Default is false.
+	 * @see javax.jms.TopicSession#createSubscriber(javax.jms.Topic, String, boolean)
+	 */
+	public void setPubSubNoLocal(boolean pubSubNoLocal) {
+		this.pubSubNoLocal = pubSubNoLocal;
+	}
+
+	/**
+	 * Return whether to inhibit the delivery of messages published by its own connection.
+	 */
+	public boolean isPubSubNoLocal() {
+		return pubSubNoLocal;
+	}
+
 	/**
 	 * Set the timeout to use for receive calls.
 	 * The default is -1, which means no timeout.
@@ -352,6 +429,9 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	/**
 	 * Set if the QOS values (deliveryMode, priority, timeToLive)
 	 * should be used for sending a message.
+	 * @see #setDeliveryMode
+	 * @see #setPriority
+	 * @see #setTimeToLive
 	 */
 	public void setExplicitQosEnabled(boolean explicitQosEnabled) {
 		this.explicitQosEnabled = explicitQosEnabled;
@@ -372,10 +452,13 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 	/**
-	 * Set the delivery mode to use when sending a message. Since a default value may be
-	 * defined administratively, it is only used when isExplicitQosEnabled equals true.
+	 * Set the delivery mode to use when sending a message.
+	 * <p>Since a default value may be defined administratively,
+	 * this is only used when isExplicitQosEnabled equals true.
 	 * @param deliveryMode the delivery mode to use
 	 * @see #isExplicitQosEnabled
+	 * @see javax.jms.Message#DEFAULT_DELIVERY_MODE
+	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
 	 */
 	public void setDeliveryMode(int deliveryMode) {
 		this.deliveryMode = deliveryMode;
@@ -389,9 +472,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 	/**
-	 * Set the priority of a message when sending. Since a default value may be defined
-	 * administratively, it is only used when isExplicitQosEnabled equals true.
+	 * Set the priority of a message when sending.
+	 * <p>Since a default value may be defined administratively,
+	 * this is only used when isExplicitQosEnabled equals true.
 	 * @see #isExplicitQosEnabled
+	 * @see javax.jms.Message#DEFAULT_PRIORITY
+	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
 	 */
 	public void setPriority(int priority) {
 		this.priority = priority;
@@ -405,10 +491,13 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 	/**
-	 * Set the time-to-live of the message when sending. Since a default value may be
-	 * defined administratively, it is only used when isExplicitQosEnabled equals true.
+	 * Set the time-to-live of the message when sending.
+	 * <p>Since a default value may be defined administratively,
+	 * this is only used when isExplicitQosEnabled equals true.
 	 * @param timeToLive the message's lifetime (in milliseconds)
 	 * @see #isExplicitQosEnabled
+	 * @see javax.jms.Message#DEFAULT_TIME_TO_LIVE
+	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
 	 */
 	public void setTimeToLive(long timeToLive) {
 		this.timeToLive = timeToLive;
@@ -430,53 +519,6 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 			throw new IllegalArgumentException("connectionFactory is required");
 		}
 	}
-
-
-	/**
-	 * Create a JMS Connection via this template's ConnectionFactory.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @return the new JMS Connection
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
-	}
-
-	/**
-	 * Create a JMS Session for the given Connection.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param con the JMS Connection to create a Session for
-	 * @return the new JMS Session
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected Session createSession(Connection con) throws JMSException {
-		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
-	}
-
-	/**
-	 * Create a JMS MessageProducer for the given Session and Destination.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to create a MessageProducer for
-	 * @param destination the JMS Destination to create a MessageProducer for
-	 * @return the new JMS MessageProducer
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected MessageProducer createProducer(Session session, Destination destination) throws JMSException {
-		return session.createProducer(destination);
-	}
-
-	/**
-	 * Create a JMS MessageConsumer for the given Session and Destination.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to create a MessageConsumer for
-	 * @param destination the JMS Destination to create a MessageConsumer for
-	 * @return the new JMS MessageConsumer
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
-		return session.createConsumer(destination);
-	}
-
 
 	/**
 	 * Resolve the given destination name into a JMS Destination,
@@ -502,6 +544,99 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 */
 	protected JmsException convertJmsAccessException(JMSException ex) {
 		return JmsUtils.convertJmsAccessException(ex);
+	}
+
+
+	/**
+	 * Create a JMS Connection via this template's ConnectionFactory.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @return the new JMS Connection
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected Connection createConnection() throws JMSException {
+		return getConnectionFactory().createConnection();
+	}
+
+	/**
+	 * Create a JMS Session for the given Connection.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param con the JMS Connection to create a Session for
+	 * @return the new JMS Session
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected Session createSession(Connection con) throws JMSException {
+		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
+	}
+
+	/**
+	 * Create a JMS MessageProducer for the given Session and Destination,
+	 * configuring it to disable message ids and/or timestamps (if necessary).
+	 * <p>Delegates to <code>doCreateProducer</code> for creation of the raw
+	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
+	 * @param session the JMS Session to create a MessageProducer for
+	 * @param destination the JMS Destination to create a MessageProducer for
+	 * @return the new JMS MessageProducer
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #doCreateProducer
+	 * @see #setMessageIdEnabled
+	 * @see #setMessageTimestampEnabled
+	 */
+	protected MessageProducer createProducer(Session session, Destination destination) throws JMSException {
+		MessageProducer producer = doCreateProducer(session, destination);
+		if (!isMessageIdEnabled()) {
+			producer.setDisableMessageID(true);
+		}
+		if (!isMessageTimestampEnabled()) {
+			producer.setDisableMessageTimestamp(true);
+		}
+		return producer;
+	}
+
+	/**
+	 * Create a raw JMS MessageProducer for the given Session and Destination.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to create a MessageProducer for
+	 * @param destination the JMS Destination to create a MessageProducer for
+	 * @return the new JMS MessageProducer
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected MessageProducer doCreateProducer(Session session, Destination destination) throws JMSException {
+		return session.createProducer(destination);
+	}
+
+	/**
+	 * Create a JMS MessageConsumer for the given Session and Destination.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to create a MessageConsumer for
+	 * @param destination the JMS Destination to create a MessageConsumer for
+	 * @return the new JMS MessageConsumer
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
+		if (isPubSubNoLocal()) {
+			return session.createConsumer(destination, null, true);
+		}
+		else {
+			return session.createConsumer(destination);
+		}
+	}
+
+	/**
+	 * Create a JMS MessageConsumer for the given Session and Destination.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to create a MessageConsumer for
+	 * @param destination the JMS Destination to create a MessageConsumer for
+	 * @return the new JMS MessageConsumer
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
+			throws JMSException {
+		if (isPubSubNoLocal()) {
+			return session.createConsumer(destination, messageSelector, true);
+		}
+		else {
+			return session.createConsumer(destination, messageSelector);
+		}
 	}
 
 
@@ -666,8 +801,8 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		}
 		send(destination, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				Message m = getMessageConverter().toMessage(message, session);
-				return postProcessor.postProcessMessage(m);
+				Message msg = getMessageConverter().toMessage(message, session);
+				return postProcessor.postProcessMessage(msg);
 			}
 		});
 	}
@@ -681,8 +816,8 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		}
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				Message m = getMessageConverter().toMessage(message, session);
-				return postProcessor.postProcessMessage(m);
+				Message msg = getMessageConverter().toMessage(message, session);
+				return postProcessor.postProcessMessage(msg);
 			}
 		});
 	}
@@ -712,10 +847,42 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		}, true);
 	}
 
+	public Message receiveSelected(String messageSelector) throws JmsException {
+		if (getDefaultDestination() == null) {
+			throw new IllegalStateException("No defaultDestination specified. Check configuration of JmsTemplate.");
+		}
+		return receiveSelected(getDefaultDestination(), messageSelector);
+	}
+
+	public Message receiveSelected(final Destination destination, final String messageSelector) throws JmsException {
+		return (Message) execute(new SessionCallback() {
+			public Object doInJms(Session session) throws JMSException {
+				return doReceiveSelected(session, destination, messageSelector);
+			}
+		}, true);
+	}
+
+	public Message receiveSelected(final String destinationName, final String messageSelector) throws JmsException {
+		return (Message) execute(new SessionCallback() {
+			public Object doInJms(Session session) throws JMSException {
+				Destination destination = resolveDestinationName(session, destinationName);
+				return doReceiveSelected(session, destination, messageSelector);
+			}
+		}, true);
+	}
+
 	protected Message doReceive(Session session, Destination destination) throws JMSException {
-		MessageConsumer consumer = createConsumer(session, destination);
+		return doReceive(session, createConsumer(session, destination));
+	}
+
+	protected Message doReceiveSelected(Session session, Destination destination, String messageSelector)
+			throws JMSException {
+		return doReceive(session, createConsumer(session, destination, messageSelector));
+	}
+
+	protected Message doReceive(Session session, MessageConsumer consumer) throws JMSException {
 		try {
-			// use transaction timeout if available
+			// Use transaction timeout (if available).
 			long timeout = getReceiveTimeout();
 			ConnectionHolder conHolder =
 					(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
@@ -726,7 +893,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 					consumer.receive(timeout) : consumer.receive();
 			if (session.getTransacted()) {
 				if (conHolder == null) {
-					// transacted session created by this template -> commit
+					// Transacted session created by this template -> commit.
 					session.commit();
 				}
 			}
@@ -766,13 +933,37 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		return doConvertFromMessage(receive(destinationName));
 	}
 
+	public Object receiveSelectedAndConvert(String messageSelector) throws JmsException {
+		if (getMessageConverter() == null) {
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
+		}
+		return doConvertFromMessage(receiveSelected(messageSelector));
+	}
+
+	public Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException {
+		if (getMessageConverter() == null) {
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
+		}
+		return doConvertFromMessage(receiveSelected(destination, messageSelector));
+	}
+
+	public Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException {
+		if (getMessageConverter() == null) {
+			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
+		}
+		return doConvertFromMessage(receiveSelected(destinationName, messageSelector));
+	}
+
 	protected Object doConvertFromMessage(Message message) {
-		try {
-			return getMessageConverter().fromMessage(message);
+		if (message != null) {
+			try {
+				return getMessageConverter().fromMessage(message);
+			}
+			catch (JMSException ex) {
+				throw convertJmsAccessException(ex);
+			}
 		}
-		catch (JMSException ex) {
-			throw convertJmsAccessException(ex);
-		}
+		return null;
 	}
 
 }

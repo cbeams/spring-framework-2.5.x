@@ -17,6 +17,7 @@
 package org.springframework.jms.core;
 
 import javax.jms.DeliveryMode;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -34,6 +35,7 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
+import javax.jms.TopicSubscriber;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
@@ -94,7 +96,6 @@ public class JmsTemplate102Tests extends TestCase {
 
 		mockJndiContext.close();
 		mockJndiControl.replay();
-
 	}
 
 	private void createMockforQueues() throws JMSException, NamingException {
@@ -144,20 +145,19 @@ public class JmsTemplate102Tests extends TestCase {
 		// TODO tests with TX =true
 		mockTopicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 		topicConnectionControl.setReturnValue(mockTopicSession);
+		mockTopicSession.getTransacted();
+		topicSessionControl.setReturnValue(false);
 
 		mockJndiContext.lookup("testTopic");
 		mockJndiControl.setReturnValue(mockTopic);
 	}
 
 	public void testTopicSessionCallback() throws Exception {
-		JmsTemplate102 sender = new JmsTemplate102();
-		sender.setPubSubDomain(true);
-		sender.setConnectionFactory(mockTopicConnectionFactory);
-		setJndiTemplate(sender);
-		sender.afterPropertiesSet();
-
-		mockTopicSession.getTransacted();
-		topicSessionControl.setReturnValue(true);
+		JmsTemplate102 template = new JmsTemplate102();
+		template.setPubSubDomain(true);
+		template.setConnectionFactory(mockTopicConnectionFactory);
+		setJndiTemplate(template);
+		template.afterPropertiesSet();
 
 		mockTopicSession.close();
 		topicSessionControl.setVoidCallable(1);
@@ -168,7 +168,7 @@ public class JmsTemplate102Tests extends TestCase {
 		topicSessionControl.replay();
 		topicConnectionControl.replay();
 
-		sender.execute(new SessionCallback() {
+		template.execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
 				boolean b = session.getTransacted();
 				return null;
@@ -184,20 +184,17 @@ public class JmsTemplate102Tests extends TestCase {
 	 * Test the execute(ProducerCallback) using a topic.
 	 */
 	public void testTopicProducerCallback() throws Exception {
-		JmsTemplate102 sender = new JmsTemplate102();
-		sender.setPubSubDomain(true);
-		sender.setConnectionFactory(mockTopicConnectionFactory);
-		setJndiTemplate(sender);
-		sender.afterPropertiesSet();
+		JmsTemplate102 template = new JmsTemplate102();
+		template.setPubSubDomain(true);
+		template.setConnectionFactory(mockTopicConnectionFactory);
+		setJndiTemplate(template);
+		template.afterPropertiesSet();
 
 		MockControl topicPublisherControl = MockControl.createControl(TopicPublisher.class);
 		TopicPublisher mockTopicPublisher = (TopicPublisher) topicPublisherControl.getMock();
 
 		mockTopicSession.createPublisher(null);
 		topicSessionControl.setReturnValue(mockTopicPublisher);
-
-		mockTopicSession.getTransacted();
-		topicSessionControl.setReturnValue(true);
 
 		mockTopicPublisher.getPriority();
 		topicPublisherControl.setReturnValue(4);
@@ -211,7 +208,54 @@ public class JmsTemplate102Tests extends TestCase {
 		topicSessionControl.replay();
 		topicConnectionControl.replay();
 
-		sender.execute(new ProducerCallback() {
+		template.execute(new ProducerCallback() {
+			public Object doInJms(Session session, MessageProducer msgProducer) throws JMSException {
+				boolean b = session.getTransacted();
+				int i = msgProducer.getPriority();
+				return null;
+			}
+		});
+
+		topicConnectionFactoryControl.verify();
+		topicConnectionControl.verify();
+		topicSessionControl.verify();
+	}
+
+	/**
+	 * Test the execute(ProducerCallback) using a topic.
+	 */
+	public void testTopicProducerCallbackWithIdAndTimestampDisabled() throws Exception {
+		JmsTemplate102 template = new JmsTemplate102();
+		template.setPubSubDomain(true);
+		template.setConnectionFactory(mockTopicConnectionFactory);
+		setJndiTemplate(template);
+		template.setMessageIdEnabled(false);
+		template.setMessageTimestampEnabled(false);
+		template.afterPropertiesSet();
+
+		MockControl topicPublisherControl = MockControl.createControl(TopicPublisher.class);
+		TopicPublisher mockTopicPublisher = (TopicPublisher) topicPublisherControl.getMock();
+
+		mockTopicSession.createPublisher(null);
+		topicSessionControl.setReturnValue(mockTopicPublisher);
+
+		mockTopicPublisher.setDisableMessageID(true);
+		topicPublisherControl.setVoidCallable(1);
+		mockTopicPublisher.setDisableMessageTimestamp(true);
+		topicPublisherControl.setVoidCallable(1);
+		mockTopicPublisher.getPriority();
+		topicPublisherControl.setReturnValue(4);
+
+		mockTopicSession.close();
+		topicSessionControl.setVoidCallable(1);
+
+		mockTopicConnection.close();
+		topicConnectionControl.setVoidCallable(1);
+
+		topicSessionControl.replay();
+		topicConnectionControl.replay();
+
+		template.execute(new ProducerCallback() {
 			public Object doInJms(Session session, MessageProducer msgProducer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = msgProducer.getPriority();
@@ -229,11 +273,11 @@ public class JmsTemplate102Tests extends TestCase {
 	 * point to point domain as specified by the value of isPubSubDomain = false.
 	 */
 	public void testQueueSessionCallback() throws Exception {
-		JmsTemplate102 sender = new JmsTemplate102();
+		JmsTemplate102 template = new JmsTemplate102();
 		// Point-to-Point (queues) are the default domain
-		sender.setConnectionFactory(mockQueueConnectionFactory);
-		setJndiTemplate(sender);
-		sender.afterPropertiesSet();
+		template.setConnectionFactory(mockQueueConnectionFactory);
+		setJndiTemplate(template);
+		template.afterPropertiesSet();
 
 		mockQueueSession.close();
 		queueSessionControl.setVoidCallable(1);
@@ -244,7 +288,7 @@ public class JmsTemplate102Tests extends TestCase {
 		queueSessionControl.replay();
 		queueConnectionControl.replay();
 
-		sender.execute(new SessionCallback() {
+		template.execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
 				boolean b = session.getTransacted();
 				return null;
@@ -260,11 +304,11 @@ public class JmsTemplate102Tests extends TestCase {
 	 * Test the method execute(ProducerCallback) with a Queue.
 	 */
 	public void testQueueProducerCallback() throws Exception {
-		JmsTemplate102 sender = new JmsTemplate102();
+		JmsTemplate102 template = new JmsTemplate102();
 		// Point-to-Point (queues) are the default domain.
-		sender.setConnectionFactory(mockQueueConnectionFactory);
-		setJndiTemplate(sender);
-		sender.afterPropertiesSet();
+		template.setConnectionFactory(mockQueueConnectionFactory);
+		setJndiTemplate(template);
+		template.afterPropertiesSet();
 
 		MockControl queueSenderControl = MockControl.createControl(QueueSender.class);
 		QueueSender mockQueueSender = (QueueSender) queueSenderControl.getMock();
@@ -286,7 +330,54 @@ public class JmsTemplate102Tests extends TestCase {
 		queueSessionControl.replay();
 		queueConnectionControl.replay();
 
-		sender.execute(new ProducerCallback() {
+		template.execute(new ProducerCallback() {
+			public Object doInJms(Session session, MessageProducer msgProducer)
+			    throws JMSException {
+				boolean b = session.getTransacted();
+				int i = msgProducer.getPriority();
+				return null;
+			}
+		});
+
+		queueConnectionFactoryControl.verify();
+		queueConnectionControl.verify();
+		queueSessionControl.verify();
+	}
+
+	public void testQueueProducerCallbackWithIdAndTimestampDisabled() throws Exception {
+		JmsTemplate102 template = new JmsTemplate102();
+		// Point-to-Point (queues) are the default domain.
+		template.setConnectionFactory(mockQueueConnectionFactory);
+		setJndiTemplate(template);
+		template.setMessageIdEnabled(false);
+		template.setMessageTimestampEnabled(false);
+		template.afterPropertiesSet();
+
+		MockControl queueSenderControl = MockControl.createControl(QueueSender.class);
+		QueueSender mockQueueSender = (QueueSender) queueSenderControl.getMock();
+
+		mockQueueSession.createSender(null);
+		queueSessionControl.setReturnValue(mockQueueSender);
+
+		mockQueueSession.close();
+		queueSessionControl.setVoidCallable(1);
+
+		mockQueueSender.setDisableMessageID(true);
+		queueSenderControl.setVoidCallable(1);
+		mockQueueSender.setDisableMessageTimestamp(true);
+		queueSenderControl.setVoidCallable(1);
+		mockQueueSender.getPriority();
+		queueSenderControl.setReturnValue(4);
+
+		queueSenderControl.replay();
+
+		mockQueueConnection.close();
+		queueConnectionControl.setVoidCallable(1);
+
+		queueSessionControl.replay();
+		queueConnectionControl.replay();
+
+		template.execute(new ProducerCallback() {
 			public Object doInJms(Session session, MessageProducer msgProducer)
 			    throws JMSException {
 				boolean b = session.getTransacted();
@@ -304,10 +395,10 @@ public class JmsTemplate102Tests extends TestCase {
 	 * Test the setting of the JmsTemplate properties.
 	 */
 	public void testBeanProperties() throws Exception {
-		JmsTemplate102 sender = new JmsTemplate102();
-		sender.setConnectionFactory(mockQueueConnectionFactory);
+		JmsTemplate102 template = new JmsTemplate102();
+		template.setConnectionFactory(mockQueueConnectionFactory);
 
-		assertTrue("connection factory ok", sender.getConnectionFactory() == mockQueueConnectionFactory);
+		assertTrue("connection factory ok", template.getConnectionFactory() == mockQueueConnectionFactory);
 
 		JmsTemplate102 s102 = new JmsTemplate102();
 		try {
@@ -347,7 +438,7 @@ public class JmsTemplate102Tests extends TestCase {
 	 * a queue and default QOS values.
 	 */
 	public void testSendStringQueue() throws Exception {
-		sendQueue(true, false, false);
+		sendQueue(true, false, false, true);
 	}
 
 	/**
@@ -355,21 +446,21 @@ public class JmsTemplate102Tests extends TestCase {
 	 * explicit QOS parameters are enabled, using a queue.
 	 */
 	public void testSendStringQueueWithQOS() throws Exception {
-		sendQueue(false, false, false);
+		sendQueue(false, false, false, false);
 	}
 
 	/**
 	 * Test the method send(MessageCreator c) using default QOS values.
 	 */
 	public void testSendDefaultDestinationQueue() throws Exception {
-		sendQueue(true, false, true);
+		sendQueue(true, false, true, true);
 	}
 
 	/**
 	 * Test the method send(MessageCreator c) using explicit QOS values.
 	 */
 	public void testSendDefaultDestinationQueueWithQOS() throws Exception {
-		sendQueue(false, false, true);
+		sendQueue(false, false, true, false);
 	}
 
 	/**
@@ -393,7 +484,7 @@ public class JmsTemplate102Tests extends TestCase {
 	 * a queue and default QOS values.
 	 */
 	public void testSendQueue() throws Exception {
-		sendQueue(true, false, false);
+		sendQueue(true, false, false, true);
 	}
 
 	/**
@@ -401,7 +492,7 @@ public class JmsTemplate102Tests extends TestCase {
 	 * QOS values.
 	 */
 	public void testSendQueueWithQOS() throws Exception {
-		sendQueue(false, false, false);
+		sendQueue(false, false, false, false);
 	}
 
 	/**
@@ -417,7 +508,7 @@ public class JmsTemplate102Tests extends TestCase {
 	 * QOS values.
 	 */
 	public void testSendTopicWithQOS() throws Exception {
-		sendQueue(false, false, false);
+		sendQueue(false, false, false, true);
 	}
 
 	/**
@@ -425,17 +516,21 @@ public class JmsTemplate102Tests extends TestCase {
 	 * callback but with different QOS options.
 	 * @param ignoreQOS test using default QOS options.
 	 */
-	private void sendQueue(boolean ignoreQOS, boolean explicitQueue, boolean useDefaultDestination)
-			throws Exception {
+	private void sendQueue(boolean ignoreQOS, boolean explicitQueue, boolean useDefaultDestination,
+			boolean disableIdAndTimestamp) throws Exception {
 
-		JmsTemplate102 sender = new JmsTemplate102();
-		setJndiTemplate(sender);
-		sender.setConnectionFactory(mockQueueConnectionFactory);
-		setJndiTemplate(sender);
-		sender.afterPropertiesSet();
+		JmsTemplate102 template = new JmsTemplate102();
+		setJndiTemplate(template);
+		template.setConnectionFactory(mockQueueConnectionFactory);
+		setJndiTemplate(template);
+		template.afterPropertiesSet();
 
 		if (useDefaultDestination) {
-			sender.setDefaultDestination(mockQueue);
+			template.setDefaultDestination(mockQueue);
+		}
+		if (disableIdAndTimestamp) {
+			template.setMessageIdEnabled(false);
+			template.setMessageTimestampEnabled(false);
 		}
 
 		//Mock the javax.jms QueueSender
@@ -444,6 +539,13 @@ public class JmsTemplate102Tests extends TestCase {
 
 		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
+
+		if (disableIdAndTimestamp) {
+			mockQueueSender.setDisableMessageID(true);
+			queueSenderControl.setVoidCallable(1);
+			mockQueueSender.setDisableMessageTimestamp(true);
+			queueSenderControl.setVoidCallable(1);
+		}
 
 		mockQueueConnection.close();
 		queueConnectionControl.setVoidCallable(1);
@@ -463,16 +565,16 @@ public class JmsTemplate102Tests extends TestCase {
 			mockQueueSender.send(mockMessage);
 		}
 		else {
-			sender.setExplicitQosEnabled(true);
-			sender.setDeliveryMode(deliveryMode);
-			sender.setPriority(priority);
-			sender.setTimeToLive(timeToLive);
+			template.setExplicitQosEnabled(true);
+			template.setDeliveryMode(deliveryMode);
+			template.setPriority(priority);
+			template.setTimeToLive(timeToLive);
 			mockQueueSender.send(mockMessage, deliveryMode, priority, timeToLive);
 		}
 		queueSenderControl.replay();
 
 		if (useDefaultDestination) {
-			sender.send(new MessageCreator() {
+			template.send(new MessageCreator() {
 				public Message createMessage(Session session) throws JMSException {
 					return session.createTextMessage("just testing");
 				}
@@ -480,14 +582,14 @@ public class JmsTemplate102Tests extends TestCase {
 		}
 		else {
 			if (explicitQueue) {
-				sender.send(mockQueue, new MessageCreator() {
+				template.send(mockQueue, new MessageCreator() {
 					public Message createMessage(Session session) throws JMSException {
 						return session.createTextMessage("just testing");
 					}
 				});
 			}
 			else {
-				sender.send("testQueue", new MessageCreator() {
+				template.send("testQueue", new MessageCreator() {
 					public Message createMessage(Session session)
 					    throws JMSException {
 						return session.createTextMessage("just testing");
@@ -504,11 +606,11 @@ public class JmsTemplate102Tests extends TestCase {
 	}
 
 	private void sendTopic(boolean ignoreQOS, boolean explicitTopic) throws Exception {
-		JmsTemplate102 sender = new JmsTemplate102();
-		sender.setPubSubDomain(true);
-		sender.setConnectionFactory(mockTopicConnectionFactory);
-		setJndiTemplate(sender);
-		sender.afterPropertiesSet();
+		JmsTemplate102 template = new JmsTemplate102();
+		template.setPubSubDomain(true);
+		template.setConnectionFactory(mockTopicConnectionFactory);
+		setJndiTemplate(template);
+		template.afterPropertiesSet();
 
 		MockControl topicPublisherControl = MockControl.createControl(TopicPublisher.class);
 		TopicPublisher mockTopicPublisher = (TopicPublisher) topicPublisherControl.getMock();
@@ -519,8 +621,6 @@ public class JmsTemplate102Tests extends TestCase {
 		mockTopicConnection.close();
 		topicConnectionControl.setVoidCallable(1);
 
-		mockTopicSession.getTransacted();
-		topicSessionControl.setReturnValue(false);
 		mockTopicSession.createPublisher(this.mockTopic);
 		topicSessionControl.setReturnValue(mockTopicPublisher);
 		mockTopicSession.createTextMessage("just testing");
@@ -536,18 +636,18 @@ public class JmsTemplate102Tests extends TestCase {
 			mockTopicPublisher.publish(mockMessage);
 		}
 		else {
-			sender.setExplicitQosEnabled(true);
-			sender.setDeliveryMode(deliveryMode);
-			sender.setPriority(priority);
-			sender.setTimeToLive(timeToLive);
+			template.setExplicitQosEnabled(true);
+			template.setDeliveryMode(deliveryMode);
+			template.setPriority(priority);
+			template.setTimeToLive(timeToLive);
 			mockTopicPublisher.publish(mockMessage, deliveryMode, priority, timeToLive);
 		}
 		topicPublisherControl.replay();
 
-		sender.setPubSubDomain(true);
+		template.setPubSubDomain(true);
 
 		if (explicitTopic) {
-			sender.send(mockTopic, new MessageCreator() {
+			template.send(mockTopic, new MessageCreator() {
 				public Message createMessage(Session session)
 				    throws JMSException {
 					return session.createTextMessage("just testing");
@@ -555,7 +655,7 @@ public class JmsTemplate102Tests extends TestCase {
 			});
 		}
 		else {
-			sender.send("testTopic", new MessageCreator() {
+			template.send("testTopic", new MessageCreator() {
 				public Message createMessage(Session session)
 				    throws JMSException {
 					return session.createTextMessage("just testing");
@@ -570,10 +670,10 @@ public class JmsTemplate102Tests extends TestCase {
 	}
 
 	public void testConverter() throws Exception {
-		JmsTemplate102 sender = new JmsTemplate102();
-		setJndiTemplate(sender);
-		sender.setConnectionFactory(mockQueueConnectionFactory);
-		sender.setMessageConverter(new SimpleMessageConverter());
+		JmsTemplate102 template = new JmsTemplate102();
+		setJndiTemplate(template);
+		template.setConnectionFactory(mockQueueConnectionFactory);
+		template.setMessageConverter(new SimpleMessageConverter());
 		String s = "Hello world";
 
 		MockControl queueSenderControl = MockControl.createControl(QueueSender.class);
@@ -599,7 +699,7 @@ public class JmsTemplate102Tests extends TestCase {
 		mockQueueSender.send(mockMessage);
 		queueSenderControl.replay();
 
-		sender.convertAndSend(mockQueue, s);
+		template.convertAndSend(mockQueue, s);
 
 		queueConnectionFactoryControl.verify();
 		queueConnectionControl.verify();
@@ -608,70 +708,229 @@ public class JmsTemplate102Tests extends TestCase {
 		queueSessionControl.verify();
 	}
 
-	public void testReceiveDefaultDestination() throws Exception {
-		doTestReceive(false, true, false, false);
-	}
-	
-	public void testReceiveDestination() throws Exception {
-		doTestReceive(true, false, false, false);
+	public void testQueueReceiveDefaultDestination() throws Exception {
+		doTestReceive(false, false, true, false, false, false, false, false);
 	}
 
-	public void testReceiveDestinationWithClientAcknowledge() throws Exception {
-		doTestReceive(true, false, false, true);
+	public void testQueueReceiveDestination() throws Exception {
+		doTestReceive(false, true, false, false, false, false, true, false);
 	}
 
-	public void testReceiveStringDestination() throws Exception {
-		doTestReceive(false, false, false, false);
+	public void testQueueReceiveDestinationWithClientAcknowledge() throws Exception {
+		doTestReceive(false, true, false, false, true, false, false, true);
 	}
 
-	public void testReceiveAndConvertDefaultDestination() throws Exception {
-		doTestReceive(false, true, true, false);
+	public void testQueueReceiveStringDestination() throws Exception {
+		doTestReceive(false, false, false, false, false, false, true, true);
 	}
 
-	public void testReceiveAndConvertStringDestination() throws Exception {
-		doTestReceive(false, false, true, false);
+	public void testQueueReceiveDefaultDestinationWithSelector() throws Exception {
+		doTestReceive(false, false, true, false, false, true, true, true);
 	}
 
-	public void testReceiveAndConvertDestination() throws Exception {
-		doTestReceive(true, false, true, false);
+	public void testQueueReceiveDestinationWithSelector() throws Exception {
+		doTestReceive(false, true, false, false, false, true, false, true);
 	}
-	
-	private void doTestReceive(boolean explicitDestination, boolean useDefaultDestination,
-			boolean testConverter, boolean clientAcknowledge) throws Exception {
 
-		JmsTemplate102 sender = new JmsTemplate102();
-		sender.setConnectionFactory(mockQueueConnectionFactory);
-		//Override the default settings for client ack used in the testSetup - createMockForQueues()
-		//Can't use Session.getAcknowledgeMode()
-		queueConnectionControl.reset();
-		if (clientAcknowledge) {
-			sender.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
-			mockQueueConnection.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);			
-		} else {
-			sender.setSessionAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
-			mockQueueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+	public void testQueueReceiveDestinationWithClientAcknowledgeWithSelector() throws Exception {
+		doTestReceive(false, true, false, false, true, true, true, false);
+	}
+
+	public void testQueueReceiveStringDestinationWithSelector() throws Exception {
+		doTestReceive(false, false, false, false, false, true, false, false);
+	}
+
+	public void testQueueReceiveAndConvertDefaultDestination() throws Exception {
+		doTestReceive(false, false, true, true, false, false, false, true);
+	}
+
+	public void testQueueReceiveAndConvertStringDestination() throws Exception {
+		doTestReceive(false, false, false, true, false, false, true, false);
+	}
+
+	public void testQueueReceiveAndConvertDestination() throws Exception {
+		doTestReceive(false, true, false, true, false, false, true, true);
+	}
+
+	public void testQueueReceiveAndConvertDefaultDestinationWithSelector() throws Exception {
+		doTestReceive(false, false, true, true, false, true, true, true);
+	}
+
+	public void testQueueReceiveAndConvertStringDestinationWithSelector() throws Exception {
+		doTestReceive(false, false, false, true, false, true, true, false);
+	}
+
+	public void testQueueReceiveAndConvertDestinationWithSelector() throws Exception {
+		doTestReceive(false, true, false, true, false, true, false, true);
+	}
+
+	public void testTopicReceiveDefaultDestination() throws Exception {
+		doTestReceive(true, false, true, false, false, false, false, false);
+	}
+
+	public void testTopicReceiveDestination() throws Exception {
+		doTestReceive(true, true, false, false, false, false, true, false);
+	}
+
+	public void testTopicReceiveDestinationWithClientAcknowledge() throws Exception {
+		doTestReceive(true, true, false, false, true, false, false, true);
+	}
+
+	public void testTopicReceiveStringDestination() throws Exception {
+		doTestReceive(true, false, false, false, false, false, true, true);
+	}
+
+	public void testTopicReceiveDefaultDestinationWithSelector() throws Exception {
+		doTestReceive(true, false, true, false, false, true, true, true);
+	}
+
+	public void testTopicReceiveDestinationWithSelector() throws Exception {
+		doTestReceive(true, true, false, false, false, true, false, true);
+	}
+
+	public void testTopicReceiveDestinationWithClientAcknowledgeWithSelector() throws Exception {
+		doTestReceive(true, true, false, false, true, true, true, false);
+	}
+
+	public void testTopicReceiveStringDestinationWithSelector() throws Exception {
+		doTestReceive(true, false, false, false, false, true, false, false);
+	}
+
+	public void testTopicReceiveAndConvertDefaultDestination() throws Exception {
+		doTestReceive(true, false, true, true, false, false, false, true);
+	}
+
+	public void testTopicReceiveAndConvertStringDestination() throws Exception {
+		doTestReceive(true, false, false, true, false, false, true, false);
+	}
+
+	public void testTopicReceiveAndConvertDestination() throws Exception {
+		doTestReceive(true, true, false, true, false, false, true, true);
+	}
+
+	public void testTopicReceiveAndConvertDefaultDestinationWithSelector() throws Exception {
+		doTestReceive(true, false, true, true, false, true, true, true);
+	}
+
+	public void testTopicReceiveAndConvertStringDestinationWithSelector() throws Exception {
+		doTestReceive(true, false, false, true, false, true, true, false);
+	}
+
+	public void testTopicReceiveAndConvertDestinationWithSelector() throws Exception {
+		doTestReceive(true, true, false, true, false, true, false, true);
+	}
+
+	private void doTestReceive(
+			boolean pubSub,
+			boolean explicitDestination, boolean useDefaultDestination, boolean testConverter,
+			boolean clientAcknowledge, boolean messageSelector, boolean noLocal, boolean timeout)
+			throws Exception {
+
+		JmsTemplate102 template = new JmsTemplate102();
+		template.setPubSubDomain(pubSub);
+		if (pubSub) {
+			template.setConnectionFactory(mockTopicConnectionFactory);
 		}
-		queueConnectionControl.setReturnValue(mockQueueSession);
-		setJndiTemplate(sender);
+		else {
+			template.setConnectionFactory(mockQueueConnectionFactory);
+		}
 
+		// Override the default settings for client ack used in the test setup.
+		// Can't use Session.getAcknowledgeMode()
+		if (pubSub) {
+			topicConnectionControl.reset();
+			if (clientAcknowledge) {
+				template.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+				mockTopicConnection.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
+			}
+			else {
+				template.setSessionAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
+				mockTopicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+			}
+			topicConnectionControl.setReturnValue(mockTopicSession);
+		}
+		else {
+			queueConnectionControl.reset();
+			if (clientAcknowledge) {
+				template.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+				mockQueueConnection.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);
+			}
+			else {
+				template.setSessionAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
+				mockQueueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+			}
+			queueConnectionControl.setReturnValue(mockQueueSession);
+		}
+
+		setJndiTemplate(template);
+
+		Destination dest = pubSub ? (Destination) mockTopic : (Destination) mockQueue;
 
 		if (useDefaultDestination) {
-			sender.setDefaultDestination(mockQueue);
+			template.setDefaultDestination(dest);
+		}
+		if (noLocal) {
+			template.setPubSubNoLocal(true);
+		}
+		if (timeout) {
+			template.setReceiveTimeout(1000);
 		}
 
-		mockQueueConnection.start();
-		queueConnectionControl.setVoidCallable(1);
-		mockQueueConnection.close();
-		queueConnectionControl.setVoidCallable(1);
+		if (pubSub) {
+			mockTopicConnection.start();
+			topicConnectionControl.setVoidCallable(1);
+			mockTopicConnection.close();
+			topicConnectionControl.setVoidCallable(1);
+		}
+		else {
+			mockQueueConnection.start();
+			queueConnectionControl.setVoidCallable(1);
+			mockQueueConnection.close();
+			queueConnectionControl.setVoidCallable(1);
+		}
 
-		MockControl queueReceiverControl = MockControl.createControl(QueueReceiver.class);
-		QueueReceiver mockQueueReceiver = (QueueReceiver) queueReceiverControl.getMock();
+		String selectorString = "selector";
+		MockControl messageConsumerControl = null;
+		MessageConsumer mockMessageConsumer = null;
 
-		mockQueueSession.createReceiver(mockQueue);
-		queueSessionControl.setReturnValue(mockQueueReceiver);
+		if (pubSub) {
+			messageConsumerControl = MockControl.createControl(TopicSubscriber.class);
+			TopicSubscriber mockTopicSubscriber = (TopicSubscriber) messageConsumerControl.getMock();
+			mockMessageConsumer = mockTopicSubscriber;
+			if (messageSelector) {
+				mockTopicSession.createSubscriber(mockTopic, selectorString, noLocal);
+			}
+			else {
+				if (noLocal) {
+					mockTopicSession.createSubscriber(mockTopic, null, true);
+				}
+				else {
+					mockTopicSession.createSubscriber(mockTopic);
+				}
+			}
+			topicSessionControl.setReturnValue(mockTopicSubscriber);
+		}
+		else {
+			messageConsumerControl = MockControl.createControl(QueueReceiver.class);
+			QueueReceiver mockQueueReceiver = (QueueReceiver) messageConsumerControl.getMock();
+			mockMessageConsumer = mockQueueReceiver;
+			if (messageSelector) {
+				mockQueueSession.createReceiver(mockQueue, selectorString);
+			}
+			else {
+				mockQueueSession.createReceiver(mockQueue);
+			}
+			queueSessionControl.setReturnValue(mockQueueReceiver);
+		}
 
-		mockQueueSession.close();
-		queueSessionControl.setVoidCallable(1);
+		if (pubSub) {
+			mockTopicSession.close();
+			topicSessionControl.setVoidCallable(1);
+		}
+		else {
+			mockQueueSession.close();
+			queueSessionControl.setVoidCallable(1);
+		}
 
 		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
@@ -685,66 +944,94 @@ public class JmsTemplate102Tests extends TestCase {
 			messageControl.setVoidCallable(1);
 		}
 
-		queueSessionControl.replay();
-		queueConnectionControl.replay();
+		if (pubSub) {
+			topicSessionControl.replay();
+			topicConnectionControl.replay();
+		}
+		else {
+			queueSessionControl.replay();
+			queueConnectionControl.replay();
+		}
 		messageControl.replay();
 
-		mockQueueReceiver.receive();
-		queueReceiverControl.setReturnValue(mockMessage);
-		mockQueueReceiver.close();
-		queueReceiverControl.setVoidCallable(1);
-		queueReceiverControl.replay();
+		if (timeout) {
+			mockMessageConsumer.receive(1000);
+		}
+		else {
+			mockMessageConsumer.receive();
+		}
+		messageConsumerControl.setReturnValue(mockMessage);
+		mockMessageConsumer.close();
+		messageConsumerControl.setVoidCallable(1);
 
-		Message m = null;
+		messageConsumerControl.replay();
+
+		Message message = null;
 		String textFromMessage = null;
+
 		if (useDefaultDestination) {
 			if (testConverter) {
-				textFromMessage = (String) sender.receiveAndConvert();
+				textFromMessage = (String)
+						(messageSelector ? template.receiveSelectedAndConvert(selectorString) :
+						template.receiveAndConvert());
 			}
 			else {
-				m = sender.receive();
+				message = (messageSelector ? template.receiveSelected(selectorString) : template.receive());
+			}
+		}
+		else if (explicitDestination) {
+			if (testConverter) {
+				textFromMessage = (String)
+						(messageSelector ? template.receiveSelectedAndConvert(dest, selectorString) :
+						template.receiveAndConvert(dest));
+			}
+			else {
+				message = (messageSelector ? template.receiveSelected(dest, selectorString) :
+						template.receive(dest));
 			}
 		}
 		else {
-			if (explicitDestination) {
-				if (testConverter) {
-					textFromMessage = (String) sender.receiveAndConvert(mockQueue);
-				}
-				else {
-					m = sender.receive(mockQueue);
-				}
+			String destinationName = (pubSub ? "testTopic" : "testQueue");
+			if (testConverter) {
+				textFromMessage = (String)
+						(messageSelector ? template.receiveSelectedAndConvert(destinationName, selectorString) :
+						template.receiveAndConvert(destinationName));
 			}
 			else {
-				if (testConverter) {
-					textFromMessage = (String) sender.receiveAndConvert("testQueue");
-				}
-				else {
-					m = sender.receive("testQueue");
-				}
+				message = (messageSelector ? template.receiveSelected(destinationName, selectorString) :
+						template.receive(destinationName));
 			}
 		}
 
-		queueConnectionFactoryControl.verify();
-		queueConnectionControl.verify();
-		queueSessionControl.verify();
-		queueReceiverControl.verify();
+		if (pubSub) {
+			topicConnectionFactoryControl.verify();
+			topicConnectionControl.verify();
+			topicSessionControl.verify();
+		}
+		else {
+			queueConnectionFactoryControl.verify();
+			queueConnectionControl.verify();
+			queueSessionControl.verify();
+		}
+		messageConsumerControl.verify();
 		messageControl.verify();
 
 		if (testConverter) {
-			assertEquals("Message Text should be equal", "Hello World!", textFromMessage);
+			assertEquals("Message text should be equal", "Hello World!", textFromMessage);
 		}
 		else {
-			assertEquals("Messages should refer to the same object", m, mockMessage);
+			assertEquals("Messages should refer to the same object", message, mockMessage);
 		}
 	}
-	private void setJndiTemplate(JmsTemplate sender) {
+
+	private void setJndiTemplate(JmsTemplate template) {
 		JndiDestinationResolver destMan = new JndiDestinationResolver();
 		destMan.setJndiTemplate(new JndiTemplate() {
 			protected Context createInitialContext() throws NamingException {
 				return mockJndiContext;
 			}
 		});
-		sender.setDestinationResolver(destMan);
+		template.setDestinationResolver(destMan);
 	}
 
 }

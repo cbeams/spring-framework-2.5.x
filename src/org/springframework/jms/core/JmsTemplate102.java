@@ -44,7 +44,7 @@ import org.springframework.jms.support.destination.DynamicDestinationResolver;
  * 1.0.2 providers, offering the same API as JmsTemplate does for JMS 1.1 providers.
  *
  * <p>You must specify the domain or style of messaging to be either
- * Point-to-Point (Queues) or Publish/Subscribe(Topics), using the
+ * Point-to-Point (Queues) or Publish/Subscribe (Topics), using the
  * "pubSubDomain" property. Point-to-Point (Queues) is the default domain.
  *
  * <p>The "pubSubDomain" property is an important setting due to the use of similar
@@ -64,6 +64,14 @@ import org.springframework.jms.support.destination.DynamicDestinationResolver;
  * @see JmsTemplate
  * @see org.springframework.jms.support.destination.DynamicDestinationResolver
  * @see org.springframework.jms.support.converter.SimpleMessageConverter102
+ * @see javax.jms.Queue
+ * @see javax.jms.Topic
+ * @see javax.jms.QueueSession
+ * @see javax.jms.TopicSession
+ * @see javax.jms.QueueSender
+ * @see javax.jms.TopicPublisher
+ * @see javax.jms.QueueReceiver
+ * @see javax.jms.TopicSubscriber
  */
 public class JmsTemplate102 extends JmsTemplate {
 
@@ -162,7 +170,7 @@ public class JmsTemplate102 extends JmsTemplate {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	protected MessageProducer createProducer(Session session, Destination destination) throws JMSException {
+	protected MessageProducer doCreateProducer(Session session, Destination destination) throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicSession) session).createPublisher((Topic) destination);
 		}
@@ -176,10 +184,28 @@ public class JmsTemplate102 extends JmsTemplate {
 	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
 		if (isPubSubDomain()) {
-			return ((TopicSession) session).createSubscriber((Topic) destination);
+			if (isPubSubNoLocal()) {
+				return ((TopicSession) session).createSubscriber((Topic) destination, null, true);
+			}
+			else {
+				return ((TopicSession) session).createSubscriber((Topic) destination);
+			}
 		}
 		else {
 			return ((QueueSession) session).createReceiver((Queue) destination);
+		}
+	}
+
+	/**
+	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
+	 */
+	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
+			throws JMSException {
+		if (isPubSubDomain()) {
+			return ((TopicSession) session).createSubscriber((Topic) destination, messageSelector, isPubSubNoLocal());
+		}
+		else {
+			return ((QueueSession) session).createReceiver((Queue) destination, messageSelector);
 		}
 	}
 

@@ -26,12 +26,18 @@ import org.springframework.jms.JmsException;
  * Implemented by JmsTemplate. Not often used but a useful option
  * to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Alternatively, the standard JMS infrastructure can be mocked.
- * However, mocking this interface constitutes significantly less work.
+ * <p>Provides JmsTemplate's send and receive methods that mirror
+ * various JMS API methods. See the JMS specification and javadocs
+ * for details on those methods.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1
+ * @see JmsTemplate
+ * @see javax.jms.Destination
+ * @see javax.jms.Session
+ * @see javax.jms.MessageProducer
+ * @see javax.jms.MessageConsumer
  */
 public interface JmsOperations {
 
@@ -189,6 +195,46 @@ public interface JmsOperations {
 	 */
 	Message receive(String destinationName) throws JmsException;
 
+	/**
+	 * Receive a message synchronously from the default destination, but only
+	 * wait up to a specified time for delivery.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * <p>This will only work with a default destination specified!
+	 * @param messageSelector the JMS message selector expression (or null if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Message receiveSelected(String messageSelector) throws JmsException;
+
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destination the destination to receive a message from
+	 * @param messageSelector the JMS message selector expression (or null if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Message receiveSelected(Destination destination, String messageSelector) throws JmsException;
+
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param messageSelector the JMS message selector expression (or null if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Message receiveSelected(String destinationName, String messageSelector) throws JmsException;
+
 
 	/**
 	 * Receive a message synchronously from the default destination, but only
@@ -226,5 +272,48 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object receiveAndConvert(String destinationName) throws JmsException;
+
+	/**
+	 * Receive a message synchronously from the default destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a configured MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * <p>This will only work with a default destination specified!
+	 * @param messageSelector the JMS message selector expression (or null if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object receiveSelectedAndConvert(String messageSelector) throws JmsException;
+
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a configured MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destination the destination to receive a message from
+	 * @param messageSelector the JMS message selector expression (or null if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException;
+
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a configured MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param messageSelector the JMS message selector expression (or null if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException;
 
 }
