@@ -73,19 +73,31 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
     }
 
     public ValueModel add(String domainObjectProperty) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding new form value model for property '" + domainObjectProperty + "'");
+        }
         ValueModel formValueModel = new AspectAdapter(
                 domainObjectAccessStrategy, domainObjectProperty);
         if (bufferChanges) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Creating form value buffer for property '" + domainObjectProperty + "'");
+            }
             formValueModel = new BufferedValueModel(formValueModel,
                     commitTrigger);
         }
+        formValueModel = onPreProcessNewFormValueModel(domainObjectProperty, formValueModel);
         formValueModels.put(domainObjectProperty, formValueModel);
-        onNewFormValueModel(domainObjectProperty, formValueModel);
+        onFormValueModelAdded(domainObjectProperty, formValueModel);
         return formValueModel;
     }
 
-    protected void onNewFormValueModel(String domainObjectProperty,
+    protected ValueModel onPreProcessNewFormValueModel(String domainObjectProperty,
             ValueModel formValueModel) {
+        return formValueModel;
+    }
+    
+    protected void onFormValueModelAdded(String domainObjectProperty, ValueModel formValueModel) {
+        
     }
 
     public Object getValue(String domainObjectProperty) {

@@ -103,7 +103,24 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
     }
 
-    protected void onNewFormValueModel(String domainObjectProperty,
+    protected ValueModel onPreProcessNewFormValueModel(
+            String domainObjectProperty, ValueModel formValueModel) {
+        if (getFormObject() instanceof TypeConverterFactory) {
+            TypeConverterFactory factory = (TypeConverterFactory)getFormObject();
+            TypeConverter converter = factory.createTypeConverter(
+                    domainObjectProperty, formValueModel);
+            if (converter != null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Installed type converter '" + converter
+                            + "' for property '" + domainObjectProperty + "'");
+                }
+                formValueModel = converter;
+            }
+        }
+        return formValueModel;
+    }
+
+    protected void onFormValueModelAdded(String domainObjectProperty,
             ValueModel formValueModel) {
         Assert
                 .notNull(rulesSource,
@@ -118,6 +135,10 @@ public class ValidatingFormModel extends DefaultFormModel implements
                     domainObjectProperty);
         }
         if (constraint != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Creating form validator for property '"
+                        + domainObjectProperty + "'");
+            }
             FormValueModelValidator validator = new FormValueModelValidator(
                     constraint, formValueModel);
             formValueModel.addValueListener(validator);
@@ -141,6 +162,10 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
 
         public void validate() {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Validating domain object property '"
+                        + constraint.getPropertyName() + "']");
+            }
             BeanValidationResultsCollector collector = new BeanValidationResultsCollector(
                     ValidatingFormModel.this);
             PropertyResults results = (PropertyResults)collector
