@@ -8,6 +8,9 @@ package org.springframework.web.bind;
 import javax.servlet.ServletRequest;
 
 import org.springframework.validation.DataBinder;
+import org.springframework.web.servlet.MultipartHttpServletRequest;
+import org.springframework.web.servlet.MultipartResolver;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * Use this class to perform manual data binding from servlet request parameters
@@ -18,6 +21,27 @@ public class ServletRequestDataBinder extends DataBinder  {
 	
 	public ServletRequestDataBinder(Object target, String name) {
 		super(target, name);
+	}
+
+	/**
+	 * Create the binder with multipart property editors if applicable
+	 */
+	public ServletRequestDataBinder(Object target, String name, ServletRequest request) {
+		super(target, name);
+
+		if (request instanceof MultipartHttpServletRequest) {
+			// Even though getMultipartResolver(request) can return null, we 
+			// don't explicitly check since it must be there if we have a 
+			// MultipartHttpServletRequest.  The try/catch is a fallback in case
+			// of programmer error when implementing custom resolvers, and simply
+			// rethrows with a friendlier message	
+			try {
+				MultipartResolver resolver = RequestContextUtils.getMultipartResolver((MultipartHttpServletRequest)request);				
+				resolver.registerMultipartEditors((MultipartHttpServletRequest)request, this);
+			} catch (NullPointerException npex) {
+				throw new IllegalArgumentException("no MultipartResolver was found even though the request is a MultipartHttpServletRequest");
+			}
+		}
 	}
 
 	/**

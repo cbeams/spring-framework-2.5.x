@@ -71,7 +71,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -80,6 +80,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * this namespace.
 	 */
 	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
+
+	/**
+	 * Well-known name for the MultipartResolver object in the bean factory for
+	 * this namespace.
+	 */
+	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
 
 	/**
 	 * Well-known name for the ViewResolver object in the bean factory for
@@ -106,6 +112,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE";
 
 	/**
+	 * Request attribute to hold current multipart resolver, retrievable by views/binders.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils
+	 */
+	public static final String MULTIPART_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".MULTIPART";
+
+	/**
 	 * Request attribute to hold current theme, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContext
 	 */
@@ -119,6 +131,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** LocaleResolver used by this servlet */
 	private LocaleResolver localeResolver;
+
+	/** MultipartResolver used by this servlet */
+	private MultipartResolver multipartResolver;
 
 	/** ThemeResolver used by this servlet */
 	private ThemeResolver themeResolver;
@@ -142,6 +157,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected void initFrameworkServlet() throws ServletException {
 		initLocaleResolver();
 		initThemeResolver();
+		initMultipartResolver();
 		initHandlerMappings();
 		initHandlerAdapters();
 		initViewResolver();
@@ -165,6 +181,35 @@ public class DispatcherServlet extends FrameworkServlet {
 		catch (BeansException ex) {
 			// We tried and failed to load the LocaleResolver specified by a bean
 			throw new ServletException("Fatal error loading locale resolver with name '" + LOCALE_RESOLVER_BEAN_NAME + "': using default", ex);
+		}
+	}
+
+	/**
+	 * Initialize the MultipartResolver used by this class.
+	 * If no bean is defined with the given name in the BeanFactory
+	 * for this namespace, no multipart handling is provided.
+	 */
+	private void initMultipartResolver() throws ServletException {
+		try {
+			this.multipartResolver =
+				(MultipartResolver) getWebApplicationContext().getBean(
+					MULTIPART_RESOLVER_BEAN_NAME);
+			logger.info(
+				"Loaded multipart resolver [" + this.multipartResolver + "]");
+		} catch (NoSuchBeanDefinitionException ex) {
+			// default to no resolver
+			this.multipartResolver = null;
+			logger.info(
+				"Unable to locate multipart resolver with name '"
+					+ MULTIPART_RESOLVER_BEAN_NAME
+					+ "': no multipart handling provided");
+		} catch (BeansException ex) {
+			// We tried and failed to load the MultipartResolver specified by a bean
+			throw new ServletException(
+				"Fatal error loading multipart resolver with name '"
+					+ MULTIPART_RESOLVER_BEAN_NAME
+					+ "': using default",
+				ex);
 		}
 	}
 
@@ -352,11 +397,21 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Make theme resolver available
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 
-		HandlerExecutionChain mappedHandler = getHandler(request);
+		// Convert the request into a multipart request and make multipart 
+		// resolver available.  If no multipart resolver is set, simply use 
+		// the existing request.  
+		HttpServletRequest processedRequest = request;
+		if (this.multipartResolver != null
+			&& this.multipartResolver.isMultipart(request)) {
+			request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);				
+			processedRequest = this.multipartResolver.resolveMultipart(request);
+		}
+
+		HandlerExecutionChain mappedHandler = getHandler(processedRequest);
 
 		if (mappedHandler == null || mappedHandler.getHandler() == null) {
 			// if we didn't find a handler
-			pageNotFoundLogger.warn("No mapping for [" + WebUtils.getRequestUri(request) + "] in DispatcherServlet with name '" + getServletName() + "'");
+			pageNotFoundLogger.warn("No mapping for [" + WebUtils.getRequestUri(processedRequest) + "] in DispatcherServlet with name '" + getServletName() + "'");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -365,7 +420,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 		// Send not-modified header for cache control?
-		if (wasRevalidated(request, response, ha, mappedHandler.getHandler())) {
+		if (wasRevalidated(processedRequest, response, ha, mappedHandler.getHandler())) {
 			return;
 		}
 
@@ -373,32 +428,37 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (mappedHandler.getInterceptors() != null) {
 			for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
 				HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-				if (!interceptor.preHandle(request, response, mappedHandler.getHandler())) {
+				if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
 					return;
 				}
 			}
 		}
 
 		// Actually invoke the handler
-		ModelAndView mv = ha.handle(request, response, mappedHandler.getHandler());
+		ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 		// Apply postHandle methods of registered interceptors
 		if (mappedHandler.getInterceptors() != null) {
 			for (int i = mappedHandler.getInterceptors().length - 1; i >=0 ; i--) {
 				HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-				interceptor.postHandle(request, response, mappedHandler.getHandler());
+				interceptor.postHandle(processedRequest, response, mappedHandler.getHandler());
 			}
 		}
 
 		// Did the handler return a view to render?
 		if (mv != null) {
 			logger.debug("Will render view in DispatcherServlet with name '" + getServletName() + "'");
-			Locale locale = this.localeResolver.resolveLocale(request);
+			Locale locale = this.localeResolver.resolveLocale(processedRequest);
 			response.setLocale(locale);
-			render(mv, request, response, locale);
+			render(mv, processedRequest, response, locale);
 		}
 		else {
 			logger.debug("Null ModelAndView returned to DispatcherServlet with name '" + getServletName() + "': assuming HandlerAdapter completed request handling");
+		}
+		
+		// Cleanup any resources used by a multipart request.  
+		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+			this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 		}
 	}
 
