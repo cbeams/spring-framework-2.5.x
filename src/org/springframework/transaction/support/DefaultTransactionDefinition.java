@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.support;
 
@@ -32,7 +32,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @since 08.05.2003
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
- *  @version $Id: DefaultTransactionDefinition.java,v 1.9 2004-11-07 16:45:54 jhoeller Exp $
+ *  @version $Id: DefaultTransactionDefinition.java,v 1.10 2005-03-13 12:33:33 jhoeller Exp $
  */
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
@@ -54,6 +54,8 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	private boolean readOnly = false;
 
+	private String name;
+
 
 	/**
 	 * Create a new DefaultTransactionDefinition, with default settings.
@@ -62,8 +64,25 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
 	 * @see #setReadOnly
+	 * @see #setName
 	 */
 	public DefaultTransactionDefinition() {
+	}
+
+	/**
+	 * Copy constructor. Definition can be modified through bean property setters.
+	 * @see #setPropagationBehavior
+	 * @see #setIsolationLevel
+	 * @see #setTimeout
+	 * @see #setReadOnly
+	 * @see #setName
+	 */
+	public DefaultTransactionDefinition(TransactionDefinition other) {
+		this.propagationBehavior = other.getPropagationBehavior();
+		this.isolationLevel = other.getIsolationLevel();
+		this.timeout = other.getTimeout();
+		this.readOnly = other.isReadOnly();
+		this.name = other.getName();
 	}
 
 	/**
@@ -78,6 +97,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	public DefaultTransactionDefinition(int propagationBehavior) {
 		this.propagationBehavior = propagationBehavior;
 	}
+
 
 	/**
 	 * Set the propagation behavior by the name of the corresponding constant in
@@ -167,6 +187,19 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	public final boolean isReadOnly() {
 		return readOnly;
+	}
+
+	/**
+	 * Set the name of this transaction. Default is none.
+	 * <p>This will be used as transaction name to be shown in a
+	 * transaction monitor, if applicable (for example, WebLogic's).
+	 */
+	public final void setName(String name) {
+		this.name = name;
+	}
+
+	public final String getName() {
+		return name;
 	}
 
 
