@@ -6,9 +6,9 @@
 
 <web-app>
 
-	<display-name>Countries</display-name>
+	<display-name>Spring Countries</display-name>
 
-	<description>Countries sample application</description>
+	<description>Spring Countries sample application</description>
 
 	<!--
 	  - Key of the system property that should specify the root directory of this
@@ -25,7 +25,7 @@
 	  -->
 	<context-param>
 		<param-name>log4jConfigLocation</param-name>
-		<param-value>/WEB-INF/classes/log4j.properties</param-value>
+		<param-value>/WEB-INF/log4j.properties</param-value>
 	</context-param>
 
 	<!--
