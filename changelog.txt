@@ -84,6 +84,7 @@ Package org.springframework.remoting
 Package org.springframework.scheduling
 * moved "configTimeDataSourceHolder" from LocalDataSourceJobStore to SchedulerFactoryBean
 * fixed LocalDataSourceJobStore to suppress a shutdown attempt on a Spring-provided DataSource
+* added "setMisfireInstruction" to the CronTriggerBean (same as with SimpleTriggerBean)
 
 Package org.springframework.util
 * introduced Assert class, mainly for checking method parameters and invariants within the framework
