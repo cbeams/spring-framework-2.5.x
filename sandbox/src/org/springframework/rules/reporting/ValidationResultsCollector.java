@@ -35,9 +35,13 @@ import org.springframework.util.visitor.Visitor;
 public class ValidationResultsCollector implements Visitor {
     protected static final Log logger = LogFactory
             .getLog(ValidationResultsCollector.class);
+
     protected ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
+
     private ValidationResultsBuilder resultsBuilder;
+
     private ValidationResults results;
+
     private boolean collectAllErrors;
 
     private Object argument;
@@ -50,6 +54,7 @@ public class ValidationResultsCollector implements Visitor {
         this.resultsBuilder = new ValidationResultsBuilder() {
             public void constraintSatisfied() {
             }
+
             public void constraintViolated(UnaryPredicate constraint) {
                 results = new ValueValidationResults(argument, constraint);
             }
@@ -88,7 +93,8 @@ public class ValidationResultsCollector implements Visitor {
                 if (!collectAllErrors) {
                     resultsBuilder.pop(false);
                     return false;
-                } else {
+                }
+                else {
                     if (result) {
                         result = false;
                     }
@@ -139,14 +145,18 @@ public class ValidationResultsCollector implements Visitor {
 
     Boolean visit(UnaryFunctionResultConstraint ofConstraint) {
         UnaryFunction f = ofConstraint.getFunction();
-        this.argument = f.evaluate(argument);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Invoking function with argument " + argument);
+        }
+        setArgument(f.evaluate(argument));
         return (Boolean)visitorSupport.invokeVisit(this, ofConstraint
                 .getPredicate());
     }
 
     boolean visit(UnaryPredicate constraint) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Testing constraint [" + constraint + "]");
+            logger.debug("Testing constraint [" + constraint + "] with argument '"
+                    + argument + "']");
         }
         boolean result = constraint.test(argument);
         result = applyAnyNegation(result);
@@ -165,7 +175,8 @@ public class ValidationResultsCollector implements Visitor {
         if (logger.isDebugEnabled()) {
             if (negated) {
                 logger.debug("[negate result]");
-            } else {
+            }
+            else {
                 logger.debug("[no negation]");
             }
         }

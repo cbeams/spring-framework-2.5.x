@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.rules.RulesProvider;
 import org.springframework.rules.RulesSource;
 import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
@@ -107,8 +108,13 @@ public class ValidatingFormModel extends DefaultFormModel implements
         Assert
                 .notNull(rulesSource,
                         "No rules source has been configured; please set a valid reference.");
-        BeanPropertyExpression constraint = rulesSource.getRules(
-                getFormObjectClass(), domainObjectProperty);
+        BeanPropertyExpression constraint;
+        if (getFormObject() instanceof RulesProvider) {
+            constraint = ((RulesProvider)getFormObject()).getRules(domainObjectProperty);
+        } else {
+            constraint = rulesSource.getRules(
+                    getFormObjectClass(), domainObjectProperty);
+        }
         if (constraint != null) {
             FormValueModelValidator validator = new FormValueModelValidator(
                     constraint, formValueModel);

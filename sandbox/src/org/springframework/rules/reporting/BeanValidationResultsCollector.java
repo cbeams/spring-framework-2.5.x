@@ -72,6 +72,7 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
     private PropertyResults collectPropertyResultsInternal(
             BeanPropertyExpression rootExpression) {
         resultsBuilder.setCurrentBeanPropertyExpression(rootExpression);
+        setArgument(resultsBuilder.getCurrentPropertyValue());
         boolean result = ((Boolean)visitorSupport.invokeVisit(this,
                 rootExpression)).booleanValue();
         if (logger.isDebugEnabled()) {
@@ -132,7 +133,6 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
     }
 
     boolean visit(UnaryPredicate constraint) {
-        setArgument(resultsBuilder.getCurrentPropertyValue());
         return super.visit(constraint);
     }
 

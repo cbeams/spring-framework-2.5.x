@@ -53,7 +53,12 @@ public class UnaryFunctionResultConstraint implements UnaryPredicate {
      * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
      */
     public boolean test(Object argument) {
-        return this.constraint.test(function.evaluate(argument));
+        System.out.println("ASASASS");
+        Object returnValue = function.evaluate(argument);
+        System.out.println(returnValue.getClass());
+        System.out.println("DFDFDFDD");
+
+        return this.constraint.test(returnValue);
     }
 
     public UnaryFunction getFunction() {

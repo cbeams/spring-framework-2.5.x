@@ -106,9 +106,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
         }
         catch (NullValueInNestedPathException e) {
             logger
-                    .info(
-                            "Bean property accessor encountered a null object along property path; returning null",
-                            e);
+                    .info("Bean property accessor encountered a null object along property path; returning null");
             return null;
         }
     }

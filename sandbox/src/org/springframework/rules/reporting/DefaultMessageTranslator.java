@@ -52,6 +52,8 @@ public class DefaultMessageTranslator implements Visitor {
 
     private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
 
+    private boolean appendValue = false;
+    
     PropertyResults results;
 
     private List args = new ArrayList();
@@ -87,8 +89,9 @@ public class DefaultMessageTranslator implements Visitor {
     }
 
     public String getMessage(PropertyResults results) {
-        return buildMessage(results.getPropertyName(), null, results
-                .getViolatedConstraint(), Locale.getDefault());
+        return buildMessage(results.getPropertyName(), results
+                .getRejectedValue(), results.getViolatedConstraint(), Locale
+                .getDefault());
     }
 
     private String buildMessage(String objectName, Object rejectedValue,
@@ -102,9 +105,11 @@ public class DefaultMessageTranslator implements Visitor {
             buf.append(messages.getMessage(resolvableObjectName(objectName),
                     locale));
             buf.append(' ');
-            if (rejectedValue != null) {
-                buf.append("'" + rejectedValue + "'");
-                buf.append(' ');
+            if (appendValue) {
+                if (rejectedValue != null) {
+                    buf.append("'" + rejectedValue + "'");
+                    buf.append(' ');
+                }
             }
         }
         for (int i = 0; i < args.length - 1; i++) {
