@@ -43,7 +43,13 @@ public class SQLErrorCodes {
 	
 	private String[] optimisticLockingFailureCodes = new String[0];
 	
+	private String[] pessimisticLockingFailureCodes = new String[0];
+
 	private String[] cannotAcquireLockCodes = new String[0];
+
+	private String[] deadlockLoserDataAccessCodes = new String[0];
+	
+	private String[] cannotSerializeTransactionCodes = new String[0];
 	
 	private String[] dataAccessResourceFailureCodes = new String[0];
 	
@@ -119,6 +125,15 @@ public class SQLErrorCodes {
 		return optimisticLockingFailureCodes;
 	}
 
+	public String[] getPessimisticLockingFailureCodes() {
+		return pessimisticLockingFailureCodes;
+	}
+	
+	public void setPessimisticLockingFailureCodes(
+			String[] pessimisticLockingFailureCodes) {
+		this.pessimisticLockingFailureCodes = pessimisticLockingFailureCodes;
+	}
+	
 	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {
 		this.cannotAcquireLockCodes = StringUtils.sortStringArray(cannotAcquireLockCodes);
 	}
@@ -126,7 +141,25 @@ public class SQLErrorCodes {
 	public String[] getCannotAcquireLockCodes() {
 		return cannotAcquireLockCodes;
 	}
-
+	
+	public String[] getCannotSerializeTransactionCodes() {
+		return cannotSerializeTransactionCodes;
+	}
+	
+	public void setCannotSerializeTransactionCodes(
+			String[] cannotSerializeTransactionCodes) {
+		this.cannotSerializeTransactionCodes = cannotSerializeTransactionCodes;
+	}
+	
+	public String[] getDeadlockLoserDataAccessCodes() {
+		return deadlockLoserDataAccessCodes;
+	}
+	
+	public void setDeadlockLoserDataAccessCodes(
+			String[] deadlockLoserDataAccessCodes) {
+		this.deadlockLoserDataAccessCodes = deadlockLoserDataAccessCodes;
+	}
+	
 	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
 		this.dataAccessResourceFailureCodes = StringUtils.sortStringArray(dataAccessResourceFailureCodes);
 	}

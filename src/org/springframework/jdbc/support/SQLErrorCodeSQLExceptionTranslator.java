@@ -27,11 +27,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
 /**
@@ -209,9 +212,21 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 					logTranslation(task, sql, sqlEx, false);
 					return new OptimisticLockingFailureException(task + ": " + sqlEx.getMessage(), sqlEx);
 				}
+				else if (Arrays.binarySearch(this.sqlErrorCodes.getPessimisticLockingFailureCodes(), errorCode) >= 0) {
+					logTranslation(task, sql, sqlEx, false);
+					return new PessimisticLockingFailureException(task + ": " + sqlEx.getMessage(), sqlEx);
+				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotAcquireLockCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
 					return new CannotAcquireLockException(task + ": " + sqlEx.getMessage(), sqlEx);
+				}
+				else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotSerializeTransactionCodes(), errorCode) >= 0) {
+					logTranslation(task, sql, sqlEx, false);
+					return new CannotSerializeTransactionException(task + ": " + sqlEx.getMessage(), sqlEx);
+				}
+				else if (Arrays.binarySearch(this.sqlErrorCodes.getDeadlockLoserDataAccessCodes(), errorCode) >= 0) {
+					logTranslation(task, sql, sqlEx, false);
+					return new DeadlockLoserDataAccessException(task + ": " + sqlEx.getMessage(), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
