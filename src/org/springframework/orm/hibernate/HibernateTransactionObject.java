@@ -40,8 +40,6 @@ public class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
 	private boolean newSessionHolder;
 
-	private Integer previousIsolationLevel;
-
 	private FlushMode previousFlushMode;
 
 	protected void setSessionHolder(SessionHolder sessionHolder, boolean newSessionHolder) {
@@ -59,14 +57,6 @@ public class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
 	public boolean hasTransaction() {
 		return (this.sessionHolder != null && this.sessionHolder.getTransaction() != null);
-	}
-
-	protected void setPreviousIsolationLevel(Integer previousIsolationLevel) {
-		this.previousIsolationLevel = previousIsolationLevel;
-	}
-
-	public Integer getPreviousIsolationLevel() {
-		return previousIsolationLevel;
 	}
 
 	protected void setPreviousFlushMode(FlushMode previousFlushMode) {

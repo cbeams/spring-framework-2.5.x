@@ -30,21 +30,11 @@ package org.springframework.jdbc.datasource;
  * @see DataSourceTransactionManager
  * @see ConnectionHolder
  * @see org.springframework.transaction.support.DefaultTransactionStatus
- * @version $Id: DataSourceTransactionObject.java,v 1.7 2004-06-19 10:02:23 jhoeller Exp $
+ * @version $Id: DataSourceTransactionObject.java,v 1.8 2004-07-03 10:01:04 jhoeller Exp $
  */
 public class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
 
-	private Integer previousIsolationLevel;
-	
 	private boolean mustRestoreAutoCommit;
-
-	protected void setPreviousIsolationLevel(Integer previousIsolationLevel) {
-		this.previousIsolationLevel = previousIsolationLevel;
-	}
-
-	public Integer getPreviousIsolationLevel() {
-		return previousIsolationLevel;
-	}
 
 	protected void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
 		this.mustRestoreAutoCommit = mustRestoreAutoCommit;

@@ -67,7 +67,10 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager {
 
 	private ConnectionHolder connectionHolder;
 
+	private Integer previousIsolationLevel;
+
 	private boolean savepointAllowed;
+
 
 	public void setConnectionHolder(ConnectionHolder connectionHolder) {
 		this.connectionHolder = connectionHolder;
@@ -75,6 +78,14 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager {
 
 	public ConnectionHolder getConnectionHolder() {
 		return connectionHolder;
+	}
+
+	public void setPreviousIsolationLevel(Integer previousIsolationLevel) {
+		this.previousIsolationLevel = previousIsolationLevel;
+	}
+
+	public Integer getPreviousIsolationLevel() {
+		return previousIsolationLevel;
 	}
 
 	public void setSavepointAllowed(boolean savepointAllowed) {

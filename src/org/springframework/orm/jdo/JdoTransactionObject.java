@@ -38,6 +38,8 @@ public class JdoTransactionObject extends JdbcTransactionObjectSupport {
 
 	private boolean newPersistenceManagerHolder;
 
+	private Object transactionData;
+
 	protected void setPersistenceManagerHolder(PersistenceManagerHolder persistenceManagerHolder,
 																						 boolean newPersistenceManagerHolder) {
 		this.persistenceManagerHolder = persistenceManagerHolder;
@@ -56,6 +58,14 @@ public class JdoTransactionObject extends JdbcTransactionObjectSupport {
 		return (this.persistenceManagerHolder != null &&
 				this.persistenceManagerHolder.getPersistenceManager() != null &&
 		    this.persistenceManagerHolder.getPersistenceManager().currentTransaction().isActive());
+	}
+
+	protected void setTransactionData(Object transactionData) {
+		this.transactionData = transactionData;
+	}
+
+	public Object getTransactionData() {
+		return transactionData;
 	}
 
 }
