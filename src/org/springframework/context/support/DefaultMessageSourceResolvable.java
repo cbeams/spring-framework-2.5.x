@@ -22,30 +22,44 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the MessageSourceResolvable interface. Easy way to
- * store all the necessary values needed to resolve messages from a MessageSource.
+ * Default implementation of the MessageSourceResolvable interface.
+ * Easy way to store all the necessary values needed to resolve
+ * a message via a MessageSource.
  * @author Juergen Hoeller
- * @version $Id: DefaultMessageSourceResolvable.java,v 1.4 2004-03-30 06:27:35 jhoeller Exp $
+ * @since 13.02.2004
+ * @see org.springframework.context.MessageSource#getMessage(MessageSourceResolvable, java.util.Locale)
  */
 public class DefaultMessageSourceResolvable implements MessageSourceResolvable, Serializable {
 
-	private String[] codes;
+	private final String[] codes;
 
-	private Object[] arguments;
+	private final Object[] arguments;
 
-	private String defaultMessage;
+	private final String defaultMessage;
+
 
 	/**
-	 * Create a new instance, using multiple codes.
-	 * @see MessageSourceResolvable#getCodes
+	 * Create a new DefaultMessageSourceResolvable.
+	 * @param codes the codes to be used to resolve this message
+	 */
+	public DefaultMessageSourceResolvable(String[] codes) {
+		this(codes, null, null);
+	}
+
+	/**
+	 * Create a new DefaultMessageSourceResolvable.
+	 * @param codes the codes to be used to resolve this message
+	 * @param arguments the array of arguments to be used to resolve this message
 	 */
 	public DefaultMessageSourceResolvable(String[] codes, Object[] arguments) {
 		this(codes, arguments, null);
 	}
 
 	/**
-	 * Create a new instance, using multiple codes and a default message.
-	 * @see MessageSourceResolvable#getCodes
+	 * Create a new DefaultMessageSourceResolvable.
+	 * @param codes the codes to be used to resolve this message
+	 * @param arguments the array of arguments to be used to resolve this message
+	 * @param defaultMessage the default message to be used to resolve this message
 	 */
 	public DefaultMessageSourceResolvable(String[] codes, Object[] arguments, String defaultMessage) {
 		this.codes = codes;
@@ -55,10 +69,12 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 
 	/**
 	 * Copy constructor: Create a new instance from another resolvable.
+	 * @param resolvable the resolvable to copy from
 	 */
 	public DefaultMessageSourceResolvable(MessageSourceResolvable resolvable) {
 		this(resolvable.getCodes(), resolvable.getArguments(), resolvable.getDefaultMessage());
 	}
+
 
 	public String[] getCodes() {
 		return codes;
@@ -69,7 +85,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 * codes array.
 	 */
 	public String getCode() {
-		return (codes != null && codes.length > 0) ? codes[codes.length - 1] : null;
+		return (this.codes != null && this.codes.length > 0) ? this.codes[this.codes.length - 1] : null;
 	}
 
 	public Object[] getArguments() {

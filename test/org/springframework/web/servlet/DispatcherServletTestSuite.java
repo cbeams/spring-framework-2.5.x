@@ -94,7 +94,7 @@ public class DispatcherServletTestSuite extends TestCase {
 
 		simpleDispatcherServlet.doGet(request, response);
 		assertTrue("forwarded to form", "form".equals(response.getForwardedUrl()));
-		DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"test"}, null);
+		DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"test"});
 		RequestContext rc = new RequestContext(request);
 
 		assertTrue("hasn't RequestContext attribute", request.getAttribute("rc") == null);
@@ -144,7 +144,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		complexDispatcherServlet.doGet(request, response);
 		assertTrue("forwarded to form", "myform.jsp".equals(response.getForwardedUrl()));
 		assertTrue("has RequestContext attribute", request.getAttribute("rc") != null);
-		DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"test"}, null);
+		DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"test"});
 
 		RequestContext rc = (RequestContext) request.getAttribute("rc");
 		assertTrue("Not in HTML escaping mode", !rc.isDefaultHtmlEscape());

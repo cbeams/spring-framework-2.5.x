@@ -57,7 +57,7 @@ public class ThemeTestSuite extends AbstractTagTests {
 		assertEquals("theme test message", rc.getThemeMessage("themetest", null, "default"));
 		assertEquals("default", rc.getThemeMessage("themetesta", "default"));
 		assertEquals("default", rc.getThemeMessage("themetesta", null, "default"));
-		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"themetest"}, null);
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"themetest"});
 		assertEquals("theme test message", rc.getThemeMessage(resolvable));
 	}
 

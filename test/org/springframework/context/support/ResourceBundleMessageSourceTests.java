@@ -71,14 +71,14 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		assertEquals("nochricht2", ac.getMessage("code2", null, new Locale("DE", "at")));
 		assertEquals("noochricht2", ac.getMessage("code2", null, new Locale("DE", "at", "oo")));
 		assertEquals("message3", ac.getMessage("code3", null, Locale.ENGLISH));
-		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[]{"code4", "code3"}, null);
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[]{"code4", "code3"});
 		assertEquals("message3", ac.getMessage(resolvable, Locale.ENGLISH));
 
 		assertEquals("message3", ac.getMessage("code3", null, Locale.ENGLISH));
-		resolvable = new DefaultMessageSourceResolvable(new String[]{"code4", "code3"}, null);
+		resolvable = new DefaultMessageSourceResolvable(new String[]{"code4", "code3"});
 		assertEquals("message3", ac.getMessage(resolvable, Locale.ENGLISH));
 
-		Object[] args = new Object[]{"Hello", new DefaultMessageSourceResolvable(new String[]{"code1"}, null)};
+		Object[] args = new Object[]{"Hello", new DefaultMessageSourceResolvable(new String[]{"code1"})};
 		assertEquals("Hello, message1", ac.getMessage("hello", args, Locale.ENGLISH));
 
 		assertEquals("default", ac.getMessage(null, null, "default", Locale.ENGLISH));

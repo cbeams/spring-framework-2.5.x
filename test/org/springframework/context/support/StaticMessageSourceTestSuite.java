@@ -186,7 +186,7 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 
 		// no code valid, no default
 		String[] codes4 = new String[] {"message.format.example99", "message.format.example98"};
-		MessageSourceResolvable resolvable4 = new DefaultMessageSourceResolvable(codes4, null);
+		MessageSourceResolvable resolvable4 = new DefaultMessageSourceResolvable(codes4);
 		try {
 			sac.getMessage(resolvable4, Locale.US);
 			fail("Should have thrown NoSuchMessageException");
