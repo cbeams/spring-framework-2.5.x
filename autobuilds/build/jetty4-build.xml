@@ -6,12 +6,12 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: jetty4-build.xml,v 1.5 2004-06-07 23:35:18 davison Exp $
+	$Id: jetty4-build.xml,v 1.6 2004-06-30 22:37:24 aarendsen Exp $
 -->
 <project name="autobuilds-jetty4" basedir="." default="usage">
 
 	
-	<property name="appserver.distname" value="Jetty-${jetty4.version}" />
+	<property name="appserver.distname" value="jetty-${jetty4.version}" />
 	<property name="deploy.dir" value="webapps" />
 	
 
