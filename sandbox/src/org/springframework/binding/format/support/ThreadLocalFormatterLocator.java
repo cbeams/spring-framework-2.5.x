@@ -21,10 +21,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.binding.format.DateFormatter;
+import org.springframework.binding.format.Formatter;
 import org.springframework.binding.format.FormatterLocator;
 import org.springframework.binding.format.LocaleContext;
-import org.springframework.binding.format.NumberFormatter;
 import org.springframework.binding.format.Style;
 import org.springframework.binding.thread.ThreadCleanupBroadcaster;
 import org.springframework.binding.thread.support.DefaultThreadLocalContext;
@@ -86,11 +85,11 @@ public class ThreadLocalFormatterLocator implements FormatterLocator {
 		return map;
 	}
 
-	public DateFormatter getDateFormatter() {
+	public Formatter getDateFormatter() {
 		return getDateFormatter(this.defaultDateStyle);
 	}
 
-	public DateFormatter getDateFormatter(Style style) {
+	public Formatter getDateFormatter(Style style) {
 		String key = DEFAULT_DATE_FORMATTER_KEY + style.getCode();
 		DateFormatter formatter = (DateFormatter)getLocaleMap().get(key);
 		if (formatter == null) {
@@ -100,15 +99,15 @@ public class ThreadLocalFormatterLocator implements FormatterLocator {
 		return formatter;
 	}
 
-	public DateFormatter getDateFormatter(String encodedFormat) {
+	public Formatter getDateFormatter(String encodedFormat) {
 		throw new UnsupportedOperationException();
 	}
 
-	public DateFormatter getDateTimeFormatter() {
+	public Formatter getDateTimeFormatter() {
 		return getDateTimeFormatter(this.defaultDateStyle, this.defaultTimeStyle);
 	}
 
-	public DateFormatter getDateTimeFormatter(Style dateStyle, Style timeStyle) {
+	public Formatter getDateTimeFormatter(Style dateStyle, Style timeStyle) {
 		String key = DEFAULT_DATE_TIME_FORMATTER_KEY + dateStyle.getCode() + timeStyle.getCode();
 		DateFormatter formatter = (DateFormatter)getLocaleMap().get(key);
 		if (formatter == null) {
@@ -119,11 +118,11 @@ public class ThreadLocalFormatterLocator implements FormatterLocator {
 		return formatter;
 	}
 
-	public DateFormatter getTimeFormatter() {
+	public Formatter getTimeFormatter() {
 		return getTimeFormatter(this.defaultTimeStyle);
 	}
 
-	public DateFormatter getTimeFormatter(Style style) {
+	public Formatter getTimeFormatter(Style style) {
 		String key = DEFAULT_TIME_FORMATTER_KEY + style.getCode();
 		DateFormatter formatter = (DateFormatter)getLocaleMap().get(key);
 		if (formatter == null) {
@@ -133,7 +132,7 @@ public class ThreadLocalFormatterLocator implements FormatterLocator {
 		return formatter;
 	}
 
-	public NumberFormatter getNumberFormatter(Class numberClass) {
+	public Formatter getNumberFormatter(Class numberClass) {
 		NumberFormatter formatter = (NumberFormatter)getLocaleMap().get(numberClass);
 		if (formatter == null) {
 			formatter = new NumberFormatter(numberClass, NumberFormat.getNumberInstance(getLocale()));
@@ -142,11 +141,11 @@ public class ThreadLocalFormatterLocator implements FormatterLocator {
 		return formatter;
 	}
 
-	public NumberFormatter getPercentFormatter() {
+	public Formatter getPercentFormatter() {
 		throw new UnsupportedOperationException();
 	}
 
-	public NumberFormatter getCurrencyFormatter() {
+	public Formatter getCurrencyFormatter() {
 		throw new UnsupportedOperationException();
 	}
 }
