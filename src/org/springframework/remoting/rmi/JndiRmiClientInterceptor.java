@@ -16,8 +16,8 @@
 
 package org.springframework.remoting.rmi;
 
-import java.rmi.ConnectException;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
@@ -127,9 +127,12 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * Set whether to refresh the RMI stub on connect failure.
 	 * Default is false.
 	 * <p>Can be turned on to allow for hot restart of the RMI server.
-	 * If a cached RMI stub throws a ConnectException, a fresh stub
-	 * will be fetched and the invocation will be retried.
+	 * If a cached RMI stub throws an RMI exception that indicates a
+	 * remote connect failure, a fresh proxy will be fetched and the
+	 * invocation will be retried.
 	 * @see java.rmi.ConnectException
+	 * @see java.rmi.ConnectIOException
+	 * @see java.rmi.NoSuchObjectException
 	 */
 	public void setRefreshStubOnConnectFailure(boolean refreshStubOnConnectFailure) {
 		this.refreshStubOnConnectFailure = refreshStubOnConnectFailure;
@@ -204,11 +207,13 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	/**
 	 * Fetches an RMI stub and delegates to doInvoke.
 	 * If configured to refresh on connect failure, it will call
-	 * refreshAndRetry on ConnectException.
+	 * refreshAndRetry on corresponding RMI exceptions.
 	 * @see #getStub
 	 * @see #doInvoke
 	 * @see #refreshAndRetry
 	 * @see java.rmi.ConnectException
+	 * @see java.rmi.ConnectIOException
+	 * @see java.rmi.NoSuchObjectException
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Remote stub = null;
@@ -224,8 +229,13 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 		catch (RemoteConnectFailureException ex) {
 			return handleRemoteConnectFailure(invocation, ex);
 		}
-		catch (ConnectException ex) {
-			return handleRemoteConnectFailure(invocation, ex);
+		catch (RemoteException ex) {
+			if (RmiClientInterceptorUtils.isConnectFailure(ex)) {
+				return handleRemoteConnectFailure(invocation, ex);
+			}
+			else {
+				throw ex;
+			}
 		}
 	}
 

@@ -19,6 +19,8 @@ package org.springframework.remoting.rmi;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.ConnectException;
+import java.rmi.ConnectIOException;
+import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
@@ -34,6 +36,9 @@ import org.springframework.remoting.RemoteConnectFailureException;
 /**
  * Factored-out methods for performing invocations within an RMI client.
  * Can handle both RMI and non-RMI service interfaces working on an RMI stub.
+ *
+ * <p>Note: This is an SPI class, not intended to be used by applications.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */
@@ -113,7 +118,7 @@ public abstract class RmiClientInterceptorUtils {
 			logger.debug("Remote service [" + serviceName + "] threw exception", ex);
 		}
 		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
-			if (ex instanceof ConnectException) {
+			if (isConnectFailure(ex)) {
 				return new RemoteConnectFailureException("Cannot connect to remote service [" + serviceName + "]", ex);
 			}
 			else {
@@ -123,6 +128,21 @@ public abstract class RmiClientInterceptorUtils {
 		else {
 			return ex;
 		}
+	}
+
+	/**
+	 * Determine whether the given RMI exception indicates a connect failure.
+	 * Treats ConnectException, ConnectIOException and NoSuchObjectException
+	 * as connect failure.
+	 * @param ex the RMI exception to check
+	 * @return whether the exception should be treated as connect failure
+	 * @see java.rmi.ConnectException
+	 * @see java.rmi.ConnectIOException
+	 * @see java.rmi.NoSuchObjectException
+	 */
+	public static boolean isConnectFailure(RemoteException ex) {
+		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
+				ex instanceof NoSuchObjectException);
 	}
 
 	/**

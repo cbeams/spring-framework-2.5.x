@@ -17,7 +17,7 @@
 package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
-import java.rmi.ConnectException;
+import java.rmi.RemoteException;
 
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
@@ -27,6 +27,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
  * Superclass for interceptors proxying remote Stateless Session Beans.
@@ -45,9 +46,12 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * Set whether to refresh the EJB home on connect failure.
 	 * Default is false.
 	 * <p>Can be turned on to allow for hot restart of the EJB server.
-	 * If a cached EJB home throws a ConnectException, a fresh home
-	 * will be fetched and the invocation will be retried.
+	 * If a cached EJB home throws an RMI exception that indicates a
+	 * remote connect failure, a fresh home will be fetched and the
+	 * invocation will be retried.
 	 * @see java.rmi.ConnectException
+	 * @see java.rmi.ConnectIOException
+	 * @see java.rmi.NoSuchObjectException
 	 */
 	public void setRefreshHomeOnConnectFailure(boolean refreshHomeOnConnectFailure) {
 		this.refreshHomeOnConnectFailure = refreshHomeOnConnectFailure;
@@ -61,11 +65,13 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	/**
 	 * Fetches an EJB home object and delegates to doInvoke.
 	 * If configured to refresh on connect failure, it will call
-	 * refreshAndRetry on ConnectException.
+	 * refreshAndRetry on corresponding RMI exceptions.
 	 * @see #getHome
 	 * @see #doInvoke
 	 * @see #refreshAndRetry
 	 * @see java.rmi.ConnectException
+	 * @see java.rmi.ConnectIOException
+	 * @see java.rmi.NoSuchObjectException
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		try {
@@ -74,8 +80,13 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 		catch (RemoteConnectFailureException ex) {
 			return handleRemoteConnectFailure(invocation, ex);
 		}
-		catch (ConnectException ex) {
-			return handleRemoteConnectFailure(invocation, ex);
+		catch (RemoteException ex) {
+			if (RmiClientInterceptorUtils.isConnectFailure(ex)) {
+				return handleRemoteConnectFailure(invocation, ex);
+			}
+			else {
+				throw ex;
+			}
 		}
 	}
 
