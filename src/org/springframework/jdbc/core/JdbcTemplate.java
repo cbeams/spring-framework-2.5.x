@@ -56,7 +56,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.2 2003-08-17 20:37:03 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.3 2003-08-20 02:46:12 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -237,6 +237,18 @@ public class JdbcTemplate implements InitializingBean {
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
 		}
 		catch (SQLException ex) {
+			if (rs != null) {
+				try {
+					rs.close();
+				}
+				catch (SQLException ignore) {}
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				}
+				catch (SQLException ignore) {}
+			}
 			throw getExceptionTranslater().translate("JdbcTemplate.query(sql)", sql, ex);
 		}
 		finally {
@@ -266,10 +278,11 @@ public class JdbcTemplate implements InitializingBean {
 	 */
 	public void doWithResultSetFromPreparedQuery(PreparedStatementCreator psc, ResultSetExtracter rse) throws DataAccessException {
 		Connection con = null;
+		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
 			con = DataSourceUtils.getConnection(this.dataSource);
-			PreparedStatement ps = psc.createPreparedStatement(con);
+			ps = psc.createPreparedStatement(con);
 			if (logger.isInfoEnabled())
 				logger.info("Executing SQL query using PreparedStatement: [" + psc + "]");
 			rs = ps.executeQuery();
@@ -282,6 +295,18 @@ public class JdbcTemplate implements InitializingBean {
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
 		}
 		catch (SQLException ex) {
+			if (rs != null) {
+				try {
+					rs.close();
+				}
+				catch (SQLException ignore) {}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				}
+				catch (SQLException ignore) {}
+			}
 			throw getExceptionTranslater().translate("JdbcTemplate.query(psc) with PreparedStatementCreator [" + psc + "]", null, ex);
 		}
 		finally {
@@ -377,12 +402,13 @@ public class JdbcTemplate implements InitializingBean {
 	 */
 	public int[] update(PreparedStatementCreator[] pscs) throws DataAccessException {
 		Connection con = null;
+		PreparedStatement ps = null;
 		int index = 0;
 		try {
 			con = DataSourceUtils.getConnection(this.dataSource);
 			int[] retvals = new int[pscs.length];
 			for (index = 0; index < retvals.length; index++) {
-				PreparedStatement ps = pscs[index].createPreparedStatement(con);
+				ps = pscs[index].createPreparedStatement(con);
 				if(logger.isInfoEnabled())
 					logger.info("Executing SQL update using PreparedStatement: [" + pscs[index] + "]");
 				retvals[index] = ps.executeUpdate();
@@ -396,6 +422,12 @@ public class JdbcTemplate implements InitializingBean {
 			return retvals;
 		}
 		catch (SQLException ex) {
+			if (ps != null) {
+				try {
+					ps.close();
+				}
+				catch (SQLException ignore) {}
+			}
 			throw getExceptionTranslater().translate("processing update " +
 			                                         (index + 1) + " of " + pscs.length + "; update was [" + pscs[index] + "]", null, ex);
 		}
@@ -447,9 +479,10 @@ public class JdbcTemplate implements InitializingBean {
 	 */
 	public int[] batchUpdate(String sql, BatchPreparedStatementSetter setter) throws DataAccessException {
 		Connection con = null;
+		PreparedStatement ps = null;
 		try {
 			con = DataSourceUtils.getConnection(this.dataSource);
-			PreparedStatement ps = con.prepareStatement(sql);
+			ps = con.prepareStatement(sql);
 			DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 			int batchSize = setter.getBatchSize();
 			for (int i = 0; i < batchSize; i++) {
@@ -463,6 +496,12 @@ public class JdbcTemplate implements InitializingBean {
 			return retvals;
 		}
 		catch (SQLException ex) {
+			if (ps != null) {
+				try {
+					ps.close();
+				}
+				catch (SQLException ignore) {}
+			}
 			throw getExceptionTranslater().translate("processing batch update " +
 			                                         " with size=" + setter.getBatchSize() + "; update was [" + sql + "]", sql, ex);
 		}
@@ -491,9 +530,9 @@ public class JdbcTemplate implements InitializingBean {
 
 	/**
 	 * Adapter to enable use of a RowCallbackHandler inside a
-	 * ResultSetExtracter. Uses a ReadOnlyResultSet to
-	 * ensure that the underlying ResultSet isn't used illegally
-	 * (for example, for navigation).
+	 * ResultSetExtracter. Uses a  regular ResultSet, so we have
+	 * to be careful when using it, so we don't use it for navigating
+	 * since this could lead to unpreditable consequences.
 	 */
 	private final class RowCallbackHandlerResultSetExtracter implements ResultSetExtracter {
 
@@ -514,14 +553,9 @@ public class JdbcTemplate implements InitializingBean {
 		 * @see org.springframework.jdbc.core.ResultSetExtracter#extractData(java.sql.ResultSet)
 		 */
 		public void extractData(ResultSet rs) throws SQLException {
-			ReadOnlyResultSet rors = new ReadOnlyResultSet(rs);
 			while (rs.next()) {
-				this.callbackHandler.processRow(rors);
+				this.callbackHandler.processRow(rs);
 			}
-			//	Since rors is a wrapper around rs, calling the close() method is
-			// forbidden. Since rs is already closed, we only need to make it
-			// null.
-			rors = null;
 		}
 	}
 

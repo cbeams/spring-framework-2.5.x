@@ -27,7 +27,7 @@ import com.mockobjects.sql.MockConnection;
 /** 
  * Mock object based tests for JdbcTemplate
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.1.1.1 2003-08-14 16:21:10 trisberg Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.2 2003-08-20 02:46:30 trisberg Exp $
  */
 public class JdbcTemplateTestSuite extends TestCase {
 
@@ -589,9 +589,9 @@ public class JdbcTemplateTestSuite extends TestCase {
 			mockPs.executeBatch();
 			psControl.setThrowable(sex);
 			
-			// Should we force the PreparedStatement to be closed as below?
-			//mockPs.close();
-			//psControl.setVoidCallable(1);
+			// Should we force the PreparedStatement to be closed as below? -- Yes, we should close what we open
+			mockPs.close();
+			psControl.setVoidCallable(1);
 			psControl.activate();
 		
 			MockConnection con = MockConnectionFactory.update(sql, mockPs);
@@ -824,8 +824,8 @@ public class JdbcTemplateTestSuite extends TestCase {
 		psControl.setThrowable(sex);
 		
 		// Insist on trying to close PreparedStatement
-		//mockPs.close();
-		//psControl.setVoidCallable(1);
+		mockPs.close();
+		psControl.setVoidCallable(1);
 		psControl.activate();
 	
 		MockConnection con = MockConnectionFactory.update(sql, mockPs);
