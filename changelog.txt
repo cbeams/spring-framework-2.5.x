@@ -56,6 +56,7 @@ Package org.springframework.jms
 Package org.springframework.orm
 * SqlMapClientFactoryBean automatically lets all operations participate in Spring-managed transaction timeouts
 * fixed NPE in HibernateTemplate's "iterate(queryString,value)" and "iterate(queryString,values)" methods
+* added "alwaysUseNewSession" flag to HibernateTemplate, enforcing a new Session even in case of a pre-bound Session
 * HibernateTemplate proxies exposed Sessions by default, applying query cache settings and transaction timeouts
 * deprecated HibernateTemplate's "createQuery", "getNamedQuery" and "createCriteria" methods (in favor of Session proxy)
 * JdoTemplate can proxy exposed PersistenceManagers ("exposeNativePersistenceManager"), applying transaction timeouts
@@ -104,6 +105,7 @@ Package org.springframework.web
 * changed HttpServletBean and GenericFilterBean to ignore unknown init-params that do not correspond to bean properties
 * added "publishEvents" init-param to FrameworkServlet, allowing to turn off the publishing of RequestHandledEvents
 * fixed DispatcherServlet to copy attribute names before iterating over them to restore original values after include
+* reworked BeanName/SimpleUrlHandlerMapping to prefer more specific mappings in case of overlapping URL paths
 * added overloaded "getFormSessionAttributeName" method with HttpServletRequest argument to AbstractFormController
 * added overloaded "getPageSessionAttributeName" method with HttpServletRequest argument to AbstractWizardFormController
 * RequestContext works outside DispatcherServlet too, falling back to root WebApplicationContext and JSTL/request locale
