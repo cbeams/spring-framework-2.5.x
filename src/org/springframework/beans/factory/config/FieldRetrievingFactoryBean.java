@@ -18,23 +18,42 @@ package org.springframework.beans.factory.config;
 
 import java.lang.reflect.Field;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean which retrieves a static or non-static field value.
  * Typically used for retrieving public static final constants.
+ *
+ * <p>Usage example:
+ *
+ * <pre>
+ * // standard definition for exposing a static field, specifying the "staticField" property
+ * &lt;bean id="myField" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"&gt;
+ *   &lt;property name="staticField"&gt;&lt;value&gt;java.sql.Connection.TRANSACTION_SERIALIZABLE&lt;/value&gt;&lt;/property&gt;
+ * &lt;/bean&gt;
+ *
+ * // convenience version that specifies a static field pattern as bean name
+ * &lt;bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;</pre>
+ * </pre>
+ *
  * @author Juergen Hoeller
- * @since 31.07.2004
+ * @since 1.1
  * @see #setStaticField
  */
-public class FieldRetrievingFactoryBean implements FactoryBean, InitializingBean {
+public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, InitializingBean {
 
 	private Class targetClass;
 
 	private Object targetObject;
 
 	private String targetField;
+
+	private String staticField;
+
+	private String beanName;
 
 	// the field we will retrieve
 	private Field fieldObject;
@@ -101,24 +120,52 @@ public class FieldRetrievingFactoryBean implements FactoryBean, InitializingBean
 	 * @see #setTargetClass
 	 * @see #setTargetField
 	 */
-	public void setStaticField(String staticField) throws ClassNotFoundException {
-		int lastDotIndex = staticField.lastIndexOf('.');
-		if (lastDotIndex == -1 || lastDotIndex == staticField.length()) {
-			throw new IllegalArgumentException("staticField must be a fully qualified class plus method name: " +
-																				 "e.g. 'example.MyExampleClass.MY_EXAMPLE_FIELD'");
-		}
-		String className = staticField.substring(0, lastDotIndex);
-		String fieldName = staticField.substring(lastDotIndex + 1);
-		setTargetClass(Class.forName(className, true, Thread.currentThread().getContextClassLoader()));
-		setTargetField(fieldName);
+	public void setStaticField(String staticField) {
+		this.staticField = staticField;
+	}
+
+	/**
+	 * The bean name of this FieldRetrievingFactoryBean will be interpreted
+	 * as "staticField" pattern, if neither "targetClass" nor "targetObject"
+	 * nor "targetField" have been specified.
+	 * This allows for concise bean definitions with just an id/name.
+	 */
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
 	}
 
 
-	public void afterPropertiesSet() throws NoSuchFieldException {
-		if (this.targetClass == null && this.targetObject == null) {
-			throw new IllegalArgumentException("Either targetClass or targetObject is required");
+	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchFieldException {
+		if (this.targetClass != null && this.targetObject != null) {
+			throw new IllegalArgumentException("Specify either targetClass or targetObject, not both");
 		}
-		if (this.targetField == null) {
+
+		if (this.targetClass == null && this.targetObject == null) {
+			if (this.targetField != null) {
+				throw new IllegalArgumentException(
+				    "Specify targetClass or targetObject in combination with targetField");
+			}
+
+			// If no other property specified, consider bean name as static field expression.
+			if (this.staticField == null) {
+				this.staticField = this.beanName;
+			}
+
+			// try to parse static field into class and field
+			int lastDotIndex = this.staticField.lastIndexOf('.');
+			if (lastDotIndex == -1 || lastDotIndex == this.staticField.length()) {
+				throw new IllegalArgumentException(
+						"staticField must be a fully qualified class plus method name: " +
+						"e.g. 'example.MyExampleClass.MY_EXAMPLE_FIELD'");
+			}
+			String className = this.staticField.substring(0, lastDotIndex);
+			String fieldName = this.staticField.substring(lastDotIndex + 1);
+			this.targetClass = ClassUtils.forName(className);
+			this.targetField = fieldName;
+		}
+
+		else if (this.targetField == null) {
+			// either targetClass or targetObject specified
 			throw new IllegalArgumentException("targetField is required");
 		}
 
@@ -129,10 +176,12 @@ public class FieldRetrievingFactoryBean implements FactoryBean, InitializingBean
 
 
 	public Object getObject() throws IllegalAccessException {
-		if (this.targetObject != null){
+		if (this.targetObject != null) {
+			// instance field
 			return this.fieldObject.get(this.targetObject);
 		}
 		else{
+			// class field
 			return this.fieldObject.get(null);
 		}
 	}

@@ -50,17 +50,14 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		assertEquals(target.publicField, fr.getObject());
 	}
 
-	public void testNotConfigured() throws NoSuchFieldException {
+	public void testNothingButBeanName() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
-		try {
-			fr.afterPropertiesSet();
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		fr.setBeanName("java.sql.Connection.TRANSACTION_SERIALIZABLE");
+		fr.afterPropertiesSet();
+		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), fr.getObject());
 	}
 
-	public void testJustTargetField() throws NoSuchFieldException {
+	public void testJustTargetField() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetField("TRANSACTION_SERIALIZABLE");
 		try {
@@ -71,7 +68,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testJustTargetClass() throws NoSuchFieldException {
+	public void testJustTargetClass() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetClass(Connection.class);
 		try {
@@ -82,7 +79,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testJustTargetObject() throws NoSuchFieldException {
+	public void testJustTargetObject() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetObject(new PublicFieldHolder());
 		try {
