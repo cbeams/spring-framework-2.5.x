@@ -7,8 +7,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.commons.dbcp.DelegatingCallableStatement;
 import org.apache.commons.dbcp.DelegatingConnection;
 import org.apache.commons.dbcp.DelegatingPreparedStatement;
+import org.apache.commons.dbcp.DelegatingResultSet;
 import org.apache.commons.dbcp.DelegatingStatement;
 
 /**
@@ -21,9 +23,12 @@ import org.apache.commons.dbcp.DelegatingStatement;
  * DBCP DataSource: If a given object is not a Commons DBCP wrapper, it will
  * be returned as-is.
  *
- * <p>Note: Up until Commobs DBCP 1.1, DelegatingCallableStatement does not
- * offer any means to access the underlying native CallableStatement. Therefore,
- * this implementation will simply return the passed-in wrapper object.
+ * <p>Note: Before Commons DBCP 1.1, DelegatingCallableStatement and
+ * DelegatingResultSet have not offered any means to access underlying delegates.
+ * Therefore, getNativeCallableStatement and getNativeResultSet will just work
+ * with DBCP 1.1. But getNativeResultSet will not be invoked by JdbcTemplate for a
+ * wrapped ResultSet anyway, because getNativeStatement/getNativePreparedStatement
+ * will already have returned the underlying delegate before.
  *
  * @author Juergen Hoeller
  * @since 25.08.2003
@@ -61,10 +66,16 @@ public class CommonsDbcpNativeJdbcExtractor implements NativeJdbcExtractor {
 	}
 
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) {
+		if (cs instanceof DelegatingCallableStatement) {
+			return ((DelegatingCallableStatement) cs).getInnermostDelegate();
+		}
 		return cs;
 	}
 
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
+		if (rs instanceof DelegatingResultSet) {
+			return ((DelegatingResultSet) rs).getInnermostDelegate();
+		}
 		return rs;
 	}
 
