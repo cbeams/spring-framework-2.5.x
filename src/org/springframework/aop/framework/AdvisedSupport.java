@@ -14,16 +14,15 @@ import java.util.Set;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.BeforeAdvice;
-import org.springframework.aop.BeforeAdvisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.ThrowsAdvisor;
+import org.springframework.aop.support.DefaultBeforeAdvisor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
+import org.springframework.aop.support.DefaultThrowsAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.StringUtils;
 
@@ -36,7 +35,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.15 2003-12-05 16:28:26 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.16 2003-12-07 14:31:33 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -208,31 +207,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 	
 	public void addBeforeAdvice(final MethodBeforeAdvice ba) {
-		addAdvisor(new BeforeAdvisor() {
-			public BeforeAdvice getBeforeAdvice() {
-				return ba;
-			}
-			public Pointcut getPointcut() {
-				return Pointcut.TRUE;
-			}
-			public boolean isPerInstance() {
-				throw new UnsupportedOperationException();
-			}
-		});
+		addAdvisor(new DefaultBeforeAdvisor(Pointcut.TRUE, ba));
 	}
 	
 	public void addThrowsAdvice(final Object throwsAdvice) {
-		addAdvisor(new ThrowsAdvisor() {
-			public Object getThrowsAdvice() {
-				return throwsAdvice;
-			}
-			public Pointcut getPointcut() {
-				return Pointcut.TRUE;
-			}
-			public boolean isPerInstance() {
-				throw new UnsupportedOperationException();
-			}
-		});
+		addAdvisor(new DefaultThrowsAdvisor(Pointcut.TRUE, throwsAdvice));
 	}
 
 	// TODO what about removing a ProxyInterceptor?
