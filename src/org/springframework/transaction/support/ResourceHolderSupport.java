@@ -112,7 +112,11 @@ public abstract class ResourceHolderSupport {
 	 * @return number of millseconds until expiration
 	 */
 	public long getTimeToLiveInMillis() {
-		return deadline.getTime() - System.currentTimeMillis();
+		if (this.deadline == null) {
+			throw new IllegalStateException("No timeout specified for this resource holder");
+		}
+		long timeToLive = this.deadline.getTime() - System.currentTimeMillis();
+		return (timeToLive >= 0 ? timeToLive : 0);
 	}
 
 	/**
