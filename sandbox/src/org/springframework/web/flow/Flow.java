@@ -660,7 +660,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @return
 	 */
-	FlowLifecycleListener getLifecycleListener() {
+	protected FlowLifecycleListener getLifecycleListener() {
 		return flowLifecycleListener;
 	}
 
