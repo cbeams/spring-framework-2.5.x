@@ -50,16 +50,6 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("1 didn't change", tb.getAge() == 11);
 	}
 
-	public void testToString() {
-		TestBean tb = new TestBean();
-		tb.setName("kerry");
-		tb.setAge(37);
-		String s = new BeanWrapperImpl(tb).toString();
-		// Test that it lists properties we've set
-		assertTrue(s.indexOf("37") != -1);
-		assertTrue(s.indexOf("kerry") != -1);
-	}
-
 	public void testIsReadablePropertyNotReadable() {
 		NoRead nr = new NoRead();
 		BeanWrapper bw = new BeanWrapperImpl(nr);
@@ -852,8 +842,8 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("someValue", bw.getPropertyValue("someProperty"));
 		assertEquals("someValue", bean.getSomeProperty());
 	}
-	
-	/*public void testErrorMessageOfNestedProperty() {
+
+	public void testErrorMessageOfNestedProperty() {
 		ITestBean parent = new TestBean();
 		ITestBean child = new DifferentTestBean();
 		child.setName("test");
@@ -861,17 +851,15 @@ public class BeanWrapperTests extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(parent);
 		try {
 			bw.getPropertyValue("spouse.bla");
-			// IMHO we should get: "Invalid property 'spouse.bla' of bean class [org.springframework.beans.TestBean]"
-			// but we're getting "of bean class [org.springframework.beans.BeanWrapperTests$DifferentTestBean]"
-			// we're trying to retrieve the property spouse.bla from the TestBean instance,
-			// not from the DifferentTestBean instance, the error message indicates otherwise.			
-		} catch (NotReadablePropertyException e) {
-			assertTrue(e.getMessage().indexOf("org.springframework.beans.TestBean") != -1);
 		}
-	}*/
-	
-	private static class DifferentTestBean extends TestBean {		
-		// class to test naming of beans in a beanwrapper error message
+		catch (NotReadablePropertyException ex) {
+			assertTrue(ex.getMessage().indexOf(TestBean.class.getName()) != -1);
+		}
+	}
+
+
+	private static class DifferentTestBean extends TestBean {
+		// class to test naming of beans in a BeanWrapper error message
 	}
 
 

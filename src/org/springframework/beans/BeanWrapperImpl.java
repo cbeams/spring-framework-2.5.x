@@ -78,7 +78,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @author Jean-Pierre Pawlak
  * @since 15 April 2001
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
@@ -108,6 +107,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	/** The nested path of the object */
 	private String nestedPath = "";
+
+	private Object rootObject;
 
 	/** Registry for default PropertyEditors */
 	private final Map defaultEditors;
@@ -181,10 +182,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	/**
-	 * Create new BeanWrapperImpl for the given object,
-	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper.
-	 * @param nestedPath the nested path of the object
+	 * @deprecated in favor of BeanWrapperImpl(object, nestedPath, rootObject)
+	 * @see #BeanWrapperImpl(Object, String, Object)
 	 */
 	public BeanWrapperImpl(Object object, String nestedPath) {
 		this();
@@ -196,11 +195,23 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper.
 	 * @param nestedPath the nested path of the object
+	 * @param rootObject the root object at the top of the path
+	 */
+	public BeanWrapperImpl(Object object, String nestedPath, Object rootObject) {
+		this();
+		setWrappedInstance(object, nestedPath, rootObject);
+	}
+
+	/**
+	 * Create new BeanWrapperImpl for the given object,
+	 * registering a nested path that the object is in.
+	 * @param object object wrapped by this BeanWrapper.
+	 * @param nestedPath the nested path of the object
 	 * @param superBw the containing BeanWrapper (must not be null)
 	 */
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
 		this.defaultEditors = superBw.defaultEditors;
-		setWrappedInstance(object, nestedPath);
+		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
 	}
 
 
@@ -214,7 +225,15 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @param object new target
 	 */
 	public void setWrappedInstance(Object object) {
-		setWrappedInstance(object, "");
+		setWrappedInstance(object, "", null);
+	}
+
+	/**
+	 * @deprecated in favor of setWrappedInstance(object, nestedPath, rootObject)
+	 * @see #setWrappedInstance(Object, String, Object)
+	 */
+	public void setWrappedInstance(Object object, String nestedPath) {
+		setWrappedInstance(object, nestedPath, null);
 	}
 
 	/**
@@ -222,13 +241,15 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * if the class of the new object is different to that of the replaced object.
 	 * @param object new target
 	 * @param nestedPath the nested path of the object
+	 * @param rootObject the root object at the top of the path
 	 */
-	public void setWrappedInstance(Object object, String nestedPath) {
+	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
 		if (object == null) {
 			throw new IllegalArgumentException("Cannot set BeanWrapperImpl target to a null object");
 		}
 		this.object = object;
-		this.nestedPath = nestedPath;
+		this.nestedPath = (nestedPath != null ? nestedPath : "");
+		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : object);
 		this.nestedBeanWrappers = null;
 		setIntrospectionClass(object.getClass());
 	}
@@ -242,6 +263,29 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	/**
+	 * Return the nested path of the object wrapped by this BeanWrapper.
+	 */
+	public String getNestedPath() {
+		return this.nestedPath;
+	}
+
+	/**
+	 * Return the root object at the top of the path of this BeanWrapper.
+	 * @see #getNestedPath
+	 */
+	public Object getRootInstance() {
+		return this.rootObject;
+	}
+
+	/**
+	 * Return the class of the root object at the top of the path of this BeanWrapper.
+	 * @see #getNestedPath
+	 */
+	public Class getRootClass() {
+		return (this.rootObject != null ? this.rootObject.getClass() : null);
+	}
+
+	/**
 	 * Set the class to introspect.
 	 * Needs to be called when the target object changes.
 	 * @param clazz the class to introspect
@@ -252,6 +296,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(clazz);
 		}
 	}
+
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		registerCustomEditor(requiredType, null, propertyEditor);
@@ -432,7 +477,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		String canonicalName = tokens.canonicalName;
 		String propertyName = tokens.actualName;
 		if (propertyValue == null) {
-			throw new NullValueInNestedPathException(getWrappedClass(), this.nestedPath + canonicalName);
+			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);
 		}
 
 		// lookup cached sub-BeanWrapper, create new one if not found
@@ -527,7 +572,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		String actualName = tokens.actualName;
 		PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
 		if (pd == null || pd.getReadMethod() == null) {
-			throw new NotReadablePropertyException(getWrappedClass(), this.nestedPath + propertyName);
+			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyName);
 		}
 		if (logger.isDebugEnabled())
 			logger.debug("About to invoke read method [" + pd.getReadMethod() + "] on object of class [" +
@@ -540,7 +585,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 					String key = tokens.keys[i];
 					if (value == null) {
 						throw new NullValueInNestedPathException(
-								getWrappedClass(), this.nestedPath + propertyName,
+								getRootClass(), this.nestedPath + propertyName,
 								"Cannot access indexed value of property referenced in indexed " +
 								"property path '" + propertyName + "': returned null");
 					}
@@ -557,7 +602,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 						int index = Integer.parseInt(key);
 						if (index < 0 || index >= set.size()) {
 							throw new InvalidPropertyException(
-									getWrappedClass(), this.nestedPath + propertyName,
+									getRootClass(), this.nestedPath + propertyName,
 									"Cannot get element with index " + index + " from Set of size " +
 									set.size() + ", accessed using property path '" + propertyName + "'");
 						}
@@ -576,7 +621,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 					}
 					else {
 						throw new InvalidPropertyException(
-								getWrappedClass(), this.nestedPath + propertyName,
+								getRootClass(), this.nestedPath + propertyName,
 								"Property referenced in indexed property path '" + propertyName +
 								"' is neither an array nor a List nor a Set nor a Map; returned value was [" + value + "]");
 					}
@@ -586,22 +631,22 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		catch (InvocationTargetException ex) {
 			throw new InvalidPropertyException(
-					getWrappedClass(), this.nestedPath + propertyName,
+					getRootClass(), this.nestedPath + propertyName,
 					"Getter for property '" + actualName + "' threw exception", ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new InvalidPropertyException(
-					getWrappedClass(), this.nestedPath + propertyName,
+					getRootClass(), this.nestedPath + propertyName,
 					"Illegal attempt to get property '" + actualName + "' threw exception", ex);
 		}
 		catch (IndexOutOfBoundsException ex) {
 			throw new InvalidPropertyException(
-					getWrappedClass(), this.nestedPath + propertyName,
+					getRootClass(), this.nestedPath + propertyName,
 					"Index of out of bounds in property path '" + propertyName + "'", ex);
 		}
 		catch (NumberFormatException ex) {
 			throw new InvalidPropertyException(
-					getWrappedClass(), this.nestedPath + propertyName,
+					getRootClass(), this.nestedPath + propertyName,
 					"Invalid index in property path '" + propertyName + "'", ex);
 		}
 	}
@@ -613,7 +658,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(
-					getWrappedClass(), this.nestedPath + propertyName,
+					getRootClass(), this.nestedPath + propertyName,
 					"Nested property in path '" + propertyName + "' does not exist", ex);
 		}
 		PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
@@ -637,7 +682,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			catch (NotReadablePropertyException ex) {
 				throw new NotWritablePropertyException(
-						getWrappedClass(), this.nestedPath + propertyName,
+						getRootClass(), this.nestedPath + propertyName,
 						"Cannot access indexed value in property referenced " +
 						"in indexed property path '" + propertyName + "'", ex);
 			}
@@ -645,7 +690,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			String key = tokens.keys[tokens.keys.length - 1];
 			if (propValue == null) {
 				throw new NullValueInNestedPathException(
-						getWrappedClass(), this.nestedPath + propertyName,
+						getRootClass(), this.nestedPath + propertyName,
 						"Cannot access indexed value in property referenced " +
 						"in indexed property path '" + propertyName + "': returned null");
 			}
@@ -657,12 +702,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce = new PropertyChangeEvent(
-							this.object, this.nestedPath + propertyName, null, newValue);
+							this.rootObject, this.nestedPath + propertyName, null, newValue);
 					throw new TypeMismatchException(pce, requiredType, ex);
 				}
 				catch (IndexOutOfBoundsException ex) {
 					throw new InvalidPropertyException(
-							getWrappedClass(), this.nestedPath + propertyName,
+							getRootClass(), this.nestedPath + propertyName,
 							"Invalid array index in property path '" + propertyName + "'", ex);
 				}
 			}
@@ -680,7 +725,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 						}
 						catch (NullPointerException ex) {
 							throw new InvalidPropertyException(
-									getWrappedClass(), this.nestedPath + propertyName,
+									getRootClass(), this.nestedPath + propertyName,
 									"Cannot set element with index " + index + " in List of size " +
 									list.size() + ", accessed using property path '" + propertyName +
 									"': List does not support filling up gaps with null elements");
@@ -696,7 +741,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			else {
 				throw new InvalidPropertyException(
-						getWrappedClass(), this.nestedPath + propertyName,
+						getRootClass(), this.nestedPath + propertyName,
 						"Property referenced in indexed property path '" + propertyName +
 						"' is neither an array nor a List nor a Map; returned value was [" + value + "]");
 			}
@@ -704,7 +749,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 		else {
 			if (!isWritableProperty(propertyName)) {
-				throw new NotWritablePropertyException(getWrappedClass(), this.nestedPath + propertyName);
+				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName);
 			}
 			PropertyDescriptor pd = getPropertyDescriptor(propertyName);
 			Method writeMethod = pd.getWriteMethod();
@@ -736,7 +781,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			catch (InvocationTargetException ex) {
 				PropertyChangeEvent propertyChangeEvent =
-						new PropertyChangeEvent(this.object, this.nestedPath + propertyName, null, value);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
 				if (ex.getTargetException() instanceof ClassCastException) {
 					throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
 				}
@@ -746,12 +791,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			catch (IllegalArgumentException ex) {
 				PropertyChangeEvent pce =
-						new PropertyChangeEvent(this.object, this.nestedPath + propertyName, null, value);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
 				throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
 			}
 			catch (IllegalAccessException ex) {
 				PropertyChangeEvent pce =
-						new PropertyChangeEvent(this.object, this.nestedPath + propertyName, null, value);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
 				throw new MethodInvocationException(pce, ex);
 			}
 		}
@@ -808,7 +853,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	private PropertyChangeEvent createPropertyChangeEvent(String propertyName, Object oldValue, Object newValue) {
 		return new PropertyChangeEvent(
-				(this.object != null ? this.object : "constructor"),
+				(this.rootObject != null ? this.rootObject : "constructor"),
 				(propertyName != null ? this.nestedPath + propertyName : null),
 				oldValue, newValue);
 	}
@@ -966,7 +1011,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			return pd;
 		}
 		else {
-			throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 			    "No property '" + propertyName + "' found");
 		}
 	}
@@ -1055,27 +1100,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 	// Diagnostics
 	//---------------------------------------------------------------------
 
-	/**
-	 * This method is expensive! Only call for diagnostics and debugging reasons,
-	 * not in production.
-	 * @return a string describing the state of this object
-	 */
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		try {
-			sb.append("BeanWrapperImpl: wrapping class [" + getWrappedClass().getName() + "]; ");
-			PropertyDescriptor pds[] = getPropertyDescriptors();
-			if (pds != null) {
-				for (int i = 0; i < pds.length; i++) {
-					Object val = getPropertyValue(pds[i].getName());
-					String valStr = (val != null) ? val.toString() : "null";
-					sb.append(pds[i].getName() + "={" + valStr + "}");
-				}
-			}
-		}
-		catch (Exception ex) {
-			sb.append("exception encountered: " + ex);
-		}
+		StringBuffer sb = new StringBuffer("BeanWrapperImpl: wrapping class [");
+		sb.append(getWrappedClass().getName()).append("]");
 		return sb.toString();
 	}
 
