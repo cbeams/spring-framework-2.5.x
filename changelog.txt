@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.180 2004-07-01 07:30:50 aarendsen Exp $
+$Id: changelog.txt,v 1.181 2004-07-06 15:51:00 jhoeller Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -13,6 +13,7 @@ Package org.springframework.beans
 * BeanUtils' "instantiateClass" methods try to set the constructors accessible if given non-accessible constructors
 * factored out PropertyAccessor base interface from BeanWrapper
 * BeanWrapperImpl supports dots in keys, for example "map[my.key]"
+* BeanWrapperImpl's "isReadableProperty" and "isWritableProperty" properly check indexed/mapped properties
 * refined BeanWrapperImpl to apply a custom editor strictly either to an array/Collection or to each of their elements
 * refined BeanWrapperImpl to automatically convert a value to an array with a single component when necessary
 * refined BeanWrapperImpl to support converting any Collection into an array rather than just a List
@@ -30,6 +31,7 @@ Package org.springframework.beans
 * added support for abstract lookup methods to AbstractBeanDefinition and AbstractAutowireCapableBeanFactory
 * added "factory-method" attribute and "lookup-method" element to "bean" tag in spring-beans.dtd
 * added "parent" option to "ref" tag in spring-beans.dtd, allowing to explicitly reference a bean in the parent factory
+* fixed "value" parsing to also detect text nodes in case of additional comment nodes
 
 Package org.springframework.context
 * reworked ApplicationEventMulticaster to have a "multicastEvent" method rather than derive from ApplicationListener
@@ -42,15 +44,18 @@ Package org.springframework.core
 * PathMatchingResourcePatternResolver can retrieve multiple class path resources with the same name
 
 Package org.springframework.dao
-* added new ConcurrencyFailureException and its subclasses CannotAcquireLockException and CannotSerializeTransactionException
+* added ConcurrencyFailureException and subclasses CannotAcquireLockException and CannotSerializeTransactionException
 * changed OptimisticLockingFailureException to inherit from ConcurrencyFailureException
 * fixed DataAccessUtils' "requiredUniqueResult" method, to correctly throw an IncorrectResultSizeDataAccessException
 
+Package org.springframework.ejb
+* added explicit proxy type checks to LocalSlsbInvokerInterceptor and AbstractRemoteSlsbInvokerInterceptor
+
 Package org.springframework.jdbc
-* added new standard translation category for CannotAcquireLockException to SqlErrorCodeSQLExceptionTranslator and sql-error-codes.xml
-* added feature to allow for defining custom translations using CustomSQLErrorCodesTranslation defined in the sql-error-codes.xml
-* DataSourceUtils' "closeConnectionIfNecessary" logs error on SQLException rather than rethrowing an exception
+* added translation category for CannotAcquireLockException to SqlErrorCodeSQLExceptionTranslator and sql-error-codes
+* allow for defining custom translations using CustomSQLErrorCodesTranslation defined in the sql-error-codes.xml file
 * removed CannotCloseJdbcConnectionException, as it is not used anymore
+* DataSourceUtils' "closeConnectionIfNecessary" logs error on SQLException rather than rethrowing an exception
 * DataSourceTransactionManager closes JDBC Connection if "doBegin" fails
 * DataSourceTransactionManager manages nested transactions via JDBC 3.0 Savepoints
 * DataSourceTransactionObject implements SavepointManager to allow for savepoint management via TransactionStatus
@@ -93,6 +98,9 @@ Package org.springframework.orm
 * JdoTemplate implements JdoOperations' convenience methods to allow for one-line data access operations
 * fixed JdoDaoSupport's "closeSessionIfNecessary" method to be named "closePersistenceManagerIfNecessary"
 * added OpenPersistenceManagerInViewInterceptor and OpenPersistenceManagerInViewFilter
+* introduced "orm.ojb" package, for Apache OJB support (configuration in Spring, DAO support, transactions)
+* added PersistenceBrokerTemplate/Callback, to support Apache OJB's PersistenceBroker API as DAO strategy
+* added PersistenceBrokerTransactionManager, a transaction strategy for Apache OJB's PersistenceBroker
 
 Package org.springframework.scheduling
 * removed deprecated TimerTaskExecutionException
@@ -126,7 +134,6 @@ Package org.springframework.web
 * removed unused (and misleading) "makeThemeNameAvailable" method from AbstractThemeResolver
 * added "suppressValidation" callback to BaseCommandController, for suppressing validation for certain requests
 * added "isFormChangeRequest" callback to SimpleFormController, to enforce suppressing validation and showing form
-* deprecated SimpleFormController's "onSubmit(command)", in favor of "onSubmit(command,errors)" resp. "doSubmitAction"
 * added "getAttributesMap" method to AbstractView, to allow for "attributesMap[key]" overrides in child view definitions
 * added overloaded "getParameters(request)" method to AbstractXsltView, delegating to "getParameters()" by default
 * reworked AbstractXsltView's "doTransform" method into 2 methods to allow for specifying a custom transform result
