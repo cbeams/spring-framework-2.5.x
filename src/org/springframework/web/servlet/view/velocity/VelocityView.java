@@ -55,12 +55,12 @@ import org.springframework.web.servlet.view.AbstractView;
  * <li>exposeCurrencyFormatter: whether to expose a Currency formatter helper object
  * </ul>
  * 
- * <p>
- * Depends on a VelocityConfiguration object such as VelocityConfigurer
+ * <p>Depends on a VelocityConfiguration object such as VelocityConfigurer
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.5 2003-10-21 07:44:22 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.6 2003-10-22 15:19:13 jhoeller Exp $
+ * @see VelocityConfiguration
  * @see VelocityConfigurer
  */
 public class VelocityView extends AbstractView {
@@ -75,19 +75,19 @@ public class VelocityView extends AbstractView {
 	public static final String DEFAULT_OUTPUT_ENCODING = "ISO-8859-1";
 
 
-	/** Instance of Velocity */
-	private VelocityEngine velocityEngine;
+	/** Name of the Velocity template */
+	private String templateName;
 
 	private int poolSize = 40;
 
-	private boolean cache;
+	private boolean cache = false;
 
 	private boolean exposeDateFormatter;
 
 	private boolean exposeCurrencyFormatter;
 
-	/** Name of the Velocity template */
-	private String templateName;
+	/** Instance of the VelocityEngine */
+	private VelocityEngine velocityEngine;
 
 	/** Velocity Template */
 	private Template velocityTemplate;
@@ -100,40 +100,19 @@ public class VelocityView extends AbstractView {
 
 
 	/**
- 	* Invoked on startup. Looks for a single VelocityConfiguration bean to
- 	* find the relevant VelocityEngine for this factory.
- 	*/
-	protected void initApplicationContext() throws ApplicationContextException {
-		
-		if (this.templateName == null) {
-			throw new ApplicationContextException("Must set templateName property on VelocityView");
-		}
-		
-		Collection c = BeanFactoryUtils.beansOfTypeIncludingAncestors(VelocityConfiguration.class, getWebApplicationContext());
-		
-		if (c.size() == 1) {
-			// We need exactly one VelocityConfiguration bean
-			VelocityConfiguration vconfig = (VelocityConfiguration) c.iterator().next();
-			this.velocityEngine = vconfig.getVelocityEngine();
-		}
-		else {
-			throw new ApplicationContextException("Must define a VelocityConfiguration bean in this web application context (may be inherited):" +
-				"VelocityConfigurer is the usual implementation. " +
-				"This bean may be given any name.");
-		}
-		 
-		// TODO remove this dependence on RuntimeSingleton
-		encoding = RuntimeSingleton.getString(VelocityEngine.OUTPUT_ENCODING, DEFAULT_OUTPUT_ENCODING);
-		
-		// Check that we can get the template, even if we might subsequently get it again
-		loadTemplate();
+	 * Set the name of the wrapped Velocity template.
+	 * This will cause the template to be loaded.
+	 * @param templateName the name of the wrapped Velocity template,
+	 * relative to the Velocity template root. For example,
+	 * "/ic/interestResult.vm".
+	 */
+	public void setTemplateName(String templateName) throws ServletException {
+		this.templateName = templateName;
 	}
-	
 
 	public void setPoolSize(int sz) {
 		this.poolSize = sz;
-		this.writerPool = null;
-		writerPool = new SimplePool(poolSize);
+		this.writerPool = new SimplePool(poolSize);
 	}
 
 	public void setCache(boolean cache) {
@@ -154,18 +133,38 @@ public class VelocityView extends AbstractView {
 		this.exposeCurrencyFormatter = exposeCurrencyFormatter;
 	}
 
+	
 	/**
-	 * Set the name of the wrapped Velocity template.
-	 * This will cause the template to be loaded.
-	 * @param templateName the name of the wrapped Velocity template,
-	 * relative to the Velocity template root. For example,
-	 * "/ic/interestResult.vm".
-	 */
-	public void setTemplateName(String templateName) throws ServletException {
-		this.templateName = templateName;
+ 	* Invoked on startup. Looks for a single VelocityConfiguration bean to
+ 	* find the relevant VelocityEngine for this factory.
+ 	*/
+	protected void initApplicationContext() throws ApplicationContextException {
+
+		if (this.templateName == null) {
+			throw new ApplicationContextException("Must set templateName property on VelocityView");
+		}
+
+		Collection c = BeanFactoryUtils.beansOfTypeIncludingAncestors(VelocityConfiguration.class, getWebApplicationContext());
+
+		if (c.size() == 1) {
+			// We need exactly one VelocityConfiguration bean
+			System.out.println(c.iterator().next().getClass());
+			VelocityConfiguration vconfig = (VelocityConfiguration) c.iterator().next();
+			this.velocityEngine = vconfig.getVelocityEngine();
+		}
+		else {
+			throw new ApplicationContextException("Must define a VelocityConfiguration bean in this web application context " +
+			                                      "(may be inherited): VelocityConfigurer is the usual implementation. " +
+			                                      "This bean may be given any name.");
+		}
+
+		// TODO remove this dependence on RuntimeSingleton
+		encoding = RuntimeSingleton.getString(VelocityEngine.OUTPUT_ENCODING, DEFAULT_OUTPUT_ENCODING);
+
+		// Check that we can get the template, even if we might subsequently get it again
+		loadTemplate();
 	}
-	
-	
+
 	/**
 	 * Load the Velocity template that is to be cached in this class.
 	 */
@@ -202,10 +201,10 @@ public class VelocityView extends AbstractView {
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 		throws ServletException {
 
-		if (this.velocityTemplate == null)
-			throw new ServletException(
-				"FastVelocityView with name '" + getName() + "' is not configured: templateName must have been set");
-				
+		if (this.velocityTemplate == null) {
+			throw new ServletException("VelocityView with name '" + getName() + "' is not configured: templateName must have been set");
+		}
+
 		// We already hold a reference to the template, but we might want to load it
 		// if not caching. As Velocity itself caches templates, so our ability to
 		// cache templates in this class is a minor optimization only.
