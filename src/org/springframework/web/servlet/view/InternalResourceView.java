@@ -23,7 +23,7 @@ import org.springframework.web.util.WebUtils;
  * to the specified resource URL using a RequestDispatcher.
  *
  * @author Rod Johnson
- * @version $Id: InternalResourceView.java,v 1.4 2003-11-21 22:34:57 jhoeller Exp $
+ * @version $Id: InternalResourceView.java,v 1.5 2003-12-12 19:46:13 jhoeller Exp $
  */
 public class InternalResourceView extends AbstractView {
 
@@ -73,8 +73,8 @@ public class InternalResourceView extends AbstractView {
 	 * Render the internal resource given the specified model.
 	 * This includes setting the model as request attributes.
 	 */
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+	protected void renderMergedOutputModel(Map model, HttpServletRequest request,
+	                                       HttpServletResponse response) throws Exception {
 
 		exposeModelAsRequestAttributes(model, request);
 

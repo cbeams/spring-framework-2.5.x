@@ -5,7 +5,6 @@
 
 package org.springframework.web.servlet.view;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,7 +35,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.3 2003-11-11 17:49:19 jhoeller Exp $
+ * @version $Id: AbstractView.java,v 1.4 2003-12-12 19:46:13 jhoeller Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View {
@@ -139,7 +138,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Set the name of the RequestContext attribute for all views,
+	 * Set the name of the RequestContext attribute for this view,
 	 * or null if not needed.
 	 * @param requestContextAttribute name of the RequestContext attribute
 	 */
@@ -186,21 +185,22 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 
 	/**
-	 * Prepares the view given the specified model.
+	 * Prepares the view given the specified model, merging it with static
+	 * attributes and a RequestContext attribute, if necessary.
 	 * Delegates to renderMergedOutputModel for the actual rendering.
 	 * @see #renderMergedOutputModel
 	 */
-	public final void render(Map model, HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
-		if (logger.isDebugEnabled())
-			logger.debug("Rendering view with name '" + this.name + "' with model=" + model +
-				" and static attributes=" + this.staticAttributes);
-		
+	public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Rendering view with name '" + this.name + "' with model=[" + model +
+				"] and static attributes=[" + this.staticAttributes + "]");
+		}
+
 		// Consolidate static and dynamic model attributes
 		Map mergedModel = new HashMap(this.staticAttributes);
 		mergedModel.putAll(model);
 
-		// expose request context?
+		// expose RequestContext?
 		if (this.requestContextAttribute != null) {
 			mergedModel.put(this.requestContextAttribute, new RequestContext(request, mergedModel));
 		}
@@ -216,11 +216,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * taking precedence over static attributes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @throws ServletException if there is any other error
-	 * @throws IOException if there is an IO exception trying to obtain
-	 * or render the view
+	 * @throws ServletException if rendering failed
 	 */
-	protected abstract void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException;
+	protected abstract void renderMergedOutputModel(Map model, HttpServletRequest request,
+	                                                HttpServletResponse response) throws Exception;
 
 }

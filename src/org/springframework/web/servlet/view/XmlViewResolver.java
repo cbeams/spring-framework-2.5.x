@@ -9,11 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 
-import javax.servlet.ServletException;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.View;
@@ -64,6 +61,18 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
+	 * This implementation returns just the view name,
+	 * as XmlViewResolver doesn't support localized resolution.
+	 */
+	protected String getCacheKey(String viewName, Locale locale) {
+		return viewName;
+	}
+
+	protected View loadView(String viewName, Locale locale) throws BeansException {
+		return (View) initFactory().getBean(viewName, View.class);
+	}
+
+	/**
 	 * Initialize the BeanFactory from the XML file.
 	 * Synchronized because of access by parallel threads.
 	 * @throws BeansException in case of initialization errors
@@ -72,7 +81,6 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 		if (this.cachedFactory != null) {
 			return this.cachedFactory;
 		}
-
 		try {
 			InputStream is = getApplicationContext().getResourceAsStream(this.location);
 			BeanFactory xbf = new XmlBeanFactory(is, getApplicationContext());
@@ -82,26 +90,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 			return xbf;
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("Cannot initialize XML file [" + this.location + "]" , ex);
-		}
-	}
-
-	protected View loadView(String viewName, Locale locale) throws ServletException {
-		try {
-			Object o = initFactory().getBean(viewName);
-			if (!(o instanceof View)) {
-				throw new ServletException("Bean with name '" + viewName + "' in XML file [" +
-				                           this.location + "] must be of type View");
-			}
-			return (View) o;
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Let superclass handle this
-			return null;
-		}
-		catch (BeansException ex) {
-			throw new ServletException("Error initializing view bean with name '" + viewName +
-			                           "' in XML file [" + this.location + "]", ex);
+			throw new ApplicationContextException("Could not load XML view definition file [" + this.location + "]" , ex);
 		}
 	}
 

@@ -41,66 +41,60 @@ public class TilesView extends InternalResourceView {
 	/**
 	 * The actual rendering of the Tiles definition.
 	 */
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
-
+	protected void renderMergedOutputModel(Map model, HttpServletRequest request,
+	                                       HttpServletResponse response) throws Exception {
 		if (!response.isCommitted()) {
 			response.setContentType(getContentType());
 		}
 		
-		try {
-			// get definitions factory			
-			DefinitionsFactory factory = (DefinitionsFactory)
-				getWebApplicationContext().getServletContext().
-				getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
-			if (factory == null) {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-				                   "Tiles definitions factory not found: TilesConfigurer not defined?");
-			}
-
-			// get component definition
-			ComponentDefinition definition = factory.getDefinition(getUrl(), request, getServletContext());
-			if (definition == null) {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND,
-				                   "Tile with name '" + getName() + "' not found");
-				return;
-			}
-
-			exposeModelAsRequestAttributes(model, request);
-
-			// get current tile context
-			ComponentContext tileContext = ComponentContext.getContext(request);
-			if (tileContext == null) {
-				tileContext = new ComponentContext(definition.getAttributes());
-				ComponentContext.setContext(tileContext, request);
-			}
-			else {
-				tileContext.addMissing(definition.getAttributes());
-			}
-
-			// execute controller associated to definition, if any
-			Controller controller = definition.getOrCreateController();
-			if (controller instanceof ApplicationContextAware) {
-				((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
-			}
-			if (controller != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Executing controller [" + controller + "]");
-				}
-				controller.perform(tileContext, request, response, getServletContext());
-			}
-
-			// process the definition
-			RequestDispatcher rd = request.getRequestDispatcher(definition.getPath());
-			if (rd == null) {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				return;
-			}
-			rd.include(request, response);
+		// get definitions factory
+		DefinitionsFactory factory = (DefinitionsFactory)
+			getWebApplicationContext().getServletContext().
+			getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
+		if (factory == null) {
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+												 "Tiles definitions factory not found: TilesConfigurer not defined?");
 		}
-		catch (Exception ex) {
-			throw new ServletException("Could not render Tiles view '" + getName() + "': " + ex.getMessage(), ex);
+
+		// get component definition
+		ComponentDefinition definition = factory.getDefinition(getUrl(), request, getServletContext());
+		if (definition == null) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND,
+												 "Tile with name '" + getName() + "' not found");
+			return;
 		}
+
+		exposeModelAsRequestAttributes(model, request);
+
+		// get current tile context
+		ComponentContext tileContext = ComponentContext.getContext(request);
+		if (tileContext == null) {
+			tileContext = new ComponentContext(definition.getAttributes());
+			ComponentContext.setContext(tileContext, request);
+		}
+		else {
+			tileContext.addMissing(definition.getAttributes());
+		}
+
+		// execute controller associated to definition, if any
+		Controller controller = definition.getOrCreateController();
+		if (controller instanceof ApplicationContextAware) {
+			((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
+		}
+		if (controller != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing controller [" + controller + "]");
+			}
+			controller.perform(tileContext, request, response, getServletContext());
+		}
+
+		// process the definition
+		RequestDispatcher rd = request.getRequestDispatcher(definition.getPath());
+		if (rd == null) {
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+		rd.include(request, response);
 	}
 
 }

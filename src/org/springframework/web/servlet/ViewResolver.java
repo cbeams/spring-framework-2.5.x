@@ -7,8 +7,6 @@ package org.springframework.web.servlet;
 
 import java.util.Locale;
 
-import javax.servlet.ServletException;
-
 /**
  * Interface to be implemented by objects that can resolve views by name.
  *
@@ -21,6 +19,7 @@ import javax.servlet.ServletException;
  * @author Rod Johnson
  * @see org.springframework.web.servlet.view.InternalResourceViewResolver
  * @see org.springframework.web.servlet.view.ResourceBundleViewResolver
+ * @see org.springframework.web.servlet.view.XmlViewResolver
  */
 public interface ViewResolver {
 		
@@ -29,8 +28,8 @@ public interface ViewResolver {
 	 * @param viewName name of the view to resolve
 	 * @param locale Locale in which to resolve the view.
 	 * ViewResolvers that support internationalization should respect this.
-	 * @throws ServletException if the view cannot be resolved.
+	 * @throws Exception if the view cannot be resolved
 	 */
-	View resolveViewName(String viewName, Locale locale) throws ServletException;
+	View resolveViewName(String viewName, Locale locale) throws Exception;
 
 }

@@ -5,10 +5,8 @@
 
 package org.springframework.web.servlet;
 
-import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,10 +46,8 @@ public interface View {
 	 * @param model Map of model attributes (model name String mapped to model object)
 	 * @param request current HTTP request
 	 * @param response HTTP response we are building
-	 * @throws ServletException if an unexpected general error occurs
-	 * @throws IOException if there is an error outputing the data
+	 * @throws Exception if rendering failed
 	 */
-	void render(Map model, HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException;
+	void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

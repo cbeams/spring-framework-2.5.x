@@ -90,52 +90,43 @@ public abstract class AbstractExcelView extends AbstractView {
 
 	private static final String SEPARATOR = "_";
 
-	//~ Instance fields --------------------------------------------------------
 
 	private String url;
 
 	private HSSFWorkbook wb;
 
-	//~ Constructors -----------------------------------------------------------
 
 	public AbstractExcelView() {
 		setContentType("application/vnd.ms-excel");
 	}
 
-	//~ Methods ----------------------------------------------------------------
+	/**
+	 * Sets the url of the Excel workbook source without localization part nor extension.
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
 
 	/**
 	 * Renders the view given the specified model.
-	 * @see org.springframework.web.servlet.view.AbstractView#renderMergedOutputModel(java.util.Map, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
-	protected final void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
-
-		if (null != url) {
-			wb = getTemplateSource(url, request);
+	protected final void renderMergedOutputModel(Map model, HttpServletRequest request,
+	                                             HttpServletResponse response) throws Exception {
+		if (this.url != null) {
+			this.wb = getTemplateSource(this.url, request);
 		}
 		else {
-			wb = new HSSFWorkbook();
+			this.wb = new HSSFWorkbook();
 			logger.info("Excel WorkBook created from scratch");
 		}
 
-		try {
-			buildExcelDocument(model, wb, request, response);
-		}
-		catch (ServletException ex) {
-			throw ex;
-		}
-		catch (IOException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new ServletException("Error creating Excel document", ex);
-		}
+		buildExcelDocument(model, this.wb, request, response);
 
 		// response.setContentLength(wb.getBytes().length);
 		response.setContentType(getContentType());
 		ServletOutputStream out = response.getOutputStream();
-		wb.write(out);
+		this.wb.write(out);
 		out.flush();
 	}
 
@@ -246,11 +237,4 @@ public abstract class AbstractExcelView extends AbstractView {
 		cell.setCellValue(text);
 	}
 
-	/**
-	 * Sets the url.
-	 * @param url The Excel workBook source without localization part nor extension
-	 */
-	public void setUrl(String url) {
-		this.url = url;
-	}
 }

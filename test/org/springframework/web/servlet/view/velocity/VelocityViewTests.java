@@ -10,29 +10,28 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.mockobjects.servlet.MockHttpServletResponse;
 import junit.framework.TestCase;
-
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.tools.generic.DateTool;
 import org.easymock.MockControl;
+
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-
-import com.mockobjects.servlet.MockHttpServletResponse;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.8 2003-11-27 11:28:02 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.9 2003-12-12 19:46:14 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -182,10 +181,6 @@ public class VelocityViewTests extends TestCase {
 		// Let it ask for locale
 		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest req = (HttpServletRequest) reqControl.getMock();
-		req.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
-		reqControl.setReturnValue(new AcceptHeaderLocaleResolver());
-		req.getLocale();
-		reqControl.setReturnValue(Locale.CANADA);
 		reqControl.replay();
 
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
@@ -202,10 +197,7 @@ public class VelocityViewTests extends TestCase {
 					throw mergeTemplateFailureException;
 				}
 			}
-
 		};
-		//vv.setExposeDateFormatter(false);
-		//vv.setExposeCurrencyFormatter(false);
 		vv.setTemplateName(templateName);
 		vv.setApplicationContext(wac);
 
@@ -215,16 +207,68 @@ public class VelocityViewTests extends TestCase {
 				fail();
 			}
 		}
-		catch (ServletException ex) {
+		catch (Exception ex) {
 			assertNotNull(mergeTemplateFailureException);
-			assertEquals(ex.getRootCause(), mergeTemplateFailureException);
+			assertEquals(ex, mergeTemplateFailureException);
 		}
 
 		wmc.verify();
 		reqControl.verify();
 	}
-	
-	
+
+	public void testExposeHelpers() throws Exception {
+		final String templateName = "test.vm";
+
+		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
+		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
+		wac.getParentBeanFactory();
+		wmc.setReturnValue(null);
+		final Template expectedTemplate = new Template();
+		VelocityConfig vc = new VelocityConfig() {
+			public VelocityEngine getVelocityEngine() {
+				return new TestVelocityEngine(templateName, expectedTemplate);
+			}
+		};
+		wac.getBeansOfType(VelocityConfig.class, true, true);
+		Map configurers = new HashMap();
+		configurers.put("velocityConfigurer", vc);
+		wmc.setReturnValue(configurers);
+		wmc.replay();
+
+		// Let it ask for locale
+		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
+		HttpServletRequest req = (HttpServletRequest) reqControl.getMock();
+		req.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
+		reqControl.setReturnValue(new AcceptHeaderLocaleResolver());
+		req.getLocale();
+		reqControl.setReturnValue(Locale.CANADA);
+		reqControl.replay();
+
+		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
+
+		VelocityView vv = new VelocityView() {
+			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
+				assertTrue(template == expectedTemplate);
+				assertEquals("myValue", context.get("myHelper"));
+				assertTrue(context.get("dateTool") instanceof DateTool);
+				DateTool dateTool = (DateTool) context.get("dateTool");
+				assertTrue(dateTool.getLocale().equals(Locale.CANADA));
+				assertTrue(response == expectedResponse);
+			}
+
+			protected void exposeHelpers(Context vContext, HttpServletRequest request) throws Exception {
+				vContext.put("myHelper", "myValue");
+			}
+		};
+		vv.setTemplateName(templateName);
+		vv.setApplicationContext(wac);
+		vv.setDateToolAttribute("dateTool");
+		vv.render(new HashMap(), req, expectedResponse);
+
+		wmc.verify();
+		reqControl.verify();
+	}
+
 
 	//	Damn thing is a class so we can't mock it
 	private class TestVelocityEngine extends VelocityEngine {

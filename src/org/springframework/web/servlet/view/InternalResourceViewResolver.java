@@ -2,8 +2,7 @@ package org.springframework.web.servlet.view;
 
 import java.util.Locale;
 
-import javax.servlet.ServletException;
-
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.servlet.View;
 
 /**
@@ -85,18 +84,19 @@ public class InternalResourceViewResolver extends AbstractCachingViewResolver {
 		this.requestContextAttribute = requestContextAttribute;
 	}
 
-	protected View loadView(String viewName, Locale locale) throws ServletException {
-		try {
-			InternalResourceView view = (InternalResourceView) this.viewClass.newInstance();
-			view.setUrl(this.prefix + viewName + this.suffix);
-			view.setRequestContextAttribute(this.requestContextAttribute);
-			return view;
-		}
-		catch (InstantiationException ex) {
-			throw new ServletException("Cannot instantiate view class", ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new ServletException("Cannot access view class", ex);
-		}
+	/**
+	 * This implementation returns just the view name,
+	 * as InternalResourceViewResolver doesn't support localized resolution.
+	 */
+	protected String getCacheKey(String viewName, Locale locale) {
+		return viewName;
 	}
+
+	protected View loadView(String viewName, Locale locale) {
+		InternalResourceView view = (InternalResourceView) BeanUtils.instantiateClass(this.viewClass);
+		view.setUrl(this.prefix + viewName + this.suffix);
+		view.setRequestContextAttribute(this.requestContextAttribute);
+		return view;
+	}
+
 }

@@ -6,7 +6,6 @@
 package org.springframework.web.servlet.view.xslt;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -48,7 +47,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * affect performance in production and isn't threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: AbstractXsltView.java,v 1.3 2003-11-02 13:07:02 johnsonr Exp $
+ * @version $Id: AbstractXsltView.java,v 1.4 2003-12-12 19:46:14 jhoeller Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
@@ -114,60 +113,52 @@ public abstract class AbstractXsltView extends AbstractView {
 		this.transformerFactory = TransformerFactory.newInstance();
 		
 		if (this.uriResolver != null) {
-			logger.info("Using custom URIResolver [" + this.uriResolver + "] in XsltView with name '" + getName() + "'");
+			logger.info("Using custom URIResolver [" + this.uriResolver + "] in XSLT view with name '" + getName() + "'");
 			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
 		logger.debug("Url in view is " + stylesheet);
 		cacheTemplates();
 	}	
 
-	private void cacheTemplates() {
-		if (stylesheet != null && !"".equals(stylesheet)) {
-			Source s = getStylesheetSource(stylesheet);
+	private void cacheTemplates() throws ApplicationContextException {
+		if (this.stylesheet != null && !"".equals(this.stylesheet)) {
 			try {
-				this.templates = transformerFactory.newTemplates(s);
-				logger.info("Loaded templates " + templates + " in XsltView with name '" + getName() + "'");
+				this.templates = this.transformerFactory.newTemplates(getStylesheetSource(this.stylesheet));
+				logger.debug("Loaded templates [" + this.templates + "] in XSLT view '" + getName() + "'");
 			}
 			catch (TransformerConfigurationException ex) {
 				throw new ApplicationContextException(
-					"Can't load stylesheet at '" + stylesheet + "' in XsltView with name '" + getName() + "'",
-					ex);
+					"Can't load stylesheet at [" + this.stylesheet + "] in XSLT view '" + getName() + "'", ex);
 			}
 		}
 	}
 
 	/** 
-	 * Load the stylesheet. This implementation uses getRealPath().
-	 * Subclasses can override this method to avoid any container
-	 * restrictions on use of this slightly questionable method.
-	 * However, when it does work it's efficient and convenient.
+	 * Load the stylesheet. Subclasses can override this.
 	 */
 	protected Source getStylesheetSource(String url) throws ApplicationContextException {
-		// TODO: Shouldn't use this: it's not guaranteed
-		// QUESTIONABLE: Servlet 2.2 idea!?
-		logger.info("Loading XSLT stylesheet '" + url + "' from filesystem using getRealPath");
-		String realPath = getServletContext().getRealPath(url);
-		if (realPath == null)
-			throw new ApplicationContextException(
-				"Can't resolve real path for XSLT stylesheet at '" + url + "'; probably results from container restriction: override XsltView.getStylesheetSource() to use an alternative approach to getRealPath()");
-		logger.info("Realpath is '" + realPath + "'");
-		Source s = new StreamSource(new File(realPath));
-		return s;
+		logger.debug("Loading XSLT stylesheet '" + url + "'");
+		try {
+			return new StreamSource(getApplicationContext().getResourceAsStream(url));
+		}
+		catch (IOException ex) {
+			throw new ApplicationContextException("Can't load XSLT stylesheet from [" + url + "]", ex);
+		}
 	}
 
-	protected final void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-
+	protected final void renderMergedOutputModel(Map model, HttpServletRequest request,
+	                                             HttpServletResponse response) throws Exception {
 		if (!this.cache) {
 			logger.warn("DEBUG SETTING: NOT THREADSAFE AND WILL IMPAIR PERFORMANCE: template will be refreshed");
 			cacheTemplates();
 		}
 
 		if (this.templates == null) {
-			if (this.transformerFactory == null)
-				throw new ServletException("View is incorrectly configured. Templates AND TransformerFactory are null");
+			if (this.transformerFactory == null) {
+				throw new ServletException("XLST view is incorrectly configured. Templates AND TransformerFactory are null");
+			}
 
-			logger.warn("XSLTView is not configured: will copy XML input");
+			logger.warn("XSLT view is not configured: will copy XML input");
 			response.setContentType("text/xml; charset=ISO-8859-1");
 		}
 		else {
@@ -198,17 +189,13 @@ public abstract class AbstractXsltView extends AbstractView {
 			dom = (Node) singleModel;
 		}
 		else {
-			if (this.root == null && docRoot == null)
+			if (this.root == null && docRoot == null) {
 				throw new ServletException(
 					"Cannot domify multiple non-Node objects without a root element name in XSLT view with name='" + getName() + "'");
-
+			}
+			
 			// docRoot local variable takes precedence
-			try {
-				dom = createDomNode(model, (docRoot == null) ? this.root : docRoot, request, response);
-			}
-			catch (Exception rex) {
-				throw new ServletException("Error creating XML node from model in XSLT view with name='" + getName() + "'", rex);
-			}
+			dom = createDomNode(model, (docRoot == null) ? this.root : docRoot, request, response);
 		}
 
 		doTransform(response, dom);
@@ -227,33 +214,35 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
 	 */
-	protected abstract Node createDomNode(Map model, String root, HttpServletRequest request, HttpServletResponse response) throws Exception;
+	protected abstract Node createDomNode(Map model, String root, HttpServletRequest request,
+	                                      HttpServletResponse response) throws Exception;
 
 	/**
 	 * Use TrAX to perform the transform.
 	 */
-	protected void doTransform(HttpServletResponse response, Node dom) throws IllegalArgumentException, IOException, ServletException {
+	protected void doTransform(HttpServletResponse response, Node dom) throws ServletException, IOException {
 		try {
-			Transformer trans = (this.templates != null) ? this.templates.newTransformer() : // we have a stylesheet
-						transformerFactory.newTransformer(); // just a copy
-		
+			Transformer trans = (this.templates != null) ?
+			    this.templates.newTransformer() : // we have a stylesheet
+						this.transformerFactory.newTransformer(); // just a copy
+
 			trans.setOutputProperty(OutputKeys.INDENT, "yes");
 			// Xalan-specific, but won't do any harm in other XSLT engines
 			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			trans.transform(new DOMSource(dom), new StreamResult(new BufferedOutputStream(response.getOutputStream())));
-		
-			logger.debug("XSLT transformed OK with stylesheet '" + stylesheet + "'");
+
+			logger.debug("XSLT transformed OK with stylesheet '" + this.stylesheet + "'");
 		}
 		catch (TransformerConfigurationException ex) {
 			throw new ServletException(
-				"Couldn't create XSLT transformer for stylesheet '" + stylesheet + "' in XSLT view with name='" + getName() + "'",
-				ex);
+				"Couldn't create XSLT transformer for stylesheet '" + this.stylesheet +
+				"' in XSLT view with name='" + getName() + "'", ex);
 		}
 		catch (TransformerException ex) {
 			throw new ServletException(
-				"Couldn't perform transform with stylesheet '" + stylesheet + "' in XSLT view with name='" + getName() + "'",
-				ex);
+				"Couldn't perform transform with stylesheet '" + this.stylesheet +
+				"' in XSLT view with name='" + getName() + "'", ex);
 		}
-	} 
+	}
 
 }

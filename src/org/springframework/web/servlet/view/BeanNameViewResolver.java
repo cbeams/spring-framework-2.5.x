@@ -2,8 +2,7 @@ package org.springframework.web.servlet.view;
 
 import java.util.Locale;
 
-import javax.servlet.ServletException;
-
+import org.springframework.beans.BeansException;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -31,12 +30,8 @@ import org.springframework.web.servlet.ViewResolver;
  */
 public class BeanNameViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
-	public View resolveViewName(String viewName, Locale locale) throws ServletException {
-		Object o = getApplicationContext().getBean(viewName);
-		if (!(o instanceof View)) {
-			throw new ServletException("Bean with name '" + viewName + "' in application context must be of type View");
-		}
-		return (View) o;
+	public View resolveViewName(String viewName, Locale locale) throws BeansException {
+		return (View) getApplicationContext().getBean(viewName, View.class);
 	}
 
 }

@@ -11,11 +11,8 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import javax.servlet.ServletException;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.web.servlet.View;
@@ -72,41 +69,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 		this.defaultParentView = defaultParentView;
 	}
 
-	protected View loadView(String viewName, Locale locale) throws ServletException {
-		try {
-			Object o = initFactory(locale).getBean(viewName);
-			if (!(o instanceof View)) {
-				throw new ServletException(
-					"Bean with name '"
-						+ viewName
-						+ "' in resource bundle with basename '"
-						+ this.basename
-						+ "' must be of type View");
-			}
-			return (View)o;
-		}
-		catch (MissingResourceException ex) {
-			throw new ServletException(
-				"Cannot load resource bundle with basename '"
-					+ this.basename
-					+ "' trying to resolve view with name '"
-					+ viewName
-					+ "'",
-				ex);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Let superclass handle this
-			return null;
-		}
-		catch (BeansException ex) {
-			throw new ServletException(
-				"Error initializing view bean with name '"
-					+ viewName
-					+ "' in resource bundle with basename '"
-					+ this.basename
-					+ "'",
-				ex);
-		}
+	protected View loadView(String viewName, Locale locale) throws MissingResourceException, BeansException {
+		return (View) initFactory(locale).getBean(viewName, View.class);
 	}
 
 	/**
@@ -114,11 +78,10 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 	 * Synchronized because of access by parallel threads.
 	 */
 	protected synchronized BeanFactory initFactory(Locale locale) throws MissingResourceException, BeansException {
-		BeanFactory parsedBundle = isCache() ? (BeanFactory)this.cachedFactories.get(locale) : null;
+		BeanFactory parsedBundle = isCache() ? (BeanFactory) this.cachedFactories.get(locale) : null;
 		if (parsedBundle != null) {
 			return parsedBundle;
 		}
-
 		ResourceBundle bundle = ResourceBundle.getBundle(this.basename, locale, Thread.currentThread().getContextClassLoader());
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(getApplicationContext());
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(lbf);

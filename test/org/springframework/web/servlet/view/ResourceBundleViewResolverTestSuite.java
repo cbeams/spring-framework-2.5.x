@@ -2,6 +2,7 @@ package org.springframework.web.servlet.view;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import junit.framework.TestCase;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.View;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  *
@@ -79,13 +81,12 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 	public void testNoSuchViewEnglish() throws Exception {
 		try {
 			View v = rb.resolveViewName("xxxxxxweorqiwuopeir", Locale.ENGLISH);
-			fail("No such view should fail with servlet exception");
-		} catch (ServletException ex) {
-			// OK
-		} catch (Exception ex) {
-			fail("No such view should fail with servlet exception, not " + ex);
+			fail("No such view should fail with exception");
 		}
-	} 
+		catch (NoSuchBeanDefinitionException ex) {
+			// OK
+		}
+	}
 
 	public void testOnSetContextCalledOnce() throws Exception {
 		TestView tv = (TestView) rb.resolveViewName("test", Locale.ENGLISH);
@@ -100,13 +101,10 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 			ResourceBundleViewResolver rb2 = new ResourceBundleViewResolver();
 			rb2.setBasename("weoriwoierqupowiuer");
 			View v = rb2.resolveViewName("debugView", Locale.ENGLISH);
-			fail("No such basename: all requests should fail with servlet exception");
+			fail("No such basename: all requests should fail with exception");
 		}
-		catch (ServletException ex) {
+		catch (MissingResourceException ex) {
 			// OK
-		}
-		catch (Exception ex) {
-			fail("No such basename: all requests should fail with servlet exception, not " + ex);
 		}
 	}
 

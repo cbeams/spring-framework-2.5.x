@@ -58,7 +58,7 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct URL", "/example2.jsp".equals(((InternalResourceView) view).getUrl()));
 	}
 
-	public void testInternalResourceViewResolverWithoutPrefixes() throws ServletException, IOException {
+	public void testInternalResourceViewResolverWithoutPrefixes() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
@@ -87,7 +87,7 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct rc attribute", request.getAttribute("rc") instanceof RequestContext);
 	}
 
-	public void testInternalResourceViewResolverWithPrefixes() throws ServletException {
+	public void testInternalResourceViewResolverWithPrefixes() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
@@ -105,7 +105,7 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct URL", "/WEB-INF/example2.jsp".equals(((InternalResourceView) view).getUrl()));
 	}
 
-	public void testInternalResourceViewResolverWithJstl() throws ServletException, IOException {
+	public void testInternalResourceViewResolverWithJstl() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
@@ -140,7 +140,7 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct JSTL attributes", locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
 	}
 
-	public void testXmlViewResolver() throws ServletException, IOException {
+	public void testXmlViewResolver() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			protected InputStream getResourceByPath(String path) throws IOException {
 				return ViewResolverTestSuite.class.getResourceAsStream(path);
@@ -205,7 +205,7 @@ public class ViewResolverTestSuite extends TestCase {
 		}
 	}
 
-	public void testXmlViewResolverWithoutCache() {
+	public void testXmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			protected InputStream getResourceByPath(String path) throws IOException {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
@@ -224,9 +224,9 @@ public class ViewResolverTestSuite extends TestCase {
 		}
 		try {
 			vr.resolveViewName("example1", Locale.getDefault());
-			fail("Should have thrown ServletException");
+			fail("Should have thrown ApplicationContextException");
 		}
-		catch (ServletException ex) {
+		catch (ApplicationContextException ex) {
 			// expected
 		}
 	}
