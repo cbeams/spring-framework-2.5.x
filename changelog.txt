@@ -4,6 +4,7 @@ SPRING FRAMEWORK CHANGELOG
 Changes in version 1.0 M1 (xx.8.2003)
 -------------------------------------
 * changed package structure from com.interface21 to org.springframework
+* revised distribution jar files (spring-beans, -aop, -jdbc, -orm, -context, -full)
 * introduced DisposableBean interface
 * introduced "destroy-method" attribute for XML bean definitions
 * SingleConnectionDataSource implements DisposableBean

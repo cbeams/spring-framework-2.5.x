@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.2 2003-08-18 21:23:10 jhoeller Exp $
+    $Id: build.xml,v 1.3 2003-08-19 16:36:26 jhoeller Exp $
 
     See page 594 of "Expert One-on-One J2EE" for a description
     of the JAR files produced by this build script, and how
@@ -87,7 +87,7 @@
 	</target>
 
 
-	<target name="beans" depends="build,initdist" description="Create the bean container JAR file (for just using the Spring core)">
+	<target name="beans" depends="build,initdist" description="Create JAR file for bean container">
 
 		<delete file="${dist.dir}/${spring-beans.jar}"/>
 
@@ -95,18 +95,55 @@
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/core/**"/>
-				<include name="org/springframework/util/*"/>
+				<include name="org/springframework/util/ClassLoaderUtils*"/>
+				<include name="org/springframework/util/StringUtils*"/>
 			</fileset>
 		</jar>
 
 	</target>
 
 
-	<target name="jdbc" depends="build,initdist" description="Create the JDBC distribution JAR file (for using Spring as library)">
+	<target name="aop" depends="build,initdist" description="Create JAR file for AOP-enabled bean container)">
+
+		<delete file="${dist.dir}/${spring-aop.jar}"/>
+
+		<jar jarfile="${dist.dir}/${spring-aop.jar}">
+			<fileset dir="${build.dir}">
+				<include name="org/springframework/aop/**"/>
+				<include name="org/springframework/beans/**"/>
+				<include name="org/springframework/core/**"/>
+				<include name="org/springframework/util/**"/>
+			</fileset>
+		</jar>
+
+	</target>
+
+
+	<target name="jdbc" depends="build,initdist" description="Create JAR file for use as JDBC access library">
 
 		<delete file="${dist.dir}/${spring-jdbc.jar}"/>
 
 		<jar jarfile="${dist.dir}/${spring-jdbc.jar}">
+			<fileset dir="${build.dir}">
+				<include name="org/springframework/beans/**"/>
+				<include name="org/springframework/core/**"/>
+				<include name="org/springframework/dao/**"/>
+				<include name="org/springframework/ejb/support/**"/>
+				<include name="org/springframework/jdbc/**"/>
+				<exclude name="org/springframework/jdbc/datasource/DataSourceTransaction*"/>
+				<include name="org/springframework/jndi/**"/>
+				<include name="org/springframework/util/**"/>
+			</fileset>
+		</jar>
+
+	</target>
+
+
+	<target name="orm" depends="build,initdist" description="Create JAR file for use as persistence and transaction library">
+
+		<delete file="${dist.dir}/${spring-orm.jar}"/>
+
+		<jar jarfile="${dist.dir}/${spring-orm.jar}">
 			<fileset dir="${build.dir}">
 				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/beans/**"/>
@@ -117,14 +154,41 @@
 				<include name="org/springframework/jndi/**"/>
 				<include name="org/springframework/orm/**"/>
 				<include name="org/springframework/transaction/**"/>
-				<include name="org/springframework/util/*"/>
+				<include name="org/springframework/util/**"/>
 			</fileset>
 		</jar>
 
 	</target>
 
 
-	<target name="full" depends="build,initdist" description="Build one big JAR containing main source tree class files">
+	<target name="context" depends="build,initdist" description="Create JAR file for use as general application framework">
+
+		<delete file="${dist.dir}/${spring-context.jar}"/>
+
+		<jar jarfile="${dist.dir}/${spring-context.jar}">
+			<fileset dir="${build.dir}">
+				<include name="org/springframework/aop/**"/>
+				<include name="org/springframework/beans/**"/>
+				<include name="org/springframework/context/**"/>
+				<include name="org/springframework/core/**"/>
+				<include name="org/springframework/dao/**"/>
+				<include name="org/springframework/ejb/**"/>
+				<include name="org/springframework/jdbc/**"/>
+				<include name="org/springframework/jndi/**"/>
+				<include name="org/springframework/orm/**"/>
+				<include name="org/springframework/transaction/**"/>
+				<include name="org/springframework/validation/**"/>
+				<include name="org/springframework/ui/**"/>
+				<include name="org/springframework/util/**"/>
+				<include name="org/springframework/web/**"/>
+				<exclude name="org/springframework/web/servlet/**"/>
+			</fileset>
+		</jar>
+
+	</target>
+
+
+	<target name="full" depends="build,initdist" description="Create JAR file with all Spring classes, including web MVC and remoting">
 
 		<delete file="${dist.dir}/${spring-full.jar}"/>
 
@@ -156,7 +220,7 @@
 	<!--
 		Note: Contained classes overlap, e.g. spring-full contains everything.
 	-->
-	<target name="alljars" depends="beans,jdbc,full,srczip" description="Create all JAR files"/>
+	<target name="alljars" depends="beans,aop,jdbc,orm,context,full,srczip" description="Create all JAR files"/>
 
 
 	<target name="javadoc" description="Generate framework Javadocs.">
@@ -356,35 +420,32 @@
 		</java>
 
 	</target>
-	
-	
-	<!--
-		Build load test Jar
-	-->
+
+
 	<target name="loadjar" depends="build,buildtests" description="Build load test jar">
-	
+
 		<mkdir dir="${loadbuild.dir}"/>
 
 		<javac destdir="${loadbuild.dir}" target="1.3" debug="${debug}"
 			deprecation="false" optimize="false" failonerror="false">
 			<src path="load"/>
-			
+
 			<classpath refid="master-classpath"/>
-			
+
 			<!-- For load -->
 			<classpath location="${build.dir}"/>
-			
+
 			<classpath location="${testbuild.dir}"/>
-			
+
 		</javac>
-		
+
 		<copy todir="${loadbuild.dir}" preservelastmodified="true">
 			<fileset dir="load">
 				<include name="**/*.xml"/>
 				<include name="**/*.properties"/>
 			</fileset>
 		</copy>
-		
+
 		<jar jarfile="${dist.dir}/${spring-load.jar}">
 			<fileset dir="${loadbuild.dir}">
 				<include name="org/springframework/load/**" />
@@ -392,7 +453,5 @@
 		</jar>
 
 	</target>
-	
-	
-	
+
 </project>
