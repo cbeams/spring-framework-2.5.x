@@ -141,7 +141,7 @@ distribution/website before using any of them in your own applications.
 - required for running Petclinic (by Hibernate)
 
 * jakarta-commons/commons-dbcp.jar
-- Commons DBCP 1.1 (http://jakarta.apache.org/commons/dbcp)
+- Commons DBCP 1.2 (http://jakarta.apache.org/commons/dbcp)
 - required for building the framework
 - required at runtime when using Spring's CommonsDbcpNativeJdbcExtractor
 - required for running JPetStore and Image Database
@@ -169,7 +169,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime, as Spring uses it for all logging
 
 * jakarta-commons/commons-pool.jar
-- Commons Pool 1.1 (http://jakarta.apache.org/commons/pool)
+- Commons Pool 1.2 (http://jakarta.apache.org/commons/pool)
 - required for running JPetStore and Image Database
 
 * jakarta-commons/commons-validator.jar
@@ -183,7 +183,7 @@ distribution/website before using any of them in your own applications.
 * jboss/jboss-common-jdbc-wrapper.jar
 - JBoss connection pool classes (http://www.jboss.org)
 - required for building the framework
-- required at runtime when using Spring's JbossNativeJdbcExtractor
+- required at runtime when using Spring's JBossNativeJdbcExtractor
 
 * jdo/jdo.jar
 - JDO API 1.0.1 (http://access1.sun.com/jdo)
@@ -219,7 +219,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's AbstractExcelView
 
 * quartz/quartz.jar
-- Quartz 1.3.2 (http://www.quartzscheduler.org)
+- Quartz 1.3.4 (http://www.opensymphony.org/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
