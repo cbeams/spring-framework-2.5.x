@@ -25,14 +25,14 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>Trivial controller that always returns a named view. The view
  * can be configured using an exposed configuration property. This
  * controller offers an alternative to sending a request straight to a view
- * such as a JSP. The advantage here is, that you're decoupling the controller
- * and the view, letter the some the configuration determine (instead of
- * the controller) the viewtechnology.</p>
+ * such as a JSP. The advantage here is that the client is not exposed to
+ * the concrete view technology but rather just to the controller URL;
+ * the concrete view will be determined by the ViewResolver.
  *
- * <p>An alternative to the ParameterizableViewController is of the
- * {@link org.springframework.web.servlet.mvc.multiaction MultiAction controllers},
- * some of which allow the same behavior, but then for more views at in one
- * controller.</p>
+ * <p>An alternative to the ParameterizableViewController is a
+ * {@link org.springframework.web.servlet.mvc.multiaction.MultiActionController MultiActionController},
+ * which can define a variety of handler methods that just return a plain
+ * ModelAndView instance for a given view name.
  *
  * <p><b><a name="workflow">Workflow
  * (<a href="AbstractController.html#workflow">and that defined by superclass</a>):</b><br>
