@@ -25,6 +25,8 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.support.AopUtils;
+
 /**
  * Spring's implementation of AOP Alliance MethodInvocation interface.
  *
@@ -149,7 +151,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 	 * @throws Throwable if invoking the joinpoint resulted in an exception
 	 */
 	protected Object invokeJoinpoint() throws Throwable {
-		return AopProxyUtils.invokeJoinpointUsingReflection(this.target, this.method, this.arguments);
+		return AopUtils.invokeJoinpointUsingReflection(this.target, this.method, this.arguments);
 	}
 
 

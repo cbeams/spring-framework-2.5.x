@@ -16,18 +16,15 @@
 
 package org.springframework.aop.framework;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.aopalliance.aop.AspectException;
-
 /**
- * Miscellaneous utilities for AOP proxies.
+ * Miscellaneous utilities for AOP proxy implementations.
  * @author Rod Johnson
  */
 public abstract class AopProxyUtils {
-	
+
 	/**
 	 * Get complete set of interfaces to proxy. This will always add the Advised interface
 	 * unless the AdvisedSupport's "opaque" flag is true.
@@ -35,7 +32,9 @@ public abstract class AopProxyUtils {
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
 		// Won't include Advised, which may be necessary.
-		Class[] proxiedInterfacesOnConfig = advised.getProxiedInterfaces() == null ? new Class[0] : advised.getProxiedInterfaces();
+		Class[] proxiedInterfacesOnConfig = advised.getProxiedInterfaces() == null ?
+				new Class[0] : advised.getProxiedInterfaces();
+
 		int lengthFromConfig = proxiedInterfacesOnConfig.length;
 		int addedInterfaces = 0;
 		if (!advised.getOpaque() && !advised.isInterfaceProxied(Advised.class)) {
@@ -44,7 +43,8 @@ public abstract class AopProxyUtils {
 		}
 		Class[] proxiedInterfaces = new Class[lengthFromConfig + addedInterfaces];
 		
-		System.arraycopy(proxiedInterfacesOnConfig, 0, proxiedInterfaces, addedInterfaces, proxiedInterfacesOnConfig.length);
+		System.arraycopy(proxiedInterfacesOnConfig, 0, proxiedInterfaces, addedInterfaces,
+				proxiedInterfacesOnConfig.length);
 		if (addedInterfaces == 1) {
 			proxiedInterfaces[0] = Advised.class;
 		}
@@ -52,30 +52,9 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
-	 * Invoke the target directly via reflection.
-	 */
-	public static Object invokeJoinpointUsingReflection(Object target, Method method, Object[] args)
-	    throws Throwable {
-		// Use reflection to invoke the method.
-		try {
-		 return method.invoke(target, args);
-		}
-		catch (InvocationTargetException ex) {
-			// Invoked method threw a checked exception.
-			// We must rethrow it. The client won't see the interceptor.
-			throw ex.getTargetException();
-		}
-		catch (IllegalArgumentException ex) {
-			throw new AspectException("AOP configuration seems to be invalid: tried calling " +
-			    method + " on [" + target + "]: ", ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new AspectException("Couldn't access method " + method, ex);
-		}
-	}
-	
-	/**
-	 * Note the same as equality of the AdvisedSupport objects.
+	 * Check equality of the proxies behind the given AdvisedSupport objects.
+	 * Not the same as equality of the AdvisedSupport objects:
+	 * rather, equality of interfaces, advisors and target sources.
 	 */
 	public static boolean equalsInProxy(AdvisedSupport a, AdvisedSupport b) {
 		if (a == b) {
@@ -92,11 +71,17 @@ public abstract class AopProxyUtils {
 		}
 		return a.getTargetSource().equals(b.getTargetSource());
 	}
-	
+
+	/**
+	 * Check equality of the proxied interfaces behind the given AdvisedSupport objects.
+	 */
 	public static boolean equalsProxiedInterfaces(AdvisedSupport a, AdvisedSupport b) {
 		return Arrays.equals(a.getProxiedInterfaces(), b.getProxiedInterfaces());
 	}
 	
+	/**
+	 * Check equality of the advisors behind the given AdvisedSupport objects.
+	 */
 	public static boolean equalsAdvisors(AdvisedSupport a, AdvisedSupport b) {
 		return Arrays.equals(a.getAdvisors(), b.getAdvisors());
 	}

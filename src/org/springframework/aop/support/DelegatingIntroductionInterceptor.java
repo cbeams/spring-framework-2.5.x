@@ -17,9 +17,10 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
-import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.util.Assert;
 
 /**
  * Convenient implementation of the IntroductionInterceptor interface.
@@ -33,15 +34,18 @@ import org.springframework.aop.framework.AopProxyUtils;
  * All interfaces except IntroductionInterceptor are picked up from
  * the subclass or delegate by default.
  *
- * <p>The suppressInterface() method can be used to suppress interfaces
- * implemented by the delegate but which should not be introduced to the
- * owning AOP proxy.
+ * <p>The <code>suppressInterface</code> method can be used to suppress interfaces
+ * implemented by the delegate but which should not be introduced to the owning
+ * AOP proxy.
  * 
  * <p>A DelegatingIntroductionInterceptor is serializable if the delegate is.
  *
  * @author Rod Johnson
+ * @since 16.11.2003
+ * @see #suppressInterface
  */
-public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport implements IntroductionInterceptor {
+public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
+		implements IntroductionInterceptor {
 		
 	/**
 	 * Object that actually implements the interfaces.
@@ -72,11 +76,10 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport i
 	 * "this" from one constructor to another. 
 	 */
 	private void init(Object delegate) {
-		if (delegate == null) {
-			throw new IllegalArgumentException("Delegate cannot be null in DelegatingIntroductionInterceptor");
-		}
+		Assert.notNull(delegate, "delegate is required");
 		this.delegate = delegate;
 		implementInterfacesOnObject(delegate);
+
 		// We don't want to expose the control interface
 		suppressInterface(IntroductionInterceptor.class);
 		suppressInterface(DynamicIntroductionAdvice.class);
@@ -94,11 +97,12 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport i
 				logger.debug("Invoking self on invocation [" + mi + "]; breaking interceptor chain");
 			}
 			// Using the following method rather than direct reflection, we
-			// get correct handling of InvocationTargetException if the introduced method throws an exception
-			return AopProxyUtils.invokeJoinpointUsingReflection(delegate, mi.getMethod(), mi.getArguments());
+			// get correct handling of InvocationTargetException
+			// if the introduced method throws an exception.
+			return AopUtils.invokeJoinpointUsingReflection(this.delegate, mi.getMethod(), mi.getArguments());
 		}
 		
-		// If we get here, just pass the invocation on
+		// If we get here, just pass the invocation on.
 		return mi.proceed();
 	}
 
