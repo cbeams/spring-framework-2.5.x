@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.137 2004-04-30 10:41:25 trisberg Exp $
+$Id: changelog.txt,v 1.138 2004-04-30 15:41:53 jhoeller Exp $
 
 
 Changes in version 1.0.2 (16.5.2003)
@@ -9,6 +9,9 @@ Changes in version 1.0.2 (16.5.2003)
 Package org.springframework.beans
 * PropertyValue and MutablePropertyValues implement java.io.Serializable
 * fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to properly handle null values in "getAsText"
+* added BeanDefinitionHolder class to beans.factory.support package, holding a BeanDefinition plus name and aliases
+* AbstractAutowireCapableBeanFactory detects BeanDefinitionHolder, applying its name to a BeanNameAware inner bean
+* DefaultXmlBeanDefinitionParser registers BeanDefinitionHolder for inner bean definition, including name and aliases 
 * added AbstractFactoryBean class as superclass for FactoryBeans that are capable of both singletons and prototypes
 * reworked List/Map/Set/PropertiesFactoryBean to extend from AbstractFactoryBean
 * deprecated PropertiesFactoryBean's "charset" property in favor of the newly added "fileEncoding" property
@@ -17,6 +20,7 @@ Package org.springframework.context
 * added ResourceMapFactoryBean class to context.support, for resolving properties into a Map with Resource values
 * fixed AbstractMessageSource's parent checks to correctly respect the child's "useCodeAsDefaultMessage" setting
 * AbstractApplicationContext uses ResourceEditor with ResourceLoader argument rather than former ContextResourceEditor
+* AbstractApplicationContext supports config location patterns for all locations that are resolvable to java.io.File
 
 Package org.springframework.core
 * reworked ResourceEditor to take ResourceLoader argument in overloaded constructor
@@ -55,6 +59,7 @@ Package org.springframework.ui
 
 Package org.springframework.util
 * added "copy(String, Writer)" and "copyToString(Reader)" methods to FileCopyUtils
+* added "determineRootDir" method to PathMatcher, refined "retrieveMatchingFiles" implementation
 
 Package org.springframework.web
 * reworked FilterConfigPropertyValues into inner class of GenericFilterBean
