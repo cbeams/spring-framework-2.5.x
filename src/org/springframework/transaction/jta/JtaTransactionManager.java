@@ -192,9 +192,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			throw new InvalidIsolationLevelException("JtaTransactionManager does not support custom isolation levels " +
 			                                         "without a JtaDialect");
 		}
-		if (definition.isReadOnly()) {
-			logger.info("JtaTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
-		}
 
 		try {
 			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -205,14 +202,12 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		catch (NotSupportedException ex) {
 			// assume "nested transactions not supported"
 			throw new IllegalTransactionStateException(
-				"JTA implementation does not support nested transactions",
-				ex);
+			    "JTA implementation does not support nested transactions", ex);
 		}
 		catch (UnsupportedOperationException ex) {
 			// assume "nested transactions not supported"
 			throw new IllegalTransactionStateException(
-				"JTA implementation does not support nested transactions",
-				ex);
+			    "JTA implementation does not support nested transactions", ex);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on begin", ex);

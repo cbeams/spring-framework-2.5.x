@@ -238,8 +238,8 @@ public abstract class SessionFactoryUtils {
 			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
 		}
 
-		public void beforeCommit() throws DataAccessException {
-			if (!this.sessionHolder.getSession().getFlushMode().equals(FlushMode.NEVER)) {
+		public void beforeCommit(boolean readOnly) throws DataAccessException {
+			if (!readOnly && !this.sessionHolder.getSession().getFlushMode().equals(FlushMode.NEVER)) {
 				logger.debug("Flushing Hibernate session on transaction synchronization");
 				try {
 					this.sessionHolder.getSession().flush();

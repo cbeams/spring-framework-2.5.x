@@ -22,6 +22,8 @@ public class DefaultTransactionStatus implements TransactionStatus {
 
 	private boolean newSynchronization;
 
+	private boolean readOnly;
+
 	private boolean debug;
 
 	private Object suspendedResources;
@@ -41,11 +43,12 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	 * debug logging should be enabled.
 	 */
 	public DefaultTransactionStatus(Object transaction, boolean newTransaction,
-																	boolean newSynchronization, boolean debug,
-	                                Object suspendedResources) {
+																	boolean newSynchronization, boolean readOnly,
+	                                boolean debug, Object suspendedResources) {
 		this.transaction = transaction;
 		this.newTransaction = newTransaction;
 		this.newSynchronization = newSynchronization;
+		this.readOnly = readOnly;
 		this.debug = debug;
 		this.suspendedResources = suspendedResources;
 	}
@@ -67,6 +70,13 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	 */
 	public boolean isNewSynchronization() {
 		return newSynchronization;
+	}
+
+	/**
+	 * Return if this transaction is defined as read-only transaction.
+	 */
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 
 	/**

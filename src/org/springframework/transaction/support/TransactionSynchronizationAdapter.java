@@ -7,7 +7,7 @@ package org.springframework.transaction.support;
  * @author Juergen Hoeller
  * @since 22.01.2004
  */
-public class TransactionSynchronizationAdapter implements TransactionSynchronization {
+public abstract class TransactionSynchronizationAdapter implements TransactionSynchronization {
 
 	public void suspend() {
 	}
@@ -15,7 +15,7 @@ public class TransactionSynchronizationAdapter implements TransactionSynchroniza
 	public void resume() {
 	}
 
-	public void beforeCommit() {
+	public void beforeCommit(boolean readOnly) {
 	}
 
 	public void beforeCompletion() {

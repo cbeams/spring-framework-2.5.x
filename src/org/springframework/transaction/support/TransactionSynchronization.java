@@ -40,12 +40,13 @@ public interface TransactionSynchronization {
 
 	/**
 	 * Invoked before transaction commit (before "beforeCompletion").
-	 * Can e.g. flush of transactional sessions to the database.
+	 * Can e.g. flush transactional sessions to the database.
 	 * <p>Note that exceptions will get propagated to the commit caller
 	 * and cause a rollback of the transaction.
+	 * @param readOnly if the transaction is defined as read-only transaction 
 	 * @throws RuntimeException in case of errors
 	 */
-	void beforeCommit();
+	void beforeCommit(boolean readOnly);
 
 	/**
 	 * Invoked before transaction commit/rollback (after "beforeCommit").

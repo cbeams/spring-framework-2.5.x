@@ -65,7 +65,7 @@ public class JtaTransactionTestSuite extends TestCase {
 
 		MockControl synchControl = MockControl.createControl(TransactionSynchronization.class);
 		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
-		synch.beforeCommit();
+		synch.beforeCommit(false);
 		synchControl.setVoidCallable(1);
 		synch.beforeCompletion();
 		synchControl.setVoidCallable(1);
@@ -104,7 +104,7 @@ public class JtaTransactionTestSuite extends TestCase {
 
 		MockControl synchControl = MockControl.createControl(TransactionSynchronization.class);
 		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
-		synch.beforeCommit();
+		synch.beforeCommit(false);
 		synchControl.setVoidCallable(1);
 		synch.beforeCompletion();
 		synchControl.setVoidCallable(1);
