@@ -74,14 +74,36 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	}
 
 	/**
-	 * Register a singleton bean with the default bean factory.
+	 * Register a singleton bean with the underlying bean factory.
+	 * <p>For more advanced needs, register with the underlying BeanFactory directly.
+	 * @see #getDefaultListableBeanFactory
+	 */
+	public void registerSingleton(String name, Class clazz) throws BeansException {
+		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz));
+	}
+
+	/**
+	 * Register a singleton bean with the underlying bean factory.
+	 * <p>For more advanced needs, register with the underlying BeanFactory directly.
+	 * @see #getDefaultListableBeanFactory
 	 */
 	public void registerSingleton(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
 		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs));
 	}
 
 	/**
-	 * Register a prototype bean with the default bean factory.
+	 * Register a prototype bean with the underlying bean factory.
+	 * <p>For more advanced needs, register with the underlying BeanFactory directly.
+	 * @see #getDefaultListableBeanFactory
+	 */
+	public void registerPrototype(String name, Class clazz) throws BeansException {
+		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz, false));
+	}
+
+	/**
+	 * Register a prototype bean with the underlying bean factory.
+	 * <p>For more advanced needs, register with the underlying BeanFactory directly.
+	 * @see #getDefaultListableBeanFactory
 	 */
 	public void registerPrototype(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
 		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs, false));
@@ -92,6 +114,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * @param code lookup code
 	 * @param locale locale message should be found within
 	 * @param defaultMessage message associated with this lookup code
+	 * @see #getStaticMessageSource
 	 */
 	public void addMessage(String code, Locale locale, String defaultMessage) {
 		getStaticMessageSource().addMessage(code, locale, defaultMessage);

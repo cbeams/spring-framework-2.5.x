@@ -52,15 +52,15 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		pvs.addPropertyValue(new PropertyValue("formView", "form"));
 		registerSingleton("/form.do", SimpleFormController.class, pvs);
 
-		registerSingleton("/locale.do", LocaleChecker.class, null);
+		registerSingleton("/locale.do", LocaleChecker.class);
 
-		registerPrototype("/throwaway.do", TestThrowawayController.class, null);
+		registerPrototype("/throwaway.do", TestThrowawayController.class);
 
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 		addMessage("testArgs", Locale.ENGLISH, "test {0} message {1}");
 
-		registerSingleton(UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME, DummyThemeSource.class, null);
+		registerSingleton(UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME, DummyThemeSource.class);
 
 		super.refresh();
 	}
