@@ -20,8 +20,6 @@ import org.springframework.web.flow.ViewState;
  */
 public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
-	protected static final String DOT_SEPARATOR = ".";
-
 	public final void init() throws FlowBuilderException {
 		setFlow(createFlow(flowId()));
 	}
@@ -389,20 +387,20 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
+	 * @param stateId
+	 * @return
+	 */
+	protected String actionId(String stateId) {
+		return stateId;
+	}
+
+	/**
 	 * @param actionStateId
 	 * @param transition
 	 * @return
 	 */
 	protected ActionState addActionState(String stateId, Transition transition) {
 		return new ActionState(getFlow(), stateId, executeAction(actionId(stateId)), transition);
-	}
-
-	/**
-	 * @param stateId
-	 * @return
-	 */
-	protected String actionId(String stateId) {
-		return stateId;
 	}
 
 	/**

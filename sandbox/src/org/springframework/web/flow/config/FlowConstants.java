@@ -8,6 +8,8 @@ package org.springframework.web.flow.config;
  */
 public abstract class FlowConstants {
 
+	public static final String DOT_SEPARATOR = ".";
+
 	// controller constants
 	
 	public static final String CURRENT_STATE_ID_ATTRIBUTE = "currentStateId";
@@ -183,6 +185,5 @@ public abstract class FlowConstants {
 	public static final String TRANSACTION_TOKEN_PARAMETER_NAME = "_txToken";
 
 	protected FlowConstants() {
-
 	}
 }
