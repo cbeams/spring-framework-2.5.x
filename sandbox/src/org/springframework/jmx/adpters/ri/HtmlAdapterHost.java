@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.jmx.adpters.ri;
+package org.springframework.jmx.adapters.ri;
 
 import org.springframework.jmx.adapters.AbstractReflectionBasedAdapterHost;
 
