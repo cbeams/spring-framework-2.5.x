@@ -42,19 +42,21 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		this.connectorServer.start();
 	}
 
-	public void tearDown() throws Exception {
-		this.connector.close();
-		this.connectorServer.stop();
-		super.tearDown();
+	protected MBeanServerConnection getServerConnection() throws Exception {
+		this.connector = JMXConnectorFactory.connect(getServiceUrl());
+		return this.connector.getMBeanServerConnection();
 	}
 
 	private JMXServiceURL getServiceUrl() throws MalformedURLException {
 		return new JMXServiceURL(SERVICE_URL);
 	}
 
-	protected MBeanServerConnection getServerConnection() throws Exception {
-		this.connector = JMXConnectorFactory.connect(getServiceUrl());
-		return this.connector.getMBeanServerConnection();
+	public void tearDown() throws Exception {
+		if (this.connector != null) {
+			this.connector.close();
+		}
+		this.connectorServer.stop();
+		super.tearDown();
 	}
 
 }
