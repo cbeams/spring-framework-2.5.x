@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart.commons;
 
@@ -34,7 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
  * MultipartFile implementation for Jakarta Commons FileUpload.
  * @author Trevor D. Cook
  * @author Juergen Hoeller
- * @since 29-Sep-2003
+ * @since 29.09.2003
  * @see CommonsMultipartResolver
  */
 public class CommonsMultipartFile implements MultipartFile, Serializable {
@@ -55,8 +55,8 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	}
 
 	/**
-	 * Return the underlying org.apache.commons.fileupload.FileItem instance.
-	 * There is hardly any need to access this.
+	 * Return the underlying <code>org.apache.commons.fileupload.FileItem</code>
+	 * instance. There is hardly any need to access this.
 	 */
 	public FileItem getFileItem() {
 		return fileItem;
@@ -99,7 +99,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	}
 
 	public byte[] getBytes() {
-		if (!this.fileItem.isInMemory() && !tempFileExists()) {
+		if (!isAvailable()) {
 			throw new IllegalStateException("File has been moved - cannot be read again");
 		}
 		byte[] bytes = this.fileItem.get();
@@ -107,7 +107,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	}
 
 	public InputStream getInputStream() throws IOException {
-		if (!this.fileItem.isInMemory() && !tempFileExists()) {
+		if (!isAvailable()) {
 			throw new IllegalStateException("File has been moved - cannot be read again");
 		}
 		InputStream inputStream = this.fileItem.getInputStream();
@@ -115,7 +115,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	}
 
 	public void transferTo(File dest) throws IOException, IllegalStateException {
-		if (!this.fileItem.isInMemory() && !tempFileExists()) {
+		if (!isAvailable()) {
 			throw new IllegalStateException("File has already been moved - cannot be transferred again");
 		}
 
@@ -129,7 +129,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			if (logger.isDebugEnabled()) {
 				String action = "transferred";
 				if (!this.fileItem.isInMemory()) {
-					action = tempFileExists() ? "copied" : "moved";
+					action = isAvailable() ? "copied" : "moved";
 				}
 				logger.debug("Multipart file '" + getName() + "' with original filename [" +
 						getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
@@ -148,17 +148,28 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		}
 	}
 
-	protected boolean tempFileExists() {
+	/**
+	 * Determine whether the multipart content is still available.
+	 * If a temporary file has been moved, the content is no longer available.
+	 */
+	protected boolean isAvailable() {
+		// If in memory, it's available.
+		if (this.fileItem.isInMemory()) {
+			return true;
+		}
+		// Check actual existence of temporary file.
 		if (this.fileItem instanceof DefaultFileItem) {
-			// check actual existence of temporary file
 			return ((DefaultFileItem) this.fileItem).getStoreLocation().exists();
 		}
-		else {
-			// check whether current file size is different than original one
-			return (this.fileItem.getSize() == this.size);
-		}
+		// Check whether current file size is different than original one.
+		return (this.fileItem.getSize() == this.size);
 	}
 
+	/**
+	 * Return a description for the storage location of the multipart content.
+	 * Tries to be as specific as possible: mentions the file location in case
+	 * of a temporary file.
+	 */
 	protected String getStorageDescription() {
 		if (this.fileItem.isInMemory()) {
 			return "in memory";

@@ -12,13 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Interface which represents an uploaded file received in a multipart request.
@@ -30,7 +30,7 @@ import java.io.IOException;
  *
  * @author Juergen Hoeller
  * @author Trevor D. Cook
- * @since 29-Sep-2003
+ * @since 29.09.2003
  * @see org.springframework.web.multipart.MultipartHttpServletRequest
  * @see org.springframework.web.multipart.MultipartResolver
  */

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart.support;
 
@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
  * Provides management of pre-generated parameter values.
  * @author Trevor D. Cook
  * @author Juergen Hoeller
- * @since 29-Sep-2003
+ * @since 29.09.2003
  * @see org.springframework.web.multipart.MultipartResolver
  */
 public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
@@ -36,10 +36,10 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	/**
 	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
-	 * @param request the request to wrap
-	 * @param parameters a map of the parameters,
-	 * with Strings as keys and String arrays as values
+	 * @param request the servlet request to wrap
 	 * @param multipartFiles a map of the multipart files
+	 * @param parameters a map of the parameters to expose,
+	 * with Strings as keys and String arrays as values
 	 */
 	public DefaultMultipartHttpServletRequest(HttpServletRequest request, Map multipartFiles, Map parameters) {
 		super(request);
@@ -52,7 +52,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	}
 
 	public String getParameter(String name) {
-		String[] values = getParameterValues(name);
+		String[] values = (String[]) this.parameters.get(name);
 		return (values != null && values.length > 0 ? values[0] : null);
 	}
 

@@ -21,15 +21,24 @@ import javax.servlet.ServletException;
 /**
  * Exception thrown on multipart resolution.
  * @author Trevor D. Cook
- * @since 29-Sep-2003
+ * @since 29.09.2003
  * @see MultipartResolver#resolveMultipart
  */
 public class MultipartException extends ServletException {
 
+	/**
+	 * Constructor for MultipartException.
+	 * @param msg message
+	 */
 	public MultipartException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for MultipartException.
+	 * @param msg message
+	 * @param ex root cause from multipart parsing API in use
+	 */
 	public MultipartException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

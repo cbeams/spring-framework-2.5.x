@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart;
 
@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Juergen Hoeller
  * @author Trevor D. Cook
- * @since 29-Sep-2003
+ * @since 29.09.2003
  * @see MultipartResolver
  * @see MultipartFile
  * @see javax.servlet.http.HttpServletRequest#getParameter

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart.cos;
 
@@ -57,24 +57,31 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 
 	/**
 	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
-	 * @param originalRequest the request to wrap
-	 * @param multipartRequest the COS multipart representation to use
+	 * @param request the servlet request to wrap
+	 * @param multipartRequest the COS multipart request to wrap
 	 */
-	protected CosMultipartHttpServletRequest(HttpServletRequest originalRequest, MultipartRequest multipartRequest) {
-		super(originalRequest);
+	protected CosMultipartHttpServletRequest(HttpServletRequest request, MultipartRequest multipartRequest) {
+		super(request);
 		this.multipartRequest = multipartRequest;
 		setMultipartFiles(initFileMap(multipartRequest));
 	}
 
 	/**
-	 * Return the underlying com.oreilly.servlet.MultipartRequest instance.
-	 * There is hardly any need to access this.
+	 * Return the underlying <code>com.oreilly.servlet.MultipartRequest</code>
+	 * instance. There is hardly any need to access this.
 	 */
 	public MultipartRequest getMultipartRequest() {
 		return multipartRequest;
 	}
 
-	protected Map initFileMap(MultipartRequest multipartRequest) {
+	/**
+	 * Initialize a Map with file name Strings as keys and
+	 * CosMultipartFile instances as values.
+	 * @param multipartRequest the COS multipart request
+	 * to get the multipart file data from
+	 * @return the Map with CosMultipartFile values
+	 */
+	private Map initFileMap(MultipartRequest multipartRequest) {
 		Map files = new HashMap();
 		Enumeration fileNames = multipartRequest.getFileNames();
 		while (fileNames.hasMoreElements()) {
@@ -107,6 +114,10 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 	}
 
 
+	/**
+	 * Implementation of Spring's MultipartFile interface on top
+	 * of a COS MultipartRequest object.
+	 */
 	private class CosMultipartFile implements MultipartFile {
 
 		private final String name;
@@ -115,7 +126,7 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 
 		private final long size;
 
-		private CosMultipartFile(String name) {
+		public CosMultipartFile(String name) {
 			this.name = name;
 			this.file = multipartRequest.getFile(this.name);
 			this.size = (file != null ? file.length() : 0);
@@ -153,7 +164,12 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 			if (this.file != null && !this.file.exists()) {
 				throw new IllegalStateException("File has been moved - cannot be read again");
 			}
-			return (this.size != 0 ? (InputStream) new FileInputStream(this.file) : new ByteArrayInputStream(new byte[0]));
+			if (this.size != 0) {
+				return new FileInputStream(this.file);
+			}
+			else {
+				return new ByteArrayInputStream(new byte[0]);
+			}
 		}
 
 		public void transferTo(File dest) throws IOException, IllegalStateException {
@@ -162,8 +178,8 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 			}
 
 			if (dest.exists() && !dest.delete()) {
-				throw new IOException("Destination file [" + dest.getAbsolutePath() +
-															"] already exists and could not be deleted");
+				throw new IOException(
+						"Destination file [" + dest.getAbsolutePath() + "] already exists and could not be deleted");
 			}
 
 			boolean moved = false;
@@ -179,9 +195,9 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Multipart file '" + getName() + "' with original filename [" +
-										 getOriginalFilename() + "], stored " +
-				             (this.file != null ? "at [" + this.file.getAbsolutePath() + "]" : "in memory") +
-				             ": " + (moved ? "moved" : "copied") + " to [" + dest.getAbsolutePath() + "]");
+						getOriginalFilename() + "], stored " +
+						(this.file != null ? "at [" + this.file.getAbsolutePath() + "]" : "in memory") +
+						": " + (moved ? "moved" : "copied") + " to [" + dest.getAbsolutePath() + "]");
 			}
 		}
 	}

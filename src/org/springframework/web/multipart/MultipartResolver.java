@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletRequest;
  *   ...
  * }</pre>
  *
- * <p>Instead of direct access, command or form controllers can register a
+ * Instead of direct access, command or form controllers can register a
  * ByteArrayMultipartFileEditor or StringMultipartFileEditor with their data
  * binder, to automatically apply multipart content to command bean properties.
  *
@@ -65,7 +65,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Juergen Hoeller
  * @author Trevor D. Cook
- * @since 29.9.2003
+ * @since 29.09.2003
  * @see MultipartHttpServletRequest
  * @see MultipartFile
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart.cos;
 
@@ -31,7 +31,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.util.WebUtils;
 
 /**
- * INCOMPLETE: How to mock com.oreilly.servlet.MultipartRequest?
+ * INCOMPLETE: How to mock <code>com.oreilly.servlet.MultipartRequest</code>?
  * @author Juergen Hoeller
  * @since 08.10.2003
  */
@@ -73,7 +73,7 @@ public class CosMultipartResolverTests extends TestCase {
 			fail("the http request was mocked, expected a MultipartException");
 		} 
 		catch (MultipartException e){
-			//expected
+			// expected
 		}
 		new File("bogusTmpDir").delete();
 	}
@@ -85,4 +85,5 @@ public class CosMultipartResolverTests extends TestCase {
 		assertTrue(new File("bogusTmpDir").exists());
 		new File("bogusTmpDir").delete();
 	}
+
 }
