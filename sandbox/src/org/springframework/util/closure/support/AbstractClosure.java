@@ -51,6 +51,4 @@ public abstract class AbstractClosure extends AlgorithmsAccessor
     public final void forEach(Iterator it) {
         forEach(it, this);
     }
-
 }
-
