@@ -31,28 +31,36 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Resource location;
-
 	private Properties properties;
+
+	private Resource[] locations;
 
 	private boolean singleton = true;
 
 	private Properties singletonInstance;
 
-	/**
-	 * Set the location of the properties file as class path resource,
-	 * e.g. "/myprops.properties".
-	 */
-	public void setLocation(Resource location) {
-		this.location = location;
-	}
 
 	/**
-	 * Set local properties on this FactoryBean, e.g. via the "props" tag
-	 * in XML bean definitions.
+	 * Set local properties, e.g. via the "props" tag in XML bean definitions.
+	 * These can be considered defaults, to be overridden by properties
+	 * loaded from files.
 	 */
 	public void setProperties(Properties properties) {
 		this.properties = properties;
+	}
+
+	/**
+	 * Set a location of a properties file to be loaded.
+	 */
+	public void setLocation(Resource location) {
+		this.locations = new Resource[] {location};
+	}
+
+	/**
+	 * Set locations of properties files to be loaded.
+	 */
+	public void setLocations(Resource[] locations) {
+		this.locations = locations;
 	}
 
 	/**
@@ -67,13 +75,14 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	 * Create a singleton instance on initialization if in singleton mode.
 	 */
 	public void afterPropertiesSet() throws IOException {
-		if (this.location == null && this.properties == null) {
-			throw new IllegalArgumentException("Either location or properties must be set");
+		if (this.properties == null && this.locations == null) {
+			throw new IllegalArgumentException("Either properties or location(s) must be set");
 		}
 		if (this.singleton) {
 			this.singletonInstance = mergeProperties();
 		}
 	}
+
 
 	/**
 	 * Return either singleton instance or newly created instance,
@@ -95,9 +104,12 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	 * loaded properties and properties set on this FactoryBean.
 	 */
 	protected Properties mergeProperties() throws IOException {
-		Properties result = (this.location != null) ? loadProperties() : new Properties();
+		Properties result = new Properties();
 		if (this.properties != null) {
 			result.putAll(this.properties);
+		}
+		if (this.locations != null) {
+			result.putAll(loadProperties());
 		}
 		return result;
 	}
@@ -109,16 +121,19 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	 * @throws java.io.IOException in case of I/O errors.
 	 */
 	protected Properties loadProperties() throws IOException {
-		logger.info("Loading properties file from class path location [" + this.location + "]");
-		Properties properties = new Properties();
-		InputStream is = this.location.getInputStream();
-		try {
-			properties.load(is);
+		Properties props = new Properties();
+		for (int i = 0; i < this.locations.length; i++) {
+			Resource location = this.locations[i];
+			logger.info("Loading props file from " + location);
+			InputStream is = location.getInputStream();
+			try {
+				props.load(is);
+			}
+			finally {
+				is.close();
+			}
 		}
-		finally {
-			is.close();
-		}
-		return properties;
+		return props;
 	}
 
 	public Class getObjectType() {
