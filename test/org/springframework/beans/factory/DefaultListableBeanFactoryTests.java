@@ -44,7 +44,7 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
  * ListableBeanFactoryTestSuite tests basic functionality-
  * @author Rod Johnson
  */
-public class DefaultListableBeanFactoryTestSuite extends TestCase {
+public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testUnreferencedSingletonWasInstantiated() {
 		KnowsIfInstantiated.clearInstantiationRecord();
@@ -571,7 +571,6 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
 		lbf.registerBeanDefinition("rod", bd);
 		assertEquals(1, lbf.getBeanDefinitionCount());
-		String name = "kerry";
 		// Depends on age, name and spouse (TestBean)
 		Object registered = lbf.autowire(
 		    DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, true);
