@@ -30,7 +30,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailTestSuite.java,v 1.6 2003-10-08 08:42:13 jhoeller Exp $
+ * @version $Id: MailTestSuite.java,v 1.7 2003-10-10 07:06:11 jhoeller Exp $
  */
 public class MailTestSuite extends TestCase {
 
@@ -39,6 +39,7 @@ public class MailTestSuite extends TestCase {
 		message.setFrom("me@mail.org");
 		message.setTo("you@mail.org");
 		message.setCc(new String[] {"he@mail.org", "she@mail.org"});
+		message.setBcc(new String[] {"us@mail.org", "them@mail.org"});
 		message.setSubject("my subject");
 		message.setText("my text");
 
@@ -47,6 +48,9 @@ public class MailTestSuite extends TestCase {
 		List ccs = Arrays.asList(message.getCc());
 		assertTrue(ccs.contains("he@mail.org"));
 		assertTrue(ccs.contains("she@mail.org"));
+		List bccs = Arrays.asList(message.getBcc());
+		assertTrue(bccs.contains("us@mail.org"));
+		assertTrue(bccs.contains("them@mail.org"));
 		assertEquals("my subject", message.getSubject());
 		assertEquals("my text", message.getText());
 
@@ -56,6 +60,9 @@ public class MailTestSuite extends TestCase {
 		ccs = Arrays.asList(messageCopy.getCc());
 		assertTrue(ccs.contains("he@mail.org"));
 		assertTrue(ccs.contains("she@mail.org"));
+		bccs = Arrays.asList(message.getBcc());
+		assertTrue(bccs.contains("us@mail.org"));
+		assertTrue(bccs.contains("them@mail.org"));
 		assertEquals("my subject", messageCopy.getSubject());
 		assertEquals("my text", messageCopy.getText());
 	}
@@ -70,6 +77,7 @@ public class MailTestSuite extends TestCase {
 		simpleMessage.setFrom("me@mail.org");
 		simpleMessage.setTo("you@mail.org");
 		simpleMessage.setCc(new String[] {"he@mail.org", "she@mail.org"});
+		simpleMessage.setBcc(new String[] {"us@mail.org", "them@mail.org"});
 		simpleMessage.setSubject("my subject");
 		simpleMessage.setText("my text");
 		sender.send(simpleMessage);
@@ -91,6 +99,10 @@ public class MailTestSuite extends TestCase {
 		assertEquals(2, ccs.size());
 		assertEquals("he@mail.org", ((InternetAddress) ccs.get(0)).getAddress());
 		assertEquals("she@mail.org", ((InternetAddress) ccs.get(1)).getAddress());
+		List bccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.BCC));
+		assertEquals(2, bccs.size());
+		assertEquals("us@mail.org", ((InternetAddress) bccs.get(0)).getAddress());
+		assertEquals("them@mail.org", ((InternetAddress) bccs.get(1)).getAddress());
 		assertEquals("my subject", sentMessage.getSubject());
 		assertEquals("my text", sentMessage.getContent());
 	}
