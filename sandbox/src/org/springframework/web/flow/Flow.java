@@ -15,10 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.OptionalDataException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -77,7 +73,7 @@ import org.springframework.util.ToStringCreator;
  * @see org.springframework.web.flow.config.AbstractFlowBuilder
  * @see org.springframework.web.flow.config.XmlFlowBuilder
  */
-public class Flow implements Serializable {
+public class Flow {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -345,15 +341,6 @@ public class Flow implements Serializable {
 	 */
 	public FlowExecution createExecution() {
 		return new FlowExecutionStack(this);
-	}
-
-	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
-		in.defaultReadObject();
-		Iterator it = statesIterator();
-		while (it.hasNext()) {
-			AbstractState state = (AbstractState)it.next();
-			state.setFlow(this);
-		}
 	}
 
 	public String toString() {

@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.io.Serializable;
-
 /**
  * Provides management information about an ongoing flow execution.
  * <p>
@@ -26,7 +24,7 @@ import java.io.Serializable;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowExecutionInfo extends FlowModel, Serializable {
+public interface FlowExecutionInfo extends FlowModel {
 
 	/**
 	 * Return the id of this flow execution. This is not a human readable flow

@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.io.Serializable;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,7 +37,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class Transition implements Serializable {
+public class Transition {
 
 	protected final Log logger = LogFactory.getLog(Transition.class);
 
@@ -58,12 +56,12 @@ public class Transition implements Serializable {
 	/**
 	 * The source state that owns this transition.
 	 */
-	private transient TransitionableState sourceState;
+	private TransitionableState sourceState;
 
 	/**
 	 * The target state that this transition should transition to when executed.
 	 */
-	private transient AbstractState targetState;
+	private AbstractState targetState;
 
 	/**
 	 * The state id for the target state; needed to lazily resolve the target
@@ -154,8 +152,8 @@ public class Transition implements Serializable {
 			return WILDCARD_EVENT_CRITERIA;
 		}
 		else {
-			//implementation note: this inner class is not a class constant
-			//because we need the eventId
+			// implementation note: this inner class is not a class constant
+			// because we need the eventId
 			return new AbstractConstraint() {
 				public boolean test(Object argument) {
 					return eventId.equals(argument);
@@ -235,5 +233,4 @@ public class Transition implements Serializable {
 		return new ToStringCreator(this).append("eventIdCriteria", eventIdCriteria).append("toState", targetStateId)
 				.toString();
 	}
-
 }

@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
@@ -220,8 +219,8 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Returns an iterator that lists the set of actions to execute for this
-	 * state. Both named and unnamed actions will be returned, but all
-	 * are wrapped as {@link ActionState.NamedAction} objects.
+	 * state. Both named and unnamed actions will be returned, but all are
+	 * wrapped as {@link ActionState.NamedAction} objects.
 	 */
 	protected Iterator namedActionIterator() {
 		return this.namedActions.iterator();
@@ -329,7 +328,7 @@ public class ActionState extends TransitionableState {
 	 * @author Keith Donald
 	 * @author Erwin Vervaet
 	 */
-	protected static class NamedAction implements Serializable {
+	protected static class NamedAction {
 
 		protected final Log logger = LogFactory.getLog(NamedAction.class);
 
@@ -392,7 +391,8 @@ public class ActionState extends TransitionableState {
 
 		/**
 		 * Get the event id to be used as grounds for a transition in the
-		 * containing state, based on given result returned from action execution.
+		 * containing state, based on given result returned from action
+		 * execution.
 		 * <p>
 		 * If the wrapped action is named, the name will be used as a qualifier
 		 * (e.g. "myAction.success").

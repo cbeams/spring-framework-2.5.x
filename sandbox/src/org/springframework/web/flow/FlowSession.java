@@ -15,6 +15,10 @@
  */
 package org.springframework.web.flow;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,20 +39,20 @@ import org.springframework.web.flow.support.FlowUtils;
 
 /**
  * A single client session instance for a <code>Flow</code> participating in a
- * <code>FlowExecution</code>. Also a <code>MutableFlowModel</code>,
- * as the flow session acts as a "flow-scope" data model.
+ * <code>FlowExecution</code>. Also a <code>MutableFlowModel</code>, as
+ * the flow session acts as a "flow-scope" data model.
  * <p>
  * The stack of executing flow sessions (managed within
  * <code>FlowExecutionStack</code>) represents the complete state of an
  * ongoing flow execution.
  * <p>
- * A flow session will go through several statuses during its lifecycle. Initially
- * it will be {@link FlowSessionStatus#CREATED}. Once the flow session
- * is activated in a flow execution, it becomes {@link FlowSessionStatus#ACTIVE}.
- * If the flow session would spawn a sub flow session, it will become
- * {@link FlowSessionStatus#SUSPENDED} untill the sub flow returns (ends).
- * When the flow session is ended by the flow execution, its status becomes
- * {@link FlowSessionStatus#ENDED}, ending its lifecycle.
+ * A flow session will go through several statuses during its lifecycle.
+ * Initially it will be {@link FlowSessionStatus#CREATED}. Once the flow
+ * session is activated in a flow execution, it becomes
+ * {@link FlowSessionStatus#ACTIVE}. If the flow session would spawn a sub flow
+ * session, it will become {@link FlowSessionStatus#SUSPENDED} untill the sub
+ * flow returns (ends). When the flow session is ended by the flow execution,
+ * its status becomes {@link FlowSessionStatus#ENDED}, ending its lifecycle.
  * 
  * @see org.springframework.web.flow.FlowExecution
  * @see org.springframework.web.flow.FlowExecutionStack
@@ -58,17 +62,19 @@ import org.springframework.web.flow.support.FlowUtils;
  */
 public class FlowSession implements MutableFlowModel, Serializable {
 
+	private static final long serialVersionUID = 3834024745107862072L;
+
 	protected final Log logger = LogFactory.getLog(FlowSession.class);
 
 	/**
 	 * The flow definition (a singleton)
 	 */
-	private Flow flow;
+	private transient Flow flow;
 
 	/**
 	 * The current state of this flow session.
 	 */
-	private AbstractState currentState;
+	private transient AbstractState currentState;
 
 	/**
 	 * The session status; may be CREATED, ACTIVE, SUSPENDED, or ENDED.
@@ -132,7 +138,8 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	}
 
 	/**
-	 * Returns the id of the state that is currently active in this flow session.
+	 * Returns the id of the state that is currently active in this flow
+	 * session.
 	 */
 	public String getCurrentStateId() {
 		return currentState.getId();
@@ -147,8 +154,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 
 	/**
 	 * Set the current state of this flow session.
-	 * @param newState The state that is currently active in this flow
-	 *        session
+	 * @param newState The state that is currently active in this flow session
 	 */
 	protected void setCurrentState(AbstractState newState) {
 		Assert.notNull(newState, "The newState is required");
@@ -181,7 +187,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
 	}
 
-	//methods implementing FlowModel
+	// methods implementing FlowModel
 
 	/**
 	 * Returns all the attributes stored in this flow session as a model map.
@@ -278,7 +284,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		return filteredEntries;
 	}
 
-	//methods implementing MutableFlowModel
+	// methods implementing MutableFlowModel
 
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (logger.isDebugEnabled()) {
@@ -313,6 +319,16 @@ public class FlowSession implements MutableFlowModel, Serializable {
 
 	public void endTransaction() {
 		FlowUtils.clearToken(this, getTransactionTokenAttributeName());
+	}
+
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.writeObject(flow.getId());
+		out.writeObject(currentState.getId());
+	}
+
+	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
+		String flowId = (String)in.readObject();
+		String currentStateId = (String)in.readObject();
 	}
 
 	public String toString() {

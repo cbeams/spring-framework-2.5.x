@@ -15,6 +15,10 @@
  */
 package org.springframework.web.flow;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,6 +54,8 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class FlowExecutionStack implements FlowExecution, Serializable {
 
+	private static final long serialVersionUID = 3258688806151469104L;
+
 	protected final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	/**
@@ -61,7 +67,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 * The execution's root flow; the top level flow that acts as the starting
 	 * point for this flow execution.
 	 */
-	private Flow rootFlow;
+	private transient Flow rootFlow;
 
 	/**
 	 * The stack of active, currently executing flow sessions. As subflows are
@@ -86,7 +92,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 * A thread-safe listener list, holding listeners monitoring the lifecycle
 	 * of this flow execution.
 	 */
-	private FlowExecutionListenerList listenerList = new FlowExecutionListenerList();
+	private transient FlowExecutionListenerList listenerList = new FlowExecutionListenerList();
 
 	/**
 	 * Create a new flow execution executing the provided flow.
@@ -100,14 +106,14 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		Assert.notNull(rootFlow, "The root flow definition is required");
 		this.id = new RandomGuid().toString();
 		this.rootFlow = rootFlow;
-		//add the list of default execution listeners configured for the flow
+		// add the list of default execution listeners configured for the flow
 		listenerList.add(rootFlow.getFlowExecutionListenerList());
 		if (logger.isDebugEnabled()) {
 			logger.debug("Created new client execution for flow '" + rootFlow.getId() + "' with id '" + getId() + "'");
 		}
 	}
 
-	//methods implementing FlowExecutionInfo
+	// methods implementing FlowExecutionInfo
 
 	public String getId() {
 		return id;
@@ -234,7 +240,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		throw new IllegalArgumentException("No such session for flow '" + flowId + "'");
 	}
 
-	//methods implementing FlowExecution
+	// methods implementing FlowExecution
 
 	public FlowExecutionListenerList getListenerList() {
 		return listenerList;
@@ -306,7 +312,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return view;
 	}
 
-	//flow session management helpers
+	// flow session management helpers
 
 	/**
 	 * Spawn a new sub flow in this flow execution stack. This will
@@ -458,7 +464,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 */
 	public Map getModel() {
 		Map model = new HashMap(getActiveFlowSession().getModel());
-		//the flow execution itself is available in the model
+		// the flow execution itself is available in the model
 		model.put(getFlowExecutionAttributeName(), this);
 		// these are added for convenience for views that aren't easily
 		// javabean aware
@@ -467,7 +473,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return model;
 	}
 
-	//methods implementing FlowModel
+	// methods implementing FlowModel
 
 	public Object getAttribute(String attributeName) {
 		if (attributeName.equals(getFlowExecutionAttributeName())) {
@@ -547,7 +553,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return getActiveFlowSession().findAttributes(criteria);
 	}
 
-	//methods implementing MutableFlowModel
+	// methods implementing MutableFlowModel
 
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (getFlowExecutionAttributeName().equals(attributeName)) {
@@ -581,7 +587,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		getActiveFlowSession().endTransaction();
 	}
 
-	//lifecycle event management
+	// lifecycle event management
 
 	/**
 	 * Notify all interested listeners that flow execution has started.
@@ -702,6 +708,16 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 				((FlowExecutionListener)o).ended(FlowExecutionStack.this, endingRootFlowSession);
 			}
 		});
+	}
+
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.writeObject(rootFlow.getId());
+		out.writeObject(executingFlowSessions);
+	}
+
+	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
+		String rootFlowId = (String)in.readObject();
+		this.executingFlowSessions = (Stack)in.readObject();
 	}
 
 	public String toString() {
