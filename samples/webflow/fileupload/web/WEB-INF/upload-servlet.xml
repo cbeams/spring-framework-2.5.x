@@ -3,11 +3,6 @@
 
 <beans>
 
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
-		<property name="suffix"><value>.jsp</value></property>
-	</bean>
-	
 	<!-- 
 		support for multipart requests using commons file upload, make sure you have the fileupload jar
 	    in your classpath
@@ -17,22 +12,27 @@
 	<bean id="frontController" name="/upload.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="flowExecutionManager">
 			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow"><ref bean="Upload"/></property>
+				<property name="flow" ref="upload"/>
 			</bean>
 		</property>
 	</bean>
 	
-	<bean id="Upload" class="org.springframework.web.flow.config.FlowFactoryBean">
+	<bean id="upload" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource"><value>/WEB-INF/upload-flow.xml</value></property>
+				<property name="resource" value="/WEB-INF/upload-flow.xml"/>
 			</bean>
 		</property>
 	</bean>
 	
-	<bean id="Upload.process" class="org.springframework.samples.fileupload.web.flow.ProcessUploadAction">
-		<property name="formObjectName"><value>file</value></property>
-		<property name="formObjectClass"><value>org.springframework.samples.fileupload.web.flow.FileUploadBean</value></property>
+	<bean id="upload.process" class="org.springframework.samples.fileupload.web.flow.ProcessUploadAction">
+		<property name="formObjectName" value="file"/>
+		<property name="formObjectClass" value="org.springframework.samples.fileupload.web.flow.FileUploadBean"/>
+	</bean>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
 	</bean>
 	
 </beans>

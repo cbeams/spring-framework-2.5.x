@@ -18,7 +18,7 @@
 	<bean id="searchFrontController" name="/search.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="flowExecutionManager">
 			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow"><ref bean="person.Search"/></property>
+				<property name="flow" ref="person.Search"/>
 			</bean>
 		</property>
 	</bean>
@@ -27,7 +27,7 @@
 	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource"><value>/WEB-INF/search-flow.xml</value></property>
+				<property name="resource" value="/WEB-INF/search-flow.xml"/>
 			</bean>
 		</property>
 	</bean>
@@ -46,9 +46,9 @@
 	-->
 	
 	<bean id="person.Search.criteria.formAction" class="org.springframework.web.flow.action.FormAction">
-		<property name="formObjectName"><value>query</value></property>
-		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.PhoneBookQuery</value></property>
-		<property name="formObjectScopeAsString"><value>flow</value></property>
+		<property name="formObjectName" value="query"/>
+		<property name="formObjectClass" value="org.springframework.samples.phonebook.domain.PhoneBookQuery"/>
+		<property name="formObjectScopeAsString" value="flow"/>
 		<property name="validator">
 			<bean id="queryValidator" class="org.springframework.samples.phonebook.domain.PhoneBookQueryValidator"/>
 		</property>
@@ -61,7 +61,7 @@
 	     "id" request parameter is mapped to the "id" attribute and converted
 	     to a java.lang.Long in the target flow model!  -->
 	<bean id="person.Search.id.set" class="org.springframework.web.flow.action.EventParameterMapperAction">
-		<property name="mapping"><value>id,java.lang.Long</value></property>
+		<property name="mapping" value="id,java.lang.Long"/>
 		<property name="targetScopeAsString"><value>flow</value></property>
 	</bean>
 
@@ -82,7 +82,7 @@
 	<bean id="detailFrontController" name="/detail.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="flowExecutionManager">
 			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow"><ref bean="person.Detail"/></property>
+				<property name="flow" ref="person.Detail"/>
 			</bean>
 		</property>
 	</bean>
@@ -91,7 +91,7 @@
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource"><value>/WEB-INF/detail-flow.xml</value></property>
+				<property name="resource" ref="/WEB-INF/detail-flow.xml"/>
 			</bean>
 		</property>
 	</bean>
@@ -123,10 +123,8 @@
 	     "id" request parameter is mapped to the "colleagueId" attribute and converted
 	     to a java.lang.Long in the target flow model!  -->
 	<bean id="person.Detail.colleagueId.set" class="org.springframework.web.flow.action.EventParameterMapperAction">
-		<property name="mapping">
-			<value>id->colleagueId,java.lang.Long</value>
-		</property>
-		<property name="targetScopeAsString"><value>flow</value></property>
+		<property name="mapping" value="id->colleagueId,java.lang.Long"/>
+		<property name="targetScopeAsString" value="flow"/>
 	</bean>
 
 	<!-- The model mapper maps attributes in a parent flow down to a spawning child subflow
@@ -142,8 +140,8 @@
 	</bean>
 
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
-		<property name="suffix"><value>.jsp</value></property>
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
 	</bean>
 
 </beans>

@@ -3,25 +3,20 @@
 
 <beans>
 
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
-		<property name="suffix"><value>.jsp</value></property>
-	</bean>
-
 	<bean id="frontController" name="/itemList.htm" class="org.springframework.web.flow.mvc.FlowController">
 		 <!-- serialize all operations within a session -->
-		<property name="synchronizeOnSession"><value>true</value></property>
+		<property name="synchronizeOnSession" value="true"/>
 		<property name="flowExecutionManager">
 			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow"><ref bean="ItemList"/></property>
+				<property name="flow" ref="itemList"/>
 			</bean>
 		</property>
 	</bean>
 	
-	<bean id="ItemList" class="org.springframework.web.flow.config.FlowFactoryBean">
+	<bean id="itemList" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource"><value>/WEB-INF/itemList-flow.xml</value></property>
+				<property name="resource" value="/WEB-INF/itemList-flow.xml"/>
 			</bean>
 		</property>
 	</bean>
@@ -30,4 +25,9 @@
 	
 	<bean id="item.add" class="org.springframework.samples.itemlist.web.flow.AddItemAction"/>
 	
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+		
 </beans>

@@ -13,7 +13,7 @@
 			Set cacheSeconds to a small, non 0, value so you can do ctrl-N to open an new
 			window and experiment with the continuations stuff.
 		-->
-		<property name="cacheSeconds"><value>5</value></property>
+		<property name="cacheSeconds" value="5"/>
 		<property name="flowExecutionManager" ref="flowExecutionManager"/>
 	</bean>
 

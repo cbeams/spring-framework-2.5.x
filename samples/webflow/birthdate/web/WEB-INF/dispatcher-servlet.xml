@@ -3,27 +3,27 @@
 
 <beans>
 
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
-		<property name="suffix"><value>.jsp</value></property>
-	</bean>
-
-	<bean id="birthDate" name="/birthDate.do" class="org.springframework.web.flow.mvc.FlowController">
+	<bean id="birthDateController" name="/birthDate.do" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="flowExecutionManager">
 			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow"><ref bean="BirthDate"/></property>
+				<property name="flow" ref="birthDate"/>
 			</bean>
 		</property>
 	</bean>
 	
-	<bean id="BirthDate" class="org.springframework.web.flow.config.FlowFactoryBean">
+	<bean id="birthDate" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource"><value>/WEB-INF/birthDate-flow.xml</value></property>
+				<property name="resource" value="/WEB-INF/birthDate-flow.xml"/>
 			</bean>
 		</property>
 	</bean>
 	
 	<bean id="birthDateFormAction" class="org.springframework.samples.birthdate.web.flow.action.BirthDateFormAction"/>
-	
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
+		<property name="suffix"><value>.jsp</value></property>
+	</bean>
+
 </beans>
