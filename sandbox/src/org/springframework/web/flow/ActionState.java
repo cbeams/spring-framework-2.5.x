@@ -58,7 +58,6 @@ public class ActionState extends TransitionableState {
 	protected void addActionBeans(Action[] actions) {
 		for (int i = 0; i < actions.length; i++) {
 			this.actions.add(actions[i]);
-			;
 		}
 	}
 

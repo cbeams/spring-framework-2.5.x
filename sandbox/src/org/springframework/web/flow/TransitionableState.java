@@ -56,7 +56,7 @@ public abstract class TransitionableState extends AbstractState {
 
 	protected void add(Transition transition) {
 		transition.setSourceState(this);
-		transitions.add(transition);
+		this.transitions.add(transition);
 	}
 
 	protected void addAll(Transition[] transitions) {
@@ -130,7 +130,6 @@ public abstract class TransitionableState extends AbstractState {
 	}
 
 	protected void createToString(ToStringCreator creator) {
-		creator.append("transitions", transitions);
+		creator.append("transitions", this.transitions);
 	}
-
 }
