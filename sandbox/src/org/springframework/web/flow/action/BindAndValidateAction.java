@@ -28,7 +28,6 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
@@ -184,7 +183,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	}
 
 	/**
-	 *  
+	 * 
 	 */
 	public void afterPropertiesSet() {
 		if (this.validators != null) {
@@ -197,7 +196,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	}
 
 	/*
-	 *  
+	 * 
 	 */
 	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws ObjectRetrievalFailureException, IllegalStateException {

@@ -269,18 +269,6 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName, Errors.class);
 	}
 
-	/**
-	 * @param model
-	 * @param attributeName
-	 * @param attributeValue
-	 * @return
-	 */
-	protected MutableAttributesAccessor export(MutableAttributesAccessor model, String attributeName,
-			Object attributeValue) {
-		model.setAttribute(attributeName, attributeValue);
-		return model;
-	}
-
 	/*
 	 * 
 	 */

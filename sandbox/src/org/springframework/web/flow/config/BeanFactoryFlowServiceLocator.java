@@ -8,6 +8,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
@@ -66,6 +67,9 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 
 	public Flow getFlow(String flowDefinitionId, Class requiredBuilderImplementationClass)
 			throws FlowServiceLookupException {
+		if (StringUtils.hasText(flowDefinitionId)) {
+			return getFlow(flowDefinitionId);
+		}
 		try {
 			String flowFactoryBeanId = "&" + flowDefinitionId;
 			FlowFactoryBean factoryBean = (FlowFactoryBean)getBeanFactory().getBean(flowFactoryBeanId,
