@@ -65,123 +65,126 @@
 		</para>
 	</sect1>
 	
-	<sect1 id="beans-definition">
-		<title>The BeanDefinition</title>
-		<para>
-			As already stated in the introduction, bean definitions describe beans managed by a
-			<literal>BeanFactory</literal> or <literal>ApplicationContext</literal>. Bean definitions
-			contain the following information:
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						The beanclass, which is the actual implementation of the bean related to the
-						bean definition
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Bean behavioral configuration elements, which state how the bean should
-						behave in the container (i.e. prototype or singleton, autowiring mode, 
-						dependency checking mode, initialization and destruction methods)
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Properties being configuration data for the bean. You could think of the number
-						of connections to use in a bean that manages a connection pool
-						(either specified as properties or as constructor arguments), or
-						the class that should be used to create the connection pool
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Other beans your bean needs to do its work, i.e. <emphasis>collaborators</emphasis>
-						(also specified as properties or as constructor arguments)
-					</para>    					
-				</listitem>
-			</itemizedlist>
-		</para>
-		<para>
-			In the list above, we mentioned the use of constructor arguments, as well as setters.
-			Spring support two types of IoC, i.e. type 2 and type 3. What that means is that you
-			use both constructor arguments to specify your dependencies and properties as well
-			as setters and getters.			
-		</para>
-		<para>				
-				The concepts listed above, directly translate to a set of elements the bean definition consists
-				of. These elements are listed below, along with a reference to further documentation about each
-				of them.
-
-				<table frame="all">
-		            <title>Bean definition explanation</title>
-		            <tgroup cols="2">
-		                <colspec colname="c1" colwidth="2*"/>
-		                <colspec colname="c2" colwidth="4*"/>
-		                <thead>
-		                    <row>
-		                        <entry>Feature</entry>
-		                        <entry>More info</entry>
-		                    </row>
-		                </thead>
-			            <tbody>
-				            <row>
-				            	<entry>class</entry>
-				            	<entry><xref linkend="beans-factory-class"/></entry>
-				            </row>
-				            <row>
-								<entry>singleton or prototype</entry>
-								<entry><xref linkend="beans-factory-modes"/></entry>
-				            </row>
-					        <row>
-					        	<entry>bean properties</entry>
-					        	<entry><xref linkend="beans-factory-collaborators"/></entry>
-						    </row>
-					        <row>
-					        	<entry>constructor arguments</entry>
-					        	<entry><xref linkend="beans-factory-collaborators"/></entry>
-						    </row>
-				            <row>
-				            	<entry>autowiring mode</entry>
-				            	<entry><xref linkend="beans-factory-autowire"/></entry>
-					        </row>
-				            <row>
-				            	<entry>dependency checking mode</entry>
-				            	<entry><xref linkend="beans-factory-dependencies"/></entry>
-				            </row>
-					        <row>
-					        	<entry>initialization method</entry>
-					        	<entry><xref linkend="beans-factory-lifecycle"/></entry>
-						    </row>
-					        <row>
-					        	<entry>destruction method</entry>
-					        	<entry><xref linkend="beans-factory-lifecycle"/></entry>
-						    </row>
-				        </tbody>
-			        </tgroup>
-		        </table>
-		    </para>
-	</sect1>        
+	<sect1 id="beans-basics">
+		<title>BeanFactory and BeanDefinitions - the basics</title>
+	
+		<sect2 id="beans-definition">
+			<title>The BeanDefinition</title>
+			<para>
+				As already stated in the introduction, bean definitions describe beans managed by a
+				<literal>BeanFactory</literal> or <literal>ApplicationContext</literal>. Bean definitions
+				contain the following information:
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							The beanclass, which is the actual implementation of the bean related to the
+							bean definition
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Bean behavioral configuration elements, which state how the bean should
+							behave in the container (i.e. prototype or singleton, autowiring mode, 
+							dependency checking mode, initialization and destruction methods)
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Properties being configuration data for the bean. You could think of the number
+							of connections to use in a bean that manages a connection pool
+							(either specified as properties or as constructor arguments), or
+							the class that should be used to create the connection pool
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Other beans your bean needs to do its work, i.e. <emphasis>collaborators</emphasis>
+							(also specified as properties or as constructor arguments)
+						</para>    					
+					</listitem>
+				</itemizedlist>
+			</para>
+			<para>
+				In the list above, we mentioned the use of constructor arguments, as well as setters.
+				Spring support two types of IoC, i.e. type 2 and type 3. What that means is that you
+				use both constructor arguments to specify your dependencies and properties as well
+				as setters and getters.			
+			</para>
+			<para>				
+					The concepts listed above, directly translate to a set of elements the bean definition consists
+					of. These elements are listed below, along with a reference to further documentation about each
+					of them.
+	
+					<table frame="all">
+						<title>Bean definition explanation</title>
+						<tgroup cols="2">
+							<colspec colname="c1" colwidth="2*"/>
+							<colspec colname="c2" colwidth="4*"/>
+							<thead>
+								<row>
+									<entry>Feature</entry>
+									<entry>More info</entry>
+								</row>
+							</thead>
+							<tbody>
+								<row>
+									<entry>class</entry>
+									<entry><xref linkend="beans-factory-class"/></entry>
+								</row>
+								<row>
+									<entry>singleton or prototype</entry>
+									<entry><xref linkend="beans-factory-modes"/></entry>
+								</row>
+								<row>
+									<entry>bean properties</entry>
+									<entry><xref linkend="beans-factory-collaborators"/></entry>
+								</row>
+								<row>
+									<entry>constructor arguments</entry>
+									<entry><xref linkend="beans-factory-collaborators"/></entry>
+								</row>
+								<row>
+									<entry>autowiring mode</entry>
+									<entry><xref linkend="beans-factory-autowire"/></entry>
+								</row>
+								<row>
+									<entry>dependency checking mode</entry>
+									<entry><xref linkend="beans-factory-dependencies"/></entry>
+								</row>
+								<row>
+									<entry>initialization method</entry>
+									<entry><xref linkend="beans-factory-lifecycle"/></entry>
+								</row>
+								<row>
+									<entry>destruction method</entry>
+									<entry><xref linkend="beans-factory-lifecycle"/></entry>
+								</row>
+							</tbody>
+						</tgroup>
+					</table>
+				</para>
+		</sect2>        
     
-    <sect1 id="beans-factory">
-    	<title>The BeanFactory</title>
-    	<para>
-			The BeanFactory is the actual <emphasis>container</emphasis> (although we don't
-			like to use the word container too much, since it kind of sounds quite heavy),
-			containing and managing your beans. A BeanFactory loads BeanDefinitions and
-			- upon request - instantiate one (or possible more) instances of the bean in 
-			question and manages it by calling lifecycle methods.
-    	</para>
-				    
-		<para>
-			All of the features described in <xref linkend="beans-definition"/> will be 
-			configurable for each of your beans using one of the out-of-the-box BeanFactory 
-			implementations. In the example below we will use the most popular BeanFactory
-			to illustrate the behavior, i.e. the <literal>XmlBeanFactory</literal>. More information 
-			on the XmlBeanFactory and other implementations can be found further ahead.
-		</para>
-	</sect1>
+		<sect2 id="beans-factory">
+			<title>The BeanFactory</title>
+			<para>
+				The BeanFactory is the actual <emphasis>container</emphasis> (although we don't
+				like to use the word container too much, since it kind of sounds quite heavy),
+				containing and managing your beans. A BeanFactory loads BeanDefinitions and
+				- upon request - instantiate one (or possible more) instances of the bean in 
+				question and manages it by calling lifecycle methods.
+			</para>
+						
+			<para>
+				All of the features described in <xref linkend="beans-definition"/> will be 
+				configurable for each of your beans using one of the out-of-the-box BeanFactory 
+				implementations. In the example below we will use the most popular BeanFactory
+				to illustrate the behavior, i.e. the <literal>XmlBeanFactory</literal>. More information 
+				on the XmlBeanFactory and other implementations can be found further ahead.
+			</para>
+		</sect2>
 		
-		<sect1 id="beans-factory-class">
+		<sect2 id="beans-factory-class">
 			<title>The bean class</title>
 			<para>
 				Of course you need to specify the actual class of your bean, that should be obvious.
@@ -206,18 +209,18 @@
 <bean name="anotherExample" class="examples.ExampleBeanTwo"/>
 				]]></programlisting>
 			</para>
-		</sect1>
+		</sect2>
 		
-		<sect1 id="beans-beanname">
+		<sect2 id="beans-beanname">
 			<title>The bean identifiers (<literal>id</literal> and <literal>name</literal>)</title>
 			<para>
 				Somehow of course you need to identifiy your beans. This can be done by a name
 				or an id. The <literal>id</literal> is to be uniquely defined across all beans
 				in a BeanFactory.
 			</para>
-		</sect1>
+		</sect2>
     	
-    	<sect1 id="beans-factory-modes">
+    	<sect2 id="beans-factory-modes">
     		<title>To singleton or not to singleton</title>
     		<para>
     			Beans exist in two types, singletons and prototypes. When a bean is a singleton,
@@ -246,9 +249,13 @@
 <bean name="yetAnotherExample" class="examples.ExampleBeanTwo" singleton="true"/>
 				]]></programlisting>
     		</para>
-		</sect1>
+		</sect2>
+	</sect1>
+	
+	<sect1 id="beans-dependencies">		
+		<title>Properties, dependencies and autowiring</title>
 		
-		<sect1 id="beans-factory-collaborators">
+		<sect2 id="beans-factory-collaborators">
 			<title>Setting beans properties and collaborators</title>
 			<para>
 				Inversion of Control is already referred to as <emphasis>Dependency Injection</emphasis>.
@@ -400,9 +407,9 @@ public class ExampleBean {
 				arguments to the constructor of the <literal>ExampleBean</literal>.	
 			</para>
 			
-		</sect1>
+		</sect2>
 		
-		<sect1 id="beans-factory-autowire">	
+		<sect2 id="beans-factory-autowire">	
 			<title>Autowiring collaborators</title>
 			<para>
 				Spring has autowire capabilities, which means it's possible to automatically let Spring
@@ -461,9 +468,9 @@ public class ExampleBean {
 		        autowiring beacuse it removes the transparency and the structure from your collaborating
 		        classes.</emphasis>
 			</para>
-		</sect1>
+		</sect2>
 		
-		<sect1 id="beans-factory-dependencies">
+		<sect2 id="beans-factory-dependencies">
 			<title>Checking for dependencies</title>
 			<para>
 				Spring also offers the capability for checking required dependencies of your beans.
@@ -504,17 +511,182 @@ public class ExampleBean {
 			        </tgroup>
 		        </table>
 			</para>
-		</sect1>
+		</sect2>
+	</sect1>
 		
-		<sect1 id="beans-factory-lifecycle">
-	    	<title>Bean Nature and Lifecycle Features</title>
-	    	<para>
-	    		Spring provides a couple of marker interfaces and some other features that allow
-	    		customizing the nature and the lifecycle of a bean managed by a beanfactory. 
-	    		Each of the marker interfaces as well as the other features and the the functionality
-	    		they offer are described below.
-	    	</para>
-	    	
+	<sect1 id="beans-factory-nature">
+	   	<title>Customizing the nature of a bean</title>
+	   	
+	   	<sect2 id="beans-factory-lifecycle">
+	   		<title>Lifecycle interfaces</title>
+	   		
+			<para>
+				Spring provides a couple of marker interfaces to change the behavior of your
+				bean in the BeanFactory. They include <literal>InitializingBean</literal> and
+				for example <literal>DisposableBean</literal>. Implementing those will for instance
+				result in the BeanFactory calling <literal>afterPropertiesSet()</literal> for the former and
+				<literal>destroy()</literal> for the latter to allow you to do things upon initialization and destruction.	    		
+			</para>
+			<para>
+				Internally, Spring uses <literal>BeanPostProcessors</literal> to process any marker
+				interfaces it can find and call the appropriate methods. If you need custom features
+				or other lifecycle behavior Spring doesn't offer out-of-the-box, you can implement
+				a <literal>BeanFactoryPostProcessor</literal> yourself. More information about this
+				can be found in <xref linkend="beans-factory-postprocessor"/>.
+			</para>
+			<para>
+				All the different lifecycle marker interfaces are described below. In one of the
+				appendices, you can find diagram as to how Spring manages beans and how those
+				lifecycle features change the nature of your beans and how they are managed.
+			</para>
+	   	
+			<sect3 id="beans-factory-lifecycle-initializingbean">
+					<title>InitializingBean / <literal>init-method</literal></title>
+					<para>
+						The <literal>org.springframework.beans.factory.InitializingBean</literal> gives
+						you the ability the do initialization work after all necessary properties on a
+						bean are set by the BeanFactory. The InitializingBean interface specifies exactly
+						one method:
+						<itemizedlist spacing="compact">
+							<listitem>
+								<para>
+									<literal>void afterPropertiesSet()</literal>: called after all
+									properties have been set by the beanfactory. This method enables you
+									to do checking if all necessary properties have been set correctly, or
+									to perform initialization work. You can throw <emphasis>any</emphasis>
+									exception to indicate misconfiguration, initialization failures, etcetera
+								</para>
+							</listitem>
+						</itemizedlist>
+					</para>
+					
+					<para>
+						<emphasis>Note: generally, the use of the <literal>InitializingBean</literal> can
+						be avoided (and by some people is discouraged). The beans package provides support
+						for a generic init-method, given to the beandefinition in the beanconfiguration store
+						(may it be XML, properties-files or a database).</emphasis>
+						
+					</para>
+					<para>
+					<programlisting><![CDATA[
+<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init()"/>
+
+public class ExampleBean {
+	public void init() {
+		// do some initialization work
+	}
+}
+					]]></programlisting>
+					
+					Is exactly the same as:
+					
+					<programlisting><![CDATA[
+<bean id="exampleInitBean class="examples.AnotherExampleBean"/>
+
+public class AnotherExampleBean implements InitializingBean {
+	public void afterPropertiesSet() {
+		// do some initialization work
+	}
+}
+					]]></programlisting>
+					</para>
+				</sect3>
+			
+			
+			
+				<sect3 id="beans-factory-lifecycle-disposablebean">
+					<title>DisposableBean / <literal>destroy-method</literal></title>
+					<para>
+						The <literal>org.springframework.beans.factory.DisposableBean</literal> interface
+						provides you with the ability to get a callback when a beanfactor is destroyed.
+						The DisposableBean interface specifies one method:
+						<itemizedlist spacing="compact">
+							<listitem>
+								<para>
+									<literal>void destroy()</literal>: called on destruction of
+									the beanfactory. This allows you to release any resources you are
+									keeping in this bean (like database connections). You can throw
+									an exception here, however, it will not stop the destruction of the bean
+									factory. It will get logged though.
+								</para>
+							</listitem>
+						</itemizedlist>
+					</para>
+					<para>
+						<emphasis>Note: generally, the use of the <literal>DisposableBean</literal> can
+						be avoided (and by some people is discouraged). The beans package provides support
+						for a generic destroy-method, given to the beandefinition in the beanconfiguration store
+						(may it be XML, properties-files or a database). For more information about this
+						feature, see the next section)</emphasis>
+					</para>
+					<para>
+					<programlisting><![CDATA[
+<bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="init()"/>
+
+public class ExampleBean {
+	public void destroy() {
+		// do some destruction work (like closing connection)
+	}
+}
+					]]></programlisting>
+					
+					Is exactly the same as:
+					
+					<programlisting><![CDATA[
+<bean id="exampleInitBean class="examples.AnotherExampleBean"/>
+
+public class AnotherExampleBean implements DisposableBean {
+	public void destroy() {
+		// do some destruction work
+	}
+}
+					]]></programlisting>
+					</para>
+				</sect3>
+			</sect2>		
+			
+			<sect2 id="beans-factory-aware">
+				<title>Knowing who you are</title>				
+			
+				<sect3 id="beans-factory-aware-beanfactoryaware">
+					<title>BeanFactoryAware</title>
+					<para>
+						The <literal>org.springframework.beans.factory.BeanFactoryAware</literal> interface
+						gives you the ability to get a reference to the BeanFactory that manages the bean
+						that implements the BeanFactoryAware interface. This feature allows for implementing
+						beans to look up their collaborators in the beanfactory. The interface specifies one
+						method:
+						<itemizedlist spacing="compact">
+							<listitem>
+								<para>
+									<literal>void setBeanFactory(BeanFactory)</literal>: method that will
+									be called <emphasis>after the initialization methods</emphasis>
+									(<literal>afterPropertiesSet</literal> and the init-method).
+								</para>
+							</listitem>
+						</itemizedlist>
+					</para>
+				</sect3>
+				
+				<sect3 id="beans-factory-aware-beannameaware">
+					<title>BeanNameAware</title>
+					<para>
+						The <literal>org.springframework.beans.factory.BeanNameAware</literal>
+						interface gives you the ability to let the BeanFactory set the name
+						of the bean on the bean itself. In case you need to know what your name is,
+						implement this interface
+						<itemizedlist spacing="compact">
+							<listitem>
+								<para>
+									<literal>void setBeanName(String)</literal>: method which
+									will be called to let the bean know what its name is
+								</para>
+							</listitem>
+						</itemizedlist>
+					</para>
+				</sect3>
+			</sect2>
+			
 			<sect2 id="beans-factory-lifecycle-factorybean">
 	    		<title>FactoryBean</title>
 		    	<para>
@@ -546,106 +718,6 @@ public class ExampleBean {
 				</para>
 			</sect2>
 			
-			<sect2 id="beans-factory-lifecycle-initializingbean">
-				<title>InitializingBean</title>
-				<para>
-					The <literal>org.springframework.beans.factory.InitializingBean</literal> gives
-					you the ability the do initialization work after all necessary properties on a
-					bean are set by the BeanFactory. The InitializingBean interface specifies exactly
-					one method:
-					<itemizedlist spacing="compact">
-						<listitem>
-							<para>
-								<literal>void afterPropertiesSet()</literal>: called after all
-								properties have been set by the beanfactory. This method enables you
-								to do checking if all necessary properties have been set correctly, or
-								to perform initialization work. You can throw <emphasis>any</emphasis>
-								exception to indicate misconfiguration, initialization failures, etcetera
-							</para>
-						</listitem>
-					</itemizedlist>
-				</para>
-				
-				<para>
-					<emphasis>Note: generally, the use of the <literal>InitializingBean</literal> can
-					be avoided (and by some people is discouraged). The beans package provides support
-					for a generic init-method, given to the beandefinition in the beanconfiguration store
-					(may it be XML, properties-files or a database). For more information about this
-					feature, see the next section)</emphasis>
-				</para>
-			</sect2>
-			
-			<sect2 id="beans-factory-lifecycle-initmethod">
-				<title>init-method</title>
-				<para>
-					Besides the InitializingBean, Spring also offers a less intrusive way of defining
-					an initialization method on your beans. Each of the implementations of the BeanFactory
-					specifies this features in a different way, but they all have the same result: 
-					a no-argument method getting called after all properties have been set and <emphasis>
-					also after the <literal>afterPropertiesSet()</literal> method from InitializingBean 
-					has been called</emphasis>. TODO INCLUDE REFERENCE TO DIFFERENT WAYS TO SPECIFY INIT_METHODS????
-				</para>
-			</sect2>
-			
-			<sect2 id="beans-factory-lifecycle-disposablebean">
-				<title>DisposableBean</title>
-				<para>
-					The <literal>org.springframework.beans.factory.DisposableBean</literal> interface
-					provides you with the ability to get a callback when a beanfactor is destroyed.
-					The DisposableBean interface specifies one method:
-					<itemizedlist spacing="compact">
-						<listitem>
-							<para>
-								<literal>void destroy()</literal>: called on destruction of
-								the beanfactory. This allows you to release any resources you are
-								keeping in this bean (like database connections). You can throw
-								an exception here, however, it will not stop the destruction of the bean
-								factory. It will get logged though.
-							</para>
-						</listitem>
-					</itemizedlist>
-				</para>
-				<para>
-					<emphasis>Note: generally, the use of the <literal>DisposableBean</literal> can
-					be avoided (and by some people is discouraged). The beans package provides support
-					for a generic destroy-method, given to the beandefinition in the beanconfiguration store
-					(may it be XML, properties-files or a database). For more information about this
-					feature, see the next section)</emphasis>
-				</para>
-			</sect2>
-			
-			<sect2 id="beans-factory-lifecycle-destroymethod">
-				<title>destroy-method</title>
-				<para>
-					Besides the Disposable, Spring also offers a less intrusive way of defining
-					an destroy methods on your beans. Each of the implementations of the BeanFactory
-					specifies this features in a different way, but they all have the same result: 
-					a no-argument method getting called after all properties have been set and <emphasis>
-					also after the <literal>destroy()</literal> method from 
-					DisposableBean has been called</emphasis>.
-					TODO INCLUDE REFERENCE TO DIFFERENT WAYS TO SPECIFY DESTROY_METHODS????
-				</para>
-			</sect2>
-			
-			<sect2 id="beans-factory-lifecycle-beanfactoryaware">
-				<title>BeanFactoryAware</title>
-				<para>
-					The <literal>org.springframework.beans.factory.BeanFactoryAware</literal> interface
-					gives you the ability to get a reference to the BeanFactory that manages the bean
-					that implements the BeanFactoryAware interface. This feature allows for implementing
-					beans to look up their collaborators in the beanfactory. The interface specifies one
-					method:
-					<itemizedlist spacing="compact">
-						<listitem>
-							<para>
-								<literal>void setBeanFactory(BeanFactory)</literal>: method that will
-								be called <emphasis>after the initialization methods</emphasis>
-								(<literal>afterPropertiesSet</literal> and the init-method).
-							</para>
-						</listitem>
-					</itemizedlist>
-				</para>
-			</sect2>
 		</sect1>
 		
 		<sect1 id="beans-factory-customizing">
