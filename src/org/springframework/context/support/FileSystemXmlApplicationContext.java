@@ -7,9 +7,14 @@ import org.springframework.beans.factory.xml.AbstractXmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Standalone XML application context, taking the context definition
- * files from the file system or from URLs. Mainly useful for test
- * harnesses, but also for standalone environments.
+ * Standalone XML application context, taking the context definition files
+ * from the file system or from URLs. Mainly useful for test harnesses,
+ * but also for standalone environments.
+ *
+ * <p>Note: In case of multiple config locations, later bean definitions will
+ * override ones defined in earlier loaded files. This can be leveraged to
+ * deliberately override certain bean definitions via an extra XML file.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
