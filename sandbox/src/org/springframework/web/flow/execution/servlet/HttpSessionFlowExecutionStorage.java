@@ -62,7 +62,8 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 			FlowExecutionStorageException {
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(getHttpServletRequest(requestingEvent), id);
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			throw new NoSuchFlowExecutionException(id, e);
 		}
 	}
@@ -97,17 +98,18 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 	}
 
 	/**
-	 * Make sure given event is a <code>HttpServletRequestEvent</code>.
+	 * Return (cast) given event as an HttpServletRequestEvent.
 	 */
-	protected void assertHttpServletRequestEvent(Event event) {
-		Assert.isInstanceOf(HttpServletRequestEvent.class, event, "Wrong event type:");
+	protected HttpServletRequestEvent getHttpServletRequestEvent(Event event) {
+		Assert.isInstanceOf(HttpServletRequestEvent.class, event, "Wrong event type: ");
+		return (HttpServletRequestEvent)event;
 	}
 
 	/**
 	 * Helper to get the HTTP request from given event.
 	 */
 	protected HttpServletRequest getHttpServletRequest(Event event) {
-		return ((HttpServletRequestEvent)event).getRequest();
+		return getHttpServletRequestEvent(event).getRequest();
 	}
 
 	/**

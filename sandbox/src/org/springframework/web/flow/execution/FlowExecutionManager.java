@@ -36,7 +36,7 @@ import org.springframework.web.flow.ViewDescriptor;
  * <ol>
  * <li>Look for a flow execution id in the event (in a parameter named
  * "_flowExecutionId").</li>
- * <li>If no a flow execution id is found, a new flow execution will be
+ * <li>If no flow execution id is found, a new flow execution will be
  * created. The top-level flow for which the execution is created is determined
  * by first looking for a flow id specified in the event using the "_flowId"
  * parameter. If this parameter is present, the specified flow will be
@@ -49,10 +49,11 @@ import org.springframework.web.flow.ViewDescriptor;
  * <li>If an existing flow execution is continued, current state id
  * ("_currentStateId") and event id ("_eventId") parameter values will be
  * obtained from the event and will be signaled in the flow execution.</li>
- * <li>The the flow execution is still active after event processing, it
+ * <li>If the flow execution is still active after event processing, it
  * will be saved in the flow execution storage. This will generate a unique
  * flow execution id that will be exposed to the caller.</li>
  * </ol>
+ * 
  * @author Erwin Vervaet
  * @author Keith Donald
  */
@@ -102,26 +103,21 @@ public class FlowExecutionManager {
 	private FlowExecutionListener[] flowExecutionListeners;
 
 	private FlowExecutionStorage flowExecutionStorage;
-
+	
 	/**
-	 * Create a new flow execution manager for a single Flow definition.
-	 * @param flow the flow definition
+	 * Create a new flow execution manager. Before use, the manager should
+	 * be appropriately configured using setter methods. At least the flow
+	 * execution storage strategy should be set!
+	 * 
+	 * @see #setFlow(Flow)
+	 * @see #setFlowLocator(FlowLocator)
+	 * @see #setFlowExecutionListener(FlowExecutionListener)
+	 * @see #setFlowExecutionListeners(FlowExecutionListener[])
+	 * @see #setFlowExecutionStorage(FlowExecutionStorage) 
 	 */
-	public FlowExecutionManager(Flow flow) {
-		Assert.notNull(flowLocator, "The flow lrequired when used standalone");
-		this.flow = flow;
+	public FlowExecutionManager() {
 	}
-
-	/**
-	 * Create a new flow execution manager that can manage executions of many 
-	 * flow definitions when parameterized at runtime, using the configured flow locator.
-	 * @param flowLocator the FlowLocator 
-	 */
-	public FlowExecutionManager(FlowLocator flowLocator) {
-		Assert.notNull(flowLocator, "The flow locator is required when used standalone");
-		this.flowLocator = flowLocator;
-	}
-
+	
 	/**
 	 * Returns the flow whose executions are managed by this manager.
 	 * Could be <code>null</code> if there is no preconfigured flow and
@@ -184,6 +180,7 @@ public class FlowExecutionManager {
 	 * Returns the storage strategy used by the flow execution manager.
 	 */
 	public FlowExecutionStorage getFlowExecutionStorage() {
+		Assert.notNull(flowExecutionStorage, "The flow execution storage strategy was not set -- configuration error?");
 		return flowExecutionStorage;
 	}
 
@@ -268,13 +265,6 @@ public class FlowExecutionManager {
 	// subclassing hooks
 
 	/**
-	 * Make sure this manager is appropriately configured.
-	 */
-	protected void assertConfigured() {
-		Assert.notNull(getFlowExecutionStorage(), "A flow execution storage strategy should be configured");
-	}
-
-	/**
 	 * Obtain a flow to use from given event. If there is a "_flowId" parameter
 	 * specified in the event, the flow with that id will be returend after
 	 * lookup using the flow locator. If no "_flowId" parameter is present in the
@@ -285,8 +275,8 @@ public class FlowExecutionManager {
 		if (!StringUtils.hasText(flowId)) {
 			Assert.notNull(getFlow(),
 					"This flow execution manager is not configured with a default top-level flow; thus, "
-							+ "the flow to execute must be provided by client views via the '"
-							+ getFlowIdParameterName() + "' parameter, yet no parameter was provided in this event");
+						+ "the flow to execute must be provided by client views via the '"
+						+ getFlowIdParameterName() + "' parameter, yet no parameter was provided in this event");
 			return getFlow();
 		}
 		else {

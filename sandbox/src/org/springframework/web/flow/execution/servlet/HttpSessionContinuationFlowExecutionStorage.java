@@ -26,8 +26,16 @@ import org.springframework.web.util.WebUtils;
  * Flow execution storage that stores flow executions as <i>continuations</i>
  * in the HttpSession.
  * <p>
+ * A downside of this storage strategy (and of server-side continuations in general)
+ * is that there could be many copies of the flow execution stored in the HTTP
+ * session, increasing server memory requirements. It is advised that you use the
+ * {@link org.springframework.web.flow.support.ExpiredFlowCleanupFilter} to
+ * cleanup any flow execution continuations as soon as the can be considered
+ * to have expired.
+ * <p>
  * This storage strategy requires a <code>HttpServletRequestEvent</code>.
- * 	
+ * 
+ * @see org.springframework.web.flow.support.ExpiredFlowCleanupFilter
  * @see org.springframework.web.flow.execution.servlet.HttpServletRequestEvent
  * 
  * @author Erwin Vervaet
@@ -40,7 +48,8 @@ public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlow
 			FlowExecutionContinuation continuation = (FlowExecutionContinuation)WebUtils.getRequiredSessionAttribute(
 					getHttpServletRequest(requestingEvent), id);
 			return continuation.getFlowExecution();
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			throw new NoSuchFlowExecutionException(id, e);
 		}
 	}

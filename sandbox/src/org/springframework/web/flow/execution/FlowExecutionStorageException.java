@@ -41,7 +41,8 @@ public class FlowExecutionStorageException extends NestedRuntimeException {
 
 	/**
 	 * Create a new flow execution storage exception.
-	 * @param flowExecutionStorage the flow execution storage encountering the problem
+	 * @param flowExecutionId the unique of the flow execution (optional)
+	 * @param flowExecution the flow execution (optional)
 	 * @param msg a descriptive message
 	 * @param ex the underlying cause of this exception
 	 */
@@ -54,7 +55,7 @@ public class FlowExecutionStorageException extends NestedRuntimeException {
 	/**
 	 * Returns the unique id of the flow execution.
 	 * Could be <code>null</code>.
-	 * @returns the flow execution id
+	 * @return the flow execution id
 	 */
 	public String getFlowExecutionId() {
 		return flowExecutionId;
@@ -63,7 +64,7 @@ public class FlowExecutionStorageException extends NestedRuntimeException {
 	/**
 	 * Returns the flow execution involved.
 	 * Could be <code>null</code>.
-	 * @returns the flow execution
+	 * @return the flow execution
 	 */
 	public FlowExecution getFlowExecution() {
 		return flowExecution;

@@ -18,12 +18,16 @@ package org.springframework.web.flow.execution.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.FlowExecutionManager;
 
 /**
@@ -33,33 +37,47 @@ import org.springframework.web.flow.execution.FlowExecutionManager;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public class HttpServletFlowExecutionManager extends FlowExecutionManager {
+public class HttpServletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
+	
+	/**
+	 * Creates an HTTP-servlet based flow execution manager.
+	 */
+	public HttpServletFlowExecutionManager() {
+		initDefaults();
+	}
 
 	/**
-	 * Creates a http-servlet based flow execution manager.
+	 * Creates an HTTP-servlet based flow execution manager.
 	 * @param flow the flow to manage
 	 */
 	public HttpServletFlowExecutionManager(Flow flow) {
-		super(flow);
 		initDefaults();
+		setFlow(flow);
 	}
 
 	/**
-	 * Creates a http-servlet based flow execution manager.
+	 * Creates an HTTP-servlet based flow execution manager.
 	 * @param flowLocator the locator to find flows to manage
 	 */
 	public HttpServletFlowExecutionManager(FlowLocator flowLocator) {
-		super(flowLocator);
 		initDefaults();
+		setFlowLocator(flowLocator);
 	}
 
 	/**
-	 * Sets defaults.
+	 * Set default properties for this manager.
 	 */
 	protected void initDefaults() {
 		setFlowExecutionStorage(new HttpSessionFlowExecutionStorage());
 	}
-
+	
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (getFlowLocator()==null) {
+			// a convenience default for use with Spring bean factories
+			setFlowLocator(new BeanFactoryFlowServiceLocator(beanFactory));
+		}
+	}
+	
 	/**
 	 * The main entry point into managed HTTP-based flow executions.
 	 * @param request the current HTTP request

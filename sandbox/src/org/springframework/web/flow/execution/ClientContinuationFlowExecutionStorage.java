@@ -28,6 +28,15 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * just decodes the incoming id and restores the <code>FlowExecution</code>
  * object.
  * <p>
+ * Note that all clients in a web flow based application need to include the
+ * unique flow execution id in each event they signal to the system. For HTTP
+ * based clients, the flow execution id is sent using a request parameter.
+ * If you're using client side continuations, you should make sure to use
+ * the HTTP POST method to send the request parameters to the server. This is
+ * required because there are limitations on the amount of data you can send
+ * using an HTTP GET request and a client side continuation easily surpasses
+ * that threshold.
+ * <p>
  * <b>Warning:</b> storing state (a flow execution continuation) on the client
  * entails a certain security risk. This implementation does not provide a
  * secure way of storing state on the client, so a malicious client could
