@@ -289,7 +289,7 @@ public class Flow implements Serializable {
 			firstAdd = true;
 		}
 		else {
-			firstAdd = true;
+			firstAdd = false;
 		}
 		state.setFlow(this);
 		this.states.add(state);
