@@ -101,7 +101,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 
 
 	/**
-	 * Constructor which uses the default "bean-refs.xml", as the name of the
+	 * Constructor which uses the default "classpath*:beanRefContext.xml", as the name of the
 	 * definition file(s). All resources returned by the definition classloader's
 	 * getResources() method with this name will be combined to create a definition.
 	 */
