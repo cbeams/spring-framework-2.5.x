@@ -45,7 +45,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.17 2004-06-21 16:34:43 jhoeller Exp $
+ * @version $Id: DataBinder.java,v 1.18 2004-07-28 07:39:11 jhoeller Exp $
  * @see #bind
  * @see #getErrors
  * @see org.springframework.web.bind.ServletRequestDataBinder
@@ -290,7 +290,8 @@ public class DataBinder {
 	 */
 	protected Object[] getArgumentsForBindingError(String field) {
 		return new Object[] {
-			new DefaultMessageSourceResolvable(new String[] {getObjectName() + "." + field, field}, null, field)
+			new DefaultMessageSourceResolvable(new String[] {getObjectName() + Errors.NESTED_PATH_SEPARATOR + field, field},
+																				 null, field)
 		};
 	}
 

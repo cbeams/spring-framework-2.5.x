@@ -18,6 +18,8 @@ package org.springframework.validation;
 
 import java.util.List;
 
+import org.springframework.beans.PropertyAccessor;
+
 /**
  * Interface to be implemented by objects that can store and expose
  * information about data binding errors.
@@ -35,6 +37,15 @@ import java.util.List;
  * @see #setNestedPath
  */
 public interface Errors {
+
+	/**
+	 * Separator between path elements in a nested path,
+	 * e.g. in "customer.name" or "customer.address.street".
+	 * "." = same as the nested property separator in the beans package.
+	 * @see org.springframework.beans.PropertyAccessor#NESTED_PROPERTY_SEPARATOR
+	 */
+	String NESTED_PATH_SEPARATOR = PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
+
 
 	/**
 	 * Return the name of the bound object.

@@ -114,8 +114,8 @@ public class BindException extends Exception implements Errors {
 		if (nestedPath == null) {
 			nestedPath = "";
 		}
-		if (nestedPath.length() > 0 && !nestedPath.endsWith(".")) {
-			nestedPath += ".";
+		if (nestedPath.length() > 0 && !nestedPath.endsWith(NESTED_PATH_SEPARATOR)) {
+			nestedPath += NESTED_PATH_SEPARATOR;
 		}
 		this.nestedPath = nestedPath;
 	}
