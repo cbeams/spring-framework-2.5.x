@@ -37,14 +37,14 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	}
 
 	/**
-	 * This implementation treats paths as classpath resources.
-	 * Only supports full classpath names including package specification,
-	 * like "/mypackage/myresource.dat".
+	 * This implementation treats paths as class path resources.
+	 * Only supports full class path names including package specification,
+	 * like "/mypackage/myresource.dat". A root slash gets prepended to
+	 * the path if not already contained.
 	 */
 	protected InputStream getResourceByPath(String path) throws IOException {
 		if (!path.startsWith("/")) {
-			// always use root,
-			// as loading relative to this class' package doesn't make sense
+			// always use root, as relative loading doesn't make sense
 			path = "/" + path;
 		}
 		return ClassLoaderUtils.getResourceAsStream(getClass(), path);

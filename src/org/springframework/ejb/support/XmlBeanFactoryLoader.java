@@ -31,7 +31,7 @@ import org.springframework.util.ClassLoaderUtils;
  *
  * @author Rod Johnson
  * @since 20-Jul-2003
- * @version $Id: XmlBeanFactoryLoader.java,v 1.2 2003-08-18 20:19:23 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryLoader.java,v 1.3 2003-08-19 16:23:38 jhoeller Exp $
  */
 public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 	
@@ -40,7 +40,8 @@ public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 	private final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Load the bean factory. 
+	 * Load the bean factory.
+	 * A root slash gets prepended to the path if not already contained.
 	 * @throws BootstrapException if the JNDI key is missing or if
 	 * the factory cannot be loaded from this location
 	 */
@@ -49,10 +50,16 @@ public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 		String beanFactoryPath = null;
 		try {
 			beanFactoryPath = (String) jt.lookup(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
-			logger.info("BeanFactoryPath from JNDI is '" + beanFactoryPath + "'");			
+			if (!beanFactoryPath.startsWith("/")) {
+				// always use root, as relative loading doesn't make sense
+				beanFactoryPath = "/" + beanFactoryPath;
+			}
+			logger.info("BeanFactoryPath from JNDI is '" + beanFactoryPath + "'");
+
 			InputStream is = ClassLoaderUtils.getResourceAsStream(getClass(), beanFactoryPath);
 			if (is == null)
 				throw new BootstrapException("Cannot load bean factory path '" + beanFactoryPath + "'", null);
+
 			ListableBeanFactory beanFactory = new XmlBeanFactory(is);
 			logger.info("Loaded BeanFactory [" + beanFactory + "]");
 			return beanFactory;
