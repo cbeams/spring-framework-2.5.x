@@ -1,6 +1,12 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.131 2004-04-22 08:35:59 jhoeller Exp $
+$Id: changelog.txt,v 1.132 2004-04-25 16:48:41 trisberg Exp $
+
+Changes in version 1.0.2 (?)
+------------------------------------
+
+Package org.springframework.jdbc
+* fixed a npe in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have datasource set
 
 
 Changes in version 1.0.1 (22.4.2003)
