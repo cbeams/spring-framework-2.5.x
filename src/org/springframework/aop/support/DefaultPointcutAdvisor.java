@@ -17,20 +17,25 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.core.Ordered;
 
 /**
  * Convenient pointcut-driven advisor implementation, implementing
  * the getPointcut() and isPerInstance() methods.
- * This is the most commonly used Advisor implementation.
- * It can be used with any pointcut and advice type, except for 
- * introductions.
+ *
+ * <p>This is the most commonly used Advisor implementation. It can be
+ * used with any pointcut and advice type, except for introductions.
+ *
  * @author Rod Johnson
- * @version $Id: DefaultPointcutAdvisor.java,v 1.6 2004-03-20 15:59:58 johnsonr Exp $
+ * @version $Id: DefaultPointcutAdvisor.java,v 1.7 2004-03-23 14:29:45 jhoeller Exp $
  */
-public class DefaultPointcutAdvisor implements PointcutAdvisor {
-	
+public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered {
+
+	private int order = Integer.MAX_VALUE;
+
 	private Pointcut pointcut;
 	
 	private Advice advice;
@@ -45,6 +50,14 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor {
 	public DefaultPointcutAdvisor(Pointcut pointcut, Advice advice) {
 		this.pointcut = pointcut;
 		this.advice = advice;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 	public void setAdvice(Advice advice) {

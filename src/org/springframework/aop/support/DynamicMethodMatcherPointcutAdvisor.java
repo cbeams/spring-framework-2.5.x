@@ -17,17 +17,21 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.core.Ordered;
 
 /**
  * Convenient superclass for Advisors that are also dynamic pointcuts.
  * @author Rod Johnson
  */
 public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodMatcher
-    implements PointcutAdvisor, Pointcut {
+    implements PointcutAdvisor, Pointcut, Ordered {
+
+	private int order = Integer.MAX_VALUE;
 
 	private Advice advice;
 	
@@ -38,6 +42,14 @@ public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodM
 		this.advice = advice;
 	}
 	
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
 	public void setAdvice(Advice advice) {
 		this.advice = advice;
 	}

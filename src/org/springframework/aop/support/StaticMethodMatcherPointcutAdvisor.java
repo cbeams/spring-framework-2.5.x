@@ -17,15 +17,20 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.core.Ordered;
 
 /**
  * Convenient superclass for Advisors that are also static pointcuts.
  * @author Rod Johnson
- * @version $Id: StaticMethodMatcherPointcutAdvisor.java,v 1.6 2004-03-19 16:54:39 johnsonr Exp $
+ * @version $Id: StaticMethodMatcherPointcutAdvisor.java,v 1.7 2004-03-23 14:29:45 jhoeller Exp $
  */
-public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcut implements PointcutAdvisor {
+public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcut
+		implements PointcutAdvisor, Ordered {
+
+	private int order = Integer.MAX_VALUE;
 
 	private Advice advice;
 	
@@ -34,6 +39,14 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 
 	public StaticMethodMatcherPointcutAdvisor(Advice advice) {
 		this.advice = advice;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 	public void setAdvice(Advice advice) {

@@ -17,16 +17,21 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.core.Ordered;
 
 /**
  * Convenient class for name-match method pointcuts that hold an Interceptor,
  * making them an Advisor.
  * @author Juergen Hoeller
- * @version $Id: NameMatchMethodPointcutAdvisor.java,v 1.4 2004-03-19 16:54:39 johnsonr Exp $
+ * @version $Id: NameMatchMethodPointcutAdvisor.java,v 1.5 2004-03-23 14:29:45 jhoeller Exp $
  */
-public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut implements PointcutAdvisor {
+public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut
+		implements PointcutAdvisor, Ordered {
+
+	private int order = Integer.MAX_VALUE;
 
 	private Advice advice;
 
@@ -35,6 +40,14 @@ public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut impl
 
 	public NameMatchMethodPointcutAdvisor(Advice advice) {
 		this.advice = advice;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 	public void setAdvice(Advice advice) {

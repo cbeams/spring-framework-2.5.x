@@ -17,17 +17,21 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.core.Ordered;
 
 /**
  * Convenient class for regexp method pointcuts that hold an Interceptor,
  * making them an Advisor.
  * @author Dmitriy Kopylenko
- * @version $Id: RegexpMethodPointcutAdvisor.java,v 1.3 2004-03-19 16:54:39 johnsonr Exp $
+ * @version $Id: RegexpMethodPointcutAdvisor.java,v 1.4 2004-03-23 14:29:45 jhoeller Exp $
  */
 public class RegexpMethodPointcutAdvisor extends RegexpMethodPointcut
-    implements PointcutAdvisor {
+    implements PointcutAdvisor, Ordered {
+
+	private int order = Integer.MAX_VALUE;
 
 	private Advice advice;
 
@@ -38,6 +42,14 @@ public class RegexpMethodPointcutAdvisor extends RegexpMethodPointcut
 		this.advice = advice;
 	}
 	
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
 	public void setAdvice(Advice advice) {
 		this.advice = advice;
 	}
