@@ -22,7 +22,7 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	/**
 	 * Set if URL lookup should always use full path within current servlet
@@ -47,6 +47,17 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
+	 * or to share common UrlPathHelper settings across multiple MethodNameResolvers
+	 * and HandlerMappings.
+	 * @see org.springframework.web.servlet.handler.AbstractUrlHandlerMapping#setUrlPathHelper
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
 	}
 
 	/**

@@ -28,7 +28,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
-	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private Map handlerMap = new HashMap();
 
@@ -55,6 +55,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
+	 * or to share common UrlPathHelper settings across multiple HandlerMappings
+	 * and MethodNameResolvers.
+	 * @see org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver#setUrlPathHelper
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
 	}
 
 	/**
