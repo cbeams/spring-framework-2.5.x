@@ -4,7 +4,6 @@
 	Similar to main build file, but using Commons Attributes to deliver
 	auto-proxying: no need to use TransactionProxyFactoryBean.
 -->
-
 <project name="jpetstore-attributes" basedir=".." default="usage">
 
 	<property name="name" value="jpetstore"/>
@@ -47,7 +46,8 @@
 			<include name="axis.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/ibatis">
-			<include name="ibatis-db.jar"/>
+			<include name="ibatis-common-2.jar"/>
+			<include name="ibatis-sqlmap-2.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="jaxrpc.jar"/>
@@ -154,8 +154,8 @@
 				<include name="hsqldb.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/ibatis">
-				<include name="ibatis-common.jar"/>
-				<include name="ibatis-sqlmap.jar"/>
+				<include name="ibatis-common-2.jar"/>
+				<include name="ibatis-sqlmap-2.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jaxrpc.jar"/>
@@ -175,9 +175,6 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/jdom">
-				<include name="jdom.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/struts">
 				<include name="struts.jar"/>

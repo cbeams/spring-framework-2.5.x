@@ -129,9 +129,6 @@
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/jdom">
-				<include name="jdom.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/struts">
 				<include name="struts.jar"/>
 			</fileset>
