@@ -32,18 +32,19 @@ import org.springframework.metadata.Attributes;
 /**
  * Implementation of TransactionAttributeSource that uses
  * attributes from an Attributes implementation.
- * Defaults to using class's transaction attribute if none is
- * associated with the target method.
- * Any transaction attribute associated with the target method completely
- * overrides a class transaction attribute.
- * <br>
- * This implementation caches attributes by method after they are first used.
+ *
+ * <p>Defaults to using class's transaction attribute if none is associated
+ * with the target method. Any transaction attribute associated with the
+ * target method completely overrides a class transaction attribute.
+ *
+ * <p>This implementation caches attributes by method after they are first used.
  * If it's ever desirable to allow dynamic changing of transaction attributes
  * (unlikely) caching could be made configurable. Caching is desirable because
  * of the cost of evaluating rollback rules.
+ *
  * @author Rod Johnson
+ * @version $Id: AttributesTransactionAttributeSource.java,v 1.8 2004-05-26 10:48:57 jhoeller Exp $
  * @see org.springframework.metadata.Attributes
- * @version $Id: AttributesTransactionAttributeSource.java,v 1.7 2004-04-01 15:36:02 jhoeller Exp $
  */
 public class AttributesTransactionAttributeSource implements TransactionAttributeSource {
 	
@@ -157,8 +158,10 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 	 * if none was found
 	 */
 	protected TransactionAttribute findTransactionAttribute(Collection atts) {
-		if (atts == null)
+		if (atts == null) {
 			return null;
+		}
+
 		TransactionAttribute txAttribute = null;
 		// Check there is a transaction attribute
 		for (Iterator itr = atts.iterator(); itr.hasNext() && txAttribute == null; ) {
@@ -170,18 +173,19 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 
 		if (txAttribute instanceof RuleBasedTransactionAttribute) {
 			RuleBasedTransactionAttribute rbta = (RuleBasedTransactionAttribute) txAttribute;
-			// We really want value: bit of a hack
-			List l = new LinkedList();
-			for (Iterator itr = atts.iterator(); itr.hasNext(); ) {
-				Object att = itr.next();
+			// We really want value: bit of a hack.
+			List rollbackRules = new LinkedList();
+			for (Iterator it = atts.iterator(); it.hasNext(); ) {
+				Object att = it.next();
 				if (att instanceof RollbackRuleAttribute) {
-					if (logger.isDebugEnabled())
-						logger.debug("Found RollbackRule " + att);
-					l.add(att);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found RollbackRule: " + att);
+					}
+					rollbackRules.add(att);
 				}
 			}
-			// Repeatedly setting this isn't elegant, but it works
-			rbta.setRollbackRules(l);
+			// Repeatedly setting this isn't elegant, but it works.
+			rbta.setRollbackRules(rollbackRules);
 		}
 		
 		return txAttribute;

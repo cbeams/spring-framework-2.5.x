@@ -111,7 +111,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		logger.debug("Looking up handler for [" + lookupPath + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking up handler for [" + lookupPath + "]");
+		}
 		return lookupHandler(lookupPath);
 	}
 
@@ -124,7 +126,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @return the associated handler instance, or null if not found
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected Object lookupHandler(String urlPath) throws BeansException {
+	protected Object lookupHandler(String urlPath) {
 		// direct match?
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler == null) {
@@ -165,7 +167,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 		else {
 			this.handlerMap.put(urlPath, handler);
-			logger.info("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
+			if (logger.isInfoEnabled()) {
+				logger.info("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
+			}
 		}
 	}
 

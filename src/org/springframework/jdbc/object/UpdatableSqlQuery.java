@@ -90,9 +90,9 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 	protected class ResultReaderImpl implements ResultReader {
 
 		/** List to save results in */
-		private List results;
+		private final List results;
 
-		private Map context;
+		private final Map context;
 
 		private int rowNum = 0;
 

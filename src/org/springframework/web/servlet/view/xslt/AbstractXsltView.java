@@ -61,18 +61,18 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * @author Rod Johnson
  * @author Darren Davison
- * @version $Id: AbstractXsltView.java,v 1.10 2004-03-18 02:46:14 trisberg Exp $
+ * @version $Id: AbstractXsltView.java,v 1.11 2004-05-26 10:48:56 jhoeller Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
-	private String DEFAULT_ROOT_TAGNAME = "DocRoot";
+	public static final String DEFAULT_ROOT = "DocRoot";
 	
 	
 	/** URL of stylesheet */
 	private Resource stylesheetLocation;
 
 	/** Document root element name, normally overridden in the view definition config */
-	private String root = DEFAULT_ROOT_TAGNAME;
+	private String root = DEFAULT_ROOT;
 
 	/** Custom URIResolver, set by subclass or as bean property */
 	private URIResolver uriResolver;
@@ -90,35 +90,35 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @param stylesheetLocation the location of the XSLT stylesheet
 	 * @see org.springframework.context.ApplicationContext#getResource
 	 */
-	public final void setStylesheetLocation(Resource stylesheetLocation) {
+	public void setStylesheetLocation(Resource stylesheetLocation) {
 		this.stylesheetLocation = stylesheetLocation;
 	}
 
 	/** 
-	 * Document root element name.
+	 * Document root element name. Default is "DocRoot".
 	 * Only used if we're not passed a single Node as model.
 	 * @param root document root element name
+	 * @see #DEFAULT_ROOT
 	 */
-	public final void setRoot(String root) {
+	public void setRoot(String root) {
 		this.root = root;
 	}
 
 	/**
 	 * Set the URIResolver used in the transform. The URIResolver
 	 * handles calls to the XSLT document() function.
-	 * This method can be used by subclasses or as a bean property
+	 * This method can be used by subclasses or as a bean property.
 	 * @param uriResolver URIResolver to set. No URIResolver
 	 * will be set if this is null (this is the default).
 	 */
-	public final void setUriResolver(URIResolver uriResolver) {
+	public void setUriResolver(URIResolver uriResolver) {
 		this.uriResolver = uriResolver;
 	}
 	
 	/**
-	 * Activate or deactivate the cache.
-	 * @param cache whether to activate the cache
+	 * Set whether to activate the cache. Default is true.
 	 */
-	public final void setCache(boolean cache) {
+	public void setCache(boolean cache) {
 		this.cache = cache;
 	}
 
@@ -197,9 +197,9 @@ public abstract class AbstractXsltView extends AbstractView {
 
 		// handle special case when we have a single node
 		if (singleModel != null && (singleModel instanceof Node)) {
-			// Don't domify if the model is already an XML node
+			// Don't domify if the model is already an XML node.
 			// We don't need to worry about model name, either:
-			// we leave the Node alone
+			// we leave the Node alone.
 			logger.debug("No need to domify: was passed an XML node");
 			dom = (Node) singleModel;
 		}

@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,13 +34,14 @@ import org.springframework.util.StringUtils;
 /**
  * Static factory that allows to register existing singleton instances programmatically.
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 06-Jan-03
- * @version $Id: StaticListableBeanFactory.java,v 1.9 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: StaticListableBeanFactory.java,v 1.10 2004-05-26 10:48:57 jhoeller Exp $
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	/** Map from bean name to bean instance */
-	private Map beans = new HashMap();
+	private final Map beans = new HashMap();
 
 	public Object getBean(String name) throws BeansException {
 		Object bean = this.beans.get(name);
@@ -94,11 +95,11 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	public String[] getBeanDefinitionNames(Class type) {
-		List matches = new LinkedList();
+		List matches = new ArrayList();
 		Set keys = this.beans.keySet();
-		Iterator itr = keys.iterator();
-		while (itr.hasNext()) {
-			String name = (String) itr.next();
+		Iterator it = keys.iterator();
+		while (it.hasNext()) {
+			String name = (String) it.next();
 			Class clazz = this.beans.get(name).getClass();
 			if (type.isAssignableFrom(clazz)) {
 				matches.add(name);
@@ -114,9 +115,9 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
 		Map matches = new HashMap();
 		Set keys = this.beans.keySet();
-		Iterator itr = keys.iterator();
-		while (itr.hasNext()) {
-			String name = (String) itr.next();
+		Iterator it = keys.iterator();
+		while (it.hasNext()) {
+			String name = (String) it.next();
 			Object bean = this.beans.get(name);
 			if (bean instanceof FactoryBean && includeFactoryBeans) {
 				FactoryBean factory = (FactoryBean) bean;

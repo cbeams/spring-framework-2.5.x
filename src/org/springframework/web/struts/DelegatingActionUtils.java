@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionServlet;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -74,7 +75,7 @@ public abstract class DelegatingActionUtils {
 	public static String determineActionBeanName(ActionMapping mapping) {
 		String prefix = mapping.getModuleConfig().getPrefix();
 		String path = mapping.getPath();
-		String beanName = (prefix != null && prefix.length() > 0) ? prefix + path : path;
+		String beanName = StringUtils.hasLength(prefix) ? prefix + path : path;
 		if (logger.isDebugEnabled()) {
 			logger.debug("DelegatingActionProxy with mapping path '" + path + "' and module prefix '" +
 			             prefix + "' delegating to Spring bean with name [" + beanName + "]");

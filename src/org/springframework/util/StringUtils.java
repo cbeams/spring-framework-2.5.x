@@ -40,19 +40,63 @@ import java.util.TreeSet;
  * @author Juergen Hoeller
  * @author Keith Donald
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.14 2004-05-18 08:03:30 jhoeller Exp $
+ * @version $Id: StringUtils.java,v 1.15 2004-05-26 10:48:57 jhoeller Exp $
  * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
 
-	// Static strings for cleanPath
-	private static String CHANGE_PATH = "/";		// folder sep.
+	private static final String CHANGE_PATH = "/";		// folder sep.
 
-	private static String WIN_CHANGE_PATH = "\\";	// Windows folder sep.
+	private static final String WIN_CHANGE_PATH = "\\";	// Windows folder sep.
 
-	private static String TOP_PATH = "..";			// Top folder
+	private static final String TOP_PATH = "..";			// Top folder
 
-	private static String CURRENT_PATH = ".";		// Current folder
+	private static final String CURRENT_PATH = ".";		// Current folder
+
+
+	/**
+	 * Check if a String has length.
+	 * <p><pre>
+	 * StringUtils.hasLength(null) = false
+	 * StringUtils.hasLength("") = false
+	 * StringUtils.hasLength(" ") = true
+	 * StringUtils.hasLength("Hello") = true
+	 * </pre>
+	 * @param str the String to check, may be null
+	 * @return <code>true</code> if the String is not null and has length
+	 */
+	public static boolean hasLength(String str) {
+		return (str != null && str.length() > 0);
+	}
+
+	/**
+	 * Check if a String has text. More specifically, returns <code>true</code>
+	 * if the string not <code>null<code>, it's <code>length is > 0</code>, and
+	 * it has at least one non-whitespace character.
+	 * <p><pre>
+	 * StringUtils.hasText(null) = false
+	 * StringUtils.hasText("") = false
+	 * StringUtils.hasText(" ") = false
+	 * StringUtils.hasText("12345") = true
+	 * StringUtils.hasText(" 12345 ") = true
+	 * </pre>
+	 * @param str the String to check, may be null
+	 * @return <code>true</code> if the String is not null, length > 0,
+	 * and not whitespace only
+	 */
+	public static boolean hasText(String str) {
+		int strLen;
+		if (str == null || (strLen = str.length()) == 0) {
+			return false;
+		}
+		for (int i = 0; i < strLen; i++) {
+			if ((Character.isWhitespace(str.charAt(i)) == false)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	/**
 	 * Count the occurrences of the substring in string s.
@@ -131,6 +175,7 @@ public abstract class StringUtils {
 		}
 		return out.toString();
 	}
+
 
 	/**
 	 * Tokenize the given String into a String array via a StringTokenizer.
@@ -288,51 +333,9 @@ public abstract class StringUtils {
 		return newArr;
 	}
 
-	/**
-	 * Checks if a String has length.
-	 * <p><pre>
-	 * StringUtils.hasLength(null) = false
-	 * StringUtils.hasLength("") = false
-	 * StringUtils.hasLength(" ") = true
-	 * StringUtils.hasLength("Hello") = true
-	 * </pre>
-	 * @param str the String to check, may be null
-	 * @return <code>true</code> if the String is has length and is not null
-	 */
-	public static boolean hasLength(String str) {
-		return (str != null && str.length() > 0);
-	}
 
 	/**
-	 * Checks if a String has text. More specifically, returns <code>true</code>
-	 * if the string not <code>null<code>, it's <code>length is > 0</code>, and
-	 * it has at least one non-whitespace character.
-	 * <p><pre>
-	 * StringUtils.hasText(null) = false
-	 * StringUtils.hasText("") = false
-	 * StringUtils.hasText(" ") = false
-	 * StringUtils.hasText("12345") = true
-	 * StringUtils.hasText(" 12345 ") = true
-	 * </pre>
-	 * @param str the String to check, may be null
-	 * @return <code>true</code> if the String is not null, length > 0,
-	 * and not whitespace only
-	 */
-	public static boolean hasText(String str) {
-		int strLen;
-		if (str == null || (strLen = str.length()) == 0) {
-			return false;
-		}
-		for (int i = 0; i < strLen; i++) {
-			if ((Character.isWhitespace(str.charAt(i)) == false)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Unqualifies a string qualified by a '.' dot character. For example,
+	 * Unqualify a string qualified by a '.' dot character. For example,
 	 * "this.name.is.qualified", returns "qualified".
 	 * @param qualifiedName the qualified name
 	 */
@@ -341,7 +344,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Unqualifies a string qualified by a separator character. For example,
+	 * Unqualify a string qualified by a separator character. For example,
 	 * "this:name:is:qualified" returns "qualified" if using a ':' separator.
 	 * @param qualifiedName the qualified name
 	 * @param separator the separator
@@ -351,7 +354,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Capitalizes a <code>String</code>, changing the first letter to
+	 * Capitalize a <code>String</code>, changing the first letter to
 	 * upper case as per {@link Character#toLowerCase(char)}.
 	 * No other letters are changed.
 	 * @param str the String to capitalize, may be null
@@ -362,7 +365,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Uncapitalizes a <code>String</code>, changing the first letter to
+	 * Uncapitalize a <code>String</code>, changing the first letter to
 	 * lower case as per {@link Character#toLowerCase(char)}.
 	 * No other letters are changed.
 	 * @param str the String to uncapitalize, may be null
@@ -392,7 +395,7 @@ public abstract class StringUtils {
 	 * Normalize the path by suppressing sequences like "path/.." and
 	 * inner simple dots folders.
 	 * <p>The result is convenient for path comparison. For other uses,
-	 * notice that  Windows separators ("\") are replaced by simple dashes.
+	 * notice that Windows separators ("\") are replaced by simple dashes.
 	 * @param path The original path
 	 * @return The normalized path
 	 */

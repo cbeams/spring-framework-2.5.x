@@ -45,7 +45,7 @@ import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
  * Controllers with attributes will be picked up by each DispatcherServlet's context.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPathMapHandlerMapping.java,v 1.6 2004-03-18 02:46:17 trisberg Exp $
+ * @version $Id: AbstractPathMapHandlerMapping.java,v 1.7 2004-05-26 10:48:57 jhoeller Exp $
  */
 public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMapping {
 	
@@ -98,8 +98,9 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 			}
 		}
 		catch (ClassNotFoundException ex) {
-			// Shouldn't happen: Attributes API gave us the classname
-			throw new ApplicationContextException("Failed to load a class returned in an attribute index: internal error in Commons Attributes indexing?", ex);
+			// Shouldn't happen: Attributes API gave us the class name.
+			throw new ApplicationContextException("Failed to load a class returned in an attribute index: " +
+																						"internal error in Commons Attributes indexing?", ex);
 		}
 	}
 

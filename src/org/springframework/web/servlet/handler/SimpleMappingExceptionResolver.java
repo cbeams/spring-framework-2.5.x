@@ -140,7 +140,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 */
 	protected ModelAndView getModelAndView(String viewName, Exception ex) {
 		ModelAndView mv = new ModelAndView(viewName);
-		if (this.exceptionAttribute != null && this.exceptionAttribute.length() > 0) {
+		if (this.exceptionAttribute != null) {
 			mv.addObject(this.exceptionAttribute, ex);
 		}
 		return mv;

@@ -18,8 +18,8 @@ package org.springframework.web.servlet.mvc.multiaction;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -188,40 +188,41 @@ public class MultiActionController extends AbstractController implements LastMod
 		// methods that are validators according to our criteria
 		Method[] methods = delegate.getClass().getMethods();
 		for (int i = 0; i < methods.length; i++) {
-			// We're looking for methods with given parameters
+			// we're looking for methods with given parameters
 			if (methods[i].getReturnType().equals(ModelAndView.class)) {
-				// We have a potential handler method, with the correct return type
+				// we have a potential handler method, with the correct return type
 				Class[] params = methods[i].getParameterTypes();
 				
 				// Check that the number and types of methods is correct.
 				// We don't care about the declared exceptions
-				if (params.length >= 2 && params[0].equals(HttpServletRequest.class) && params[1].equals(HttpServletResponse.class)) {
-					// We're in business
+				if (params.length >= 2 && params[0].equals(HttpServletRequest.class) &&
+						params[1].equals(HttpServletResponse.class)) {
+					// we're in business
 					logger.info("Found action method [" + methods[i] + "]");
 					this.methodHash.put(methods[i].getName(), methods[i]);
 					
-					// Look for corresponding LastModified method
+					// look for corresponding LastModified method
 					try {
-						Method lastModifiedMethod = delegate.getClass().getMethod(methods[i].getName() + LAST_MODIFIED_METHOD_SUFFIX, new Class[] { HttpServletRequest.class } );
-						// Put in cache, keyed by handler method name
+						Method lastModifiedMethod = delegate.getClass().getMethod(methods[i].getName() + LAST_MODIFIED_METHOD_SUFFIX,
+																																			new Class[] { HttpServletRequest.class } );
+						// put in cache, keyed by handler method name
 						this.lastModifiedMethodHash.put(methods[i].getName(), lastModifiedMethod);
 						logger.info("Found last modified method for action method [" + methods[i] + "]");
 					}
 					catch (NoSuchMethodException ex) {
-						// No last modified method. That's ok
+						// No last modified method. That's ok.
 					}
 				}
-			}	// for each method with the correct return type
-		} 	// for each method in the class
+			}
+		}
 		
-		// There must be SOME handler methods
-		
+		// There must be SOME handler methods.
 		// WHAT IF SETTING DELEGATE LATER!?
 		if (this.methodHash.isEmpty()) {
 			throw new ApplicationContextException("No handler methods in class " + getClass().getName());
 		}
 		
-		// Now look for exception handlers
+		// now look for exception handlers
 		this.exceptionHandlerHash = new HashMap();
 		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].getReturnType().equals(ModelAndView.class) &&
@@ -301,30 +302,29 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 
 		try {
-			// A real generic Collection! Parameters to method
-			List params = new LinkedList();
+			// A real generic Collection! Parameters to method.
+			List params = new ArrayList(4);
 			params.add(request);
 			params.add(response);
 				
 			if (m.getParameterTypes().length >= 3 && m.getParameterTypes()[2].equals(HttpSession.class) ){
-				// Require a session
 				HttpSession session = request.getSession(false);
 				if (session == null) {
-					//throw new SessionRequiredException("Session was required for method '" + method + "'");
-					return handleException(request, response, new SessionRequiredException("Session was required for method '" + method + "'"));
+					return handleException(request, response,
+																 new SessionRequiredException("Session was required for method '" + method + "'"));
 				}
 				params.add(session);
 			}
 			
-			// If last parameter isn't of HttpSession type it's a command
-			if (m.getParameterTypes().length >= 3 && !m.getParameterTypes()[m.getParameterTypes().length - 1].equals(HttpSession.class)) {
+			// If last parameter isn't of HttpSession type, it's a command.
+			if (m.getParameterTypes().length >= 3 &&
+					!m.getParameterTypes()[m.getParameterTypes().length - 1].equals(HttpSession.class)) {
 				Object command = newCommandObject(m.getParameterTypes()[m.getParameterTypes().length - 1]);
 				params.add(command);
 				bind(request, command);
 			}
 			
-			Object[] parray = params.toArray(new Object[params.size()]);
-			return (ModelAndView) m.invoke(this.delegate, parray);
+			return (ModelAndView) m.invoke(this.delegate, params.toArray(new Object[params.size()]));
 		}
 		catch (InvocationTargetException ex) {
 			// This is what we're looking for: the handler method threw an exception
