@@ -16,19 +16,68 @@
 
 package org.springframework.mail;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.springframework.mail.cos.CosMailSenderImpl;
+
 /**
- * @author Tim Morrow
+ * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @since 23.10.2004
+ * @since 10.09.2003
  */
 public class SimpleMailMessageTests extends TestCase {
 
+	public void testSimpleMessage() {
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setFrom("me@mail.org");
+		message.setTo("you@mail.org");
+
+		SimpleMailMessage messageCopy = new SimpleMailMessage(message);
+		assertEquals("me@mail.org", messageCopy.getFrom());
+		assertEquals("you@mail.org", messageCopy.getTo()[0]);
+
+		message.setReplyTo("reply@mail.org");
+		message.setCc(new String[] {"he@mail.org", "she@mail.org"});
+		message.setBcc(new String[] {"us@mail.org", "them@mail.org"});
+		Date sentDate = new Date();
+		message.setSentDate(sentDate);
+		message.setSubject("my subject");
+		message.setText("my text");
+
+		assertEquals("me@mail.org", message.getFrom());
+		assertEquals("reply@mail.org", message.getReplyTo());
+		assertEquals("you@mail.org", message.getTo()[0]);
+		List ccs = Arrays.asList(message.getCc());
+		assertTrue(ccs.contains("he@mail.org"));
+		assertTrue(ccs.contains("she@mail.org"));
+		List bccs = Arrays.asList(message.getBcc());
+		assertTrue(bccs.contains("us@mail.org"));
+		assertTrue(bccs.contains("them@mail.org"));
+		assertEquals(sentDate, message.getSentDate());
+		assertEquals("my subject", message.getSubject());
+		assertEquals("my text", message.getText());
+
+		messageCopy = new SimpleMailMessage(message);
+		assertEquals("me@mail.org", messageCopy.getFrom());
+		assertEquals("reply@mail.org", messageCopy.getReplyTo());
+		assertEquals("you@mail.org", messageCopy.getTo()[0]);
+		ccs = Arrays.asList(messageCopy.getCc());
+		assertTrue(ccs.contains("he@mail.org"));
+		assertTrue(ccs.contains("she@mail.org"));
+		bccs = Arrays.asList(message.getBcc());
+		assertTrue(bccs.contains("us@mail.org"));
+		assertTrue(bccs.contains("them@mail.org"));
+		assertEquals(sentDate, messageCopy.getSentDate());
+		assertEquals("my subject", messageCopy.getSubject());
+		assertEquals("my text", messageCopy.getText());
+	}
+
 	/**
-	 * Tests that two equal SimpleMailMessages have equal hashcodes.
+	 * Tests that two equal SimpleMailMessages have equal hash codes.
 	 */
 	public final void testHashCode() {
 		SimpleMailMessage message1 = new SimpleMailMessage();
@@ -84,6 +133,24 @@ public class SimpleMailMessageTests extends TestCase {
 		message1.setText("text");
 		message2 = new SimpleMailMessage(message1);
 		assertTrue(message1.equals(message2));
+	}
+
+	public void testCosMailSenderImplWithSimpleMessageAndBadHostName() throws MailException {
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setFrom("a@a.com");
+		message.setTo("b@b.com");
+		message.setSubject("test");
+		message.setText("another test");
+
+		CosMailSenderImpl sender = new CosMailSenderImpl();
+		sender.setHost("hostxyzdoesnotexist");
+		try {
+			sender.send(message);
+			fail("Should have thrown MailSendException");
+		}
+		catch (Exception ex) {
+			assertTrue(ex instanceof MailSendException);
+		}
 	}
 
 }
