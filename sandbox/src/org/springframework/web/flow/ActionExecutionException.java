@@ -27,14 +27,14 @@ import org.springframework.core.NestedRuntimeException;
 public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
-	 * The action executor that threw an exception while executing.
+	 * The action that threw an exception while executing.
 	 */
-	private ActionState.ActionExecutor actionExecutor;
-
+	private ActionStateAction action;
+	
 	/**
 	 * Create a new action execution exception.
-	 * @param message the message as to why execution failed
-	 * @param cause the underlying cause of the exception, thrown by the action
+	 * @param message a descriptive error message
+	 * @param cause the underlying cause of the exception
 	 */
 	public ActionExecutionException(String message, Throwable cause) {
 		super(message, cause);
@@ -42,22 +42,22 @@ public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new action execution exception.
-	 * @param actionExecutor the action executor that generated the exception
+	 * @param action the action that generated the exception
 	 * @param cause the underlying cause of the exception, thrown by the action
 	 */
-	public ActionExecutionException(ActionState.ActionExecutor actionExecutor, Throwable cause) {
-		super("Executing action '" + actionExecutor + "' in state '" + actionExecutor.getAction().getState().getId()
-				+ "' of flow '" + actionExecutor.getAction().getState().getFlow().getId()
+	public ActionExecutionException(ActionStateAction action, Throwable cause) {
+		super("Executing action '" + action + "' in state '" + action.getState().getId()
+				+ "' of flow '" + action.getState().getFlow().getId()
 				+ "' threw an unrecoverable exception", cause);
-		this.actionExecutor = actionExecutor;
+		this.action = action;
 	}
 
 	/**
 	 * Returns information about the action that threw an exception when
 	 * executed.
-	 * @returns the action
+	 * @return the failing action
 	 */
 	public ActionStateAction getAction() {
-		return actionExecutor.getAction();
+		return action;
 	}
 }

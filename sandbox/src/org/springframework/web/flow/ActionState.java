@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.util.Styler;
 
 /**
@@ -84,7 +83,7 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param action The action and any configuration properties for use within
+	 * @param action the action and any configuration properties for use within
 	 *        this state
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
@@ -116,7 +115,7 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param action The action and any configuration properties for use within
+	 * @param action the action and any configuration properties for use within
 	 *        this state
 	 * @param transitions the transitions out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
@@ -162,7 +161,7 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param action The actions with any configuration properties for use
+	 * @param actions the actions with any configuration properties for use
 	 *        within this state
 	 * @param transition the transitions (paths) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
@@ -178,7 +177,7 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param action The actions with any configuration properties for use
+	 * @param actions the actions with any configuration properties for use
 	 *        within this state
 	 * @param transitions the transitions (paths) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
@@ -195,16 +194,16 @@ public class ActionState extends TransitionableState {
 	 * @param action the action to add
 	 */
 	protected void addAction(Action action) {
-		this.actionExecutors.add(createActionExecutor(new ActionStateAction(this, action)));
+		this.actionExecutors.add(new ActionExecutor(createActionStateAction(action)));
 	}
 
 	/**
-	 * Add a action instance to this state.
+	 * Add an action instance to this state.
 	 * @param action the state action to add
 	 */
 	protected void addAction(ActionStateAction action) {
 		action.setState(this);
-		this.actionExecutors.add(createActionExecutor(action));
+		this.actionExecutors.add(new ActionExecutor(action));
 	}
 
 	/**
@@ -219,7 +218,7 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * @param actionNames the names of the actions
+	 * Add a collection of actions to this state.
 	 * @param actions the actions to add
 	 */
 	protected void addActions(ActionStateAction[] actions) {
@@ -230,13 +229,10 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Create the action executor for the provided state action.
-	 * @param actionName the name of the action to wrap
-	 * @param action the action to wrap
-	 * @return the action executor
+	 * Create an action state action wrapper for the provided action.
 	 */
-	protected ActionExecutor createActionExecutor(ActionStateAction action) {
-		return new ActionExecutor(action);
+	protected ActionStateAction createActionStateAction(Action action) {
+		return new ActionStateAction(this, action);
 	}
 
 	/**
@@ -245,7 +241,7 @@ public class ActionState extends TransitionableState {
 	 * {@link ActionState.ActionExecutor} objects.
 	 * @return the ActionExecutor iterator
 	 */
-	protected Iterator actionExecutors() {
+	private Iterator actionExecutors() {
 		return this.actionExecutors.iterator();
 	}
 
@@ -282,7 +278,7 @@ public class ActionState extends TransitionableState {
 	/**
 	 * Returns this state's action instance associated with the requesting
 	 * target action instance.
-	 * @param targetAction the requesting target action implementation
+	 * @param targetAction the requesting target action object
 	 * @return the action
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
@@ -320,8 +316,8 @@ public class ActionState extends TransitionableState {
 		int executionCount = 0;
 		String[] eventIds = new String[actionExecutors.size()];
 		while (it.hasNext()) {
-			ActionExecutor namedAction = (ActionExecutor)it.next();
-			Event event = namedAction.execute(context);
+			ActionExecutor actionExecutor = (ActionExecutor)it.next();
+			Event event = actionExecutor.execute(context);
 			if (event != null) {
 				eventIds[executionCount] = event.getId();
 				context.setLastEvent(event);
@@ -330,10 +326,9 @@ public class ActionState extends TransitionableState {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger
-								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-										+ eventIds[executionCount] + "' -- "
-										+ "I will proceed to the next action in the chain");
+						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+								+ eventIds[executionCount] + "' -- "
+								+ "I will proceed to the next action in the chain");
 					}
 				}
 			}
@@ -354,18 +349,19 @@ public class ActionState extends TransitionableState {
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
 					"No actions were executed, thus I cannot execute any state transition "
-							+ "-- programmer configuration error; "
-							+ "make sure you add at least one action to this state"));
+						+ "-- programmer configuration error; "
+						+ "make sure you add at least one action to this state"));
 		}
 	}
 
 	/**
 	 * Internal action executor, encapsulating a single action's execution and
 	 * result handling logic.
+	 * 
 	 * @author Keith Donald
 	 * @author Erwin Vervaet
 	 */
-	protected static class ActionExecutor {
+	private static class ActionExecutor {
 
 		protected final Log logger = LogFactory.getLog(ActionExecutor.class);
 
@@ -380,13 +376,16 @@ public class ActionState extends TransitionableState {
 			this.action = action;
 		}
 
+		/**
+		 * Returns the wrapped action.
+		 */
 		public ActionStateAction getAction() {
 			return action;
 		}
 
 		/**
 		 * Execute the wrapped action.
-		 * @param context the flow request context
+		 * @param context the flow execution request context
 		 * @return result of execution
 		 */
 		protected Event execute(RequestContext context) {
@@ -397,7 +396,7 @@ public class ActionState extends TransitionableState {
 				return getEvent(action.getTargetAction().execute(context));
 			}
 			catch (Exception e) {
-				throw new ActionExecutionException(this, e);
+				throw new ActionExecutionException(action, e);
 			}
 		}
 
@@ -413,8 +412,8 @@ public class ActionState extends TransitionableState {
 			if (resultEvent == null) {
 				return null;
 			}
-			if (StringUtils.hasText(action.getResultQualifier())) {
-				return new ActionNameQualifiedEvent(action.getResultQualifier(), resultEvent);
+			if (action.isNamed()) {
+				return new ActionNameQualifiedEvent(action.getName(), resultEvent);
 			}
 			else {
 				return resultEvent;

@@ -21,9 +21,9 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CachingMapTemplate;
-import org.springframework.util.StringUtils;
 import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 
@@ -230,10 +230,10 @@ public class MultiAction extends AbstractAction {
 	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
 		public String getMethodName(RequestContext context, MultiAction action) {
 			Assert.isInstanceOf(ActionState.class, context.getCurrentState());
-			String methodName = ((ActionState)context.getCurrentState()).getAction(action).getExecuteMethodName();
-			if (StringUtils.hasText(methodName)) {
+			ActionStateAction actionStateAction = ((ActionState)context.getCurrentState()).getAction(action);
+			if (actionStateAction.isNamed()) {
 				// use action name as method name
-				return methodName;
+				return actionStateAction.getName();
 			}
 			else {
 				// use current state name as method name

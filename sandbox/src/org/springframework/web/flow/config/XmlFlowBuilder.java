@@ -341,15 +341,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected void parseAndAddActionState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
-		String[] actionNames = parseActionNames(element);
-		Action[] actions = parseActions(element);
+		ActionStateAction[] actionStateActions = parseActionStateActions(element);
 		Transition[] transitions = parseTransitions(element);
-		ActionStateAction[] stateActions = new ActionStateAction[actions.length];
-		for (int i = 0; i < stateActions.length; i++) {
-			stateActions[i] = new ActionStateAction(actions[i]);
-			stateActions[i].setResultQualifier(actionNames[i]);
-		}
-		new ActionState(flow, id, stateActions, transitions);
+		new ActionState(flow, id, actionStateActions, transitions);
 	}
 
 	/**
@@ -399,49 +393,34 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Find all action names (for named actions) in given action state
-	 * definition. Unnamed actions have a [null] action name. The returned array
-	 * should contain a name (or [null]) for each Action returned by the
-	 * <code>parseActions()</code> method.
+	 * Parse all given action state action definitions contained in given element.
 	 */
-	protected String[] parseActionNames(Element element) {
-		List actionNames = new LinkedList();
+	protected ActionStateAction[] parseActionStateActions(Element element) {
+		List actionStateActions = new LinkedList();
 		NodeList childNodeList = element.getChildNodes();
 		for (int i = 0; i < childNodeList.getLength(); i++) {
 			Node childNode = childNodeList.item(i);
 			if (childNode instanceof Element) {
 				Element childElement = (Element)childNode;
 				if (ACTION_ELEMENT.equals(childElement.getNodeName())) {
-					if (childElement.hasAttribute(NAME_ATTRIBUTE)) {
-						// a named action
-						actionNames.add(childElement.getAttribute(NAME_ATTRIBUTE));
-					}
-					else {
-						actionNames.add(null);
-					}
+					actionStateActions.add(parseActionStateAction(childElement));
 				}
 			}
 		}
-		return (String[])actionNames.toArray(new String[actionNames.size()]);
+		return (ActionStateAction[])actionStateActions.toArray(new ActionStateAction[actionStateActions.size()]);
 	}
 
 	/**
-	 * Find all action definitions in given action state definition and obtain
-	 * corresponding Action objects.
+	 * Parse an action state action definition and return the corresponding
+	 * object.
 	 */
-	protected Action[] parseActions(Element element) {
-		List actions = new LinkedList();
-		NodeList childNodeList = element.getChildNodes();
-		for (int i = 0; i < childNodeList.getLength(); i++) {
-			Node childNode = childNodeList.item(i);
-			if (childNode instanceof Element) {
-				Element childElement = (Element)childNode;
-				if (ACTION_ELEMENT.equals(childElement.getNodeName())) {
-					actions.add(parseFlowService(childElement, Action.class));
-				}
-			}
+	protected ActionStateAction parseActionStateAction(Element element) {
+		Action targetAction = (Action)parseFlowService(element, Action.class);
+		ActionStateAction actionStateAction = new ActionStateAction(targetAction);
+		if (element.hasAttribute(NAME_ATTRIBUTE)) {
+			actionStateAction.setName(element.getAttribute(NAME_ATTRIBUTE));
 		}
-		return (Action[])actions.toArray(new Action[actions.size()]);
+		return actionStateAction;
 	}
 
 	/**

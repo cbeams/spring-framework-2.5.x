@@ -303,10 +303,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * entered.
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param actionName a logical name to associate with this action, used to
-	 *        qualify action results (e.g "myAction.success"), so one action can
-	 *        be reused in different flows with other actions that return the
-	 *        same logical result
 	 * @param action the action implementation
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
@@ -324,10 +320,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * entered.
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param actionName a logical name to associate with this action, used to
-	 *        qualify action results (e.g "myAction.success"), so one action can
-	 *        be reused in different flows with other actions that return the
-	 *        same logical result
 	 * @param action the action implementation
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
@@ -366,10 +358,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * when entered.
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param actionNames the logical names to associate with each action, used
-	 *        to qualify action results (e.g "myAction.success"), so one action
-	 *        can be reused in different flows with other actions that return
-	 *        the same logical result
 	 * @param actions the action implementations, to be executed in order until
 	 *        a valid transitional result is returned (Chain of Responsibility)
 	 * @param transitions The supported transitions for this state, where each
@@ -387,8 +375,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Request that the action with the specified id be executed when the action
 	 * state being built is entered. Simply looks the action up by name and
 	 * returns it.
-	 * @param actionId The action id
-	 * @return The action
+	 * @param actionId the action id
+	 * @return the action
 	 * @throws NoSuchActionException the action could not be resolved.
 	 */
 	protected Action action(String actionId) throws NoSuchActionException {
@@ -432,16 +420,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Creates an action state action suitable for adding to exactly one action
-	 * state, invoking the specified execute method name on the target action
-	 * when executed.
-	 * @param executeMethodName the action execute method name
+	 * Creates an named action state action suitable for adding to exactly one action
+	 * state.
+	 * @param name the action name
 	 * @param action the action
 	 * @return the action state action
 	 */
-	protected ActionStateAction method(String executeMethodName, Action action) {
+	protected ActionStateAction name(String name, Action action) {
 		ActionStateAction stateAction = new ActionStateAction(action);
-		stateAction.setExecuteMethodName(executeMethodName);
+		stateAction.setName(name);
 		return stateAction;
 	}
 
