@@ -424,10 +424,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 			this.nestedBeanWrappers = new HashMap();
 		}
 		// get value of bean property
-		String[] tokens = getPropertyNameTokens(nestedProperty);
-		Object propertyValue = getPropertyValue(tokens[0], tokens[1], tokens[2]);
-		String canonicalName = tokens[0];
-		String propertyName = tokens[1];
+		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
+		Object propertyValue = getPropertyValue(tokens);
+		String canonicalName = tokens.canonicalName;
+		String propertyName = tokens.actualName;
 		if (propertyValue == null) {
 			throw new NullValueInNestedPathException(getWrappedClass(), this.nestedPath + canonicalName);
 		}
@@ -474,36 +474,55 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return nestedBw;
 	}
 
-	private String[] getPropertyNameTokens(String propertyName) {
-		String actualName = propertyName;
-		String key = null;
-		int keyStart = propertyName.indexOf(PROPERTY_KEY_PREFIX);
-		if (keyStart != -1 && propertyName.endsWith(PROPERTY_KEY_SUFFIX)) {
-			actualName = propertyName.substring(0, keyStart);
-			key = propertyName.substring(keyStart + 1, propertyName.length() - 1);
-			if (key.startsWith("'") && key.endsWith("'")) {
-				key = key.substring(1, key.length() - 1);
-			}
-			else if (key.startsWith("\"") && key.endsWith("\"")) {
-				key = key.substring(1, key.length() - 1);
+	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
+		PropertyTokenHolder tokens = new PropertyTokenHolder();
+		String actualName = null;
+		List keys = new ArrayList(2);
+		int searchIndex = 0;
+		while (searchIndex != -1) {
+			int keyStart = propertyName.indexOf(PROPERTY_KEY_PREFIX, searchIndex);
+			searchIndex = -1;
+			if (keyStart != -1) {
+				int keyEnd = propertyName.indexOf(PROPERTY_KEY_SUFFIX, keyStart + PROPERTY_KEY_PREFIX.length());
+				if (keyEnd != -1) {
+					if (actualName == null) {
+						actualName = propertyName.substring(0, keyStart);
+					}
+					String key = propertyName.substring(keyStart + PROPERTY_KEY_PREFIX.length(), keyEnd);
+					if (key.startsWith("'") && key.endsWith("'")) {
+						key = key.substring(1, key.length() - 1);
+					}
+					else if (key.startsWith("\"") && key.endsWith("\"")) {
+						key = key.substring(1, key.length() - 1);
+					}
+					keys.add(key);
+					searchIndex = keyEnd + PROPERTY_KEY_SUFFIX.length();
+				}
 			}
 		}
-		String canonicalName = actualName;
-		if (key != null) {
-			canonicalName += PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;
+		tokens.actualName = (actualName != null ? actualName : propertyName);
+		tokens.canonicalName = tokens.actualName;
+		if (!keys.isEmpty()) {
+			tokens.canonicalName +=
+					PROPERTY_KEY_PREFIX +
+					StringUtils.collectionToDelimitedString(keys, PROPERTY_KEY_SUFFIX + PROPERTY_KEY_PREFIX) +
+					PROPERTY_KEY_SUFFIX;
+			tokens.keys = (String[]) keys.toArray(new String[keys.size()]);
 		}
-		return new String[] {canonicalName, actualName, key};
+		return tokens;
 	}
 
 
 	public Object getPropertyValue(String propertyName) throws BeansException {
 		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
-		String[] tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
-		return nestedBw.getPropertyValue(tokens[0], tokens[1], tokens[2]);
+		PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
+		return nestedBw.getPropertyValue(tokens);
 	}
 
-	protected Object getPropertyValue(String propertyName, String actualName, String key) throws BeansException {
-		PropertyDescriptor pd = getPropertyDescriptorInternal(actualName);
+	protected Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
+		String propertyName = tokens.canonicalName;
+		String actualName = tokens.actualName;
+		PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
 		if (pd == null || pd.getReadMethod() == null) {
 			throw new NotReadablePropertyException(getWrappedClass(), this.nestedPath + propertyName);
 		}
@@ -512,50 +531,55 @@ public class BeanWrapperImpl implements BeanWrapper {
 					this.object.getClass().getName() + "]");
 		try {
 			Object value = pd.getReadMethod().invoke(this.object, (Object[]) null);
-			if (key != null) {
-				if (value == null) {
-					throw new NullValueInNestedPathException(
-							getWrappedClass(), this.nestedPath + propertyName,
-							"Cannot access indexed value of property referenced in indexed " +
-							"property path '" + propertyName + "': returned null");
-				}
-				else if (value.getClass().isArray()) {
-					return Array.get(value, Integer.parseInt(key));
-				}
-				else if (value instanceof List) {
-					List list = (List) value;
-					return list.get(Integer.parseInt(key));
-				}
-				else if (value instanceof Set) {
-					// apply index to Iterator in case of a Set
-					Set set = (Set) value;
-					int index = Integer.parseInt(key);
-					Iterator it = set.iterator();
-					for (int i = 0; it.hasNext(); i++) {
-						Object elem = it.next();
-						if (i == index) {
-							return elem;
+			if (tokens.keys != null) {
+				// apply indexes and map keys
+				for (int i = 0; i < tokens.keys.length; i++) {
+					String key = tokens.keys[i];
+					if (value == null) {
+						throw new NullValueInNestedPathException(
+								getWrappedClass(), this.nestedPath + propertyName,
+								"Cannot access indexed value of property referenced in indexed " +
+								"property path '" + propertyName + "': returned null");
+					}
+					else if (value.getClass().isArray()) {
+						value = Array.get(value, Integer.parseInt(key));
+					}
+					else if (value instanceof List) {
+						List list = (List) value;
+						value = list.get(Integer.parseInt(key));
+					}
+					else if (value instanceof Set) {
+						// apply index to Iterator in case of a Set
+						Set set = (Set) value;
+						int index = Integer.parseInt(key);
+						if (index < 0 || index >= set.size()) {
+							throw new InvalidPropertyException(
+									getWrappedClass(), this.nestedPath + propertyName,
+									"Cannot get element with index " + index + " from Set of size " +
+									set.size() + ", accessed using property path '" + propertyName + "'");
+						}
+						Iterator it = set.iterator();
+						for (int j = 0; it.hasNext(); j++) {
+							Object elem = it.next();
+							if (j == index) {
+								value = elem;
+								break;
+							}
 						}
 					}
-					throw new InvalidPropertyException(
-							getWrappedClass(), this.nestedPath + propertyName,
-							"Cannot get element with index " + index + " from Set of size " +
-							set.size() + ", accessed using property path '" + propertyName + "'");
-				}
-				else if (value instanceof Map) {
-					Map map = (Map) value;
-					return map.get(key);
-				}
-				else {
-					throw new InvalidPropertyException(
-							getWrappedClass(), this.nestedPath + propertyName,
-							"Property referenced in indexed property path '" + propertyName +
-							"' is neither an array nor a List nor a Map; returned value was [" + value + "]");
+					else if (value instanceof Map) {
+						Map map = (Map) value;
+						value = map.get(key);
+					}
+					else {
+						throw new InvalidPropertyException(
+								getWrappedClass(), this.nestedPath + propertyName,
+								"Property referenced in indexed property path '" + propertyName +
+								"' is neither an array nor a List nor a Set nor a Map; returned value was [" + value + "]");
+					}
 				}
 			}
-			else {
-				return value;
-			}
+			return value;
 		}
 		catch (InvocationTargetException ex) {
 			throw new InvalidPropertyException(
@@ -589,17 +613,24 @@ public class BeanWrapperImpl implements BeanWrapper {
 					getWrappedClass(), this.nestedPath + propertyName,
 					"Nested property in path '" + propertyName + "' does not exist", ex);
 		}
-		String[] tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
-		nestedBw.setPropertyValue(tokens[0], tokens[1], tokens[2], value);
+		PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
+		nestedBw.setPropertyValue(tokens, value);
 	}
 
-	protected void setPropertyValue(String propertyName, String actualName, String key, Object value)
+	protected void setPropertyValue(PropertyTokenHolder tokens, Object value)
 			throws BeansException {
+		String propertyName = tokens.canonicalName;
 
-		if (key != null) {
+		if (tokens.keys != null) {
+			// apply indexes and map keys: fetch value for all keys but the last one
+			PropertyTokenHolder getterTokens = new PropertyTokenHolder();
+			getterTokens.canonicalName = tokens.canonicalName;
+			getterTokens.actualName = tokens.actualName;
+			getterTokens.keys = new String[tokens.keys.length - 1];
+			System.arraycopy(tokens.keys, 0, getterTokens.keys, 0, tokens.keys.length - 1);
 			Object propValue = null;
 			try {
-				propValue = getPropertyValue(actualName);
+				propValue = getPropertyValue(getterTokens);
 			}
 			catch (NotReadablePropertyException ex) {
 				throw new NotWritablePropertyException(
@@ -607,6 +638,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 						"Cannot access indexed value in property referenced " +
 						"in indexed property path '" + propertyName + "'", ex);
 			}
+			// set value for last key
+			String key = tokens.keys[tokens.keys.length - 1];
 			if (propValue == null) {
 				throw new NullValueInNestedPathException(
 						getWrappedClass(), this.nestedPath + propertyName,
@@ -1084,6 +1117,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 				return null;
 			}
 		}
+	}
+
+
+	private static class PropertyTokenHolder {
+
+		private String canonicalName;
+
+		private String actualName;
+
+		private String[] keys;
 	}
 
 }

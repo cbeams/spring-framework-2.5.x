@@ -115,15 +115,31 @@ public class BeanWrapperTests extends TestCase {
 		assertFalse(bw.isWritableProperty("xxx"));
 
 		assertTrue(bw.isReadableProperty("array[0]"));
+		assertTrue(bw.isReadableProperty("array[0].name"));
 		assertTrue(bw.isReadableProperty("list[0]"));
+		assertTrue(bw.isReadableProperty("list[0].name"));
 		assertTrue(bw.isReadableProperty("set[0]"));
+		assertTrue(bw.isReadableProperty("set[0].name"));
 		assertTrue(bw.isReadableProperty("map[key1]"));
+		assertTrue(bw.isReadableProperty("map[key1].name"));
+		assertTrue(bw.isReadableProperty("map[key4][0]"));
+		assertTrue(bw.isReadableProperty("map[key4][0].name"));
+		assertTrue(bw.isReadableProperty("map[key4][1]"));
+		assertTrue(bw.isReadableProperty("map[key4][1].name"));
 		assertFalse(bw.isReadableProperty("array[key1]"));
 
 		assertTrue(bw.isWritableProperty("array[0]"));
+		assertTrue(bw.isWritableProperty("array[0].name"));
 		assertTrue(bw.isWritableProperty("list[0]"));
+		assertTrue(bw.isWritableProperty("list[0].name"));
 		assertTrue(bw.isWritableProperty("set[0]"));
+		assertTrue(bw.isWritableProperty("set[0].name"));
 		assertTrue(bw.isWritableProperty("map[key1]"));
+		assertTrue(bw.isWritableProperty("map[key1].name"));
+		assertTrue(bw.isWritableProperty("map[key4][0]"));
+		assertTrue(bw.isWritableProperty("map[key4][0].name"));
+		assertTrue(bw.isWritableProperty("map[key4][1]"));
+		assertTrue(bw.isWritableProperty("map[key4][1].name"));
 		assertFalse(bw.isWritableProperty("array[key1]"));
 	}
 
@@ -722,6 +738,8 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("name5", bw.getPropertyValue("map[key.3].name"));
 		assertEquals("name4", bw.getPropertyValue("map['key1'].name"));
 		assertEquals("name5", bw.getPropertyValue("map[\"key.3\"].name"));
+		assertEquals("nameX", bw.getPropertyValue("map[key4][0].name"));
+		assertEquals("nameY", bw.getPropertyValue("map[key4][1].name"));
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("array[0].name", "name5");
@@ -732,6 +750,8 @@ public class BeanWrapperTests extends TestCase {
 		pvs.addPropertyValue("set[1].name", "name9");
 		pvs.addPropertyValue("map[key1].name", "name1");
 		pvs.addPropertyValue("map['key.3'].name", "name0");
+		pvs.addPropertyValue("map[key4][0].name", "nameA");
+		pvs.addPropertyValue("map[key4][1].name", "nameB");
 		bw.setPropertyValues(pvs);
 		assertEquals("name5", tb0.getName());
 		assertEquals("name4", tb1.getName());
@@ -747,6 +767,8 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("name9", bw.getPropertyValue("set[1].name"));
 		assertEquals("name1", bw.getPropertyValue("map[\"key1\"].name"));
 		assertEquals("name0", bw.getPropertyValue("map['key.3'].name"));
+		assertEquals("nameA", bw.getPropertyValue("map[key4][0].name"));
+		assertEquals("nameB", bw.getPropertyValue("map[key4][1].name"));
 	}
 
 	public void testIndexedPropertiesWithDirectAccess() {

@@ -56,6 +56,8 @@ public class IndexedTestBean {
 		TestBean tb5 = new TestBean("name5", 0);
 		TestBean tb6 = new TestBean("name6", 0);
 		TestBean tb7 = new TestBean("name7", 0);
+		TestBean tbX = new TestBean("nameX", 0);
+		TestBean tbY = new TestBean("nameY", 0);
 		this.array = new TestBean[] {tb0, tb1};
 		this.list = new ArrayList();
 		this.list.add(tb2);
@@ -67,6 +69,10 @@ public class IndexedTestBean {
 		this.map.put("key1", tb4);
 		this.map.put("key2", tb5);
 		this.map.put("key.3", tb5);
+		List list = new ArrayList();
+		list.add(tbX);
+		list.add(tbY);
+		this.map.put("key4", list);
 	}
 
 	public TestBean[] getArray() {
