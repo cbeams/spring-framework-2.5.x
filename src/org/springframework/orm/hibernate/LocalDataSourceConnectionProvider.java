@@ -11,12 +11,12 @@ import net.sf.hibernate.connection.ConnectionProvider;
 import net.sf.hibernate.util.JDBCExceptionReporter;
 
 /**
- * Hibernate connection provider for local DataSource instances in an
- * application context. Default provider when using LocalSessionFactoryBean,
- * if not explictly overridden by the Hibernate configuration.
+ * Hibernate connection provider for local DataSource instances
+ * in an application context. This provider will be used if
+ * LocalSessionFactoryBean's "dataSource" property is set.
  * @author Juergen Hoeller
  * @since 11.07.2003
- * @see LocalSessionFactoryBean
+ * @see LocalSessionFactoryBean#setDataSource
  */
 public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
@@ -31,12 +31,10 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
 	public void configure(Properties props) throws HibernateException {
 		this.dataSource = (DataSource) configTimeDataSourceHolder.get();
-		// absoutely needs thread-bound DataSource to initialize
+		// absolutely needs thread-bound DataSource to initialize
 		if (this.dataSource == null) {
 			throw new HibernateException("No local DataSource found for configuration - dataSource property must be set on LocalSessionFactoryBean");
 		}
-		// reset thread-bound DataSource
-		configTimeDataSourceHolder.set(null);
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -59,6 +57,9 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		}
 	}
 
+	/**
+	 * Only used in Hibernate 2.0's ConnectionProvider.
+	 */
 	public boolean isStatementCache() {
 		return true;
 	}
