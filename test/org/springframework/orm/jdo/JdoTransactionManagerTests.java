@@ -17,6 +17,7 @@
 package org.springframework.orm.jdo;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,10 +29,9 @@ import javax.transaction.Status;
 import javax.transaction.UserTransaction;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.transaction.InvalidIsolationLevelException;
-import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.JtaTransactionTestSuite;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -509,7 +509,14 @@ public class JdoTransactionManagerTests extends TestCase {
 	public void testInvalidIsolation() {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
+		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm, 1);
+		pm.close();
+		pmControl.setVoidCallable(1);
 		pmfControl.replay();
+		pmControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -522,28 +529,6 @@ public class JdoTransactionManagerTests extends TestCase {
 			fail("Should have thrown InvalidIsolationLevelException");
 		}
 		catch (InvalidIsolationLevelException ex) {
-			// expected
-		}
-
-		pmfControl.verify();
-	}
-
-	public void testInvalidTimeout() {
-		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
-		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		pmfControl.replay();
-
-		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
-		TransactionTemplate tt = new TransactionTemplate(tm);
-		tt.setTimeout(10);
-		try {
-			tt.execute(new TransactionCallbackWithoutResult() {
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-				}
-			});
-			fail("Should have thrown InvalidTimeoutException");
-		}
-		catch (InvalidTimeoutException ex) {
 			// expected
 		}
 
@@ -598,7 +583,9 @@ public class JdoTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testTransactionCommitWithDataSource() {
+	public void testTransactionCommitWithDataSource() throws SQLException {
+		TransactionTemplate tt = new TransactionTemplate();
+
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl dsControl = MockControl.createControl(DataSource.class);
@@ -617,10 +604,12 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setReturnValue(tx, 2);
 		pm.close();
 		pmControl.setVoidCallable(1);
-		tx.begin();
-		txControl.setVoidCallable(1);
-		dialect.getJdbcConnection(pm);
-		dialectControl.setReturnValue(con);
+		dialect.beginTransaction(tx, tt);
+		dialectControl.setVoidCallable(1);
+		dialect.getJdbcConnection(pm, false);
+		dialectControl.setReturnValue(con, 1);
+		dialect.releaseJdbcConnection(con, pm);
+		dialectControl.setVoidCallable(1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -633,7 +622,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		JdoTransactionManager tm = new JdoTransactionManager(pmf);
 		tm.setDataSource(ds);
 		tm.setJdoDialect(dialect);
-		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setTransactionManager(tm);
 		final List l = new ArrayList();
 		l.add("test");
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
