@@ -3,6 +3,11 @@
  */
 package org.springframework.web.flow;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.ModelAndView;
+
 /**
  * Subinterface of <code>FlowSessionExecutionInfo</code> that exposes mutable
  * operations. Designed for use by the <code>FlowSessionExecutionListener</code>,
@@ -36,4 +41,14 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	 * @return the current state definition.
 	 */
 	public AbstractState getCurrentState();
+
+	/**
+	 * @param eventId
+	 * @param currentStateId
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	public ModelAndView signalEvent(String eventId, String currentStateId, HttpServletRequest request,
+			HttpServletResponse response);
 }

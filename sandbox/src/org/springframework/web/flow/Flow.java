@@ -30,7 +30,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.ProcessTemplate;
-import org.springframework.util.closure.support.Block;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -140,9 +139,9 @@ import org.springframework.web.servlet.ModelAndView;
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
- * @see FlowEventProcessor
+ * @see FlowExecutionFactory
  */
-public class Flow implements FlowEventProcessor, Serializable {
+public class Flow implements FlowExecutionFactory, Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -407,21 +406,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/*
-	 * see #FlowEventProcessor.execute
-	 */
-	public ModelAndView signal(String eventId, String stateId, FlowExecutionInfo flowExecutionInfo,
-			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
-		Assert.isTrue(flowExecutionInfo.isActive(),
-				"The currently executing flow stack is not active - this should not happen");
-		FlowExecutionStack flowExecution = ((FlowExecutionStack)flowExecutionInfo);
-		fireRequestSubmitted(flowExecution, request);
-		TransitionableState state = flowExecution.getActiveFlow().getRequiredTransitionableState(stateId);
-		ModelAndView view = state.execute(eventId, flowExecution, request, response);
-		fireRequestProcessed(flowExecution, request);
-		return view;
-	}
-
-	/*
 	 * see #FlowEventProcessor.resume
 	 */
 	public FlowExecutionStartResult resume(String stateId, HttpServletRequest request, HttpServletResponse response,
@@ -457,30 +441,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 			HttpServletResponse response, Map inputAttributes) {
 		TransitionableState state = getRequiredTransitionableState(stateId);
 		return new StartStateMarker(this, state).startIn(sessionExecution, request, response, inputAttributes);
-	}
-
-	// lifecycle event publishers
-
-	protected void fireRequestSubmitted(final FlowExecution sessionExecution, final HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getFlowExecutionListenerCount() + " listener(s)");
-		}
-		getFlowExecutionListenerIteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestSubmitted(sessionExecution, request);
-			}
-		});
-	}
-
-	protected void fireRequestProcessed(final FlowExecution sessionExecution, final HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request processed event to " + getFlowExecutionListenerCount() + " listener(s)");
-		}
-		getFlowExecutionListenerIteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestProcessed(sessionExecution, request);
-			}
-		});
 	}
 
 	public String toString() {

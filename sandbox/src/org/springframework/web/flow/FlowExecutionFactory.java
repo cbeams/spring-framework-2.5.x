@@ -20,8 +20,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.servlet.ModelAndView;
-
 /**
  * Handles flow events signaled by the web-tier in response to web-controller
  * requests. There are two major different types of event processing operations:
@@ -40,7 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
  * 
  * @author Keith Donald
  */
-public interface FlowEventProcessor {
+public interface FlowExecutionFactory {
 
 	/**
 	 * Start a new session for this flow. This will cause a flow session
@@ -78,27 +76,5 @@ public interface FlowEventProcessor {
 	 */
 	public FlowExecutionStartResult resume(String stateId, HttpServletRequest request, HttpServletResponse response,
 			Map inputAttributes) throws IllegalStateException;
-
-	/**
-	 * Signal an occurence of the event identified by <code>eventId</code> in
-	 * the state identified by <code>stateId</code>
-	 * 
-	 * @param eventId The id of the event to execute (e.g 'submit', 'next',
-	 *        'back')
-	 * @param stateId The id of the state to execute this event in (e.g
-	 *        'personDetails.view')
-	 * @param sessionExecutionInfo A active flow session execution, tracking any
-	 *        suspended parent flows that spawned this flow (as a subflow)
-	 * @param request the client http request
-	 * @param response the server http response
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the event execution.
-	 * @throws FlowNavigationException if the <code>eventId</code> is not a
-	 *         valid event for the state identified by <code>stateId</code>,
-	 *         or if the <code>stateId</code> does not map to a valid flow
-	 *         state.
-	 */
-	public ModelAndView signal(String eventId, String stateId, FlowExecutionInfo flowExecutionInfo,
-			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException;
 
 }

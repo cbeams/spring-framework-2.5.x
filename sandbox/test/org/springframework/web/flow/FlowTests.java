@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.flow.action.AbstractActionBean;
+import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowServiceLocator;
 
@@ -103,9 +103,9 @@ public class FlowTests extends TestCase {
 		}
 		
 		public void buildStates() {
-			addGetState(PERSON_DETAILS, useActionBean(NoOpActionBean.class));
+			addGetState(PERSON_DETAILS, executeAction(NoOpActionBean.class));
 			addViewState(PERSON_DETAILS);
-			addBindAndValidateState(PERSON_DETAILS, useActionBean(NoOpActionBean.class));
+			addBindAndValidateState(PERSON_DETAILS, executeAction(NoOpActionBean.class));
 			addFinishEndState();
 		}
 	};
@@ -133,8 +133,8 @@ public class FlowTests extends TestCase {
 	/**
 	 * Action bean stub thatr does nothing, just returns "success"
 	 */
-	private final class NoOpActionBean extends AbstractActionBean {
-		public ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	private final class NoOpActionBean extends AbstractAction {
+		public ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 				MutableAttributesAccessor attributes) throws RuntimeException {
 			return success();
 		}

@@ -13,20 +13,20 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Keith Donald
  */
 public class FlowExecutionStartResult implements Serializable {
-	private FlowExecutionInfo executionInfo;
+	private FlowExecution execution;
 
 	private ModelAndView startingView;
 
-	public FlowExecutionStartResult(FlowExecutionInfo executionInfo, ModelAndView startingView) {
-		this.executionInfo = executionInfo;
+	public FlowExecutionStartResult(FlowExecution execution, ModelAndView startingView) {
+		this.execution = execution;
 		this.startingView = startingView;
 	}
 
 	/**
 	 * @return Returns the sessionInfo.
 	 */
-	public FlowExecutionInfo getFlowExecutionInfo() {
-		return executionInfo;
+	public FlowExecution getFlowExecution() {
+		return execution;
 	}
 
 	/**

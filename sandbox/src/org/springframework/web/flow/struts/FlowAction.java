@@ -28,7 +28,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowEventProcessor;
+import org.springframework.web.flow.FlowExecution;
+import org.springframework.web.flow.FlowExecutionFactory;
 import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowExecutionStartResult;
 import org.springframework.web.flow.NoSuchFlowSessionException;
@@ -102,13 +103,13 @@ public class FlowAction extends TemplateAction {
 		return ACTION_FORM_ATTRIBUTE;
 	}
 
-	protected FlowEventProcessor getEventProcessor(ActionMapping mapping) {
-		return getEventProcessor(getFlowId(mapping));
+	protected FlowExecutionFactory getFlowExecutionFactory(ActionMapping mapping) {
+		return getFlowExecutionFactory(getFlowId(mapping));
 	}
 
-	protected FlowEventProcessor getEventProcessor(String flowId) {
+	protected FlowExecutionFactory getFlowExecutionFactory(String flowId) {
 		Assert.hasText(flowId, "The flow id must be set to lookup the flow for this action");
-		return (Flow)getBean(flowId, FlowEventProcessor.class);
+		return (Flow)getBean(flowId, FlowExecutionFactory.class);
 	}
 
 	protected String getFlowId(ActionMapping mapping) {
@@ -142,36 +143,29 @@ public class FlowAction extends TemplateAction {
 		}
 		// end struts specific
 
-		FlowExecutionInfo sessionExecution;
+		FlowExecution flowExecution;
 		ModelAndView viewDescriptor = null;
 
 		if (getStringParameter(request, getFlowSessionIdParameterName()) == null) {
 			// No existing flow session execution to lookup as no _flowSessionId
 			// was provided - start a new one
-			FlowExecutionStartResult startResult = getEventProcessor(mapping).start(request, response, null);
-			sessionExecution = startResult.getFlowExecutionInfo();
+			FlowExecutionStartResult startResult = getFlowExecutionFactory(mapping).start(request, response, null);
+			flowExecution = startResult.getFlowExecution();
 			viewDescriptor = startResult.getStartingView();
-			saveInHttpSession(sessionExecution, request);
+			saveInHttpSession(flowExecution, request);
 		}
 		else {
 			// Client is participating in an existing flow session execution,
 			// retrieve information about it
-			sessionExecution = getRequiredFlowSessionExecution(getRequiredStringParameter(request,
+			flowExecution = getRequiredFlowExecution(getRequiredStringParameter(request,
 					getFlowSessionIdParameterName()), request);
+			
 			// let client tell you what state they are in (if possible)
-			String currentStateIdParam = getStringParameter(request, getCurrentStateIdParameterName());
-			if (currentStateIdParam == null) {
-				if (logger.isWarnEnabled()) {
-					logger
-							.warn("Current state id was not provided in request for flow session '"
-									+ sessionExecution.getCaption()
-									+ "' - pulling current state id from session - "
-									+ "note: if the user has been using the with browser back/forward buttons in browser, the currentState could be incorrect.");
-				}
-				currentStateIdParam = sessionExecution.getCurrentStateId();
-			}
+			String stateId = getStringParameter(request, getCurrentStateIdParameterName());
+
 			// let client tell you what event was signaled in the current state
 			String eventId = getStringParameter(request, getEventIdParameterName());
+			
 			if (eventId == null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("No '" + getEventIdParameterName()
@@ -186,39 +180,36 @@ public class FlowAction extends TemplateAction {
 								+ "' request parameter (or '"
 								+ getEventIdAttributeName()
 								+ "' request attribute) is required to signal an event in the current state of this executing flow '"
-								+ sessionExecution.getCaption() + "' -- programmer error?");
+								+ flowExecution.getCaption() + "' -- programmer error?");
 			}
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
 				logger.error("The event submitted by the browser was '" + getNotSetEventIdParameterMarker()
 						+ "' - this is likely a view (jsp, etc) configuration error - " + "the '"
 						+ getEventIdParameterName()
-						+ "' parameter must be set to a valid event to execute within the current state '"
-						+ currentStateIdParam + "' of this flow '" + sessionExecution.getCaption()
-						+ "' - else I don't know what to do!");
+						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
+						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
 			}
 			else {
 				// execute the signaled event within the current state
-				viewDescriptor = getEventProcessor(sessionExecution.getActiveFlowId()).signal(eventId,
-						currentStateIdParam, sessionExecution, request, response);
+				viewDescriptor = flowExecution.signalEvent(eventId, stateId, request, response);
 			}
 		}
 
-		if (!sessionExecution.isActive()) {
+		if (!flowExecution.isActive()) {
 			// event execution resulted in the entire flow ending, cleanup
-			removeFromHttpSession(sessionExecution, request);
+			removeFromHttpSession(flowExecution, request);
 		}
 		else {
 			// We're still in the flow, inject flow model into request
 			if (viewDescriptor != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("[Placing information about the new current flow state in request scope]");
-					logger.debug("    - " + getFlowSessionIdAttributeName() + "=" + sessionExecution.getId());
-					logger.debug("    - " + getCurrentStateIdAttributeName() + "="
-							+ sessionExecution.getCurrentStateId());
+					logger.debug("    - " + getFlowSessionIdAttributeName() + "=" + flowExecution.getId());
+					logger.debug("    - " + getCurrentStateIdAttributeName() + "=" + flowExecution.getCurrentStateId());
 				}
-				request.setAttribute(getFlowSessionIdAttributeName(), sessionExecution.getId());
-				request.setAttribute(getCurrentStateIdAttributeName(), sessionExecution.getCurrentStateId());
-				request.setAttribute(getFlowSessionExecutionInfoAttributeName(), sessionExecution);
+				request.setAttribute(getFlowSessionIdAttributeName(), flowExecution.getId());
+				request.setAttribute(getCurrentStateIdAttributeName(), flowExecution.getCurrentStateId());
+				request.setAttribute(getFlowSessionExecutionInfoAttributeName(), flowExecution);
 
 				// struts specific
 				String mappingFlowId = getFlowId(mapping);
@@ -236,10 +227,10 @@ public class FlowAction extends TemplateAction {
 				}
 				if (form instanceof BindingActionForm) {
 					BindingActionForm bindingForm = (BindingActionForm)form;
-					bindingForm.setErrors((Errors)sessionExecution.getAttribute(
+					bindingForm.setErrors((Errors)flowExecution.getAttribute(
 							AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class));
 					bindingForm.setHttpServletRequest(request);
-					bindingForm.setModel(sessionExecution);
+					bindingForm.setModel(flowExecution);
 				}
 				// end struts specific
 			}
@@ -276,10 +267,10 @@ public class FlowAction extends TemplateAction {
 		}
 	}
 
-	protected FlowExecutionInfo getRequiredFlowSessionExecution(String flowSessionId, HttpServletRequest request)
+	protected FlowExecution getRequiredFlowExecution(String flowSessionId, HttpServletRequest request)
 			throws NoSuchFlowSessionException {
 		try {
-			return (FlowExecutionInfo)getRequiredSessionAttribute(request, flowSessionId);
+			return (FlowExecution)getRequiredSessionAttribute(request, flowSessionId);
 		}
 		catch (IllegalStateException e) {
 			throw new NoSuchFlowSessionException(flowSessionId, e);

@@ -29,6 +29,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.SessionKeyUtils;
 
 /**
@@ -101,23 +102,22 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		return flow;
 	}
 
-	protected FlowEventProcessor getEventProcessor() {
+	protected FlowExecutionFactory getEventProcessor() {
 		return flow;
 	}
 
-	protected ViewDescriptor startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
+	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
 		FlowExecutionStartResult result = getEventProcessor().start(request, response, input);
-		this.flowSessionExecution = (FlowExecution)result.getFlowExecutionInfo();
+		this.flowSessionExecution = (FlowExecution)result.getFlowExecution();
 		return result.getStartingView();
 	}
 
-	protected ViewDescriptor startFlow(Map input) {
+	protected ModelAndView startFlow(Map input) {
 		return startFlow(new MockHttpServletRequest(), new MockHttpServletResponse(), input);
 	}
 
-	protected ViewDescriptor executeEvent(String eventId, MockHttpServletRequest request,
-			MockHttpServletResponse response) {
-		return getEventProcessor().signal(eventId, getCurrentStateId(), getFlowSessionExecution(), request, response);
+	protected ModelAndView executeEvent(String eventId, MockHttpServletRequest request, MockHttpServletResponse response) {
+		return getFlowSessionExecution().signalEvent(eventId, getCurrentStateId(), request, response);
 	}
 
 }

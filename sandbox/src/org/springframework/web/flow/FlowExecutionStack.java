@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
@@ -31,6 +34,7 @@ import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.Block;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.SessionKeyUtils;
 
 /**
@@ -287,6 +291,26 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		getActiveFlowSession().removeAttribute(attributeName);
 	}
 
+	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
+			HttpServletResponse response) {
+		Assert.isTrue(isActive(), "This flow execution is not active - this should not happen");
+		if (stateId == null) {
+			if (logger.isWarnEnabled()) {
+				logger
+						.warn("Current state id was not provided in request for flow session '"
+								+ getCaption()
+								+ "' - pulling current state id from session - "
+								+ "note: if the user has been using the with browser back/forward buttons in browser, the currentState could be incorrect.");
+			}
+			stateId = getCurrentStateId();
+		}
+		fireRequestSubmitted(request);
+		TransitionableState state = getActiveFlow().getRequiredTransitionableState(stateId);
+		ModelAndView view = state.execute(eventId, this, request, response);
+		fireRequestProcessed(request);
+		return view;
+	}
+
 	protected void activate(FlowSession flowSession) {
 		if (!executingFlowSessions.isEmpty()) {
 			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
@@ -333,6 +357,30 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		});
 	}
 
+	// lifecycle event publishers
+
+	protected void fireRequestSubmitted(final HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing request submitted event to " + getListenerCount() + " listener(s)");
+		}
+		getListenerIterator().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).requestSubmitted(FlowExecutionStack.this, request);
+			}
+		});
+	}
+
+	protected void fireRequestProcessed(final HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing request processed event to " + getListenerCount() + " listener(s)");
+		}
+		getListenerIterator().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).requestProcessed(FlowExecutionStack.this, request);
+			}
+		});
+	}
+
 	protected void fireEventSignaled(final String eventId) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing event signaled event to " + getListenerCount() + " listener(s)");
@@ -350,8 +398,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		}
 		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).stateTransitioned(FlowExecutionStack.this, previousState,
-						getCurrentState());
+				((FlowExecutionListener)o).stateTransitioned(FlowExecutionStack.this, previousState, getCurrentState());
 			}
 		});
 	}
