@@ -2,16 +2,12 @@
 
     <title>Integrating view technologies</title>
     
+	<!-- ============================================================ -->
+	<!-- Introduction                                                 -->
+	<!-- ============================================================ -->
 	<sect1 id="view-introduction">	
 		
 		<title>Introduction</title>
-
-		<para> 
-            Spring is an application framework for all layers: it offers a
-			bean configuration foundation, AOP support, a JDBC abstraction
-			framework, abstract transaction support, etc. It is a very
-			non-intrusive effort.
-        </para>
 
 		<para>
 			One of the areas in which Spring excels is its separation of view
@@ -26,6 +22,9 @@
 		
 	</sect1>
 	
+	<!-- ============================================================ -->
+	<!-- Velocity                                                     -->
+	<!-- ============================================================ -->
 	<sect1 id="view-velocity">
 	
 		<title>Velocity</title>
@@ -127,6 +126,8 @@
 			    get Velocity up and running in your Spring MVC application.
 			</para>
 
+			<sect3 id="view-velocity-template-locations">
+			<title>Template Locations</title>
 			<para>
 
 				The main property values concern the location of the Velocity
@@ -147,6 +148,11 @@
 			    <literal>WEB-INF/lib</literal>
 
             </para>
+
+			</sect3>
+
+			<sect3 id="view-velocity-example-velocityproperties">
+			<title>Example velocity.properties</title>
 
 			<para> 
 
@@ -196,7 +202,11 @@ file.resource.loader.cache=false
 # defined a log4j.properties file
 runtime.log.logsystem.log4j.category=com.mycompany.myapplication 
 			]]></programlisting>		
-		        
+
+			</sect3>
+
+			<sect3 id="view-velocity-root-markers">
+			<title>Web application root marker</title>		        
 			<para>
 
 				The file resource loader configuration above uses a marker to
@@ -211,6 +221,11 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 			    documentation for details on how to do this.
 
             </para>
+
+			</sect3>
+
+			<sect3 id="view-velocity-alternate-properties">
+			<title>Alternative property specifications</title>
 
             <para>
 
@@ -232,6 +247,10 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 </property>
 			]]></programlisting>		
 
+			</sect3>
+
+			<sect3 id="view-velocity-default-properties">
+			<title>Default configuration (file resource loaders)</title>
             <para>
 
                 Note that as of Spring version 1.0-m4 you can avoid using a
@@ -245,6 +264,8 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 			<programlisting><![CDATA[
 <property name="resourceLoaderPath"><value>/WEB-INF/velocity/</value></property>
 			]]></programlisting>		
+
+			</sect3>
             
         </sect2>
 			
@@ -323,6 +344,14 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
   <head><title>$title</title></head>
   <body>
     <h1>This is $title!!</h1>
+
+	## model objects are set in the controller and referenced
+    ## via bean properties o method names.  See the Velocity 
+    ## docs for info
+
+    Model Value: $model.value
+    Model Method Return Value: $model.getReturnVal()
+
   </body>
 </html>
 			]]></programlisting>
@@ -351,6 +380,8 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 
 			</para>
 
+			<sect3 id="view-velocity-validation">
+			<title>Validation errors</title>
 			<para>
 			
 			    The error messages that are actually produced from the
@@ -389,6 +420,10 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 
 			</para>
 
+			</sect3>
+
+			<sect3 id="view-velocity-macrohelper">
+			<title>Velocity macro helper</title>
 			<para>
 
 			    Next, a velocity macro needs to be defined.  It makes sense to
@@ -428,6 +463,10 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 #end
             ]]></programlisting>
 
+			</sect3>
+
+			<sect3 id="view-velocity-validationmessages">
+			<title>Associating error messages with the HTML field</title>
 			<para>
 
 			    Finally, in your html forms, you can use code similar to the
@@ -450,6 +489,7 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 </html>
             ]]></programlisting>
 
+			</sect3>
 		</sect2>		
 		
    		<sect2 id="view-velocity-summary">
@@ -495,6 +535,9 @@ ProjectRoot
 	
 	
 	
+	<!-- ============================================================ -->
+	<!-- XSLT                                                         -->
+	<!-- ============================================================ -->
 	<sect1 id="view-xslt">
 		<title>XSLT Views</title>
 
@@ -525,12 +568,9 @@ ProjectRoot
 
 			</para>
 			
-		</sect2>
 
-
-		<sect2 id="view-xslt-config">
-
-			<title>Configuration</title> 
+			<sect3 id="view-xslt-beandefs">
+			<title>Bean definitions</title> 
 
             <para>
 
@@ -544,6 +584,10 @@ ProjectRoot
 
              </para>
 
+			 </sect3>
+
+			 <sect3 id="view-xslt-controllercode">
+			 <title>Standard MVC controller code</title>
 			 <para>
 
                 The controller logic is encapsulated in a subclass of
@@ -587,10 +631,10 @@ protected ModelAndView handleRequestInternal(
 			    danger when using tools to manage the domification process.
 
 	        </para>		
-		</sect2>
+		</sect3>
 
 
-		<sect2 id="view-xslt-subclassing">
+		<sect3 id="view-xslt-subclassing">
 
 			<title>Convert the model data to XML</title> 
 
@@ -635,7 +679,8 @@ public class HomePage extends AbstractXsltView {
 
 			</para>
 			
-			<sect3 id="view-xslt-formathelper">
+			
+			<sect4 id="view-xslt-formathelper">
 			
 				<title>Formatting dates and currency</title>
 				
@@ -651,10 +696,10 @@ public class HomePage extends AbstractXsltView {
 
 				</para>	
 				
-			</sect3>
-		</sect2>
+			</sect4>
+		</sect3>
 
-		<sect2 id="view-xslt-viewdefinitions">
+		<sect3 id="view-xslt-viewdefinitions">
 
 			<title>Defining the view properties</title> 
 
@@ -684,10 +729,10 @@ home.root=words
 			 </para>
 
 			 			
-		</sect2>
+		</sect3>
 
 
-		<sect2 id="view-xslt-transforming">
+		<sect3 id="view-xslt-transforming">
 
 			<title>Document transformation</title>
 
@@ -723,8 +768,9 @@ home.root=words
 
 			</para>
 
-		</sect2>
+		</sect3>
 
+		</sect2>
 
 		<sect2 id="view-xslt-summary">
 
@@ -777,83 +823,9 @@ ProjectRoot
 	</sect1>
 
 
-
-    <sect1 id="view-tapestry">
-		<title>Tapestry</title>
-
-		<para>
-
-			intro
-
-		</para>
-		
-		<sect2 id="view-tapestry-config">
-
-			<title>Configuration</title> 
-
-            <para>
-
-			    config
-
-			</para>
-			
-		</sect2>
-
-
-		<sect2 id="view-tapestry-summary">
-
-			<title>Summary</title> 
-
-            <para>
-
-			    summarize files / libs involved
-			
-			</para>
-
-		</sect2>
-
-
-	</sect1>
-
-
-	<sect1 id="view-tiles">
-		<title>Tiles</title>
-
-		<para>
-
-			intro
-
-		</para>
-		
-		<sect2 id="view-tiles-config">
-
-			<title>Configuration</title> 
-
-            <para>
-
-			    config
-
-			</para>
-			
-		</sect2>
-
-
-		<sect2 id="view-tiles-summary">
-
-			<title>Summary</title> 
-
-            <para>
-
-			    summarize files / libs involved
-			
-			</para>
-
-		</sect2>
-
-
-	</sect1>
-
-
+	<!-- ============================================================ -->
+	<!-- Document                                                     -->
+	<!-- ============================================================ -->
     <sect1 id="view-document">
 		<title>Document views (PDF/Excel)</title>
 
@@ -877,6 +849,561 @@ ProjectRoot
 
 
 		<sect2 id="view-document-summary">
+
+			<title>Summary</title> 
+
+            <para>
+
+			    summarize files / libs involved
+			
+			</para>
+
+		</sect2>
+
+
+	</sect1>
+
+
+
+	<!-- ============================================================ -->
+	<!-- Tapestry                                                     -->
+	<!-- ============================================================ -->
+    <sect1 id="view-tapestry">
+		<title>Tapestry</title>
+
+		<para>
+
+			Tapestry is a powerful, component-oriented web application
+			framework from Apache's Jakarta project (<ulink
+			url="http://jakarta.apache.org/tapestry"/>). Spring Framework is a
+			powerful J2EE application framework which is built around the
+			concept of a lightweight container. While Spring has its own
+			powerful web ui layer, there are a number of unique advantages to
+			building a J2EE application using a combination of Tapestry for
+			the web ui, and the Spring container for the lower layers. This
+			document attempts to detail a few best practices for combining
+			these two frameworks. It is expected that you are relatively
+			familiar with both Tapestry and Spring Framework basics, so they
+			will not be explained here. General introductory documentation for
+			both Tapestry and Spring Framework are available on their
+			respective web sites.
+ 
+
+		</para>
+		
+		<sect2 id="view-tapestry-architecture">
+			<title>Architecture</title> 
+            <para>
+
+			    A typical layered J2EE application built with Tapestry and
+			    Spring will consist of a top UI layer built with Tapestry, and
+			    a number of lower layers, hosted out of one or more Spring
+			    Application Contexts.
+
+			</para>
+
+			<para>
+
+			    //TODO Graphic insert
+
+			</para>			
+		</sect2>
+
+
+		<sect2 id="view-tapestry-implementation">
+			<title>Implementation</title> 
+            <para>
+
+			    The only real question (which needs to be addressed by this
+			    document), is how Tapestry pages get access to service
+			    implementations, which are simply beans defined in an instance
+			    of the Spring Application Context.
+
+			</para>
+
+			<sect3 id="view-tapestry-context">
+			<title>Sample application context</title>
+			<para>
+
+			    Assume we have the following simple Application Context
+			    definition, in xml form:
+
+<programlisting><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+       "http://www.springframework.org/dtd/spring-beans.dtd">
+ 
+ <beans>
+ 
+   <!-- ========================= GENERAL DEFINITIONS ========================= -->
+ 
+   <!-- ========================= PERSISTENCE DEFINITIONS ========================= -->
+ 
+   <!-- the DataSource -->
+   <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+     <property name="jndiName"><value>java:DefaultDS</value></property>
+     <property name="inContainer"><value>false</value></property>
+   </bean>
+ 
+   <!-- define a Hibernate Session factory via a Spring LocalSessionFactoryBean -->
+   <bean id="hibSessionFactory" 
+     class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
+     <property name="dataSource"><ref bean="dataSource"/></property>
+   </bean>
+ 
+   <!--
+      - Defines a transaction manager for usage in business or data access objects.
+      - No special treatment by the context, just a bean instance available as reference
+      - for business objects that want to handle transactions, e.g. via TransactionTemplate.
+     -->
+   <bean id="transactionManager" 
+     class="org.springframework.transaction.jta.JtaTransactionManager">
+   </bean>
+ 
+   <bean id="mapper" 
+     class="com.whatever.dataaccess.mapper.hibernate.MapperImpl">
+     <property name="sessionFactory"><ref bean="hibSessionFactory"/></property>
+   </bean>
+   
+   <!-- ========================= BUSINESS DEFINITIONS ========================= -->
+ 
+   <!-- AuthenticationService, including tx interceptor -->
+   <bean id="authenticationServiceTarget"
+         class="com.whatever.services.service.user.AuthenticationServiceImpl">
+     <property name="mapper"><ref bean="mapper"/></property>
+   </bean>
+   <bean id="authenticationService" 
+     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+     <property name="transactionManager"><ref bean="transactionManager"/></property>
+     <property name="target"><ref bean="authenticationServiceTarget"/></property>
+     <property name="proxyInterfacesOnly"><value>true</value></property>
+     <property name="transactionAttributes">
+       <props>
+         <prop key="*">PROPAGATION_REQUIRED</prop>
+       </props>
+     </property>
+   </bean>  
+ 
+   <!-- UserService, including tx interceptor -->
+   <bean id="userServiceTarget"
+         class="com.whatever.services.service.user.UserServiceImpl">
+     <property name="mapper"><ref bean="mapper"/></property>
+   </bean>
+   <bean id="userService" 
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+     <property name="transactionManager"><ref bean="transactionManager"/></property>
+     <property name="target"><ref bean="userServiceTarget"/></property>
+     <property name="proxyInterfacesOnly"><value>true</value></property>
+     <property name="transactionAttributes">
+       <props>
+         <prop key="*">PROPAGATION_REQUIRED</prop>
+       </props>
+     </property>
+   </bean>  
+ 
+ </beans>
+
+ ]]></programlisting>
+
+                 Inside the Tapestry application, we need to load this
+                 application context, and allow Tapestry pages to get the
+                 authenticationService and userService beans, which implement
+                 the AuthenticationService and UserService interfaces,
+                 respectively.
+
+			</para>
+			</sect3>
+
+			<sect3 id="view-tapestry-appctx">
+			<title>Obtaining beans in Tapestry pages</title>
+			<para>
+
+				At this point, the application context is available to a
+				web-app by calling Spring's static utility function
+				WebApplicationContextUtils.getApplicationContext(servletContext),
+				where servletContext is the standard ServletContext from the
+				J2EE Servlet spec. As such, one simple mechanism for a page to
+				get an instance of the UserService, for example, would be with
+				code such as:
+
+<programlisting><![CDATA[
+   WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
+           getRequestCycle().getRequestContext().getServlet().getServletContext());
+   UserService userService = appContext.getBean("userService");
+   ... some code which uses UserService
+]]></programlisting> 
+
+                This mechanism does work. It can be made a lot less verbose by
+                encapsulating most of the functionality in a method in the
+                base class for the page or component. However, in some
+                respects it goes against the Inversion of Control approach
+                which Spring encourages, which is being used in other layers
+                of this app, in that ideally you would like the page to not
+                have to ask the context for a specific bean by name, and in
+                fact, the page would ideally not know about the context at
+                all.
+
+			</para>
+
+			<para>
+ 
+                Luckilly, there is a mechanism to allow this. We rely upon the
+                fact that Tapestry already has a mechanism to declaratively
+                add properties to a page, and it is in fact the preferred
+                approach to manage all properties on a page in this
+                declarative fashion, so that Tapestry can properly maange
+                their lifecycle as part of the page and component lifecycle.
+
+			</para>
+			</sect3>
+
+			<sect3 id="view-tapestry-exposeappctx">
+			<title>Exposing the application context to Tapestry</title>
+			<para>
+ 
+                First we need to make the Application Context available to the
+                Tapestry page or Component without having to have the
+                ServletContext; this is because at the stage in the
+                page's/component's lifecycle when we need to access the
+                Application Context, the ServletContext won't be easily
+                available to the page, so we can't use
+                WebApplicationContextUtils.getApplicationContext(servletContext)
+                directly. One way is by defining a custom version of the
+                Tapestry IEngine which exposes this for us:
+ 
+
+<programlisting><![CDATA[
+ package com.whatever.web.xportal;
+ ...
+ import ...
+ ...
+ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
+ 
+   public static final String APPLICATION_CONTEXT_KEY = "appContext";
+ 
+   /**
+    * @see org.apache.tapestry.engine.AbstractEngine#setupForRequest(org.apache.tapestry.request.RequestContext)
+    */
+   protected void setupForRequest(RequestContext context) {
+     super.setupForRequest(context);
+     
+     // insert ApplicationContext in global, if not there
+     Map global = (Map) getGlobal();
+     ApplicationContext ac = (ApplicationContext) global.get(APPLICATION_CONTEXT_KEY);
+     if (ac == null) {
+       ac = WebApplicationContextUtils.getWebApplicationContext(
+         context.getServlet().getServletContext()
+       );
+       global.put(APPLICATION_CONTEXT_KEY, ac);
+     }
+   }
+ }
+]]></programlisting> 
+ 
+                This engine class places the Spring Application Context as an
+                attribute called "appContext" in this Tapestry app's 'Global'
+                object. Make sure to register the fact that this special
+                IEngine instance should be used for this Tapestry application,
+                with an entry in the Tapestry application definition file. For
+                example:
+ 
+
+<programlisting><![CDATA[
+ file: xportal.application:
+ 
+ <?xml version="1.0" encoding="UTF-8"?>
+ <!--$Id: views.xml,v 1.3 2004-02-04 00:54:22 davison Exp $-->
+ <!DOCTYPE application PUBLIC 
+   "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
+ <application
+     name="Whatever xPortal"
+     engine-class="com.whatever.web.xportal.MyEngine">
+ </application>
+]]></programlisting> 
+
+                </para>
+			</sect3>
+
+
+			<sect3 id="view-tapestry-componentdefs">
+			<title>Component definition files</title>
+			<para>
+                 Now in our page or component definition file (*.page or
+                 *.jwc), we simply add property-specification elements to grab
+                 the beans we need out of the ApplicationContext, and create
+                 page or component properties for them. For example:
+
+<programlisting><![CDATA[
+   <property-specification name="userService"
+                           type="com.whatever.services.service.user.UserService">
+     global.appContext.getBean("userService")
+   </property-specification>
+   <property-specification name="authenticationService"
+                           type="com.whatever.services.service.user.AuthenticationService">
+     global.appContext.getBean("authenticationService")
+   </property-specification>
+]]></programlisting> 
+ 
+                 The OGNL expression inside the property-specification
+                 specifies the initial value for the property, as a bean
+                 obtained from the context. The entire page definition might
+                 look like this:
+ 
+
+<programlisting><![CDATA[
+ <?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE page-specification PUBLIC 
+   "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
+     
+ <page-specification class="com.whatever.web.xportal.pages.Login">
+ 
+   <property-specification name="username" type="java.lang.String"/>
+   <property-specification name="password" type="java.lang.String"/>
+   <property-specification name="error" type="java.lang.String"/>
+   <property-specification name="callback" type="org.apache.tapestry.callback.ICallback" persistent="yes"/>
+   <property-specification name="userService"
+                           type="com.whatever.services.service.user.UserService">
+     global.appContext.getBean("userService")
+   </property-specification>
+   <property-specification name="authenticationService"
+                           type="com.whatever.services.service.user.AuthenticationService">
+     global.appContext.getBean("authenticationService")
+   </property-specification>
+   
+   <bean name="delegate" class="com.whatever.web.xportal.PortalValidationDelegate"/>
+ 
+   <bean name="validator" class="org.apache.tapestry.valid.StringValidator" lifecycle="page">
+       <set-property name="required" expression="true"/>
+       <set-property name="clientScriptingEnabled" expression="true"/>
+   </bean>
+ 
+   <component id="inputUsername" type="ValidField">
+     <static-binding name="displayName" value="Username"/>
+     <binding name="value" expression="username"/>
+     <binding name="validator" expression="beans.validator"/>
+   </component>
+   
+   <component id="inputPassword" type="ValidField">
+     <binding name="value" expression="password"/>
+     <binding name="validator" expression="beans.validator"/>
+     <static-binding name="displayName" value="Password"/>
+     <binding name="hidden" expression="true"/>
+   </component>
+ 
+ </page-specification>
+]]></programlisting> 
+
+                </para>
+				</sect3>
+
+				<sect3 id="view-tapestry-getters">
+				<title>Adding abstract accessors</title>
+				<para> 
+                Now in the Java class definition for the page or component
+                itself, all we need to do is add an abstract getter method for
+                the properties we have defined, to access them. When the page
+                or component is actually loaded by Tapestry, it performs
+                runtime code instrumentation on the classfile to add the
+                properties which have been defined, and hook up the abstract
+                getter methods to the newly created fields. For example:
+ 
+
+<programlisting><![CDATA[
+   // our UserService implementation; will come from page definition
+   public abstract UserService getUserService();
+   // our AuthenticationService implementation; will come from page definition
+   public abstract AuthenticationService getAuthenticationService();
+]]></programlisting> 
+ 
+                For completeness, the entire Java class, for a login page in
+                this example, might look like this:
+ 
+
+<programlisting><![CDATA[
+ package com.whatever.web.xportal.pages;
+ 
+ /**
+  *  Allows the user to login, by providing username and password.
+  *  After succesfully logging in, a cookie is placed on the client browser
+  *  that provides the default username for future logins (the cookie
+  *  persists for a week).
+  */
+ public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
+ 
+   /** the key under which the authenticated user object is stored in the visit as */
+   public static final String USER_KEY = "user";
+   
+   /**
+    * The name of a cookie to store on the user's machine that will identify
+    * them next time they log in.
+    **/
+   private static final String COOKIE_NAME = Login.class.getName() + ".username";  
+   private final static int ONE_WEEK = 7 * 24 * 60 * 60;
+ 
+   // --- attributes
+ 
+   public abstract String getUsername();
+   public abstract void setUsername(String username);
+ 
+   public abstract String getPassword();
+   public abstract void setPassword(String password);
+ 
+   public abstract ICallback getCallback();
+   public abstract void setCallback(ICallback value);
+   
+   public abstract UserService getUserService();
+ 
+   public abstract AuthenticationService getAuthenticationService();
+ 
+   // --- methods
+ 
+   protected IValidationDelegate getValidationDelegate() {
+     return (IValidationDelegate) getBeans().getBean("delegate");
+   }
+ 
+   protected void setErrorField(String componentId, String message) {
+     IFormComponent field = (IFormComponent) getComponent(componentId);
+     IValidationDelegate delegate = getValidationDelegate();
+     delegate.setFormComponent(field);
+     delegate.record(new ValidatorException(message));
+   }
+ 
+   /**
+    *  Attempts to login. 
+    *
+    *  <p>If the user name is not known, or the password is invalid, then an error
+    *  message is displayed.
+    *
+    **/
+   public void attemptLogin(IRequestCycle cycle) {
+     
+     String password = getPassword();
+ 
+     // Do a little extra work to clear out the password.
+ 
+     setPassword(null);
+     IValidationDelegate delegate = getValidationDelegate();
+ 
+     delegate.setFormComponent((IFormComponent) getComponent("inputPassword"));
+     delegate.recordFieldInputValue(null);
+ 
+     // An error, from a validation field, may already have occured.
+ 
+     if (delegate.getHasErrors())
+       return;
+ 
+     try {
+       User user = getAuthenticationService().login(getUsername(), getPassword());
+       loginUser(user, cycle);
+     }
+     catch (FailedLoginException ex) {
+       this.setError("Login failed: " + ex.getMessage());
+       return;
+     }
+   }
+ 
+   /**
+    *  Sets up the {@link User} as the logged in user, creates
+    *  a cookie for their username (for subsequent logins),
+    *  and redirects to the appropriate page, or
+    *  a specified page).
+    *
+    **/
+   public void loginUser(User user, IRequestCycle cycle) {
+     
+     String username = user.getUsername();
+ 
+     // Get the visit object; this will likely force the
+     // creation of the visit object and an HttpSession.
+ 
+     Map visit = (Map) getVisit();
+     visit.put(USER_KEY, user);
+ 
+     // After logging in, go to the MyLibrary page, unless otherwise
+     // specified.
+ 
+     ICallback callback = getCallback();
+ 
+     if (callback == null)
+       cycle.activate("Home");
+     else
+       callback.performCallback(cycle);
+ 
+     // I've found that failing to set a maximum age and a path means that
+     // the browser (IE 5.0 anyway) quietly drops the cookie.
+ 
+     IEngine engine = getEngine();
+     Cookie cookie = new Cookie(COOKIE_NAME, username);
+     cookie.setPath(engine.getServletPath());
+     cookie.setMaxAge(ONE_WEEK);
+ 
+     // Record the user's username in a cookie
+ 
+     cycle.getRequestContext().addCookie(cookie);
+ 
+     engine.forgetPage(getPageName());
+   }
+   
+   public void pageBeginRender(PageEvent event) {
+     if (getUsername() == null)
+       setUsername(getRequestCycle().getRequestContext().getCookieValue(COOKIE_NAME));
+   }
+ }
+]]></programlisting> 
+
+                </para>
+				</sect3>
+
+			</sect2>
+
+			<sect2 id="view-tapestry-summary">
+			<title>Summary</title>
+			<para> 
+                In this example, we've managed to allow service beans defined
+                in the Spring Application Context to be provided to the page
+                in a declarative fashion. The page class does not know where
+                the service implementations are coming from, and in fact it is
+                easy to slip in another implementation, for example, during
+                testing. This inversion of control is one of the prime goals
+                and benefits of the Spring Framework, and we have managed to
+                extend it all the way up the J2EE stack in this Tapestry
+                application.
+
+			</para>
+		</sect2>
+
+
+	</sect1>
+
+
+	<!-- ============================================================ -->
+	<!-- Tiles                                                        -->
+	<!-- ============================================================ -->
+	<sect1 id="view-tiles">
+		<title>Tiles</title>
+
+		<para>
+
+			intro
+
+		</para>
+		
+		<sect2 id="view-tiles-config">
+
+			<title>Configuration</title> 
+
+            <para>
+
+			    config
+
+			</para>
+			
+		</sect2>
+
+
+		<sect2 id="view-tiles-summary">
 
 			<title>Summary</title> 
 
