@@ -94,18 +94,47 @@ import org.springframework.jdbc.support.lob.LobHandler;
  */
 public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
+	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
+
+	private static ThreadLocal configTimeTransactionManagerHolder = new ThreadLocal();
+
 	private static ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
+
+	/**
+	 * Return the DataSource for the currently configured Hibernate SessionFactory,
+	 * to be used by LocalDataSourceConnectionProvoder.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * SessionFactory, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setDataSource
+	 * @see LocalDataSourceConnectionProvider
+	 */
+	public static DataSource getConfigTimeDataSource() {
+		return (DataSource) configTimeDataSourceHolder.get();
+	}
+
+	/**
+	 * Return the JTA TransactionManager for the currently configured Hibernate
+	 * SessionFactory, to be used by LocalTransactionManagerLookup.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * SessionFactory, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setJtaTransactionManager
+	 * @see LocalTransactionManagerLookup
+	 */
+	public static TransactionManager getConfigTimeTransactionManager() {
+		return (TransactionManager) configTimeTransactionManagerHolder.get();
+	}
 
 	/**
 	 * Return the LobHandler for the currently configured Hibernate SessionFactory,
 	 * to be used by Type implementations like ClobStringType.
 	 * <p>This instance will be set before initialization of the corresponding
 	 * SessionFactory, and reset immediately afterwards. It is thus only available
-	 * in constructors of UserType implementations.
+	 * during configuration.
 	 * @see #setLobHandler
 	 * @see org.springframework.orm.hibernate.support.ClobStringType
 	 * @see org.springframework.orm.hibernate.support.BlobByteArrayType
-	 * @see net.sf.hibernate.type.Type
 	 */
 	public static LobHandler getConfigTimeLobHandler() {
 		return (LobHandler) configTimeLobHandlerHolder.get();
@@ -353,13 +382,13 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		if (this.dataSource != null) {
 			// make given DataSource available for SessionFactory configuration
 			config.setProperty(Environment.CONNECTION_PROVIDER, LocalDataSourceConnectionProvider.class.getName());
-			LocalDataSourceConnectionProvider.configTimeDataSourceHolder.set(this.dataSource);
+			configTimeDataSourceHolder.set(this.dataSource);
 		}
 
 		if (this.jtaTransactionManager != null) {
 			// set Spring-provided JTA TransactionManager for Hibernate cache callbacks
 			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
-			LocalTransactionManagerLookup.configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
+			configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
 		}
 
 		if (this.entityInterceptor != null) {
@@ -377,12 +406,12 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 		if (this.jtaTransactionManager != null) {
 			// reset TransactionManager holder
-			LocalTransactionManagerLookup.configTimeTransactionManagerHolder.set(null);
+			configTimeTransactionManagerHolder.set(null);
 		}
 
 		if (this.dataSource != null) {
 			// reset DataSource holder
-			LocalDataSourceConnectionProvider.configTimeDataSourceHolder.set(null);
+			configTimeDataSourceHolder.set(null);
 		}
 
 		if (this.lobHandler != null) {

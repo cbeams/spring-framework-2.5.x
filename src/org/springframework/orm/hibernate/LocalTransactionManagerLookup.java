@@ -44,20 +44,14 @@ import net.sf.hibernate.transaction.TransactionManagerLookup;
  */
 public class LocalTransactionManagerLookup implements TransactionManagerLookup {
 
-	/**
-	 * This will hold the TransactionManager to use for the currently configured
-	 * Hibernate SessionFactory. It will be set just before initialization
-	 * of the respective SessionFactory, and reset immediately afterwards.
-	 */
-	protected static ThreadLocal configTimeTransactionManagerHolder = new ThreadLocal();
-
 	private final TransactionManager transactionManager;
 
 	public LocalTransactionManagerLookup() {
-		TransactionManager tm = (TransactionManager) configTimeTransactionManagerHolder.get();
+		TransactionManager tm = LocalSessionFactoryBean.getConfigTimeTransactionManager();
 		// absolutely needs thread-bound DataSource to initialize
 		if (tm == null) {
-			throw new IllegalStateException("No TransactionManager found - transactionManager property must be set on LocalSessionFactoryBean");
+			throw new IllegalStateException("No JTA TransactionManager found - " +
+			    "jtaTransactionManager property must be set on LocalSessionFactoryBean");
 		}
 		this.transactionManager = tm;
 	}

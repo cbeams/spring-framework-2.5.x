@@ -36,21 +36,14 @@ import net.sf.hibernate.util.JDBCExceptionReporter;
  */
 public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
-	/**
-	 * This will hold the DataSource to use for the currently configured
-	 * Hibernate SessionFactory. It will be set just before initialization
-	 * of the SessionFactory, and reset immediately afterwards.
-	 */
-	protected static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
-
 	private DataSource dataSource;
 
 	public void configure(Properties props) throws HibernateException {
-		this.dataSource = (DataSource) configTimeDataSourceHolder.get();
+		this.dataSource = LocalSessionFactoryBean.getConfigTimeDataSource();
 		// absolutely needs thread-bound DataSource to initialize
 		if (this.dataSource == null) {
 			throw new HibernateException("No local DataSource found for configuration - " +
-			                             "dataSource property must be set on LocalSessionFactoryBean");
+			    "dataSource property must be set on LocalSessionFactoryBean");
 		}
 	}
 
