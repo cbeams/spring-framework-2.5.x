@@ -3,9 +3,9 @@ package org.springframework.ejb.access;
 import javax.ejb.EJBObject;
 
 /**
- * Superclass for interceptors proxying remote EJBs.
- *  @author Rod Johnson
- *  @version $Revision: 1.1.1.1 $
+ * Superclass for interceptors proxying remote Stateless Session Beans.
+ * @author Rod Johnson
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 	
@@ -15,15 +15,16 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @return EJBObject
 	 */
 	protected EJBObject newSessionBeanInstance() {
-		if (logger.isDebugEnabled())
-			logger.debug("Trying to create EJB");
-	
+		if (logger.isDebugEnabled()) {
+			logger.debug("Trying to create reference to remote EJB");
+		}
+
 		EJBObject session = (EJBObject) getHomeBeanWrapper().invoke(CREATE_METHOD, null);
+		// if it throws remote exception (wrapped in bean exception), retry?
 	
-		// if it throws remote exception (wrapped in bean exception, retry?)
-	
-		if (logger.isDebugEnabled())
-			logger.debug("EJB created OK [" + session + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Obtained reference to remote EJB: " + session);
+		}
 		return session;
 	}
 
