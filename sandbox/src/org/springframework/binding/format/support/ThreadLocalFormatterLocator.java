@@ -41,9 +41,9 @@ public class ThreadLocalFormatterLocator implements FormatterLocator {
 
 	private LocaleContext localeContext = new ThreadLocaleContext();
 
-	private Style defaultDateStyle;
+	private Style defaultDateStyle = Style.MEDIUM;
 
-	private Style defaultTimeStyle;
+	private Style defaultTimeStyle = Style.MEDIUM;
 
 	public void setCleanupBroadcaster(ThreadCleanupBroadcaster broadcaster) {
 		formatterStorage.setCleanupBroadcaster(broadcaster);

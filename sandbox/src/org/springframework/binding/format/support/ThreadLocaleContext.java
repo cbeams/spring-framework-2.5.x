@@ -20,7 +20,13 @@ import java.util.Locale;
 import org.springframework.binding.format.LocaleContext;
 
 public class ThreadLocaleContext implements LocaleContext {
-	private static ThreadLocal localeHolder = new ThreadLocal();
+	private static ThreadLocal localeHolder = new LocaleThreadLocal();
+
+	private static class LocaleThreadLocal extends ThreadLocal {
+		protected Object initialValue() {
+			return Locale.getDefault();
+		}
+	}
 
 	public Locale getLocale() {
 		return (Locale)localeHolder.get();

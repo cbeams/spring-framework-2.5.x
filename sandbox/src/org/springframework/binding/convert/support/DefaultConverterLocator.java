@@ -17,6 +17,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.binding.convert.Converter;
 import org.springframework.binding.convert.ConverterLocator;
 import org.springframework.binding.format.FormatterLocator;
+import org.springframework.binding.format.Style;
 import org.springframework.binding.support.TextToMappingConverter;
 
 /**
@@ -71,6 +72,7 @@ public class DefaultConverterLocator implements ConverterLocator, BeanFactoryPos
 
 	protected void addDefaultConverters() {
 		addConverter(new TextToClassConverter());
+		addConverter(new TextToCodedEnumConverter(Style.class));
 		addConverter(new TextToNumberConverter(Short.class, formatterLocator));
 		addConverter(new TextToNumberConverter(Integer.class, formatterLocator));
 		addConverter(new TextToNumberConverter(Long.class, formatterLocator));
