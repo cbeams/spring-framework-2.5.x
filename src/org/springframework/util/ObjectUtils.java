@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.lang.reflect.Array;
+
 /**
  * Miscellaneous object utility methods. Mainly for internal use within the
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
@@ -27,6 +29,8 @@ package org.springframework.util;
  * @see org.apache.commons.lang.ObjectUtils
  */
 public abstract class ObjectUtils {
+
+    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
 	/**
 	 * Determine if the given objects are equal, returning true if both are null
@@ -80,5 +84,26 @@ public abstract class ObjectUtils {
 		}
 		return false;
 	}
+
+    /**
+     * Convert a primitive array to an object array of wrapper objects.
+     * @param primitiveArray the primitive array
+     * @return The object array.
+     * @throws IllegalArgumentException if the parameter is not a primitive array.
+     */
+    public static Object[] toObjectArray(Object primitiveArray) {
+        if (primitiveArray == null) { return EMPTY_OBJECT_ARRAY; }
+        Class clazz = primitiveArray.getClass();
+        Assert.isTrue(clazz.isArray(),
+                "The specified parameter is not an array--it must be a primitive array.");
+        Assert.isTrue(clazz.getComponentType().isPrimitive(),
+                "The specified parameter is not a primitive array.");
+        int length = Array.getLength(primitiveArray);
+        Object[] newArray = new Object[length];
+        for (int i = 0; i < length; i++) {
+            newArray[i] = Array.get(primitiveArray, i);
+        }
+        return newArray;
+    }
 
 }

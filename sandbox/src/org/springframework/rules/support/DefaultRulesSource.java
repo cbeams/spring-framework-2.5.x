@@ -57,7 +57,7 @@ public class DefaultRulesSource extends ConstraintsAccessor implements RulesSour
 
 	public void addRules(String contextId, Rules rules) {
 		Map context = getOrCreateRuleContext(contextId);
-		context.put(rules.getDomainObjectClass(), rules);
+		context.put(rules.getDomainObjectType(), rules);
 	}
 
 	private Map getOrCreateRuleContext(String contextId) {

@@ -25,8 +25,7 @@ import org.springframework.util.closure.Constraint;
  *
  * @author Keith Donald
  */
-public class LessThan extends ComparisonBinaryPredicate implements
-		BinaryConstraint {
+public class LessThan extends ComparisonBinaryPredicate implements BinaryConstraint {
 
 	public static LessThan INSTANCE = new LessThan();
 
@@ -42,8 +41,12 @@ public class LessThan extends ComparisonBinaryPredicate implements
 		return new LessThan(c);
 	}
 
-	public static Constraint value(Object value) {
+	public static Constraint value(Comparable value) {
 		return INSTANCE.bind(instance(), value);
+	}
+
+	public static Constraint value(Comparable value, Comparator comparator) {
+		return INSTANCE.bind(instance(comparator), value);
 	}
 
 	public LessThan() {

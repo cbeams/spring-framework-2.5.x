@@ -17,6 +17,7 @@ package org.springframework.rules.constraint.property;
 
 import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.constraint.ParameterizedBinaryConstraint;
+import org.springframework.util.closure.Constraint;
 
 /**
  * A constraint that returns the result of a <code>boolean</code>
@@ -39,8 +40,11 @@ public class ParameterizedPropertyConstraint implements PropertyConstraint {
 	 *            The constant parameter value participating in the expression.
 	 */
 	public ParameterizedPropertyConstraint(String propertyName, BinaryConstraint expression, Object parameter) {
-		ParameterizedBinaryConstraint valueConstraint = new ParameterizedBinaryConstraint(expression, parameter);
-		this.parameterizedExpression = new PropertyValueConstraint(propertyName, valueConstraint);
+		this(propertyName, new ParameterizedBinaryConstraint(expression, parameter));
+	}
+
+	public ParameterizedPropertyConstraint(String propertyName, Constraint parameterizedExpression) {
+		this.parameterizedExpression = new PropertyValueConstraint(propertyName, parameterizedExpression);
 	}
 
 	public String getPropertyName() {
@@ -50,7 +54,7 @@ public class ParameterizedPropertyConstraint implements PropertyConstraint {
 	public boolean isDependentOn(String propertyName) {
 		return parameterizedExpression.test(propertyName);
 	}
-	
+
 	public boolean isCompoundRule() {
 		return parameterizedExpression.isCompoundRule();
 	}

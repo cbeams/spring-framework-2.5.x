@@ -45,7 +45,7 @@ public class Rules extends ConstraintsAccessor implements Constraint, PropertyCo
 		InitializingBean {
 	private static final Log logger = LogFactory.getLog(Rules.class);
 
-	private Class domainObjectClass;
+	private Class domainObjectType;
 
 	private Map propertiesConstraints = new HashMap();
 
@@ -54,21 +54,21 @@ public class Rules extends ConstraintsAccessor implements Constraint, PropertyCo
 	}
 
 	public Rules(Class domainObjectClass) {
-		setDomainObjectClass(domainObjectClass);
+		setDomainObjectType(domainObjectClass);
 	}
 
 	public Rules(Class domainObjectClass, Map propertiesConstraints) {
-		setDomainObjectClass(domainObjectClass);
+		setDomainObjectType(domainObjectClass);
 		setPropertiesConstraints(propertiesConstraints);
 	}
 
-	public void setDomainObjectClass(Class domainObjectClass) {
-		Assert.notNull(domainObjectClass, "The domainObjectClass property is required");
-		this.domainObjectClass = domainObjectClass;
+	public void setDomainObjectType(Class domainObjectType) {
+		Assert.notNull(domainObjectType, "The domainObjectType property is required");
+		this.domainObjectType = domainObjectType;
 	}
 
-	public Class getDomainObjectClass() {
-		return domainObjectClass;
+	public Class getDomainObjectType() {
+		return domainObjectType;
 	}
 
 	public void afterPropertiesSet() {
@@ -126,8 +126,8 @@ public class Rules extends ConstraintsAccessor implements Constraint, PropertyCo
 	 * @return this, to support chaining.
 	 */
 	public Rules add(PropertyConstraint constraint) {
-		CompoundPropertyConstraint and = (CompoundPropertyConstraint)propertiesConstraints
-				.get(constraint.getPropertyName());
+		CompoundPropertyConstraint and = (CompoundPropertyConstraint)propertiesConstraints.get(constraint
+				.getPropertyName());
 		if (and == null) {
 			putPropertyConstraint(constraint);
 		}
@@ -197,8 +197,8 @@ public class Rules extends ConstraintsAccessor implements Constraint, PropertyCo
 		return true;
 	}
 
-	public boolean supports(Class clazz) {
-		return clazz.equals(this.domainObjectClass);
+	public boolean supports(Class type) {
+		return this.domainObjectType.isAssignableFrom(type);
 	}
 
 	public void validate(final Object bean, final Errors errors) {
@@ -206,7 +206,7 @@ public class Rules extends ConstraintsAccessor implements Constraint, PropertyCo
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("domainObjectClass", domainObjectClass).append("propertyRules",
+		return new ToStringCreator(this).append("domainObjectClass", domainObjectType).append("propertyRules",
 				propertiesConstraints).toString();
 	}
 

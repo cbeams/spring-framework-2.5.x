@@ -41,8 +41,8 @@ public class PropertyValueConstraint extends AbstractPropertyConstraint implemen
 	public PropertyValueConstraint(String propertyName, Constraint valueConstraint) {
 		super(propertyName);
 		Assert.notNull(valueConstraint, "valueConstraint is required");
-		Assert.isTrue(!(valueConstraint instanceof PropertyConstraint), "valueConstraint needs to be of type "
-				+ PropertyConstraint.class.getName());
+		Assert.isTrue(!(valueConstraint instanceof PropertyConstraint),
+				"valueConstraint cannot be a PropertyConstraint - it must be a plain constraint that tests property values!");
 		this.valueConstraint = valueConstraint;
 	}
 

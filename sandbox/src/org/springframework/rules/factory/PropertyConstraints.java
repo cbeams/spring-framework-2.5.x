@@ -52,19 +52,19 @@ public class PropertyConstraints extends AlgorithmsAccessor {
 		return c.eq(propertyName, value);
 	}
 
-	public PropertyConstraint lt(Object value) {
+	public PropertyConstraint lt(Comparable value) {
 		return c.lt(propertyName, value);
 	}
 
-	public PropertyConstraint lte(Object value) {
+	public PropertyConstraint lte(Comparable value) {
 		return c.lte(propertyName, value);
 	}
 
-	public PropertyConstraint gt(Object value) {
+	public PropertyConstraint gt(Comparable value) {
 		return c.gte(propertyName, value);
 	}
 
-	public PropertyConstraint gte(Object value) {
+	public PropertyConstraint gte(Comparable value) {
 		return c.gte(propertyName, value);
 	}
 

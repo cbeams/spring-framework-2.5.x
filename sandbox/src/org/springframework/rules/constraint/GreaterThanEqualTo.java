@@ -26,8 +26,7 @@ import org.springframework.util.closure.Constraint;
  *
  * @author Keith Donald
  */
-public class GreaterThanEqualTo extends ComparisonBinaryPredicate implements
-		BinaryConstraint {
+public class GreaterThanEqualTo extends ComparisonBinaryPredicate implements BinaryConstraint {
 
 	public static GreaterThanEqualTo INSTANCE = new GreaterThanEqualTo();
 
@@ -43,8 +42,12 @@ public class GreaterThanEqualTo extends ComparisonBinaryPredicate implements
 		return new GreaterThanEqualTo(c);
 	}
 
-	public static Constraint value(Object value) {
+	public static Constraint value(Comparable value) {
 		return INSTANCE.bind(instance(), value);
+	}
+
+	public static Constraint value(Comparable value, Comparator comparator) {
+		return INSTANCE.bind(instance(comparator), value);
 	}
 
 	public GreaterThanEqualTo() {

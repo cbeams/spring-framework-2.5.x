@@ -15,6 +15,8 @@
  */
 package org.springframework.rules.constraint;
 
+import java.util.Comparator;
+
 import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.closure.Constraint;
@@ -28,7 +30,7 @@ public class EqualTo extends ComparisonBinaryPredicate {
 
 	public static EqualTo INSTANCE = new EqualTo();
 
-	public static synchronized BinaryConstraint instance() {
+	public static BinaryConstraint instance() {
 		return INSTANCE;
 	}
 
@@ -36,12 +38,24 @@ public class EqualTo extends ComparisonBinaryPredicate {
 		INSTANCE = instance;
 	}
 
+	public static BinaryConstraint instance(Comparator c) {
+		return new GreaterThan(c);
+	}
+
 	public static Constraint value(Object value) {
 		return INSTANCE.bind(instance(), value);
 	}
 
+	public static Constraint value(Object value, Comparator comparator) {
+		return INSTANCE.bind(instance(comparator), value);
+	}
+
 	public EqualTo() {
 		super();
+	}
+
+	public EqualTo(Comparator comparator) {
+		super(comparator);
 	}
 
 	/**

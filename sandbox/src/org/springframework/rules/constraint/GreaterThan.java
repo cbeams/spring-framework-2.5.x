@@ -41,8 +41,12 @@ public class GreaterThan extends ComparisonBinaryPredicate implements BinaryCons
 		return new GreaterThan(c);
 	}
 
-	public static Constraint value(Object value) {
+	public static Constraint value(Comparable value) {
 		return INSTANCE.bind(instance(), value);
+	}
+
+	public static Constraint value(Comparable value, Comparator comparator) {
+		return INSTANCE.bind(instance(comparator), value);
 	}
 
 	public GreaterThan() {

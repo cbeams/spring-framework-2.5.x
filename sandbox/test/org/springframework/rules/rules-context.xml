@@ -20,10 +20,10 @@
   		<property name="rules">
   			<list>
 				<bean class="org.springframework.rules.Rules">
-					<property name="beanClass">
+					<property name="domainObjectType">
 						<value>org.springframework.rules.Person</value>
 					</property>
-	  				<property name="propertyRules">
+	  				<property name="propertiesConstraints">
 	  		 			<map>
 	  		 				<entry key="firstName">
 	  							<ref bean="required"/>

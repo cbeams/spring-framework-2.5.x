@@ -15,6 +15,7 @@
  */
 package org.springframework.rules.constraint;
 
+import java.util.Comparator;
 import java.util.Set;
 
 import org.springframework.rules.closure.BinaryConstraint;
@@ -58,6 +59,102 @@ public class ConstraintsAccessor extends AlgorithmsAccessor {
 
 	public Constraint testResultOf(Closure closure, Constraint constraint) {
 		return getConstraints().testResultOf(closure, constraint);
+	}
+
+	public Constraint eq(Object value) {
+		return getConstraints().eq(value);
+	}
+
+	public Constraint eq(int value) {
+		return getConstraints().eq(value);
+	}
+
+	public Constraint eq(Object value, Comparator comparator) {
+		return getConstraints().eq(value, comparator);
+	}
+
+	public Constraint gt(Comparable value) {
+		return getConstraints().gt(value);
+	}
+
+	public Constraint gt(int value) {
+		return getConstraints().gt(value);
+	}
+
+	public Constraint gt(Comparable value, Comparator comparator) {
+		return getConstraints().gt(value);
+	}
+
+	public Constraint gte(Comparable value) {
+		return getConstraints().gte(value);
+	}
+
+	public Constraint gte(int value) {
+		return getConstraints().gte(value);
+	}
+
+	public Constraint gte(Comparable value, Comparator comparator) {
+		return getConstraints().gte(value, comparator);
+	}
+
+	public Constraint lt(Comparable value) {
+		return getConstraints().lt(value);
+	}
+
+	public Constraint lt(int value) {
+		return getConstraints().lt(value);
+	}
+
+	public Constraint lt(Comparable value, Comparator comparator) {
+		return getConstraints().lt(value, comparator);
+	}
+
+	public Constraint lte(Comparable value) {
+		return getConstraints().lte(value);
+	}
+
+	public Constraint lte(int value) {
+		return getConstraints().lte(value);
+	}
+
+	public Constraint lte(Comparable value, Comparator comparator) {
+		return getConstraints().lte(value, comparator);
+	}
+
+	public Constraint range(Comparable min, Comparable max) {
+		return getConstraints().range(min, max);
+	}
+
+	public Constraint range(Object min, Object max, Comparator comparator) {
+		return getConstraints().range(min, max, comparator);
+	}
+
+	public Constraint range(int min, int max) {
+		return getConstraints().range(min, max);
+	}
+
+	public Constraint between(Comparable min, Comparable max) {
+		return getConstraints().between(min, max);
+	}
+
+	public Constraint between(Object min, Object max, Comparator comparator) {
+		return getConstraints().between(min, max, comparator);
+	}
+
+	public Constraint between(int min, int max) {
+		return getConstraints().between(min, max);
+	}
+
+	public Constraint present() {
+		return getConstraints().present();
+	}
+
+	public Constraint ifTrue(Constraint constraint, Constraint mustAlsoBeTrue) {
+		return getConstraints().ifTrue(constraint, mustAlsoBeTrue);
+	}
+
+	public Constraint ifTrueElse(Constraint constraint, Constraint mustAlsoBeTrue, Constraint elseMustAlsoBeTrue) {
+		return getConstraints().ifTrue(constraint, mustAlsoBeTrue, elseMustAlsoBeTrue);
 	}
 
 	public Constraint and(Constraint constraint1, Constraint constraint2) {
@@ -156,19 +253,19 @@ public class ConstraintsAccessor extends AlgorithmsAccessor {
 		return getConstraints().eq(propertyName, propertyValue);
 	}
 
-	public PropertyConstraint gt(String propertyName, Object propertyValue) {
+	public PropertyConstraint gt(String propertyName, Comparable propertyValue) {
 		return getConstraints().gt(propertyName, propertyValue);
 	}
 
-	public PropertyConstraint gte(String propertyName, Object propertyValue) {
+	public PropertyConstraint gte(String propertyName, Comparable propertyValue) {
 		return getConstraints().gte(propertyName, propertyValue);
 	}
 
-	public PropertyConstraint lt(String propertyName, Object propertyValue) {
+	public PropertyConstraint lt(String propertyName, Comparable propertyValue) {
 		return getConstraints().lt(propertyName, propertyValue);
 	}
 
-	public PropertyConstraint lte(String propertyName, Object propertyValue) {
+	public PropertyConstraint lte(String propertyName, Comparable propertyValue) {
 		return getConstraints().lte(propertyName, propertyValue);
 	}
 
