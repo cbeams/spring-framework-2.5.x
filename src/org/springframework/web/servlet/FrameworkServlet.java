@@ -75,7 +75,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @see #doService
  * @see #initFrameworkServlet
  * @see #setContextClass
@@ -311,33 +311,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 
 	/**
-	 * It's up to each subclass to decide whether or not it supports a request method.
-	 * It should throw a Servlet exception if it doesn't support a particular request type.
-	 * This might commonly be done with GET for forms, for example
-	 */
-	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
-		serviceWrapper(request, response);
-	}
-
-	/**
-	 * It's up to each subclass to decide whether or not it supports a request method.
-	 * It should throw a Servlet exception if it doesn't support a particular request type.
-	 * This might commonly be done with GET for forms, for example
-	 */
-	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
-		serviceWrapper(request, response);
-	}
-
-	/**
 	 * Handle this request, publishing an event regardless of the outcome.
 	 * The actually event handling is performed by the abstract doService() method.
-	 * Both doGet() and doPost() are handled by this method.
 	 */
-	private void serviceWrapper(HttpServletRequest request, HttpServletResponse response)
+	protected final void service(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
-
 		long startTime = System.currentTimeMillis();
 		Exception failureCause = null;
 		try {
