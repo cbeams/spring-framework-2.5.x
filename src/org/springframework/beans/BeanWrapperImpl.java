@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.5 2003-08-28 17:23:19 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.6 2003-10-13 23:29:27 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -314,25 +314,28 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	public Object doTypeConversionIfNecessary(Object target, String propertyName, Object oldValue,
 																						Object newValue, Class requiredType) throws BeansException {
-		// Only need to cast if value isn't null
 		if (newValue != null) {
-			// We may need to change the value of newValue
-			// custom editor for this type?
+			// Custom editor for this type?
 			PropertyEditor pe = findCustomEditor(requiredType, propertyName);
+			// Value not of required type?
 			if ((pe != null || !requiredType.isAssignableFrom(newValue.getClass()))) {
+
 				if (newValue instanceof String[]) {
+					// Convert String array to String
 					newValue = StringUtils.arrayToCommaDelimitedString((String[])newValue);
 					if (logger.isDebugEnabled())
 						logger.debug("Convert: StringArray to CommaDelimitedString");
 				}
+
 				if (newValue instanceof String) {
+					// Use PropertyEditor's setAsText in case of a String value
 					if (logger.isDebugEnabled())
 						logger.debug("Convert: String to " + requiredType);
 					if (pe == null) {
-						// no custom editor -> check BeanWrapper's default editors
+						// No custom editor -> check BeanWrapper's default editors
 						pe = (PropertyEditor) defaultEditors.get(requiredType);
 						if (pe == null) {
-							// no BeanWrapper default editor -> check standard editors
+							// No BeanWrapper default editor -> check standard JavaBean editors
 							pe = PropertyEditorManager.findEditor(requiredType);
 						}
 					}
@@ -347,6 +350,21 @@ public class BeanWrapperImpl implements BeanWrapper {
 							throw new TypeMismatchException(
 									new PropertyChangeEvent(target, this.nestedPath + propertyName, oldValue, newValue), requiredType, ex);
 						}
+					}
+				}
+
+				else if (pe != null) {
+					// Not a String -> use PropertyEditor's setValue
+					// With standard PropertyEditors, this will return the very same object;
+					// we just want to allow special PropertyEditors to override setValue
+					// for type conversion from non-String values to the required type.
+					try {
+						pe.setValue(newValue);
+						newValue = pe.getValue();
+					}
+					catch (IllegalArgumentException ex) {
+						throw new TypeMismatchException(
+								new PropertyChangeEvent(target, this.nestedPath + propertyName, oldValue, newValue), requiredType, ex);
 					}
 				}
 			}
@@ -375,7 +393,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	private String getFinalPath(String nestedPath) {
 		String finalPath = nestedPath.substring(nestedPath.lastIndexOf(NESTED_PROPERTY_SEPARATOR) + 1);
-		;
 		if (logger.isDebugEnabled()) {
 			logger.debug("Final path in nested property value '" + nestedPath + "' is '" + finalPath + "'");
 		}
