@@ -148,10 +148,10 @@ public class Transition implements Serializable {
 		}
 		else {
 			//implementation note: this inner class is not a class constant
-			//because we want toString() to return the eventId
+			//because we need the eventId
 			return new Constraint() {
-				public boolean test(Object eventId) {
-					return eventId.equals(eventId);
+				public boolean test(Object argument) {
+					return eventId.equals(argument);
 				}
 	
 				public String toString() {
