@@ -39,10 +39,8 @@ import javax.servlet.jsp.PageContext;
  * testing applications when testing custom JSP tags.
  *
  * <p>Note: Expects initialization via the constructor rather than
- * via the PageContext.initialize method. Just supports attributes
- * at one level rather than overriding ones in request, page, etc.
- * Does not support writing to a JspWriter, request dispatching,
- * and handlePageException calls.
+ * via the PageContext.initialize method. Does not support writing to
+ * a JspWriter, request dispatching, and handlePageException calls.
  *
  * @author Juergen Hoeller
  * @since 30.04.2004
@@ -96,8 +94,8 @@ public class MockPageContext extends PageContext {
 	 * @param response the current HttpServletResponse
 	 * (only necessary when writing to the response)
 	 */
-	public MockPageContext(ServletContext servletContext, HttpServletRequest request,
-												 HttpServletResponse response) {
+	public MockPageContext(
+			ServletContext servletContext, HttpServletRequest request, HttpServletResponse response) {
 		this(servletContext, request, response, new MockServletConfig(servletContext));
 	}
 
@@ -109,8 +107,9 @@ public class MockPageContext extends PageContext {
 	 * @param servletConfig the ServletConfig
 	 * (hardly ever accessed from within a tag)
 	 */
-	public MockPageContext(ServletContext servletContext, HttpServletRequest request,
-												 HttpServletResponse response, ServletConfig servletConfig) {
+	public MockPageContext(
+			ServletContext servletContext, HttpServletRequest request, HttpServletResponse response,
+			ServletConfig servletConfig) {
 		this.servletContext = servletContext;
 		this.servletConfig = servletConfig;
 		this.request = request;
@@ -118,8 +117,9 @@ public class MockPageContext extends PageContext {
 	}
 
 
-	public void initialize(Servlet servlet, ServletRequest request, ServletResponse response,
-												 String errorPageURL, boolean needsSession, int bufferSize, boolean autoFlush) {
+	public void initialize(
+			Servlet servlet, ServletRequest request, ServletResponse response,
+			String errorPageURL, boolean needsSession, int bufferSize, boolean autoFlush) {
 		throw new UnsupportedOperationException("Use appropriate constructor");
 	}
 
@@ -131,7 +131,22 @@ public class MockPageContext extends PageContext {
 	}
 
 	public void setAttribute(String name, Object value, int scope) {
-		setAttribute(name, value);
+		switch (scope) {
+			case PAGE_SCOPE:
+				setAttribute(name, value);
+				break;
+			case REQUEST_SCOPE:
+				this.request.setAttribute(name, value);
+				break;
+			case SESSION_SCOPE:
+				this.request.getSession().setAttribute(name, value);
+				break;
+			case APPLICATION_SCOPE:
+				this.servletContext.setAttribute(name, value);
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid scope: " + scope);
+		}
 	}
 
 	public Object getAttribute(String name) {
@@ -139,11 +154,33 @@ public class MockPageContext extends PageContext {
 	}
 
 	public Object getAttribute(String name, int scope) {
-		return getAttribute(name);
+		switch (scope) {
+			case PAGE_SCOPE:
+				return getAttribute(name);
+			case REQUEST_SCOPE:
+				return this.request.getAttribute(name);
+			case SESSION_SCOPE:
+				HttpSession session = this.request.getSession(false);
+				return (session != null ? session.getAttribute(name) : null);
+			case APPLICATION_SCOPE:
+				return this.servletContext.getAttribute(name);
+			default:
+				throw new IllegalArgumentException("Invalid scope: " + scope);
+		}
 	}
 
 	public Object findAttribute(String name) {
-		return getAttribute(name);
+		Object value = getAttribute(name);
+		if (value == null) {
+			value = getAttribute(name, REQUEST_SCOPE);
+			if (value == null) {
+				value = getAttribute(name, SESSION_SCOPE);
+				if (value == null) {
+					value = getAttribute(name, APPLICATION_SCOPE);
+				}
+			}
+		}
+		return value;
 	}
 
 	public void removeAttribute(String name) {
@@ -151,15 +188,60 @@ public class MockPageContext extends PageContext {
 	}
 
 	public void removeAttribute(String name, int scope) {
-		removeAttribute(name);
+		switch (scope) {
+			case PAGE_SCOPE:
+				removeAttribute(name);
+				break;
+			case REQUEST_SCOPE:
+				this.request.removeAttribute(name);
+				break;
+			case SESSION_SCOPE:
+				this.request.getSession().removeAttribute(name);
+				break;
+			case APPLICATION_SCOPE:
+				this.servletContext.removeAttribute(name);
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid scope: " + scope);
+		}
 	}
 
 	public int getAttributesScope(String name) {
-		return PAGE_SCOPE;
+		if (getAttribute(name) != null) {
+			return PAGE_SCOPE;
+		}
+		else if (getAttribute(name, REQUEST_SCOPE) != null) {
+			return REQUEST_SCOPE;
+		}
+		else if (getAttribute(name, SESSION_SCOPE) != null) {
+			return SESSION_SCOPE;
+		}
+		else if (getAttribute(name, APPLICATION_SCOPE) != null) {
+			return APPLICATION_SCOPE;
+		}
+		else {
+			return 0;
+		}
+	}
+
+	public Enumeration getAttributeNames() {
+		return this.attributes.elements();
 	}
 
 	public Enumeration getAttributeNamesInScope(int scope) {
-		return this.attributes.keys();
+		switch (scope) {
+			case PAGE_SCOPE:
+				return getAttributeNames();
+			case REQUEST_SCOPE:
+				return this.request.getAttributeNames();
+			case SESSION_SCOPE:
+				HttpSession session = this.request.getSession(false);
+				return (session != null ? session.getAttributeNames() : null);
+			case APPLICATION_SCOPE:
+				return this.servletContext.getAttributeNames();
+			default:
+				throw new IllegalArgumentException("Invalid scope: " + scope);
+		}
 	}
 
 	public JspWriter getOut() {
@@ -171,7 +253,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public Object getPage() {
-		throw new UnsupportedOperationException("getException");
+		throw new UnsupportedOperationException("getPage");
 	}
 
 	public ServletRequest getRequest() {
