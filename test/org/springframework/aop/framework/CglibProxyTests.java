@@ -22,6 +22,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContextException;
@@ -189,10 +190,22 @@ public class CglibProxyTests extends AbstractAopProxyTests {
         NoArgCtorTestBean proxy = (NoArgCtorTestBean) aop.getProxy();
         proxy = (NoArgCtorTestBean) aop.getProxy();
 
-        // assertEquals("The name property has not been set", "Rob Harrop", proxy.getName());
-        // assertEquals("The age property has not been set", 22, proxy.getAge());
+        assertNotNull("Proxy should be null", proxy);
     }
 
+    public void testUnadvisedProxyCreationWithCallDuringConstructor() throws Exception {
+        CglibTestBean target = new CglibTestBean();
+        AdvisedSupport pc = new AdvisedSupport(new Class[]{});
+        mockTargetSource.setTarget(target);
+        pc.setTargetSource(mockTargetSource);
+
+        Cglib2AopProxy aop = new Cglib2AopProxy(pc);
+        CglibTestBean proxy = (CglibTestBean)aop.getProxy();
+
+        assertNotNull("Proxy should not be null", proxy);
+
+    }
+    
     // TODO: fails with a ClassFormatError
     /*
     public void testProxyAProxy() {
