@@ -426,12 +426,12 @@
 			<version>1.4</version>
 		</dependency>
 		<dependency>
-			<groupId>velocity</groupId>
+			<groupId>velocity-tools</groupId>
 			<artifactId>velocity-tools-generic</artifactId>
 			<version>1.1</version>
 		</dependency>
 		<dependency>
-			<groupId>velocity</groupId>
+			<groupId>velocity-tools</groupId>
 			<artifactId>velocity-tools-view</artifactId>
 			<version>1.1</version>
 		</dependency>
