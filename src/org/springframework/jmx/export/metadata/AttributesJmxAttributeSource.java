@@ -19,6 +19,7 @@ package org.springframework.jmx.export.metadata;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,10 +28,11 @@ import org.springframework.metadata.Attributes;
 /**
  * Implementation of the <code>JmxAttributeSource</code> interface that
  * reads metadata via Spring's <code>Attributes</code> abstraction.
+ *
  * @author Rob Harrop
- * @since 1.2
  * @see org.springframework.metadata.Attributes
  * @see org.springframework.metadata.commons.CommonsAttributes
+ * @since 1.2
  */
 public class AttributesJmxAttributeSource implements JmxAttributeSource, InitializingBean {
 
@@ -42,6 +44,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 
 	/**
 	 * Create a new AttributesJmxAttributeSource.
+	 *
 	 * @see #setAttributes
 	 */
 	public AttributesJmxAttributeSource() {
@@ -49,6 +52,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 
 	/**
 	 * Create a new AttributesJmxAttributeSource.
+	 *
 	 * @param attributes the Attributes implementation to use
 	 */
 	public AttributesJmxAttributeSource(Attributes attributes) {
@@ -75,6 +79,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	/**
 	 * If the specified class has a <code>ManagedResource</code> attribute,
 	 * then it is returned. Otherwise returns null.
+	 *
 	 * @param clazz the class to read the attribute data from
 	 * @return the attribute, or null if not found
 	 * @throws InvalidMetadataException if more than one attribute exists
@@ -95,16 +100,16 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	/**
 	 * If the specified method has a <code>ManagedAttribute</code> attribute,
 	 * then it is returned. Otherwise returns null.
+	 *
 	 * @param method the method to read the attribute data from
 	 * @return the attribute, or null if not found
 	 * @throws InvalidMetadataException if more than one attribute exists,
-	 * or if the supplied method does not represent a JavaBean property
+	 *                                  or if the supplied method does not represent a JavaBean property
 	 */
 	public ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd == null) {
-			throw new InvalidMetadataException(
-					"The ManagedAttribute attribute is only valid for JavaBean properties: " +
+			throw new InvalidMetadataException("The ManagedAttribute attribute is only valid for JavaBean properties: " +
 					"use ManagedOperation for methods");
 		}
 		Collection attrs = this.attributes.getAttributes(method, ManagedAttribute.class);
@@ -122,16 +127,16 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	/**
 	 * If the specified method has a <code>ManagedOperation</code> attribute,
 	 * then it is returned. Otherwise return null.
+	 *
 	 * @param method the method to read the attribute data from
 	 * @return the attribute, or null if not found
 	 * @throws InvalidMetadataException if more than one attribute exists,
-	 * or if the supplied method represents a JavaBean property
+	 *                                  or if the supplied method represents a JavaBean property
 	 */
 	public ManagedOperation getManagedOperation(Method method) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
-			throw new InvalidMetadataException(
-					"The ManagedOperation attribute is not valid for JavaBean properties: "+
+			throw new InvalidMetadataException("The ManagedOperation attribute is not valid for JavaBean properties: " +
 					"use ManagedAttribute instead");
 		}
 		Collection attrs = this.attributes.getAttributes(method, ManagedOperation.class);
@@ -150,21 +155,37 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	 * If the specified method has <code>ManagedOperationParameters</code> then these
 	 * are returned, otherwise a zero length array of <code>ManagedOperationParameter</code>
 	 * is returned.
+	 *
 	 * @param method the <code>Method</code> to get the <code>ManagedOperationParameter</code>s for.
 	 * @return the array of <code>ManagedOperationParameter</code>.
 	 * @throws InvalidMetadataException if the number of <code>ManagedOperationParameter</code>s does not match the number
-	 * of parameters in the <code>Method</code>
+	 *                                  of parameters in the <code>Method</code>
 	 */
 	public ManagedOperationParameter[] getManagedOperationParameters(Method method) throws InvalidMetadataException {
 		Collection attrs = this.attributes.getAttributes(method, ManagedOperationParameter.class);
 
-		if(attrs.size() == 0) {
+		if (attrs.size() == 0) {
 			return new ManagedOperationParameter[0];
-		} else if(attrs.size() != method.getParameterTypes().length) {
+		}
+		else if (attrs.size() != method.getParameterTypes().length) {
 			throw new InvalidMetadataException("Method [" + method +
 					"] has an incorrect number of ManagedOperationParameters specified");
-		} else {
-			return (ManagedOperationParameter[]) attrs.toArray(new ManagedOperationParameter[attrs.size()]);
+		}
+		else {
+			ManagedOperationParameter[] params = new ManagedOperationParameter[attrs.size()];
+
+			for (Iterator itr = attrs.iterator(); itr.hasNext();) {
+				ManagedOperationParameter param = (ManagedOperationParameter) itr.next();
+
+				if (param.getIndex() < 0 || param.getIndex() >= params.length) {
+					throw new InvalidMetadataException("ManagedOperationParameter index for [" +
+							param.getName() + "] is out of bounds.");
+				}
+
+				params[param.getIndex()] = param;
+			}
+
+			return params;
 		}
 	}
 }

@@ -22,6 +22,11 @@ package org.springframework.jmx.export.metadata;
 public class ManagedOperationParameter {
 
 	/**
+	 * Stores the index of the parameter.
+	 */
+	private int index = 0;
+
+	/**
 	 * Stores the name of the parameter.
 	 */
 	private String name = "";
@@ -57,5 +62,19 @@ public class ManagedOperationParameter {
 	 */
 	public String getName() {
 		return this.name;
+	}
+
+	/**
+	 * Gets the index of the parameter in the operation signature.
+	 */
+	public int getIndex() {
+		return index;
+	}
+
+  /**
+	 * Sets the index of the parameter
+	 */ 
+	public void setIndex(int index) {
+		this.index = index;
 	}
 }
