@@ -1,4 +1,5 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
+<%@ include file="/WEB-INF/jsp/header.jsp" %>
 
 <P>
 <H2><c:if test="${command.new}">New </c:if>Owner:</H2>
@@ -23,4 +24,5 @@
 </FORM>
 <P>
 <BR>
-<A href="<c:url value="/welcome.htm"/>">Home</A>
+
+<%@ include file="/WEB-INF/jsp/footer.jsp" %>

@@ -1,4 +1,5 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
+<%@ include file="/WEB-INF/jsp/header.jsp" %>
 
 <P>
 <H2>Find Owners:</H2>
@@ -17,4 +18,5 @@
 <A href="<c:url value="/addOwner.htm"/>">Add Owner</A>
 <P>
 <BR>
-<A href="<c:url value="/welcome.htm"/>">Home</A>
+
+<%@ include file="/WEB-INF/jsp/footer.jsp" %>

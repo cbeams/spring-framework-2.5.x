@@ -1,4 +1,5 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
+<%@ include file="/WEB-INF/jsp/header.jsp" %>
 
 <H2>Internal error</H2>
 <P>
@@ -43,6 +44,6 @@ try {
 
 <P>
 <BR>
-<A href="<c:url value="/welcome.htm"/>">Home</A>
 
 
+<%@ include file="/WEB-INF/jsp/footer.jsp" %>

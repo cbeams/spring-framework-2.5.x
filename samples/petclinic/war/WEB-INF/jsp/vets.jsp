@@ -1,8 +1,9 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
+<%@ include file="/WEB-INF/jsp/header.jsp" %>
 
 <P>
 <H2>Veterinarians:</H2>
-<TABLE border="true">
+<TABLE border="1">
   <TH>Name</TH><TH>Specialties</TH>
   <c:forEach var="vet" items="${vets}">
     <TR>
@@ -20,4 +21,5 @@
 </TABLE>
 <P>
 <BR>
-<A href="<c:url value="/welcome.htm"/>">Home</A>
+
+<%@ include file="/WEB-INF/jsp/footer.jsp" %>
