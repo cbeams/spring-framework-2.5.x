@@ -10,7 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Manages resources and transactions synchronizations per thread.
+ * Internal class that manages resources and transaction synchronizations per thread.
  * Supports one resource per key without overwriting, i.e. a resource needs to
  * be removed before a new one can be set for the same key.
  * Supports a list of transaction synchronizations if synchronization is active.
@@ -18,12 +18,13 @@ import org.apache.commons.logging.LogFactory;
  * <p>Resource management code should check for thread-bound resources, e.g. JDBC
  * Connections or Hibernate Sessions, via getResource. It is normally not supposed
  * to bind resources to threads, as this is the responsiblity of transaction managers.
- * An exception is binding on first use if transaction synchronization is active.
+ * A further option is to lazily bind on first use if transaction synchronization
+ * is active, for performing transactions that span an arbitrary number of resources.
  *
  * <p>Transaction synchronization must be activated and deactivated by a transaction
- * manager via initSynchronization and clearSynchronization. Automatically supported
- * by AbstractPlatformTransactionManager, and thus by all standard Spring transaction
- * managers, like JtaTransactionManager.
+ * manager via initSynchronization and clearSynchronization. This is automatically
+ * supported by AbstractPlatformTransactionManager, and thus by all standard Spring
+ * transaction managers, like HibernateTransactionManager and JtaTransactionManager.
  *
  * <p>Resource management code should only register synchronizations when this
  * manager is active, and perform resource cleanup immediately else.
@@ -33,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>Synchronization is for example used to always return the same resources like
  * JDBC Connections or Hibernate Sessions within a JTA transaction, for any given
  * DataSource or SessionFactory. In the Hibernate case, the afterCompletion Session
- * close calls allow for proper transactional handling of the JVM-level cache with JTA.
+ * close calls allow for proper transactional JVM-level caching even with JTA.
  *
  * @author Juergen Hoeller
  * @since 02.06.2003
@@ -58,6 +59,10 @@ public abstract class TransactionSynchronizationManager {
 
 	private static final ThreadLocal synchronizations = new ThreadLocal();
 
+
+	//-------------------------------------------------------------------------
+	// Management of transaction-associated resource handles
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Return all resources that are bound to the current thread.
@@ -87,7 +92,8 @@ public abstract class TransactionSynchronizationManager {
 	public static Object getResource(Object key) {
 		Object value = getResourceMap().get(key);
 		if (value != null && logger.isDebugEnabled()) {
-			logger.debug("Retrieved value [" + value + "] for key [" + key + "] bound to thread [" + Thread.currentThread().getName() + "]");
+			logger.debug("Retrieved value [" + value + "] for key [" + key + "] bound to thread [" +
+									 Thread.currentThread().getName() + "]");
 		}
 		return value;
 	}
@@ -98,13 +104,14 @@ public abstract class TransactionSynchronizationManager {
 	 * @param value value to bind
 	 * @throws IllegalStateException if there is already a value bound to the thread
 	 */
-	public static void bindResource(Object key, Object value) {
+	public static void bindResource(Object key, Object value) throws IllegalStateException {
 		if (hasResource(key)) {
 			throw new IllegalStateException("Already a value for key [" + key + "] bound to thread");
 		}
 		getResourceMap().put(key, value);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Bound value [" + value + "] for key [" + key + "] to thread [" + Thread.currentThread().getName() + "]");
+			logger.debug("Bound value [" + value + "] for key [" + key + "] to thread [" +
+									 Thread.currentThread().getName() + "]");
 		}
 	}
 
@@ -114,17 +121,22 @@ public abstract class TransactionSynchronizationManager {
 	 * @return the previously bound value
 	 * @throws IllegalStateException if there is no value bound to the thread
 	 */
-	public static Object unbindResource(Object key) {
+	public static Object unbindResource(Object key) throws IllegalStateException {
 		if (!hasResource(key)) {
 			throw new IllegalStateException("No value for key [" + key + "] bound to thread");
 		}
 		Object value = getResourceMap().remove(key);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Removed value [" + value + "] for key [" + key + "] from thread [" + Thread.currentThread().getName() + "]");
+			logger.debug("Removed value [" + value + "] for key [" + key + "] from thread [" +
+									 Thread.currentThread().getName() + "]");
 		}
 		return value;
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Management of transaction synchronizations
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Return if thread synchronizations are active for the current thread.
@@ -168,7 +180,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @throws IllegalStateException if synchronization is not active
 	 * @see TransactionSynchronization
 	 */
-	public static List getSynchronizations() {
+	public static List getSynchronizations() throws IllegalStateException {
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
