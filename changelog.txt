@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.183 2004-07-12 03:30:26 trisberg Exp $
+$Id: changelog.txt,v 1.184 2004-07-12 16:55:12 jhoeller Exp $
 
 
 Changes in version 1.1 RC1 (19.7.2004)
@@ -14,6 +14,7 @@ Package org.springframework.beans
 * factored out PropertyAccessor base interface from BeanWrapper
 * BeanWrapperImpl supports dots in keys, for example "map[my.key]"
 * BeanWrapperImpl's "isReadableProperty" and "isWritableProperty" properly check indexed/mapped properties
+* fixed BeanWrapperImpl to check for changed property values when caching nested BeanWrappers
 * refined BeanWrapperImpl to apply a custom editor strictly either to an array/Collection or to each of their elements
 * refined BeanWrapperImpl to automatically convert a value to an array with a single component when necessary
 * refined BeanWrapperImpl to support converting any Collection into an array rather than just a List
@@ -87,6 +88,8 @@ Package org.springframework.orm
 * SessionFactoryUtils and PersistenceManagerFactoryUtils log error on cleanup failure rather than rethrowing it
 * added "contains", "clear", "delete", "iterate" to HibernateOperations/HibernateTemplate, analogous to Session
 * added "cacheQueries" property to HibernateTemplate, for marking all executed queries as cacheable
+* added protected "checkWriteOperationAllowed" method to HibernateTemplate, checking whether FlushMode is not NEVER
+* apply "checkWriteOperationAllowed" before all save/update/delete operations in HibernateTemplate
 * HibernateTransactionManager and HibernateAccessor use SQLErrorCodeSQLExceptionTranslator if DataSource available
 * added deferred close option to OpenSessionInViewFilter/Interceptor, as alternative to a single session per request
 * added "dataSource2" property to LocalPersistenceManagerFactoryBean
