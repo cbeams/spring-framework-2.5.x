@@ -22,7 +22,7 @@ import org.springframework.util.enums.support.ShortCodedLabeledEnum;
  * @author Keith Donald
  */
 public class Style extends ShortCodedLabeledEnum {
-	public static final Style FULL = new Style(0, "Short");
+	public static final Style FULL = new Style(0, "Full");
 
 	public static final Style LONG = new Style(1, "Long");
 

@@ -56,12 +56,12 @@ public class Mapping implements Serializable {
 	 * from a source attribute map to a target map with the same name. The type
 	 * converter will be applied to the target value during the conversion.
 	 * @param sourceAttributeName The source attribute name
-	 * @param valueTypeConverter the type converter
+	 * @param valueConversionExecutor the type converter
 	 */
-	public Mapping(String sourceAttributeName, ConversionExecutor valueTypeConverter) {
+	public Mapping(String sourceAttributeName, ConversionExecutor valueConversionExecutor) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = sourceAttributeName;
-		this.valueConversionExecutor = valueTypeConverter;
+		this.valueConversionExecutor = valueConversionExecutor;
 	}
 
 	/**
@@ -83,12 +83,12 @@ public class Mapping implements Serializable {
 	 * conversion.
 	 * @param sourceAttributeName The source attribute name
 	 * @param targetAttributeName The target attribute name
-	 * @param valueTypeConverter the type converter
+	 * @param valueConversionExecutor the type converter
 	 */
-	public Mapping(String sourceAttributeName, String targetAttributeName, ConversionExecutor valueTypeConverter) {
+	public Mapping(String sourceAttributeName, String targetAttributeName, ConversionExecutor valueConversionExecutor) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = targetAttributeName;
-		this.valueConversionExecutor = valueTypeConverter;
+		this.valueConversionExecutor = valueConversionExecutor;
 	}
 
 	private void setSourceAttributeName(String sourceAttributeName) {
