@@ -364,7 +364,7 @@ syntax as a prepared statement in JDBC. In fact, that is what
 SqlUpdate creates behind the scenes. For the parameters, we have to
 give them a name and declare what type they are so that the framework
 can set them before the prepared statement is executed. After all
-parameters have been declared, we “compile�? the statement in JDO
+parameters have been declared, we “compile�? the statement in JDO
 fashion. This will signal that we are done declaring parameters, and
 the framework will check to make sure that we have a matching
 declaration for each placeholder in the SQL statement. Next we
@@ -623,7 +623,7 @@ configuration file for the web application – springapp-servlet.xml.</P>
 <FONT COLOR="#000000">    &lt;!--  Controller for the initial &quot;Hello&quot; page --&gt;</FONT>
 <FONT COLOR="#000000">    &lt;bean id=&quot;springappController&quot; class=&quot;web.SpringappController&quot;&gt;</FONT>
 <FONT COLOR="#000000">        &lt;property name=&quot;productManager&quot;&gt;</FONT>
-<FONT COLOR="#000000">            &lt;ref external=&quot;prodMan&quot;/&gt;</FONT>
+<FONT COLOR="#000000">            &lt;ref bean=&quot;prodMan&quot;/&gt;</FONT>
 <FONT COLOR="#000000">        &lt;/property&gt;</FONT>
 <FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 
@@ -637,7 +637,7 @@ configuration file for the web application – springapp-servlet.xml.</P>
 <FONT COLOR="#000000">        &lt;property name=&quot;formView&quot;&gt;&lt;value&gt;priceincrease&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#000000">        &lt;property name=&quot;successView&quot;&gt;&lt;value&gt;hello&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#000000">        &lt;property name=&quot;productManager&quot;&gt;</FONT>
-<FONT COLOR="#000000">            &lt;ref external=&quot;prodMan&quot;/&gt;</FONT>
+<FONT COLOR="#000000">            &lt;ref bean=&quot;prodMan&quot;/&gt;</FONT>
 <FONT COLOR="#000000">        &lt;/property&gt;</FONT>
 <FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 
