@@ -45,10 +45,19 @@ public class BshScriptFactoryContextTests extends TestCase {
 //		}
 //	}
 	
-	public void testSimple() {
+	public void testScriptDefinitionFromFile() {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
 		Hello hello = (Hello) ac.getBean("simple");
 		assertEquals("hello world", hello.sayHello());
+		assertTrue(hello instanceof DynamicObject);
+		assertTrue(hello instanceof Script);
+		System.err.println(((DynamicScript) hello).getResourceString());
+	}
+	
+	public void testInlineScriptDefinition() {
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
+		Hello hello = (Hello) ac.getBean("inline");
+		assertEquals("hello world inline", hello.sayHello());
 		assertTrue(hello instanceof DynamicObject);
 		assertTrue(hello instanceof Script);
 		System.err.println(((DynamicScript) hello).getResourceString());

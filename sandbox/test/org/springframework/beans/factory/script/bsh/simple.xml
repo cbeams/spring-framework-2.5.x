@@ -7,7 +7,20 @@
 		factory-bean="scriptFactory"
 		factory-method="create"
 	>
-		<constructor-arg index="0"><value>/org/springframework/beans/factory/script/bsh/SimpleHello.bsh</value></constructor-arg>
+		<constructor-arg index="0"><value>classpath:/org/springframework/beans/factory/script/bsh/SimpleHello.bsh</value></constructor-arg>
+		<constructor-arg index="1"><value>org.springframework.beans.factory.script.Hello</value></constructor-arg>
+	</bean>
+	
+	<bean id="inline"
+		factory-bean="scriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0">
+			<value>inline:
+				String sayHello() {
+				   return "hello world inline";
+				}
+			</value></constructor-arg>
 		<constructor-arg index="1"><value>org.springframework.beans.factory.script.Hello</value></constructor-arg>
 	</bean>
 	

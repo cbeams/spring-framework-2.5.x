@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,6 +34,8 @@ import org.springframework.beans.BeansException;
  * @author Rod Johnson
  */
 public abstract class AbstractScript implements Script {
+	
+	private static final String INLINE_PREFIX = "inline:";
 	
 	protected final Log log = LogFactory.getLog(getClass());
 
@@ -57,13 +60,13 @@ public abstract class AbstractScript implements Script {
 	 */
 	public AbstractScript(String location, ScriptContext context) {
 		this.location = location;
-		
 		this.context = context;
 	}
 
 	public String getLocation() {
 		return location;
 	}
+
 	
 	public Class[] getInterfaces() {
 		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
@@ -88,9 +91,16 @@ public abstract class AbstractScript implements Script {
 	 * @see org.springframework.beans.factory.script.Script#createObject()
 	 */
 	public Object createObject() throws BeansException {
+		
 		++loads;
 		InputStream is = null;
+		
 		try {
+			if (isInline()) {
+				log.info("Inline script definition");
+				return createObject(new StringBufferInputStream(inlineScriptBody()));
+			}
+			
 			is = context.getResourceLoader().getResource(location).getInputStream();
 			if (is == null) {
 				throw new ScriptNotFoundException("No script found at '" + location + "'");
@@ -104,8 +114,7 @@ public abstract class AbstractScript implements Script {
 		catch (IOException ex) {
 			throw new CompilationException("Error reading script from '" + location + "'", ex);
 		} 
-		finally {
-			
+		finally {			
 			try {
 				if (is != null) {
 					is.close();
@@ -119,10 +128,22 @@ public abstract class AbstractScript implements Script {
 
 	protected abstract Object createObject(InputStream is) throws IOException, BeansException;
 	
+	protected boolean isInline() {
+		return location.startsWith(INLINE_PREFIX);
+	}
+	
+	protected String inlineScriptBody() {
+		return location.substring(INLINE_PREFIX.length());
+	}
+	
 	/**
 	 * @see org.springframework.beans.factory.script.Script#isChanged()
 	 */
 	public boolean isModified() {
+		if (isInline()) {
+			return false;
+		}
+		
 		try {
 			File f = context.getResourceLoader().getResource(location).getFile();
 			boolean changed = f.lastModified() > lastReloadTime;
