@@ -319,8 +319,7 @@ public abstract class Assert {
      * @see Class#isInstance
      */
     public static void isInstanceOf(Class clazz, Object o) {
-        Assert.notNull(o, "The object to assert dynamic instanceof cannot be null");
-        Assert.isTrue(clazz.isInstance(o), "Object of class '" + o.getClass().getName() + "' must be an instanceof '"
+        Assert.notNull(clazz, "The clazz to perform the instanceof assertion cannot be null");
+        Assert.isTrue(clazz.isInstance(o), "Object of class '" + (o != null ? o.getClass().getName() : "[null]") + "' must be an instanceof '"
                 + clazz.getName() + "'");
-    }
-}
+    }}
