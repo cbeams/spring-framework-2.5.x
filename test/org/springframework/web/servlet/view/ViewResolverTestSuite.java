@@ -38,7 +38,7 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testBeanNameViewResolver() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(new MockServletContext());
+		wac.initRootContext(new MockServletContext());
 		MutablePropertyValues pvs1 = new MutablePropertyValues();
 		pvs1.addPropertyValue(new PropertyValue("url", "/example1.jsp"));
 		wac.registerSingleton("example1", InternalResourceView.class, pvs1);
@@ -59,7 +59,8 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testInternalResourceViewResolverWithoutPrefixes() throws ServletException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(new MockServletContext());
+		wac.initRootContext(new MockServletContext());
+		wac.rebuild();
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setApplicationContext(wac);
 		vr.setRequestContextAttribute("rc");
@@ -72,8 +73,7 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct view class", InternalResourceView.class.equals(view.getClass()));
 		assertTrue("Correct URL", "example2".equals(((InternalResourceView) view).getUrl()));
 
-		ServletContext sc = new MockServletContext();
-		HttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/example");
+		HttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/example");
 		HttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
@@ -88,7 +88,7 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testInternalResourceViewResolverWithPrefixes() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(new MockServletContext());
+		wac.initRootContext(new MockServletContext());
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setPrefix("/WEB-INF/");
 		vr.setSuffix(".jsp");
@@ -105,7 +105,7 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testInternalResourceViewResolverWithJstl() throws ServletException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(new MockServletContext());
+		wac.initRootContext(new MockServletContext());
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setViewClass(JstlView.class);
 		vr.setApplicationContext(wac);
@@ -144,7 +144,7 @@ public class ViewResolverTestSuite extends TestCase {
 			}
 		};
 		wac.registerSingleton("testBean", TestBean.class, null);
-		wac.setServletContext(new MockServletContext());
+		wac.initRootContext(new MockServletContext());
 		TestBean testBean = (TestBean) wac.getBean("testBean");
 		XmlViewResolver vr = new XmlViewResolver();
 		vr.setLocation("/org/springframework/web/servlet/view/views.xml");
@@ -189,7 +189,7 @@ public class ViewResolverTestSuite extends TestCase {
 				return null;
 			}
 		};
-		wac.setServletContext(new MockServletContext());
+		wac.initRootContext(new MockServletContext());
 		XmlViewResolver vr = new XmlViewResolver();
 		try {
 			vr.setApplicationContext(wac);
@@ -207,7 +207,7 @@ public class ViewResolverTestSuite extends TestCase {
 				return null;
 			}
 		};
-		wac.setServletContext(new MockServletContext());
+		wac.initRootContext(new MockServletContext());
 		XmlViewResolver vr = new XmlViewResolver();
 		vr.setCache(false);
 		try {

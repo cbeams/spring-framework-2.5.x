@@ -2,49 +2,39 @@ package org.springframework.web.context.support;
 
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.ui.context.support.StaticUiApplicationContext;
+import org.springframework.web.context.NestedWebApplicationContext;
+import org.springframework.web.context.RootWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Static WebApplicationContext implementation for testing.
  * Not for use in production applications.
  */
-public class StaticWebApplicationContext extends StaticUiApplicationContext implements WebApplicationContext {
-
-	private String namespace;
+public class StaticWebApplicationContext extends StaticUiApplicationContext
+		implements RootWebApplicationContext, NestedWebApplicationContext {
 
 	private ServletContext servletContext;
 
-	public StaticWebApplicationContext() {
+	private String namespace;
+
+	public void initRootContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
 	}
 
-	public StaticWebApplicationContext(ApplicationContext parent, String namespace) {
-		super(parent);
+	public void initNestedContext(ServletContext servletContext, String namespace,
+																WebApplicationContext parent, Object owner) {
+		this.servletContext = servletContext;
 		this.namespace = namespace;
+		setParent(parent);
+	}
+
+	public ServletContext getServletContext() {
+		return servletContext;
 	}
 
 	public String getNamespace() {
 		return namespace;
-	}
-
-	/**
-	 * Normally this would cause loading, but this class doesn't rely on loading.
-	 * @see WebApplicationContext#setServletContext(ServletContext)
-	 */
-	public void setServletContext(ServletContext servletContext) throws ApplicationContextException, BeansException {
-		this.servletContext = servletContext;
-		refresh();
-		WebApplicationContextUtils.publishConfigObjects(this);
-		// Expose as a ServletContext object
-		WebApplicationContextUtils.publishWebApplicationContext(this);
-	}
-	
-
-	public ServletContext getServletContext() {
-		return servletContext;
 	}
 
 }

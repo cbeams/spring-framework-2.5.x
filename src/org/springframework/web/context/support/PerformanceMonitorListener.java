@@ -2,15 +2,17 @@ package org.springframework.web.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.util.ResponseTimeMonitorImpl;
 
 /**
  * Listener that logs the response times of web requests.
+ * To be registered in a WebApplicationContext.
  * @author Rod Johnson
  * @since January 21, 2001
- * @version $RevisionId$
+ * @see RequestHandledEvent
  */
 public class PerformanceMonitorListener implements ApplicationListener {
 
@@ -19,18 +21,20 @@ public class PerformanceMonitorListener implements ApplicationListener {
 	protected ResponseTimeMonitorImpl responseTimeMonitor;
 
 	public PerformanceMonitorListener() {
-		responseTimeMonitor = new ResponseTimeMonitorImpl();
+		this.responseTimeMonitor = new ResponseTimeMonitorImpl();
 	}
 
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof RequestHandledEvent) {
 			RequestHandledEvent rhe = (RequestHandledEvent) event;
 			// Could use one monitor per URL
-			responseTimeMonitor.recordResponseTime(rhe.getTimeMillis());
+			this.responseTimeMonitor.recordResponseTime(rhe.getTimeMillis());
 			if (logger.isInfoEnabled()) {
 				// Stringifying objects is expensive. Don't do it unless it will show.
-				logger.info("PerformanceMonitorListener: last=" + rhe.getTimeMillis() + "ms; " + responseTimeMonitor + "; client was " + rhe.getIpAddress());
+				logger.info("PerformanceMonitorListener: last=" + rhe.getTimeMillis() + "ms; " +
+										this.responseTimeMonitor + "; client was " + rhe.getIpAddress());
 			}
 		}
 	}
+
 }

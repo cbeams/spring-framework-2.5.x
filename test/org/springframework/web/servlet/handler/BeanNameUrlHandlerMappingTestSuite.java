@@ -4,13 +4,13 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.context.ApplicationContextException;
+import org.springframework.web.context.RootWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.context.ApplicationContextException;
 
 /**
  * @author Rod Johnson
@@ -20,13 +20,13 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/servlet/handler/map1.xml";
 	
-	private WebApplicationContext wac;
+	private RootWebApplicationContext wac;
 
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, CONF);
 		wac = new XmlWebApplicationContext();
-		wac.setServletContext(sc);
+		wac.initRootContext(sc);
 	}
 
 	public void testRequestsWithoutHandlers() throws Exception {

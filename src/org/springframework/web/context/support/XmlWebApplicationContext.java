@@ -12,19 +12,26 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.xml.AbstractXmlBeanDefinitionReader;
-import org.springframework.context.ApplicationContext;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.NestedWebApplicationContext;
+import org.springframework.web.context.RootWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
  * WebApplicationContext implementation that takes configuration from an XML document.
+ * Implements both RootWebApplicationContext (for use with ContextLoader) and
+ * NestedWebApplicationContext (for use with FrameworkServlet).
  *
  * <p>Supports various servlet context init parameters for config file lookup.
  * By default, the lookup occurs in the web app's WEB-INF directory, looking for
  * "WEB-INF/applicationContext.xml" for the root context, and
  * "WEB-INF/test-servlet.xml" for a namespaced context with the name "test-servlet"
  * (like for a DispatcherServlet instance with the web.xml servlet name "test").
+ *
+ * <p>Config locations can be overridden via the "contextConfigLocation" context-param
+ * in web.xml for the root context, respectively via "contextConfigLocationPrefix" and
+ * "contextConfigLocationSuffix" for child contexts (getting applied to the namespace).
  *
  * <p>A config location can consist of multiple names of XML files, separated by any
  * number of commas and spaces, like "applicationContext1.xml, applicationContext2.xml".
@@ -39,9 +46,10 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.web.context.ContextLoader#initContext
- * @see org.springframework.web.servlet.FrameworkServlet#getNamespace
+ * @see org.springframework.web.servlet.FrameworkServlet#createWebApplicationContext
  */
-public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	implements WebApplicationContext {
+public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
+		implements RootWebApplicationContext, NestedWebApplicationContext {
 
 	/**
 	 * Any number of these characters are considered delimiters
@@ -78,61 +86,55 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	    DEFAULT_CONFIG_LOCATION_PREFIX + "applicationContext" + DEFAULT_CONFIG_LOCATION_SUFFIX;
 
 
-	/** Namespace of this context, or null if root */
-	private String namespace = null;
-
 	/** Servlet context that this context runs in */
 	private ServletContext servletContext;
+
+	/** Namespace of this context, or null if root */
+	private String namespace = null;
 
 	/** Path from which the configuration was loaded */
 	private String[] configLocations;
 
 
-	/**
-	 * Create a new root web application context, for use in an entire web application.
-	 * This context will be the parent for individual servlet contexts.
-	 */
-	public XmlWebApplicationContext() {
-		setDisplayName("Root WebApplicationContext");
-	}
-	
-	/** 
-	 * Create a new child WebApplicationContext.
-	 */
-	public XmlWebApplicationContext(ApplicationContext parent, String namespace) {
-		super(parent);
-		this.namespace = namespace;
-		setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
-	}
-
-	/**
-	 * Return the namespace of this context, or null if root.
-	 */
-	public String getNamespace() {
-		return this.namespace;
-	}
-
-	/**
-	 * Initialize and attach to the given context.
-	 * @param servletContext ServletContext to use to load configuration,
-	 * and in which this web application context should be set as an attribute
-	 */
-	public void setServletContext(ServletContext servletContext) throws BeansException {
+	public void initRootContext(ServletContext servletContext) throws BeansException {
 		this.servletContext = servletContext;
-		this.configLocations = initConfigLocations();
-		logger.info("Using config location [" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "]");
+		setDisplayName("Root WebApplicationContext");
+
+		String configLocation = this.servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
+		if (configLocation != null) {
+			this.configLocations = StringUtils.tokenizeToStringArray(configLocation, CONFIG_LOCATION_DELIMITERS, true, true);
+		}
+		else {
+			this.configLocations = new String[] {DEFAULT_CONFIG_LOCATION};
+		}
+		logger.info("Using config locations [" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "]");
+
 		refresh();
-		
-		if (this.namespace == null) {
-			// We're the root context
-			WebApplicationContextUtils.publishConfigObjects(this);
-			// Expose as a ServletContext object
-			WebApplicationContextUtils.publishWebApplicationContext(this);
-		}	
+	}
+
+	public void initNestedContext(ServletContext servletContext, String namespace,
+															 WebApplicationContext parent, Object owner) throws BeansException {
+		this.servletContext = servletContext;
+		this.namespace = namespace;
+		setParent(parent);
+		setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
+
+		String configLocationPrefix = this.servletContext.getInitParameter(CONFIG_LOCATION_PREFIX_PARAM);
+		String prefix = (configLocationPrefix != null) ? configLocationPrefix : DEFAULT_CONFIG_LOCATION_PREFIX;
+		String configLocationSuffix = this.servletContext.getInitParameter(CONFIG_LOCATION_SUFFIX_PARAM);
+		String suffix = (configLocationSuffix != null) ? configLocationSuffix : DEFAULT_CONFIG_LOCATION_SUFFIX;
+		this.configLocations = new String[] {prefix + getNamespace() + suffix};
+		logger.info("Using config locations [" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "]");
+
+		refresh();
 	}
 
 	public ServletContext getServletContext() {
 		return this.servletContext;
+	}
+
+	public String getNamespace() {
+		return this.namespace;
 	}
 
 	/**
@@ -145,30 +147,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	/**
 	 * Initialize the config locations for the current namespace.
 	 * This can be overridden in subclasses for custom config lookup.
-	 * <p>Default implementation returns the namespace with the default prefix
-	 * "WEB-INF/" and suffix ".xml", if a namespace is set. For the root context,
-	 * the "configLocation" servlet context parameter is used, falling back to
-	 * "WEB-INF/applicationContext.xml" if no parameter is found.
-	 * @return the URL or path of the configuration
 	 */
-	protected String[] initConfigLocations() {
-		if (getNamespace() != null) {
-			String configLocationPrefix = this.servletContext.getInitParameter(CONFIG_LOCATION_PREFIX_PARAM);
-			String prefix = (configLocationPrefix != null) ? configLocationPrefix : DEFAULT_CONFIG_LOCATION_PREFIX;
-			String configLocationSuffix = this.servletContext.getInitParameter(CONFIG_LOCATION_SUFFIX_PARAM);
-			String suffix = (configLocationSuffix != null) ? configLocationSuffix : DEFAULT_CONFIG_LOCATION_SUFFIX;
-			return new String[] {prefix + getNamespace() + suffix};
-		}
-		else {
-			String configLocation = this.servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
-			if (configLocation != null) {
-				return StringUtils.tokenizeToStringArray(configLocation, CONFIG_LOCATION_DELIMITERS, true, true);
-			}
-			else {
-				return new String[] {DEFAULT_CONFIG_LOCATION};
-			}
-		}
-	}
 
 	protected void loadBeanDefinitions(AbstractXmlBeanDefinitionReader reader) throws BeansException, IOException {
 		for (int i = 0; i < this.configLocations.length; i++) {

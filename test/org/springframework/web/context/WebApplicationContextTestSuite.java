@@ -21,8 +21,8 @@ import org.springframework.web.mock.MockServletContext;
 public class WebApplicationContextTestSuite extends AbstractApplicationContextTests {
 
 	private ServletContext servletContext;
-	
-	private WebApplicationContext root;
+
+	private RootWebApplicationContext root;
 
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		InitAndIB.constructed = false;
@@ -31,9 +31,9 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, "/org/springframework/web/context/WEB-INF/applicationContext.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM, "/org/springframework/web/context/WEB-INF/");
 		this.servletContext = sc;
-		root.setServletContext(sc);
-		XmlWebApplicationContext wac = new XmlWebApplicationContext(root, "test-servlet");
-		wac.setServletContext(sc);
+		root.initRootContext(sc);
+		XmlWebApplicationContext wac = new XmlWebApplicationContext();
+		wac.initNestedContext(sc, "test-servlet", root, null);
 		return wac;
 	}
 
@@ -55,33 +55,6 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 		assertTrue("1 parent events after publication", parentListener.getEventCount() == 1);
 	}
 
-
-	public void testWebApplicationContextExposedAsServletContextAttribute() throws Exception {
-		WebApplicationContext wc = (WebApplicationContext) this.servletContext.getAttribute(WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
-		assertTrue("WebApplicationContext exposed in ServletContext as attribute", wc != null);
-		assertTrue("WebApplicationContext exposed in ServletContext as attribute == root", wc == this.root);
-	}
-
-	/** Assumes web.xml defines testConfigObject of type TestConfigBean */
-	public void testConfigObjects() throws Exception {
-		assertTrue("has 'testConfigObject' attribute", servletContext.getAttribute("testConfigObject") != null);
-		Object o = servletContext.getAttribute("testConfigObject");
-		assertTrue("testConfigObject attribute is of type TestConfigBean", o instanceof TestConfigBean);
-		TestConfigBean tcb = (TestConfigBean) o;
-		assertTrue("tcb name=Tony", tcb.getName().equals("Tony"));
-		assertTrue("tcb age=48", tcb.getAge() == 48);
-
-		// Now test context aware config object
-		assertTrue("has 'testConfigObject2' attribute", servletContext.getAttribute("testConfigObject2") != null);
-		o = servletContext.getAttribute("testConfigObject2");
-		assertTrue("testConfigObject2 attribute is of type ContextAwareTestConfigBean", o instanceof ContextAwareTestConfigBean);
-		ContextAwareTestConfigBean ctcb = (ContextAwareTestConfigBean) o;
-		assertTrue("ctcb name=Gordon", ctcb.getName().equals("Gordon"));
-		assertTrue("ctcb age=49", ctcb.getAge() == 49);
-		assertTrue("ctcb context is non null", ctcb.getApplicationContext() != null);
-		assertTrue("ctcb context is context", ctcb.getApplicationContext() == root);
-	}
-
 	public void testCount() {
 		assertTrue("should have 14 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
 			this.applicationContext.getBeanDefinitionCount() == 14);
@@ -90,8 +63,8 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 	public void testWithoutMessageSource() throws Exception {
 		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM, "/org/springframework/web/context/WEB-INF/");
-		WebApplicationContext wac = new XmlWebApplicationContext(null, "testNamespace");
-		wac.setServletContext(sc);
+		NestedWebApplicationContext wac = new XmlWebApplicationContext();
+		wac.initNestedContext(sc, "testNamespace", null, null);
 		try {
 			wac.getMessage("someMessage", null, Locale.getDefault());
 			fail("Should have thrown NoSuchMessageException");

@@ -28,8 +28,8 @@ public abstract class AbstractTagTest extends TestCase {
 	protected MockPageContext createPageContext() {
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
-		SimpleWebApplicationContext wac = new SimpleWebApplicationContext(null, "test");
-		wac.setServletContext(sc);
+		SimpleWebApplicationContext wac = new SimpleWebApplicationContext();
+		wac.initNestedContext(sc, "test", null, null);
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		LocaleResolver lr = new AcceptHeaderLocaleResolver();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, lr);

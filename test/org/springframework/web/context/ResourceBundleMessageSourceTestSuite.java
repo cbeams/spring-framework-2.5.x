@@ -42,7 +42,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	 */
 	public static final String WAR_ROOT = "/org/springframework/web/context";
 
-	private WebApplicationContext root;
+	private RootWebApplicationContext root;
 
 	private MessageSource themeMsgSource;
 
@@ -223,9 +223,9 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, "/org/springframework/web/context/WEB-INF/applicationContext.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM, "/org/springframework/web/context/WEB-INF/");
-		root.setServletContext(sc);
-		XmlWebApplicationContext wac = new XmlWebApplicationContext(root, "test-servlet");
-		wac.setServletContext(sc);
+		root.initRootContext(sc);
+		NestedWebApplicationContext wac = new XmlWebApplicationContext();
+		wac.initNestedContext(sc, "test-servlet", root, null);
 
 		Theme theme = wac.getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
 		assertNotNull(theme);

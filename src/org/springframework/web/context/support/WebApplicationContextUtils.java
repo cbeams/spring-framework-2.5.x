@@ -6,12 +6,8 @@
 package org.springframework.web.context.support;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeansException;
+import org.springframework.web.context.RootWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -23,25 +19,36 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: WebApplicationContextUtils.java,v 1.4 2003-11-13 11:51:26 jhoeller Exp $
+ * @version $Id: WebApplicationContextUtils.java,v 1.5 2003-12-06 15:52:00 jhoeller Exp $
  * @see #getWebApplicationContext
+ * @see org.springframework.web.context.ContextLoader
  */
 public abstract class WebApplicationContextUtils {
 
-	/** Config object prefix in bean names */
-	public static final String CONFIG_OBJECT_PREFIX = "config.";
-
-	private static Log logger = LogFactory.getLog(WebApplicationContextUtils.class);
+	/**
+	 * Find the root WebApplicationContext for this web app, which is
+	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
+	 * @param sc ServletContext to find the web application context for
+	 * @return the root WebApplicationContext for this web app, or null if none
+	 */
+	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
+		return (WebApplicationContext) sc.getAttribute(RootWebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
+	}
 
 	/**
 	 * Find the root WebApplicationContext for this web app, which is
-	 * typically loaded via ContextLoader resp. ContextLoaderListener.
+	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
 	 * @param sc ServletContext to find the web application context for
 	 * @return the root WebApplicationContext for this web app, or null if none
-	 * @see org.springframework.web.context.ContextLoader
+	 * @throws IllegalStateException if the root WebApplicationContext could not be found
 	 */
-	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
-		return (WebApplicationContext) sc.getAttribute(WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
+	public static WebApplicationContext getRequiredWebApplicationContext(ServletContext sc) throws IllegalStateException {
+		WebApplicationContext wac =
+				(WebApplicationContext) sc.getAttribute(RootWebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
+		if (wac == null) {
+			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
+		}
+		return wac;
 	}
 
 	/**
@@ -55,58 +62,7 @@ public abstract class WebApplicationContextUtils {
 		if (sc == null) {
 			throw new IllegalArgumentException("ServletContext can't be null in WebApplicationContext " + wac);
 		}
-		sc.setAttribute(WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME, wac);
-		logger.info(
-			"Loader initialized on server name "
-				+ wac.getServletContext().getServerInfo()
-				+ "; WebApplicationContext object is available in ServletContext with name '"
-				+ WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME
-				+ "'");
-	}
-
-	/**
-	 * Initialize all config objects if necessary, and publish them as
-	 * ServletContext attributes.
-	 * @param wac WebApplicationContext whose config objects should be published
-	 */
-	public static void publishConfigObjects(WebApplicationContext wac) throws BeansException {
-		logger.info("Configuring config objects");
-		String[] beanNames = wac.getBeanDefinitionNames();
-		for (int i = 0; i < beanNames.length; i++) {
-			String name = beanNames[i];
-			if (name.startsWith(CONFIG_OBJECT_PREFIX)) {
-				// Strip prefix
-				String strippedName = name.substring(CONFIG_OBJECT_PREFIX.length());
-				Object configObject = wac.getBean(name);
-				wac.getServletContext().setAttribute(strippedName, configObject);
-				logger.info("Config object with name ["	+ name	+ "] and class ["	+ configObject.getClass().getName() +
-										"] initialized and added to ServletConfig");
-			}
-		}
-	}
-
-	/**
-	 * Retrieve a config object by name. This will be sought in the ServletContext,
-	 * where it must have been placed by config. Can only be called after the
-	 * ServletContext is available, i.e. not in a subclass constructor.
-	 * @param sc current ServletContext
-	 * @param name name of the config object
-	 * @param requiredClass type of the config object
-	 * @throws ServletException if the object isn't found or not of the required type
-	 */
-	public static Object getConfigObject(ServletContext sc, String name, Class requiredClass) throws ServletException {
-		Object o = sc.getAttribute(CONFIG_OBJECT_PREFIX + name);
-		if (o == null) {
-			String msg = "Cannot retrieve config object with name '" + name + "'";
-			logger.error(msg);
-			throw new ServletException(msg);
-		}
-		if (!requiredClass.isAssignableFrom(o.getClass())) {
-			String msg = "Config object with name '" + name + "' isn't of required type [" + requiredClass.getName() + "]";
-			logger.error(msg);
-			throw new ServletException(msg);
-		}
-		return o;
+		sc.setAttribute(RootWebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME, wac);
 	}
 
 }

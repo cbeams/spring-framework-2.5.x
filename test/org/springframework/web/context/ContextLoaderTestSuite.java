@@ -15,10 +15,10 @@ import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockServletConfig;
 import org.springframework.web.mock.MockServletContext;
+import org.springframework.web.servlet.SimpleWebApplicationContext;
 
 /**
  * @author Juergen Hoeller
@@ -32,7 +32,7 @@ public class ContextLoaderTestSuite extends TestCase {
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext wc = (WebApplicationContext)sc.getAttribute(WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
+		WebApplicationContext wc = (WebApplicationContext)sc.getAttribute(RootWebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) wc.getBean("lifecycle");
 		assertTrue("Not destroyed", !lb.isDestroyed());
@@ -46,7 +46,7 @@ public class ContextLoaderTestSuite extends TestCase {
 		HttpServlet servlet = new ContextLoaderServlet();
 		ServletConfig config = new MockServletConfig(sc, "test");
 		servlet.init(config);
-		WebApplicationContext wc = (WebApplicationContext)sc.getAttribute(WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
+		WebApplicationContext wc = (WebApplicationContext)sc.getAttribute(RootWebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) wc.getBean("lifecycle");
 		assertTrue("Not destroyed", !lb.isDestroyed());
@@ -56,12 +56,12 @@ public class ContextLoaderTestSuite extends TestCase {
 
 	public void testContextLoaderWithCustomContext() throws Exception {
 		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
-		sc.addInitParameter(ContextLoader.CONTEXT_CLASS_PARAM, "org.springframework.web.context.support.StaticWebApplicationContext");
+		sc.addInitParameter(ContextLoader.CONTEXT_CLASS_PARAM, "org.springframework.web.servlet.SimpleWebApplicationContext");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
-		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof StaticWebApplicationContext);
+		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(RootWebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
+		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof SimpleWebApplicationContext);
 	}
 
 	public void testContextLoaderWithInvalidLocation() throws Exception {

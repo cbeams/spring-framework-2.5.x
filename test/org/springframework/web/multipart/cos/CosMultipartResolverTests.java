@@ -22,9 +22,8 @@ public class CosMultipartResolverTests extends TestCase {
 
 	public void testWithApplicationContext() throws MultipartException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		MockServletContext sc = new MockServletContext();
-		sc.setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
-		wac.setServletContext(sc);
+		wac.initRootContext(new MockServletContext());
+		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		CosMultipartResolver resolver = new CosMultipartResolver();
 		resolver.setMaximumFileSize(1000);
 		resolver.setHeaderEncoding("enc");

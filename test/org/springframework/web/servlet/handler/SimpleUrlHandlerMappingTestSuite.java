@@ -4,7 +4,6 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockServletContext;
@@ -25,10 +24,10 @@ public class SimpleUrlHandlerMappingTestSuite extends TestCase {
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM,
 		                    "/org/springframework/web/servlet/handler/");
 		XmlWebApplicationContext root = new XmlWebApplicationContext();
-		root.setServletContext(sc);
-		XmlWebApplicationContext wac = new XmlWebApplicationContext(root, "map2err");
+		root.initRootContext(sc);
+		XmlWebApplicationContext wac = new XmlWebApplicationContext();
 		try {
-			wac.setServletContext(sc);
+			wac.initNestedContext(sc, "map2err", root, null);
 			fail("Should have thrown NoSuchBeanDefinitionException");
 		}
 		catch (FatalBeanException ex) {
@@ -49,8 +48,8 @@ public class SimpleUrlHandlerMappingTestSuite extends TestCase {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM,
 		                    "/org/springframework/web/servlet/handler/map2.xml");
-		WebApplicationContext wac = new XmlWebApplicationContext();
-		wac.setServletContext(sc);
+		XmlWebApplicationContext wac = new XmlWebApplicationContext();
+		wac.initRootContext(sc);
 		Object bean = wac.getBean("mainController");
 		HandlerMapping hm = (HandlerMapping) wac.getBean(beanName);
 

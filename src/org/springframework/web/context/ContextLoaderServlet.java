@@ -50,21 +50,33 @@ import javax.servlet.http.HttpServletResponse;
  * @author Darren Davison
  * @see ContextLoader
  * @see ContextLoaderListener
+ * @see org.springframework.web.util.Log4jConfigServlet
  */
 public class ContextLoaderServlet extends HttpServlet {
+
+	private ContextLoader contextLoader;
 
 	/**
 	 * Initialize the root web application context.
 	 */
 	public void init() throws ServletException {
-		ContextLoader.initContext(getServletContext());
+		this.contextLoader = createContextLoader();
+		this.contextLoader.initContext(getServletContext());
+	}
+
+	/**
+	 * Create the ContextLoader to use. Can be overridden in subclasses.
+	 * @return the new ContextLoader
+	 */
+	protected ContextLoader createContextLoader() {
+		return new ContextLoader();
 	}
 
 	/**
 	 * Close the root web application context.
 	 */
 	public void destroy() {
-		ContextLoader.closeContext(getServletContext());
+		this.contextLoader.closeContext(getServletContext());
 	}
 
 	/**

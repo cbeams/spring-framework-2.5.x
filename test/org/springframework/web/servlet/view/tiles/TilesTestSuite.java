@@ -112,7 +112,7 @@ public class TilesTestSuite extends TestCase {
 	private WebApplicationContext prepareWebApplicationContext() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		MockServletContext sc = new MockServletContext("/org/springframework/web/servlet/view/tiles/", "web.xml");
-		wac.setServletContext(sc);
+		wac.initRootContext(sc);
 
 		TilesConfigurer tc = new TilesConfigurer();
 		tc.setDefinitions(new String[] {"tiles-test.xml"});

@@ -24,16 +24,16 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 	/** Comes from this package */
 	public static String PROPS_FILE = "org.springframework.web.servlet.view.testviews";
 
-	ResourceBundleViewResolver rb;
+	private ResourceBundleViewResolver rb;
 	
-	WebApplicationContext wac;
+	private StaticWebApplicationContext wac;
 	
 	public ResourceBundleViewResolverTestSuite() {
 		rb = new ResourceBundleViewResolver();
 		rb.setBasename(PROPS_FILE);
 		rb.setCache(getCache());
 		wac = new StaticWebApplicationContext();
-		wac.setServletContext(new MockServletContext());
+		wac.initRootContext(new MockServletContext());
 
 		// This will be propagated to views, so we need it
 		rb.setApplicationContext(wac);

@@ -3,6 +3,7 @@ package org.springframework.web.servlet.handler;
 import junit.framework.TestCase;
 
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.RootWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockServletContext;
@@ -18,13 +19,13 @@ public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 
 	private HandlerMapping hm;
 
-	private WebApplicationContext wac;
+	private RootWebApplicationContext wac;
 
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, CONF);
 		wac = new XmlWebApplicationContext();
-		wac.setServletContext(sc);
+		wac.initRootContext(sc);
 		hm = (HandlerMapping) wac.getBean("urlMapping");
 	}
 
