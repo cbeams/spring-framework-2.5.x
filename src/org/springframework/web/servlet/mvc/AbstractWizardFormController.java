@@ -317,6 +317,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			Integer pageInteger = new Integer(page);
 			String pageAttrName = getPageSessionAttributeName(request);
 			if (isSessionForm()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Setting page session attribute [" + pageAttrName + "] to [" + pageInteger + "]");
+                }
 				request.getSession().setAttribute(pageAttrName, pageInteger);
 			}
 			request.setAttribute(pageAttrName, pageInteger);
@@ -415,6 +418,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		// Remove page session attribute, provide copy as request attribute.
 		String pageAttrName = getPageSessionAttributeName(request);
 		if (isSessionForm()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removing page attribute [" + pageAttrName + "]");
+            }
 			request.getSession().removeAttribute(pageAttrName);
 		}
 		request.setAttribute(pageAttrName, new Integer(currentPage));
