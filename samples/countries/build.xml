@@ -12,16 +12,7 @@
 	<property name="dist.dir" value="dist"/>
 	<property name="db.dir" value="db"/>
 
-	<property name="test.dir" value="test"/>
-	<property name="testsrc.dir" value="${test.dir}/src"/>
-	<property name="testbuild.dir" value="${test.dir}/.classes"/>
-	<property name="testreports.dir" value="${test.dir}/reports"/>
-	<property name="testhtml.dir" value="${testreports.dir}/html"/>
-
 	<property name="spring.root" value="../.."/>
-
-	<property file="build.properties"/>
-	<property name="deploy.dir" value="my_deploy_directory"/>
 
 
 	<path id="master-classpath">
@@ -64,13 +55,11 @@
 	</target>
 
 
-	<target name="clean" description="Clean output dirs (build, dist, testbuild, weblib)">
+	<target name="clean" description="Clean output dirs (build, docs, weblib, dist)">
 
 		<delete dir="${build.dir}"/>
 		<delete dir="${docs.dir}"/>
 		<delete dir="${weblib.dir}"/>
-		<delete dir="${testbuild.dir}"/>
-		<delete dir="${testreports.dir}"/>
 		<delete dir="${dist.dir}"/>
 
 	</target>
@@ -139,7 +128,6 @@
 			<include name="WEB-INF/jboss-web.xml"/>
 			<include name="WEB-INF/classes/*.properties"/>
 			<include name="WEB-INF/lib/**"/>
-			<include name="WEB-INF/tld/**"/>
 			<include name="WEB-INF/views/**"/>
 			<exclude name="**/.*"/>
 		</war>
