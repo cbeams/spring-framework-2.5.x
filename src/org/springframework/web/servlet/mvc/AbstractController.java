@@ -109,15 +109,16 @@ public abstract class AbstractController extends WebContentGenerator implements 
 		checkAndPrepare(request, response, this instanceof LastModified);
 
 		// execute in synchronized block if required
-		HttpSession session = request.getSession(false);
-		if (this.synchronizeOnSession && session != null) {
-			synchronized (session) {
-				return handleRequestInternal(request, response);
+		if (this.synchronizeOnSession) {
+			HttpSession session = request.getSession(false);
+			if (session != null) {
+				synchronized (session) {
+					return handleRequestInternal(request, response);
+				}
 			}
 		}
-		else {
-			return handleRequestInternal(request, response);
-		}
+		
+		return handleRequestInternal(request, response);
 	}
 
 	/**

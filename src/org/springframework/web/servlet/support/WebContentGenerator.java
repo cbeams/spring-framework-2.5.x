@@ -22,7 +22,6 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
@@ -149,10 +148,11 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			throw new ServletException("This resource does not support request method '" + method + "'");
 		}
 
-		// check whether session was required
-		HttpSession session = request.getSession(false);
-		if (this.requireSession && session == null) {
-			throw new ServletException("This resource requires a pre-existing HttpSession: none was found");
+		// check whether session is required
+		if (this.requireSession) {
+			if (request.getSession(false) == null) {
+				throw new ServletException("This resource requires a pre-existing HttpSession: none was found");
+			}
 		}
 
 		// do declarative cache control
