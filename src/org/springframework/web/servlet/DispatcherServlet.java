@@ -283,11 +283,11 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// default is no multipart resolver
+			// Default is no multipart resolver.
 			this.multipartResolver = null;
 			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate MultipartResolver with name ["	+ MULTIPART_RESOLVER_BEAN_NAME +
-						"]: no multipart handling provided");
+				logger.info("Unable to locate MultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
+						"': no multipart request handling provided");
 			}
 		}
 	}
@@ -305,7 +305,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// we need to use the default
+			// We need to use the default.
 			this.localeResolver = new AcceptHeaderLocaleResolver();
 			if (logger.isInfoEnabled()) {
 				logger.info("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
@@ -327,7 +327,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// we need to use the default
+			// We need to use the default.
 			this.themeResolver = new FixedThemeResolver();
 			if (logger.isInfoEnabled()) {
 				logger.info("Unable to locate ThemeResolver with name '" + THEME_RESOLVER_BEAN_NAME +
@@ -343,13 +343,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initHandlerMappings() throws BeansException {
 		if (this.detectAllHandlerMappings) {
-			// find all HandlerMappings in the ApplicationContext,
-			// including ancestor contexts
+			// Find all HandlerMappings in the ApplicationContext,
+			// including ancestor contexts.
 			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					getWebApplicationContext(), HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList(matchingBeans.values());
-				// we keep HandlerMappings in sorted order
+				// We keep HandlerMappings in sorted order.
 				Collections.sort(this.handlerMappings, new OrderComparator());
 			}
 		}
@@ -381,12 +381,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
 	private void initHandlerAdapters() throws BeansException {
-		// find all HandlerAdapters in the ApplicationContext
+		// Find all HandlerAdapters in the ApplicationContext,
+		// including ancestor contexts.
 		Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				getWebApplicationContext(), HandlerAdapter.class, true, false);
 		if (!matchingBeans.isEmpty()) {
 			this.handlerAdapters = new ArrayList(matchingBeans.values());
-			// we keep HandlerAdapters in sorted order
+			// We keep HandlerAdapters in sorted order.
 			Collections.sort(this.handlerAdapters, new OrderComparator());
 		}
 		else {
@@ -408,11 +409,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initHandlerExceptionResolvers() throws BeansException {
 		if (this.detectAllHandlerExceptionResolvers) {
-			// find all HandlerExceptionResolvers in the ApplicationContext
+			// Find all HandlerExceptionResolvers in the ApplicationContext,
+			// including ancestor contexts.
 			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					getWebApplicationContext(), HandlerExceptionResolver.class, true, false);
 			this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
-			// we keep HandlerExceptionResolvers in sorted order
+			// We keep HandlerExceptionResolvers in sorted order.
 			Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
 		}
 		else {
@@ -434,12 +436,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initViewResolvers() throws BeansException {
 		if (this.detectAllViewResolvers) {
-			// find all ViewResolvers in the ApplicationContext
+			// Find all ViewResolvers in the ApplicationContext,
+			// including ancestor contexts.
 			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					getWebApplicationContext(), ViewResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.viewResolvers = new ArrayList(matchingBeans.values());
-				// we keep ViewResolvers in sorted order
+				// We keep ViewResolvers in sorted order.
 				Collections.sort(this.viewResolvers, new OrderComparator());
 			}
 		}
@@ -480,7 +483,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					request.getRequestURI() + "]");
 		}
 
-		// make framework objects available for handlers
+		// Make framework objects available for handlers.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
@@ -515,7 +518,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				// apply preHandle methods of registered interceptors
+				// Apply preHandle methods of registered interceptors.
 				if (mappedHandler.getInterceptors() != null) {
 					for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
 						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
@@ -527,11 +530,11 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
-				// actually invoke the handler
+				// Actually invoke the handler.
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
-				// apply postHandle methods of registered interceptors
+				// Apply postHandle methods of registered interceptors.
 				if (mappedHandler.getInterceptors() != null) {
 					for (int i = mappedHandler.getInterceptors().length - 1; i >= 0; i--) {
 						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
@@ -562,11 +565,8 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 			}
 
-			// did the handler return a view to render?
+			// Did the handler return a view to render?
 			if (mv != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Will render view in DispatcherServlet with name '" + getServletName() + "'");
-				}
 				Locale locale = this.localeResolver.resolveLocale(processedRequest);
 				response.setLocale(locale);
 				render(mv, processedRequest, response, locale);
@@ -584,7 +584,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 		}
 		finally {
-			// clean up any resources used by a multipart request
+			// Clean up any resources used by a multipart request.
 			if (processedRequest instanceof MultipartHttpServletRequest && processedRequest != request) {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
@@ -592,14 +592,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Override HttpServlet's getLastModified to evaluate the Last-Modified
-	 * value of the mapped handler.
+	 * Override HttpServlet's <code>getLastModified</code> method to evaluate
+	 * the Last-Modified value of the mapped handler.
 	 */
 	protected long getLastModified(HttpServletRequest request) {
 		try {
 			HandlerExecutionChain mappedHandler = getHandler(request, true);
 			if (mappedHandler == null || mappedHandler.getHandler() == null) {
-				// ignore -> will reappear on doService
+				// Ignore -> will reappear on doService.
 				logger.debug("No handler found in getLastModified");
 				return -1;
 			}
@@ -612,7 +612,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			return lastModified;
 		}
 		catch (Exception ex) {
-			// ignore -> will reappear on doService
+			// Ignore -> will reappear on doService.
 			logger.debug("Exception thrown in getLastModified", ex);
 			return -1;
 		}
@@ -689,7 +689,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		View view = null;
 		if (mv.isReference()) {
-			// we need to resolve the view name
+			// We need to resolve the view name.
 			for (Iterator it = this.viewResolvers.iterator(); it.hasNext() && view == null;) {
 				ViewResolver viewResolver = (ViewResolver) it.next();
 				view = viewResolver.resolveViewName(mv.getViewName(), locale);
@@ -700,7 +700,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		else {
-			// no need to lookup: the ModelAndView object contains the actual View object
+			// No need to lookup: the ModelAndView object contains the actual View object.
 			view = mv.getView();
 			if (view == null) {
 				throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a " +
@@ -708,7 +708,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		// delegate to the View object for rendering
+		// Delegate to the View object for rendering.
+		if (logger.isDebugEnabled()) {
+			logger.debug("Rendering view [" + view + "] in DispatcherServlet with name '" + getServletName() + "'");
+		}
 		view.render(mv.getModelInternal(), request, response);
 	}
 
@@ -726,7 +729,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			HttpServletRequest request, HttpServletResponse response, Exception ex)
 			throws Exception {
 
-		// apply afterCompletion methods of registered interceptors
+		// Apply afterCompletion methods of registered interceptors.
 		Exception currEx = ex;
 
 		if (mappedHandler != null) {
