@@ -1,6 +1,17 @@
 /*
- * The Spring Framework is published under the terms
- * of the Apache Software License.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.jms;
 
@@ -108,7 +119,10 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _queueConnectionFactoryControl.setReturnValue(_mockQueueConnection);
         _queueConnectionFactoryControl.replay();
 
-        _mockQueueConnection.createQueueSession(true, Session.AUTO_ACKNOWLEDGE);
+        //		TODO tests with TX = true
+        _mockQueueConnection.createQueueSession(
+            false,
+            Session.AUTO_ACKNOWLEDGE);
         _queueConnectionControl.setReturnValue(_mockQueueSession);
 
         mockJndiContext.lookup("testQueue");
@@ -140,7 +154,10 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _topicConnectionFactoryControl.replay();
 
         //Specify behavior of the TopicConnection
-        _mockTopicConnection.createTopicSession(true, Session.AUTO_ACKNOWLEDGE);
+        //		TODO tests with TX = true        
+        _mockTopicConnection.createTopicSession(
+            false,
+            Session.AUTO_ACKNOWLEDGE);
         _topicConnectionControl.setReturnValue(_mockTopicSession);
 
         //Specify behavior of the JndiContext
@@ -181,25 +198,25 @@ public class JmsTemplate102Tests extends JmsTestCase {
         JmsTemplate102 sender = new JmsTemplate102();
         sender.setPubSubDomain(true);
         sender.setConnectionFactory(_mockTopicConnectionFactory);
-        
-		//Mock the javax.jms TopicPublisher
-		MockControl topicPublisherControl =
-			MockControl.createControl(TopicPublisher.class);
-		TopicPublisher mockTopicPublisher =
-			(TopicPublisher) topicPublisherControl.getMock();
-			
-		_mockTopicSession.createPublisher(null);
-		_topicSessionControl.setReturnValue(mockTopicPublisher);
 
-		_queueSessionControl.replay();	
-				
+        //Mock the javax.jms TopicPublisher
+        MockControl topicPublisherControl =
+            MockControl.createControl(TopicPublisher.class);
+        TopicPublisher mockTopicPublisher =
+            (TopicPublisher) topicPublisherControl.getMock();
+
+        _mockTopicSession.createPublisher(null);
+        _topicSessionControl.setReturnValue(mockTopicPublisher);
+
+        _queueSessionControl.replay();
+
         //Session behavior
         _mockTopicSession.getTransacted();
         _topicSessionControl.setReturnValue(true);
         _topicSessionControl.replay();
-        
-		mockTopicPublisher.getPriority();
-		topicPublisherControl.setReturnValue(4);        
+
+        mockTopicPublisher.getPriority();
+        topicPublisherControl.setReturnValue(4);
 
         //connection behavior
         _mockTopicConnection.close();
@@ -469,14 +486,13 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _queueSessionControl.replay();
 
         if (ignoreQOS) {
-            mockQueueSender.send(_mockQueue, mockMessage);
+            mockQueueSender.send(mockMessage);
         } else {
             sender.setExplicitQosEnabled(true);
             sender.setDeliveryMode(_deliveryMode);
             sender.setPriority(_priority);
             sender.setTimeToLive(_timeToLive);
             mockQueueSender.send(
-                _mockQueue,
                 mockMessage,
                 _deliveryMode,
                 _priority,
@@ -545,14 +561,13 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _topicSessionControl.replay();
 
         if (ignoreQOS) {
-            mockTopicPublisher.publish(_mockTopic, mockMessage);
+            mockTopicPublisher.publish(mockMessage);
         } else {
             sender.setExplicitQosEnabled(true);
             sender.setDeliveryMode(_deliveryMode);
             sender.setPriority(_priority);
             sender.setTimeToLive(_timeToLive);
             mockTopicPublisher.publish(
-                _mockTopic,
                 mockMessage,
                 _deliveryMode,
                 _priority,
@@ -584,4 +599,46 @@ public class JmsTemplate102Tests extends JmsTestCase {
         topicPublisherControl.verify();
     }
 
+    public void testConverter() throws Exception {
+    	
+		JmsTemplate102 sender = new JmsTemplate102();
+		sender.setConnectionFactory(_mockQueueConnectionFactory);
+		sender.setJmsConverter(new ToStringConverter());
+		String s = "Hello world";
+		
+		//Mock the javax.jms QueueSender
+		MockControl queueSenderControl =
+			MockControl.createControl(QueueSender.class);
+		QueueSender mockQueueSender =
+			(QueueSender) queueSenderControl.getMock();
+
+		MockControl messageControl =
+			MockControl.createControl(TextMessage.class);
+		TextMessage mockMessage = (TextMessage) messageControl.getMock();
+
+		_mockQueueConnection.close();
+		_queueConnectionControl.replay();
+
+		_mockQueueSession.createSender(this._mockQueue);
+		_queueSessionControl.setReturnValue(mockQueueSender);
+		_mockQueueSession.createTextMessage("Hello world");
+		_queueSessionControl.setReturnValue(mockMessage);
+		_queueSessionControl.replay();
+
+		mockQueueSender.send(mockMessage);
+		queueSenderControl.replay();
+		
+		sender.send(_mockQueue, s);
+		
+		_queueConnectionFactoryControl.verify();
+		_queueConnectionControl.verify();
+		queueSenderControl.verify();
+
+		_queueSessionControl.verify();
+
+		
+		
+    }
+    
+    
 }

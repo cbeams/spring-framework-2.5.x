@@ -1,6 +1,17 @@
 /*
- * The Spring Framework is published under the terms
- * of the Apache Software License.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.jms;
 
@@ -89,7 +100,8 @@ public class JmsTemplate11Tests extends JmsTestCase
         _connectionFactoryControl.setReturnValue(_mockConnection);
         _connectionFactoryControl.replay();
 
-        _mockConnection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+		//TODO tests with TX= true
+        _mockConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         _connectionControl.setReturnValue(_mockSession);
 
         mockJndiContext.lookup("testDestination");
@@ -272,11 +284,11 @@ public class JmsTemplate11Tests extends JmsTestCase
         _sessionControl.setReturnValue(mockMessageProducer);
         _mockSession.createTextMessage("just testing");
         _sessionControl.setReturnValue(mockMessage);
-        _sessionControl.replay();
+		_sessionControl.replay();
 
         if (ignoreQOS)
         {
-            mockMessageProducer.send(_mockQueue, mockMessage);
+			mockMessageProducer.send(mockMessage);
         } else
         {
             sender.setExplicitQosEnabled(true);
@@ -284,14 +296,13 @@ public class JmsTemplate11Tests extends JmsTestCase
             sender.setPriority(_priority);
             sender.setTimeToLive(_timeToLive);
             mockMessageProducer.send(
-                _mockQueue,
                 mockMessage,
                 _deliveryMode,
                 _priority,
                 _timeToLive);
         }
 
-        messageProducerControl.replay();
+		messageProducerControl.replay();
 
         if (useDefaultDestination)
         {
@@ -308,7 +319,7 @@ public class JmsTemplate11Tests extends JmsTestCase
 
             if (explicitDestination)
             {
-                sender.send(_mockQueue, new MessageCreator()
+				sender.send(_mockQueue, new MessageCreator()
                 {
                     public Message createMessage(Session session)
                         throws JMSException
@@ -337,4 +348,43 @@ public class JmsTemplate11Tests extends JmsTestCase
 
     }
 
+	public void testConverter() throws Exception
+	{
+		JmsTemplate11 sender = new JmsTemplate11();
+		sender.setConnectionFactory(_mockConnectionFactory);
+		sender.setJmsConverter(new ToStringConverter());
+		String s = "Hello world";
+		
+		//Mock the javax.jms MessageProducer
+		MockControl messageProducerControl =
+			MockControl.createControl(MessageProducer.class);
+		MessageProducer mockMessageProducer =
+			(MessageProducer) messageProducerControl.getMock();
+
+		MockControl messageControl =
+			MockControl.createControl(TextMessage.class);
+		TextMessage mockMessage = (TextMessage) messageControl.getMock();
+		
+		_mockConnection.close();
+		_connectionControl.replay();
+
+		_mockSession.createProducer(_mockQueue);
+		_sessionControl.setReturnValue(mockMessageProducer);
+		_mockSession.createTextMessage("Hello world");
+		_sessionControl.setReturnValue(mockMessage);
+		_sessionControl.replay();
+		
+		mockMessageProducer.send(mockMessage);
+		
+		messageProducerControl.replay();
+								
+		sender.send(_mockQueue, s);	
+
+		_connectionFactoryControl.verify();
+		_connectionControl.verify();
+		messageProducerControl.verify();
+
+		_sessionControl.verify();
+
+	}
 }
