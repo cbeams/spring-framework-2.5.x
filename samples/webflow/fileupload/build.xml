@@ -17,13 +17,14 @@
 
 	<target name="build.webapp.libs">
 		<copy todir="${target.weblib.dir}">
+			<fileset file="${commons.fileupload.jar}"/>
 			<fileset file="${commons.logging.jar}" />
 			<fileset file="${log4j.jar}" />
 			<fileset file="${jakarta.taglibs.jar}" />
 			<fileset file="${jstl.jar}" />
 			<fileset file="${spring.jar}" />
-			<fileset file="${spring.sandbox.jar}" />
-			<fileset file="${commons.fileupload.jar}"/>
+			<fileset file="${spring.webflow.jar}" />
+			<fileset file="${spring.webflow.support.jar}" />
 		</copy>
 	</target>
 </project>
