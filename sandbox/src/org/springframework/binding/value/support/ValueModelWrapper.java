@@ -15,15 +15,18 @@
  */
 package org.springframework.binding.value.support;
 
+import java.beans.PropertyChangeListener;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.binding.value.BoundValueModel;
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
 
 /**
  * @author Keith Donald
  */
-public abstract class ValueModelWrapper implements ValueModel {
+public abstract class ValueModelWrapper implements BoundValueModel {
     protected final Log logger = LogFactory.getLog(getClass());
 
     private ValueModel wrappedModel;
@@ -59,6 +62,37 @@ public abstract class ValueModelWrapper implements ValueModel {
 
     public void removeValueChangeListener(ValueChangeListener l) {
         wrappedModel.removeValueChangeListener(l);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        getBoundValueModel().addPropertyChangeListener(listener);
+    }
+
+    public void addPropertyChangeListener(String propertyName,
+            PropertyChangeListener listener) {
+        getBoundValueModel().addPropertyChangeListener(propertyName, listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        getBoundValueModel().removePropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(String propertyName,
+            PropertyChangeListener listener) {
+        getBoundValueModel().removePropertyChangeListener(propertyName,
+                listener);
+    }
+
+    private BoundValueModel getBoundValueModel() {
+        try {
+            return (BoundValueModel)wrappedModel;
+        }
+        catch (ClassCastException e) {
+            RuntimeException ex = new UnsupportedOperationException(
+                    "Value model wrapper does not wrap a bound value model");
+            ex.initCause(e);
+            throw ex;
+        }
     }
 
 }
