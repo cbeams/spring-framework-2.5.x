@@ -1,7 +1,6 @@
 package org.springframework.samples.petclinic.validation;
 
 import org.springframework.samples.petclinic.Pet;
-
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -22,7 +21,7 @@ public class PetValidator implements Validator {
 		if (name == null || "".equals(name)) {
 			errors.rejectValue("name", "required", null, "required");
 		}
-		if (pet.isNew() && pet != pet.getOwner().getPet(name)) {
+		if (pet.isNew() && pet.getOwner().getPet(name, true) != null) {
 			errors.rejectValue("name", "duplicate", null, "already exists");
 		}
 	}
