@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: CglibProxyTests.java,v 1.12 2004-06-24 14:23:06 jhoeller Exp $
+ * @version $Id: CglibProxyTests.java,v 1.13 2004-06-25 11:15:09 robharrop Exp $
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 
@@ -117,7 +117,9 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 	public void testMultipleProxies() {
 
 		TestBean target = new TestBean();
+		target.setAge(20);
 		TestBean target2 = new TestBean();
+		target2.setAge(21);
 
 		ITestBean proxy1 = getAdvisedProxy(target);
 		ITestBean proxy2 = getAdvisedProxy(target2);

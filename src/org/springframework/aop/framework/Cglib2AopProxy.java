@@ -12,12 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,17 +41,19 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * CGLIB 2 AopProxy implementation for the Spring AOP framework.
- *
- * <p>Objects of this type should be obtained through proxy factories,
- * configured by a AdvisedSupport implementation. This class is internal
- * to the Spring framework and need not be used directly by client code.
- *
- * <p>Proxies created using this class are threadsafe if the
- * underlying (target) class is threadsafe.
- *
+ * 
+ * <p>
+ * Objects of this type should be obtained through proxy factories, configured
+ * by a AdvisedSupport implementation. This class is internal to the Spring
+ * framework and need not be used directly by client code.
+ * 
+ * <p>
+ * Proxies created using this class are threadsafe if the underlying (target)
+ * class is threadsafe.
+ * 
  * @author Rod Johnson
  * @author Rob Harrop
- * @version $Id: Cglib2AopProxy.java,v 1.9 2004-06-24 13:10:48 robharrop Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.10 2004-06-25 11:10:20 robharrop Exp $
  */
 public class Cglib2AopProxy implements AopProxy {
 
@@ -87,8 +90,7 @@ public class Cglib2AopProxy implements AopProxy {
 	 *             exception in this case, rather than let a mysterious failure
 	 *             happen later.
 	 */
-	protected Cglib2AopProxy(AdvisedSupport config)
-			throws AopConfigException {
+	protected Cglib2AopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null)
 			throw new AopConfigException(
 					"Cannot create AopProxy with null ProxyConfig");
@@ -159,14 +161,14 @@ public class Cglib2AopProxy implements AopProxy {
 			Callback[] callbacks = getCallbacks(rootClass);
 
 			e.setCallbacks(callbacks);
-			
+
 			Class[] types = new Class[callbacks.length];
-			
-			for(int x = 0; x < types.length; x++) {
+
+			for (int x = 0; x < types.length; x++) {
 				types[x] = callbacks[x].getClass();
 			}
 			e.setCallbackTypes(types);
-			
+
 			return e.create();
 		} catch (CodeGenerationException ex) {
 			throw new AspectException(
@@ -220,8 +222,8 @@ public class Cglib2AopProxy implements AopProxy {
 
 		// choose a "direct to target" dispatcher (used for
 		// unadvised calls to static targets that cannot return this)
-		Callback targetDispatcher = isStatic ? (Callback) new StaticDispatcher(advised.getTargetSource().getTarget()) : NoOp.INSTANCE;
-
+		Callback targetDispatcher = isStatic ? (Callback) new StaticDispatcher(
+				advised.getTargetSource().getTarget()) : NoOp.INSTANCE;
 
 		Callback[] mainCallbacks = new Callback[]{aopInterceptor, // For
 				// normal
@@ -229,7 +231,8 @@ public class Cglib2AopProxy implements AopProxy {
 				targetInterceptor, // invoke target without considering
 				// advice, if optimized
 				NoOp.INSTANCE, // no override for methods mapped to this.
-				targetDispatcher, advisedDispatcher, new EqualsInterceptor(this.advised)
+				targetDispatcher, advisedDispatcher,
+				new EqualsInterceptor(this.advised)
 
 		};
 
@@ -282,9 +285,8 @@ public class Cglib2AopProxy implements AopProxy {
 	}
 
 	/**
-	 * Checks to see if this CallbackFilter
-	 * is the same CallbackFilter used 
-	 * for another proxy
+	 * Checks to see if this CallbackFilter is the same CallbackFilter used for
+	 * another proxy
 	 */
 	public boolean equals(Object other) {
 		if (other == null)
@@ -302,7 +304,7 @@ public class Cglib2AopProxy implements AopProxy {
 
 		return AopProxyUtils.equalsInProxy(advised, otherCglibProxy.advised);
 	}
-	
+
 	public int hashCode() {
 		return 0;
 	}
@@ -381,9 +383,9 @@ public class Cglib2AopProxy implements AopProxy {
 		 */
 		public Object intercept(Object proxy, Method method, Object[] args,
 				MethodProxy methodProxy) throws Throwable {
-			
+
 			Object target = advised.getTargetSource().getTarget();
-			
+
 			try {
 				Object ret = methodProxy.invoke(target, args);
 				return massageReturnTypeIfNecessary(proxy, target, ret);
@@ -413,7 +415,7 @@ public class Cglib2AopProxy implements AopProxy {
 
 			Object oldProxy = null;
 			Object target = advised.getTargetSource().getTarget();
-			
+
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				Object ret = methodProxy.invoke(target, args);
@@ -482,16 +484,16 @@ public class Cglib2AopProxy implements AopProxy {
 	 *  
 	 */
 	private class EqualsInterceptor implements MethodInterceptor {
-		
+
 		private AdvisedSupport advised;
-		
+
 		private EqualsInterceptor(AdvisedSupport advised) {
 			this.advised = advised;
 		}
-		
+
 		public Object intercept(Object proxy, Method method, Object[] args,
 				MethodProxy methodProxy) throws Throwable {
-			
+
 			Object other = args[0];
 
 			if (other == null)
@@ -500,20 +502,22 @@ public class Cglib2AopProxy implements AopProxy {
 				return Boolean.TRUE;
 
 			AdvisedSupport otherAdvised = null;
-			
+
 			if (other instanceof Factory) {
-				// The 0th callback will be the OldCglib2AopProxy if we're correct
-				Callback callback = ((Factory) other).getCallback(INVOKE_EQUALS);
+				// The 0th callback will be the OldCglib2AopProxy if we're
+				// correct
+				Callback callback = ((Factory) other)
+						.getCallback(INVOKE_EQUALS);
 				if (!(callback instanceof EqualsInterceptor))
 					return Boolean.FALSE;
 				otherAdvised = ((EqualsInterceptor) callback).advised;
-			}
-			else {
+			} else {
 				// Not a valid comparison
 				return Boolean.FALSE;
 			}
 
-			return Boolean.valueOf(AopProxyUtils.equalsInProxy(advised, otherAdvised));
+			return Boolean.valueOf(AopProxyUtils.equalsInProxy(advised,
+					otherAdvised));
 		}
 
 	}
@@ -652,20 +656,20 @@ public class Cglib2AopProxy implements AopProxy {
 	}
 
 	private class ProxyCallbackFilter implements CallbackFilter {
-		
+
 		private AdvisedSupport advised = null;
-		
+
 		public ProxyCallbackFilter(AdvisedSupport advised) {
 			this.advised = advised;
 		}
-		
+
 		/**
 		 * Implementation of CallbackFilter.accept() to return the index of the
 		 * callback we need.
 		 * 
-		 * The callbacks for each proxy are built up of a set of fixed callbacks for
-		 * general use and then a set of callbacks that are specific to a method for
-		 * use on static targets with a fixed advice chain.
+		 * The callbacks for each proxy are built up of a set of fixed callbacks
+		 * for general use and then a set of callbacks that are specific to a
+		 * method for use on static targets with a fixed advice chain.
 		 * 
 		 * The callback used is determined thus:
 		 * <dl>
@@ -677,23 +681,25 @@ public class Cglib2AopProxy implements AopProxy {
 		 * <dt>For Object.finalize():</dt>
 		 * <dd>No override for this method is used</dd>
 		 * <dt>For equals():</dt>
-		 * <dd>The EqualsInterceptor is used to redirect equals() calls to a special handler to this
-		 * proxy.</dd>
+		 * <dd>The EqualsInterceptor is used to redirect equals() calls to a
+		 * special handler to this proxy.</dd>
 		 * <dt>For methods on the Advised class:</dt>
-		 * <dd>the AdvisedDispatcher is used to dispatch the call directly to the
-		 * target</dd>
+		 * <dd>the AdvisedDispatcher is used to dispatch the call directly to
+		 * the target</dd>
 		 * <dt>For advised methods:</dt>
 		 * <dd>If the target is static and the advice chain is frozen then a
 		 * FixedChainStaticTargetInterceptor specific to the method is used to
-		 * invoke the advice chain. Otherwise a DyanmicAdvisedInterceptor is used.
-		 * </dd>
+		 * invoke the advice chain. Otherwise a DyanmicAdvisedInterceptor is
+		 * used.</dd>
 		 * <dt>For non-advised methods:</dt>
 		 * <dd>Where it can be determined that the method will not return
-		 * <code>this</code> or when ProxyFactory.getExposeProxy() return false
-		 * then a Dispatcher is used. For static targets the StaticDispatcher is
-		 * used and for dynamic targets a DynamicUnadvisedInterceptor is used. If it possible
-		 * for the method to return <code>this</code> then a StaticUnadvisedInterceptor is
-		 * used for static targets - the DynamicUnadvisedInterceptor already considers this.</dd>
+		 * <code>this</code> or when ProxyFactory.getExposeProxy() return
+		 * false then a Dispatcher is used. For static targets the
+		 * StaticDispatcher is used and for dynamic targets a
+		 * DynamicUnadvisedInterceptor is used. If it possible for the method to
+		 * return <code>this</code> then a StaticUnadvisedInterceptor is used
+		 * for static targets - the DynamicUnadvisedInterceptor already
+		 * considers this.</dd>
 		 * </dl>
 		 * 
 		 * @see net.sf.cglib.proxy.CallbackFilter#accept(java.lang.reflect.Method)
@@ -702,14 +708,17 @@ public class Cglib2AopProxy implements AopProxy {
 
 			if (method.getDeclaringClass() == Object.class
 					&& method.getName().equals("finalize")) {
-				logger.info("Object.finalize () method found - using NO_OVERRIDE");
+				logger
+						.info("Object.finalize () method found - using NO_OVERRIDE");
 				return NO_OVERRIDE;
 			}
 
 			if (method.getDeclaringClass() == Advised.class) {
 				if (logger.isInfoEnabled()) {
-					logger.info("Method " + method
-							+ " is declared on Advised - using DISPATCH_ADVISED");
+					logger
+							.info("Method "
+									+ method
+									+ " is declared on Advised - using DISPATCH_ADVISED");
 				}
 				return DISPATCH_ADVISED;
 			}
@@ -722,7 +731,8 @@ public class Cglib2AopProxy implements AopProxy {
 
 			// Could consider more aggressive optimization in which we have a
 			// distinct
-			// callback with the advice chain for each method, but it's probably not
+			// callback with the advice chain for each method, but it's probably
+			// not
 			// worth it
 
 			// We can apply optimizations
@@ -751,9 +761,11 @@ public class Cglib2AopProxy implements AopProxy {
 
 				String key = method.toString();
 
-				// check to see if we have fixed interceptor to serve this method
+				// check to see if we have fixed interceptor to serve this
+				// method
 				// else use the AOP_PROXY
-				if (isStatic && isFrozen && fixedInterceptorMap.containsKey(key)) {
+				if (isStatic && isFrozen
+						&& fixedInterceptorMap.containsKey(key)) {
 					if (logger.isInfoEnabled()) {
 						logger
 								.info("Method "
@@ -763,7 +775,8 @@ public class Cglib2AopProxy implements AopProxy {
 
 					// we know that we are optimising so we can use the
 					// FixedStaticChainInterceptors
-					int index = ((Integer) fixedInterceptorMap.get(key)).intValue();
+					int index = ((Integer) fixedInterceptorMap.get(key))
+							.intValue();
 					return (index + fixedInterceptorOffset);
 				} else {
 					return AOP_PROXY;
@@ -813,11 +826,11 @@ public class Cglib2AopProxy implements AopProxy {
 				}
 			}
 		}
-		
+
 		public int hashCode() {
 			return 0;
 		}
-		
+
 		public boolean equals(Object other) {
 			if (other == null)
 				return false;
@@ -832,8 +845,24 @@ public class Cglib2AopProxy implements AopProxy {
 				return false;
 			}
 
-			return AopProxyUtils.equalsInProxy(advised, otherCallbackFilter.advised);
+			if (advised.isFrozen() != otherCallbackFilter.advised.isFrozen()) {
+				return false;
+			}
+			
+			if(advised.getExposeProxy() != otherCallbackFilter.advised.getExposeProxy()) {
+				return false;
+			}
+
+			if (advised.getTargetSource().isStatic() != otherCallbackFilter.advised
+					.getTargetSource().isStatic()) {
+				return false;
+			}
+
+			return (AopProxyUtils.equalsProxiedInterfaces(advised,
+					otherCallbackFilter.advised) & AopProxyUtils
+					.equalsAdvisors(advised, otherCallbackFilter.advised));
 		}
+
 	}
 	/**
 	 * Implementation of AOP Alliance MethodInvocation used by this AOP proxy

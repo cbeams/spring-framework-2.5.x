@@ -25,7 +25,7 @@ import org.aopalliance.aop.AspectException;
 /**
  * Miscellaneous utilities for AOP proxies
  * @author Rod Johnson
- * @version $Id: AopProxyUtils.java,v 1.6 2004-03-19 21:35:54 johnsonr Exp $
+ * @version $Id: AopProxyUtils.java,v 1.7 2004-06-25 11:10:19 robharrop Exp $
  */
 public abstract class AopProxyUtils {
 	
@@ -79,10 +79,10 @@ public abstract class AopProxyUtils {
 		if (a == b)
 			return true;
 	
-		if (!Arrays.equals(a.getProxiedInterfaces(), b.getProxiedInterfaces()))
+		if (!equalsProxiedInterfaces(a, b))
 			return false;
 
-		if (!Arrays.equals(a.getAdvisors(), b.getAdvisors()))
+		if (!equalsAdvisors(a, b))
 			return false;
 	
 		if (a.getTargetSource() == null)
@@ -90,5 +90,14 @@ public abstract class AopProxyUtils {
 	
 		return a.getTargetSource().equals(b.getTargetSource());
 	}
+	
+	public static boolean equalsProxiedInterfaces(AdvisedSupport a, AdvisedSupport b) {
+		return Arrays.equals(a.getProxiedInterfaces(), b.getProxiedInterfaces());
+	}
+	
+	public static boolean equalsAdvisors(AdvisedSupport a, AdvisedSupport b) {
+		return Arrays.equals(a.getAdvisors(), b.getAdvisors());
+	}
+
 
 }
