@@ -19,7 +19,7 @@ import org.springframework.binding.format.FormatterLocator;
  */
 public class DefaultConverterLocator implements ConverterLocator, InitializingBean {
 
-	private Map sourceClassConverters;
+	private Map sourceClassConverters = new HashMap();
 
 	private FormatterLocator formatterLocator;
 

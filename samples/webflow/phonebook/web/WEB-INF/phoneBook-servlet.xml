@@ -29,7 +29,7 @@
 	<!-- java flow builder definition for the search flow -->
 	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
-			<bean class="org.springframework.samples.phonebook.web.flow.SearchPersonFlowBuilder"/>
+			<bean class="org.springframework.samples.phonebook.web.flow.SearchPersonFlowBuilder" autowire="byType"/>
 		</property>
 	</bean>
 	
@@ -88,7 +88,7 @@
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
-	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterRegistry"/>
+	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterLocator"/>
 
 	<bean id="converter.locator" class="org.springframework.binding.convert.support.DefaultConverterLocator" autowire="byType"/>
 	

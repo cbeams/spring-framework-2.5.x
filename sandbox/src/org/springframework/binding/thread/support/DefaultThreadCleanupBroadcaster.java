@@ -17,11 +17,12 @@ package org.springframework.binding.thread.support;
 
 import java.util.Iterator;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.binding.thread.ThreadCleanupBroadcaster;
 import org.springframework.binding.thread.ThreadCleanupListener;
 import org.springframework.util.EventListenerListHelper;
 
-public class DefaultThreadCleanupBroadcaster implements ThreadCleanupBroadcaster {
+public class DefaultThreadCleanupBroadcaster implements ThreadCleanupBroadcaster, DisposableBean {
 	private ThreadLocal listenerListHolder = new ThreadLocal();
 
 	public void addThreadCleanupListener(ThreadCleanupListener listener) {
@@ -50,5 +51,9 @@ public class DefaultThreadCleanupBroadcaster implements ThreadCleanupBroadcaster
 			ThreadCleanupListener listener = (ThreadCleanupListener)it.next();
 			listener.onCleanup();
 		}
+	}
+
+	public void destroy() throws Exception {
+		fireCleanupEvent();
 	}
 }
