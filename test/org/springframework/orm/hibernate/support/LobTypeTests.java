@@ -123,7 +123,35 @@ public class LobTypeTests extends TestCase {
 		type.nullSafeSet(ps, "content", 1);
 		Synchronization synch = transaction.getSynchronization();
 		assertNotNull(synch);
+		synch.beforeCompletion();
 		synch.afterCompletion(Status.STATUS_COMMITTED);
+		tmControl.verify();
+	}
+
+	public void testClobStringTypeWithJtaSynchronizationAndRollback() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 1);
+
+		lobHandler.getClobAsString(rs, 1);
+		lobHandlerControl.setReturnValue("content");
+		lobCreator.setClobAsString(ps, 1, "content");
+		lobCreatorControl.setVoidCallable(1);
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		ClobStringType type = new ClobStringType(lobHandler, tm);
+		assertEquals("content", type.nullSafeGet(rs, new String[] {"column"}, null));
+		tmControl.replay();
+		type.nullSafeSet(ps, "content", 1);
+		Synchronization synch = transaction.getSynchronization();
+		assertNotNull(synch);
+		synch.afterCompletion(Status.STATUS_ROLLEDBACK);
 		tmControl.verify();
 	}
 
@@ -182,7 +210,36 @@ public class LobTypeTests extends TestCase {
 		type.nullSafeSet(ps, content, 1);
 		Synchronization synch = transaction.getSynchronization();
 		assertNotNull(synch);
+		synch.beforeCompletion();
 		synch.afterCompletion(Status.STATUS_COMMITTED);
+		tmControl.verify();
+	}
+
+	public void testBlobByteArrayTypeWithJtaSynchronizationAndRollback() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 1);
+
+		byte[] content = "content".getBytes();
+		lobHandler.getBlobAsBytes(rs, 1);
+		lobHandlerControl.setReturnValue(content);
+		lobCreator.setBlobAsBytes(ps, 1, content);
+		lobCreatorControl.setVoidCallable(1);
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobByteArrayType type = new BlobByteArrayType(lobHandler, tm);
+		assertEquals(content, type.nullSafeGet(rs, new String[] {"column"}, null));
+		tmControl.replay();
+		type.nullSafeSet(ps, content, 1);
+		Synchronization synch = transaction.getSynchronization();
+		assertNotNull(synch);
+		synch.afterCompletion(Status.STATUS_ROLLEDBACK);
 		tmControl.verify();
 	}
 
@@ -288,7 +345,52 @@ public class LobTypeTests extends TestCase {
 		type.nullSafeSet(ps, "content", 1);
 		Synchronization synch = transaction.getSynchronization();
 		assertNotNull(synch);
+		synch.beforeCompletion();
 		synch.afterCompletion(Status.STATUS_COMMITTED);
+		tmControl.verify();
+	}
+
+	public void testBlobSerializableTypeWithJtaSynchronizationAndRollback() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 1);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject("content");
+		oos.close();
+
+		lobHandler.getBlobAsBinaryStream(rs, 1);
+		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
+		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
+		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
+			public boolean matches(Object[] o1, Object[] o2) {
+				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
+			}
+			public String toString(Object[] objects) {
+				return null;
+			}
+		});
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobSerializableType type = new BlobSerializableType(lobHandler, tm);
+		assertEquals(1, type.sqlTypes().length);
+		assertEquals(Types.BLOB, type.sqlTypes()[0]);
+		assertEquals(Serializable.class, type.returnedClass());
+		assertTrue(type.isMutable());
+
+		assertEquals("content", type.nullSafeGet(rs, new String[] {"column"}, null));
+		tmControl.replay();
+		type.nullSafeSet(ps, "content", 1);
+		Synchronization synch = transaction.getSynchronization();
+		assertNotNull(synch);
+		synch.afterCompletion(Status.STATUS_ROLLEDBACK);
 		tmControl.verify();
 	}
 
