@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.87 2004-02-11 17:18:46 jhoeller Exp $
+$Id: changelog.txt,v 1.88 2004-02-12 14:20:47 colins Exp $
 
 
 Changes in version 1.0 RC1 (11.02.2003)
@@ -46,6 +46,9 @@ Package org.springframework.beans
 * added support for "autodetect" autowire mode to XML bean definition format
 * added "set" tag to XML bean definition format, analogous to "list" and "map"
 * fixed "constructor-arg" detection in DefaultXmlBeanDefinitionParser to not interfere with inner bean definitions
+* reworked BeanFactoryLoader interface as BeanFactoryLocator
+* added SingletonBeanFactoryLocator class, for use by glue code needing to access BeanFactories/ApplicationContexts
+* added SimpleJndiBeanFactoryLocator class
 
 Package org.springframework.context
 * ApplicationContext interface does not extend AutowireCapableBeanFactory anymore (use ConfigurableApplicationContext)
@@ -56,6 +59,8 @@ Package org.springframework.context
 * reworked internal structure of AbstractNestingMessageSource and ResourceBundleMessageSource
 * added ReloadableResourceBundleMessageSource, supporting hot reloading of message definition files
 * added "useCodeAsDefaultMessage" property to AbtractNestingMessageSource, to ease development and debugging
+* added DefaultBeanFactoryLocator class, for use by glue code needing to access BeanFactories/ApplicationContexts
+* added JndiBeanFactoryLocator class
 
 Package org.springframework.core
 * removed HasRootCause, InternalErrorException, ParameterizableErrorCoded, and Timestamped
@@ -67,6 +72,10 @@ Package org.springframework.core
 
 Package org.springframework.dao
 * TypeMismatchException extends InvalidDataAccessResourceUsageException
+
+Package org.springframework.ejb
+* replaced use of BeanFactoryLoader interface with BeanFactoryLocator, to load BeanFactories/ApplicationContexts for EJBs
+* removed XmlBeanFactoryLoader; its functionality is replaced by SimpleJndiBeanFactoryLocator/JndiBeanFactoryLocator
 
 Package org.springframework.jdbc
 * added support for transaction suspension to DataSourceTransactionManager
