@@ -87,7 +87,7 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
         return predicates.iterator();
     }
 
-    public abstract boolean test(Object value);
+    public abstract boolean test(Object argument);
 
     /**
      * Utility method that validates that each predicate aggregated by this

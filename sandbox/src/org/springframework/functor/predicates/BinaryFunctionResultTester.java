@@ -29,6 +29,15 @@ public class BinaryFunctionResultTester implements BinaryPredicate {
     private UnaryPredicate tester;
     private BinaryFunction function;
 
+    /**
+     * Creates a BinaryFunctionResultTester that tests the result return from
+     * evaulating the specified binary function.
+     * 
+     * @param tester
+     *            The predicate that will test the function return value.
+     * @param function
+     *            The function to test.
+     */
     public BinaryFunctionResultTester(
         UnaryPredicate tester,
         BinaryFunction function) {
@@ -38,6 +47,13 @@ public class BinaryFunctionResultTester implements BinaryPredicate {
         this.function = function;
     }
 
+    /**
+     * Tests the result returned by evaluating the specified arguments against
+     * the configured binary function.
+     * 
+     * @see org.springframework.functor.BinaryPredicate#test(java.lang.Object,
+     *      java.lang.Object)
+     */
     public boolean test(Object argument1, Object argument2) {
         return this.tester.test(function.evaluate(argument1, argument2));
     }

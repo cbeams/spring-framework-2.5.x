@@ -59,14 +59,14 @@ public abstract class ComparisonBinaryPredicate implements BinaryPredicate {
      *            the second argument
      * @return true if the comparsion result passes, false otherwise
      */
-    public boolean test(Object value1, Object value2) {
+    public boolean test(Object argument1, Object argument2) {
         Comparator c;
         if (comparator != null) {
             c = new NullSafeComparator(comparator);
         } else {
             c = NullSafeComparator.instance();
         }
-        return testCompareResult(c.compare(value1, value2));
+        return testCompareResult(c.compare(argument1, argument2));
     }
 
     /**
