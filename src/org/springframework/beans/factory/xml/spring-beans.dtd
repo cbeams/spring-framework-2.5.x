@@ -28,10 +28,11 @@
 	As the format is simple, a DTD is sufficient, and there's no need
 	for a schema at this point.
 
-  XML documents that conform to this DTD should declare the following doctype:
-	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+	XML documents that conform to this DTD should declare the following doctype:
+	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.21 2004-01-29 23:27:50 aarendsen Exp $
+	$Id: spring-beans.dtd,v 1.22 2004-01-29 23:31:17 aarendsen Exp $
 -->
 
 <!--
