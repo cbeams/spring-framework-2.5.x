@@ -30,7 +30,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.XmlFlowBuilder;
 import org.springframework.web.flow.config.XmlFlowBuilderTests;
-import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * Test case for FlowExecutionStack

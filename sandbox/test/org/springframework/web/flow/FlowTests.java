@@ -20,7 +20,6 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.flow.StateTests.ExecutionCounterAction;
 import org.springframework.web.flow.StateTests.InputOutputMapper;
-import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * @author Keith Donald
@@ -91,7 +90,7 @@ public class FlowTests extends TestCase {
 			stateTransitions = 0;
 		}
 
-		public void stateTransitioned(FlowExecutionContext context, AbstractState previousState, AbstractState newState) {
+		public void stateTransitioned(FlowExecutionContext context, State previousState, State newState) {
 			assertTrue(flowExecutionsStarted > 0);
 			stateTransitions++;
 			eventSignaled = false;

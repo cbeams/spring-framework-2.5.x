@@ -30,11 +30,11 @@ import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.LocalEvent;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
-import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * Test case for XML flow builder.

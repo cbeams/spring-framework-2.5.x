@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.LocalEvent;
 import org.springframework.web.flow.action.AbstractAction;
-import org.springframework.web.flow.support.LocalEvent;
 
 public class AddItemAction extends AbstractAction {
 

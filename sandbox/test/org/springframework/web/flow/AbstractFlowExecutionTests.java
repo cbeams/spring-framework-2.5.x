@@ -25,7 +25,6 @@ import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
-import org.springframework.web.flow.support.LocalEvent;
 import org.springframework.web.servlet.ModelAndView;
 
 /**

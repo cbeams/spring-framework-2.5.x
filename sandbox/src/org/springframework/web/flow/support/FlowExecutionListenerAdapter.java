@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow.support;
 
-import org.springframework.web.flow.AbstractState;
+import org.springframework.web.flow.State;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.FlowExecutionListener;
@@ -44,7 +44,7 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	public void eventSignaled(FlowExecutionContext context, Event event) {
 	}
 
-	public void stateTransitioned(FlowExecutionContext context, AbstractState previousState, AbstractState newState) {
+	public void stateTransitioned(FlowExecutionContext context, State previousState, State newState) {
 	}
 
 	public void subFlowEnded(FlowExecutionContext context, FlowSession endedSession) {

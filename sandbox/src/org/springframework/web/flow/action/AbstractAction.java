@@ -22,7 +22,7 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecutionContext;
-import org.springframework.web.flow.support.LocalEvent;
+import org.springframework.web.flow.LocalEvent;
 
 /**
  * Base action implementation that provides a number of helper methods generally

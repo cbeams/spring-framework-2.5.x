@@ -24,7 +24,6 @@ import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeSetter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * Tests that each of the Flow state types execute as expected when entered.
