@@ -17,22 +17,9 @@ package org.springframework.util.thread;
 
 public interface ThreadLocalStorage {
 
-	/**
-	 * Returns the thread-local object for the given key, or null if no such
-	 * object exists.
-	 */
 	public Object get(Object key);
 
-	/**
-	 * Stores the value object at the given key, overwriting any prior value
-	 * that may have been stored at that key. Care should be taken in selecting
-	 * keys to avoid naming conflicts; in general, prefixing a key with a module
-	 * id is a good idea.
-	 */
 	public void put(Object key, Object value);
 
-	/**
-	 * Clears all keys.
-	 */
 	public void clear();
 }

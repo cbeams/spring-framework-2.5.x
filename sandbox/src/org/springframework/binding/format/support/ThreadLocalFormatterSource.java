@@ -25,7 +25,7 @@ import org.springframework.binding.format.DateFormatter;
 import org.springframework.binding.format.FormatterSource;
 import org.springframework.binding.format.NumberFormatter;
 import org.springframework.binding.format.Style;
-import org.springframework.util.thread.LocaleContext;
+import org.springframework.context.LocaleContext;
 import org.springframework.util.thread.ThreadCleanupBroadcaster;
 import org.springframework.util.thread.support.DefaultThreadLocalStorage;
 
