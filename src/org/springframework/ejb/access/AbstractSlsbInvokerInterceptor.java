@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ejb.access;
 
@@ -114,7 +114,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 */
 	protected Method getCreateMethod(Object home) throws AspectException {
 		try {
-			// cache the EJB create() method that must be declared on the home interface
+			// Cache the EJB create() method that must be declared on the home interface.
 			return home.getClass().getMethod("create", (Class[]) null);
 		}
 		catch (NoSuchMethodException ex) {
@@ -171,7 +171,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 			if (createMethodToUse == null) {
 				createMethodToUse = getCreateMethod(home);
 			}
-			// invoke cached EJB home object
+			// Invoke create() method on EJB home object.
 			return createMethodToUse.invoke(home, (Object[]) null);
 		}
 		catch (IllegalAccessException ex) {

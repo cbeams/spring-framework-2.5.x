@@ -195,8 +195,8 @@ public abstract class StringUtils {
 
 	/**
 	 * Delete any character in a given string.
-	 * @param chars characters to delete.
-	 * E.g. az\n will delete as, zs and new lines.
+	 * @param chars a set of characters to delete.
+	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
 	 */
 	public static String deleteAny(String inString, String chars) {
 		if (inString == null || chars == null) {
