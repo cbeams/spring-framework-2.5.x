@@ -163,7 +163,7 @@ public abstract class RequestUtils {
 		}
 
 		protected Object doParse(String parameter) throws NumberFormatException {
-			return new Double(parameter);
+			return Double.valueOf(parameter);
 		}
 	};
 
