@@ -32,6 +32,7 @@ public class FindOwnersForm	extends AbstractClinicForm {
 	}
 
 	protected void initApplicationContext() {
+		super.initApplicationContext();
 		if (this.selectView == null) {
 			throw new IllegalArgumentException("selectView isn't set");
 		}
