@@ -44,7 +44,7 @@
 		well, and they will also be evaluated and applied automatically.
 	-->
 	<bean id="transactionAdvisor"
-		class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor"
+		class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
 		autowire="constructor" >
 	</bean>
 	

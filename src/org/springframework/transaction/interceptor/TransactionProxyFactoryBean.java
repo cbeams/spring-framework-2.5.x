@@ -61,7 +61,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.24 2004-03-19 21:35:54 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.25 2004-03-23 16:05:23 jhoeller Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -206,9 +206,9 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		}
 		else {
 			// rely on default pointcut
-			proxyFactory.addAdvisor(new TransactionAttributeSourceTransactionAroundAdvisor(transactionInterceptor));
+			proxyFactory.addAdvisor(new TransactionAttributeSourceAdvisor(transactionInterceptor));
 			// could just do the following, but it's usually less efficient because of AOP advice chain caching
-			//proxyFactory.addInterceptor(transactionInterceptor);
+			// proxyFactory.addInterceptor(transactionInterceptor);
 		}
 
 		if (this.postInterceptors != null) {

@@ -22,27 +22,27 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 
 /**
- * InterceptionAroundAdvisor driven by a TransactionAttributeSource.
- * Used to exclude TransactionInterceptor from methods that are non transactional.
+ * Advisor driven by a TransactionAttributeSource, used to exclude
+ * a TransactionInterceptor from methods that are non-transactional.
  *
- * <p>Because the AOP framework caches advice calculations, this is normally faster
- * than just letting the TransactionInterceptor run and find out itself that it
- * has no work to do.
+ * <p>Because the AOP framework caches advice calculations, this is normally
+ * faster than just letting the TransactionInterceptor run and find out
+ * itself that it has no work to do.
  *
  * @author Rod Johnson
- * @version $Id: TransactionAttributeSourceTransactionAroundAdvisor.java,v 1.6 2004-03-23 14:33:30 jhoeller Exp $
+ * @version $Id: TransactionAttributeSourceAdvisor.java,v 1.1 2004-03-23 16:05:23 jhoeller Exp $
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
-public class TransactionAttributeSourceTransactionAroundAdvisor extends StaticMethodMatcherPointcutAdvisor {
+public class TransactionAttributeSourceAdvisor extends StaticMethodMatcherPointcutAdvisor {
 	
 	private TransactionAttributeSource transactionAttributeSource;
 	
-	public TransactionAttributeSourceTransactionAroundAdvisor(TransactionInterceptor ti) {
+	public TransactionAttributeSourceAdvisor(TransactionInterceptor ti) {
 		super(ti);
 		if (ti.getTransactionAttributeSource() == null) {
-			throw new AopConfigException("Cannot construct a TransactionAttributeSourceTransactionAroundAdvisor " +
-																	 "using a TransactionInterceptor that has no TransactionAttributeSource configured");
+			throw new AopConfigException("Cannot construct a TransactionAttributeSourceAdvisor using a " +
+																	 "TransactionInterceptor that has no TransactionAttributeSource configured");
 		}
 		this.transactionAttributeSource = ti.getTransactionAttributeSource();
 	}

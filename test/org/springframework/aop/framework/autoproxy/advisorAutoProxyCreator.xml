@@ -68,7 +68,7 @@
 	
 	<bean id="txAdvisor"
 		autowire="constructor"
-		class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor">
+		class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
 		<property name="order"><value>10</value></property>
 	</bean>
 	

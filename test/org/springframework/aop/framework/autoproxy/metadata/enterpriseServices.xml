@@ -44,7 +44,7 @@
 	</bean>
 	
 	<bean id="es.txAdvice"
-		class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor"
+		class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
 		autowire="constructor" >
 	</bean>
 	
