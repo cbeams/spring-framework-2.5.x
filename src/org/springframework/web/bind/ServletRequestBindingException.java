@@ -1,8 +1,6 @@
-
 package org.springframework.web.bind;
 
 import javax.servlet.ServletException;
-
 
 /**
  * Fatal binding exception, thrown when we want to
@@ -11,12 +9,12 @@ import javax.servlet.ServletException;
  */
 public class ServletRequestBindingException extends ServletException {
 
-	public ServletRequestBindingException(String s) {
-		super(s);
+	public ServletRequestBindingException(String msg) {
+		super(msg);
 	}
 
-	public ServletRequestBindingException(String s, Throwable t) {
-		super(s, t);
+	public ServletRequestBindingException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 }

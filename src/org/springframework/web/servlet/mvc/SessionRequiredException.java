@@ -7,7 +7,6 @@ package org.springframework.web.servlet.mvc;
 
 import javax.servlet.ServletException;
 
-
 /**
  * Exception thrown when a Controller requires a session for the
  * current method. This exception is normally raised by framework
@@ -16,20 +15,12 @@ import javax.servlet.ServletException;
  */
 public class SessionRequiredException extends ServletException {
 
-	/**
-	 * Constructor for SessionRequiredException.
-	 * @param mesg message
-	 */
-	public SessionRequiredException(String mesg) {
-		super(mesg);
+	public SessionRequiredException(String msg) {
+		super(msg);
 	}
 
-	/**
-	 * Constructor for SessionRequiredException.
-	 * @param mesg message
-	 * @param t root cause
-	 */
-	public SessionRequiredException(String mesg, Throwable t) {
-		super(mesg, t);
+	public SessionRequiredException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
+
 }
