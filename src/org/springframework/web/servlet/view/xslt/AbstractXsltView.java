@@ -31,10 +31,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.springframework.context.ApplicationContextException;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.view.AbstractView;
 import org.w3c.dom.Node;
+
+import org.springframework.context.ApplicationContextException;
+import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
@@ -54,7 +54,7 @@ import org.w3c.dom.Node;
  * affect performance in production and isn't threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: AbstractXsltView.java,v 1.1.1.1 2003-08-14 16:21:00 trisberg Exp $
+ * @version $Id: AbstractXsltView.java,v 1.2 2003-08-28 15:23:32 jhoeller Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
@@ -149,16 +149,15 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * However, when it does work it's efficient and convenient.
 	 */
 	protected Source getStylesheetSource(String url) throws ApplicationContextException {
-		// Shouldn't use this: it's not guaranteed
+		// TODO: Shouldn't use this: it's not guaranteed
 		// QUESTIONABLE: Servlet 2.2 idea!?
-		// TODO
 		logger.info("Loading XSLT stylesheet '" + url + "' from filesystem using getRealPath");
-		String realpath = ((WebApplicationContext) getApplicationContext()).getServletContext().getRealPath(url);
-		if (realpath == null)
+		String realPath = getServletContext().getRealPath(url);
+		if (realPath == null)
 			throw new ApplicationContextException(
 				"Can't resolve real path for XSLT stylesheet at '" + url + "'; probably results from container restriction: override XsltView.getStylesheetSource() to use an alternative approach to getRealPath()");
-		logger.info("Realpath is '" + realpath + "'");
-		Source s = new StreamSource(new File(realpath));
+		logger.info("Realpath is '" + realPath + "'");
+		Source s = new StreamSource(new File(realPath));
 		return s;
 	}
 

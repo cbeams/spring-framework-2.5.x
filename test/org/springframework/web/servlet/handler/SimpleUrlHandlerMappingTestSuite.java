@@ -4,9 +4,10 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
+import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -19,22 +20,25 @@ public class SimpleUrlHandlerMappingTestSuite extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/servlet/handler/map2.xml";
 	
-	private ApplicationContext ac;
+	private WebApplicationContext wac;
 
-	public SimpleUrlHandlerMappingTestSuite() throws IOException {
-		ac = new ClassPathXmlApplicationContext(CONF);
+	public void setUp() throws Exception {
+		MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, CONF);
+		wac = new XmlWebApplicationContext();
+		wac.setServletContext(sc);
 	}
 
 	public void testUrlMappingWithUrlMap() throws Exception {
-		checkMappings((HandlerMapping) ac.getBean("urlMapping"));
+		checkMappings((HandlerMapping) wac.getBean("urlMapping"));
 	}
 
 	public void testUrlMappingWithProps() throws Exception {
-		checkMappings((HandlerMapping) ac.getBean("urlMappingWithProps"));
+		checkMappings((HandlerMapping) wac.getBean("urlMappingWithProps"));
 	}
 
 	private void checkMappings(HandlerMapping hm) throws Exception {
-		Object bean = ac.getBean("mainController");
+		Object bean = wac.getBean("mainController");
 		
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);

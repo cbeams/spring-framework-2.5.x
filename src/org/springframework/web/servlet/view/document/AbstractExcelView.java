@@ -16,8 +16,8 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+
 import org.springframework.context.ApplicationContextException;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractView;
 
@@ -146,7 +146,7 @@ public abstract class AbstractExcelView extends AbstractView {
 		// Check for document with language and country localisation
 		if (country.length() > 1) {
 			source = url + SEPARATOR + lang + country + EXTENSION;
-			realPath = ((WebApplicationContext) getApplicationContext()).getServletContext().getRealPath(source);
+			realPath = getServletContext().getRealPath(source);
 			try {
 				inputFile = new FileInputStream(realPath);
 			}
@@ -157,7 +157,7 @@ public abstract class AbstractExcelView extends AbstractView {
 		// Check for document with language localisation
 		if (lang.length() > 1 && null == inputFile) {
 			source = url + SEPARATOR + lang + EXTENSION;
-			realPath = ((WebApplicationContext) getApplicationContext()).getServletContext().getRealPath(source);
+			realPath = getServletContext().getRealPath(source);
 			try {
 				inputFile = new FileInputStream(realPath);
 			}
@@ -168,7 +168,7 @@ public abstract class AbstractExcelView extends AbstractView {
 		// Check for document without localisation
 		if (null == inputFile) {
 			source = url + EXTENSION;
-			realPath = ((WebApplicationContext) getApplicationContext()).getServletContext().getRealPath(source);
+			realPath = getServletContext().getRealPath(source);
 			try {
 				inputFile = new FileInputStream(realPath);
 			}

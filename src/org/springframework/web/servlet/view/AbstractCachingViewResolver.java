@@ -19,7 +19,7 @@ import javax.servlet.ServletException;
 
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
@@ -30,7 +30,7 @@ import org.springframework.web.servlet.ViewResolver;
  * View retrieval is deferred to subclasses.
  * @author Rod Johnson
  */
-public abstract class AbstractCachingViewResolver extends ApplicationObjectSupport implements ViewResolver {
+public abstract class AbstractCachingViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
 	/** View name --> View instance */
 	private Map viewHash = new HashMap();

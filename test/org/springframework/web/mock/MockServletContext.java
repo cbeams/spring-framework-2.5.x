@@ -37,17 +37,18 @@ public class MockServletContext implements ServletContext {
 	private Hashtable _attributes = new Hashtable();
 
 	/**
-	 * Param warRoot should not end with a /
+	 * Param warRoot should not end with a /.
+	 */
+	public MockServletContext(String warRoot) throws Exception {
+		this.warRoot = warRoot;
+	}
+
+	/**
+	 * Param warRoot should not end with a /.
 	 */
 	public MockServletContext(String warRoot, String webXml) throws Exception {
 		this.warRoot = warRoot;
-		//System.out.println("------> MockServletContext: WAR root is '" + warRoot + "'");
-
-		//InputStream is = new FileInputStream(
-		
 		InputStream is = getClass().getResourceAsStream(warRoot + webXml);
-		
-		//System.out.println("Loading web.xml from InputStream [" + is + "]");
 		DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document doc = db.parse(is);
 		parseWebXml(doc);
@@ -59,10 +60,7 @@ public class MockServletContext implements ServletContext {
 		//System.out.println("------> MockServletContext: no WAR root!!");
 	}
 
-	/**
-	 * Parse the web.xml
-	 */
-	private void parseWebXml(Document webxml) throws Exception {
+	private void parseWebXml(Document webxml) {
 		NodeList nl = webxml.getElementsByTagName("display-name");
 		if (nl.getLength() > 0)
 			displayName = getText(nl.item(0));
@@ -74,7 +72,7 @@ public class MockServletContext implements ServletContext {
 	}
 	
 	
-	private void parseContextParamNode(Element n) throws Exception {
+	private void parseContextParamNode(Element n) {
 		//<context-param>
 		//<param-name>configPath</param-name>
   		//<param-value>/WEB-INF/applicationContext.xml</param-value>   	

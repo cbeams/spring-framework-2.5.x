@@ -1,12 +1,11 @@
 package org.springframework.web.servlet.handler;
 
-import java.io.IOException;
-
 import junit.framework.TestCase;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
+import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -19,16 +18,19 @@ public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 
 	private HandlerMapping hm;
 
-	private ApplicationContext ac;
+	private WebApplicationContext wac;
 
-	public PathMatchingUrlHandlerMappingTestSuite() throws IOException {
-		ac = new ClassPathXmlApplicationContext(CONF);
-		hm = (HandlerMapping) ac.getBean("urlMapping");
-		hm.setApplicationContext(ac);
+	public void setUp() throws Exception {
+		MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, CONF);
+		wac = new XmlWebApplicationContext();
+		wac.setServletContext(sc);
+		hm = (HandlerMapping) wac.getBean("urlMapping");
+		hm.setApplicationContext(wac);
 	}
 
 	public void testRequestsWithHandlers() throws Exception {
-		Object bean = ac.getBean("mainController");
+		Object bean = wac.getBean("mainController");
 
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
@@ -47,8 +49,8 @@ public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 		// there a couple of mappings defined with which we can test the
 		// path matching, let's do that...
 
-		Object bean = ac.getBean("mainController");
-		Object defaultBean = ac.getBean("starController");
+		Object bean = wac.getBean("mainController");
+		Object defaultBean = wac.getBean("starController");
 
 		// testing some normal behavior
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/pathmatchingTest.html");
@@ -195,7 +197,7 @@ public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 	}
 
 	public void testDefaultMapping() throws Exception {
-		Object bean = ac.getBean("starController");
+		Object bean = wac.getBean("starController");
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/goggog.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);

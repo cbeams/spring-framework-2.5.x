@@ -21,9 +21,10 @@ import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.Velocity;
+
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -50,7 +51,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @see VelocityView
  */
-public class VelocityConfigurer extends ApplicationObjectSupport {
+public class VelocityConfigurer extends WebApplicationObjectSupport {
 
 	public static final String DEFAULT_CONFIG_LOCATION = "WEB-INF/velocity.properties";
 

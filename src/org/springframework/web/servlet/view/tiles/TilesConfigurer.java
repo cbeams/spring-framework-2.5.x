@@ -1,7 +1,5 @@
 package org.springframework.web.servlet.view.tiles;
 
-import javax.servlet.ServletContext;
-
 import org.apache.struts.tiles.DefinitionsFactory;
 import org.apache.struts.tiles.DefinitionsFactoryConfig;
 import org.apache.struts.tiles.DefinitionsFactoryException;
@@ -10,9 +8,8 @@ import org.apache.struts.tiles.TilesUtilImpl;
 import org.apache.struts.tiles.xmlDefinition.I18nFactorySet;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Helper class to configure Tiles for the Spring Framework (see
@@ -49,7 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Juergen Hoeller
  * @see TilesView
  */
-public class TilesConfigurer extends ApplicationObjectSupport {
+public class TilesConfigurer extends WebApplicationObjectSupport {
 
 	/** factory class for Tiles */
 	private Class factoryClass = I18nFactorySet.class;
@@ -105,8 +102,7 @@ public class TilesConfigurer extends ApplicationObjectSupport {
 			}
 
 			// initialize the definitions factory
-			ServletContext sc = ((WebApplicationContext) getApplicationContext()).getServletContext();
-			DefinitionsFactory factory = TilesUtil.createDefinitionsFactory(sc, factoryConfig);
+			DefinitionsFactory factory = TilesUtil.createDefinitionsFactory(getServletContext(), factoryConfig);
 			getApplicationContext().shareObject(TilesUtilImpl.DEFINITIONS_FACTORY, factory);
 
 			logger.info("Tiles: initialization done");

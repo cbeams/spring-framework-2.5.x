@@ -40,6 +40,9 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	public final void setApplicationContext(ApplicationContext ctx) throws ApplicationContextException {
 		// ignore reinitialization
 		if (this.applicationContext == null) {
+			if (!requiredContextClass().isInstance(ctx)) {
+				throw new ApplicationContextException("Invalid application context: needs to be of type '" + requiredContextClass().getName() + "'");
+			}
 			this.applicationContext = ctx;
 			initApplicationContext();
 		}
@@ -50,6 +53,15 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	 */
 	public final ApplicationContext getApplicationContext() {
 		return applicationContext;
+	}
+
+	/**
+	 * Determine the context class that any context passed to
+	 * setApplicationContext must be an instance of.
+	 * Can be overridden in subclasses.
+	 */
+	protected Class requiredContextClass() {
+		return ApplicationContext.class;
 	}
 
 	/**

@@ -10,8 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.Controller;
 
-import org.springframework.context.support.ApplicationObjectSupport;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Convenience class for Spring-aware Tiles component controllers.
@@ -20,14 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Juergen Hoeller
  * @since 22.08.2003
  */
-public abstract class ComponentControllerSupport extends ApplicationObjectSupport implements Controller {
-
-	/**
-	 * Convenience method for subclasses that returns the current ServletContext.
-	 */
-	protected final ServletContext getServletContext() {
-		return ((WebApplicationContext) getApplicationContext()).getServletContext();
-	}
+public abstract class ComponentControllerSupport extends WebApplicationObjectSupport implements Controller {
 
 	/**
 	 * This implementation delegates to the simplified doPerform,
@@ -49,8 +41,8 @@ public abstract class ComponentControllerSupport extends ApplicationObjectSuppor
 	 * @param response current HTTP response
 	 * @throws ServletException in case of execution errors
 	 * @throws IOException in case of I/O errors
-	 * @see #getServletContext
 	 * @see org.apache.struts.tiles.Controller#perform
+	 * @see #getServletContext
 	 */
 	protected abstract void doPerform(ComponentContext componentContext, HttpServletRequest request,
 	                                  HttpServletResponse response) throws ServletException, IOException;

@@ -22,19 +22,14 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
+import org.springframework.web.mock.MockHttpSession;
 import org.springframework.web.servlet.LastModified;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- *
  * @author Rod Johnson
- * @version $RevisionId$
  */
 public class CommandControllerTestSuite extends TestCase {
-
-	public CommandControllerTestSuite(String name) {
-		super(name);
-	}
 
 	public void testNoArgsNoErrors() throws Exception {
 		TestController mc = new TestController();
@@ -104,7 +99,7 @@ public class CommandControllerTestSuite extends TestCase {
 		}
 	}
 
-	public void testRequireSession() throws Exception {
+	public void testRequireSessionWithoutSession() throws Exception {
 		TestController mc = new TestController();
 		mc.setRequireSession(true);
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
@@ -118,14 +113,23 @@ public class CommandControllerTestSuite extends TestCase {
 		}
 	}
 
+	public void testRequireSessionWithSession() throws Exception {
+		TestController mc = new TestController();
+		mc.setRequireSession(true);
+		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		request.setSession(new MockHttpSession());
+		HttpServletResponse response = new MockHttpServletResponse();
+		mc.handleRequest(request, response);
+	}
+
 	public void testNoCaching() throws Exception {
 		TestController mc = new TestController();
 		mc.setCacheSeconds(0);
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("no-cache"));
 		assertTrue("Correct expires header", response.getHeader("Expires").equals("" + 1L));
+		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
 	}
 
 	public void testNoCachingWithoutExpires() throws Exception {
@@ -135,8 +139,19 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("no-cache"));
-		assertTrue("Correct expires header", response.getHeader("Expires") == null);
+		assertTrue("No expires header", response.getHeader("Expires") == null);
+		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
+	}
+
+	public void testNoCachingWithoutCacheControl() throws Exception {
+		TestController mc = new TestController();
+		mc.setCacheSeconds(0);
+		mc.setUseCacheControlHeader(false);
+		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		mc.handleRequest(request, response);
+		assertTrue("Correct expires header", response.getHeader("Expires").equals("" + 1L));
+		assertTrue("No cache control", response.getHeader("Cache-Control") == null);
 	}
 
 	public void testCaching() throws Exception {
@@ -146,7 +161,7 @@ public class CommandControllerTestSuite extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
-		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=10"));
+		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("max-age=10"));
 	}
 
 	public void testCachingWithoutExpires() throws Exception {
@@ -156,8 +171,8 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct expires header", response.getHeader("Expires") == null);
-		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=10"));
+		assertTrue("No expires header", response.getHeader("Expires") == null);
+		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("max-age=10"));
 	}
 
 	public void testCachingWithoutCacheControl() throws Exception {
@@ -168,7 +183,7 @@ public class CommandControllerTestSuite extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
-		assertTrue("Correct caching", response.getHeader("Cache-Control") == null);
+		assertTrue("No cache control", response.getHeader("Cache-Control") == null);
 	}
 
 	public void testCachingWithLastModified() throws Exception {
@@ -182,8 +197,8 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=10, must-revalidate"));
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
+		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("max-age=10, must-revalidate"));
 	}
 
 	public void testCachingWithCustomCacheForSecondsCall() throws Exception {
@@ -196,8 +211,50 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=5"));
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
+		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("max-age=5"));
+	}
+
+	public void testCachingWithCustomApplyCacheSecondsCall1() throws Exception {
+		TestController mc = new TestController() {
+			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
+				applyCacheSeconds(response, 5);
+				return super.handle(request, response, command, errors);
+			}
+		};
+		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		mc.handleRequest(request, response);
+		assertTrue("Correct expires header", response.getHeader("Expires") != null);
+		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("max-age=5"));
+	}
+
+	public void testCachingWithCustomApplyCacheSecondsCall2() throws Exception {
+		TestController mc = new TestController() {
+			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
+				applyCacheSeconds(response, 0);
+				return super.handle(request, response, command, errors);
+			}
+		};
+		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		mc.handleRequest(request, response);
+		assertTrue("Correct expires header", response.getHeader("Expires").equals("" + 1L));
+		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
+	}
+
+	public void testCachingWithCustomApplyCacheSecondsCall3() throws Exception {
+		TestController mc = new TestController() {
+			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
+				applyCacheSeconds(response, -1);
+				return super.handle(request, response, command, errors);
+			}
+		};
+		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		mc.handleRequest(request, response);
+		assertTrue("No expires header", response.getHeader("Expires") == null);
+		assertTrue("No cache control", response.getHeader("Cache-Control") == null);
 	}
 
 	public void testCustomDateEditorWithAllowEmpty() throws Exception {

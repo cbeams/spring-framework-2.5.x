@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import javax.servlet.ServletException;
 
-import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
@@ -29,7 +29,7 @@ import org.springframework.web.servlet.ViewResolver;
  * @see XmlViewResolver
  * @see ResourceBundleViewResolver
  */
-public class BeanNameViewResolver extends ApplicationObjectSupport implements ViewResolver {
+public class BeanNameViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
 	public View resolveViewName(String viewName, Locale locale) throws ServletException {
 		Object o = getApplicationContext().getBean(viewName);

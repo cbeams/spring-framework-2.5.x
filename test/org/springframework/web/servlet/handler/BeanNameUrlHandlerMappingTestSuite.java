@@ -1,14 +1,13 @@
 package org.springframework.web.servlet.handler;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
+import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -21,16 +20,19 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 	
 	private HandlerMapping hm;
 	
-	private ApplicationContext ac;
+	private WebApplicationContext wac;
 
-	public BeanNameUrlHandlerMappingTestSuite() throws IOException {
-		ac = new ClassPathXmlApplicationContext(CONF);
+	public void setUp() throws Exception {
+		MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, CONF);
+		wac = new XmlWebApplicationContext();
+		wac.setServletContext(sc);
 		hm = new BeanNameUrlHandlerMapping();
-		hm.setApplicationContext(ac);
+		hm.setApplicationContext(wac);
 	}
 
 	public void testRequestsWithHandlers() throws Exception {
-		Object bean = ac.getBean("godCtrl");
+		Object bean = wac.getBean("godCtrl");
 
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
@@ -56,7 +58,7 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 	}
 
 	public void testAsteriskMatches() throws ServletException {
-		Object bean = ac.getBean("godCtrl");
+		Object bean = wac.getBean("godCtrl");
 
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/test.html");
 		HandlerExecutionChain hec = hm.getHandler(req);

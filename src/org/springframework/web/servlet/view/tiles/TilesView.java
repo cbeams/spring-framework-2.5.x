@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,9 +15,8 @@ import org.apache.struts.tiles.DefinitionsFactory;
 import org.apache.struts.tiles.DefinitionsFactoryException;
 import org.apache.struts.tiles.TilesUtilImpl;
 
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.web.servlet.view.InternalResourceView;
 
 /**
  * TilesView retrieves a Tiles definition.
@@ -57,8 +55,7 @@ public class TilesView extends InternalResourceView {
 			}
 
 			// get component definition
-			ServletContext sc = ((WebApplicationContext) getApplicationContext()).getServletContext();
-			ComponentDefinition definition = factory.getDefinition(getUrl(), request, sc);
+			ComponentDefinition definition = factory.getDefinition(getUrl(), request, getServletContext());
 			if (definition == null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND,
 				                   "Tile with name '" + getName() + "' not found");
@@ -83,7 +80,7 @@ public class TilesView extends InternalResourceView {
 				((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
 			}
 			if (controller != null) {
-				controller.perform(tileContext, request, response, sc);
+				controller.perform(tileContext, request, response, getServletContext());
 			}
 
 			// process the definition
