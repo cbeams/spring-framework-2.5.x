@@ -370,13 +370,27 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 							+ "] requested. Creating new instance.");
 				}
 				
+				// Create the BeanFactory but don't initialize it
 				BeanFactory groupContext = createDefinition(this.resourceName, factoryKey);
 
+				// Record its existence now, before instantiating any singletons
 				bfg = new BeanFactoryGroup();
 				bfg.definition = groupContext;
 				bfg.refCount = 1;
 				this.bfgInstancesByKey.put(this.resourceName, bfg);
 				this.bfgInstancesByObj.put(groupContext, bfg);
+
+				// Now initialize the BeanFactory. This may cause a re-entrant invocation
+				// of this method, but since we've already added the BeanFactory to our
+				// mappings, the next time it will be found and simply have its
+				// reference count incremented.
+				try {
+					initializeDefinition(groupContext);
+				}
+				catch (BeansException e) {
+					throw new FatalBeanException("Unable to initialize group definition. " +
+						"Group resource name [" + this.resourceName + "], factory key [" + factoryKey + "]", e);
+				}
 			}
 
 			final BeanFactory groupContext = bfg.definition;
@@ -451,6 +465,11 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * which supports standard Spring Resource prefixes ('classpath:', 'classpath*:', etc.)
 	 * This is split out as a separate method so that subclasses can override the actual
 	 * type used (to be an ApplicationContext, for example).
+	 *
+	 * <p>
+	 * This method should not instantiate any singletons. That function is performed
+	 * by {@link #initializeDefinition initializeDefinition()}, which should also be
+	 * overridden if this method is.
 	 */
 	protected BeanFactory createDefinition(String resourceName, String factoryKey) throws BeansException {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
@@ -472,8 +491,6 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		try {
 			for (int j = 0; j < configResources.length; j++)
 				reader.loadBeanDefinitions(configResources[j]);
-			
-			factory.preInstantiateSingletons();
 		}
 		catch (BeansException e) {
 			throw new FatalBeanException("Unable to load group definition. " +
@@ -482,6 +499,19 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		return factory;
 	}
 	
+	/**
+	 * Instantiate singletons and do any other normal initialization of the factory.
+	 * Subclasses that override {@link #createDefinition createDefinition()} should
+	 * also override this method.
+	 *
+	 * @param groupDef The factory returned by {@link #createDefinition createDefinition()}.
+	 */
+	protected void initializeDefinition(BeanFactory groupDef) throws BeansException {
+		if (groupDef instanceof DefaultListableBeanFactory) {
+			((DefaultListableBeanFactory)groupDef).preInstantiateSingletons();
+		}
+	}
+
 	/**
 	 * Destroy definition in separate method so subclass may work with other definition types.
 	 */

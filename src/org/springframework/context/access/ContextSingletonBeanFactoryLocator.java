@@ -124,7 +124,18 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 */
 	protected BeanFactory createDefinition(String resourceName, String factoryKey)
 			throws BeansException {
-		return new ClassPathXmlApplicationContext(resourceName);
+		return new ClassPathXmlApplicationContext(new String[] { resourceName }, false);
+	}
+
+	/**
+	 * Overrides default method to initialize definition object, which this method
+	 * assumes is a ConfigurableApplicationContext. This implementation simply invokes
+	 * {@link ConfigurableApplicationContext#refresh ConfigurableApplicationContext.refresh()}.
+	 */
+	protected void initializeDefinition(BeanFactory groupDef) throws BeansException {
+		if (groupDef instanceof ConfigurableApplicationContext) {
+			((ConfigurableApplicationContext)groupDef).refresh();
+		}
 	}
 	
     /**
