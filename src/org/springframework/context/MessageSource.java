@@ -38,7 +38,7 @@ public interface MessageSource {
 	 * otherwise the default message passed as a parameter
 	 * @see <a href="http://java.sun.com/j2se/1.3/docs/api/java/text/MessageFormat.html">java.text.MessageFormat</a>
 	 */
-	String getMessage(String code, Object args[], String defaultMessage, Locale locale);
+	String getMessage(String code, Object[] args, String defaultMessage, Locale locale);
 
 	/**
 	 * Try to resolve the message. Treat as an error if the message can't be found.
@@ -51,7 +51,7 @@ public interface MessageSource {
 	 * @throws NoSuchMessageException if not found in any locale
 	 * @see <a href="http://java.sun.com/j2se/1.3/docs/api/java/text/MessageFormat.html">java.text.MessageFormat</a>
 	 */
-	String getMessage(String code, Object args[], Locale locale) throws NoSuchMessageException;
+	String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException;
 
 	/**
 	 * Try to resolve the message using all the attributes contained within the
