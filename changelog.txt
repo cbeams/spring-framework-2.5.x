@@ -17,15 +17,15 @@ Package org.springframework.beans
 * removed "getDependentBeanNames" hook and implementation from AbstractAutowireCapable/DefaultListableBeanFactory
 * fixed DefaultListableBeanFactory's "getBeansOfType" implementation to correctly ignore abstract FactoryBeans
 * added "import" element for XML bean definitions, to allow for loading further bean definitions from relative paths
-* modified SingletonBeanFactoryLocator to work in environments where resources returned by classloader are not on filesystem
+* modified SingletonBeanFactoryLocator to work in environments where classloader resources are not on file system
 
 Package org.springframework.context
 * factored out the "publishEvent" method into the ApplicationEventPublisher interface, extended by ApplicationContext
 * added ApplicationEventPublisherAware and MessageSourceAware interfaces, to be implemented by application objects
 * reworked EventPublicationInterceptor to implement ApplicationEventPublisherAware rather than ApplicationContextAware
 * AbstractApplicationContext uses the internal MessageSource as "parentMessageSource", if the parent context allows to
-* AbstractMessageSource delegates to the parent's "getMessageInternal" method, to avoid "useCodeAsDefaultMessage" trap  
-* ContextSingletonBeanFactoryLocator resource handling modified in similar fashion described above for SingletonBeanFactoryLocator
+* AbstractMessageSource delegates to the parent's "getMessageInternal" method, to avoid "useCodeAsDefaultMessage" trap
+* ContextSingletonBeanFactoryLocator resource handling modified in similar fashion as for SingletonBeanFactoryLocator
 
 Package org.springframework.core
 * fixed "createRelative" implementation in ClassPathResource to correctly handle relative subdirectories
@@ -37,12 +37,13 @@ Package org.springframework.ejb
 Package org.springframework.jdbc
 * SingleConnectionDataSource and TransactionAwareDataSourceProxy do not use thread context class loader for proxies
 * clarified that LobHandler's getters are supposed to return Java null in case of SQL NULL (following the JDBC spec)
-* OracleLobHandler's getter implementations return null rather than an empty array/stream in case of SQL NULL 
+* OracleLobHandler's getter implementations return null rather than an empty array/stream in case of SQL NULL
 
 Package org.springframework.jms
+* added SimpleMessageConverter102 subclass which handles BytesMessage without JMS 1.1's "getBodyLength" method
 * added "sessionAcknowledgeModeName" property to JmsTemplate, for specifying a JMS Session acknowledge constant by name
 * added acknowledge mode check to JmsTemplate and JmsTemplate102 before calling "acknowledge" on a received message
-* added SimpleMessageConverter102 subclass which handles BytesMessage without JMS 1.1's "getBodyLength" method
+* added JmsGatewaySupport convenience base class, for setting up a JmsTemplate instance via a ConnectionFactory
 
 Package org.springframework.mock
 * fixed MockServletContext's "getResource" implementation to correctly determine URL via Resource's "getURL" method
@@ -65,6 +66,7 @@ Package org.springframework.web
 * added "exposeHelpers" hook to InternalResourceView, for use by JstlView by TilesJstlView (to avoid super calls)
 * call ServletRequest's "removeAttribute" if a model attribute is null in InternalResourceView (e.g. for includes)
 * fixed resetting of previous nested path in NestedPathTag, properly working in request scope (rather than page scope)
+* BindStatus and BindTag can be created without Errors instance in the request too, falling back to plain value
 * changed MessageTag's "arguments" attribute to Object, allowing for either a String (EL/plain), Object array or Object
 * added "javaScriptEscape" attribute to MessageTag, to apply JavaScript escaping to output texts
 * added EscapeBodyTag class aka "spring:escapeBody", allowing to HTML- and/or JavaScript-escape enclosed body content
