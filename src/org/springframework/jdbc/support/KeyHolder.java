@@ -35,6 +35,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * usual type for auto-generated keys.
  *
  * @author Thomas Risberg
+ * @since 1.1
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.object.SqlUpdate
  */

@@ -32,6 +32,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * it to the corresponding JdbcTemplate or SqlUpdate methods.
  *
  * @author Thomas Risberg
+ * @since 1.1
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.object.SqlUpdate
  */
@@ -75,7 +76,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 		}
 		else {
 			throw new DataRetrievalFailureException("Unable to retrieve the generated key. " +
-																							"Check that the table has an identity column enabled.");
+					"Check that the table has an identity column enabled.");
 		}
 	}
 
