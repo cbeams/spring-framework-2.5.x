@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.jdo;
 
@@ -36,9 +36,9 @@ import org.springframework.core.io.Resource;
 /**
  * FactoryBean that creates a local JDO PersistenceManager instance.
  * Behaves like a PersistenceManagerFactory instance when used as bean
- * reference, e.g. for JdoTemplate's persistenceManagerFactory property.
- * Note that switching to JndiObjectFactoryBean is just a matter of
- * configuration!
+ * reference, e.g. for JdoTemplate's "persistenceManagerFactory" property.
+ * Note that switching to a JndiObjectFactoryBean or a bean-style
+ * PersistenceManagerFactory instance is just a matter of configuration!
  *
  * <p>The typical usage will be to register this as singleton factory
  * (for a certain underlying data source) in an application context,
@@ -53,11 +53,46 @@ import org.springframework.core.io.Resource;
  * JdoTransactionManager is much more convenient than setting up your
  * JDO implementation for JTA transactions (which might involve JCA).
  *
+ * <p>As alternative to the properties-driven approach that this FactoryBean
+ * offers (which is analogous to using the standard JDOHelper class with
+ * a Properties object that is populated with standard JDO properties),
+ * you can set up an instance of your PersistenceManagerFactory
+ * implementation class directly.
+ *
+ * <p>Like a DataSource, a PersistenceManagerFactory is encouraged to
+ * support bean-style configuration, which makes it very easy to set up as
+ * Spring-managed bean. The implementation class becomes the bean class;
+ * the remaining properties are applied as bean properties (starting with
+ * lower-case characters, in contrast to the respective JDO properties).
+ *
+ * <p>For example, in case of <a href="http://www.jpox.org">JPOX</a>:
+ *
+ * <p><pre>
+ * &lt;bean id="persistenceManagerFactory" class="org.jpox.PersistenceManagerFactoryImpl" destroy-method="close"&gt;
+ *   &lt;property name="connectionFactory"&gt;&lt;ref bean="dataSource"/&gt;&lt;/property&gt;
+ *   &lt;property name="nontransactionalRead"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+ * &lt;/bean&gt;
+ * </pre>
+ *
+ * <p>Note that some PersistenceManagerFactory implementations might require
+ * such direct setup to be able to accept an external connection factory
+ * (i.e. a JDBC DataSource). This FactoryBean's "dataSource" property might
+ * not work for those, as it is applied after JDOHelper's initialization work.
+ *
+ * <p>The "close" method is standardized as of JDO 1.0.1; don't forget to
+ * specify it as "destroy-method" for any PersistenceManagerFactory instance.
+ * Note that this FactoryBean will automatically invoke "close" for the
+ * PersistenceManagerFactory it creates, without any special configuration.
+ *
  * @author Juergen Hoeller
  * @since 03.06.2003
  * @see JdoTemplate#setPersistenceManagerFactory
  * @see JdoTransactionManager#setPersistenceManagerFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
+ * @see javax.jdo.JDOHelper#getPersistenceManagerFactory
+ * @see #setDataSource
+ * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory
+ * @see javax.jdo.PersistenceManagerFactory#close
  */
 public class LocalPersistenceManagerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
@@ -68,6 +103,8 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	private Properties jdoProperties;
 
 	private DataSource dataSource;
+
+	private DataSource dataSource2;
 
 	private PersistenceManagerFactory persistenceManagerFactory;
 
@@ -94,11 +131,32 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	/**
 	 * Set the DataSource to be used by the PersistenceManagerFactory.
 	 * If set, this will override corresponding settings in JDO properties.
+	 * <p>This is the main DataSource to be used by the JDO implementation.
+	 * When specifying it as reference here, you can use any DataSource
+	 * that your application defines, being able to choose any connection
+	 * pool implementation (be it local or from JNDI).
 	 * <p>Note: If this is set, the JDO settings should not define
 	 * a connection factory to avoid meaningless double configuration.
+	 * @see #setDataSource2
+	 * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Set the second DataSource to be used by the PersistenceManagerFactory.
+	 * If set, this will override corresponding settings in JDO properties.
+	 * <p>A JDO implementation typically uses the second DataSource for
+	 * performing strictly non-transactional operations, like key generation.
+	 * It is only necessary to specify this when actually using JTA and a
+	 * key generation strategy that depends on non-transactional execution.
+	 * <p>Note: If this is set, the JDO settings should not define
+	 * a second connection factory to avoid meaningless double configuration.
+	 * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory2
+	 */
+	public void setDataSource2(DataSource dataSource2) {
+		this.dataSource2 = dataSource2;
 	}
 
 
@@ -110,7 +168,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 */
 	public void afterPropertiesSet() throws IllegalArgumentException, IOException, JDOException {
 		if (this.configLocation == null && this.jdoProperties == null) {
-			throw new IllegalArgumentException("Either configLocation (e.g. '/kodo.properties') or jdoProperties must be set");
+			throw new IllegalArgumentException("Either configLocation or jdoProperties must be set");
 		}
 
 		Properties props = new Properties();
@@ -138,6 +196,10 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 			// use given DataSource as JDO connection factory
 			this.persistenceManagerFactory.setConnectionFactory(this.dataSource);
 		}
+		if (this.dataSource2 != null) {
+			// use given DataSource as second JDO connection factory
+			this.persistenceManagerFactory.setConnectionFactory2(this.dataSource2);
+		}
 	}
 
 	/**
@@ -147,12 +209,12 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 * <p>The default implementation invokes JDOHelper's getPersistenceManagerFactory.
 	 * A custom implementation could prepare the instance in a specific way,
 	 * or use a custom PersistenceManagerFactory implementation.
-	 * @param prop Properties prepared by this LocalPersistenceManagerFactoryBean
+	 * @param props Properties prepared by this LocalPersistenceManagerFactoryBean
 	 * @return the PersistenceManagerFactory instance
 	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory
 	 */
-	protected PersistenceManagerFactory newPersistenceManagerFactory(Properties prop) {
-		return JDOHelper.getPersistenceManagerFactory(prop);
+	protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
+		return JDOHelper.getPersistenceManagerFactory(props);
 	}
 
 	/**
