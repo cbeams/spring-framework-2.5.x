@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.18 2004-05-08 22:55:56 davison Exp $-->
+<!--$Id: views.xml,v 1.19 2004-07-02 00:24:09 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -227,11 +227,14 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       <literal>WEB-INF/lib</literal> folder too! The latest stable velocity
       jar and commons collections jar are supplied with the Spring framework
       and can be copied from the <literal>/lib/velocity</literal> or
-      <literal>/lib/jakarta-commons</literal> directories.</para>
+      <literal>/lib/jakarta-commons</literal> directories. If you make use of
+      Spring's dateToolAttribute or numberToolAttribute in your Velocity
+      views, you will also need to include the
+      <literal>velocity-tools-generic-1.x.jar</literal></para>
     </sect2>
 
     <sect2 id="view-velocity-configuration-dispatcher">
-      <title>Dispatcher Servlet Context</title>
+      <title>Context configuration</title>
 
       <para>The configuration file for your Spring dispatcher servlet (usually
       <literal>WEB-INF/[servletname]-servlet.xml</literal>) will require a
@@ -420,125 +423,172 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
     </sect2>
 
     <sect2 id="view-velocity-forms">
-      <title>Form Handling</title>
+      <title>Form handling</title>
 
       <para>Spring provides a tag library for use in JSP's that contains
       (amongst other things) a <literal>&lt;spring:bind&gt;</literal> tag.
       This tag primarily enables forms to display the results of failed
       validations from a <literal>Validator</literal> in the web or business
-      tier. This behaviour can be simulated with a Velocity macro and some
-      additional Spring functionality.</para>
+      tier. From version 1.1, Spring now has support for the same
+      functionality in both Velocity and FreeMarker.</para>
 
       <sect3 id="view-velocity-validation">
-        <title>Validation errors</title>
+        <title>the springBind Velocity macro (VM)</title>
 
-        <para>The error messages that are actually produced from the
-        validation of a form submission can be read from a properties file to
-        make them easily maintainable or internationalised. Spring handles
-        this elegantly in its own way and you should refer to the MVC tutorial
-        or relevant parts of the javadocs for details on how this works. In
-        order to gain access to the messages, the
-        <literal>RequestContext</literal> object needs to be exposed to your
-        Velocity templates in the <literal>VelocityContext</literal>. Amend
-        your configurer definition in *-servlet.xml or your individual view
-        definitions in views.properties or views.xml file to give a name to
-        this attribute (giving it a name is what causes it to be
-        exposed)</para>
+        <para>A standard set of Velocity macros are maintained within the
+        <literal>spring.jar</literal> file, so they are always available to a
+        suitably configured application, however they can only be used if your
+        Velocity view uses an extended class;
+        <literal>VelocityFormView</literal>. Note that this class is <emphasis
+        role="bold">not required</emphasis> for any aspect of HTML form
+        handling <emphasis role="bold">except</emphasis> where you wish to
+        take advantage of the Spring VM's. Below is an example of a
+        view.properties file showing correct configuration of such a
+        view</para>
 
-        <programlisting>&lt;bean 
-    id="viewResolver" 
-    class="org.springframework.web.servlet.view.velocity.VelocityViewResolver"&gt;
-     &lt;!-- other props omitted --&gt;
-    &lt;property name="requestContextAttribute"&gt;&lt;value&gt;rc&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting>
+        <programlisting>personFormV.class=org.springframework.web.servlet.view.velocity.VelocityFormView
+personFormV.url=personForm.vm
+personFormV.requestContextAttribute=rc</programlisting>
 
-        <para>The example above is based on our earlier example and sets the
-        RequestContext attribute name to be rc. All Velocity views that are
-        resolved by this bean will now have an additional object available to
-        them via the reference <literal>$rc</literal></para>
-      </sect3>
-
-      <sect3 id="view-velocity-macrohelper">
-        <title>Velocity macro helper</title>
-
-        <para>Next, a velocity macro needs to be defined. It makes sense to
-        create this macro in a global macro file since it will be reusable
-        across many Velocity templates (html forms). Refer to the Velocity
-        documentation for more information on creating macros.</para>
-
-        <para>The code below should go into the file VM_global_library.vm in
-        the root directory of your Velocity template location..</para>
-
-        <programlisting>#*
- * showerror
- *
- * display an error for the field name supplied if one exists
- * in the supplied errors object.
- *
- * param $errors the object obtained from RequestContext.getErrors( "formBeanName" )
- * param $field the field name you want to display errors for (if any)
- *
- *#
-#macro( showerror $errors $field )
-    #if( $errors )
-        #if( $errors.getFieldErrors( $field ))
-            #foreach($err in $errors.getFieldErrors( $field ))
-                &lt;span class="fieldErrorText"&gt;$rc.getMessage($err)&lt;/span&gt;&lt;br /&gt;
-            #end
-        #end
-    #end
-#end      </programlisting>
+        <para>Note that the <literal>RequestContext</literal> attribute is
+        required for <literal>VelocityFormView</literal>'s to work correctly.
+        Either set the property on individual views, or optionally on the
+        <literal>ViewResolver</literal> itself so that all views have a
+        <literal>RequestContext</literal> available to them. Here we set the
+        name to be rc and our <literal>personViewV</literal> will now have an
+        additional object available to them via the reference
+        <literal>$rc</literal></para>
       </sect3>
 
       <sect3 id="view-velocity-validationmessages">
-        <title>Associating error messages with the HTML field</title>
+        <title>Binding fields in the HTML form</title>
 
-        <para>Finally, in your html forms, you can use code similar to the
-        following to display bound error messages for each input field.</para>
+        <para>Now, in your html forms (Velocity templates), you can use code
+        similar to the following to display bound values and error messages
+        for each input field in similar fashion to the JSP equivalent.</para>
 
-        <programlisting>## set the following variable once somewhere at the top of
-## the velocity template
-#set ($errors=$rc.getErrors("commandBean"))
-&lt;html&gt;
+        <programlisting>&lt;html&gt;
 ...
-&lt;form ...&gt;
-    &lt;input name="query" value="$!commandBean.query"&gt;&lt;br&gt;
-    #showerror($errors "query")
+&lt;form action="" method="POST"&gt;
+  Name: 
+  #springBind( "command.name" false )
+  &lt;input type="text" name="${status.expression}" value="$!status.value" /&gt;&lt;br&gt;
+  #foreach($error in $status.errorMessages) &lt;b&gt;$error&lt;/b&gt; &lt;br&gt; #end
+  &lt;br&gt;
+
+  Age: 
+  #springBind( "command.age" false )
+  &lt;input type="text" name="${status.expression}" value="$!status.value" /&gt;&lt;br&gt;
+  #foreach($error in $status.errorMessages) &lt;b&gt;$error&lt;/b&gt; &lt;br&gt; #end
+  &lt;br&gt;
+  
+  Street: 
+  #springBind( "command.address.street" false )
+  &lt;input type="text" name="${status.expression}" value="$!status.value" /&gt;&lt;br&gt;
+  #foreach($error in $status.errorMessages) &lt;b&gt;$error&lt;/b&gt; &lt;br&gt; #end
+  &lt;br&gt;
+  
+  &lt;input type="submit" value="submit"/&gt;
 &lt;/form&gt;
 ...
-&lt;/html&gt;        </programlisting>
+&lt;/html&gt;</programlisting>
+
+        <para><literal>#springBind</literal> requires a 'path' argument which
+        consists of the name of your command object (it will be 'command'
+        unless you changed it in your FormController properties) followed by a
+        period and the name of the field on the command object you wish to
+        bind to. Nested fields can be used too as shown in the example above
+        for the 'Street' field.</para>
+
+        <para>The second argument to the <literal>#springBind</literal> macro
+        determines whether HTML escaping should be used in the status error
+        messages or values. Set to true or false as required.</para>
       </sect3>
     </sect2>
+  </sect1>
 
-    <sect2 id="view-velocity-summary">
-      <title>Summary</title>
+  <sect1>
+    <title>FreeMarker</title>
 
-      <para>To summarize, this is the tree structure of files discussed in the
-      example above. Only a partial tree is shown, some required directories
-      are not highlighted here. Incorrect file locations are probably the
-      major reason for velocity views not working, with incorrect properties
-      in the view definitions a close second.</para>
+    <para><ulink url="http://www.freemarker.org">FreeMarker</ulink> is a
+    templating language with similar goals to Velocity. FreeMarker has a more
+    powerful language and additional constructs compared to Velocity, but it
+    is correspondingly more complex to learn. Spring aims to abstract much of
+    the configuration complexities away and so when using FreeMarker within
+    your Spring applications, it's very similar to using Velocity. For this
+    reason, much of what is said in the Velocity section above also applies
+    here and it would be worth a read if you haven't already done so.</para>
 
-      <programlisting>ProjectRoot
-  |
-  +- WebContent
-      |
-      +- WEB-INF
-          |
-          +- lib
-          |   |
-          |   +- velocity-1.3.1.jar
-          |   +- spring.jar
-          |
-          +- velocity
-          |   |
-          |   +- VM_global_library.vm
-          |   +- mainTemplate.vm
-          |   +- secondaryTemplate.vm
-          |
-          +- frontcontroller-servlet.xml
-          +- frontcontroller-views.xml
-          +- velocity.properties</programlisting>
+    <sect2>
+      <title>Dependencies</title>
+
+      <para>Your application should include the latest FreeMarker jar file
+      (<literal>freemarker-2.3.jar</literal> at the time of writing) which can
+      always be found in the Spring distribution or from the FreeMarker web
+      site.</para>
+    </sect2>
+
+    <sect2>
+      <title>Context configuration</title>
+
+      <para>A FreeMarker configuration is initialized by adding the following
+      definition to your *-servlet.xml. For non web-apps add a
+      <literal>FreeMarkerConfigurationFactoryBean</literal> application
+      context definition file.</para>
+
+      <programlisting>&lt;!-- freemarker config --&gt;
+&lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
+  &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/ftl/&lt;/value&gt;&lt;/property&gt; 
+&lt;/bean&gt;</programlisting>
+    </sect2>
+
+    <sect2>
+      <title>Form handling</title>
+
+      <para>FreeMarker macros are available within spring.jar similar to the
+      Velocity macros and all of the same principals apply. Here's an example
+      view definition making use of the
+      <literal>FreeMarkerFormView</literal><programlisting>personFormF.class=org.springframework.web.servlet.view.freemarker.FreeMarkerFormView
+personFormF.url=personForm.ftl
+personFormF.requestContextAttribute=rc</programlisting></para>
+
+      <sect3>
+        <title>Binding fields in the HTML form</title>
+
+        <para>Here's the FreeMarker equivalent of the Velocity example
+        above:<programlisting>&lt;#import "/org/springframework/web/servlet/view/freemarker/spring.ftl" as spring /&gt;
+
+&lt;html&gt;
+...
+&lt;form action="" method="POST"&gt;
+  Name:
+  &lt;@spring.bind "command.name" /&gt; 
+  &lt;input type="text" name="${spring.status.expression}" value="${spring.status.value?default("")}" /&gt;&lt;br&gt;
+  &lt;#list spring.status.errorMessages as error&gt; &lt;b&gt;${error}&lt;/b&gt; &lt;br&gt; &lt;/#list&gt;
+  &lt;br&gt;
+
+  Age: 
+  &lt;@spring.bind "command.age" /&gt; 
+  &lt;input type="text" name="${spring.status.expression}" value="${spring.status.value}" /&gt;&lt;br&gt;
+  &lt;#list spring.status.errorMessages as error&gt; &lt;b&gt;${error}&lt;/b&gt; &lt;br&gt; &lt;/#list&gt;
+  &lt;br&gt;
+  
+  Street:
+  &lt;@spring.bind "command.address.street" /&gt; 
+  &lt;input type="text" name="${spring.status.expression}" value="${spring.status.value?default("")}" /&gt;&lt;br&gt;
+  &lt;#list spring.status.errorMessages as error&gt; &lt;b&gt;${error}&lt;/b&gt; &lt;br&gt; &lt;/#list&gt;
+  &lt;br&gt;
+  
+  &lt;input type="submit" value="submit"/&gt;
+&lt;/form&gt;
+...
+&lt;/html&gt;</programlisting></para>
+
+        <para>Note that a critical difference with FreeMarker is that the
+        Spring macros have to be imported into the template under their own
+        namespace. This is done in the first line of the file shown
+        above.</para>
+      </sect3>
     </sect2>
   </sect1>
 
@@ -659,7 +709,10 @@ public class HomePage extends AbstractXsltView {
           name="myParam"&gt;defaultValue&lt;/xsl:param&gt;</literal> To
           specify the parameters, override the method
           <literal>getParameters()</literal> from AbstractXsltView and return
-          a <literal>Map</literal> of the name/value pairs.</para>
+          a <literal>Map</literal> of the name/value pairs. If your parameters
+          need to derive information from the current request, you can (from
+          version 1.1) override the <literal>getParameters(HttpServletRequest
+          request)</literal> method instead.</para>
         </sect4>
 
         <sect4 id="view-xslt-formathelper">
