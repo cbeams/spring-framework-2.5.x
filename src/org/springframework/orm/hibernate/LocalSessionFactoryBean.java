@@ -1,20 +1,20 @@
 package org.springframework.orm.hibernate;
 
-import java.util.Properties;
-import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
-import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.Session;
-import net.sf.hibernate.tool.hbm2ddl.DatabaseMetadata;
-import net.sf.hibernate.dialect.Dialect;
+import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.cfg.Configuration;
 import net.sf.hibernate.cfg.Environment;
+import net.sf.hibernate.dialect.Dialect;
+import net.sf.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,21 +24,21 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * FactoryBean that creates a local Hibernate SessionFactory instance.
- * Behaves like a SessionFactory instance when used as bean reference,
- * e.g. for HibernateTemplate's sessionFactory property. Note that
- * switching to JndiObjectFactoryBean is just a matter of configuration!
+ * Behaves like a SessionFactory instance when used as bean reference, e.g.
+ * for HibernateTemplate's "sessionFactory" property. Note that switching
+ * to JndiObjectFactoryBean is just a matter of configuration!
  *
  * <p>The typical usage will be to register this as singleton factory
- * (for a certain underlying data source) in an application context,
+ * (for a certain underlying JDBC DataSource) in an application context,
  * and give bean references to application services that need it.
  *
  * <p>Configuration settings can either be read from a Hibernate XML file,
  * specified as "configLocation", or completely via this class. A typical
  * local configuration consists of one or more "mappingResources", various
- * Hibernate "properties" (not strictly necessary), and a "dataSource"
- * that the SessionFactory should use. The latter can also be specified via
- * Hibernate properties, but "dataSource" supports any Spring-configured
- * DataSource, instead of relying on Hibernate's own connection providers.
+ * "hibernateProperties" (not strictly necessary), and a "dataSource" that the
+ * SessionFactory should use. The latter can also be specified via Hibernate
+ * properties, but "dataSource" supports any Spring-configured DataSource,
+ * instead of relying on Hibernate's own connection providers.
  *
  * <p>This SessionFactory handling strategy is appropriate for most types of
  * applications, from Hibernate-only single database apps to ones that need
@@ -60,7 +60,7 @@ import org.springframework.beans.factory.InitializingBean;
  * without any configuration hassle like container-specific setup.
  *
  * <p>Note: This class requires Hibernate 2.0.1; we recommend to use the
- * newest release in the 2.0.x series.
+ * newest stable release in the 2.x series.
  *
  * @author Juergen Hoeller
  * @since 05.05.2003
@@ -70,7 +70,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
-	private Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String configLocation;
 
@@ -87,20 +87,20 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	private SessionFactory sessionFactory;
 
 	/**
-	 * Set the location of the Hibernate XML config file as classpath resource.
+	 * Set the location of the Hibernate XML config file as class path resource.
 	 * A typical value is "/hibernate.cfg.xml", in the case of web applications
 	 * normally to be found in WEB-INF/classes.
-	 * <p>Note: Can be omitted when all necessary properties and mapping
-	 * resources are specified locally via this bean. If neither a location
-	 * nor any mapping resources are set, a default Hibernate configuration
-	 * will be performed, using "/hibernate.cfg.xml".
+	 * <p>Note: Can be omitted when all necessary properties and mapping resources
+	 * are specified locally via this bean. If neither a location nor any mapping
+	 * resources are set, default Hibernate configuration will be performed,
+	 * using "/hibernate.cfg.xml".
 	 */
 	public void setConfigLocation(String configLocation) {
 		this.configLocation = configLocation;
 	}
 
 	/**
-	 * Set Hibernate mapping resources to be found in the classpath,
+	 * Set Hibernate mapping resources to be found in the class path,
 	 * like "/example.hbm.xml".
 	 * <p>Can be used to override values from a Hibernate XML config file,
 	 * or to specify all mappings locally.
@@ -125,8 +125,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	/**
 	 * Set the DataSource to be used by the SessionFactory.
 	 * If set, this will override any setting in the Hibernate properties.
-	 * <p>Note: If this is set, the Hibernate settings do not have to define
-	 * a connection provider at all, avoiding duplicated configuration.
+	 * <p>Note: If this is set, the Hibernate settings should not define
+	 * a connection provider to avoid meaningless double configuration.
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -136,11 +136,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Set a Hibernate entity interceptor that allows to inspect and change
 	 * property values before writing to and reading from the database.
 	 * Will get applied to any new Session created by this factory.
-	 * <p>Such an interceptor can either be set at the SessionFactory level,
-	 * i.e. on LocalSessionFactoryBean, or at the Session level, i.e. on
-	 * HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
-	 * It's preferable to set it on LocalSessionFactoryBean or HibernateTransactionManager
-	 * to avoid repeated configuration and guarantee consistent behavior in transactions.
+	 * <p>Such an interceptor can either be set at the SessionFactory level, i.e. on
+	 * LocalSessionFactoryBean, or at the Session level, i.e. on HibernateTemplate,
+	 * HibernateInterceptor, and HibernateTransactionManager. It's preferable to set
+	 * it on LocalSessionFactoryBean or HibernateTransactionManager to avoid repeated
+	 * configuration and guarantee consistent behavior in transactions.
 	 * @see HibernateTemplate#setEntityInterceptor
 	 * @see HibernateInterceptor#setEntityInterceptor
 	 * @see HibernateTransactionManager#setEntityInterceptor
@@ -153,7 +153,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Set whether to execute a schema update after SessionFactory initialization.
 	 * <p>For details on how to make schema update scripts work, see the Hibernate
 	 * documentation, as this class leverages the same schema update script support
-	 * in net.sf.hibernate.cfg.Configuration than Hibernate's own SchemaUpdate tool.
+	 * in net.sf.hibernate.cfg.Configuration as Hibernate's own SchemaUpdate tool.
 	 * @see net.sf.hibernate.cfg.Configuration#generateSchemaUpdateScript
 	 * @see net.sf.hibernate.tool.hbm2ddl.SchemaUpdate
 	 */
@@ -322,7 +322,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
-	 * Close the SessionFactory on context shutdown.
+	 * Close the SessionFactory on bean factory shutdown.
 	 */
 	public void destroy() throws HibernateException {
 		logger.info("Closing Hibernate SessionFactory of LocalSessionFactoryBean [" + this + "]");
