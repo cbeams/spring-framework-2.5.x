@@ -186,8 +186,8 @@ public class EnumEditor extends PropertyEditorSupport {
 	}
 
 	public String getAsText() {
-		Enum ce = (Enum)getValue();
-		return (ce != null ? ce.getLabel() : "");
+		Enum e = (Enum)getValue();
+		return (e != null ? e.getLabel() : "");
 	}
 
 }

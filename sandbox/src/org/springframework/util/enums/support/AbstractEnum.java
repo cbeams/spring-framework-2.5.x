@@ -25,7 +25,7 @@ import org.springframework.util.enums.Enum;
  * Abstract base superclass for CodedEnum implementations.
  * @author Keith Donald
  */
-public abstract class AbstractEnum implements Enum, MessageSourceResolvable, Serializable, Comparable {
+public abstract class AbstractEnum implements Enum, MessageSourceResolvable, Comparable, Serializable {
 
 	private String label;
 
