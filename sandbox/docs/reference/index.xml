@@ -2,7 +2,9 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
                       "file:/C:/Program%20Files/Oxygen3.1/docbook/dtd/docbookx.dtd"
 [
-<!ENTITY selector     SYSTEM "selector.xml">
+<!ENTITY selector SYSTEM "selector.xml">
+<!ENTITY service SYSTEM "service.xml">
+
 ]>
 <book>
     <bookinfo>
@@ -10,5 +12,8 @@
         <subtitle>Sandbox Documentation</subtitle>
     </bookinfo>
     <toc/>
+    
     &selector;
+    
+    &service;
 </book>
