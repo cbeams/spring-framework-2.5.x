@@ -20,7 +20,7 @@ import javax.sql.DataSource;
 
 /**
  * Base class for JdbcTemplate and other JDBC-accessing DAO helpers,
- * defining common properties like exception translator.
+ * defining common properties like DataSource and exception translator.
  *
  * <p>Not intended to be used directly. See JdbcTemplate.
  *
@@ -38,6 +38,7 @@ public class JdbcAccessor {
 
 	/** Helper to translate SQL exceptions to DataAccessExceptions */
 	private SQLExceptionTranslator exceptionTranslator;
+
 
 	/**
 	 * Set the JDBC DataSource to obtain connections from.
@@ -69,9 +70,9 @@ public class JdbcAccessor {
 	 * Return the exception translator for this instance.
 	 * Creates a default one for the specified DataSource if none set.
 	 */
-	public synchronized SQLExceptionTranslator getExceptionTranslator() {
+	public SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
-			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
+			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
 		}
 		return this.exceptionTranslator;
 	}
@@ -81,7 +82,7 @@ public class JdbcAccessor {
 	 * creating a default one for the specified DataSource if none set.
 	 */
 	public void afterPropertiesSet() {
-		if (this.dataSource == null) {
+		if (getDataSource() == null) {
 			throw new IllegalArgumentException("dataSource is required");
 		}
 		getExceptionTranslator();
