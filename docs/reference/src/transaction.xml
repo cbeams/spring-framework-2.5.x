@@ -402,7 +402,7 @@
       <para><programlisting>DefaultTransactionDefinition def = new DefaultTransactionDefinition()
 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
-TransactionStatus status = transactionManager.getTransactionDefinition(def);
+TransactionStatus status = transactionManager.getTransaction(def);
 
 try {
     // execute your business logic here
