@@ -48,12 +48,9 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * @param suppressClose if the returned connection will be a close-suppressing
 	 * proxy or the physical connection.
 	 */
-	public SingleConnectionDataSource(String driverName, String url, String user, String password,
+	public SingleConnectionDataSource(String driverClassName, String url, String username, String password,
 	                                  boolean suppressClose) throws CannotGetJdbcConnectionException {
-		setDriverClassName(driverName);
-		setUrl(url);
-		setUsername(user);
-		setPassword(password);
+		super(driverClassName, url, username, password);
 		this.suppressClose = suppressClose;
 	}
 

@@ -32,7 +32,7 @@ import java.sql.SQLException;
  *
  * @author Juergen Hoeller
  * @since 14.03.2003
- * @version $Id: DriverManagerDataSource.java,v 1.2 2003-08-26 16:44:05 jhoeller Exp $
+ * @version $Id: DriverManagerDataSource.java,v 1.3 2003-08-28 17:26:49 jhoeller Exp $
  * @see org.springframework.jndi.support.SimpleNamingContextBuilder
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
@@ -46,14 +46,21 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 
 	private String password = "";
 
+	/**
+	 * Constructor for bean-style configuration.
+	 */
 	public DriverManagerDataSource() {
 	}
 
-	public DriverManagerDataSource(String driverName, String url, String user, String password)
+	/**
+	 * Create a new SingleConnectionDataSource with the given standard
+	 * DriverManager parameters.
+	 */
+	public DriverManagerDataSource(String driverClassName, String url, String username, String password)
 	    throws CannotGetJdbcConnectionException {
-		setDriverClassName(driverName);
+		setDriverClassName(driverClassName);
 		setUrl(url);
-		setUsername(user);
+		setUsername(username);
 		setPassword(password);
 	}
 
@@ -97,7 +104,7 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 	}
 
 	/**
-	 * This returns a new connection every time: Close it when returning one to the "pool".
+	 * This DataSource returns a new connection every time: Close it when returning one to the "pool".
 	 */
 	public boolean shouldClose(Connection conn) {
 		return true;
@@ -125,9 +132,7 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 	 */
 	protected Connection getConnectionFromDriverManager(String url, String username, String password) throws SQLException {
 		logger.info("Creating new JDBC connection to [" + url + "]");
-		Connection con = DriverManager.getConnection(url, username, password);
-		con.setAutoCommit(true);
-		return con;
+		return DriverManager.getConnection(url, username, password);
 	}
 
 }
