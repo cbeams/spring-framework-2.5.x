@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -90,6 +91,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
 	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
 	public static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
+
+	public static final String IMPORT_ELEMENT = "import";
+	public static final String RESOURCE_ATTRIBUTE = "resource";
 
 	public static final String BEAN_ELEMENT = "bean";
 	public static final String ID_ATTRIBUTE = "id";
@@ -168,9 +172,15 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		int beanDefinitionCounter = 0;
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && BEAN_ELEMENT.equals(node.getNodeName())) {
-				beanDefinitionCounter++;
-				registerBeanDefinition((Element) node);
+			if (node instanceof Element) {
+				Element ele = (Element) node;
+				if (IMPORT_ELEMENT.equals(node.getNodeName())) {
+					importBeanDefinitionResource(ele);
+				}
+				else if (BEAN_ELEMENT.equals(node.getNodeName())) {
+					beanDefinitionCounter++;
+					registerBeanDefinition(ele);
+				}
 			}
 		}
 		logger.debug("Found " + beanDefinitionCounter + " <" + BEAN_ELEMENT + "> elements defining beans");
@@ -197,6 +207,22 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return resource;
 	}
 
+
+	/**
+	 * Parse an "import" element and load the bean definitions
+	 * from the given resource into the bean factory.
+	 */
+	protected void importBeanDefinitionResource(Element ele) {
+		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+		try {
+			Resource relativeResource = this.resource.createRelative(location);
+			this.beanDefinitionReader.loadBeanDefinitions(relativeResource);
+		}
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException(
+					"Invalid relative resource location [" + location + "] to import bean definitions from", ex);
+		}
+	}
 
 	/**
 	 * Parse a "bean" element and register it with the bean factory.

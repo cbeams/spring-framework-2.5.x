@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +62,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StopWatch;
 
@@ -1112,10 +1115,12 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testResourceAndInputStream() throws IOException {
-		InputStream is = getClass().getResourceAsStream("resource.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("resource.xml", getClass()));
+		// comes from "resourceImport.xml"
 		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
+		// comes from "resource.xml"
 		ResourceTestBean resource2 = (ResourceTestBean) xbf.getBean("resource2");
+
 		assertTrue(resource1.getResource() instanceof ClassPathResource);
 		StringWriter writer = new StringWriter();
 		FileCopyUtils.copy(new InputStreamReader(resource1.getResource().getInputStream()), writer);
@@ -1130,7 +1135,34 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		FileCopyUtils.copy(new InputStreamReader(resource2.getInputStream()), writer);
 		assertEquals("test", writer.toString());
 	}
-	
+
+	public void testClassPathResourceWithImport() {
+		XmlBeanFactory xbf = new XmlBeanFactory(
+				new ClassPathResource("org/springframework/beans/factory/xml/resource.xml"));
+		// comes from "resourceImport.xml"
+		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
+		// comes from "resource.xml"
+		ResourceTestBean resource2 = (ResourceTestBean) xbf.getBean("resource2");
+	}
+
+	public void testUrlResourceWithImport() {
+		URL url = getClass().getResource("resource.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(new UrlResource(url));
+		// comes from "resourceImport.xml"
+		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
+		// comes from "resource.xml"
+		ResourceTestBean resource2 = (ResourceTestBean) xbf.getBean("resource2");
+	}
+
+	public void testFileSystemResourceWithImport() {
+		String file = getClass().getResource("resource.xml").getFile();
+		XmlBeanFactory xbf = new XmlBeanFactory(new FileSystemResource(file));
+		// comes from "resourceImport.xml"
+		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
+		// comes from "resource.xml"
+		ResourceTestBean resource2 = (ResourceTestBean) xbf.getBean("resource2");
+	}
+
 	public void testLookupOverrideMethodsWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
