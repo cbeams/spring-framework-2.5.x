@@ -12,12 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.remoting.rmi;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
 import java.rmi.ConnectIOException;
 import java.rmi.MarshalException;
@@ -323,7 +322,7 @@ public class RmiSupportTests extends TestCase {
 	}
 
 	public void testRemoteInvocation() throws NoSuchMethodException {
-		// let's see if the remote invocation object works:
+		// let's see if the remote invocation object works
 
 		RemoteBean rb = new RemoteBean();
 
@@ -357,8 +356,7 @@ public class RmiSupportTests extends TestCase {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
 			protected Remote lookupStub() throws Exception {
 				return new RmiInvocationHandler() {
-					public Object invoke(RemoteInvocation invocation)
-							throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+					public Object invoke(RemoteInvocation invocation) throws RemoteException {
 						throw new RemoteException();
 					}
 				};
