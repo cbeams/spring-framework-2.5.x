@@ -30,7 +30,7 @@ import javax.jms.Session;
  * operations they attempt.  The JmsTemplate will catch and handle
  * these JMSExceptions appropriately.
  *
- * If extra parameters need to be set, such as the delivery mode, priority or time
+ * <p>If extra parameters need to be set, such as the delivery mode, priority or time
  * to live, override any of the getters with your own implementation.
  *
  * @author Mark Pollack
@@ -39,13 +39,10 @@ public interface MessageCreator {
 
 	/**
 	 * Implement this method to return a message to be sent.
-	 *
-	 * @param session The JMS session
-	 * @return The message to be sent.
-	 * @throws The JMS Checked Exception.  Do not catch it, it will be
-	 * handled correctly by the JmsTemplate.
+	 * @param session the JMS session
+	 * @return the message to be sentt
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
-	public Message createMessage(Session session) throws JMSException;
-
+	Message createMessage(Session session) throws JMSException;
 
 }

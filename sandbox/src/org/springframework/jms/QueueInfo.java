@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.core;
+package org.springframework.jms;
+
+import org.springframework.jms.DestinationInfo;
 
 /**
- * Information about a JMS Topic.
+ * Information about a JMS Queue.
  * @author Mark Pollack
  */
-public class TopicInfo extends DestinationInfo {
+public class QueueInfo extends DestinationInfo {
 
-	public TopicInfo(String name) {
+	public QueueInfo(String name) {
 		setName(name);
 	}
 }

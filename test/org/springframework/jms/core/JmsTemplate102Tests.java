@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.jms;
+package org.springframework.jms.core;
 
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
@@ -35,15 +35,9 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 
-import org.springframework.jms.core.DefaultJmsAdmin;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.JmsTemplate102;
-import org.springframework.jms.core.MessageCreator;
-import org.springframework.jms.core.ProducerCallback;
-import org.springframework.jms.core.SessionCallback;
+import org.springframework.jms.support.destination.JndiDestinationResolver;
 import org.springframework.jndi.JndiTemplate;
 
 /**
@@ -83,14 +77,6 @@ public class JmsTemplate102Tests extends TestCase {
 	private int _deliveryMode = DeliveryMode.PERSISTENT;
 	private int _priority = 9;
 	private int _timeToLive = 10000;
-
-	/**
-	 * Constructor for JmsSenderTests.
-	 * @param name The name of the test.
-	 */
-	public JmsTemplate102Tests(String name) {
-		super(name);
-	}
 
 	/**
 	 * Create the mock objects for testing.
@@ -187,10 +173,15 @@ public class JmsTemplate102Tests extends TestCase {
 		//Session behavior
 		_mockTopicSession.getTransacted();
 		_topicSessionControl.setReturnValue(true);
-		_topicSessionControl.replay();
 
-		//connection behavior
+		_mockTopicSession.close();
+		_topicSessionControl.setVoidCallable(1);
+
+		//Connection behavior
 		_mockTopicConnection.close();
+		_topicConnectionControl.setVoidCallable(1);
+
+		_topicSessionControl.replay();
 		_topicConnectionControl.replay();
 
 		sender.execute(new SessionCallback() {
@@ -205,19 +196,10 @@ public class JmsTemplate102Tests extends TestCase {
 		_topicSessionControl.verify();
 	}
 
-	private void setJndiTemplate(JmsTemplate sender) {
-		((DefaultJmsAdmin) sender.getJmsAdmin()).setJndiTemplate(new JndiTemplate() {
-			protected Context createInitialContext() throws NamingException {
-				return mockJndiContext;
-			}
-		});
-	}
-
 	/**
-	 * Test the execute(ProducerCallback) using a topic
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * Test the execute(ProducerCallback) using a topic.
 	 */
-	public void testTopicJmsSenderCallback() throws Exception {
+	public void testTopicProducerCallback() throws Exception {
 		JmsTemplate102 sender = new JmsTemplate102();
 		sender.setPubSubDomain(true);
 		sender.setConnectionFactory(_mockTopicConnectionFactory);
@@ -233,23 +215,25 @@ public class JmsTemplate102Tests extends TestCase {
 		_mockTopicSession.createPublisher(null);
 		_topicSessionControl.setReturnValue(mockTopicPublisher);
 
-		_queueSessionControl.replay();
-
 		//Session behavior
 		_mockTopicSession.getTransacted();
 		_topicSessionControl.setReturnValue(true);
-		_topicSessionControl.replay();
 
 		mockTopicPublisher.getPriority();
 		topicPublisherControl.setReturnValue(4);
 
-		//connection behavior
+		_mockTopicSession.close();
+		_topicSessionControl.setVoidCallable(1);
+
+		//Connection behavior
 		_mockTopicConnection.close();
+		_topicConnectionControl.setVoidCallable(1);
+
+		_topicSessionControl.replay();
 		_topicConnectionControl.replay();
 
 		sender.execute(new ProducerCallback() {
-			public Object doInJms(Session session, MessageProducer msgProducer)
-			    throws JMSException {
+			public Object doInJms(Session session, MessageProducer msgProducer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = msgProducer.getPriority();
 				return null;
@@ -264,7 +248,6 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Test the method execute(SessionCallback action) with using the
 	 * point to point domain as specified by the value of isPubSubDomain = false.
-	 * @throws Exception unexpected, let JUnit handle it.
 	 */
 	public void testQueueSessionCallback() throws Exception {
 		JmsTemplate102 sender = new JmsTemplate102();
@@ -276,10 +259,15 @@ public class JmsTemplate102Tests extends TestCase {
 		//Session behavior
 		_mockQueueSession.getTransacted();
 		_queueSessionControl.setReturnValue(true);
-		_queueSessionControl.replay();
+
+		_mockQueueSession.close();
+		_queueSessionControl.setVoidCallable(1);
 
 		//connection behavior
 		_mockQueueConnection.close();
+		_queueConnectionControl.setVoidCallable(1);
+
+		_queueSessionControl.replay();
 		_queueConnectionControl.replay();
 
 		sender.execute(new SessionCallback() {
@@ -292,14 +280,12 @@ public class JmsTemplate102Tests extends TestCase {
 		_queueConnectionFactoryControl.verify();
 		_queueConnectionControl.verify();
 		_queueSessionControl.verify();
-
 	}
 
 	/**
 	 * Test the method execute(ProducerCallback) with a Queue.
-	 * @throws Exception unexpected, let JUnit handle it.
 	 */
-	public void testQueueJmsSenderCallback() throws Exception {
+	public void testQueueProducerCallback() throws Exception {
 		JmsTemplate102 sender = new JmsTemplate102();
 		//Point to Point (queues) are the default domain.
 		sender.setConnectionFactory(_mockQueueConnectionFactory);
@@ -319,7 +305,8 @@ public class JmsTemplate102Tests extends TestCase {
 		_mockQueueSession.createSender(null);
 		_queueSessionControl.setReturnValue(mockQueueSender);
 
-		_queueSessionControl.replay();
+		_mockQueueSession.close();
+		_queueSessionControl.setVoidCallable(1);
 
 		mockQueueSender.getPriority();
 		queueSenderControl.setReturnValue(4);
@@ -328,6 +315,9 @@ public class JmsTemplate102Tests extends TestCase {
 
 		//additional connection behavior
 		_mockQueueConnection.close();
+		_queueConnectionControl.setVoidCallable(1);
+
+		_queueSessionControl.replay();
 		_queueConnectionControl.replay();
 
 		sender.execute(new ProducerCallback() {
@@ -346,7 +336,7 @@ public class JmsTemplate102Tests extends TestCase {
 
 	/**
 	 * Test the setting of the JmsTemplate Properites.
-	 * @throws Exception
+	 * @throws java.lang.Exception
 	 */
 	public void testBeanProperties() throws Exception {
 		JmsTemplate102 sender = new JmsTemplate102();
@@ -377,11 +367,8 @@ public class JmsTemplate102Tests extends TestCase {
 			s102.afterPropertiesSet();
 			fail("IllegalArgumentException not thrown. Mismatch of Destination and ConnectionFactory types.");
 		}
-		catch (IllegalArgumentException e) {
-			assertEquals(
-			    "Exception message not matching",
-			    "Specified a Spring JMS 1.0.2 Sender for queues but did not supply an instance of a QueueConnectionFactory",
-			    e.getMessage());
+		catch (IllegalArgumentException ex) {
+			// expected
 		}
 
 		s102 = new JmsTemplate102();
@@ -391,18 +378,15 @@ public class JmsTemplate102Tests extends TestCase {
 			s102.afterPropertiesSet();
 			fail("IllegalArgumentException not thrown. Mismatch of Destination and ConnectionFactory types.");
 		}
-		catch (IllegalArgumentException e) {
-			assertEquals(
-			    "Exception message not matching",
-			    "Specified a Spring JMS 1.0.2 Sender for topics but did not supply an instance of a TopicConnectionFactory",
-			    e.getMessage());
+		catch (IllegalArgumentException ex) {
+			// expected
 		}
 	}
 
 	/**
 	 * Test the method send(String destination, MessgaeCreator c) using
 	 * a queue and default QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendStringQueue() throws Exception {
 		sendQueue(true, false, false);
@@ -411,7 +395,7 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Test the method send(String destination, MessageCreator c) when
 	 * explicit QOS parameters are enabled, using a queue.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendStringQueueWithQOS() throws Exception {
 		sendQueue(false, false, false);
@@ -419,7 +403,7 @@ public class JmsTemplate102Tests extends TestCase {
 
 	/**
 	 * Test the method send(MessageCreator c) using default QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendDefaultDestinationQueue() throws Exception {
 		sendQueue(true, false, true);
@@ -427,7 +411,7 @@ public class JmsTemplate102Tests extends TestCase {
 
 	/**
 	 * Test the method send(MessageCreator c) using explicit QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendDefaultDestinationQueueWithQOS() throws Exception {
 		sendQueue(false, false, true);
@@ -436,7 +420,7 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Test the method send(String destination, MessageCreator c) using
 	 * a topic and default QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendStringTopic() throws Exception {
 		sendTopic(true, false);
@@ -445,7 +429,7 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Test the method send(String destination, MessageCreator c) using explicit
 	 * QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendStringTopicWithQOS() throws Exception {
 		sendTopic(false, false);
@@ -454,7 +438,7 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Test the method send(Destination queue, MessgaeCreator c) using
 	 * a queue and default QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendQueue() throws Exception {
 		sendQueue(true, false, false);
@@ -463,7 +447,7 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Test the method send(Destination queue, MessageCreator c) sing explicit
 	 * QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendQueueWithQOS() throws Exception {
 		sendQueue(false, false, false);
@@ -472,7 +456,7 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Test the method send(Destination queue, MessgaeCreator c) using
 	 * a topic and default QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendTopic() throws Exception {
 		sendTopic(true, false);
@@ -481,7 +465,7 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Test the method send(Destination queue, MessageCreator c) using explicity
 	 * QOS values.
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * @throws java.lang.Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendTopicWithQOS() throws Exception {
 		sendQueue(false, false, false);
@@ -491,19 +475,13 @@ public class JmsTemplate102Tests extends TestCase {
 	 * Common method for testing a send method that uses the MessageCreator
 	 * callback but with different QOS options.
 	 * @param ignoreQOS test using default QOS options.
-	 * @throws Exception unexpected, let junit handle it.
 	 */
-	private void sendQueue(
-	    boolean ignoreQOS,
-	    boolean explicitQueue,
-	    boolean useDefaultDestination)
-	    throws Exception {
+	private void sendQueue(boolean ignoreQOS, boolean explicitQueue, boolean useDefaultDestination) throws Exception {
 		JmsTemplate102 sender = new JmsTemplate102();
 		setJndiTemplate(sender);
 		sender.setConnectionFactory(_mockQueueConnectionFactory);
 		setJndiTemplate(sender);
 		sender.afterPropertiesSet();
-
 
 		if (useDefaultDestination) {
 			sender.setDefaultDestination(_mockQueue);
@@ -520,12 +498,17 @@ public class JmsTemplate102Tests extends TestCase {
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
 		_mockQueueConnection.close();
-		_queueConnectionControl.replay();
+		_queueConnectionControl.setVoidCallable(1);
 
 		_mockQueueSession.createSender(this._mockQueue);
 		_queueSessionControl.setReturnValue(mockQueueSender);
 		_mockQueueSession.createTextMessage("just testing");
 		_queueSessionControl.setReturnValue(mockMessage);
+
+		_mockQueueSession.close();
+		_queueSessionControl.setVoidCallable(1);
+
+		_queueConnectionControl.replay();
 		_queueSessionControl.replay();
 
 		if (ignoreQOS) {
@@ -576,11 +559,9 @@ public class JmsTemplate102Tests extends TestCase {
 		queueSenderControl.verify();
 
 		_queueSessionControl.verify();
-
 	}
 
-	private void sendTopic(boolean ignoreQOS, boolean explicitTopic)
-	    throws Exception {
+	private void sendTopic(boolean ignoreQOS, boolean explicitTopic) throws Exception {
 
 		//Setup the test
 		JmsTemplate102 sender = new JmsTemplate102();
@@ -600,12 +581,17 @@ public class JmsTemplate102Tests extends TestCase {
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
 		_mockTopicConnection.close();
-		_topicConnectionControl.replay();
+		_topicConnectionControl.setVoidCallable(1);
 
 		_mockTopicSession.createPublisher(this._mockTopic);
 		_topicSessionControl.setReturnValue(mockTopicPublisher);
 		_mockTopicSession.createTextMessage("just testing");
 		_topicSessionControl.setReturnValue(mockMessage);
+
+		_mockTopicSession.close();
+		_topicSessionControl.setVoidCallable(1);
+
+		_topicConnectionControl.replay();
 		_topicSessionControl.replay();
 
 		if (ignoreQOS) {
@@ -650,11 +636,10 @@ public class JmsTemplate102Tests extends TestCase {
 	}
 
 	public void testConverter() throws Exception {
-
 		JmsTemplate102 sender = new JmsTemplate102();
 		setJndiTemplate(sender);
 		sender.setConnectionFactory(_mockQueueConnectionFactory);
-		sender.setConverter(new ToStringConverter());
+		sender.setMessageConverter(new ToStringConverter());
 		String s = "Hello world";
 
 		//Mock the javax.jms QueueSender
@@ -668,27 +653,39 @@ public class JmsTemplate102Tests extends TestCase {
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
 		_mockQueueConnection.close();
-		_queueConnectionControl.replay();
+		_queueConnectionControl.setVoidCallable(1);
 
 		_mockQueueSession.createSender(this._mockQueue);
 		_queueSessionControl.setReturnValue(mockQueueSender);
 		_mockQueueSession.createTextMessage("Hello world");
 		_queueSessionControl.setReturnValue(mockMessage);
+
+		_mockQueueSession.close();
+		_queueSessionControl.setVoidCallable(1);
+
+		_queueConnectionControl.replay();
 		_queueSessionControl.replay();
 
 		mockQueueSender.send(mockMessage);
 		queueSenderControl.replay();
 
-		sender.send(_mockQueue, s);
+		sender.convertAndSend(_mockQueue, s);
 
 		_queueConnectionFactoryControl.verify();
 		_queueConnectionControl.verify();
 		queueSenderControl.verify();
 
 		_queueSessionControl.verify();
-
-
 	}
 
+	private void setJndiTemplate(JmsTemplate sender) {
+		JndiDestinationResolver destMan = new JndiDestinationResolver();
+		destMan.setJndiTemplate(new JndiTemplate() {
+			protected Context createInitialContext() throws NamingException {
+				return mockJndiContext;
+			}
+		});
+		sender.setDestinationResolver(destMan);
+	}
 
 }

@@ -14,15 +14,32 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.core;
+package org.springframework.jms;
 
 /**
- * Information about a JMS Queue.
+ * Simple bean with properties.
  * @author Mark Pollack
  */
-public class QueueInfo extends DestinationInfo {
+public class SimpleTestBean {
 
-	public QueueInfo(String name) {
-		setName(name);
+	private String name;
+
+	private double age;
+
+	public void setName(String name) {
+		this.name = name;
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setAge(double age) {
+		this.age = age;
+	}
+
+	public double getAge() {
+		return age;
+	}
+
 }

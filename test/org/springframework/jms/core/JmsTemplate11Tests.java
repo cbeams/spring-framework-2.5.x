@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.jms;
+package org.springframework.jms.core;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -28,15 +28,9 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 
-import org.springframework.jms.core.DefaultJmsAdmin;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.JmsTemplate11;
-import org.springframework.jms.core.MessageCreator;
-import org.springframework.jms.core.ProducerCallback;
-import org.springframework.jms.core.SessionCallback;
+import org.springframework.jms.support.destination.JndiDestinationResolver;
 import org.springframework.jndi.JndiTemplate;
 
 /**
@@ -66,14 +60,6 @@ public class JmsTemplate11Tests extends TestCase {
 	private int _timeToLive = 10000;
 
 	/**
-	 * Constructor for JmsTemplate11Tests.
-	 * @param name name of the test
-	 */
-	public JmsTemplate11Tests(String name) {
-		super(name);
-	}
-
-	/**
 	 * Create the mock objects for testing.
 	 */
 	protected void setUp() throws Exception {
@@ -84,11 +70,9 @@ public class JmsTemplate11Tests extends TestCase {
 
 		mockJndiContext.close();
 		mockJndiControl.replay();
-
 	}
 
-	private void createMockforDestination()
-	    throws JMSException, NamingException {
+	private void createMockforDestination() throws JMSException, NamingException {
 		_connectionFactoryControl =
 		    MockControl.createControl(ConnectionFactory.class);
 		_mockConnectionFactory =
@@ -115,15 +99,14 @@ public class JmsTemplate11Tests extends TestCase {
 		mockJndiControl.setReturnValue(_mockQueue);
 	}
 
-	public void testJmsSenderCallback() throws Exception {
-		JmsTemplate11 sender = new JmsTemplate11();
+	public void testProducerCallback() throws Exception {
+		JmsTemplate sender = new JmsTemplate();
 		sender.setConnectionFactory(_mockConnectionFactory);
 		setJndiTemplate(sender);
 
 		//Session behavior
 		_mockSession.getTransacted();
 		_sessionControl.setReturnValue(true);
-
 
 		//Mock the javax.jms MessageProducer
 		MockControl messageProducerControl =
@@ -137,12 +120,16 @@ public class JmsTemplate11Tests extends TestCase {
 		mockMessageProducer.getPriority();
 		messageProducerControl.setReturnValue(4);
 
-		_sessionControl.replay();
 		messageProducerControl.replay();
 
+		_mockSession.close();
+		_sessionControl.setVoidCallable(1);
 
-		//connection behavior
+		//Connection behavior
 		_mockConnection.close();
+		_connectionControl.setVoidCallable(1);
+
+		_sessionControl.replay();
 		_connectionControl.replay();
 
 		sender.execute(new ProducerCallback() {
@@ -160,22 +147,24 @@ public class JmsTemplate11Tests extends TestCase {
 
 	/**
 	 * Test the method execute(SessionCallback action).
-	 * @throws Exception unexpected, let JUnit handle it.
 	 */
 	public void testSessionCallback() throws Exception {
-		JmsTemplate11 sender = new JmsTemplate11();
+		JmsTemplate sender = new JmsTemplate();
 		sender.setConnectionFactory(_mockConnectionFactory);
 		setJndiTemplate(sender);
 
 		//Session behavior
 		_mockSession.getTransacted();
 		_sessionControl.setReturnValue(true);
-		_sessionControl.replay();
 
+		_mockSession.close();
+		_sessionControl.setVoidCallable(1);
 
-
-		//connection behavior
+		//Connection behavior
 		_mockConnection.close();
+		_connectionControl.setVoidCallable(1);
+
+		_sessionControl.replay();
 		_connectionControl.replay();
 
 		sender.execute(new SessionCallback() {
@@ -188,76 +177,62 @@ public class JmsTemplate11Tests extends TestCase {
 		_connectionFactoryControl.verify();
 		_connectionControl.verify();
 		_sessionControl.verify();
-
-	}
-
-	/**
-	 * Test seding to a destination using the method
-	 * send(Destination d, MessageCreator messageCreator)
-	 * @throws Exception unexpected, let JUnit handle it.
-	 */
-	public void testSendDestination() throws Exception {
-		sendDestination(true, true, false);
 	}
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(Destination d, MessageCreator messageCreator) using QOS
-	 * parameters
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * send(Destination d, MessageCreator messageCreator)
+	 */
+	public void testSendDestination() throws Exception {
+		doTestSendDestination(true, true, false);
+	}
+
+	/**
+	 * Test sending to a destination using the method
+	 * send(Destination d, MessageCreator messageCreator) using QOS parameters.
 	 */
 	public void testSendDestinationWithQOS() throws Exception {
-		sendDestination(false, true, false);
+		doTestSendDestination(false, true, false);
 	}
 
 	/**
 	 * Test seding to a destination using the method
 	 * send(String d, MessageCreator messageCreator)
-	 * @throws Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendStringDestination() throws Exception {
-		sendDestination(true, false, false);
+		doTestSendDestination(true, false, false);
 	}
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator) using QOS
-	 * parameters
-	 * @throws Exception unexpected, let JUnit handle it.
+	 * send(String d, MessageCreator messageCreator) using QOS parameters.
 	 */
 	public void testSendStringDestinationWithQOS() throws Exception {
-		sendDestination(false, false, false);
+		doTestSendDestination(false, false, false);
 	}
 
 	/**
 	 * Test sending to the default destination.
-	 * @throws Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendDefaultDestination() throws Exception {
-		sendDestination(true, true, true);
+		doTestSendDestination(true, true, true);
 	}
 
 	/**
 	 * Test sending to the default destination using explicit QOS parameters.
-	 * @throws Exception unexpected, let JUnit handle it.
 	 */
 	public void testSendDefaultDestinationWithQOS() throws Exception {
-		sendDestination(false, true, true);
+		doTestSendDestination(false, true, true);
 	}
-
 
 	/**
 	 * Common method for testing a send method that uses the MessageCreator
 	 * callback but with different QOS options.
 	 * @param ignoreQOS test using default QOS options.
-	 * @throws Exception unexpected, let junit handle it.
 	 */
-	private void sendDestination(
-	    boolean ignoreQOS,
-	    boolean explicitDestination,
-	    boolean useDefaultDestination)
+	private void doTestSendDestination(boolean ignoreQOS, boolean explicitDestination, boolean useDefaultDestination)
 	    throws Exception {
-		JmsTemplate11 sender = new JmsTemplate11();
+		JmsTemplate sender = new JmsTemplate();
 		sender.setConnectionFactory(_mockConnectionFactory);
 		setJndiTemplate(sender);
 		if (useDefaultDestination) {
@@ -274,14 +249,19 @@ public class JmsTemplate11Tests extends TestCase {
 		    MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
+		_mockSession.close();
+		_sessionControl.setVoidCallable(1);
+
 		_mockConnection.close();
-		_connectionControl.replay();
+		_connectionControl.setVoidCallable(1);
 
 		_mockSession.createProducer(_mockQueue);
 		_sessionControl.setReturnValue(mockMessageProducer);
 		_mockSession.createTextMessage("just testing");
 		_sessionControl.setReturnValue(mockMessage);
+
 		_sessionControl.replay();
+		_connectionControl.replay();
 
 		if (ignoreQOS) {
 			mockMessageProducer.send(mockMessage);
@@ -306,10 +286,8 @@ public class JmsTemplate11Tests extends TestCase {
 					return session.createTextMessage("just testing");
 				}
 			});
-
 		}
 		else {
-
 			if (explicitDestination) {
 				sender.send(_mockQueue, new MessageCreator() {
 					public Message createMessage(Session session)
@@ -337,10 +315,10 @@ public class JmsTemplate11Tests extends TestCase {
 	}
 
 	public void testConverter() throws Exception {
-		JmsTemplate11 sender = new JmsTemplate11();
+		JmsTemplate sender = new JmsTemplate();
 		sender.setConnectionFactory(_mockConnectionFactory);
 		setJndiTemplate(sender);
-		sender.setConverter(new ToStringConverter());
+		sender.setMessageConverter(new ToStringConverter());
 		String s = "Hello world";
 
 		//Mock the javax.jms MessageProducer
@@ -353,34 +331,41 @@ public class JmsTemplate11Tests extends TestCase {
 		    MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
+		_mockSession.close();
+		_sessionControl.setVoidCallable(1);
+
 		_mockConnection.close();
-		_connectionControl.replay();
+		_connectionControl.setVoidCallable(1);
 
 		_mockSession.createProducer(_mockQueue);
 		_sessionControl.setReturnValue(mockMessageProducer);
 		_mockSession.createTextMessage("Hello world");
 		_sessionControl.setReturnValue(mockMessage);
+
 		_sessionControl.replay();
+		_connectionControl.replay();
 
 		mockMessageProducer.send(mockMessage);
 
 		messageProducerControl.replay();
 
-		sender.send(_mockQueue, s);
+		sender.convertAndSend(_mockQueue, s);
 
 		_connectionFactoryControl.verify();
 		_connectionControl.verify();
 		messageProducerControl.verify();
 
 		_sessionControl.verify();
-
 	}
 
 	private void setJndiTemplate(JmsTemplate sender) {
-		((DefaultJmsAdmin) sender.getJmsAdmin()).setJndiTemplate(new JndiTemplate() {
+		JndiDestinationResolver destMan = new JndiDestinationResolver();
+		destMan.setJndiTemplate(new JndiTemplate() {
 			protected Context createInitialContext() throws NamingException {
 				return mockJndiContext;
 			}
 		});
+		sender.setDestinationResolver(destMan);
 	}
+
 }

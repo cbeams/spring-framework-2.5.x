@@ -14,33 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.converter;
+package org.springframework.jms;
 
-import javax.jms.Message;
-import javax.jms.Session;
+import org.springframework.jms.DestinationInfo;
 
 /**
- * Converter between Java Objects and JMS Messages.
+ * Information about a JMS Topic.
  * @author Mark Pollack
- *
  */
-public interface Converter {
+public class TopicInfo extends DestinationInfo {
 
-	/**
-	 * Convert a Java object to a JMS Message using the supplied session to create
-	 * the mesage object.
-	 * @param object The object to convert
-	 * @param session The session to use for creating a JMS Message
-	 * @return
-	 */
-	Message toMessage(Object object, Session session);
-
-	/**
-	 * Convert from a JMS Message to a Java object.
-	 * @param message The message to convert
-	 * @return the converter Java object.
-	 */
-	Object fromMessage(Message message);
-
-
+	public TopicInfo(String name) {
+		setName(name);
+	}
 }

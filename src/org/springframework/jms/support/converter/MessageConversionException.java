@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.converter;
+package org.springframework.jms.support.converter;
 
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.jms.JmsException;
 
 /**
- * Thrown by JmsConverter when it can not convert an object to/from a JMS message.
+ * Thrown by MessageConverter when it can not convert an object to/from a JMS message.
  * @author Mark Pollack
  */
-public class ConversionException extends NestedRuntimeException {
+public class MessageConversionException extends JmsException {
 
-	public ConversionException(String msg) {
+	public MessageConversionException(String msg) {
 		super(msg);
 	}
 
-	public ConversionException(String msg, Throwable ex) {
+	public MessageConversionException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
 

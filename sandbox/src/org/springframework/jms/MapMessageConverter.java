@@ -13,26 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.jms.converter;
-
-import org.springframework.beans.factory.InitializingBean;
+package org.springframework.jms;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-
 import java.math.BigDecimal;
-
 import java.sql.Timestamp;
-
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,16 +37,19 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jms.support.converter.MessageConversionException;
+import org.springframework.jms.support.converter.MessageConverter;
+
 /**
  * Converts between a JavaBean and a MapMessage.
- *
  * @author Mark Pollack
  * @author Jawaid Hakim
  */
-public class MapMessageConverter implements Converter, InitializingBean {
-    
+public class MapMessageConverter implements MessageConverter, InitializingBean {
+
     //TODO refactor to use Spring bean package classes...
-    
+
     private static Map primitiveTypes = new HashMap();
     private static Map primitiveWrapperTypes = new HashMap();
     private static Map primitiveWrapperTypesArray = new HashMap();
@@ -308,7 +304,7 @@ public class MapMessageConverter implements Converter, InitializingBean {
 
     public Object fromMessage(Message message) {
         if (!(message instanceof MapMessage)) {
-            throw new ConversionException("Did not provide MapMessageConverter with a MapMessage");
+            throw new MessageConversionException("Did not provide MapMessageConverter with a MapMessage");
         }
 
         return unmarshal((MapMessage) message);
@@ -450,7 +446,7 @@ public class MapMessageConverter implements Converter, InitializingBean {
 
             return nestedMsg;
         } catch (Exception ex) {
-            throw new ConversionException("error", ex);
+            throw new MessageConversionException("error", ex);
         }
     }
 
@@ -564,7 +560,7 @@ public class MapMessageConverter implements Converter, InitializingBean {
             unqualifiedName =
                 source.getString(getUnqualifiedClassnameFieldName());
         } catch (JMSException e) {
-            throw new ConversionException(
+            throw new MessageConversionException(
                 "Could not find field named "
                     + this.unqualifiedClassnameFieldName
                     + "in message when unmarshalling",
@@ -572,7 +568,7 @@ public class MapMessageConverter implements Converter, InitializingBean {
         }
 
         if (unqualifiedName == null) {
-            throw new ConversionException("Unqualified classname field not found");
+            throw new MessageConversionException("Unqualified classname field not found");
         }
 
         String fullName = getPackageName() + "." + unqualifiedName;
@@ -596,7 +592,7 @@ public class MapMessageConverter implements Converter, InitializingBean {
         MapMessage source,
         String beanName,
         String fullName)
-        throws ConversionException {
+        throws MessageConversionException {
         try {
             Object bean = Class.forName(fullName).newInstance();
 
@@ -726,7 +722,7 @@ public class MapMessageConverter implements Converter, InitializingBean {
 
             return bean;
         } catch (Exception ex) {
-            throw new ConversionException(
+            throw new MessageConversionException(
                 "Exception unmarshalling message",
                 ex);
         }

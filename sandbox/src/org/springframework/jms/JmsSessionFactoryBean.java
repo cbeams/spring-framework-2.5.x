@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.core;
+package org.springframework.jms;
 
 import javax.jms.Connection;
 import javax.jms.Session;

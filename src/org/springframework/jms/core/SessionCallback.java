@@ -20,20 +20,23 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 /**
- * Callback interface for JMS code.  To be used with JmsTemplate's execute
+ * Callback interface for JMS code. To be used with JmsTemplate's execute
  * method, often as an anonymous class within a method implementation.
- * The typical implementatino will perform multiple operations on the
- * JMS Session
+ *
+ * <p>The typical implementatino will perform multiple operations
+ * on the JMS Session, possibly returning a result object.
  *
  * @author Mark Pollack
+ * @see JmsTemplate#execute(SessionCallback)
  */
 public interface SessionCallback {
 
 	/**
 	 * Execute operations against a JMS session possibly returning a result.
 	 * @param session the JMS session
-	 * @return The result object from working with the session.
-	 * @throws JMSException JMS provider exception.
+	 * @return a result object from working with the session, if any
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	Object doInJms(Session session) throws JMSException;
+
 }

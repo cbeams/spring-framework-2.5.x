@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.core;
+package org.springframework.jms;
 
 /**
  * Information about a JMS Destination.  Queue and Topic subclasses

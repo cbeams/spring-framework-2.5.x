@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.jms;
+package org.springframework.jms.core;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
-import org.springframework.jms.converter.ConversionException;
-import org.springframework.jms.converter.Converter;
+import org.springframework.jms.support.converter.MessageConverter;
 
 /**
- * A simple converter that uses the toString method.
+ * A simple message converter that uses the toString method.
  * @author Mark Pollack
+ * @see java.lang.Object#toString
  */
-public class ToStringConverter implements Converter {
+public class ToStringConverter implements MessageConverter {
 
-	public Message toMessage(Object object, Session session) {
-		try {
-			return session.createTextMessage(object.toString());
-		}
-		catch (JMSException ex) {
-			throw new ConversionException("Could not convert object to message", ex);
-		}
+	/**
+	 * This implementations creates a JMS text message with
+	 * the toString result of the given object.
+	 * @see javax.jms.Session#createTextMessage
+	 */
+	public Message toMessage(Object object, Session session) throws JMSException {
+		return session.createTextMessage(object.toString());
 	}
 
 	public Object fromMessage(Message message) {

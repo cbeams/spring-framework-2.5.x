@@ -21,24 +21,27 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 /**
- * Callback interface for JMS code.  To be used with JmsTemplate's send method,
- * often as an anonymous class within a method implementation.  The typical
- * implementation will perform multiple operations on the JMS Session and
- * MessageProducer.   When used with a 1.0.2 provider, you need to downcast
- * to the appropriate domain implementation, either QueueSender or TopicPublisher,
- * to send a message.
+ * Callback interface for JMS code. To be used with JmsTemplate's execute method,
+ * often as an anonymous class within a method implementation.
+ *
+ * <p>The typical implementation will perform multiple operations on the
+ * JMS Session and MessageProducer. When used with a 1.0.2 provider, you
+ * need to downcast to the appropriate domain implementation, either
+ * QueueSender or TopicPublisher, to send a message.
  *
  * @author Mark Pollack
+ * @see JmsTemplate#execute(ProducerCallback)
  */
 public interface ProducerCallback {
 
 	/**
-	 * Perform operations on the Session and MessageProducer.  The messgae producer is
-	 * not associated with any destination.
-	 * @param session The JMS session object to use
-	 * @param msgProducer  The JMS MessageProducer object to use
-	 * @return A return value, if any.
-	 * @throws JMSException JMS provider exception.
+	 * Perform operations on the given Session and MessageProducer.
+	 * The message producer is not associated with any destination.
+	 * @param session the JMS session object to use
+	 * @param producer the JMS MessageProducer object to use
+	 * @return a result object from working with the session, if any
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
-	Object doInJms(Session session, MessageProducer msgProducer) throws JMSException;
+	Object doInJms(Session session, MessageProducer producer) throws JMSException;
+
 }
