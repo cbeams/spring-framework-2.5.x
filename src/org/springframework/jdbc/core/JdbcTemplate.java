@@ -1024,10 +1024,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	private static class ListResultSetExtractor implements ResultSetExtractor {
 
 		public Object extractData(ResultSet rs) throws SQLException {
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int numberOfColumns = rsmd.getColumnCount();
 			List listOfRows = new ArrayList();
+			ResultSetMetaData rsmd = null;
+			int numberOfColumns = -1;
 			while (rs.next()) {
+				if (rsmd == null) {
+					// Lazily initialize meta data, to avoid unnecessary fetching
+					// in case of an empty result set.
+					rsmd = rs.getMetaData();
+					numberOfColumns = rsmd.getColumnCount();
+				}
 				Map mapOfColValues = CollectionFactory.createLinkedMapIfPossible(numberOfColumns);
 				for (int i = 1; i <= numberOfColumns; i++) {
 					Object o = getJdbcObject(rs, i);
@@ -1052,14 +1058,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 
 		public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
+			if (!rs.next()) {
+				throw new IncorrectResultSizeDataAccessException("Expected single row but found none", 1, 0);
+			}
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int nrOfColumns = rsmd.getColumnCount();
 			if (nrOfColumns != 1) {
 				throw new IncorrectResultSizeDataAccessException(
 						"Expected single column but found " + nrOfColumns, 1, nrOfColumns);
-			}
-			if (!rs.next()) {
-				throw new IncorrectResultSizeDataAccessException("Expected single row but found none", 1, 0);
 			}
 			Object result = getJdbcObject(rs, 1);
 			if (rs.next()) {
