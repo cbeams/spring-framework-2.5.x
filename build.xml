@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.29 2004-01-05 20:27:28 jhoeller Exp $
+    $Id: build.xml,v 1.30 2004-01-07 02:48:21 colins Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -340,7 +340,9 @@
 
  	<target name="compileTestAttributes" depends="build">
 
-		<taskdef resource="org/apache/commons/attributes/anttasks.properties"/>
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
+		  <classpath refid="attribute-compiler-classpath"/>
+        </taskdef>
 
 	 	<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.test}">
