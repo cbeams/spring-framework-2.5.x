@@ -19,6 +19,7 @@ package org.springframework.web.multipart.commons;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,7 +59,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
- * @since 29-Sep-2003
+ * @since 29.09.2003
  * @see #CommonsMultipartResolver(ServletContext)
  * @see CommonsMultipartFile
  * @see org.apache.commons.fileupload.DiskFileUpload
@@ -183,8 +184,8 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 		DiskFileUpload fileUpload = this.fileUpload;
 		String enc = determineEncoding(request);
 
-		// use prototype FileUpload instance if the request specifies
-		// its own encoding that does not match the default encoding
+		// Use new temporary FileUpload instance if the request specifies
+		// its own encoding that does not match the default encoding.
 		if (!enc.equals(this.defaultEncoding)) {
 			fileUpload = new DiskFileUpload();
 			fileUpload.setSizeMax(this.fileUpload.getSizeMax());
@@ -194,9 +195,18 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 		}
 
 		try {
-			List fileItems = fileUpload.parseRequest(request);
 			Map parameters = new HashMap();
 			Map multipartFiles = new HashMap();
+
+			// Pre-populate parameters Map with query parameters.
+			Enumeration paramNames = request.getParameterNames();
+			while (paramNames.hasMoreElements()) {
+				String paramName = (String) paramNames.nextElement();
+				parameters.put(paramName, request.getParameterValues(paramName));
+			}
+
+			// Extract multipart files and multipart parameters.
+			List fileItems = fileUpload.parseRequest(request);
 			for (Iterator it = fileItems.iterator(); it.hasNext();) {
 				FileItem fileItem = (FileItem) it.next();
 				if (fileItem.isFormField()) {
@@ -263,8 +273,10 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 		Map multipartFiles = request.getFileMap();
 		for (Iterator it = multipartFiles.values().iterator(); it.hasNext();) {
 			CommonsMultipartFile file = (CommonsMultipartFile) it.next();
-			logger.debug("Cleaning up multipart file [" + file.getName() + "] with original filename [" +
-			    file.getOriginalFilename() + "], stored " + file.getStorageDescription());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cleaning up multipart file [" + file.getName() + "] with original filename [" +
+						file.getOriginalFilename() + "], stored " + file.getStorageDescription());
+			}
 			file.getFileItem().delete();
 		}
 	}

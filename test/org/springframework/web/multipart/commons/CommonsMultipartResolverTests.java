@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart.commons;
 
@@ -82,6 +82,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
+		originalRequest.addParameter("getField", "getValue");
 		assertTrue(resolver.isMultipart(originalRequest));
 		MultipartHttpServletRequest request = resolver.resolveMultipart(originalRequest);
 
@@ -90,9 +91,10 @@ public class CommonsMultipartResolverTests extends TestCase {
 		while (parameterEnum.hasMoreElements()) {
 			parameterNames.add(parameterEnum.nextElement());
 		}
-		assertEquals(2, parameterNames.size());
+		assertEquals(3, parameterNames.size());
 		assertTrue(parameterNames.contains("field3"));
 		assertTrue(parameterNames.contains("field4"));
+		assertTrue(parameterNames.contains("getField"));
 		assertEquals("value3", request.getParameter("field3"));
 		List parameterValues = Arrays.asList(request.getParameterValues("field3"));
 		assertEquals(1, parameterValues.size());
@@ -102,6 +104,9 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertEquals(2, parameterValues.size());
 		assertTrue(parameterValues.contains("value4"));
 		assertTrue(parameterValues.contains("value5"));
+		assertEquals("value4", request.getParameter("field4"));
+		assertEquals("getValue", request.getParameter("getField"));
+
 		List parameterMapKeys = new ArrayList();
 		List parameterMapValues = new ArrayList();
 		for (Iterator parameterMapIter = request.getParameterMap().keySet().iterator(); parameterMapIter.hasNext();) {
@@ -109,12 +114,14 @@ public class CommonsMultipartResolverTests extends TestCase {
 			parameterMapKeys.add(key);
 			parameterMapValues.add(request.getParameterMap().get(key));
 		}
-		assertEquals(2, parameterMapKeys.size());
-		assertEquals(2, parameterMapValues.size());
+		assertEquals(3, parameterMapKeys.size());
+		assertEquals(3, parameterMapValues.size());
 		int field3Index = parameterMapKeys.indexOf("field3");
 		int field4Index = parameterMapKeys.indexOf("field4");
+		int getFieldIndex = parameterMapKeys.indexOf("getField");
 		assertTrue(field3Index != -1);
 		assertTrue(field4Index != -1);
+		assertTrue(getFieldIndex != -1);
 		parameterValues = Arrays.asList((String[]) parameterMapValues.get(field3Index));
 		assertEquals(1, parameterValues.size());
 		assertTrue(parameterValues.contains("value3"));
@@ -122,6 +129,9 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertEquals(2, parameterValues.size());
 		assertTrue(parameterValues.contains("value4"));
 		assertTrue(parameterValues.contains("value5"));
+		parameterValues = Arrays.asList((String[]) parameterMapValues.get(getFieldIndex));
+		assertEquals(1, parameterValues.size());
+		assertTrue(parameterValues.contains("getValue"));
 
 		Set fileNames = new HashSet();
 		Iterator fileIter = request.getFileNames();
