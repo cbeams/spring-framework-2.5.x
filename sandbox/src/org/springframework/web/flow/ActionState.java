@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.util.Styler;
 
 /**
@@ -49,7 +48,7 @@ public class ActionState extends TransitionableState {
 	/**
 	 * The set of actions to be executed when this action state is entered.
 	 */
-	private Set namedActions = new LinkedHashSet(1);
+	private Set actionExecutors = new LinkedHashSet(1);
 
 	/**
 	 * Create a new action state.
@@ -68,17 +67,17 @@ public class ActionState extends TransitionableState {
 	/**
 	 * Create a new action state.
 	 * @param flow the owning flow
-	 * @param id the state identifier (must be unique to the flow)
-	 * @param actionName the name of the named action
+	 * @param actionInfo The action and any configuration properties for use
+	 *        within this state
 	 * @param action the named action to execute in this state
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, String actionName, Action action, Transition transition)
+	public ActionState(Flow flow, String id, ActionStateAction actionInfo, Transition transition)
 			throws IllegalArgumentException {
 		super(flow, id, transition);
-		addAction(actionName, action);
+		addAction(actionInfo);
 	}
 
 	/**
@@ -105,10 +104,10 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, String actionName, Action action, Transition[] transitions)
+	public ActionState(Flow flow, String id, ActionStateAction action, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
-		addAction(actionName, action);
+		addAction(action);
 	}
 
 	/**
@@ -150,10 +149,10 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, String[] actionNames, Action[] actions, Transition transition)
+	public ActionState(Flow flow, String id, ActionStateAction[] actions, Transition transition)
 			throws IllegalArgumentException {
 		super(flow, id, transition);
-		addActions(actionNames, actions);
+		addActions(actions);
 	}
 
 	/**
@@ -166,10 +165,10 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, String[] actionNames, Action[] actions, Transition[] transitions)
+	public ActionState(Flow flow, String id, ActionStateAction[] actions, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
-		addActions(actionNames, actions);
+		addActions(actions);
 	}
 
 	/**
@@ -177,7 +176,7 @@ public class ActionState extends TransitionableState {
 	 * @param action the action to add
 	 */
 	protected void addAction(Action action) {
-		this.namedActions.add(createNamedAction(null, action));
+		this.actionExecutors.add(createActionExecutor(new ActionStateAction(this, action)));
 	}
 
 	/**
@@ -185,8 +184,9 @@ public class ActionState extends TransitionableState {
 	 * @param actionName the name of the action
 	 * @param action the action to add
 	 */
-	protected void addAction(String actionName, Action action) {
-		this.namedActions.add(createNamedAction(actionName, action));
+	protected void addAction(ActionStateAction action) {
+		action.setState(this);
+		this.actionExecutors.add(createActionExecutor(action));
 	}
 
 	/**
@@ -205,12 +205,10 @@ public class ActionState extends TransitionableState {
 	 * @param actionNames the names of the actions
 	 * @param actions the actions to add
 	 */
-	protected void addActions(String[] actionNames, Action[] actions) {
-		Assert.notEmpty(actionNames, "You must add at least one action");
-		Assert.notEmpty(actions, "You must add at least one action");
-		Assert.isTrue(actionNames.length == actions.length, "The name->action arrays must be equal in length");
-		for (int i = 0; i < actions.length; i++) {
-			addAction(actionNames[i], actions[i]);
+	protected void addActions(ActionStateAction[] actionInfos) {
+		Assert.notEmpty(actionInfos, "You must add at least one action info");
+		for (int i = 0; i < actionInfos.length; i++) {
+			addAction(actionInfos[i]);
 		}
 	}
 
@@ -220,18 +218,18 @@ public class ActionState extends TransitionableState {
 	 * @param action the action to wrap
 	 * @return the wrapped named action
 	 */
-	protected NamedAction createNamedAction(String actionName, Action action) {
-		return new NamedAction(this, actionName, action);
+	protected ActionExecutor createActionExecutor(ActionStateAction action) {
+		return new ActionExecutor(action);
 	}
 
 	/**
 	 * Returns an iterator that lists the set of actions to execute for this
 	 * state. Both named and unnamed actions will be returned, but all are
-	 * wrapped as {@link ActionState.NamedAction} objects.
+	 * wrapped as {@link ActionState.ActionExecutor} objects.
 	 * @return the NamedAction iterator
 	 */
-	protected Iterator namedActionIterator() {
-		return this.namedActions.iterator();
+	protected Iterator actionExecutors() {
+		return this.actionExecutors.iterator();
 	}
 
 	/**
@@ -240,7 +238,7 @@ public class ActionState extends TransitionableState {
 	 * @return the action count
 	 */
 	public int getActionCount() {
-		return namedActions.size();
+		return actionExecutors.size();
 	}
 
 	/**
@@ -256,29 +254,29 @@ public class ActionState extends TransitionableState {
 	 * @return the action list, as a typed array
 	 */
 	public Action[] getActions() {
-		Action[] actions = new Action[namedActions.size()];
+		Action[] actions = new Action[actionExecutors.size()];
 		int i = 0;
-		for (Iterator it = namedActionIterator(); it.hasNext();) {
-			actions[i++] = ((NamedAction)it.next()).getAction();
+		for (Iterator it = actionExecutors(); it.hasNext();) {
+			actions[i++] = ((ActionExecutor)it.next()).getAction().getAction();
 		}
 		return actions;
 	}
 
 	/**
-	 * Returns the name associated with an action instance executed by
-	 * this action state.
+	 * Returns the name associated with an action instance executed by this
+	 * action state.
 	 * @param action the action for which the name should be looked up
 	 * @return the name of given action or <code>null</code> if the action
 	 *         does not have a name
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
 	 */
-	public String getActionName(Action action) throws NoSuchElementException {
+	public ActionStateAction getActionInfo(Action action) throws NoSuchElementException {
 		Assert.notNull(action, "The action should not be [null]");
-		for (Iterator it = namedActionIterator(); it.hasNext();) {
-			NamedAction namedAction = (NamedAction)it.next();
-			if (action == namedAction.getAction()) {
-				return namedAction.getName();
+		for (Iterator it = actionExecutors(); it.hasNext();) {
+			ActionStateAction actionInfo = ((ActionExecutor)it.next()).getAction();
+			if (actionInfo.getAction() == action) {
+				return actionInfo;
 			}
 		}
 		throw new NoSuchElementException("Action '" + action + "' is not an action executed by state '" + this + "'");
@@ -301,11 +299,11 @@ public class ActionState extends TransitionableState {
 	 *         transition
 	 */
 	protected ViewDescriptor doEnterState(StateContext context) {
-		Iterator it = namedActionIterator();
+		Iterator it = actionExecutors();
 		int executionCount = 0;
-		String[] eventIds = new String[namedActions.size()];
+		String[] eventIds = new String[actionExecutors.size()];
 		while (it.hasNext()) {
-			NamedAction namedAction = (NamedAction)it.next();
+			ActionExecutor namedAction = (ActionExecutor)it.next();
 			Event event = namedAction.execute(context);
 			if (event != null) {
 				eventIds[executionCount] = event.getId();
@@ -315,9 +313,10 @@ public class ActionState extends TransitionableState {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-								+ eventIds[executionCount] + "' -- "
-								+ "I will proceed to the next action in the chain");
+						logger
+								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+										+ eventIds[executionCount] + "' -- "
+										+ "I will proceed to the next action in the chain");
 					}
 				}
 			}
@@ -338,8 +337,8 @@ public class ActionState extends TransitionableState {
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
 					"No actions were executed, thus I cannot execute any state transition "
-					+ "-- programmer configuration error; "
-					+ "make sure you add at least one action to this state"));
+							+ "-- programmer configuration error; "
+							+ "make sure you add at least one action to this state"));
 		}
 	}
 
@@ -352,15 +351,11 @@ public class ActionState extends TransitionableState {
 	 * @author Keith Donald
 	 * @author Erwin Vervaet
 	 */
-	protected static class NamedAction {
+	protected static class ActionExecutor {
 
-		protected final Log logger = LogFactory.getLog(NamedAction.class);
+		protected final Log logger = LogFactory.getLog(ActionExecutor.class);
 
-		private ActionState state;
-
-		private String name;
-
-		private Action action;
+		private ActionStateAction action;
 
 		/**
 		 * Create a new action wrapper.
@@ -368,42 +363,13 @@ public class ActionState extends TransitionableState {
 		 * @param name the name of the action, or null if it's unnamed
 		 * @param action the action to wrap
 		 */
-		public NamedAction(ActionState state, String name, Action action) {
-			Assert.notNull(state, "The owning action state is required");
-			Assert.notNull(action, "The action is required");
-			this.state = state;
-			this.name = name;
+		public ActionExecutor(ActionStateAction action) {
+			Assert.notNull(action, "The action state's action is required");
 			this.action = action;
 		}
 
-		/**
-		 * Returns the state that manages and invokes this named action
-		 * instance.
-		 * @return the action state
-		 */
-		public ActionState getState() {
-			return state;
-		}
-
-		/**
-		 * Returns the name of the wrapped action, or null when it's unnamed.
-		 */
-		public String getName() {
-			return name;
-		}
-
-		/**
-		 * Returns the wrapped action.
-		 */
-		public Action getAction() {
+		public ActionStateAction getAction() {
 			return action;
-		}
-
-		/**
-		 * Returns true when the wrapped action is named, false otherwise.
-		 */
-		public boolean isNamed() {
-			return StringUtils.hasText(name);
 		}
 
 		/**
@@ -416,7 +382,7 @@ public class ActionState extends TransitionableState {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				return getEvent(action.execute(context));
+				return getEvent(action.getAction().execute(context));
 			}
 			catch (Exception e) {
 				throw new ActionExecutionException(this, e);
@@ -435,8 +401,8 @@ public class ActionState extends TransitionableState {
 			if (resultEvent == null) {
 				return null;
 			}
-			if (isNamed()) {
-				return new ActionNameQualifiedEvent(name, resultEvent);
+			if (action.isNamed()) {
+				return new ActionNameQualifiedEvent(action.getName(), resultEvent);
 			}
 			else {
 				return resultEvent;
@@ -485,8 +451,7 @@ public class ActionState extends TransitionableState {
 		}
 
 		public String toString() {
-			return (isNamed() ? "[name='" + name + "', class='" + action.getClass().getName() + "']" : "[class='"
-					+ action.getClass().getName() + "']");
+			return action.toString();
 		}
 	}
 }

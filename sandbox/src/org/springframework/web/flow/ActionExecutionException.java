@@ -27,9 +27,9 @@ import org.springframework.core.NestedRuntimeException;
 public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
-	 * The action that threw an exception while executing.
+	 * The action executor that threw an exception while executing.
 	 */
-	private ActionState.NamedAction action;
+	private ActionState.ActionExecutor actionExecutor;
 
 	/**
 	 * Create a new action execution exception.
@@ -42,35 +42,22 @@ public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new action execution exception.
-	 * @param action the action that generated the exception
+	 * @param actionExecutor the action executor that generated the exception
 	 * @param cause the underlying cause of the exception, thrown by the action
 	 */
-	public ActionExecutionException(ActionState.NamedAction action, Throwable cause) {
-		super("Executing action '" + action + "' in state '" + action.getState().getId() + "' of flow '"
-				+ action.getState().getFlow().getId() + "' threw an unrecoverable exception", cause);
-        this.action = action;
+	public ActionExecutionException(ActionState.ActionExecutor actionExecutor, Throwable cause) {
+		super("Executing action '" + actionExecutor + "' in state '" + actionExecutor.getAction().getState().getId()
+				+ "' of flow '" + actionExecutor.getAction().getState().getFlow().getId()
+				+ "' threw an unrecoverable exception", cause);
+		this.actionExecutor = actionExecutor;
 	}
 
 	/**
-	 * Returns the action state of the flow that was executing the action that
-	 * threw the unhandled exception occured.
+	 * Returns information about the action that threw an exception when
+	 * executed.
+	 * @returns the action
 	 */
-	public ActionState getState() {
-		return action.getState();
+	public ActionStateAction getAction() {
+		return actionExecutor.getAction();
 	}
-
-	/**
-	 * Returns the action that threw the unhandled exception.
-	 */
-	public Action getAction() {
-		return action.getAction();
-	}
-
-	/**
-	 * Returns the name of the action that threw the unhandled exception, or
-	 * <code>null</code> if it was an unnamed action.
-	 */
-	public String getActionName() {
-		return action.getName();
-	}	
 }
