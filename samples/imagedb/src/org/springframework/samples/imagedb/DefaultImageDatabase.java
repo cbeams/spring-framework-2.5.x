@@ -29,6 +29,8 @@ import org.springframework.util.FileCopyUtils;
  *
  * @author Juergen Hoeller
  * @since 07.01.2004
+ * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.support.lob.LobHandler
  */
 public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabase {
 
@@ -84,7 +86,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		logger.info("Checking images: not implemented but invoked by scheduling");
 	}
 
-	public void clearDatabase() {
+	public void clearDatabase() throws DataAccessException {
 		getJdbcTemplate().update("DELETE FROM imagedb");
 	}
 
