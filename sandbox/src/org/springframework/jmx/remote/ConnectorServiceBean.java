@@ -34,85 +34,113 @@ import org.springframework.jmx.util.JmxUtils;
 
 /**
  * @author Rob Harrop
+ * @author Marcus Brito
  */
 public class ConnectorServiceBean implements InitializingBean {
 
-	private MBeanServer mbeanServer;
+    private MBeanServer mbeanServer;
 
-	private JMXConnectorServer connectorServer;
+    private JMXConnectorServer connectorServer;
 
-	private boolean registerConnectorAsMBean = false;
+    private boolean registerConnectorAsMBean = false;
 
-	private String objectName;
+    private String objectName;
 
-	private String serviceUrl = "service:jmx:jmxmp://localhost:9876";
+    private String serviceUrl = "service:jmx:jmxmp://localhost:9876";
 
-	private Map environment;
+    private Map environment;
 
-	public void setServer(MBeanServer mbeanServer) {
-		this.mbeanServer = mbeanServer;
-	}
+    private boolean threaded = false;
 
-	public void setRegisterConnectorAsMBean(boolean registerConnectorAsMBean) {
-		this.registerConnectorAsMBean = registerConnectorAsMBean;
-	}
+    private boolean daemon = false;
 
-	public void setEnvironment(Map environment) {
-		this.environment = environment;
-	}
+    public void setThreaded(boolean threaded) {
+        this.threaded = threaded;
+    }
 
-	public void setObjectName(String objectName) {
-		this.objectName = objectName;
-	}
+    public void setDaemon(boolean daemon) {
+        this.daemon = daemon;
+    }
 
-	public void setServiceUrl(String serviceUrl) {
-		this.serviceUrl = serviceUrl;
-	}
+    public void setServer(MBeanServer mbeanServer) {
+        this.mbeanServer = mbeanServer;
+    }
 
-	public String getServiceUrl() {
-		return this.serviceUrl;
-	}
+    public void setRegisterConnectorAsMBean(boolean registerConnectorAsMBean) {
+        this.registerConnectorAsMBean = registerConnectorAsMBean;
+    }
 
-	public void afterPropertiesSet() throws Exception {
-		start();
-	}
+    public void setEnvironment(Map environment) {
+        this.environment = environment;
+    }
 
-	public void start() throws MalformedURLException, IOException, JMException {
-		if (mbeanServer == null) {
-			this.mbeanServer = JmxUtils.locateMBeanServer();
-		}
+    public void setObjectName(String objectName) {
+        this.objectName = objectName;
+    }
 
-		ObjectName oname = null;
+    public void setServiceUrl(String serviceUrl) {
+        this.serviceUrl = serviceUrl;
+    }
 
-		// check that the object name is specified
-		if ((registerConnectorAsMBean)) {
-			if (objectName == null) {
-				throw new ObjectNamingException(
-						"Must set value for property, objectName, "
-								+ "when registerConnectorAsBean is true.");
-			} else {
-				try {
-					oname = ObjectNameManager.getInstance(objectName);
-				} catch (MalformedObjectNameException ex) {
-					throw new ObjectNamingException("ObjectName: " + objectName
-							+ " is malformed.", ex);
-				}
-			}
-		}
+    public String getServiceUrl() {
+        return this.serviceUrl;
+    }
 
-		// create the service url
-		JMXServiceURL url = new JMXServiceURL(serviceUrl);
+    public void afterPropertiesSet() throws Exception {
+        start();
+    }
 
-		// create the connector now
-		connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url,
-				environment, mbeanServer);
+    public void start() throws MalformedURLException, IOException, JMException {
+        if (mbeanServer == null) {
+            this.mbeanServer = JmxUtils.locateMBeanServer();
+        }
 
-		// do we want to register the connector with the mbean server?
-		if (registerConnectorAsMBean) {
-			mbeanServer.registerMBean(connectorServer, oname);
-		}
+        ObjectName oname = null;
 
-		// now start the connector
-		connectorServer.start();
-	}
+        // check that the object name is specified
+        if ((registerConnectorAsMBean)) {
+            if (objectName == null) {
+                throw new ObjectNamingException("Must set value for property, objectName, "
+                        + "when registerConnectorAsBean is true.");
+            } else {
+                try {
+                    oname = ObjectNameManager.getInstance(objectName);
+                } catch (MalformedObjectNameException ex) {
+                    throw new ObjectNamingException("ObjectName: " + objectName
+                            + " is malformed.", ex);
+                }
+            }
+        }
+
+        // create the service url
+        JMXServiceURL url = new JMXServiceURL(serviceUrl);
+
+        // create the connector now
+        connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url,
+                environment, mbeanServer);
+
+        // do we want to register the connector with the mbean server?
+        if (registerConnectorAsMBean) {
+            mbeanServer.registerMBean(connectorServer, oname);
+        }
+
+        if (threaded) {
+            // now start the connector
+            Thread connectorThread = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        connectorServer.start();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e.getMessage(), e);
+                    }
+                }
+            });
+
+            connectorThread.setName("JMX Connector Thread [" + serviceUrl + "]");
+            connectorThread.setDaemon(daemon);
+            connectorThread.start();
+        } else {
+            connectorServer.start();
+        }
+    }
 }
