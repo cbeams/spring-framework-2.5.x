@@ -523,7 +523,7 @@ public abstract class RequestUtils {
 		}
 
 		protected Object doParse(String parameter) throws NumberFormatException {
-			return Boolean.valueOf(parameter.equalsIgnoreCase("true") || parameter.equalsIgnoreCase("yes")
+			return new Boolean(parameter.equalsIgnoreCase("true") || parameter.equalsIgnoreCase("yes")
 					|| parameter.equalsIgnoreCase("on") || parameter.equals("1"));
 		}
 

@@ -356,9 +356,10 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 		StringBuffer buf = new StringBuffer(strVal);
 
-		int startIndex = buf.indexOf(this.placeholderPrefix);
+		int startIndex = buf.toString().indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
-			int endIndex = buf.indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
+			int endIndex = buf.toString().indexOf(
+			    this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholderToUse = null;
@@ -391,11 +392,11 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 						logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
 					}
 					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
-					startIndex = buf.indexOf(this.placeholderPrefix, startIndex + propVal.length());
+					startIndex = buf.toString().indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
 				else if (this.ignoreUnresolvablePlaceholders) {
 					// proceed with unprocessed value
-					startIndex = buf.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
+					startIndex = buf.toString().indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
 				}
 				else {
 					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");
