@@ -16,8 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility methods that are useful for bean definition readers implementations.
@@ -27,6 +31,12 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
  */
 public class BeanDefinitionReaderUtils {
+
+	/**
+	 * Separator for generated bean names. If a class name or parent name is not
+	 * unique, "#2", "#3" etc will be appended, until the name becomes unique.
+	 */
+	public static final String GENERATED_BEAN_NAME_SEPARATOR = "#";
 
 	/**
 	 * Create a new RootBeanDefinition or ChildBeanDefinition for the given
@@ -64,6 +74,57 @@ public class BeanDefinitionReaderUtils {
 			}
 			else {
 				return new ChildBeanDefinition(parent, className, cargs, pvs);
+			}
+		}
+	}
+
+	/**
+	 * Generate a bean name for the given bean definition, unique within the
+	 * given bean factory.
+	 * @param beanDefinition the bean definition to generate a bean name for
+	 * @param beanFactory the bean factory that the definition is going to be
+	 * registered with (to check for existing bean names)
+	 * @return the bean name to use
+	 * @throws BeanDefinitionStoreException if no unique name can be generated
+	 * for the given bean definition
+	 */
+	public static String generateBeanName(
+			AbstractBeanDefinition beanDefinition, BeanDefinitionRegistry beanFactory)
+			throws BeanDefinitionStoreException {
+
+		String generatedId = beanDefinition.getBeanClassName();
+		if (generatedId == null && beanDefinition instanceof ChildBeanDefinition) {
+			generatedId = ((ChildBeanDefinition) beanDefinition).getParentName();
+		}
+		if (!StringUtils.hasText(generatedId)) {
+			throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), "",
+					"Unnamed bean definition specifies neither 'class' nor 'parent' - can't generate name");
+		}
+		int counter = 1;
+		String id = generatedId;
+		while (beanFactory.containsBeanDefinition(id)) {
+			counter++;
+			id = generatedId + GENERATED_BEAN_NAME_SEPARATOR + counter;
+		}
+		return id;
+	}
+
+	/**
+	 * Register the given bean definition with the given bean factory.
+	 * @param bdHolder the bean definition including name and aliases
+	 * @param beanFactory the bean factory to register with
+	 * @throws BeansException if registration failed
+	 */
+	public static void registerBeanDefinition(
+			BeanDefinitionHolder bdHolder, BeanDefinitionRegistry beanFactory) throws BeansException {
+
+		// register bean definition under primary name
+		beanFactory.registerBeanDefinition(bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+
+		// register aliases for bean name, if any
+		if (bdHolder.getAliases() != null) {
+			for (int i = 0; i < bdHolder.getAliases().length; i++) {
+				beanFactory.registerAlias(bdHolder.getBeanName(), bdHolder.getAliases()[i]);
 			}
 		}
 	}
