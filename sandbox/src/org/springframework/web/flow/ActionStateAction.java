@@ -34,8 +34,14 @@ import org.springframework.util.ToStringCreator;
  */
 public class ActionStateAction {
 
+	/**
+	 * The action name property.
+	 */
 	public static final String NAME_PROPERTY = "name";
 
+	/**
+	 * The action description property.
+	 */
 	public static final String DESCRIPTION_PROPERTY = "description";
 
 	/**
