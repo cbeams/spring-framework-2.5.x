@@ -30,8 +30,8 @@ public class ReflectiveModelMBeanInfoAssembler extends
         AbstractReflectionBasedModelMBeanInfoAssembler {
 
     
-    protected String getDescription(Object bean) {
-        return bean.getClass().getName() + " instance";
+    protected String getDescription(String beanKey, Class beanClass) {
+        return beanClass.getName() + " instance";
     }
 
     protected boolean includeReadAttribute(Method method) {
@@ -55,7 +55,7 @@ public class ReflectiveModelMBeanInfoAssembler extends
         return propertyDescriptor.getDisplayName();
     }
     
-    protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, Object bean) {
+    protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, String beanKey, Class beanClass) {
        // no-op
     }
     

@@ -28,7 +28,7 @@ public abstract class AbstractAutodetectTest extends TestCase {
         AutodetectCapableModelMBeanInfoAssembler assembler = getAssembler();
         assertTrue("The bean should be included", assembler.includeBean("testBean", bean.getClass()));
         
-    }  
-    
+    }
+        
     protected abstract AutodetectCapableModelMBeanInfoAssembler getAssembler();
 }

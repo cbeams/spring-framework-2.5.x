@@ -247,7 +247,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				List chain = this.advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(
 				    this.advised, null, methods[x], rootClass);
 				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
-				    chain, this.advised.getTargetSource().getTarget());
+				    chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetSource().getTargetClass());
 				this.fixedInterceptorMap.put(methods[x].toString(), new Integer(x));
 			}
 
@@ -534,10 +534,10 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 		private final Class targetClass;
 
-		public FixedChainStaticTargetInterceptor(List adviceChain, Object target) {
+		public FixedChainStaticTargetInterceptor(List adviceChain, Object target, Class targetClass) {
 			this.adviceChain = adviceChain;
 			this.target = target;
-			this.targetClass = target.getClass();
+			this.targetClass = targetClass;
 		}
 
 		public Object intercept(

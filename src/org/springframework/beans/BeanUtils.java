@@ -312,4 +312,14 @@ public abstract class BeanUtils {
 		targetBw.setPropertyValues(values);
 	}
 
+    /**
+     * Retreives the <code>PropertyDescriptor</code>s of a given <code>Class</code>.
+     * @param clazz any <code>Class</code> instance.
+     * @return an array of <code>PropertyDescriptors</code> for the supplied <code>Class</code>.
+     */
+    public static PropertyDescriptor[] getPropertyDescriptors(Class clazz){
+        CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
+        return cr.getBeanInfo().getPropertyDescriptors();
+    }
+
 }

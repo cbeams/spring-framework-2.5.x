@@ -151,7 +151,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
      */
     protected ModelMBeanInfo getMBeanInfoFromAssembler() {
         IJmxTestBean bean = getBean();
-        ModelMBeanInfo info = getAssembler().getMBeanInfo(bean);
+        ModelMBeanInfo info = getAssembler().getMBeanInfo("foo", bean.getClass());
         return info;
     }
 

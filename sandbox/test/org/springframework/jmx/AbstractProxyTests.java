@@ -181,11 +181,11 @@ public abstract class AbstractProxyTests extends TestCase {
 
         }
 
-        protected String getDescription(Object bean) {
+        protected String getDescription(String beanKey, Class beanClass) {
             return "";
         }
 
-        protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, Object bean) {
+        protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, String beanKey, Class beanClass) {
 
         }
     }

@@ -26,8 +26,9 @@ public interface ModelMBeanInfoAssembler {
 
     /**
      * Creates the ModelMBeanInfo for the given managed resource.
-     * @param bean The resource that is to be managed.
-     * @return The ModelMBeanInfo metadata.
+     * @param beanKey the <code>String</code> key associated with the bean
+     * @param beanClass the <code>Class</code> of the managed resource
+     * @return The <code>ModelMBeanInfo</code> metadata.
      */
-    public ModelMBeanInfo getMBeanInfo(Object bean);
+    public ModelMBeanInfo getMBeanInfo(String beanKey, Class beanClass);
 }

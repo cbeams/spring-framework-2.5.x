@@ -24,6 +24,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 
 import org.springframework.jmx.assemblers.AutodetectCapableModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.ModelMBeanInfoAssembler;
@@ -33,6 +34,9 @@ import org.springframework.jmx.naming.KeyNamingStrategy;
 import org.springframework.jmx.naming.ObjectNamingStrategy;
 import org.springframework.jmx.util.JmxUtils;
 import org.springframework.jmx.proxy.JmxProxyFactoryBean;
+import org.springframework.jmx.support.ClassOnlyTargetSource;
+import org.springframework.jmx.support.LazyInitInterceptor;
+import org.springframework.aop.framework.ProxyFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -209,25 +213,9 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
             for (int x = 0; x < keys.length; x++) {
                 String key = (String) keys[x];
 
-                Object bean = beans.get(key);
-                ObjectName objectName = namingStrategy.getObjectName(bean, key);
+                Object val = beans.get(key);
 
-                if (bean instanceof DynamicMBean) {
-                    log.info("Registering User Created MBean: " +
-                            objectName.toString());
-
-                    server.registerMBean(bean, objectName);
-                } else {
-                    ModelMBean mbean = mbeanProvider.getModelMBean();
-                    mbean.setModelMBeanInfo(assembler.getMBeanInfo(bean));
-                    mbean.setManagedResource(bean, "ObjectReference");
-
-                    log.info("Registering and Assembling MBean: " +
-                            objectName.toString());
-
-                    server.registerMBean(mbean, objectName);
-                }
-
+                ObjectName objectName = registerBean(key, val);
                 registeredBeans[x] = objectName;
 
                 log.info("Registered MBean: " + objectName.toString());
@@ -242,6 +230,100 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
                     "This is a serious error and points to an error in the Spring JMX Code",
                     ex);
         }
+    }
+
+    private ObjectName registerBean(String beanKey, Object mapValue) throws JMException, InvalidTargetObjectTypeException {
+        if (mapValue instanceof String) {
+            String stringValue = (String) mapValue;
+
+            // might be a bean name
+            if (log.isDebugEnabled()) {
+                log.debug("Key " + beanKey + " is mapped to a String value - might be a bean name.");
+            }
+
+            BeanDefinition beanDefinition = beanFactory.getBeanDefinition(stringValue);
+
+            if (beanDefinition != null && beanDefinition.isLazyInit()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found bean name for lazy init bean with key [" + beanKey
+                            + "]. Registering bean with lazy init support.");
+                }
+                return registerLazyInit(beanKey, stringValue, beanDefinition);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("String value under key [" + beanKey + "] either did not point to a bean or the " +
+                            "bean it pointed to was not registered for lazy initialization. " +
+                            "Registering bean normally with JMX server.");
+                }
+                Object bean = beanFactory.getBean(stringValue);
+                return registerBean(beanKey, bean);
+            }
+        } else {
+            if (isMBean(mapValue)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Located MBean under key [" + beanKey + "] registering with JMX server " +
+                            "without Spring intervention.");
+                }
+                return registerMBean(beanKey, mapValue);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Located bean under key [" + beanKey + "] registering with JMX server.");
+                }
+                return registerSimpleBean(beanKey, mapValue);
+            }
+        }
+    }
+
+    private boolean isMBean(Object object) {
+        // todo: extend this implementation to cover all user created mbeans.
+        return (object instanceof DynamicMBean);
+    }
+
+    private ObjectName registerSimpleBean(String beanKey, Object bean) throws JMException,
+            InvalidTargetObjectTypeException {
+        ObjectName objectName = namingStrategy.getObjectName(bean, beanKey);
+
+        if(log.isDebugEnabled()) {
+            log.debug("Registering and Assembling MBean: " +
+                objectName.toString());
+        }
+
+        ModelMBean mbean = mbeanProvider.getModelMBean();
+        mbean.setModelMBeanInfo(assembler.getMBeanInfo(beanKey, bean.getClass()));
+        mbean.setManagedResource(bean, "ObjectReference");
+
+        server.registerMBean(mbean, objectName);
+
+        return objectName;
+    }
+
+    private ObjectName registerLazyInit(String beanKey, String beanName, BeanDefinition beanDefinition)
+            throws JMException, InvalidTargetObjectTypeException{
+        Class beanClass = beanFactory.getType(beanName);
+
+        ProxyFactory proxyFactory = new ProxyFactory();
+        proxyFactory.setTargetSource(new ClassOnlyTargetSource(beanClass));
+        proxyFactory.addAdvice(new LazyInitInterceptor(beanFactory, beanName));
+        proxyFactory.setProxyTargetClass(true);
+        proxyFactory.setFrozen(true);
+
+        Object proxy = proxyFactory.getProxy();
+
+        ObjectName objectName = namingStrategy.getObjectName(proxy, beanKey);
+
+        ModelMBean mbean = mbeanProvider.getModelMBean();
+        mbean.setModelMBeanInfo(assembler.getMBeanInfo(beanKey, beanClass));
+        mbean.setManagedResource(proxy, "ObjectReference");
+
+        server.registerMBean(mbean, objectName);
+
+        return objectName;
+    }
+
+    private ObjectName registerMBean(String beanKey, Object mbean) throws JMException {
+        ObjectName objectName = namingStrategy.getObjectName(mbean, beanKey);
+        server.registerMBean(mbean, objectName);
+        return objectName;
     }
 
     /**
@@ -279,9 +361,9 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
                     // for JMXification
                     beans.put(beanName, bean);
                     if (log.isInfoEnabled()) {
-                    log.debug("Bean Name: " + beanName +
-                            " has been auto-registered for JMXification.");
-                }
+                        log.debug("Bean Name: " + beanName +
+                                " has been auto-registered for JMXification.");
+                    }
                 } else {
                     if (log.isInfoEnabled()) {
                         log.debug("Bean with name: " + beanName +

@@ -15,8 +15,9 @@
  */
 package org.springframework.jmx.assemblers;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
+import org.springframework.beans.BeanUtils;
+import org.springframework.jmx.exceptions.MBeanAssemblyException;
+import org.springframework.jmx.util.JmxUtils;
 
 import javax.management.Descriptor;
 import javax.management.IntrospectionException;
@@ -24,11 +25,8 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanConstructorInfo;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.jmx.exceptions.MBeanAssemblyException;
-import org.springframework.jmx.util.JmxUtils;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 
 /**
  * @author robh
@@ -45,10 +43,8 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
 
     private static final String GET_CLASS = "getClass";
 
-    protected ModelMBeanAttributeInfo[] getAttributeInfo(Object bean) {
-        BeanWrapper bw = new BeanWrapperImpl(bean);
-
-        PropertyDescriptor[] props = bw.getPropertyDescriptors();
+    protected ModelMBeanAttributeInfo[] getAttributeInfo(String beanKey, Class beanClass) {
+        PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(beanClass);
         ModelMBeanAttributeInfo[] info = new ModelMBeanAttributeInfo[props.length];
         int attrCount = 0;
 
@@ -111,12 +107,12 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
         return result;
     }
 
-    protected ModelMBeanConstructorInfo[] getConstructorInfo(Object bean) {
+    protected ModelMBeanConstructorInfo[] getConstructorInfo(String beanKey, Class beanClass) {
         return new ModelMBeanConstructorInfo[] {};
     }
 
-    protected ModelMBeanOperationInfo[] getOperationInfo(Object bean) {
-        Method[] methods = bean.getClass().getMethods();
+    protected ModelMBeanOperationInfo[] getOperationInfo(String beanKey, Class beanClass) {
+        Method[] methods = beanClass.getMethods();
         ModelMBeanOperationInfo[] info = new ModelMBeanOperationInfo[methods.length];
         int attrCount = 0;
 
@@ -167,7 +163,7 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
         return result;
     }
 
-    protected ModelMBeanNotificationInfo[] getNotificationInfo(Object bean) {
+    protected ModelMBeanNotificationInfo[] getNotificationInfo(String beanKey, Class beanClass) {
         return new ModelMBeanNotificationInfo[] {};
     }
 

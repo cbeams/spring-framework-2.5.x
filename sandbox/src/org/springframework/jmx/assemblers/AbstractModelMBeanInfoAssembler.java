@@ -33,15 +33,15 @@ import org.springframework.context.ApplicationContextException;
 public abstract class AbstractModelMBeanInfoAssembler implements
         ModelMBeanInfoAssembler {
 
-    public ModelMBeanInfo getMBeanInfo(Object bean) {
+    public ModelMBeanInfo getMBeanInfo(String beanKey, Class beanClass) {
 
-        ModelMBeanInfo info = new ModelMBeanInfoSupport(bean.getClass().getName(), getDescription(bean),
-                getAttributeInfo(bean), getConstructorInfo(bean),
-                getOperationInfo(bean), getNotificationInfo(bean));
+        ModelMBeanInfo info = new ModelMBeanInfoSupport(beanClass.getName(), getDescription(beanKey, beanClass),
+                getAttributeInfo(beanKey, beanClass), getConstructorInfo(beanKey, beanClass),
+                getOperationInfo(beanKey, beanClass), getNotificationInfo(beanKey, beanClass));
         
         try {
             Descriptor desc = info.getMBeanDescriptor();
-            populateMBeanDescriptor(desc, bean);
+            populateMBeanDescriptor(desc, beanKey, beanClass);
             info.setMBeanDescriptor(desc);
         } catch(MBeanException ex) {
             throw new ApplicationContextException("Unable to populate MBean Descriptor", ex);
@@ -50,18 +50,16 @@ public abstract class AbstractModelMBeanInfoAssembler implements
         return info;
     }
 
-    protected abstract String getDescription(Object bean);
+    protected abstract String getDescription(String beanKey, Class beanClass);
     
-    protected abstract ModelMBeanAttributeInfo[] getAttributeInfo(Object bean);
+    protected abstract ModelMBeanAttributeInfo[] getAttributeInfo(String beanKey, Class beanClass);
 
-    protected abstract ModelMBeanConstructorInfo[] getConstructorInfo(
-            Object bean);
+    protected abstract ModelMBeanConstructorInfo[] getConstructorInfo(String beanKey, Class beanClass);
 
-    protected abstract ModelMBeanOperationInfo[] getOperationInfo(Object bean);
+    protected abstract ModelMBeanOperationInfo[] getOperationInfo(String beanKey, Class beanClass);
 
-    protected abstract ModelMBeanNotificationInfo[] getNotificationInfo(
-            Object bean);
+    protected abstract ModelMBeanNotificationInfo[] getNotificationInfo(String beanKey, Class beanClass);
     
-    protected abstract void populateMBeanDescriptor(Descriptor mbeanDescriptor, Object bean);
+    protected abstract void populateMBeanDescriptor(Descriptor mbeanDescriptor, String beanKey, Class beanClass);
 
 }

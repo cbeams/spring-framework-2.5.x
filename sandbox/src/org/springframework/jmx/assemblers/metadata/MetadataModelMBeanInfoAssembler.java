@@ -137,8 +137,8 @@ public class MetadataModelMBeanInfoAssembler extends
      * metdata. Returns an empty <code>String</code> if no description can be
      * found.
      */
-    protected String getDescription(Object bean) {
-        ManagedResource mr = attributeSource.getManagedResource(bean.getClass());
+    protected String getDescription(String beanKey, Class beanClass) {
+        ManagedResource mr = attributeSource.getManagedResource(beanClass);
 
         if (mr == null) {
             return "";
@@ -147,9 +147,8 @@ public class MetadataModelMBeanInfoAssembler extends
         }
     }
 
-    protected void populateMBeanDescriptor(Descriptor mbeanDescriptor,
-            Object bean) {
-        ManagedResource mr = attributeSource.getManagedResource(bean.getClass());
+    protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, String beanKey, Class beanClass) {
+        ManagedResource mr = attributeSource.getManagedResource(beanClass);
 
         mbeanDescriptor.setField(LOG, mr.isLog() ? "true" : "false");
 

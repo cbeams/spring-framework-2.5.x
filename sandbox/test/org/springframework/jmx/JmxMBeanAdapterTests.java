@@ -5,6 +5,7 @@ package org.springframework.jmx;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.beans.PropertyEditor;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -14,11 +15,18 @@ import javax.management.modelmbean.ModelMBeanInfo;
 
 import junit.framework.TestCase;
 import org.springframework.jmx.assemblers.ModelMBeanInfoAssembler;
+import org.springframework.jmx.assemblers.AutodetectCapableModelMBeanInfoAssembler;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.BeansException;
 
 /**
  * @author robh
  */
-public class JmxMBeanAdaptorTests extends TestCase {
+public class JmxMBeanAdapterTests extends TestCase {
 
     private static final String OBJECT_NAME = "spring:test=jmxMBeanAdaptor";
 
@@ -82,9 +90,11 @@ public class JmxMBeanAdaptorTests extends TestCase {
 
         private boolean invoked = false;
 
-        public ModelMBeanInfo getMBeanInfo(Object bean) {
+        public ModelMBeanInfo getMBeanInfo(String beanKey, Class beanClass) {
             invoked = true;
             return null;
         }
     }
+
+
 }
