@@ -69,22 +69,71 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private final ResourceLoader resourceLoader;
 
+	private final ClassLoader classLoader;
+
 
 	/**
 	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
+	 * <p>ClassLoader access will happen via the thread context class loader on actual
+	 * access (applying to the thread that does the "getResources" call)
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public PathMatchingResourcePatternResolver() {
 		this.resourceLoader = new DefaultResourceLoader();
+		this.classLoader = null;
+	}
+
+	/**
+	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
+	 * @param classLoader the ClassLoader to load classpath resources with,
+	 * or null for using the thread context class loader on actual access
+	 * (applying to the thread that does the "getResources" call)
+	 * @see org.springframework.core.io.DefaultResourceLoader
+	 */
+	public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
+		this.resourceLoader = new DefaultResourceLoader(classLoader);
+		this.classLoader = classLoader;
+	}
+
+	/**
+	 * Create a new PathMatchingResourcePatternResolver.
+	 * <p>ClassLoader access will happen via the thread context class loader on actual
+	 * access (applying to the thread that does the "getResources" call)
+	 * @param resourceLoader ResourceLoader to load root directories
+	 * and actual resources with
+	 */
+	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+		this.classLoader = null;
 	}
 
 	/**
 	 * Create a new PathMatchingResourcePatternResolver.
 	 * @param resourceLoader ResourceLoader to load root directories
 	 * and actual resources with
+	 * @param classLoader the ClassLoader to load classpath resources with,
+	 * or null for using the thread context class loader on actual access
+	 * (applying to the thread that does the "getResources" call)
 	 */
-	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
+	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader, ClassLoader classLoader) {
 		this.resourceLoader = resourceLoader;
+		this.classLoader = classLoader;
+	}
+
+	/**
+	 * Return the ResourceLoader that this pattern resolver works with.
+	 */
+	public ResourceLoader getResourceLoader() {
+		return resourceLoader;
+	}
+
+	/**
+	 * Return the ClassLoader that this pattern resolver works with,
+	 * or null if using the thread context class loader on actual access
+	 * (applying to the thread that does the "getResources" call).
+	 */
+	public ClassLoader getClassLoader() {
+		return classLoader;
 	}
 
 
@@ -104,15 +153,24 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	 * Find all class path resources with the given name via the ClassLoader.
-	 * @param resourceName the name to look for
+	 * Find all class location resources with the given location via the ClassLoader.
+	 * @param location the absolute path within the classpath
 	 * @return the result as Resource array
 	 * @throws IOException in case of I/O errors
 	 * @see java.lang.ClassLoader#getResources
 	 */
-	protected Resource[] findAllClassPathResources(String resourceName) throws IOException {
+	protected Resource[] findAllClassPathResources(String location) throws IOException {
+		String path = location;
+		if (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+		ClassLoader cl = this.classLoader;
+		if (cl == null) {
+			// no class loader specified -> use thread context class loader
+			cl = Thread.currentThread().getContextClassLoader();
+		}
+		Enumeration resourceUrls = cl.getResources(path);
 		List result = new ArrayList();
-		Enumeration resourceUrls = Thread.currentThread().getContextClassLoader().getResources(resourceName);
 		while (resourceUrls.hasMoreElements()) {
 			URL url = (URL) resourceUrls.nextElement();
 			result.add(new UrlResource(url));
@@ -205,7 +263,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected void doRetrieveMatchingFiles(String fullPattern, File dir, List result) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching directory [" + dir.getAbsolutePath() +
-									 "] for files matching pattern [" + fullPattern + "]");
+					"] for files matching pattern [" + fullPattern + "]");
 		}
 		File[] dirContents = dir.listFiles();
 		if (dirContents == null) {
