@@ -63,7 +63,6 @@
 	<classpathentry kind="lib" path="lib/aopalliance/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/axis/saaj.jar"/>
 	<classpathentry kind="lib" path="lib/axis/wsdl4j.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate/ehcache.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/odmg.jar"/>
 	<classpathentry kind="lib" path="lib/hsqldb/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-discovery.jar"/>
@@ -91,5 +90,6 @@
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxremote.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxremote_optional.jar"/>
+	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.0.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
