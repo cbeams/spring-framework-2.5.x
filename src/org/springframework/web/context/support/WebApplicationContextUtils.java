@@ -23,12 +23,14 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Utilities common to all WebApplicationContext implementations.
  *
- * <p>Features a convenient method to retrieve the WebApplicationContext
- * for a given ServletContext. This is e.g. useful to access a Spring
- * context from within Struts actions.
+ * <p>Features a convenient method to retrieve the root WebApplicationContext
+ * for a given ServletContext. This is e.g. useful for accessing a Spring
+ * context from within custom web views or Struts actions.
  *
  * @author Rod Johnson
- * @version $Id: WebApplicationContextUtils.java,v 1.1.1.1 2003-08-14 16:20:48 trisberg Exp $
+ * @author Juergen Hoeller
+ * @version $Id: WebApplicationContextUtils.java,v 1.2 2003-10-08 14:16:06 jhoeller Exp $
+ * @see #getWebApplicationContext
  */
 public abstract class WebApplicationContextUtils {
 
@@ -38,9 +40,11 @@ public abstract class WebApplicationContextUtils {
 	private static Log logger = LogFactory.getLog(WebApplicationContextUtils.class);
 
 	/**
-	 * Find the root WebApplicationContext for this web app.
-	 * @param sc ServletContext to find the application context for
-	 * @return the WebApplicationContext for this web app, or null if none
+	 * Find the root WebApplicationContext for this web app, which is
+	 * typically loaded via ContextLoader resp. ContextLoaderListener.
+	 * @param sc ServletContext to find the web application context for
+	 * @return the root WebApplicationContext for this web app, or null if none
+	 * @see org.springframework.web.context.ContextLoader
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
 		return (WebApplicationContext) sc.getAttribute(WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME);
@@ -67,10 +71,9 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
-	 * Retrieve a config object by name. This will be sought in the
-	 * ServletContext, where it must have been placed by config.
-	 * Can only be called after the ServletContext is available. This means
-	 * it can't be called in a subclass constructor.
+	 * Retrieve a config object by name. This will be sought in the ServletContext,
+	 * where it must have been placed by config. Can only be called after the
+	 * ServletContext is available, i.e. not in a subclass constructor.
 	 * @param sc current ServletContext
 	 * @param name name of the config object
 	 * @param requiredClass type of the config object

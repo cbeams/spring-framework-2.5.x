@@ -6,6 +6,7 @@ import javax.servlet.ServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -14,10 +15,9 @@ import org.springframework.web.util.WebUtils;
 /**
  * PropertyValues implementation created from parameters in a ServletRequest.
  * Looks for all property values beginning with a certain prefix
- * and prefix separator.
- * This class is immutable once initialized.
+ * and prefix separator. This class is immutable once initialized.
  * @author Rod Johnson
- * @version $Id: ServletRequestParameterPropertyValues.java,v 1.1.1.1 2003-08-14 16:20:48 trisberg Exp $
+ * @version $Id: ServletRequestParameterPropertyValues.java,v 1.2 2003-10-08 14:16:19 jhoeller Exp $
  */
 public class ServletRequestParameterPropertyValues implements PropertyValues {
 
@@ -34,8 +34,8 @@ public class ServletRequestParameterPropertyValues implements PropertyValues {
 	private MutablePropertyValues mutablePropertyValues;
 
 	/**
-	 * Creates new ServletRequestPropertyValues using the default
-	 * prefix separator and the given prefix (the underscore character, _).
+	 * Create new ServletRequestPropertyValues using the default prefix
+	 * separator and the given prefix (the underscore character "_").
 	 * @param request HTTP Request
 	 * @param prefix prefix for properties
 	 */
@@ -43,10 +43,9 @@ public class ServletRequestParameterPropertyValues implements PropertyValues {
 		this(request, prefix, DEFAULT_PREFIX_SEPARATOR);
 	}
 
-
 	/**
-	 * Creates new ServletRequestPropertyValues using no prefix
-	 * (and hence, no prefix separator)
+	 * Create new ServletRequestPropertyValues using no prefix
+	 * (and hence, no prefix separator).
 	 * @param request HTTP Request
 	 */
 	public ServletRequestParameterPropertyValues(ServletRequest request) {
@@ -54,7 +53,7 @@ public class ServletRequestParameterPropertyValues implements PropertyValues {
 	}
 
 	/**
-	 * Creates new ServletRequestPropertyValues supplying both prefix and prefixSeparator.
+	 * Create new ServletRequestPropertyValues supplying both prefix and prefix separator.
 	 * @param request HTTP Request
 	 * @param prefix prefix for properties
 	 * @param prefixSeparator Separator delimiting prefix (e.g. user) from property name
