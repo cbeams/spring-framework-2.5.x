@@ -16,7 +16,7 @@
 package org.springframework.binding.value.support;
 
 import org.springframework.util.Assert;
-import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.Styler;
 import org.springframework.util.closure.Closure;
 
 /**
@@ -54,14 +54,14 @@ public class RefreshableValueHolder extends ValueHolder {
 
 	private void refreshInternal() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Autorefreshing held value '" + DefaultObjectStyler.call(super.getValue()) + "'");
+			logger.debug("Auto-refreshing held value '" + Styler.call(super.getValue()) + "'");
 		}
 		setValueInternal(refreshFunction.call(null));
 	}
 	
 	public void refresh() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Refreshing held value '" + DefaultObjectStyler.call(super.getValue()) + "'");
+			logger.debug("Refreshing held value '" + Styler.call(super.getValue()) + "'");
 		}
 		setValue(refreshFunction.call(null));
 	}

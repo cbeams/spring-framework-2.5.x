@@ -40,7 +40,7 @@ import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.Styler;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
@@ -108,7 +108,7 @@ public class DefaultMessageTranslator implements Visitor {
 		StringBuffer buf = new StringBuffer(255);
 		MessageSourceResolvable[] args = resolveArguments(constraint);
 		if (logger.isDebugEnabled()) {
-			logger.debug(DefaultObjectStyler.call(args));
+			logger.debug(Styler.call(args));
 		}
 		if (objectName != null) {
 			buf.append(messages.getMessage(resolvableObjectName(objectName),

@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.Styler;
 
 /**
  * Thrown when the event identified by <code>eventId</code> does not map to a valid
@@ -57,6 +57,6 @@ public class EventNotSupportedException extends FlowNavigationException {
 	public String getMessage() {
 		return "No transition found for event '" + eventId + "' in state '" + state.getId() + "' of flow '"
 				+ getFlow().getId() + "' -- valid transitional event criteria are "
-				+ DefaultObjectStyler.call(state.getEventIdCriteria()) + " -- programmer error?";
+				+ Styler.call(state.getEventIdCriteria()) + " -- programmer error?";
 	}
 }

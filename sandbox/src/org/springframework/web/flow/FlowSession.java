@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.Styler;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.web.flow.support.FlowUtils;
@@ -219,7 +219,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		if (value == null) {
 			throw new IllegalStateException("Required attribute '" + attributeName
 					+ "' is not present in flow scope for flow '" + getFlowId()
-					+ "'; attributes currently in scope are = " + DefaultObjectStyler.call(attributes));
+					+ "'; attributes currently in scope are = " + Styler.call(attributes));
 		}
 		return value;
 	}

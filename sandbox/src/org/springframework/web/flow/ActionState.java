@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.Styler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -307,9 +307,9 @@ public class ActionState extends TransitionableState {
 					+ "' of flow '" + getFlow().getId()
 					+ "'; transitions must be defined to handle action result outcomes -- "
 					+ "possible flow configuration error?  Note: the eventIds signaled were: '"
-					+ DefaultObjectStyler.call(eventIds)
+					+ Styler.call(eventIds)
 					+ "', while the supported set of eventId criteria for this action state is '"
-					+ DefaultObjectStyler.call(getEventIdCriteria()) + "'");
+					+ Styler.call(getEventIdCriteria()) + "'");
 		}
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(

@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.Styler;
 
 /**
  * Thrown when a state could not be found in a flow, on lookup by
@@ -51,6 +51,6 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 
 	public String getMessage() {
 		return "No state with state id '" + stateId + "' exists for flow '" + getFlow().getId()
-				+ "' -- valid states are " + DefaultObjectStyler.call(getFlow().getStateIds()) + "-- programmer error?";
+				+ "' -- valid states are " + Styler.call(getFlow().getStateIds()) + "-- programmer error?";
 	}
 }

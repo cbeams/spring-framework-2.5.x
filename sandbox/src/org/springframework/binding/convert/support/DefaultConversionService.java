@@ -28,13 +28,15 @@ import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.Converter;
 import org.springframework.binding.format.FormatterLocator;
+import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
 import org.springframework.binding.support.TextToMappingConverter;
+import org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster;
 
 /**
  * Default, local implementation of a conversion service.
  * <p>
  * Acts as bean factory post processor, registering property editor adapters for
- * each supported <i>source String</i> conversion. This makes for very
+ * each supported <i>source String </i> conversion. This makes for very
  * convenient use with the Spring container.
  * @author Keith Donald
  */
@@ -46,6 +48,10 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 
 	public DefaultConversionService() {
 
+	}
+
+	public void setFormatterLocator(FormatterLocator formatterLocator) {
+		this.formatterLocator = formatterLocator;
 	}
 
 	public void setConverters(Converter[] converters) {
@@ -76,12 +82,21 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 		}
 	}
 
-	public void setFormatterLocator(FormatterLocator formatterLocator) {
-		this.formatterLocator = formatterLocator;
+	public void afterPropertiesSet() {
+		initFormatterLocator();
+		addDefaultConverters();
 	}
 
-	public void afterPropertiesSet() {
-		addDefaultConverters();
+	protected void initFormatterLocator() {
+		if (this.formatterLocator == null) {
+			final DefaultThreadCleanupBroadcaster cleanupBroadcaster = new DefaultThreadCleanupBroadcaster();
+			this.formatterLocator = new ThreadLocalFormatterLocator(cleanupBroadcaster) {
+				protected void finalize() throws Throwable {
+					cleanupBroadcaster.fireCleanupEvent();
+					super.finalize();
+				}
+			};
+		}
 	}
 
 	protected void addDefaultConverters() {
@@ -92,10 +107,10 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 	}
 
 	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) {
-		if (sourceClassConverters == null) {
+		if (this.sourceClassConverters == null) {
 			return null;
 		}
-		Map sourceTargetConverters = (Map)sourceClassConverters.get(sourceClass);
+		Map sourceTargetConverters = (Map)this.sourceClassConverters.get(sourceClass);
 		Converter converter = (Converter)sourceTargetConverters.get(targetClass);
 		if (converter != null) {
 			return new ConversionExecutor(converter, targetClass);
@@ -105,7 +120,7 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.sourceClassConverters != null) {
-			Map sourceStringConverters = (Map)sourceClassConverters.get(String.class);
+			Map sourceStringConverters = (Map)this.sourceClassConverters.get(String.class);
 			if (sourceStringConverters != null) {
 				Iterator it = sourceStringConverters.entrySet().iterator();
 				while (it.hasNext()) {
