@@ -25,6 +25,12 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
         new ReflectiveVisitorSupport();
     private static final String EMPTY = "[empty]";
     private static final String NULL = "[null]";
+
+    private static final ObjectStyler INSTANCE = new DefaultObjectStyler();
+    
+    public static String evaluate(Object o) {
+        return INSTANCE.style(o);
+    }
     
     /**
      * Styles the string form of this object using the reflective visitor

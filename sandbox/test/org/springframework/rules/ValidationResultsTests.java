@@ -4,6 +4,8 @@
  */
 package org.springframework.rules;
 
+import java.util.Locale;
+
 import junit.framework.TestCase;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -31,7 +33,7 @@ public class ValidationResultsTests extends TestCase {
         Person p = new Person();
         ValidationResultsCollector c = new ValidationResultsCollector(p);
         ValidationResults r = c.collectResults(rulesSource.getRules(Person.class));
-        System.out.println(r.getResults().size());
+        assertEquals(2, r.getViolatedCount());
     }
 
     public void testValidationResultsCollectorCollectAllErrors() {
@@ -39,8 +41,7 @@ public class ValidationResultsTests extends TestCase {
         ValidationResultsCollector c = new ValidationResultsCollector(p);
         c.setCollectAllErrors(true);
         ValidationResults r = c.collectResults(rulesSource.getRules(Person.class));
-        System.out.println(r.getResults().size());
-        System.out.println(r.getViolatedCount());
+        assertEquals(2, r.getViolatedCount());
     }
   
     public void testNestedValidationResultsPropertyConstraint() {
@@ -59,7 +60,7 @@ public class ValidationResultsTests extends TestCase {
         ValidationResultsCollector c = new ValidationResultsCollector(p);
         c.setCollectAllErrors(true);
         ValidationResults r = c.collectResults(rules);
-        System.out.println(r.getResults().size());
-        System.out.println(r.getViolatedCount());
+        assertEquals(2, r.getViolatedCount());
+        System.out.println(ac.getMessage(r.getResults("firstName"), Locale.getDefault()));
     }
 }

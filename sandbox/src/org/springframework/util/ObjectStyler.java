@@ -11,7 +11,7 @@ package org.springframework.util;
  * @author  Keith Donald
  */
 public interface ObjectStyler {
-    
+
     /**
      * Styles the string form of this object.
      * 

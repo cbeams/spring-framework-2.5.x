@@ -26,6 +26,7 @@ import org
     .beans
     .ParameterizedBeanPropertyExpression;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
 
@@ -89,6 +90,9 @@ public class PropertyResults implements MessageSourceResolvable {
         if (resolvedArgs == null) {
             this.resolvedArgs =
                 new DefaultArgumentTranslator(this).resolveArguments();
+            if (logger.isDebugEnabled()) {
+                logger.debug(DefaultObjectStyler.evaluate(resolvedArgs));
+            }
         }
         return resolvedArgs;
     }
@@ -174,6 +178,7 @@ public class PropertyResults implements MessageSourceResolvable {
 
         void visit(UnaryNot not) {
             add("not", null, "not");
+            visitorSupport.invokeVisit(this, not.getPredicate());
         }
 
         void visit(UnaryPredicate constraint) {
@@ -235,7 +240,7 @@ public class PropertyResults implements MessageSourceResolvable {
      * @see org.springframework.context.MessageSourceResolvable#getCodes()
      */
     public String[] getCodes() {
-        return new String[0];
+        return new String[] { "args" };
     }
 
     /**
