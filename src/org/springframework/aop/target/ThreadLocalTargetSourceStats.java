@@ -19,21 +19,40 @@ package org.springframework.aop.target;
 /**
  * Statistics for a ThreadLocal TargetSource.
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public interface ThreadLocalTargetSourceStats {
 	
 	/**
-	 * @return all clients given one of us
+	 * Return the number of client invocations.
+	 */
+	int getNrOfInvocations();
+
+	/**
+	 * Return the number of hits that were satisfied by a thread-bound object.
+	 */
+	int getNrOfHits();
+
+	/**
+	 * Return the number of thread-bound objects created.
+	 */
+	int getNrOfObjects();
+
+	/**
+	 * @deprecated in favour of getNrOfInvocations
+	 * @see #getNrOfInvocations
 	 */
 	int getInvocations();
 
 	/**
-	 * @return hits that were satisfied by a thread bound object
+	 * @deprecated in favour of getNrOfHits
+	 * @see #getNrOfHits
 	 */
 	int getHits();
 
 	/**
-	 * @return thread bound objects created
+	 * @deprecated in favour of getNrOfObjects
+	 * @see #getNrOfObjects
 	 */
 	int getObjects();
 

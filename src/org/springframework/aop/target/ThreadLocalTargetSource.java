@@ -16,6 +16,7 @@
 
 package org.springframework.aop.target;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.DisposableBean;
  * <p>Cleanup is performed in the destroy() method from DisposableBean.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see #destroy
  */
 public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
@@ -53,7 +55,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	/**
 	 * Set of managed targets, enabling us to keep track of the targets we've created.
 	 */
-	private Set targetSet = new HashSet();
+	private final Set targetSet = Collections.synchronizedSet(new HashSet());
 	
 	private int invocations;
 	
@@ -70,9 +72,8 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 		Object target = this.targetInThread.get();
 		if (target == null) {
 			if (logger.isInfoEnabled()) {
-				logger.info("No target for apartment prototype '" + getTargetBeanName() +
-										"' found in thread: creating one and binding it to thread '" +
-										Thread.currentThread().getName() + "'");
+				logger.info("No target for apartment prototype '" + getTargetBeanName() + "' found in thread: " +
+				    "creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
 			}
 			// associate target with ThreadLocal
 			target = newPrototypeInstance();
@@ -109,18 +110,42 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 		}
 		this.targetSet.clear();
 		
-		// Clear ThreadLocal
+		// clear ThreadLocal
 		this.targetInThread = null;
 	}
 
+	public int getNrOfInvocations() {
+		return invocations;
+	}
+
+	public int getNrOfHits() {
+		return hits;
+	}
+
+	public int getNrOfObjects() {
+		return targetSet.size();
+	}
+
+	/**
+	 * @deprecated in favour of getNrOfInvocations
+	 * @see #getNrOfInvocations
+	 */
 	public int getInvocations() {
 		return invocations;
 	}
 
+	/**
+	 * @deprecated in favour of getNrOfHits
+	 * @see #getNrOfHits
+	 */
 	public int getHits() {
 		return hits;
 	}
 
+	/**
+	 * @deprecated in favour of getNrOfObjects
+	 * @see #getNrOfObjects
+	 */
 	public int getObjects() {
 		return targetSet.size();
 	}

@@ -77,18 +77,18 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 	public void testCanGetStatsViaMixin() {
 		ThreadLocalTargetSourceStats stats = (ThreadLocalTargetSourceStats) beanFactory.getBean("apartment");
 		// +1 because creating target for stats call counts
-		assertEquals(1, stats.getInvocations());
+		assertEquals(1, stats.getNrOfInvocations());
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		apartment.doWork();
 		// +1 again
-		assertEquals(3, stats.getInvocations());
+		assertEquals(3, stats.getNrOfInvocations());
 		// + 1 for states call!
-		assertEquals(3, stats.getHits());
+		assertEquals(3, stats.getNrOfHits());
 		apartment.doWork();
-		assertEquals(6, stats.getInvocations());
-		assertEquals(6, stats.getHits());
+		assertEquals(6, stats.getNrOfInvocations());
+		assertEquals(6, stats.getNrOfHits());
 		// Only one thread so only one object can have been bound
-		assertEquals(1, stats.getObjects());
+		assertEquals(1, stats.getNrOfObjects());
 	}
 	
 
@@ -124,7 +124,7 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 		assertEquals(INITIAL_COUNT + 3, r.mine.getCount() );
 		
 		// Bound to two threads
-		assertEquals(2, ((ThreadLocalTargetSourceStats) apartment).getObjects());
+		assertEquals(2, ((ThreadLocalTargetSourceStats) apartment).getNrOfObjects());
 	}
 
 }
