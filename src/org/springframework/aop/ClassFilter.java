@@ -24,7 +24,7 @@ package org.springframework.aop;
  * of an IntroductionAdvice.
  *
  * @author Rod Johnson
- * @version $Id: ClassFilter.java,v 1.4 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: ClassFilter.java,v 1.5 2004-07-24 13:45:46 johnsonr Exp $
  * @see org.springframework.aop.Pointcut
  */
 public interface ClassFilter {
@@ -40,10 +40,6 @@ public interface ClassFilter {
 	/**
 	 * Canonical instance of a ClassFilter that matches all classes.
 	 */
-	ClassFilter TRUE = new ClassFilter() {
-		public boolean matches(Class clazz) {
-			return true;
-		}
-	};
+	ClassFilter TRUE = TrueClassFilter.INSTANCE;
 
 }
