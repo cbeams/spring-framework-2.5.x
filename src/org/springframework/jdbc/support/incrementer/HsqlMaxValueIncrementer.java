@@ -10,7 +10,6 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.InternalErrorException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -38,7 +37,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: HsqlMaxValueIncrementer.java,v 1.1 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: HsqlMaxValueIncrementer.java,v 1.2 2004-02-02 11:36:54 jhoeller Exp $
  */
 
 public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
@@ -185,8 +184,9 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 						if (rs.next()) {
 							valueCache[i] = rs.getLong(1);
 						}
-						else
-							throw new InternalErrorException("last_insert_id() failed after executing an update");
+						else {
+							throw new DataAccessResourceFailureException("last_insert_id() failed after executing an update");
+						}
 					}
 					long maxValue = valueCache[(valueCache.length - 1)];
 					stmt.executeUpdate(deleteSql + maxValue);

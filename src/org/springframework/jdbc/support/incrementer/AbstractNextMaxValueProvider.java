@@ -2,18 +2,17 @@ package org.springframework.jdbc.support.incrementer;
 
 import java.sql.Types;
 
-import org.springframework.core.InternalErrorException;
 import org.springframework.jdbc.object.SqlFunction;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * Abstract implementation of Classes NextMaxValueProvider used as 
+ * Abstract implementation of Classes NextMaxValueProvider used as
  * inner Class by several NextMaxValueProvider classes.
- * It translates the key in different types: long, int, double and String. 
+ * It translates the key in different types: long, int, double and String.
  * Subclasses should provide implementations of protected abstract method getNextKey(int).
  * @author <a href="mailto:jp.pawlak@tiscali.fr">Jean-Pierre Pawlak</a>
  * @author <a href="mailto:isabelle@meta-logix.com">Isabelle Muszynski</a>
- * @version $Id: AbstractNextMaxValueProvider.java,v 1.1 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: AbstractNextMaxValueProvider.java,v 1.2 2004-02-02 11:36:54 jhoeller Exp $
  */
 public abstract class AbstractNextMaxValueProvider {
 
@@ -24,7 +23,7 @@ public abstract class AbstractNextMaxValueProvider {
 	protected int paddingLength;
 
 	public int getNextIntValue() {
-		return (int)getNextKey(Types.INTEGER);
+		return (int) getNextKey(Types.INTEGER);
 	}
 
 	public long getNextLongValue() {
@@ -36,13 +35,13 @@ public abstract class AbstractNextMaxValueProvider {
 	}
 
 	public String getNextStringValue() {
-		String s = new Integer((int)getNextKey(Types.INTEGER)).toString();
+		String s = new Integer((int) getNextKey(Types.INTEGER)).toString();
 		if (prefixWithZero) {
 			int len = s.length();
 			if (len < paddingLength + 1) {
 				StringBuffer buff = new StringBuffer(paddingLength);
 				for (int i = 0; i < paddingLength - len; i++)
-				buff.append("0");
+					buff.append("0");
 				buff.append(s);
 				s = buff.toString();
 			}
@@ -58,7 +57,7 @@ public abstract class AbstractNextMaxValueProvider {
 		this.prefixWithZero = prefixWithZero;
 		this.paddingLength = length;
 	}
-	
+
 	/**
 	 * Give the key to use as a long.
 	 * @param type The Sql type of the key in the database.
@@ -74,27 +73,28 @@ public abstract class AbstractNextMaxValueProvider {
 	 */
 	protected long getLongValue(SqlFunction sqlf, int type) {
 		long fLong = 0;
-		switch(JdbcUtils.translateType(type)) {
+		switch (JdbcUtils.translateType(type)) {
 			case Types.BIGINT:
-				fLong = ((Long)sqlf.runGeneric()).longValue();
+				fLong = ((Long) sqlf.runGeneric()).longValue();
 				break;
 			case Types.INTEGER:
-				fLong = ((Integer)sqlf.runGeneric()).intValue();
+				fLong = ((Integer) sqlf.runGeneric()).intValue();
 				break;
 			case Types.NUMERIC:
-				fLong = (long)((Double)sqlf.runGeneric()).doubleValue();
+				fLong = (long) ((Double) sqlf.runGeneric()).doubleValue();
 				break;
 			case Types.VARCHAR:
 				try {
-					fLong = Long.parseLong((String)sqlf.runGeneric());
-				} catch (NumberFormatException ex) {
-					throw new InternalErrorException("Key value could not be converted to long");
+					fLong = Long.parseLong((String) sqlf.runGeneric());
+				}
+				catch (NumberFormatException ex) {
+					throw new IllegalArgumentException("Key value could not be converted to long");
 				}
 				break;
 			default:
-				throw new InternalErrorException("Unhandled SQL type: " + type);
+				throw new IllegalArgumentException("Unhandled SQL type: " + type);
 		}
-		return fLong;	
+		return fLong;
 	}
 
 }
