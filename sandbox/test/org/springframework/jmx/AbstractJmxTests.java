@@ -3,41 +3,38 @@
  */
 package org.springframework.jmx;
 
-import junit.framework.TestCase;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
+import junit.framework.TestCase;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 /**
- * @author robh
+ * @author Rob Harrop
  */
 public class AbstractJmxTests extends TestCase {
 
-    private ApplicationContext ctx;
+	private ApplicationContext ctx;
 
-    protected MBeanServer server;
+	protected MBeanServer server;
 
-    public AbstractJmxTests(String name) {
-        super(name);
-    }
+	public void setUp() throws Exception {
+		server = MBeanServerFactory.createMBeanServer();
+		ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
+	}
 
-    public void setUp() throws Exception{
-        server = MBeanServerFactory.createMBeanServer();
-        ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
-    }
+	protected String getApplicationContextPath() {
+		return "org/springframework/jmx/applicationContext.xml";
+	}
 
-    protected String getApplicationContextPath() {
-        return "org/springframework/jmx/applicationContext.xml";
-    }
+	public void tearDown() throws Exception {
+		MBeanServerFactory.releaseMBeanServer(server);
+		server = null;
+	}
 
-    public void tearDown() throws Exception {
-        MBeanServerFactory.releaseMBeanServer(server);
-        server = null;
-    }
-
-    protected ApplicationContext getContext() {
-        return this.ctx;
-    }
+	protected ApplicationContext getContext() {
+		return this.ctx;
+	}
 }

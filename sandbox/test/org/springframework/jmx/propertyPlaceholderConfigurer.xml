@@ -15,7 +15,7 @@
         </property>
     </bean>
 
-   <bean id="jmxAdapter" class="org.springframework.jmx.JmxMBeanAdapter">
+   <bean id="jmxAdapter" class="org.springframework.jmx.MBeanExporter">
         <property name="beans">
             <map>
                 <entry key="bean:name=proxyTestBean1">

@@ -1,42 +1,52 @@
-package org.springframework.jmx;
+/*
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
-import junit.framework.TestCase;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.aop.support.AopUtils;
+package org.springframework.jmx;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import junit.framework.TestCase;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jmx.util.ObjectNameManager;
+
 /**
- * @author robh
+ * @author Rob Harrop
  */
-public class LazyInitTests extends TestCase{
+public class LazyInitTests extends TestCase {
 
+	public void testLazyInit() {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
+	}
 
-    public void testLazyInit() {
-        try {
-            ApplicationContext ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
-            assertTrue(true);
-        } catch(RuntimeException ex) {
-            ex.printStackTrace();
-            fail("ExceptionOnInitBean was instantiated");
+	public void testInvokeOnLazyInitBean() throws Exception {
+		ExceptionOnInitBean bean = null;
+		ApplicationContext ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
+		MBeanServer server = (MBeanServer) ctx.getBean("server");
+		ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean2");
 
-        }
-    }
+		String name = (String) server.getAttribute(oname, "name");
 
-    public void testInvokeOnLazyInitBean() throws Exception{
-        ExceptionOnInitBean bean = null;
-        ApplicationContext ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
-        MBeanServer server = (MBeanServer)ctx.getBean("server");
-        ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean2");
+		assertEquals("Invalid name returned", "foo", name);
+	}
 
-        String name = (String) server.getAttribute(oname, "name");
+	private String getApplicationContextPath() {
+		return "org/springframework/jmx/lazyInit.xml";
+	}
 
-        assertEquals("Invalid name returned", "foo", name);
-    }
-
-    private String getApplicationContextPath() {
-        return "org/springframework/jmx/lazyInit.xml";
-    }
 }

@@ -1,123 +1,137 @@
 /*
- * Created on Jul 5, 2004
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
+
 package org.springframework.jmx;
 
 /**
- * @@org.springframework.jmx.metadata.support.ManagedResource 
+ * @@org.springframework.jmx.metadata.ManagedResource
  *    (description="My Managed Bean", objectName="spring:bean=test",
  *    log=true, logFile="jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate",
  *    persistPeriod=200, persistLocation="foo", persistName="bar")
- * 
+ *
  * @author Rob Harrop
  */
-public class JmxTestBean implements IJmxTestBean{
+public class JmxTestBean implements IJmxTestBean {
 
-    private String name;
+	private String name;
 
-    private String nickName;
+	private String nickName;
 
-    private int age;
+	private int age;
 
-    private boolean isSuperman;
+	private boolean isSuperman;
 
-    /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute
-     *   (description="The Age Attribute", currencyTimeLimit=15)
-     */
-    public int getAge() {
-        return age;
-    }
+	/**
+	 * @@org.springframework.jmx.metadata.ManagedAttribute
+	 *   (description="The Age Attribute", currencyTimeLimit=15)
+	 */
+	public int getAge() {
+		return age;
+	}
 
-    /**
-     * 
-     * @param age
-     *            The age to set.
-     */
-    public void setAge(int age) {
-        this.age = age;
-    }
+	/**
+	 *
+	 * @param age
+	 *            The age to set.
+	 */
+	public void setAge(int age) {
+		this.age = age;
+	}
 
-    /**
-     * @@org.springframework.jmx.metadata.support.ManagedOperation(currencyTimeLimit=30)
-     */
-    public long myOperation() {
-        return 1L;
-    }
+	/**
+	 * @@org.springframework.jmx.metadata.ManagedOperation(currencyTimeLimit=30)
+	 */
+	public long myOperation() {
+		return 1L;
+	}
 
-    /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute
-     *  (description="The Name Attribute",  currencyTimeLimit=20,
-     *   defaultValue="bar", persistPolicy="OnUpdate")
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+	/**
+	 * @@org.springframework.jmx.metadata.ManagedAttribute
+	 *  (description="The Name Attribute",  currencyTimeLimit=20,
+	 *   defaultValue="bar", persistPolicy="OnUpdate")
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute
-     *   (defaultValue="foo", persistPeriod=300)
-     */
-    public String getName() {
-        return name;
-    }
+	/**
+	 * @@org.springframework.jmx.metadata.ManagedAttribute
+	 *   (defaultValue="foo", persistPeriod=300)
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Nick
-     *                                                                              Name
-     *                                                                              Attribute")
-     */
-    public String getNickName() {
-        return this.nickName;
-    }
+	/**
+	 * @@org.springframework.jmx.metadata.ManagedAttribute(description="The Nick
+	 *                                                                              Name
+	 *                                                                              Attribute")
+	 */
+	public String getNickName() {
+		return this.nickName;
+	}
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
-    }
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
 
-    /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Is
-     *                                                                              Superman
-     *                                                                              Attribute")
-     */
-    public void setSuperman(boolean superman) {
-        this.isSuperman = superman;
-    }
+	/**
+	 * @@org.springframework.jmx.metadata.ManagedAttribute(description="The Is
+	 *                                                                              Superman
+	 *                                                                              Attribute")
+	 */
+	public void setSuperman(boolean superman) {
+		this.isSuperman = superman;
+	}
 
-    public boolean isSuperman() {
-        return isSuperman;
-    }
+	public boolean isSuperman() {
+		return isSuperman;
+	}
 
-    /**
-     * @@org.springframework.jmx.metadata.support.ManagedOperation(description="Add Two
-     *                                                                              Numbers
-     *                                                                              Together")
-     */
-    public int add(int x, int y) {
-        return x + y;
-    }
+	/**
+	 * @@org.springframework.jmx.metadata.ManagedOperation(description="Add Two
+	 *                                                                              Numbers
+	 *                                                                              Together")
+	 */
+	public int add(int x, int y) {
+		return x + y;
+	}
 
-    /**
-     * Test method that is not exposed by the MetadataAssembler
-     *  
-     */
-    public void dontExposeMe() {
-        throw new RuntimeException();
-    }
+	/**
+	 * Test method that is not exposed by the MetadataAssembler
+	 *
+	 */
+	public void dontExposeMe() {
+		throw new RuntimeException();
+	}
 
-    protected void someProtectedMethod() {
+	protected void someProtectedMethod() {
 
-    }
+	}
 
-    private void somePrivateMethod() {
+	private void somePrivateMethod() {
 
-    }
+	}
 
-    protected void getSomething() {
+	protected void getSomething() {
 
-    }
+	}
 
-    private void getSomethingElse(){
+	private void getSomethingElse() {
 
-    }
+	}
+
 }

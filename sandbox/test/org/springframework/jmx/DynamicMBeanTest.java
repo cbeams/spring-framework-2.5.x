@@ -1,6 +1,19 @@
 /*
- * Created on Oct 19, 2004
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
+
 package org.springframework.jmx;
 
 import javax.management.Attribute;
@@ -17,8 +30,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.ReflectionException;
 
 /**
- * @author robh
- *  
+ * @author Rob Harrop
  */
 public class DynamicMBeanTest implements DynamicMBean {
 
@@ -28,7 +40,8 @@ public class DynamicMBeanTest implements DynamicMBean {
 
 		if ("name".equals(attribute)) {
 			return "Rob Harrop";
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -39,18 +52,15 @@ public class DynamicMBeanTest implements DynamicMBean {
 	}
 
 	public AttributeList getAttributes(String[] arg0) {
-
 		return null;
 	}
 
 	public AttributeList setAttributes(AttributeList arg0) {
-
 		return null;
 	}
 
 	public Object invoke(String arg0, Object[] arg1, String[] arg2)
 			throws MBeanException, ReflectionException {
-
 		return null;
 	}
 
@@ -59,14 +69,14 @@ public class DynamicMBeanTest implements DynamicMBean {
 				"java.lang.String",
 				"",
 				true, false, false);
-		
-		MBeanInfo inf = new MBeanInfo(DynamicMBeanTest.class.getName(), 
-				"", 
+
+		MBeanInfo inf = new MBeanInfo(DynamicMBeanTest.class.getName(),
+				"",
 				new MBeanAttributeInfo[]{attr},
 				new MBeanConstructorInfo[0],
 				new MBeanOperationInfo[0],
 				new MBeanNotificationInfo[0]);
-		
+
 		return inf;
 	}
 

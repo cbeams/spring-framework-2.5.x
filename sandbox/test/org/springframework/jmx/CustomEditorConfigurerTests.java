@@ -1,49 +1,63 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.springframework.jmx;
 
-import javax.management.ObjectName;
-import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.management.ObjectName;
 
 /**
- * @author robh
+ * @author Rob Harrop
  */
 public class CustomEditorConfigurerTests extends AbstractJmxTests {
-    private final SimpleDateFormat df = new SimpleDateFormat("yyyy/MMM/dd");
 
-    public CustomEditorConfigurerTests(String name) {
-        super(name);
-    }
+	private final SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
 
-    protected String getApplicationContextPath() {
-        return "org/springframework/jmx/customConfigurer.xml";
-    }
+	protected String getApplicationContextPath() {
+		return "org/springframework/jmx/customConfigurer.xml";
+	}
 
-    public void testDatesInJmx() throws Exception {
-        ObjectName oname = new ObjectName("bean:name=dateRange");
+	public void testDatesInJmx() throws Exception {
+		ObjectName oname = new ObjectName("bean:name=dateRange");
 
-        Date startJmx = (Date)server.getAttribute(oname, "startDate");
-        Date endJmx = (Date)server.getAttribute(oname, "endDate");
+		Date startJmx = (Date) server.getAttribute(oname, "startDate");
+		Date endJmx = (Date) server.getAttribute(oname, "endDate");
 
-        assertEquals("startDate ", getStartDate(), startJmx);
-        assertEquals("endDate ", getEndDate(), endJmx);
-    }
+		assertEquals("startDate ", getStartDate(), startJmx);
+		assertEquals("endDate ", getEndDate(), endJmx);
+	}
 
-    public void testGetDates() throws Exception {
-        DateRange dr = (DateRange) getContext().getBean("dateRange");
+	public void testGetDates() throws Exception {
+		DateRange dr = (DateRange) getContext().getBean("dateRange");
 
-        assertEquals("startDate ", getStartDate(), dr.getStartDate());
-        assertEquals("endDate ", getEndDate(), dr.getEndDate());
-    }
+		assertEquals("startDate ", getStartDate(), dr.getStartDate());
+		assertEquals("endDate ", getEndDate(), dr.getEndDate());
+	}
 
-    private Date getStartDate() throws ParseException {
-        Date start = df.parse("2004/Oct/12");
-        return start;
-    }
+	private Date getStartDate() throws ParseException {
+		Date start = df.parse("2004/10/12");
+		return start;
+	}
 
-    private Date getEndDate() throws ParseException {
-        Date end = df.parse("2004/Nov/13");
-        return end;
-    }
+	private Date getEndDate() throws ParseException {
+		Date end = df.parse("2004/11/13");
+		return end;
+	}
+
 }
-
