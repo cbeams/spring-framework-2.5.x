@@ -40,20 +40,17 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		"update seat_status set booking_id = null where performance_id = ? and price_band_id = ? and name = ? and confirmed = ?";
 
 	private MockControl ctrlPreparedStatement;
+
 	private PreparedStatement mockPreparedStatement;
 
 	protected void setUp() throws Exception {
 		super.setUp();
-
-		ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
+		ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
 	}
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
-
 		ctrlPreparedStatement.verify();
 	}
 
@@ -62,21 +59,16 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		ctrlPreparedStatement.replay();
 	}
 
-	public void testUpdate() {
-		try {
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(1);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testUpdate() throws SQLException {
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -85,23 +77,18 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(1, rowsAffected);
 	}
 
-	public void testUpdateInt() {
-		try {
-			mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(1);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testUpdateInt() throws SQLException {
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE_INT);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE_INT);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -110,24 +97,19 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(1, rowsAffected);
 	}
 
-	public void testUpdateIntInt() {
-		try {
-			mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-			mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(1);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testUpdateIntInt() throws SQLException {
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE_INT_INT);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE_INT_INT);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -136,23 +118,18 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(1, rowsAffected);
 	}
 
-	public void testUpdateString() {
-		try {
-			mockPreparedStatement.setString(1, "rod");
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(1);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testUpdateString() throws SQLException {
+		mockPreparedStatement.setString(1, "rod");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE_STRING);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE_STRING);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -161,26 +138,21 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(1, rowsAffected);
 	}
 
-	public void testUpdateMixed() {
-		try {
-			mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-			mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
-			mockPreparedStatement.setString(3, "rod");
-			mockPreparedStatement.setObject(4, Boolean.TRUE, Types.BOOLEAN);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(1);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testUpdateMixed() throws SQLException {
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
+		mockPreparedStatement.setString(3, "rod");
+		mockPreparedStatement.setObject(4, Boolean.TRUE, Types.BOOLEAN);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE_OBJECTS);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE_OBJECTS);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -189,26 +161,21 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(1, rowsAffected);
 	}
 
-	public void testUpdateConstructor() {
-		try {
-			mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-			mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
-			mockPreparedStatement.setString(3, "rod");
-			mockPreparedStatement.setObject(4, Boolean.TRUE, Types.BOOLEAN);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(1);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testUpdateConstructor() throws SQLException {
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
+		mockPreparedStatement.setString(3, "rod");
+		mockPreparedStatement.setObject(4, Boolean.TRUE, Types.BOOLEAN);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE_OBJECTS);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE_OBJECTS);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -217,21 +184,16 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(1, rowsAffected);
 	}
 
-	public void testUnderMaxRows() {
-		try {
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(3);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testUnderMaxRows() throws SQLException {
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(3);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -240,21 +202,16 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(3, rowsAffected);
 	}
 
-	public void testMaxRows() {
-		try {
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(5);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testMaxRows() throws SQLException {
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(5);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -263,21 +220,16 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(5, rowsAffected);
 	}
 
-	public void testOverMaxRows() {
-		try {
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(8);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testOverMaxRows() throws SQLException {
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(8);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -285,26 +237,22 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		try {
 			int rowsAffected = pc.run();
 			fail("Shouldn't continue when too many rows affected");
-		} catch (JdbcUpdateAffectedIncorrectNumberOfRowsException juaicrex) {
+		}
+		catch (JdbcUpdateAffectedIncorrectNumberOfRowsException juaicrex) {
 			// OK
 		}
 	}
 
-	public void testRequiredRows() {
-		try {
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(3);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testRequiredRows() throws SQLException {
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(3);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -313,21 +261,16 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		assertEquals(3, rowsAffected);
 	}
 
-	public void testNotRequiredRows() {
-		try {
-			mockPreparedStatement.executeUpdate();
-			ctrlPreparedStatement.setReturnValue(2);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+	public void testNotRequiredRows() throws SQLException {
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(2);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(UPDATE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(UPDATE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -335,13 +278,14 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		try {
 			int rowsAffected = pc.run();
 			fail("Shouldn't continue when too many rows affected");
-		} catch (JdbcUpdateAffectedIncorrectNumberOfRowsException juaicrex) {
+		}
+		catch (JdbcUpdateAffectedIncorrectNumberOfRowsException juaicrex) {
 			// OK
 		}
 	}
 
 
-	class Updater extends SqlUpdate {
+	private class Updater extends SqlUpdate {
 
 		public Updater() {
 			setSql(UPDATE);
@@ -355,7 +299,7 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 	}
 
 
-	class IntUpdater extends SqlUpdate {
+	private class IntUpdater extends SqlUpdate {
 
 		public IntUpdater() {
 			setSql(UPDATE_INT);
@@ -370,7 +314,7 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 	}
 
 
-	class IntIntUpdater extends SqlUpdate {
+	private class IntIntUpdater extends SqlUpdate {
 
 		public IntIntUpdater() {
 			setSql(UPDATE_INT_INT);
@@ -386,7 +330,7 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 	}
 
 
-	class StringUpdater extends SqlUpdate {
+	private class StringUpdater extends SqlUpdate {
 
 		public StringUpdater() {
 			setSql(UPDATE_STRING);
@@ -401,7 +345,7 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 	}
 
 
-	class MixedUpdater extends SqlUpdate {
+	private class MixedUpdater extends SqlUpdate {
 
 		public MixedUpdater() {
 			setSql(UPDATE_OBJECTS);
@@ -413,53 +357,33 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 			compile();
 		}
 
-		public int run(
-			int performanceId,
-			int type,
-			String name,
-			boolean confirmed) {
+		public int run(int performanceId, int type, String name, boolean confirmed) {
 			Object[] params =
-				new Object[] {
-					new Integer(performanceId),
-					new Integer(type),
-					name,
-					new Boolean(confirmed)};
+				new Object[] {new Integer(performanceId), new Integer(type), name,
+											new Boolean(confirmed)};
 			return update(params);
 		}
 	}
 
 
-	class ConstructorUpdater extends SqlUpdate {
+	private class ConstructorUpdater extends SqlUpdate {
 
 		public ConstructorUpdater() {
-			super(
-				mockDataSource,
-				UPDATE_OBJECTS,
-				new int[] {
-					Types.NUMERIC,
-					Types.NUMERIC,
-					Types.VARCHAR,
-					Types.BOOLEAN });
+			super(mockDataSource, UPDATE_OBJECTS,
+						new int[] {Types.NUMERIC, Types.NUMERIC, Types.VARCHAR, Types.BOOLEAN });
 			compile();
 		}
 
-		public int run(
-			int performanceId,
-			int type,
-			String name,
-			boolean confirmed) {
+		public int run(int performanceId, int type, String name, boolean confirmed) {
 			Object[] params =
-				new Object[] {
-					new Integer(performanceId),
-					new Integer(type),
-					name,
-					new Boolean(confirmed)};
+				new Object[] {new Integer(performanceId), new Integer(type), name,
+											new Boolean(confirmed)};
 			return update(params);
 		}
 	}
 
 
-	class MaxRowsUpdater extends SqlUpdate {
+	private class MaxRowsUpdater extends SqlUpdate {
 
 		public MaxRowsUpdater() {
 			setSql(UPDATE);
@@ -474,7 +398,7 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 	}
 
 
-	class RequiredRowsUpdater extends SqlUpdate {
+	private class RequiredRowsUpdater extends SqlUpdate {
 
 		public RequiredRowsUpdater() {
 			setSql(UPDATE);
