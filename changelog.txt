@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.179 2004-07-01 02:34:44 trisberg Exp $
+$Id: changelog.txt,v 1.180 2004-07-01 07:30:50 aarendsen Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -130,6 +130,7 @@ Package org.springframework.web
 * added "getAttributesMap" method to AbstractView, to allow for "attributesMap[key]" overrides in child view definitions
 * added overloaded "getParameters(request)" method to AbstractXsltView, delegating to "getParameters()" by default
 * reworked AbstractXsltView's "doTransform" method into 2 methods to allow for specifying a custom transform result
+* added "removeFromCache" method to AbstractCachingViewResolver to make removal of cached views possible at runtime
 
 
 Changes in version 1.0.2 (3.6.2004)
