@@ -91,6 +91,15 @@ public abstract class DependencyInjectionAspectSupport implements InitializingBe
 			this.aabf = (AutowireCapableBeanFactory) beanFactory;
 		}
 	}
+	
+	/**
+	 * Expose the owning bean factory to subclasses. 
+	 * Call only after initialization is complete.
+	 * @return the owning bean factory. Cannot be null in valid use of this class.
+	 */
+	protected BeanFactory getBeanFactory() {
+		return this.beanFactory;
+	}
 
 	public void setAutowireByTypeClasses(List autowireByTypeClasses) {
 		this.autowireByTypeClasses = autowireByTypeClasses;
