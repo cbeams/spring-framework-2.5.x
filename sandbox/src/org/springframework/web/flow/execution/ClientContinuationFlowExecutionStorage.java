@@ -24,7 +24,7 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * Flow execution storage implementation that will store a flow execution as a
  * <i>continuation</i> on the client side. It will actually encode the state of
  * the flow execution in the unique id that is returned from the
- * {@link #save(Event, String, FlowExecution) save} method. The load method
+ * {@link #save(String, FlowExecution, Event) save} method. The load method
  * just decodes the incoming id and restores the <code>FlowExecution</code>
  * object.
  * <p>

@@ -33,7 +33,7 @@ public interface FlowExecutionStorage {
 	 * Load an existing flow execution, identified by given unique id, from
 	 * the storage.
 	 * @param id the unique id of the flow execution, as returned by the
-	 *        {@link #save(Event, String, FlowExecution) save} method
+	 *        {@link #save(String, FlowExecution, Event) save} method
 	 * @param requestingEvent the event requesting the load of the flow execution
 	 * @return the loaded flow execution
 	 * @throws NoSuchFlowExecutionException when there is no flow execution
@@ -62,7 +62,7 @@ public interface FlowExecutionStorage {
 	/**
 	 * Remove the identified flow execution from the storage.
 	 * @param id the unique id of the flow execution, as returned by the
-	 *        {@link #save(Event, String, FlowExecution) save} method
+	 *        {@link #save(String, FlowExecution, Event) save} method
 	 * @param requestingEvent the event requesting the remove of the flow execution
 	 * @throws FlowExecutionStorageException when there is a technical problem
 	 *         accessing the flow execution storage
