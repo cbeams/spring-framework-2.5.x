@@ -126,7 +126,7 @@ import org.springframework.core.io.UrlResource;
  * The client code is as simple as:
  * <pre>
  * BeanFactoryLocator bfl = SingletonBeanFactoryLocator.getInstance();
- * BeanFactoryReference bf = bfl.useFactory("com.mycompany.myapp");
+ * BeanFactoryReference bf = bfl.useBeanFactory("com.mycompany.myapp");
  * // now use some bean from factory 
  * MyClass zed = bf.getFactory().getBean("mybean");
  * </pre>
@@ -263,7 +263,7 @@ import org.springframework.core.io.UrlResource;
  * </pre>
  *   
  * @author Colin Sampaleanu
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
@@ -338,7 +338,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		this.resourceName = resourceName;
 	}
 
-	// see superclass JavaDoc: org.springframework.beans.factory.access.BeanFactoryLocator#useFactory(java.lang.String)
+	// see superclass JavaDoc: org.springframework.beans.factory.access.BeanFactoryLocator#useBeanFactory(java.lang.String)
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		synchronized (this.bfgInstancesByKey) {
 			BeanFactoryGroup bfg = (BeanFactoryGroup) this.bfgInstancesByKey
