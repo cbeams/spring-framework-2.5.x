@@ -78,9 +78,9 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * a SimpleApplicationEventMulticaster is used.
  *
  * <p>Implements resource loading through extending DefaultResourceLoader.
- * Therefore, treats resource paths as class path resources. Only supports
- * full classpath resource names that include the package path, like
- * "mypackage/myresource.dat".
+ * Therefore, treats plain resource paths as class path resources (only
+ * supporting full class path resource names that include the package path,
+ * e.g. "mypackage/myresource.dat").
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -454,7 +454,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	private void refreshListeners() throws BeansException {
 		logger.debug("Refreshing listeners");
-		Collection listeners = getBeansOfType(ApplicationListener.class, false, false).values();
+		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found " + listeners.size() + " listeners in bean factory");
 		}
