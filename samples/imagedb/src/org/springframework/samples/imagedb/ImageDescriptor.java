@@ -7,6 +7,8 @@ package org.springframework.samples.imagedb;
  */
 public class ImageDescriptor {
 
+	public static final int SHORT_DESCRIPTION_MAX_LENGTH = 1000;
+
 	private final String name;
 
 	private final String description;
@@ -25,11 +27,12 @@ public class ImageDescriptor {
 	}
 
 	public String getShortDescription() {
-		return (description.length() <= 200) ? description : description.substring(0, 200);
+		return (description == null || description.length() <= SHORT_DESCRIPTION_MAX_LENGTH) ?
+		    description : description.substring(0, SHORT_DESCRIPTION_MAX_LENGTH);
 	}
 
 	public int getDescriptionLength() {
-		return description.length();
+		return (description != null ? description.length() : 0);
 	}
 
 }
