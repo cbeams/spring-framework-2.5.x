@@ -1,4 +1,4 @@
-<project name="spring-core" default="usage" basedir=".">
+<project name="spring-benchmark" default="usage" basedir=".">
 
 	<property file="build.properties"/>
 	<property file="project.properties"/>
@@ -181,7 +181,7 @@
           	 failonerror="true"
           	 maxmemory="512m"
            >
-         <arg value="/com/wrox/j2eewoejb/bm/client/bm.properties"/> 
+         <arg value="/org/springframework/benchmark/cmt/client/bm.properties"/> 
          <classpath location="bin"/>
          <classpath refid="master-classpath"/>
        </java>
