@@ -20,6 +20,10 @@ distribution/website before using any of them in your own applications.
 - Apache Axis 1.1 (http://ws.apache.org/axis)
 - required for running JPetStore
 
+* bsh/bsh-2.0b2.jar
+- BeanShell 2.0 beta2 (http://www.beanshell.org)
+- required for running the test suite (by JasperReports)
+
 * c3p0/c3p0-0.8.5.1.jar
 - C3P0 0.8.5.1 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
