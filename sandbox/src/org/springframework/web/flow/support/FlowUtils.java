@@ -71,9 +71,9 @@ public class FlowUtils {
 	 * @param tokenName the key used to save the token in the model map
 	 */
 	public static void setToken(MutableAttributesAccessor model, String tokenName) {
-		String token = new RandomGuid().toString();
+		String txToken = new RandomGuid().toString();
 		synchronized (model) {
-			model.setAttribute(tokenName, token);
+			model.setAttribute(tokenName, txToken);
 		}
 	}
 

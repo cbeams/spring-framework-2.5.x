@@ -352,7 +352,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return
 	 */
 	protected ViewState addViewState(String stateIdPrefix, Transition[] transitions) {
-		return new ViewState(getFlow(), view(stateIdPrefix), addViewName(stateIdPrefix), transitions);
+		return new ViewState(getFlow(), view(stateIdPrefix), viewName(stateIdPrefix), transitions);
 	}
 
 	/**
@@ -371,10 +371,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return
 	 */
 	protected ViewState addViewState(String stateIdPrefix, Transition transition) {
-		return new ViewState(getFlow(), view(stateIdPrefix), addViewName(stateIdPrefix), transition);
+		return new ViewState(getFlow(), view(stateIdPrefix), viewName(stateIdPrefix), transition);
 	}
 
-	protected String addViewName(String stateIdPrefix) {
+	protected String viewName(String stateIdPrefix) {
 		return view(stateIdPrefix);
 	}
 

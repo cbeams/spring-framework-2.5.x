@@ -23,7 +23,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAccessor {
 
-	public static String ATTRIBUTE_NAME = "flowExecutionInfo";
+	public static String ATTRIBUTE_NAME = "flowExecution";
 
 	/**
 	 * Add a flow execution listener; the added listener will receive callbacks
@@ -31,11 +31,11 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	 * @param listener The execution listener to add.
 	 */
 	public void addFlowExecutionListener(FlowExecutionListener listener);
-	
+
 	/**
-	 * Register given collection of flow execution listeners with this flow execution.
-	 * The added listeners will receive callbacks on events occuring in this flow
-	 * execution.
+	 * Register given collection of flow execution listeners with this flow
+	 * execution. The added listeners will receive callbacks on events occuring
+	 * in this flow execution.
 	 * @param listeners The collection of listeners to add.
 	 */
 	public void addFlowExecutionListeners(FlowExecutionListener[] listeners);
@@ -53,7 +53,7 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	 * this flow execution.
 	 */
 	public Iterator getFlowExecutionListenersIterator();
-	
+
 	/**
 	 * Returns this flow execution's active flow definition.
 	 * @return The active flow definition

@@ -108,6 +108,13 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
+	 * @return The number of actions executed by this action state when it is entered.
+	 */
+	public int getActionCount() {
+		return namedActions.size();
+	}
+
+	/**
 	 * Hook method implementation that initiates state processing.
 	 * 
 	 * This implementation iterators over each configured Action for this state
