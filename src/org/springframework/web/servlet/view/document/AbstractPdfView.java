@@ -44,9 +44,12 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
+ * @author Juergen Hoeller
  */
 public abstract class AbstractPdfView extends AbstractView {
 	
+	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
+
 	/**
 	 * This constructor sets the appropriate content type "application/pdf".
 	 * Note that IE won't take much notice of this, but there's not a lot we
@@ -71,7 +74,7 @@ public abstract class AbstractPdfView extends AbstractView {
 		// for an explanation of why we can't use the obvious form above.
 
 		// IE workaround: write into byte array first.
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
 		Document document = getDocument();
 		PdfWriter writer = PdfWriter.getInstance(document, baos);
 
