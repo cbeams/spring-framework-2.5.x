@@ -25,89 +25,72 @@ import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.util.WebUtils;
 
 /**
  * @author Alef Arendsen
  */
 public class CookieLocaleResolverTests extends TestCase {
 
-	public void testSetCookieName() {
-		CookieLocaleResolver resolver = getCookieLocaleResolver();
-		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_NAME, resolver.getCookieName());
-		
+	public void testResolveLocale() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		Cookie cookie = new Cookie("LanguageKoekje", "nl");
+		request.setCookies(new Cookie[] {cookie});
+
+		CookieLocaleResolver resolver = new CookieLocaleResolver();
 		// yup, koekje is the Dutch name for Cookie ;-)
 		resolver.setCookieName("LanguageKoekje");
-		assertEquals(resolver.getCookieName(), "LanguageKoekje");		
-	}
-
-	public void testGetCookiePath() {
-		CookieLocaleResolver resolver = getCookieLocaleResolver();
-		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_PATH, resolver.getCookiePath());
-		
-		// yup, koekje is the Dutch name for Cookie ;-)
-		resolver.setCookiePath("LanguageKoekje");
-		assertEquals(resolver.getCookiePath(), "LanguageKoekje");		
-	}
-
-	public void testSetCookieMaxAge() {
-		CookieLocaleResolver resolver = getCookieLocaleResolver();
-		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_MAX_AGE, resolver.getCookieMaxAge());
-		
-		resolver.setCookieMaxAge(123456);
-		assertEquals(resolver.getCookieMaxAge(), 123456);		
-	}
-
-	public void testResolveLocale() {
-		MockServletContext context = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(context);
-				
-		Cookie c = new Cookie("LanguageKoek", "nl");		
-		request.setCookies(new Cookie[] {c});
-		
-		CookieLocaleResolver resolver = getCookieLocaleResolver();
-		resolver.setCookieName("LanguageKoek");
 		Locale loc = resolver.resolveLocale(request);
-		//System.out.println(loc.getLanguage());
 		assertEquals(loc.getLanguage(), "nl");
 	}
 
-	public void testSetLocale() {
-		MockServletContext context = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(context);
-		
+	public void testSetAndResolveLocale() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
-		CookieLocaleResolver resolver = getCookieLocaleResolver();
-		resolver.setCookieName("LanguageKoek");
-		resolver.setLocale(request, response, new Locale("nl"));
-		
-		Cookie[] cookies = response.getCookies();
-		Cookie found = null;
-		for (int i = 0; i < cookies.length; i++) {
-			if (cookies[i].getName().equals("LanguageKoek")) {
-				found = cookies[i];
-				break;
-			}
-		}
-		assertNotNull(found);
-		//System.out.println("found '" + found.getValue() + "'");
-		
-		context = new MockServletContext();
-		request = new MockHttpServletRequest(context);
-		
-		request.setCookies(new Cookie[] {found});
 
-		resolver = getCookieLocaleResolver();
-		resolver.setCookieName("LanguageKoek");
+		CookieLocaleResolver resolver = new CookieLocaleResolver();
+		resolver.setLocale(request, response, new Locale("nl"));
+
+		Cookie cookie = response.getCookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
+		assertNotNull(cookie);
+		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_NAME, cookie.getName());
+		assertEquals(null, cookie.getDomain());
+		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_PATH, cookie.getPath());
+		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_MAX_AGE, cookie.getMaxAge());
+
+		request = new MockHttpServletRequest();
+		request.setCookies(new Cookie[] {cookie});
+
+		resolver = new CookieLocaleResolver();
 		Locale loc = resolver.resolveLocale(request);
-		//System.out.println(loc.getLanguage());
 		assertEquals(loc.getLanguage(), "nl");
 	}
-	
-	private CookieLocaleResolver getCookieLocaleResolver() {
+
+	public void testCustomCookie() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
 		CookieLocaleResolver resolver = new CookieLocaleResolver();
-		return resolver;
+		resolver.setCookieName("LanguageKoek");
+		resolver.setCookieDomain(".springframework.org");
+		resolver.setCookiePath("/mypath");
+		resolver.setCookieMaxAge(10000);
+		resolver.setLocale(request, response, new Locale("nl"));
+
+		Cookie cookie = response.getCookie("LanguageKoek");
+		assertNotNull(cookie);
+		assertEquals("LanguageKoek", cookie.getName());
+		assertEquals(".springframework.org", cookie.getDomain());
+		assertEquals("/mypath", cookie.getPath());
+		assertEquals(10000, cookie.getMaxAge());
+
+		request = new MockHttpServletRequest();
+		request.setCookies(new Cookie[] {cookie});
+
+		resolver = new CookieLocaleResolver();
+		resolver.setCookieName("LanguageKoek");
+		Locale loc = resolver.resolveLocale(request);
+		assertEquals(loc.getLanguage(), "nl");
 	}
 
 }

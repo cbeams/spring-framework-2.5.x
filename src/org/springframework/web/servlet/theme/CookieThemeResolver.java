@@ -20,12 +20,14 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.servlet.ThemeResolver;
+import org.springframework.web.util.CookieGenerator;
 import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of ThemeResolver that uses a cookie sent back to the user
  * in case of a custom setting, with a fallback to the default theme.
- * This is especially useful for stateless applications without user sessions.
+ * This is particularly useful for stateless applications without user sessions.
  *
  * <p>Custom controllers can thus override the user's theme by calling
  * <code>setThemeName</code>, e.g. responding to a certain theme change request.
@@ -35,7 +37,9 @@ import org.springframework.web.util.WebUtils;
  * @since 17.06.2003
  * @see #setThemeName
  */
-public class CookieThemeResolver extends AbstractThemeResolver {
+public class CookieThemeResolver extends CookieGenerator implements ThemeResolver {
+
+	public final static String ORIGINAL_DEFAULT_THEME_NAME = "theme";
 
 	/**
 	 * Name of the request attribute that holds the theme name. Only used
@@ -48,97 +52,59 @@ public class CookieThemeResolver extends AbstractThemeResolver {
 
 	public static final String DEFAULT_COOKIE_NAME = CookieThemeResolver.class.getName() + ".THEME";
 
-	public static final String DEFAULT_COOKIE_PATH = "/";
 
-	public static final int DEFAULT_COOKIE_MAX_AGE = Integer.MAX_VALUE;
+	private String defaultThemeName = ORIGINAL_DEFAULT_THEME_NAME;
 
 
-	private String cookieName = DEFAULT_COOKIE_NAME;
-
-	private int cookieMaxAge = DEFAULT_COOKIE_MAX_AGE;
-
-	private String cookiePath = DEFAULT_COOKIE_PATH;
+	public CookieThemeResolver() {
+		setCookieName(DEFAULT_COOKIE_NAME);
+	}
 
 
 	/**
-	 * Use the given name for theme cookies, containing the theme name.
+	 * Set the name of the default theme.
 	 */
-	public void setCookieName(String cookieName) {
-		this.cookieName = cookieName;
+	public void setDefaultThemeName(String defaultThemeName) {
+		this.defaultThemeName = defaultThemeName;
 	}
 
 	/**
-	 * Return the name for theme cookies.
+	 * Return the name of the default theme.
 	 */
-	public String getCookieName() {
-		return cookieName;
-	}
-
-	/**
-	 * Use the given path for theme cookies.
-	 * The cookie is only visible for URLs in the path and below. 
-	 */
-	public void setCookiePath(String cookiePath) {
-		this.cookiePath = cookiePath;
-	}
-
-	/**
-	 * Return the path for theme cookies.
-	 */
-	public String getCookiePath() {
-		return cookiePath;
-	}
-
-	/**
-	 * Use the given maximum age, specified in seconds, for locale cookies.
-	 * Useful special value: -1 ... not persistent, deleted when client shuts down
-	 */
-	public void setCookieMaxAge(int cookieMaxAge) {
-		this.cookieMaxAge = cookieMaxAge;
-	}
-
-	/**
-	 * Return the maximum age for locale cookies.
-	 */
-	public int getCookieMaxAge() {
-		return cookieMaxAge;
+	public String getDefaultThemeName() {
+		return defaultThemeName;
 	}
 
 
 	public String resolveThemeName(HttpServletRequest request) {
-		// check theme for preparsed resp. preset theme
+		// Check request for preparsed or preset theme.
 		String theme = (String) request.getAttribute(THEME_REQUEST_ATTRIBUTE_NAME);
-		if (theme != null)
+		if (theme != null) {
 			return theme;
+		}
 
-		// retrieve cookie value
+		// Retrieve cookie value from request.
 		Cookie cookie = WebUtils.getCookie(request, getCookieName());
-
 		if (cookie != null) {
 			return cookie.getValue();
 		}
 
-		// fallback
+		// Fall back to default theme.
 		return getDefaultThemeName();
 	}
 
 	public void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName) {
-		Cookie cookie = null;
 		if (themeName != null) {
-			// set request attribute and add cookie
+			// Set request attribute and add cookie.
 			request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, themeName);
-			cookie = new Cookie(getCookieName(), themeName);
-			cookie.setPath(getCookiePath());
-			cookie.setMaxAge(getCookieMaxAge());
+			addCookie(response, themeName);
 		}
+
 		else {
-			// set request attribute to fallback theme and remove cookie
+			// Set request attribute to fallback theme and remove cookie.
 			request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, getDefaultThemeName());
-			cookie = new Cookie(getCookieName(), "");
-			cookie.setPath(getCookiePath());
-			cookie.setMaxAge(0);
+			removeCookie(response);
 		}
-		response.addCookie(cookie);
 	}
 
 }

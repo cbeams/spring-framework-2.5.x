@@ -22,17 +22,15 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.util.CookieGenerator;
 import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of LocaleResolver that uses a cookie sent back to the user
  * in case of a custom setting, with a fallback to the accept header locale.
- * This is especially useful for stateless applications without user sessions.
+ * This is particularly useful for stateless applications without user sessions.
  *
  * <p>Custom controllers can thus override the user's locale by calling
  * <code>setLocale</code>, e.g. responding to a certain locale change request.
@@ -42,7 +40,7 @@ import org.springframework.web.util.WebUtils;
  * @since 27.02.2003
  * @see #setLocale
  */
-public class CookieLocaleResolver implements LocaleResolver {
+public class CookieLocaleResolver extends CookieGenerator implements LocaleResolver {
 
 	/**
 	 * Name of the request attribute that holds the locale. Only used for
@@ -55,67 +53,14 @@ public class CookieLocaleResolver implements LocaleResolver {
 
 	public static final String DEFAULT_COOKIE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
 
-	public static final String DEFAULT_COOKIE_PATH = "/";
 
-	public static final int DEFAULT_COOKIE_MAX_AGE = Integer.MAX_VALUE;
-
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private String cookieName = DEFAULT_COOKIE_NAME;
-
-	private String cookiePath = DEFAULT_COOKIE_PATH;
-
-	private int cookieMaxAge = DEFAULT_COOKIE_MAX_AGE;
-
-
-	/**
-	 * Use the given name for locale cookies.
-	 */
-	public void setCookieName(String cookieName) {
-		this.cookieName = cookieName;
-	}
-
-	/**
-	 * Return the given name for locale cookies.
-	 */
-	public String getCookieName() {
-		return cookieName;
-	}
-
-	/**
-	 * Use the given path for locale cookies.
-	 * The cookie is only visible for URLs in the path and below. 
-	 */
-	public void setCookiePath(String cookiePath) {
-		this.cookiePath = cookiePath;
-	}
-
-	/**
-	 * Return the path for locale cookies.
-	 */
-	public String getCookiePath() {
-		return cookiePath;
-	}
-
-	/**
-	 * Use the given maximum age, specified in seconds, for locale cookies.
-	 * Useful special value: -1 ... not persistent, deleted when client shuts down
-	 */
-	public void setCookieMaxAge(int cookieMaxAge) {
-		this.cookieMaxAge = cookieMaxAge;
-	}
-
-	/**
-	 * Return the maximum age for locale cookies.
-	 */
-	public int getCookieMaxAge() {
-		return cookieMaxAge;
+	public CookieLocaleResolver() {
+		setCookieName(DEFAULT_COOKIE_NAME);
 	}
 
 
 	public Locale resolveLocale(HttpServletRequest request) {
-		// Check locale for pre-parsed or preset locale.
+		// Check request for pre-parsed or preset locale.
 		Locale locale = (Locale) request.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME);
 		if (locale != null) {
 			return locale;
@@ -139,26 +84,17 @@ public class CookieLocaleResolver implements LocaleResolver {
 	}
 
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
-		Cookie cookie = null;
 		if (locale != null) {
 			// Set request attribute and add cookie.
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, locale);
-			cookie = new Cookie(getCookieName(), locale.toString());
-			cookie.setPath(getCookiePath());
-			cookie.setMaxAge(getCookieMaxAge());
-			if (logger.isDebugEnabled()) {
-				logger.debug("Set cookie for locale '" + locale + "'");
-			}
+			addCookie(response, locale.toString());
 		}
+
 		else {
 			// Set request attribute to fallback locale and remove cookie.
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, request.getLocale());
-			cookie = new Cookie(getCookieName(), "");
-			cookie.setPath(getCookiePath());
-			cookie.setMaxAge(0);
-			logger.debug("Removed locale cookie");
+			removeCookie(response);
 		}
-		response.addCookie(cookie);
 	}
 
 }

@@ -21,10 +21,6 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.web.servlet.theme.AbstractThemeResolver;
-import org.springframework.web.servlet.theme.CookieThemeResolver;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
-import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.ThemeResolver;
 
 /**
