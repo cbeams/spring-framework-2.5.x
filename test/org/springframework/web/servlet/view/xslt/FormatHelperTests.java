@@ -12,12 +12,11 @@ import junit.framework.TestCase;
 import org.w3c.dom.Element;
 
 /**
- * test the FormatHelper methods
- * 
+ * Test the FormatHelper methods.
  * @author Rod Johnson
  * @author Darren Davison
  * @since 26-Jul-2003
- * @version $Id: FormatHelperTests.java,v 1.2 2003-10-27 00:00:39 davison Exp $
+ * @version $Id: FormatHelperTests.java,v 1.3 2003-10-31 17:03:30 jhoeller Exp $
  */
 public class FormatHelperTests extends TestCase {
 
@@ -72,7 +71,7 @@ public class FormatHelperTests extends TestCase {
 		el = (Element) e.getElementsByTagName("day-of-month").item(0);
 		assertTrue( "24".equals(el.getFirstChild().getNodeValue() ));
 		el = (Element) e.getElementsByTagName("hours").item(0);
-		assertTrue( "12".equals(el.getFirstChild().getNodeValue() ));
+		assertTrue( "1".equals(el.getFirstChild().getNodeValue() ));
 		el = (Element) e.getElementsByTagName("minutes").item(0);
 		assertTrue( "26".equals(el.getFirstChild().getNodeValue() ));
 		el = (Element) e.getElementsByTagName("am-pm").item(0);
