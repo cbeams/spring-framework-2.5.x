@@ -153,8 +153,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	public void setReturnGeneratedKeys(boolean returnGeneratedKeys) {
 		if (isCompiled()) {
-			throw new InvalidDataAccessApiUsageException("The returnGeneratedKeys flag must be set " +
-																									 "before the operation is compiled");
+			throw new InvalidDataAccessApiUsageException(
+					"The returnGeneratedKeys flag must be set before the operation is compiled");
 		}
 		this.returnGeneratedKeys = returnGeneratedKeys;
 	}
@@ -172,8 +172,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	public void setGeneratedKeysColumnNames(String[] names) {
 		if (isCompiled()) {
-			throw new InvalidDataAccessApiUsageException("The column names for the generated keys must be set " +
-																									 "before the operation is compiled");
+			throw new InvalidDataAccessApiUsageException(
+					"The column names for the generated keys must be set before the operation is compiled");
 		}
 		this.generatedKeysColumnNames = names;
 	}
@@ -259,7 +259,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	public final void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
 			if (getSql() == null) {
-				throw new InvalidDataAccessApiUsageException("sql must be set in class " + getClass().getName());
+				throw new InvalidDataAccessApiUsageException("sql is required");
 			}
 
 			try {
@@ -271,7 +271,10 @@ public abstract class RdbmsOperation implements InitializingBean {
 		
 			compileInternal();
 			this.compiled = true;
-			logger.info("RdbmsOperation with SQL [" + getSql() + "] compiled");
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("RdbmsOperation with SQL [" + getSql() + "] compiled");
+			}
 		}
 	}
 
@@ -303,7 +306,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	protected void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
 		if (!this.compiled) {
-			logger.info("SQL operation not compiled before execution - invoking compile");
+			logger.debug("SQL operation not compiled before execution - invoking compile");
 			compile();
 		}
 
@@ -316,8 +319,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 					if (!supportsLobParameters() &&
 							(((SqlParameter)param).getSqlType() == Types.BLOB ||
 							((SqlParameter)param).getSqlType() == Types.CLOB)) {
-						throw new InvalidDataAccessApiUsageException("BLOB or CLOB parameters are not allowed " +
-																												 "for this kind of operation.");
+						throw new InvalidDataAccessApiUsageException(
+								"BLOB or CLOB parameters are not allowed for this kind of operation.");
 					}
 					declaredInParameters++;
 				}
@@ -329,20 +332,23 @@ public abstract class RdbmsOperation implements InitializingBean {
 				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none was declared");
 			}
 			if (parameters.length < declaredInParameters) {
-				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " +
-																										 declaredInParameters + " in parameters were declared in class [" +
-																										 getClass().getName() + "]");
+				throw new InvalidDataAccessApiUsageException(
+						parameters.length + " parameters were supplied, but " +
+						declaredInParameters + " in parameters were declared in class [" +
+						getClass().getName() + "]");
 			}
 			if (parameters.length > this.declaredParameters.size()) {
-				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " +
-																										 this.declaredParameters.size() + " parameters were declared " +
-				                                             "in class [" + getClass().getName() + "]");
+				throw new InvalidDataAccessApiUsageException(
+						parameters.length + " parameters were supplied, but " +
+						this.declaredParameters.size() + " parameters were declared " +
+						"in class [" + getClass().getName() + "]");
 			}
 		}
 		else {
 			// no parameters were supplied
 			if (!this.declaredParameters.isEmpty()) {
-				throw new InvalidDataAccessApiUsageException(this.declaredParameters.size() + " parameters must be supplied");
+				throw new InvalidDataAccessApiUsageException(
+						this.declaredParameters.size() + " parameters must be supplied");
 			}
 		}
 	}
