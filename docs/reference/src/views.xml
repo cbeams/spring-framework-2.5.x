@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.15 2004-03-29 19:21:39 davison Exp $-->
+<!--$Id: views.xml,v 1.16 2004-04-07 02:42:48 colins Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
   <sect1 id="view-introduction">
     <title>Introduction</title>
 
-    <para>One of the areas in which Spring excels is its separation of view
-    technologies from the rest of the MVC framework. Deciding to use Velocity
-    or XSLT in place of an existing JSP for example, is primarily a matter of
+    <para>One of the areas in which Spring excels is in the separation of view
+    technologies from the rest of the MVC framework. For example, deciding to use Velocity
+    or XSLT in place of an existing JSP is primarily a matter of
     configuration. This chapter covers the major view technologies that work
     with Spring and touches briefly on how to add new ones. This chapter
     assumes you are already familiar with <xref linkend="mvc-viewresolver" />
@@ -20,12 +20,11 @@
     <title>Using Spring together with JSP &amp; JSTL</title>
 
     <para>Spring provides a couple of out-of-the-box solutions for JSP and
-    JSTL views (which in fact happen to be the most popular ones). Using JSP
-    (and also JSTL) is done using a normal viewresolver defined in the
+    JSTL views (which are the most popular ones, incidentally). Using JSP
+    or JSTL is done using a normal viewresolver defined in the
     WebApplicationContext. Furthermore, of course you need to write some JSPs
     that will actually render the view. This part describes some of the
-    features and additional things Spring provides to facilitate JSP
-    development.</para>
+    additional features Spring provides to facilitate JSP development.</para>
 
     <sect2 id="view-jsp-resolver">
       <title>View resolvers</title>
@@ -61,18 +60,17 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 &lt;/bean&gt;</programlisting>
 
       <para>The InternalResourceBundleViewResolver can be configured for using
-      JSPs as described above. As probably already stated earlier on, we
-      strongly encourage to place JSP files in a a directory under the WEB-INF
-      directory, since there they can't be access directly by clients.</para>
+      JSPs as described above. As a best practice, we
+      strongly encourage placing your JSP files in a a directory under the WEB-INF
+      directory, so there can be no direct access by clients.</para>
     </sect2>
 
     <sect2 id="view-jsp-jstl">
       <title>'Plain-old' JSPs versus JSTL</title>
 
-      <para>When using Java Standard Tag Library you need to use a special
-      viewclass, i.e. the <literal>JstlView</literal>. JSTL needs some
-      preparation before things like the i18N features. So remember: when
-      using JSTL, use the JstlView.</para>
+      <para>When using Java Standard Tag Library you must use a special
+      view class, the <literal>JstlView</literal>, as JSTL needs some
+      preparation before things such as the i18N features will work.</para>
     </sect2>
 
     <sect2 id="view-jsp-tags">
@@ -81,8 +79,8 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       <para>Spring provides data binding of request parameters to command
       objects as described in earlier chapters. To facilitate the development
       of JSP pages in combination with those data binding features, Spring
-      provides a couple of tags that ease the pain (if that should even arise
-      ;-). All Spring have <emphasis>html escaping</emphasis> features to
+      provides a few tags that make things even easier. 
+      All Spring tags have <emphasis>html escaping</emphasis> features to
       enable or disable escaping of characters.</para>
 
       <para>The tag libarry descriptor (TLD) is included in the
@@ -103,7 +101,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       <title>Dependencies</title>
 
       <para>To be able to use Tiles you have to have a couple of additional
-      dependencies including in your project. The following is the list of
+      dependencies included in your project. The following is the list of
       dependencies you need.</para>
 
       <para><itemizedlist spacing="compact">
@@ -140,8 +138,8 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       Tiles concepts, please have a look at <ulink
       url="http://jakarta.apache.org/struts"></ulink>. In Spring this is done
       using the <literal>TilesConfigurer</literal>. Have a look at the
-      following piece of code (which you should include in your
-      WebApplicationContext): <programlisting>&lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
+      following piece of example ApplicationContext configuration: 
+      <programlisting>&lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
     &lt;property name="factoryClass"&gt;
         &lt;value&gt;org.apache.struts.tiles.xmlDefinition.I18nFactorySet&lt;/value&gt;
     &lt;/property&gt;
@@ -827,7 +825,7 @@ home.root=words
       view the model output, and Spring makes it simple to generate a PDF
       document or an Excel spreadsheet dynamically from the model data. The
       document is the view and will be streamed from the server with the
-      corrdct content type to (hopefully) enable the client PC to run the
+      correct content type to (hopefully) enable the client PC to run their
       spreadsheet or PDF viewer application in response.</para>
 
       <para>In order to use Excel views, you need to add the 'poi' library to

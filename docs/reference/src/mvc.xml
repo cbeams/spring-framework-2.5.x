@@ -196,7 +196,7 @@
     <para>The <literal>WebApplicationContext</literal> is just an ordinary
     ApplicationContext that has some extra features necessary for
     webapplications. It differs from a normal ApplicationContext in that it is
-    capable of resolving themes (see <xref linkend="mvc-themes" />), and that
+    capable of resolving themes (see <xref linkend="mvc-themeresolver" />), and that
     is knows to which servlet it is associated (by having a link to the
     <literal>ServletContext</literal>). The WebApplicationContext is bound in
     the ServletContext, and using <literal>RequestContextUtils</literal> you
@@ -241,7 +241,7 @@
           <row>
             <entry>controller(s)</entry>
 
-            <entry>(<xref linkend="mvc-controllers" />) the beans providing
+            <entry>(<xref linkend="mvc-controller" />) the beans providing
             the actual functionality (or at least, access to the
             functionality) as part of the MVC triad</entry>
           </row>
@@ -280,7 +280,7 @@
           <row>
             <entry>handlerexception resolver</entry>
 
-            <entry>(<xref linkend="exceptionhandlers" />) offers functionality
+            <entry>(<xref linkend="mvc-exceptionhandlers" />) offers functionality
             to map exceptions to views or implement other more complex
             exception handling code</entry>
           </row>
@@ -689,7 +689,7 @@ ModelAndView anyMeaningfulName(HttpServletRequest, HttpServletResponse, Exceptio
             <literal>doIt(HttpServletRequest, HttpServletResponse)</literal>
             method is called. This method name resolver works with the
             <literal>PathMatcher</literal> (see <xref
-            linkend="mvc-utilities-pathmatcher" />) so if the properties
+            linkend="mvc-utilities-pathmatching" />) so if the properties
             contained <literal>/**/welcom?.html</literal> it would also have
             worked!</para>
           </listitem>
@@ -878,7 +878,7 @@ public class SampleDelegate {
     <sect2 id="mvc-handlermapping-urlhandlermapping">
       <title><literal>SimpleUrlHandlerMapping</literal></title>
 
-      <para>Another - and much more powerful handlermapping - is the the
+      <para>Another - and much more powerful handlermapping - is the
       <literal>SimpleUrlHandlerMapping</literal>. This mapping is configurable
       in the applicationcontext and has Ant-style pathmatching capabilities
       (see <xref linkend="mvc-utilities-pathmatching" />). A couple of example
@@ -1025,11 +1025,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
   <sect1 id="mvc-viewresolver">
     <title>Views and resolving them</title>
 
-    <para>No MVC framework for web applications without a way to address
-    views. Spring provides view resolvers, which enable you to - without tying
-    yourself to a specific view technology - render models in a browser.
-    Out-of-the-box, Spring enables you to use for example Java Server Pages,
-    Velocity templates and XSLT views. <xref linkend="view" /> has details of
+    <para>No MVC framework for web applications is without a way to address
+    views. Spring provides view resolvers, which enable you to render models 
+    in a browser without tying yourself to a specific view technology.
+    Out-of-the-box, Spring enables you to use Java Server Pages,
+    Velocity templates and XSLT views, for example. <xref linkend="view" /> has details of
     integrating various view technologies.</para>
 
     <para>The two classes which are important to the way Spring handles views
@@ -1045,9 +1045,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para>As discussed before, all controllers in the SpringWeb framework,
       return a <literal>ModelAndView</literal> instance. Views in Spring are
       addressed by a view name and are resolved by a viewresolver. Spring
-      comes with a couple of view resolvers. We'll list most of them as
-      provided by the Spring framework and then provide a couple of
-      examples.</para>
+      comes with quite a few view resolvers. We'll list most of them
+      and then provide a couple of examples.</para>
 
       <table frame="all">
         <title>View resolvers</title>
@@ -1088,7 +1087,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
               <entry>Simple implementation of ViewResolver that allows for
               direct resolution of symbolic view names to URLs, without
-              explicit mapping definition. This is appropriate if your
+              an explicit mapping definition. This is appropriate if your
               symbolic names match the names of your view resources in a
               straightforward manner, without the need for arbitrary
               mappings</entry>
@@ -1116,7 +1115,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         </tgroup>
       </table>
 
-      <para>When having JSP for a view technology you can use the for example
+      <para>As an example, when using JSP for a view technology you can use the
       the <literal>UrlBasedViewResolver</literal>. This view resolver
       translates view names to a URL and hands the request over the
       RequestDispatcher to render the view. <programlisting>&lt;bean id="viewResolver" 
@@ -1140,32 +1139,30 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
   <sect1 id="mvc-localeresolver">
     <title>Using locales</title>
 
-    <para>Most parts of Spring's architecture support internalization, just as
+    <para>Most parts of Spring's architecture support internationalization, just as
     the Spring web framework does. SpringWEB enables you to automatically
-    resolve messages using the client's locale. This is done through the
-    so-called <literal>LocaleResolver</literal>, that exists in a couple of
-    useful forms. Defining a localeresolver is pretty simple, just stick it in
-    your webapplication context and you're done. You have to make a decision
-    where to retrieve the locale from however. There are a couple of
-    localeresolver to choose from.</para>
-
-    <para>Besides the resolving locales, you can also attach an interceptor to
-    the handlermapping (see <xref linkend="mvc-handlermapping-interceptor" />
-    for more info on that), to change the locale based on for instance a
-    parameter occurring in the request.</para>
+    resolve messages using the client's locale. This is done with  
+    <literal>LocaleResolver</literal> objects.</para>
 
     <para>When a request comes in, the DispatcherServlet looks for a locale
     resolver and if it finds one it tries to use it and set the locale. Using
     the <literal>RequestContext.getLocale()</literal> method, you can always
     retrieve the locale that was resolved by the locale resolver.</para>
 
+    <para>Besides the automatic locale resolution, you can also attach an interceptor to
+    the handlermapping (see <xref linkend="mvc-handlermapping-interceptor" />
+    for more info on that), to change the locale under specific circumstances, based on a
+    parameter occurring in the request for example.</para>
+
     <para>Locale resolvers and interceptors are all defined in the
-    <literal>org.springframework.web.servlet.i18n</literal> package.</para>
+    <literal>org.springframework.web.servlet.i18n</literal> package, and
+    are configured in your application context in the normal way. Here is a selection
+    of the locale resolvers included in Spring.</para>
 
     <sect2 id="mvc-localeresolver-acceptheader">
       <title><literal>AcceptHeaderLocaleResolver</literal></title>
 
-      <para>This locale resolver inspect the
+      <para>This locale resolver inspects the
       <literal>accept-language</literal> header in the request that was sent
       by the browser of the client. Usually this header field contains the
       locale of the client's operating system.</para>
@@ -1174,7 +1171,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <sect2 id="mvc-localeresolver-cookie">
       <title><literal>CookieLocaleResolver</literal></title>
 
-      <para>This locale resolver inspect a Cookie that might exist on the
+      <para>This locale resolver inspects a Cookie that might exist on the
       client, to see if there's a locale specified. If so, it uses that
       specific locale. Using the properties of this locale resolver, you can
       specify the name of the cookie, as well as the maximum age.
@@ -1243,10 +1240,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <sect2 id="mvc-localeresolver-session">
       <title><literal>SessionLocaleResolver</literal></title>
 
-      <para>Besides the CookieLocaleResolver and the
-      AcceptHeaderLocaleResolver, you can also use the
-      <literal>SessionLocaleResolver</literal> to retrieve locales from the
-      session that might be associated to the user's request.</para>
+      <para>The <literal>SessionLocaleResolver</literal> allows you to retrieve 
+      locales from the session that might be associated to the user's request.</para>
     </sect2>
 
     <sect2 id="mvc-localeresolver-interceptor">
@@ -1256,7 +1251,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <literal>LocaleChangeInterceptor</literal>. This interceptor needs to be
       added to one of the handler mappings (see <xref
       linkend="mvc-handlermapping" />) and it will detect a parameter in the
-      request and changes the locale (call <literal>setLocale()</literal> on
+      request and change the locale (it calls <literal>setLocale()</literal> on
       the LocaleResolver that also exists in the context). <programlisting>&lt;bean id="localeChangeInterceptor" 
       class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"&gt;
     &lt;property name="paramName"&gt;&lt;value&gt;siteLanguage&lt;/value&gt;&lt;/property&gt;
@@ -1298,21 +1293,22 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <title>Introduction</title>
 
       <para>Spring has built-in multipart support to handle fileuploads in
-      webapplications. The design for the multipart support is done in such a
-      way that pluggable so-called <literal>MultipartResovlers</literal> can
-      be used. Out of the box, Spring provides MultipartResolver for use with
-      <emphasis>Commons FileUpload</emphasis> and <emphasis>COS
-      FileUpload</emphasis>. How uploading files is supported will be
-      described in the rest of this chapter.</para>
+      webapplications. The design for the multipart support is done with
+      pluggable <literal>MultipartResovler</literal> objects, defined in the
+      <literal>org.springframework.web.multipart</literal> package.
+      Out of the box, Spring provides MultipartResolver for use with
+      <emphasis>Commons FileUpload</emphasis> (<ulink 
+      url="http://jakarta.apache.org/commons/fileupload"></ulink>) and 
+      <emphasis>COS FileUpload</emphasis> (<ulink
+      url="http://www.servlets.com/cos"></ulink>). How uploading files is 
+      supported will be described in the rest of this chapter.</para>
 
-      <para>As already said, the multipart support is provided through the
-      <literal>MultipartResolver</literal> interface, located in the
-      <literal>org.springframework.web.multipart</literal> package. By
-      default, no multipart handling will be done by Spring. You'll have to
+      <para>By default, no multipart handling will be done by Spring, as some developers
+      will want to handle multiparts themselves. You'll have to
       enable it yourself by adding a multipartresolver to the webapplication's
       context. After you've done that, each request will be inspected for a
       multipart that it might contain. If no such multipart is found, the
-      request will continue as expected. If however, a multipart is found in
+      request will continue as expected. However, if a multipart is found in
       the request, the MultipartResolver that has been declared in your
       context will resolve. After that, the multipart attribute in your
       request will be treated as any other attributes.</para>
@@ -1320,16 +1316,6 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
     <sect2 id="mvc-multipart-resolver">
       <title>Using the <literal>MultipartResolver</literal></title>
-
-      <para>To be able to resolve multiparts from a request, you will have to
-      declare a MultipartResolver. There's two multipart resolver Spring's
-      comes with. First of all the resolver that works with Commons FileUpload
-      (<ulink url="http://jakarta.apache.org/commons/fileupload"></ulink>),
-      and secondly, the resolver that uses the O'Reilly COS package (<ulink
-      url="http://www.servlets.com/cos"></ulink>). Without a MultipartResolver
-      declared in your webapplication context, no detection of multiparts will
-      take place, because some developers might find the need to parse out the
-      multiparts themselves.</para>
 
       <para>The following example shows how to use the
       <literal>CommonsMultipartResolver</literal>: <programlisting>&lt;bean id="multipartResolver" 
@@ -1339,7 +1325,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     &lt;property name="maximumFileSize"&gt;
         &lt;value&gt;100000&lt;/value&gt;
     &lt;/property&gt;
-&lt;/bean&gt;</programlisting> But you can also use the
+&lt;/bean&gt;</programlisting> This is an example using the 
       <literal>CosMultipartResolver</literal>: <programlisting>&lt;bean id="multipartResolver" 
     class="org.springframework.web.multipart.cos.CosMultipartResolver"&gt;
 
@@ -1350,12 +1336,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 &lt;/bean&gt;</programlisting></para>
 
       <para>Of course you need to stick the appropriate jars in your classpath
-      if using one the multipartresolver. In case of the
+      for the multipartresolver to work. In the case of the
       CommonsMultipartResolver, you need to use
-      <literal>commons-fileupload.jar</literal>, in case of the
+      <literal>commons-fileupload.jar</literal>, while in the case of the
       CosMultipartResolver, use <literal>cos.jar</literal>.</para>
 
-      <para>Now that Spring's set up to handle multipart requests, let's talk
+      <para>Now that you have seen how to set Spring up to handle multipart requests, let's talk
       about how to actually use it. When the Spring DispatcherServlet detects
       a Multipart request, it activates the resolver that has been declared in
       your context and hands over the request. What it basically does is wrap
@@ -1369,22 +1355,21 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <sect2 id="mvc-multipart-forms">
       <title>Handling a fileupload in a form</title>
 
-      <para>After the MultipartResolver has finished doing its jobs, the
-      request will be processed as any other. So in fact, you can create a
-      form, with a form upload field, and let Spring bind the file on your
+      <para>After the MultipartResolver has finished doing its job, the
+      request will be processed like any other. To use it, you create a
+      form with an upload field, then let Spring bind the file on your
       form. Just as with any other property that's not automagically
       convertible to a String or primitive type, to be able to put binary data
-      in your beans, you have to register a custom editor with the
-      <literal>ServletRequestDatabinder</literal>. There's a couple of editors
-      available for handling file and setting the result on a bean. There's a
+      in your beans you have to register a custom editor with the
+      <literal>ServletRequestDatabinder</literal>. There are a couple of editors
+      available for handling files and setting the results on a bean. There's a
       <literal>StringMultipartEditor</literal> capable of converting files to
       Strings (using a user-defined character set) and there's a
-      <literal>ByteArrayMultipartEditor</literal> which concerts files to
-      byte-arrays. They function just as for instance the
-      <literal>CustomDateEditor</literal></para>
+      <literal>ByteArrayMultipartEditor</literal> which converts files to
+      byte arrays. They function just as the <literal>CustomDateEditor</literal> does.</para>
 
       <para>So, to be able to upload files using a form in a website, declare
-      the resolver, a url mapping to a controller that will process the bean
+      the resolver, a url mapping to a controller that will process the bean,
       and the controller itself. <programlisting>&lt;beans&gt;
 
     ...
@@ -1457,11 +1442,11 @@ public class FileUploadBean {
         return file;
     }
 }</programlisting> As you can see, the FileUploadBean has a property typed
-      byte[] that holds the file. The controller register a custom editor to
+      byte[] that holds the file. The controller registers a custom editor to
       let Spring know how to actually convert the multipart objects the
-      resolver has found, to properties specified by the bean. Right now,
-      nothing is done with the byte[] and the bean itself, but you can do with
-      it whatever you want (save it in a database, mail it to somebody,
+      resolver has found to properties specified by the bean. In these examples,
+      nothing is done with the byte[] property of the bean itself, but in practice
+      you can do whatever you want (save it in a database, mail it to somebody,
       etcetera).</para>
 
       <para>But we're still not finished. To actually let the user upload
@@ -1506,9 +1491,9 @@ public class FileUploadBean {
     implementing the <literal>resolveException(Exception, Handler)</literal>
     method and returning a <literal>ModelAndView</literal>, you can also use
     the <literal>SimpleMappingExceptionResolver</literal>. This resolver
-    enables you to map the class name of any exception that might be thrown to
-    a view name. With this, you will be do exactly the same the exception
-    mapping feature from the servlet api does, but it's also possible to do
+    enables you to take the class name of any exception that might be thrown and map
+    it to a view name. This is functionally equivalent to the exception
+    mapping feature from the servlet api, but it's also possible to implement
     more fine grained mappings of exception from different handlers.</para>
   </sect1>
 
