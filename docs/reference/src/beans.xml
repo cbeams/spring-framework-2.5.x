@@ -599,8 +599,8 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
 &lt;/bean&gt;
 
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
-&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;
-</programlisting> <programlisting>public class ExampleBean {
+&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
+      <programlisting>public class ExampleBean {
 
     private AnotherBean beanOne;
     private YetAnotherBean beanTwo;
@@ -729,7 +729,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
                     &lt;value&gt;just some string&lt;/value&gt;
                 &lt;/entry&gt;
                 &lt;entry key="yup a ref"&gt;
-                    &lt;ref bean="myDataSource"&lt;/ref&gt;
+                    &lt;ref bean="myDataSource"/&gt;
                 &lt;/entry&gt;
             &lt;/map&gt;
         &lt;/property&gt;
@@ -737,7 +737,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         &lt;property name="someSet"&gt;
             &lt;set&gt;
                 &lt;value&gt;just some string&lt;/value&gt;
-                &lt;ref bean="myDataSource"&lt;/ref&gt;
+                &lt;ref bean="myDataSource"/&gt;
             &lt;/set&gt;
         &lt;/property&gt;
 
@@ -1003,7 +1003,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       element is initialized.</para>
 
       <para>Following is an example config:<programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="manager"&gt;
-    &lt;property name="manager"&gt;&lt;ref local="manager"/&gt;
+    &lt;property name="manager"&gt;&lt;ref local="manager"/&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="manager" class="ManagerBean"/&gt;</programlisting></para>
@@ -2239,7 +2239,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   &lt;property name="targetMethod"&gt;&lt;value&gt;getProperties&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
-  &lt;property name="targetObject"&gt;&lt;ref local='sysProps'/&gt;&lt;/property&gt;
+  &lt;property name="targetObject"&gt;&lt;ref local="sysProps"/&gt;&lt;/property&gt;
   &lt;property name="targetMethod"&gt;&lt;value&gt;getProperty&lt;/value&gt;&lt;/property&gt;
   &lt;property name="arguments"&gt;
     &lt;list&gt;
