@@ -113,7 +113,7 @@
 	<bean id="converter.locator" class="org.springframework.binding.convert.support.DefaultConverterLocator" autowire="byType"/>
 
 	<!-- A formatter registry, a thread-safe cache for Formatters -->
-	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterLocator"/>
+	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterLocator" autowire="byType"/>
 
 	<!-- A broadcaster that will notify the formatter registry to cleanup all thread locals on app shutdown -->
 	<bean id="thread.cleanupBroadcaster" class="org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster"/>
