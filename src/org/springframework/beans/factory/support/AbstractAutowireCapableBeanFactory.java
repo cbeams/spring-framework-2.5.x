@@ -36,6 +36,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -490,16 +491,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (int i = 0; i < constructors.length; i++) {
 			try {
 				Constructor constructor = constructors[i];
-				if (constructor.getParameterTypes().length < minNrOfArgs) {
-					throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-							minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
-							beanName + "' (hint: specify index arguments for simple parameters to avoid type ambiguities)");
-				}
 				if (constructorToUse != null &&
 						constructorToUse.getParameterTypes().length > constructor.getParameterTypes().length) {
 					// Already found greedy constructor that can be satisfied ->
 					// do not look any further, there are only less greedy constructors left.
 					break;
+				}
+				if (constructor.getParameterTypes().length < minNrOfArgs) {
+					throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
+							minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
+							beanName + "' (hint: specify index arguments for simple parameters to avoid type ambiguities)");
 				}
 
 				Class[] argTypes = constructor.getParameterTypes();
@@ -512,17 +513,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					minTypeDiffWeight = typeDiffWeight;
 				}
 			}
-			catch (BeansException ex) {
+			catch (UnsatisfiedDependencyException ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Ignoring constructor [" + constructors[i] + "] of bean '" + beanName +
 							"': could not satisfy dependencies", ex);
 				}
 				if (i == constructors.length - 1 && constructorToUse == null) {
-					// all constructors tried
 					throw ex;
 				}
 				else {
-					// swallow and try next constructor
+					// Swallow and try next constructor.
 				}
 			}
 		}
@@ -601,19 +601,27 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				usedValueHolders.add(valueHolder);
 
 				if (bw instanceof BeanWrapperImpl) {
-					// Synchronize if custom editors are registered.
-					// Necessary because PropertyEditors are not thread-safe.
-					if (!getCustomEditors().isEmpty()) {
-						synchronized (getCustomEditors()) {
+					try {
+						// Synchronize if custom editors are registered.
+						// Necessary because PropertyEditors are not thread-safe.
+						if (!getCustomEditors().isEmpty()) {
+							synchronized (getCustomEditors()) {
+								args[j] = ((BeanWrapperImpl) bw).doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+							}
+						}
+						else {
 							args[j] = ((BeanWrapperImpl) bw).doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
 						}
 					}
-					else {
-						args[j] = ((BeanWrapperImpl) bw).doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+					catch (TypeMismatchException ex) {
+						throw new UnsatisfiedDependencyException(
+								mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
+								"Could not convert constructor argument value [" + valueHolder.getValue() +
+						    "] to required type [" + argTypes[j].getName() + "]: " + ex.getMessage());
 					}
 				}
 				else {
-					// Fallback: a BeanWrapper that oes not support type conversion
+					// Fallback: a BeanWrapper that does not support type conversion
 					// for given values (currently BeanWrapperImpl is needed for this).
 					if (argTypes[j].isInstance(valueHolder.getValue())) {
 						args[j] = valueHolder.getValue();

@@ -310,7 +310,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			if (beanInstance != null) {
 				beanClass = beanInstance.getClass();
 			}
-			
+
 			else {
 				// OK, let's assume it's a bean definition.
 				RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
@@ -339,9 +339,13 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			throw ex;
 		}
 		catch (BeanCreationException ex) {
-			// Can only happen when checking FactoryBean.
-			logger.debug("Ignoring BeanCreationException on FactoryBean type check", ex);
-			return null;
+			if (ex.contains(BeanCurrentlyInCreationException.class) ||
+					ex.contains(FactoryBeanNotInitializedException.class)) {
+				// Can only happen when checking a FactoryBean.
+				logger.debug("Ignoring BeanCreationException on FactoryBean type check", ex);
+				return null;
+			}
+			throw ex;
 		}
 	}
 

@@ -13,7 +13,4 @@
 	<bean id="abstractFactoryBean" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
 		abstract="true"/>
 
-	<bean id="lazyFactoryBean" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
-		lazy-init="true"/>
-
 </beans>
