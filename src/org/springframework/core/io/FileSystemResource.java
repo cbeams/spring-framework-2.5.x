@@ -24,9 +24,7 @@ import java.net.URL;
 
 /**
  * Resource implementation for java.io.File handles.
- *
- * <p>Obviously supports resolution as File, and also as URL.
- *
+ * Obviously supports resolution as File, and also as URL.
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see java.io.File
@@ -68,7 +66,7 @@ public class FileSystemResource extends AbstractResource {
 	}
 
 	public String getDescription() {
-		return "file path [" + this.file.getAbsolutePath() + "]";
+		return "file [" + this.file.getAbsolutePath() + "]";
 	}
 
 }

@@ -112,7 +112,7 @@ public class ClassPathResource extends AbstractResource {
 	}
 
 	public String getDescription() {
-		return "classpath resource [" + this.path + "]";
+		return "class path resource [" + this.path + "]";
 	}
 
 }

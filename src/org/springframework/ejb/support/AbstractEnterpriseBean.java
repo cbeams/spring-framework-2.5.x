@@ -46,7 +46,7 @@ import org.springframework.context.access.ContextJndiBeanFactoryLocator;
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
- * @version $Id: AbstractEnterpriseBean.java,v 1.11 2004-03-18 19:17:53 jhoeller Exp $
+ * @version $Id: AbstractEnterpriseBean.java,v 1.12 2004-03-19 18:34:38 jhoeller Exp $
  * @see #setBeanFactoryLocator
  * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
  * @see org.springframework.beans.factory.access.JndiBeanFactoryLocator
@@ -70,10 +70,15 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	/**
 	 * Set the BeanFactoryLocator to use for this EJB.
 	 * Default is a ContextJndiBeanFactoryLocator.
-	 * <p>Can be invoked before loadBeanFactory, for example in a constructor
-	 * or in a setSessionContext implementation if you want to override
-	 * the default BeanFactoryLocator.
-	 * @see #loadBeanFactory
+	 * <p>Can be invoked before loadBeanFactory, for example in constructor
+	 * or setSessionContext if you want to override the default locator.
+	 * <p>Note that the BeanFactory is automatically loaded by the
+	 * ejbCreate implementations of AbstractStatelessSessionBean and
+	 * AbstractMessageDriverBean but needs to be explicitly loaded in
+	 * custom AbstractStatefulSessionBean ejbCreate methods.
+	 * @see AbstractStatelessSessionBean#ejbCreate
+	 * @see AbstractMessageDrivenBean#ejbCreate
+	 * @see AbstractStatefulSessionBean#loadBeanFactory
 	 * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
 	 * @see org.springframework.beans.factory.access.JndiBeanFactoryLocator
 	 */
@@ -82,13 +87,13 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	}
 
 	/**
-	 * Can be invoked before loadBeanFactory.
-	 * Invoke in constructor or setXXXXContext() if you want
-	 * to override the default bean factory factory key.
+	 * Set the bean factory locator key.
 	 * <p>In case of the default BeanFactoryLocator implementation,
-	 * JndiBeanFactoryLocator, this is the JNDI path. The
-	 * default value of this property is
-	 * {@link #BEAN_FACTORY_PATH_ENVIRONMENT_KEY}
+	 * ContextJndiBeanFactoryLocator, this is the JNDI path. The default
+	 * value of this property is "java:comp/env/ejb/BeanFactoryPath".
+	 * <p>Can be invoked before loadBeanFactory, for example in constructor
+	 * or setSessionContext if you want to override the default locator key.
+	 * @see #BEAN_FACTORY_PATH_ENVIRONMENT_KEY
 	 */
 	public void setBeanFactoryLocatorKey(String factoryKey) {
 		this.beanFactoryLocatorKey = factoryKey;
