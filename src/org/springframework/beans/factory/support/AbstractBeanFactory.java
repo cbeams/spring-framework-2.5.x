@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.31 2003-12-10 08:53:19 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.32 2003-12-11 18:19:43 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -1096,15 +1096,12 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 	/**
 	 * Find bean instances that match the required type.
-	 * <p>This method is unsupported in this class, and throws UnsupportedOperationException.
-	 * Subclasses should override it if they can obtain information about bean names
-	 * by type, as a ListableBeanFactory implementation can.
+	 * If a subclass cannot obtain information about bean names by type,
+	 * a corresponding exception should be thrown.
 	 * @param requiredType the type of the beans to look up
 	 * @return a Map of bean names and bean instances that match the required type
 	 * @throws BeansException in case of errors
 	 */
-	protected Map findMatchingBeans(Class requiredType) throws BeansException {
-		throw new UnsupportedOperationException("AbstractBeanFactory does not support autowiring by type");
-	}
+	protected abstract Map findMatchingBeans(Class requiredType) throws BeansException;
 
 }
