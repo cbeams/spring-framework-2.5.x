@@ -16,6 +16,7 @@
 
 package org.springframework.jmx.support;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -29,10 +30,12 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Collection of generic utility methods to support Spring JMX.
  * Includes a convenient method to locate an MBeanServer.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
@@ -44,12 +47,12 @@ public class JmxUtils {
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
 	/**
-	 * Attempt to find a locally running <code>MBeanServer</code>. Fails if no
-	 * <code>MBeanServer</code> can be found, or if more than one is found.
-	 * @return the <code>MBeanServer</code> if found
-	 * @throws org.springframework.jmx.MBeanServerNotFoundException
-	 * if no <code>MBeanServer</code> is found, or more than one is found
-	 */
+		 * Attempt to find a locally running <code>MBeanServer</code>. Fails if no
+		 * <code>MBeanServer</code> can be found, or if more than one is found.
+		 *
+		 * @return the <code>MBeanServer</code> if found
+		 * @throws org.springframework.jmx.MBeanServerNotFoundException if no <code>MBeanServer</code> is found, or more than one is found
+		 */
 	public static MBeanServer locateMBeanServer() throws MBeanServerNotFoundException {
 		List servers = MBeanServerFactory.findMBeanServer(null);
 		// Check to see if an MBeanServer is registered.
@@ -95,10 +98,21 @@ public class JmxUtils {
 		return signature;
 	}
 
+	public static String getAttributeName(PropertyDescriptor property, boolean useStrictCasing) {
+		if (useStrictCasing) {
+			return StringUtils.capitalize(property.getName());
+		}
+		else {
+			return property.getName();
+		}
+
+	}
+
 	/**
-	 * Check whether the supplied <code>Class</code> is a valid MBean resource.
-	 * @param beanClass the class of the bean to test
-	 */
+		 * Check whether the supplied <code>Class</code> is a valid MBean resource.
+		 *
+		 * @param beanClass the class of the bean to test
+		 */
 	public static boolean isMBean(Class beanClass) {
 		if (beanClass == null) {
 			return false;
@@ -117,11 +131,12 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Return whether an MBean interface exists for the given class
-	 * (that is, an interface whose name matches the class name of
-	 * the given class but with suffix "MBean).
-	 * @param clazz the class to check
-	 */
+		 * Return whether an MBean interface exists for the given class
+		 * (that is, an interface whose name matches the class name of
+		 * the given class but with suffix "MBean).
+		 *
+		 * @param clazz the class to check
+		 */
 	private static boolean hasMBeanInterface(Class clazz) {
 		Class[] implementedInterfaces = clazz.getInterfaces();
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
