@@ -28,12 +28,15 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
+import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -423,6 +426,32 @@ public class FormControllerTestSuite extends TestCase {
 		}
 	}
 
+	public void testFormControllerInWebApplicationContext() {
+		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
+		ctx.setServletContext(new MockServletContext());
+		RefController mc = new RefController();
+		mc.setApplicationContext(ctx);
+		try {
+			mc.invokeWebSpecificStuff();
+		}
+		catch (IllegalStateException ex) {
+			fail("Shouldn't have thrown exception: " + ex.getMessage());
+		}
+	}
+
+	public void testFormControllerInNonWebApplicationContext() {
+		StaticApplicationContext ctx = new StaticApplicationContext();
+		RefController mc = new RefController();
+		mc.setApplicationContext(ctx);
+		try {
+			mc.invokeWebSpecificStuff();
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+	}
+
 
 	private static class TestControllerWithCustomOnSubmit extends TestController {
 
@@ -449,6 +478,10 @@ public class FormControllerTestSuite extends TestCase {
 			Map m = new HashMap();
 			m.put(NUMBERS_ATT, NUMBERS);
 			return m;
+		}
+
+		public void invokeWebSpecificStuff() {
+			getTempDir();
 		}
 	}
 

@@ -20,6 +20,7 @@ import java.io.File;
 
 import javax.servlet.ServletContext;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
@@ -32,14 +33,15 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport {
 
-	protected Class requiredContextClass() {
-		return WebApplicationContext.class;
-	}
-
 	/**
 	 * Return the current application context as WebApplicationContext.
 	 */
 	protected final WebApplicationContext getWebApplicationContext() {
+		ApplicationContext ctx = getApplicationContext();
+		if (!(ctx instanceof WebApplicationContext)) {
+			throw new IllegalStateException("WebApplicationObjectSupport instance [" + this +
+																			"] does not run in a WebApplicationContext but in: " + ctx);
+		}
 		return (WebApplicationContext) getApplicationContext();
 	}
 

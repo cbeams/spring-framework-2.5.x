@@ -20,7 +20,6 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.util.WebUtils;
@@ -50,9 +49,10 @@ public class WebApplicationObjectSupportTests extends TestCase {
 		};
 		try {
 			wao.setApplicationContext(ac);
-			fail("Should have thrown ApplicationContextException");
+			wao.getWebApplicationContext();
+			fail("Should have thrown IllegalStateException");
 		}
-		catch (ApplicationContextException ex) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
