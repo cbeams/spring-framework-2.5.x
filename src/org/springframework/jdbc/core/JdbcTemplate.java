@@ -34,18 +34,18 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
- * It simplifies the use of JDBC and helps to avoid common errors. It executes
- * core JDBC workflow, leaving application code to provide SQL and extract results.
- * This class executes SQL queries or updates, initating iteration over
- * ResultSets and catching JDBC exceptions and translating them to
- * the generic, more informative, exception hierarchy defined in
- * the org.springframework.dao package.
+ * It simplifies the use of JDBC and helps to avoid common errors.
+ * It executes core JDBC workflow, leaving application code to provide SQL
+ * and extract results. This class executes SQL queries or updates, initiating
+ * iteration over ResultSets and catching JDBC exceptions and translating
+ * them to the generic, more informative exception hierarchy defined in the
+ * org.springframework.dao package.
  *
- * <p>Code using this class need only implement callback interfaces,
- * giving them a clearly defined contract. The PreparedStatementCreator callback
- * interface creates a prepared statement given a Connection provided by this class,
- * providing SQL and any necessary parameters. The RowCallbackHandler interface
- * extracts values from each row of a ResultSet.
+ * <p>Code using this class need only implement callback interfaces, giving
+ * them a clearly defined contract. The PreparedStatementCreator callback
+ * interface creates a prepared statement given a Connection provided by this
+ * class, providing SQL and any necessary parameters. The RowCallbackHandler
+ * interface extracts values from each row of a ResultSet.
  *
  * <p>Can be used within a service implementation via direct instantiation
  * with a DataSource reference, or get prepared in an application context
@@ -58,8 +58,8 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson (Wrox, 2002).
  *
- * <p>Because this class is parameterizable by the callback interfaces and the
- * SQLExceptionTranslator interface, it isn't necessary to subclass it.
+ * <p>Because this class is parameterizable by the callback interfaces and
+ * the SQLExceptionTranslator interface, it isn't necessary to subclass it.
  * All SQL issued by this class is logged.
  *
  * @author Rod Johnson
@@ -67,11 +67,11 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.33 2004-03-17 08:48:53 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.34 2004-03-17 17:37:40 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
- * @see org.springframework.jdbc.object
  * @see org.springframework.jdbc.datasource
+ * @see org.springframework.jdbc.object
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, InitializingBean {
 
@@ -184,7 +184,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
-		if (sql == null) {;
+		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
 		}
 		if (sql.indexOf("?") != -1) {
@@ -235,7 +235,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	public int update(final String sql) throws DataAccessException {
 		Integer result = (Integer) execute(new StatementCallback() {
 			public Object doInStatement(Statement stmt) throws SQLException {
-				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing SQL update [" + sql + "]");
 				}

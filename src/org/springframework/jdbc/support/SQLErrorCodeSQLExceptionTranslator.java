@@ -22,10 +22,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 
 /**
  * Implementation of SQLExceptionTranslator that uses specific vendor codes.
- * More precise than SQLState implementation, but vendor specific.
- *
- * <p>The JdbcTemplate class enables error handling to be parameterized without
- * making application's dependent on a particular RDBMS.
+ * More precise than SQLState implementation, but vendor-specific.
  *
  * <p>This class applies the following matching rules:
  * <ul>
@@ -40,8 +37,8 @@ import org.springframework.jdbc.BadSqlGrammarException;
  * 
  * @author Rod Johnson
  * @author Thomas Risberg
+ * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.3 2004-03-17 17:37:51 jhoeller Exp $
  * @see org.springframework.jdbc.support.SQLErrorCodesFactory
- * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.2 2004-02-14 19:17:39 trisberg Exp $
  */
 public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslator {
 
@@ -59,7 +56,6 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	 */
 	public SQLErrorCodeSQLExceptionTranslator() {
 	}
-
 
 	/**
 	 * Create a SQLErrorCode translator given these error codes.
@@ -109,49 +105,44 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		this.sqlErrorCodes = sec;		
 	}
 
-	/**
-	 * @see org.springframework.jdbc.support.SQLExceptionTranslator#translate(java.lang.String, java.lang.String, java.sql.SQLException)
-	 */
 	public DataAccessException translate(String task, String sql, SQLException sqlex) {
-
-		// First, try custom translation
+		// first, try custom translation
 		DataAccessException dex = customTranslate(task, sql, sqlex);
 		if (dex != null) {
 			return dex;
 		}
 		
-		// Now try error codes
+		// now try error codes
 		String errorCode = Integer.toString(sqlex.getErrorCode());
 		if (errorCode != null) {
-			if (Arrays.binarySearch(sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
+			if (Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new BadSqlGrammarException(task, sql, sqlex);
 			}
-			else if (Arrays.binarySearch(sqlErrorCodes.getDataIntegrityViolationCodes() , errorCode) >= 0) {
+			else if (Arrays.binarySearch(this.sqlErrorCodes.getDataIntegrityViolationCodes() , errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new DataIntegrityViolationException(task + ": " + sqlex.getMessage(), sqlex);
 			}
-			else if (Arrays.binarySearch(sqlErrorCodes.getDataRetrievalFailureCodes() , errorCode) >= 0) {
+			else if (Arrays.binarySearch(this.sqlErrorCodes.getDataRetrievalFailureCodes() , errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new DataRetrievalFailureException(task + ": " + sqlex.getMessage(), sqlex);
 			}
-			else if (Arrays.binarySearch(sqlErrorCodes.getOptimisticLockingFailureCodes() , errorCode) >= 0) {
+			else if (Arrays.binarySearch(this.sqlErrorCodes.getOptimisticLockingFailureCodes() , errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new OptimisticLockingFailureException(task + ": " + sqlex.getMessage(), sqlex);
 			}
-			else if (Arrays.binarySearch(sqlErrorCodes.getDataAccessResourceFailureCodes() , errorCode) >= 0) {
+			else if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes() , errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new DataAccessResourceFailureException(task + ": " + sqlex.getMessage(), sqlex);
 			}
 		}
 
-		// We couldn't identify it more precisely - let's hand it over to the SQLState fallback translator.
+		// we couldn't identify it more precisely - let's hand it over to the SQLState fallback translator
 		logger.warn("Unable to translate SQLException with errorCode '" + sqlex.getErrorCode() +
 						"', will now try the fallback translator");
 		return this.fallback.translate(task, sql, sqlex);
 	}
-	
-	
+
 	/**
 	 * Subclasses can override this method to attempt a custom mapping from SQLException to DataAccessException
 	 * @param task task being attempted

@@ -19,10 +19,11 @@ import org.springframework.jdbc.UncategorizedSQLException;
 
 /**
  * Implementation of SQLExceptionTranslator that uses the SQLState
- * code in the SQL exception. Can't diagnose all problems, but is
+ * code in the SQLException. Can't diagnose all problems, but is
  * portable between databases.
  * @author Rod Johnson
- * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.2 2004-02-25 19:57:14 trisberg Exp $
+ * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.3 2004-03-17 17:37:51 jhoeller Exp $
+ * @see java.sql.SQLException#getSQLState
  */
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	
@@ -47,15 +48,15 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 		INTEGRITY_VIOLATION_CODES.add("44");	// With check violation
 	}
 	
-	/**
-	 * @see org.springframework.jdbc.support.SQLExceptionTranslator#translate(java.lang.String,java.lang.String,java.sql.SQLException)
-	 */
 	public DataAccessException translate(String task, String sql, SQLException sqlex) {
-		logger.warn("Translating SQLException with SQLState '" + sqlex.getSQLState() + "' and errorCode '" + sqlex.getErrorCode() +
-						"' and message [" + sqlex.getMessage() + "]; SQL was [" + sql + "] for task [" + task + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("Translating SQLException with SQLState '" + sqlex.getSQLState() +
+			            "' and errorCode '" + sqlex.getErrorCode() + "' and message [" +
+			            sqlex.getMessage() + "]; SQL was [" + sql + "] for task [" + task + "]");
+		}
 
 		String sqlState = sqlex.getSQLState();
-		// Some JDBC drivers nest the actual exception from a batched update - need to get the nested one
+		// some JDBC drivers nest the actual exception from a batched update - need to get the nested one
 		if (sqlState == null) {
 			SQLException nestedEx = sqlex.getNextException();
 			if (nestedEx != null)
@@ -67,12 +68,14 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 				return new BadSqlGrammarException(task, sql, sqlex);
 			}
 			else if (INTEGRITY_VIOLATION_CODES.contains(classCode)) {
-				return new DataIntegrityViolationException("(" + task + "): data integrity violated by SQL '" + sql + "'", sqlex);
+				return new DataIntegrityViolationException("(" + task + "): data integrity violated by SQL '" +
+				                                           sql + "'", sqlex);
 			}
 		}
 		
-		// We couldn't identify it more precisely
-		return new UncategorizedSQLException("(" + task + "): encountered SQLException [" + sqlex.getMessage() + "]", sql, sqlex);
+		// we couldn't identify it more precisely
+		return new UncategorizedSQLException("(" + task + "): encountered SQLException [" +
+		                                     sqlex.getMessage() + "]", sql, sqlex);
 	}
 
 }

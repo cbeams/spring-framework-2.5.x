@@ -27,7 +27,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
  * Factory for creating SQLErrorCodes based on the
- * DatabaseProductName taken from the DatabaseMetaData.
+ * databaseProductName taken from the DatabaseMetaData.
  *
  * <p>Returns SQLErrorCodes populated with vendor codes
  * defined in a configuration file named "sql-error-codes.xml".
@@ -36,7 +36,8 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
-   @version $Id: SQLErrorCodesFactory.java,v 1.6 2004-02-16 20:49:23 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.7 2004-03-17 17:37:51 jhoeller Exp $
+ * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
 
@@ -54,8 +55,8 @@ public class SQLErrorCodesFactory {
 	public static final String SQL_ERROR_CODE_DEFAULT_PATH = "org/springframework/jdbc/support/sql-error-codes.xml";
 
 	/**
-	* Keep track of this instance so we can return it to classes that request it.
-	*/
+	 * Keep track of this instance so we can return it to classes that request it.
+	 */
 	private static final SQLErrorCodesFactory instance;
 
 	static {
@@ -139,8 +140,9 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Return SQLErrorCodes for the given DataSource,
-	 * evaluating DatabaseProductName from DatabaseMetaData,
+	 * evaluating databaseProductName from DatabaseMetaData,
 	 * or an empty error codes instance if no SQLErrorCodes were found.
+	 * @see java.sql.DatabaseMetaData#getDatabaseProductName
 	 */
 	public SQLErrorCodes getErrorCodes(DataSource ds) {
 		logger.info("Looking up default SQLErrorCodes for DataSource");
@@ -161,14 +163,16 @@ public class SQLErrorCodesFactory {
 					String dbName = dbmd.getDatabaseProductName();
 					String driverVersion = dbmd.getDriverVersion();
 					// special check for DB2
-					if (dbName != null && dbName.startsWith("DB2/"))
+					if (dbName != null && dbName.startsWith("DB2/")) {
 						dbName = "DB2";
+					}
 					if (dbName != null) {
 						logger.info("Database Product Name is " + dbName);
 						logger.info("Driver Version is " + driverVersion);
-						SQLErrorCodes sec = (SQLErrorCodes) rdbmsErrorCodes.get(dbName);
-						if (sec != null)
+						SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
+						if (sec != null) {
 							return sec;
+						}
 						logger.info("Error Codes for " + dbName + " not found");
 					}
 				}
@@ -186,7 +190,7 @@ public class SQLErrorCodesFactory {
 			}
 		}
 		
-		// Fallback is to return an empty ErrorCodes instance
+		// fallback is to return an empty ErrorCodes instance
 		return new SQLErrorCodes();
 	}
 
@@ -195,9 +199,9 @@ public class SQLErrorCodesFactory {
 	 * database metadata lookup.
 	 */
 	public SQLErrorCodes getErrorCodes(String dbName) {
-		SQLErrorCodes sec = (SQLErrorCodes) rdbmsErrorCodes.get(dbName);
+		SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
 		if (sec == null) {
-		// could not find the database among the defined ones
+			// could not find the database among the defined ones
 			sec = new SQLErrorCodes();
 		}
 		return sec;
