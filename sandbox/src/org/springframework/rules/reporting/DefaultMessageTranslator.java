@@ -49,9 +49,13 @@ import org.springframework.util.visitor.Visitor;
 public class DefaultMessageTranslator implements Visitor {
     protected static final Log logger = LogFactory
             .getLog(DefaultMessageTranslator.class);
+
     private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
+
     PropertyResults results;
+
     private List args = new ArrayList();
+
     private MessageSource messages;
 
     public DefaultMessageTranslator(MessageSource messages) {
@@ -83,9 +87,8 @@ public class DefaultMessageTranslator implements Visitor {
     }
 
     public String getMessage(PropertyResults results) {
-        return buildMessage(results.getPropertyName(), results
-                .getRejectedValue(), results.getViolatedConstraint(), Locale
-                .getDefault());
+        return buildMessage(results.getPropertyName(), null, results
+                .getViolatedConstraint(), Locale.getDefault());
     }
 
     private String buildMessage(String objectName, Object rejectedValue,
@@ -189,7 +192,8 @@ public class DefaultMessageTranslator implements Visitor {
         MessageSourceResolvable resolvable;
         if (p instanceof ParameterizedBinaryPredicate) {
             resolvable = handleParameterizedBinaryPredicate((ParameterizedBinaryPredicate)p);
-        } else {
+        }
+        else {
             resolvable = handleRange((Range)p);
         }
         Object[] args = new Object[] { resolvable };
@@ -222,12 +226,9 @@ public class DefaultMessageTranslator implements Visitor {
     private String getMessageCode(Object o) {
         if (o instanceof TypeResolvable) {
             String type = ((TypeResolvable)o).getType();
-            if (type != null) {
-                return type;
-            }
+            if (type != null) { return type; }
         }
         return ClassUtils.getShortNameAsProperty(o.getClass());
     }
-
 
 }
