@@ -361,8 +361,9 @@ public class OracleLobHandler implements LobHandler {
 			Connection conToUse = (nativeJdbcExtractor != null) ?
 					nativeJdbcExtractor.getNativeConnectionFromStatement(ps) : ps.getConnection();
 			if (!connectionClass.isAssignableFrom(conToUse.getClass())) {
-				throw new InvalidDataAccessApiUsageException("OracleLobHandler needs to work on oracle.jdbc.OracleConnection" +
-																										 " - specify a proper NativeJdbcExtractor");
+				throw new InvalidDataAccessApiUsageException("OracleLobCreator needs to work on " +
+																										 "[oracle.jdbc.OracleConnection], not on [" + conToUse.getClass() +
+																										 "] - specify a corresponding NativeJdbcExtractor");
 			}
 			return conToUse;
 		}
