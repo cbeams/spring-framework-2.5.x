@@ -34,7 +34,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: SqlCall.java,v 1.8 2004-04-21 18:43:22 jhoeller Exp $
+ * @version $Id: SqlCall.java,v 1.9 2004-06-28 21:21:04 jhoeller Exp $
  */
 public abstract class SqlCall extends RdbmsOperation {
 
@@ -95,24 +95,6 @@ public abstract class SqlCall extends RdbmsOperation {
 
 
 	/**
-	 * Return a CallableStatementCreator to perform an operation
-	 * with this parameters.
-	 * @param inParams parameters. May be null.
-	 */
-	protected CallableStatementCreator newCallableStatementCreator(Map inParams) {
-		return this.callableStatementFactory.newCallableStatementCreator(inParams);
-	}
-
-	/**
-	 * Return a CallableStatementCreator to perform an operation
-	 * with the parameters returned from this ParameterMapper.
-	 * @param inParamMapper parametermapper. May not be null.
-	 */
-	protected CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
-		return this.callableStatementFactory.newCallableStatementCreator(inParamMapper);
-	}
-
-	/**
 	 * Overridden method to configure the CallableStatementCreatorFactory
 	 * based on our declared parameters.
 	 * @see RdbmsOperation#compileInternal()
@@ -148,8 +130,20 @@ public abstract class SqlCall extends RdbmsOperation {
 		if (logger.isInfoEnabled()) {
 			logger.info("Compiled stored procedure. Call string is [" + getCallString() + "]");
 		}
+
 		this.callableStatementFactory = new CallableStatementCreatorFactory(getCallString(), getDeclaredParameters());
+		this.callableStatementFactory.setResultSetType(getResultSetType());
+		this.callableStatementFactory.setUpdatableResults(isUpdatableResults());
+		this.callableStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
+
 		onCompileInternal();
+	}
+
+	/**
+	 * Hook method that subclasses may override to react to compilation.
+	 * This implementation does nothing.
+	 */
+	protected void onCompileInternal() {
 	}
 
 	/**
@@ -160,10 +154,21 @@ public abstract class SqlCall extends RdbmsOperation {
 	}
 
 	/**
-	 * Hook method that subclasses may override to react to compilation.
-	 * This implementation does nothing.
+	 * Return a CallableStatementCreator to perform an operation
+	 * with this parameters.
+	 * @param inParams parameters. May be null.
 	 */
-	protected void onCompileInternal() {
+	protected CallableStatementCreator newCallableStatementCreator(Map inParams) {
+		return this.callableStatementFactory.newCallableStatementCreator(inParams);
+	}
+
+	/**
+	 * Return a CallableStatementCreator to perform an operation
+	 * with the parameters returned from this ParameterMapper.
+	 * @param inParamMapper parametermapper. May not be null.
+	 */
+	protected CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
+		return this.callableStatementFactory.newCallableStatementCreator(inParamMapper);
 	}
 
 }

@@ -16,8 +16,6 @@
 
 package org.springframework.jdbc.object;
 
-import java.sql.ResultSet;
-
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
@@ -33,13 +31,9 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SqlOperation.java,v 1.11 2004-05-28 14:11:41 jhoeller Exp $
+ * @version $Id: SqlOperation.java,v 1.12 2004-06-28 21:21:04 jhoeller Exp $
  */
 public abstract class SqlOperation extends RdbmsOperation {
-
-	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
-
-	private boolean updatableResults = false;
 
 	/**
 	 * Object enabling us to create PreparedStatementCreators
@@ -47,42 +41,6 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 */
 	private PreparedStatementCreatorFactory preparedStatementFactory;
 
-
-	/**
-	 * Set whether to use prepared statements that return a
-	 * specific type of ResultSet.
-	 * @param resultSetType the ResultSet type
-	 * @see java.sql.ResultSet#TYPE_FORWARD_ONLY
-	 * @see java.sql.ResultSet#TYPE_SCROLL_INSENSITIVE
-	 * @see java.sql.ResultSet#TYPE_SCROLL_SENSITIVE
-	 */
-	protected void setResultSetType(int resultSetType) {
-		this.resultSetType = resultSetType;
-	}
-
-	/**
-	 * Return whether prepared statements will return a specific
-	 * type of ResultSet.
-	 */
-	protected int getResultSetType() {
-		return resultSetType;
-	}
-
-	/**
-	 * Set whether to use prepared statements capable of returning
-	 * updatable ResultSets.
-	 */
-	protected void setUpdatableResults(boolean updatableResults) {
-		this.updatableResults = updatableResults;
-	}
-
-	/**
-	 * Return whether prepared statements will return updatable ResultSets.
-	 */
-	protected boolean isUpdatableResults() {
-		return updatableResults;
-	}
-	
 
 	/**
 	 * Overridden method to configure the PreparedStatementCreatorFactory
@@ -104,8 +62,10 @@ public abstract class SqlOperation extends RdbmsOperation {
 																									 " variables were declared for this object");
 
 		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
-		this.preparedStatementFactory.setResultSetType(this.resultSetType);
-		this.preparedStatementFactory.setUpdatableResults(this.updatableResults);
+		this.preparedStatementFactory.setResultSetType(getResultSetType());
+		this.preparedStatementFactory.setUpdatableResults(isUpdatableResults());
+		this.preparedStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
+
 		onCompileInternal();
 	}
 
