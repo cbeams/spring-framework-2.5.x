@@ -654,12 +654,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (Map) execute(csc, new CallableStatementCallback() {
 			public Object doInCallableStatement(CallableStatement cs) throws SQLException {
 				boolean retVal = cs.execute();
+				int updateCount = cs.getUpdateCount();
 				if (logger.isDebugEnabled()) {
 					logger.debug("CallableStatement.execute returned [" + retVal + "]");
+					logger.debug("CallableStatement.getUpdateCount returned [" + updateCount + "]");
 				}
 				Map returnedResults = new HashMap();
-				if (retVal) {
-					returnedResults.putAll(extractReturnedResultSets(cs, declaredParameters));
+				if (retVal || updateCount != -1) {
+					returnedResults.putAll(extractReturnedResultSets(cs, declaredParameters, updateCount));
 				}
 				returnedResults.putAll(extractOutputParameters(cs, declaredParameters));
 				return returnedResults;
@@ -673,25 +675,33 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * @param parameters Parameter list for the stored procedure
 	 * @return Map that contains returned results
 	 */
-	protected Map extractReturnedResultSets(CallableStatement cs, List parameters) throws SQLException {
+	protected Map extractReturnedResultSets(CallableStatement cs, List parameters, int updateCount) throws SQLException {
 		Map returnedResults = new HashMap();
 		int rsIndex = 0;
+		boolean moreResults; 
 		do {
-			Object param = null;
-			if (parameters != null && parameters.size() > rsIndex) {
-				param = parameters.get(rsIndex);
+			if (updateCount == -1) {
+				Object param = null;
+				if (parameters != null && parameters.size() > rsIndex) {
+					param = parameters.get(rsIndex);
+				}
+				if (param instanceof SqlReturnResultSet) {
+					SqlReturnResultSet rsParam = (SqlReturnResultSet) param;
+					returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
+				}
+				else {
+					logger.warn("ResultSet returned from stored procedure but a corresponding " +
+											"SqlReturnResultSet parameter was not declared");
+				}
+				rsIndex++;
 			}
-			if (param instanceof SqlReturnResultSet) {
-				SqlReturnResultSet rsParam = (SqlReturnResultSet) param;
-				returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
+			moreResults = cs.getMoreResults();
+			updateCount = cs.getUpdateCount();
+			if (logger.isDebugEnabled()) {
+				logger.debug("CallableStatement.getUpdateCount returned [" + updateCount + "]");
 			}
-			else {
-				logger.warn("ResultSet returned from stored procedure but a corresponding " +
-										"SqlReturnResultSet parameter was not declared");
-			}
-			rsIndex++;
 		}
-		while (cs.getMoreResults());
+		while (moreResults || updateCount != -1);
 		return returnedResults;
 	}
 

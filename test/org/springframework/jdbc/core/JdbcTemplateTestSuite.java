@@ -1179,8 +1179,12 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		final CallableStatement mockCallableStatement2 =	(CallableStatement) ctrlCallableStatement2.getMock();
 		mockCallableStatement2.execute();
 		ctrlCallableStatement2.setReturnValue(true);
+		mockCallableStatement2.getUpdateCount();
+		ctrlCallableStatement2.setReturnValue(-1);
 		mockCallableStatement2.getMoreResults();
 		ctrlCallableStatement2.setReturnValue(false);
+		mockCallableStatement2.getUpdateCount();
+		ctrlCallableStatement2.setReturnValue(-1);
 
 		ctrlResultSet.replay();
 		ctrlStatement.replay();
@@ -1369,6 +1373,8 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 			mockCallable = (CallableStatement) ctrlCallable.getMock();
 			mockCallable.execute();
 			ctrlCallable.setReturnValue(true);
+			mockCallable.getUpdateCount();
+			ctrlCallable.setReturnValue(-1);
 			mockCallable.getResultSet();
 			ctrlCallable.setReturnValue(mockResultSet);
 			mockCallable.close();

@@ -118,6 +118,8 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Integer(4));
 		mockCallable.getWarnings();
@@ -142,6 +144,8 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Integer(4));
 		mockCallable.getWarnings();
@@ -179,6 +183,8 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		ctrlCallable.setVoidCallable(1);
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(false, 1);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue(new Integer(5), 1);
 		mockCallable.getWarnings();
@@ -236,6 +242,8 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue(new Integer(4));
 		mockCallable.getWarnings();
@@ -264,6 +272,8 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getWarnings();
 		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
@@ -345,10 +355,14 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(true);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getResultSet();
 		ctrlCallable.setReturnValue(mockResultSet);
 		mockCallable.getMoreResults();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -386,10 +400,14 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(true);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getResultSet();
 		ctrlCallable.setReturnValue(mockResultSet);
 		mockCallable.getMoreResults();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getWarnings();
 		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
@@ -422,6 +440,8 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue("OK");
 		mockCallable.getWarnings();
@@ -450,6 +470,8 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue("OK");
 		mockCallable.getWarnings();
