@@ -166,8 +166,8 @@ public class PagedListHolder implements Serializable {
 	 */
 	public int getPage() {
 		this.newPageSet = false;
-		if (this.page >= getNrOfPages()) {
-			this.page = getNrOfPages() - 1;
+		if (this.page >= getPageCount()) {
+			this.page = getPageCount() - 1;
 		}
 		return this.page;
 	}
@@ -190,6 +190,15 @@ public class PagedListHolder implements Serializable {
 	/**
 	 * Return the number of pages for the current source list.
 	 */
+	public int getPageCount() {
+		return getNrOfPages();
+	}
+
+	/**
+	 * Return the number of pages for the current source list.
+	 * @deprecated in favor of getPageCount
+	 * @see #getPageCount
+	 */
 	public int getNrOfPages() {
 		float nrOfPages = (float) getSource().size() / getPageSize();
 		return (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages);
@@ -206,7 +215,7 @@ public class PagedListHolder implements Serializable {
 	 * Return if the current page is the last one.
 	 */
 	public boolean isLastPage() {
-		return getPage() == getNrOfPages() -1;
+		return getPage() == getPageCount() -1;
 	}
 
 	/**

@@ -145,6 +145,15 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return the number of wizard pages.
 	 * Useful to check whether the last page has been reached.
 	 */
+	protected final int getPageCount() {
+		return this.pages.length;
+	}
+
+	/**
+	 * Return the number of wizard pages.
+	 * @deprecated in favor of getPageCount
+	 * @see #getPageCount
+	 */
 	protected final int getNrOfPages() {
 		return this.pages.length;
 	}
