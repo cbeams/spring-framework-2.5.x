@@ -18,9 +18,11 @@ package org.springframework.validation;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Map;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
@@ -271,6 +273,102 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("TOO_YOUNG", errors.getFieldError("spouse.age").getCode());
 		assertEquals("tb", ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getObjectName());
 		assertEquals(new Integer(0), ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getRejectedValue());
+	}
+
+	public void testBindingToIndexedField() {
+		IndexedTestBean tb = new IndexedTestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(String.class, "array.name", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("array" + text);
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0]", "a");
+		binder.bind(pvs);
+		Errors errors = binder.getErrors();
+		errors.rejectValue("array[0].name", "NOT_ROD", "are you sure you're not Rod?");
+		errors.rejectValue("map[key1].name", "NOT_ROD", "are you sure you're not Rod?");
+
+		assertEquals(1, errors.getFieldErrorCount("array[0].name"));
+		assertEquals("NOT_ROD", errors.getFieldError("array[0].name").getCode());
+		assertEquals("NOT_ROD.tb.array[0].name", errors.getFieldError("array[0].name").getCodes()[0]);
+		assertEquals("NOT_ROD.tb.array.name", errors.getFieldError("array[0].name").getCodes()[1]);
+		assertEquals("NOT_ROD.array[0].name", errors.getFieldError("array[0].name").getCodes()[2]);
+		assertEquals("NOT_ROD.array.name", errors.getFieldError("array[0].name").getCodes()[3]);
+		assertEquals("NOT_ROD.name", errors.getFieldError("array[0].name").getCodes()[4]);
+		assertEquals("NOT_ROD", errors.getFieldError("array[0].name").getCodes()[5]);
+		assertEquals(1, errors.getFieldErrorCount("map[key1].name"));
+		assertEquals("NOT_ROD", errors.getFieldError("map[key1].name").getCode());
+		assertEquals("NOT_ROD.tb.map[key1].name", errors.getFieldError("map[key1].name").getCodes()[0]);
+		assertEquals("NOT_ROD.tb.map.name", errors.getFieldError("map[key1].name").getCodes()[1]);
+		assertEquals("NOT_ROD.map[key1].name", errors.getFieldError("map[key1].name").getCodes()[2]);
+		assertEquals("NOT_ROD.map.name", errors.getFieldError("map[key1].name").getCodes()[3]);
+		assertEquals("NOT_ROD.name", errors.getFieldError("map[key1].name").getCodes()[4]);
+		assertEquals("NOT_ROD", errors.getFieldError("map[key1].name").getCodes()[5]);
+	}
+
+	public void testBindingToNestedIndexedField() {
+		IndexedTestBean tb = new IndexedTestBean();
+		tb.getArray()[0].setNestedIndexedBean(new IndexedTestBean());
+		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("list" + text);
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "a");
+		binder.bind(pvs);
+		Errors errors = binder.getErrors();
+		errors.rejectValue("array[0].nestedIndexedBean.list[0].name", "NOT_ROD", "are you sure you're not Rod?");
+
+		assertEquals(1, errors.getFieldErrorCount("array[0].nestedIndexedBean.list[0].name"));
+		assertEquals("NOT_ROD", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCode());
+		assertEquals("NOT_ROD.tb.array[0].nestedIndexedBean.list[0].name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[0]);
+		assertEquals("NOT_ROD.tb.array[0].nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[1]);
+		assertEquals("NOT_ROD.tb.array.nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[2]);
+		assertEquals("NOT_ROD.array[0].nestedIndexedBean.list[0].name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[3]);
+		assertEquals("NOT_ROD.array[0].nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[4]);
+		assertEquals("NOT_ROD.array.nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[5]);
+		assertEquals("NOT_ROD.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[6]);
+		assertEquals("NOT_ROD", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[7]);
+	}
+
+	public void testDirectBindingToIndexedField() {
+		IndexedTestBean tb = new IndexedTestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(String.class, "array", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean("array" + text, 99));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0]", "a");
+		binder.bind(pvs);
+		Errors errors = binder.getErrors();
+		errors.rejectValue("array[0]", "NOT_ROD", "are you sure you're not Rod?");
+		errors.rejectValue("map[key1]", "NOT_ROD", "are you sure you're not Rod?");
+
+		assertEquals("arraya", errors.getFieldValue("array[0]"));
+		assertEquals(1, errors.getFieldErrorCount("array[0]"));
+		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCode());
+		assertEquals("NOT_ROD.tb.array[0]", errors.getFieldError("array[0]").getCodes()[0]);
+		assertEquals("NOT_ROD.tb.array", errors.getFieldError("array[0]").getCodes()[1]);
+		assertEquals("NOT_ROD.array[0]", errors.getFieldError("array[0]").getCodes()[2]);
+		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
+		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals(1, errors.getFieldErrorCount("map[key1]"));
+		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCode());
+		assertEquals("NOT_ROD.tb.map[key1]", errors.getFieldError("map[key1]").getCodes()[0]);
+		assertEquals("NOT_ROD.tb.map", errors.getFieldError("map[key1]").getCodes()[1]);
+		assertEquals("NOT_ROD.map[key1]", errors.getFieldError("map[key1]").getCodes()[2]);
+		assertEquals("NOT_ROD.map", errors.getFieldError("map[key1]").getCodes()[3]);
+		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCodes()[4]);
 	}
 
 
