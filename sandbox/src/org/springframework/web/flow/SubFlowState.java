@@ -122,7 +122,7 @@ public class SubFlowState extends TransitionableState {
 		}
 	}
 
-	protected FlowAttributesMapper getAttributesMapper(Flow flow) throws NoSuchFlowAttributeMapperException {
+	protected FlowAttributesMapper getAttributesMapper(Flow flow) throws NoSuchFlowAttributesMapperException {
 		if (this.attributesMapper != null) {
 			return this.attributesMapper;
 		}
@@ -133,7 +133,7 @@ public class SubFlowState extends TransitionableState {
 			return flow.getFlowDao().getFlowAttributesMapper(this.attributesMapperId);
 		}
 		catch (NoSuchBeanDefinitionException e) {
-			throw new NoSuchFlowAttributeMapperException(flow, this, e);
+			throw new NoSuchFlowAttributesMapperException(flow, this, e);
 		}
 	}
 

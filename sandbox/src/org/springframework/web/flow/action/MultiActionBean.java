@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.action;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,7 +24,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.flow.action.AbstractActionBean;
+import org.springframework.web.flow.ActionBeanEvent;
+import org.springframework.web.flow.EventHandlerMethodNameResolver;
+import org.springframework.web.flow.FlowSessionExecutionInfo;
+import org.springframework.web.flow.FlowUtils;
+import org.springframework.web.flow.MutableAttributesAccessor;
 
 /**
  * @author Keith Donald
