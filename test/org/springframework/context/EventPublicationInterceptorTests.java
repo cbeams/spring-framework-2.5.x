@@ -15,7 +15,7 @@ import org.springframework.context.support.StaticApplicationContext;
 
 /** 
  * @author Dmitriy Kopylenko
- * @version $Id: EventPublicationInterceptorTests.java,v 1.1 2003-10-04 15:58:29 jhoeller Exp $
+ * @version $Id: EventPublicationInterceptorTests.java,v 1.2 2003-10-23 18:45:26 uid112313 Exp $
  */
 public class EventPublicationInterceptorTests extends TestCase {
 
@@ -23,18 +23,17 @@ public class EventPublicationInterceptorTests extends TestCase {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		ApplicationContext ctx = new StaticApplicationContext();
 		interceptor.setApplicationContext(ctx);
-		interceptor.setApplicationEventClass(null);
+
 		try {
-			interceptor.afterPropertiesSet();
+			interceptor.setApplicationEventClass(null);
 			fail("Should have thrown IllegalStateException");
 		}
 		catch (IllegalArgumentException e) {
 			//Expected
 		}
 
-		interceptor.setApplicationEventClass(getClass());
 		try {
-			interceptor.afterPropertiesSet();
+			interceptor.setApplicationEventClass(getClass());
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException e) {
@@ -57,8 +56,7 @@ public class EventPublicationInterceptorTests extends TestCase {
 
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationContext(ctx);
-		interceptor.setApplicationEventClass(org.springframework.context.TestApplicationEvent.class);
-		interceptor.afterPropertiesSet();
+		interceptor.setApplicationEventClass(TestApplicationEvent.class);
 
 		ProxyFactory factory = new ProxyFactory(target);
 		factory.addInterceptor(0, interceptor);
@@ -68,6 +66,14 @@ public class EventPublicationInterceptorTests extends TestCase {
 		//Invoke any method on the advised proxy to see if the interceptor has been invoked
 		testBean.getAge();
 		assertTrue("Interceptor published 1 event", listener.getEventCount() == 1);
+	}
+
+
+	public static class TestApplicationEvent extends ApplicationEvent {
+
+		public TestApplicationEvent(Object source) {
+			super(source);
+		}
 	}
 
 }
