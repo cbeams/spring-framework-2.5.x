@@ -109,5 +109,6 @@
 	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/xmlc/xmlc-base.jar"/>
 	<classpathentry kind="lib" path="lib/xmlc/xmlc-xerces.jar"/>
+	<classpathentry kind="lib" path="lib/ognl/ognl.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
