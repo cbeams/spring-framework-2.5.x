@@ -8,11 +8,14 @@ import java.util.Hashtable;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
@@ -127,7 +130,7 @@ public class JmsSender102Tests extends TestCase {
 		queueConnectionFactoryControl.setReturnValue(mockQueueConnection);
 		queueConnectionFactoryControl.replay();
 
-		mockQueueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+		mockQueueConnection.createQueueSession(true, Session.AUTO_ACKNOWLEDGE);
 		queueConnectionControl.setReturnValue(this.mockQueueSession);
 
 		mockJndiContext.lookup("testQueue");
@@ -157,7 +160,7 @@ public class JmsSender102Tests extends TestCase {
 		topicConnectionFactoryControl.setReturnValue(mockTopicConnection);
 		topicConnectionFactoryControl.replay();
 
-		mockTopicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+		mockTopicConnection.createTopicSession(true, Session.AUTO_ACKNOWLEDGE);
 		topicConnectionControl.setReturnValue(mockTopicSession);
 
 		mockJndiContext.lookup("testTopic");
@@ -185,6 +188,9 @@ public class JmsSender102Tests extends TestCase {
 				e.getMessage());
 		}
 
+		//The default is for the JmsSender102 to send to queues.
+		//Test to make sure exeception is thrown and has reasonable
+		//message.
 		s102 = new JmsSender102(mockTopicConnectionFactory);
 		try {
 			s102.afterPropertiesSet();
@@ -195,7 +201,7 @@ public class JmsSender102Tests extends TestCase {
 				"Specified a Spring JMS 1.0.2 Sender for queues but did not supply an instance of a QueueConnectionFactory",
 				e.getMessage());
 		}
-		
+
 		s102 = new JmsSender102(mockQueueConnectionFactory);
 		s102.setPubSubDomain(true);
 		try {
@@ -207,14 +213,45 @@ public class JmsSender102Tests extends TestCase {
 				"Specified a Spring JMS 1.0.2 Sender for topics but did not supply an instance of a TopicConnectionFactory",
 				e.getMessage());
 		}
-		
-		
+	}
 
+	public void testSendQueue() throws Exception {
+		JmsSender sender = new JmsSender102(mockQueueConnectionFactory);
+
+		MockControl queueSenderControl = MockControl.createControl(QueueSender.class);
+		QueueSender mockQueueSender = (QueueSender)queueSenderControl.getMock();
+
+		MockControl messageControl = MockControl.createControl(TextMessage.class);
+		TextMessage mockMessage = (TextMessage)messageControl.getMock();
+
+		this.mockQueueConnection.close();
+		this.queueConnectionControl.replay();
+		
+		this.mockQueueSession.createSender(this.mockQueue);
+		this.queueSessionControl.setReturnValue(mockQueueSender);
+		this.mockQueueSession.createTextMessage("just testing");
+		this.queueSessionControl.setReturnValue(mockMessage);
+		this.queueSessionControl.replay();
+		
+		mockQueueSender.send(mockQueue, mockMessage);
+		queueSenderControl.replay();
+
+		sender.send("testQueue", new SimpleMessageCreator());
+		
+		queueSenderControl.verify();
+		
+		this.queueSessionControl.verify();
 
 	}
 
-	public void sendQueue() throws Exception {
-		JmsSender sender = new JmsSender102(mockQueueConnectionFactory);
+	/**
+	 * Inner class that implements the MessageCreator interface to
+	 * create a simple text message
+	 */
+	class SimpleMessageCreator implements MessageCreator {
+		public Message createMessage(Session session) throws JMSException {
+			return session.createTextMessage("just testing");
+		}
 
 	}
 
