@@ -125,16 +125,6 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Set the name of the command in the model.
-	 * @deprecated as of 1.0 M3: use setCommandName instead.
-	 * This method will be removed before 1.0 final!
-	 * @see #setCommandName
-	 */
-	public final void setBeanName(String beanName) {
-		setCommandName(beanName);
-	}
-
-	/**
-	 * Set the name of the command in the model.
 	 * The command object will be included in the model under this name.
 	 */
 	public final void setCommandName(String commandName) {
@@ -213,18 +203,6 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #createCommand
 	 */
 	protected Object getCommand(HttpServletRequest request) throws Exception {
-		return userObject(request);
-	}
-
-	/**
-	 * Retrieve a command object for the given request.
-	 * @deprecated as of 1.0 M3: use getCommand instead.
-	 * This method will be removed before 1.0 final!
-	 * @param request current HTTP request
-	 * @return object command to bind onto
-	 * @see #getCommand
-	 */
-	protected Object userObject(HttpServletRequest request) throws Exception {
 		return createCommand();
 	}
 
