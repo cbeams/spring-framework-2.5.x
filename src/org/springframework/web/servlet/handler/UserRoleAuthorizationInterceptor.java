@@ -1,12 +1,10 @@
-package org.springframework.web.servlet.support;
+package org.springframework.web.servlet.handler;
 
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Interceptor that checks the authorization of the current user via the
@@ -15,7 +13,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * @since 20.06.2003
  * @see javax.servlet.http.HttpServletRequest#isUserInRole
  */
-public class UserRoleAuthorizationInterceptor implements HandlerInterceptor {
+public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 	private String[] authorizedRoles;
 
@@ -48,15 +46,12 @@ public class UserRoleAuthorizationInterceptor implements HandlerInterceptor {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
-	 * @throws ServletException if there is an internal error
-	 * @throws IOException in case of an I/O error when writing the response
+	 * @throws javax.servlet.ServletException if there is an internal error
+	 * @throws java.io.IOException in case of an I/O error when writing the response
 	 */
 	protected void handleNotAuthorized(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException, IOException {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
-	}
-
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 	}
 
 }
