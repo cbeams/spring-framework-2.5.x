@@ -100,5 +100,19 @@ public class RollbackRuleAttribute implements Serializable{
 	public String toString() {
 		return "RollbackRule with pattern '" + this.exceptionName + "'";
 	}
+	
+	public boolean equals(Object o) {
+		if ( !(o instanceof RollbackRuleAttribute) )
+			return false;
 
+		RollbackRuleAttribute rhs = (RollbackRuleAttribute) o;
+		
+		// no possibility of null
+		return this.exceptionName.equals(rhs.exceptionName);
+	}
+	
+	public int hashCode() {
+		return exceptionName.hashCode();
+	}
+	
 }

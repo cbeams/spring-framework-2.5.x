@@ -46,5 +46,7 @@ public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 	public String toString() {
 		return "No" + super.toString();
 	}
+	
 
+	// rely on superclass equals() and hashCode methods
 }
