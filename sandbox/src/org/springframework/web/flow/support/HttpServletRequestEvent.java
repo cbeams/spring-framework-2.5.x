@@ -20,7 +20,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.util.Assert;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Event;
@@ -40,22 +39,21 @@ public class HttpServletRequestEvent extends Event {
 	private long timestamp = new Date().getTime();
 
 	/**
-	 * The wrapped http servlet request.
-	 */
-	private HttpServletRequest request;
-
-	/**
 	 * Construct a flow event for the specified servlet request.
 	 * @param request the HTTP servlet request
 	 */
 	public HttpServletRequestEvent(HttpServletRequest request) {
-		Assert.notNull(request);
-		this.request = request;
+		super(request);
+	}
+
+	public HttpServletRequest getRequest() {
+		return (HttpServletRequest)getSource();
 	}
 
 	public String getId() {
 		try {
-			return RequestUtils.getRequiredStringParameter(request, getEventIdParameterName());
+			//TODO remove dependency on spring mvc
+			return RequestUtils.getRequiredStringParameter(getRequest(), getEventIdParameterName());
 		}
 		catch (ServletRequestBindingException e) {
 			throw new IllegalArgumentException("The event id is not present in the request: " + e.getMessage());
@@ -67,30 +65,26 @@ public class HttpServletRequestEvent extends Event {
 	}
 
 	public String getStateId() {
-		return request.getParameter(getCurrentStateIdParameterName());
+		return getRequest().getParameter(getCurrentStateIdParameterName());
 	}
 
 	public Object getParameter(String parameterName) {
-		return request.getParameter(parameterName);
+		return getRequest().getParameter(parameterName);
 	}
 
 	public Map getParameters() {
-		return request.getParameterMap();
+		return getRequest().getParameterMap();
 	}
-	
-	public Object getSource() {
-		return request;
-	}
-	
+
 	// subclassing hooks
-	
+
 	/**
 	 * Returns the name of the event id parameter in the request ("_eventId").
 	 */
 	protected String getEventIdParameterName() {
 		return FlowConstants.EVENT_ID_PARAMETER;
 	}
-	
+
 	/**
 	 * Returns the name of the current state id parameter in the request
 	 * ("_currentStateId").

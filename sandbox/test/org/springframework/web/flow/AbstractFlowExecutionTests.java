@@ -127,7 +127,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 *         (returned when the first view state is entered)
 	 */
 	protected ViewDescriptor startFlow(Map input) {
-		return startFlow(new LocalEvent("start", input));
+		return startFlow(new LocalEvent(this, "start", input));
 	}
 
 	/**
