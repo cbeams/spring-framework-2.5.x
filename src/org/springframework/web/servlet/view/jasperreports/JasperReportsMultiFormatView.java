@@ -154,6 +154,15 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 		this.contentDispositionMappings = mappings;
 	}
 
+	/**
+	 * Gets the mappings of <code>Content-Disposition</code> header values to
+	 * mapping keys.
+	 */
+	public Properties getContentDispositionMappings() {
+		// NOTE: Added to support configuration through the properties file mechanism.
+		return contentDispositionMappings;
+	}
+
 
 	/**
 	 * Locates the format key in the model using the configured discriminator key and uses this
