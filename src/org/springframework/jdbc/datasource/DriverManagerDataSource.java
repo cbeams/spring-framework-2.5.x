@@ -45,7 +45,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
  *
  * @author Juergen Hoeller
  * @since 14.03.2003
- * @version $Id: DriverManagerDataSource.java,v 1.8 2004-04-28 18:33:07 jhoeller Exp $
+ * @version $Id: DriverManagerDataSource.java,v 1.9 2004-07-06 14:48:49 jhoeller Exp $
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see org.springframework.mock.jndi.SimpleNamingContextBuilder
  * @see org.apache.commons.dbcp.BasicDataSource
@@ -148,8 +148,8 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 	 */
 	protected Connection getConnectionFromDriverManager(String url, String username, String password)
 	    throws SQLException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Creating new JDBC connection to [" + url + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating new JDBC connection to [" + url + "]");
 		}
 		return DriverManager.getConnection(url, username, password);
 	}
