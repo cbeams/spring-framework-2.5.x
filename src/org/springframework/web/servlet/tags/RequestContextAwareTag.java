@@ -32,17 +32,12 @@ import org.springframework.web.servlet.support.RequestContext;
  * The RequestContext instance provides easy access to current
  * state like WebApplicationContext, Locale, Theme, etc.
  *
- * <p>Supports an HTML escaping setting per tag instance,
- * overriding any default setting at the page or web.xml level.
- *
  * <p>Note: Only intended for DispatcherServlet requests!
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.web.servlet.support.RequestContext
  * @see org.springframework.web.servlet.DispatcherServlet
- * @see HtmlEscapeTag#setDefaultHtmlEscape
- * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  */
 public abstract class RequestContextAwareTag extends TagSupport implements TryCatchFinally {
 
@@ -64,7 +59,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 		this.requestContext = (RequestContext) this.pageContext.getAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE);
 		try {
 			if (this.requestContext == null) {
-				this.requestContext =	new JspAwareRequestContext(this.pageContext);
+				this.requestContext = new JspAwareRequestContext(this.pageContext);
 				this.pageContext.setAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE, this.requestContext);
 			}
 			return doStartTagInternal();
