@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc;
 
@@ -234,6 +234,41 @@ public class WizardFormControllerTests extends TestCase {
 		// name set -> now allowed to finish
 	}
 
+	public void testSubmitWithoutValidation() throws Exception {
+		AbstractWizardFormController wizard = new TestWizardController();
+		wizard.setAllowDirtyBack(false);
+		wizard.setAllowDirtyForward(false);
+		HttpSession session = performRequest(wizard, null, null, 0, null, 0, null);
+
+		Properties params = new Properties();
+		params.setProperty("formChange", "true");
+		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1", "value");
+		performRequest(wizard, session, params, 1, null, 0, null);
+		// no validation -> allowed to go to 1
+
+		params.clear();
+		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "0", "value");
+		performRequest(wizard, session, params, 1, null, 0, null);
+		// not allowed to go to 0
+
+		params.clear();
+		params.setProperty("age", "32");
+		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "0", "value");
+		performRequest(wizard, session, params, 0, null, 32, null);
+		// age set -> now allowed to go to 0
+
+		params.clear();
+		params.setProperty(AbstractWizardFormController.PARAM_FINISH, "value");
+		performRequest(wizard, session, params, 0, null, 32, null);
+		// finish while dirty -> show dirty page (0)
+
+		params.clear();
+		params.setProperty("name", "myname");
+		params.setProperty(AbstractWizardFormController.PARAM_FINISH + ".x", "value");
+		performRequest(wizard, session, params, -1, "myname", 32, null);
+		// name set -> now allowed to finish
+	}
+
 	public void testCancel() throws Exception {
 		AbstractWizardFormController wizard = new TestWizardController();
 		HttpSession session = performRequest(wizard, null, null, 0, null, 0, null);
@@ -315,7 +350,7 @@ public class WizardFormControllerTests extends TestCase {
 			assertTrue(request.getSession().getAttribute(wizard.getPageSessionAttributeName(request)) == null);
 		}
 		else if (target == -2) {
-			assertTrue("Cancel view returned", "abort".equals(mv.getViewName()));
+			assertTrue("Cancel view returned", "cancel".equals(mv.getViewName()));
 			assertTrue("Correct model size", mv.getModel().size() == 1);
 			assertTrue(request.getSession().getAttribute(wizard.getFormSessionAttributeName(request)) == null);
 			assertTrue(request.getSession().getAttribute(wizard.getPageSessionAttributeName(request)) == null);
@@ -324,6 +359,11 @@ public class WizardFormControllerTests extends TestCase {
 		assertTrue("Has model", tb != null);
 		assertTrue("Name is " + name, (tb.getName() == name || name.equals(tb.getName())));
 		assertTrue("Age is " + age, tb.getAge() == age);
+		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + "tb");
+		if (params != null && params.containsKey("formChange")) {
+			assertNotNull(errors);
+			assertFalse(errors.hasErrors());
+		}
 		return request.getSession(false);
 	}
 
@@ -339,6 +379,10 @@ public class WizardFormControllerTests extends TestCase {
 		protected Map referenceData(HttpServletRequest request, int page) throws Exception {
 			assertEquals(new Integer(page), request.getAttribute("target"));
 			return super.referenceData(request, page);
+		}
+
+		protected boolean suppressValidation(HttpServletRequest request) {
+			return (request.getParameter("formChange") != null);
 		}
 
 		protected void validatePage(Object command, Errors errors, int page) {
@@ -370,7 +414,7 @@ public class WizardFormControllerTests extends TestCase {
 				HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 		    throws ServletException, IOException {
 			assertTrue(getCurrentPage(request) == 0 || getCurrentPage(request) == 1);
-			return new ModelAndView("abort", getCommandName(), command);
+			return new ModelAndView("cancel", getCommandName(), command);
 		}
 	}
 
