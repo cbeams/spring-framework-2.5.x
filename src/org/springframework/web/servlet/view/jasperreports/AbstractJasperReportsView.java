@@ -177,8 +177,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #getReportDataTypes
 	 */
 	protected JRDataSource getReportData(Map model) throws IllegalArgumentException {
-		JRDataSource dataSource = null;
-
 		// Try model attribute with specified name.
 		if (this.reportDataKey != null) {
 			Object value = model.get(this.reportDataKey);
@@ -191,10 +189,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			return convertReportData(value);
 		}
 
-		if (dataSource == null) {
-			throw new IllegalArgumentException("No JRDataSource supplied");
-		}
-		return dataSource;
+		throw new IllegalArgumentException("No report data supplied in model " + model);
 	}
 
 	/**
