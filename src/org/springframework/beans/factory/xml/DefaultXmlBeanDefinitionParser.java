@@ -194,8 +194,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Parse a standard bean definition.
 	 */
 	protected AbstractBeanDefinition parseBeanDefinition(Element ele, String beanName) {
+		String className = null;
 		try {
-			String className = null;
 			if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 				className = ele.getAttribute(CLASS_ATTRIBUTE);
 			}
@@ -260,7 +260,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
-			throw new FatalBeanException("Error creating bean with name '" + beanName + "'", ex);
+			throw new FatalBeanException("Error creating bean with name '" + beanName + "'; " +
+					"classname was '" + className + "'", ex);
 		}
 	}
 
