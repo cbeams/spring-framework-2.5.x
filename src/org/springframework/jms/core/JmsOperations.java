@@ -22,40 +22,42 @@ import javax.jms.Message;
 import org.springframework.jms.JmsException;
 
 /**
- * Interface that implements a basic set of JMS operations.
- * Implemented by JmsTemplate102 that uses the JMS 1.0.2 specification and
- * JmsTemplate11 that uses the JMS 1.1 specification.  Not often used
- * but a useful option to enhance testability, as it can easily be 
- * mocked or stubbed.
+ * Interface that specifies a basic set of JMS operations.
+ * Implemented by JmsTemplate. Not often used but a useful option
+ * to enhance testability, as it can easily be mocked or stubbed.
+ *
+ * <p>Alternatively, the standard JMS infrastructure can be mocked.
+ * However, mocking this interface constitutes significantly less work.
  *
  * @author Mark Pollack
+ * @author Juergen Hoeller
  */
 public interface JmsOperations {
 
 	/**
-	 * Execute the action specified by the given action object within a
-	 * JMS Session.
+	 * Execute the action specified by the given action object within
+	 * a JMS Session.
 	 * <p>When used with a 1.0.2 provider, you may need to downcast
 	 * to the appropriate domain implementation, either QueueSession or
 	 * TopicSession in the action objects doInJms callback method.
 	 * <p>Note: The value of isPubSubDomain affects the behavior of this method.
 	 * If isPubSubDomain equals true, then a TopicSession is passed to the callback.
 	 * If false, then a QueueSession is passed to the callback.
-	 * @param action callback object that exposes the session.
-	 * @return The result object from working with the session.
+	 * @param action callback object that exposes the session
+	 * @return the result object from working with the session
 	 * @throws JmsException if there is any problem
 	 */
-	public Object execute(SessionCallback action) throws JmsException;
+	Object execute(SessionCallback action) throws JmsException;
 
 	/**
-	 * Send a message to a JMS destination.  The callback gives access to
+	 * Send a message to a JMS destination. The callback gives access to
 	 * the JMS session and MessageProducer in order to do more complex
 	 * send operations.
-	 * @param action callback object that exposes the session/producer pair.
-	 * @return The result object from working with the session.
+	 * @param action callback object that exposes the session/producer pair
+	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public Object execute(ProducerCallback action) throws JmsException;
+	Object execute(ProducerCallback action) throws JmsException;
 
 
 	/**
@@ -64,113 +66,164 @@ public interface JmsOperations {
 	 * @param messageCreator callback to create a message.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public void send(MessageCreator messageCreator) throws JmsException;
+	void send(MessageCreator messageCreator) throws JmsException;
 
 	/**
-	 * Send to the specified destination.  This method is useful when replying to
-	 * the destination in an incoming message specified in the JMSReplyTo message
-	 * property.
+	 * Send a message to the specified destination.
+	 * The MessageCreator callback creates the message given a Session.
 	 * @param destination the destination to send this message to
 	 * @param messageCreator callback to create a message.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public void send(Destination destination, MessageCreator messageCreator) throws JmsException;
+	void send(Destination destination, MessageCreator messageCreator) throws JmsException;
 
 	/**
-	 * Send a message to a JMS destination. The MessageCreator callback creates
-	 * the message given a session.
-	 * @param destinationName The destination name can refer to
-	 * either a dynamic destination or one residing in JNDI.
+	 * Send a message to the specified destination.
+	 * The MessageCreator callback creates the message given a Session.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
 	 * @param messageCreator callback to create a message.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public void send(String destinationName, MessageCreator messageCreator) throws JmsException;
+	void send(String destinationName, MessageCreator messageCreator) throws JmsException;
 
 
 	/**
-	 * Send an object to the default destination, converting the object
-	 * to a JMS message with the template's converter.
+	 * Send the given object to the default destination, converting the object
+	 * to a JMS message with a configured MessageConverter.
 	 * <p>This will only work with a default destination specified!
 	 * @param message the object to convert to a message
 	 * @throws JmsException converted checked JMSException to unchecked
 	 */
-	public void convertAndSend(Object message) throws JmsException;
+	void convertAndSend(Object message) throws JmsException;
 
 	/**
-	 * Send an object to the destination, converting the object to a JMS message
-	 * with the template's converter.
+	 * Send the given object to the specified destination, converting the object
+	 * to a JMS message with a configured MessageConverter.
 	 * @param destination the destination to send this message to
 	 * @param message the object to convert to a message
 	 * @throws JmsException converted checked JMSException to unchecked
 	 */
-	public void convertAndSend(Destination destination, Object message) throws JmsException;
+	void convertAndSend(Destination destination, Object message) throws JmsException;
 
 	/**
-	 * Send an object, converting to a JMS message, to the given destination.
-	 * @param destination the destination to send this message to.
-	 * A JNDI destination or a dynamic destination if enabled.
+	 * Send the given object to the specified destination, converting the object
+	 * to a JMS message with a configured MessageConverter.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
 	 * @param message the object to convert to a message
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public void convertAndSend(String destination, Object message) throws JmsException;
+	void convertAndSend(String destinationName, Object message) throws JmsException;
 
 	/**
-	 * Send an object to the default destination, converting the object to a JMS message.
-	 * The callback allows for modification of the message after conversion.
+	 * Send the given object to the default destination, converting the object
+	 * to a JMS message with a configured MessageConverter. The MessagePostProcessor
+	 * callback allows for modification of the message after conversion.
 	 * <p>This will only work with a default destination specified!
 	 * @param message the object to convert to a message
 	 * @param postProcessor the callback to modify the message
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public void convertAndSend(Object message, MessagePostProcessor postProcessor)
+	void convertAndSend(Object message, MessagePostProcessor postProcessor)
 	    throws JmsException;
 
 	/**
-	 * Send an object to the destination, converting the object to a JMS message.
-	 * The callback allows for modification of the message after conversion.
+	 * Send the given object to the specified destination, converting the object
+	 * to a JMS message with a configured MessageConverter. The MessagePostProcessor
+	 * callback allows for modification of the message after conversion.
 	 * @param destination the destination to send this message to
 	 * @param message the object to convert to a message
 	 * @param postProcessor the callback to modify the message
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public void convertAndSend(Destination destination, Object message, MessagePostProcessor postProcessor)
+	void convertAndSend(Destination destination, Object message, MessagePostProcessor postProcessor)
 	    throws JmsException;
 
 	/**
-	 * Send an object to the destination, converting the object to a JMS message.
-	 * The callback allows for modification of the message after conversion.
-	 * @param destination the destination to send this message to.
-	 * A JNDI destination or a dynamic destination if enabled.
+	 * Send the given object to the specified destination, converting the object
+	 * to a JMS message with a configured MessageConverter. The MessagePostProcessor
+	 * callback allows for modification of the message after conversion.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
 	 * @param message the object to convert to a message.
 	 * @param postProcessor the callback to modify the message
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public void convertAndSend(String destination, Object message, MessagePostProcessor postProcessor)
+	void convertAndSend(String destinationName, Object message, MessagePostProcessor postProcessor)
 	    throws JmsException;
 
 
 	/**
-	 * Receive a message synchronously but only wait up to a specified time
-	 * for delivery.
-	 * This method should be used carefully, since it will block the thread
+	 * Receive a message synchronously from the default destination, but only
+	 * wait up to a specified time for delivery.
+	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
-	 * @param destination The destination to receive a message from.
-	 * @param timeout the timeout value (in milliseconds)
+	 * <p>This will only work with a default destination specified!
 	 * @return the message produced for the consumer or null if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public Message receive(Destination destination, long timeout) throws JmsException;
+	Message receive() throws JmsException;
 
 	/**
-	 * Receive a message synchronously but only wait up to a specified time for
-	 * delivery.  This method should be used carefully, since it will block the
-	 * thread until the message becomes available or until the timeout value is exceeded.
-	 * @param destination The destination to receive a message from.   The name can refer to
-	 * either a dynamic destination or one residing in JNDI.
-	 * @param timeout the timeout value (in milliseconds)
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destination the destination to receive a message from
 	 * @return the message produced for the consumer or null if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	public Message receive(String destination, long timeout) throws JmsException;
+	Message receive(Destination destination) throws JmsException;
+
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Message receive(String destinationName) throws JmsException;
+
+
+	/**
+	 * Receive a message synchronously from the default destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a configured MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * <p>This will only work with a default destination specified!
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object receiveAndConvert() throws JmsException;
+
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a configured MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destination the destination to receive a message from
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object receiveAndConvert(Destination destination) throws JmsException;
+
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a configured MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @return the message produced for the consumer or null if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object receiveAndConvert(String destinationName) throws JmsException;
 
 }

@@ -30,6 +30,7 @@ import javax.naming.NamingException;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JndiDestinationResolver;
 import org.springframework.jndi.JndiTemplate;
 
@@ -318,7 +319,7 @@ public class JmsTemplate11Tests extends TestCase {
 		JmsTemplate sender = new JmsTemplate();
 		sender.setConnectionFactory(_mockConnectionFactory);
 		setJndiTemplate(sender);
-		sender.setMessageConverter(new ToStringConverter());
+		sender.setMessageConverter(new SimpleMessageConverter());
 		String s = "Hello world";
 
 		//Mock the javax.jms MessageProducer
