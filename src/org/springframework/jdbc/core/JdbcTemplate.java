@@ -67,7 +67,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.24 2004-02-17 17:21:25 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.25 2004-02-17 18:56:47 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -798,19 +798,27 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int nrOfColumns = rsmd.getColumnCount();
 			if (nrOfColumns != 1) {
-				throw new InvalidDataAccessApiUsageException("Expected single column, but received " +
-																										 nrOfColumns + " columns");
+				throw new InvalidDataAccessApiUsageException("Expected single column, but received " + nrOfColumns + " columns");
 			}
 			if (!rs.next()) {
 				throw new InvalidDataAccessApiUsageException("Expected single row, not empty ResultSet");
 			}
-			Object result = rs.getObject(1);
+			Object result = null;
+			if (requiredType.equals(Integer.class) && (
+			rsmd.getColumnType(1) == java.sql.Types.NUMERIC ||
+			rsmd.getColumnType(1) == java.sql.Types.INTEGER ||
+			rsmd.getColumnType(1) == java.sql.Types.SMALLINT ||
+			rsmd.getColumnType(1) == java.sql.Types.TINYINT))
+				result = new Integer(rs.getInt(1));
+			else
+				result = rs.getObject(1);
 			if (rs.next()) {
 				throw new InvalidDataAccessApiUsageException("Expected single row, not more than one");
 			}
 			if (this.requiredType != null && !this.requiredType.isInstance(result)) {
-				throw new InvalidDataAccessApiUsageException("Result object [" + result + "] is not of required type [" +
-				                                             this.requiredType.getName() + "]");
+				throw new InvalidDataAccessApiUsageException("Result object (db-type=\"" + rsmd.getColumnTypeName(1) + "\" value=\"" + 
+															result + "\") is of type [" + rsmd.getColumnClassName(1) + "] and not of required type [" +
+															this.requiredType.getName() + "]");
 			}
 			return result;
 		}
