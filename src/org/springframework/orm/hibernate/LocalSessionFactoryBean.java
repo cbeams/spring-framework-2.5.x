@@ -32,6 +32,7 @@ import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.cfg.Configuration;
 import net.sf.hibernate.cfg.Environment;
+import net.sf.hibernate.cfg.NamingStrategy;
 import net.sf.hibernate.dialect.Dialect;
 import net.sf.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.apache.commons.logging.Log;
@@ -129,6 +130,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	private LobHandler lobHandler;
 
 	private Interceptor entityInterceptor;
+
+	private NamingStrategy namingStrategy;
 
 	private boolean schemaUpdate = false;
 
@@ -260,9 +263,19 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @see HibernateTemplate#setEntityInterceptor
 	 * @see HibernateInterceptor#setEntityInterceptor
 	 * @see HibernateTransactionManager#setEntityInterceptor
+	 * @see net.sf.hibernate.cfg.Configuration#setInterceptor
 	 */
 	public void setEntityInterceptor(Interceptor entityInterceptor) {
 		this.entityInterceptor = entityInterceptor;
+	}
+
+	/**
+	 * Set a Hibernate NamingStrategy for the SessionFactory, determining the
+	 * physical column and table names given the info in the mapping document.
+	 * @see net.sf.hibernate.cfg.Configuration#setNamingStrategy
+	 */
+	public void setNamingStrategy(NamingStrategy namingStrategy) {
+		this.namingStrategy = namingStrategy;
 	}
 
 	/**
@@ -337,6 +350,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		}
 
 		if (this.jtaTransactionManager != null) {
+			// set Spring-provided JTA TransactionManager for Hibernate cache callbacks
 			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
 			LocalTransactionManagerLookup.configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
 		}
@@ -344,6 +358,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		if (this.entityInterceptor != null) {
 			// set given entity interceptor at SessionFactory level
 			config.setInterceptor(this.entityInterceptor);
+		}
+
+		if (this.namingStrategy != null) {
+			// pass given naming strategy to Hibernate Configuration
+			config.setNamingStrategy(this.namingStrategy);
 		}
 
 		// perform custom post-processing in subclasses
