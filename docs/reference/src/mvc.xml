@@ -1162,7 +1162,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para>When mixing different view technologies in a webapplications, you
       can use the ResourceBundleViewResolver: <programlisting>&lt;bean id="viewResolver"
       class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
-    &lt;property name="baseName"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
     &lt;property name="defaultParentView"&gt;&lt;value&gt;parentView&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 	<para>
