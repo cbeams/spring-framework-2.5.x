@@ -20,6 +20,8 @@ public interface ImageDatabase {
 
 	void storeImage(String name, InputStream is, String description) throws DataAccessException, IOException;
 
+	void checkImages() throws DataAccessException;
+
 	void clearDatabase() throws DataAccessException;
 
 }

@@ -10,6 +10,25 @@
 	<description>Spring Image Database sample application</description>
 
 	<!--
+	  - Location of the XML file that defines the root application context.
+	  - Applied by ContextLoaderServlet.
+		-
+		- Can include "/WEB-INF/schedulingContext-quartz.xml" for Quartz scheduling,
+		- or "/WEB-INF/schedulingContext-timer.xml" for Timer scheduling.
+	  -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			/WEB-INF/applicationContext.xml  /WEB-INF/schedulingContext-quartz.xml
+		</param-value>
+		<!--
+		<param-value>
+			/WEB-INF/applicationContext.xml  /WEB-INF/schedulingContext-timer.xml
+		</param-value>
+		-->
+	</context-param>
+
+	<!--
 	  - Loads the root application context of this web app at startup,
 	  - by default from "/WEB-INF/applicationContext.xml".
 		- Note that it is preferable to use ContextLoaderListener in a servlet container

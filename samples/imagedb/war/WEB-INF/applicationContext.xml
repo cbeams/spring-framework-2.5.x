@@ -9,7 +9,12 @@
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location"><value>WEB-INF/jdbc.properties</value></property>
+		<property name="locations">
+			<list>
+				<value>WEB-INF/jdbc.properties</value>
+				<value>WEB-INF/mail.properties</value>
+			</list>
+		</property>
 	</bean>
 
 	<!-- Local DataSource that works in any environment -->
@@ -49,7 +54,7 @@
 		<property name="lobHandler"><ref bean="${imageDatabase.lobHandler}"/></property>
 	</bean>
 
-	<!-- Transactional proxy for the  business object above -->
+	<!-- Transactional proxy for the business object above -->
 	<bean id="imageDatabase" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
 		<property name="target"><ref local="imageDatabaseTarget"/></property>
@@ -61,6 +66,12 @@
 				<prop key="clearDatabase">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
+	</bean>
+
+	<!-- MailSender implementation for JavaMail -->
+	<!-- Used by ListImagesQuartzJob and ListImagesTimerTask; see "scheduling-*.xml" -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host"><value>${mail.host}</value></property>
 	</bean>
 
 </beans>

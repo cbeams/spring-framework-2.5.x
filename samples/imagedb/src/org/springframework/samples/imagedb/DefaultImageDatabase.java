@@ -91,6 +91,11 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		}
 	}
 
+	public void checkImages() {
+		// could implement consistency check here
+		logger.info("Checking images: not implemented but invoked by scheduling");
+	}
+
 	public void clearDatabase() {
 		getJdbcTemplate().update("DELETE FROM imagedb");
 	}
@@ -100,6 +105,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 
 		public GetImagesQuery(DataSource ds) {
 			super(ds, "SELECT image_name, description FROM imagedb");
+			compile();
 		}
 
 		protected Object mapRow(ResultSet rs, int rowNum) throws SQLException {
