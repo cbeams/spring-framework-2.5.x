@@ -202,7 +202,7 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Returns the marker value indicating that the event id parameter was not
 	 * set properly in the request because of view configuration error (
-	 * {@link FlowConstants.NOT_SET_EVENT_ID}).
+	 * {@link FlowConstants#NOT_SET_EVENT_ID}).
 	 * <p>
 	 * This is useful when a view relies on an dynamic means to set the eventId
 	 * request parameter, for example, using javascript. This approach assumes
