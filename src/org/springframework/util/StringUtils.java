@@ -99,15 +99,15 @@ public abstract class StringUtils {
 
 	/**
 	 * Count the occurrences of the substring in string s.
-	 * @param s string to search in. Return 0 if this is null.
+	 * @param str string to search in. Return 0 if this is null.
 	 * @param sub string to search for. Return 0 if this is null.
 	 */
-	public static int countOccurrencesOf(String s, String sub) {
-		if (s == null || sub == null || "".equals(sub)) {
+	public static int countOccurrencesOf(String str, String sub) {
+		if (str == null || sub == null || "".equals(sub)) {
 			return 0;
 		}
 		int count = 0, pos = 0, idx = 0;
-		while ((idx = s.indexOf(sub, pos)) != -1) {
+		while ((idx = str.indexOf(sub, pos)) != -1) {
 			++count;
 			pos = idx + sub.length();
 		}
@@ -178,17 +178,23 @@ public abstract class StringUtils {
 
 	/**
 	 * Tokenize the given String into a String array via a StringTokenizer.
-	 * @param s the String to tokenize
+	 * <p>The given delimiters string is supposed to consist of any number of
+	 * delimiter characters. Each of those characters can be used to separate
+	 * tokens. A delimiter is always a single character; for multi-character
+	 * delimiters, consider using <code>delimitedListToStringArray</code>
+	 * @param str the String to tokenize
 	 * @param delimiters the delimiter characters, assembled as String
+	 * (each of those characters is individually considered as delimiter).
 	 * @param trimTokens trim the tokens via String.trim
 	 * @param ignoreEmptyTokens omit empty tokens from the result array
 	 * @return an array of the tokens
 	 * @see java.util.StringTokenizer
 	 * @see java.lang.String#trim
+	 * @see #delimitedListToStringArray
 	 */
 	public static String[] tokenizeToStringArray(
-			String s, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
-		StringTokenizer st = new StringTokenizer(s, delimiters);
+			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
+		StringTokenizer st = new StringTokenizer(str, delimiters);
 		List tokens = new ArrayList();
 		while (st.hasMoreTokens()) {
 			String token = st.nextToken();
@@ -204,28 +210,33 @@ public abstract class StringUtils {
 
 	/**
 	 * Take a String which is a delimited list and convert it to a String array.
-	 * @param s String
-	 * @param delim delim (this will not be returned)
+	 * <p>A single delimiter can consists of more than one character: It will still
+	 * be considered as single delimiter string, rather than as bunch of potential
+	 * delimiter characters - in contrast to <code>tokenizeToStringArray</code>.
+	 * @param str the input String
+	 * @param delimiter the delimiter between elements (this is a single delimiter,
+	 * rather than a bunch individual delimiter characters)
 	 * @return an array of the tokens in the list
+	 * @see #tokenizeToStringArray
 	 */
-	public static String[] delimitedListToStringArray(String s, String delim) {
-		if (s == null) {
+	public static String[] delimitedListToStringArray(String str, String delimiter) {
+		if (str == null) {
 			return new String[0];
 		}
-		if (delim == null) {
-			return new String[] {s};
+		if (delimiter == null) {
+			return new String[] {str};
 		}
 
 		List result = new ArrayList();
 		int pos = 0;
 		int delPos = 0;
-		while ((delPos = s.indexOf(delim, pos)) != -1) {
-			result.add(s.substring(pos, delPos));
-			pos = delPos + delim.length();
+		while ((delPos = str.indexOf(delimiter, pos)) != -1) {
+			result.add(str.substring(pos, delPos));
+			pos = delPos + delimiter.length();
 		}
-		if (s.length() > 0 && pos <= s.length()) {
-			// add rest of String, but not in case of empty input
-			result.add(s.substring(pos));
+		if (str.length() > 0 && pos <= str.length()) {
+			// Add rest of String, but not in case of empty input.
+			result.add(str.substring(pos));
 		}
 
 		return (String[]) result.toArray(new String[result.size()]);
@@ -233,22 +244,22 @@ public abstract class StringUtils {
 
 	/**
 	 * Convert a CSV list into an array of Strings.
-	 * @param s CSV list
+	 * @param str CSV list
 	 * @return an array of Strings, or the empty array if s is null
 	 */
-	public static String[] commaDelimitedListToStringArray(String s) {
-		return delimitedListToStringArray(s, ",");
+	public static String[] commaDelimitedListToStringArray(String str) {
+		return delimitedListToStringArray(str, ",");
 	}
 
 	/**
 	 * Convenience method to convert a CSV string list to a set.
 	 * Note that this will suppress duplicates.
-	 * @param s CSV String
+	 * @param str CSV String
 	 * @return a Set of String entries in the list
 	 */
-	public static Set commaDelimitedListToSet(String s) {
+	public static Set commaDelimitedListToSet(String str) {
 		Set set = new TreeSet();
-		String[] tokens = commaDelimitedListToStringArray(s);
+		String[] tokens = commaDelimitedListToStringArray(str);
 		for (int i = 0; i < tokens.length; i++) {
 			set.add(tokens[i]);
 		}
@@ -335,13 +346,13 @@ public abstract class StringUtils {
 	 * Append the given String to the given String array, returning a new array
 	 * consisting of the input array contents plus the given String.
 	 * @param arr the array to append to
-	 * @param s the String to append
+	 * @param str the String to append
 	 * @return the new array
 	 */
-	public static String[] addStringToArray(String[] arr, String s) {
+	public static String[] addStringToArray(String[] arr, String str) {
 		String[] newArr = new String[arr.length + 1];
 		System.arraycopy(arr, 0, newArr, 0, arr.length);
-		newArr[arr.length] = s;
+		newArr[arr.length] = str;
 		return newArr;
 	}
 
