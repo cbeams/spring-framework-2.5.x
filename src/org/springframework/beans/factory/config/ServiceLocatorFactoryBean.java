@@ -138,43 +138,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	private class ServiceLocatorInvocationHandler implements InvocationHandler {
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			try {
-				Class[] paramTypes = method.getParameterTypes();
-				Method interfaceMethod = serviceLocatorInterface.getMethod(method.getName(), paramTypes);
-				Class serviceLocatorReturnType = interfaceMethod.getReturnType();
-
-				// Check whether the method is a valid service locator.
-				if (paramTypes.length > 1 || void.class.equals(serviceLocatorReturnType)) {
-					throw new UnsupportedOperationException(
-							"May only call methods with signature '<type> xxx()' or '<type> xxx(<idtype> id)' " +
-							"on factory interface, but tried to call: " + interfaceMethod);
-				}
-
-				// Check whether a service id was passed in.
-				String beanName = "";
-				if (args != null && args.length == 1 && args[0] != null) {
-					beanName = args[0].toString();
-				}
-
-				// Look for explicit serviceId-to-beanName mappings.
-				if (serviceMappings != null) {
-					String mappedName = serviceMappings.getProperty(beanName);
-					if (mappedName != null) {
-						beanName = mappedName;
-					}
-				}
-
-				if (StringUtils.hasLength(beanName)) {
-					// Service locator for a specific bean name.
-					return beanFactory.getBean(beanName, serviceLocatorReturnType);
-				}
-				else {
-					// Service locator for a bean type.
-					return BeanFactoryUtils.beanOfTypeIncludingAncestors(beanFactory, serviceLocatorReturnType);
-				}
-			}
-
-			catch (NoSuchMethodException ex) {
+			if (Object.class.equals(method.getDeclaringClass())) {
 				// It's normal to get here for non service locator interface method calls
 				// (toString, equals, etc). Simply apply call to invocation handler object.
 				try {
@@ -183,6 +147,40 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 				catch (InvocationTargetException invEx) {
 					throw invEx.getTargetException();
 				}
+			}
+
+			Class[] paramTypes = method.getParameterTypes();
+			Method interfaceMethod = serviceLocatorInterface.getMethod(method.getName(), paramTypes);
+			Class serviceLocatorReturnType = interfaceMethod.getReturnType();
+
+			// Check whether the method is a valid service locator.
+			if (paramTypes.length > 1 || void.class.equals(serviceLocatorReturnType)) {
+				throw new UnsupportedOperationException(
+						"May only call methods with signature '<type> xxx()' or '<type> xxx(<idtype> id)' " +
+						"on factory interface, but tried to call: " + interfaceMethod);
+			}
+
+			// Check whether a service id was passed in.
+			String beanName = "";
+			if (args != null && args.length == 1 && args[0] != null) {
+				beanName = args[0].toString();
+			}
+
+			// Look for explicit serviceId-to-beanName mappings.
+			if (serviceMappings != null) {
+				String mappedName = serviceMappings.getProperty(beanName);
+				if (mappedName != null) {
+					beanName = mappedName;
+				}
+			}
+
+			if (StringUtils.hasLength(beanName)) {
+				// Service locator for a specific bean name.
+				return beanFactory.getBean(beanName, serviceLocatorReturnType);
+			}
+			else {
+				// Service locator for a bean type.
+				return BeanFactoryUtils.beanOfTypeIncludingAncestors(beanFactory, serviceLocatorReturnType);
 			}
 		}
 
