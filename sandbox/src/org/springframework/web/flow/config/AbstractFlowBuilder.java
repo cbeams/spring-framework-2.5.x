@@ -22,7 +22,6 @@ import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
@@ -40,31 +39,33 @@ import org.springframework.web.flow.action.MultiAction;
  * MVC's simple form controller:
  * 
  * <pre>
- * public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
  * 
- * 	protected String flowId() {
- * 		return &quot;customer.Detail&quot;;
- * 	}
- * 
- *  public void buildStates() {
+ *  public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
+ *  
+ *  	protected String flowId() {
+ *  		return &quot;customer.Detail&quot;;
+ *  	}
+ *  
+ *   public void buildStates() {
  *      // get customer information
- *   	addActionState(&quot;getDetails&quot;,
- *                     action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *                     on(success(), &quot;viewDetails&quot;));
+ *    	addActionState(&quot;getDetails&quot;,
+ *                      action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *                      on(success(), &quot;viewDetails&quot;));
  *      // view customer information               
- *   	addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *                   on(submit(), &quot;bindAndValidate&quot;);
+ *    	addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *                    on(submit(), &quot;bindAndValidate&quot;);
  *      // bind and validate customer information updates 
- *   	addActionState(&quot;bindAndValidate&quot;,
- *                     action(&quot;customer.Detail.bindAndValidate&quot;),
- *                     new Transition[] {
- *                         on(error(), &quot;viewDetails&quot;),
- *                         on(success(), &quot;finish&quot;)
- *                     }
+ *    	addActionState(&quot;bindAndValidate&quot;,
+ *                      action(&quot;customer.Detail.bindAndValidate&quot;),
+ *                      new Transition[] {
+ *                          on(error(), &quot;viewDetails&quot;),
+ *                          on(success(), &quot;finish&quot;)
+ *                      }
  *      // finish
- *   	addEndState(&quot;finish&quot;);
- *  }
- * 
+ *    	addEndState(&quot;finish&quot;);
+ *   }
+ *  
+ *  
  * </pre>
  * 
  * What this Java-based FlowBuilder implementation does is add four states to a
@@ -205,8 +206,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds a <code>ViewState</code> to the flow built by this builder. A view
 	 * state triggers the rendering of a view template when entered.
 	 * 
-	 * @param stateIdPrefix The <code>ViewState</code> id - must be locally
-	 *        unique to the flow built by this builder.
+	 * @param stateId The <code>ViewState</code> id; must be unique in the
+	 *        context of the flow built by this builder
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -218,9 +219,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix, String viewName, Transition[] transitions)
+	protected ViewState addViewState(String stateId, String viewName, Transition[] transitions)
 			throws IllegalArgumentException {
-		return new ViewState(getFlow(), stateIdPrefix, viewName, transitions);
+		return new ViewState(getFlow(), stateId, viewName, transitions);
 	}
 
 	/**
@@ -229,8 +230,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * A marker has a <code>null</code> <code>viewName</code> and assumes
 	 * the HTTP response has already been written when entered. The marker notes
 	 * that control should be returned to the HTTP client.
-	 * @param stateId The <code>ViewState</code> id - must be locally unique
-	 *        to the flow built by this builder.
+	 * @param stateId The <code>ViewState</code> id; must be unique in the
+	 *        context of the flow built by this builder
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The view marker state
@@ -248,7 +249,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * assumes the HTTP response has already been written when entered. The
 	 * marker notes that control should be returned to the HTTP client.
 	 * <p>
-	 * @param stateId The <code>ViewState</code> id
+	 * @param stateId The <code>ViewState</code> id; must be unique in the
+	 *        context of the flow built by this builder
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
