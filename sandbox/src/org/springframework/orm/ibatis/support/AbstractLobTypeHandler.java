@@ -24,6 +24,7 @@ import java.sql.SQLException;
 
 import com.ibatis.sqlmap.engine.type.BaseTypeHandler;
 
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -35,7 +36,17 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 
+	/**
+	 * Order value for TransactionSynchronization objects that clean up LobCreators.
+	 * Return DataSourceUtils.#CONNECTION_SYNCHRONIZATION_ORDER - 100 to execute
+	 * LobCreator cleanup before JDBC Connection cleanup, if any.
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
+	 */
+	public static final int LOB_CREATOR_SYNCHRONIZATION_ORDER =
+			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
+
 	private LobHandler lobHandler;
+
 
 	public AbstractLobTypeHandler() {
 		// this.lobHandler = SqlMapClientFactoryBean.getConfigTimeLobHandler();
@@ -43,6 +54,7 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 
 	public final void setParameter(PreparedStatement ps, int i, Object parameter, String jdbcType)
 			throws SQLException {
+
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			throw new IllegalStateException("Spring transaction synchronization needs to be active for " +
 					"setting values in iBATIS TypeHandlers that delegate to a Spring LobHandler");
@@ -54,26 +66,20 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 		catch (IOException ex) {
 			throw new SQLException("I/O errors during LOB access: " + ex.getMessage());
 		}
+
 		TransactionSynchronizationManager.registerSynchronization(
-				new TransactionSynchronizationAdapter() {
-					public void beforeCompletion() {
-						lobCreator.close();
-					}
-				}
-		);
+				new LobCreatorSynchronization(lobCreator));
 	}
 
 	protected abstract void setParameterInternal(
 			PreparedStatement ps, int index, Object parameter, String jdbcType, LobCreator lobCreator)
 			throws SQLException, IOException;
 
-	public final Object getResult(ResultSet rs, String columnName)
-			throws SQLException {
+	public final Object getResult(ResultSet rs, String columnName) throws SQLException {
 		return getResult(rs, rs.findColumn(columnName));
 	}
 
-	public final Object getResult(ResultSet rs, int columnIndex)
-			throws SQLException {
+	public final Object getResult(ResultSet rs, int columnIndex) throws SQLException {
 		try {
 			return getResultInternal(rs, columnIndex, this.lobHandler);
 		}
@@ -85,9 +91,31 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 	protected abstract Object getResultInternal(ResultSet rs, int columnIndex, LobHandler lobHandler)
 			throws SQLException, IOException;
 
-	public Object getResult(CallableStatement cs, int columnIndex)
-			throws SQLException {
+	public Object getResult(CallableStatement cs, int columnIndex) throws SQLException {
 		throw new SQLException("Retrieving LOBs from a CallableStatement is not supported");
+	}
+
+
+	/**
+	 * Callback for resource cleanup at the end of a Spring transaction.
+	 * Invokes LobCreator.close to clean up temporary LOBs that might have been created.
+	 * @see org.springframework.jdbc.support.lob.LobCreator#close
+	 */
+	private static class LobCreatorSynchronization extends TransactionSynchronizationAdapter {
+
+		private final LobCreator lobCreator;
+
+		private LobCreatorSynchronization(LobCreator lobCreator) {
+			this.lobCreator = lobCreator;
+		}
+
+		public int getOrder() {
+			return LOB_CREATOR_SYNCHRONIZATION_ORDER;
+		}
+
+		public void beforeCompletion() {
+			this.lobCreator.close();
+		}
 	}
 
 }
