@@ -18,7 +18,7 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +31,7 @@ import org.springframework.core.JdkVersion;
  * Method.hashCode() call. On J2SE 1.3, falls back to using java.util.HashMap.
  *
  * @author Rod Johnson
- * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.6 2004-05-26 10:41:13 jhoeller Exp $
+ * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.7 2004-06-02 17:07:34 jhoeller Exp $
  * @see java.util.IdentityHashMap
  * @see java.util.HashMap
  * @see java.lang.reflect.Method#hashCode
@@ -44,11 +44,11 @@ public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFact
 		// Use IdentityHashMap, introduced in J2SE 1.4, which is a lot faster
 		// as we want to compare Method keys by reference. If not available,
 		// fall back to standard HashMap.
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return new HashMap();
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			return IdentityHashMapCreator.createIdentityHashMap();
 		}
 		else {
-			return new IdentityHashMap();
+			return new HashMap();
 		}
 	}
 	
@@ -69,6 +69,18 @@ public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFact
 
 	public void adviceChanged(AdvisedSupport advisedSupport) {
 		this.methodCache.clear();
+	}
+
+
+	/**
+	 * Actual creation of a java.util.IdentityHashMap.
+	 * In separate inner class to avoid runtime dependency on JDK 1.4.
+	 */
+	private static abstract class IdentityHashMapCreator {
+
+		private static Map createIdentityHashMap() {
+			return new LinkedHashMap();
+		}
 	}
 
 }
