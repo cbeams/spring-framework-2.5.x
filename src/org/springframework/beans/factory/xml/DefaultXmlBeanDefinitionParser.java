@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.28 2004-07-01 20:55:49 jhoeller Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.29 2004-07-02 07:21:15 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
@@ -639,21 +639,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * get the text value we know this element contains.
 	 */
 	protected String getTextValue(Element ele, String beanName) {
+		StringBuffer value = new StringBuffer();
 		NodeList nl = ele.getChildNodes();
-		if (nl.getLength() == 0) {
-			// treat empty value as empty String
-			return "";
-		}
-		Text text = null;
 		for (int i = 0; i < nl.getLength(); i++) {
 			Object item = nl.item(i);
 			if (item instanceof Text) {
-				if (text != null) {
-					throw new BeanDefinitionStoreException(this.resource, beanName,
-																								 "Expected to find single node of type text " +
-																								 "as child of <value> element");
-				}
-				text = ((Text) item);
+				value.append(((Text) item).getData());
 			}
 			else if (item instanceof Comment) {
 				// ignore
@@ -664,13 +655,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 																							 "not: " + item.getClass().getName());
 			}
 		}
-		if (text != null) {
-			return text.getData();
-		}
-		else {
-			throw new BeanDefinitionStoreException(this.resource, beanName,
-																						 "Expected to find a node of type text as child of <value> element");
-		}
+		return value.toString();
 	}
 
 	protected int getDependencyCheck(String att) {

@@ -16,7 +16,7 @@
 	</bean>
 
 	<bean id="kerry" class="org.springframework.beans.TestBean">
-		<property name="name"><value>Kerry</value></property>
+		<property name="name"><value>Ker<!-- a comment -->ry</value></property>
 		<property name="age"><value>34</value></property>
 		<property name="spouse"><ref local="rod"/></property>
 		<property name="touchy"><value></value></property>
