@@ -43,10 +43,8 @@
 
 <!--
 	Defines a single action that should be executed when the action state is entered.
-	Use this element when you need to define more than one action per action state,
-	or need more control over action configuration.
 -->
-<!ELEMENT action EMPTY>
+<!ELEMENT action ( property* )>
 
 <!--
 	Identifier of the action implementation exported in the configured registry.
@@ -80,6 +78,27 @@
 	as a named action.
 -->
 <!ATTLIST action name CDATA #IMPLIED>
+
+<!--
+	Property associated with an action in an action state. This allows
+	basic action state specific parametrization of an action.
+-->
+<!ELEMENT property ( value? )>
+
+<!--
+	The name of the property
+-->
+<!ATTLIST property name CDATA #REQUIRED>
+
+<!--
+	A short-cut alternative to a child element "value".
+-->
+<!ATTLIST property value CDATA #IMPLIED>
+
+<!--
+	Contains a property value.
+-->
+<!ELEMENT value ( #PCDATA )>
 
 <!--
 	Defines a view state: a state where a view will be rendered.

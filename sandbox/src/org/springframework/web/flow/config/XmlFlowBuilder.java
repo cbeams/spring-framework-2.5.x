@@ -31,6 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.ActionStateAction;
@@ -128,6 +129,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String CLASSREF_ATTRIBUTE = "classref";
 
 	private static final String NAME_ATTRIBUTE = "name";
+	
+	private static final String VALUE_ATTRIBUTE = "value";
 
 	private static final String VIEW_STATE_ELEMENT = "view-state";
 
@@ -146,6 +149,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String EVENT_ATTRIBUTE = "on";
 
 	private static final String TO_ATTRIBUTE = "to";
+
+	private static final String PROPERTY_ELEMENT = "property";
+	
+	private static final String VALUE_ELEMENT = "value";
 	
 
 	private Resource resource;
@@ -397,15 +404,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected ActionStateAction[] parseActionStateActions(Element element) {
 		List actionStateActions = new LinkedList();
-		NodeList childNodeList = element.getChildNodes();
-		for (int i = 0; i < childNodeList.getLength(); i++) {
-			Node childNode = childNodeList.item(i);
-			if (childNode instanceof Element) {
-				Element childElement = (Element)childNode;
-				if (ACTION_ELEMENT.equals(childElement.getNodeName())) {
-					actionStateActions.add(parseActionStateAction(childElement));
-				}
-			}
+		List actionElements = DomUtils.getChildElementsByTagName(element, ACTION_ELEMENT);
+		for (int i = 0; i < actionElements.size(); i++) {
+			actionStateActions.add(parseActionStateAction((Element)actionElements.get(i)));
 		}
 		return (ActionStateAction[])actionStateActions.toArray(new ActionStateAction[actionStateActions.size()]);
 	}
@@ -420,7 +421,27 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		if (element.hasAttribute(NAME_ATTRIBUTE)) {
 			actionStateAction.setName(element.getAttribute(NAME_ATTRIBUTE));
 		}
+		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
+		for (int i = 0; i < propertyElements.size(); i++) {
+			parseAndAddProperty((Element)propertyElements.get(i), actionStateAction);
+		}
 		return actionStateAction;
+	}
+	
+	/**
+	 * Parse a property definition from given element and add the property
+	 * to given action.
+	 */
+	protected void parseAndAddProperty(Element element, ActionStateAction action) {
+		String name = element.getAttribute(NAME_ATTRIBUTE);
+		if (element.hasAttribute(VALUE_ATTRIBUTE)) {
+			action.setProperty(name, element.getAttribute(VALUE_ATTRIBUTE));
+		}
+		else {
+			List valueElements = DomUtils.getChildElementsByTagName(element, VALUE_ELEMENT);
+			Assert.state(valueElements.size() == 1, "A property value should be specified for property '" + name + "'");
+			action.setProperty(name, DomUtils.getTextValue((Element)valueElements.get(0)));
+		}
 	}
 
 	/**
@@ -429,15 +450,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Transition[] parseTransitions(Element element) {
 		List transitions = new LinkedList();
-		NodeList childNodeList = element.getChildNodes();
-		for (int i = 0; i < childNodeList.getLength(); i++) {
-			Node childNode = childNodeList.item(i);
-			if (childNode instanceof Element) {
-				Element childElement = (Element)childNode;
-				if (TRANSITION_ELEMENT.equals(childElement.getNodeName())) {
-					transitions.add(parseTransition(childElement));
-				}
-			}
+		List transitionElements = DomUtils.getChildElementsByTagName(element, TRANSITION_ELEMENT);
+		for (int i = 0; i < transitionElements.size(); i++) {
+			transitions.add(parseTransition((Element)transitionElements.get(i)));
 		}
 		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
 	}
@@ -457,23 +472,13 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
      * element and return the identified mapper, or null if no mapper is referenced.
      */
     protected FlowAttributeMapper parseAttributeMapper(Element element) {
-    	Element attributeMapperElement = null;
-		NodeList childNodeList = element.getChildNodes();
-		for (int i = 0; i < childNodeList.getLength(); i++) {
-			Node childNode = childNodeList.item(i);
-			if (childNode instanceof Element) {
-				Element childElement = (Element)childNode;
-				if (ATTRIBUTE_MAPPER_ELEMENT.equals(childElement.getNodeName())) {
-					attributeMapperElement = childElement;
-				}
-			}
-		}
-		
-		if (attributeMapperElement !=  null) {
-			return (FlowAttributeMapper)parseFlowService(attributeMapperElement, FlowAttributeMapper.class);
-		}
-    	else {
+    	List attributeMapperElements = DomUtils.getChildElementsByTagName(element, ATTRIBUTE_MAPPER_ELEMENT);
+    	if (attributeMapperElements.isEmpty()) {
     		return null;
+    	}
+    	else {
+    		Element attributeMapperElement = (Element)attributeMapperElements.get(0);
+    		return (FlowAttributeMapper)parseFlowService(attributeMapperElement, FlowAttributeMapper.class);
     	}
     }
     
