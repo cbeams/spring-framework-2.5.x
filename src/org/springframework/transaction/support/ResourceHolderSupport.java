@@ -31,9 +31,25 @@ import java.util.Date;
  */
 public abstract class ResourceHolderSupport {
 
+	private boolean synchronizedWithTransaction;
+
 	private boolean rollbackOnly;
 
 	private Date deadline;
+
+	/**
+	 * Mark the resource as synchronized with a transaction.
+	 */
+	public void setSynchronizedWithTransaction(boolean synchronizedWithTransaction) {
+		this.synchronizedWithTransaction = synchronizedWithTransaction;
+	}
+
+	/**
+	 * Return whether the resource is synchronized with a transaction.
+	 */
+	public boolean isSynchronizedWithTransaction() {
+		return synchronizedWithTransaction;
+	}
 
 	/**
 	 * Mark the resource transaction as rollback-only.
@@ -63,6 +79,20 @@ public abstract class ResourceHolderSupport {
 	 */
 	public void setTimeoutInMillis(long millis) {
 		this.deadline = new Date(System.currentTimeMillis() + millis);
+	}
+
+	/**
+	 * Clear the timeout, leaving this object without an associated timeout.
+	 */
+	public void clearTimeout() {
+		this.deadline = null;
+	}
+
+	/**
+	 * Return whether this object has an associated timeout.
+	 */
+	public boolean hasTimeout() {
+		return (this.deadline != null);
 	}
 
 	/**
