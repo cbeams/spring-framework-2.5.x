@@ -560,6 +560,9 @@ public abstract class SessionFactoryUtils {
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			query.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
+		if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+			query.setReadOnly(true);
+		}
 	}
 
 	/**
@@ -807,8 +810,6 @@ public abstract class SessionFactoryUtils {
 
 		public void beforeCommit(boolean readOnly) throws DataAccessException {
 			if (!readOnly) {
-				// read-write transaction -> flush the Hibernate Session
-				logger.debug("Flushing Hibernate session on transaction synchronization");
 				Session session = null;
 				// Check whether there is a Hibernate Session for the current JTA
 				// transaction. Else, fall back to the default thread-bound Session.
@@ -818,8 +819,10 @@ public abstract class SessionFactoryUtils {
 				if (session == null) {
 					session = this.sessionHolder.getSession();
 				}
-				// further check: only flush when not FlushMode.NEVER
-				if (!session.getFlushMode().equals(FlushMode.NEVER)) {
+				// Read-write transaction -> flush the Hibernate Session.
+				// Further check: only flush when not FlushMode.NEVER.
+				if (!FlushMode.NEVER.equals(session.getFlushMode())) {
+					logger.debug("Flushing Hibernate session on transaction synchronization");
 					try {
 						session.flush();
 					}

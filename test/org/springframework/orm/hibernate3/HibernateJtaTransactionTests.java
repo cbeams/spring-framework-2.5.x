@@ -29,6 +29,7 @@ import org.easymock.MockControl;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
+import org.hibernate.Query;
 import org.hibernate.classic.Session;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
@@ -160,6 +161,13 @@ public class HibernateJtaTransactionTests extends TestCase {
 	private void doTestJtaTransactionCommit(int status, final boolean readOnly) throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+		final MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
 		ut.getStatus();
 		utControl.setReturnValue(status, 1);
 		ut.getStatus();
@@ -170,28 +178,32 @@ public class HibernateJtaTransactionTests extends TestCase {
 			ut.commit();
 			utControl.setVoidCallable(1);
 		}
-		utControl.replay();
 
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		final MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
+		final List list = new ArrayList();
+		list.add("test");
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
 		if (status == Status.STATUS_NO_TRANSACTION && readOnly) {
 			session.setFlushMode(FlushMode.NEVER);
 			sessionControl.setVoidCallable(1);
+			query.setReadOnly(true);
+			queryControl.setReturnValue(query, 1);
 		}
+		query.list();
+		queryControl.setReturnValue(list, 1);
+
+		utControl.replay();
 		sfControl.replay();
 		sessionControl.replay();
+		queryControl.replay();
 
 		JtaTransactionManager ptm = new JtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setReadOnly(readOnly);
-		final List l = new ArrayList();
-		l.add("test");
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
@@ -202,24 +214,23 @@ public class HibernateJtaTransactionTests extends TestCase {
 					assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
 					ht.setExposeNativeSession(true);
-					List htl = ht.executeFind(new HibernateCallback() {
+					ht.executeFind(new HibernateCallback() {
 						public Object doInHibernate(org.hibernate.Session sess) {
 							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 							assertEquals(session, sess);
-							return l;
+							return null;
 						}
 					});
 					ht = new HibernateTemplate(sf);
-					ht.setExposeNativeSession(true);
-					htl = ht.executeFind(new HibernateCallback() {
+					List htl = ht.executeFind(new HibernateCallback() {
 						public Object doInHibernate(org.hibernate.Session sess) {
 							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-							assertEquals(session, sess);
-							return l;
+							return sess.createQuery("some query string").list();
 						}
 					});
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					sessionControl.verify();
+					queryControl.verify();
 					sessionControl.reset();
 					try {
 						if (!readOnly) {
@@ -243,7 +254,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 			}
 		});
 
-		assertTrue("Correct result list", result == l);
+		assertTrue("Correct result list", result == list);
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 

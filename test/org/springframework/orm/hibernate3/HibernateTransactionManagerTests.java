@@ -95,10 +95,11 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.setReturnValue(query, 1);
 		query.list();
 		queryControl.setReturnValue(list, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+
 		dsControl.replay();
 		conControl.replay();
 		sfControl.replay();
@@ -742,7 +743,11 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
 
+		final List list = new ArrayList();
+		list.add("test");
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -751,26 +756,32 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setVoidCallable(1);
 		session.connection();
 		sessionControl.setReturnValue(con, 2);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.commit();
-		txControl.setVoidCallable(1);
 		con.setReadOnly(true);
 		conControl.setVoidCallable(1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setReadOnly(true);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		tx.commit();
+		txControl.setVoidCallable(1);
 		con.isReadOnly();
 		conControl.setReturnValue(true, 1);
 		con.setReadOnly(false);
 		conControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+
+		conControl.replay();
 		sfControl.replay();
 		sessionControl.replay();
 		txControl.replay();
-		conControl.replay();
+		queryControl.replay();
 
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setReadOnly(true);
-		final List l = new ArrayList();
-		l.add("test");
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
@@ -778,21 +789,19 @@ public class HibernateTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				HibernateTemplate ht = new HibernateTemplate(sf);
-				return ht.executeFind(new HibernateCallback() {
-					public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-						return l;
-					}
-				});
+				return ht.find("some query string");
 			}
 		});
-		assertTrue("Correct result list", result == l);
+		assertTrue("Correct result list", result == list);
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		conControl.verify();
 		sfControl.verify();
 		sessionControl.verify();
 		txControl.verify();
-		conControl.verify();
+		queryControl.verify();
 	}
 
 	public void testTransactionCommitWithFlushingFailure() throws HibernateException, SQLException {
