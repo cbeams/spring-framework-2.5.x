@@ -19,7 +19,7 @@ package org.springframework.web.servlet.view.jasperreports;
 /**
  * @author Rob Harrop
  */
-public class JasperReportsCsvViewTests extends AbstractJasperReportsTests {
+public class JasperReportsCsvViewTests extends AbstractJasperReportsViewTests {
 
 	protected AbstractJasperReportsView getViewImplementation() {
 		return new JasperReportsCsvView();

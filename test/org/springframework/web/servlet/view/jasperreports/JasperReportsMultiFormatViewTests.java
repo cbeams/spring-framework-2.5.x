@@ -8,7 +8,7 @@ import java.util.HashMap;
  *
  * @author robh
  */
-public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsTests{
+public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsViewTests{
 
 	protected void extendModel(Map model) {
 		model.put(getDiscriminatorKey(), "csv");
