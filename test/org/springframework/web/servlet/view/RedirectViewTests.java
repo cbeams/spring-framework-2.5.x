@@ -25,6 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+
 /**
  * Tests for redirect view, and query string construction.
  * Doesn't test URL encoding, although it does check it's called.
@@ -34,7 +37,8 @@ import org.easymock.MockControl;
  */
 public class RedirectViewTests extends TestCase {
 
-	private void test(final Map m, String url, boolean contextRelative, String expectedUrlForEncoding) throws Exception {
+	private void test(final Map m, String url, boolean contextRelative, String expectedUrlForEncoding)
+			throws Exception {
 		class TestRedirectView extends RedirectView {
 			public boolean valid;
 			
@@ -130,6 +134,17 @@ public class RedirectViewTests extends TestCase {
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
+	}
+
+	public void testHttp11() throws Exception {
+		RedirectView rv = new RedirectView();
+		rv.setUrl("http://url.somewhere.com");
+		rv.setHttp10Compatible(false);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		rv.render(new HashMap(), request, response);
+		assertEquals(303, response.getStatus());
+		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
 	}
 
 }

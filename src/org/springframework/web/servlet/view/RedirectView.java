@@ -42,7 +42,10 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	private boolean contextRelative = false;
 
+	private boolean http10Compatible = true;
+
 	private String encodingScheme = DEFAULT_ENCODING_SCHEME;
+
 
 	/**
 	 * Constructor for use as a bean.
@@ -70,6 +73,19 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Create a new RedirectView with the given URL.
+	 * @param url the URL to redirect to
+	 * @param contextRelative whether to interpret the given URL as
+	 * relative to the current ServletContext
+	 * @param http10Compatible whether to stay compatible with HTTP 1.0 clients
+	 */
+	public RedirectView(String url, boolean contextRelative, boolean http10Compatible) {
+		setUrl(url);
+		this.contextRelative = contextRelative;
+		this.http10Compatible = http10Compatible;
+	}
+
+	/**
 	 * Set whether to interpret the given URL as relative to the current
 	 * ServletContext, i.e. as relative to the web application root.
 	 * <p>Default is false: The URL will be intepreted as absolute, i.e.
@@ -81,15 +97,32 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Set whether to stay compatible with HTTP 1.0 clients.
+	 * <p>In the default implementation, this will enforce HTTP status code
+	 * 302 in any case, i.e. delegate to HttpServletResponse.sendRedirect.
+	 * Turning this off will send HTTP status code 303, which is the correct
+	 * code for HTTP 1.1 clients, but not understood by HTTP 1.0 clients.
+	 * <p>Many HTTP 1.1 clients treat 302 just like 303, not making any
+	 * difference. However, some clients depend on 303 when redirecting
+	 * after a POST request; turn this flag off in such a scenario.
+	 * @see javax.servlet.http.HttpServletResponse#sendRedirect
+	 */
+	public void setHttp10Compatible(boolean http10Compatible) {
+		this.http10Compatible = http10Compatible;
+	}
+
+	/**
 	 * Set the encoding scheme for this view.
 	 */
 	public void setEncodingScheme(String encodingScheme) {
 		this.encodingScheme = encodingScheme;
 	}
 
+
 	/**
 	 * Convert model to request parameters and redirect to the given URL.
 	 * @see #appendQueryProperties
+	 * @see #sendRedirect
 	 */
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -102,8 +135,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		targetUrl.append(getUrl());
 		appendQueryProperties(targetUrl, model, this.encodingScheme);
 
-		// send redirect
-		response.sendRedirect(response.encodeRedirectURL(targetUrl.toString()));
+		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
 	}
 
 	/**
@@ -140,12 +172,34 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Determine name-value pairs for query strings, which will be stringified,
-	 * URL-encoded and formatted by buildRedirectUrl.
+	 * URL-encoded and formatted by appendQueryProperties.
 	 * <p>This implementation returns all model elements as-is.
 	 * @see #appendQueryProperties
 	 */
 	protected Map queryProperties(Map model) {
 		return model;
+	}
+
+	/**
+	 * Send a redirect back to the HTTP client
+	 * @param request current HTTP request (allows for reacting to request method)
+	 * @param response current HTTP response (for sending response headers)
+	 * @param targetUrl the target URL to redirect to
+	 * @param http10Compatible whether to stay compatible with HTTP 1.0 clients
+	 * @throws IOException if thrown by response methods
+	 */
+	protected void sendRedirect(
+			HttpServletRequest request, HttpServletResponse response, String targetUrl, boolean http10Compatible)
+			throws IOException {
+		if (http10Compatible) {
+			// always send status code 302
+			response.sendRedirect(response.encodeRedirectURL(targetUrl));
+		}
+		else {
+			// correct HTTP status code is 303, in particular for POST requests
+			response.setStatus(303);
+			response.setHeader("Location", response.encodeRedirectURL(targetUrl));
+		}
 	}
 
 }
