@@ -62,10 +62,15 @@ distribution/website before using any of them in your own applications.
 - HSQLDB 1.7.1 (http://hsqldb.sourceforge.net)
 - required for running JPetStore and Petclinic
 
-* ibatis/ibatis-common.jar, ibatis/ibatis-sqlmap.jar, ibatis/ibatis-sqlmap-2.jar
-- iBATIS SQL Maps 1.3.1 and 2.0 RC5 (http://www.ibatis.com)
+* ibatis/ibatis-sqlmap.jar, ibatis/ibatis-common.jar
+- iBATIS SQL Maps 1.3.1 (http://www.ibatis.com)
 - required for building the framework
-- required at runtime when using Spring's iBATIS SQL Maps support
+- required at runtime when using Spring's iBATIS SQL Maps 1.3 support
+
+* ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
+- iBATIS SQL Maps 2.0 RC5 (http://www.ibatis.com)
+- ibatis-sqlmap-2.jar is required for building the framework
+- required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
 * itext/itext-1.02b.jar
 - iText PDF 1.02 (http://www.lowagie.com/itext)

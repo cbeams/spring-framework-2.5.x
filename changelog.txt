@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.161 2004-06-09 18:58:18 jhoeller Exp $
+$Id: changelog.txt,v 1.162 2004-06-11 23:59:06 jhoeller Exp $
 
 
 Changes in version 1.0.3 (27.6.2004)
@@ -10,8 +10,17 @@ Package org.springframework.aop
 * fixed debug log statements to avoid invocation of "toString" method on target (not supported e.g. by Axis proxy)
 
 Package org.springframework.beans
+* factored out PropertyAccessor base interface from BeanWrapper
+* refined BeanWrapperImpl to apply a custom editor strictly either to an array/Collection or to each of their elements
+* refined BeanWrapperImpl to automatically convert a value to an array with a single component when necessary
+* refined BeanWrapperImpl to support converting any Collection into an array rather than just a List
 * fixed PropertiesEditor's support for converting a Map to Properties
+* added ArgumentConvertingMethodInvoker subclass of MethodInvoker, converting given arguments via BeanWrapperImpl
+* MethodInvokingFactoryBean derives from ArgumentConvertingMethodInvoker to inherit argument conversion
 * fixed MethodInvokingFactoryBean's singleton initialization to properly allow for circular reference detection
+
+Package org.springframework.dao
+* fixed DataAccessUtils' "requiredUniqueResult" method, to correctly throw an IncorrectResultSizeDataAccessException
 
 Package org.springframework.jdbc
 * adapted CommonsDbcpNativeJdbcExtractor for Commons DBCP 1.2, to support both DBCP 1.1 and 1.2
@@ -31,10 +40,14 @@ Package org.springframework.scheduling
 * added "jobSchedulingDataLocation" property to SchedulerFactoryBean, supporting Quartz 1.3's job definition XML files
 * added "dataSource" property to SchedulerFactoryBean, for using a Spring-managed DataSource as Quartz job store
 * added "overwriteExistingJobs" property to SchedulerFactoryBean, to control overwriting of persistent jobs
+* MethodInvokingJobDetail/TimerTaskFactoryBean derive from ArgumentConvertingMethodInvoker to inherit arg conversion
 
 Package org.springframework.util
 * deprecated ResponseTimeMonitorImpl's "getUptime" method in favor of "getUptimeMillis"
 * deprecated StopWatch's "getLastInterval"/"getTotalTime" in favor of "getLastTaskTimeMillis"/"getTotalTimeMillis"
+
+Package org.springframework.validation
+* added "rejectIfEmptyOrWhitespace" method to ValidationUtils, for rejecting if empty or just containing whitespace
 
 Package org.springframework.web
 * added IntrospectorCleanupListener to web.util package, for cleaning up JavaBeans Introspector leaks on shutdown

@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.64 2004-06-10 20:51:57 aarendsen Exp $
+    $Id: build.xml,v 1.65 2004-06-11 23:59:06 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -24,6 +24,9 @@
 
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
+			<!-- Exclude ibatis-common-2, because it conflicts with ibatis-common -->
+			<!-- The former is not needed for building the framework, but the latter is -->
+			<exclude name="ibatis/ibatis-common-2.jar"/>
 		</fileset>
 
 	</path>
