@@ -218,8 +218,8 @@
       provide a close integration between AOP implementation and Spring IoC to
       help solve common problems in enterprise applications.</para>
 
-      <para> Thus, for example, Spring&#39;s AOP functionality is normally
-      used in conjunction with a Spring IoC container. AOP advice is specified
+      <para>Thus, for example, Spring&#39;s AOP functionality is normally used
+      in conjunction with a Spring IoC container. AOP advice is specified
       using normal bean definition syntax (although this allows powerful
       &#34;autoproxying&#34; capabilities); advice and pointcuts are
       themselves managed by Spring IoC: a crucial difference from other AOP
@@ -1040,8 +1040,8 @@
 
       <itemizedlist>
         <listitem>
-          <para>A target bean that will be proxied. This is the
-          &#34;personTarget&#34; bean definition in the example below.</para>
+          <para>A <emphasis>target bean</emphasis> that will be proxied. This
+          is the &#34;personTarget&#34; bean definition in the example below.</para>
         </listitem>
 
         <listitem>
@@ -1112,6 +1112,47 @@
       implementation. However, its class would be a dynamic proxy class. It
       would be possible to cast it to the <literal>Advised</literal> interface
       (discussed below).</para>
+
+      <para>It&#39;s possible to conceal the distinction between target and
+      proxy using an anonymous <emphasis>inner bean</emphasis>, as follows.
+      Only the <literal>ProxyFactoryBean</literal> definition is different;
+      the advice is included only for completeness:</para>
+
+      <para><programlisting>&#60;bean id=&#34;myAdvisor&#34; class=&#34;com.mycompany.MyAdvisor&#34;&#62;
+    &#60;property name=&#34;someProperty&#34;&#62;&#60;value&#62;Custom string property value&#60;/value&#62;&#60;/property&#62;
+&#60;/bean&#62;
+
+&#60;bean id=&#34;debugInterceptor&#34; class=&#34;org.springframework.aop.interceptor.NopInterceptor&#34;&#62;
+&#60;/bean&#62;
+
+&#60;bean id=&#34;person&#34; 
+    class=&#34;org.springframework.aop.framework.ProxyFactoryBean&#34;&#62;
+    &#60;property name=&#34;proxyInterfaces&#34;&#62;&#60;value&#62;com.mycompany.Person&#60;/value&#62;&#60;/property&#62;
+
+    &#60;!-- Use inner bean, not local reference to target --&#62;
+    &#60;property name=&#34;target&#34;&#62;
+        &#60;bean class=&#34;com.mycompany.PersonImpl&#34;&#62;
+            &#60;property name=&#34;name&#34;&#62;&#60;value&#62;Tony&#60;/value&#62;&#60;/property&#62;
+            &#60;property name=&#34;age&#34;&#62;&#60;value&#62;51&#60;/value&#62;&#60;/property&#62;
+        &#60;/bean&#62;
+   &#60;/property&#62;
+
+    &#60;property name=&#34;interceptorNames&#34;&#62;
+        &#60;list&#62;
+            &#60;value&#62;myAdvisor&#60;/value&#62;
+            &#60;value&#62;debugInterceptor&#60;/value&#62;
+        &#60;/list&#62;
+    &#60;/property&#62;
+&#60;/bean&#62;</programlisting></para>
+
+      <para>This has the advantage that there&#39;s only one object of type
+      <literal>Person</literal>: useful if we want to prevent users of the
+      application context obtaining a reference to the un-advised object, or
+      need to avoid any ambiguity with Spring IoC <emphasis>autowiring</emphasis>.
+      There&#39;s also arguably an advantage in that the ProxyFactoryBean
+      definition is self-contained. However, there are times when being able
+      to obtain the un-advised target from the factory might actually be an
+      <emphasis>advantage</emphasis>: for example, in certain test scenarios.</para>
     </sect2>
 
     <sect2>
@@ -1213,6 +1254,10 @@
         &#60;/props&#62;
     &#60;/property&#62;
 &#60;/bean&#62;</programlisting></para>
+
+      <para>As with the <literal>ProxyFactoryBean</literal>, we might choose
+      to use an inner bean to set the value of <literal>target</literal>
+      property, instead of a reference to a top-level target bean.</para>
 
       <para>The <literal>TransactionProxyFactoryBean</literal> automatically
       creates a transaction advisor, including a pointcut based on the
@@ -1328,9 +1373,9 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
 
     <programlisting>Advisor[] getAdvisors();
 
-void addInterceptor(Interceptor interceptor) throws AopConfigException;
+void addAdvice(Advice advice) throws AopConfigException;
 
-void addInterceptor(int pos, Interceptor interceptor) 
+void addAdvice(int pos, Advice advice) 
         throws AopConfigException;
 
 void addAdvisor(Advisor advisor) throws AopConfigException;
@@ -1358,14 +1403,34 @@ boolean isFrozen();</programlisting>
     matches all classes and methods.</para>
 
     <para>The <literal>addAdvisor()</literal> methods can be used to add any
-    Advisor. Usually this will be the generic <literal>DefaultPointcutAdvisor</literal>,
-    which can be used with any advice or pointcut (but not for introduction).</para>
+    Advisor. Usually the advisor holding pointcut and advice will be the
+    generic <literal>DefaultPointcutAdvisor</literal>, which can be used with
+    any advice or pointcut (but not for introduction).</para>
 
     <para>By default, it&#39;s possible to add or remove advisors or
     interceptors even once a proxy has been created. The only restriction is
     that it&#39;s impossible to add or remove an introduction advisor, as
     existing proxies from the factory will not show the interface change. (You
     can obtain a new proxy from the factory to avoid this problem.)</para>
+
+    <para>A simple example of casting an AOP proxy to the <literal>Advised</literal>
+    interface and examining and manipulating its advice:</para>
+
+    <para><programlisting>Advised advised = (Advised) myObject;
+Advisor[] advisors = advised.getAdvisors();
+int oldAdvisorCount = advisors.length;
+System.out.println(oldAdvisorCount + &#34; advisors&#34;);
+
+// Add an advice like an interceptor without a pointcut
+// Will match all proxied methods
+// Can use for interceptors, before, after returning or throws advice
+advised.addAdvice(new DebugInterceptor());
+
+// Add selective advice using a pointcut
+advised.addAdvisor(new DefaultPointcutAdvisor(mySpecialPointcut, myAdvice));
+
+assertEquals(&#34;Added two advisors&#34;,
+     oldAdvisorCount + 2, advised.getAdvisors().length);</programlisting></para>
 
     <remark>It&#39;s questionable whether it&#39;s advisable (no pun intended)
     to modify advice on a business object in production, although there are no
@@ -1503,7 +1568,8 @@ boolean isFrozen();</programlisting>
         <para>Autoproxying in general has the advantage of making it
         impossible for callers or dependencies to obtain an un-advised object.
         Calling getBean(&#34;businessObject1&#34;) on this ApplicationContext
-        will return an AOP proxy, not the target business object.</para>
+        will return an AOP proxy, not the target business object. (The
+        &#34;inner bean&#34; idiom shown earlier also offers this benefit.)</para>
 
         <para><programlisting>&#60;bean id=&#34;autoProxyCreator&#34;
     class=&#34;org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator&#34;&#62;
