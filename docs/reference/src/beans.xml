@@ -1544,7 +1544,7 @@ public class AnotherExampleBean implements DisposableBean {
     <emphasis>preInstantiateSingletons</emphasis> method will completely
     ignore bean definitions which are considered abstract.</para>
 
-    <para><emphasis>Important Note</emphasis>: XmlBeanFactory will by default
+    <para><emphasis>Important Note</emphasis>: Application contexts (but not simple bean factories) will by default
     pre-instantiate all singletons. Therefore it is important (at least for
     singleton beans) that if you have a (parent) bean definition which you
     intend to use only as a template, and this definition specifies a class,
