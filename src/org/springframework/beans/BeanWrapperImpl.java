@@ -38,6 +38,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
@@ -70,7 +71,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.36 2004-04-01 14:55:53 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.37 2004-04-05 07:17:55 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -92,6 +93,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// Register default editors in this class, for restricted environments.
 		// We're not using the JRE's PropertyEditorManager to avoid potential
 		// SecurityExceptions when running in a SecurityManager.
+		defaultEditors.put(byte[].class, ByteArrayPropertyEditor.class);
 		defaultEditors.put(Class.class, ClassEditor.class);
 		defaultEditors.put(File.class, FileEditor.class);
 		defaultEditors.put(InputStream.class, InputStreamEditor.class);

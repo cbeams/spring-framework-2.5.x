@@ -25,7 +25,8 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: BeanWrapperTestSuite.java,v 1.18 2004-03-26 11:06:42 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: BeanWrapperTestSuite.java,v 1.19 2004-04-05 07:17:57 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -980,6 +981,13 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals(2, tb.getArray()[1]);
 	}
 
+	public void testByteArrayPropertyEditor() {
+		ByteArrayBean bean = new ByteArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.setPropertyValue("array", "myvalue");
+		assertEquals("myvalue", new String(bean.getArray()));
+	}
+
 
 	private static class NoRead {
 
@@ -1050,6 +1058,20 @@ public class BeanWrapperTestSuite extends TestCase {
 		}
 
 		public void setArray(int[] array) {
+			this.array = array;
+		}
+	}
+
+
+	private static class ByteArrayBean {
+
+		private byte[] array;
+
+		public byte[] getArray() {
+			return array;
+		}
+
+		public void setArray(byte[] array) {
 			this.array = array;
 		}
 	}
