@@ -23,7 +23,6 @@ import javax.ejb.CreateException;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.remoting.RemoteLookupFailureException;
@@ -75,23 +74,21 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 			ejb = getSessionBeanInstance();
 			return RmiClientInterceptorUtils.doInvoke(invocation, ejb);
 		}
+		catch (NamingException ex) {
+			throw new RemoteLookupFailureException("Failed to locate remote EJB [" + getJndiName() + "]", ex);
+		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
 			if (targetEx instanceof RemoteException) {
+				RemoteException rex = (RemoteException) targetEx;
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
-				    invocation.getMethod(), (RemoteException) targetEx, getJndiName());
+				    invocation.getMethod(), rex, isConnectFailure(rex), getJndiName());
 			}
 			else if (targetEx instanceof CreateException) {
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
 				    invocation.getMethod(), targetEx, "Could not create remote EJB [" + getJndiName() + "]");
 			}
 			throw targetEx;
-		}
-		catch (NamingException ex) {
-			throw new RemoteLookupFailureException("Failed to locate remote EJB [" + getJndiName() + "]", ex);
-		}
-		catch (Throwable ex) {
-			throw new AspectException("Failed to invoke remote EJB [" + getJndiName() + "]", ex);
 		}
 		finally {
 			if (ejb != null) {

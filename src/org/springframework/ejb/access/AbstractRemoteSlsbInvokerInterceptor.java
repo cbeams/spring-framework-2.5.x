@@ -81,13 +81,24 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 			return handleRemoteConnectFailure(invocation, ex);
 		}
 		catch (RemoteException ex) {
-			if (RmiClientInterceptorUtils.isConnectFailure(ex)) {
+			if (isConnectFailure(ex)) {
 				return handleRemoteConnectFailure(invocation, ex);
 			}
 			else {
 				throw ex;
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the given RMI exception indicates a connect failure.
+	 * Default implementation delegates to RmiClientInterceptorUtils.
+	 * @param ex the RMI exception to check
+	 * @return whether the exception should be treated as connect failure
+	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
+	 */
+	protected boolean isConnectFailure(RemoteException ex) {
+		return RmiClientInterceptorUtils.isConnectFailure(ex);
 	}
 
 	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {

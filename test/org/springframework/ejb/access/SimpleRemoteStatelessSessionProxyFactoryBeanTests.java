@@ -35,7 +35,19 @@ import org.springframework.remoting.RemoteAccessException;
  * @author Rod Johnson
  * @since 21-May-2003
  */
-public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase {
+public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRemoteSlsbInvokerInterceptorTests {
+
+	protected SimpleRemoteSlsbInvokerInterceptor createInterceptor() {
+		return new SimpleRemoteStatelessSessionProxyFactoryBean();
+	}
+
+	protected Object configuredProxy(SimpleRemoteSlsbInvokerInterceptor si, Class ifc) throws NamingException {
+		SimpleRemoteStatelessSessionProxyFactoryBean fb = (SimpleRemoteStatelessSessionProxyFactoryBean) si;
+		fb.setBusinessInterface(ifc);
+		fb.afterPropertiesSet();
+		return fb.getObject();
+	}
+
 
 	public void testInvokesMethod() throws Exception {
 		final int value = 11;

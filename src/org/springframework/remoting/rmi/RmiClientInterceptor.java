@@ -211,13 +211,24 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 			return handleRemoteConnectFailure(invocation, ex);
 		}
 		catch (RemoteException ex) {
-			if (RmiClientInterceptorUtils.isConnectFailure(ex)) {
+			if (isConnectFailure(ex)) {
 				return handleRemoteConnectFailure(invocation, ex);
 			}
 			else {
 				throw ex;
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the given RMI exception indicates a connect failure.
+	 * Default implementation delegates to RmiClientInterceptorUtils.
+	 * @param ex the RMI exception to check
+	 * @return whether the exception should be treated as connect failure
+	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
+	 */
+	protected boolean isConnectFailure(RemoteException ex) {
+		return RmiClientInterceptorUtils.isConnectFailure(ex);
 	}
 
 	/**
@@ -283,7 +294,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 			}
 			catch (RemoteException ex) {
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
-				    invocation.getMethod(), ex, getServiceUrl());
+				    invocation.getMethod(), ex, isConnectFailure(ex), getServiceUrl());
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
@@ -294,7 +305,20 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 		}
 		else {
 			// traditional RMI stub
-			return RmiClientInterceptorUtils.invoke(invocation, stub, getServiceUrl());
+			try {
+				return RmiClientInterceptorUtils.doInvoke(invocation, stub);
+			}
+			catch (InvocationTargetException ex) {
+				Throwable targetEx = ex.getTargetException();
+				if (targetEx instanceof RemoteException) {
+					RemoteException rex = (RemoteException) targetEx;
+					throw RmiClientInterceptorUtils.convertRmiAccessException(
+							invocation.getMethod(), rex, isConnectFailure(rex), getServiceUrl());
+				}
+				else {
+					throw targetEx;
+				}
+			}
 		}
 	}
 

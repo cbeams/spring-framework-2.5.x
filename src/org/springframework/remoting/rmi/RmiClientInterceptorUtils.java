@@ -20,9 +20,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.ConnectException;
 import java.rmi.ConnectIOException;
+import java.rmi.MarshalException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.StubNotFoundException;
+import java.rmi.UnknownHostException;
+import java.rmi.UnmarshalException;
 import java.util.Arrays;
 
 import org.aopalliance.aop.AspectException;
@@ -69,14 +73,12 @@ public abstract class RmiClientInterceptorUtils {
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
 			if (targetEx instanceof RemoteException) {
-				throw convertRmiAccessException(invocation.getMethod(), (RemoteException) targetEx, serviceName);
+				RemoteException rex = (RemoteException) targetEx;
+				throw convertRmiAccessException(invocation.getMethod(), rex, serviceName);
 			}
 			else {
 				throw targetEx;
 			}
-		}
-		catch (Throwable ex) {
-			throw new AspectException("Failed to invoke remote service [" + serviceName + "]", ex);
 		}
 	}
 
@@ -86,63 +88,27 @@ public abstract class RmiClientInterceptorUtils {
 	 * @param invocation the AOP MethodInvocation
 	 * @param stub the RMI stub
 	 * @return the invocation result, if any
-	 * @throws NoSuchMethodException if thrown by reflection
-	 * @throws IllegalAccessException if thrown by reflection
 	 * @throws InvocationTargetException if thrown by reflection
 	 */
-	public static Object doInvoke(MethodInvocation invocation, Remote stub)
-	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		Method method = invocation.getMethod();
-		if (method.getDeclaringClass().isInstance(stub)) {
-			// directly implemented
-			return method.invoke(stub, invocation.getArguments());
-		}
-		else {
-			// not directly implemented
-			Method stubMethod = stub.getClass().getMethod(method.getName(), method.getParameterTypes());
-			return stubMethod.invoke(stub, invocation.getArguments());
-		}
-	}
-
-	/**
-	 * Convert the given RemoteException that happened during remote access
-	 * to Spring's RemoteAccessException if the method signature does not
-	 * support RemoteException. Else, return the original RemoteException.
-	 * @param method the invoked method
-	 * @param ex the RemoteException that happended
-	 * @param serviceName the name of the service (for debugging purposes)
-	 * @return the exception to be thrown to the caller
-	 */
-	public static Exception convertRmiAccessException(Method method, RemoteException ex, String serviceName) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Remote service [" + serviceName + "] threw exception", ex);
-		}
-		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
-			if (isConnectFailure(ex)) {
-				return new RemoteConnectFailureException("Cannot connect to remote service [" + serviceName + "]", ex);
+	public static Object doInvoke(MethodInvocation invocation, Remote stub) throws InvocationTargetException {
+		try {
+			Method method = invocation.getMethod();
+			if (method.getDeclaringClass().isInstance(stub)) {
+				// directly implemented
+				return method.invoke(stub, invocation.getArguments());
 			}
 			else {
-				return new RemoteAccessException("Cannot access remote service [" + serviceName + "]", ex);
+				// not directly implemented
+				Method stubMethod = stub.getClass().getMethod(method.getName(), method.getParameterTypes());
+				return stubMethod.invoke(stub, invocation.getArguments());
 			}
 		}
-		else {
-			return ex;
+		catch (InvocationTargetException ex) {
+			throw ex;
 		}
-	}
-
-	/**
-	 * Determine whether the given RMI exception indicates a connect failure.
-	 * Treats ConnectException, ConnectIOException and NoSuchObjectException
-	 * as connect failure.
-	 * @param ex the RMI exception to check
-	 * @return whether the exception should be treated as connect failure
-	 * @see java.rmi.ConnectException
-	 * @see java.rmi.ConnectIOException
-	 * @see java.rmi.NoSuchObjectException
-	 */
-	public static boolean isConnectFailure(RemoteException ex) {
-		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
-				ex instanceof NoSuchObjectException);
+		catch (Throwable ex) {
+			throw new AspectException("Local remote service proxy invocation failed", ex);
+		}
 	}
 
 	/**
@@ -168,6 +134,70 @@ public abstract class RmiClientInterceptorUtils {
 		else {
 			return new RemoteException(message, ex);
 		}
+	}
+
+	/**
+	 * Convert the given RemoteException that happened during remote access
+	 * to Spring's RemoteAccessException if the method signature does not
+	 * support RemoteException. Else, return the original RemoteException.
+	 * @param method the invoked method
+	 * @param ex the RemoteException that happened
+	 * @param serviceName the name of the service (for debugging purposes)
+	 * @return the exception to be thrown to the caller
+	 */
+	public static Exception convertRmiAccessException(Method method, RemoteException ex, String serviceName) {
+		return convertRmiAccessException(method, ex, isConnectFailure(ex), serviceName);
+	}
+
+	/**
+	 * Convert the given RemoteException that happened during remote access
+	 * to Spring's RemoteAccessException if the method signature does not
+	 * support RemoteException. Else, return the original RemoteException.
+	 * @param method the invoked method
+	 * @param ex the RemoteException that happened
+	 * @param isConnectFailure whether the given exception should be considered
+	 * a connect failure
+	 * @param serviceName the name of the service (for debugging purposes)
+	 * @return the exception to be thrown to the caller
+	 */
+	public static Exception convertRmiAccessException(
+			Method method, RemoteException ex, boolean isConnectFailure, String serviceName) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Remote service [" + serviceName + "] threw exception", ex);
+		}
+		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
+			if (isConnectFailure) {
+				return new RemoteConnectFailureException("Cannot connect to remote service [" + serviceName + "]", ex);
+			}
+			else {
+				return new RemoteAccessException("Cannot access remote service [" + serviceName + "]", ex);
+			}
+		}
+		else {
+			return ex;
+		}
+	}
+
+	/**
+	 * Determine whether the given RMI exception indicates a connect failure.
+	 * Treats ConnectException, ConnectIOException, UnknownHostException,
+	 * NoSuchObjectException, StubNotFoundException, MarshalException and
+	 * UnmarshalException as connect failure.
+	 * @param ex the RMI exception to check
+	 * @return whether the exception should be treated as connect failure
+	 * @see java.rmi.ConnectException
+	 * @see java.rmi.ConnectIOException
+	 * @see java.rmi.UnknownHostException
+	 * @see java.rmi.NoSuchObjectException
+	 * @see java.rmi.StubNotFoundException
+	 * @see java.rmi.MarshalException
+	 * @see java.rmi.UnmarshalException
+	 */
+	public static boolean isConnectFailure(RemoteException ex) {
+		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
+				ex instanceof UnknownHostException ||
+				ex instanceof NoSuchObjectException || ex instanceof StubNotFoundException ||
+				ex instanceof MarshalException || ex instanceof UnmarshalException);
 	}
 
 }
