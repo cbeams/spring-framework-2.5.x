@@ -15,6 +15,7 @@
  */
 package org.springframework.functor;
 
+import org.springframework.functor.functions.GetProperty;
 import org
     .springframework
     .functor
@@ -28,6 +29,7 @@ import org.springframework.functor.predicates.GreaterThanEqualTo;
 import org.springframework.functor.predicates.LessThan;
 import org.springframework.functor.predicates.LessThanEqualTo;
 import org.springframework.functor.predicates.ParameterizedBinaryPredicate;
+import org.springframework.functor.predicates.Range;
 import org.springframework.functor.predicates.UnaryAnd;
 import org.springframework.functor.predicates.UnaryFunctionResultTester;
 import org.springframework.functor.predicates.UnaryNot;
@@ -273,12 +275,12 @@ public class PredicateFactory {
      * @return The predicate
      */
     public static UnaryPredicate equalsProperty(
-            String propertyName,
-            String otherPropertyName) {
+        String propertyName,
+        String otherPropertyName) {
         return new BeanPropertyConstantExpressionTester(
-                propertyName,
-                propertyName,
-                EqualTo.instance());
+            propertyName,
+            propertyName,
+            EqualTo.instance());
     }
 
     /**
@@ -333,6 +335,56 @@ public class PredicateFactory {
             propertyName,
             otherPropertyName,
             LessThanEqualTo.instance());
+    }
+
+    /**
+     * Apply a "range" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            the property with the range constraint.
+     * @param min
+     *            the low edge of the range
+     * @param max
+     *            the high edge of the range
+     * @return The range predicate constraint
+     */
+    public static UnaryPredicate inRange(
+        String propertyName,
+        Comparable min,
+        Comparable max) {
+        Range range = new Range(min, max);
+        BinaryPredicate valueTester =
+            attachResultTester(range, GetProperty.instance());
+        return new ParameterizedBinaryPredicate(valueTester, propertyName);
+    }
+
+    /**
+     * Apply a "range" constraint between two other properties to a bean
+     * property.
+     * 
+     * @param propertyName
+     *            the property with the range constraint.
+     * @param lowPropertyName
+     *            the low edge of the range
+     * @param highPropertyName
+     *            the high edge of the range
+     * @return The range predicate constraint
+     */
+    public static UnaryPredicate inRangeProperty(
+        String propertyName,
+        String minPropertyName,
+        String maxPropertyName) {
+        BeanPropertyExpressionTester min =
+            new BeanPropertyExpressionTester(
+                propertyName,
+                minPropertyName,
+                GreaterThanEqualTo.instance());
+        BeanPropertyExpressionTester max =
+            new BeanPropertyExpressionTester(
+                propertyName,
+                minPropertyName,
+                LessThanEqualTo.instance());
+        return and(min, max);
     }
 
 }
