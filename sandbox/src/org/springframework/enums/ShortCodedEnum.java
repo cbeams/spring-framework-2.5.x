@@ -16,9 +16,15 @@
 package org.springframework.enums;
 
 /**
+ * <p>Implementation of CodedEnum which uses Short as the code type.</p>
+ * 
+ * <p>Should almsot always be subclassed, but for some simple situations it may
+ * be used directly. Note that you will not be able to use unique type based
+ * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.</p> 
+ * 
  * @author Keith Donald
  */
-public abstract class ShortCodedEnum extends AbstractCodedEnum {
+public class ShortCodedEnum extends AbstractCodedEnum {
 
     private Short code;
     
