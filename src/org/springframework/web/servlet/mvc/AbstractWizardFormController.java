@@ -145,6 +145,10 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Return the wizard pages, i.e. the view names for the pages.
 	 * The array index corresponds to the page number.
+	 * <p>Note that a concrete wizard form controller might override
+	 * <code>getViewName(HttpServletRequest, Object, int)</code> to
+	 * determine the view name for each page dynamically.
+	 * @see #getViewName(javax.servlet.http.HttpServletRequest, Object, int)
 	 */
 	public final String[] getPages() {
 		return pages;
@@ -153,6 +157,10 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Return the number of wizard pages.
 	 * Useful to check whether the last page has been reached.
+	 * <p>Note that a concrete wizard form controller might override
+	 * <code>getPageCount(HttpServletRequest, Object)</code> to determine
+	 * the page count dynamically.
+	 * @see #getPageCount(javax.servlet.http.HttpServletRequest, Object)
 	 */
 	protected final int getPageCount() {
 		return this.pages.length;
@@ -287,6 +295,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		return null;
 	}
 
+
 	/**
 	 * Show first page as form view.
 	 */
@@ -309,7 +318,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected final ModelAndView showPage(HttpServletRequest request, BindException errors, int page)
 	    throws Exception {
 
-		if (page >= 0 && page < this.pages.length) {
+		if (page >= 0 && page < getPageCount(request, errors.getTarget())) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
 			}
@@ -328,16 +337,44 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			if (this.pageAttribute != null) {
 				controlModel.put(this.pageAttribute, new Integer(page));
 			}
-			return showForm(request, errors, this.pages[page], controlModel);
+			String viewName = getViewName(request, errors.getTarget(), page);
+			return showForm(request, errors, viewName, controlModel);
 		}
 		else {
-			throw new ServletException("Invalid page number: " + page);
+			throw new ServletException("Invalid wizard page number: " + page);
 		}
 	}
 
 	/**
+	 * Return the page count for this wizard form controller.
+	 * Default implementation delegates to <code>getPageCount()</code>.
+	 * <p>Can be overridden to dynamically adapt the page count.
+	 * @param request current HTTP request
+	 * @param command the command object as returned by formBackingObject
+	 * @return the current page count
+	 * @see #getPageCount
+	 */
+	protected int getPageCount(HttpServletRequest request, Object command) {
+		return getPageCount();
+	}
+
+	/**
+	 * Return the name of the view for the specified page of this wizard form controller.
+	 * Default implementation takes the view name from the <code>getPages()</code> array.
+	 * <p>Can be overridden to dynamically switch the page view or to return view names
+	 * for dynamically defined pages.
+	 * @param request current HTTP request
+	 * @param command the command object as returned by formBackingObject
+	 * @return the current page count
+	 * @see #getPageCount
+	 */
+	protected String getViewName(HttpServletRequest request, Object command, int page) {
+		return getPages()[page];
+	}
+
+	/**
 	 * Return the initial page of the wizard, i.e. the page shown at wizard startup.
-	 * Default implementation delegates to getInitialPage(HttpServletRequest).
+	 * Default implementation delegates to <code>getInitialPage(HttpServletRequest)</code>.
 	 * @param request current HTTP request
 	 * @param command the command object as returned by formBackingObject
 	 * @return the initial page number
@@ -517,7 +554,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the target page specified in the request.
-	 * <p>Default implementation delegates to getTargetPage(HttpServletRequest, int).
+	 * <p>Default implementation delegates to
+	 * <code>getTargetPage(HttpServletRequest, int)</code>.
 	 * Subclasses can override this for customized target page determination.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
@@ -573,7 +611,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 		if (!suppressValidation(request)) {
 			// In case of remaining errors on a page -> show the page.
-			for (int page = 0; page < this.pages.length; page++) {
+			for (int page = 0; page < getPageCount(request, command); page++) {
 				validatePage(command, errors, page, true);
 				if (errors.hasErrors()) {
 					return showPage(request, errors, page);
@@ -588,7 +626,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for custom validation logic for individual pages.
-	 * Default implementation calls validatePage(command, errors, page).
+	 * Default implementation calls <code>validatePage(command, errors, page)</code>.
 	 * <p>Implementations will typically call fine-granular <code>validateXXX</code>
 	 * methods of this instance's Validator, combining them to validation of the
 	 * corresponding pages. The Validator's default <code>validate</code> method
