@@ -84,7 +84,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.47 2004-06-14 10:54:58 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.48 2004-06-16 16:18:25 trisberg Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -103,6 +103,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	/** If this variable is false, we will throw exceptions on SQL warnings */
 	private boolean ignoreWarnings = true;
 
+	/** 
+	 * If this variable is set to a non-zero value it will be used for setting the fetchSize on
+	 * statements used for query processing.
+	 */
+	private int fetchSize = 0;
 
 	/**
 	 * Construct a new JdbcTemplate for bean usage.
@@ -155,6 +160,27 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 */
 	public boolean getIgnoreWarnings() {
 		return ignoreWarnings;
+	}
+
+	/**
+	 * Set fetchSize value.  This is important for processing large resultsets.  
+	 * Setting this higher than the default value will increase processing speed 
+	 * at the cost of memory consumption.
+	 * 
+	 * Default is 0 meaning that no change to the driver's default setting will be made.
+	 */
+	public void setFetchSize(int fetchSize) {
+		this.fetchSize = fetchSize;
+	}
+
+	/**
+	 * Return the value used for fetchSize.  This method returns the fetchSize
+	 * specified for the JdbcTemplate, not the fetchSize used by the JDBC driver.
+	 * 
+	 * Default is 0.
+	 */
+	public int getFetchSize() {
+		return fetchSize;
 	}
 
 
@@ -222,6 +248,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			public Object doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = null;
 				try {
+					if (getFetchSize() > 0)
+						stmt.setFetchSize(getFetchSize());
 					rs = stmt.executeQuery(sql);
 					ResultSet rsToUse = rs;
 					if (nativeJdbcExtractor != null) {
@@ -345,6 +373,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				}
 				ResultSet rs = null;
 				try {
+					if (getFetchSize() > 0)
+						ps.setFetchSize(getFetchSize());
 					rs = ps.executeQuery();
 					ResultSet rsToUse = rs;
 					if (nativeJdbcExtractor != null) {
