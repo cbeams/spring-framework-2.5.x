@@ -285,7 +285,7 @@
 -->
 <!ELEMENT constructor-arg (
 	description?,
-	(bean | ref | idref | list | set | map | props | value | null)
+	(bean | ref | idref | value | null | list | set | map | props)?
 )>
 
 <!--
@@ -304,6 +304,16 @@
 <!ATTLIST constructor-arg type CDATA #IMPLIED>
 
 <!--
+  A short-cut alternative to a child element "ref bean=".
+-->
+<!ATTLIST constructor-arg ref CDATA #IMPLIED>
+
+<!--
+  A short-cut alternative to a child element "value".
+-->
+<!ATTLIST constructor-arg value CDATA #IMPLIED>
+
+<!--
 	Bean definitions can have zero or more properties.
 	Property elements correspond to JavaBean setter methods exposed
 	by the bean classes. Spring supports primitives, references to other
@@ -311,7 +321,7 @@
 -->
 <!ELEMENT property (
 	description?,
-	(bean | ref | idref | list | set | map | props | value | null)
+	(bean | ref | idref | value | null | list | set | map | props)?
 )>
 
 <!--
@@ -320,6 +330,16 @@
 	to setAge()/optional getAge() methods.
 -->
 <!ATTLIST property name CDATA #REQUIRED>
+
+<!--
+  A short-cut alternative to a child element "ref bean=".
+-->
+<!ATTLIST property ref CDATA #IMPLIED>
+
+<!--
+  A short-cut alternative to a child element "value".
+-->
+<!ATTLIST property value CDATA #IMPLIED>
 
 <!--
 	A lookup method causes the IoC container to override the given method and return
@@ -426,6 +446,35 @@
 <!ATTLIST idref local IDREF #IMPLIED>
 
 <!--
+	Contains a string representation of a property value.
+	The property may be a string, or may be converted to the
+	required type using the JavaBeans PropertyEditor
+	machinery. This makes it possible for application developers
+	to write custom PropertyEditor implementations that can
+	convert strings to objects.
+
+	Note that this is recommended for simple objects only.
+	Configure more complex objects by populating JavaBean
+	properties with references to other beans.
+-->
+<!ELEMENT value (#PCDATA)>
+
+<!--
+	The value tag can have an optional type attribute, to specify the
+	exact type that the value should be converted to. Only needed
+	if the type of the target property or constructor argument is
+	too generic: for example, in case of a collection element.
+-->
+<!ATTLIST value type CDATA #IMPLIED>
+
+<!--
+	Denotes a Java null value. Necessary because an empty "value" tag
+	will resolve to an empty String, which will not be resolved to a
+	null value unless a special PropertyEditor does so.
+-->
+<!ELEMENT null (#PCDATA)>
+
+<!--
 	A list can contain multiple inner bean, ref, collection, or value elements.
 	Java lists are untyped, pending generics support in Java 1.5,
 	although references will be strongly typed.
@@ -433,7 +482,7 @@
 	is automatically performed by the BeanFactory.
 -->
 <!ELEMENT list (
-	(bean | ref | idref | list | set | map | props | value | null)*
+	(bean | ref | idref | value | null | list | set | map | props)*
 )>
 
 <!--
@@ -442,7 +491,7 @@
 	although references will be strongly typed.
 -->
 <!ELEMENT set (
-	(bean | ref | idref | list | set | map | props | value | null)*
+	(bean | ref | idref | value | null | list | set | map | props)*
 )>
 
 <!--
@@ -454,17 +503,31 @@
 )>
 
 <!--
-	A map entry can be an inner bean, ref, collection, or value.
-	The name of the property is given by the "key" attribute.
+	A map entry can be an inner bean, ref, value, or collection.
+	The key of the entry is given by the "key" attribute or sub-element.
 -->
 <!ELEMENT entry (
-	(bean | ref | idref | list | set | map | props | value | null)
+  key?,
+	(bean | ref | idref | value | null | list | set | map | props)
 )>
 
 <!--
-	Each map element must specify its key.
+	Each map element must specify its key as attribute or as sub-element.
+	A key attribute is always a String value.
 -->
-<!ATTLIST entry key CDATA #REQUIRED>
+<!ATTLIST entry key CDATA #IMPLIED>
+
+<!--
+  A short-cut alternative to a key element with a "ref bean=" child element.
+-->
+<!ATTLIST entry key-ref CDATA #IMPLIED>
+
+<!--
+	A key element can contain an inner bean, ref, value, or collection.
+-->
+<!ELEMENT key (
+	(bean | ref | idref | value | null | list | set | map | props)
+)>
 
 <!--
 	Props elements differ from map elements in that values must be strings.
@@ -485,24 +548,3 @@
 	Each property element must specify its key.
 -->
 <!ATTLIST prop key CDATA #REQUIRED>
-
-<!--
-	Contains a string representation of a property value.
-	The property may be a string, or may be converted to the
-	required type using the JavaBeans PropertyEditor
-	machinery. This makes it possible for application developers
-	to write custom PropertyEditor implementations that can
-	convert strings to objects.
-
-	Note that this is recommended for simple objects only.
-	Configure more complex objects by populating JavaBean
-	properties with references to other beans.
--->
-<!ELEMENT value (#PCDATA)>
-
-<!--
-	Denotes a Java null value. Necessary because an empty "value" tag
-	will resolve to an empty String, which will not be resolved to a
-	null value unless a special PropertyEditor does so.
--->
-<!ELEMENT null (#PCDATA)>
