@@ -102,6 +102,48 @@ public class BindTestSuite extends AbstractTagTest {
 		assertTrue("Correct errorMessage", "message1".equals(status.getErrorMessage()));
 		assertTrue("Correct errorMessagesAsString", "message1".equals(status.getErrorMessagesAsString(",")));
 	}
+	
+	public void testBindStatusGetErrorMessagesAsString()
+	throws JspException {
+		// one error (should not include delimiter)
+		MockPageContext pc = createPageContext();
+		ServletRequestDataBinder errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		errors.reject("code1", null, "message1");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb");	
+		tag.doStartTag();	
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("Error messages String should be 'message1'",
+			status.getErrorMessagesAsString(","), "message1");
+			
+		// two errors
+		pc = createPageContext();
+		errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		errors.reject("code1", null, "message1");
+		errors.reject("code1", null, "message2");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb");
+		tag.doStartTag();		
+		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("Error messages String should be 'message1,message2'",
+			status.getErrorMessagesAsString(","), "message1,message2");
+			
+		// no errors
+		pc = createPageContext();
+		errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb");
+		tag.doStartTag();		
+		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("Error messages String should be ''",
+			status.getErrorMessagesAsString(","), "");
+	}
 
 	public void testBindTagWithFieldErrors() throws JspException {
 		MockPageContext pc = createPageContext();

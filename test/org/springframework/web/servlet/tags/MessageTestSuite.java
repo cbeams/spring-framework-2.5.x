@@ -6,7 +6,10 @@ import java.util.Locale;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import com.mockobjects.servlet.MockPageContext;
 
@@ -142,6 +145,21 @@ public class MessageTestSuite extends AbstractTagTest {
 		assertNotNull(pc.getAttribute("testvar"));
 		assertEquals(pc.getAttribute("testvar"), "test message");
 
+	}
+	
+	public void testNullMessageSource() throws JspException {
+		MockPageContext pc = createPageContext();
+		WebApplicationContext ctx = (WebApplicationContext)pc.getRequest().getAttribute(
+			DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		ctx.close();
+		
+		MessageTag tag = new MessageTag();
+		tag.setPageContext(pc);
+		tag.setCode("test");
+		tag.setVar("testvar2");
+		tag.doStartTag();
+		
+		
 	}
 
 }
