@@ -2,26 +2,21 @@ package org.springframework.web.multipart.support;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 
 /**
  * Servlet 2.3 Filter that resolves multipart requests via a MultipartResolver
  * in the root web application context. Supports a "multipartResolverBeanName"
- * filter init param; the default bean name is "filterMultipartResolver".
+ * filter init-param; the default bean name is "filterMultipartResolver".
  *
  * <p>MultipartResolver determination is customizable: Override this filter's
  * getMultipartResolver method to use a custom MultipartResolver instance,
@@ -34,27 +29,40 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * @author Juergen Hoeller
  * @since 08.10.2003
- * @see #getMultipartResolver
  * @see org.springframework.web.multipart.MultipartResolver
  * @see org.springframework.web.servlet.DispatcherServlet
  */
-public class MultipartFilter implements Filter {
-
-	public static final String MULTIPART_RESOLVER_BEAN_NAME_PARAM = "multipartResolverBeanName";
+public class MultipartFilter extends OncePerRequestFilter {
 
 	public static final String DEFAULT_MULTIPART_RESOLVER_BEAN_NAME = "filterMultipartResolver";
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	private String multipartResolverBeanName = DEFAULT_MULTIPART_RESOLVER_BEAN_NAME;
 
 	private MultipartResolver multipartResolver;
 
 	/**
-	 * Fetches a reference to the MultipartResolver via getMultipartResolver
-	 * and stores it for use in doFilter.
-	 * @see #getMultipartResolver
+	 * Set the bean name of the MultipartResolver to fetch from Spring's
+	 * root application context.
 	 */
-	public void init(FilterConfig filterConfig) throws ServletException {
-		this.multipartResolver = getMultipartResolver(filterConfig);
+	public void setMultipartResolverBeanName(String multipartResolverBeanName) {
+		this.multipartResolverBeanName = multipartResolverBeanName;
+	}
+
+	/**
+	 * Return the bean name of the MultipartResolver to fetch from Spring's
+	 * root application context.
+	 */
+	protected String getMultipartResolverBeanName() {
+		return multipartResolverBeanName;
+	}
+
+	/**
+	 * Fetches a reference to the MultipartResolver via lookupMultipartResolver
+	 * and stores it for use in this filter.
+	 * @see #lookupMultipartResolver
+	 */
+	protected void initFilterBean() throws ServletException {
+		this.multipartResolver = lookupMultipartResolver();
 		if (this.multipartResolver == null) {
 			throw new ServletException("Could not determine MultipartResolver");
 		}
@@ -67,18 +75,11 @@ public class MultipartFilter implements Filter {
 	 * <p>This can be overridden to use a custom MultipartResolver instance,
 	 * for example if not using a Spring web application context.
 	 * @return the MultipartResolver instance, or null if none found
-	 * @see org.springframework.web.context.support.WebApplicationContextUtils#getWebApplicationContext
-	 * @see #MULTIPART_RESOLVER_BEAN_NAME_PARAM
-	 * @see #DEFAULT_MULTIPART_RESOLVER_BEAN_NAME
 	 */
-	protected MultipartResolver getMultipartResolver(FilterConfig filterConfig) {
-		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
-		String beanName = filterConfig.getInitParameter(MULTIPART_RESOLVER_BEAN_NAME_PARAM);
-		if (beanName == null) {
-			beanName = DEFAULT_MULTIPART_RESOLVER_BEAN_NAME;
-		}
-		logger.info("Using multipart resolver '" + beanName + "' for multipart filter");
-		return (MultipartResolver) wac.getBean(beanName);
+	protected MultipartResolver lookupMultipartResolver() {
+		logger.info("Using MultipartResolver '" + getMultipartResolverBeanName() + "' for MultipartFilter");
+		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+		return (MultipartResolver) wac.getBean(getMultipartResolverBeanName());
 	}
 
 	/**
@@ -88,12 +89,12 @@ public class MultipartFilter implements Filter {
 	 * from proper parameter extraction in the multipart case, and are able to cast to
 	 * MultipartHttpServletRequest if they need to.
 	 */
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
-	    throws IOException, ServletException {
-		HttpServletRequest processedRequest = (HttpServletRequest) request;
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+																	FilterChain filterChain) throws ServletException, IOException {
+		HttpServletRequest processedRequest = request;
 		if (this.multipartResolver.isMultipart(processedRequest)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Resolving request [" + processedRequest.getRequestURI() + "] with multipart filter");
+				logger.debug("Resolving request [" + processedRequest.getRequestURI() + "] with MultipartFilter");
 			}
 			processedRequest = this.multipartResolver.resolveMultipart(processedRequest);
 		}
@@ -105,9 +106,6 @@ public class MultipartFilter implements Filter {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
 		}
-	}
-
-	public void destroy() {
 	}
 
 }

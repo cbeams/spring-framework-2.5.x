@@ -8,16 +8,19 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.mockobjects.servlet.MockFilterChain;
 import com.mockobjects.servlet.MockFilterConfig;
@@ -28,6 +31,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockServletContext;
@@ -47,9 +51,9 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 	public void testWithApplicationContext() throws MultipartException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		MockServletContext sc = new MockServletContext();
-		sc.setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
-		wac.setServletContext(sc);
+		wac.initRootContext(new MockServletContext());
+		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
+		wac.rebuild();
 		CommonsMultipartResolver resolver = new MockCommonsMultipartResolver();
 		DiskFileUpload fileUpload = resolver.getFileUpload();
 		resolver.setMaximumFileSize(1000);
@@ -176,15 +180,20 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 	public void testWithServletContextAndFilter() throws ServletException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.initRootContext(new MockServletContext());
 		wac.registerSingleton("filterMultipartResolver", MockCommonsMultipartResolver.class, new MutablePropertyValues());
-		MockServletContext sc = new MockServletContext();
-		sc.setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
-		wac.setServletContext(sc);
-		CommonsMultipartResolver resolver = new CommonsMultipartResolver(sc);
+		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
+		wac.rebuild();
+		WebApplicationContextUtils.publishWebApplicationContext(wac);
+		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
 		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
 
-		MockFilterConfig filterConfig = new MockFilterConfig();
-		filterConfig.setupGetServletContext(sc);
+		MockFilterConfig filterConfig = new MockFilterConfig() {
+			public Enumeration getInitParameterNames() {
+				return Collections.enumeration(new ArrayList());
+			}
+		};
+		filterConfig.setupGetServletContext(wac.getServletContext());
 		final List files = new ArrayList();
 		MockFilterChain filterChain = new MockFilterChain() {
 			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
@@ -206,35 +215,53 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 	public void testWithServletContextAndFilterWithCustomBeanName() throws ServletException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.initRootContext(new MockServletContext());
+		wac.rebuild();
 		wac.registerSingleton("myMultipartResolver", MockCommonsMultipartResolver.class, new MutablePropertyValues());
-		MockServletContext sc = new MockServletContext();
-		sc.setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
-		wac.setServletContext(sc);
-		CommonsMultipartResolver resolver = new CommonsMultipartResolver(sc);
+		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
+		WebApplicationContextUtils.publishWebApplicationContext(wac);
+		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
 		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
 
 		MockFilterConfig filterConfig = new MockFilterConfig() {
 			public String getInitParameter(String s) {
-				if (MultipartFilter.MULTIPART_RESOLVER_BEAN_NAME_PARAM.equals(s))
+				if ("multipartResolverBeanName".equals(s))
 					return "myMultipartResolver";
 				else
 					return super.getInitParameter(s);
 			}
+			public Enumeration getInitParameterNames() {
+				return Collections.enumeration(Arrays.asList(new String[] {"multipartResolverBeanName"}));
+			}
 		};
-		filterConfig.setupGetServletContext(sc);
+		filterConfig.setupGetServletContext(wac.getServletContext());
 		final List files = new ArrayList();
 		MockFilterChain filterChain = new MockFilterChain() {
 			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
-				MultipartHttpServletRequest request = (MultipartHttpServletRequest) originalRequest;
-				files.addAll(request.getFileMap().values());
+				if (originalRequest instanceof MultipartHttpServletRequest) {
+					MultipartHttpServletRequest request = (MultipartHttpServletRequest) originalRequest;
+					files.addAll(request.getFileMap().values());
+				}
 			}
 		};
-		MultipartFilter filter = new MultipartFilter();
+		MultipartFilter filter = new MultipartFilter() {
+			private boolean invoked = false;
+			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+																			FilterChain filterChain) throws ServletException, IOException {
+				super.doFilterInternal(request, response, filterChain);
+				if (invoked) {
+					throw new ServletException("Should not have been invoked twice");
+				}
+				invoked = true;
+			}
+		};
 		filter.init(filterConfig);
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
-		filter.doFilter(originalRequest, new MockHttpServletResponse(), filterChain);
+		HttpServletResponse response = new MockHttpServletResponse();
+		filter.doFilter(originalRequest, response, filterChain);
+		filter.doFilter(originalRequest, response, filterChain);
 		CommonsMultipartFile file1 = (CommonsMultipartFile) files.get(0);
 		CommonsMultipartFile file2 = (CommonsMultipartFile) files.get(1);
 		assertTrue(((MockFileItem) file1.getFileItem()).deleted);
