@@ -29,7 +29,7 @@ public class ComparableComparator implements Comparator {
     /**
      * Factory method that returns a shared instance of a ComparableComparator.
      */
-    public static ComparableComparator instance() {
+    public static Comparator instance() {
         return INSTANCE;
     }
 

@@ -61,7 +61,7 @@ public class PropertyComparator implements Comparator, Serializable {
      *            must be comparables in this case, will be compared.
      */
     public PropertyComparator(String property) {
-        this(property, ComparableComparator.instance());
+        this(property, new NullSafeComparator(ComparableComparator.instance()));
     }
 
     /**

@@ -28,7 +28,11 @@ import org.springframework.util.ToStringCreator;
  */
 public class NullSafeComparator implements Comparator {
 
-    private static final NullSafeComparator INSTANCE = new NullSafeComparator();
+    private static final NullSafeComparator NULLS_LOW = new NullSafeComparator(
+            true);
+
+    private static final NullSafeComparator NULLS_HIGH = new NullSafeComparator(
+            false);
 
     /**
      * The comparator to use when comparing two non-null objects.
@@ -42,12 +46,15 @@ public class NullSafeComparator implements Comparator {
     private boolean nullsLow;
 
     /**
-     * Create a NullSafeComparator that sorts <code>null</code> lower than any
-     * non-null object it is compared with. When comparing two non-null objects,
-     * the {@link ComparableComparator}is used.
+     * Create a NullSafeComparator that sorts <code>null</code> based on the
+     * provided boolean. When comparing two non-null objects, the
+     * {@link ComparableComparator}is used.
+     * 
+     * @param nullsLow
+     *            whether to treat nulls lower or higher than non-null objects
      */
-    private NullSafeComparator() {
-        this(ComparableComparator.instance(), true);
+    private NullSafeComparator(boolean nullsLow) {
+        this(ComparableComparator.instance(), nullsLow);
     }
 
     /**
@@ -60,18 +67,6 @@ public class NullSafeComparator implements Comparator {
      */
     public NullSafeComparator(Comparator comparator) {
         this(comparator, true);
-    }
-
-    /**
-     * Create a NullSafeComparator that sorts <code>null</code> based on the
-     * provided boolean. When comparing two non-null objects, the
-     * {@link ComparableComparator}is used.
-     * 
-     * @param nullsLow
-     *            whether to treat nulls lower or higher than non-null objects
-     */
-    public NullSafeComparator(boolean nullsLow) {
-        this(ComparableComparator.instance(), nullsLow);
     }
 
     /**
@@ -117,8 +112,12 @@ public class NullSafeComparator implements Comparator {
      * 
      * @return The shared instance.
      */
-    public static final NullSafeComparator instance() {
-        return INSTANCE;
+    public static final Comparator instance() {
+        return instance(true);
+    }
+
+    public static final Comparator instance(boolean nullsLow) {
+        return (nullsLow ? NULLS_LOW : NULLS_HIGH);
     }
 
     public String toString() {
@@ -127,4 +126,3 @@ public class NullSafeComparator implements Comparator {
     }
 
 }
-

@@ -18,58 +18,46 @@ package org.springframework.util.comparator;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.springframework.util.ToStringCreator;
+
 /**
  * A {@link Comparator}for {@link Boolean}objects that can sort either true or
  * false first.
  */
 public final class BooleanComparator implements Comparator, Serializable {
-    private static final BooleanComparator TRUE_FIRST = new BooleanComparator(
+    private static final BooleanComparator TRUE_LOW = new BooleanComparator(
             true);
 
-    private static final BooleanComparator FALSE_FIRST = new BooleanComparator(
+    private static final BooleanComparator TRUE_HIGH = new BooleanComparator(
             false);
 
-    private boolean trueFirst = false;
+    private boolean trueLow;
 
     /**
-     * Returns a BooleanComparator instance that sorts <code>true</code>
-     * values before <code>false</code> values.
+     * Returns the default <code>BooleanComparator</code> instance, sorting
+     * <code>true</code> values first.
      * 
-     * @return the true first singleton BooleanComparator
+     * @return The boolean comparator
      */
-    public static BooleanComparator trueFirst() {
-        return TRUE_FIRST;
-    }
-
-    /**
-     * Returns a BooleanComparator instance that sorts <code>false</code>
-     * values before <code>true</code> values.
-     * 
-     * @return the false first singleton BooleanComparator
-     */
-    public static BooleanComparator falseFirst() {
-        return FALSE_FIRST;
+    public static Comparator instance() {
+        return instance(true);
     }
 
     /**
      * Returns a BooleanComparator instance that sorts
-     * <code><i>trueFirst</i></code> values.
+     * <code><i>trueLow</i></code> values.
      * 
-     * @param trueFirst
-     *            when <code>true</code>, sort <code>true</code>, when
-     *            <code>false</code>, sort <code>false</code>
+     * @param trueLow
+     *            when <code>true</code>, true < false, when
+     *            <code>false</code>, true > false</code>
      * @return a singleton BooleanComparator instance
      */
-    public static BooleanComparator getBooleanComparator(boolean trueFirst) {
-        return trueFirst ? TRUE_FIRST : FALSE_FIRST;
+    public static Comparator instance(boolean trueLow) {
+        return trueLow ? TRUE_LOW : TRUE_HIGH;
     }
 
-    private BooleanComparator(boolean trueFirst) {
-        this.trueFirst = trueFirst;
-    }
-
-    public boolean isTrueFirst() {
-        return trueFirst;
+    private BooleanComparator(boolean trueLow) {
+        this.trueLow = trueLow;
     }
 
     public int compare(Object obj1, Object obj2) {
@@ -78,7 +66,7 @@ public final class BooleanComparator implements Comparator, Serializable {
 
     /**
      * Compares two non- <code>null</code> <code>Boolean</code> objects
-     * according to the value of {@link #trueFirst}.
+     * according to the value of {@link #trueLow}.
      * 
      * @param b1
      *            the first boolean to compare
@@ -88,21 +76,25 @@ public final class BooleanComparator implements Comparator, Serializable {
      * @throws NullPointerException
      *             when either argument <code>null</code>
      */
-    public int compare(Boolean b1, Boolean b2) {
+    private int compare(Boolean b1, Boolean b2) {
         boolean v1 = b1.booleanValue();
         boolean v2 = b2.booleanValue();
-        return (v1 ^ v2) ? ((v1 ^ trueFirst) ? 1 : -1) : 0;
+        return (v1 ^ v2) ? ((v1 ^ trueLow) ? 1 : -1) : 0;
     }
 
     public int hashCode() {
         int hash = "BooleanComparator".hashCode();
-        return trueFirst ? -1 * hash : hash;
+        return trueLow ? -1 * hash : hash;
     }
 
     public boolean equals(Object object) {
         return (this == object)
-                || ((object instanceof BooleanComparator) && (this.trueFirst == ((BooleanComparator)object).trueFirst));
+                || ((object instanceof BooleanComparator) && (this.trueLow == ((BooleanComparator)object).trueLow));
     }
 
+    public String toString() {
+        return new ToStringCreator(this).append("trueFirst", trueLow)
+                .toString();
+    }
 }
 

@@ -27,11 +27,9 @@ import org.springframework.util.ToStringCreator;
 /**
  * A comparator that chains a sequence of one or more more Comparators.
  * <p>
- * <p>
  * A compound comparator calls each Comparator in sequence until a single
  * Comparator returns a non-zero result, or the comparators are exhausted and
  * zero is returned.
- * <p>
  * <p>
  * This facilitates in-memory sorting similar to multi-column sorting in SQL.
  * The order of any single Comparator in the list can also be reversed.
@@ -40,8 +38,6 @@ import org.springframework.util.ToStringCreator;
  */
 public class CompoundComparator implements Comparator, Serializable {
     private List sortDefinitions;
-
-    private boolean locked;
 
     /**
      * Construct a CompoundComparator with initially no Comparators. Clients
@@ -75,7 +71,8 @@ public class CompoundComparator implements Comparator, Serializable {
      *            The sort order for each Comparator.
      */
     public CompoundComparator(List sortDefinitions) {
-        Assert.notNull(sortDefinitions, "At least one sortDefinition is required");
+        Assert.notNull(sortDefinitions,
+                "At least one sortDefinition is required");
         this.sortDefinitions = sortDefinitions;
     }
 
@@ -98,10 +95,6 @@ public class CompoundComparator implements Comparator, Serializable {
      *            false -> forward sort order; true -> reverse sort order
      */
     public void addComparator(Comparator comparator, SortOrder order) {
-        Assert
-                .state(
-                        !locked,
-                        "You may not mutate the sortDefinitionList after executing a comparison operation");
         sortDefinitions.add(new SortDefinition(comparator, order));
     }
 
@@ -159,7 +152,24 @@ public class CompoundComparator implements Comparator, Serializable {
         getSortDefinition(index).setOrder(SortOrder.DESCENDING);
     }
 
-    public void flip(int index) {
+    /**
+     * Flip the sort order of each sort definition contained by this compound
+     * comparator.
+     */
+    public void flipOrder() {
+        Iterator it = sortDefinitions.iterator();
+        while (it.hasNext()) {
+            ((SortDefinition)it.next()).flipOrder();
+        }
+    }
+
+    /**
+     * Flip the sort order of the sort definition at the specified index.
+     * 
+     * @param index
+     *            the sort definition index to flip
+     */
+    public void flipOrder(int index) {
         getSortDefinition(index).flipOrder();
     }
 
@@ -173,11 +183,9 @@ public class CompoundComparator implements Comparator, Serializable {
     }
 
     public int compare(Object o1, Object o2) {
-        if (locked == false) {
-            Assert.state(sortDefinitions.size() > 0,
-                    "No sort definitions have been added to this compound comparator to invoke!");
-            locked = true;
-        }
+        Assert
+                .state(sortDefinitions.size() > 0,
+                        "No sort definitions have been added to this CompoundComparator to compare!");
         Iterator it = sortDefinitions.iterator();
         for (int i = 0; it.hasNext(); i++) {
             SortDefinition def = (SortDefinition)it.next();
