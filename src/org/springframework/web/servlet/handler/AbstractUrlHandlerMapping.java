@@ -16,7 +16,7 @@ import org.springframework.web.util.WebUtils;
  * URL lookup. For information on the latter, see alwaysUseFullPath property.
  *
  * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
- * and a various Ant-style pattern matches, e.g. a registered "/t*" matches
+ * and various Ant-style pattern matches, e.g. a registered "/t*" matches
  * both "/test" and "/team". For details, see the PathMatcher class.
  *
  * @author Juergen Hoeller
@@ -54,7 +54,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Look up a handler instance for the given URL path.
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
-	 * and a various Ant-style pattern matches, e.g. a registered "/t*" matches
+	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the PathMatcher class.
 	 * @param urlPath URL the bean is mapped to
 	 * @return the associated handler instance, or null if not found
