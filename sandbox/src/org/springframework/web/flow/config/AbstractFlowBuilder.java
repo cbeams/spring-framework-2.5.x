@@ -22,8 +22,8 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.FlowConstants;
+import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
@@ -123,9 +123,9 @@ import org.springframework.web.flow.ViewState;
 public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
-	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>.
+	 * The default <code>MODEL_MAPPER_ID_SUFFIX</code>.
 	 */
-	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
+	public static final String MODEL_MAPPER_ID_SUFFIX = "modelMapper";
 
 	protected AbstractFlowBuilder() {
 		super();
@@ -203,17 +203,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param subFlowId the id of the Flow definition to retieve and to be
 	 *        spawned as a subflow (could also be the ID of a FlowFactoryBean
 	 *        that produces the Flow)
-	 * @param attributesMapperIdPrefix The id of the attributes mapper, to map
+	 * @param modelMapperIdPrefix The id of the model mapper, to map
 	 *        attributes between the the flow built by this builder and the sub
 	 *        flow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
 	 *        sub flow ends (this assumes you always transition to the same
 	 *        state regardless of which EndState is reached in the subflow)
 	 */
-	protected void addSubFlowState(String id, String subFlowId, String attributesMapperIdPrefix,
+	protected void addSubFlowState(String id, String subFlowId, String modelMapperIdPrefix,
 			String subFlowDefaultFinishStateId) {
-		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperIdPrefix),
-				subFlowDefaultFinishStateId);
+		addSubFlowState(id, spawnFlow(subFlowId), useModelMapper(modelMapperIdPrefix), subFlowDefaultFinishStateId);
 	}
 
 	/**
@@ -221,15 +220,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * ID.
 	 * @param id the state id
 	 * @param subFlow the Flow definition to be spawned as a subflow
-	 * @param attributesMapper The attributes mapper to map attributes between
-	 *        the the flow built by this builder and the sub flow
+	 * @param modelMapper The model mapper to map attributes between the
+	 *        the flow built by this builder and the sub flow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
 	 *        sub flow ends (this assumes you always transition to the same
 	 *        state regardless of which EndState is reached in the subflow)
 	 */
-	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper attributesMapper,
+	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper modelMapper,
 			String subFlowDefaultFinishStateId) {
-		addSubFlowState(id, subFlow, attributesMapper, new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
+		addSubFlowState(id, subFlow, modelMapper, new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
 
 	/**
@@ -249,9 +248,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        sub flow ends (this assumes you always transition to the same
 	 *        state regardless of which EndState is reached in the subflow)
 	 */
-	protected void addSubFlowState(String id, Class subFlowBuilderImplementation,
-			FlowModelMapper attributesMapper, String subFlowDefaultFinishStateId) {
-		addSubFlowState(id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper,
+	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowModelMapper modelMapper,
+			String subFlowDefaultFinishStateId) {
+		addSubFlowState(id, spawnFlow(id, subFlowBuilderImplementation), modelMapper,
 				new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
 
@@ -262,14 +261,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param id the state id
 	 * @param subFlowId the id of the Flow definition to retieve (could also be
 	 *        the ID of a FlowFactoryBean that produces the Flow)
-	 * @param attributesMapperIdPrefix The id of the attributes mapper to map
+	 * @param modelMapperIdPrefix The id of the model mapper to map
 	 *        attributes between the the flow built by this builder and the sub
 	 *        flow
 	 * @param transitions The eligible set of state transitions
 	 */
-	protected void addSubFlowState(String id, String subFlowId, String attributesMapperIdPrefix,
-			Transition[] transitions) {
-		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperIdPrefix), transitions);
+	protected void addSubFlowState(String id, String subFlowId, String modelMapperIdPrefix, Transition[] transitions) {
+		addSubFlowState(id, spawnFlow(subFlowId), useModelMapper(modelMapperIdPrefix), transitions);
 	}
 
 	/**
@@ -277,13 +275,12 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * ID.
 	 * @param id the state id
 	 * @param subFlow The flow definition to be used as the subflow
-	 * @param attributesMapper The attributes mapper to map attributes between
-	 *        the the flow built by this builder and the sub flow
+	 * @param modelMapper The model mapper to map attributes between the
+	 *        the flow built by this builder and the sub flow
 	 * @param transitions The eligible set of state transitions
 	 */
-	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper attributesMapper,
-			Transition[] transitions) {
-		new SubFlowState(getFlow(), id, subFlow, attributesMapper, transitions);
+	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper modelMapper, Transition[] transitions) {
+		new SubFlowState(getFlow(), id, subFlow, modelMapper, transitions);
 	}
 
 	/**
@@ -298,13 +295,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * does indeed create the subflow.
 	 * @param id the state id, as well as the subflow id
 	 * @param flowBuilderImplementation The flow builder implementation
-	 * @param attributesMapper The attributes mapper to map attributes between
-	 *        the the flow built by this builder and the sub flow
+	 * @param modelMapper The model mapper to map attributes between the
+	 *        the flow built by this builder and the sub flow
 	 * @param transitions The eligible set of state transitions
 	 */
-	protected void addSubFlowState(String id, Class subFlowBuilderImplementation,
-			FlowModelMapper attributesMapper, Transition[] transitions) {
-		new SubFlowState(getFlow(), id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper, transitions);
+	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowModelMapper modelMapper,
+			Transition[] transitions) {
+		new SubFlowState(getFlow(), id, spawnFlow(id, subFlowBuilderImplementation), modelMapper, transitions);
 	}
 
 	/**
@@ -396,18 +393,17 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the attribute mapper with the specified name prefix be used
-	 * to map attributes between a parent flow and a spawning subflow when the
-	 * subflow state being constructed is entered.
-	 * @param attributesMapperIdPrefix The attribute mapper prefix
-	 * @return The attributes mapper
+	 * Request that the model attribute mapper with the specified name prefix be
+	 * used to map attributes between a parent flow and a spawning subflow when
+	 * the subflow state being constructed is entered.
+	 * @param modelMapperIdPrefix The attribute mapper prefix
+	 * @return The model mapper
 	 */
-	protected FlowModelMapper useAttributesMapper(String attributesMapperIdPrefix)
-			throws NoSuchFlowAttributesMapperException {
-		if (!StringUtils.hasText(attributesMapperIdPrefix)) {
+	protected FlowModelMapper useModelMapper(String modelMapperIdPrefix) throws NoSuchFlowModelMapperException {
+		if (!StringUtils.hasText(modelMapperIdPrefix)) {
 			return null;
 		}
-		return getFlowServiceLocator().getFlowAttributesMapper(attributesMapper(attributesMapperIdPrefix));
+		return getFlowServiceLocator().getFlowModelMapper(modelMapper(modelMapperIdPrefix));
 	}
 
 	/**
@@ -415,11 +411,11 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * to map attributes between a parent flow and a spawning subflow when the
 	 * subflow state being constructed is entered.
 	 * @param flowAttributesMapperImplementationClass
-	 * @return The attributes mapper
+	 * @return The model mapper
 	 */
 	protected FlowModelMapper useAttributesMapper(Class flowAttributesMapperImplementationClass)
-			throws NoSuchFlowAttributesMapperException {
-		return getFlowServiceLocator().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
+			throws NoSuchFlowModelMapperException {
+		return getFlowServiceLocator().getFlowModelMapper(flowAttributesMapperImplementationClass);
 	}
 
 	/**
@@ -2192,6 +2188,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return prefix + getQualifierDelimiter() + suffix;
 	}
 
+	protected String qualify(String suffix) {
+		return join(flowId(), suffix);
+	}
+
 	/**
 	 * @return
 	 */
@@ -2200,23 +2200,23 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * @param attributesMapperIdPrefix
+	 * @param modelMapperIdPrefix
 	 * @return
 	 */
-	protected String attributesMapper(String attributesMapperIdPrefix) {
-		Assert.notNull(attributesMapperIdPrefix, "The attributes mapper id prefix is required");
-		if (!attributesMapperIdPrefix.endsWith(ATTRIBUTES_MAPPER_ID_SUFFIX)) {
-			return attributesMapperIdPrefix + getQualifierDelimiter() + ATTRIBUTES_MAPPER_ID_SUFFIX;
+	protected String modelMapper(String modelMapperIdPrefix) {
+		Assert.notNull(modelMapperIdPrefix, "The model mapper id prefix is required");
+		if (!modelMapperIdPrefix.endsWith(MODEL_MAPPER_ID_SUFFIX)) {
+			return modelMapperIdPrefix + getQualifierDelimiter() + MODEL_MAPPER_ID_SUFFIX;
 		}
 		else {
-			return attributesMapperIdPrefix;
+			return modelMapperIdPrefix;
 		}
 	}
 
 	/**
 	 * @return
 	 */
-	protected String getDefaultFlowAttributesMapperId() {
-		return attributesMapper(getFlow().getId());
+	protected String getDefaultFlowModelMapperId() {
+		return modelMapper(getFlow().getId());
 	}
 }

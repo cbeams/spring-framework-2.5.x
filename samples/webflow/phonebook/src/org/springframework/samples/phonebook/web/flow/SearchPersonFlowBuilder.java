@@ -3,6 +3,8 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
+import org.springframework.samples.phonebook.web.flow.action.QueryAction;
+import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
@@ -11,10 +13,24 @@ import org.springframework.web.flow.config.FlowBuilderException;
  */
 public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
+	private static final String RESULTS = "results";
+
+	private static final String CRITERIA = "criteria";
+
 	protected String flowId() {
 		return "person.Search";
 	}
 
 	public void buildStates() throws FlowBuilderException {
+		addViewState(CRITERIA, onSubmitBindAndValidate(CRITERIA));
+		addBindAndValidateState(CRITERIA, new Transition[] { onErrorView(CRITERIA), onSuccess("query") });
+		addActionState("query", executeAction(QueryAction.class), new Transition[] { onErrorView(CRITERIA),
+				onSuccessView(RESULTS) });
+		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(set("userId")) });
+		addActionState(set("userId"), qualify(set("userId")), new Transition[] { onError("error"),
+				onSuccess("person.Detail") });
+		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useModelMapper("userId"),
+				new Transition[] { onFinish(view(RESULTS)), onError("error") });
+		addEndState("error", "error.view");
 	}
 }

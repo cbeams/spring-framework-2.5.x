@@ -16,8 +16,8 @@
 package org.springframework.web.flow.config;
 
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
@@ -50,22 +50,22 @@ public interface FlowServiceLocator extends FlowLocator {
 	public Action getAction(Class actionImplementationClass) throws ServiceLookupException;
 
 	/**
-	 * Lookup a flow attributes mapper with specified id.
+	 * Lookup a flow model attributes mapper with specified id.
 	 * @param flowAttributesMapperId The flow attributes mapper id
-	 * @return The flow attributes mapper
-	 * @throws ServiceLookupException When the flow attributes mapper cannot be
-	 *         found
+	 * @return The flow model attributes mapper
+	 * @throws ServiceLookupException When the flow model attributes mapper
+	 *         cannot be found
 	 */
-	public FlowModelMapper getFlowAttributesMapper(String flowAttributesMapperId) throws ServiceLookupException;
+	public FlowModelMapper getFlowModelMapper(String flowModelMapperId) throws ServiceLookupException;
 
 	/**
-	 * Lookup a flow attributes mapper of specified implementation class.
-	 * @param flowAttributesMapperImplementationClass The required implementation class
-	 * @return The flow attributes mapper
-	 * @throws ServiceLookupException When the flow attributes mapper cannot be
-	 *         found
+	 * Lookup a flow model attributes mapper of specified implementation class.
+	 * @param flowAttributesMapperImplementationClass The required
+	 *        implementation class
+	 * @return The flow model attributes mapper
+	 * @throws ServiceLookupException When the flow model attributes mapper
+	 *         cannot be found
 	 */
-	public FlowModelMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
-			throws ServiceLookupException;
+	public FlowModelMapper getFlowModelMapper(Class flowModelMapperImplementationClass) throws ServiceLookupException;
 
 }

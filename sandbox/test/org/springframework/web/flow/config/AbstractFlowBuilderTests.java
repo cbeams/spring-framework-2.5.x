@@ -64,7 +64,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 				}
 			}
 
-			public FlowModelMapper getFlowAttributesMapper(String id) throws ServiceLookupException {
+			public FlowModelMapper getFlowModelMapper(String id) throws ServiceLookupException {
 				if (id.equals("personId.attributesMapper")) {
 					return new PersonIdMapper();
 				}

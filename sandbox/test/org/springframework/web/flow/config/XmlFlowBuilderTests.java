@@ -54,7 +54,7 @@ public class XmlFlowBuilderTests extends TestCase {
 				throw new NoSuchFlowDefinitionException(flowDefinitionId);
 			}
 
-			public FlowModelMapper getFlowAttributesMapper(String flowAttributesMapperId)
+			public FlowModelMapper getFlowModelMapper(String flowAttributesMapperId)
 					throws ServiceLookupException {
 				if ("attribMapper1".equals(flowAttributesMapperId)) {
 					return new FlowModelMapper() {
@@ -67,7 +67,7 @@ public class XmlFlowBuilderTests extends TestCase {
 						}
 					};
 				}
-				throw new NoSuchFlowAttributesMapperException(flowAttributesMapperId);
+				throw new NoSuchFlowModelMapperException(flowAttributesMapperId);
 			}
 		});
 		flow = new FlowFactoryBean(builder).getFlow();

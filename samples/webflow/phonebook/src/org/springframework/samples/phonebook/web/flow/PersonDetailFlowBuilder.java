@@ -3,6 +3,7 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
+import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
@@ -16,6 +17,12 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 	}
 
 	public void buildStates() throws FlowBuilderException {
+		addGetState(flowId());
+		String setCollegueId = set("collegueId");
+		addViewState(flowId(), new Transition[] { onBack("finish"), onSelect(setCollegueId) });
+		addActionState(setCollegueId, qualify(setCollegueId), onSuccess("collegue.Detail"));
+		addSubFlowState("collegue.Detail", PersonDetailFlowBuilder.class, useModelMapper("collegueId"),
+				new Transition[] { onFinishGet(flowId()), onError("error") });
+		addEndState("finish");
 	}
-
 }

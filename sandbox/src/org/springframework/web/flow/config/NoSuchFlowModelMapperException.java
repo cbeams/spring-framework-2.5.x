@@ -18,19 +18,19 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
- * Throw when a flow attributes mapper cannot be found.
+ * Thrown when a flow model attributes mapper service cannot be found.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class NoSuchFlowAttributesMapperException extends ServiceLookupException {
+public class NoSuchFlowModelMapperException extends ServiceLookupException {
 
 	/**
 	 * Create a new flow attributes mapper lookup exception.
 	 * @param serviceImplementationClass The required implementation class of
 	 *        the service that cannot be found
 	 */
-	public NoSuchFlowAttributesMapperException(Class serviceImplementationClass) {
+	public NoSuchFlowModelMapperException(Class serviceImplementationClass) {
 		super(serviceImplementationClass);
 	}
 
@@ -40,7 +40,7 @@ public class NoSuchFlowAttributesMapperException extends ServiceLookupException 
 	 *        the service that cannot be found
 	 * @param cause The underlying cause of this exception
 	 */
-	public NoSuchFlowAttributesMapperException(Class serviceImplementationClass, Throwable cause) {
+	public NoSuchFlowModelMapperException(Class serviceImplementationClass, Throwable cause) {
 		super(serviceImplementationClass, cause);
 	}
 
@@ -48,7 +48,7 @@ public class NoSuchFlowAttributesMapperException extends ServiceLookupException 
 	 * Create a new flow attributes mapper lookup exception.
 	 * @param serviceId The id of the service that cannot be found
 	 */
-	public NoSuchFlowAttributesMapperException(String serviceId) {
+	public NoSuchFlowModelMapperException(String serviceId) {
 		super(serviceId);
 	}
 
@@ -57,20 +57,20 @@ public class NoSuchFlowAttributesMapperException extends ServiceLookupException 
 	 * @param serviceId The id of the service that cannot be found
 	 * @param cause The underlying cause of this exception
 	 */
-	public NoSuchFlowAttributesMapperException(String serviceId, Throwable cause) {
+	public NoSuchFlowModelMapperException(String serviceId, Throwable cause) {
 		super(serviceId, cause);
 	}
 
 	public String getMessage() {
 		if (isServiceIdLookupFailure()) {
-			return "No attributes mapper was found with id '"
+			return "No flow model mapper was found with id '"
 					+ getServiceId()
-					+ "' -- make sure there is a single FlowAttributesMapper implementation exported in the context with this id";
+					+ "' -- make sure there is a single FlowModelMapper implementation exported in the context with this id";
 		}
 		else {
-			return "No attributes mapper was found of implementation '"
+			return "No flow model mapper was found of implementation '"
 					+ getServiceImplementationClass()
-					+ "'; make sure there is a single FlowAttributesMapper implementation of this type exported in the context";
+					+ "'; make sure there is a single FlowModelMapper implementation of this type exported in the context";
 		}
 	}
 

@@ -140,30 +140,30 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public FlowModelMapper getFlowAttributesMapper(String flowAttributesMapperId)
+	public FlowModelMapper getFlowModelMapper(String flowModelMapperId)
 			throws ServiceLookupException {
 		try {
-			return (FlowModelMapper)getBeanFactory().getBean(flowAttributesMapperId, FlowModelMapper.class);
+			return (FlowModelMapper)getBeanFactory().getBean(flowModelMapperId, FlowModelMapper.class);
 		}
 		catch (BeansException e) {
-			throw new NoSuchFlowAttributesMapperException(flowAttributesMapperId, e);
+			throw new NoSuchFlowModelMapperException(flowModelMapperId, e);
 		}
 	}
 
-	public FlowModelMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
+	public FlowModelMapper getFlowModelMapper(Class flowModelMapperImplementationClass)
 			throws ServiceLookupException {
-		if (!FlowModelMapper.class.isAssignableFrom(flowAttributesMapperImplementationClass)) {
+		if (!FlowModelMapper.class.isAssignableFrom(flowModelMapperImplementationClass)) {
 			throw new IllegalArgumentException("Your attributes mapper implementation '"
-					+ flowAttributesMapperImplementationClass + "' must implement the '"
+					+ flowModelMapperImplementationClass + "' must implement the '"
 					+ FlowModelMapper.class.getName() + "' interface");
 
 		}
 		try {
 			return (FlowModelMapper)BeanFactoryUtils.beanOfType(getListableBeanFactory(),
-					flowAttributesMapperImplementationClass);
+					flowModelMapperImplementationClass);
 		}
 		catch (BeansException e) {
-			throw new NoSuchFlowAttributesMapperException(flowAttributesMapperImplementationClass, e);
+			throw new NoSuchFlowModelMapperException(flowModelMapperImplementationClass, e);
 		}
 	}
 }

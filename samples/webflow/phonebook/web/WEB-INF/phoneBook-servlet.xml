@@ -35,7 +35,7 @@
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
-	<bean id="person.Search.setUserId" class="org.springframework.web.flow.action.BindAndValidateAction">
+	<bean id="person.Search.userId.set" class="org.springframework.web.flow.action.BindAndValidateAction">
 		<property name="formObjectName"><value>id</value></property>
 		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.UserId</value></property>
 	</bean>
@@ -69,7 +69,7 @@
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
-	<bean id="person.Detail.setCollegueId" class="org.springframework.web.flow.action.BindAndValidateAction">
+	<bean id="person.Detail.collegueId.set" class="org.springframework.web.flow.action.BindAndValidateAction">
 		<property name="formObjectName"><value>colleagueId</value></property>
 		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.UserId</value></property>
 	</bean>
