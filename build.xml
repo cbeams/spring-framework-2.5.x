@@ -3,11 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.5 2003-08-30 02:59:33 jhoeller Exp $
-
-    See page 594 of "Expert One-on-One J2EE" for a description
-    of the JAR files produced by this build script, and how
-    they can be deployed in applications.
+    $Id: build.xml,v 1.6 2003-09-20 15:02:06 johnsonr Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -287,7 +283,7 @@
 			<formatter type="plain"/>
 
 			<batchtest fork="yes" todir="${reports.dir}">
-				<fileset dir="test" includes="${test.includes}" excludes="${test.excludes}"/>
+				<fileset dir="${testbuild.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
 
 		</junit>
@@ -346,7 +342,7 @@
 			<classpath refid="master-classpath"/>
 
 			<batchtest fork="yes">
-				<fileset dir="test" includes="${test.includes}" excludes="${test.excludes}"/>
+				<fileset dir="${testbuild.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
 
 		</junit>
