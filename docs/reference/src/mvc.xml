@@ -7,11 +7,11 @@
 		<title>Introduction to the web framework</title>
 
 		<para>
-			Spring's web framework is designed around a DispatcherServlet that dispatches requests to handlers, with configurable handler mappings, view resolution, and locale and theme resolution. The default handler is a very simple Controller interface, just offering a "ModelAndView handleRequest(request,response)" method. This can already be used for application controllers, but you will prefer the included implementation hierarchy, consisting of AbstractController, AbstractCommandController, MultiActionController, SimpleFormController, AbstractWizardFormController. Application controllers will typically be subclasses of those. Note that you can choose an appropriate base class: If you don't have a form, you don't need a FormController. This is a major difference to Struts.
+			Spring's web framework is designed around a DispatcherServlet that dispatches requests to handlers, with configurable handler mappings, view resolution, locale and theme resolution as well support for upload files. The default handler is a very simple Controller interface, just offering a <literal>ModelAndView handleRequest(request,response)</literal> method. This can already be used for application controllers, but you will prefer the included implementation hierarchy, consisting of for example <literal>AbstractController</literal>, <literal>AbstractCommandController</literal> and <literal>SimpleFormController</literal>. Application controllers will typically be subclasses of those. Note that you can choose an appropriate base class: If you don't have a form, you don't need a FormController. This is a major difference to Struts.
 		</para>
 
 		<para>
-			You can take any object as command or form object: There's no need to implement an interface or derive from a base class. Spring's data binding is highly flexible, e.g. it treats type mismatches as validation errors that can be evaluated by the application, not as system errors. So you don't need to duplicate your business objects' properties as Strings in your form objects, just to be able to handle invalid submissions, or to convert the Strings properly. Instead, it's often preferable to bind directly to your business objects. This is another major difference to Struts which is built around required base classes like Action and ActionForm - for every type of action.
+			You can take any object as command or form object: There's no need to implement an interface or derive from a base class. Spring's data binding is highly flexible, e.g. it treats type mismatches as validation errors that can be evaluated by the application, not as system errors. So you don't need to duplicate your business objects' properties as Strings in your form objects, just to be able to handle invalid submissions, or to convert the Strings properly. Instead, it's often preferable to bind directly to your business objects. This is another major difference to Struts which is built around required base classes like <literal>Action</literal> and <literal>ActionForm</literal> - for every type of action.
 		</para>
 
 		<para>
@@ -94,13 +94,191 @@
 		
 	</sect1>
 	
-	<sect1 id="mvc-overview">
-		<title>General overview</title>
+	<sect1 id="mvc-servlet">
+		<title>The <literal>DispatcherServlet</literal></title>
 		
 		<para>
-			The general overview of the Spring web framework. More to come and also other section
-			will be below...
+			Spring's web framework is - like many other web frameworks - designed around a servlet that dispatches requests
+			to controller and offers other functionality facilitating the development of webapplications. Spring's
+			<literal>DispatcherServlet</literal> however, does more than just that. It is completely integrated with
+			the Spring ApplicationContext and makes fully use of that.
 		</para>
+		
+		<para>
+			Servlets are declared in the <literal>web.xml</literal> of your webapplication, so is the DispatcherServlet.
+			Requests that you want the DispatcherServlet to handle, will have to be mapped, using a url-mapping in the same
+			<literal>web.xml</literal> file.
+		</para>
+		<programlisting><![CDATA[<web-app>
+	...
+	<servlet>
+		<servlet-name>example</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>example</servlet-name>
+		<url-pattern>*.form</url-pattern>
+	</servlet-mapping>    
+</web-app>]]></programlisting>
+
+		<para>
+			In the example above, all requests ending with <literal>.form</literal> will be handled by the DispatcherServlet.
+			Then, the DispatcherServlet needs to be configured. As illustrated in <xref linkend="context"/>, ApplicationContexts in
+			Spring can be scoped. In the web framework, each DispatcherServlet has its own <literal>WebApplicationContext</literal>,
+			which contains the DispatcherServlet configuration beans. The default BeanFactory used by the DispatcherServlet is the
+			<literal>XmlBeanFactory</literal> and the DispatcherServlet will on initialization 
+			<emphasis>look for a file named <literal>[servlet-name]-servlet.xml</literal></emphasis> in the <literal>WEB-INF</literal>
+			directory of your web application. The default values used by the DispatcherServlet can be modified by using the
+			servlet initialization parameters (see below for more information).
+		</para>
+		
+		<para>
+			The <literal>WebApplicationContext</literal> is just an ordinary ApplicationContext that has some extra features
+			necessary for webapplications. It differs from a normal ApplicationContext in that it is capable of resolving
+			themes (see <xref linkend="mvc-themes"/>) and that is knows to which servlet it is associated (by having a link
+			to the <literal>ServletContext</literal>). The WebApplicationContext is bound in the ServletContext, and using
+			<literal>RequestContextUtils</literal> you can always lookup the WebApplicationContext in case you need it.
+		</para>
+		
+		<para>
+			The Spring DispatcherServlet has a couple of special beans it uses, in order to be able to process requests
+			and render the appropriate views. Those beans are included in the Spring framework and (optionally) have to be configured in 
+			the WebApplicationContext, just as any other bean would have to configured. Each of those beans, is described
+			in more detail below. Right now, we'll just mention them, just to let you know they exist and to enable us to
+			go on talking about the DispatcherServlet. For most of the beans, defaults are provided so you don't have to
+			worry about those.
+		</para>
+		
+		<table frame="all">
+			<title>Special beans in the WebApplicationContext</title>
+			<tgroup cols="2">
+				<colspec colname="c1" colwidth="1*"/>
+				<colspec colname="c2" colwidth="4*"/>
+				<thead>
+					<row>
+						<entry>Expression</entry>
+						<entry>Explanation</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>handler mapping(s)</entry>
+						<entry>(<xref linkend="mvc-handlermapping"/>) a list of pre- and postprocessors and controllers that 
+							will be executed if they match certain criteria (for instance a matching URL specified with the
+							controller)
+						</entry>
+					</row>
+					<row>
+						<entry>view resolver</entry>
+						<entry>(<xref linkend="mvc-viewresolver"/>) capable of resolving view names and needed by the DispatcherServlet
+							to resolves those views with
+						</entry>
+					</row>
+					<row>
+						<entry>locale resolver</entry>
+						<entry>(<xref linkend="mvc-localeresolver"/>) capable of resolves the locale a client is using, in order
+							to be able to offer internationalized views
+						</entry>
+					</row>
+					<row>
+						<entry>theme resolver</entry>
+						<entry>(<xref linkend="mvc-themeresolver"/>) capable of resolving themes your webapplication can use e.g.
+							to offer personalized layouts
+						</entry>
+					</row>
+					<row>
+						<entry>multipart resolver</entry>
+						<entry>(<xref linkend="mvc-multipart"/>) offers functionality to process file uploads from HTML forms
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+		
+		<para>
+			When a DispatcherServlet is setup for use and a request comes in for that specific DispatcherServlet it starts
+			processing it. The list below describes the complete process a request goes through if a DispatcherServlet
+			is supposed to handle it:
+			
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						The WebApplicationContext is searched for and bound in the request as an attribute in order
+						for controller and other elements in the chain of process to use it. It is bound by default under
+						the key <literal>DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The locale resolver is bound to the request to let elements in the chain resolve the
+						locale to use when processing the request (rendering the view, preparing data, etcetera).
+						If you don't use the resolver, it won't affect anything, so if you don't need locale resolving,
+						just don't bother
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The theme resolver is bound to the request to let e.g. views determine which theme to use
+						(if you don't needs themes, don't bother, the resolver is just bound and does not
+						affect anything if you don't use it)
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						If a multipart resolver is specified, the request is inspected for multiparts and if so,
+						it is wrapped in a <literal>MultipartHttpServletRequest</literal> for further processing
+						by other elements in the chain (more information about multipart handling is provided
+						below)
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						An appropriate handler is searched for. If a handler is found, it execution chain
+						associated to the handler (preprocessors, postprocessors, controllers) will be executed
+						in order to prepare a model
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						If a model is returned, the view is rendered, using the view resolver that has been
+						configured with the WebApplicationContext. If no model was returned
+						(which could be the result of a pre- or postprocessor intercepting the request because
+						of for instance security reasons), no view is rendered as well, since the
+						request could already have been fulfilled
+					</para>
+				</listitem>
+			</orderedlist>
+		</para>
+		
+		<para>
+			The Spring DispatcherServlet also has support for returning the <emphasis>last-modification-date</emphasis>, 
+			as specified by the Servlet API. The process of determining the last modification date for a specific
+			request, is simple. The DispatcherServlet will first of all lookup an appropriate handler mapping 
+			and test is the handler that matched <emphasis>implements the interface <literal>LastModified</literal></emphasis>
+			and if so, the value the of <literal>long getLastModified(request)</literal> is returned to the client.
+		</para>	
+		
+		<para>
+			TODO: initialization parameters of the servlet
+		</para>
+		
+	</sect1>
+	
+	<sect1 id="mvc-handlermapping">
+		<title>Handler mappings</title>
+	</sect1>
+	
+	<sect1 id="mvc-viewresolver">
+		<title>Views and resolving them</title>
+	</sect1>
+	
+	<sect1 id="mvc-localeresolver">
+		<title>Using locales</title>
+	</sect1>
+	
+	<sect1 id="mvc-themeresolver">
+		<title>Using themes</title>
 	</sect1>
 	
 	<sect1 id="mvc-multipart">

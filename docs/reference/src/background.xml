@@ -10,6 +10,13 @@
     		specifically.
 		</para>
 	</sect1>
+	
+	<sect1 id="background-mvc">
+    	<title>Model-View-Controller pattern (MVC)</title>
+    	<para>
+    		This is supposed to be a background article about Model View Controller.
+		</para>
+	</sect1>
 
 </chapter>
 
