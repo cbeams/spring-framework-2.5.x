@@ -28,12 +28,11 @@ import org.springframework.aop.AfterReturningAdvice;
  * a more efficient alternative solution in cases where there is no interception
  * advice and therefore no need to create a MethodInvocation object.
  *
- * <p>Used internally by the AOP framework: application developers should not need
+ * <p>Used internally by the AOP framework: Application developers should not need
  * to use this class directly.
  * 
- * <p>You can also use this class to wrap Spring AfterReurningAdvice implementations
- * for use in other AOP frameworks supporting the AOP Alliance
- * interfaces.
+ * <p>You can also use this class to wrap Spring AfterReturningAdvice implementations
+ * for use in other AOP frameworks supporting the AOP Alliance interfaces.
  *
  * @author Rod Johnson
  */
@@ -49,9 +48,9 @@ public final class AfterReturningAdviceInterceptor implements MethodInterceptor,
 	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
 	 */
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		Object retval = mi.proceed();
-		advice.afterReturning(retval, mi.getMethod(), mi.getArguments(), mi.getThis() );
-		return retval;
+		Object retVal = mi.proceed();
+		this.advice.afterReturning(retVal, mi.getMethod(), mi.getArguments(), mi.getThis());
+		return retVal;
 	}
 	
 }
