@@ -82,7 +82,7 @@ import org.springframework.web.flow.ViewState;
  * customerDetails.view</code> This view state will automatically be configured
  * with the following defaults:
  * <ol>
- * <li>A view name called <code>customerDetails.view</code> --this is the
+ * <li>A view name called <code>customerDetails.view</code> -- this is the
  * logical name of a view resource. This logical view name gets mapped to a
  * physical view resource (jsp, etc.) by the calling front controller (via a
  * spring view resolver, or a struts action forward, for example.)
@@ -433,7 +433,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        map attributes between the the flow built by this builder and the
 	 *        subflow; note, the id prefix will have the model mapper suffix
 	 *        appended to produce the qualified service identifier (e.g
-	 *        userId.modelMapper) See: {@link String#modelMapper(String)}
+	 *        userId.modelMapper) See: {@link #modelMapper(String)}
 	 * @return The model mapper
 	 * @throws NoSuchFlowModelMapperException no FlowModelMapper implementation
 	 *         was exported with the specified id.
@@ -2394,12 +2394,12 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
-	 * <li>On the occurence of event that matches the criteria defined by
+	 * <li>On the occurence of an event that matches the criteria defined by
 	 * ${eventIdCriteria}, transition to state ${stateId}.
 	 * </ul>
 	 * @param eventIdCriteria The event id criteria
 	 * @param stateId the state Id
-	 * @return the transition (matchingEventIdCriteria->stateId)
+	 * @return the transition (event matching eventIdCriteria->stateId)
 	 */
 	protected Transition onEvent(Constraint eventIdCriteria, String stateId) {
 		return new Transition(eventIdCriteria, stateId);
@@ -2630,7 +2630,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * <li>on an occurence of the '<code>submit</code>' event, transition
 	 * to the end state with the id <code>finish</code>
 	 * </ul>
-	 * @param stateId The state id
 	 * @return The transition (submit->finish)
 	 */
 	protected Transition onSubmitFinish() {
