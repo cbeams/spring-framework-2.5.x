@@ -149,7 +149,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	public void testPropertyPlaceholderConfigurerWithUnresolvablePlaceholder() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.addPropertyValue("name", "${ref}");
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, null);
 		try {
@@ -159,6 +159,24 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		catch (BeanDefinitionStoreException ex) {
 			// expected
 			assertTrue(ex.getMessage().indexOf("ref") != -1);
+		}
+	}
+
+	public void testPropertyPlaceholderConfigurerWithIgnoreUnresolvablePlaceholder() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "${ref}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("ignoreUnresolvablePlaceholders", Boolean.TRUE);
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		try {
+			ac.refresh();
+			TestBean tb = (TestBean) ac.getBean("tb");
+			assertEquals("${ref}", tb.getName());
+		}
+		catch (BeanDefinitionStoreException ex) {
+			fail("Should not have thrown BeanDefinitionStoreException");
 		}
 	}
 

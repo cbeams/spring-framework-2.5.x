@@ -71,7 +71,7 @@ import org.springframework.core.Constants;
  * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
- * @version $Id: PropertyPlaceholderConfigurer.java,v 1.7 2004-02-25 17:11:12 jhoeller Exp $
+ * @version $Id: PropertyPlaceholderConfigurer.java,v 1.8 2004-03-08 16:52:36 jhoeller Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
@@ -103,6 +103,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	private String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
+
+	private boolean ignoreUnresolvablePlaceholders = false;
 
 
 	/**
@@ -147,6 +149,14 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	 */
 	public void setSystemPropertiesModeName(String constantName) throws IllegalArgumentException {
 		this.systemPropertiesMode = constants.asNumber(constantName).intValue();
+	}
+
+	/**
+	 * Set whether to ignore unresolvable placeholders. Default is false:
+	 * An exception will be thrown if a placeholder cannot not be resolved.
+	 */
+	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
+		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 	}
 
 
@@ -334,6 +344,10 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 					logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
 					strVal = strVal.substring(0, startIndex) + propVal + strVal.substring(endIndex+1);
 					startIndex = strVal.indexOf(this.placeholderPrefix, startIndex + propVal.length());
+				}
+				else if (this.ignoreUnresolvablePlaceholders) {
+					// return unprocessed value
+					return strVal;
 				}
 				else {
 					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");
