@@ -21,6 +21,7 @@ import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.TargetSource;
 
 /**
  * InvocationHandler implementation for the Spring AOP framework,
@@ -40,7 +41,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.14 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.15 2003-12-01 11:00:23 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -97,7 +98,7 @@ public class AopProxy implements InvocationHandler {
 	public AopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null)
 			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
-		if (config.getAdvisors().length == 0 && config.getTargetSource() == null)
+		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE)
 			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
 		this.advised = config;
 	}
@@ -115,8 +116,10 @@ public class AopProxy implements InvocationHandler {
 		Object oldProxy = null;
 		boolean setInvocationContext = false;
 		boolean setProxyContext = false;
-		Object target = null;
-		Class targetClass = null;
+	
+		TargetSource targetSource = advised.getTargetSource();
+		Class targetClass = null;//targetSource.getTargetClass();
+		Object target = null;		
 		
 		try {
 			// Try special rules for equals() method and implementation of the
@@ -134,13 +137,15 @@ public class AopProxy implements InvocationHandler {
 			
 			Object retVal = null;
 			
-			if (advised.getTargetSource() != null) {
-				targetClass = advised.getTargetSource().getTargetClass();
-				// TODO optimize out all those method calls?
-				target = advised.getTargetSource().getTarget();
+			// May be null. Get as late as possible to minimize the time we "own" the target,
+			// in case it comes from a pool.
+			target = targetSource.getTarget();
+			if (target != null) {
+				targetClass = target.getClass();
 			}
 		
 			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
+			
 			
 			
 			// Check whether we only have one InvokerInterceptor: that is, no real advice,
@@ -152,7 +157,6 @@ public class AopProxy implements InvocationHandler {
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
 				retVal = invokeJoinpointUsingReflection(target, method, args);
-				// TODO return CGLIB optimization
 			}
 			else {
 				// We need to create a method invocation...
@@ -190,9 +194,9 @@ public class AopProxy implements InvocationHandler {
 			return retVal;
 		}
 		finally {
-			if (target != null) {
+			if (target != null && !targetSource.isStatic()) {
 				// Must have come from TargetSource
-				advised.getTargetSource().releaseTarget(target);
+				targetSource.releaseTarget(target);
 			}
 			
 			if (setInvocationContext) {
