@@ -22,14 +22,24 @@ package org.springframework.beans.factory;
  * it is used as a factory, not directly as a bean.
  *
  * <p><b>NB: A bean that implements this interface cannot be used
- * as a normal bean.</b>
+ * as a normal bean.</b> A FactoryBean is defined in a bean style,
+ * but the object exposed for bean references is always the object
+ * that it creates.
  *
- * <p>FactoryBeans can support singletons and prototypes.
+ * <p>FactoryBeans can support singletons and prototypes, and can
+ * either create objects lazily on demand or eagerly on startup.
+ *
+ * <p>This interface is heavily used within the framework, for
+ * example for the AOP ProxyFactoryBean or JndiObjectFactoryBean.
+ * It can be used for application components, but this is not common
+ * outside of infrastructure code.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since March 08, 2003
+ * @since 08.03.2003
  * @see org.springframework.beans.factory.BeanFactory
+ * @see org.springframework.aop.framework.ProxyFactoryBean
+ * @see org.springframework.jndi.JndiObjectFactoryBean
  */
 public interface FactoryBean {
 

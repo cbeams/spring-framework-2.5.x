@@ -498,7 +498,8 @@ public class BindTagTests extends AbstractTagTests {
 		bindTag.setPath("name");
 
 		assertTrue("Correct doStartTag return value", bindTag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		org.springframework.web.servlet.tags.BindStatus status = (org.springframework.web.servlet.tags.BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		org.springframework.web.servlet.tags.BindStatus status =
+				(org.springframework.web.servlet.tags.BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertTrue("Has status variable", status != null);
 		assertEquals("tb.name", status.getPath());
 	}
@@ -519,11 +520,11 @@ public class BindTagTests extends AbstractTagTests {
 		bindTag.setPath("tb2.name");
 
 		assertTrue("Correct doStartTag return value", bindTag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		org.springframework.web.servlet.tags.BindStatus status = (org.springframework.web.servlet.tags.BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		org.springframework.web.servlet.tags.BindStatus status =
+				(org.springframework.web.servlet.tags.BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertTrue("Has status variable", status != null);
 		assertEquals("tb2.name", status.getPath());
 	}
-
 
 	public void testTransformTagCorrectBehavior() throws JspException {
 		// first set up the pagecontext and the bean

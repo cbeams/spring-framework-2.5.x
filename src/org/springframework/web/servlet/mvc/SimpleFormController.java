@@ -150,6 +150,45 @@ public class SimpleFormController extends AbstractFormController {
 
 
 	/**
+	 * This implementation shows the configured form view, delegating to the
+	 * analogous showForm version with a controlModel argument.
+	 * <p>Can be called within onSubmit implementations, to redirect back to the form
+	 * in case of custom validation errors (i.e. not determined by the validator).
+	 * <p>Can be overridden in subclasses to show a custom view, writing directly
+	 * to the response or preparing the response before rendering a view.
+	 * <p>If calling showForm with a custom control model in subclasses, it's preferable
+	 * to override the analogous showForm version with a controlModel argument
+	 * (which will handle both standard form showing and custom form showing then).
+	 * @see #setFormView
+	 * @see #showForm(HttpServletRequest, HttpServletResponse, BindException, Map)
+	 */
+	protected ModelAndView showForm(
+			HttpServletRequest request, HttpServletResponse response, BindException errors)
+			throws Exception {
+		return showForm(request, response, errors, null);
+	}
+
+	/**
+	 * This implementation shows the configured form view.
+	 * <p>Can be called within onSubmit implementations, to redirect back to the form
+	 * in case of custom validation errors (i.e. not determined by the validator).
+	 * <p>Can be overridden in subclasses to show a custom view, writing directly
+	 * to the response or preparing the response before rendering a view.
+	 * @param request current HTTP request
+	 * @param errors validation errors holder
+	 * @param controlModel model map containing controller-specific control data
+	 * (e.g. current page in wizard-style controllers or special error message)
+	 * @return the prepared form view
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #setFormView
+	 */
+	protected ModelAndView showForm(
+			HttpServletRequest request, HttpServletResponse response, BindException errors, Map controlModel)
+			throws Exception {
+		return showForm(request, errors, getFormView(), controlModel);
+	}
+
+	/**
 	 * Create a reference data map for the given request and command,
 	 * consisting of bean name/bean instance pairs as expected by ModelAndView.
 	 * <p>Default implementation delegates to referenceData(request).
@@ -180,66 +219,24 @@ public class SimpleFormController extends AbstractFormController {
 		return null;
 	}
 
-	/**
-	 * This implementation shows the configured form view, delegating to the
-	 * analogous showForm version with a controlModel argument.
-	 * <p>Can be called within onSubmit implementations, to redirect back to the form
-	 * in case of custom validation errors (i.e. not determined by the validator).
-	 * <p>Can be overridden in subclasses to show a custom view, writing directly
-	 * to the response or preparing the response before rendering a view.
-	 * <p>If calling showForm with a custom control model in subclasses, it's preferable
-	 * to override the analogous showForm version with a controlModel argument
-	 * (which will handle both standard form showing and custom form showing then).
-	 * @see #setFormView
-	 * @see #showForm(HttpServletRequest, HttpServletResponse, BindException, Map)
-	 */
-	protected ModelAndView showForm(
-			HttpServletRequest request, HttpServletResponse response, BindException errors) throws Exception {
-		return showForm(request, response, errors, null);
-	}
 
 	/**
-	 * This implementation shows the configured form view.
-	 * <p>Can be called within onSubmit implementations, to redirect back to the form
-	 * in case of custom validation errors (i.e. not determined by the validator).
-	 * <p>Can be overridden in subclasses to show a custom view, writing directly
-	 * to the response or preparing the response before rendering a view.
-	 * @param request current HTTP request
-	 * @param errors validation errors holder
-	 * @param controlModel model map containing controller-specific control data
-	 * (e.g. current page in wizard-style controllers or special error message)
-	 * @return the prepared form view
-	 * @throws Exception in case of invalid state or arguments
-	 * @see #setFormView
-	 */
-	protected ModelAndView showForm(
-			HttpServletRequest request, HttpServletResponse response, BindException errors, Map controlModel)
-			throws Exception {
-		return showForm(request, errors, getFormView(), controlModel);
-	}
-
-	/**
-	 * This implementation delegates to <code>isFormChangeRequest</code>:
-	 * A form change request changes the appearance of the form
-	 * and should not get validated but just show the new form.
-	 * @see #isFormChangeRequest
-	 */
-	protected boolean suppressValidation(HttpServletRequest request) {
-		return isFormChangeRequest(request);
-	}
-
-	/**
-	 * This implementation calls showForm in case of errors,
-	 * and delegates to onSubmit's full version else.
+	 * This implementation calls <code>showForm</code> in case of errors,
+	 * and delegates to <code>onSubmit</code>'s full version else.
 	 * <p>This can only be overridden to check for an action that should be executed
 	 * without respect to binding errors, like a cancel action. To just handle successful
-	 * submissions without binding errors, override one of the onSubmit methods.
-	 * @see #showForm
+	 * submissions without binding errors, override one of the <code>onSubmit</code>
+	 * methods or <code>doSubmitAction</code>.
+	 * @see #showForm(HttpServletRequest, HttpServletResponse, BindException)
 	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
+	 * @see #onSubmit(Object, BindException)
+	 * @see #onSubmit(Object)
+	 * @see #doSubmitAction(Object)
 	 */
-	protected ModelAndView processFormSubmission(HttpServletRequest request,
-			HttpServletResponse response, Object command, BindException errors)
+	protected ModelAndView processFormSubmission(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {
+
 		if (errors.hasErrors() || isFormChangeRequest(request)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Data binding errors: " + errors.getErrorCount());
@@ -266,6 +263,16 @@ public class SimpleFormController extends AbstractFormController {
 	 */
 	protected boolean isFormChangeRequest(HttpServletRequest request) {
 		return false;
+	}
+
+	/**
+	 * This implementation delegates to <code>isFormChangeRequest</code>:
+	 * A form change request changes the appearance of the form
+	 * and should not get validated but just show the new form.
+	 * @see #isFormChangeRequest
+	 */
+	protected boolean suppressValidation(HttpServletRequest request) {
+		return isFormChangeRequest(request);
 	}
 
 

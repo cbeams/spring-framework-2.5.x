@@ -31,18 +31,20 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * <p>Form controller that autopopulates a form bean from the request.
  * This, either using a new bean instance per request, or using the same bean
- * when the <code>sessionForm</code> property has been set to <code>true</code>.
- * This class is the base class for both framework subclasses like
+ * when the <code>sessionForm</code> property has been set to <code>true</code>.</p>
+ *
+ * <p>This class is the base class for both framework subclasses like
  * {@link SimpleFormController SimpleFormController} and
  * {@link AbstractWizardFormController AbstractWizardFormController}, and
  * custom form controllers you can provide yourself.</p>
- * <p>Both form- input-views and after-submission-views have to be provided
+ *
+ * <p>Both form-input views and after-submission views have to be provided
  * programmatically. To provide those views using configuration properties,
  * use the {@link SimpleFormController SimpleFormController}.</p>
  *
- * <p>Subclasses need to override showForm to prepare the form view, and
- * processFormSubmission to handle submit requests. For the latter, binding errors
- * like type mismatches will be reported via the given "errors" holder.
+ * <p>Subclasses need to override <code>showForm</code> to prepare the form view,
+ * and <code>processFormSubmission</code> to handle submit requests. For the latter,
+ * binding errors like type mismatches will be reported via the given "errors" holder.
  * For additional custom form validation, a validator (property inherited from
  * BaseCommandController) can be used, reporting via the same "errors" instance.</p>
  *
@@ -52,7 +54,7 @@ import org.springframework.web.servlet.ModelAndView;
  * (like Struts' <code>ActionForm</code>). More complex properties of JavaBeans
  * (Dates, Locales, but also your own application-specific or compound types)
  * can be represented and submitted to the controller, by using the notion of
- * <code>java.beans.PropertyEditors</code>. For more information on that
+ * a <code>java.beans.PropertyEditor</code>. For more information on that
  * subject, see the workflow of this controller and the explanation of the
  * {@link BaseCommandController BaseCommandController}.</p>
  *
@@ -75,9 +77,10 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>Call to {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
  *      to return a View that should be rendered (typically the view that renders
  *      the form). This method has to be implemented in subclasses.</li>
- *  <li>Call to {@link #referenceData referenceData()} to allow you to bind any
- *      relevant reference data you might need when editing a form (e.g. a List
- *      of Locale objects you're going to let the user select one from)</li>
+ *  <li>The showForm() implementation will call {@link #referenceData referenceData()},
+ *      which you can implement to provide any relevant reference data you might need
+ *      when editing a form (e.g. a List of Locale objects you're going to let the
+ *      user select one from).</li>
  *  <li>Model gets exposed and view gets rendered, to let the user fill in the form.</li>
  *  <li><b>The controller receives a form submission (typically a POST).</b>
  *      To use a different way of detecting a form submission, override the
@@ -147,6 +150,8 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Alef Arendsen
+ * @see #showForm(HttpServletRequest, HttpServletResponse, BindException)
+ * @see #processFormSubmission
  * @see SimpleFormController
  * @see AbstractWizardFormController
  */
@@ -375,11 +380,18 @@ public abstract class AbstractFormController extends BaseCommandController {
 		return createCommand();
 	}
 
+
 	/**
 	 * Prepare the form model and view, including reference and error data.
-	 * Can show a configured form page, or generate a programmatic form view.
-	 * <p>A typical implementation will call showForm(request,errors,"myView")
-	 * to prepare the form view for a specific view name.
+	 * Can show a configured form page, or generate a form view programmatically.
+	 * <p>A typical implementation will call
+	 * <code>showForm(request, errors, "myView")</code>
+	 * to prepare the form view for a specific view name, returning the
+	 * ModelAndView provided there.
+	 * <p>For building a custom ModelAndView, call <code>errors.getModel()</code>
+	 * to populate the ModelAndView model with the command and the Errors instance,
+	 * under the specified command name, as expected by the "spring:bind" tag.
+	 * You also need to include the model returned by <code>referenceData</code>.
 	 * <p>Note: If you decide to have a "formView" property specifying the
 	 * view name, consider using SimpleFormController.
 	 * @param request current HTTP request
@@ -388,10 +400,14 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @return the prepared form view, or null if handled directly
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #showForm(HttpServletRequest, BindException, String)
+	 * @see org.springframework.validation.Errors
+	 * @see org.springframework.validation.BindException#getModel
+	 * @see #referenceData(HttpServletRequest, Object, Errors)
 	 * @see SimpleFormController#setFormView
 	 */
 	protected abstract ModelAndView showForm(
-			HttpServletRequest request, HttpServletResponse response, BindException errors) throws Exception;
+			HttpServletRequest request, HttpServletResponse response, BindException errors)
+			throws Exception;
 
 	/**
 	 * Prepare model and view for the given form, including reference and errors.
@@ -456,17 +472,19 @@ public abstract class AbstractFormController extends BaseCommandController {
 		return null;
 	}
 
+
 	/**
-	 * Process form submission request. Called by handleRequestInternal in case
-	 * of a form submission, with or without binding errors. Implementations
-	 * need to proceed properly, typically showing a form view in case of
-	 * binding errors or performing a submit action else.
+	 * Process form submission request. Called by <code>handleRequestInternal</code>
+	 * in case of a form submission, with or without binding errors. Implementations
+	 * need to proceed properly, typically showing a form view in case of binding
+	 * errors or performing a submit action else.
 	 * <p>Subclasses can implement this to provide custom submission handling
 	 * like triggering a custom action. They can also provide custom validation
-	 * and call showForm or proceed with the submission accordingly.
-	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
-	 * with the command and the Errors instance, under the specified command name,
-	 * as expected by the "spring:bind" tag.
+	 * and call <code>showForm</code> or proceed with the submission accordingly.
+	 * <p>For a success view, call <code>errors.getModel()</code> to populate the
+	 * ModelAndView model with the command and the Errors instance, under the
+	 * specified command name, as expected by the "spring:bind" tag. For a form view,
+	 * simply return the ModelAndView object provided by <code>showForm</code>.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
@@ -475,7 +493,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of errors
 	 * @see #handleRequestInternal
 	 * @see #isFormSubmission
-	 * @see #showForm
+	 * @see #showForm(HttpServletRequest, HttpServletResponse, BindException)
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */

@@ -83,6 +83,11 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * <p>The given instance is supposed to be fully initialized; the factory
 	 * will not perform any initialization callbacks (in particular, it won't
 	 * call InitializingBean's <code>afterPropertiesSet</code> method).
+	 * The given instance will not receive any destruction callbacks
+	 * (like DisposableBean's <code>destroy</code> method) either.
+	 * <p><b>Register a bean definition instead of an existing instance if
+	 * your bean is supposed to receive initialization and/or destruction
+	 * callbacks.</b>
 	 * <p>Typically invoked during factory configuration, but can also be
 	 * used for runtime registration of singletons. Therefore, a factory
 	 * implementation should synchronize singleton access; it will have
@@ -91,6 +96,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * @param singletonObject the existing object
 	 * @throws BeansException if the singleton could not be registered
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
+	 * @see org.springframework.beans.factory.DisposableBean#destroy
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#registerBeanDefinition
 	 */
 	void registerSingleton(String beanName, Object singletonObject) throws BeansException;
 
