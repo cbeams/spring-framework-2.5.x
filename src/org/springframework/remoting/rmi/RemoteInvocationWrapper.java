@@ -8,20 +8,22 @@ import java.rmi.server.UnicastRemoteObject;
 /**
  * Server-side implementation of RemoteInvocationHandler.
  * An instance of this class exists for each remote object.
- *
  * @author Juergen Hoeller
  * @since 14.05.2003
  */
 class RemoteInvocationWrapper extends UnicastRemoteObject implements RemoteInvocationHandler {
 
-	private Object wrappedObject;
+	private final Object wrappedObject;
 
 	/**
 	 * Create a new RemoteInvocationWrapper.
 	 * @param wrappedObject	the locally wrapped object, on which methods are invoked
+	 * @param port the port number on which the remote object receives calls
+	 * (if 0, an anonymous port is chosen)
 	 */
-	public RemoteInvocationWrapper(Object wrappedObject) throws RemoteException {
-		super();
+	protected RemoteInvocationWrapper(Object wrappedObject, int port) throws RemoteException {
+		// the super() invocation will export this object as remote service
+		super(port);
 		this.wrappedObject = wrappedObject;
 	}
 

@@ -1,18 +1,19 @@
 package org.springframework.remoting.rmi;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
+import java.lang.reflect.Method;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 
+import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
-import org.springframework.remoting.support.RemoteProxySupport;
+import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
  * Interceptor for accessing transparent RMI services.
@@ -26,37 +27,88 @@ import org.springframework.remoting.support.RemoteProxySupport;
  * <p>This interceptor can only access RMI objects that got exported with a
  * RemoteInvocationWrapper, i.e. working on the RemoteInvocationHandler level.
  *
- * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
- * Effectively, any serializable Java object can be transported without hassle.
- * Hessian and Burlap have their own (de-)serialization mechanisms, but are
- * HTTP-based and thus much easier to setup than RMI.
- *
  * @author Juergen Hoeller
  * @since 29.09.2003
  */
-public class RmiClientInterceptor extends RemoteProxySupport implements MethodInterceptor, InitializingBean {
+public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
 
-	private RemoteInvocationHandler rmiProxy;
+	private Remote rmiProxy;
 
-	public void afterPropertiesSet() throws MalformedURLException, NotBoundException, RemoteException {
-		Remote remoteObj = Naming.lookup(getServiceUrl());
-		if (!(remoteObj instanceof RemoteInvocationHandler)) {
-			throw new NotBoundException("Bound RMI object isn't a RemoteInvocationHandler (no transparent RMI handler)");
+	public void afterPropertiesSet() throws Exception {
+		if (getServiceUrl() == null) {
+			throw new IllegalArgumentException("serviceUrl is required");
 		}
-		this.rmiProxy = (RemoteInvocationHandler) remoteObj;
+		Remote remoteObj = createRmiProxy();
+		if (remoteObj instanceof RemoteInvocationHandler) {
+			logger.info("RMI object [" + getServiceUrl() + "] is an RMI invoker");
+		}
+		else if (getServiceInterface() != null) {
+			boolean isImpl = getServiceInterface().isInstance(remoteObj);
+			logger.info("Using service interface [" + getServiceInterface().getName() + "] for RMI object [" +
+									getServiceUrl() + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+		}
+		this.rmiProxy = remoteObj;
+	}
+
+	/**
+	 * Create the RMI proxy. Default implementations looks up the service URL
+	 * via java.rmi.Naming. Can be overridden in subclasses.
+	 * @see java.rmi.Naming#lookup
+	 */
+	protected Remote createRmiProxy() throws Exception {
+		return Naming.lookup(getServiceUrl());
+	}
+
+	/**
+	 * Return the underlying RMI proxy that this interceptor delegates to.
+	 */
+	protected Remote getRmiProxy() {
+		return rmiProxy;
 	}
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		try {
-			return this.rmiProxy.invokeRemote(invocation.getMethod().getName(),
-			                                  invocation.getMethod().getParameterTypes(),
-			                                  invocation.getArguments());
+			if (this.rmiProxy instanceof RemoteInvocationHandler) {
+				RemoteInvocationHandler invoker = (RemoteInvocationHandler) this.rmiProxy;
+				return invoker.invokeRemote(invocation.getMethod().getName(),
+																		invocation.getMethod().getParameterTypes(),
+																		invocation.getArguments());
+			}
+			else {
+				Method method = invocation.getMethod();
+				if (method.getDeclaringClass().isInstance(this.rmiProxy)) {
+					// directly implemented
+					return method.invoke(this.rmiProxy, invocation.getArguments());
+				}
+				else {
+					// not directly implemented
+					Method proxyMethod = this.rmiProxy.getClass().getMethod(method.getName(), method.getParameterTypes());
+					return proxyMethod.invoke(this.rmiProxy, invocation.getArguments());
+				}
+			}
 		}
 		catch (RemoteException ex) {
-			throw new RemoteAccessException("Cannot access transparent RMI service", ex);
+			logger.debug("RMI invoker for service [" + getServiceUrl() + "] threw exception", ex);
+			if (!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
+				throw new RemoteAccessException("Cannot access RMI invoker for [" + getServiceUrl() + "]", ex);
+			}
+			else {
+				throw ex;
+			}
 		}
 		catch (InvocationTargetException ex) {
-			throw ex.getTargetException();
+			Throwable targetException = ex.getTargetException();
+			logger.debug("RMI method of service [" + getServiceUrl() + "] threw exception", targetException);
+			if (targetException instanceof RemoteException &&
+					!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
+				throw new RemoteAccessException("Cannot access RMI service [" + getServiceUrl() + "]", targetException);
+			}
+			else {
+				throw targetException;
+			}
+		}
+		catch (Throwable t) {
+			throw new AspectException("Failed to invoke RMI service [" + getServiceUrl() + "]", t);
 		}
 	}
 

@@ -5,9 +5,11 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -40,9 +42,11 @@ public class RmiServiceExporter implements InitializingBean {
 
 	private Object service;
 
-	private String name;
+	private String serviceName;
 
-	private int port = Registry.REGISTRY_PORT;
+	private int servicePort = 0;  // anonymous port
+
+	private int registryPort = Registry.REGISTRY_PORT;
 
 	/**
 	 * Set the service to export via RMI.
@@ -53,20 +57,28 @@ public class RmiServiceExporter implements InitializingBean {
 	}
 
 	/**
-	 * Set the name of the exported RMI object,
+	 * Set the name of the exported RMI service,
 	 * i.e. rmi://localhost:port/NAME
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
 	}
 
 	/**
-	 * Set the port of the registry for the exported RMI object,
+	 * Set the port that the exported RMI service will use.
+	 * Default is 0 (anonymous port).
+	 */
+	public void setServicePort(int servicePort) {
+		this.servicePort = servicePort;
+	}
+
+	/**
+	 * Set the port of the registry for the exported RMI service,
 	 * i.e. rmi://localhost:PORT/name
 	 * Default is Registry.REGISTRY_PORT (1099).
 	 */
-	public void setPort(int port) {
-		this.port = port;
+	public void setRegistryPort(int registryPort) {
+		this.registryPort = registryPort;
 	}
 
 	/**
@@ -75,22 +87,32 @@ public class RmiServiceExporter implements InitializingBean {
 	 */
 	public void afterPropertiesSet() throws RemoteException, AlreadyBoundException {
 		Registry registry = null;
-		logger.info("Looking for RMI registry at port [" + this.port + "]");
+		logger.info("Looking for RMI registry at port '" + this.registryPort + "'");
 		try {
 			// retrieve registry
-			registry = LocateRegistry.getRegistry(this.port);
+			registry = LocateRegistry.getRegistry(this.registryPort);
 			registry.list();
 		}
 		catch (RemoteException ex) {
 			logger.debug("RMI registry access threw exception", ex);
 			logger.warn("Could not detect RMI registry - creating new one");
 			// assume no registry found -> create new one
-			registry = LocateRegistry.createRegistry(this.port);
+			registry = LocateRegistry.createRegistry(this.registryPort);
 		}
+
 		// bind wrapper to registry
-		logger.info("Binding RMI service [" + this.name + "] to registry at port [" + this.port + "]");
-		Remote wrapper = new RemoteInvocationWrapper(this.service);
-		registry.rebind(this.name, wrapper);
+		logger.info("Binding RMI service '" + this.serviceName + "' to registry at port '" + this.registryPort + "'");
+		if (this.service instanceof Remote) {
+			// plain RMI service
+			Remote exportedObject = UnicastRemoteObject.exportObject((Remote) this.service, this.servicePort);
+			registry.rebind(this.serviceName, exportedObject);
+		}
+		else {
+			// RMI invoker
+			logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
+			Remote wrapper = new RemoteInvocationWrapper(this.service, this.servicePort);
+			registry.rebind(this.serviceName, wrapper);
+		}
 	}
 
 }

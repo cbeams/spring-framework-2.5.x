@@ -8,11 +8,17 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * Factory bean for transparent RMI proxies. Behaves like the proxied service when
- * used as bean reference, exposing the specified service interface.
+ * Factory bean for RMI proxies, supporting both plain and transparent RMI.
+ * Behaves like the proxied service when used as bean reference, exposing the
+ * specified service interface.
  *
  * <p>The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
- * For details, see RmiClientInterceptor docs.
+ * For details on transparent RMI, see RmiClientInterceptor docs.
+ *
+ * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
+ * Effectively, any serializable Java object can be transported without hassle.
+ * Hessian and Burlap have their own (de-)serialization mechanisms, but are
+ * HTTP-based and thus much easier to setup than RMI.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
@@ -22,8 +28,11 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 
 	private Object serviceProxy;
 
-	public void afterPropertiesSet() throws MalformedURLException, NotBoundException, RemoteException {
+	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
+		if (getServiceInterface() == null) {
+			throw new IllegalArgumentException("serviceInterface is required");
+		}
 		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
 	}
 
