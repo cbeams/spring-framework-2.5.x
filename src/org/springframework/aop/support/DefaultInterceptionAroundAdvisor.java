@@ -7,30 +7,19 @@ import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.Pointcut;
 
 /**
- * Default InterceptionAdvice implementation that
- * is a JavaBean taking Pointcut and Interceptor.
+ * Default InterceptionAdvice implementation.
  * @author Rod Johnson
- * @version $Id: DefaultInterceptionAroundAdvisor.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: DefaultInterceptionAroundAdvisor.java,v 1.3 2003-12-09 14:02:30 johnsonr Exp $
  */
-public class DefaultInterceptionAroundAdvisor implements InterceptionAroundAdvisor {
+public class DefaultInterceptionAroundAdvisor extends AbstractPointcutAdvisor implements InterceptionAroundAdvisor {
 	
 	private Interceptor interceptor;
-
-	private Pointcut pointcut;
-	
-	private boolean isPerInstance = false;
-	
-	public DefaultInterceptionAroundAdvisor() {
-	}
 	
 	public DefaultInterceptionAroundAdvisor(Pointcut pointcut, Interceptor interceptor) {
-		setPointcut(pointcut);
+		super(pointcut);
 		setInterceptor(interceptor);
 	}
 	
-	public void setPerInstance(boolean perInstance) {
-		this.isPerInstance = perInstance;
-	}
 	
 	/**
 	 * If no pointcut is supplied, the advice will always fire.
@@ -43,25 +32,15 @@ public class DefaultInterceptionAroundAdvisor implements InterceptionAroundAdvis
 		this.interceptor = interceptor;
 	}
 
-	public void setPointcut(Pointcut pointcut) {
-		this.pointcut = pointcut;
-	}
 
 	public Interceptor getInterceptor() {
 		return this.interceptor;
 	}
 
-	public Pointcut getPointcut() {
-		return this.pointcut;
-	}
-	
-	public boolean isPerInstance() {
-		return this.isPerInstance;
-	}
 
 	public String toString() {
 		return getClass().getName() + ": interceptor=(" + interceptor + 
-				"); Pointcut=(" + pointcut + "); perInstance=" + this.isPerInstance;
+				"); Pointcut=(" + getPointcut() + ") ";//perInstance=" + this.isPerInstance;
 	}
 	
 	public boolean equals(Object other) {

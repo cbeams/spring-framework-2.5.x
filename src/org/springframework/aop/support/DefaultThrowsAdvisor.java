@@ -9,44 +9,30 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.ThrowsAdvisor;
 
 /**
- * 
+ * Default ThrowsAdvisor implementation, holding a pointcut and 
+ * throws advice. Note that a throws advice is an object.
+ * @see org.springframework.aop.support.ThrowsAdviceInterceptor
  * @author Rod Johnson
- * @version $Id: DefaultThrowsAdvisor.java,v 1.1 2003-12-07 14:30:46 johnsonr Exp $
+ * @version $Id: DefaultThrowsAdvisor.java,v 1.2 2003-12-09 14:02:32 johnsonr Exp $
  */
-public class DefaultThrowsAdvisor implements ThrowsAdvisor {
+public class DefaultThrowsAdvisor extends AbstractPointcutAdvisor implements ThrowsAdvisor {
 	
-	private final Object throwsAdvice;
-	
-	private final Pointcut pointcut;
-	
+	private final Object throwsAdvice;	
 
 	/**
 	 * @param throwsAdvice
 	 * @param pointcut
 	 */
 	public DefaultThrowsAdvisor(Pointcut pointcut, Object throwsAdvice) {
+		super(pointcut);
 		this.throwsAdvice = throwsAdvice;
-		this.pointcut = pointcut;
 	}
+	
 	/**
 	 * @see org.springframework.aop.ThrowsAdvisor#getThrowsAdvice()
 	 */
 	public Object getThrowsAdvice() {
 		return throwsAdvice;
-	}
-
-	/**
-	 * @see org.springframework.aop.Advisor#isPerInstance()
-	 */
-	public boolean isPerInstance() {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * @see org.springframework.aop.PointcutAdvisor#getPointcut()
-	 */
-	public Pointcut getPointcut() {
-		return pointcut;
 	}
 
 }
