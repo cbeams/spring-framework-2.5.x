@@ -1,9 +1,17 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/ValidatingFormModel.java,v 1.3 2004-06-13 11:35:31 kdonald Exp $
- * $Revision: 1.3 $
- * $Date: 2004-06-13 11:35:31 $
+ * Copyright 2002-2004 the original author or authors.
  * 
- * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.rules.values;
 
@@ -66,9 +74,10 @@ public class ValidatingFormModel extends DefaultFormModel implements
     }
 
     public Object getValue(String aspect) {
+        System.out.println(aspect);
         return getValueModel(aspect).get();
     }
-    
+
     public Object getDomainObject() {
         return this;
     }
@@ -100,30 +109,48 @@ public class ValidatingFormModel extends DefaultFormModel implements
         if (validationListener != null) {
             validationListeners.remove(validationListener);
         }
-
     }
 
     protected void onNewFormValueModel(String domainObjectProperty,
-            final ValueModel formValueModel) {
-        final BeanPropertyExpression exp = rulesSource.getRules(
+            ValueModel formValueModel) {
+        BeanPropertyExpression constraint = rulesSource.getRules(
                 getDomainObjectClass(), domainObjectProperty);
-        if (exp != null) {
-            formValueModel.addValueListener(new ValueListener() {
-                public void valueChanged() {
-                    BeanValidationResultsCollector collector = new BeanValidationResultsCollector(
-                            ValidatingFormModel.this);
-                    PropertyResults results = (PropertyResults)collector
-                            .collectPropertyResults(exp);
-                    if (results == null) {
-                        constraintSatisfied(exp, formValueModel);
-                    }
-                    else {
-                        constraintViolated(exp, formValueModel, results);
-                    }
-                }
-            });
+        if (constraint != null) {
+            FormValueModelValidator validator = new FormValueModelValidator(
+                    constraint, formValueModel);
+            formValueModel.addValueListener(validator);
+            validator.validate();
         }
     }
+
+    private class FormValueModelValidator implements ValueListener {
+        private BeanPropertyExpression constraint;
+
+        private ValueModel formValueModel;
+
+        public FormValueModelValidator(BeanPropertyExpression constraint,
+                ValueModel formValueModel) {
+            this.constraint = constraint;
+            this.formValueModel = formValueModel;
+        }
+
+        public void valueChanged() {
+            validate();
+        }
+
+        public void validate() {
+            BeanValidationResultsCollector collector = new BeanValidationResultsCollector(
+                    ValidatingFormModel.this);
+            PropertyResults results = (PropertyResults)collector
+                    .collectPropertyResults(constraint);
+            if (results == null) {
+                constraintSatisfied(constraint, formValueModel);
+            }
+            else {
+                constraintViolated(constraint, formValueModel, results);
+            }
+        }
+    };
 
     protected void constraintSatisfied(BeanPropertyExpression exp,
             ValueModel formValueModel) {

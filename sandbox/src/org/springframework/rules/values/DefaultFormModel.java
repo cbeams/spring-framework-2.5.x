@@ -1,9 +1,17 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/DefaultFormModel.java,v 1.3 2004-06-13 11:35:31 kdonald Exp $
- * $Revision: 1.3 $
- * $Date: 2004-06-13 11:35:31 $
+ * Copyright 2002-2004 the original author or authors.
  * 
- * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.rules.values;
 
@@ -17,12 +25,13 @@ import org.apache.commons.logging.LogFactory;
  * @author Keith Donald
  */
 public class DefaultFormModel implements FormModel {
-    protected static final Log logger = LogFactory.getLog(DefaultFormModel.class);
+    protected static final Log logger = LogFactory
+            .getLog(DefaultFormModel.class);
 
     private MutableAspectAccessStrategy domainObjectAccessStrategy;
 
     private Object domainObject;
-    
+
     private ValueModel domainObjectHolder;
 
     private ValueModel commitTrigger;
@@ -55,6 +64,14 @@ public class DefaultFormModel implements FormModel {
         this.bufferChanges = bufferChanges;
     }
 
+    public void addValidationListener(ValidationListener listener) {
+
+    }
+
+    public void removeValidationListener(ValidationListener listener) {
+
+    }
+
     public void setFormProperties(String[] domainObjectProperties) {
         formValueModels.clear();
         for (int i = 0; i < domainObjectProperties.length; i++) {
@@ -85,8 +102,8 @@ public class DefaultFormModel implements FormModel {
             formValueModel = new BufferedValueModel(formValueModel,
                     commitTrigger);
         }
-        onNewFormValueModel(domainObjectProperty, formValueModel);
         formValueModels.put(domainObjectProperty, formValueModel);
+        onNewFormValueModel(domainObjectProperty, formValueModel);
         return formValueModel;
     }
 
