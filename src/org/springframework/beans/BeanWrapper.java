@@ -32,7 +32,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.7 2003-12-10 08:53:42 jhoeller Exp $
+ * @version $Id: BeanWrapper.java,v 1.8 2004-01-06 22:24:25 jhoeller Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -163,9 +163,8 @@ public interface BeanWrapper {
 	 * <p>Does not allow unknown fields.
 	 * @param pvs PropertyValues to set on the target object
 	 * @param ignoreUnknown should we ignore unknown values (not found in the bean!?)
-	 * @param pvsValidator property values validator. Ignored if it's null.
 	 */
-	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, PropertyValuesValidator pvsValidator)
+	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
 	    throws BeansException;
 
 

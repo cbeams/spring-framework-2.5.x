@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.20 2003-12-30 01:23:16 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.21 2004-01-06 22:24:25 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -606,22 +606,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	public void setPropertyValues(PropertyValues pvs) throws BeansException {
-		setPropertyValues(pvs, false, null);
+		setPropertyValues(pvs, false);
 	}
 
-	public void setPropertyValues(PropertyValues propertyValues, boolean ignoreUnknown,
-									PropertyValuesValidator pvsValidator) throws BeansException {
+	public void setPropertyValues(PropertyValues propertyValues, boolean ignoreUnknown) throws BeansException {
 		// Create only if needed
 		PropertyVetoExceptionsException propertyVetoExceptionsException = new PropertyVetoExceptionsException(this);
-
-		if (pvsValidator != null) {
-			try {
-				pvsValidator.validatePropertyValues(propertyValues);
-			}
-			catch (InvalidPropertyValuesException ipvex) {
-				propertyVetoExceptionsException.addMissingFields(ipvex);
-			}
-		}
 
 		PropertyValue[] pvs = propertyValues.getPropertyValues();
 		for (int i = 0; i < pvs.length; i++) {
