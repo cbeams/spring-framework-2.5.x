@@ -64,7 +64,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	
 	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		Object command = userObject(request);
+		Object command = getCommand(request);
 		BindException errors = bindAndValidate(request, command);
 		return handle(request, response, command, errors);
 	}

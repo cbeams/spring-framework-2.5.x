@@ -15,8 +15,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 
 /**
  * <p>Controller implementation creating a certain object (the command object)
- * on receipt of request and attempt to populate this object with request
- * parameters.</p>
+ * on receipt of request and attempt to populate this object with request parameters.</p>
  *
  * <p>This controller is the base for all controller wishing to populate
  * JavaBeans based on request parameters, validate the content of such
@@ -198,13 +197,14 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Check if the given command object is a valid for this controller,
-	 * i.e. its command class.
-	 * @param command command object to check
-	 * @return if the command object is valid for this controller
+	 * Retrieve a command object for the given request.
+	 * <p>Default implementation calls createCommand. Subclasses can override this.
+	 * @param request current HTTP request
+	 * @return object command to bind onto
+	 * @see #createCommand
 	 */
-	protected final boolean checkCommand(Object command) {
-		return (this.commandClass == null || this.commandClass.isInstance(command));
+	protected Object getCommand(HttpServletRequest request) throws ServletException {
+		return createCommand();
 	}
 
 	/**
@@ -230,14 +230,13 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Retrieve a user's command object for the given request.
-	 * <p>Default implementation calls createCommand. Subclasses can override this.
-	 * @param request current HTTP request
-	 * @return object command to bind onto
-	 * @see #createCommand
+	 * Check if the given command object is a valid for this controller,
+	 * i.e. its command class.
+	 * @param command command object to check
+	 * @return if the command object is valid for this controller
 	 */
-	protected Object userObject(HttpServletRequest request) throws ServletException {
-		return createCommand();
+	protected final boolean checkCommand(Object command) {
+		return (this.commandClass == null || this.commandClass.isInstance(command));
 	}
 
 	/**

@@ -74,7 +74,7 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>XXX Return and view gets rendered. Continue after user has filled in
  *      form</li>
  *  <li>POST request on the controller is received</li>
- *  <li>if <code>sessionForm</code> is not set, {@link #userObject userObject()}
+ *  <li>if <code>sessionForm</code> is not set, {@link #getCommand getCommand()}
  *      is called to retrieve a command class. Otherwise, the controller tries
  *      to find the command object which is already bound in the session. If it cannot
  *      find the object, it'll do a call to {@link #handleInvalidSubmit handleInvalidSubmit}
@@ -224,7 +224,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 			  return handleInvalidSubmit(request, response);
 		  }
 			// process submit
-			Object command = userObject(request);
+			Object command = getCommand(request);
 			ServletRequestDataBinder errors = bindAndValidate(request, command);
 			return processFormSubmission(request, response, command, errors);
 		}
@@ -261,10 +261,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// show new form
 		logger.debug("Displaying new form");
 		Object formObject = formBackingObject(request);
-		if (formObject == null)
+		if (formObject == null) {
 			throw new ServletException("Form object returned by formBackingObject() may not be null");
-		if (!checkCommand(formObject))
+		}
+		if (!checkCommand(formObject)) {
 			throw new ServletException("Form object returned by formBackingObject() must match commandClass");
+		}
 		// bind without validation, to allow for prepopulating a form, and for
 		// convenient error evaluation in views (on both first attempt and resubmit)
 		ServletRequestDataBinder binder = createBinder(request, formObject);
@@ -309,7 +311,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Prepare model and view for the given form, including reference and errors.
 	 * In session form mode: Re-puts the form object in the session when returning
-	 * to the form, as it has been removed by userObject.
+	 * to the form, as it has been removed by getCommand.
 	 * Can be used in subclasses to redirect back to a specific form page.
 	 * @param request current HTTP request
 	 * @param errors binder containing errors
@@ -326,7 +328,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Prepare model and view for the given form, including reference and errors,
 	 * adding a controller-specific control model.
 	 * In session form mode: Re-puts the form object in the session when returning
-	 * to the form, as it has been removed by userObject.
+	 * to the form, as it has been removed by getCommand.
 	 * Can be used in subclasses to redirect back to a specific form page.
 	 * @param request current HTTP request
 	 * @param errors binder containing errors
@@ -403,9 +405,9 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @return object form to bind onto
 	 * @throws ServletException in case of invalid state or arguments
 	 */
-	protected final Object userObject(HttpServletRequest request) throws ServletException {
+	protected final Object getCommand(HttpServletRequest request) throws ServletException {
 		if (!isSessionForm()) {
-			return super.userObject(request);
+			return super.getCommand(request);
 		}
 		HttpSession session = request.getSession(false);
 		if (session == null)
