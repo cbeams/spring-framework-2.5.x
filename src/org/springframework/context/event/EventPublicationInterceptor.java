@@ -57,7 +57,7 @@ public class EventPublicationInterceptor
 
 	public void afterPropertiesSet() throws Exception {
 		if (this.applicationEventClass == null || !ApplicationEvent.class.isAssignableFrom(this.applicationEventClass)) {
-			throw new IllegalStateException("applicationEventClass is required and needs to implement ApplicationEvent");
+			throw new IllegalStateException("applicationEventClass is required and needs to extend ApplicationEvent");
 		}
 	}
 
