@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.23 2004-08-16 06:01:28 davison Exp $-->
+<!--$Id: views.xml,v 1.24 2004-08-23 01:00:13 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -543,18 +543,18 @@ recommend sticking to 'spring' --&gt;
                 <entry><literal>#springFormInput($path
                 $attributes)</literal></entry>
 
-                <entry><literal>&lt;@spring.formInput path
+                <entry><literal>&lt;@spring.formInput path,
                 attributes/&gt;</literal></entry>
               </row>
 
               <row>
-                <entry><emphasis role="bold">formTextArea</emphasis> (large
+                <entry><emphasis role="bold">formTextarea</emphasis> (large
                 text field for gathering long, freeform text input)</entry>
 
-                <entry><literal>#springFormTextArea($path
+                <entry><literal>#springFormTextarea($path
                 $attributes)</literal></entry>
 
-                <entry><literal>&lt;@spring.formTextArea path
+                <entry><literal>&lt;@spring.formTextarea path,
                 attributes/&gt;</literal></entry>
               </row>
 
@@ -566,7 +566,7 @@ recommend sticking to 'spring' --&gt;
                 <entry><literal>#springFormSingleSelect( $path $options
                 $attributes)</literal></entry>
 
-                <entry><literal>&lt;@spring.formSingleSelect path options
+                <entry><literal>&lt;@spring.formSingleSelect path, options,
                 attributes/&gt;</literal></entry>
               </row>
 
@@ -578,7 +578,7 @@ recommend sticking to 'spring' --&gt;
                 <entry><literal>#springFormMultiSelect($path $options
                 $attributes)</literal></entry>
 
-                <entry><literal>&lt;@spring.formMultiSelect path options
+                <entry><literal>&lt;@spring.formMultiSelect path, options,
                 attributes/&gt;</literal></entry>
               </row>
 
@@ -590,20 +590,20 @@ recommend sticking to 'spring' --&gt;
                 <entry><literal>#springFormRadioButtons($path $options
                 $separator $attributes)</literal></entry>
 
-                <entry><literal>&lt;@spring.formRadioButtons path options
-                separator attributes/&gt;</literal></entry>
+                <entry><literal>&lt;@spring.formRadioButtons path, options
+                separator, attributes/&gt;</literal></entry>
               </row>
 
               <row>
-                <entry><emphasis role="bold">formCheckBoxes</emphasis> (a set
+                <entry><emphasis role="bold">formCheckboxes</emphasis> (a set
                 of checkboxes allowing 0 or more values to be
                 selected)</entry>
 
-                <entry><literal>#springFormCheckBoxes($path $options
+                <entry><literal>#springFormCheckboxes($path $options
                 $separator $attributes)</literal></entry>
 
-                <entry><literal>&lt;@spring.formCheckBoxes path options
-                separator attributes/&gt;</literal></entry>
+                <entry><literal>&lt;@spring.formCheckboxes path, options,
+                separator, attributes/&gt;</literal></entry>
               </row>
 
               <row>
@@ -613,7 +613,7 @@ recommend sticking to 'spring' --&gt;
                 <entry><literal>#springShowErrors($separator
                 $classOrStyle)</literal></entry>
 
-                <entry><literal>&lt;@spring.showErrors separator
+                <entry><literal>&lt;@spring.showErrors separator,
                 classOrStyle/&gt;</literal></entry>
               </row>
             </tbody>
@@ -630,15 +630,25 @@ recommend sticking to 'spring' --&gt;
           </listitem>
 
           <listitem>
-            <para>options: a list of all the available values that can be
-            selected from in the input field. Usually supplied as reference
-            data by the controller</para>
+            <para>options: a Map of all the available values that can be
+            selected from in the input field. The keys to the map represent
+            the values that will be POSTed back from the form and bound to the
+            command object. Map objects stored against the keys are the labels
+            displayed on the form to the user and may be different from the
+            corresponding values posted back by the form. Usually such a map
+            is supplied as reference data by the controller. Any Map
+            implementation can be used depending on required behaviour. For
+            strictly sorted maps, a <literal>SortedMap</literal> such as a
+            <literal>TreeMap</literal> with a suitable Comparator may be used
+            and for arbitrary Maps that should return values in insertion
+            order, use a <literal>LinkedHashMap</literal> or a
+            <literal>LinkedMap</literal> from commons-collections.</para>
           </listitem>
 
           <listitem>
             <para>separator: where multiple options are available as discreet
             elements (radio buttons or checkboxes), the sequence of characters
-            used to separate each one in the list (ie "&lt;br&gt;")</para>
+            used to separate each one in the list (ie "&lt;br&gt;").</para>
           </listitem>
 
           <listitem>
@@ -646,7 +656,7 @@ recommend sticking to 'spring' --&gt;
             to be included within the HTML tag itself. This string is echoed
             literally by the macro. For example, in a textarea field you may
             supply attributes as 'rows="5" cols="60"' or you could pass style
-            information such as 'style="border:1px solid silver"'</para>
+            information such as 'style="border:1px solid silver"'.</para>
           </listitem>
 
           <listitem>
@@ -662,7 +672,7 @@ recommend sticking to 'spring' --&gt;
         are explained in the notes.</para>
 
         <sect4>
-          <title>formInput</title>
+          <title>Input Fields</title>
 
           <para><programlisting>&lt;!-- the Name field example from above using form macros in VTL --&gt;
 ...
@@ -682,73 +692,133 @@ recommend sticking to 'spring' --&gt;
           characters that will be used to separate multiple errors on a given
           field) and also accepts a second parameter, this time a class name
           or style attribute. Note that FreeMarker is able to specify default
-          values for the attributes parameter, unlike Velocity, and the
-          formInput macro above could be expressed as follows in FTL:</para>
+          values for the attributes parameter, unlike Velocity, and the two
+          macro calls above could be expressed as follows in FTL:</para>
 
-          <programlisting>&lt;@spring.formInput "command.name"/&gt;</programlisting>
+          <programlisting>&lt;@spring.formInput "command.name"/&gt;
+&lt;@spring.showErrors "&lt;br&gt;"/&gt;</programlisting>
 
           <para>Output is shown below of the form fragment generating the name
           field, and displying a validation error after the form was submitted
           with no value in the field. Validation occurs through Spring's
           Validation framework.</para>
 
-          <figure>
-            <title>VTL / FTL binding to an invalid name field
-            submission</title>
-
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref="images/bind1.jpg" />
-              </imageobject>
-            </mediaobject>
-          </figure>
-
           <para>The generated HTML looks like this:</para>
 
           <programlisting>Name:
-  &lt;input
-    type="text"
-    name="name"
-    value=""
-     
+  &lt;input type="text" name="name" value=""     
 &gt;
 &lt;br&gt;
   &lt;b&gt;required&lt;/b&gt;
 &lt;br&gt;
 &lt;br&gt;</programlisting>
+
+          <para>The formTextarea macro works the same way as the formInput
+          macro and accepts the same parameter list. Commonly, the second
+          parameter (attributes) will be used to pass style information or
+          rows and cols attributes for the textarea.</para>
         </sect4>
 
         <sect4>
-          <title>formRadioButtons</title>
+          <title>Selection Fields</title>
+
+          <para>Four selection field macros can be used to generate common UI
+          value selection inputs in your HTML forms.</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>formSingleSelect</para>
+            </listitem>
+
+            <listitem>
+              <para>formMultiSelect</para>
+            </listitem>
+
+            <listitem>
+              <para>formRadioButtons</para>
+            </listitem>
+
+            <listitem>
+              <para>formCheckboxes</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Each of the four macros accepts a Map of options containing
+          the value for the form field, and the label corresponding to that
+          value. The value and the label can be the same.</para>
 
           <para>An example of radio buttons in FTL is below. The form backing
           object specifies a default value of 'London' for this field and so
           no validation is necessary. When the form is rendered, the entire
           list of cities to choose from is supplied as reference data in the
-          model under the name 'cityList'.</para>
+          model under the name 'cityMap'.</para>
 
           <programlisting>...
   Town:
-  &lt;@spring.formRadioButtons "command.address.town", cityList, "" /&gt;&lt;br&gt;&lt;br&gt;</programlisting>
+  &lt;@spring.formRadioButtons "command.address.town", cityMap, "" /&gt;&lt;br&gt;&lt;br&gt;</programlisting>
 
-          <para>This renders accordingly;</para>
+          <para>This renders a line of radio buttons, one for each value in
+          <literal>cityMap</literal> using the separator "". No additional
+          attributes are supplied (the last parameter to the macro is
+          missing). The cityMap uses the same String for each key-value pair
+          in the map. The map's keys are what the form actually submits as
+          POSTed request parameters, map values are the labels that the user
+          sees. In the example above, given a list of three well known cities
+          and a default value in the form backing object, the HTML would
+          be</para>
 
-          <figure>
-            <title>macro displaying bound radio buttons</title>
+          <programlisting>Town:
+&lt;input type="radio" name="address.town" value="London"
+   
+&gt;
+London
+&lt;input type="radio" name="address.town" value="Paris"
+  checked="checked" 
+&gt;
+Paris
+&lt;input type="radio" name="address.town" value="New York"
+   
+&gt;
+New York</programlisting>
 
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref="images/bind2.jpg" />
-              </imageobject>
-            </mediaobject>
-          </figure>
+          <para>If your application expects to handle cities by internal codes
+          for example, the map of codes would be created with suitable keys
+          like the example below.</para>
 
-          <para>[todo: proper examples]</para>
+          <programlisting>protected Map referenceData(HttpServletRequest request) throws Exception {
+  Map cityMap = new LinkedHashMap();
+  cityMap.put("LDN", "London");
+  cityMap.put("PRS", "Paris");
+  cityMap.put("NYC", "New York");
+  
+  Map m = new HashMap();
+  m.put("cityMap", cityMap);
+  return m;
+}</programlisting>
+
+          <para>The code would now produce output where the radio values are
+          the relevant codes but the user still sees the more user friendly
+          city names.</para>
+
+          <programlisting>Town:
+&lt;input type="radio" name="address.town" value="LDN"
+   
+&gt;
+London
+&lt;input type="radio" name="address.town" value="PRS"
+  checked="checked" 
+&gt;
+Paris
+&lt;input type="radio" name="address.town" value="NYC"
+   
+&gt;
+New York</programlisting>
         </sect4>
       </sect3>
 
       <sect3>
-        <title>advanced usage of form macros</title>
+        <title>overriding HTML escaping and making tags XHTML
+        compliant</title>
 
         <para>Default usage of the form macros above will result in HTML tags
         that are HTML 4.01 compliant and that use the default value for HTML
@@ -764,7 +834,7 @@ recommend sticking to 'spring' --&gt;
         'true' for a model/context variable named xhtmlCompliant:</para>
 
         <programlisting>## for Velocity..
-#set($xhtmlCompliant = true)
+#set($springXhtmlCompliant = true)
 
 &lt;#-- for FreeMarker --&gt;
 &lt;#assign xhtmlCompliant = true in spring&gt;</programlisting>

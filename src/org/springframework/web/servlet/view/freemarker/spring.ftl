@@ -98,15 +98,16 @@
  * from a list of options.
  *
  * @param path the name of the field to bind to
- * @param options a list (sequence) of all the available options
+ * @param options a map (value=label) of all the available options
  * @param attributes any additional attributes for the element (such as class
  *        or CSS styles or size
 -->
 <#macro formSingleSelect path options attributes="">
 	<@bind path/>
 	<select name="${spring.status.expression}" ${attributes}>
-		<#list options as option>
-		<option <#if spring.status.value?default("") == option>selected="true"</#if>>${option}</option>
+		<#list options?keys as value>
+		<option value="${value}" 
+		<#if spring.status.value?default("") == value>selected="true"</#if>>${options[value]}</option>
 		</#list>
 	</select>
 </#macro>
@@ -118,16 +119,16 @@
  * the list of options.
  *
  * @param path the name of the field to bind to
- * @param options a list (sequence) of all the available options
+ * @param options a map (value=label) of all the available options
  * @param attributes any additional attributes for the element (such as class
  *        or CSS styles or size
 -->
 <#macro formMultiSelect path options attributes="">
 	<@bind path/>
 	<select multiple="multiple" name="${spring.status.expression}" ${attributes}>
-		<#list options as option>
-		<#assign isSelected = contains(spring.status.value?default([""]), option)>
-		<option <#if isSelected>selected="true"</#if>>${option}</option>
+		<#list options?keys as value>
+		<#assign isSelected = contains(spring.status.value?default([""]), value)>
+		<option value="${value}" <#if isSelected>selected="true"</#if>>${options[value]}</option>
 		</#list>
 	</select>
 </#macro>
@@ -138,7 +139,7 @@
  * Show radio buttons.
  *
  * @param path the name of the field to bind to
- * @param options a list (sequence) of all the available options
+ * @param options a map (value=label) of all the available options
  * @param separator the html tag or other character list that should be used to
  *        separate each option.  Typically '&nbsp;' or '<br>'
  * @param attributes any additional attributes for the element (such as class
@@ -146,11 +147,11 @@
 -->
 <#macro formRadioButtons path options separator attributes="">
 	<@bind path/>
-	<#list options as option>
-	<input type="radio" name="${spring.status.expression}" value="${option}"
-	  <#if spring.status.value?default("") == option>checked="checked"</#if> ${attributes}
+	<#list options?keys as value>
+	<input type="radio" name="${spring.status.expression}" value="${value}"
+	  <#if spring.status.value?default("") == value>checked="checked"</#if> ${attributes}
 	<@closeTag/>
-	${option}${separator}
+	${options[value]}${separator}
 	</#list>
 </#macro>
 
@@ -160,7 +161,7 @@
  * Show checkboxes.
  *
  * @param path the name of the field to bind to
- * @param options a list (sequence) of all the available options
+ * @param options a map (value=label) of all the available options
  * @param separator the html tag or other character list that should be used to
  *        separate each option.  Typically '&nbsp;' or '<br>'
  * @param attributes any additional attributes for the element (such as class
@@ -168,12 +169,12 @@
 -->
 <#macro formCheckboxes path options separator attributes="">
 	<@bind path/>
-	<#list options as option>
-	<#assign isSelected = contains(spring.status.value?default([""]), option)>
-	<input type="checkbox" name="${spring.status.expression}" value="${option}"
+	<#list options?keys as value>
+	<#assign isSelected = contains(spring.status.value?default([""]), value)>
+	<input type="checkbox" name="${spring.status.expression}" value="${value}"
 	  <#if isSelected>checked="checked"</#if> ${attributes}
 	<@closeTag/>
-	${option}${separator}
+	${options[value]}${separator}
   </#list>
 </#macro>
 
