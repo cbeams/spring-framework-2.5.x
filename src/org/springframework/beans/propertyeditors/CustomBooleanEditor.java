@@ -18,6 +18,8 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Property editor for Boolean properties.
  *
@@ -38,10 +40,14 @@ import java.beans.PropertyEditorSupport;
  */
 public class CustomBooleanEditor extends PropertyEditorSupport {
 
+	public static final String VALUE_TRUE = "true";
+
+	public static final String VALUE_FALSE = "false";
+
 	private final boolean allowEmpty;
 
 	/**
-	 * Create a new instance.
+	 * Create a new CustomBooleanEditor instance.
 	 * <p>The allowEmpty parameter states if an empty String should
 	 * be allowed for parsing, i.e. get interpreted as null value.
 	 * Else, an IllegalArgumentException gets thrown in that case.
@@ -52,13 +58,13 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 	}
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (this.allowEmpty && (text == null || "".equals(text.trim()))) {
+		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			setValue(null);
 		}
-		else if (text.equalsIgnoreCase("true")) {
+		else if (text.equalsIgnoreCase(VALUE_TRUE)) {
 			setValue(Boolean.TRUE);
 		}
-		else if (text.equalsIgnoreCase("false")) {
+		else if (text.equalsIgnoreCase(VALUE_FALSE)) {
 			setValue(Boolean.FALSE);
 		}
 		else
