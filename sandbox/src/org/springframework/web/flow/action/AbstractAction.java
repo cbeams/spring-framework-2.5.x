@@ -42,22 +42,23 @@ import org.springframework.web.util.WebUtils;
  * <li>Inserting action pre and post execution logic (may also be done with an
  * interceptor)
  * </ul>
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
-	 * The form object is then aliased under this name by the default populate
-	 * and bind actions.
+	 * The form object instance is aliased under this attribute name in
+	 * the flow model by the default populate and bind actions.
 	 */
-	public static final String LOCAL_FORM_OBJECT_NAME = "localFormObject";
+	public static final String FORM_OBJECT_ATTRIBUTE = "localFormObject";
 
 	/**
-	 * The form object errors instance is aliased under this name by the default
-	 * populate and bind actions
+	 * The form object errors instance is aliased under this attribute name
+	 * in the flow model by the default populate and bind actions.
 	 */
-	public static final String LOCAL_FORM_OBJECT_ERRORS_NAME = "localFormObjectErrors";
+	public static final String FORM_OBJECT_ERRORS_ATTRIBUTE = "localFormObjectErrors";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -225,8 +226,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Gets the form object from the model, using the local (to flow) name of
-	 * {@link #LOCAL_FORM_OBJECT_NAME}.
+	 * Gets the form object from the model, using the name {@link #FORM_OBJECT_ATTRIBUTE}.
 	 * 
 	 * @param model the flow model
 	 * @param formObjectClass the class of the form object, which will be
@@ -235,32 +235,31 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         model
 	 */
-	protected Object getLocalFormObject(FlowModel model, Class formObjectClass) throws IllegalStateException {
-		return model.getRequiredAttribute(LOCAL_FORM_OBJECT_NAME, formObjectClass);
+	protected Object getFormObject(FlowModel model, Class formObjectClass) throws IllegalStateException {
+		return getRequiredFormObject(model, FORM_OBJECT_ATTRIBUTE, formObjectClass);
 	}
 
 	/**
-	 * Gets the form object from the model, using the local (to flow) name of
-	 * {@link #LOCAL_FORM_OBJECT_NAME}.
+	 * Gets the form object from the model, using the name {@link #LOCAL_FORM_OBJECT_NAME}.
 	 * 
 	 * @param model the flow model
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         model
 	 */
-	protected Object getLocalFormObject(FlowModel model) throws IllegalStateException {
-		return model.getRequiredAttribute(LOCAL_FORM_OBJECT_NAME);
+	protected Object getFormObject(FlowModel model) throws IllegalStateException {
+		return getRequiredFormObject(model, FORM_OBJECT_ATTRIBUTE);
 	}
 
 	/**
 	 * Gets the form object <code>Errors</code> tracker from the model, using
-	 * the local (to flow) name of {@link #LOCAL_FORM_OBJECT_NAME}.
+	 * the name {@link #FORM_OBJECT_ERRORS_ATTRIBUTE}.
 	 * 
 	 * @param model the flow model
 	 * @throws IllegalStateException if the Errors instance is not found in the
 	 *         model
 	 */
-	protected Errors getLocalFormErrors(FlowModel model) throws IllegalStateException {
-		return (Errors)model.getRequiredAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class);
+	protected Errors getFormErrors(FlowModel model) throws IllegalStateException {
+		return getRequiredFormErrors(model, FORM_OBJECT_ERRORS_ATTRIBUTE);
 	}
 
 	/**
@@ -270,8 +269,11 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param formObjectClass the class of the form object, which will be
 	 *        verified
 	 * @return the form object
+	 * @throws IllegalStateException if the form object is not found in the
+	 *         model
 	 */
-	protected Object getRequiredFormObject(FlowModel model, String formObjectName, Class formObjectClass) {
+	protected Object getRequiredFormObject(FlowModel model, String formObjectName, Class formObjectClass)
+			throws IllegalStateException {
 		return model.getRequiredAttribute(formObjectName, formObjectClass);
 	}
 
@@ -280,8 +282,10 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param model the flow model
 	 * @param formObjectName the name of the form in the model
 	 * @return the form object
+	 * @throws IllegalStateException if the form object is not found in the
+	 *         model
 	 */
-	protected Object getRequiredFormObject(FlowModel model, String formObjectName) {
+	protected Object getRequiredFormObject(FlowModel model, String formObjectName) throws IllegalStateException {
 		return model.getRequiredAttribute(formObjectName);
 	}
 
@@ -291,25 +295,26 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param model The flow model
 	 * @param formObjectErrorsName The name of the form object errors
 	 * @return The form object errors instance
+	 * @throws IllegalStateException if the Errors instance is not found in the
+	 *         model
 	 */
-	protected Errors getRequiredFormErrors(FlowModel model, String formObjectErrorsName) {
+	protected Errors getRequiredFormErrors(FlowModel model, String formObjectErrorsName) throws IllegalStateException {
 		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectErrorsName, Errors.class);
 	}
 
 	/**
-	 * Export a <i>new </i> errors instance to the flow model for the form
-	 * object under the local (to flow) form object name,
-	 * {@link #LOCAL_FORM_OBJECT_NAME}.
+	 * Export a <i>new</i> errors instance to the flow model for the form
+	 * object using name {@link #FORM_OBJECT_ATTRIBUTE}.
 	 * 
 	 * @param model The flow model
 	 * @param formObject The form object to export an errors instance under
 	 */
 	protected void exportErrors(MutableFlowModel model, Object formObject) {
-		exportErrors(model, formObject, LOCAL_FORM_OBJECT_NAME);
+		exportErrors(model, formObject, FORM_OBJECT_ATTRIBUTE);
 	}
 
 	/**
-	 * Export a <i>new </i> errors instance to the flow model for the form
+	 * Export a <i>new</i> errors instance to the flow model for the form
 	 * object with the specified form object name.
 	 * @param model The flow model
 	 * @param formObject The form object
@@ -319,11 +324,12 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		exportErrorsInternal(model, new BindException(formObject, formObjectName));
 	}
 
+	/**
+	 * Helper to export form object error information.
+	 */
 	protected void exportErrorsInternal(MutableFlowModel model, BindException errors) {
-		// also bind it under the local (to flow) alias, so other actions can
-		// find it easily
-		model.setAttribute(LOCAL_FORM_OBJECT_NAME, errors.getTarget());
-		model.setAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, errors);
+		model.setAttribute(FORM_OBJECT_ATTRIBUTE, errors.getTarget());
+		model.setAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE, errors);
 		model.setAttributes(errors.getModel());
 	}
 
