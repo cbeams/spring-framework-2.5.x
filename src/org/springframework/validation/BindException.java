@@ -55,6 +55,7 @@ public class BindException extends Exception implements Errors {
 	 */
 	public static final String ERROR_KEY_PREFIX = BindException.class.getName() + ".";
 
+
 	private final List errors = new LinkedList();
 
 	private final BeanWrapper beanWrapper;
@@ -291,9 +292,9 @@ public class BindException extends Exception implements Errors {
 	public Object getFieldValue(String field) {
 		FieldError fe = getFieldError(field);
 		String fixedField = fixedField(field);
-		// use rejected value in case of error, current bean property value else
+		// Use rejected value in case of error, current bean property value else.
 		Object value = (fe != null) ? fe.getRejectedValue() : getBeanWrapper().getPropertyValue(fixedField);
-		// apply custom editor, but not on binding failures like type mismatches
+		// Apply custom editor, but not on binding failures like type mismatches.
 		if (fe == null || !fe.isBindingFailure()) {
 			PropertyEditor customEditor = getCustomEditor(fixedField);
 			if (customEditor != null) {
@@ -336,9 +337,9 @@ public class BindException extends Exception implements Errors {
 	 */
 	public final Map getModel() {
 		Map model = new HashMap();
-		// errors instance, even if no errors
+		// Errors instance, even if no errors.
 		model.put(ERROR_KEY_PREFIX + this.objectName, this);
-		// mapping from name to target object
+		// Mapping from name to target object.
 		model.put(this.objectName, this.beanWrapper.getWrappedInstance());
 		return model;
 	}

@@ -328,106 +328,112 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @throws HibernateException in case of Hibernate initialization errors
 	 */
 	public void afterPropertiesSet() throws IllegalArgumentException, HibernateException, IOException {
-		// create Configuration instance
+		// Create Configuration instance.
 		Configuration config = newConfiguration();
 
 		if (this.dataSource != null) {
-			// make given DataSource available for SessionFactory configuration
+			// Make given DataSource available for SessionFactory configuration.
 			configTimeDataSourceHolder.set(this.dataSource);
 		}
 
 		if (this.jtaTransactionManager != null) {
-			// make Spring-provided JTA TransactionManager available
+			// Make Spring-provided JTA TransactionManager available.
 			configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
 		}
 
 		if (this.lobHandler != null) {
-			// make given LobHandler available for SessionFactory configuration
-			// do early because because mapping resource might refer to custom types
+			// Make given LobHandler available for SessionFactory configuration.
+			// Do early because because mapping resource might refer to custom types.
 			configTimeLobHandlerHolder.set(this.lobHandler);
 		}
 
-		if (this.entityInterceptor != null) {
-			// set given entity interceptor at SessionFactory level
-			config.setInterceptor(this.entityInterceptor);
-		}
+		try {
 
-		if (this.namingStrategy != null) {
-			// pass given naming strategy to Hibernate Configuration
-			config.setNamingStrategy(this.namingStrategy);
-		}
-
-		if (this.configLocation != null) {
-			// load Hibernate configuration from given location
-			config.configure(this.configLocation.getURL());
-		}
-
-		if (this.hibernateProperties != null) {
-			// add given Hibernate properties
-			config.addProperties(this.hibernateProperties);
-		}
-
-		if (this.dataSource != null) {
-			// set Spring-provided DataSource as Hibernate property
-			config.setProperty(Environment.CONNECTION_PROVIDER, LocalDataSourceConnectionProvider.class.getName());
-		}
-
-		if (this.jtaTransactionManager != null) {
-			// set Spring-provided JTA TransactionManager as Hibernate property
-			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
-		}
-
-		if (this.mappingLocations != null) {
-			// register given Hibernate mapping definitions, contained in resource files
-			for (int i = 0; i < this.mappingLocations.length; i++) {
-				config.addInputStream(this.mappingLocations[i].getInputStream());
+			if (this.entityInterceptor != null) {
+				// Set given entity interceptor at SessionFactory level.
+				config.setInterceptor(this.entityInterceptor);
 			}
-		}
 
-		if (this.mappingJarLocations != null) {
-			// register given Hibernate mapping definitions, contained in jar files
-			for (int i = 0; i < this.mappingJarLocations.length; i++) {
-				Resource resource = this.mappingJarLocations[i];
-				config.addJar(resource.getFile());
+			if (this.namingStrategy != null) {
+				// Pass given naming strategy to Hibernate Configuration.
+				config.setNamingStrategy(this.namingStrategy);
 			}
-		}
 
-		if (this.mappingDirectoryLocations != null) {
-			// register all Hibernate mapping definitions in the given directories
-			for (int i = 0; i < this.mappingDirectoryLocations.length; i++) {
-				File file = this.mappingDirectoryLocations[i].getFile();
-				if (!file.isDirectory()) {
-					throw new IllegalArgumentException("Mapping directory location [" + this.mappingDirectoryLocations[i] +
-																						 "] does not denote a directory");
+			if (this.configLocation != null) {
+				// Load Hibernate configuration from given location.
+				config.configure(this.configLocation.getURL());
+			}
+
+			if (this.hibernateProperties != null) {
+				// Add given Hibernate properties to Configuration.
+				config.addProperties(this.hibernateProperties);
+			}
+
+			if (this.dataSource != null) {
+				// Set Spring-provided DataSource as Hibernate property.
+				config.setProperty(Environment.CONNECTION_PROVIDER, LocalDataSourceConnectionProvider.class.getName());
+			}
+
+			if (this.jtaTransactionManager != null) {
+				// Set Spring-provided JTA TransactionManager as Hibernate property.
+				config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
+			}
+
+			if (this.mappingLocations != null) {
+				// Register given Hibernate mapping definitions, contained in resource files.
+				for (int i = 0; i < this.mappingLocations.length; i++) {
+					config.addInputStream(this.mappingLocations[i].getInputStream());
 				}
-				config.addDirectory(file);
+			}
+
+			if (this.mappingJarLocations != null) {
+				// Register given Hibernate mapping definitions, contained in jar files.
+				for (int i = 0; i < this.mappingJarLocations.length; i++) {
+					Resource resource = this.mappingJarLocations[i];
+					config.addJar(resource.getFile());
+				}
+			}
+
+			if (this.mappingDirectoryLocations != null) {
+				// Register all Hibernate mapping definitions in the given directories.
+				for (int i = 0; i < this.mappingDirectoryLocations.length; i++) {
+					File file = this.mappingDirectoryLocations[i].getFile();
+					if (!file.isDirectory()) {
+						throw new IllegalArgumentException(
+								"Mapping directory location [" + this.mappingDirectoryLocations[i] +
+								"] does not denote a directory");
+					}
+					config.addDirectory(file);
+				}
+			}
+
+			// Perform custom post-processing in subclasses.
+			postProcessConfiguration(config);
+
+			// Build SessionFactory instance.
+			logger.info("Building new Hibernate SessionFactory");
+			this.configuration = config;
+			this.sessionFactory = newSessionFactory(config);
+		}
+
+		finally {
+			if (this.dataSource != null) {
+				// Reset DataSource holder.
+				configTimeDataSourceHolder.set(null);
+			}
+
+			if (this.jtaTransactionManager != null) {
+				// Reset TransactionManager holder.
+				configTimeTransactionManagerHolder.set(null);
+			}
+
+			if (this.lobHandler != null) {
+				// Reset LobHandler holder.
+				configTimeLobHandlerHolder.set(null);
 			}
 		}
 
-		// perform custom post-processing in subclasses
-		postProcessConfiguration(config);
-
-		// build SessionFactory instance
-		logger.info("Building new Hibernate SessionFactory");
-		this.configuration = config;
-		this.sessionFactory = newSessionFactory(config);
-
-		if (this.dataSource != null) {
-			// reset DataSource holder
-			configTimeDataSourceHolder.set(null);
-		}
-
-		if (this.jtaTransactionManager != null) {
-			// reset TransactionManager holder
-			configTimeTransactionManagerHolder.set(null);
-		}
-
-		if (this.lobHandler != null) {
-			// reset LobHandler holder
-			configTimeLobHandlerHolder.set(null);
-		}
-
-		// execute schema update if requested
+		// Execute schema update if requested.
 		if (this.schemaUpdate) {
 			updateDatabaseSchema();
 		}
