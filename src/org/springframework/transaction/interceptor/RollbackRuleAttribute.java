@@ -34,7 +34,7 @@ public class RollbackRuleAttribute implements Serializable{
 			new RollbackRuleAttribute(RuntimeException.class);
 	
 	/**
-	 * Could hold exception, resolving classname but would always require FQN.
+	 * Could hold exception, resolving class name but would always require FQN.
 	 * This way does multiple string comparisons, but how often do we decide
 	 * whether to roll back a transaction following an exception?
 	 */
@@ -56,15 +56,16 @@ public class RollbackRuleAttribute implements Serializable{
 	/**
 	 * Construct a new RollbackRule for the given exception name.
 	 * This can be a substring, with no wildcard support at present.
-	 * A value of "ServletException" would match ServletException and
-	 * subclasses, for example.
+	 * A value of "ServletException" would match
+	 * <code>javax.servlet.ServletException</code> and subclasses, for example.
 	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and whether
 	 * to include package information (which isn't mandatory). For example,
 	 * "Exception" will match nearly anything, and will probably hide other rules.
 	 * "java.lang.Exception" would be correct if "Exception" was meant to define
-	 * a rule for all checked exceptions. With more unusual Exception
-	 * names such as "BaseBusinessException" there's no need to use a FQN.
+	 * a rule for all checked exceptions. With more unusual exception names such
+	 * as "BaseBusinessException" there's no need to use a FQN.
 	 * @param exceptionName the exception pattern
+	 * (can also be a fully qualified class name)
 	 */
 	public RollbackRuleAttribute(String exceptionName) {
 		this.exceptionName = exceptionName;
@@ -79,11 +80,11 @@ public class RollbackRuleAttribute implements Serializable{
 
 	/**
 	 * Return the depth to the superclass matching.
-	 * 0 means t matches. Return -1 if there's no match.
-	 * Otherwise, return depth. Lowest depth wins.
+	 * 0 means ex matches exactly. Returns -1 if there's no match.
+	 * Otherwise, returns depth. Lowest depth wins.
 	 */
-	public int getDepth(Throwable t) {
-		return getDepth(t.getClass(), 0);
+	public int getDepth(Throwable ex) {
+		return getDepth(ex.getClass(), 0);
 	}
 
 	private int getDepth(Class exceptionClass, int depth) {
