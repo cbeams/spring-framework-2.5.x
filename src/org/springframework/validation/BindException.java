@@ -196,16 +196,12 @@ public class BindException extends Exception implements Errors {
 	public PropertyEditor getCustomEditor(String field) {
 		field = fixedField(field);
 		FieldError fe = getFieldError(field);
-		if(fe != null) {
-			return null;
-		} else {
-			return getBeanWrapper().findCustomEditor(null, field);
-		}
+		return (fe == null ? getBeanWrapper().findCustomEditor(null, field) : null);
 	}
 
 	/**
-	 * Return a model Map for the ocntained state, exposing an Errors
-	 * instance as '{@link #ERROR_KEY_PREFIX ERROR_KEY_PREFIX} + objectname'
+	 * Return a model Map for the obtained state, exposing an Errors
+	 * instance as '{@link #ERROR_KEY_PREFIX ERROR_KEY_PREFIX} + objectName'
 	 * and the object itself.<br>
 	 * Note that the Map is constructed each time you're calling this method,
 	 * adding things to the map and then re-calling it will not do...
