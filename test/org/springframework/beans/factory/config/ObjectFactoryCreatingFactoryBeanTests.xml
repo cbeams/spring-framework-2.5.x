@@ -11,7 +11,7 @@
   </bean> 	
 
   <bean id="prototype" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
-   <property name="targetName"><idref local="prototypeTarget"/></property>
+   <property name="targetBeanName"><idref local="prototypeTarget"/></property>
   </bean> 
   
   <bean id="testBean" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBeanTests$TestBean">

@@ -31,64 +31,55 @@ import org.springframework.beans.factory.ObjectFactory;
  * 
  * <p>A Sample config in an XML BeanFactory might look as follows:</p>
  *
- * <pre> 
- * <beans>
+ * <pre>&lt;beans>
  *
- *   &lt;!-- Singleton bean since we have state -->
+ *   &lt;!-- Prototype bean since we have state -->
  *   &lt;bean id="myService" class="a.b.c.MyService" singleton="false">
- *   &lt;/bean> 	
+ *   &lt;/bean>
+ * 
  *   &lt;bean id="myServiceFactory" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
- *     &lt;property name="targetName">&lt;idref local="myService"/>&lt;/property>
+ *     &lt;property name="targetBeanName">&lt;idref local="myService"/>&lt;/property>
  *   &lt;/bean> 
  *  
  *   &lt;bean id="clientBean" class="a.b.c.MyClientBean">
  *     &lt;property name="myServiceFactory">&lt;ref local="myServiceFactory"/>&lt;/property>
  *   &lt;/bean>
  *
- * &lt;/beans>
- * </pre>
- *  
- * 
- * @see org.springframework.beans.factory.ObjectFactory
- * 
+ * &lt;/beans></pre>
+ *
  * @author Colin Sampaleanu
  * @since 2004-05-11
- * @version $Id: ObjectFactoryCreatingFactoryBean.java,v 1.1 2004-05-12 15:22:21 colins Exp $
+ * @version $Id: ObjectFactoryCreatingFactoryBean.java,v 1.2 2004-05-17 17:08:07 jhoeller Exp $
+ * @see org.springframework.beans.factory.ObjectFactory
  */
 public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean implements BeanFactoryAware {
 	
-	private String targetName;
+	private String targetBeanName;
+
 	private BeanFactory beanFactory;
 	
 	/**
-	 * @param targetName The targetName to set.
+	 * Set the name of the target bean.
+	 * The target has to be a prototype bean.
 	 */
-	public void setTargetName(String targetName) {
-		this.targetName = targetName;
+	public void setTargetBeanName(String targetBeanName) {
+		this.targetBeanName = targetBeanName;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
-	 */
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.AbstractFactoryBean#createInstance()
-	 */
-	protected Object createInstance() throws Exception {
+	protected Object createInstance() {
 		return new ObjectFactory() {
 			public Object getObject() throws BeansException {
-				return beanFactory.getBean(targetName);
+				return beanFactory.getBean(targetBeanName);
 			}
 		};
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
-	 */
 	public Class getObjectType() {
 		return ObjectFactory.class;
 	}
+
 }
