@@ -84,8 +84,9 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 	}
 
 
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-																	FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(
+			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
 		PersistenceManagerFactory pmf = lookupPersistenceManagerFactory();
 		PersistenceManager pm = null;
@@ -123,7 +124,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 	 */
 	protected PersistenceManagerFactory lookupPersistenceManagerFactory() {
 		logger.info("Using persistence manager factory '" + getPersistenceManagerFactoryBeanName() +
-								"' for OpenPersistenceManagerInViewFilter");
+				"' for OpenPersistenceManagerInViewFilter");
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 		return (PersistenceManagerFactory) wac.getBean(getPersistenceManagerFactoryBeanName());
 	}

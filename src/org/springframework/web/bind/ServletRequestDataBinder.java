@@ -32,9 +32,12 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * Special binder to perform data binding from servlet request parameters
  * to JavaBeans, including support for multipart files.
  *
+ * <p>See the DataBinder superclass for customization options, which include
+ * specifying allowed/required fields, and registering custom property editors.
+ *
  * <p>Used by Spring web MVC's BaseCommandController and MultiActionController.
  * Note that BaseCommandController and its subclasses allow for easy customization
- * of the binder instances that they use, for example registering custom editors.
+ * of the binder instances that they use through overriding <code>initBinder</code>.
  *
  * <p>Can also be used for manual data binding in custom web controllers.
  * Simply instantiate a ServletRequestDataBinder for each binding process,
@@ -43,6 +46,9 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #bind(javax.servlet.ServletRequest)
+ * @see #setAllowedFields
+ * @see #setRequiredFields
+ * @see #registerCustomEditor
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
  */
@@ -181,8 +187,8 @@ public class ServletRequestDataBinder extends DataBinder {
 	 */
 	public void closeNoCatch() throws ServletRequestBindingException {
 		if (getErrors().hasErrors()) {
-			throw new ServletRequestBindingException("Errors binding onto object '" + getErrors().getObjectName() + "'",
-																							 getErrors());
+			throw new ServletRequestBindingException(
+					"Errors binding onto object '" + getErrors().getObjectName() + "'", getErrors());
 		}
 	}
 

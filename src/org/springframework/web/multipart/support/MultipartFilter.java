@@ -93,7 +93,9 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * @return the MultipartResolver instance, or null if none found
 	 */
 	protected MultipartResolver lookupMultipartResolver() {
-		logger.info("Using MultipartResolver '" + getMultipartResolverBeanName() + "' for MultipartFilter");
+		if (logger.isInfoEnabled()) {
+			logger.info("Using MultipartResolver '" + getMultipartResolverBeanName() + "' for MultipartFilter");
+		}
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 		return (MultipartResolver) wac.getBean(getMultipartResolverBeanName());
 	}
@@ -105,13 +107,15 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * from proper parameter extraction in the multipart case, and are able to cast to
 	 * MultipartHttpServletRequest if they need to.
 	 */
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-																	FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(
+			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+
 		HttpServletRequest processedRequest = request;
 		if (this.multipartResolver.isMultipart(processedRequest)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Resolving multipart request [" + processedRequest.getRequestURI() +
-				             "] with MultipartFilter");
+						"] with MultipartFilter");
 			}
 			processedRequest = this.multipartResolver.resolveMultipart(processedRequest);
 		}
@@ -120,6 +124,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 				logger.debug("Request [" + processedRequest.getRequestURI() + "] is not a multipart request");
 			}
 		}
+		
 		try {
 			filterChain.doFilter(processedRequest, response);
 		}

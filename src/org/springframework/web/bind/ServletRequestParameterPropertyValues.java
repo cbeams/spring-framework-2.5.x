@@ -23,7 +23,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * PropertyValues implementation created from parameters in a ServletRequest.
- * Looks for all property values beginning with a certain prefix and
+ * Can look for all property values beginning with a certain prefix and
  * prefix separator (default is "_").
  *
  * <p>For example, with a prefix of "spring", "spring_param1" and
@@ -72,8 +72,8 @@ public class ServletRequestParameterPropertyValues extends MutablePropertyValues
 	 * and the rest of the parameter name ("param1", "param2")
 	 */
 	public ServletRequestParameterPropertyValues(ServletRequest request, String prefix, String prefixSeparator) {
-		super(WebUtils.getParametersStartingWith(request,
-																						 (prefix != null) ? prefix + prefixSeparator : null));
+		super(WebUtils.getParametersStartingWith(
+				request, (prefix != null) ? prefix + prefixSeparator : null));
 	}
 
 }

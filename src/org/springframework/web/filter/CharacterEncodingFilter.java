@@ -65,8 +65,10 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 		this.forceEncoding = forceEncoding;
 	}
 
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-	                                FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(
+			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		
 		if (this.forceEncoding || request.getCharacterEncoding() == null) {
 			request.setCharacterEncoding(this.encoding);
 		}

@@ -136,8 +136,9 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-																	FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(
+			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
 		SessionFactory sessionFactory = lookupSessionFactory();
 		Session session = null;
