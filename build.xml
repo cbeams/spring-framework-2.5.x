@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.31 2004-01-13 18:14:58 jhoeller Exp $
+    $Id: build.xml,v 1.32 2004-01-14 17:24:32 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -287,8 +287,9 @@
 			<include name="docs/**"/>
 			<exclude name="docs/reference/**"/>
 			<include name="samples/countries/**"/>
-			<include name="samples/petclinic/**"/>
+			<include name="samples/imagedb/**"/>
 			<include name="samples/jpetstore/**"/>
+			<include name="samples/petclinic/**"/>
 			<include name="samples/tiles-example/**"/>
 			<include name="samples/webapp-minimal/**"/>
 			<include name="samples/webapp-typical/**"/>
