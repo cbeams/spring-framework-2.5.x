@@ -141,7 +141,7 @@ public class MimeMessageHelper {
 	/**
 	 * Return the underlying MimeMessage.
 	 */
-	public MimeMessage getMimeMessage() {
+	public final MimeMessage getMimeMessage() {
 		return mimeMessage;
 	}
 
@@ -162,8 +162,8 @@ public class MimeMessageHelper {
 	}
 
 	public void setFrom(String from, String personal) throws MessagingException, UnsupportedEncodingException {
-		this.mimeMessage.setFrom(this.encoding != null ?
-		                         new InternetAddress(from, personal, this.encoding) :
+		this.mimeMessage.setFrom(getEncoding() != null ?
+		                         new InternetAddress(from, personal, getEncoding()) :
 		                         new InternetAddress(from, personal));
 	}
 
@@ -176,8 +176,8 @@ public class MimeMessageHelper {
 	}
 
 	public void setReplyTo(String replyTo, String personal) throws MessagingException, UnsupportedEncodingException {
-		InternetAddress replyToAddress = (this.encoding != null) ?
-				new InternetAddress(replyTo, personal, this.encoding) : new InternetAddress(replyTo, personal);
+		InternetAddress replyToAddress = (getEncoding() != null) ?
+				new InternetAddress(replyTo, personal, getEncoding()) : new InternetAddress(replyTo, personal);
 		this.mimeMessage.setReplyTo(new InternetAddress[] {replyToAddress});
 	}
 
@@ -212,8 +212,8 @@ public class MimeMessageHelper {
 
 	public void addTo(String to, String personal) throws MessagingException, UnsupportedEncodingException {
 		this.mimeMessage.addRecipient(Message.RecipientType.TO,
-		                              this.encoding != null ?
-		                              new InternetAddress(to, personal, this.encoding) :
+		                              getEncoding() != null ?
+		                              new InternetAddress(to, personal, getEncoding()) :
 		                              new InternetAddress(to, personal));
 	}
 
@@ -248,8 +248,8 @@ public class MimeMessageHelper {
 
 	public void addCc(String cc, String personal) throws MessagingException, UnsupportedEncodingException {
 		this.mimeMessage.addRecipient(Message.RecipientType.CC,
-		                              this.encoding != null ?
-		                              new InternetAddress(cc, personal, this.encoding) :
+		                              getEncoding() != null ?
+		                              new InternetAddress(cc, personal, getEncoding()) :
 		                              new InternetAddress(cc, personal));
 	}
 
@@ -284,8 +284,8 @@ public class MimeMessageHelper {
 
 	public void addBcc(String bcc, String personal) throws MessagingException, UnsupportedEncodingException {
 		this.mimeMessage.addRecipient(Message.RecipientType.BCC,
-		                              this.encoding != null ?
-		                              new InternetAddress(bcc, personal, this.encoding) :
+		                              getEncoding() != null ?
+		                              new InternetAddress(bcc, personal, getEncoding()) :
 		                              new InternetAddress(bcc, personal));
 	}
 
@@ -295,8 +295,8 @@ public class MimeMessageHelper {
 	}
 
 	public void setSubject(String subject) throws MessagingException {
-		if (this.encoding != null) {
-			this.mimeMessage.setSubject(subject, this.encoding);
+		if (getEncoding() != null) {
+			this.mimeMessage.setSubject(subject, getEncoding());
 		}
 		else {
 			this.mimeMessage.setSubject(subject);
@@ -341,7 +341,7 @@ public class MimeMessageHelper {
 			partToUse.setDataHandler(new DataHandler(
 			    new DataSource() {
 						public InputStream getInputStream() throws IOException {
-							return new ByteArrayInputStream(encoding != null ? text.getBytes(encoding) : text.getBytes());
+							return new ByteArrayInputStream(getEncoding() != null ? text.getBytes(getEncoding()) : text.getBytes());
 						}
 						public OutputStream getOutputStream() throws IOException {
 							throw new UnsupportedOperationException("Read-only javax.activation.DataSource");
@@ -356,8 +356,8 @@ public class MimeMessageHelper {
 			));
 		}
 		else {
-			if (this.encoding != null) {
-				partToUse.setText(text, this.encoding);
+			if (getEncoding() != null) {
+				partToUse.setText(text, getEncoding());
 			}
 			else {
 				partToUse.setText(text);
