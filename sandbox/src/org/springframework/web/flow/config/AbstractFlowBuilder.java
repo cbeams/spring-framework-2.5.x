@@ -40,19 +40,19 @@ import org.springframework.web.flow.ViewState;
  * 
  * <pre>
  * public class EditPersonDetailsFlowBuilder extends AbstractFlowBuilder {
- *
- *   public static final String PERSON_DETAILS = "personDetails";
- * 
- *   protected String flowId() {
- *       return PERSON_DETAILS;
- *   }
- *   
- *   public void buildStates() {
- *       addGetState(PERSON_DETAILS);
- *       addViewState(PERSON_DETAILS);
- *       addBindAndValidateState(PERSON_DETAILS);
- *       addDefaultEndState();
- *   }
+ *     public static final String PERSON_DETAILS = &quot;personDetails&quot;;
+ *              
+ *     protected String flowId() {
+ *         return PERSON_DETAILS;
+ *     }
+ *                
+ *     public void buildStates() {
+ *         addGetState(PERSON_DETAILS);
+ *         addViewState(PERSON_DETAILS);
+ *         addBindAndValidateState(PERSON_DETAILS);
+ *         addDefaultEndState();
+ *     }
+ * }
  * </pre>
  * 
  * What this java-based FlowBuilder implementation does is add four states to a
@@ -919,43 +919,51 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * By default, the Action <code>id</code> to use for lookup will be the
 	 * same as the specified <code>stateId</code>. It is expected that a
 	 * valid <code>Action</code> implementation be exported in the backing
-	 * service locator registry under that ID, or a NoSuchActionException will
-	 * be thrown.
+	 * service locator registry under that id, or a
+	 * <code>NoSuchActionException</code> will be thrown.
 	 * <p>
-	 * As this method adds a action state intended to execute creational logic,
+	 * As this method adds an action state intended to execute creational logic,
 	 * it also establishes several naming conventions and relavent defaults:
 	 * <p>
 	 * For example, the usage:
-	 * 
-	 * <pre>
-	 *   ActionState createState = addCreateState("person");
-	 * </pre>
-	 * 
-	 * ... builds an action state with the following properties:
-	 * <ul>
-	 * <li>id: <code>person.create</code> (note how the {@link CREATE}action
-	 * qualifier is appended in a hierarchical fashion to the 'person' prefix)
-	 * <li>action: set to the <code>Action</code> implementation in the
-	 * registry exported with the id '<code>person.create</code>'
-	 * </ul>
+	 * <p>
+	 * <code>ActionState createState = addCreateState("person");</code>
+	 * <p>
+	 * ... builds an action state with the following properties: <table
+	 * border="1">
+	 * <tr>
+	 * <th>Property</th>
+	 * <th>Value</th>
+	 * <th>Notes</th>
+	 * <tr>
+	 * <td>id</td>
+	 * <td>person.create</td>
+	 * <td>The create action qualifier is appended in a hierarchical fashion to
+	 * the 'person' prefix</td>
+	 * <tr>
+	 * <td>action</td>
+	 * <td colspan="2">The <code>Action</code> implementation in the registry
+	 * exported with the id '<code>person.create</code>'</td>
+	 * </table>
 	 * <p>
 	 * In addition, the create action state will be configured with the
 	 * following default state transitions:
 	 * <ul>
-	 * <li>on event 'success', transition to the '${stateIdPrefix}.view' state
-	 * (e.g <code>person.view</code>) This assumes, after successfully
-	 * executing some object creational logic you will wish to view the results
-	 * of that creation.
+	 * <li>on event 'success', transition to the
+	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>person.view</code>)
 	 * </ul>
+	 * This assumes, after successfully executing some object creational logic
+	 * you will wish to view the results of that creation.
+	 * <p>
 	 * If these defaults do not fit your needs, use one of the more generic
 	 * action state builder methods. This method is provided as a convenience to
 	 * help reduce repetive configuration code for common situations.
 	 * 
-	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
-	 *        {@link CREATE}action constant will be appended to this prefix to
-	 *        build the qualified state id (e.g person.create). Note: the
-	 *        qualified state ID will also be used as the actionId, to lookup in
-	 *        the locator's registry.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        {@link FlowConstants#CREATE}action constant will be appended to
+	 *        this prefix to build the qualified state id (e.g person.create).
+	 *        Note: the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
 	protected ActionState addCreateState(String stateIdPrefix) {
@@ -974,14 +982,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * For example, the usage:
 	 * 
 	 * <pre>
-	 *   ActionState createState = addCreateState("person", myCreateAction);
+	 * ActionState createState = addCreateState(&quot;person&quot;, myCreateAction);
 	 * </pre>
 	 * 
 	 * ... builds an action state with the following properties:
 	 * <ul>
 	 * <li>id: <code>person.create</code> (note how the {@link CREATE}action
 	 * qualifier is appended in a hierarchical fashion to the 'person' prefix)
-	 * <li>action: set to the 'myCreateAction' <code>Action</code> implementation
+	 * <li>action: set to the 'myCreateAction' <code>Action</code>
+	 * implementation
 	 * </ul>
 	 * <p>
 	 * In addition, the create action state will be configured with the
