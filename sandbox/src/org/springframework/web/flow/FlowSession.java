@@ -339,17 +339,18 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	 * @param flowLocator the flow locator
 	 */
 	protected void rehydrate(FlowLocator flowLocator) {
+		//implementation note: we cannot integrate this code into the readObject()
+		//method since we need the flow locator!
+		
 		Assert.state(this.flow == null, "The flow is already set - already restored");
 		Assert.state(this.currentState == null, "The current state is already set - already restored");
-		Assert
-				.notNull(flowId,
+		Assert.notNull(flowId,
 						"The flow id was not set during deserialization: cannot restore--was this flow session deserialized properly?");
 		this.flow = flowLocator.getFlow(this.flowId);
-		Assert
-				.notNull(flowId,
+		this.flowId = null;
+		Assert.notNull(currentStateId,
 						"The current state id was not set during deserialization: cannot restore--was this flow session deserialized properly?");
 		this.currentState = this.flow.getRequiredState(this.currentStateId);
-		this.flowId = null;
 		this.currentStateId = null;
 	}
 

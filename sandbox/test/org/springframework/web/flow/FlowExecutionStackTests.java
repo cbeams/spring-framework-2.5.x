@@ -72,12 +72,8 @@ public class FlowExecutionStackTests extends TestCase {
 		};
 		flowExecution = flow.createExecution();
 	}
-
-	public void testRehydrate() throws Exception {
-		Map inputData = new HashMap(1);
-		inputData.put("name", "value");
-		flowExecution.start(inputData, new MockHttpServletRequest(), new MockHttpServletResponse());
-
+	
+	protected void runFlowExecutionRehydrationTest() throws Exception {
 		//serialize the flowExecution
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		ObjectOutputStream oout = new ObjectOutputStream(bout);
@@ -95,17 +91,36 @@ public class FlowExecutionStackTests extends TestCase {
 		restoredFlowExecution.rehydrate(flowLocator, flowExecution.getListenerList().toArray());
 
 		assertEquals(flowExecution.isActive(), restoredFlowExecution.isActive());
-		assertEquals(flowExecution.getActiveFlowId(), restoredFlowExecution.getActiveFlowId());
-		assertEquals(flowExecution.getCurrentStateId(), restoredFlowExecution.getCurrentStateId());
-		assertTrue(entriesCollectionsAreEqual(flowExecution.attributeEntries(), restoredFlowExecution
-				.attributeEntries()));
+		if (flowExecution.isActive()) {
+			assertTrue(entriesCollectionsAreEqual(flowExecution.attributeEntries(), restoredFlowExecution
+					.attributeEntries()));
+			assertEquals(flowExecution.getCurrentStateId(), restoredFlowExecution.getCurrentStateId());
+			assertEquals(flowExecution.getActiveFlowId(), restoredFlowExecution.getActiveFlowId());
+			assertSame(flowExecution.getRootFlow(), restoredFlowExecution.getRootFlow());
+		}
 		assertEquals(flowExecution.getId(), restoredFlowExecution.getId());
 		assertEquals(flowExecution.getLastEventId(), restoredFlowExecution.getLastEventId());
 		assertEquals(flowExecution.getLastEventTimestamp(), restoredFlowExecution.getLastEventTimestamp());
-		assertSame(flowExecution.getRootFlow(), restoredFlowExecution.getRootFlow());
 		assertEquals(flowExecution.getListenerList().size(), restoredFlowExecution.getListenerList().size());
 	}
 
+	public void testRehydrate() throws Exception {
+		//setup some input data
+		Map inputData = new HashMap(1);
+		inputData.put("name", "value");
+		
+		//start the flow execution
+		flowExecution.start(inputData, new MockHttpServletRequest(), new MockHttpServletResponse());
+		
+		runFlowExecutionRehydrationTest();
+	}
+
+	public void testRehydrateNotStarted() throws Exception {
+		//don't start the flow execution
+		
+		runFlowExecutionRehydrationTest();
+	}
+	
 	/**
 	 * Helper to test if 2 collections of Map.Entry objects contain the same
 	 * values.

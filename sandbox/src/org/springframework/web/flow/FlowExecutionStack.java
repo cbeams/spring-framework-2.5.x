@@ -70,11 +70,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	private transient Flow rootFlow;
 
 	/**
-	 * The stack of active, currently executing flow sessions. As subflows are
-	 * spawned, they are pushed onto the stack. As they end, they are popped off
-	 * the stack.
+	 * Set only on deserialization so this object can be fully reconstructed.
 	 */
-	private Stack executingFlowSessions = new Stack();
+	private String rootFlowId;
 
 	/**
 	 * The id of the last valid event that was signaled in this flow execution.
@@ -87,6 +85,13 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 * The timestamp when the last valid event was signaled.
 	 */
 	private long lastEventTimestamp;
+
+	/**
+	 * The stack of active, currently executing flow sessions. As subflows are
+	 * spawned, they are pushed onto the stack. As they end, they are popped off
+	 * the stack.
+	 */
+	private Stack executingFlowSessions = new Stack();
 
 	/**
 	 * A thread-safe listener list, holding listeners monitoring the lifecycle
@@ -709,6 +714,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.id);
+		out.writeObject(this.getRootFlow().getId());
 		out.writeObject(this.lastEventId);
 		out.writeLong(this.lastEventTimestamp);
 		out.writeObject(this.executingFlowSessions);
@@ -716,22 +722,34 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
 		this.id = (String)in.readObject();
+		this.rootFlowId = (String)in.readObject();
 		this.lastEventId = (String)in.readObject();
 		this.lastEventTimestamp = in.readLong();
 		this.executingFlowSessions = (Stack)in.readObject();
 	}
 
 	public synchronized void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners) {
+		//implementation note: we cannot integrate this code into the readObject()
+		//method since we need the flow locator and listener list!
+		
 		if (this.rootFlow != null) {
 			// nothing to do, we're already hydrated
 			return;
 		}
+		Assert.notNull(rootFlowId,
+						"The root flow id was not set during deserialization: cannot restore--was this flow execution deserialized properly?");
+		this.rootFlow = flowLocator.getFlow(rootFlowId);
+		this.rootFlowId = null;
 		Iterator it = this.executingFlowSessions.iterator();
 		while (it.hasNext()) {
 			FlowSession session = (FlowSession)it.next();
 			session.rehydrate(flowLocator);
 		}
-		this.rootFlow = getRootFlowSession().getFlow();
+		if (isActive()) {
+			//sanity check
+			Assert.isTrue(getRootFlow()==getRootFlowSession().getFlow(),
+							"the root flow of the execution should be the same of the flow in the root flow session");
+		}
 		this.listenerList = new FlowExecutionListenerList();
 		this.listenerList.add(this.rootFlow.getFlowExecutionListenerList());
 		this.listenerList.add(listeners);
