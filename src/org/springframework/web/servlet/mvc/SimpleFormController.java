@@ -129,7 +129,7 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * Return the name of the view that should be used for form display.
 	 */
-	protected final String getFormView() {
+	public final String getFormView() {
 		return this.formView;
 	}
 
@@ -143,7 +143,7 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * Return the name of the view that should be shown on successful submit.
 	 */
-	protected final String getSuccessView() {
+	public final String getSuccessView() {
 		return this.successView;
 	}
 

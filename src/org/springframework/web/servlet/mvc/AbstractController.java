@@ -102,6 +102,13 @@ public abstract class AbstractController extends WebContentGenerator implements 
 		this.synchronizeOnSession = synchronizeOnSession;
 	}
 
+	/**
+	 * Return whether controller execution should be synchronized on the session.
+	 */
+	public final boolean isSynchronizeOnSession() {
+		return synchronizeOnSession;
+	}
+
 	public final ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 

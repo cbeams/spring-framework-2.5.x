@@ -94,7 +94,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Return the HTTP methods that this content generator supports.
 	 */
-	protected String[] getSupportedMethods() {
+	public final String[] getSupportedMethods() {
 		return (String[]) this.supportedMethods.toArray(new String[this.supportedMethods.size()]);
 	}
 
@@ -108,7 +108,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Return whether a session is required to handle requests.
 	 */
-	protected boolean isRequireSession() {
+	public final boolean isRequireSession() {
 		return requireSession;
 	}
 
@@ -124,7 +124,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Return whether the HTTP 1.0 expires header is used.
 	 */
-	protected boolean isUseExpiresHeader() {
+	public final boolean isUseExpiresHeader() {
 		return useExpiresHeader;
 	}
 
@@ -140,7 +140,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Return whether the HTTP 1.1 cache-control header is used.
 	 */
-	protected boolean isUseCacheControlHeader() {
+	public final boolean isUseCacheControlHeader() {
 		return useCacheControlHeader;
 	}
 
@@ -158,7 +158,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Return the number of seconds that content is cached.
 	 */
-	protected int getCacheSeconds() {
+	public final int getCacheSeconds() {
 		return cacheSeconds;
 	}
 

@@ -137,7 +137,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return the wizard pages, i.e. the view names for the pages.
 	 * The array index corresponds to the page number.
 	 */
-	protected final String[] getPages() {
+	public final String[] getPages() {
 		return pages;
 	}
 
@@ -171,12 +171,26 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
+	 * Return the name of the page attribute in the model.
+	 */
+	public final String getPageAttribute() {
+		return pageAttribute;
+	}
+
+	/**
 	 * Set if "dirty back" is allowed, i.e. if moving to a former wizard
 	 * page is allowed in case of validation errors for the current page.
 	 * @param allowDirtyBack if "dirty back" is allowed
 	 */
 	public final void setAllowDirtyBack(boolean allowDirtyBack) {
 		this.allowDirtyBack = allowDirtyBack;
+	}
+
+	/**
+	 * Return whether "dirty back" is allowed.
+	 */
+	public final boolean isAllowDirtyBack() {
+		return allowDirtyBack;
 	}
 
 	/**
@@ -188,9 +202,16 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		this.allowDirtyForward = allowDirtyForward;
 	}
 
+	/**
+	 * Return whether "dirty forward" is allowed.
+	 */
+	public final boolean isAllowDirtyForward() {
+		return allowDirtyForward;
+	}
+
 
 	/**
-	 * Call page-specific onBindAndValidate method.
+	 * Calls page-specific onBindAndValidate method.
 	 */
 	protected final void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
 	    throws Exception {
@@ -225,7 +246,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Call page-specific referenceData method.
+	 * Calls page-specific referenceData method.
 	 */
 	protected final Map referenceData(HttpServletRequest request, Object command, Errors errors)
 	    throws Exception {

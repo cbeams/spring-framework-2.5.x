@@ -184,7 +184,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Return if request parameters should be bound in case of a new form.
 	 */
-	protected final boolean isBindOnNewForm() {
+	public final boolean isBindOnNewForm() {
 		return bindOnNewForm;
 	}
 
@@ -203,7 +203,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Return if session form mode is activated.
 	 */
-	protected final boolean isSessionForm() {
+	public final boolean isSessionForm() {
 		return sessionForm;
 	}
 	

@@ -126,6 +126,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
+
 	private String commandName = DEFAULT_COMMAND_NAME;
 
 	private Class commandClass;
@@ -148,7 +149,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Return the name of the command in the model.
 	 */
-	protected final String getCommandName() {
+	public final String getCommandName() {
 		return this.commandName;
 	}
 
@@ -163,7 +164,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Return the command class for this controller.
 	 */
-	protected final Class getCommandClass() {
+	public final Class getCommandClass() {
 		return this.commandClass;
 	}
 
@@ -178,7 +179,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Return the Validators for this controller.
 	 */
-	protected final Validator[] getValidators() {
+	public final Validator[] getValidators() {
 		return validators;
 	}
 
@@ -193,7 +194,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Return the primary Validator for this controller.
 	 */
-	protected final Validator getValidator() {
+	public final Validator getValidator() {
 		return (validators != null && validators.length > 0 ? validators[0] : null);
 	}
 
@@ -207,7 +208,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Return if the Validator should get applied when binding.
 	 */
-	protected final boolean isValidateOnBinding() {
+	public final boolean isValidateOnBinding() {
 		return validateOnBinding;
 	}
 
@@ -225,7 +226,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Return the strategy to use for resolving errors into message codes.
 	 */
-	protected final MessageCodesResolver getMessageCodesResolver() {
+	public final MessageCodesResolver getMessageCodesResolver() {
 		return messageCodesResolver;
 	}
 
