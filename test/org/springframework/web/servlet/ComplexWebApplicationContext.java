@@ -35,9 +35,11 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -344,16 +346,20 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	public static class ComplexLocaleChecker implements MyHandler {
 
 		public void doSomething(HttpServletRequest request) throws ServletException, IllegalAccessException {
+			WebApplicationContext wac = RequestContextUtils.getWebApplicationContext(request);
+			if (!(wac instanceof ComplexWebApplicationContext)) {
+				throw new ServletException("Incorrect WebApplicationContext");
+			}
 			if (!(request instanceof MultipartHttpServletRequest)) {
 				throw new ServletException("Not in a MultipartHttpServletRequest");
-			}
-			if (!(RequestContextUtils.getWebApplicationContext(request) instanceof ComplexWebApplicationContext)) {
-				throw new ServletException("Incorrect WebApplicationContext");
 			}
 			if (!(RequestContextUtils.getLocaleResolver(request) instanceof SessionLocaleResolver)) {
 				throw new ServletException("Incorrect LocaleResolver");
 			}
 			if (!Locale.CANADA.equals(RequestContextUtils.getLocale(request))) {
+				throw new ServletException("Incorrect Locale");
+			}
+			if (!Locale.CANADA.equals(LocaleContextHolder.getLocale())) {
 				throw new ServletException("Incorrect Locale");
 			}
 			if (!(RequestContextUtils.getThemeResolver(request) instanceof SessionThemeResolver)) {
