@@ -28,7 +28,7 @@ import java.util.TreeSet;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.7 2004-03-01 09:19:48 jhoeller Exp $
+ * @version $Id: StringUtils.java,v 1.8 2004-03-08 14:43:16 kdonald Exp $
  * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
@@ -265,5 +265,88 @@ public abstract class StringUtils {
 		newArr[arr.length] = s;
 		return newArr;
 	}
+
+    /**
+     * Checks if a String has length.
+     * <p>
+     * <pre>
+     *  StringUtils.hasLength(null) = false
+     *  StringUtils.hasLength("") = false
+     *  StringUtils.hasLength(" ") = true
+     *  StringUtils.hasLength("Keith") = true
+     * </pre>
+     * 
+     * @param str
+     *            the String to check, may be null
+     * @return <code>true</code> if the String is has length and is not null
+     */
+    public static boolean hasLength(String str) {
+        return (str != null && str.length() > 0);
+    }
+
+    /**
+     * Checks if a String has text. More specifically, returns <code>true</code>
+     * if the string not <code>null<code>, it's <code>length is > 0</code>, and 
+     * it has at least one non-whitespace character.
+     * <p> 
+     * <pre>
+     *  StringUtils.hasText(null) = false
+     *  StringUtils.hasText("") = false
+     *  StringUtils.hasText(" ") = false
+     *  StringUtils.hasText("12345") = true
+     *  StringUtils.hasText(" 12345 ") = true
+     * </pre>
+     * 
+     * @param str
+     *            the String to check, may be null
+     * @return <code>true</code> if the String is not null, length > 0, and not whitespace
+     *         only.
+     */
+    public static boolean hasText(String str) {
+        int strLen;
+        if (str == null || (strLen = str.length()) == 0) {
+            return false;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if ((Character.isWhitespace(str.charAt(i)) == false)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Unqualifies a string qualified by a separator character.  For example,
+     * "this.name.is.qualified", returns "qualified."
+     * 
+     * @param qualifiedName
+     *            The qualified name.
+     * @param separator
+     *            The separator.
+     */
+    public static String unqualify(String qualifiedName, char separator) {
+        return qualifiedName.substring(
+            qualifiedName.lastIndexOf(separator) + 1);
+    }
+
+    /**
+     * Uncapitalizes a <code>String</code>, changing the first letter to lower case as per
+     * {@link Character#toLowerCase(char)}. No other letters are changed.
+     * 
+     * @param str
+     *            the String to uncapitalize, may be null
+     * @return the uncapitalized String, <code>null</code> if null String
+     *         input
+     */
+    public static String uncapitalize(String str) {
+        int strLen;
+        if (str == null || (strLen = str.length()) == 0) {
+            return str;
+        }
+        return new StringBuffer(strLen)
+            .append(Character.toLowerCase(str.charAt(0)))
+            .append(str.substring(1))
+            .toString();
+    }
 
 }
