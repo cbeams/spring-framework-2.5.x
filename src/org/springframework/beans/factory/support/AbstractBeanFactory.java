@@ -301,7 +301,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 			// In case of FactoryBean, return singleton status of created object if not a dereference.
 			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
-					!BeanFactoryUtils.isFactoryDereference(name)) {
+					!isFactoryDereference(name)) {
 				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 				return factoryBean.isSingleton();
 			}
@@ -340,8 +340,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 
 			// Check bean class whether we're dealing with a FactoryBean.
-			if (FactoryBean.class.isAssignableFrom(beanClass) &&
-					!BeanFactoryUtils.isFactoryDereference(name)) {
+			if (FactoryBean.class.isAssignableFrom(beanClass) && !isFactoryDereference(name)) {
 				// If it's a FactoryBean, we want to look at what it creates, not the factory class.
 				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 				return factoryBean.getObjectType();
@@ -555,8 +554,29 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName the name of the bean
 	 * @param bean the bean instance
 	 */
-	protected final void registerDisposableBean(String beanName, DisposableBean bean) {
+	protected void registerDisposableBean(String beanName, DisposableBean bean) {
 		this.disposableBeans.put(beanName, bean);
+	}
+
+	/**
+	 * Add the given bean to the list of further disposable beans in this factory,
+	 * registering the given destroy method to be called on factory shutdown.
+	 * Typically used for inner beans which are not registered in the singleton cache.
+	 * <p>Note: This does not have to be called for beans that reside in the singleton
+	 * cache! It just allows to register further beans for destruction on shutdown.
+	 * @param beanName the name of the bean
+	 * @param bean the bean instance
+	 * @param destroyMethodName the name of the destroy method
+	 */
+	protected void registerDisposableBean(
+			final String beanName, final Object bean, final String destroyMethodName) {
+		// Register DisposableBean wrapper for inner bean, to be able to call the
+		// custom destroy method on factory shutdown.
+		registerDisposableBean(beanName, new DisposableBean() {
+			public void destroy() {
+				invokeCustomDestroyMethod(beanName, bean, destroyMethodName);
+			}
+		});
 	}
 
 	public void destroySingletons() {
@@ -600,9 +620,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @see #destroyBean
 	 */
 	private void destroyDisposableBean(String beanName) {
-		Object innerBeanInstance = this.disposableBeans.remove(beanName);
-		if (innerBeanInstance != null) {
-			destroyBean(beanName, innerBeanInstance);
+		Object disposableBean = this.disposableBeans.remove(beanName);
+		if (disposableBean != null) {
+			destroyBean(beanName, disposableBean);
 		}
 	}
 
@@ -612,10 +632,20 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	//---------------------------------------------------------------------
 
 	/**
+	 * Return whether the given name is a factory dereference
+	 * (beginning with the factory dereference prefix).
+	 * @see BeanFactory#FACTORY_BEAN_PREFIX
+	 * @see org.springframework.beans.factory.BeanFactoryUtils#isFactoryDereference
+	 */
+	protected boolean isFactoryDereference(String name) {
+		return BeanFactoryUtils.isFactoryDereference(name);
+	}
+
+	/**
 	 * Return the bean name, stripping out the factory dereference prefix if necessary,
 	 * and resolving aliases to canonical names.
 	 */
-	private String transformedBeanName(String name) {
+	protected String transformedBeanName(String name) {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 		// handle aliasing
 		String canonicalName = (String) this.aliasMap.get(beanName);
@@ -742,7 +772,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 		// Don't let calling code try to dereference the
 		// bean factory if the bean isn't a factory
-		if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
+		if (isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
 			throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
 		}
 
@@ -750,7 +780,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
 		if (beanInstance instanceof FactoryBean) {
-			if (!BeanFactoryUtils.isFactoryDereference(name)) {
+			if (!isFactoryDereference(name)) {
 				// return bean instance from factory
 				FactoryBean factory = (FactoryBean) beanInstance;
 				if (logger.isDebugEnabled()) {
@@ -777,6 +807,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 		return beanInstance;
 	}
+
 
 	/**
 	 * Destroy the given bean. Must destroy beans that depend on the given

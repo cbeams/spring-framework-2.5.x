@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -125,9 +124,11 @@ public class XmlBeanFactoryTests extends TestCase {
 
 		TestBean hasInnerBeans = (TestBean) xbf.getBean("hasInnerBeans");
 		assertEquals(5, hasInnerBeans.getAge());
-		assertNotNull(hasInnerBeans.getSpouse());
-		assertEquals("inner1", hasInnerBeans.getSpouse().getName());
-		assertEquals(6, hasInnerBeans.getSpouse().getAge());
+		TestBean inner1 = (TestBean) hasInnerBeans.getSpouse();
+		assertNotNull(inner1);
+		assertEquals("inner1", inner1.getName());
+		assertEquals(6, inner1.getAge());
+
 		assertNotNull(hasInnerBeans.getFriends());
 		List friends = (List) hasInnerBeans.getFriends();
 		assertEquals(2, friends.size());
@@ -135,11 +136,13 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("inner2", inner2.getName());
 		assertEquals(DerivedTestBean.class.getName(), inner2.getBeanName());
 		assertFalse(xbf.containsBean("innerBean"));
+		assertNotNull(inner2);
 		assertEquals(7, inner2.getAge());
 		TestBean innerFactory = (TestBean) friends.get(1);
 		assertEquals(DummyFactory.SINGLETON_NAME, innerFactory.getName());
 		assertNotNull(hasInnerBeans.getSomeMap());
 		assertEquals(2, hasInnerBeans.getSomeMap().size());
+
 		TestBean inner3 = (TestBean) hasInnerBeans.getSomeMap().get("someKey");
 		assertEquals("Jenny", inner3.getName());
 		assertEquals(30, inner3.getAge());
@@ -148,6 +151,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(9, inner4.getAge());
 
 		xbf.destroySingletons();
+		assertTrue(inner1.wasDestroyed());
 		assertTrue(inner2.wasDestroyed());
 		assertTrue(innerFactory.getName() == null);
 	}
@@ -229,8 +233,9 @@ public class XmlBeanFactoryTests extends TestCase {
 
 		// abstract beans should not match
 		Map tbs = parent.getBeansOfType(TestBean.class);
-		assertEquals(1, tbs.size());
-		assertEquals("inheritedTestBeanPrototype", tbs.keySet().iterator().next());
+		assertEquals(2, tbs.size());
+		assertTrue(tbs.containsKey("inheritedTestBeanPrototype"));
+		assertTrue(tbs.containsKey("inheritedTestBeanSingleton"));
 
 		// abstract bean should throw exception on creation attempt
 		try {
@@ -294,7 +299,6 @@ public class XmlBeanFactoryTests extends TestCase {
 	 * Note that prototype/singleton distinction is <b>not</b> inherited.
 	 * It's possible for a subclass singleton not to return independent
 	 * instances even if derived from a prototype
-	 * @throws Exception
 	 */
 	public void testSingletonInheritsFromParentFactoryPrototype() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
@@ -306,6 +310,14 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inherits.getAge() == 2);
 		TestBean inherits2 = (TestBean) child.getBean("singletonInheritsFromParentFactoryPrototype");
 		assertTrue(inherits2 == inherits);
+	}
+
+	public void testSingletonFromParent() {
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		TestBean beanFromParent = (TestBean) parent.getBean("inheritedTestBeanSingleton");
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		TestBean beanFromChild = (TestBean) child.getBean("inheritedTestBeanSingleton");
+		assertTrue("singleton from parent and child is the same", beanFromParent == beanFromChild);
 	}
 
 	public void testCircularReferences() {

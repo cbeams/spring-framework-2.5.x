@@ -852,15 +852,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Resolve an inner bean definition.
 	 */
-	private Object resolveInnerBeanDefinition(String beanName, String innerBeanName, BeanDefinition innerBd)
+	private Object resolveInnerBeanDefinition(String beanName, final String innerBeanName, BeanDefinition innerBd)
 	    throws BeansException {
-		RootBeanDefinition mergedInnerBd = getMergedBeanDefinition(innerBeanName, innerBd);
-		Object innerBean = createBean(innerBeanName, mergedInnerBd, null, false);
+		final RootBeanDefinition mergedInnerBd = getMergedBeanDefinition(innerBeanName, innerBd);
+		final Object innerBean = createBean(innerBeanName, mergedInnerBd, null, false);
 		if (mergedInnerBd.isSingleton()) {
+			// Keep reference to inner bean, to be able to destroy it on factory shutdown?
 			if (innerBean instanceof DisposableBean) {
 				registerDependentBean(innerBeanName, beanName);
-				// Keep reference to inner bean, to be able to destroy it on factory shutdown.
 				registerDisposableBean(innerBeanName, (DisposableBean) innerBean);
+			}
+			else if (mergedInnerBd.getDestroyMethodName() != null) {
+				registerDependentBean(innerBeanName, beanName);
+				registerDisposableBean(innerBeanName, innerBean, mergedInnerBd.getDestroyMethodName());
 			}
 		}
 		return getObjectForSharedInstance(innerBeanName, innerBean);
