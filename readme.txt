@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.1.3 (December 2004)
----------------------------------------------------
+THE SPRING FRAMEWORK, release 1.1.4 (January 2005)
+--------------------------------------------------
 http://www.springframework.org
 
 
