@@ -1,9 +1,10 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.43 2003-11-14 17:05:16 jhoeller Exp $
+$Id: changelog.txt,v 1.44 2003-11-19 10:38:24 johnsonr Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
+* major AOP API changes. See AOP-API-changes-M2-M3.txt for further details
 * fixed empty-value-on-primitive-property check in BeanWrapperImpl to allow a custom editor to modify the value first
 * added support for indexed and mapped properties to BeanWrapperImpl, with "beanName.indexedProperty[index]" syntax
 * ClassEditor and other framework classes use the thread context class loader now, consistent within the framework
@@ -31,7 +32,6 @@ Changes in version 1.0 M3 (XX.11.2003)
 * added "default-dependency-check" and "default-autowire" attributes to root tag in XML bean definitions
 * reworked PropertiesFactoryBean to allow for loaded and local properties
 * added "targetClass" argument to StaticMethodPointcut.applies()
-* can now cast any AOP proxy to ProxyConfig to manipulate it
 * can force CGLIB proxying using new "proxyTargetClass" property on DefaultProxyConfig
 * CGLIB proxies support introductions now
 * split ApplicationContext interface into ApplicationContext client interface and ConfigurableApplicationContext SPI
