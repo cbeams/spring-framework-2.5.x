@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="view">
 
     <title>Integrating view technologies</title>
@@ -292,7 +293,7 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
   will normally be overridden in child definitions.
 -->
 <bean id="parentVelocityView" class="org.springframework.web.servlet.view.velocity.VelocityView">
-  <property name="templateName"><value>mainTemplate.vm</value></property>        
+  <property name="url"><value>mainTemplate.vm</value></property>        
 </bean>
 
 <!--
@@ -311,7 +312,7 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
   - Another view - this one defines a different velocity template.
 -->
 <bean id="secondaryView" parent="parentVelocityView">
-  <property name="templateName"><value>secondaryTemplate.vm</value></property>  
+  <property name="url"><value>secondaryTemplate.vm</value></property>  
   <property name="attributes">
     <props>
       <prop key="title">My Velocity Secondary Page</prop>
@@ -1275,7 +1276,7 @@ public class PDFPage extends AbstractPdfView {
  file: xportal.application:
  
  <?xml version="1.0" encoding="UTF-8"?>
- <!--$Id: views.xml,v 1.4 2004-02-05 23:49:52 davison Exp $-->
+ <!--$Id: views.xml,v 1.5 2004-02-16 23:39:42 davison Exp $-->
  <!DOCTYPE application PUBLIC 
    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
