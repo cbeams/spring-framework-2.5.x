@@ -62,8 +62,8 @@ public class DefaultThreadLocalContext implements ThreadLocalContext, ThreadClea
 		return get(attributeName);
 	}
 
-	public void setAttribute(String attributeName, Object value) {
-		put(attributeName, value);
+	public Object setAttribute(String attributeName, Object value) {
+		return put(attributeName, value);
 	}
 
 	public Object get(Object key) {
@@ -71,9 +71,9 @@ public class DefaultThreadLocalContext implements ThreadLocalContext, ThreadClea
 		return map.get(key);
 	}
 
-	public void put(Object key, Object value) {
+	public Object put(Object key, Object value) {
 		Map map = getThreadLocalStorageMap();
-		map.put(key, value);
+		return map.put(key, value);
 	}
 
 	public void clear() {

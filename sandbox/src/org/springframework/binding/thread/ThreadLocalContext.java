@@ -22,7 +22,7 @@ package org.springframework.binding.thread;
 public interface ThreadLocalContext {
 	public Object get(Object key);
 
-	public void put(Object key, Object value);
+	public Object put(Object key, Object value);
 
 	public void clear();
 }

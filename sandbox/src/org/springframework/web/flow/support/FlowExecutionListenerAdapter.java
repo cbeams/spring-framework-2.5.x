@@ -20,6 +20,7 @@ import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowSession;
+import org.springframework.web.flow.FlowExecutionContext;
 
 /**
  * An abstract adapter class for listeners (observers) of flow execution

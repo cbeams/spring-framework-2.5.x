@@ -69,12 +69,14 @@ import org.springframework.web.util.WebUtils;
  *       
  *        
  *         
- *          &lt;action path=&quot;/userRegistration&quot;
- *              type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
- *              name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
- *              className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
- *                  &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
- *          &lt;/action&gt;
+ *          
+ *           &lt;action path=&quot;/userRegistration&quot;
+ *               type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
+ *               name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
+ *               className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
+ *                   &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
+ *           &lt;/action&gt;
+ *           
  *          
  *         
  *        
@@ -155,7 +157,7 @@ public class FlowAction extends TemplateAction {
 				if (context.isFlowExecutionActive()) {
 					if (form instanceof BindingActionForm) {
 						BindingActionForm bindingForm = (BindingActionForm)form;
-						bindingForm.setErrors((Errors)context.getRequestAttribute(
+						bindingForm.setErrors((Errors)context.requestScope().getAttribute(
 								AbstractAction.FORM_OBJECT_ERRORS_ATTRIBUTE, Errors.class));
 						bindingForm.setRequest(request);
 					}

@@ -28,17 +28,17 @@ public class AddItemAction extends AbstractAction {
 	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
 		// check to ensure the incoming request is within the active transaction
 		// note that we're also ending the transaction using reset==true
-		if (!context.inTransaction(true)) {
+		if (!context.getTransactionSynchronizer().inTransaction(true)) {
 			// the transaction was not valid so cannot continue normal
 			// processing
 			return new LocalEvent("txError");
 		}
-		List list = (List)context.getAttribute("list");
+		List list = (List)context.requestScope().getAttribute("list");
 		if (list == null) {
 			list = new ArrayList();
-			context.setRequestAttribute("list", list);
+			context.requestScope().setAttribute("list", list);
 		}
-		String data = (String)context.getAttribute("data");
+		String data = (String)context.requestScope().getAttribute("data");
 		if (data != null && data.length() > 0) {
 			list.add(data);
 		}

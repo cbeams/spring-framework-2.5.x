@@ -30,8 +30,8 @@ public class ExecuteQueryAction extends AbstractAction {
 	}
 
 	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
-		PhoneBookQuery query = (PhoneBookQuery)context.getAttribute("query");
-		context.setRequestAttribute("persons", phoneBook.query(query));
+		PhoneBookQuery query = (PhoneBookQuery)context.flowScope().getAttribute("query");
+		context.requestScope().setAttribute("persons", phoneBook.query(query));
 		return success();
 	}
 }

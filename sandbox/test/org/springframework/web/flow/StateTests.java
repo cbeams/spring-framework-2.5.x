@@ -154,7 +154,7 @@ public class StateTests extends TestCase {
 		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
 		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
 		assertEquals("mySubFlowViewName", view.getViewName());
-		assertEquals("attributeValue", flowExecution.getActiveFlowSession().getAttribute("childInputAttribute"));
+		assertEquals("attributeValue", flowExecution.getActiveFlowSession().flowScope().getAttribute("childInputAttribute"));
 		view = flowExecution.signalEvent(new LocalEvent("submit"));
 		assertEquals("myParentFlowEndingViewName", view.getViewName());
 		assertTrue(!flowExecution.isActive());

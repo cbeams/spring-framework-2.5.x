@@ -31,6 +31,7 @@ public interface AttributeSetter extends AttributeAccessor {
 	 * Set the attribute with the provided name to the value provided.
 	 * @param attributeName The attribute name
 	 * @param attributeValue The attribute value
+	 * @return the previous value, or null if no previous value was held
 	 */
-	public void setAttribute(String attributeName, Object attributeValue);
+	public Object setAttribute(String attributeName, Object attributeValue);
 }

@@ -308,9 +308,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 */
 	protected Object loadFormObject(FlowExecutionContext context) throws ObjectRetrievalFailureException,
 			ServletRequestBindingException {
-		if (!isCreateFormObjectPerRequest()
-				&& context.getFlowAttributeAccessor().containsAttribute(getFormObjectName())) {
-			Object formObject = context.getFlowAttribute(getFormObjectName(), getFormObjectClass());
+		if (!isCreateFormObjectPerRequest() && context.flowScope().containsAttribute(getFormObjectName())) {
+			Object formObject = context.flowScope().getAttribute(getFormObjectName(), getFormObjectClass());
 			if (logger.isDebugEnabled()) {
 				logger.debug("Binding to existing form object '" + getFormObjectName() + "' in flow scope by name");
 			}
@@ -427,7 +426,7 @@ public class BindAndValidateAction extends AbstractAction {
 			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
 					+ "', details='" + binder.getTarget() + "'");
 		}
-		//binder.bind(context);
+		// binder.bind(context);
 		onBind(context, binder.getTarget(), binder.getErrors());
 		if (logger.isDebugEnabled()) {
 			logger.debug("After bind of object '" + binder.getObjectName() + "', details='" + binder.getTarget() + "'");

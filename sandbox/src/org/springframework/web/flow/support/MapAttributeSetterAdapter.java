@@ -49,11 +49,11 @@ public class MapAttributeSetterAdapter extends AttributeSetterSupport {
 		}
 	}
 
-	public void setAttribute(String attributeName, Object attributeValue) {
+	public Object setAttribute(String attributeName, Object attributeValue) {
 		if (map == null) {
 			map = new HashMap();
 		}
-		map.put(attributeName, attributeValue);
+		return map.put(attributeName, attributeValue);
 	}
 
 	public boolean containsAttribute(String attributeName) {
@@ -76,5 +76,4 @@ public class MapAttributeSetterAdapter extends AttributeSetterSupport {
 		}
 		return map.remove(attributeName);
 	}
-	
 }

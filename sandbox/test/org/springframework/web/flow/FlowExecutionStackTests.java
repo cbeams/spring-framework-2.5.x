@@ -90,8 +90,8 @@ public class FlowExecutionStackTests extends TestCase {
 
 		assertEquals(flowExecution.isActive(), restoredFlowExecution.isActive());
 		if (flowExecution.isActive()) {
-			assertTrue(entriesCollectionsAreEqual(flowExecution.getActiveFlowSession().attributeEntries(),
-					restoredFlowExecution.getActiveFlowSession().attributeEntries()));
+			assertTrue(entriesCollectionsAreEqual(flowExecution.getActiveFlowSession().flowScope().attributeEntries(),
+					restoredFlowExecution.getActiveFlowSession().flowScope().attributeEntries()));
 			assertEquals(flowExecution.getCurrentStateId(), restoredFlowExecution.getCurrentStateId());
 			assertEquals(flowExecution.getActiveFlowId(), restoredFlowExecution.getActiveFlowId());
 			assertSame(flowExecution.getRootFlow(), restoredFlowExecution.getRootFlow());

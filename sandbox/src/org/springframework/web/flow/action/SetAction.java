@@ -83,7 +83,7 @@ public class SetAction extends AbstractAction {
 
 	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
 		if (requestParameterMapper != null) {
-			this.requestParameterMapper.map(context.getEvent(), context.getFlowAttributeAccessor());
+			this.requestParameterMapper.map(context.getEvent(), context.flowScope());
 		}
 		return success();
 	}

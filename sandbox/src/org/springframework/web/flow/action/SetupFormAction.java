@@ -69,17 +69,16 @@ public class SetupFormAction extends BindAndValidateAction {
 		return true;
 	}
 
-	protected Event doExecuteAction(FlowExecutionContext context)
-			throws Exception {
+	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
 		Object formObject = loadRequiredFormObject(context);
 		DataBinder binder = createBinder(context, formObject);
 		if (prepopulateFromRequest) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Prepopulating backing form object from request parameters");
 			}
-			//binder.bind(context);
+			// binder.bind(context);
 		}
-		//exposeBindExceptionErrors(context, binder.getErrors());
+		// exposeBindExceptionErrors(context, binder.getErrors());
 		exposeViewPlaceholders(context);
 		try {
 			setupReferenceData(context);
@@ -103,8 +102,8 @@ public class SetupFormAction extends BindAndValidateAction {
 			// placeholders indicating attributes on forms that have not been
 			// mapped to dynamic fields on backing objects - for use during
 			// development only
-			context.setRequestAttribute(NOT_MAPPED_PLACEHOLDER_ATTRIBUTE, NOT_MAPPED_PLACEHOLDER_VALUE);
-			context.setRequestAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_ATTRIBUTE, createNotMappedEnumSet());
+			context.requestScope().setAttribute(NOT_MAPPED_PLACEHOLDER_ATTRIBUTE, NOT_MAPPED_PLACEHOLDER_VALUE);
+			context.requestScope().setAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_ATTRIBUTE, createNotMappedEnumSet());
 		}
 	}
 
