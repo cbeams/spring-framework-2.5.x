@@ -194,6 +194,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public static final String GET = "get";
 
 	/**
+	 * The <code>SET</code> action state/event identifier.
+	 */
+	public static final String SET = "set";
+
+	/**
 	 * The <code>LOAD</code> event identifier.
 	 */
 	public static final String LOAD = "load";
@@ -783,6 +788,32 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(get(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix) {
+		return createSetState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix, Transition transition) {
+		return createSetState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(set(stateIdPrefix), transitions);
 	}
 
 	/**
@@ -1539,6 +1570,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public String get(String getActionStateIdPrefix) {
 		return buildStateId(getActionStateIdPrefix, GET);
+	}
+
+	/**
+	 * @param setActionStateIdPrefix
+	 * @return
+	 */
+	public String set(String getActionStateIdPrefix) {
+		return buildStateId(getActionStateIdPrefix, SET);
 	}
 
 	/**
