@@ -19,6 +19,8 @@ package org.springframework.binding.convert;
  * A type converter converts objects of one type to that of another. They may
  * also support conversion from multiple source types to multiple different
  * target types.
+ * <p>
+ * Implementations of this interface are thread-safe.
  * @author Keith Donald
  */
 public interface Converter {

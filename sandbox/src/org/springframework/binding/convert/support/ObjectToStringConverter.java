@@ -30,8 +30,10 @@ import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
 
 /**
- * Converts textual representations of numbers to a <code>Number</code>
- * specialization. Delegates to a synchronized formatter to parse text strings.
+ * Converts objects to string form, generally for debugging purposes.
+ * <p>
+ * Formatters are used to convert to/from user input values (for example, in a
+ * text field). This converter is not intended for that kind of use.
  * @author Keith Donald
  */
 public class ObjectToStringConverter extends AbstractFormattingConverter implements Visitor {

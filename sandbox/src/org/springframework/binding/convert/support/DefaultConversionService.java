@@ -36,7 +36,7 @@ import org.springframework.binding.support.TextToMappingConverter;
  * Default, local implementation of a conversion service.
  * <p>
  * Acts as bean factory post processor, registering property editor adapters for
- * each supported <i>source String </i> conversion. This makes for very
+ * each supported conversion with a <code>java.lang.String sourceClass</code>. This makes for very
  * convenient use with the Spring container.
  * @author Keith Donald
  */

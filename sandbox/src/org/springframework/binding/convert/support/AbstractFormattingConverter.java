@@ -19,8 +19,8 @@ import org.springframework.binding.format.FormatterLocator;
 
 /**
  * A converter that delegates to a formatter to perform the conversion.
- * Formatters are not thread safe, so we use a FormatterLocator that is expected
- * to provide us with synchronized instances.
+ * Formatters are typically not thread safe, so we use a FormatterLocator that
+ * is expected to provide us with synchronized instances as neccessary.
  * @author Keith Donald
  */
 public abstract class AbstractFormattingConverter extends AbstractConverter {
