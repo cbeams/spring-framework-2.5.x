@@ -31,12 +31,25 @@ import org.springframework.context.ResourceLoaderAware;
  * in application code, e.g. for generating email content. For web views,
  * FreeMarkerConfigurer is used to set up a FreeMarkerConfigurationFactory.
  *
- * <p>See base class FreeMarkerConfigurationFactory for details.
+ * The simplest way to use this class is to specify just a "templateLoaderPath";
+ * you do not need any further configuration then. For example, in a web
+ * application context:
+ *
+ * <pre>
+ * &lt;bean id="freemarkerConfiguration" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean"&gt;
+ *   &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/freemarker/&lt;/value>&lt;/property&gt;
+ * &lt;/bean&gt;</pre>
+
+ * See the base class FreeMarkerConfigurationFactory for configuration details.
  *
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
  * @author Darren Davison
  * @since 3/3/2004
+ * @see #setConfigLocation
+ * @see #setFreemarkerSettings
+ * @see #setTemplateLoaderPath
+ * @see org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer
  */
 public class FreeMarkerConfigurationFactoryBean extends FreeMarkerConfigurationFactory
 		implements FactoryBean, InitializingBean, ResourceLoaderAware {

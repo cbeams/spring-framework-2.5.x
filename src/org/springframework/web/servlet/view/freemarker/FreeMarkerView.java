@@ -48,7 +48,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  *
  * <p>Depends on a single FreeMarkerConfig object such as FreeMarkerConfigurer
  * being accessible in the current web application context, with any bean name.
- * Alternatively, you can set the Freemarker Configuration object as bean property.
+ * Alternatively, you can set the FreeMarker Configuration object as bean property.
  *
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
@@ -134,12 +134,12 @@ public class FreeMarkerView extends AbstractTemplateView {
 			getTemplate(this.configuration.getLocale());
 		}
 		catch (ParseException ex) {
-		    throw new ApplicationContextException("Failed to parse FreeMarker template for URL [" + 
-			        getUrl() + "]", ex);
+		    throw new ApplicationContextException(
+						"Failed to parse FreeMarker template for URL [" +  getUrl() + "]", ex);
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("Cannot load FreeMarker template for URL [" + 
-			        getUrl() + "]", ex);
+			throw new ApplicationContextException(
+					"Could not load FreeMarker template for URL [" + getUrl() + "]", ex);
 		}
 	}
 
@@ -156,11 +156,16 @@ public class FreeMarkerView extends AbstractTemplateView {
 		Template template = getTemplate(RequestContextUtils.getLocale(request));
 		if (logger.isDebugEnabled()) {
 			logger.debug("Preparing to process FreeMarker template [" + template.getName() +
-									 "] with model [" + model + "] ");
+					"] with model [" + model + "] ");
 		}
+
 		response.setContentType(getContentType());
 		exposeHelpers(model, request);
 		processTemplate(template, model, response);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Processed FreeMarker template [" + getUrl() + "] in VelocityView '" + getBeanName() + "'");
+		}
 	}
 
 	/**

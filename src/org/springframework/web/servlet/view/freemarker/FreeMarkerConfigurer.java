@@ -31,13 +31,13 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
 /**
  * JavaBean to configure FreeMarker for web usage, via the "configLocation"
  * and/or "freemarkerSettings" and/or "templateLoaderPath" properties.
- * The simplest way to use this class is to specify just a "templateLoaderPath":
- * You do not need any further configuration then.
+ * The simplest way to use this class is to specify just a "templateLoaderPath";
+ * you do not need any further configuration then.
  *
  * <pre>
- * &lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
- *   &lt;property name="templateLoaderPath">&lt;value>/WEB-INF/freemarker/&lt;/value>&lt;/property>
- * &lt;/bean></pre>
+ * &lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
+ *   &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/freemarker/&lt;/value>&lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * This bean must be included in the application context of any application
  * using Spring's FreeMarkerView for web MVC. It exists purely to configure FreeMarker.

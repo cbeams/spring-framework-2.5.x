@@ -29,24 +29,24 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
 /**
  * JavaBean to configure Velocity for web usage, via the "configLocation"
  * and/or "velocityProperties" and/or "resourceLoaderPath" bean properties.
- * The simplest way to use this class is to specify just a "resourceLoaderPath":
- * You do not need any further configuration then.
+ * The simplest way to use this class is to specify just a "resourceLoaderPath";
+ * you do not need any further configuration then.
  *
  * <pre>
- * &lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
- *   &lt;property name="resourceLoaderPath">&lt;value>/WEB-INF/velocity/&lt;/value>&lt;/property>
- * &lt;/bean></pre>
+ * &lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
+ *   &lt;property name="resourceLoaderPath">&lt;value&gt;/WEB-INF/velocity/&lt;/value>&lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * This bean must be included in the application context of any application
- * using Spring's VelocityView for web MVC. It exists purely to configure Velocity.
- * It is not meant to be referenced by application components but just internally
+ * using Spring's VelocityView for web MVC. It exists purely to configure Velocity;
+ * it is not meant to be referenced by application components but just internally
  * by VelocityView. Implements VelocityConfig to be found by VelocityView without
  * depending on the bean name the configurer. Each DispatcherServlet can define
  * its own VelocityConfigurer if desired.
  *
  * <p>Note that you can also refer to a preconfigured VelocityEngine instance, for
  * example one set up by VelocityEngineFactoryBean, via the "velocityEngine" property.
- * This allows to shared a VelocityEngine for web and email usage, for example.
+ * This allows to share a VelocityEngine for web and email usage, for example.
  *
  * <p>This configurer registers the "spring.vm" Velocimacro library for web views
  * (contained in this package and thus in spring.jar), which makes all macros
@@ -71,6 +71,9 @@ public class VelocityConfigurer extends VelocityEngineFactory
 
 	/** the name of the resource loader for Spring's bind macros */
 	private static final String SPRING_MACRO_RESOURCE_LOADER_NAME = "springMacro";
+
+	/** the key for the class of Spring's bind macro resource loader */
+	private static final String SPRING_MACRO_RESOURCE_LOADER_CLASS = "springMacro.resource.loader.class";
 
 	/** the name of Spring's default bind macro library */
 	private static final String SPRING_MACRO_LIBRARY = "org/springframework/web/servlet/view/velocity/spring.vm";
@@ -102,20 +105,20 @@ public class VelocityConfigurer extends VelocityEngineFactory
 	}
 
 	/**
-	 * Provides a SpringResourceLoader in addition to any default or user defined loader
-	 * in order to load the spring Velocity macros from the classpath.
-	 * @see org.springframework.ui.velocity.SpringResourceLoader
+	 * Provides a ClasspathResourceLoader in addition to any default or user-defined
+	 * loader in order to load the spring Velocity macros from the class path.
+	 * @see org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
 	 */
 	protected void postProcessVelocityEngine(VelocityEngine velocityEngine) {
-		velocityEngine.setProperty(SPRING_MACRO_RESOURCE_LOADER_NAME + ".resource.loader.class",
-															 ClasspathResourceLoader.class.getName());
-		velocityEngine.addProperty(VelocityEngine.RESOURCE_LOADER,
-															 SPRING_MACRO_RESOURCE_LOADER_NAME);
-		velocityEngine.addProperty(VelocityEngine.VM_LIBRARY,
-															 SPRING_MACRO_LIBRARY);
+		velocityEngine.setProperty(
+				SPRING_MACRO_RESOURCE_LOADER_CLASS, ClasspathResourceLoader.class.getName());
+		velocityEngine.addProperty(
+				VelocityEngine.RESOURCE_LOADER, SPRING_MACRO_RESOURCE_LOADER_NAME);
+		velocityEngine.addProperty(
+				VelocityEngine.VM_LIBRARY, SPRING_MACRO_LIBRARY);
 		if (logger.isInfoEnabled()) {
 			logger.info("ClasspathResourceLoader with name '" + SPRING_MACRO_RESOURCE_LOADER_NAME +
-									"' added to configured VelocityEngine");
+					"' added to configured VelocityEngine");
 		}
 	}
 

@@ -62,7 +62,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 		this.templateLoaderPath = templateLoaderPath;
 		if (logger.isInfoEnabled()) {
 			logger.info("SpringTemplateLoader for FreeMarker: using resource loader [" + this.resourceLoader +
-									"] and template loader path [" + this.templateLoaderPath + "]");
+					"] and template loader path [" + this.templateLoaderPath + "]");
 		}
 	}
 
@@ -76,7 +76,15 @@ public class SpringTemplateLoader implements TemplateLoader {
 
 	public Reader getReader(Object templateSource, String encoding) throws IOException {
 		Resource resource = (Resource) templateSource;
-		return new InputStreamReader(resource.getInputStream(), encoding);
+		try {
+			return new InputStreamReader(resource.getInputStream(), encoding);
+		}
+		catch (IOException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not find FreeMarker template: " + resource);
+			}
+			throw ex;
+		}
 	}
 
 

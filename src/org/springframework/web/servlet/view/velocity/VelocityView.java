@@ -153,6 +153,13 @@ public class VelocityView extends AbstractTemplateView {
 	}
 
 	/**
+	 * Return whether the Velocity template should be cached.
+	 */
+	protected boolean isCacheTemplate() {
+		return cacheTemplate;
+	}
+
+	/**
 	 * Set the VelocityEngine to be used by this view.
 	 * If this is not set, the default lookup will occur: A single VelocityConfig
 	 * is expected in the current web application context, with any bean name.
@@ -201,7 +208,8 @@ public class VelocityView extends AbstractTemplateView {
 				"]: Did you specify the correct resource loader path?", ex);
 		}
 		catch (Exception ex) {
-			throw new ApplicationContextException("Cannot load Velocity template for URL [" + getUrl() + "]", ex);
+			throw new ApplicationContextException(
+					"Could not load Velocity template for URL [" + getUrl() + "]", ex);
 		}
 	}
 
@@ -216,35 +224,21 @@ public class VelocityView extends AbstractTemplateView {
 		// if not caching. As Velocity itself caches templates, so our ability to
 		// cache templates in this class is a minor optimization only.
 		Template template = this.template;
-		if (!this.cacheTemplate) {
+		if (!isCacheTemplate()) {
 			template = getTemplate();
 		}
 
 		response.setContentType(getContentType());
-
 		exposeHelpers(model, request);
 
 		// create Velocity Context from model
 		Context velocityContext = createVelocityContext(model);
 		exposeHelpers(velocityContext, request);
+		exposeToolAttributes(velocityContext, request);
 
-		if (this.velocityFormatterAttribute != null) {
-			velocityContext.put(this.velocityFormatterAttribute, new VelocityFormatter(velocityContext));
-		}
-
-		if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
-			Locale locale = RequestContextUtils.getLocale(request);
-			if (this.dateToolAttribute != null) {
-				velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(locale));
-			}
-			if (this.numberToolAttribute != null) {
-				velocityContext.put(this.numberToolAttribute, new LocaleAwareNumberTool(locale));
-			}
-		}
-		
 		mergeTemplate(template, velocityContext, response);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Merged with Velocity template '" + getUrl() + "' in VelocityView '" + getBeanName() + "'");
+			logger.debug("Merged with Velocity template [" + getUrl() + "] in VelocityView '" + getBeanName() + "'");
 		}
 	}
 
@@ -296,6 +290,30 @@ public class VelocityView extends AbstractTemplateView {
 	 * @see #exposeHelpers(Map, HttpServletRequest)
 	 */
 	protected void exposeHelpers(Context velocityContext, HttpServletRequest request) throws Exception {
+	}
+
+	/**
+	 * Expose the tool attributes, according to corresponding bean property settings.
+	 * @param velocityContext Velocity context that will be passed to the template at merge time
+	 * @param request current HTTP request
+	 * @see #setVelocityFormatterAttribute
+	 * @see #setDateToolAttribute
+	 * @see #setNumberToolAttribute
+	 */
+	protected final void exposeToolAttributes(Context velocityContext, HttpServletRequest request) {
+		if (this.velocityFormatterAttribute != null) {
+			velocityContext.put(this.velocityFormatterAttribute, new VelocityFormatter(velocityContext));
+		}
+
+		if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
+			Locale locale = RequestContextUtils.getLocale(request);
+			if (this.dateToolAttribute != null) {
+				velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(locale));
+			}
+			if (this.numberToolAttribute != null) {
+				velocityContext.put(this.numberToolAttribute, new LocaleAwareNumberTool(locale));
+			}
+		}
 	}
 
 	/**

@@ -50,6 +50,8 @@ public class SpringResourceLoader extends ResourceLoader {
 
 	public static final String SPRING_RESOURCE_LOADER_CLASS = "spring.resource.loader.class";
 
+	public static final String SPRING_RESOURCE_LOADER_CACHE = "spring.resource.loader.cache";
+
 	public static final String SPRING_RESOURCE_LOADER = "spring.resource.loader";
 
 	public static final String SPRING_RESOURCE_LOADER_PATH = "spring.resource.loader.path";
@@ -67,30 +69,34 @@ public class SpringResourceLoader extends ResourceLoader {
 				this.rsvc.getApplicationAttribute(SPRING_RESOURCE_LOADER);
 		this.resourceLoaderPath = (String) this.rsvc.getApplicationAttribute(SPRING_RESOURCE_LOADER_PATH);
 		if (this.resourceLoader == null) {
-			throw new IllegalArgumentException("'resourceLoader' application attribute must be present " +
-																				 "for SpringResourceLoader");
+			throw new IllegalArgumentException(
+					"'resourceLoader' application attribute must be present for SpringResourceLoader");
 		}
 		if (this.resourceLoaderPath == null) {
-			throw new IllegalArgumentException("'resourceLoaderPath' application attribute must be present " +
-																				 "for SpringResourceLoader");
+			throw new IllegalArgumentException(
+					"'resourceLoaderPath' application attribute must be present for SpringResourceLoader");
 		}
 		if (!this.resourceLoaderPath.endsWith("/")) {
 			this.resourceLoaderPath += "/";
 		}
-		logger.info("SpringResourceLoader for Velocity: using resource loader [" + this.resourceLoader +
-								"] and resource loader path [" + this.resourceLoaderPath + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("SpringResourceLoader for Velocity: using resource loader [" + this.resourceLoader +
+					"] and resource loader path [" + this.resourceLoaderPath + "]");
+		}
 	}
 
 	public InputStream getResourceStream(String source) throws ResourceNotFoundException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for Velocity resource with name [" + source + "]");
 		}
+		org.springframework.core.io.Resource resource =
+				this.resourceLoader.getResource(this.resourceLoaderPath + source);
 		try {
-			return this.resourceLoader.getResource(this.resourceLoaderPath + source).getInputStream();
+			return resource.getInputStream();
 		}
 		catch (IOException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not find Velocity resource [" + this.resourceLoaderPath + source + "]", ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not find Velocity resource: " + resource);
 			}
 			throw new ResourceNotFoundException(ex.getMessage());
 		}
