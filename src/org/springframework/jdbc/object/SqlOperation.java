@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.object;
 
@@ -31,6 +31,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see PreparedStatementCreatorFactory
  */
 public abstract class SqlOperation extends RdbmsOperation {
 
@@ -56,9 +57,9 @@ public abstract class SqlOperation extends RdbmsOperation {
 			throw new InvalidDataAccessApiUsageException(ex.getMessage());
 		}
 		if (bindVarCount != getDeclaredParameters().size())
-			throw new InvalidDataAccessApiUsageException("SQL '" + getSql() + "' requires " + bindVarCount +
-			                                             " bind variables, but " + getDeclaredParameters().size() +
-																									 " variables were declared for this object");
+			throw new InvalidDataAccessApiUsageException(
+					"SQL '" + getSql() + "' requires " + bindVarCount + " bind variables, but " +
+					getDeclaredParameters().size() + " variables were declared for this object");
 
 		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
 		this.preparedStatementFactory.setResultSetType(getResultSetType());

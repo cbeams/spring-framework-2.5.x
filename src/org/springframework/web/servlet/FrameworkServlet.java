@@ -255,11 +255,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		if (isPublishContext()) {
 			// Publish the context as a servlet context attribute.
-			String attName = getServletContextAttributeName();
-			getServletContext().setAttribute(attName, wac);
+			String attrName = getServletContextAttributeName();
+			getServletContext().setAttribute(attrName, wac);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
-						"' as ServletContext attribute with name [" + attName + "]");
+						"' as ServletContext attribute with name [" + attrName + "]");
 			}
 		}
 
@@ -305,8 +305,10 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Return the ServletContext attribute name for this servlet's
-	 * WebApplicationContext.
+	 * Return the ServletContext attribute name for this servlet's WebApplicationContext.
+	 * Default implementation returns SERVLET_CONTEXT_PREFIX + servlet name.
+	 * @see #SERVLET_CONTEXT_PREFIX
+	 * @see #getServletName
 	 */
 	public String getServletContextAttributeName() {
 		return SERVLET_CONTEXT_PREFIX + getServletName();
