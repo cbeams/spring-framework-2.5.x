@@ -11,8 +11,6 @@ import javax.ejb.EJBException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
-
 /**
  * Convenient superclass for stateless session beans (SLSBs), minimizing
  * the work involved in implementing an SLSB and preventing common errors.
@@ -35,27 +33,24 @@ import org.springframework.beans.BeansException;
  * eliminating a common cause of EJB deployment failure.
  *
  * @author Rod Johnson
- * @version $Id: AbstractStatelessSessionBean.java,v 1.5 2004-02-13 17:54:51 jhoeller Exp $
+ * @version $Id: AbstractStatelessSessionBean.java,v 1.6 2004-03-01 09:30:39 jhoeller Exp $
  */
 public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** 
-	 * This implementation loads the BeanFactory. Any BeansException
-	 * thrown by loadBeanFactory is rethrown as CreateException.
-	 * <p>Don't override it (although it can't be made final): code initialization
-	 * in onEjbCreate(), which is called when the BeanFactory is available.
+	 * This implementation loads the BeanFactory. A BeansException thrown by
+	 * loadBeanFactory will simply get propagated, as it is a runtime exception.
+	 * <p>Don't override it (although it can't be made final): code your own
+	 * initialization in onEjbCreate(), which is called when the BeanFactory
+	 * is available.
 	 * <p>Unfortunately we can't load the BeanFactory in setSessionContext(),
-	 * as resource manager access isn't permitted and the BeanFactory may require it.
+	 * as resource manager access isn't permitted there - but the BeanFactory
+	 * may require it.
 	 */
 	public void ejbCreate() throws CreateException {
-		try {
-			loadBeanFactory();
-		}
-		catch (BeansException ex) {
-			throw new CreateException(ex.getMessage());
-		}
+		loadBeanFactory();
 		onEjbCreate();
 	}
 	
