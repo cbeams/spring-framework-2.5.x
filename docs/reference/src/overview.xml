@@ -109,7 +109,7 @@
 		</para>
 		<para>
 			Spring's <emphasis>Web</emphasis> package provides basic 
-			web-oriented integration features, such multipart functionality,
+			web-oriented integration features, such as multipart functionality,
 			initialization of contexts using servlet listeners and 
 			a web-oriented application context. When using
 			Spring together with WebWork or Struts, this is the package to 
