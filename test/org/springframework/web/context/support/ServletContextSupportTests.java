@@ -115,7 +115,7 @@ public class ServletContextSupportTests extends TestCase {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "name${var}${var}${");
+		pvs.addPropertyValue("name", "${key4}name${var}${var}${");
 		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
@@ -131,11 +131,102 @@ public class ServletContextSupportTests extends TestCase {
 		TestBean tb1 = (TestBean) wac.getBean("tb1");
 		TestBean tb2 = (TestBean) wac.getBean("tb2");
 		assertEquals(98, tb1.getAge());
-		assertEquals("namemyvarmyvar${", tb1.getName());
+		assertEquals("mykey4namemyvarmyvar${", tb1.getName());
 		assertEquals(tb2, tb1.getSpouse());
 	}
 
-	public void testServletContextPropertyPlaceholderConfigurerWithSearchAttributes() {
+	public void testServletContextPropertyPlaceholderConfigurerWithLocalOverriding() {
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("key4", "mykey4");
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("age", "${age}");
+		pvs.addPropertyValue("name", "${key4}name${var}${var}${");
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		wac.registerSingleton("tb1", TestBean.class, pvs);
+
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
+		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
+
+		wac.refresh();
+
+		TestBean tb1 = (TestBean) wac.getBean("tb1");
+		TestBean tb2 = (TestBean) wac.getBean("tb2");
+		assertEquals(98, tb1.getAge());
+		assertEquals("yourkey4namemyvarmyvar${", tb1.getName());
+		assertEquals(tb2, tb1.getSpouse());
+	}
+
+	public void testServletContextPropertyPlaceholderConfigurerWithContextOverride() {
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("key4", "mykey4");
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("age", "${age}");
+		pvs.addPropertyValue("name", "${key4}name${var}${var}${");
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		wac.registerSingleton("tb1", TestBean.class, pvs);
+
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
+		pvs.addPropertyValue("contextOverride", Boolean.TRUE);
+		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
+
+		wac.refresh();
+
+		TestBean tb1 = (TestBean) wac.getBean("tb1");
+		TestBean tb2 = (TestBean) wac.getBean("tb2");
+		assertEquals(98, tb1.getAge());
+		assertEquals("mykey4namemyvarmyvar${", tb1.getName());
+		assertEquals(tb2, tb1.getSpouse());
+	}
+
+	public void testServletContextPropertyPlaceholderConfigurerWithContextOverrideAndAttributes() {
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("key4", "mykey4");
+		sc.setAttribute("key4", "attrkey4");
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("age", "${age}");
+		pvs.addPropertyValue("name", "${key4}name${var}${var}${");
+		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		wac.registerSingleton("tb1", TestBean.class, pvs);
+
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
+		pvs.addPropertyValue("contextOverride", Boolean.TRUE);
+		pvs.addPropertyValue("searchContextAttributes", Boolean.TRUE);
+		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
+
+		wac.refresh();
+
+		TestBean tb1 = (TestBean) wac.getBean("tb1");
+		TestBean tb2 = (TestBean) wac.getBean("tb2");
+		assertEquals(98, tb1.getAge());
+		assertEquals("attrkey4namemyvarmyvar${", tb1.getName());
+		assertEquals(tb2, tb1.getSpouse());
+	}
+
+	public void testServletContextPropertyPlaceholderConfigurerWithAttributes() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
 
@@ -178,7 +269,7 @@ public class ServletContextSupportTests extends TestCase {
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("properties", "var=${m}var\nref=tb2\nm=my");
-		pvs.addPropertyValue("searchAttributes", Boolean.TRUE);
+		pvs.addPropertyValue("searchContextAttributes", Boolean.TRUE);
 		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
 		sc.setAttribute("age", new Integer(98));
 
