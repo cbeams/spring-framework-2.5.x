@@ -246,10 +246,7 @@ public abstract class Assert {
 	 * @see Class#isInstance
 	 */
 	public static void isInstanceOf(Class clazz, Object obj) {
-		Assert.notNull(clazz, "The clazz to perform the instanceof assertion cannot be null");
-		Assert.isTrue(clazz.isInstance(obj),
-				"Object of class '" + (obj != null ? obj.getClass().getName() : "[null]") +
-				"' must be an instance of '" + clazz.getName() + "'");
+        isInstanceOf(clazz, obj, "");
 	}
     
     /**
