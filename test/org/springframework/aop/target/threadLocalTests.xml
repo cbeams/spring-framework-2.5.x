@@ -38,6 +38,32 @@
 		<property name="proxyTargetClass"><value>true</value></property>
 		
 	</bean>
+	
+	
+	<!-- ================ Definitions for second ThreadLocalTargetSource ====== -->
+	
+	<bean id="test" singleton="false"
+		class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+	
+	<bean id="wife"
+		class="org.springframework.beans.TestBean">
+		<property name="name"><value>Kerry</value></property>
+	</bean>
+	
+	<bean id="threadLocalTs2" class="org.springframework.aop.target.ThreadLocalTargetSource">	
+		<property name="targetBeanName"><value>test</value></property>
+	</bean>
+	
+	<bean id="threadLocal2" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		
+		<property name="targetSource"><ref local="threadLocalTs2"/></property>
+		
+	</bean>
 
 </beans>		
 	

@@ -29,15 +29,16 @@ import org.springframework.beans.factory.DisposableBean;
  * to clear the references they hold.
  *
  * @author Rod Johnson
- * @version $Id: ThreadLocalTargetSource.java,v 1.3 2003-12-11 10:58:12 johnsonr Exp $
+ * @version $Id: ThreadLocalTargetSource.java,v 1.4 2003-12-14 16:43:37 johnsonr Exp $
  */
 public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource implements ThreadLocalTargetSourceStats, DisposableBean {
 	
 	/**
 	 * ThreadLocal holding the target associated with the current
-	 * thread.
+	 * thread. Unlike most ThreadLocals, which are static, this variable
+	 * is meant to be per thread per instance of the ThreadLocalTargetSource class.
 	 */
-	private static ThreadLocal holders = new ThreadLocal();
+	private ThreadLocal holders = new ThreadLocal();
 	
 	/**
 	 * Level of indirection so that we can clear the references out of
