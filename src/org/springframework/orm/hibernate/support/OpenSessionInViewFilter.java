@@ -180,7 +180,9 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * @see #getSessionFactoryBeanName
 	 */
 	protected SessionFactory lookupSessionFactory() {
-		logger.info("Using session factory '" + getSessionFactoryBeanName() + "' for OpenSessionInViewFilter");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Using session factory '" + getSessionFactoryBeanName() + "' for OpenSessionInViewFilter");
+		}
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 		return (SessionFactory) wac.getBean(getSessionFactoryBeanName());
 	}
