@@ -27,7 +27,7 @@
 	</service>
 	<service name="OrderService" provider="java:RPC">
 		<parameter name="allowedMethods" value="*"/>
-		<parameter name="className" value="org.springframework.samples.jpetstore.service.server.JaxRpcOrderService"/>
+		<parameter name="className" value="org.springframework.samples.jpetstore.service.JaxRpcOrderService"/>
 		<beanMapping qname="jpetstore:Order" xmlns:jpetstore="urn:JPetStore" languageSpecificType="java:org.springframework.samples.jpetstore.domain.Order"/>
 		<beanMapping qname="jpetstore:LineItem" xmlns:jpetstore="urn:JPetStore" languageSpecificType="java:org.springframework.samples.jpetstore.domain.LineItem"/>
 		<beanMapping qname="jpetstore:Item" xmlns:jpetstore="urn:JPetStore" languageSpecificType="java:org.springframework.samples.jpetstore.domain.Item"/>
