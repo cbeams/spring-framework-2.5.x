@@ -110,7 +110,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	/**
 	 * @return The sub flow spawned by this state.
 	 */
-	protected Flow getSubFlow() {
+	public Flow getSubFlow() {
 		return this.subFlow;
 	}
 
@@ -127,7 +127,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 * @return The attributes mapper used to map data between parent and sub
 	 *         flow model, or null if no mapping is done
 	 */
-	protected FlowAttributesMapper getFlowAttributesMapper() {
+	public FlowAttributesMapper getFlowAttributesMapper() {
 		return this.flowAttributesMapper;
 	}
 

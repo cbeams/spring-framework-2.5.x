@@ -107,14 +107,14 @@ public abstract class TransitionableState extends AbstractState {
 	/**
 	 * @return An iterator looping over all transitions in this state
 	 */
-	protected Iterator transitionsIterator() {
+	public Iterator transitionsIterator() {
 		return transitions.iterator();
 	}
 
 	/**
 	 * @return The list of transitions owned by this state
 	 */
-	protected Transition[] getTransitions() {
+	public Transition[] getTransitions() {
 		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
 	}
 
@@ -122,7 +122,7 @@ public abstract class TransitionableState extends AbstractState {
 	 * @return A collection of all the criteria (Constraint objects) used
 	 *         to match events with transitions in this state.
 	 */
-	protected Collection getEventIdCriteria() {
+	public Collection getEventIdCriteria() {
 		if (transitions.isEmpty()) {
 			return Collections.EMPTY_SET;
 		}
@@ -154,7 +154,7 @@ public abstract class TransitionableState extends AbstractState {
 	 * @return The transition associated with the event, or null if there
 	 *         is no such transition in this state
 	 */
-	protected Transition getTransition(String eventId) {
+	public Transition getTransition(String eventId) {
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();

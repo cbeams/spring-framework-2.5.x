@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.flow;
+package org.springframework.web.flow.config;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,16 +24,16 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.flow.ActionResult;
+import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.action.AbstractAction;
-import org.springframework.web.flow.config.AbstractFlowBuilder;
-import org.springframework.web.flow.config.FlowServiceLocator;
 
 /**
  * @author Keith Donald
  * @author Rod Johnson
  * @author Colin Sampaleanu
  */
-public class FlowTests extends TestCase {
+public class AbstractFlowBuilderTests extends TestCase {
 
 	private static String PERSON_DETAILS = "personDetails";
 
@@ -101,7 +101,7 @@ public class FlowTests extends TestCase {
 		protected String flowId() {
 			return "test.detailFlow";
 		}
-		
+
 		public void buildStates() {
 			addGetState(PERSON_DETAILS, executeAction(NoOpActionBean.class));
 			addViewState(PERSON_DETAILS);
