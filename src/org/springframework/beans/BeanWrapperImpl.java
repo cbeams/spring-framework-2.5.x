@@ -803,8 +803,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @return converted value (i.e. possibly the result of type conversion)
 	 */
 	protected Object doTypeConversionIfNecessary(String propertyName, String fullPropertyName,
-																							 Object oldValue, Object newValue,
-																							 Class requiredType) throws BeansException {
+			Object oldValue, Object newValue, Class requiredType) throws BeansException {
 		Object convertedValue = newValue;
 		if (convertedValue != null) {
 
