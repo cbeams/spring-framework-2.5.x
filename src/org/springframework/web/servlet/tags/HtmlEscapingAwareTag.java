@@ -40,8 +40,8 @@ public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 	private Boolean htmlEscape;
 
 	/**
-	 * Sets HTML escaping for this tag, overriding the default
-	 * HTML escaping setting for the current page.
+	 * Set HTML escaping for this tag, as boolean value.
+	 * Overrides the default HTML escaping setting for the current page.
 	 * @see HtmlEscapeTag#setDefaultHtmlEscape
 	 */
 	public void setHtmlEscape(String htmlEscape) throws JspException {
@@ -50,7 +50,7 @@ public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 	}
 
 	/**
-	 * Returns the HTML escaping setting for this tag,
+	 * Return the HTML escaping setting for this tag,
 	 * or the default setting if not overridden.
 	 */
 	protected boolean isHtmlEscape() {

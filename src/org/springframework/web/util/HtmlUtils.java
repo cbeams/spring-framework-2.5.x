@@ -38,7 +38,7 @@ public abstract class HtmlUtils {
 	private static final String REFERENCE_START = "&#";
 	private static final String MALFORMED_REFERENCE = "&#;";
 
-	private static final Map ENTITIES = new HashMap();
+	private static final Map ENTITIES = new HashMap(252);
 
 	static {
 		ENTITIES.put("nbsp", new Integer(160));
@@ -293,27 +293,30 @@ public abstract class HtmlUtils {
 		ENTITIES.put("lsaquo", new Integer(8249));
 		ENTITIES.put("rsaquo", new Integer(8250));
 		ENTITIES.put("euro", new Integer(8364));
+		System.out.println(ENTITIES.size());
 	}
 
 	/**
 	 * Turn special characters into HTML character references.
 	 * Handles complete character set defined in HTML 4.01 recommendation.
-	 * <p>Escapes all special characters to their corresponding numerial reference
-	 * in the decimal format: &#<i>Decimal</i>;
+	 * <p>Escapes all special characters to their corresponding numerial
+	 * reference in the decimal format: &#<i>Decimal</i>;
 	 * <p>Reference:
 	 * <a href="http://www.w3.org/TR/html4/sgml/entities.html">
 	 * http://www.w3.org/TR/html4/sgml/entities.html
 	 * </a>
+	 * @param input the (unescaped) input string
+	 * @return the escaped string
 	 */
-	public static String htmlEscape(String s) {
-		if (s == null) {
+	public static String htmlEscape(String input) {
+		if (input == null) {
 			return null;
 		}
 
-		StringBuffer escaped = new StringBuffer(s.length());
-		for (int i = 0; i < s.length(); i++) {
-			char c = s.charAt(i);
-			// handle non special ASCII chars first since they will be most common
+		StringBuffer escaped = new StringBuffer(input.length());
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			// handle non-special ASCII chars first since they will be most common
 			if ((c >= 0 && c <= 33)
 			    || (c >= 35 && c <= 37)
 			    || (c >= 39 && c <= 59)
@@ -615,24 +618,26 @@ public abstract class HtmlUtils {
 	 * <a href="http://www.w3.org/TR/html4/sgml/entities.html">
 	 * http://www.w3.org/TR/html4/sgml/entities.html
 	 * </a>
+	 * @param input the (escaped) input string
+	 * @return the unescaped string
 	 */
-	public static String htmlUnescape(String s) {
-		if (s == null) {
+	public static String htmlUnescape(String input) {
+		if (input == null) {
 			return null;
 		}
 
-		StringBuffer unescaped = new StringBuffer(s.length());
-		for (int i = 0; i < s.length(); i++) {
-			char c = s.charAt(i);
+		StringBuffer unescaped = new StringBuffer(input.length());
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
 			if (c == '&') {
 				// don't look more than 12 chars ahead as reference like strings
 				// should not be longer than 12 chars in length (including ';')
 				// prevents the entire string from being searched when an '&'
 				// with no following ';' is an encountered
-				int start = Math.min(i + 1, s.length() - 1);
-				int end = Math.min(s.length(), start + 12);
+				int start = Math.min(i + 1, input.length() - 1);
+				int end = Math.min(input.length(), start + 12);
 
-				String reference = s.substring(start, end);
+				String reference = input.substring(start, end);
 				int semi = reference.indexOf(';');
 
 				if (semi == -1) {

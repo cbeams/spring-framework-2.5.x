@@ -3,12 +3,10 @@
 
 <beans>
 
-	<!-- ===========================================================-->
-	<!-- Message source						-->
-	<!-- ===========================================================-->
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basename"><value>org/springframework/web/context/WEB-INF/test-messages</value></property>
 	</bean>
+	
 	<bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
 		<property name="basenamePrefix"><value>org/springframework/web/context/WEB-INF/test-</value></property>
 	</bean>
@@ -38,26 +36,20 @@
 		<property name="spouse"><ref local="rod"/></property>
 	</bean>
 
-
 	<bean id="typeMismatch" class="org.springframework.beans.TestBean" singleton="false">
 		<property name="name"><value>typeMismatch</value></property>
 		<property name="age"><value>34x</value></property>
 		<property name="spouse"><ref local="rod"/></property>
 	</bean>
 
-	<!-- Factory beans are automatically treated
-		differently -->
-	<bean id="singletonFactory"
-		class="org.springframework.beans.factory.DummyFactory">
+	<bean id="singletonFactory" class="org.springframework.beans.factory.DummyFactory">
 	</bean>
 
-	<bean id="prototypeFactory"
-		class="org.springframework.beans.factory.DummyFactory">
+	<bean id="prototypeFactory" class="org.springframework.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
 	
 	<bean id="listenerVeto" class="org.springframework.beans.TestBean">
-		<!--	<listener property="age" beanRef="agistListener" /> -->
 		<property name="name"><value>listenerVeto</value></property>
 		<property name="age"><value>66</value></property>
 	</bean>
