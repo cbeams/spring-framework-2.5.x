@@ -110,7 +110,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	 * real method name.</p>
 	 * 
 	 * <p>Note that in the case of no match, where the {@link #defaultMethodName} property
-	 * is used if available, that method name is consired to already be the real method
+	 * is used if available, that method name is considered to already be the real method
 	 * name, and is not run through the logical mapping.</p>
 	 * 
 	 * @param logicalMappings a Properties object mapping logical method names to real method

@@ -55,10 +55,10 @@ import org.springframework.jmx.support.JmxUtils;
  * A bean that allows for any Spring-managed to be exposed to an <code>MBeanServer</code>
  * without the need to define any JMX-specific information in the bean classes.
  * <p/>
- * <p>If the bean implements one of the JMX management interface then
+ * <p>If the bean implements one of the JMX management interfaces then
  * MBeanExporter will simply register the MBean with the server automatically.
  * <p/>
- * <p>If the bean does not implement on the JMX management interface then
+ * <p>If the bean does not implement one of the JMX management interfaces then
  * <code>MBeanExporter</code> will create the management information using the
  * supplied <code>ModelMBeanMetadataAssembler</code> implementation.
  *
