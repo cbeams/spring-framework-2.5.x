@@ -10,9 +10,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationEventMulticaster;
 import org.springframework.context.ApplicationListener;
-
 
 /**
  * Concrete implementation of ApplicationEventMulticaster

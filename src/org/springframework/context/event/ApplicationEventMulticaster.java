@@ -3,7 +3,9 @@
  * of the Apache Software License.
  */
  
- package org.springframework.context;
+ package org.springframework.context.event;
+
+import org.springframework.context.ApplicationListener;
 
 /**
  * Subinterface of ApplicationListener to be implemented by
