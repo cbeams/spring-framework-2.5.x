@@ -711,13 +711,27 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		out.writeObject(rootFlow.getId());
 		out.writeObject(executingFlowSessions);
 	}
 
 	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
-		String rootFlowId = (String)in.readObject();
 		this.executingFlowSessions = (Stack)in.readObject();
+	}
+
+	/**
+	 * Restore this <code>FlowExecution</code> for use after deserialization
+	 * @param flowLocator the flow locator
+	 */
+	protected void restore(FlowLocator flowLocator, FlowExecutionListener[] listeners) {
+		Assert.state(this.rootFlow == null, "The root flow is already set");
+		Iterator it = this.executingFlowSessions.iterator();
+		while (it.hasNext()) {
+			FlowSession session = (FlowSession)it.next();
+			session.restore(flowLocator);
+		}
+		this.rootFlow = getRootFlowSession().getFlow();
+		this.listenerList = new FlowExecutionListenerList();
+		this.listenerList.add(listeners);
 	}
 
 	public String toString() {

@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.web.flow.support.FlowUtils;
@@ -85,6 +86,16 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	 * The session data model ("flow scope");
 	 */
 	private Map attributes = new HashMap();
+
+	/**
+	 * Set only on deserialization so this object can be fully reconstructed
+	 */
+	private String flowId;
+
+	/**
+	 * Set only on deserialization so this object can be fully reconstructed
+	 */
+	private String currentStateId;
 
 	/**
 	 * Create a new flow session.
@@ -322,13 +333,34 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	}
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		out.writeObject(flow.getId());
-		out.writeObject(currentState.getId());
+		out.writeObject(this.flow.getId());
+		out.writeObject(this.currentState.getId());
+		out.writeObject(this.status);
+		out.writeObject(this.attributes);
 	}
 
 	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
-		String flowId = (String)in.readObject();
-		String currentStateId = (String)in.readObject();
+		this.flowId = (String)in.readObject();
+		this.currentStateId = (String)in.readObject();
+		this.status = (FlowSessionStatus)in.readObject();
+		this.attributes = (Map)in.readObject();
+	}
+
+	/**
+	 * Restore this <code>Flow Session</code> for use after deserialization
+	 * @param flowLocator the flow locator
+	 */
+	protected void restore(FlowLocator flowLocator) {
+		Assert.state(this.flow == null, "The flow is already set - already restored");
+		Assert.state(this.currentState == null, "The current state is already set - already restored");
+		Assert.notNull(flowId,
+				"The flow id was not set during deserialization: cannot restore--was this session deserialized?");
+		this.flow = flowLocator.getFlow(this.flowId);
+		if (!StringUtils.hasText(this.currentStateId)) {
+			this.currentState = this.flow.getRequiredState(this.currentStateId);
+		}
+		this.flowId = null;
+		this.currentStateId = null;
 	}
 
 	public String toString() {
