@@ -1358,6 +1358,32 @@ public class FileUploadBean {
 		
 	</sect1>
 	
+	<sect1 id="mvc-exceptionhandlers">
+		<title>Handling exceptions</title>
+		<para>
+			Spring provides so-called <literal>HandlerExceptionResolvers</literal> to
+			ease the pain when unexpected exception might occur while your request is
+			handled by any controller that matched the request. <literal>HandlerExceptionResolvers</literal>
+			somewhat resembles the exception-mappings you can define in the webapplication descriptor
+			<literal>web.xml</literal>. However, they provide a more flexible to handle exceptions. First of
+			all, the HandlerExceptionResolver informs you about what handler was execution while the
+			exception was thrown. Furthermore, a programmatic way of handling exception gives you
+			a lot more options to respond appropriately, then in case the request is forwarded
+			to another URL (which is the case when using the servlet specific exception mappings).
+		</para>
+		<para>
+			Besides implementing the <literal>HandlerExceptionResolver</literal>, which is only
+			a matter of implementing the <literal>resolveException(Exception, Handler)</literal>
+			method and returning a <literal>ModelAndView</literal>, you can also use the
+			<literal>SimpleMappingExceptionResolver</literal>. This resolver enables you to
+			map the class name of any exception that might be thrown to a view name. With this,
+			you will be do exactly the same the exception mapping feature from the servlet api
+			does, but it's also possible to do more fine grained mappings of exception from
+			different handlers.
+		</para>
+		
+	</sect1>
+	
 	<sect1 id="mvc-utilities">
 		<title>Commonly used utilities</title>
 		
