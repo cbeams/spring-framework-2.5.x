@@ -17,18 +17,21 @@ package org.springframework.binding.convert;
 
 /**
  * A type converter converts objects of one type to that of another. They may
- * also support conversion for multiple different types.
+ * also support conversion from multiple source types to multiple different
+ * target types.
  * @author Keith Donald
  */
 public interface Converter {
 
 	/**
-	 * @return
+	 * The source classes this converter can convert from.
+	 * @return The supported source classes.
 	 */
 	public Class[] getSourceClasses();
 
 	/**
-	 * @return
+	 * The target classes this converter can convert to.
+	 * @return The supported target classes.
 	 */
 	public Class[] getTargetClasses();
 
@@ -36,10 +39,12 @@ public interface Converter {
 	 * Convert the provided source object argument to an instance of the
 	 * specified target class.
 	 * 
-	 * @param source the source object to convert
-	 * @param the target class to convert the source to
+	 * @param source the source object to convert, its class must be one of the
+	 *        supported <code>sourceClasses</code>
+	 * @param the target class to convert the source to, must be one of the
+	 *        supported <code>targetClasses</code>
 	 * @return The converted object, an instance of the default target type
-	 * @throws ConversionException An exception occured during the conversion.
+	 * @throws ConversionException An exception occured during the conversion
 	 */
 	public Object convert(Object source, Class targetClass) throws ConversionException;
 

@@ -17,9 +17,24 @@ package org.springframework.binding.convert;
 
 /**
  * A service interface for retrieving type conversion executors. The returned
- * command object is thread-safe.
+ * command object is thread-safe and may be safely cached for use by client
+ * code.
  * @author Keith Donald
  */
 public interface ConversionService {
+
+	/**
+	 * Return a conversion executor command object capable of converting source
+	 * objects of the specified <code>sourceClass</code> to instances of the
+	 * <code>targetClass</code>.
+	 * <p>
+	 * The returned ConversionExecutor is thread-safe and may safely be cached
+	 * for use in client code.
+	 * @param sourceClass The source class to convert from
+	 * @param targetClass The target class to convert to
+	 * @return The executor that can execute instance conversion
+	 * @throws ConversionException An exception occured retrieving a converter
+	 *         for the source-to-target pair.
+	 */
 	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) throws ConversionException;
 }

@@ -71,12 +71,9 @@ public class ValidationResultsTests extends TestCase {
 		String message =
 				r.getResults("firstName").buildMessage(ac, Locale.getDefault());
 		System.out.println(message);
-
-		/* TODO: that stuff is certainly not meant to be equal ;-)
 		assertEquals(
-				"First Name must have text and must be at least 2 characters or must *not* equal Last Name",
+				"First Name must have text and must be at least 2 characters or must *not* equal Last Name.",
 				message);
-		*/
 	}
 	
 }
