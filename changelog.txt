@@ -1,20 +1,22 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.53 2003-11-28 16:53:42 jhoeller Exp $
+$Id: changelog.txt,v 1.54 2003-11-28 21:09:46 jhoeller Exp $
 
 
 Changes in version 1.0 RC1 (XX.12.2003)
 ---------------------------------------
 * dissolved event propagation support in BeanWrapper and DataBinder
+* added "autowireExistingBean" method to BeanFactory interface
 * fixed ManagedList and ManagedMap resolution for prototypes in AbstractBeanFactory
 * dependent beans (with corresponding "depends-on") are destroyed first in AbstractBeanFactory's "destroySingletons"
 * factored out bean definition format reading logic into Properties/Xml/JdbcBeanDefinitionReader
 * dissolved bean definition reading methods in DefaultListableBeanFactory, reduced them in XmlBeanFactory
 * allow for "list" and "map" as sub-element of "list" in XML bean definitions
 * added "preInstantiateSingletons" method to ConfigurableListableBeanFactory interface
-* fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons" now
-* DispatcherServlet's default exception handling lets RuntimeExceptions straight through now
-* HandlerInterceptors are allowed to throw any Exception now
+* fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons"
+* introduced support for iBATIS Database Layer, in the org.springframework.orm.ibatis package
+* DispatcherServlet's default exception handling lets RuntimeExceptions straight through
+* HandlerInterceptors are allowed to throw any Exception
 * moved WebContentGenerator from package org.springframework.web.servlet.mvc to web.servlet.support
 * introduced WebContentInterceptor for applying request/response checks and preparations to a set of controllers
 * MultiActionController extends AbstractController now, for applying checks and preparation to all handle methods 
