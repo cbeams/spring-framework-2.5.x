@@ -36,7 +36,7 @@
 	     (be sure to comment out the xml variant)
 	     Notice the consistency: you may plug in any other FlowBuilder implementation in
 	     exactly the same fashion -->
-	<--
+	<!--
 	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.samples.phonebook.web.flow.SearchPersonFlowBuilder" autowire="byType"/>
@@ -99,7 +99,6 @@
 	     (be sure to comment out the xml variant)
 	     Notice the consistency: you may plug in any other FlowBuilder implementation in
 	     exactly the same fashion -->
-	<--
 	<!--
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
