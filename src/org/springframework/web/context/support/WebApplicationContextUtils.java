@@ -7,6 +7,8 @@ package org.springframework.web.context.support;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
@@ -20,11 +22,13 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: WebApplicationContextUtils.java,v 1.6 2003-12-09 08:45:22 jhoeller Exp $
+ * @version $Id: WebApplicationContextUtils.java,v 1.7 2003-12-16 17:14:56 johnsonr Exp $
  * @see #getWebApplicationContext
  * @see org.springframework.web.context.ContextLoader
  */
 public abstract class WebApplicationContextUtils {
+	
+	private static final Log log = LogFactory.getLog(WebApplicationContextUtils.class);
 
 	/**
 	 * Find the root WebApplicationContext for this web app, which is
@@ -68,6 +72,7 @@ public abstract class WebApplicationContextUtils {
 			throw new IllegalArgumentException("ServletContext can't be null in WebApplicationContext " + wac);
 		}
 		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		log.info("Published root WebApplicationContext [" + wac + "] with ServletContext attribute name '" + WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "'");
 	}
 
 	/**
