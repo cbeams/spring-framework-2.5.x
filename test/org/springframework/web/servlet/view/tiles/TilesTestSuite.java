@@ -69,14 +69,14 @@ public class TilesTestSuite extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		view.render(new HashMap(), request, response);
-		assertEquals("/WEB-INF/jsp/layout.jsp", response.included);
+		assertEquals("/WEB-INF/jsp/layout.jsp", response.forwarded);
 		ComponentContext cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
 		assertNotNull(cc);
 		PathAttribute attr = (PathAttribute) cc.getAttribute("content");
 		assertEquals("/WEB-INF/jsp/content.jsp", attr.getValue());
 
 		view.render(new HashMap(), request, response);
-		assertEquals("/WEB-INF/jsp/layout.jsp", response.included);
+		assertEquals("/WEB-INF/jsp/layout.jsp", response.forwarded);
 		cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
 		assertNotNull(cc);
 		attr = (PathAttribute) cc.getAttribute("content");
@@ -95,7 +95,7 @@ public class TilesTestSuite extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		view.render(new HashMap(), request, response);
-		assertEquals("/WEB-INF/jsp/layout.jsp", response.included);
+		assertEquals("/WEB-INF/jsp/layout.jsp", response.forwarded);
 		ComponentContext cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
 		assertNotNull(cc);
 		PathAttribute attr = (PathAttribute) cc.getAttribute("content");
@@ -119,7 +119,7 @@ public class TilesTestSuite extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		view.render(new HashMap(), request, response);
-		assertEquals("/WEB-INF/jsp/layout.jsp", response.included);
+		assertEquals("/WEB-INF/jsp/layout.jsp", response.forwarded);
 		ComponentContext cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
 		assertNotNull(cc);
 		PathAttribute attr = (PathAttribute) cc.getAttribute("content");
@@ -127,7 +127,7 @@ public class TilesTestSuite extends TestCase {
 		assertEquals("testVal", request.getAttribute("testAttr"));
 
 		view.render(new HashMap(), request, response);
-		assertEquals("/WEB-INF/jsp/layout.jsp", response.included);
+		assertEquals("/WEB-INF/jsp/layout.jsp", response.forwarded);
 		cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
 		assertNotNull(cc);
 		attr = (PathAttribute) cc.getAttribute("content");

@@ -37,7 +37,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: InternalResourceView.java,v 1.11 2004-03-23 22:51:05 jhoeller Exp $
+ * @version $Id: InternalResourceView.java,v 1.12 2004-03-24 11:38:48 jhoeller Exp $
  * @see javax.servlet.RequestDispatcher#forward
  * @see javax.servlet.RequestDispatcher#include
  */
@@ -64,11 +64,15 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request,
 	                                       HttpServletResponse response) throws Exception {
 
+		// expose the model object as request attributes
 		exposeModelAsRequestAttributes(model, request);
 
-		// let the target resource set the content type
-		// simply forward to the JSP
-		RequestDispatcher rd = request.getRequestDispatcher(getUrl());
+		// determine the path for the request dispatcher
+		String dispatcherPath = prepareForRendering(request, response);
+
+		// forward to the resource (typically a JSP)
+		// Note: The JSP is supposed to determine the content type itself.
+		RequestDispatcher rd = request.getRequestDispatcher(dispatcherPath);
 		if (rd == null) {
 			throw new ServletException("Could not get RequestDispatcher for [" + getUrl() +
 			                           "]: check that this file exists within your WAR");
@@ -94,9 +98,9 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws ServletException {
 		if (model != null) {
-			Iterator itr = model.keySet().iterator();
-			while (itr.hasNext()) {
-				Object key = itr.next();
+			Iterator it = model.keySet().iterator();
+			while (it.hasNext()) {
+				Object key = it.next();
 				if (!(key instanceof String)) {
 					throw new ServletException("Invalid key [" + key + "] in model Map - only Strings allowed as model keys");
 				}
@@ -114,6 +118,24 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		else {
 			logger.debug("Model is null. Nothing to expose to request.");
 		}
+	}
+
+	/**
+	 * Prepare for rendering, and determine the request dispatcher path
+	 * to forward to respectively to include.
+	 * <p>This implementation simply returns the configured URL.
+	 * Subclasses can override this to determine a resource to render,
+	 * typically interpreting the URL in a different manner.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return the request dispatcher path to use
+	 * @throws Exception if preparations failed
+	 * @see #getUrl
+	 * @see org.springframework.web.servlet.view.tiles.TilesView#prepareForRendering
+	 */
+	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response)
+	    throws Exception {
+		return getUrl();
 	}
 
 }
