@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC1 (14.3.2005)
+Changes in version 1.2 RC1 (18.3.2005)
 --------------------------------------
 
 Overall
@@ -14,9 +14,14 @@ Package org.springframework.aop
 * deprecated AopUtils' "getAllInterfaces(ForClass)AsList" methods in favor of "getAllInterfaces(ForClass)AsSet"
 * removed deprecated RegexpMethodPointcut class: use Perl5RegexpMethodPointcut or JdkRegexpMethodPointcut instead
 
+Package org.springframework.beans
+* PropertyOverrideConfigurer does not log invalid keys at WARN level in case of "ignoreInvalidKeys" (only at DEBUG)
+* XmlBeanDefinitionReader offers an "errorHandler" property and uses the factored-out SimpleSaxErrorHandler as default
+
 Package org.springframework.jdbc
 * LazyConnectionDataSourceProxy handles "toString", "equals" and "hashCode" itself (avoiding to fetch target Connection)
 * added debug logging to LazyConnectionDataSourceProxy, logging whether an operation is handled locally or in target
+* factored out protected "createJdbcTemplate" in JdbcDaoSupport, allowing to override JdbcTemplate creation
 
 Package org.springframework.jmx
 * added JMX support, for registration of Spring-managed beans as JMX MBeans as well as for access to remote JMX MBeans
@@ -24,20 +29,36 @@ Package org.springframework.jmx
 Package org.springframework.orm
 * added "orm.hibernate3" support package for Hibernate3, mirroring the Hibernate 2.1 support in "orm.hibernate"
 * removed deprecated "createQuery" and "createCriteria" methods from HibernateTemplate: use Session methods instead
+* SessionFactoryUtils sets Hibernate Session's flush mode to NEVER for a read-only transaction even with JTA
 
 Package org.springframework.samples
 * migrated Petclinic's Hibernate layer from Hibernate 2.1 to Hibernate3
 
+Package org.springframework.transaction
+* added "getName" method to TransactionDefinition interface, allowing to specify a symbolic name for a transaction
+* TransactionInterceptor exposes fully qualified class name + "." + method name as transaction name (by default)
+* added thread-bound "currentTransactionReadOnly" flag to TransactionSynchronizationManager
+* JtaTransactionManager autodetects JTA TransactionManager at "java:/TransactionManager" too (JBoss, JRun4)
+* WebLogicJtaTransactionManager autodetects WebLogic 7.0 or 8.1+, adapting accordingly (TransactionManager lookup etc)
+* WebLogicJtaTransactionManager invokes WebLogic's special "begin(name)" method, for visibility in WebLogic's tx monitor
+* WebLogicJtaTransactionManager applies per-transaction isolation level as WebLogic's "ISOLATION LEVEL" tx property
+
+Package org.springframework.util
+* reworked FileCopyUtils to return byte/character count on appropriate "copy" methods
+* added SimpleSaxErrorHandler and SimpleTransformErrorListener to "util.xml" package
+
 Package org.springframework.validation
-* added RequiredFieldErrorProcessor, PropertyAccessExceptionProcessor and corresponding default implementations
-  offering the possibility for people to override the default behavior of translating binding errors
+* added "addAllErrors(Errors)" method to Errors interface and BindException, for merging Errors objects
+* factored out BindingErrorProcessor strategy from DataBinder, with DefaultBindErrorProcessor implementation
 
 Package org.springframework.web
-* changed MultiActionController's log level from INFO to DEBUG
 * removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)
-* enhanced ParameterMethodNameResolver to also be able to resolve methods base purely based on existence of specified parameters
-* included debug logging for session attributes being added and removed (AbstractFormController and AbstractWizardFormController)
-* added createBinder and initBinder methods to MultiActionController, which may be overriden by subclasses
+* AbstractXlstView offers an "errorListener" property and registers a default ErrorListener with the XSLT transformer
+* ParameterMethodNameResolver can optionally resolve methods based purely based on existence of specified parameters
+* AbstractFormController/AbstractWizardFormController perform debug logging for session attributes being added/removed
+* changed MultiActionController's log level from INFO to DEBUG
+* added "createBinder" and "initBinder" methods to MultiActionController, which may be overridden by subclasses
+
 
 Changes in version 1.1.5 (28.2.2005)
 ------------------------------------
