@@ -47,6 +47,7 @@ import org.springframework.context.event.ApplicationEventMulticasterImpl;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.OrderComparator;
+import org.springframework.util.ClassLoaderUtils;
 
 
 /**
@@ -66,7 +67,7 @@ import org.springframework.core.OrderComparator;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -87,6 +88,12 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * @see MessageSource
 	 */
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
+
+	/**
+	 * Pseudo URL prefix for loading from the class path.
+	 * @see #getResourceAsStream
+	 */
+	public static final String CLASSPATH_URL_PREFIX = "classpath:";
 
 
 	//---------------------------------------------------------------------
@@ -384,6 +391,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * @see #getResourceByPath
 	 */
 	public final InputStream getResourceAsStream(String location) throws IOException {
+		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
+			return ClassLoaderUtils.getResourceAsStream(location.substring(CLASSPATH_URL_PREFIX.length()));
+		}
 		try {
 			// try URL
 			URL url = new URL(location);
