@@ -9,7 +9,8 @@ import junit.framework.TestCase;
  * 
  * @author colin sampaleanu
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBeanTests.java,v 1.1 2003-11-22 00:45:34 colins Exp $
+ * @version $Id: MethodInvokingFactoryBeanTests.java,v 1.1 2003/11/22 00:45:34
+ *          colins Exp $
  */
 public class MethodInvokingFactoryBeanTests extends TestCase {
 
@@ -53,13 +54,19 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setStaticMethod(fqmn);
-		mcfb.afterPropertiesSet();
 		mcfb.setSingleton(false);
+		mcfb.afterPropertiesSet();
 		i = (Integer) mcfb.getObject();
 		assertTrue(i.intValue() == 1);
 		i = (Integer) mcfb.getObject();
 		assertTrue(i.intValue() == 2);
 
+		// void return value
+		fqmn = TestClass1.class.getName() + ".voidRetvalMethod";
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setStaticMethod(fqmn);
+		mcfb.afterPropertiesSet();
+		assertTrue(MethodInvokingFactoryBean.VOID.equals(mcfb.getObject()));
 	}
 
 	public void testGetObjectType() throws Exception {
@@ -69,7 +76,15 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.setTarget(tc1);
 		mcfb.setTargetMethod("method1");
 		mcfb.afterPropertiesSet();
-		assertTrue(mcfb.getObjectType().equals(int.class));
+		assertTrue(int.class.equals(mcfb.getObjectType()));
+
+		String fqmn = TestClass1.class.getName() + ".voidRetvalMethod";
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setStaticMethod(fqmn);
+		mcfb.afterPropertiesSet();
+		Class objType = mcfb.getObjectType();
+		assertTrue(objType.equals(MethodInvokingFactoryBean.VoidType.class));
+
 	}
 
 	public void testAfterPropertiesSet() {
@@ -168,6 +183,10 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		public static int staticMethod1() {
 			return ++_staticField1;
 		}
+
+		public static void voidRetvalMethod() {
+		}
+
 	}
 
 }

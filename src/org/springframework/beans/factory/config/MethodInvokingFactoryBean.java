@@ -50,10 +50,12 @@ import org.springframework.beans.factory.InitializingBean;
  * 
  * @author colin sampaleanu
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBean.java,v 1.2 2003-11-22 20:02:58 colins Exp $
+ * @version $Id: MethodInvokingFactoryBean.java,v 1.3 2003-11-26 04:47:40 colins Exp $
  */
 public class MethodInvokingFactoryBean implements FactoryBean, InitializingBean {
 
+    public static final VoidType VOID = new VoidType();
+	
 	private boolean _singleton = true;
 	private String _staticMethod;
 	private Object _target;
@@ -86,7 +88,10 @@ public class MethodInvokingFactoryBean implements FactoryBean, InitializingBean 
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
 	public Class getObjectType() {
-		return _methodObj.getReturnType();
+		Class type = _methodObj.getReturnType();
+		if (type.equals(void.class))
+			type = MethodInvokingFactoryBean.VoidType.class;
+		return type; 
 	}
 
 	/*
@@ -203,6 +208,15 @@ public class MethodInvokingFactoryBean implements FactoryBean, InitializingBean 
 	private Object obtainObject() throws Exception {
 
 		// in the static case, target will just be null
-		return _methodObj.invoke(_target, _args);
+		Object result = _methodObj.invoke(_target, _args);
+		if (result == null)
+			result = VOID;
+		return result;
 	}
+	
+    // special marker class used for a null return value
+	public static class VoidType {
+	}
+	
+	
 }
