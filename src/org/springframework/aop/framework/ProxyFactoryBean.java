@@ -72,7 +72,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.26 2004-04-01 15:35:46 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.27 2004-04-15 22:05:15 dkopylenko Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -127,12 +127,13 @@ public class ProxyFactoryBean extends AdvisedSupport
 	/**
 	 * Set the list of Interceptor/Advisor bean names. This must always be set
 	 * to use this factory bean in a bean factory.
-	 * <p>The referenced beans should be of type Interceptor or Advisor.
+	 * <p>The referenced beans should be of type Interceptor, Advisor or Advice
 	 * The last entry in the list can be the name of any bean in the factory.
 	 * If it's neither an Interceptor nor an Advisor, a new SingletonTargetSource
 	 * is added to wrap it.
 	 * @see org.aopalliance.intercept.MethodInterceptor
 	 * @see org.springframework.aop.Advisor
+	 * @see org.aopalliance.aop.Advice
 	 * @see org.springframework.aop.target.SingletonTargetSource
 	 */
 	public void setInterceptorNames(String[] interceptorNames) {
