@@ -48,13 +48,13 @@ import org.springframework.util.StringUtils;
  * methods, which are provided by subclasses.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.29 2004-04-21 17:49:36 jhoeller Exp $
+ * @version $Id: AdvisedSupport.java,v 1.30 2004-05-27 08:42:15 jhoeller Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
 	
 	/**
-	 * Canonical TargetSource when there's no target, and behaviour is supplied
+	 * Canonical TargetSource when there's no target, and behavior is supplied
 	 * by the advisors.
 	 */
 	public static final TargetSource EMPTY_TARGET_SOURCE = new TargetSource() {
@@ -76,7 +76,14 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	};
 
 
-	/** 
+	/** List of AdvisedSupportListener */
+	private final List listeners = new LinkedList();
+
+	TargetSource targetSource = EMPTY_TARGET_SOURCE;
+
+	AdvisorChainFactory advisorChainFactory;
+
+	/**
 	 * List of Advice. If an Interceptor is added, it will be wrapped
 	 * in an Advice before being added to this List. 
 	 */
@@ -91,28 +98,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/** Interfaces to be implemented by the proxy */
 	private Set interfaces = new HashSet();
 
-	protected TargetSource targetSource = EMPTY_TARGET_SOURCE;
-
-	private MethodInvocationFactory methodInvocationFactory;
-	
 	/**
 	 * Set to true when the first AOP proxy has been created, meaning that we must
 	 * track advice changes via onAdviceChange() callback.
 	 */
 	private boolean isActive;
-	
-	/** List of AdvisedSupportListener */
-	private LinkedList listeners = new LinkedList();
-	
-	protected AdvisorChainFactory advisorChainFactory;
-	
+
 
 	/**
-	 * No arg constructor to allow use as a Java bean.
+	 * No arg constructor to allow use as a JavaBean.
 	 */
 	public AdvisedSupport() {
 		setAdvisorChainFactory(new HashMapCachingAdvisorChainFactory());
-		//setMethodInvocationFactory(new SimpleMethodInvocationFactory());
 	}
 	
 	/**
@@ -120,35 +117,31 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param interfaces the proxied interfaces
 	 */
 	public AdvisedSupport(Class[] interfaces) {
-		// Make sure we get default advisor chain and method invocation factories
 		this();
 		setInterfaces(interfaces);
 	}
 
 
-	public void addListener(AdvisedSupportListener l) {
-		listeners.add(l);
-	}
-	
-	public void removeListener(AdvisedSupportListener l) {
-		listeners.remove(l);
+	public void addListener(AdvisedSupportListener listener) {
+		this.listeners.add(listener);
 	}
 
-	public void setTargetSource(TargetSource ts) {
-		if (isActive() && getOptimize()) {
-			throw new AopConfigException("Can't change target with an optimized CGLIB proxy: it has it's own target");
-		}
-		this.targetSource = ts;
+	public void removeListener(AdvisedSupportListener listener) {
+		this.listeners.remove(listener);
 	}
-	
+
 	public void setTarget(Object target) {
 		setTargetSource(new SingletonTargetSource(target));
 	}
+
+	public void setTargetSource(TargetSource targetSource) {
+		if (isActive() && getOptimize()) {
+			throw new AopConfigException("Can't change target with an optimized CGLIB proxy: it has it's own target");
+		}
+		this.targetSource = targetSource;
+	}
 	
-	/**
-	 *  @return the TargetSource. Never returns null
-	 */
-	public final TargetSource getTargetSource() {
+	public TargetSource getTargetSource() {
 		return this.targetSource;
 	}
 	
@@ -157,21 +150,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addListener(advisorChainFactory);
 	}
 	
-	/**
-	 * Return the AdvisorChainFactory associated with this ProxyConfig.
-	 */
-	public final AdvisorChainFactory getAdvisorChainFactory() {
+	public AdvisorChainFactory getAdvisorChainFactory() {
 		return this.advisorChainFactory;
 	}
-	
-	public final MethodInvocationFactory getMethodInvocationFactory() {
-		return this.methodInvocationFactory;
-	}
 
-	public void setMethodInvocationFactory(MethodInvocationFactory methodInvocationFactory) {
-		this.methodInvocationFactory = methodInvocationFactory;
-	}
-	
+
 	/**
 	 * Call this method on a new instance created by the no-arg constructor
 	 * to create an independent copy of the configuration from the other.
@@ -189,6 +172,38 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			Advisor advice = (Advisor) other.advisors.get(i);
 			addAdvisor(advice);
 		}
+	}
+
+	/**
+	 * Set the interfaces to be proxied.
+	 */
+	public void setInterfaces(Class[] interfaces) {
+		this.interfaces.clear();
+		for (int i = 0; i < interfaces.length; i++) {
+			addInterface(interfaces[i]);
+		}
+	}
+
+	/**
+	 * Add a new proxied interface.
+	 * @param newInterface additional interface to proxy
+	 */
+	public void addInterface(Class newInterface) {
+		this.interfaces.add(newInterface);
+		adviceChanged();
+		logger.debug("Added new aspect interface: " + newInterface);
+	}
+
+	public Class[] getProxiedInterfaces() {
+		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
+	}
+
+	/**
+	 * Remove a proxied interface.
+	 * Does nothing if it isn't proxied.
+	 */
+	public boolean removeInterface(Class intf) {
+		return this.interfaces.remove(intf);
 	}
 
 	public void addInterceptor(Interceptor interceptor) throws AopConfigException {
@@ -219,6 +234,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addAdvisor(pos, new DefaultPointcutAdvisor(interceptor));
 	}
 	
+	/**
+	 * Convenience method to remove an interceptor.
+	 */
+	public final boolean removeInterceptor(Interceptor interceptor) throws AopConfigException {
+		int index = indexOf(interceptor);
+		if (index == -1) {
+			return false;
+		}
+		else {
+			removeAdvisor(index);
+			return true;
+		}
+	}
+
 	public void addAfterReturningAdvice(final AfterReturningAdvice ara) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ara));
 	}
@@ -292,53 +321,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this.advisors.remove(index);
 		updateAdvisorsArray();
 		adviceChanged();
-	}
-
-	/**
-	 * Convenience method to remove an interceptor.
-	 */
-	public final boolean removeInterceptor(Interceptor interceptor) throws AopConfigException {
-		int index = indexOf(interceptor);
-		if (index == -1) {
-			return false;
-		}
-		else {
-			removeAdvisor(index);
-			return true;
-		}
-	}
-
-	/**
-	 * Set the interfaces to be proxied.
-	 * @param interfaces the interfaces to set
-	 */
-	public void setInterfaces(Class[] interfaces) {
-		this.interfaces.clear();
-		for (int i = 0; i < interfaces.length; i++) {
-			addInterface(interfaces[i]);
-		}
-	}
-
-	/**
-	 * Add a new proxied interface.
-	 * @param newInterface additional interface to proxy
-	 */
-	public void addInterface(Class newInterface) {
-		this.interfaces.add(newInterface);
-		adviceChanged();
-		logger.debug("Added new aspect interface: " + newInterface);
-	}
-
-	/**
-	 * Remove a proxied interface.
-	 * Does nothing if it isn't proxied.
-	 */
-	public boolean removeInterface(Class intf) {
-		return this.interfaces.remove(intf);
-	}
-
-	public final Class[] getProxiedInterfaces() {
-		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
 	private void addAdvisorInternal(int pos, Advisor advice) throws AopConfigException {
