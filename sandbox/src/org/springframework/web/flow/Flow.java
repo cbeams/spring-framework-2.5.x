@@ -898,6 +898,26 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
+	 * @param actionStateId
+	 * @param actionBeans
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createActionState(String actionStateId, ActionBean[] actionBeans, Transition[] transitions) {
+		return new ActionState(actionStateId, actionBeans, transitions);
+	}
+
+	/**
+	 * @param actionStateId
+	 * @param actionBeanNames
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createActionState(String actionStateId, String[] actionBeanNames, Transition[] transitions) {
+		return new ActionState(actionStateId, actionBeanNames, transitions);
+	}
+
+	/**
 	 * @param stateIdPrefix
 	 * @return
 	 */
