@@ -27,7 +27,8 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  */
 public class StateGroups implements Serializable {
-    public static final String DEFAULT_GROUP_ID = "default";
+	
+    public static final String DEFAULT_GROUP_ID = "main";
 
     private Set stateGroups = new LinkedHashSet(6);
 

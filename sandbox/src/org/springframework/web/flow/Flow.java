@@ -133,673 +133,762 @@ import org.springframework.util.closure.support.AbstractConstraint;
  */
 public class Flow implements FlowEventProcessor, Serializable {
 
-    private static final long serialVersionUID = 3258695403305513015L;
+	private static final long serialVersionUID = 3258695403305513015L;
 
-    protected static final String CREATE_ACTION_SUFFIX = "create";
+	public static final String CREATE = "create";
 
-    protected static final String ADD_ACTION_SUFFIX = "add";
+	public static final String ADD = "add";
 
-    protected static final String REMOVE_ACTION_SUFFIX = "remove";
+	public static final String LINK = "link";
 
-    protected static final String DELETE_ACTION_SUFFIX = "delete";
+	public static final String REMOVE = "remove";
 
-    protected static final String GET_ACTION_SUFFIX = "get";
+	public static final String UNLINK = "unlink";
 
-    protected static final String POPULATE_FORM_ACTION_SUFFIX = "populate";
+	public static final String DELETE = "delete";
 
-    protected static final String VIEW_SUFFIX = "view";
+	public static final String GET = "get";
 
-    protected static final String SUBMIT_ACTION_SUFFIX = "submit";
+	public static final String POPULATE = "populate";
 
-    protected static final String BIND_AND_VALIDATE_FORM_ACTION_SUFFIX = "bindAndValidate";
+	public static final String VIEW = "view";
 
-    protected static final String EDIT_SUFFIX = "edit";
+	public static final String SUBMIT = "submit";
 
-    protected static final String VALIDATE_ACTION_SUFFIX = "validate";
+	public static final String BIND_AND_VALIDATE = "bindAndValidate";
 
-    protected static final String SEARCH_ACTION_SUFFIX = "search";
+	public static final String EDIT = "edit";
 
-    protected static final String SAVE_ACTION_SUFFIX = "save";
+	public static final String VALIDATE = "validate";
 
-    protected static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "AttributesMapper";
+	public static final String SEARCH = "search";
 
-    protected final Log logger = LogFactory.getLog(getClass());
+	public static final String SAVE = "save";
 
-    private String id;
+	public static final String SUCCESS = "success";
 
-    private StartState startState;
+	public static final String ERROR = "error";
 
-    private StateGroups stateGroups = new StateGroups();
+	public static final String BACK = "back";
 
-    private transient FlowDao flowDao;
+	public static final String CANCEL = "cancel";
 
-    private transient FlowLifecycleListener flowLifecycleListener;
+	public static final String FINISH = "finish";
 
-    public Flow(String id) {
-        this.id = id;
-        initFlow();
-    }
+	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "AttributesMapper";
 
-    public Flow(String id, FlowDao flowDao) {
-        this.id = id;
-        setFlowDao(flowDao);
-        initFlow();
-    }
+	protected final Log logger = LogFactory.getLog(getClass());
 
-    public Flow(String id, String startStateId, AbstractState[] states) {
-        this.id = id;
-        addAll(states);
-        setStartState(startStateId);
-        initFlow();
-    }
+	private String id;
 
-    public void setFlowDao(FlowDao dao) {
-        Assert.notNull(dao, "The flow data access object is required for loading subflows and action beans");
-        this.flowDao = dao;
-    }
+	private StartState startState;
 
-    public void setFlowLifecycleListener(FlowLifecycleListener listener) {
-        this.flowLifecycleListener = listener;
-    }
+	private StateGroups stateGroups = new StateGroups();
 
-    protected void initFlow() {
+	private transient FlowDao flowDao;
 
-    }
+	private transient FlowLifecycleListener flowLifecycleListener;
 
-    protected FlowDao getFlowDao() {
-        assertFlowDaoSet();
-        return this.flowDao;
-    }
+	public Flow(String id) {
+		this.id = id;
+		initFlow();
+	}
 
-    private void assertFlowDaoSet() {
-        Assert.notNull(flowDao,
-                "The flow DAO reference is required to load subflows and action beans - programmer error?");
-    }
+	public Flow(String id, FlowDao flowDao) {
+		this.id = id;
+		setFlowDao(flowDao);
+		initFlow();
+	}
 
-    /**
-     * @return Returns the listener. A listener is not required.
-     */
-    public FlowLifecycleListener getFlowLifecycleListener() {
-        return flowLifecycleListener;
-    }
+	public Flow(String id, String startStateId, AbstractState[] states) {
+		this.id = id;
+		addAll(states);
+		setStartState(startStateId);
+		initFlow();
+	}
 
-    public String getId() {
-        return id;
-    }
+	public void setFlowDao(FlowDao dao) {
+		Assert.notNull(dao, "The flow data access object is required for loading subflows and action beans");
+		this.flowDao = dao;
+	}
 
-    public boolean add(AbstractState state) {
-        return addAll(StateGroups.DEFAULT_GROUP_ID, new AbstractState[] { state });
-    }
+	public void setFlowLifecycleListener(FlowLifecycleListener listener) {
+		this.flowLifecycleListener = listener;
+	}
 
-    public boolean addAll(AbstractState[] states) {
-        return addAll(StateGroups.DEFAULT_GROUP_ID, states);
-    }
-
-    public boolean add(String groupId, AbstractState state) {
-        return addAll(groupId, new AbstractState[] { state });
-    }
-
-    public boolean addAll(String groupId, AbstractState state) {
-        return addAll(groupId, new AbstractState[] { state });
-    }
-
-    public boolean addAll(String groupId, AbstractState[] states) {
-        boolean firstAdd = false;
-        if (this.stateGroups.isEmpty()) {
-            firstAdd = true;
-        }
-        boolean changed = this.stateGroups.addAll(groupId, states);
-        if (changed && firstAdd) {
-            setStartState((TransitionableState)this.stateGroups.statesIterator().next());
-        }
-        return changed;
-    }
-
-    public boolean addSubFlow(String subFlowId, Transition transition) {
-        return add(new SubFlowState(subFlowId, transition));
-    }
-
-    public boolean addSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
-            String subFlowDefaultFinishStateId) {
-        return addSubFlow(subFlowIdSuffix, subFlowAttributesMapperId, new Transition[] {
-                onBack(subFlowDefaultFinishStateId), onCancel(subFlowDefaultFinishStateId),
-                onFinish(subFlowDefaultFinishStateId) });
-    }
-
-    public boolean addSubFlow(String subFlowId, Transition[] transitions) {
-        return add(new SubFlowState(subFlowId, transitions));
-    }
-
-    public boolean addSubFlow(String subFlowId, String subFlowAttributesMapperId, Transition[] transitions) {
-        return add(new SubFlowState(subFlowId, subFlowAttributesMapperId, transitions));
-    }
-    
-    public static String buildEditSubflowId(String suffix) {
-        return "edit" + StringUtils.capitalize(suffix);
-    }
-
-    public boolean addEditSubFlow(String subFlowIdSuffix, Transition transition) {
-        return addSubFlow(buildEditSubflowId(subFlowIdSuffix), transition);
-    }
-
-    public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
-            String subFlowDefaultFinishStateId) {
-        return addSubFlow(buildEditSubflowId(subFlowIdSuffix), subFlowAttributesMapperId, subFlowDefaultFinishStateId);
-    }
-
-    public boolean addEditSubFlow(String subFlowIdSuffix, Transition[] transitions) {
-        return addSubFlow(buildEditSubflowId(subFlowIdSuffix), transitions);
-    }
-
-    public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId, Transition[] transitions) {
-        return addSubFlow(buildEditSubflowId(subFlowIdSuffix), subFlowAttributesMapperId, transitions);
-    }
-
-    public boolean add(StateGroup stateGroup) {
-        return this.stateGroups.add(stateGroup);
-    }
-
-    public Iterator statesIterator() {
-        return this.stateGroups.statesIterator();
-    }
-
-    public void setStartState(TransitionableState state) throws NoSuchFlowStateException {
-        assertValidState(state);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Setting start state for flow '" + getId() + "' as '" + state + "'");
-        }
-        this.startState = new StartState(state);
-    }
-
-    public void setStartState(String startStateId) throws NoSuchFlowStateException {
-        this.startState = new StartState((ViewState)getRequiredState(startStateId));
-    }
-
-    private void assertValidState(AbstractState state) throws NoSuchFlowStateException {
-        getRequiredState(state.getId());
-    }
-
-    public AbstractState getRequiredState(String stateId) throws NoSuchFlowStateException {
-        AbstractState state = getState(stateId);
-        if (state == null) {
-            throw new NoSuchFlowStateException(this, stateId);
-        }
-        return state;
-    }
-
-    public AbstractState getState(String stateId) {
-        Iterator it = stateGroups.statesIterator();
-        while (it.hasNext()) {
-            AbstractState state = (AbstractState)it.next();
-            if (state.getId().equals(stateId)) {
-                return state;
-            }
-        }
-        return null;
-    }
-
-    public TransitionableState getRequiredTransitionableState(String stateId) throws NoSuchFlowStateException {
-        AbstractState state = getRequiredState(stateId);
-        Assert.state(state.isTransitionable(), "This state '" + stateId + "' of flow '" + getId()
-                + "' must be transitionable");
-        return (TransitionableState)state;
-    }
-
-    public StartState getStartState() throws IllegalStateException {
-        Assert.state(startState != null, "No state has been marked as the start state for this flow '" + getId()
-                + "' -- programmer error?");
-        return startState;
-    }
-
-    public int getViewStateCount() {
-        return new AbstractConstraint() {
-            public boolean test(Object o) {
-                return ((AbstractState)o).isViewState();
-            }
-        }.findAll(stateGroups.statesIterator()).size();
-    }
-
-    public int getActionStateCount() {
-        return new AbstractConstraint() {
-            public boolean test(Object o) {
-                return ((AbstractState)o).isActionState();
-            }
-        }.findAll(stateGroups.statesIterator()).size();
-    }
-
-    public int getSubFlowStateCount() {
-        return new AbstractConstraint() {
-            public boolean test(Object o) {
-                return ((AbstractState)o).isSubFlowState();
-            }
-        }.findAll(stateGroups.statesIterator()).size();
-    }
-
-    public int getEndStateCount() {
-        return new AbstractConstraint() {
-            public boolean test(Object o) {
-                return ((AbstractState)o).isEndState();
-            }
-        }.findAll(stateGroups.statesIterator()).size();
-    }
-
-    public ViewDescriptor start(FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
-            HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("A new session for flow '" + getId() + "' was requested; processing...");
-        }
-        return getStartState().enter(this, sessionExecutionStack, request, response, inputAttributes);
-    }
-
-    public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionStack sessionExecutionStack,
-            HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
-        Assert.isTrue(sessionExecutionStack.isActive(),
-                "The currently executing flow stack is not active - this should not happen");
-        Flow activeFlow = getActiveFlow(sessionExecutionStack);
-        TransitionableState currentState = activeFlow.getRequiredTransitionableState(stateId);
-        ViewDescriptor viewDescriptor = currentState.execute(eventId, activeFlow, sessionExecutionStack, request,
-                response);
-        return viewDescriptor;
-    }
-
-    Flow getActiveFlow(FlowSessionExecutionStack sessionExecutionStack) {
-        String activeFlowId = sessionExecutionStack.getActiveFlowId();
-        if (getId().equals(activeFlowId)) {
-            return this;
-        }
-        else {
-            return getFlowDao().getFlow(activeFlowId);
-        }
-    }
-
-    FlowLifecycleListener getLifecycleListener() {
-        return flowLifecycleListener;
-    }
-
-    boolean isLifecycleListenerSet() {
-        return flowLifecycleListener != null;
-    }
-
-    public FlowSession createSession() {
-        return new FlowSession(getId(), getStartState().getState().getId());
-    }
-
-    public FlowSession createSession(Map input) {
-        return new FlowSession(getId(), null, input);
-    }
-
-    public ActionState createCreateState(String stateIdPrefix) {
-        return createCreateState(stateIdPrefix, onSuccessView(stateIdPrefix));
-    }
-
-    public ActionState createCreateState(String stateIdPrefix, Transition transition) {
-        return createCreateState(stateIdPrefix, new Transition[] { transition });
-    }
-
-    public ActionState createCreateState(String stateIdPrefix, Transition[] transitions) {
-        return new ActionState(buildStateId(CREATE_ACTION_SUFFIX, stateIdPrefix), transitions);
-    }
-
-    public ActionState createGetState(String stateIdPrefix) {
-        return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
-    }
-
-    public ActionState createGetState(String stateIdPrefix, Transition transition) {
-        return createGetState(stateIdPrefix, new Transition[] { transition });
-    }
-
-    public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
-        return new ActionState(buildStateId(GET_ACTION_SUFFIX, stateIdPrefix), transitions);
-    }
-
-    public ActionState createPopulateState(String stateIdPrefix) {
-        return createPopulateState(stateIdPrefix, onSuccessView(stateIdPrefix));
-    }
-
-    public ActionState createPopulateState(String stateIdPrefix, Transition transition) {
-        return createPopulateState(stateIdPrefix, new Transition[] { transition });
-    }
-
-    public ActionState createPopulateState(String stateIdPrefix, Transition[] transitions) {
-        return new ActionState(populate(stateIdPrefix), transitions);
-    }
-
-    public ViewState createViewState(String stateIdPrefix) {
-        return createViewState(stateIdPrefix, new Transition[] { onBackEnd(), onCancelEnd(),
-                onSubmitBindAndValidate(stateIdPrefix) });
-    }
-
-    public ViewState createViewState(String stateIdPrefix, String viewName) {
-        return createViewState(stateIdPrefix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
-                onSubmitBindAndValidate(stateIdPrefix) });
-    }
-
-    public ViewState createViewState(String stateIdPrefix, Transition transition) {
-        return new ViewState(view(stateIdPrefix), transition);
-    }
-
-    public ViewState createViewState(String stateIdPrefix, String viewName, Transition transition) {
-        return new ViewState(view(stateIdPrefix), viewName, transition);
-    }
-
-    public ViewState createViewState(String stateIdPrefix, Transition[] transitions) {
-        return new ViewState(view(stateIdPrefix), transitions);
-    }
-
-    public ViewState createViewState(String stateIdPrefix, String viewName, Transition[] transitions) {
-        return new ViewState(view(stateIdPrefix), viewName, transitions);
-    }
-
-    public ActionState createBindAndValidateState(String stateIdPrefix) {
-        return createBindAndValidateState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdPrefix) });
-    }
-
-    public ActionState createBindAndValidateState(String stateIdPrefix, Transition transition) {
-        return createBindAndValidateState(stateIdPrefix, new Transition[] { transition });
-    }
-
-    public ActionState createBindAndValidateState(String stateIdPrefix, Transition[] transitions) {
-        return new ActionState(buildStateId(BIND_AND_VALIDATE_FORM_ACTION_SUFFIX, stateIdPrefix), transitions);
-    }
-
-    public ActionState createAddState(String stateIdPrefix) {
-        return createAddState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdPrefix) });
-    }
-
-    public ActionState createAddState(String stateIdPrefix, Transition[] transitions) {
-        return new ActionState(add(stateIdPrefix), transitions);
-    }
-
-    public ActionState createAddState(String stateIdPrefix, String successStateId) {
-        return createAddState(stateIdPrefix, new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
-    }
-
-    public ActionState createAddState(String stateIdPrefix, String addActionBeanName, Transition[] transitions) {
-        ActionState addState = new ActionState(add(stateIdPrefix), addActionBeanName, transitions);
-        addState.setUpdateAction(true);
-        return addState;
-    }
-
-    public ActionState createSaveState(String stateIdPrefix) {
-        return createSaveState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdPrefix) });
-    }
-
-    public ActionState createSaveState(String stateIdPrefix, String successStateId) {
-        return createSaveState(stateIdPrefix,
-                new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
-    }
-
-    public ActionState createSaveState(String stateIdPrefix, Transition[] transitions) {
-        return new ActionState(save(stateIdPrefix), transitions);
-    }
-
-    public ActionState createSaveState(String stateIdPrefix, String saveActionBeanName, Transition[] transitions) {
-        ActionState saveState = new ActionState(save(stateIdPrefix), saveActionBeanName, transitions);
-        saveState.setUpdateAction(true);
-        return saveState;
-    }
-
-    public ActionState createDeleteState(String stateIdPrefix) {
-        return createDeleteState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdPrefix) });
-    }
-
-    public ActionState createDeleteState(String stateIdPrefix, String successAndErrorStateId) {
-        return createDeleteState(stateIdPrefix, new Transition[] { onSuccess(successAndErrorStateId),
-                onErrorView(successAndErrorStateId) });
-    }
-
-    public ActionState createDeleteState(String stateIdPrefix, Transition[] transitions) {
-        return new ActionState(delete(stateIdPrefix), transitions);
-    }
-
-    public ActionState createDeleteState(String stateIdPrefix, String deleteActionBeanName, Transition[] transitions) {
-        ActionState saveState = new ActionState(delete(stateIdPrefix), deleteActionBeanName, transitions);
-        saveState.setUpdateAction(true);
-        return saveState;
-    }
-
-    public ActionState createValidateState(String stateIdPrefix) {
-        return createValidateState(stateIdPrefix, new Transition[] { onSuccess(getFinishEndStateId()),
-                onErrorView(stateIdPrefix) });
-    }
-
-    public ActionState createValidateState(String stateIdPrefix, Transition[] transitions) {
-        return new ActionState(validate(stateIdPrefix), transitions);
-    }
-
-    protected Transition onSuccess(String successStateId) {
-        return OnEvent.success(successStateId);
-    }
-
-    protected Transition onSuccessGet(String getActionStateIdPrefix) {
-        return OnEvent.Success.get(getActionStateIdPrefix);
-    }
-
-    protected Transition onSuccessPopulate(String populateActionStateIdPrefix) {
-        return OnEvent.Success.populate(populateActionStateIdPrefix);
-    }
-
-    protected Transition onSuccessView(String viewStateIdPrefix) {
-        return OnEvent.Success.view(viewStateIdPrefix);
-    }
-
-    protected Transition onSubmit(String submitStateId) {
-        return OnEvent.submit(submitStateId);
-    }
-
-    protected Transition onSubmitBindAndValidate(String bindAndValidateStateIdPrefix) {
-        return onSubmit(bindAndValidate(bindAndValidateStateIdPrefix));
-    }
-
-    protected Transition onSubmitEdit(String stateIdPrefix) {
-        return onSubmit(edit(stateIdPrefix));
-    }
-
-    protected Transition onSubmitEnd() {
-        return onSubmit(EndState.DEFAULT_FINISH_STATE_ID);
-    }
-
-    protected Transition onSearchGet(String getSearchResultsActionStateIdPrefix) {
-        return OnEvent.search(get(getSearchResultsActionStateIdPrefix));
-    }
-
-    protected Transition onSuccessEdit(String editSubFlowStateIdPrefix) {
-        return OnEvent.Success.edit(editSubFlowStateIdPrefix);
-    }
-
-    protected Transition onBack(String backStateId) {
-        return OnEvent.back(backStateId);
-    }
-
-    protected Transition onBackPopulate(String populateActionStateIdPrefix) {
-        return OnEvent.Back.populate(populateActionStateIdPrefix);
-    }
-
-    protected Transition onBackView(String viewActionStateIdPrefix) {
-        return OnEvent.Back.view(viewActionStateIdPrefix);
-    }
-
-    protected Transition onBackEdit(String editSubFlowStateIdPrefix) {
-        return OnEvent.Back.edit(editSubFlowStateIdPrefix);
-    }
-
-    protected Transition onBackCancel() {
-        return OnEvent.Back.cancel();
-    }
-
-    protected Transition onBackEnd() {
-        return OnEvent.Back.end();
-    }
-
-    protected Transition onEditEdit(String editSubFlowStateIdPrefix) {
-        return OnEvent.edit(edit(editSubFlowStateIdPrefix));
-    }
-
-    protected Transition onCancel(String cancelStateId) {
-        return OnEvent.cancel(cancelStateId);
-    }
-
-    protected Transition onCancelEnd() {
-        return OnEvent.Cancel.end();
-    }
-
-    protected Transition onFinish(String finishStateId) {
-        return OnEvent.finish(finishStateId);
-    }
-
-    protected Transition onFinishEnd() {
-        return OnEvent.Finish.end();
-    }
-
-    protected Transition onFinishGet(String getActionStateIdPrefix) {
-        return OnEvent.Finish.get(getActionStateIdPrefix);
-    }
-
-    protected Transition onFinishPopulate(String populateActionStateIdPrefix) {
-        return OnEvent.Finish.populate(populateActionStateIdPrefix);
-    }
-
-    protected Transition onFinishSave(String saveActionStateIdPrefix) {
-        return OnEvent.Finish.save(saveActionStateIdPrefix);
-    }
-
-    protected Transition onFinishEdit(String editSubFlowStateIdPrefix) {
-        return OnEvent.Finish.edit(editSubFlowStateIdPrefix);
-    }
-
-    protected Transition onErrorView(String viewStateIdPrefix) {
-        return OnEvent.Error.view(viewStateIdPrefix);
-    }
-
-    protected Transition onSuccessSave(String saveActionStateIdPrefix) {
-        return OnEvent.Success.save(saveActionStateIdPrefix);
-    }
-
-    protected Transition onSuccessAdd(String addActionStateIdPrefix) {
-        return OnEvent.Success.add(addActionStateIdPrefix);
-    }
-
-    protected Transition onSuccessEnd() {
-        return OnEvent.Success.end();
-    }
-
-    public String getBackEndStateId() {
-        return EndState.DEFAULT_BACK_STATE_ID;
-    }
-
-    public String getCancelEndStateId() {
-        return EndState.DEFAULT_CANCEL_STATE_ID;
-    }
-
-    public String getFinishEndStateId() {
-        return EndState.DEFAULT_FINISH_STATE_ID;
-    }
-
-    public static String buildStateId(String suffix, String prefix) {
-        return prefix + "." + suffix;
-    }
-
-    public EndState createFinishEndState() {
-        return new EndState(getFinishEndStateId());
-    }
-
-    public EndState createFinishEndState(String viewName) {
-        return new EndState(getFinishEndStateId(), viewName);
-    }
-
-    protected AbstractState createBackEndState() {
-        return new EndState(getBackEndStateId());
-    }
-
-    protected AbstractState createBackEndState(String backViewName) {
-        return new EndState(getBackEndStateId(), backViewName);
-    }
-
-    protected void addDefaultEndStates() {
-        add(createCancelEndState());
-        add(createBackEndState());
-        add(createFinishEndState());
-    }
-
-    protected void addDefaultEndStates(String viewName) {
-        add(createCancelEndState(viewName));
-        add(createBackEndState(viewName));
-        add(createFinishEndState(viewName));
-    }
-
-    protected AbstractState createCancelEndState() {
-        return new EndState(EndState.DEFAULT_CANCEL_STATE_ID);
-    }
-
-    protected AbstractState createCancelEndState(String cancelViewName) {
-        return new EndState(EndState.DEFAULT_CANCEL_STATE_ID, cancelViewName);
-    }
-
-    public static String create(String createActionStateIdPrefix) {
-        return buildStateId(CREATE_ACTION_SUFFIX, createActionStateIdPrefix);
-    }
-
-    public static String get(String getActionStateIdPrefix) {
-        return buildStateId(GET_ACTION_SUFFIX, getActionStateIdPrefix);
-    }
-
-    public static String populate(String populateFormActionStateIdPrefix) {
-        return buildStateId(POPULATE_FORM_ACTION_SUFFIX, populateFormActionStateIdPrefix);
-    }
-
-    public static String view(String viewActionStateIdPrefix) {
-        return buildStateId(VIEW_SUFFIX, viewActionStateIdPrefix);
-    }
-
-    public static String add(String addActionStateIdPrefix) {
-        return buildStateId(ADD_ACTION_SUFFIX, addActionStateIdPrefix);
-    }
-
-    public static String save(String saveActionStateIdPrefix) {
-        return buildStateId(SAVE_ACTION_SUFFIX, saveActionStateIdPrefix);
-    }
-
-    public static String bindAndValidate(String bindAndValidateStateIdPrefix) {
-        return buildStateId(BIND_AND_VALIDATE_FORM_ACTION_SUFFIX, bindAndValidateStateIdPrefix);
-    }
-    
-    public static String validate(String validateActionStateIdPrefix) {
-        return buildStateId(VALIDATE_ACTION_SUFFIX, validateActionStateIdPrefix);
-    }
-
-    public static String delete(String deleteActionStateIdPrefix) {
-        return buildStateId(DELETE_ACTION_SUFFIX, deleteActionStateIdPrefix);
-    }
-
-    public static String edit(String editActionStateIdPrefix) {
-        return buildStateId(EDIT_SUFFIX, editActionStateIdPrefix);
-    }
-    
-    public static String attributesMapper(String attributesMapperIdPrefix) {
-        return attributesMapperIdPrefix + ATTRIBUTES_MAPPER_ID_SUFFIX;
-    }
-
-    public static String action(String actionBeanNamePrefix) {
-        // we no longer append any standard suffix to action names
-        // this method is left in for the time being in case we change our minds
-        return actionBeanNamePrefix;
-    }
-
-    public static Transition onEvent(String eventName, String newState) {
-        return new Transition(eventName, newState);
-    }
-
-    public String getDefaultFlowAttributesMapperId() {
-        return getId() + ATTRIBUTES_MAPPER_ID_SUFFIX;
-    }
-
-    public String toString() {
-        return new ToStringCreator(this).append("id", id).append("startState", startState).append("stateGroups",
-                stateGroups).toString();
-    }
+	protected void initFlow() {
+
+	}
+
+	protected FlowDao getFlowDao() {
+		assertFlowDaoSet();
+		return this.flowDao;
+	}
+
+	private void assertFlowDaoSet() {
+		Assert.notNull(flowDao,
+				"The flow DAO reference is required to load subflows and action beans - programmer error?");
+	}
+
+	/**
+	 * @return Returns the listener. A listener is not required.
+	 */
+	public FlowLifecycleListener getFlowLifecycleListener() {
+		return flowLifecycleListener;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public boolean add(AbstractState state) {
+		return addAll(getDefaultStateGroupId(), new AbstractState[] { state });
+	}
+
+	/**
+	 * @return
+	 */
+	protected String getDefaultStateGroupId() {
+		return StateGroups.DEFAULT_GROUP_ID;
+	}
+
+	public boolean addAll(AbstractState[] states) {
+		return addAll(getDefaultStateGroupId(), states);
+	}
+
+	public boolean add(String groupId, AbstractState state) {
+		return addAll(groupId, new AbstractState[] { state });
+	}
+
+	public boolean addAll(String groupId, AbstractState state) {
+		return addAll(groupId, new AbstractState[] { state });
+	}
+
+	public boolean addAll(String groupId, AbstractState[] states) {
+		boolean firstAdd = false;
+		if (this.stateGroups.isEmpty()) {
+			firstAdd = true;
+		}
+		boolean changed = this.stateGroups.addAll(groupId, states);
+		if (changed && firstAdd) {
+			setStartState((TransitionableState)this.stateGroups.statesIterator().next());
+		}
+		return changed;
+	}
+
+	public boolean addSubFlow(String subFlowId, Transition transition) {
+		return add(new SubFlowState(subFlowId, transition));
+	}
+
+	public boolean addSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
+			String subFlowDefaultFinishStateId) {
+		return addSubFlow(subFlowIdSuffix, subFlowAttributesMapperId, new Transition[] {
+				onBack(subFlowDefaultFinishStateId), onCancel(subFlowDefaultFinishStateId),
+				onFinish(subFlowDefaultFinishStateId) });
+	}
+
+	public boolean addSubFlow(String subFlowId, Transition[] transitions) {
+		return add(new SubFlowState(subFlowId, transitions));
+	}
+
+	public boolean addSubFlow(String subFlowId, String subFlowAttributesMapperId, Transition[] transitions) {
+		return add(new SubFlowState(subFlowId, subFlowAttributesMapperId, transitions));
+	}
+
+	public boolean addEditSubFlow(String editSubFlowIdSuffix, Transition transition) {
+		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), transition);
+	}
+
+	public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
+			String subFlowDefaultFinishStateId) {
+		return addSubFlow(buildEditFlowId(subFlowIdSuffix), subFlowAttributesMapperId, subFlowDefaultFinishStateId);
+	}
+
+	public boolean addEditSubFlow(String subFlowIdSuffix, Transition[] transitions) {
+		return addSubFlow(buildEditFlowId(subFlowIdSuffix), transitions);
+	}
+
+	public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId, Transition[] transitions) {
+		return addSubFlow(buildEditFlowId(subFlowIdSuffix), subFlowAttributesMapperId, transitions);
+	}
+
+	public static String buildEditFlowId(String suffix) {
+		return EDIT + StringUtils.capitalize(suffix);
+	}
+
+	public boolean add(StateGroup stateGroup) {
+		return this.stateGroups.add(stateGroup);
+	}
+
+	public Iterator statesIterator() {
+		return this.stateGroups.statesIterator();
+	}
+
+	public void setStartState(TransitionableState state) throws NoSuchFlowStateException {
+		assertValidState(state);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Setting start state for flow '" + getId() + "' as '" + state + "'");
+		}
+		this.startState = new StartState(state);
+	}
+
+	public void setStartState(String startStateId) throws NoSuchFlowStateException {
+		this.startState = new StartState((ViewState)getRequiredState(startStateId));
+	}
+
+	private void assertValidState(AbstractState state) throws NoSuchFlowStateException {
+		getRequiredState(state.getId());
+	}
+
+	public AbstractState getRequiredState(String stateId) throws NoSuchFlowStateException {
+		AbstractState state = getState(stateId);
+		if (state == null) {
+			throw new NoSuchFlowStateException(this, stateId);
+		}
+		return state;
+	}
+
+	public AbstractState getState(String stateId) {
+		Iterator it = stateGroups.statesIterator();
+		while (it.hasNext()) {
+			AbstractState state = (AbstractState)it.next();
+			if (state.getId().equals(stateId)) {
+				return state;
+			}
+		}
+		return null;
+	}
+
+	public TransitionableState getRequiredTransitionableState(String stateId) throws NoSuchFlowStateException {
+		AbstractState state = getRequiredState(stateId);
+		Assert.state(state.isTransitionable(), "This state '" + stateId + "' of flow '" + getId()
+				+ "' must be transitionable");
+		return (TransitionableState)state;
+	}
+
+	public StartState getStartState() throws IllegalStateException {
+		Assert.state(startState != null, "No state has been marked as the start state for this flow '" + getId()
+				+ "' -- programmer error?");
+		return startState;
+	}
+
+	public int getViewStateCount() {
+		return new AbstractConstraint() {
+			public boolean test(Object o) {
+				return ((AbstractState)o).isViewState();
+			}
+		}.findAll(stateGroups.statesIterator()).size();
+	}
+
+	public int getActionStateCount() {
+		return new AbstractConstraint() {
+			public boolean test(Object o) {
+				return ((AbstractState)o).isActionState();
+			}
+		}.findAll(stateGroups.statesIterator()).size();
+	}
+
+	public int getSubFlowStateCount() {
+		return new AbstractConstraint() {
+			public boolean test(Object o) {
+				return ((AbstractState)o).isSubFlowState();
+			}
+		}.findAll(stateGroups.statesIterator()).size();
+	}
+
+	public int getEndStateCount() {
+		return new AbstractConstraint() {
+			public boolean test(Object o) {
+				return ((AbstractState)o).isEndState();
+			}
+		}.findAll(stateGroups.statesIterator()).size();
+	}
+
+	public ViewDescriptor start(FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
+			HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("A new session for flow '" + getId() + "' was requested; processing...");
+		}
+		return getStartState().enter(this, sessionExecutionStack, request, response, inputAttributes);
+	}
+
+	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionStack sessionExecutionStack,
+			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
+		Assert.isTrue(sessionExecutionStack.isActive(),
+				"The currently executing flow stack is not active - this should not happen");
+		Flow activeFlow = getActiveFlow(sessionExecutionStack);
+		TransitionableState currentState = activeFlow.getRequiredTransitionableState(stateId);
+		ViewDescriptor viewDescriptor = currentState.execute(eventId, activeFlow, sessionExecutionStack, request,
+				response);
+		return viewDescriptor;
+	}
+
+	Flow getActiveFlow(FlowSessionExecutionStack sessionExecutionStack) {
+		String activeFlowId = sessionExecutionStack.getActiveFlowId();
+		if (getId().equals(activeFlowId)) {
+			return this;
+		}
+		else {
+			return getFlowDao().getFlow(activeFlowId);
+		}
+	}
+
+	FlowLifecycleListener getLifecycleListener() {
+		return flowLifecycleListener;
+	}
+
+	boolean isLifecycleListenerSet() {
+		return flowLifecycleListener != null;
+	}
+
+	public FlowSession createSession() {
+		return new FlowSession(getId(), getStartState().getState().getId());
+	}
+
+	public FlowSession createSession(Map input) {
+		return new FlowSession(getId(), null, input);
+	}
+
+	// flow config factory methods
+
+	public ActionState createActionState(String stateId, Transition transition) {
+		return new ActionState(stateId, transition);
+	}
+
+	public ActionState createActionState(String stateId, String actionBeanName, Transition transition) {
+		return new ActionState(stateId, actionBeanName, transition);
+	}
+
+	public ActionState createActionState(String stateId, Transition[] transitions) {
+		return new ActionState(stateId, transitions);
+	}
+
+	public ActionState createActionState(String stateId, String actionBeanName, Transition[] transitions) {
+		return new ActionState(stateId, actionBeanName, transitions);
+	}
+
+	public ActionState createCreateState(String stateIdPrefix) {
+		return createCreateState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	public ActionState createCreateState(String stateIdPrefix, Transition transition) {
+		return createCreateState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	public ActionState createCreateState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(create(stateIdPrefix), transitions);
+	}
+
+	public ActionState createGetState(String stateIdPrefix) {
+		return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	public ActionState createGetState(String stateIdPrefix, Transition transition) {
+		return createGetState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(get(stateIdPrefix), transitions);
+	}
+
+	public ActionState createPopulateState(String stateIdPrefix) {
+		return createPopulateState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	public ActionState createPopulateState(String stateIdPrefix, Transition transition) {
+		return createPopulateState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	public ActionState createPopulateState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(populate(stateIdPrefix), transitions);
+	}
+
+	public ViewState createViewState(String stateIdPrefix) {
+		return createViewState(stateIdPrefix, new Transition[] { onBackEnd(), onCancelEnd(),
+				onSubmitBindAndValidate(stateIdPrefix) });
+	}
+
+	public ViewState createViewState(String stateIdPrefix, String viewName) {
+		return createViewState(stateIdPrefix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
+				onSubmitBindAndValidate(stateIdPrefix) });
+	}
+
+	public ViewState createViewState(String stateIdPrefix, Transition transition) {
+		return new ViewState(view(stateIdPrefix), transition);
+	}
+
+	public ViewState createViewState(String stateIdPrefix, String viewName, Transition transition) {
+		return new ViewState(view(stateIdPrefix), viewName, transition);
+	}
+
+	public ViewState createViewState(String stateIdPrefix, Transition[] transitions) {
+		return new ViewState(view(stateIdPrefix), transitions);
+	}
+
+	public ViewState createViewState(String stateIdPrefix, String viewName, Transition[] transitions) {
+		return new ViewState(view(stateIdPrefix), viewName, transitions);
+	}
+
+	public ActionState createBindAndValidateState(String stateIdPrefix) {
+		return createBindAndValidateState(stateIdPrefix,
+				new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+	}
+
+	public ActionState createBindAndValidateState(String stateIdPrefix, Transition transition) {
+		return createBindAndValidateState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	public ActionState createBindAndValidateState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(bindAndValidate(stateIdPrefix), transitions);
+	}
+
+	public ActionState createAddState(String stateIdPrefix) {
+		return createAddState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+	}
+
+	public ActionState createAddState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(add(stateIdPrefix), transitions);
+	}
+
+	public ActionState createAddState(String stateIdPrefix, String successStateId) {
+		return createAddState(stateIdPrefix, new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
+	}
+
+	public ActionState createAddState(String stateIdPrefix, String addActionBeanName, Transition[] transitions) {
+		return createActionState(add(stateIdPrefix), addActionBeanName, transitions);
+	}
+
+	public ActionState createSaveState(String stateIdPrefix) {
+		return createSaveState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+	}
+
+	public ActionState createSaveState(String stateIdPrefix, String successStateId) {
+		return createSaveState(stateIdPrefix,
+				new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
+	}
+
+	public ActionState createSaveState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(save(stateIdPrefix), transitions);
+	}
+
+	public ActionState createSaveState(String stateIdPrefix, String saveActionBeanName, Transition[] transitions) {
+		return createActionState(add(stateIdPrefix), saveActionBeanName, transitions);
+	}
+
+	public ActionState createDeleteState(String stateIdPrefix) {
+		return createDeleteState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+	}
+
+	public ActionState createDeleteState(String stateIdPrefix, String successAndErrorStateId) {
+		return createDeleteState(stateIdPrefix, new Transition[] { onSuccess(successAndErrorStateId),
+				onErrorView(successAndErrorStateId) });
+	}
+
+	public ActionState createDeleteState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(delete(stateIdPrefix), transitions);
+	}
+
+	public ActionState createDeleteState(String stateIdPrefix, String deleteActionBeanName, Transition[] transitions) {
+		return createActionState(delete(stateIdPrefix), deleteActionBeanName, transitions);
+	}
+
+	public ActionState createValidateState(String stateIdPrefix) {
+		return createValidateState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+	}
+
+	public ActionState createValidateState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(validate(stateIdPrefix), transitions);
+	}
+
+	public EndState createFinishEndState() {
+		return new EndState(getDefaultSuccessEndStateId());
+	}
+
+	public EndState createFinishEndState(String viewName) {
+		return new EndState(getDefaultSuccessEndStateId(), viewName);
+	}
+
+	public AbstractState createBackEndState() {
+		return new EndState(getDefaultBackEndStateId());
+	}
+
+	public AbstractState createBackEndState(String backViewName) {
+		return new EndState(getDefaultBackEndStateId(), backViewName);
+	}
+
+	public EndState createCancelEndState() {
+		return new EndState(getDefaultCancelEndStateId());
+	}
+
+	public EndState createCancelEndState(String cancelViewName) {
+		return new EndState(getDefaultCancelEndStateId(), cancelViewName);
+	}
+
+	protected void addDefaultEndStates() {
+		add(createCancelEndState());
+		add(createBackEndState());
+		add(createFinishEndState());
+	}
+
+	protected void addDefaultEndStates(String viewName) {
+		add(createCancelEndState(viewName));
+		add(createBackEndState(viewName));
+		add(createFinishEndState(viewName));
+	}
+
+	public Transition onEvent(String eventId, String newState) {
+		return new Transition(eventId, newState);
+	}
+
+	public Transition onSuccess(String successStateId) {
+		return onEvent(getSuccessEventId(), successStateId);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getSuccessEventId() {
+		return SUCCESS;
+	}
+
+	public Transition onSuccessGet(String getActionStateIdPrefix) {
+		return onSuccess(get(getActionStateIdPrefix));
+	}
+
+	public Transition onSuccessPopulate(String populateActionStateIdPrefix) {
+		return onSuccess(populate(populateActionStateIdPrefix));
+	}
+
+	public Transition onSuccessEdit(String editSubFlowStateIdPrefix) {
+		return onSuccess(edit(editSubFlowStateIdPrefix));
+	}
+
+	public Transition onSuccessView(String viewStateIdPrefix) {
+		return onSuccess(view(viewStateIdPrefix));
+	}
+
+	public Transition onSuccessAdd(String addActionStateIdPrefix) {
+		return onSuccess(add(addActionStateIdPrefix));
+	}
+
+	public Transition onSuccessSave(String saveActionStateIdPrefix) {
+		return onSuccess(save(saveActionStateIdPrefix));
+	}
+
+	public Transition onSuccessEnd() {
+		return onSuccess(getDefaultSuccessEndStateId());
+	}
+
+	public Transition onEditEdit(String editSubFlowStateIdPrefix) {
+		return onEvent(EDIT, edit(editSubFlowStateIdPrefix));
+	}
+
+	public Transition onSubmit(String submitActionStateId) {
+		return onEvent(getSubmitEventId(), submitActionStateId);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getSubmitEventId() {
+		return SUBMIT;
+	}
+
+	public Transition onSubmitBindAndValidate(String bindAndValidateStateIdPrefix) {
+		return onSubmit(bindAndValidate(bindAndValidateStateIdPrefix));
+	}
+
+	public Transition onSubmitEdit(String stateIdPrefix) {
+		return onSubmit(edit(stateIdPrefix));
+	}
+
+	public Transition onSubmitEnd() {
+		return onSubmit(getDefaultBackEndStateId());
+	}
+
+	public Transition onSearch(String searchActionStateId) {
+		return onEvent(getSearchEventId(), searchActionStateId);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getSearchEventId() {
+		return SEARCH;
+	}
+
+	public Transition onSearchGet(String getSearchResultsActionStateIdPrefix) {
+		return onSearch(get(getSearchResultsActionStateIdPrefix));
+	}
+
+	public Transition onBack(String backStateId) {
+		return onEvent(getBackEventId(), backStateId);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getBackEventId() {
+		return BACK;
+	}
+
+	public Transition onBackPopulate(String populateActionStateIdPrefix) {
+		return onBack(populate(populateActionStateIdPrefix));
+	}
+
+	public Transition onBackView(String viewActionStateIdPrefix) {
+		return onBack(view(viewActionStateIdPrefix));
+	}
+
+	public Transition onBackEdit(String editSubFlowStateIdPrefix) {
+		return onBack(edit(editSubFlowStateIdPrefix));
+	}
+
+	public Transition onBackCancel() {
+		return onBack(getDefaultCancelEndStateId());
+	}
+
+	/**
+	 * @return
+	 */
+	public String getDefaultCancelEndStateId() {
+		return EndState.DEFAULT_CANCEL_STATE_ID;
+	}
+
+	public Transition onBackEnd() {
+		return onBack(getDefaultBackEndStateId());
+	}
+
+	/**
+	 * @return
+	 */
+	public String getDefaultBackEndStateId() {
+		return EndState.DEFAULT_BACK_STATE_ID;
+	}
+
+	public Transition onCancel(String cancelStateId) {
+		return onEvent(getCancelEventId(), cancelStateId);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getCancelEventId() {
+		return CANCEL;
+	}
+
+	public Transition onCancelEnd() {
+		return onCancel(getDefaultCancelEndStateId());
+	}
+
+	public Transition onFinish(String finishStateId) {
+		return onEvent(getFinishEventId(), finishStateId);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getFinishEventId() {
+		return FINISH;
+	}
+
+	public Transition onFinishEnd() {
+		return onFinish(getDefaultSuccessEndStateId());
+	}
+
+	/**
+	 * @return
+	 */
+	public String getDefaultSuccessEndStateId() {
+		return EndState.DEFAULT_FINISH_STATE_ID;
+	}
+
+	public Transition onFinishGet(String getActionStateIdPrefix) {
+		return onFinish(get(getActionStateIdPrefix));
+	}
+
+	public Transition onFinishPopulate(String populateActionStateIdPrefix) {
+		return onFinish(populate(populateActionStateIdPrefix));
+	}
+
+	public Transition onFinishSave(String saveActionStateIdPrefix) {
+		return onFinish(save(saveActionStateIdPrefix));
+	}
+
+	public Transition onFinishEdit(String editSubFlowStateIdPrefix) {
+		return onFinish(edit(editSubFlowStateIdPrefix));
+	}
+
+	public Transition onError(String errorStateIdPrefix) {
+		return onEvent(getErrorEventId(), errorStateIdPrefix);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getErrorEventId() {
+		return ERROR;
+	}
+
+	public Transition onErrorView(String viewStateIdPrefix) {
+		return onError(view(viewStateIdPrefix));
+	}
+
+	public String create(String createActionStateIdPrefix) {
+		return buildStateId(createActionStateIdPrefix, CREATE);
+	}
+
+	public String get(String getActionStateIdPrefix) {
+		return buildStateId(getActionStateIdPrefix, GET);
+	}
+
+	public String populate(String populateFormActionStateIdPrefix) {
+		return buildStateId(populateFormActionStateIdPrefix, POPULATE);
+	}
+
+	public String view(String viewActionStateIdPrefix) {
+		return buildStateId(viewActionStateIdPrefix, VIEW);
+	}
+
+	public String add(String addActionStateIdPrefix) {
+		return buildStateId(addActionStateIdPrefix, ADD);
+	}
+
+	public String save(String saveActionStateIdPrefix) {
+		return buildStateId(saveActionStateIdPrefix, SAVE);
+	}
+
+	public String bindAndValidate(String bindAndValidateStateIdPrefix) {
+		return buildStateId(bindAndValidateStateIdPrefix, BIND_AND_VALIDATE);
+	}
+
+	public String validate(String validateActionStateIdPrefix) {
+		return buildStateId(validateActionStateIdPrefix, VALIDATE);
+	}
+
+	public String delete(String deleteActionStateIdPrefix) {
+		return buildStateId(deleteActionStateIdPrefix, DELETE);
+	}
+
+	public String edit(String editActionStateIdPrefix) {
+		return buildStateId(editActionStateIdPrefix, EDIT);
+	}
+
+	public String buildStateId(String stateIdPrefix, String stateIdSuffix) {
+		return stateIdPrefix + "." + stateIdSuffix;
+	}
+
+	public String attributesMapper(String attributesMapperBeanNamePrefix) {
+		return attributesMapperBeanNamePrefix + ATTRIBUTES_MAPPER_ID_SUFFIX;
+	}
+
+	public String getDefaultFlowAttributesMapperId() {
+		return attributesMapper(getId());
+	}
+
+	public String toString() {
+		return new ToStringCreator(this).append("id", id).append("startState", startState).append("stateGroups",
+				stateGroups).toString();
+	}
 
 }

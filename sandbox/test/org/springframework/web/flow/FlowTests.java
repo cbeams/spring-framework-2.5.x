@@ -51,10 +51,10 @@ public class FlowTests extends TestCase {
     private void testCreateFlow(boolean listen) {
         final String flowId = "testFlow";
 
-        String viewPersonDetailsStateId = "viewPersonDetails";
-        String getPersonDetailsStateId = "getPersonDetails";
+        String viewPersonDetailsStateId = "view";
+        String getPersonDetailsStateId = "get";
         String submitEventId = "submit";
-        String submitAction = "bindAndValidatePersonDetails";
+        String submitAction = "bindAndValidate";
         String finish = "finish";
 
         HttpServletRequest req1 = new MockHttpServletRequest();
@@ -119,7 +119,7 @@ public class FlowTests extends TestCase {
 
         // ignoring now b/c this is failing on the above flowEnded() call that
         // is currently untestable (that is indeed working correctly)
-        try {
+        //try {
             vdesc = flow.execute(submitEventId, viewPersonDetailsStateId, fes, req2, null);
             assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
             assertEquals(0, vdesc.getModel().size());
@@ -129,10 +129,10 @@ public class FlowTests extends TestCase {
             if (listen) {
                 flowListenerMc.verify();
             }
-        }
-        catch (Throwable e) {
-
-        }
+        //}
+        //catch (Throwable e) {
+        //
+        //}
     }
 
     private class TestFlow extends Flow {

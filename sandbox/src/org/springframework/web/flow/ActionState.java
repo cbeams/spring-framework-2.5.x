@@ -36,12 +36,12 @@ public class ActionState extends TransitionableState {
 
     public ActionState(String id, Transition transition) {
         super(id, transition);
-        setBeanName(appendStandardActionBeanNameSuffix(id));
+        setBeanName(buildActionBeanName(id));
     }
 
     public ActionState(String id, Transition[] transitions) {
         super(id, transitions);
-        setBeanName(appendStandardActionBeanNameSuffix(id));
+        setBeanName(buildActionBeanName(id));
     }
 
     public ActionState(String id, String beanName, Transition transition) {
@@ -64,9 +64,8 @@ public class ActionState extends TransitionableState {
         this.actionBeanNames.add(beanName);
     }
 
-    private String appendStandardActionBeanNameSuffix(String stateId) {
-        // we no longer append any standard suffix to action names
-        // this method is left in for the time being in case we change our minds
+    protected String buildActionBeanName(String stateId) {
+    	// do nothing, subclasses may override
         return stateId;
     }
 
