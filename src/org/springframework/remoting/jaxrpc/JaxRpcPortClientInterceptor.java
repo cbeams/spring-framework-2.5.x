@@ -17,10 +17,12 @@
 package org.springframework.remoting.jaxrpc;
 
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.xml.namespace.QName;
+import javax.xml.rpc.Call;
 import javax.xml.rpc.Service;
 import javax.xml.rpc.ServiceException;
 import javax.xml.rpc.Stub;
@@ -126,75 +128,80 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
-	 * Set the username to specify on the stub.
+	 * Set the username to specify on the stub or call.
 	 * @see javax.xml.rpc.Stub#USERNAME_PROPERTY
+	 * @see javax.xml.rpc.Call#USERNAME_PROPERTY
 	 */
 	public void setUsername(String username) {
 		this.username = username;
 	}
 
 	/**
-	 * Return the username to specify on the stub.
+	 * Return the username to specify on the stub or call.
 	 */
 	public String getUsername() {
 		return username;
 	}
 
 	/**
-	 * Set the password to specify on the stub.
+	 * Set the password to specify on the stub or call.
 	 * @see javax.xml.rpc.Stub#PASSWORD_PROPERTY
+	 * @see javax.xml.rpc.Call#PASSWORD_PROPERTY
 	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
 	/**
-	 * Return the password to specify on the stub.
+	 * Return the password to specify on the stub or call.
 	 */
 	public String getPassword() {
 		return password;
 	}
 
 	/**
-	 * Set the endpoint address to specify on the stub.
+	 * Set the endpoint address to specify on the stub or call.
 	 * @see javax.xml.rpc.Stub#ENDPOINT_ADDRESS_PROPERTY
+	 * @see javax.xml.rpc.Call#setTargetEndpointAddress
 	 */
 	public void setEndpointAddress(String endpointAddress) {
 		this.endpointAddress = endpointAddress;
 	}
 
 	/**
-	 * Return the endpoint address to specify on the stub.
+	 * Return the endpoint address to specify on the stub or call.
 	 */
 	public String getEndpointAddress() {
 		return endpointAddress;
 	}
 
 	/**
-	 * Set the maintain session flag to specify on the stub.
+	 * Set the maintain session flag to specify on the stub or call.
 	 * @see javax.xml.rpc.Stub#SESSION_MAINTAIN_PROPERTY
+	 * @see javax.xml.rpc.Call#SESSION_MAINTAIN_PROPERTY
 	 */
 	public void setMaintainSession(boolean maintainSession) {
 		this.maintainSession = maintainSession;
 	}
 
 	/**
-	 * Return the maintain session flag to specify on the stub.
+	 * Return the maintain session flag to specify on the stub or call.
 	 */
 	public boolean isMaintainSession() {
 		return maintainSession;
 	}
 
 	/**
-	 * Set custom properties to be set on the stub for the port.
+	 * Set custom properties to be set on the stub or call.
 	 * @see javax.xml.rpc.Stub#_setProperty
+	 * @see javax.xml.rpc.Call#setProperty
 	 */
 	public void setCustomProperties(Properties customProperties) {
 		this.customProperties = customProperties;
 	}
 
 	/**
-	 * Return custom properties to be set on the stub for the port.
+	 * Return custom properties to be set on the stub or call.
 	 */
 	public Properties getCustomProperties() {
 		return customProperties;
@@ -202,11 +209,16 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Set the interface of the service that this factory should create a proxy for.
-	 * Can be different from the JAX-RPC port interface, if using a non-RMI business
-	 * interface for exposed proxies.
-	 * <p>The interface must be suitable for a JAX-RPC port, if "portInterface"
-	 * is not set. Else, it must match the methods in the port interface but can
-	 * be a non-RMI business interface.
+	 * This will typically be a non-RMI business interface, although you can also
+	 * use an RMI port interface as recommended by JAX-RPC here.
+	 * <p>If the specified service interface is a non-RMI business interface,
+	 * invocations will either be translated to the underlying RMI port interface
+	 * (in case of a "portInterface" being specified) or to JAX-RPC dynamic calls.
+	 * <p>The dynamic call mechanism has the advantage that you don't need to
+	 * maintain an RMI port interface in addition to an existing non-RMI business
+	 * interface. In terms of configuration, specifying the business interface
+	 * as "serviceInterface" will be enough; this interceptor will automatically
+	 * switch to dynamic calls in such a scenario.
 	 * @see #setPortInterface
 	 */
 	public void setServiceInterface(Class serviceInterface) {
@@ -226,7 +238,9 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Set the JAX-RPC port interface to use. Only needs to be set if the exposed
 	 * service interface is different from the port interface, i.e. when using
-	 * a non-RMI business interface as service interface for exposed proxies.
+	 * a non-RMI business interface as service interface for exposed proxies,
+	 * and if the JAX-RPC dynamic call mechanism is not desirable. See the
+	 * javadoc of the "serviceInterface" property for more details.
 	 * <p>The interface must be suitable for a JAX-RPC port, i.e. it must be an
 	 * RMI service interface (that extends <code>java.rmi.Remote</code>).
 	 * @see #setServiceInterface
@@ -235,7 +249,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	public void setPortInterface(Class portInterface) {
 		if (portInterface != null &&
 				(!portInterface.isInterface() || !Remote.class.isAssignableFrom(portInterface))) {
-			throw new IllegalArgumentException("portInterface must be an interface derived from java.rmi.Remote");
+			throw new IllegalArgumentException(
+					"portInterface must be an interface derived from [java.rmi.Remote]");
 		}
 		this.portInterface = portInterface;
 	}
@@ -248,40 +263,123 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 
-	/**
-	 * Create and initialize the JAX-RPC stub for the specified port.
-	 */
 	public void afterPropertiesSet() throws ServiceException {
+		prepare();
+	}
+
+	/**
+	 * Create and initialize the JAX-RPC service for the specified port.
+	 * <p>Prepares a JAX-RPC stub if possible (if an RMI interface is available);
+	 * falls back to JAX-RPC dynamic calls else. Using dynamic calls can be
+	 * enforced through overriding <code>alwaysUseJaxRpcCall</code> to return true.
+	 * <p><code>postProcessJaxRpcService</code> and <code>postProcessPortStub</code>
+	 * hooks are available for customization in subclasses. When using dynamic calls,
+	 * each can be post-processed via <code>postProcessJaxRpcCall</code>.
+	 * @see #alwaysUseJaxRpcCall
+	 * @see #postProcessJaxRpcService
+	 * @see #postProcessPortStub
+	 * @see #postProcessJaxRpcCall
+	 */
+	public void prepare() throws ServiceException {
 		if (this.portName == null) {
 			throw new IllegalArgumentException("portName is required");
-		}
-		if (this.serviceInterface == null && this.portInterface == null) {
-			throw new IllegalArgumentException("Either serviceInterface or portInterface is required");
 		}
 
 		if (this.jaxRpcService == null) {
 			this.jaxRpcService = createJaxRpcService();
-			postProcessJaxRpcService(this.jaxRpcService);
 		}
 
+		// Cache the QName for the port.
 		this.portQName = getQName(this.portName);
-		Class actualInterface = (this.portInterface != null ? this.portInterface : this.serviceInterface);
-		Remote remoteObj = this.jaxRpcService.getPort(this.portQName, actualInterface);
 
-		if (this.serviceInterface != null) {
-			boolean isImpl = this.serviceInterface.isInstance(remoteObj);
+		// Determine interface to use at the JAX-RPC port level:
+		// Use portInterface if specified, else fall back to serviceInterface.
+		Class actualInterface = (this.portInterface != null ? this.portInterface : this.serviceInterface);
+
+		if (actualInterface != null && Remote.class.isAssignableFrom(actualInterface) &&
+				!alwaysUseJaxRpcCall()) {
+			// JAX-RPC-compliant port interface -> using JAX-RPC stub for port.
+
 			if (logger.isInfoEnabled()) {
-				logger.info("Using service interface [" + this.serviceInterface.getName() + "] for JAX-RPC object [" +
-						this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+				logger.info("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName +
+						"], using port interface [" + actualInterface.getName() + "]");
+			}
+			Remote remoteObj = this.jaxRpcService.getPort(this.portQName, actualInterface);
+
+			if (logger.isInfoEnabled()) {
+				if (this.serviceInterface != null) {
+					boolean isImpl = this.serviceInterface.isInstance(remoteObj);
+					logger.info("Using service interface [" + this.serviceInterface.getName() + "] for JAX-RPC port [" +
+							this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+				}
+			}
+
+			if (!(remoteObj instanceof Stub)) {
+				throw new ServiceException("Port stub of class [" + remoteObj.getClass().getName() +
+						"] is not a valid JAX-RPC stub: it does not implement interface [javax.xml.rpc.Stub]");
+			}
+			Stub stub = (Stub) remoteObj;
+
+			// Apply properties to JAX-RPC stub.
+			preparePortStub(stub);
+
+			// Allow for custom post-processing in subclasses.
+			postProcessPortStub(stub);
+
+			this.portStub = remoteObj;
+		}
+
+		else {
+			// No JAX-RPC-compliant port interface -> using JAX-RPC dynamic calls.
+			if (logger.isInfoEnabled()) {
+				logger.info("Using JAX-RPC dynamic calls for JAX-RPC port [" + this.portQName + "]");
 			}
 		}
+	}
 
-		if (!(remoteObj instanceof Stub)) {
-			throw new ServiceException("Returned port stub [" + remoteObj + "] does not implement javax.xml.rpc.Stub");
-		}
+	/**
+	 * Return the prepared QName for the port.
+	 * @see #setPortName
+	 * @see #getQName
+	 */
+	protected QName getPortQName() {
+		return portQName;
+	}
 
-		// apply properties to stub
-		Stub stub = (Stub) remoteObj;
+	/**
+	 * Return whether to always use JAX-RPC dynamic calls.
+	 * Called by <code>afterPropertiesSet</code>.
+	 * <p>Default is false; if an RMI interface is specified as "portInterface"
+	 * or "serviceInterface", it will be used to create a JAX-RPC port stub.
+	 * <p>Can be overridden to enforce the use of the JAX-RPC Call API,
+	 * for example if there is a need to customize at the Call level.
+	 * This just necessary if you you want to use an RMI interface as
+	 * "serviceInterface", though; in case of only a non-RMI interface being
+	 * available, this interceptor will fall back to the Call API anyway.
+	 * @see #postProcessJaxRpcCall
+	 */
+	protected boolean alwaysUseJaxRpcCall() {
+		return false;
+	}
+
+
+	/**
+	 * Prepare the given JAX-RPC port stub, applying properties to it.
+	 * Called by <code>afterPropertiesSet</code>.
+	 * <p>Just applied when actually creating a JAX-RPC port stub,
+	 * in case of a specified JAX-RPC-compliant port interface.
+	 * Else, JAX-RPC dynamic calls will be used.
+	 * @param stub the current JAX-RPC port stub
+	 * @see #afterPropertiesSet
+	 * @see #setUsername
+	 * @see #setPassword
+	 * @see #setEndpointAddress
+	 * @see #setMaintainSession
+	 * @see #setCustomProperties
+	 * @see #setPortInterface
+	 * @see #prepareJaxRpcCall
+	 */
+	protected void preparePortStub(Stub stub) {
 		if (this.username != null) {
 			stub._setProperty(Stub.USERNAME_PROPERTY, this.username);
 		}
@@ -301,30 +399,21 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 				stub._setProperty(key, this.customProperties.getProperty(key));
 			}
 		}
-
-		postProcessPortStub(stub);
-		this.portStub = remoteObj;
 	}
 
 	/**
-	 * Post-process the given JAX-RPC Service. Called by afterPropertiesSet.
-	 * Useful for example to register custom type mappings.
-	 * <p>Just applied when creating a JAX-RPC Service instance locally,
-	 * i.e. not applied when an existing Service reference is passed in.
-	 * @param service the current JAX-RPC Service
-	 * @see #afterPropertiesSet
-	 * @see #setJaxRpcService
-	 * @see javax.xml.rpc.Service#getTypeMappingRegistry
+	 * Post-process the given JAX-RPC port stub.
+	 * Default implementation is empty. Called by <code>prepare</code>.
+	 * <p>Just applied when actually creating a JAX-RPC port stub,
+	 * in case of a specified JAX-RPC-compliant port interface.
+	 * Else, JAX-RPC dynamic calls will be used.
+	 * @param stub the current JAX-RPC port stub
+	 * (can be cast to an implementation-specific class if necessary)
+	 * @see #prepare
+	 * @see #setPortInterface
+	 * @see #postProcessJaxRpcCall
 	 */
-	protected void postProcessJaxRpcService(Service service) {
-	}
-
-	/**
-	 * Post-process the given JAX-RPC port stub. Called by afterPropertiesSet.
-	 * @param portStub the current JAX-RPC port stub
-	 * @see #afterPropertiesSet
-	 */
-	protected void postProcessPortStub(Stub portStub) {
+	protected void postProcessPortStub(Stub stub) {
 	}
 
 	/**
@@ -337,8 +426,125 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		// traditional RMI stub invocation
-		return RmiClientInterceptorUtils.invoke(invocation, getPortStub(), this.portQName.toString());
+		Remote stub = getPortStub();
+		if (stub != null) {
+			// JAX-RPC stub available -> traditional RMI stub invocation.
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking operation '" + invocation.getMethod().getName() +
+						"' on JAX-RPC port stub");
+			}
+			return RmiClientInterceptorUtils.invoke(invocation, stub, getPortQName().toString());
+		}
+
+		else {
+			// No JAX-RPC stub -> using JAX-RPC dynamic calls.
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking operation '" + invocation.getMethod().getName() +
+						"' as JAX-RPC dynamic call");
+			}
+			return performJaxRpcCall(invocation);
+		}
+	}
+
+
+	/**
+	 * Perform a JAX-RPC dynamic call for the given AOP method invocation.
+	 * Delegates to <code>prepareJaxRpcCall</code> and
+	 * <code>postProcessJaxRpcCall</code> for setting up the call object.
+	 * <p>Default implementation uses method name as JAX-RPC operation name
+	 * and method arguments as arguments for the JAX-RPC call. Can be
+	 * overridden in subclasses for custom operation names and/or arguments.
+	 * @param invocation the current AOP MethodInvocation that should
+	 * be converted to a JAX-RPC call
+	 * @return the return value of the invocation, if any
+	 * @throws Throwable the exception thrown by the invocation, if any
+	 * @see #getJaxRpcService
+	 * @see #getPortQName
+	 * @see #prepareJaxRpcCall
+	 * @see #postProcessJaxRpcCall
+	 */
+	protected Object performJaxRpcCall(MethodInvocation invocation) throws Throwable {
+		Service service = getJaxRpcService();
+		if (service == null) {
+			throw new IllegalStateException("JaxRpcClientInterceptor is not properly initialized - " +
+					"invoke 'prepare' before attempting any operations");
+		}
+
+		QName portQName = getPortQName();
+
+		// Create JAX-RPC call object, using the method name as operation name.
+		Call call = service.createCall(portQName, invocation.getMethod().getName());
+
+		// Apply properties to JAX-RPC stub.
+		prepareJaxRpcCall(call);
+
+		// Allow for custom post-processing in subclasses.
+		postProcessJaxRpcCall(call, invocation);
+
+		// Perform actual invocation.
+		try {
+			return call.invoke(invocation.getArguments());
+		}
+		catch (RemoteException ex) {
+			throw RmiClientInterceptorUtils.convertRmiAccessException(
+					invocation.getMethod(), ex, portQName.toString());
+		}
+	}
+
+	/**
+	 * Prepare the given JAX-RPC call, applying properties to it.
+	 * Called by <code>invoke</code>.
+	 * <p>Just applied when actually using JAX-RPC dynamic calls,
+	 * i.e. if no JAX-RPC-compliant port interface was specified.
+	 * Else, a JAX-RPC port stub will be used.
+	 * @param call the current JAX-RPC call object
+	 * @see #invoke
+	 * @see #setUsername
+	 * @see #setPassword
+	 * @see #setEndpointAddress
+	 * @see #setMaintainSession
+	 * @see #setCustomProperties
+	 * @see #setPortInterface
+	 * @see #preparePortStub
+	 */
+	protected void prepareJaxRpcCall(Call call) {
+		if (this.username != null) {
+			call.setProperty(Call.USERNAME_PROPERTY, this.username);
+		}
+		if (this.password != null) {
+			call.setProperty(Call.PASSWORD_PROPERTY, this.password);
+		}
+		if (this.endpointAddress != null) {
+			call.setTargetEndpointAddress(this.endpointAddress);
+		}
+		if (this.maintainSession) {
+			call.setProperty(Call.SESSION_MAINTAIN_PROPERTY, new Boolean(this.maintainSession));
+		}
+		if (this.customProperties != null) {
+			Enumeration en = this.customProperties.propertyNames();
+			while (en.hasMoreElements()) {
+				String key = (String) en.nextElement();
+				call.setProperty(key, this.customProperties.getProperty(key));
+			}
+		}
+	}
+
+	/**
+	 * Post-process the given JAX-RPC call.
+	 * Default implementation is empty. Called by <code>invoke</code>.
+	 * <p>Just applied when actually using JAX-RPC dynamic calls,
+	 * i.e. if no JAX-RPC-compliant port interface was specified.
+	 * Else, a JAX-RPC port stub will be used.
+	 * @param call the current JAX-RPC call object
+	 * (can be cast to an implementation-specific class if necessary)
+	 * @param invocation the current AOP MethodInvocation that the call was
+	 * created for (can be used to check method name, method parameters
+	 * and/or passed-in arguments)
+	 * @see #invoke
+	 * @see #setPortInterface
+	 * @see #postProcessPortStub
+	 */
+	protected void postProcessJaxRpcCall(Call call, MethodInvocation invocation) {
 	}
 
 }

@@ -48,6 +48,8 @@ public class LocalJaxRpcServiceFactory {
 
 	private String serviceName;
 
+	private JaxRpcServicePostProcessor[] servicePostProcessors;
+
 
 	/**
 	 * Set the ServiceFactory class to use, for example
@@ -114,9 +116,32 @@ public class LocalJaxRpcServiceFactory {
 		return serviceName;
 	}
 
+	/**
+	 * Set the JaxRpcServicePostProcessors to be applied to JAX-RPC Service
+	 * instances created by this factory.
+	 * <p>Such post-processors can, for example, register custom type mappings.
+	 * They are reusable across all pre-built subclasses of this factory:
+	 * LocalJaxRpcServiceFactoryBean, JaxRpcPortClientInterceptor,
+	 * JaxRpcPortProxyFactoryBean.
+	 * @see LocalJaxRpcServiceFactoryBean
+	 * @see JaxRpcPortClientInterceptor
+	 * @see JaxRpcPortProxyFactoryBean
+	 */
+	public void setServicePostProcessors(JaxRpcServicePostProcessor[] servicePostProcessors) {
+		this.servicePostProcessors = servicePostProcessors;
+	}
 
 	/**
-	 * Return a QName for the given name,* relative to the namespace URI
+	 * Return the JaxRpcServicePostProcessors to be applied to JAX-RPC Service
+	 * instances created by this factory.
+	 */
+	public JaxRpcServicePostProcessor[] getServicePostProcessors() {
+		return servicePostProcessors;
+	}
+
+
+	/**
+	 * Return a QName for the given name, relative to the namespace URI
 	 * of this factory, if given.
 	 * @see #setNamespaceUri
 	 */
@@ -142,16 +167,46 @@ public class LocalJaxRpcServiceFactory {
 	 * Create a JAX-RPC Service according to the parameters of this factory.
 	 * @see #setServiceName
 	 * @see #setWsdlDocumentUrl
+	 * @see #postProcessJaxRpcService
 	 */
 	public Service createJaxRpcService() throws ServiceException {
 		if (this.serviceName == null) {
 			throw new IllegalArgumentException("serviceName is required");
 		}
+
 		ServiceFactory serviceFactory = createServiceFactory();
+
+		// Create service, with or without WSDL document URL.
 		QName serviceQName = getQName(this.serviceName);
-		return (this.wsdlDocumentUrl != null) ?
+		Service service = (this.wsdlDocumentUrl != null) ?
 				serviceFactory.createService(this.wsdlDocumentUrl, serviceQName) :
 				serviceFactory.createService(serviceQName);
+
+		// Allow for custom post-processing in subclasses.
+		postProcessJaxRpcService(service);
+
+		return service;
+	}
+
+	/**
+	 * Post-process the given JAX-RPC Service.
+	 * Called by <code>createJaxRpcService</code>.
+	 * Useful, for example, to register custom type mappings.
+	 * <p>Default implementation delegates to all registered JaxRpcServicePostProcessors.
+	 * It is usually preferable to implement custom type mappings etc there rather than
+	 * in a subclass of this factory, to be able to reuse the post-processors.
+	 * @param service the current JAX-RPC Service
+	 * (can be cast to an implementation-specific class if necessary)
+	 * @see #createJaxRpcService
+	 * @see #setServicePostProcessors
+	 * @see javax.xml.rpc.Service#getTypeMappingRegistry
+	 */
+	protected void postProcessJaxRpcService(Service service) {
+		if (this.servicePostProcessors != null) {
+			for (int i = 0; i < this.servicePostProcessors.length; i++) {
+				this.servicePostProcessors[i].postProcessJaxRpcService(service);
+			}
+		}
 	}
 
 }

@@ -46,6 +46,12 @@ import org.springframework.web.util.WebUtils;
  * any public setters. For some reason, Axis tries to resolve public setters
  * in a special way...
  *
+ * <p>JAX-RPC service endpoints are usually required to implement an
+ * RMI port interface. However, many JAX-RPC implementations accept plain
+ * service endpoint classes too, avoiding the need to maintain an RMI port
+ * interface in addition to an existing non-RMI business interface.
+ * Therefore, implementing the business interface will usually be sufficient.
+ *
  * @author Juergen Hoeller
  * @since 16.12.2003
  * @see #init
