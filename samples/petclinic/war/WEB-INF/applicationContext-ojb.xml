@@ -6,22 +6,14 @@
 	-->
 <beans>
 
-	<!-- ========================= GENERAL DEFINITIONS ========================= -->
-
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+  
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
 	</bean>
 
-	<!-- Message source for this context, loaded from localized "messages_xx" files -->
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-		<property name="basename"><value>messages</value></property>										
-	</bean>
-
-
-	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
-  
 	<!-- Local DataSource that works in any environment -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
@@ -52,29 +44,20 @@
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
 	<!--
-		- A parent bean definition which is a base definition for transaction proxies.
-		- It is markes as abstract, since it is never supposed to be instantiated itself.
-		- We set shared transaction attributes here, following our naming patterns.
-		- The attributes can still be overridden in child bean definitions.
-		-->
-	<bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
-			abstract="true">
-		<property name="transactionManager"><ref bean="transactionManager"/></property>
+	  - Petclinic's central data access object: OJB implementation.
+    -->
+	<bean id="clinicTarget" class="org.springframework.samples.petclinic.ojb.PersistenceBrokerClinic"/>
+
+	<!--
+		- Transactional proxy for Petclinic's central data access object.
+    -->
+	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="clinicTarget"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="*">PROPAGATION_REQUIRED</prop>
 			</props>
-		</property>
-	</bean>
-
-	<!--
-	  - Petclinic primary business object: OJB implementation, as an inner bean wrapped
-		- by an outer transactional proxy. The two bean definitions could have been separate,
-		- but this is cleaner as there is no need to ever access the unwrapped object.
-    -->
-	<bean id="clinic" parent="baseTransactionProxy">
-		<property name="target">
-			<bean class="org.springframework.samples.petclinic.ojb.PersistenceBrokerClinic"/>
 		</property>
 	</bean>
 

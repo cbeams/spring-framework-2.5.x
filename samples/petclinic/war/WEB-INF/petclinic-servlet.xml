@@ -6,6 +6,14 @@
 	-->
 <beans>
 
+	<!-- ========================= MESSAGE SOURCE DEFINITION ========================= -->
+
+	<!-- Message source for this context, loaded from localized "messages_xx" files -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename"><value>messages</value></property>
+	</bean>
+
+
 	<!-- ========================= MAPPING DEFINITIONS ========================= -->
 
 	<!--

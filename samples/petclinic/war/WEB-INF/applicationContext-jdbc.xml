@@ -6,22 +6,14 @@
 	-->
 <beans>
 
-	<!-- ========================= GENERAL DEFINITIONS ========================= -->
-
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+  
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
 	</bean>
 
-	<!-- Message source for this context, loaded from localized "messages_xx" files -->
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-		<property name="basename"><value>messages</value></property>										
-	</bean>
-
-
-	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
-  
 	<!-- Local DataSource that works in any environment -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
@@ -50,42 +42,29 @@
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
-	<!-- Petclinic primary business object: HSQL JDBC implementation -->
-	<!-- (only initialized when referenced by the clinic proxy) -->
+	<!-- Petclinic's central data access object: HSQL JDBC implementation -->
+	<!-- (only initialized when referenced by the "clinic" proxy) -->
 	<bean id="hsqlClinic" class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic" lazy-init="true">
 		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 
-	<!-- Petclinic primary business object: MySQL JDBC implementation -->
-	<!-- (only initialized when referenced by the clinic proxy) -->
+	<!-- Petclinic's central data access object: MySQL JDBC implementation -->
+	<!-- (only initialized when referenced by the "clinic" proxy) -->
 	<bean id="mysqlClinic" class="org.springframework.samples.petclinic.jdbc.MySQLJdbcClinic" lazy-init="true">
 		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 
 	<!--
-		- A parent bean definition which is a base definition for transaction proxies.
-		- It is markes as abstract, since it is never supposed to be instantiated itself.
-		- We set shared transaction attributes here, following our naming patterns.
-		- The attributes can still be overridden in child bean definitions.
-		-->
-	<bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
-			abstract="true">
-		<property name="transactionManager"><ref bean="transactionManager"/></property>
+		- Transactional proxy for Petclinic's central data access facade.
+    -->
+	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref bean="${petclinic.jdbcImplBeanName}"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
-	</bean>
-
-	<!--
-	  - Transactional proxy for Petclinic's primary business object. As opposed to the
-		- Hibernate example, we keep the business object as an external bean we refer to,
-		- not as an inner bean. This is in order to demonstrate how the actual object
-		- being wrapped can be configured via a PropertyPlaceholderConfigurer placeholder.
-    -->
-	<bean id="clinic" parent="baseTransactionProxy">
-		<property name="target"><ref bean="${petclinic.jdbcImplBeanName}"/></property>
 	</bean>
 
 </beans>
