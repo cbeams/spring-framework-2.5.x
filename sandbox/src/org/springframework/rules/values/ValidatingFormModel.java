@@ -132,6 +132,8 @@ public class ValidatingFormModel extends DefaultFormModel implements
                 .notNull(rulesSource,
                         "No rules source has been configured; please set a valid reference.");
         BeanPropertyExpression constraint;
+        //@TODO if form object changes, rules aren't updated...introduces subtle bugs...
+        // ... for rules dependent on instance...
         if (getFormObject() instanceof RulesProvider) {
             constraint = ((RulesProvider)getFormObject())
                     .getRules(domainObjectProperty);
