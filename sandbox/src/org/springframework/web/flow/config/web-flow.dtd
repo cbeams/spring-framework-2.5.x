@@ -2,7 +2,7 @@
 
 <!--
 	Web flow DTD
-	Authors: Erwin Vervaet
+	Authors: Erwin Vervaet, Keith Donald
 	
 	This DTD defines the web flow XML syntax. Web flows capture the page flow
 	in (part of) a web application.
@@ -18,7 +18,7 @@
 	are composed of one or more states.
 -->
 <!ELEMENT web-flow (
-	(action-state | view-state | sub-flow-state | end-state)+
+	(action-state | view-state | subflow-state | end-state)+
 )>
 
 <!--
@@ -46,6 +46,31 @@
 <!ATTLIST action-state id ID #REQUIRED>
 
 <!--
+	Convenience attribute when the action-state executes exactly one action.
+	This is the id of the action.
+-->
+<!ATTLIST action-state actionId CDATA #IMPLIED>
+
+<!--
+	Defines an action that is executed by the flow in an action state.
+-->
+<!ELEMENT action EMPTY>
+
+<!--
+	Id of the bean definition of the action in the application context
+	hierarchy linked with the flow. This is similar to the <ref bean="myBean"/>
+	notation of the Spring beans DTD.
+-->
+<!ATTLIST action id CDATA #REQUIRED>
+
+<!--
+	Name of the action. This is optional. When not specified, the action will
+	not have any name and the events signaled by the action will not get the
+	action name prepended to them.
+-->
+<!ATTLIST action name CDATA #IMPLIED>
+
+<!--
 	Defines a view state: a state where a view will be rendered.
 	Transitions triggered by the view lead on to other states.
 -->
@@ -65,52 +90,7 @@
 	control to the client. Use this when an action has already generated
 	the response.
 -->
-<!ATTLIST view-state view CDATA #IMPLIED>
-
-<!--
-	Defines a sub flow state: a state where a sub flow is spawned. When the
-	sub flow reaches an end state, the corresponding transition in this state
-	is triggered to continue the flow.
--->
-<!ELEMENT sub-flow-state (
-	transition*
-)>
-
-<!--
-	Unique id of a sub flow state.
--->
-<!ATTLIST sub-flow-state id ID #REQUIRED>
-
-<!--
-	Name (unique bean id) of the sub flow that will be spawned.
--->
-<!ATTLIST sub-flow-state flow CDATA #REQUIRED>
-
-<!--
-	Optional name (bean id) of a mapper that will map model data to and from
-	the sub flow.
--->
-<!ATTLIST sub-flow-state model-mapper CDATA #IMPLIED>
-
-<!--
-	Defines an end state: a state that terminates the flow.
--->
-<!ELEMENT end-state EMPTY>
-
-<!--
-	Unique id of an end state.
--->
-<!ATTLIST end-state id ID #REQUIRED>
-
-<!--
-	Name of the view that will be rendered when this state is reached
-	and when there is no parent flow to continue. This is optional. When
-	not present, this state will be a market end state.
-	A marker end state does not actually render a view, but just returns
-	control to the client. Use this when an action has already generated
-	the response.
--->
-<!ATTLIST end-state view CDATA #IMPLIED>
+<!ATTLIST view-state view-name CDATA #IMPLIED>
 
 <!--
 	Defines a transition to another state.
@@ -130,7 +110,7 @@
 	signaled in a view state or a subflow state, the transition event is simply
 	the name of the event that triggers the transition ("ok" in the previous example).
 -->
-<!ATTLIST transition event CDATA #REQUIRED>
+<!ATTLIST transition on CDATA #REQUIRED>
 
 <!--
 	Target state of the transition.
@@ -138,20 +118,46 @@
 <!ATTLIST transition to IDREF #REQUIRED>
 
 <!--
-	Defines an action that is executed by the flow in an action state.
+	Defines a sub flow state: a state where a sub flow is spawned. When the
+	sub flow reaches an end state, the corresponding transition in this state
+	is triggered to continue the flow.
 -->
-<!ELEMENT action EMPTY>
+<!ELEMENT subflow-state (
+	transition*
+)>
 
 <!--
-	Name of the action. This is optional. When not specified, the action will
-	not have any name and the events signaled by the action will not get the
-	action name prepended to them.
+	Unique id of a sub flow state.
 -->
-<!ATTLIST action name CDATA #IMPLIED>
+<!ATTLIST subflow-state id ID #REQUIRED>
 
 <!--
-	Id of the bean definition of the action in the application context
-	hierarchy linked with the flow. This is similar to the <ref bean="myBean"/>
-	notation of the Spring beans DTD.
+	Name (unique bean id) of the sub flow that will be spawned.
 -->
-<!ATTLIST action bean CDATA #REQUIRED>
+<!ATTLIST subflow-state flow CDATA #REQUIRED>
+
+<!--
+	Optional name (bean id) of a mapper that will map model data to and from
+	the sub flow.
+-->
+<!ATTLIST subflow-state attribute-mapper CDATA #IMPLIED>
+
+<!--
+	Defines an end state: a state that terminates the flow.
+-->
+<!ELEMENT end-state EMPTY>
+
+<!--
+	Unique id of an end state.
+-->
+<!ATTLIST end-state id ID #REQUIRED>
+
+<!--
+	Name of the view that will be rendered when this state is reached
+	and when there is no parent flow to continue. This is optional. When
+	not present, this state will be a market end state.
+	A marker end state does not actually render a view, but just returns
+	control to the client. Use this when an action has already generated
+	the response.
+-->
+<!ATTLIST end-state viewName CDATA #IMPLIED>

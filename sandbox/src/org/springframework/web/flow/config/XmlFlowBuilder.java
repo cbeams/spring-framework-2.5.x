@@ -116,25 +116,25 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String ACTION_ELEMENT = "action";
 
-	private static final String NAME_ATTRIBUTE = "name";
+	private static final String BEAN_ATTRIBUTE = "id";
 
-	private static final String BEAN_ATTRIBUTE = "bean";
+	private static final String NAME_ATTRIBUTE = "name";
 
 	private static final String VIEW_STATE_ELEMENT = "view-state";
 
-	private static final String VIEW_ATTRIBUTE = "view";
+	private static final String VIEW_ATTRIBUTE = "viewName";
 
-	private static final String SUB_FLOW_STATE_ELEMENT = "sub-flow-state";
+	private static final String SUBFLOW_STATE_ELEMENT = "subflow-state";
 
 	private static final String FLOW_ATTRIBUTE = "flow";
 
-	private static final String MODEL_MAPPER_ATTRIBUTE = "model-mapper";
+	private static final String MODEL_MAPPER_ATTRIBUTE = "attribute-mapper";
 
 	private static final String END_STATE_ELEMENT = "end-state";
 
 	private static final String TRANSITION_ELEMENT = "transition";
 
-	private static final String EVENT_ATTRIBUTE = "event";
+	private static final String EVENT_ATTRIBUTE = "on";
 
 	private static final String TO_ATTRIBUTE = "to";
 
@@ -293,7 +293,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				else if (VIEW_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddViewState(flow, element);
 				}
-				else if (SUB_FLOW_STATE_ELEMENT.equals(element.getNodeName())) {
+				else if (SUBFLOW_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddSubFlowState(flow, element);
 				}
 				else if (END_STATE_ELEMENT.equals(element.getNodeName())) {
