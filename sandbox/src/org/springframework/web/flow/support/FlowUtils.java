@@ -15,10 +15,8 @@ public class FlowUtils {
 	 * Retrieve information about the current flow session execution.
 	 * @param model The model for the executing flow.
 	 * @return The session info
-	 * @throws IllegalStateException should not happen
 	 */
-	public static FlowExecutionInfo getFlowExecutionInfo(AttributesAccessor model)
-			throws IllegalStateException {
+	public static FlowExecutionInfo getFlowExecutionInfo(AttributesAccessor model) {
 		return (FlowExecutionInfo)model.getRequiredAttribute(FlowExecutionInfo.ATTRIBUTE_NAME);
 	}
 }
