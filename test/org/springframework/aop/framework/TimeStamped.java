@@ -1,5 +1,5 @@
 
-package org.springframework.core;
+package org.springframework.aop.framework;
 
 /**
  * This interface can be implemented by cacheable objects
