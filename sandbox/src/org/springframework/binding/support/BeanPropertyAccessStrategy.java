@@ -26,6 +26,7 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -63,34 +64,70 @@ public class BeanPropertyAccessStrategy implements
 
     private String nestedPath = "";
 
+    private DomainObjectChangeHandler domainObjectChangeHandler;
+
     public BeanPropertyAccessStrategy(Object bean) {
-        this((bean instanceof ValueModel ? (ValueModel)bean : new ValueHolder(
-                bean)));
+        this((bean instanceof ValueModel ? (ValueModel)bean
+                : createValueHolder(bean)));
+    }
+
+    private static ValueModel createValueHolder(Object bean) {
+        Assert
+                .notNull(
+                        bean,
+                        "The bean value must not be null--otherwise I won't know what class the bean is!");
+        if (Class.class.isAssignableFrom(bean.getClass())) {
+            return new ValueHolder(BeanUtils.instantiateClass((Class)bean));
+        }
+        else {
+            return new ValueHolder(bean);
+        }
     }
 
     public BeanPropertyAccessStrategy(final ValueModel beanHolder) {
         Assert.notNull(beanHolder);
         this.beanWrapper = new BeanWrapperImpl();
         this.beanHolder = beanHolder;
-        if (beanHolder.getValue() != null) {
-            beanWrapper.setWrappedInstance(beanHolder.getValue());
-        }
+        Assert
+                .notNull(
+                        beanHolder.getValue(),
+                        "The bean holder value must not be null--otherwise I won't know what class the bean is!");
         if (logger.isDebugEnabled()) {
             logger.debug("[Subscribing to mutable bean holder; bean value="
                     + beanHolder.getValue() + "]");
         }
-        this.beanHolder.addValueChangeListener(new ValueChangeListener() {
-            public void valueChanged() {
+        this.domainObjectChangeHandler = new DomainObjectChangeHandler();
+        this.domainObjectChangeHandler.updateBeanWrapper();
+        this.beanHolder.addValueChangeListener(domainObjectChangeHandler);
+    }
+
+    private class DomainObjectChangeHandler implements ValueChangeListener {
+        public void valueChanged() {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Backing domain object has changed; new value = "
+                        + beanHolder.getValue());
+            }
+            updateBeanWrapper(beanHolder.getValue());
+        }
+
+        private void updateBeanWrapper() {
+            updateBeanWrapper(beanHolder.getValue());
+        }
+
+        private void updateBeanWrapper(Object newValue) {
+            if (beanHolder.getValue() != null) {
                 if (logger.isDebugEnabled()) {
                     logger
-                            .debug("[Updating the enclosed bean wrapper's target object; new value='"
-                                    + beanHolder.getValue() + "']");
+                            .debug("[Setting the enclosed bean wrapper's target object; new value='"
+                                    + newValue + "']");
                 }
-                if (beanHolder.getValue() != null) {
-                    beanWrapper.setWrappedInstance(beanHolder.getValue());
-                }
+                beanWrapper.setWrappedInstance(newValue);
             }
-        });
+            else {
+                throw new IllegalArgumentException(
+                        "Held bean value cannot be null!");
+            }
+        }
     }
 
     private BeanPropertyAccessStrategy(ValueModel nestedDomainObjectHolder,
@@ -125,7 +162,7 @@ public class BeanPropertyAccessStrategy implements
         beanWrapper.setPropertyValues(pvs, ignoreUnknown);
     }
 
-    public Class getWrappedClass() {
+    public Class getDomainObjectClass() {
         return beanWrapper.getWrappedClass();
     }
 

@@ -16,8 +16,8 @@
 package org.springframework.binding.value.support;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -33,8 +33,7 @@ import org.springframework.util.DefaultObjectStyler;
  */
 public abstract class AbstractValueModel extends
         AbstractPropertyChangePublisher implements BoundValueModel {
-    protected static final Log logger = LogFactory
-            .getLog(AbstractValueModel.class);
+    protected final Log logger = LogFactory.getLog(getClass());
 
     private Set listeners;
 
@@ -54,7 +53,7 @@ public abstract class AbstractValueModel extends
 
     private Collection getOrCreateListeners() {
         if (listeners == null) {
-            listeners = new HashSet();
+            listeners = new LinkedHashSet(9);
         }
         return listeners;
     }

@@ -136,9 +136,12 @@ public class BufferedValueModel extends AbstractValueModel implements
                     logger.debug("[Setting buffered value to '" + value + "']");
                 }
             }
-            Object oldValue = this.bufferedValue;
+            Object oldValue = (this.bufferedValue == NO_VALUE) ? getWrappedValue()
+                    : this.bufferedValue;
             this.bufferedValue = value;
-            fireValueChanged();
+            fireValueChanged(oldValue,
+                    (this.bufferedValue == NO_VALUE ? getWrappedValue()
+                            : this.bufferedValue));
             firePropertyChange(VALUE_PROPERTY, oldValue, this.bufferedValue);
             firePropertyChange(IS_DIRTY_PROPERTY, !isDirty(), isDirty());
         }
@@ -166,12 +169,16 @@ public class BufferedValueModel extends AbstractValueModel implements
         }
     }
 
-    protected void doBufferedValueCommit(Object bufferedValue) {
-        getWrappedModel().setValue(bufferedValue);
-    }
-
     public ValueModel getWrappedModel() {
         return wrappedModel;
+    }
+
+    public Object getWrappedValue() {
+        return wrappedModel.getValue();
+    }
+
+    protected void doBufferedValueCommit(Object bufferedValue) {
+        wrappedModel.setValue(bufferedValue);
     }
 
     private void revert() {
