@@ -124,6 +124,16 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	/**
 	 * @param request
 	 * @param parameterName
+	 * @param defaultValue
+	 * @return
+	 */
+	protected boolean getBooleanParameter(HttpServletRequest request, String parameterName, boolean defaultValue) {
+		return RequestUtils.getBooleanParameter(request, parameterName, defaultValue);
+	}
+
+	/**
+	 * @param request
+	 * @param parameterName
 	 * @return
 	 */
 	protected long getLongParameter(HttpServletRequest request, String parameterName) {
@@ -172,6 +182,17 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	protected long getRequiredLongParameter(HttpServletRequest request, String parameterName)
 			throws ServletRequestBindingException {
 		return RequestUtils.getRequiredLongParameter(request, parameterName);
+	}
+
+	/**
+	 * @param request
+	 * @param parameterName
+	 * @return
+	 * @throws ServletRequestBindingException
+	 */
+	protected boolean getRequiredBooleanParameter(HttpServletRequest request, String parameterName)
+			throws ServletRequestBindingException {
+		return RequestUtils.getRequiredBooleanParameter(request, parameterName);
 	}
 
 	/**
@@ -259,13 +280,14 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	 * @param attributeValue
 	 * @return
 	 */
-	protected MutableAttributesAccessor export(MutableAttributesAccessor model, String attributeName, Object attributeValue) {
+	protected MutableAttributesAccessor export(MutableAttributesAccessor model, String attributeName,
+			Object attributeValue) {
 		model.setAttribute(attributeName, attributeValue);
 		return model;
 	}
 
 	/*
-	 *
+	 *  
 	 */
 	public final ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException {
