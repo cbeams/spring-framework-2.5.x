@@ -8,10 +8,15 @@ package org.springframework.aop.framework.autoproxy.metadata;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 
-
 /**
- * @org.springframework.enterpriseservices.Pooling (size=10)
- * @org.springframework.transaction.interceptor.DefaultTransaction ( timeout=-1 )
+ * Illustrates class and method attributes
+ * <br>The attribute syntax is that of Commons Attributes.
+ * 
+ * @org.springframework.aop.framework.autoproxy.target.PoolingAttribute (10)
+ * 
+ * @org.springframework.transaction.interceptor.DefaultTransactionAttribute ()
+ * 
+ * @author Rod Johnson
  */
 public class TxClassWithClassAttribute {
 	
@@ -21,7 +26,7 @@ public class TxClassWithClassAttribute {
 	}
 	
 	/**
-	 * Inherits transaction attribute.
+	 * Inherits transaction attribute from class.
 	 * Illustrates programmatic rollback.
 	 * @param rollbackOnly
 	 */
@@ -39,9 +44,9 @@ public class TxClassWithClassAttribute {
 	}
 
 	/**
-	 * @org.springframework.transaction.interceptor.RuleBasedTransaction ( timeout=-1 )
-	 * @org.springframework.transaction.interceptor.RollbackRule ( "java.lang.Exception" )
-	 * @org.springframework.transaction.interceptor.NoRollbackRule ( "ServletException" )
+	 * @org.springframework.transaction.interceptor.RuleBasedTransactionAttribute ()
+	 * @org.springframework.transaction.interceptor.RollbackRuleAttribute ("java.lang.Exception")
+	 * @org.springframework.transaction.interceptor.NoRollbackRuleAttribute ("ServletException")
 	 */
 	public void echoException(Exception ex) throws Exception {
 		if (ex != null)

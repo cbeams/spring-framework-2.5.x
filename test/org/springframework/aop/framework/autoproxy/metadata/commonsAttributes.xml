@@ -8,12 +8,9 @@
 
 <beans>
 
-	<!-- 
-		Rely on default attribute source (BCEL)
-	-->
-	<bean id="enterpriseServices" 
-		class="org.springframework.enterpriseservices.EnterpriseServices">	
-	</bean>
+	<bean id="attributes"
+		class="org.springframework.metadata.commons.CommonsAttributes"
+	/>
 
 </beans>		
 	
