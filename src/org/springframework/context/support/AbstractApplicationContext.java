@@ -50,6 +50,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * Partial implementation of ApplicationContext. Doesn't mandate the type
@@ -74,7 +75,7 @@ import org.springframework.core.io.Resource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -99,6 +100,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/** Parent context */
 	private ApplicationContext parent;
+
+	/** BeanFactoryPostProcessors to apply on refresh */
+	private final List beanFactoryPostProcessors = new ArrayList();
 
 	/** Display name */
 	private String displayName = getClass().getName() + ";hashCode=" + hashCode();
@@ -196,6 +200,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.parent = parent;
 	}
 
+	public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor) {
+		this.beanFactoryPostProcessors.add(beanFactoryPostProcessor);
+	}
+
+	/**
+	 * Return the list of BeanPostProcessors that will get applied
+	 * to beans created with this factory.
+	 */
+	public List getBeanFactoryPostProcessors() {
+		return beanFactoryPostProcessors;
+	}
+
 	/**
 	 * Load or reload configuration.
 	 * @throws org.springframework.context.ApplicationContextException if the configuration
@@ -206,12 +222,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void refresh() throws BeansException {
 		this.startupTime = System.currentTimeMillis();
 
+		// tell subclass to refresh the internal bean factory
 		refreshBeanFactory();
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		beanFactory.ignoreDependencyType(ApplicationContext.class);
+
+		// configure the bean factory with context semantics
 		beanFactory.registerCustomEditor(Resource.class, new ContextResourceEditor(this));
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+		beanFactory.ignoreDependencyType(ResourceLoader.class);
+		beanFactory.ignoreDependencyType(ApplicationContext.class);
 		postProcessBeanFactory(beanFactory);
+
+		// invoke factory processors registered with the context instance
+		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
+			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
+			factoryProcessor.postProcessBeanFactory(beanFactory);
+		}
 
 		if (getBeanDefinitionCount() == 0) {
 			logger.warn("No beans defined in ApplicationContext [" + getDisplayName() + "]");
@@ -220,7 +246,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			logger.info(getBeanDefinitionCount() + " beans defined in ApplicationContext [" + getDisplayName() + "]");
 		}
 
-		// invoke factory processors that can override values in the bean definitions
+		// invoke factory processors registered as beans in the context
 		invokeBeanFactoryPostProcessors();
 
 		// register bean processor that intercept bean creation
