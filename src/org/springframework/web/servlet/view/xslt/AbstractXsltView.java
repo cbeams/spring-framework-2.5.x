@@ -174,8 +174,8 @@ public abstract class AbstractXsltView extends AbstractView {
 		}
 	}
 
-	protected final void renderMergedOutputModel(Map model, HttpServletRequest request,
-	                                             HttpServletResponse response) throws Exception {
+	protected final void renderMergedOutputModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (!this.cache) {
 			logger.warn("DEBUG SETTING: NOT THREADSAFE AND WILL IMPAIR PERFORMANCE: template will be refreshed");
 			cacheTemplates();
@@ -203,7 +203,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		if (model.size() == 1) {
 			docRoot = (String) model.keySet().iterator().next();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Single model object received, keyname [" + docRoot + "] will be used as root tag name");
+				logger.debug("Single model object received, key [" + docRoot + "] will be used as root tag");
 			}
 			singleModel = model.get(docRoot);
 		}
@@ -241,8 +241,9 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
 	 */
-	protected abstract Node createDomNode(Map model, String root, HttpServletRequest request,
-	                                      HttpServletResponse response) throws Exception;
+	protected abstract Node createDomNode(
+			Map model, String root, HttpServletRequest request, HttpServletResponse response)
+			throws Exception;
 
 	/**
 	 * Perform the actual transformation, writing to the HTTP response.
@@ -255,32 +256,35 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @param response current HTTP response
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
-	 * @see #doTransform(Node, HttpServletRequest, Result)
+	 * @see #doTransform(Node, Map, Result, String)
 	 * @see javax.xml.transform.stream.StreamResult
 	 * @see javax.servlet.ServletResponse#getOutputStream
 	 */
 	protected void doTransform(Map model, Node dom, HttpServletRequest request, HttpServletResponse response)
 	    throws Exception {
-		doTransform(dom, request, new StreamResult(new BufferedOutputStream(response.getOutputStream())));
+		Map parameters = getParameters(request);
+		doTransform(
+				dom, parameters,
+				new StreamResult(new BufferedOutputStream(response.getOutputStream())),
+				response.getCharacterEncoding());
 	}
 
 	/**
 	 * Perform the actual transformation, writing to the given result.
-	 * @param dom the XNL node to transform
-	 * @param request current HTTP request
+	 * @param dom the XML node to transform
+	 * @param parameters a Map of parameters to be applied to the stylesheet
 	 * @param result the result to write to
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
 	 */
-	protected void doTransform(Node dom, HttpServletRequest request, Result result)
+	protected void doTransform(Node dom, Map parameters, Result result, String encoding)
 	    throws Exception {
 		try {
 			Transformer trans = (this.templates != null) ?
 			    this.templates.newTransformer() : // we have a stylesheet
-						this.transformerFactory.newTransformer(); // just a copy
+					this.transformerFactory.newTransformer(); // just a copy
 				
 			// apply any subclass supplied parameters to the transformer
-			Map parameters = getParameters(request);
 			if (parameters != null) {
 				for (Iterator iter = parameters.entrySet().iterator(); iter.hasNext();) {
 					Map.Entry entry = (Map.Entry) iter.next();
@@ -291,12 +295,16 @@ public abstract class AbstractXsltView extends AbstractView {
 				}
 			}
 
+			trans.setOutputProperty(OutputKeys.ENCODING, encoding);
 			trans.setOutputProperty(OutputKeys.INDENT, "yes");
+
 			// Xalan-specific, but won't do any harm in other XSLT engines
 			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-			trans.transform(new DOMSource(dom), result);
 
-			logger.debug("XSLT transformed OK with stylesheet [" + this.stylesheetLocation + "]");
+			trans.transform(new DOMSource(dom), result);
+			if (logger.isDebugEnabled()) {
+				logger.debug("XSLT transformed with stylesheet [" + this.stylesheetLocation + "]");
+			}
 		}
 		catch (TransformerConfigurationException ex) {
 			throw new ServletException(
@@ -311,7 +319,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Return a <code>Map</code> of parameters to be applied to the stylesheet.
+	 * Return a Map of parameters to be applied to the stylesheet.
 	 * Subclasses can override this method in order to apply one or more
 	 * parameters to the transformation process.
 	 * <p>Default implementation delegates to simple getParameter version.
@@ -325,7 +333,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Return a <code>Map</code> of parameters to be applied to the stylesheet.
+	 * Return a Map of parameters to be applied to the stylesheet.
 	 * Subclasses can override this method in order to apply one or more
 	 * parameters to the transformation process.
 	 * <p>Default implementation delegates simply returns null.
