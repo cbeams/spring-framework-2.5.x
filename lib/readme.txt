@@ -43,7 +43,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CosMultipartResolver or CosMailSender
 
 * dom4j/dom4j.jar
-- DOM4J 1.4 XML parser (http://dom4j.sourceforge.net)
+- DOM4J 1.5.2 XML parser (http://dom4j.sourceforge.net)
 - required for running Petclinic (by Hibernate)
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
@@ -64,7 +64,12 @@ distribution/website before using any of them in your own applications.
 * hibernate/hibernate2.jar, hibernate/odmg.jar
 - Hibernate 2.1.8 (http://www.hibernate.org)
 - required for building the framework
-- required at runtime when using Spring's Hibernate support
+- required at runtime when using Spring's Hibernate 2.1 support
+
+* hibernate/hibernate3.jar
+- Hibernate 3.0 RC1 (http://www.hibernate.org)
+- required for building the framework
+- required at runtime when using Spring's Hibernate 3.x support
 
 * hsqldb/hsqldb.jar
 - HSQLDB 1.7.2.7 (http://hsqldb.sourceforge.net)
