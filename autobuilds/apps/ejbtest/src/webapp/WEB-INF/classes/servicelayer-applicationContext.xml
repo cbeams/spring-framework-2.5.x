@@ -53,8 +53,19 @@
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
   
-	<bean id="simpleService" class="org.springframework.autobuilds.ejbtest.simple.SimpleServiceImpl">
+  <!-- pojo SimpleService bean, and tx wrapped proxy which is actually used by clients -->
+	<bean id="simpleServiceTarget" class="org.springframework.autobuilds.ejbtest.simple.SimpleServiceImpl">
 	</bean>
+  <bean id="simpleService" 
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <property name="transactionManager"><ref bean="transactionManager"/></property>
+    <property name="target"><ref bean="simpleServiceTarget"/></property>
+    <property name="transactionAttributes">
+      <props>
+        <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
+      </props>
+    </property>
+  </bean>  
 
 	<!-- a proxy to remote EJB, with the cached home flag oon, to test home caching -->
 	<bean id="cachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
