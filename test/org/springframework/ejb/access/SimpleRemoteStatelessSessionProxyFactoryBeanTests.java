@@ -45,6 +45,8 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 		MyEjb myEjb = (MyEjb) ec.getMock();
 		myEjb.getValue();
 		ec.setReturnValue(value, 1);
+		myEjb.remove();
+		ec.setVoidCallable(1);
 		ec.replay();
 		
 		MockControl mc = MockControl.createControl(MyHome.class);
@@ -72,7 +74,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-		assertTrue(mbm.getValue() == value);
+		assertEquals("Returns expected value", value, mbm.getValue());
 		mc.verify();	
 		ec.verify();	
 	}
@@ -85,6 +87,10 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 		MyEjb myEjb = (MyEjb) ec.getMock();
 		myEjb.getValue();
 		ec.setThrowable(rex);
+		// TODO might want to control this behaviour...
+		// Do we really want to call remove after a remote exception?
+		myEjb.remove();
+		ec.setVoidCallable(1);
 		ec.replay();
 	
 		MockControl mc = MockControl.createControl(MyHome.class);
@@ -117,7 +123,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 			fail("Should've thrown remote exception");
 		}
 		catch (RemoteException ex) {
-			assertTrue(ex == rex);
+			assertSame("Threw expected RemoteException", rex, ex);
 		}
 		mc.verify();	
 		ec.verify();	
