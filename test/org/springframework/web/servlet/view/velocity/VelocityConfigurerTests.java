@@ -1,6 +1,7 @@
 
 package org.springframework.web.servlet.view.velocity;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringBufferInputStream;
 import java.util.Properties;
@@ -52,8 +53,9 @@ public class VelocityConfigurerTests extends TestCase {
 	public void testVelocityEngineFactoryBeanWithApplicationContext() {
 		MockControl acControl = MockControl.createControl(ApplicationContext.class);
 		ApplicationContext ac = (ApplicationContext) acControl.getMock();
-		ac.getResourceBasePath();
-		acControl.setReturnValue("mybase");
+		File resourceBase = new File("C:/mybase");
+		ac.getResourceBase();
+		acControl.setReturnValue(resourceBase);
 		acControl.replay();
 
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
@@ -64,7 +66,7 @@ public class VelocityConfigurerTests extends TestCase {
 		vefb.setApplicationContext(ac);
 		assertTrue(vefb.getObject() instanceof VelocityEngine);
 		VelocityEngine ve = (VelocityEngine) vefb.getObject();
-		assertEquals("mybase/mydir", ve.getProperty("myprop"));
+		assertEquals(resourceBase.getAbsolutePath() + "/mydir", ve.getProperty("myprop"));
 
 		acControl.verify();
 	}
@@ -72,8 +74,9 @@ public class VelocityConfigurerTests extends TestCase {
 	public void testVelocityConfigurer() {
 		MockControl acControl = MockControl.createControl(ApplicationContext.class);
 		ApplicationContext ac = (ApplicationContext) acControl.getMock();
-		ac.getResourceBasePath();
-		acControl.setReturnValue("mybase");
+		File resourceBase = new File("C:/mybase");
+		ac.getResourceBase();
+		acControl.setReturnValue(resourceBase);
 		acControl.replay();
 
 		VelocityConfigurer vc = new VelocityConfigurer();
@@ -84,7 +87,7 @@ public class VelocityConfigurerTests extends TestCase {
 		vc.setApplicationContext(ac);
 		assertTrue(vc.getVelocityEngine() instanceof VelocityEngine);
 		VelocityEngine ve = vc.getVelocityEngine();
-		assertEquals("mybase/mydir", ve.getProperty("myprop"));
+		assertEquals(resourceBase.getAbsolutePath() + "/mydir", ve.getProperty("myprop"));
 
 		acControl.verify();
 	}
@@ -135,7 +138,7 @@ public class VelocityConfigurerTests extends TestCase {
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
 		wac.getResourceAsStream(configLocation);
 		wmc.setReturnValue(new StringBufferInputStream("foo=bar"));
-		wac.getResourceBasePath();
+		wac.getResourceBase();
 		wmc.setReturnValue(null);
 		wmc.replay();
 		vc.setApplicationContext(wac);
@@ -180,7 +183,7 @@ public class VelocityConfigurerTests extends TestCase {
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
 		wac.getResourceAsStream(configLocation);
 		wmc.setReturnValue(new StringBufferInputStream("foo=bar"));
-		wac.getResourceBasePath();
+		wac.getResourceBase();
 		wmc.setReturnValue(null);
 		wmc.replay();
 		try {

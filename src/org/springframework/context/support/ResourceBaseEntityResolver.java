@@ -6,9 +6,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.xml.sax.InputSource;
+
 import org.springframework.beans.factory.xml.BeansDtdResolver;
 import org.springframework.context.ApplicationContext;
-import org.xml.sax.InputSource;
 
 /**
  * EntityResolver implementation that tries to resolve entity references
@@ -27,7 +28,7 @@ import org.xml.sax.InputSource;
  *
  * @author Juergen Hoeller
  * @since 31.07.2003
- * @see org.springframework.context.ApplicationContext#getResourceBasePath
+ * @see org.springframework.context.ApplicationContext#getResourceBase
  * @see org.springframework.context.ApplicationContext#getResourceAsStream
  */
 public class ResourceBaseEntityResolver extends BeansDtdResolver {

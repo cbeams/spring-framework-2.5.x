@@ -1,5 +1,6 @@
 package org.springframework.context.support;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -65,7 +66,7 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	/**
 	 * This implementation returns null, as there is no base path for class path resources.
 	 */
-	public String getResourceBasePath() {
+	public File getResourceBase() {
 		return null;
 	}
 

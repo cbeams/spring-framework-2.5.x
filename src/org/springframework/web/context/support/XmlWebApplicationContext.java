@@ -5,6 +5,7 @@
 
 package org.springframework.web.context.support;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -24,6 +25,10 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * "test-servlet" (like for a DispatcherServlet instance with the web.xml servlet-name "test").
  * These config location defaults can be overridden via setConfigLocations, respectively
  * via the "contextConfigLocation" parameters of ContextLoader and FrameworkServlet.
+ *
+ * <p>Note: In case of multiple config locations, later bean definitions will
+ * override ones defined in earlier loaded files. This can be leveraged to
+ * deliberately override certain bean definitions via an extra XML file.
  *
  * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
  * the web application root. Absolute paths, e.g. for files outside the web app root,
@@ -127,11 +132,11 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 	/**
 	 * This implementation returns the real path of the root directory of the
 	 * web application that this WebApplicationContext is associated with.
-	 * @see org.springframework.context.ApplicationContext#getResourceBasePath
+	 * @see org.springframework.context.ApplicationContext#getResourceBase
 	 * @see javax.servlet.ServletContext#getRealPath
 	 */
-	public String getResourceBasePath() {
-		return getServletContext().getRealPath("/");
+	public File getResourceBase() {
+		return new File(getServletContext().getRealPath("/"));
 	}
 
 	/**

@@ -13,7 +13,7 @@ import org.springframework.beans.BeansException;
  *
  * <p>Implementing this interface is typical when an object requires
  * access to file resources, i.e. wants to call getResourceAsStream or
- * getResourceBasePath, or to the message source. Configuration via bean
+ * getResourceBase, or to the message source. Configuration via bean
  * references should make it unnecessary to implement this interface for
  * bean lookup purposes.
  *

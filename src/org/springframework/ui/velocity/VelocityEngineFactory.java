@@ -5,6 +5,7 @@
 
 package org.springframework.ui.velocity;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -146,11 +147,14 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 		}
 
 		// determine the root directory of the application
-		String resourceBase = null;
+		String resourceBasePath = null;
 		if (this.appRootMarker != null) {
 			if (getApplicationContext() != null) {
-				resourceBase = getApplicationContext().getResourceBasePath();
-				if (resourceBase == null) {
+				File resourceBase = getApplicationContext().getResourceBase();
+				if (resourceBase != null) {
+					resourceBasePath = resourceBase.getAbsolutePath();
+				}
+				else {
 					logger.warn("Cannot replace marker [" + this.appRootMarker + "] with resource base - no base directory available");
 				}
 			}
@@ -163,8 +167,8 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 		for (Iterator it = props.keySet().iterator(); it.hasNext();) {
 			String key = (String) it.next();
 			String value = props.getProperty(key);
-			if (this.appRootMarker != null && resourceBase != null) {
-				value = StringUtils.replace(value, this.appRootMarker, resourceBase);
+			if (this.appRootMarker != null && resourceBasePath != null) {
+				value = StringUtils.replace(value, this.appRootMarker, resourceBasePath);
 			}
 			this.velocityEngine.setProperty(key, value);
 		}

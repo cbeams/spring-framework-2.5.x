@@ -63,7 +63,7 @@ import org.springframework.util.ClassLoaderUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -232,8 +232,8 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * This should be appropriate for standalone implementations but can
 	 * be overridden for implementations targetted at a container.
 	 */
-	public String getResourceBasePath() {
-		return (new File("")).getAbsolutePath() + File.separatorChar;
+	public File getResourceBase() {
+		return (new File("")).getAbsoluteFile();
 	}
 
 
@@ -392,23 +392,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 
 	//---------------------------------------------------------------------
-	// Implementation of MessageSource
-	//---------------------------------------------------------------------
-
-	public String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
-		return this.messageSource.getMessage(code, args, defaultMessage, locale);
-	}
-
-	public String getMessage(String code, Object args[], Locale locale) throws NoSuchMessageException {
-		return this.messageSource.getMessage(code, args, locale);
-	}
-
-	public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
-		return this.messageSource.getMessage(resolvable, locale);
-	}
-
-
-	//---------------------------------------------------------------------
 	// Implementation of BeanFactory
 	//---------------------------------------------------------------------
 
@@ -430,6 +413,15 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
 		return getBeanFactory().getAliases(name);
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of HierarchicalBeanFactory
+	//---------------------------------------------------------------------
+
+	public BeanFactory getParentBeanFactory() {
+		return getParent();
 	}
 
 
@@ -473,11 +465,19 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 
 	//---------------------------------------------------------------------
-	// Implementation of HierarchicalBeanFactory
+	// Implementation of MessageSource
 	//---------------------------------------------------------------------
 
-	public BeanFactory getParentBeanFactory() {
-		return getParent();
+	public String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
+		return this.messageSource.getMessage(code, args, defaultMessage, locale);
+	}
+
+	public String getMessage(String code, Object args[], Locale locale) throws NoSuchMessageException {
+		return this.messageSource.getMessage(code, args, locale);
+	}
+
+	public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
+		return this.messageSource.getMessage(resolvable, locale);
 	}
 
 
