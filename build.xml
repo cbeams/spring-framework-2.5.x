@@ -1333,11 +1333,15 @@
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
-		<delete file="${dist.dir}/spring-webflow-support.jar"/>
+		
+		<copy file="${sandbox.src.dir}/org/springframework/web/flow/config/spring-webflow.dtd"
+			 todir="${dist.dir}" preservelastmodified="true"/>
+		
 	</target>
 
 	<target name="webflow.support.jar" depends="sandbox.build,initdist" description="Create jar with webflow support classes">
-		<jar jarfile="${dist.dir}/spring-webflow-support.jar">
+		<delete file="${dist.dir}/spring-webflow-support.jar"/>
+  	    <jar jarfile="${dist.dir}/spring-webflow-support.jar">
 			<fileset dir="${sandbox.target.classes.dir}">
 				<include name="META-INF/**"/>
 				<include name="org/springframework/binding/**"/>
