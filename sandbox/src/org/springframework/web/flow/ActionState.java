@@ -303,10 +303,10 @@ public class ActionState extends TransitionableState {
 			}
 		}
 		if (executionCount > 0) {
-			throw new CannotExecuteStateTransitionException(this, "No transition was matched to the event(s)"
+			throw new CannotExecuteStateTransitionException(this, "No transition was matched to the event(s) "
 					+ "signaled by the " + executionCount + " action(s) that executed in this action state '" + getId()
 					+ "' of flow '" + getFlow().getId()
-					+ "'; a transition must be defined to handle possible action result outcomes -- "
+					+ "'; transitions must be defined to handle action result outcomes -- "
 					+ "possible flow configuration error?  Note: the eventIds signaled were: '"
 					+ DefaultObjectStyler.call(eventIds)
 					+ "', while the supported set of eventId criteria for this action state is '"
