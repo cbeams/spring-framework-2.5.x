@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.28 2003-11-28 21:09:22 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.29 2003-12-01 09:06:41 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -313,7 +313,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		if (dependencyCheck) {
 			bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 		}
-		configureBean("(existing bean)", bd, new BeanWrapperImpl(existingBean));
+		populateBean("(existing bean)", bd, new BeanWrapperImpl(existingBean));
 	}
 
 
@@ -533,7 +533,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			this.singletonCache.put(beanName, bean);
 		}
 
-		configureBean(beanName, mergedBeanDefinition, instanceWrapper);
+		populateBean(beanName, mergedBeanDefinition, instanceWrapper);
 		callLifecycleMethodsIfNecessary(bean, beanName, mergedBeanDefinition, instanceWrapper);
 
 		bean = applyBeanPostProcessors(bean, beanName);
@@ -689,24 +689,34 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	}
 
 	/**
-	 * Configure the bean instance in the given BeanWrapper.
+	 * Populate the bean instance in the given BeanWrapper with the property values
+	 * from the bean definition.
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @param bw BeanWrapper with bean instance
 	 */
-	protected void configureBean(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
-		// add property values based on autowire by name if it's applied
-		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
-			autowireByName(beanName, mergedBeanDefinition, bw);
+	protected void populateBean(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
+		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
+
+		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME ||
+				mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
+			MutablePropertyValues mpvs = new MutablePropertyValues(pvs);
+
+			// add property values based on autowire by name if it's applied
+			if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
+				autowireByName(beanName, mergedBeanDefinition, bw, mpvs);
+			}
+
+			// add property values based on autowire by type if it's applied
+			if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
+				autowireByType(beanName, mergedBeanDefinition, bw, mpvs);
+			}
+
+			pvs = mpvs;
 		}
 
-		// add property values based on autowire by type if it's applied
-		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
-			autowireByType(beanName, mergedBeanDefinition, bw);
-		}
-
-		dependencyCheck(beanName, mergedBeanDefinition, bw);
-		applyPropertyValues(beanName, bw, mergedBeanDefinition.getPropertyValues());
+		dependencyCheck(beanName, mergedBeanDefinition, bw, pvs);
+		applyPropertyValues(beanName, bw, pvs);
 	}
 
 	/**
@@ -715,14 +725,17 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @param beanName name of the bean we're wiring up.
 	 * Useful for debugging messages; not used functionally.
 	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 * @param bw BeanWrapper from which we can obtain information about the bean
+	 * @param pvs the PropertyValues to register wired objects with
 	 */
-	protected void autowireByName(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
+	protected void autowireByName(String beanName, RootBeanDefinition mergedBeanDefinition,
+																BeanWrapper bw, MutablePropertyValues pvs) {
 		String[] propertyNames = unsatisfiedObjectProperties(mergedBeanDefinition, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];
 			if (containsBean(propertyName)) {
 				Object bean = getBean(propertyName);
-				mergedBeanDefinition.addPropertyValue(new PropertyValue(propertyName, bean));
+				pvs.addPropertyValue(propertyName, bean);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Added autowiring by name from bean name '" + beanName +
 						"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
@@ -744,18 +757,19 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * namespaces, but doesn't work as well as standard Spring behaviour for bigger applications.
 	 * @param beanName of the bean to autowire by type
 	 * @param mergedBeanDefinition bean definition to update through autowiring
-	 * @param instanceWrapper BeanWrapper from which we can obtain information about the bean
+	 * @param bw BeanWrapper from which we can obtain information about the bean
+	 * @param pvs the PropertyValues to register wired objects with
 	 */
-	protected void autowireByType(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper instanceWrapper) {
-		String[] propertyNames = unsatisfiedObjectProperties(mergedBeanDefinition, instanceWrapper);
+	protected void autowireByType(String beanName, RootBeanDefinition mergedBeanDefinition,
+																BeanWrapper bw, MutablePropertyValues pvs) {
+		String[] propertyNames = unsatisfiedObjectProperties(mergedBeanDefinition, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];
 			// Look for a matching type
-			Class requiredType = instanceWrapper.getPropertyDescriptor(propertyName).getPropertyType();
+			Class requiredType = bw.getPropertyDescriptor(propertyName).getPropertyType();
 			Map matchingBeans = findMatchingBeans(requiredType);
 			if (matchingBeans.size() == 1) {
-				mergedBeanDefinition.addPropertyValue(
-				    new PropertyValue(propertyName, matchingBeans.values().iterator().next()));
+				pvs.addPropertyValue(propertyName, matchingBeans.values().iterator().next());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Autowiring by type from bean name '" + beanName +
 											"' via property '" + propertyName + "' to bean named '" +
@@ -783,14 +797,14 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @param beanName name of the bean
 	 * @throws org.springframework.beans.factory.UnsatisfiedDependencyException
 	 */
-	protected void dependencyCheck(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw)
+	protected void dependencyCheck(String beanName, RootBeanDefinition mergedBeanDefinition,
+																 BeanWrapper bw, PropertyValues pvs)
 			throws UnsatisfiedDependencyException {
 		int dependencyCheck = mergedBeanDefinition.getDependencyCheck();
 		if (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_NONE)
 			return;
 
 		Set ignoreTypes = getIgnoredDependencyTypes();
-		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
 		for (int i = 0; i < pds.length; i++) {
 			if (pds[i].getWriteMethod() != null &&
