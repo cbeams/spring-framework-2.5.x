@@ -56,6 +56,8 @@ Package org.springframework.orm
 Package org.springframework.web
 * fixed "createRelative" implementation in ServletContextResource to correctly handle relative subdirectories
 * turned protected getter methods in controller implementations to public, for introspection and testing purposes
+* added "exposeHelpers" hook to InternalResourceView, for use by JstlView by TilesJstlView (to avoid super calls)
+* call ServletRequest's "removeAttribute" if a model attribute is null in InternalResourceView (e.g. for includes)
 * fixed resetting of previous nested path in NestedPathTag, properly working in request scope (rather than page scope)
 
 
