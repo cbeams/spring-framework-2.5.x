@@ -75,7 +75,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     }
 
     public void addValidationListener(final ValidationListener listener) {
-        Algorithms.instance().forEach(formModels.values(),
+        Algorithms.instance().forEachIn(formModels.values(),
                 new UnaryProcedure() {
                     public void run(Object formModel) {
                         ((FormModel)formModel).addValidationListener(listener);
@@ -104,7 +104,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     }
 
     public void removeValidationListener(final ValidationListener listener) {
-        Algorithms.instance().forEach(formModels.values(),
+        Algorithms.instance().forEachIn(formModels.values(),
                 new UnaryProcedure() {
                     public void run(Object formModel) {
                         ((FormModel)formModel)
@@ -187,7 +187,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     }
 
     public void commit() {
-        Algorithms.instance().forEach(formModels.values(),
+        Algorithms.instance().forEachIn(formModels.values(),
                 new UnaryProcedure() {
                     public void run(Object formModel) {
                         ((FormModel)formModel).commit();
@@ -196,7 +196,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     }
 
     public void revert() {
-        Algorithms.instance().forEach(formModels.values(),
+        Algorithms.instance().forEachIn(formModels.values(),
                 new UnaryProcedure() {
                     public void run(Object formModel) {
                         ((FormModel)formModel).revert();

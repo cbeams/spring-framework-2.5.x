@@ -88,7 +88,7 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
      * @return A reference to this, to support chaining.
      */
     public CompoundUnaryPredicate addAll(List predicates) {
-        Algorithms.instance().forEach(predicates, new UnaryProcedure() {
+        Algorithms.instance().forEachIn(predicates, new UnaryProcedure() {
             public void run(Object o) {
                 add((UnaryPredicate)o);
             }
