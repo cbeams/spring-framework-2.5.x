@@ -54,7 +54,7 @@ knowledge about it immediately.
 The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). J2SE 1.4 is
 required for building the framework. Note that J2EE 1.2 (Servlet 2.2, JSP 1.1) is good enough if not using
 Spring's web MVC or EJB support. Integration is provided with Log4J 1.2, CGLIB 2.0, Jakarta Commons Attributes
-2.1, Hibernate 2.1, JDO 1.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0, JAX-RPC 1.1, Caucho's Hessian and Burlap
+2.1, Hibernate 2.1/3.0, JDO 1.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0, JAX-RPC 1.1, Caucho's Hessian & Burlap
 2.1/3.0, Quartz 1.4, EHCache 1.1, JSTL 1.0, Velocity 1.4, FreeMarker 2.3, JasperReports 0.6, Struts/Tiles 1.2,
 Jakarta Commons FileUpload 1.0, Jason Hunter's COS, etc.
 
@@ -90,9 +90,9 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-aop" (~140 KB)
-- Contents: AOP framework, source-level metadata support
-- Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
+* "spring-aop" (~150 KB)
+- Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
+- Dependencies: spring-core, (CGLIB, Commons Attributes)
 
 * "spring-dao" (~245 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
@@ -106,7 +106,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
-* "spring-webmvc" (~185 KB)
+* "spring-webmvc" (~190 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, JasperReports)
 
@@ -114,11 +114,15 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: remoting, EJB, JMS, JMX
 - Dependencies: spring-core, spring-aop, (spring-web, JAX-RPC, Hessian, Burlap, EJB, JMS, JMX)
 
-* "spring-orm" (~265 KB)
-- Contents: iBATIS SQL Maps support, Hibernate support, JDO support, Apache OJB
-- Dependencies: spring-dao, (spring-aop, spring-web, iBATIS SQL Maps, Hibernate, JDO, Apache OJB)
+* "spring-orm" (~105 KB)
+- Contents: iBATIS SQL Maps support, JDO support, Apache OJB support
+- Dependencies: spring-dao, (spring-aop, spring-web, iBATIS SQL Maps, JDO, Apache OJB)
 
-* "spring" (~1525 KB)
+* "spring-hibernate" (~170 KB)
+- Contents: Hibernate 2.1 support, Hibernate 3.0 support
+- Dependencies: spring-dao, (spring-aop, spring-web, Hibernate2, Hibernate3)
+
+* "spring" (~1550 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
