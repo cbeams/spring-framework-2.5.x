@@ -27,24 +27,35 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.transaction.TransactionSystemException;
 
 /**
- * FactoryBean that retrieves the JTA TransactionManager for BEA's
- * WebLogic application server version 7.0.  
+ * FactoryBean that retrieves the internal JTA TransactionManager of BEA's
+ * WebLogic version 7.0, which is required for proper transaction suspension
+ * support on that application server version.
  * 
- * <p>This class doesn't need be used with version 8.1 since for this version 
- * the regular JNDI lookup returns a ClientTransactionManagerImpl that can 
- * handle the necessary transaction management tasks. 
+ * <p>Uses WebLogic <code>TxHelper</code>'s static access methods to obtain
+ * the server's internal JTA TransactionManager.
  *
- * <p>Uses WebLogic TxHelper's static access methods to obtain the JTA
- * TransactionManager.
+ * <p>This class doesn't need be used with WebLogic 8.1 or higher, since the
+ * regular JNDI lookup is sufficient there: it returns a JTA TransactionManager
+ * that can handle all transaction management tasks properly.
+ *
+ * <p><b>Note that as of Spring 1.2, this class is effectively superseded by
+ * WebLogicJtaTransactionManager's autodetection of WebLogic 7.0 or 8.1+.</b>
+ * It is only kept as a way to explicitly expose the JTA TransactionManager
+ * on WebLogic 7.0, for non-Spring code that needs access to this facility.
+ *
+ * <p><b>For typical scenarios, use Spring's WebLogicJtaTransactionManager
+ * as-is and do not bother with setting up this FactoryBean.</b>
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 1.1
+ * @see WebLogicJtaTransactionManager
  * @see JtaTransactionManager#setTransactionManager
  * @see weblogic.transaction.TxHelper#getTransactionManager
  */
 public class WebLogicServerTransactionManagerFactoryBean implements FactoryBean {
 
-	private static final String FACTORY_CLASS = "weblogic.transaction.TxHelper";
+	private static final String TX_HELPER_CLASS_NAME = "weblogic.transaction.TxHelper";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -57,14 +68,13 @@ public class WebLogicServerTransactionManagerFactoryBean implements FactoryBean 
 	public WebLogicServerTransactionManagerFactoryBean() throws TransactionSystemException {
 		Class clazz;
 		try {
-			logger.debug("Trying Weblogic: " + FACTORY_CLASS);
-			clazz = Class.forName(FACTORY_CLASS);
-			logger.info("Found WebLogic: " + FACTORY_CLASS);
+			logger.debug("Looking for WebLogic TxHelper: " + TX_HELPER_CLASS_NAME);
+			clazz = Class.forName(TX_HELPER_CLASS_NAME);
+			logger.info("Found WebLogic TxHelper: " + clazz.getName());
 		}
 		catch (ClassNotFoundException ex) {
-			logger.debug("Could not find WebLogic TransactionManager factory class", ex);
-			throw new TransactionSystemException(
-					"Couldn't find the WebLogic TransactionManager factory class");
+			logger.debug("Could not find WebLogic TxHelper class", ex);
+			throw new TransactionSystemException("Couldn't find WebLogic TxHelper class");
 		}
 		try {
 			Method method = clazz.getMethod("getTransactionManager", (Class[]) null);
@@ -72,7 +82,7 @@ public class WebLogicServerTransactionManagerFactoryBean implements FactoryBean 
 		}
 		catch (Exception ex) {
 			throw new TransactionSystemException(
-					"Found WebLogic TransactionManager factory class [" + clazz.getName() +
+					"Found WebLogic TxHelper class [" + clazz.getName() +
 					"], but couldn't invoke its static 'getTransactionManager' method", ex);
 		}
 	}

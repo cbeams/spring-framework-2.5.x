@@ -95,17 +95,15 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * <i>not</i> specified by J2EE; it is individual for each J2EE server, often kept
  * in JNDI like the UserTransaction. Some well-known JNDI locations are:
  * <ul>
- * <li>"java:comp/UserTransaction" for Resin, Orion (Oracle OC4J), JOnAS (JOTM),
- * BEA WebLogic (unofficial)
- * <li>"javax.transaction.TransactionManager" for BEA WebLogic (official)
+ * <li>"java:comp/UserTransaction" for Resin, Oracle OC4J (Orion), JOnAS (JOTM),
+ * BEA WebLogic
  * <li>"java:/TransactionManager" for JBoss, JRun4
  * </ul>
  *
- * <p>"java:comp/UserTransaction" as JNDI name for the TransactionManager means that
- * the same JTA object implements both the UserTransaction and the TransactionManager
- * interface. As this is easy to test when looking up the UserTransaction, this will
- * be autodetected on initialization of JtaTransactionManager. In this case, there's
- * no need to specify the "transactionManagerName" (for Resin, Orion, JOnAS, WebLogic).
+ * <p>Both of these cases are autodetected by JtaTransactionManager, provided that
+ * the "autodetectTransactionManager" flag is set to "true" (which it is by default).
+ * Consequently, JtaTransactionManager will support transaction suspension
+ * out-of-the-box on many J2EE servers.
  *
  * <p>A JNDI lookup can also be factored out into a corresponding JndiObjectFactoryBean,
  * passed into JtaTransactionManager's "transactionManager" property. Such a bean
@@ -146,14 +144,21 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * avoiding double configuration. Alternatively, specify corresponding Hibernate
  * properties (see Hibernate docs for details).
  *
- * <p>JtaTransactionManager supports timeouts but not custom isolation levels.
- * Custom subclasses can override <code>applyIsolationLevel</code> for specific JTA
- * implementations. Note that some resource-specific transaction managers like
- * DataSourceTransactionManager and HibernateTransactionManager do support timeouts,
- * custom isolation levels, and transaction suspension without JTA's restrictions.
+ * <p><b>This standard JtaTransactionManager supports timeouts but not per-transaction
+ * isolation levels.</b> Custom subclasses can override <code>doJtaBegin</code> for
+ * specific JTA implementations to provide this functionality; Spring includes a
+ * corresponding WebLogicJtaTransactionManager class, for example. Such adapters
+ * for specific J2EE transaction coordinators can also expose transaction names
+ * for monitoring; with standard JTA, transaction names will be ignored.
  *
- * <p>This class is serializable. Active synchronizations do not survive
- * serialization, though.
+ * <p><b>Consider using WebLogicJtaTransactionManager on BEA WebLogic, which supports
+ * the full power of Spring's transaction definitions on WebLogic's transaction
+ * coordinator</b>, <i>beyond standard JTA</i>: transaction names, per-transaction
+ * isolation levels, and proper resuming of transactions in all cases.
+ * WebLogicJtaTransactionManager automatically adapts to WebLogic 7.0 or 8.1+.
+ *
+ * <p>This class is serializable. Active synchronizations do not survive serialization,
+ * though.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
@@ -161,19 +166,32 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @see #setUserTransaction
  * @see #setTransactionManagerName
  * @see #setTransactionManager
- * @see #applyIsolationLevel
+ * @see #doJtaBegin
  * @see JotmFactoryBean
  * @see WebSphereTransactionManagerFactoryBean
  * @see WebLogicJtaTransactionManager
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
- * @see org.springframework.orm.hibernate.HibernateTransactionManager
- * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  */
 public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		implements InitializingBean, Serializable {
 
+	/**
+	 * Default JNDI location for the JTA UserTransaction. Many J2EE servers
+	 * also provide support for the JTA TransactionManager interface there.
+	 * @see #setUserTransactionName
+	 * @see #setAutodetectTransactionManager
+	 */
 	public static final String DEFAULT_USER_TRANSACTION_NAME = "java:comp/UserTransaction";
+
+	/**
+	 * Fallback JNDI location for the JTA TransactionManager. Applied if
+	 * the JTA UserTransaction does not implement the JTA TransactionManager
+	 * interface, provided that the "autodetectTransactionManager" flag is "true".
+	 * @see #setTransactionManagerName
+	 * @see #setAutodetectTransactionManager
+	 */
+	public static final String FALLBACK_TRANSACTION_MANAGER_NAME = "java:/TransactionManager";
 
 
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
@@ -230,10 +248,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public JtaTransactionManager(TransactionManager transactionManager) {
 		this();
-		this.transactionManager = transactionManager;
 		// Do not attempt UserTransaction lookup: use given TransactionManager
 		// to get a UserTransaction handle.
 		this.userTransactionName = null;
+		this.transactionManager = transactionManager;
 		afterPropertiesSet();
 	}
 
@@ -316,11 +334,14 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Set whether to autodetect a JTA UserTransaction object that implements the
-	 * JTA TransactionManager interface too. Default is true.
-	 * <p>Can be turned off to deliberately ignore an available TransactionManager,
-	 * for example when there are known issues with suspend/resume and any attempt
-	 * to use REQUIRES_NEW or NOT_SUPPORTED should fail.
+	 * Set whether to autodetect a JTA UserTransaction object that implements
+	 * the JTA TransactionManager interface too (i.e. the JNDI location for the
+	 * TransactionManager is "java:comp/UserTransaction", same as for the UserTransaction).
+	 * Also checks the fallback JNDI location "java:/TransactionManager".
+	 * <p>Default is true. Can be turned off to deliberately ignore an available
+	 * TransactionManager, for example when there are known issues with suspend/resume
+	 * and any attempt to use REQUIRES_NEW or NOT_SUPPORTED should fail fast.
+	 * @see #FALLBACK_TRANSACTION_MANAGER_NAME
 	 */
 	public void setAutodetectTransactionManager(boolean autodetectTransactionManager) {
 		this.autodetectTransactionManager = autodetectTransactionManager;
@@ -328,34 +349,77 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 
 	public void afterPropertiesSet() throws TransactionSystemException {
+		// Fetch JTA UserTransaction from JNDI, if necessary.
 		if (this.userTransaction == null) {
 			if (this.userTransactionName != null) {
 				this.userTransaction = lookupUserTransaction(this.userTransactionName);
 			}
-			else if (this.transactionManager instanceof UserTransaction) {
-				this.userTransaction = (UserTransaction) this.transactionManager;
-			}
-			else if (this.transactionManager != null) {
-				this.userTransaction = new UserTransactionAdapter(this.transactionManager);
-			}
 			else {
-				throw new IllegalArgumentException(
-						"Either userTransaction or userTransactionName or transactionManager must be set");
+				this.userTransaction = retrieveUserTransaction();
 			}
 		}
+
+		// Fetch JTA TransactionManager from JNDI, if necessary.
 		if (this.transactionManager == null) {
 			if (this.transactionManagerName != null) {
 				this.transactionManager = lookupTransactionManager(this.transactionManagerName);
 			}
-			else if (this.autodetectTransactionManager && this.userTransaction instanceof TransactionManager) {
-				if (logger.isInfoEnabled()) {
-					logger.info("JTA UserTransaction object [" + this.userTransaction + "] implements TransactionManager");
+			else {
+				this.transactionManager = retrieveTransactionManager();
+			}
+		}
+
+		// Autodetect UserTransaction object that implements TransactionManager,
+		// and check fallback JNDI location else.
+		if (this.transactionManager == null && this.autodetectTransactionManager) {
+			if (this.userTransaction instanceof TransactionManager) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("JTA UserTransaction object [" + this.userTransaction + "] implements TransactionManager");
 				}
 				this.transactionManager = (TransactionManager) this.userTransaction;
 			}
 			else {
-				logger.info("No JTA TransactionManager specified: transaction suspension not available");
+				// Check fallback JNDI location.
+				try {
+					this.transactionManager = lookupTransactionManager(FALLBACK_TRANSACTION_MANAGER_NAME);
+				}
+				catch (TransactionSystemException ex) {
+					logger.debug("No JTA TransactionManager found at fallback JNDI location", ex);
+					// OK, so no JTA TransactionManager is available...
+				}
 			}
+		}
+
+		// If only JTA TransactionManager specified, create UserTransaction handle for it.
+		if (this.userTransaction == null && this.transactionManager != null) {
+			if (this.transactionManager instanceof UserTransaction) {
+				this.userTransaction = (UserTransaction) this.transactionManager;
+			}
+			else {
+				this.userTransaction = new UserTransactionAdapter(this.transactionManager);
+			}
+		}
+
+		// We at least need the JTA UserTransaction.
+		if (this.userTransaction != null) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Using JTA UserTransaction: " + this.userTransaction);
+			}
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Either 'userTransaction' or 'userTransactionName' or 'transactionManager' " +
+					"or 'transactionManagerName' must be set");
+		}
+
+		// For transaction suspension, the JTA TransactionManager is necessary too.
+		if (this.transactionManager != null) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Using JTA TransactionManager: " + this.transactionManager);
+			}
+		}
+		else {
+			logger.warn("No JTA TransactionManager found: transaction suspension not available");
 		}
 	}
 
@@ -372,11 +436,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected UserTransaction lookupUserTransaction(String userTransactionName)
 			throws TransactionSystemException {
 		try {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Retrieving JTA UserTransaction from JNDI location [" + userTransactionName + "]");
+			}
 			UserTransaction ut = (UserTransaction)
 					getJndiTemplate().lookup(userTransactionName, UserTransaction.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA UserTransaction [" + ut + "] from JNDI location [" + userTransactionName + "]");
-			}
 			return ut;
 		}
 		catch (NamingException ex) {
@@ -398,18 +462,43 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected TransactionManager lookupTransactionManager(String transactionManagerName)
 			throws TransactionSystemException {
 		try {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Retrieving JTA TransactionManager from JNDI location [" + transactionManagerName + "]");
+			}
 			TransactionManager tm = (TransactionManager)
 					getJndiTemplate().lookup(transactionManagerName, TransactionManager.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA TransactionManager [" + tm + "] from JNDI location [" +
-						transactionManagerName + "]");
-			}
 			return tm;
 		}
 		catch (NamingException ex) {
 			throw new TransactionSystemException(
 					"JTA TransactionManager is not available at JNDI location [" + transactionManagerName + "]", ex);
 		}
+	}
+
+	/**
+	 * Allows subclasses to retrieve the JTA UserTransaction in a vendor-specific manner.
+	 * Only called if no "userTransaction" or "userTransactionName" specified.
+	 * <p>Default implementation simply returns null.
+	 * @return the JTA UserTransaction handle to use, or null if none found
+	 * @throws TransactionSystemException in case of errors
+	 * @see #setUserTransaction
+	 * @see #setUserTransactionName
+	 */
+	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
+		return null;
+	}
+
+	/**
+	 * Allows subclasses to retrieve the JTA TransactionManager in a vendor-specific manner.
+	 * Only called if no "transactionManager" or "transactionManagerName" specified.
+	 * <p>Default implementation simply returns null.
+	 * @return the JTA TransactionManager handle to use, or null if none found
+	 * @throws TransactionSystemException in case of errors
+	 * @see #setTransactionManager
+	 * @see #setTransactionManagerName
+	 */
+	protected TransactionManager retrieveTransactionManager() throws TransactionSystemException {
+		return null;
 	}
 
 
@@ -446,14 +535,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		return false;
 	}
 
+
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		logger.debug("Beginning JTA transaction");
 		try {
-			applyIsolationLevel(definition.getIsolationLevel());
-			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
-				getUserTransaction().setTransactionTimeout(definition.getTimeout());
-			}
-			getUserTransaction().begin();
+			doJtaBegin(definition);
 		}
 		catch (NotSupportedException ex) {
 			// assume nested transaction not supported
@@ -471,13 +557,39 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
+	 * Perform a JTA begin on the JTA UserTransaction or TransactionManager.
+	 * <p>This implementation only supports standard JTA functionality:
+	 * that is, no per-transaction isolation levels and no transaction names.
+	 * Can be overridden in subclasses, for specific JTA implementations.
+	 * <p>Calls <code>applyIsolationLevel</code> and <code>applyTimeout</code>
+	 * before invoking the UserTransaction's <code>begin</code> method.
+	 * @throws NotSupportedException if thrown by JTA methods
+	 * @throws SystemException if thrown by JTA methods
+	 * @see #getUserTransaction
+	 * @see #getTransactionManager
+	 * @see #applyIsolationLevel
+	 * @see #applyTimeout
+	 * @see javax.transaction.UserTransaction#setTransactionTimeout
+	 * @see javax.transaction.UserTransaction#begin
+	 */
+	protected void doJtaBegin(TransactionDefinition definition)
+			throws NotSupportedException, SystemException {
+
+		applyIsolationLevel(definition.getIsolationLevel());
+		applyTimeout(definition.getTimeout());
+		getUserTransaction().begin();
+	}
+
+	/**
 	 * Apply the given transaction isolation level. Default implementation
 	 * will throw an exception for any level other than ISOLATION_DEFAULT.
-	 * To be overridden in subclasses for specific JTA implementations.
+	 * <p>To be overridden in subclasses for specific JTA implementations,
+	 * as alternative to overriding the full <code>doJtaBegin</code> method.
 	 * @param isolationLevel isolation level taken from transaction definition
 	 * @throws InvalidIsolationLevelException if the given isolation level
 	 * cannot be applied
 	 * @throws SystemException if thrown by the JTA implementation
+	 * @see #doJtaBegin
 	 * @see #getUserTransaction
 	 * @see #getTransactionManager
 	 */
@@ -490,6 +602,21 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	/**
+	 * Apply the given transaction timeout. Default implementation will call
+	 * <code>setTransactionTimeout</code> for a non-default timeout value.
+	 * @param timeout timeout value taken from transaction definition
+	 * @throws SystemException if thrown by the JTA implementation
+	 * @see #doJtaBegin
+	 * @see #getUserTransaction
+	 * @see javax.transaction.UserTransaction#setTransactionTimeout
+	 */
+	protected void applyTimeout(int timeout) throws SystemException {
+		if (timeout > TransactionDefinition.TIMEOUT_DEFAULT) {
+			getUserTransaction().setTransactionTimeout(timeout);
+		}
+	}
+
 
 	protected Object doSuspend(Object transaction) {
 		if (getTransactionManager() == null) {
@@ -497,6 +624,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 					"JtaTransactionManager needs a JTA TransactionManager for suspending a transaction - " +
 					"specify the 'transactionManager' or 'transactionManagerName' property");
 		}
+		logger.debug("Suspending JTA transaction");
 		try {
 			return doJtaSuspend();
 		}
@@ -511,6 +639,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @return the suspended JTA Transaction object
 	 * @throws SystemException if thrown by JTA methods
 	 * @see #getTransactionManager
+	 * @see javax.transaction.TransactionManager#suspend
 	 */
 	protected Transaction doJtaSuspend() throws SystemException {
 		return getTransactionManager().suspend();
@@ -522,6 +651,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 					"JtaTransactionManager needs a JTA TransactionManager for suspending a transaction - " +
 					"specify the 'transactionManager' or 'transactionManagerName' property");
 		}
+		logger.debug("Resuming JTA transaction");
 		try {
 			doJtaResume((Transaction) suspendedResources);
 		}
@@ -540,6 +670,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws InvalidTransactionException if thrown by JTA methods
 	 * @throws SystemException if thrown by JTA methods
 	 * @see #getTransactionManager
+	 * @see javax.transaction.TransactionManager#resume
 	 */
 	protected void doJtaResume(Transaction suspendedTransaction)
 	    throws InvalidTransactionException, SystemException {
@@ -608,10 +739,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 					"libraries are available on the client side: " + ex.getMessage());
 		}
 
-		// do client-side JNDI lookup
+		// Do client-side JNDI lookup.
 		this.jndiTemplate = new JndiTemplate();
 
-		// run lookup code for UserTransaction
+		// Perform lookup for JTA UserTransaction.
 		this.userTransaction = lookupUserTransaction(this.userTransactionName);
 	}
 
