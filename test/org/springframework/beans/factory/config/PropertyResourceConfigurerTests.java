@@ -35,6 +35,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.JdkVersion;
 
 /**
  * @author Juergen Hoeller
@@ -343,7 +344,11 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurer() {
-		StaticApplicationContext ac = new StaticApplicationContext();
+	    // ignore for JAVA_13
+	    if (JdkVersion.getMajorJavaVersion() == JdkVersion.JAVA_13) 
+	        return;
+	    
+	    StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "${myName}");
 		pvs.addPropertyValue("age", "${myAge}");
@@ -368,6 +373,10 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurerWithCustomTreePaths() {
+	    // ignore for JAVA_13
+	    if (JdkVersion.getMajorJavaVersion() == JdkVersion.JAVA_13) 
+	        return;
+	    
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "${myName}");
