@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -75,7 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.41 2004-06-02 00:47:17 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.42 2004-06-09 06:15:03 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -483,7 +484,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return nestedBw.getPropertyValue(tokens[0], tokens[1], tokens[2]);
 	}
 
-	private Object getPropertyValue(String propertyName, String actualName, String key) throws BeansException {
+	protected Object getPropertyValue(String propertyName, String actualName, String key) throws BeansException {
 		PropertyDescriptor pd = getPropertyDescriptorInternal(actualName);
 		if (pd == null || pd.getReadMethod() == null) {
 			throw new NotReadablePropertyException(getWrappedClass(), this.nestedPath + propertyName);
@@ -568,8 +569,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 		nestedBw.setPropertyValue(tokens[0], tokens[1], tokens[2], value);
 	}
 
-	private void setPropertyValue(String propertyName, String actualName, String key, Object value)
+	protected void setPropertyValue(String propertyName, String actualName, String key, Object value)
 			throws BeansException {
+
 		if (key != null) {
 			Object propValue = null;
 			try {
@@ -625,6 +627,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 																					 value + "]");
 			}
 		}
+
 		else {
 			if (!isWritableProperty(propertyName)) {
 				throw new NotWritablePropertyException(getWrappedClass(), this.nestedPath + propertyName);
@@ -769,38 +772,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 																							 Class requiredType) throws BeansException {
 		if (newValue != null) {
 
-			if (requiredType != null && requiredType.isArray()) {
-				// convert individual elements to array elements
-				Class componentType = requiredType.getComponentType();
-				if (newValue instanceof List) {
-					List list = (List) newValue;
-					Object result = Array.newInstance(componentType, list.size());
-					for (int i = 0; i < list.size(); i++) {
-						Object value = doTypeConversionIfNecessary(propertyName,
-																											 propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-																											 null, list.get(i), componentType);
-						Array.set(result, i, value);
-					}
-					return result;
-				}
-				else if (newValue instanceof Object[]) {
-					Object[] array = (Object[]) newValue;
-					Object result = Array.newInstance(componentType, array.length);
-					for (int i = 0; i < array.length; i++) {
-						Object value = doTypeConversionIfNecessary(propertyName,
-																											 propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-																											 null, array[i], componentType);
-						Array.set(result, i, value);
-					}
-					return result;
-				}
-			}
-
 			// custom editor for this type?
 			PropertyEditor pe = findCustomEditor(requiredType, fullPropertyName);
 
 			// value not of required type?
-			if (pe != null || (requiredType != null && !requiredType.isAssignableFrom(newValue.getClass()))) {
+			if (pe != null ||
+					(requiredType != null &&
+					 (requiredType.isArray() || !requiredType.isAssignableFrom(newValue.getClass())))) {
 
 				if (pe == null && requiredType != null) {
 					// no custom editor -> check BeanWrapperImpl's default editors
@@ -811,7 +789,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 					}
 				}
 
-				if (newValue instanceof String[]) {
+				if (requiredType != null && !requiredType.isArray() && newValue instanceof String[]) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Converting String array to comma-delimited String [" + newValue + "]");
 					}
@@ -833,10 +811,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 																							requiredType, ex);
 						}
 					}
-					else {
-						throw new TypeMismatchException(createPropertyChangeEvent(fullPropertyName, oldValue, newValue),
-																						requiredType);
-					}
 				}
 
 				else if (pe != null) {
@@ -853,15 +827,52 @@ public class BeanWrapperImpl implements BeanWrapper {
 																						requiredType, ex);
 					}
 				}
+
+				if (newValue != null && requiredType != null && requiredType.isArray()) {
+					Class componentType = requiredType.getComponentType();
+					if (newValue instanceof Collection) {
+						// convert individual elements to array elements
+						Collection coll = (Collection) newValue;
+						Object result = Array.newInstance(componentType, coll.size());
+						int i = 0;
+						for (Iterator it = coll.iterator(); it.hasNext(); i++) {
+							Object value = doTypeConversionIfNecessary(propertyName,
+																												 propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+																												 null, it.next(), componentType);
+							Array.set(result, i, value);
+						}
+						return result;
+					}
+					else if (newValue.getClass().isArray()) {
+						// convert individual elements to array elements
+						int arrayLength = Array.getLength(newValue);
+						Object result = Array.newInstance(componentType, arrayLength);
+						for (int i = 0; i < arrayLength; i++) {
+							Object value = doTypeConversionIfNecessary(propertyName,
+																												 propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+																												 null, Array.get(newValue, i), componentType);
+							Array.set(result, i, value);
+						}
+						return result;
+					}
+					else {
+						// a plain value: convert it to an array with a single component
+						Object result = Array.newInstance(componentType, 1) ;
+						Object val = doTypeConversionIfNecessary(propertyName,
+																										 propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
+																										 null, newValue, componentType);
+						Array.set(result, 0, val);
+						return result;
+					}
+				}
 			}
 
-			if (requiredType != null && requiredType.isArray() && !newValue.getClass().isArray()) {
-				Class componentType = requiredType.getComponentType();
-				Object result = Array.newInstance(componentType, 1) ;
-				Object val = doTypeConversionIfNecessary(propertyName, propertyName + "[0]",
-																								 null, newValue, componentType);
-				Array.set(result, 0, val) ;
-				return result;
+			// Throw explicit TypeMismatchException with full context information
+			// if the resulting value definitely doesn't match the required type.
+			if (newValue != null && requiredType != null && !requiredType.isPrimitive() &&
+					!requiredType.isAssignableFrom(newValue.getClass())) {
+				throw new TypeMismatchException(createPropertyChangeEvent(fullPropertyName, oldValue, newValue),
+																				requiredType);
 			}
 		}
 

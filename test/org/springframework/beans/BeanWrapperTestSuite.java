@@ -21,14 +21,19 @@ import java.beans.PropertyEditorSupport;
 import java.beans.PropertyVetoException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanWrapperTestSuite.java,v 1.21 2004-06-02 00:46:00 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.22 2004-06-09 06:14:37 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -270,19 +275,81 @@ public class BeanWrapperTestSuite extends TestCase {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 
-		bw.setPropertyValue("stringArray", "foo,fi,fi,fum");
-		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
-		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
-		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
-
 		bw.setPropertyValue("stringArray", new String[] {"foo", "fi", "fi", "fum"});
 		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 
+		List list = new ArrayList();
+		list.add("foo");
+		list.add("fi");
+		list.add("fi");
+		list.add("fum");
+		bw.setPropertyValue("stringArray", list);
+		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
+		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
+		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+
+		Set set = new HashSet();
+		set.add("foo");
+		set.add("fi");
+		set.add("fum");
+		bw.setPropertyValue("stringArray", set);
+		assertTrue("stringArray length = 3", pt.stringArray.length == 3);
+		List result = Arrays.asList(pt.stringArray);
+		assertTrue("correct values", result.contains("foo") && result.contains("fi") && result.contains("fum"));
+
 		bw.setPropertyValue("stringArray", "one");
 		assertTrue("stringArray length = 1", pt.stringArray.length == 1);
 		assertTrue("stringArray elt is ok", pt.stringArray[0].equals("one"));
+
+		bw.setPropertyValue("stringArray", "foo,fi,fi,fum");
+		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
+		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
+		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+	}
+
+	public void testStringArrayPropertyWithCustomEditor() throws Exception {
+		PropsTest pt = new PropsTest();
+		BeanWrapper bw = new BeanWrapperImpl(pt);
+		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			public void setAsText(String text) {
+				setValue(text.substring(1));
+			}
+		});
+
+		bw.setPropertyValue("stringArray", new String[] {"4foo", "7fi", "6fi", "5fum"});
+		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
+		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
+		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+
+		List list = new ArrayList();
+		list.add("4foo");
+		list.add("7fi");
+		list.add("6fi");
+		list.add("5fum");
+		bw.setPropertyValue("stringArray", list);
+		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
+		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
+		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+
+		Set set = new HashSet();
+		set.add("4foo");
+		set.add("7fi");
+		set.add("6fum");
+		bw.setPropertyValue("stringArray", set);
+		assertTrue("stringArray length = 3", pt.stringArray.length == 3);
+		List result = Arrays.asList(pt.stringArray);
+		assertTrue("correct values", result.contains("foo") && result.contains("fi") && result.contains("fum"));
+
+		bw.setPropertyValue("stringArray", "8one");
+		assertTrue("stringArray length = 1", pt.stringArray.length == 1);
+		assertTrue("correct values", pt.stringArray[0].equals("one"));
+
+		bw.setPropertyValue("stringArray", "1foo,3fi,2fi,1fum");
+		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
+		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
+		                             pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 	}
 
 	public void testIntArrayProperty() {
@@ -299,11 +366,74 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
 		                             pt.intArray[2] == 2 && pt.intArray[3] == 3);
 
+		List list = new ArrayList();
+		list.add(new Integer(4));
+		list.add("5");
+		list.add(new Integer(2));
+		list.add("3");
+		bw.setPropertyValue("intArray", list);
+		assertTrue("intArray length = 4", pt.intArray.length == 4);
+		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
+		                             pt.intArray[2] == 2 && pt.intArray[3] == 3);
+
+		Set set = new HashSet();
+		set.add("4");
+		set.add(new Integer(5));
+		set.add("3");
+		bw.setPropertyValue("intArray", set);
+		assertTrue("intArray length = 3", pt.intArray.length == 3);
+		List result = new ArrayList();
+		result.add(new Integer(pt.intArray[0]));
+		result.add(new Integer(pt.intArray[1]));
+		result.add(new Integer(pt.intArray[2]));
+		assertTrue("correct values", result.contains(new Integer(4)) && result.contains(new Integer(5)) &&
+																 result.contains(new Integer(3)));
+
+		bw.setPropertyValue("intArray", new Integer[] {new Integer(1)});
+		assertTrue("intArray length = 4", pt.intArray.length == 1);
+		assertTrue("correct values", pt.intArray[0] == 1);
+
 		bw.setPropertyValue("intArray", new Integer(1));
 		assertTrue("intArray length = 4", pt.intArray.length == 1);
 		assertTrue("correct values", pt.intArray[0] == 1);
 
 		bw.setPropertyValue("intArray", new String[] {"1"});
+		assertTrue("intArray length = 4", pt.intArray.length == 1);
+		assertTrue("correct values", pt.intArray[0] == 1);
+
+		bw.setPropertyValue("intArray", "1");
+		assertTrue("intArray length = 4", pt.intArray.length == 1);
+		assertTrue("correct values", pt.intArray[0] == 1);
+	}
+
+	public void testIntArrayPropertyWithCustomEditor() {
+		PropsTest pt = new PropsTest();
+		BeanWrapper bw = new BeanWrapperImpl(pt);
+		bw.registerCustomEditor(int.class, new PropertyEditorSupport() {
+			public void setAsText(String text) {
+				setValue(new Integer(Integer.parseInt(text) + 1));
+			}
+		});
+
+		bw.setPropertyValue("intArray", new int[] {4, 5, 2, 3});
+		assertTrue("intArray length = 4", pt.intArray.length == 4);
+		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
+		                             pt.intArray[2] == 2 && pt.intArray[3] == 3);
+
+		bw.setPropertyValue("intArray", new String[] {"3", "4", "1", "2"});
+		assertTrue("intArray length = 4", pt.intArray.length == 4);
+		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
+		                             pt.intArray[2] == 2 && pt.intArray[3] == 3);
+
+		bw.setPropertyValue("intArray", new Integer(1));
+		assertTrue("intArray length = 4", pt.intArray.length == 1);
+		assertTrue("correct values", pt.intArray[0] == 1);
+
+		bw.setPropertyValue("intArray", new String[] {"0"});
+		assertTrue("intArray length = 4", pt.intArray.length == 1);
+		assertTrue("correct values", pt.intArray[0] == 1);
+
+		bw.setPropertyValue("intArray", "0");
 		assertTrue("intArray length = 4", pt.intArray.length == 1);
 		assertTrue("correct values", pt.intArray[0] == 1);
 	}
