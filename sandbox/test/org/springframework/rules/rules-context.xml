@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+  	<bean id="rulesSource" class="org.springframework.rules.DefaultRulesSource">
+  		<property name="beanRules">
+  			<list>
+				<bean class="org.springframework.rules.Rules">
+					<property name="beanClass"><value>org.springframework.samples.petclinic.Person</value></property>
+	  				<property name="propertyRules">
+	  		 			<map>
+	  		 				<entry key="firstName">
+	  							<bean class="org.springframework.rules.predicates.Required"/>
+	  		 				</entry>
+	  					</map>
+	  				</property>
+				</bean>
+			</list>
+  		</property>
+  	</bean>
+</beans>
