@@ -98,10 +98,11 @@
 		<title>The <literal>DispatcherServlet</literal></title>
 		
 		<para>
-			Spring's web framework is - like many other web frameworks - designed around a servlet that dispatches requests
-			to controller and offers other functionality facilitating the development of webapplications. Spring's
-			<literal>DispatcherServlet</literal> however, does more than just that. It is completely integrated with
-			the Spring ApplicationContext and makes fully use of that.
+			Spring's web framework is - like many other web frameworks - a request driven web framework, designed around a 
+			servlet that dispatches requests to controllers and offers other functionality facilitating the development 
+			of webapplications. Spring's <literal>DispatcherServlet</literal> however, does more than just that. It is 
+			completely integrated with the Spring ApplicationContext and allows you to use every other feature Spring
+			has.
 		</para>
 		
 		<para>
@@ -136,7 +137,7 @@
 		<para>
 			The <literal>WebApplicationContext</literal> is just an ordinary ApplicationContext that has some extra features
 			necessary for webapplications. It differs from a normal ApplicationContext in that it is capable of resolving
-			themes (see <xref linkend="mvc-themes"/>) and that is knows to which servlet it is associated (by having a link
+			themes (see <xref linkend="mvc-themes"/>), and that is knows to which servlet it is associated (by having a link
 			to the <literal>ServletContext</literal>). The WebApplicationContext is bound in the ServletContext, and using
 			<literal>RequestContextUtils</literal> you can always lookup the WebApplicationContext in case you need it.
 		</para>
@@ -198,6 +199,11 @@
 						<entry>(<xref linkend="mvc-multipart"/>) offers functionality to process file uploads from HTML forms
 						</entry>
 					</row>
+					<row>
+						<entry>handlerexception resolver</entry>
+						<entry>(<xref linkend="exceptionhandlers"/>) offers functionality to
+							map exceptions to views or implement other more complex exception handling code</entry>
+					</row>
 				</tbody>
 			</tgroup>
 		</table>
@@ -258,16 +264,64 @@
 		</para>
 		
 		<para>
+			Exception that might be thrown during processing of the request get picked up by any of the
+			handlerexception resolvers that are declared in the WebApplicationContext. Using those exception
+			resolvers you can define custom behavior in case such exceptions get thrown.
+		</para>
+		
+		<para>
 			The Spring DispatcherServlet also has support for returning the <emphasis>last-modification-date</emphasis>, 
 			as specified by the Servlet API. The process of determining the last modification date for a specific
 			request, is simple. The DispatcherServlet will first of all lookup an appropriate handler mapping 
 			and test is the handler that matched <emphasis>implements the interface <literal>LastModified</literal></emphasis>
 			and if so, the value the of <literal>long getLastModified(request)</literal> is returned to the client.
-		</para>	
+		</para>
 		
 		<para>
-			TODO: initialization parameters of the servlet
+			You can customize Spring's DispatcherServlet by adding context parameters in the
+			<literal>web.xml</literal> file or servlet init parameters. The possibilities are
+			listed below.
 		</para>
+		
+		<table frame="all">
+			<title>DispatcherServlet initialization parameters</title>
+			<tgroup cols="2">
+				<colspec colname="c1" colwidth="1*"/>
+				<colspec colname="c2" colwidth="4*"/>
+				<thead>
+					<row>
+						<entry>Parameter</entry>
+						<entry>Explanation</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry><literal>contextClass</literal></entry>
+						<entry>Class that implements <literal>WebApplicationContext</literal>, which
+							will be used to instantiate the context used by this servlet. If this
+							parameter isn't specified, the <literal>XmlWebApplicationContext</literal>
+							will be used
+						</entry>
+					</row>
+					<row>
+						<entry><literal>contextConfigLocation</literal></entry>
+						<entry>String which is passed to the context instance (specified by
+							<literal>contextClass</literal>) to indicate where context(s) can
+							be found. The String is potentially split up into multiple strings
+							(using a comma as a delimiter) to support multiple contexts
+							(in case of multiple context locations, of beans that are defined
+							twice, the latest takes precedence)
+						</entry>
+					</row>
+					<row>
+						<entry>namespace</entry>
+						<entry>the namespace of the <literal>WebApplicationContext</literal>.
+							Defaults to <literal>[server-name]-servlet</literal>
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
 		
 	</sect1>
 	

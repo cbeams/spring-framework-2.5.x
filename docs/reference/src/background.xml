@@ -1,20 +1,17 @@
 <chapter id="background">
 
-    <title>Background articles</title>
+    <title>Background information</title>
     
     <sect1 id="background-ioc">
-    	<title>Inversion of Control</title>
+    	<title>Inversion of Control / Dependency Injection</title>
     	<para>
-    		This is supposed to be a background article about Inversion of Control in order
-    		to give users a better feeling of why they actually should use IoC in general and Spring
-    		specifically.
-		</para>
-	</sect1>
-	
-	<sect1 id="background-mvc">
-    	<title>Model-View-Controller pattern (MVC)</title>
-    	<para>
-    		This is supposed to be a background article about Model View Controller.
+    		Early 2004, Martin Fowler asked the readers of his site: when talking about Inversion 
+    		of Control: <emphasis>"the question, is what aspect of control are they inverting?"</emphasis>.
+    		After talking a bit about the term Inversion of Control Martin suggests to rename the 
+    		pattern or at least, give it a more self-explanatory name and starts to use the
+    		term <emphasis>Dependency Injection</emphasis>. His article continues to explain some of 
+    		the ideas behind Inversion of Control or Dependency Injection. If you need a decent
+    		insight: <ulink url="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</ulink>.
 		</para>
 	</sect1>
 
