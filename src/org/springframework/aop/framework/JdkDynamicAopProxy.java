@@ -107,8 +107,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				// What if equals throws exception!?
 
 				// This class implements the equals() method itself
-				// TODO change to ternary on canonical
-				return new Boolean(equals(args[0]));
+				return equals(args[0]) ? Boolean.TRUE : Boolean.FALSE;
 			}
 			else if (Advised.class == method.getDeclaringClass()) {
 				// Service invocations on ProxyConfig with the proxy config
