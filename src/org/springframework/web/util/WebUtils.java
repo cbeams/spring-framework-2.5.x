@@ -1,9 +1,9 @@
 package org.springframework.web.util;
 
+import java.io.File;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.File;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -34,8 +34,8 @@ public abstract class WebUtils {
 	 */
 	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
-	/** Name suffix in case of image buttons */
-	public static final String SUBMIT_IMAGE_SUFFIX = ".x";
+	/** Name suffixes in case of image buttons */
+	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
 
 	/**
 	 * Set a system property to the web application root directory.
@@ -240,14 +240,24 @@ public abstract class WebUtils {
 
 	/**
 	 * Checks if a specific input type="submit" parameter was sent in the request,
-	 * either via a button (directly with name) or via an image (name + ".x").
+	 * either via a button (directly with name) or via an image (name + ".x" or
+	 * name + ".y").
 	 * @param request current HTTP request
 	 * @param name name of the parameter
 	 * @return if the parameter was sent
-	 * @see #SUBMIT_IMAGE_SUFFIX
+	 * @see #SUBMIT_IMAGE_SUFFIXES
 	 */
 	public static boolean hasSubmitParameter(ServletRequest request, String name) {
-		return (request.getParameter(name) != null || request.getParameter(name + SUBMIT_IMAGE_SUFFIX) != null);
+		if (request.getParameter(name) != null) {
+			return true;
+		}
+		for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
+			String suffix = SUBMIT_IMAGE_SUFFIXES[i];
+			if (request.getParameter(name + suffix) != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
