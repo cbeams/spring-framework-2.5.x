@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.flow.config;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,8 +22,12 @@ import junit.framework.TestCase;
 
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionResult;
+import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.SubFlowState;
+import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.action.AbstractAction;
 
 /**
@@ -34,6 +37,8 @@ import org.springframework.web.flow.action.AbstractAction;
  * @author Colin Sampaleanu
  */
 public class AbstractFlowBuilderTests extends TestCase {
+
+	private String PERSONS_LIST = "persons";
 
 	private static String PERSON_DETAILS = "personDetails";
 
@@ -55,7 +60,17 @@ public class AbstractFlowBuilderTests extends TestCase {
 				}
 			}
 		});
-		new FlowFactoryBean(master).getFlow();
+		Flow flow = new FlowFactoryBean(master).getFlow();
+		assertEquals("persons", flow.getId());
+		assertTrue(flow.getStateCount() == 4);
+		assertTrue(flow.containsState("persons.get"));
+		assertTrue(flow.getState("persons.get") instanceof ActionState);
+		assertTrue(flow.containsState("persons.view"));
+		assertTrue(flow.getState("persons.view") instanceof ViewState);
+		assertTrue(flow.containsState("personDetails"));
+		assertTrue(flow.getState("personDetails") instanceof SubFlowState);
+		assertTrue(flow.containsState("finish"));
+		assertTrue(flow.getState("finish") instanceof EndState);
 	}
 
 	public void testNoBeanFactorySet() {
@@ -70,8 +85,6 @@ public class AbstractFlowBuilderTests extends TestCase {
 	}
 
 	private class TestMasterFlowDependencyLookup extends AbstractFlowBuilder {
-		private String PERSONS_LIST = "persons";
-
 		protected String flowId() {
 			return PERSONS_LIST;
 		}

@@ -163,6 +163,14 @@ public class Flow implements Serializable {
 	}
 
 	/**
+	 * Returns the number of states managed by this flow.
+	 * @return The state count.
+	 */
+	public int getStateCount() {
+		return this.states.size();
+	}
+
+	/**
 	 * Returns an ordered iterator over the state definitions of this flow. The
 	 * order is determined by the order in which the states were added.
 	 * @return The states iterator
