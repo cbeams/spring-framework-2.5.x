@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.181 2004-07-06 15:51:00 jhoeller Exp $
+$Id: changelog.txt,v 1.182 2004-07-09 17:39:01 jhoeller Exp $
 
 
-Changes in version 1.1 RC1 (11.7.2004)
+Changes in version 1.1 RC1 (19.7.2004)
 --------------------------------------
 
 Package org.springframework.aop
@@ -18,11 +18,12 @@ Package org.springframework.beans
 * refined BeanWrapperImpl to automatically convert a value to an array with a single component when necessary
 * refined BeanWrapperImpl to support converting any Collection into an array rather than just a List
 * fixed PropertiesEditor's support for converting a Map to Properties
-* fixed PropertyPlaceholderConfigurer's parsing to detect all inner bean definitions (including BeanDefinitionHolder)
 * added ArgumentConvertingMethodInvoker subclass of MethodInvoker, converting given arguments via BeanWrapperImpl
 * MethodInvokingFactoryBean derives from ArgumentConvertingMethodInvoker to inherit argument conversion
 * fixed MethodInvokingFactoryBean's singleton initialization to properly allow for circular reference detection
 * fixed PropertyPlaceholderConfigurer's circular reference detection to allow repeated placeholder in single value
+* fixed PropertyPlaceholderConfigurer's parsing to detect all inner bean definitions (including BeanDefinitionHolder)
+* PropertyPlaceholderConfigurer detects and parses placeholders in map keys, rather than just in map values
 * PropertyPlaceholderConfigurer and PropertiesFactoryBean respect the defaults of a given Properties instance
 * AbstractAutowireCapableBeanFactory's "autowireConstructor" regards all constructors, just preferring public ones
 * reworked root/child bean definition concept, allowing to override any settings in a child (including class name)
@@ -86,6 +87,7 @@ Package org.springframework.orm
 * added "contains", "clear", "delete", "iterate" to HibernateOperations/HibernateTemplate, analogous to Session
 * added "cacheQueries" property to HibernateTemplate, for marking all executed queries as cacheable
 * HibernateTransactionManager and HibernateAccessor use SQLErrorCodeSQLExceptionTranslator if DataSource available
+* added deferred close option to OpenSessionInViewFilter/Interceptor, as alternative to a single session per request
 * added "dataSource2" property to LocalPersistenceManagerFactoryBean
 * added JdoObjectRetrievalFailureException and JdoOptimisticLockingFailureException
 * refined PersistenceManagerFactoryUtils' "convertJdoAccessException" implementation to become more fine-granular
@@ -125,6 +127,7 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * added IntrospectorCleanupListener to web.util package, for cleaning up JavaBeans Introspector leaks on shutdown
+* fixed UrlPathHelper to return servlet path for lookup if request URI does not contain servlet path (e.g. index page)
 * added "getContextLoader" accessor to ContextLoaderListener and ContextLoaderServlet
 * deprecated RequestHandledEvent's getURL/getTimeMillis/getIpAddress -> getRequestUrl/getProcessingTime/getClientAddress
 * added optional "sessionId" and "userName" fields to RequestHandledEvent, for easier session and user tracking
