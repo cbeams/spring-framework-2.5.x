@@ -28,7 +28,7 @@ import javax.sql.DataSource;
  * @since 28.11.2003
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
-public class JdbcAccessor {
+public abstract class JdbcAccessor {
 
 	/**
 	 * Used to obtain connections throughout the lifecycle of this object.
@@ -56,7 +56,7 @@ public class JdbcAccessor {
 
 	/**
 	 * Set the exception translator for this instance.
-	 * If no custom translator is provided, a default is used
+	 * <p>If no custom translator is provided, a default is used
 	 * which examines the SQLException's vendor-specific error code.
 	 * @param exceptionTranslator exception translator
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
@@ -68,7 +68,7 @@ public class JdbcAccessor {
 
 	/**
 	 * Return the exception translator for this instance.
-	 * Creates a default one for the specified DataSource if none set.
+	 * <p>Creates a default one for the specified DataSource if none set.
 	 */
 	public SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
