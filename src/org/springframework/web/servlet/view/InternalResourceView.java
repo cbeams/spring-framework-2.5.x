@@ -5,7 +5,6 @@
  
 package org.springframework.web.servlet.view;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -23,7 +22,7 @@ import org.springframework.web.util.WebUtils;
  * to the specified resource URL using a RequestDispatcher.
  *
  * @author Rod Johnson
- * @version $Id: InternalResourceView.java,v 1.5 2003-12-12 19:46:13 jhoeller Exp $
+ * @version $Id: InternalResourceView.java,v 1.6 2003-12-15 03:53:40 colins Exp $
  */
 public class InternalResourceView extends AbstractView {
 

@@ -5,16 +5,11 @@
  
 package org.springframework.aop.framework;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * TODO reentrance tests
  * @author Rod Johnson
- * @version $Id: ThreadLocalMethodInvocationFactory.java,v 1.6 2003-12-10 12:05:25 johnsonr Exp $
+ * @version $Id: ThreadLocalMethodInvocationFactory.java,v 1.7 2003-12-15 03:53:40 colins Exp $
  */
 public class ThreadLocalMethodInvocationFactory extends SimpleMethodInvocationFactory {
 	

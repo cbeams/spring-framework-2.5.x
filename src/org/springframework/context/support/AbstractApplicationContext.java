@@ -32,7 +32,6 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventMulticaster;
 import org.springframework.context.ApplicationListener;
@@ -63,7 +62,7 @@ import org.springframework.util.ClassLoaderUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME

@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,7 +34,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.4 2003-12-12 19:46:13 jhoeller Exp $
+ * @version $Id: AbstractView.java,v 1.5 2003-12-15 03:53:40 colins Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View {
