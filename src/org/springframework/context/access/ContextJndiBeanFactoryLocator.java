@@ -22,20 +22,66 @@
 
 package org.springframework.context.access;
 
+import javax.naming.NamingException;
+
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
-import org.springframework.beans.factory.access.JndiBeanFactoryLocator;
+import org.springframework.beans.factory.access.BootstrapException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.util.StringUtils;
 
 /**
- * Subclass of JndiBeanFactoryLocator which creates a
- * ClassPathXmlApplicationContext instead of a DefaultListableBeanFactory.
- * Operates identically in every other respect.
- *  
+ * BeanFactoryLocator implementation that creates the BeanFactory from one or
+ * more classpath locations specified in one JNDI environment variable.
+ *
+ * <p>This default implementation creates a ClassPathXmlApplicationContext.
+ * Subclasses may override createBeanFactory for custom instantiation.
+ *
  * @author Colin Sampaleanu
+ * @author Juergen Hoeller
  */
-public class ContextJndiBeanFactoryLocator extends JndiBeanFactoryLocator {
+public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements BeanFactoryLocator {
 
+	/**
+	 * Any number of these characters are considered delimiters between
+	 * multiple bean factory config paths in a single String value.
+	 */
+	public static final String BEAN_FACTORY_PATH_DELIMITERS = ",; \t\n";
+
+	/**
+	 * Load/use a bean factory, as specified by a factoryKey which is a JNDI
+	 * address, of the form <code>java:comp/env/ejb/BeanFactoryPath</code>. The
+	 * contents of this JNDI location must be a string containing one or more
+	 * classpath resource names (separated by any of the delimiters
+	 * '<code>,; \t\n</code>' if there is more than one. The resulting
+	 * BeanFactory (or subclass) will be created from the combined resources.
+	 */
+	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
+		String beanFactoryPath = null;
+		try {
+			beanFactoryPath = (String) lookup(factoryKey);
+			if (logger.isInfoEnabled()) {
+				logger.info("Bean factory path from JNDI environment variable [" + factoryKey +
+						"] is: " + beanFactoryPath);
+			}
+			String[] paths = StringUtils.tokenizeToStringArray(beanFactoryPath, BEAN_FACTORY_PATH_DELIMITERS);
+			return createBeanFactory(paths);
+		}
+		catch (NamingException ex) {
+			throw new BootstrapException("Define an environment variable [" + factoryKey + "] containing " +
+					"the class path locations of XML bean definition files", ex);
+		}
+	}
+
+	/**
+	 * Actually create the BeanFactory, given an array of class path resource strings
+	 * which should be combined. This is split out as a separate method so that subclasses
+	 * can override the actual type uses (to be an ApplicationContext, for example).
+	 * @param resources an array of Strings representing classpath resource names
+	 * @return the created BeanFactory, wrapped in a BeanFactoryReference
+	 */
 	protected BeanFactoryReference createBeanFactory(String[] resources) throws BeansException {
 		return new ContextBeanFactoryReference(new ClassPathXmlApplicationContext(resources));
 	}

@@ -16,43 +16,100 @@
 
 package org.springframework.context.access;
 
+import junit.framework.TestCase;
+
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.access.JndiBeanFactoryLocator;
-import org.springframework.beans.factory.access.JndiBeanFactoryLocatorTests;
+import org.springframework.beans.factory.access.BootstrapException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 /**
  * @author Colin Sampaleanu
  */
-public class ContextJndiBeanFactoryLocatorTests extends JndiBeanFactoryLocatorTests {
+public class ContextJndiBeanFactoryLocatorTests extends TestCase {
 
-	/**
-	 * Override default imple to use JndiBeanFactoryLocator instead of Simple variant
-	 */
-	private JndiBeanFactoryLocator createLocator() {
-		JndiBeanFactoryLocator jbfl = new ContextJndiBeanFactoryLocator();
-		return jbfl;
+	public static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
+
+	public void testBeanFactoryPathRequiredFromJndiEnvironment() throws Exception {
+		// Set up initial context but don't bind anything
+		SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+
+		ContextJndiBeanFactoryLocator jbfl = new ContextJndiBeanFactoryLocator();
+		try {
+			jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
+			fail();
+		}
+		catch (BootstrapException ex) {
+			// Check for helpful JNDI message
+			assertTrue(ex.getMessage().indexOf(BEAN_FACTORY_PATH_ENVIRONMENT_KEY) != -1);
+		}
 	}
 
-	/**
-	 * Do an extra test to make sure we are actually working with an ApplicationContext,
-	 * not a BeanFactory
-	 */
-	public void testBeanFactoryPathFromJndiEnvironmentWithSingleFile()
-			throws Exception {
-		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder
-				.emptyActivatedContextBuilder();
+	public void testBeanFactoryPathFromJndiEnvironmentNotFound() throws Exception  {
+		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
-		String path = "/org/springframework/beans/factory/xml/collections.xml";
+		String bogusPath = "RUBBISH/com/xxxx/framework/server/test1.xml";
+
+		// Set up initial context
+		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, bogusPath);
+
+		ContextJndiBeanFactoryLocator jbfl = new ContextJndiBeanFactoryLocator();
+		try {
+			jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
+			fail();
+		}
+		catch (BeansException ex) {
+			// Check for helpful JNDI message
+			assertTrue(ex.getMessage().indexOf(bogusPath) != -1);
+		}
+	}
+
+	public void testBeanFactoryPathFromJndiEnvironmentNotValidXml() throws Exception {
+		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+
+		String nonXmlPath = "com/xxxx/framework/server/SlsbEndpointBean.class";
+
+		// Set up initial context
+		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, nonXmlPath);
+
+		ContextJndiBeanFactoryLocator jbfl = new ContextJndiBeanFactoryLocator();
+		try {
+			jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
+			fail();
+		}
+		catch (BeansException ex) {
+			// Check for helpful JNDI message
+			assertTrue(ex.getMessage().indexOf(nonXmlPath) != -1);
+		}
+	}
+
+	public void testBeanFactoryPathFromJndiEnvironmentWithSingleFile() throws Exception {
+		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+
+		String path = "org/springframework/beans/factory/xml/collections.xml";
 
 		// Set up initial context
 		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, path);
 
-		JndiBeanFactoryLocator jbfl = createLocator();
-		BeanFactory bf = jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY)
-				.getFactory();
+		ContextJndiBeanFactoryLocator jbfl = new ContextJndiBeanFactoryLocator();
+		BeanFactory bf = jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY).getFactory();
+		assertTrue(bf.containsBean("rod"));
 		assertTrue(bf instanceof ApplicationContext);
+	}
+
+	public void testBeanFactoryPathFromJndiEnvironmentWithMultipleFiles() throws Exception {
+		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+
+		String path = "/org/springframework/beans/factory/xml/collections.xml /org/springframework/beans/factory/xml/parent.xml";
+
+		// Set up initial context
+		sncb.bind(BEAN_FACTORY_PATH_ENVIRONMENT_KEY, path);
+
+		ContextJndiBeanFactoryLocator jbfl = new ContextJndiBeanFactoryLocator();
+		BeanFactory bf = jbfl.useBeanFactory(BEAN_FACTORY_PATH_ENVIRONMENT_KEY).getFactory();
+		assertTrue(bf.containsBean("rod"));
+		assertTrue(bf.containsBean("inheritedTestBean"));
 	}
 
 }

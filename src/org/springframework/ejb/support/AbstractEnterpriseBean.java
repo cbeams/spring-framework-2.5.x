@@ -33,15 +33,14 @@ import org.springframework.util.WeakReferenceMonitor;
  * logic deferred to beans in the BeanFactory.
  *
  * <p>Default is to use a ContextJndiBeanFactoryLocator, which will initialize an XML
- * ApplicationContext from the classpath (based on a JNDI name specified). For a slightly
- * lighter weight implementation when ApplicationContext usage is not required,
- * setBeanFactoryLocator may be called (<i>before</i> your EJB's ejbCreate method is
- * invoked, for example, in setSessionContext) with a JndiBeanFactoryLocator, which will
- * load an XML BeanFactory from the classpath. For use of a shared ApplicationContext
- * between mutliple EJBs, where the container classloader setup supports this visibility,
+ * ApplicationContext from the class path (based on a JNDI name specified). For a
+ * different locator strategy, <code>setBeanFactoryLocator</code> may be called
+ * (<i>before</i> your EJB's <code>ejbCreate method</code> is invoked, for example,
+ * in <code>setSessionContext</code>). For use of a shared ApplicationContext between
+ * multiple EJBs, where the container class loader setup supports this visibility,
  * you may instead use a ContextSingletonBeanFactoryLocator. Alternately,
- * setBeanFactoryLocator may be called with a completely custom implementation of
- * BeanFactoryLocator.
+ * <code>setBeanFactoryLocator</code> may be called with a completely custom
+ * implementation of the BeanFactoryLocator interface.
  *
  * <p>Note that we cannot use final for our implementation of EJB lifecycle methods,
  * as this violates the EJB specification.
@@ -50,7 +49,7 @@ import org.springframework.util.WeakReferenceMonitor;
  * @author Colin Sampaleanu
  * @see #setBeanFactoryLocator
  * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
- * @see org.springframework.beans.factory.access.JndiBeanFactoryLocator
+ * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  */
 abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
@@ -83,7 +82,6 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * @see AbstractMessageDrivenBean#ejbCreate
 	 * @see AbstractStatefulSessionBean#loadBeanFactory
 	 * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
-	 * @see org.springframework.beans.factory.access.JndiBeanFactoryLocator
 	 */
 	public void setBeanFactoryLocator(BeanFactoryLocator beanFactoryLocator) {
 		this.beanFactoryLocator = beanFactoryLocator;
