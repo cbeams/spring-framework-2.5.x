@@ -15,38 +15,10 @@
  */
 package org.springframework.rules.predicates;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.reporting.TypeResolvableSupport;
 
-/**
- * A constraint based on a regular expression pattern.
- * 
- * @author Keith Donald
- */
-public class RegexpConstraint extends TypeResolvableSupport implements
-        UnaryPredicate {
-    private Pattern pattern;
-
-    /**
-     * Creates a RegexpConstraint with the provided regular expression pattern
-     * string.
-     * 
-     * @param regex
-     *            The regular expression
-     */
-    public RegexpConstraint(String regex) {
-        pattern = Pattern.compile(regex);
-    }
-
-    public boolean test(Object argument) {
-        if (argument == null) {
-            argument = "";
-        }
-        Matcher m = pattern.matcher((CharSequence)argument);
-        return m.matches();
-    }
+public abstract class TypeResolvableUnaryPredicate extends
+        TypeResolvableSupport implements UnaryPredicate {
 
 }
