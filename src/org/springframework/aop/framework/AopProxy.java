@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.6 2003-11-12 14:59:55 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.7 2003-11-14 09:23:20 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -85,33 +85,41 @@ public class AopProxy implements InvocationHandler {
 	 */
 	public final Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 	
-		MethodInvocation invocation = this.methodInvocationFactory.getMethodInvocation(this.config, proxy, method, args);
-		
-		if (this.config.getExposeInvocation()) {
-			// Make invocation available if necessary
-			AopContext.setCurrentInvocation(invocation);
-		}
-		
+		MethodInvocation invocation = null;
 		try {
 			// Try special rules for equals() method and implementation of the
 			// ProxyConfig AOP configuration interface
-			if (EQUALS_METHOD.equals(invocation.getMethod())) {
+			if (EQUALS_METHOD.equals(method)) {
 				// What if equals throws exception!?
-				logger.debug("Intercepting equals() method in proxy");
+
 				// This class implements the equals() method itself
-				return invocation.getMethod().invoke(this, invocation.getArguments());
+				return method.invoke(this, args);
 			}
-			else if (ProxyConfig.class.equals(invocation.getMethod().getDeclaringClass())) {
+			else if (ProxyConfig.class.equals(method.getDeclaringClass())) {
 				// Service invocations on ProxyConfig with the proxy config
-				return invocation.getMethod().invoke(this.config, invocation.getArguments());
+				return method.invoke(this.config, args);
+			}
+			/*
+			else if no advice... and have target
+				// Service invocations on ProxyConfig with the proxy config
+				return method.invoke(this.config.getTarget(), args);
+			}
+			*/
+			
+			// Looks like we need to create a method invocation...
+			invocation = this.methodInvocationFactory.getMethodInvocation(this.config, proxy, method, args);
+		
+			if (this.config.getExposeInvocation()) {
+				// Make invocation available if necessary
+				AopContext.setCurrentInvocation(invocation);
 			}
 			
+			// If we get here, we need to create a MethodInvocation
 			Object retVal = invocation.proceed();
 			if (retVal != null && retVal == invocation.getThis()) {
 				// Special case: it returned this
 				// Note that we can't help if the target sets
 				// a reference to itself in another returned object
-				logger.debug("Replacing 'this' with reference to proxy");
 				retVal = proxy;
 			}
 			return retVal;
@@ -119,6 +127,10 @@ public class AopProxy implements InvocationHandler {
 		finally {
 			if (this.config.getExposeInvocation()) {
 				AopContext.setCurrentInvocation(null);
+			}
+			if (invocation != null) {
+				// TODO move into AOP Alliance
+				((MethodInvocationImpl) invocation).clear();
 			}
 		}
 	}
@@ -138,7 +150,8 @@ public class AopProxy implements InvocationHandler {
 	public Object getProxy(ClassLoader cl) {
 		if (!this.config.getProxyTargetClass() && this.config.getProxiedInterfaces() != null && this.config.getProxiedInterfaces().length > 0) {
 			// Proxy specific interfaces: J2SE dynamic proxy is sufficient
-			logger.info("Creating J2SE proxy for [" + this.config.getTarget() + "]");
+			if (logger.isInfoEnabled())
+				logger.info("Creating J2SE proxy for [" + this.config.getTarget() + "]");
 			Class[] proxiedInterfaces = completeProxiedInterfaces();
 			return Proxy.newProxyInstance(cl, proxiedInterfaces, this);
 		}
@@ -148,7 +161,8 @@ public class AopProxy implements InvocationHandler {
 				throw new IllegalArgumentException("Either an interface or a target is required for proxy creation");
 			}
 			// proxy the given class itself: CGLIB necessary
-			logger.info("Creating CGLIB proxy for [" + this.config.getTarget() + "]");
+			if (logger.isInfoEnabled())
+				logger.info("Creating CGLIB proxy for [" + this.config.getTarget() + "]");
 			// delegate to inner class to avoid AopProxy runtime dependency on CGLIB
 			// --> J2SE proxies work without cglib.jar then
 			return (new CglibProxyFactory()).createProxy();
