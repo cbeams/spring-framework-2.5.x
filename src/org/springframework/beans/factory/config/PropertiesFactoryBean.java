@@ -2,6 +2,7 @@ package org.springframework.beans.factory.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -10,6 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.util.DefaultPropertiesPersister;
+import org.springframework.util.PropertiesPersister;
 
 /**
  * Allows for making a properties file from a classpath location available
@@ -34,6 +37,10 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	private Properties properties;
 
 	private Resource[] locations;
+
+	private String charset;
+
+	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
 
 	private boolean singleton = true;
 
@@ -61,6 +68,24 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	 */
 	public void setLocations(Resource[] locations) {
 		this.locations = locations;
+	}
+
+	/**
+	 * Set the charset to use for parsing properties files.
+	 * Default is none, using java.util.Properties' default charset.
+	 * @see org.springframework.util.PropertiesPersister#load
+	 */
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+
+	/**
+	 * Set the PropertiesPersister to use for parsing properties files.
+	 * The default is DefaultPropertiesPersister.
+	 * @see org.springframework.util.DefaultPropertiesPersister
+	 */
+	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
+		this.propertiesPersister = propertiesPersister;
 	}
 
 	/**
@@ -127,7 +152,12 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 			logger.info("Loading props file from " + location);
 			InputStream is = location.getInputStream();
 			try {
-				props.load(is);
+				if (this.charset != null) {
+					this.propertiesPersister.load(props, new InputStreamReader(is, this.charset));
+				}
+				else {
+					this.propertiesPersister.load(props, is);
+				}
 			}
 			finally {
 				is.close();
