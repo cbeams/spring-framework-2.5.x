@@ -4,7 +4,7 @@
  */
 package org.springframework.jms;
 
-import javax.jms.ConnectionFactory;
+
 
 /**
  * A helper class that simplifies sending of JMS messages.
@@ -14,27 +14,16 @@ import javax.jms.ConnectionFactory;
  */
 public interface JmsSender {
 	
-	/**
-	 * Get the connection factory to obtain JMS connections.
-	 * @return the JMS connection factory.
-	 */
-	ConnectionFactory getConnectionFactory();
-	
-	/**
-	 * Set the connection factory to obtain JMS connections
-	 * from.
-	 * @param cf The JMS connection factory.
-	 */
-	void setConnectionFactory(ConnectionFactory cf);
 
 	/**
 	 * Send a message to a supplied JMS destination.
-	 * @param jndiDestinationName
+	 * @param destinationName The destination name is looked up first looked up in JNDI.
+     * If it is not found then a call to 
 	 * @param messageCreator 
-	 * @throws JmsException spring converted JmsException
+	 * @throws JmsException converted checked JMSException to unchecked.
 	 */
-	public void send(final String jndiDestinationName,
-					 final MessageCreator messageCreator) throws JmsException;
+	public void send(final String destinationName,
+					  final MessageCreator messageCreator) throws JmsException;
 	
 	/*
 	//Send to a specified destination.  useful when replying to the destination

@@ -10,6 +10,8 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Session;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiTemplate;
 
@@ -33,6 +35,8 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	
 	//TODO this should maybe be done better...see AbstractJndiLocator
 	private final JndiTemplate _jndiTemplate = new JndiTemplate();
+    
+    protected final Log logger = LogFactory.getLog(getClass());
 	
 	/**
 	 * Set the JNDI environment to use for the JNDI lookup.
@@ -63,14 +67,16 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	}
 	
 	/**
-	 * @inheritDoc
+     * Return the connection factory used sending messages.
+	 * @return the connection factory.
 	 */
 	public ConnectionFactory getConnectionFactory() {
 		return _cf;
 	}
 
 	/**
-	 * @inheritDoc
+     * Set the connection factory used for sending messages.
+	 * @param cf the connection factory.
 	 */
 	public void setConnectionFactory(ConnectionFactory cf) {
 		_cf = cf;
@@ -86,32 +92,49 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 			throw new IllegalArgumentException("ConnectionFactory is required");
 		}
 	}
-	/**
-	 * @return
-	 */
+
+    /**
+     * Determine if acknowledgement mode of the JMS session used for sending a message. 
+     * @return The ack mode used for sending a message.
+     */
 	public int getSessionAcknowledgeMode() {
 		return _sessionAcknowledgeMode;
 	}
+    
+    /**
+     * Set the JMS acknowledgement mode that is used when creating a JMS session to send
+     * a message.  Vendor extensions to the acknowledgment mode can be set here as well.
+     * 
+     * Note that that inside an ejb the parameters to 
+     * create<Queue|Topic>Session(boolean transacted, int acknowledgeMode) method are not 
+     * taken into account.  Depending on the tx context in the ejb, the container makes its own
+     * decisions on these values.  See section 17.3.5 of the EJB Spec.
+     *  
+     * @param ackMode The acknowledgement mode.
+     */
+    public void setSessionAcknowledgeMode(int ackMode) {
+        _sessionAcknowledgeMode = ackMode;
+    }
 
 	/**
-	 * @return
+     * Determine if the JMS session used for sending a message is transacted.
+	 * @return Return true if using a transacted JMS session, false otherwise.
 	 */
 	public boolean isSessionTransacted() {
 		return _sessionTransacted;
 	}
 
-	/**
-	 * @param i
-	 */
-	public void setSessionAcknowledgeMode(int i) {
-		_sessionAcknowledgeMode = i;
-	}
-
-	/**
-	 * @param b
-	 */
-	public void setSessionTransacted(boolean b) {
-		_sessionTransacted = b;
-	}
+    /**
+     * Set the transaction mode that is used when creating a JMS session to send a message.
+     * 
+     * Note that that inside an ejb the parameters to 
+     * create<Queue|Topic>Session(boolean transacted, int acknowledgeMode) method are not 
+     * taken into account.  Depending on the tx context in the ejb, the container makes its own
+     * decisions on these values.  See section 17.3.5 of the EJB Spec. 
+     * @param txMode The transaction mode.
+     */
+	 public void setSessionTransacted(boolean txMode) {
+		_sessionTransacted = txMode;
+	 }
 
 }
