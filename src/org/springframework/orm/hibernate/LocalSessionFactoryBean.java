@@ -331,25 +331,13 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		// create Configuration instance
 		Configuration config = newConfiguration();
 
-		if (this.configLocation != null) {
-			// load Hibernate configuration from given location
-			config.configure(this.configLocation.getURL());
-		}
-
-		if (this.hibernateProperties != null) {
-			// add given Hibernate properties
-			config.addProperties(this.hibernateProperties);
-		}
-
 		if (this.dataSource != null) {
 			// make given DataSource available for SessionFactory configuration
-			config.setProperty(Environment.CONNECTION_PROVIDER, LocalDataSourceConnectionProvider.class.getName());
 			configTimeDataSourceHolder.set(this.dataSource);
 		}
 
 		if (this.jtaTransactionManager != null) {
-			// set Spring-provided JTA TransactionManager for Hibernate cache callbacks
-			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
+			// make Spring-provided JTA TransactionManager available
 			configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
 		}
 
@@ -367,6 +355,26 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		if (this.namingStrategy != null) {
 			// pass given naming strategy to Hibernate Configuration
 			config.setNamingStrategy(this.namingStrategy);
+		}
+
+		if (this.configLocation != null) {
+			// load Hibernate configuration from given location
+			config.configure(this.configLocation.getURL());
+		}
+
+		if (this.hibernateProperties != null) {
+			// add given Hibernate properties
+			config.addProperties(this.hibernateProperties);
+		}
+
+		if (this.dataSource != null) {
+			// set Spring-provided DataSource as Hibernate property
+			config.setProperty(Environment.CONNECTION_PROVIDER, LocalDataSourceConnectionProvider.class.getName());
+		}
+
+		if (this.jtaTransactionManager != null) {
+			// set Spring-provided JTA TransactionManager as Hibernate property
+			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
 		}
 
 		if (this.mappingLocations != null) {
