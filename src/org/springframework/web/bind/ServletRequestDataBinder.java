@@ -5,19 +5,25 @@
 
 package org.springframework.web.bind;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.validation.DataBinder;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
- * Use this class to perform manual data binding from servlet request parameters
- * to JavaBeans, including support for multipart files.
+ * Use this class to perform manual data binding from servlet request
+ * parameters to JavaBeans, including support for multipart files.
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
 public class ServletRequestDataBinder extends DataBinder {
+
+	private boolean bindEmptyMultipartFiles = true;
 
 	/**
 	 * Create a new DataBinder instance.
@@ -26,6 +32,17 @@ public class ServletRequestDataBinder extends DataBinder {
 	 */
 	public ServletRequestDataBinder(Object target, String name) {
 		super(target, name);
+	}
+
+	/**
+	 * Set whether to bind empty MultipartFile parameters. Default is true.
+	 * <p>Turn this off if you want to keep an already bound MultipartFile
+	 * when the user resubmits the form without choosing a different file.
+	 * Else, the already bound MultipartFile will be replaced by an empty
+	 * MultipartFile holder.
+	 */
+	public void setBindEmptyMultipartFiles(boolean bindEmptyMultipartFiles) {
+		this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
 	}
 
 	/**
@@ -51,7 +68,16 @@ public class ServletRequestDataBinder extends DataBinder {
 		// bind multipart files
 		if (request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-			bind(new MutablePropertyValues(multipartRequest.getFileMap()));
+			Map fileMap = multipartRequest.getFileMap();
+			MutablePropertyValues pvs = new MutablePropertyValues();
+			for (Iterator it = fileMap.keySet().iterator(); it.hasNext();) {
+				String key = (String) it.next();
+				MultipartFile value = (MultipartFile) fileMap.get(key);
+				if (this.bindEmptyMultipartFiles || !value.isEmpty()) {
+					pvs.addPropertyValue(key, value);
+				}
+			}
+			bind(pvs);
 		}
 	}
 
