@@ -2,29 +2,28 @@ package org.springframework.beans;
 
 /**
  * Thrown on an unrecoverable problem encountered in the
- * beans packages or sub-packages: e.g. bad class or field.
+ * beans packages or sub-packages, e.g. bad class or field.
  * @author Rod Johnson
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FatalBeanException extends BeansException {
 
 	/**
-	 * Constructs a <code>FatalBeanException</code>
-	 * with the specified message.
-	 * @param msg the detail message.
+	 * Constructs a <code>FatalBeanException</code> with the specified message.
+	 * @param msg the detail message
 	 */
 	public FatalBeanException(String msg) {
 		super(msg);
 	}
 
 	/**
-	 * Constructs a <code>FatalBeanException</code>
-	 * with the specified message and root cause.
-	 * @param msg the detail message.
-	 * @param t root cause
+	 * Constructs a <code>FatalBeanException</code> with the specified message
+	 * and root cause.
+	 * @param msg the detail message
+	 * @param ex root cause
 	 */
-	public FatalBeanException(String msg, Throwable t) {
-		super(msg, t);
+	public FatalBeanException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 }

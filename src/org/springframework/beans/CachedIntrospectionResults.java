@@ -30,15 +30,13 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @since 05 May 2001
-*  @version $Id: CachedIntrospectionResults.java,v 1.5 2003-11-25 13:03:14 johnsonr Exp $
+*  @version $Id: CachedIntrospectionResults.java,v 1.6 2004-02-04 17:39:58 jhoeller Exp $
  */
 final class CachedIntrospectionResults {
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
-	/**
-	 * Map keyed by class containing CachedIntrospectionResults
-	 */
+	/** Map keyed by class containing CachedIntrospectionResults */
 	private static HashMap classCache = new HashMap();
 
 	/**
@@ -47,18 +45,18 @@ final class CachedIntrospectionResults {
 	 * unnecessary lookup at startup only.
 	 */
 	protected static CachedIntrospectionResults forClass(Class clazz) throws BeansException {
-		Object o = classCache.get(clazz);
-		if (o == null) {
-			// Can throw BeansException
-			o = new CachedIntrospectionResults(clazz);
-			classCache.put(clazz, o);
+		Object results = classCache.get(clazz);
+		if (results == null) {
+			// can throw BeansException
+			results = new CachedIntrospectionResults(clazz);
+			classCache.put(clazz, results);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using cached introspection results for class " + clazz.getName());
 			}
 		}
-		return (CachedIntrospectionResults) o;
+		return (CachedIntrospectionResults) results;
 	}
 
 
