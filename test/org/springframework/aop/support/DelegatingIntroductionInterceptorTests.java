@@ -34,20 +34,11 @@ import org.springframework.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
 /**
- * 
  * @author Rod Johnson
- * @since 13-May-2003
+ * @since 13.05.2003
  */
 public class DelegatingIntroductionInterceptorTests extends TestCase {
 
-	/**
-	 * Constructor for DelegatingIntroductionInterceptorTests.
-	 * @param arg0
-	 */
-	public DelegatingIntroductionInterceptorTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testNullTarget() throws Exception {
 		try {
 			IntroductionInterceptor ii = new DelegatingIntroductionInterceptor(null);

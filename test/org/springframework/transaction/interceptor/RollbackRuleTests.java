@@ -31,14 +31,6 @@ import org.springframework.beans.FatalBeanException;
  */
 public class RollbackRuleTests extends TestCase {
 
-	/**
-	 * Constructor for RollbackRuleTests.
-	 * @param arg0
-	 */
-	public RollbackRuleTests(String arg0) {
-		super(arg0);
-	}
-
 	public void testFoundImmediatelyWithString() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute("java.lang.Exception");
 		assertTrue(rr.getDepth(new Exception()) == 0);

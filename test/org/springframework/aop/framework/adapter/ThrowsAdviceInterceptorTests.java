@@ -30,19 +30,10 @@ import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.framework.MethodCounter;
 
 /**
- * 
  * @author Rod Johnson
  */
 public class ThrowsAdviceInterceptorTests extends TestCase {
 
-	/**
-	 * Constructor for ThrowsAdviceInterceptorTest.
-	 * @param arg0
-	 */
-	public ThrowsAdviceInterceptorTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testNoHandlerMethods() {
 		Object o = new Object();
 		try {

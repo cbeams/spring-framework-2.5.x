@@ -26,11 +26,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Rod Johnson
  */
 public class DummyAttributesMetadataAutoProxyTests extends AbstractMetadataAutoProxyTests {
-	
-	public DummyAttributesMetadataAutoProxyTests(String arg0) {
-		super(arg0);
-	}
-	
+
 	protected BeanFactory getBeanFactory() throws IOException {
 		// Load from classpath
 		BeanFactory bf = new ClassPathXmlApplicationContext(new String[] {

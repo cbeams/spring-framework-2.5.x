@@ -25,8 +25,8 @@ import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.LockedException;
 import org.springframework.aop.framework.TimeStamped;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
@@ -39,14 +39,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class BeanNameAutoProxyCreatorTests extends TestCase {
 
 	private BeanFactory bf;
-	
-	/**
-	 * Constructor for ProxyFactoryBeanTests.
-	 * @param arg0
-	 */
-	public BeanNameAutoProxyCreatorTests(String arg0) {
-		super(arg0);
-	}
 	
 	protected void setUp() throws IOException {
 		// Note that we need an application context, not just a bean factory,
@@ -180,9 +172,7 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 	}
 	
 	/**
-	 * Also has counting before advice
-	 * @param tb
-	 * @throws Exception
+	 * Also has counting before advice.
 	 */
 	private void cglibAssertions(TestBean tb) {
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) bf.getBean("countingBeforeAdvice");

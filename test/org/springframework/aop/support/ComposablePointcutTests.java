@@ -28,7 +28,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * 
  * @author Rod Johnson
  */
 public class ComposablePointcutTests extends TestCase {
@@ -57,21 +56,11 @@ public class ComposablePointcutTests extends TestCase {
 		}
 	};
 	
-	/**
-	 * Constructor for PointcutSupportTests.
-	 * @param arg0
-	 */
-	public ComposablePointcutTests(String arg0) throws Exception {
-		super(arg0);
-	}
-	
 	public void testMatchAll() throws NoSuchMethodException {
 		Pointcut pc = new ComposablePointcut();
-		
 		assertTrue(pc.getClassFilter().matches(Object.class));
 		assertTrue(pc.getMethodMatcher().matches(Object.class.getMethod("hashCode", (Class[]) null), Exception.class));
 	}
-	
 
 	public void testFilterByClass() throws NoSuchMethodException {
 		ComposablePointcut pc = new ComposablePointcut();

@@ -26,25 +26,11 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.metadata.support.MapAttributes;
 
-
 /**
- * 
  * @author Rod Johnson
  */
 public class AttributesTransactionAttributeSourceTests extends TestCase {
 
-	/**
-	 * Constructor for AttributeRegistryTransactionAttributeSourceTests.
-	 * @param arg0
-	 */
-	public AttributesTransactionAttributeSourceTests(String arg0) {
-		super(arg0);
-	}
-	
-	protected void setUp() {
-		//Logger.getLogger(RuleBasedTransactionAttribute.class.getName()).setLevel(Level.DEBUG);
-	}
-	
 	public void testNullOrEmpty() throws Exception {
 		Method method = ITestBean.class.getMethod("getAge", (Class[]) null);
 		
@@ -90,7 +76,6 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	/**
 	 * Test the important case where the invocation is on a proxied interface method, but
 	 * the attribute is defined on the target class
-	 * @throws Exception
 	 */
 	public void testTransactionAttributeDeclaredOnClassMethod() throws Exception {
 		Method classMethod = TestBean.class.getMethod("getAge", (Class[]) null);

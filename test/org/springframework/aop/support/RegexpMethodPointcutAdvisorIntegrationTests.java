@@ -29,19 +29,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.SerializationTestUtils;
 
 /**
- * 
  * @author Rod Johnson
  */
 public class RegexpMethodPointcutAdvisorIntegrationTests extends TestCase {
 
-	/**
-	 * Constructor for RegexpMethodPointcutAroundAdvisorTests.
-	 * @param arg0
-	 */
-	public RegexpMethodPointcutAdvisorIntegrationTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testSinglePattern() throws Throwable {
 		BeanFactory bf = new ClassPathXmlApplicationContext("org/springframework/aop/support/regexpSetterTests.xml"); 
 		ITestBean advised = (ITestBean) bf.getBean("settersAdvised");

@@ -44,25 +44,14 @@ import org.springframework.transaction.CountingTxManager;
 public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	
 	private static final String TXMANAGER_BEAN_NAME = "es.txManager";
-	/**
-	 * Constructor for ProxyFactoryBeanTests.
-	 * @param arg0
-	 */
-	protected AbstractMetadataAutoProxyTests(String arg0) {
-		super(arg0);
-	}
-	
+
 	/**
 	 * Return a bean factory with attributes and EnterpriseServices configured.
-	 * @return
-	 * @throws IOException
 	 */
 	protected abstract BeanFactory getBeanFactory() throws IOException;
-	
-	
+
 	/**
-	 * If no pointcuts match (no atts) there should be proxying
-	 * @throws Exception
+	 * If no pointcuts match (no atts) there should be proxying.
 	 */
 	public void testNoProxy() throws Exception {
 		BeanFactory bf = getBeanFactory();
@@ -181,8 +170,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	}
 	
 	/**
-	 * Plain old class with no special attributes
-	 * @throws Exception
+	 * Plain old class with no special attributes.
 	 */
 	public void testNoAutoProxying() throws Exception {
 		BeanFactory bf = getBeanFactory();

@@ -30,10 +30,6 @@ import org.springframework.transaction.TransactionDefinition;
  */
 public class TransactionAttributeSourceEditorTests extends TestCase {
 
-	public TransactionAttributeSourceEditorTests(String arg0) {
-		super(arg0);
-	}
-
 	public void testNull() throws Exception {
 		TransactionAttributeSourceEditor pe = new TransactionAttributeSourceEditor();
 		pe.setAsText(null);

@@ -34,20 +34,11 @@ import org.springframework.util.StringUtils;
 /**
  * Also tests AdvisedSupport superclass.
  * @author Rod Johnson
- * @since 14-Mar-2003
+ * @since 14.05.2003
  */
 public class ProxyFactoryTests extends TestCase {
 
-	/**
-	 * Constructor for ProxyFactoryTests.
-	 * @param arg0
-	 */
-	public ProxyFactoryTests(String arg0) {
-		super(arg0);
-	}
-
 	public void testNullTarget() {
-
 		try {
 			// Use the constructor taking Object
 			new ProxyFactory((Object) null);

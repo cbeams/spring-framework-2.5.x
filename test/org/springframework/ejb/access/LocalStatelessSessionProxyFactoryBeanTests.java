@@ -32,18 +32,10 @@ import org.springframework.jndi.JndiTemplate;
 /**
  * Tests Business Methods pattern
  * @author Rod Johnson
- * @since 21-May-2003
+ * @since 21.05.2003
  */
 public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 
-	/**
-	 * Constructor for LocalStatelessSessionProxyFactoryBeanTests.
-	 * @param arg0
-	 */
-	public LocalStatelessSessionProxyFactoryBeanTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testInvokesMethod() throws Exception {
 		final int value = 11;
 		final String jndiName = "foo";

@@ -36,15 +36,6 @@ public class CommonsAttributesMetadataAutoProxyTests extends AbstractMetadataAut
 		// If we're within an IDE, compile the attributes programmatically
 		CommonsAttributeCompilerUtils.compileAttributesIfNecessary("**/autoproxy/metadata/*.java");
 	}
-	
-	/**
-	 * Constructor for ProxyFactoryBeanTests.
-	 * @param arg0
-	 */
-	public CommonsAttributesMetadataAutoProxyTests(String arg0) {
-		super(arg0);
-	}
-	
 
 	protected BeanFactory getBeanFactory() throws IOException {
 		// Load from classpath, NOT a file path
@@ -53,6 +44,5 @@ public class CommonsAttributesMetadataAutoProxyTests extends AbstractMetadataAut
 					"/org/springframework/aop/framework/autoproxy/metadata/enterpriseServices.xml"});
 		return bf;
 	}
-	
 	
 }

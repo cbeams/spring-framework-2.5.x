@@ -20,22 +20,12 @@ package org.springframework.util;
 import junit.framework.TestCase;
 
 /**
- *
  * @author Rod Johnson
  */
 public class StopWatchTests extends TestCase {
 
 	/**
-	 * Constructor for StopWatchTests.
-	 * @param arg0
-	 */
-	public StopWatchTests(String arg0) {
-		super(arg0);
-	}
-	
-	/**
 	 * Are timings off in JUnit?
-	 * @throws Exception
 	 */
 	public void testValidUsage() throws Exception {
 		StopWatch sw = new StopWatch();

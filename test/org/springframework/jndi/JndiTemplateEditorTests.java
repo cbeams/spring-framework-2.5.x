@@ -19,14 +19,11 @@ package org.springframework.jndi;
 
 import junit.framework.TestCase;
 
-
+/**
+ * @author Rod Johnson
+ */
 public class JndiTemplateEditorTests extends TestCase {
 
-	
-	public JndiTemplateEditorTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testNullIsIllegalArgument() {
 		try {
 			new JndiTemplateEditor().setAsText(null);
@@ -36,20 +33,6 @@ public class JndiTemplateEditorTests extends TestCase {
 			// OK
 		}
 	}
-	
-	/**
-	 * There's a property string, but it's format is bogus.
-	 *
-	 */
-//	public void testBogusFormat() {
-//		try {
-//			new JndiTemplateEditor().setAsText("=erever=====");
-//			fail("Bogus properties");
-//		}
-//		catch (IllegalArgumentException ex) {
-//			// OK
-//		}
-//	}
 	
 	public void testEmptyStringMeansNullEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
