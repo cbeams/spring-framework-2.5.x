@@ -18,6 +18,7 @@ import java.beans.VetoableChangeSupport;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -62,7 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.12 2003-11-10 17:56:58 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.13 2003-11-12 19:09:53 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -111,26 +112,26 @@ public class BeanWrapperImpl implements BeanWrapper {
 	/** The nested path of the object */
 	private String nestedPath = "";
 
+	/* Map with cached nested BeanWrappers */
+	private Map nestedBeanWrappers;
+
+	/** Map with custom PropertyEditor instances */
+	private Map customEditors;
+
 	/**
 	 * Cached introspections results for this object, to prevent encountering the cost
 	 * of JavaBeans introspection every time.
 	 */
 	private CachedIntrospectionResults cachedIntrospectionResults;
 
+	/** Should we propagate events to listeners? */
+	private boolean eventPropagationEnabled = false;
+
 	/** Standard java.beans helper object used to propagate events */
 	private VetoableChangeSupport vetoableChangeSupport;
 
 	/** Standard java.beans helper object used to propagate events */
 	private PropertyChangeSupport propertyChangeSupport;
-
-	/** Should we propagate events to listeners? */
-	private boolean eventPropagationEnabled = false;
-
-	/* Map with cached nested BeanWrappers */
-	private Map nestedBeanWrappers;
-
-	/** Map with custom PropertyEditor instances */
-	private Map customEditors;
 
 
 	//---------------------------------------------------------------------
@@ -217,15 +218,18 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	public void registerCustomEditor(Class requiredType, String propertyPath, PropertyEditor propertyEditor) {
 		if (propertyPath != null) {
-			BeanWrapperImpl bw = getBeanWrapperForNestedProperty(propertyPath);
-			bw.doRegisterCustomEditor(requiredType, getFinalPath(propertyPath), propertyEditor);
+			List bws = getBeanWrappersForPropertyPath(propertyPath);
+			for (Iterator it = bws.iterator(); it.hasNext();) {
+				BeanWrapperImpl bw = (BeanWrapperImpl) it.next();
+				bw.doRegisterCustomEditor(requiredType, getFinalPath(propertyPath), propertyEditor);
+			}
 		}
 		else {
 			doRegisterCustomEditor(requiredType, propertyPath, propertyEditor);
 		}
 	}
 
-	public void doRegisterCustomEditor(Class requiredType, String propertyName, PropertyEditor propertyEditor) {
+	private synchronized void doRegisterCustomEditor(Class requiredType, String propertyName, PropertyEditor propertyEditor) {
 		if (this.customEditors == null) {
 			this.customEditors = new HashMap();
 		}
@@ -233,8 +237,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 			// consistency check
 			PropertyDescriptor descriptor = getPropertyDescriptor(propertyName);
 			if (requiredType != null && !descriptor.getPropertyType().isAssignableFrom(requiredType)) {
-				throw new IllegalArgumentException("Types do not match: required=" + requiredType.getName() +
-																					 ", found=" + descriptor.getPropertyType());
+				throw new IllegalArgumentException("Types do not match: required [" + requiredType.getName() +
+																					 "], found [" + descriptor.getPropertyType().getName() + "]");
 			}
 			this.customEditors.put(propertyName, propertyEditor);
 		}
@@ -248,7 +252,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
 		if (propertyPath != null) {
-			BeanWrapperImpl bw = getBeanWrapperForNestedProperty(propertyPath);
+			BeanWrapperImpl bw = getBeanWrapperForPropertyPath(propertyPath);
 			return bw.doFindCustomEditor(requiredType, getFinalPath(propertyPath));
 		}
 		else {
@@ -256,7 +260,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	public PropertyEditor doFindCustomEditor(Class requiredType, String propertyName) {
+	private synchronized PropertyEditor doFindCustomEditor(Class requiredType, String propertyName) {
 		if (this.customEditors == null) {
 			return null;
 		}
@@ -283,6 +287,397 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		// no property-specific editor -> check type-specific editor
 		return (PropertyEditor) this.customEditors.get(requiredType);
+	}
+
+
+	/**
+	 * Is the property nested? That is, does it contain the nested
+	 * property separator (usually ".").
+	 * @param path property path
+	 * @return boolean is the property nested
+	 */
+	private boolean isNestedProperty(String path) {
+		return path.indexOf(NESTED_PROPERTY_SEPARATOR) != -1;
+	}
+
+	/**
+	 * Get the last component of the path. Also works if not nested.
+	 * @param nestedPath property path we know is nested
+	 * @return last component of the path (the property on the target bean)
+	 */
+	private String getFinalPath(String nestedPath) {
+		String finalPath = nestedPath.substring(nestedPath.lastIndexOf(NESTED_PROPERTY_SEPARATOR) + 1);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Final path in nested property value '" + nestedPath + "' is '" + finalPath + "'");
+		}
+		return finalPath;
+	}
+
+	/**
+	 * Recursively navigate to return a BeanWrapper for the nested property path.
+	 * @param propertyPath property property path, which may be nested
+	 * @return a BeanWrapper for the target bean
+	 */
+	private BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) {
+		int pos = propertyPath.indexOf(NESTED_PROPERTY_SEPARATOR);
+		// Handle nested properties recursively
+		if (pos > -1) {
+			String nestedProperty = propertyPath.substring(0, pos);
+			String nestedPath = propertyPath.substring(pos + 1);
+			logger.debug("Navigating to nested property '" + nestedProperty + "' of property path '" + propertyPath + "'");
+			BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
+			return nestedBw.getBeanWrapperForPropertyPath(nestedPath);
+		}
+		else {
+			return this;
+		}
+	}
+
+	/**
+	 * Recursively navigate to return a BeanWrapper for the nested property path.
+	 * @param propertyPath property property path, which may be nested
+	 * @return a BeanWrapper for the target bean
+	 */
+	private List getBeanWrappersForPropertyPath(String propertyPath) {
+		List beanWrappers = new ArrayList();
+		int pos = propertyPath.indexOf(NESTED_PROPERTY_SEPARATOR);
+		// Handle nested properties recursively
+		if (pos > -1) {
+			String nestedProperty = propertyPath.substring(0, pos);
+			String nestedPath = propertyPath.substring(pos + 1);
+			if (nestedProperty.indexOf('[') == -1) {
+				Class propertyType = getPropertyDescriptor(nestedProperty).getPropertyType();
+				if (propertyType.isArray()) {
+					Object[] array = (Object[]) getPropertyValue(nestedProperty);
+					for (int i = 0; i < array.length; i++) {
+						beanWrappers.addAll(
+								getBeanWrappersForNestedProperty(propertyPath, nestedProperty + "[" + i + "]", nestedPath));
+					}
+					return beanWrappers;
+				}
+				else if (List.class.isAssignableFrom(propertyType)) {
+					List list = (List) getPropertyValue(nestedProperty);
+					for (int i = 0; i < list.size(); i++) {
+						beanWrappers.addAll(
+								getBeanWrappersForNestedProperty(propertyPath, nestedProperty + "[" + i + "]", nestedPath));
+					}
+					return beanWrappers;
+				}
+				else if (Map.class.isAssignableFrom(propertyType)) {
+					Map map = (Map) getPropertyValue(nestedProperty);
+					for (Iterator it = map.keySet().iterator(); it.hasNext();) {
+						beanWrappers.addAll(
+								getBeanWrappersForNestedProperty(propertyPath, nestedProperty + "[" + it.next() + "]", nestedPath));
+					}
+					return beanWrappers;
+				}
+			}
+			beanWrappers.addAll(getBeanWrappersForNestedProperty(propertyPath, nestedProperty, nestedPath));
+			return beanWrappers;
+		}
+		else {
+			beanWrappers.add(this);
+			return beanWrappers;
+		}
+	}
+
+	private List getBeanWrappersForNestedProperty(String propertyPath, String nestedProperty, String nestedPath) {
+		logger.debug("Navigating to nested property '" + nestedProperty + "' of property path '" + propertyPath + "'");
+		BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
+		return nestedBw.getBeanWrappersForPropertyPath(nestedPath);
+	}
+
+	/**
+	 * Retrieve a BeanWrapper for the given nested property.
+	 * Create a new one if not found in the cache.
+	 * <p>Note: Caching nested BeanWrappers is necessary now,
+	 * to keep registered custom editors for nested properties.
+	 * @param nestedProperty property to create the BeanWrapper for
+	 * @return the BeanWrapper instance, either cached or newly created
+	 */
+	private BeanWrapperImpl getNestedBeanWrapper(String nestedProperty) {
+		if (this.nestedBeanWrappers == null) {
+			this.nestedBeanWrappers = new HashMap();
+		}
+		// get value of bean property
+		String[] tokens = getPropertyNameTokens(nestedProperty);
+		Object propertyValue = getPropertyValue(tokens[0], tokens[1], tokens[2]);
+		String canonicalName = tokens[0];
+		if (propertyValue == null) {
+			throw new NullValueInNestedPathException(getWrappedClass(), canonicalName);
+		}
+
+		// lookup cached sub-BeanWrapper, create new one if not found
+		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(canonicalName);
+		if (nestedBw == null) {
+			logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
+			nestedBw = new BeanWrapperImpl(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
+			// inherit all type-specific PropertyEditors
+			if (this.customEditors != null) {
+				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
+					Object key = it.next();
+					if (key instanceof Class) {
+						Class requiredType = (Class) key;
+						PropertyEditor propertyEditor = (PropertyEditor) this.customEditors.get(key);
+						nestedBw.registerCustomEditor(requiredType, null, propertyEditor);
+					}
+				}
+			}
+			this.nestedBeanWrappers.put(canonicalName, nestedBw);
+		}
+		else {
+			logger.debug("Using cached nested BeanWrapper for property '" + canonicalName + "'");
+		}
+		return nestedBw;
+	}
+
+	private String[] getPropertyNameTokens(String propertyName) {
+		String actualName = propertyName;
+		String key = null;
+		int keyStart = propertyName.indexOf('[');
+		if (keyStart != -1 && propertyName.endsWith("]")) {
+			actualName = propertyName.substring(0, keyStart);
+			key = propertyName.substring(keyStart + 1, propertyName.length() - 1);
+			if (key.startsWith("'") && key.endsWith("'")) {
+				key = key.substring(1, key.length() - 1);
+			}
+			else if (key.startsWith("\"") && key.endsWith("\"")) {
+				key = key.substring(1, key.length() - 1);
+			}
+		}
+		String canonicalName = actualName;
+		if (key != null) {
+			canonicalName += "[" + key + "]";
+		}
+		return new String[] {canonicalName, actualName, key};
+	}
+
+
+	public Object getPropertyValue(String propertyName) throws BeansException {
+		if (isNestedProperty(propertyName)) {
+			BeanWrapper nestedBw = getBeanWrapperForPropertyPath(propertyName);
+			return nestedBw.getPropertyValue(getFinalPath(propertyName));
+		}
+
+		String[] tokens = getPropertyNameTokens(propertyName);
+		String canonicalName = tokens[0];
+		String actualName = tokens[1];
+		String key = tokens[2];
+
+		return getPropertyValue(canonicalName, actualName, key);
+	}
+
+	private Object getPropertyValue(String propertyName, String actualName, String key) {
+		PropertyDescriptor pd = getPropertyDescriptor(actualName);
+		Method readMethod = pd.getReadMethod();
+		if (readMethod == null) {
+			throw new FatalBeanException("Cannot get property '" + actualName + "': not readable", null);
+		}
+		if (logger.isDebugEnabled())
+			logger.debug("About to invoke read method [" + readMethod +
+			             "] on object of class [" + this.object.getClass().getName() + "]");
+		try {
+			Object value = readMethod.invoke(this.object, null);
+			if (key != null) {
+				if (value == null) {
+					throw new FatalBeanException("Cannot access indexed value in property referenced in indexed property path '" +
+					                             propertyName + "': returned null");
+				}
+				else if (value.getClass().isArray()) {
+					Object[] array = (Object[]) value;
+					return array[Integer.parseInt(key)];
+				}
+				else if (value instanceof List) {
+					List list = (List) value;
+					return list.get(Integer.parseInt(key));
+				}
+				else if (value instanceof Map) {
+					Map map = (Map) value;
+					return map.get(key);
+				}
+				else {
+					throw new FatalBeanException("Property referenced in indexed property path '" + propertyName +
+					                             "' is neither an array nor a List nor a Map; returned value was [" + value + "]");
+				}
+			}
+			else {
+				return value;
+			}
+		}
+		catch (InvocationTargetException ex) {
+			throw new FatalBeanException("Getter for property '" + actualName + "' threw exception", ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new FatalBeanException("Illegal attempt to get property '" + actualName + "' threw exception", ex);
+		}
+		catch (IndexOutOfBoundsException ex) {
+			throw new FatalBeanException("Index of out of bounds in property path '" + propertyName + "'", ex);
+		}
+		catch (NumberFormatException ex) {
+			throw new FatalBeanException("Invalid index in property path '" + propertyName + "'");
+		}
+	}
+
+	public void setPropertyValue(String propertyName, Object value) throws PropertyVetoException, BeansException {
+		setPropertyValue(new PropertyValue(propertyName, value));
+	}
+
+	/**
+	 * Set an individual field. All other setters go through this.
+	 * @param pv property value to use for update
+	 * @throws PropertyVetoException if a listeners throws a JavaBeans API veto
+	 * @throws BeansException if there's a low-level, fatal error
+	 */
+	public void setPropertyValue(PropertyValue pv) throws PropertyVetoException, BeansException {
+		if (isNestedProperty(pv.getName())) {
+			try {
+				BeanWrapper nestedBw = getBeanWrapperForPropertyPath(pv.getName());
+				nestedBw.setPropertyValue(new PropertyValue(getFinalPath(pv.getName()), pv.getValue()));
+				return;
+			}
+			catch (NullValueInNestedPathException ex) {
+				// Let this through
+				throw ex;
+			}
+			catch (FatalBeanException ex) {
+				// Error in the nested path
+				throw new NotWritablePropertyException(pv.getName(), getWrappedClass());
+			}
+		}
+
+		if (!isWritableProperty(pv.getName())) {
+			throw new NotWritablePropertyException(pv.getName(), getWrappedClass());
+		}
+		PropertyDescriptor pd = getPropertyDescriptor(pv.getName());
+		Method writeMethod = pd.getWriteMethod();
+		Method readMethod = pd.getReadMethod();
+		Object oldValue = null;	// May stay null if it's not a readable property
+		PropertyChangeEvent propertyChangeEvent = null;
+
+		try {
+			if (readMethod != null && this.eventPropagationEnabled) {
+				// Can only find existing value if it's a readable property
+				try {
+					oldValue = readMethod.invoke(this.object, new Object[]{});
+				}
+				catch (Exception ex) {
+					// The getter threw an exception, so we couldn't retrieve the old value.
+					// We're not really interested in any exceptions at this point,
+					// so we merely log the problem and leave oldValue null
+					logger.warn("Failed to invoke getter [" + readMethod.getName() +
+											"] to get old property value before property change: getter probably threw an exception",
+											ex);
+				}
+			}
+
+			// Old value may still be null
+			propertyChangeEvent = createPropertyChangeEventWithTypeConversionIfNecessary(
+					pv.getName(), oldValue, pv.getValue(), pd.getPropertyType());
+
+			// May throw PropertyVetoException: if this happens the PropertyChangeSupport
+			// class fires a reversion event, and we jump out of this method, meaning
+			// the change was never actually made
+			if (this.eventPropagationEnabled) {
+				this.vetoableChangeSupport.fireVetoableChange(propertyChangeEvent);
+			}
+
+			if (pd.getPropertyType().isPrimitive() &&
+					(propertyChangeEvent.getNewValue() == null || "".equals(propertyChangeEvent.getNewValue()))) {
+				throw new IllegalArgumentException("Invalid value [" + pv.getValue() + "] for property '" +
+																					 pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
+			}
+
+			// Make the change
+			if (logger.isDebugEnabled())
+				logger.debug("About to invoke write method [" + writeMethod +
+				             "] on object of class [" + object.getClass().getName() + "]");
+			writeMethod.invoke(this.object, new Object[] {propertyChangeEvent.getNewValue()});
+			if (logger.isDebugEnabled())
+				logger.debug("Invoked write method [" + writeMethod + "] ok");
+
+			// If we get here we've changed the property OK and can broadcast it
+			if (this.eventPropagationEnabled) {
+				this.propertyChangeSupport.firePropertyChange(propertyChangeEvent);
+			}
+		}
+		catch (InvocationTargetException ex) {
+			if (ex.getTargetException() instanceof PropertyVetoException) {
+				throw (PropertyVetoException) ex.getTargetException();
+			}
+			else if (ex.getTargetException() instanceof ClassCastException) {
+				throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
+			}
+			else {
+				throw new MethodInvocationException(ex.getTargetException(), propertyChangeEvent);
+			}
+		}
+		catch (IllegalAccessException ex) {
+			throw new FatalBeanException("Illegal attempt to set property [" + pv + "] threw exception", ex);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
+		}
+	}
+
+	/**
+	 * Bulk update from a Map.
+	 * Bulk updates from PropertyValues are more powerful: this method is
+	 * provided for convenience.
+	 * @param map map containing properties to set, as name-value pairs.
+	 * The map may include nested properties.
+	 * @throws BeansException if there's a fatal, low-level exception
+	 */
+	public void setPropertyValues(Map map) throws BeansException {
+		setPropertyValues(new MutablePropertyValues(map));
+	}
+
+	public void setPropertyValues(PropertyValues pvs) throws BeansException {
+		setPropertyValues(pvs, false, null);
+	}
+
+	public void setPropertyValues(PropertyValues propertyValues, boolean ignoreUnknown,
+																PropertyValuesValidator pvsValidator) throws BeansException {
+		// Create only if needed
+		PropertyVetoExceptionsException propertyVetoExceptionsException = new PropertyVetoExceptionsException(this);
+
+		if (pvsValidator != null) {
+			try {
+				pvsValidator.validatePropertyValues(propertyValues);
+			}
+			catch (InvalidPropertyValuesException ipvex) {
+				propertyVetoExceptionsException.addMissingFields(ipvex);
+			}
+		}
+
+		PropertyValue[] pvs = propertyValues.getPropertyValues();
+		for (int i = 0; i < pvs.length; i++) {
+			try {
+				// This method may throw ReflectionException, which won't be caught
+				// here, if there is a critical failure such as no matching field.
+				// We can attempt to deal only with less serious exceptions
+				setPropertyValue(pvs[i]);
+			}
+					// Fatal ReflectionExceptions will just be rethrown
+			catch (NotWritablePropertyException ex) {
+				if (!ignoreUnknown)
+					throw ex;
+				// Otherwise, just ignore it and continue...
+			}
+			catch (PropertyVetoException ex) {
+				propertyVetoExceptionsException.addPropertyVetoException(ex);
+			}
+			catch (TypeMismatchException ex) {
+				propertyVetoExceptionsException.addTypeMismatchException(ex);
+			}
+			catch (MethodInvocationException ex) {
+				propertyVetoExceptionsException.addMethodInvocationException(ex);
+			}
+		}
+
+		// If we encountered individual exceptions, throw the composite exception
+		if (propertyVetoExceptionsException.getExceptionCount() > 0) {
+			throw propertyVetoExceptionsException;
+		}
 	}
 
 	/**
@@ -399,295 +794,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 
-
-	public void setPropertyValue(String propertyName, Object value) throws PropertyVetoException, BeansException {
-		setPropertyValue(new PropertyValue(propertyName, value));
-	}
-
-	/**
-	 * Is the property nested? That is, does it contain the nested
-	 * property separator (usually ".").
-	 * @param path property path
-	 * @return boolean is the property nested
-	 */
-	private boolean isNestedProperty(String path) {
-		return path.indexOf(NESTED_PROPERTY_SEPARATOR) != -1;
-	}
-
-	/**
-	 * Get the last component of the path. Also works if not nested.
-	 * @param nestedPath property path we know is nested
-	 * @return last component of the path (the property on the target bean)
-	 */
-	private String getFinalPath(String nestedPath) {
-		String finalPath = nestedPath.substring(nestedPath.lastIndexOf(NESTED_PROPERTY_SEPARATOR) + 1);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Final path in nested property value [" + nestedPath + "] is [" + finalPath + "]");
-		}
-		return finalPath;
-	}
-
-	/**
-	 * Recursively navigate to return a BeanWrapper for the nested path.
-	 * @param path property path, which may be nested
-	 * @return a BeanWrapper for the target bean
-	 */
-	private BeanWrapperImpl getBeanWrapperForNestedProperty(String path) {
-		int pos = path.indexOf(NESTED_PROPERTY_SEPARATOR);
-		// Handle nested properties recursively
-		if (pos > -1) {
-			String nestedProperty = path.substring(0, pos);
-			String nestedPath = path.substring(pos + 1);
-			logger.debug("Navigating to property path [" + nestedPath + "] of nested property [" + nestedProperty + "]");
-			BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
-			return nestedBw.getBeanWrapperForNestedProperty(nestedPath);
-		}
-		else {
-			return this;
-		}
-	}
-
-	/**
-	 * Retrieve a BeanWrapper for the given nested property.
-	 * Create a new one if not found in the cache.
-	 * <p>Note: Caching nested BeanWrappers is necessary now,
-	 * to keep registered custom editors for nested properties.
-	 * @param nestedProperty property to create the BeanWrapper for
-	 * @return the BeanWrapper instance, either cached or newly created
-	 */
-	private BeanWrapperImpl getNestedBeanWrapper(String nestedProperty) {
-		if (this.nestedBeanWrappers == null) {
-			this.nestedBeanWrappers = new HashMap();
-		}
-		// get value of bean property
-		Object propertyValue = getPropertyValue(nestedProperty);
-		if (propertyValue == null) {
-			throw new NullValueInNestedPathException(getWrappedClass(), nestedProperty);
-		}
-		// lookup cached sub-BeanWrapper, create new one if not found
-		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(propertyValue);
-		if (nestedBw == null) {
-			logger.debug("Creating new nested BeanWrapper for property [" + nestedProperty + "]");
-			nestedBw = new BeanWrapperImpl(propertyValue, this.nestedPath + nestedProperty + NESTED_PROPERTY_SEPARATOR);
-			// inherit all type-specific PropertyEditors
-			if (this.customEditors != null) {
-				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
-					Object key = it.next();
-					if (key instanceof Class) {
-						Class requiredType = (Class) key;
-						PropertyEditor propertyEditor = (PropertyEditor) this.customEditors.get(key);
-						nestedBw.registerCustomEditor(requiredType, null, propertyEditor);
-					}
-				}
-			}
-			this.nestedBeanWrappers.put(propertyValue, nestedBw);
-		}
-		else {
-			logger.debug("Using cached nested BeanWrapper for property [" + nestedProperty + "]");
-		}
-		return nestedBw;
-	}
-
-	/**
-	 * Set an individual field. All other setters go through this.
-	 * @param pv property value to use for update
-	 * @throws PropertyVetoException if a listeners throws a JavaBeans API veto
-	 * @throws BeansException if there's a low-level, fatal error
-	 */
-	public void setPropertyValue(PropertyValue pv) throws PropertyVetoException, BeansException {
-		if (isNestedProperty(pv.getName())) {
-			try {
-				BeanWrapper nestedBw = getBeanWrapperForNestedProperty(pv.getName());
-				nestedBw.setPropertyValue(new PropertyValue(getFinalPath(pv.getName()), pv.getValue()));
-				return;
-			}
-			catch (NullValueInNestedPathException ex) {
-				// Let this through
-				throw ex;
-			}
-			catch (FatalBeanException ex) {
-				// Error in the nested path
-				throw new NotWritablePropertyException(pv.getName(), getWrappedClass());
-			}
-		}
-
-		if (!isWritableProperty(pv.getName())) {
-			throw new NotWritablePropertyException(pv.getName(), getWrappedClass());
-		}
-
-		PropertyDescriptor pd = getPropertyDescriptor(pv.getName());
-		Method writeMethod = pd.getWriteMethod();
-		Method readMethod = pd.getReadMethod();
-		Object oldValue = null;	// May stay null if it's not a readable property
-		PropertyChangeEvent propertyChangeEvent = null;
-
-		try {
-			if (readMethod != null && this.eventPropagationEnabled) {
-				// Can only find existing value if it's a readable property
-				try {
-					oldValue = readMethod.invoke(this.object, new Object[]{});
-				}
-				catch (Exception ex) {
-					// The getter threw an exception, so we couldn't retrieve the old value.
-					// We're not really interested in any exceptions at this point,
-					// so we merely log the problem and leave oldValue null
-					logger.warn("Failed to invoke getter [" + readMethod.getName() +
-											"] to get old property value before property change: getter probably threw an exception",
-											ex);
-				}
-			}
-
-			// Old value may still be null
-			propertyChangeEvent = createPropertyChangeEventWithTypeConversionIfNecessary(
-					pv.getName(), oldValue, pv.getValue(), pd.getPropertyType());
-
-			// May throw PropertyVetoException: if this happens the PropertyChangeSupport
-			// class fires a reversion event, and we jump out of this method, meaning
-			// the change was never actually made
-			if (this.eventPropagationEnabled) {
-				this.vetoableChangeSupport.fireVetoableChange(propertyChangeEvent);
-			}
-
-			if (pd.getPropertyType().isPrimitive() &&
-					(propertyChangeEvent.getNewValue() == null || "".equals(propertyChangeEvent.getNewValue()))) {
-				throw new IllegalArgumentException("Invalid value [" + pv.getValue() + "] for property '" +
-																					 pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
-			}
-
-			// Make the change
-			if (logger.isDebugEnabled())
-				logger.debug("About to invoke write method [" + writeMethod +
-				             "] on object of class [" + object.getClass().getName() + "]");
-			writeMethod.invoke(object, new Object[] {propertyChangeEvent.getNewValue()});
-			if (logger.isDebugEnabled())
-				logger.debug("Invoked write method [" + writeMethod + "] ok");
-
-			// If we get here we've changed the property OK and can broadcast it
-			if (this.eventPropagationEnabled) {
-				this.propertyChangeSupport.firePropertyChange(propertyChangeEvent);
-			}
-		}
-		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof PropertyVetoException) {
-				throw (PropertyVetoException) ex.getTargetException();
-			}
-			else if (ex.getTargetException() instanceof ClassCastException) {
-				throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
-			}
-			else {
-				throw new MethodInvocationException(ex.getTargetException(), propertyChangeEvent);
-			}
-		}
-		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to set property [" + pv + "] threw exception", ex);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
-		}
-	}
-
-	/**
-	 * Bulk update from a Map.
-	 * Bulk updates from PropertyValues are more powerful: this method is
-	 * provided for convenience.
-	 * @param map map containing properties to set, as name-value pairs.
-	 * The map may include nested properties.
-	 * @throws BeansException if there's a fatal, low-level exception
-	 */
-	public void setPropertyValues(Map map) throws BeansException {
-		setPropertyValues(new MutablePropertyValues(map));
-	}
-
-	public void setPropertyValues(PropertyValues pvs) throws BeansException {
-		setPropertyValues(pvs, false, null);
-	}
-
-	public void setPropertyValues(PropertyValues propertyValues, boolean ignoreUnknown,
-																PropertyValuesValidator pvsValidator) throws BeansException {
-		// Create only if needed
-		PropertyVetoExceptionsException propertyVetoExceptionsException = new PropertyVetoExceptionsException(this);
-
-		if (pvsValidator != null) {
-			try {
-				pvsValidator.validatePropertyValues(propertyValues);
-			}
-			catch (InvalidPropertyValuesException ipvex) {
-				propertyVetoExceptionsException.addMissingFields(ipvex);
-			}
-		}
-
-		PropertyValue[] pvs = propertyValues.getPropertyValues();
-		for (int i = 0; i < pvs.length; i++) {
-			try {
-				// This method may throw ReflectionException, which won't be caught
-				// here, if there is a critical failure such as no matching field.
-				// We can attempt to deal only with less serious exceptions
-				setPropertyValue(pvs[i]);
-			}
-					// Fatal ReflectionExceptions will just be rethrown
-			catch (NotWritablePropertyException ex) {
-				if (!ignoreUnknown)
-					throw ex;
-				// Otherwise, just ignore it and continue...
-			}
-			catch (PropertyVetoException ex) {
-				propertyVetoExceptionsException.addPropertyVetoException(ex);
-			}
-			catch (TypeMismatchException ex) {
-				propertyVetoExceptionsException.addTypeMismatchException(ex);
-			}
-			catch (MethodInvocationException ex) {
-				propertyVetoExceptionsException.addMethodInvocationException(ex);
-			}
-		}   // for each property
-
-		// If we encountered individual exceptions, throw the composite exception
-		if (propertyVetoExceptionsException.getExceptionCount() > 0) {
-			throw propertyVetoExceptionsException;
-		}
-	}
-
-	public Object getPropertyValue(String propertyName) throws BeansException {
-		if (isNestedProperty(propertyName)) {
-			BeanWrapper nestedBw = getBeanWrapperForNestedProperty(propertyName);
-			return nestedBw.getPropertyValue(getFinalPath(propertyName));
-		}
-
-		PropertyDescriptor pd = getPropertyDescriptor(propertyName);
-		Method readMethod = pd.getReadMethod();
-		if (readMethod == null) {
-			throw new FatalBeanException("Cannot get scalar property [" + propertyName + "]: not readable", null);
-		}
-		if (logger.isDebugEnabled())
-			logger.debug("About to invoke read method [" + readMethod +
-			             "] on object of class [" + object.getClass().getName() + "]");
-		try {
-			return readMethod.invoke(object, null);
-		}
-		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Getter for property '" + propertyName + "' threw exception", ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to get property '" + propertyName + "' threw exception", ex);
-		}
-	}
-
 	public PropertyDescriptor[] getPropertyDescriptors() {
 		return cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
 	}
 
-	/**
-	 * Method getProperties.
-	 * @return PropertyDescriptor[] property descriptor for the wrapped target
-	 * @throws BeansException if property descriptors cannot be obtained
-	 */
-	public PropertyDescriptor[] getProperties() throws BeansException {
-		return this.cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
-	}
-
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
 		if (isNestedProperty(propertyName)) {
-			BeanWrapper nestedBw = getBeanWrapperForNestedProperty(propertyName);
+			BeanWrapper nestedBw = getBeanWrapperForPropertyPath(propertyName);
 			return nestedBw.getPropertyDescriptor(getFinalPath(propertyName));
 		}
 		return this.cachedIntrospectionResults.getPropertyDescriptor(propertyName);
@@ -713,28 +826,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	public Object invoke(String methodName, Object[] args) throws BeansException {
-		try {
-			MethodDescriptor md = this.cachedIntrospectionResults.getMethodDescriptor(methodName);
-			if (logger.isDebugEnabled())
-				logger.debug("About to invoke method '" + methodName + "'");
-			Object returnVal = md.getMethod().invoke(this.object, args);
-			if (logger.isDebugEnabled())
-				logger.debug("Successfully invoked method '" + methodName + "'");
-			return returnVal;
-		}
-		catch (InvocationTargetException ex) {
-			//if (ex.getTargetException() instanceof ClassCastException)
-			//	throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
-			throw new MethodInvocationException(ex.getTargetException(), methodName);
-		}
-		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to invoke method '" + methodName + "' threw exception", ex);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new FatalBeanException("Illegal argument to method '" + methodName + "' threw exception", ex);
-		}
-	}
 
 	//---------------------------------------------------------------------
 	// Bean event support
@@ -798,20 +889,44 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 
+	public Object invoke(String methodName, Object[] args) throws BeansException {
+		try {
+			MethodDescriptor md = this.cachedIntrospectionResults.getMethodDescriptor(methodName);
+			if (logger.isDebugEnabled())
+				logger.debug("About to invoke method '" + methodName + "'");
+			Object returnVal = md.getMethod().invoke(this.object, args);
+			if (logger.isDebugEnabled())
+				logger.debug("Successfully invoked method '" + methodName + "'");
+			return returnVal;
+		}
+		catch (InvocationTargetException ex) {
+			//if (ex.getTargetException() instanceof ClassCastException)
+			//	throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
+			throw new MethodInvocationException(ex.getTargetException(), methodName);
+		}
+		catch (IllegalAccessException ex) {
+			throw new FatalBeanException("Illegal attempt to invoke method '" + methodName + "' threw exception", ex);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new FatalBeanException("Illegal argument to method '" + methodName + "' threw exception", ex);
+		}
+	}
+
+
 	//---------------------------------------------------------------------
 	// Diagnostics
 	//---------------------------------------------------------------------
 
 	/**
 	 * This method is expensive! Only call for diagnostics and debugging reasons,
-	 * not in production
+	 * not in production.
 	 * @return a string describing the state of this object
 	 */
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		try {
 			sb.append("BeanWrapperImpl: eventPropagationEnabled=" + eventPropagationEnabled
-								+ " wrapping [" + getWrappedInstance().getClass() + "]; ");
+								+ " wrapping class [" + getWrappedInstance().getClass().getName() + "]; ");
 			PropertyDescriptor pds[] = getPropertyDescriptors();
 			if (pds != null) {
 				for (int i = 0; i < pds.length; i++) {

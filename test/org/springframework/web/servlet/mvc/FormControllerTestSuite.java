@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.IndexedTestBean;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -316,6 +317,41 @@ public class FormControllerTestSuite extends TestCase {
 		}
 	}
 
+	public void testSubmitWithIndexedProperties() throws Exception {
+		String formView = "fred";
+		String successView = "tony";
+
+		SimpleFormController mc = new SimpleFormController();
+		mc.setCommandClass(IndexedTestBean.class);
+		mc.setFormView(formView);
+		mc.setSuccessView(successView);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/foo.html");
+		request.addParameter("array[0].name", "name3");
+		request.addParameter("array[1].age", "name2");
+		request.addParameter("list[0].name", "name1");
+		request.addParameter("list[1].age", "name0");
+		HttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = mc.handleRequest(request, response);
+		assertTrue("returned correct view name: expected '" + formView + "', not '" + mv.getViewName() + "'",
+		mv.getViewName().equals(formView));
+
+		// Has bean
+		IndexedTestBean bean = (IndexedTestBean) mv.getModel().get(mc.getBeanName());
+		assertTrue("model is non null", bean != null);
+		assertEquals("name3", bean.getArray()[0].getName());
+		assertEquals("name1", ((TestBean) bean.getList().get(0)).getName());
+		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getBeanName());
+		assertTrue("errors returned in model", errors != null);
+		assertTrue("2 errors", errors.getErrorCount() == 2);
+		FieldError fe1 = errors.getFieldError("array[1].age");
+		assertTrue("Saved invalid value", fe1.getRejectedValue().equals("name2"));
+		assertTrue("Correct field", fe1.getField().equals("array[1].age"));
+		FieldError fe2 = errors.getFieldError("list[1].age");
+		assertTrue("Saved invalid value", fe2.getRejectedValue().equals("name0"));
+		assertTrue("Correct field", fe2.getField().equals("list[1].age"));
+	}
+
 
 	private static class TestValidator implements Validator {
 
@@ -332,6 +368,7 @@ public class FormControllerTestSuite extends TestCase {
 				errors.rejectValue("name", TOOSHORT, null, "need full name");
 		}
 	};
+
 
 	private static class TestController extends SimpleFormController {
 		
@@ -350,7 +387,8 @@ public class FormControllerTestSuite extends TestCase {
 			return person;
 		}
 	}
-	
+
+
 	private static class RefController extends SimpleFormController {
 		
 		final String NUMBERS_ATT = "NUMBERS";

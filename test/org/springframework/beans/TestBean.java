@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.3 2003-10-30 07:52:36 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.4 2003-11-12 19:09:53 jhoeller Exp $
  */
 
 package org.springframework.beans;
@@ -39,6 +39,8 @@ public class TestBean implements ITestBean, IOther {
 	private INestedTestBean doctor = new NestedTestBean();
 
 	private INestedTestBean lawyer = new NestedTestBean();
+
+	private IndexedTestBean nestedIndexedBean;
 
 	public String getTouchy() {
 		return touchy;
@@ -195,4 +197,12 @@ public class TestBean implements ITestBean, IOther {
 		lawyer = bean;
 	}
 
-} // class Test
+	public IndexedTestBean getNestedIndexedBean() {
+		return nestedIndexedBean;
+	}
+
+	public void setNestedIndexedBean(IndexedTestBean nestedIndexedBean) {
+		this.nestedIndexedBean = nestedIndexedBean;
+	}
+
+}
