@@ -16,6 +16,7 @@
 package org.springframework.util;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Iterator;
@@ -446,6 +447,14 @@ public class EventListenerListHelper implements Serializable {
 		}
 	}
 
+	public Object toArray() {
+		if (listeners == null) {
+			return Array.newInstance(listenerClass, 0);
+		} else {
+			return listeners.clone();
+		}
+	}
+	
 	public String toString() {
 		return new ToStringCreator(this).append("listenerClass", listenerClass).append("listeners", listeners)
 				.toString();
