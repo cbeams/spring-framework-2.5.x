@@ -105,24 +105,24 @@ public abstract class SqlCall extends RdbmsOperation {
 		}
 		else {
 			List parameters = getDeclaredParameters();
-			int firstParameter = 0;
+			int parameterCount = 0;
 			if (isFunction()) {
 				this.callString = "{? = call " + getSql() + "(";
-				firstParameter = 1;
+				parameterCount = -1;
 			}
 			else {
 				this.callString = "{call " + getSql() + "(";
 			}
-			for (int i = firstParameter; i < parameters.size(); i++) {
+			for (int i = 0; i < parameters.size(); i++) {
 				SqlParameter p = (SqlParameter) parameters.get(i);
-				if ((p instanceof SqlReturnResultSet)) {
-					firstParameter++;
-				}
-				else {
-					if (i > firstParameter) {
+				if (!(p instanceof SqlReturnResultSet)) {
+					if (parameterCount > 0) {
 						this.callString += ", ";
 					}
-					this.callString += "?";
+					if (parameterCount >= 0) {
+						this.callString += "?";
+					}
+					parameterCount++;
 				}
 			}
 			this.callString += ")}";
