@@ -21,11 +21,13 @@ import org.springframework.beans.factory.support.BeanFactoryUtils;
  * <br>
  * Note that all beans required to support the auto-proxying infrastructure, such as
  * advisors and all beans they reference, must have names beginning with the prefix
- * auto_. This allows us to avoid circular references, which might otherwise arise when
+ * <code>auto_</code>. This allows us to avoid circular references, which might otherwise arise when
  * a PostProcessor attempted to use an advisor which referenced another bean that
  * was post processed by this post processor.
+ * Note that this default value (_auto) can be changed by setting the
+ * <code>infrastructureBeanNamePrefix</code> property.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreator.java,v 1.1 2003-12-12 16:50:43 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreator.java,v 1.2 2003-12-12 20:52:01 johnsonr Exp $
  */
 public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 
@@ -36,13 +38,41 @@ public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 	 */	
 	public final static String AUTO_ADVICE_PREFIX = "auto_";
 	
-	public final static String AUTO_PROXY_INFRASTRUCTURE_PREFIX = "auto_";
+	public final static String DEFAULT_INFRASTRUCTURE_BEAN_NAME_PREFIX = "auto_";
 	
 	/**
 	 * BeanFactory that owns this post processor
 	 */
 	private ListableBeanFactory owningFactory;
+	
+	/** Prefix that will screen out auto proxying */
+	private String infrastructureBeanNamePrefix = DEFAULT_INFRASTRUCTURE_BEAN_NAME_PREFIX;
 
+	/**
+	 * @return return the prefix for bean names that will cause them not to
+	 * be considered for autoproxying by this object.
+	 */
+	public String getInfrastructureBeanNamePrefix() {
+		return this.infrastructureBeanNamePrefix;
+	}
+
+	/** 
+	 * Set the prefix for bean names that will cause them to 
+	 * be excluded for autoproxying by this object. This prefix
+	 * should be set to avoid circular references. Default value is
+	 * <code>_auto</code>.
+	 * @param infrastructureBeanNamePrefix new exclusion prefix
+	 */
+	public void setInfrastructureBeanNamePrefix(String infrastructureBeanNamePrefix) {
+		this.infrastructureBeanNamePrefix = infrastructureBeanNamePrefix;
+	}
+	
+	
+	/**
+	 * If subclasses implement BeanFactoryAware, they should invoke this
+	 * form of the method as well.
+	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		super.setBeanFactory(beanFactory);
 		if (!(beanFactory instanceof ListableBeanFactory)) {
@@ -62,7 +92,7 @@ public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 		List candidateAdvice = new LinkedList();
 		for (int i = 0; i < adviceNames.length; i++) {
 			String name = adviceNames[i];
-			if (name.startsWith(AUTO_ADVICE_PREFIX)) {
+			if (name.startsWith(infrastructureBeanNamePrefix)) {
 				Advisor advice = (Advisor) this.owningFactory.getBean(name);
 				candidateAdvice.add(advice);
 			}
@@ -135,7 +165,7 @@ public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * @see org.springframework.aop.framework.support.AbstractAutoProxyCreator#shouldSkip(java.lang.Object, java.lang.String)
 	 */
 	protected boolean shouldSkip(Object bean, String name) {
-		return name.startsWith(AUTO_PROXY_INFRASTRUCTURE_PREFIX);
+		return name.startsWith(infrastructureBeanNamePrefix);
 	}
 
 	
