@@ -35,7 +35,6 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -472,8 +471,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			throw new BeanDefinitionStoreException(
 					this.resource, beanName, "Tag 'property' must have a 'name' attribute");
 		}
+		if (pvs.contains(propertyName)) {
+			throw new BeanDefinitionStoreException(
+					this.resource, beanName, "Multiple 'property' definitions for property '" + propertyName + "'");
+		}
 		Object val = getPropertyValue(ele, beanName, propertyName);
-		pvs.addPropertyValue(new PropertyValue(propertyName, val));
+		pvs.addPropertyValue(propertyName, val);
 	}
 
 	/**
