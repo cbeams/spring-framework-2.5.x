@@ -189,6 +189,7 @@
     <jar jarfile="${target.dir}/${project.name.file}-ejb.jar">
       <fileset dir="${target.classes.java.dir}">
         <include name="**/ejb/*.class"/>
+        <include name="**/SimpleService*.class*"/>
       </fileset>
       <metainf dir="${src.ejb.dir}"/>
     </jar>
