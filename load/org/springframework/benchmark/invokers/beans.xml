@@ -67,14 +67,52 @@
 	
 	-->
 	
+	<!--
+		The most important definition:
+		the recommended model
+	-->
 	<bean id="singleton" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
 		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
 		<property name="target"><ref local="singletonTarget"/></property>
 
 		<!-- Force the use of CGLIB -->
+		<property name="proxyTargetClass"><value>false</value></property>
+		<property name="optimize"><value>false</value></property> 
+	
+		<property name="transactionAttributes">
+			<props>
+			<!-- Faster to have exact match -->
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="singletonCglib" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		<property name="target"><ref local="singletonTarget"/></property>
+
+		<!-- Force the use of CGLIB -->
 		<property name="proxyTargetClass"><value>true</value></property>
-		<property name="enableCglibSubclassOptimizations"><value>true</value></property> 
+		<property name="optimize"><value>false</value></property> 
+	
+		<property name="transactionAttributes">
+			<props>
+			<!-- Faster to have exact match -->
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="singletonOptimizedCglib" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		<property name="target"><ref local="singletonTarget"/></property>
+
+		<!-- Force the use of CGLIB -->
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="optimize"><value>true</value></property> 
 	
 		<property name="transactionAttributes">
 			<props>
