@@ -247,7 +247,7 @@ public class ExecuteAStatement {
       <literal>InvalidDataAccessApiUsageException</literal> will be thrown.
       Here is an example that contains two query methods, one for an
       <literal>int</literal> and one that queries for a
-      <literal>String</literal>. </para>
+      <literal>String</literal>.</para>
 
       <programlisting>import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -323,7 +323,7 @@ public class RunAQuery {
       <literal><literal>DataSource</literal></literal> is just a matter of
       configuration then: You can even replace the definition of the
       <literal>FactoryBean</literal> with a non-JNDI
-      <literal><literal>DataSource</literal></literal>! </para>
+      <literal><literal>DataSource</literal></literal>!</para>
     </sect2>
 
     <sect2 id="jdbc-SmartDataSource">
@@ -380,7 +380,7 @@ public class RunAQuery {
       respective ApplicationContext, or in conjunction with a simple JNDI
       environment. Pool-assuming <literal>Connection.close()</literal> calls
       will simply close the connection, so any DataSource-aware persistence
-      code should work. </para>
+      code should work.</para>
     </sect2>
 
     <sect2 id="jdbc-DataSourceTransactionManager">
@@ -512,19 +512,64 @@ public class RunAQuery {
     <sect2 id="jdbc-SqlUpdate">
       <title>SqlUpdate</title>
 
-      <para>ToDo</para>
+      <para>RdbmsOperation subclass representing a SQL update. Like a query,
+      an update object is reusable. Like all RdbmsOperation objects, an update
+      can have parameters and is defined in SQL.</para>
+
+      <para>This class provides a number of update() methods analogous to the
+      execute() methods of query objects.</para>
+
+      <para>This class is concrete. Although it can be subclassed (for example
+      to add a custom update method) it can easily be parameterized by setting
+      SQL and declaring parameters.</para>
+
+      <para>Example - ToDo</para>
     </sect2>
 
     <sect2 id="jdbc-StoredProcedure">
       <title>StoredProcedure</title>
 
-      <para>ToDo</para>
+      <para>Superclass for object abstractions of RDBMS stored procedures.
+      This class is abstract and its execute methods are protected, preventing
+      use other than through a subclass that offers tighter typing.</para>
+
+      <para>The inherited sql property is the name of the stored procedure in
+      the RDBMS. Note that JDBC 3.0 introduces named parameters, although the
+      other features provided by this class are still necessary in JDBC
+      3.0.</para>
+
+      <para>Example - ToDo</para>
     </sect2>
 
     <sect2 id="jdbc-SqlFunction">
       <title>SqlFunction</title>
 
-      <para>ToDo</para>
+      <para>SQL "function" wrapper for a query that returns a single row of
+      results. The default behavior is to return an int, but that can be
+      overridden by using the methods with an extra return type parameter.
+      This is similar to using the <literal>queryForXxx</literal> methods of
+      the <literal>JdbcTemplate</literal>. The advantage with
+      <literal>SqlFunction</literal> is that you don't have to create the
+      <literal>JdbcTemplate</literal>, it is done behind the scenes.</para>
+
+      <para>This class is intended to use to call SQL functions that return a
+      single result using a query like "select user()" or "select sysdate from
+      dual". It is not intended for calling more complex stored functions or
+      for using a <literal>CallableStatement</literal> to invoke a stored
+      procedure or stored function. Use <literal>StoredProcedure</literal> or
+      <literal>SqlCall</literal> for this type of processing.</para>
+
+      <para>This is a concrete class, which there is normally no need to
+      subclass. Code using this package can create an object of this type,
+      declaring SQL and parameters, and then invoke the appropriate run method
+      repeatedly to execute the function. Here is an example of retrieving the
+      count of rows from a table:</para>
+
+      <para><programlisting>  public int countRows() {
+    SqlFunction sf = new SqlFunction(dataSource, "select count(*) from mytable");
+    sf.compile();
+    return sf.run();
+  }</programlisting></para>
 
       <para></para>
     </sect2>
