@@ -41,8 +41,8 @@ import org.springframework.beans.factory.FactoryBean;
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @since 09-May-2003
- * @see org.springframework.ejb.access.AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup(boolean)
- * @see org.springframework.ejb.access.AbstractSlsbInvokerInterceptor#setCacheHome(boolean)
+ * @see AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup
+ * @see AbstractSlsbInvokerInterceptor#setCacheHome
  */
 public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInterceptor
     implements FactoryBean {

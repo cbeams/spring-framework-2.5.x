@@ -56,9 +56,9 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  * @author Juergen Hoeller
  * @since 09-May-2003
  * @see org.springframework.remoting.RemoteAccessException
- * @see org.springframework.ejb.access.AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup(boolean)
- * @see org.springframework.ejb.access.AbstractSlsbInvokerInterceptor#setCacheHome(boolean)
- * @see org.springframework.ejb.access.AbstractRemoteSlsbInvokerInterceptor#setRefreshHomeOnConnectFailure(boolean)
+ * @see AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup
+ * @see AbstractSlsbInvokerInterceptor#setCacheHome
+ * @see AbstractRemoteSlsbInvokerInterceptor#setRefreshHomeOnConnectFailure
  */
 public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {
 	

@@ -43,8 +43,8 @@ import org.aopalliance.intercept.MethodInvocation;
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.ejb.access.AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup(boolean)
- * @see org.springframework.ejb.access.AbstractSlsbInvokerInterceptor#setCacheHome(boolean)
+ * @see AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup
+ * @see AbstractSlsbInvokerInterceptor#setCacheHome
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
