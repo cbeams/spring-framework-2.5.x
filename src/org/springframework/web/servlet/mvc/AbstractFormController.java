@@ -220,7 +220,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (isFormSubmission(request)) {
 			HttpSession session = request.getSession(false);
 			if (isSessionForm() &&
-					(session == null || session.getAttribute(getFormSessionAttributeName()) == null)) {
+					(session == null || session.getAttribute(getFormSessionAttributeName(request)) == null)) {
 				// Cannot submit a session form if no form object is in the session.
 				return handleInvalidSubmit(request, response);
 			}
@@ -249,14 +249,28 @@ public abstract class AbstractFormController extends BaseCommandController {
 	}
 
 	/**
-	 * Return the name of the HttpSession attribute that holds
-	 * the form object for this form controller.
-	 * <p>Default is an internal name, of no relevance to applications,
-	 * as the form session attribute is not usually accessed directly.
-	 * Can be overridden to use an application-specific attribute name,
-	 * which allows other code to access the session attribute directly.
-	 * @return the name of the form session attribute,
-	 * or null if not in session form mode
+	 * Return the name of the HttpSession attribute that holds the form object
+	 * for this form controller.
+	 * <p>Default implementation delegates to the <code>getFormSessionAttributeName</code>
+	 * version without arguments.
+	 * @param request current HTTP request
+	 * @return the name of the form session attribute, or null if not in session form mode
+	 * @see #getFormSessionAttributeName
+	 * @see javax.servlet.http.HttpSession#getAttribute
+	 */
+	protected String getFormSessionAttributeName(HttpServletRequest request) {
+		return getFormSessionAttributeName();
+	}
+
+	/**
+	 * Return the name of the HttpSession attribute that holds the form object
+	 * for this form controller.
+	 * <p>Default is an internal name, of no relevance to applications, as the form
+	 * session attribute is not usually accessed directly. Can be overridden to use
+	 * an application-specific attribute name, which allows other code to access
+	 * the session attribute directly.
+	 * @return the name of the form session attribute, or null if not in session form mode
+	 * @see javax.servlet.http.HttpSession#getAttribute
 	 */
 	protected String getFormSessionAttributeName() {
 		return isSessionForm() ? getClass().getName() + ".FORM." + getCommandName() : null;
@@ -328,11 +342,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (session == null) {
 			throw new ServletException("Must have session when trying to bind");
 		}
-		Object sessionFormObject = session.getAttribute(getFormSessionAttributeName());
+		String formAttrName = getFormSessionAttributeName(request);
+		Object sessionFormObject = session.getAttribute(formAttrName);
 		if (sessionFormObject == null) {
 			throw new ServletException("Form object not found in session");
 		}
-		session.removeAttribute(getFormSessionAttributeName());
+		session.removeAttribute(formAttrName);
 		return sessionFormObject;
 	}
 
@@ -411,7 +426,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected final ModelAndView showForm(
 			HttpServletRequest request, BindException errors, String viewName, Map controlModel) throws Exception {
 		if (isSessionForm()) {
-			request.getSession().setAttribute(getFormSessionAttributeName(), errors.getTarget());
+			request.getSession().setAttribute(getFormSessionAttributeName(request), errors.getTarget());
 		}
 		Map model = errors.getModel();
 		Map referenceData = referenceData(request, errors.getTarget(), errors);

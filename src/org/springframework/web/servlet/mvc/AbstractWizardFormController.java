@@ -323,8 +323,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			}
 			// Set page session attribute, expose overriding request attribute.
 			Integer pageInteger = new Integer(page);
-			request.getSession().setAttribute(getPageSessionAttributeName(), pageInteger);
-			request.setAttribute(getPageSessionAttributeName(), pageInteger);
+			String pageAttrName = getPageSessionAttributeName(request);
+			if (isSessionForm()) {
+				request.getSession().setAttribute(pageAttrName, pageInteger);
+			}
+			request.setAttribute(pageAttrName, pageInteger);
 			// Set page request attribute for evaluation by views.
 			Map controlModel = new HashMap();
 			if (this.pageAttribute != null) {
@@ -361,17 +364,33 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Return the name of the HttpSession attribute that holds
-	 * the page object for this wizard form controller.
-	 * <p>Default is an internal name, of no relevance to applications,
-	 * as the page session attribute is not usually accessed directly.
-	 * Can be overridden to use an application-specific attribute name,
-	 * which allows other code to access the session attribute directly.
-	 * @return the name of the page session attribute
+	 * Return the name of the HttpSession attribute that holds the page object
+	 * for this wizard form controller.
+	 * <p>Default implementation delegates to the <code>getPageSessionAttributeName</code>
+	 * version without arguments.
+	 * @param request current HTTP request
+	 * @return the name of the form session attribute, or null if not in session form mode
+	 * @see #getPageSessionAttributeName
+	 * @see #getFormSessionAttributeName(javax.servlet.http.HttpServletRequest)
+	 * @see javax.servlet.http.HttpSession#getAttribute
+	 */
+	protected String getPageSessionAttributeName(HttpServletRequest request) {
+		return getPageSessionAttributeName();
+	}
+
+	/**
+	 * Return the name of the HttpSession attribute that holds the page object
+	 * for this wizard form controller.
+	 * <p>Default is an internal name, of no relevance to applications, as the form
+	 * session attribute is not usually accessed directly. Can be overridden to use
+	 * an application-specific attribute name, which allows other code to access
+	 * the session attribute directly.
+	 * @return the name of the page session attribute, or null if not in session form mode
 	 * @see #getFormSessionAttributeName
+	 * @see javax.servlet.http.HttpSession#getAttribute
 	 */
 	protected String getPageSessionAttributeName() {
-		return getClass().getName() + ".PAGE." + getCommandName();
+		return isSessionForm() ? getClass().getName() + ".PAGE." + getCommandName() : null;
 	}
 
 	/**
@@ -402,8 +421,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 		int currentPage = getCurrentPage(request);
 		// Remove page session attribute, provide copy as request attribute.
-		request.getSession().removeAttribute(getPageSessionAttributeName());
-		request.setAttribute(getPageSessionAttributeName(), new Integer(currentPage));
+		String pageAttrName = getPageSessionAttributeName(request);
+		if (isSessionForm()) {
+			request.getSession().removeAttribute(pageAttrName);
+		}
+		request.setAttribute(pageAttrName, new Integer(currentPage));
 
 		// cancel?
 		if (isCancel(request)) {
@@ -452,7 +474,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected int getCurrentPage(HttpServletRequest request) {
 		// check for overriding attribute in request
-		Integer pageAttr = (Integer) request.getAttribute(getPageSessionAttributeName());
+		String pageAttrName = getPageSessionAttributeName(request);
+		Integer pageAttr = (Integer) request.getAttribute(pageAttrName);
 		if (pageAttr != null) {
 			return pageAttr.intValue();
 		}
@@ -462,12 +485,14 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			return Integer.parseInt(pageParam);
 		}
 		// check for original attribute in session
-		pageAttr = (Integer) request.getSession().getAttribute(getPageSessionAttributeName());
-		if (pageAttr != null) {
-			return pageAttr.intValue();
+		if (isSessionForm()) {
+			pageAttr = (Integer) request.getSession().getAttribute(pageAttrName);
+			if (pageAttr != null) {
+				return pageAttr.intValue();
+			}
 		}
-		throw new IllegalStateException("Page attribute [" + getPageSessionAttributeName() +
-		    "] neither found in session nor in request");
+		throw new IllegalStateException(
+				"Page attribute [" + pageAttrName + "] neither found in session nor in request");
 	}
 
 	/**
