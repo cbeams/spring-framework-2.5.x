@@ -12,12 +12,12 @@ Run "ant.bat" in this directory for available targets (e.g. "ant build",
 "ant warfile"). Note that to start Ant this way, you'll need an XML
 parser in your classpath (e.g. in jre/lib/ext; included in JDK 1.4).
 You can use "warfile.bat" as a shortcut for war file creation.
-Tje war file will be created in the 'dist' directory.
+The war file will be created in the 'dist' directory.
 
 You can also invoke an existing installation of Ant, with this
 directory as execution directory. Note that you need to do this
 to execute the "test" target, as you need the JUnit task from
-optional.jar (not included here.)
+optional.jar (not included here).
 
 To be able to execute the web application with its default settings,
 you'll need to start the HSQLDB instance in the db/hsqldb directory
@@ -36,5 +36,5 @@ Note for JBoss users:
 - in build.properties: uncomment the jboss.root property
 - in build.properties: set the port number for HSQL to 1701
 - if using JBoss 3.2.x, copy db/jboss/3.2.x/*.xml in your deploy directory
-- for time being no database descriptor is provided for other JBoss versions
+- for the time being, no database descriptor is provided for other JBoss versions
  

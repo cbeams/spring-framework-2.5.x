@@ -1,6 +1,5 @@
 <h1>Using Tiles together with Spring</h1>
-<h5>Author: Alef Arendsen (<a href="mailto:alef@jteam.nl">alef@jteam.nl</a>)<br>
-Remarks: small example application will be provided</h5>
+<h5>Author: Alef Arendsen (<a href="mailto:alef@jteam.nl">alef@jteam.nl</a>)</h5>
 
 <h2>Introduction</h2>
 <p>
@@ -78,13 +77,12 @@ The InternalResourceViewResolver instantiates the given <code>viewClass</code> f
   welcomeView.url=welcome (<b>this is the name of a definition</b>)
 
   vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
-  vetsView.url=vetsView (<b>again, tthis is the name of a definition</b>)
+  vetsView.url=vetsView (<b>again, this is the name of a definition</b>)
 
   findOwnersForm.class=org.springframework.web.servlet.view.JstlView
   findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 </pre>
 
 	As you can see, when using the ResourceBundleViewResolver, you can mix view using different view technologies.
-
 
 </p>
