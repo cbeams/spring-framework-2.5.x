@@ -22,24 +22,46 @@ import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Interceptor that exposes the current MethodInvocation.
+ * We occasionally need to do this--for example, when a pointcut
+ * or target object needs to know the Invocation context.
+ * <br>Don't use this interceptor unless this is really necessary.
+ * Target objects should not normally know about Spring AOP,
+ * as this creates a dependency on Spring. Target objects
+ * should be plain POJOs as far as possible.
+ * <br>If used, this interceptor will normally be the first
+ * in the interceptor chain.
  * @author Rod Johnson
- * @version $Id: ExposeInvocationInterceptor.java,v 1.1 2004-07-20 16:32:09 johnsonr Exp $
+ * @version $Id: ExposeInvocationInterceptor.java,v 1.2 2004-07-20 16:38:49 johnsonr Exp $
  */
 public class ExposeInvocationInterceptor implements MethodInterceptor {
 	
 	private static ThreadLocal invocation = new ThreadLocal();
 	
-	public static MethodInvocation currentInvocation() {
+	/**
+	 * Return the AOP Alliance MethodInvocation object associated with the current
+	 * invocation. 
+	 * @return the invocation object associated with the current invocation
+	 * @throws AspectException if there is no AOP invocation
+	 * in progress, or if the ExposeInvocationInterceptor was not
+	 * added to this interceptor chain.
+	 */
+	public static MethodInvocation currentInvocation() throws AspectException {
 		MethodInvocation mi = (MethodInvocation) invocation.get();
 		if (mi == null)
-			throw new AspectException("No invocation set");
+			throw new AspectException("No MethodInvocation found: " +
+					"Check that an AOP invocation is in progress, and that the ExposeInvocationInterceptor is in the interceptor chain");
 		return mi;
 	}
 	
-	public static ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
+	/**
+	 * Singleton instance of this class
+	 */
+	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
 	
+	/**
+	 * Ensure that only the canonical instance can be used
+	 */
 	private ExposeInvocationInterceptor() {
-		
 	}
 
 	/**
