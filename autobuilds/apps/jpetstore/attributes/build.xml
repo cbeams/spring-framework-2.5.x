@@ -27,7 +27,7 @@
 	<path id="attribute-compiler-classpath">
 
 		<fileset dir="${spring.root}/lib/jakarta-commons">
-			<include name="commons-attributes-compiler-SNAPSHOT.jar"/>
+			<include name="commons-attributes-compiler.jar"/>
 			<include name="commons-collections.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/xdoclet">
@@ -54,7 +54,7 @@
 			<include name="servlet.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
-			<include name="commons-attributes-api*.jar"/>
+			<include name="commons-attributes-api.jar"/>
 			<include name="commons-logging.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/struts">
@@ -162,7 +162,7 @@
 				<include name="jstl.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
-				<include name="commons-attributes-api*.jar"/>
+				<include name="commons-attributes-api.jar"/>
 				<include name="commons-beanutils.jar"/>
 				<include name="commons-collections.jar"/>
 				<include name="commons-dbcp.jar"/>
