@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.StringUtils;
 
@@ -42,7 +43,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.18 2004-03-19 07:45:22 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.19 2004-03-19 17:45:36 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -174,19 +175,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 	}
-	
+
 
 	//---------------------------------------------------------------------
 	// Implementation of BeanDefinitionRegistry
 	//---------------------------------------------------------------------
 
-	public void registerBeanDefinition(String name, AbstractBeanDefinition beanDefinition)
+	public void registerBeanDefinition(String name, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
-		try {
-			beanDefinition.validate();
-		}
-		catch (BeanDefinitionValidationException ex) {
-			throw new BeanDefinitionStoreException("Validation of bean definition with name '" + name + "' failed", ex);
+		if (beanDefinition instanceof AbstractBeanDefinition) {
+			try {
+				((AbstractBeanDefinition) beanDefinition).validate();
+			}
+			catch (BeanDefinitionValidationException ex) {
+				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), name,
+				                                       "Validation of bean definition with name failed", ex);
+			}
 		}
 		Object oldBeanDefinition = this.beanDefinitionMap.get(name);
 		if (oldBeanDefinition != null) {
@@ -210,8 +214,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of superclass abstract methods
 	//---------------------------------------------------------------------
 
-	public AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException {
-		AbstractBeanDefinition bd = (AbstractBeanDefinition) this.beanDefinitionMap.get(beanName);
+	public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
+		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
 			throw new NoSuchBeanDefinitionException(beanName, toString());
 		}
@@ -247,7 +251,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (getParentBeanFactory() == null) {
 			sb.append("; Root of BeanFactory hierarchy");
 		}
-		else { 
+		else {
 			sb.append("; parent=<" + getParentBeanFactory() + ">");
 		}
 		return sb.toString();

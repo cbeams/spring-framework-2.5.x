@@ -19,7 +19,6 @@ package org.springframework.beans.factory.config;
 import java.beans.PropertyEditor;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 
@@ -34,7 +33,7 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see ConfigurableListableBeanFactory
- * @version $Id: ConfigurableBeanFactory.java,v 1.10 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: ConfigurableBeanFactory.java,v 1.11 2004-03-19 17:45:35 jhoeller Exp $
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 
@@ -72,24 +71,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void ignoreDependencyType(Class type);
 
 	/**
-	 * Return the registered PropertyValues for the given bean.
+	 * Return the registered BeanDefinition for the given bean.
 	 * @param beanName name of the bean
-	 * @return the registered PropertyValues
+	 * @return the registered BeanDefinition
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if there is no bean with the given name
 	 * @throws BeansException in case of errors
 	 */
-	MutablePropertyValues getPropertyValues(String beanName) throws BeansException;
-
-	/**
-	 * Return the registered ConstructorArgumentValues for the given bean.
-	 * @param beanName name of the bean
-	 * @return the registered ConstructorArgumentValues
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if there is no bean with the given name
-	 * @throws BeansException in case of errors
-	 */
-	ConstructorArgumentValues getConstructorArgumentValues(String beanName) throws BeansException;
+	BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
 	/**
 	 * Given a bean name, create an alias. We typically use this method to

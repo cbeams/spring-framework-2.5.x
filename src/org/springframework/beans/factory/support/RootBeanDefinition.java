@@ -32,7 +32,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RootBeanDefinition.java,v 1.17 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: RootBeanDefinition.java,v 1.18 2004-03-19 17:45:36 jhoeller Exp $
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -169,6 +169,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	public ConstructorArgumentValues getConstructorArgumentValues() {
+		return constructorArgumentValues;
+	}
+
+	/**
+	 * Return if there are constructor argument values for this bean.
+	 */
+	public boolean hasConstructorArgumentValues() {
+		return (constructorArgumentValues != null && !constructorArgumentValues.isEmpty());
+	}
+
 	/**
 	 * Returns the class of the wrapped bean.
 	 * @throws IllegalStateException if the bean definition does not carry
@@ -191,20 +202,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		else {
 			return (String) this.beanClass;
 		}
-	}
-
-	/**
-	 * Return the constructor argument values for this bean.
-	 */
-	public ConstructorArgumentValues getConstructorArgumentValues() {
-		return constructorArgumentValues;
-	}
-
-	/**
-	 * Return if there are constructor argument values for this bean.
-	 */
-	public boolean hasConstructorArgumentValues() {
-		return (constructorArgumentValues != null && !constructorArgumentValues.isEmpty());
 	}
 
 	/**

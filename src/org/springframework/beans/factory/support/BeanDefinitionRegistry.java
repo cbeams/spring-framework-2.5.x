@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Interface for registries that hold bean definitions,
@@ -28,7 +29,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  *
  * @author Juergen Hoeller
  * @since 26.11.2003
- * @version $Id: BeanDefinitionRegistry.java,v 1.6 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: BeanDefinitionRegistry.java,v 1.7 2004-03-19 17:45:36 jhoeller Exp $
  */
 public interface BeanDefinitionRegistry {
 
@@ -53,14 +54,14 @@ public interface BeanDefinitionRegistry {
 	boolean containsBeanDefinition(String name);
 
 	/**
-	 * Return the bean definition for the given bean name.
+	 * Return the BeanDefinition for the given bean name.
 	 * @param name name of the bean to find a definition for
-	 * @return the BeanDefinition for this prototype name. Must never return null.
+	 * @return the BeanDefinition for the given name (never null)
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if the bean definition cannot be resolved
 	 * @throws BeansException in case of errors
 	 */
-	AbstractBeanDefinition getBeanDefinition(String name) throws BeansException;
+	BeanDefinition getBeanDefinition(String name) throws BeansException;
 
 	/**
 	 * Register a new bean definition with this registry.
@@ -71,7 +72,7 @@ public interface BeanDefinitionRegistry {
 	 * @see RootBeanDefinition
 	 * @see ChildBeanDefinition
 	 */
-	void registerBeanDefinition(String name, AbstractBeanDefinition beanDefinition)
+	void registerBeanDefinition(String name, BeanDefinition beanDefinition)
 			throws BeansException;
 
 	/**

@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -48,6 +48,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -577,17 +578,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Given a PropertyValue, return a value, resolving any references to other
 	 * beans in the factory if necessary. The value could be:
-	 * <li>An AbstractBeanDefinition, which leads to the creation of a
-	 * corresponding new bean instance. Singleton flags and names of such
-	 * "inner beans" are always ignored: Inner beans are anonymous prototypes.
+	 * <li>A BeanDefinition, which leads to the creation of a corresponding
+	 * new bean instance. Singleton flags and names of such "inner beans"
+	 * are always ignored: Inner beans are anonymous prototypes.
 	 * <li>A RuntimeBeanReference, which must be resolved.
 	 * <li>A ManagedList. This is a special collection that may contain
-	 * RuntimeBeanReferences that will need to be resolved.
-	 * <li>A ManagedMap. In this case the value may be a reference that must
-	 * be resolved.
+	 * RuntimeBeanReferences or Collections that will need to be resolved.
+	 * <li>A ManagedSet. May also contain RuntimeBeanReferences or
+	 * Collections that will need to be resolved.
+	 * <li>A ManagedMap. In this case the value may be a RuntimeBeanReference
+	 * or Collection that will need to be resolved.
 	 * <li>An ordinary object or null, in which case it's left alone.
-	 * If the value is a simple object, but the property takes a Collection type,
-	 * the value must be placed in a list.
 	 */
 	protected Object resolveValueIfNecessary(String beanName, RootBeanDefinition mergedBeanDefinition,
 																					 String argName, Object value) throws BeansException {
@@ -595,8 +596,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// requires a runtime reference to another bean to be resolved.
 		// If it does, we'll attempt to instantiate the bean and set the reference.
 		if (value instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition bd = (AbstractBeanDefinition) value;
-			bd.setSingleton(false);  // an inner bean should never be cached as singleton
+			BeanDefinition bd = (BeanDefinition) value;
+			if (bd instanceof AbstractBeanDefinition) {
+				// an inner bean should never be cached as singleton
+				((AbstractBeanDefinition) bd).setSingleton(false);
+			}
 			String innerBeanName = "(inner bean for property '" + beanName + "." + argName + "')";
 			Object bean = createBean(innerBeanName, getMergedBeanDefinition(innerBeanName, bd));
 			if (bean instanceof DisposableBean) {

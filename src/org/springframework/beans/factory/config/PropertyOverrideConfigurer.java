@@ -50,7 +50,7 @@ import org.springframework.beans.FatalBeanException;
  * @author Juergen Hoeller
  * @since 12.03.2003
  * @see PropertyPlaceholderConfigurer
- * @version $Id: PropertyOverrideConfigurer.java,v 1.4 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: PropertyOverrideConfigurer.java,v 1.5 2004-03-19 17:45:35 jhoeller Exp $
  */
 public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
@@ -73,7 +73,8 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		}
 		String beanName = key.substring(0, dotIndex);
 		String beanProperty = key.substring(dotIndex+1);
-		factory.getPropertyValues(beanName).addPropertyValue(beanProperty, value);
+		BeanDefinition bd = factory.getBeanDefinition(beanName);
+		bd.getPropertyValues().addPropertyValue(beanProperty, value);
 		logger.debug("Property '" + key + "' set to [" + value + "]");
 	}
 

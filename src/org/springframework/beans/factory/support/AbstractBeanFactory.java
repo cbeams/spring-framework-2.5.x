@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -31,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -41,9 +40,9 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /**
  * Abstract superclass for BeanFactory implementations.
@@ -62,7 +61,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.49 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.50 2004-03-19 17:45:36 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  */
@@ -304,16 +303,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 		return ignoreDependencyTypes;
 	}
 
-	public MutablePropertyValues getPropertyValues(String beanName) throws BeansException {
-		return getBeanDefinition(beanName).getPropertyValues();
-	}
-
-	public ConstructorArgumentValues getConstructorArgumentValues(String beanName) throws BeansException {
-		AbstractBeanDefinition bd = getBeanDefinition(beanName);
-		return (bd instanceof RootBeanDefinition ?
-		    ((RootBeanDefinition) bd).getConstructorArgumentValues() : null);
-	}
-
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
 		logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
 		synchronized (this.aliasMap) {
@@ -511,7 +500,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
 	 * @return a merged RootBeanDefinition with overridden properties
 	 */
-	protected RootBeanDefinition getMergedBeanDefinition(String beanName, AbstractBeanDefinition bd) {
+	protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd) {
 		if (bd instanceof RootBeanDefinition) {
 			return (RootBeanDefinition) bd;
 		}
@@ -558,8 +547,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if the bean definition cannot be resolved
 	 * @throws BeansException in case of errors
+	 * @see RootBeanDefinition
+	 * @see ChildBeanDefinition
 	 */
-	public abstract AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException;
+	public abstract BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
 	/**
 	 * Create a bean instance for the given bean definition.

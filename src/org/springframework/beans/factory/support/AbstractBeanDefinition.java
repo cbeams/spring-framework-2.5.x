@@ -17,46 +17,61 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /**
- * Common base class for bean definitions. Use a FactoryBean to
- * customize behaviour when returning application beans.
- *
- * <p>A BeanDefinition describes a bean instance, which has property values
- * and further information supplied by concrete classes or subinterfaces.
- *
- * <p>Once configuration is complete, a BeanFactory will be able
- * to return direct references to objects defined by BeanDefinitions.
- *
+ * Common base class for bean definitions, factoring out common
+ * functionality from RootBeanDefinition and ChildBeanDefinition.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractBeanDefinition.java,v 1.11 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.12 2004-03-19 17:45:36 jhoeller Exp $
+ * @see RootBeanDefinition
+ * @see ChildBeanDefinition
  */
-public abstract class AbstractBeanDefinition {
+public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private MutablePropertyValues propertyValues;
+
+	private String resourceDescription;
 
 	private boolean singleton = true;
 
 	private boolean lazyInit = false;
 
-	private String resourceDescription;
-
 
 	/**
-	 * Set the PropertyValues to be applied to a new instance of this bean.
+	 * Create a new bean definition.
+	 * @param pvs the PropertyValues to be applied to a new instance of the bean
 	 */
 	protected AbstractBeanDefinition(MutablePropertyValues pvs) {
 		this.propertyValues = (pvs != null) ? pvs : new MutablePropertyValues();
 	}
 
-	/**
-	 * Return the PropertyValues to be applied to a new instance of this bean.
-	 */
 	public MutablePropertyValues getPropertyValues() {
 		return propertyValues;
 	}
-	
+
+	/**
+	 * This implementations returns null: Just RootBeanDefinitions
+	 * have concrete support for constructor argument values.
+	 */
+	public ConstructorArgumentValues getConstructorArgumentValues() {
+		return null;
+	}
+
+	/**
+	 * Set a description of the resource that this bean definition
+	 * came from (for the purpose of showing context in case of errors).
+	 */
+	public void setResourceDescription(String resourceDescription) {
+		this.resourceDescription = resourceDescription;
+	}
+
+	public String getResourceDescription() {
+		return resourceDescription;
+	}
+
 	/**
 	 * Set if this a <b>Singleton</b>, with a single, shared instance returned
 	 * on all calls. If false, the BeanFactory will apply the <b>Prototype</b>
@@ -91,14 +106,6 @@ public abstract class AbstractBeanDefinition {
 	 */
 	public boolean isLazyInit() {
 		return lazyInit;
-	}
-
-	public void setResourceDescription(String resourceDescription) {
-		this.resourceDescription = resourceDescription;
-	}
-
-	public String getResourceDescription() {
-		return resourceDescription;
 	}
 
 	/**
