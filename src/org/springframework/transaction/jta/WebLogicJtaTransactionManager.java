@@ -41,6 +41,10 @@ import org.springframework.transaction.TransactionUsageException;
  * <p>Currently tested on BEA WebLogic 8.1 SP2. On WebLogic 7.0 SP2, "forceResume"
  * unfortunately fails with a mysterious, WebLogic-internal NullPointerException.
  * Thanks to Eugene Kuleshov for tracking down and reporting this issue!
+ * The solution for WebLogic 7.0 is to set the transactionManager using the
+ * WebLogicServerTransactionManagerFactoryBean.  This factory bean can provide a
+ * reference to the ServerTransactionManagerImpl via WebLogic's TxHelper class.
+ * This has been tested on WebLogic 7.0 SP5.
  *
  * @author Juergen Hoeller
  * @since 1.1
