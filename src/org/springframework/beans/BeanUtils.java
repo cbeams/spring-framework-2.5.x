@@ -282,15 +282,15 @@ public abstract class BeanUtils {
 	/**
 	 * Copy the property values of the given source bean into the given target bean,
 	 * ignoring the given ignoreProperties.
-	 * @param source source bean
-	 * @param target target bean
+	 * @param source the source bean
+	 * @param target the target bean
 	 * @param ignoreProperties array of property names to ignore
 	 * @throws IllegalArgumentException if the classes of source and target do not match
 	 */
 	public static void copyProperties(Object source, Object target, String[] ignoreProperties)
 	    throws IllegalArgumentException, BeansException {
-		if (source == null || target == null || !source.getClass().isInstance(target)) {
-			throw new IllegalArgumentException("Target must be an instance of source");
+		if (source == null || target == null) {
+			throw new IllegalArgumentException("Source and target must not be null");
 		}
 		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
 		BeanWrapper sourceBw = new BeanWrapperImpl(source);

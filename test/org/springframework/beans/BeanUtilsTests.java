@@ -16,7 +16,6 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +66,7 @@ public class BeanUtilsTests extends TestCase {
 			BeanUtils.copyProperties(tb, "");
 			fail("Should have thrown IllegalArgumentException");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (InvalidPropertyException ex) {
 			// expected
 		}
 
