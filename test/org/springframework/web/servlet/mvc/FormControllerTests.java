@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc;
 
@@ -135,7 +135,7 @@ public class FormControllerTests extends TestCase {
 		assertTrue("name set", "rod".equals(person.getName()));
 	}
 
-	public void testSubmitNoErrors() throws Exception {
+	public void testSubmitWithoutErrors() throws Exception {
 		String formView = "f";
 		String successView = "s";
 		
@@ -161,6 +161,33 @@ public class FormControllerTests extends TestCase {
 		assertTrue("bean age bound ok", person.getAge() == age);
 	}
 	
+	public void testSubmitWithoutValidation() throws Exception {
+		String formView = "f";
+		String successView = "s";
+
+		TestController mc = new TestController();
+		mc.setFormView(formView);
+		mc.setSuccessView(successView);
+
+		String name = "Rod";
+		int age = 32;
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/welcome.html");
+		request.addParameter("name", name);
+		request.addParameter("age", "" + age);
+		request.addParameter("formChange", "true");
+		HttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = mc.handleRequest(request, response);
+
+		assertEquals("returned correct view name", formView, mv.getViewName());
+		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
+		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + TestController.BEAN_NAME);
+		assertTrue("model is non null", person != null);
+		assertTrue("errors is non null", errors != null);
+		assertTrue("bean name bound ok", person.getName().equals(name));
+		assertTrue("bean age bound ok", person.getAge() == age);
+	}
+
 	public void testSubmitWithCustomOnSubmit() throws Exception {
 		String formView = "f";
 
@@ -426,6 +453,32 @@ public class FormControllerTests extends TestCase {
 		assertTrue("No errors", errors.getErrorCount() == 0);
 	}
 
+	public void testFormControllerInWebApplicationContext() {
+		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
+		ctx.setServletContext(new MockServletContext());
+		RefController mc = new RefController();
+		mc.setApplicationContext(ctx);
+		try {
+			mc.invokeWebSpecificStuff();
+		}
+		catch (IllegalStateException ex) {
+			fail("Shouldn't have thrown exception: " + ex.getMessage());
+		}
+	}
+
+	public void testFormControllerInNonWebApplicationContext() {
+		StaticApplicationContext ctx = new StaticApplicationContext();
+		RefController mc = new RefController();
+		mc.setApplicationContext(ctx);
+		try {
+			mc.invokeWebSpecificStuff();
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+	}
+
 
 	private static class TestValidator implements Validator {
 
@@ -456,46 +509,24 @@ public class FormControllerTests extends TestCase {
 
 
 	private static class TestController extends SimpleFormController {
-		
+
 		public static String BEAN_NAME = "person";
-		
+
 		public static int DEFAULT_AGE = 52;
-		
+
 		public TestController() {
 			setCommandClass(TestBean.class);
 			setCommandName(BEAN_NAME);
 		}
-		
+
 		protected Object formBackingObject(HttpServletRequest request) throws ServletException {
 			TestBean person = new TestBean();
 			person.setAge(DEFAULT_AGE);
 			return person;
 		}
-	}
 
-	public void testFormControllerInWebApplicationContext() {
-		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
-		ctx.setServletContext(new MockServletContext());
-		RefController mc = new RefController();
-		mc.setApplicationContext(ctx);
-		try {
-			mc.invokeWebSpecificStuff();
-		}
-		catch (IllegalStateException ex) {
-			fail("Shouldn't have thrown exception: " + ex.getMessage());
-		}
-	}
-
-	public void testFormControllerInNonWebApplicationContext() {
-		StaticApplicationContext ctx = new StaticApplicationContext();
-		RefController mc = new RefController();
-		mc.setApplicationContext(ctx);
-		try {
-			mc.invokeWebSpecificStuff();
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
+		protected boolean isFormChangeRequest(HttpServletRequest request) {
+			return (request.getParameter("formChange") != null);
 		}
 	}
 
