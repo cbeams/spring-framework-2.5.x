@@ -177,7 +177,8 @@
 		
 		<para>
 			Sometimes the current circumstances do not allow you to
-			completely switch to a different framework. Spring does force
+			completely switch to a different framework. Spring does 
+			<emphasis>not</emphasis> force
 			you to use everything within it; it's not an <emphasis>all-or-nothing</emphasis>
 			solution. Existing frontends using WebWork, Struts, Tapestry,
 			or other UI frameworks can be integrated perfectly well with
