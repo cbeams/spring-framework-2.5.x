@@ -111,15 +111,25 @@ import org.springframework.web.util.WebUtils;
  * @author Erwin Vervaet
  */
 public class FlowAction extends TemplateAction {
+	
+	/**
+	 * Get the flow execution from given model and view. Subclasses
+	 * should override this if the flow execution is not available in
+	 * it's standard place, where it is put by the
+	 * {@link org.springframework.web.flow.FlowExecutionStack}.
+	 */
+	protected FlowExecution getFlowExecution(ModelAndView modelAndView) {
+		//TODO: this is not extremely clean (pulling a attribute from hard
+		//coded name that is configurable elsewhere)
+		return (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
+	}
 
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
 		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(getFlowId(mapping), locator);
 		ModelAndView modelAndView = executionManager.handleRequest(request, response);
-		//TODO: this is not extremely clean (pulling a attribute from hard
-		// coded name that is configurable elsewhere)
-		FlowExecution flowExecution = (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
+		FlowExecution flowExecution = getFlowExecution(modelAndView);
 		if (flowExecution != null && flowExecution.isActive()) {
 			if (form instanceof BindingActionForm) {
 				BindingActionForm bindingForm = (BindingActionForm)form;
