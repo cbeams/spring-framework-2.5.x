@@ -6,7 +6,7 @@
 # directory of any container you want to test against in this file, or the
 # port on which the containers will be started.
 # 
-# $Id: build.properties.sample,v 1.1 2004-04-16 23:13:35 colins Exp $
+# $Id: build.properties.sample,v 1.2 2004-05-19 12:16:27 colins Exp $
 # -----------------------------------------------------------------------------
 
 # WARNING:  The relative paths below are relative to the directory where the
@@ -37,4 +37,4 @@
 
 #cactus.home.orion1x = c:/Apps/orion-1.6.0
 #cactus.home.orion2x = c:/Apps/orion-2.0.2
-#cactus.home.jboss3x = c:dev/jboss-3.2.3
+#cactus.home.jboss3x = c:/dev/jboss-3.2.3

@@ -19,7 +19,7 @@
     <java>asm.jar</java>
   </module>
   <module>
-    <java>cglib-2.0.jar</java>
+    <java>cglib-2.0.1.jar</java>
   </module>
   <module>
     <java>commons-collections.jar</java>

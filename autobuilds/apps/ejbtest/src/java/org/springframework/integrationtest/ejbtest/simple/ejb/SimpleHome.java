@@ -54,46 +54,23 @@
  * <http://www.apache.org/>.
  *
  */
-package org.apache.cactus.sample.ejb;
+package org.springframework.integrationtest.ejbtest.simple.ejb;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.rmi.PortableRemoteObject;
+import java.rmi.RemoteException;
 
-import org.apache.cactus.ServletTestCase;
+import javax.ejb.CreateException;
+import javax.ejb.EJBHome;
 
 /**
- * Sample Cactus test for a session bean.
+ * Simple EJB home interface
  *
- * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
- * 
- * @version $Id: TestConverterEJB.java,v 1.1 2004-04-16 23:13:37 colins Exp $
+ * @author colin sampaleanu
+ * @version $Id: SimpleHome.java,v 1.1 2004-05-19 12:16:29 colins Exp $
  */
-public class TestConverterEJB extends ServletTestCase
+public interface SimpleHome extends EJBHome
 {
     /**
-     * Class under test
+     * @see EJB specifications
      */
-    private Converter converter;
-
-    /**
-     * @see TestCase#setUp()
-     */ 
-    public void setUp() throws Exception
-    {
-        Context ctx = new InitialContext();
-        ConverterHome home = (ConverterHome) PortableRemoteObject.narrow(
-            ctx.lookup("Converter"), ConverterHome.class);
-        this.converter = home.create();
-    }
-
-    /**
-     * Verify yen to dollars conversion works.
-     * @throws Exception on error
-     */
-    public void testConvert() throws Exception
-    {
-        double dollar = this.converter.convertYenToDollar(100.0);
-        assertEquals("dollar", 1.0, dollar, 0.01);
-    }
+	SimpleService create() throws RemoteException, CreateException;
 }

@@ -27,6 +27,16 @@
       <session-type>Stateless</session-type>
       <transaction-type>Container</transaction-type>
     </session>
+    <session>
+      <description>Simple Session Bean</description>
+      <display-name>Simple</display-name>
+      <ejb-name>Simple</ejb-name>
+      <home>org.springframework.integrationtest.ejbtest.simple.ejb.SimpleHomeRemote</home>
+      <remote>org.springframework.integrationtest.ejbtest.simple.ejb.SimpleRemote</remote>
+      <ejb-class>org.springframework.integrationtest.ejbtest.simple.ejb.SimpleEJB</ejb-class>
+      <session-type>Stateless</session-type>
+      <transaction-type>Container</transaction-type>
+    </session>
 
   </enterprise-beans>
   <assembly-descriptor>
@@ -41,6 +51,14 @@
     <container-transaction>
       <method>
         <ejb-name>CmtJtaNoSpringTx</ejb-name>
+        <method-intf>Remote</method-intf>
+        <method-name>*</method-name>
+      </method>
+      <trans-attribute>Required</trans-attribute>
+    </container-transaction>
+    <container-transaction>
+      <method>
+        <ejb-name>Simple</ejb-name>
         <method-intf>Remote</method-intf>
         <method-name>*</method-name>
       </method>

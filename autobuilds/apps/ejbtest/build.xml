@@ -87,11 +87,11 @@
   <property name="aspectjrt.jar"
       location="../../lib/aspectj/aspectjrt-1.1.1.jar"/>
   <property name="cactus.jar"
-      location="../../lib/cactus/cactus-1.5.jar"/>
+      location="../../lib/cactus/cactus-1.6.1.jar"/>
   <property name="cactus.ant.jar"
-      location="../../lib/cactus/cactus-ant-1.5.jar"/>
+      location="../../lib/cactus/cactus-ant-1.6.1.jar"/>
   <property name="commons.httpclient.jar"
-      location="../../lib/jakarta-commons/commons-httpclient-2.0-rc2.jar"/>
+      location="../../lib/jakarta-commons/commons-httpclient-2.0.jar"/>
   <property name="commons.logging.jar"
       location="${spring.root}/lib/jakarta-commons/commons-logging.jar"/>
   <property name="ejb.jar"
@@ -224,7 +224,7 @@
       </fileset>
       <fileset dir="${spring.root}/lib/cglib">
         <include name="asm.jar"/>
-        <include name="cglib-2.0.jar"/>
+        <include name="cglib-2.0.1.jar"/>
       </fileset>
       <fileset dir="${spring.root}/lib/dom4j">
         <include name="dom4j.jar"/>

@@ -12,6 +12,12 @@
     <java>aopalliance.jar</java>
   </module>
   <module>
+    <java>asm.jar</java>
+  </module>
+  <module>
+    <java>cglib-2.0.1.jar</java>
+  </module>
+  <module>
     <java>commons-collections.jar</java>
   </module>
   <module>
