@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.25 2004-01-02 14:51:37 colins Exp $
+    $Id: build.xml,v 1.26 2004-01-04 23:43:08 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -46,6 +46,7 @@
 		<echo message=""/>
 		<echo message="build    --> build all; don't create JARs"/>
 		<echo message="alljars  --> create all JAR files"/>
+		<echo message="tests    --> run tests"/>
 		<echo message=""/>
 		<echo message="Note that several targets depend on Commons Attributes attribute compilation."/>
 		<echo message="You will need to copy the following 3 jars to $ANT_HOME/lib:"/>
@@ -320,6 +321,7 @@
 				<include name="lib/jakarta-commons/**"/>
 				<include name="lib/jakarta-taglibs/**"/>
 				<include name="lib/j2ee/**"/>
+				<include name="lib/jboss/**"/>
 				<include name="lib/jdo/**"/>
 				<include name="lib/jdom/**"/>
 				<include name="lib/junit/**"/>
