@@ -23,7 +23,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Factory Bean to create and obtain an MBeanServer instance.
+ * Factory Bean to create and obtain an <code>MBeanServer</code> instance.
  *
  * @author Rob Harrop
  * @since 1.2
@@ -31,32 +31,33 @@ import org.springframework.beans.factory.InitializingBean;
 public class MBeanServerFactoryBean implements FactoryBean, InitializingBean {
 
 	/**
-	 * Should the MBeanServerFactoryBean instruct the MBeanServerFactory to
-	 * maintain an internal reference to the MBeanServer
+	 * Should the <code>MBeanServerFactoryBean</code> instruct the <code>MBeanServerFactory</code> to
+	 * maintain an internal reference to the <code>MBeanServer</code>.
 	 */
 	private boolean haveFactoryHoldReference = true;
 
 	/**
-	 * Hold the MBeanServer
+	 * Hold the <code>MBeanServer</code>.
 	 */
 	private MBeanServer server = null;
 
 	/**
-	 * The default domain used by the MBeanServer
+	 * The default domain used by the <code>MBeanServer</code>
 	 */
 	private String defaultDomain = null;
 
 	/**
-	 * Returns the MBeanServer instance
+	 * Returns the <code>MBeanServer</code> instance
 	 *
-	 * @return The MBeanServer instance
+	 * @return The <code>MBeanServer</code> instance
 	 */
 	public Object getObject() throws Exception {
 		return this.server;
 	}
 
 	/**
-	 * Returns the default domain used by the MBeanServer
+	 * Returns the default domain used by the <code>MBeanServer</code>
+	 *
 	 * @return
 	 */
 	public String getDefaultDomain() {
@@ -64,9 +65,10 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * Set the default domain to be used by the MBeanServer.
-	 * Must be set before the MBeanServer is created, that is before
-	 * afterPropertiesSet() is called.
+	 * Set the default domain to be used by the <code>MBeanServer</code>.
+	 * Must be set before the <code>MBeanServer</code> is created, that is before
+	 * <code>afterPropertiesSet()</code> is called.
+	 *
 	 * @param defaultDomain The domain name to use
 	 */
 	public void setDefaultDomain(String defaultDomain) {
@@ -74,25 +76,26 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * Indicates whether the MBeanServerFactory was instruced to maintain
-	 * a reference to the MBeanServer after creation.
-	 * @return True if the MBeanServerFactory has the reference otherwise false
+	 * Indicates whether the <code>MBeanServerFactory</code>. was instruced to maintain
+	 * a reference to the <code>MBeanServer</code> after creation.
+	 *
+	 * @return True if the <code>MBeanServerFactory</code> has the reference otherwise false
 	 */
 	public boolean getHaveFactoryHoldReference() {
 		return haveFactoryHoldReference;
 	}
 
 	/**
-	 * Setting this value to true will cause the MBeanServer to be created with a call
-	 * to MBeanServerFactory.createMBeanServer(), and thus it will be possible to
-	 * retreive a reference to the MBeanServer using MBeanServerFactory.findMBeanServer().
+	 * Setting this value to true will cause the <code>MBeanServer</code> to be created with a call
+	 * to <code>MBeanServerFactory.createMBeanServer()</code>, and thus it will be possible to
+	 * retreive a reference to the MBeanServer using <code>MBeanServerFactory.findMBeanServer()<code>.
 	 */
 	public void setHaveFactoryHoldReference(boolean haveFactoryHoldReference) {
 		this.haveFactoryHoldReference = haveFactoryHoldReference;
 	}
 
 	/**
-	 * Convenience method to retreive the MBeanServer
+	 * Convenience method to retreive the <code>MBeanServer</code>
 	 * without the need to cast.
 	 */
 	public MBeanServer getServer() {
@@ -100,25 +103,25 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * Indicates the type of Object returned by this factory bean
+	 * Indicates the type of <code>Object</code> returned by this factory bean.
 	 *
-	 * @return Always MBeanServer
+	 * @return Always <code>MBeanServer</code>.
 	 */
 	public Class getObjectType() {
 		return MBeanServer.class;
 	}
 
 	/**
-	 * Indicates that the MBeanServer returned by this method is a singleton.
+	 * Indicates that the <code>MBeanServer</code> returned by this method is a singleton.
 	 *
-	 * @return Always true
+	 * @return Always <code>true</code>.
 	 */
 	public boolean isSingleton() {
 		return true;
 	}
 
 	/**
-	 * Creats the MBeanServer instance
+	 * Creates the <code>MBeanServer</code> instance
 	 */
 	public void afterPropertiesSet() throws Exception {
 		if (haveFactoryHoldReference) {

@@ -33,13 +33,14 @@ import org.springframework.jmx.util.ObjectNameManager;
 
 /**
  * <code>ObjectNamingStrategy</code> implementation that builds
- * <code>ObjectName</code> instances from the key used to in the
+ * <code>ObjectName</code> instances from the key used in the
  * "beans" map passed to <code>MBeanExporter</code>.
- *
+ * <p/>
  * <p>Can also check object name mappings, given as <code>Properties</code>
- * or as mappingLocations of properties files. The key used to look up is the key
- * used in <code>MBeanExporter</code>'s "beans" map. If no mapping is found
- * for a given key, the key itself is used to build an <code>ObjectName</code>.
+ * or as <code>mappingLocations</code> of properties files. The key used
+ * to look up is the key used in <code>MBeanExporter</code>'s "beans" map.
+ * If no mapping is found for a given key, the key itself is used to
+ * build an <code>ObjectName</code>.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -50,14 +51,28 @@ import org.springframework.jmx.util.ObjectNameManager;
  */
 public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean {
 
+	/**
+	 * <code>Log</code> instance for this class.
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * Stores the mappings of bean key to <code>ObjectName</code>.
+	 */
 	private Properties mappings;
 
+	/**
+	 * Stores the <code>Resource</code>s containing properties that should be loaded
+	 * into the final merged set of <code>Properties</code> used for <code>ObjectName</code>
+	 * resolution.
+	 */
 	private Resource[] mappingLocations;
 
+	/**
+	 * Stores the result of merging the <code>mappings</code> <code>Properties</code>
+	 * with the the properties stored in the resources defined by <code>mappingLocations</code>.
+	 */
 	private Properties mergedMappings;
-
 
 	/**
 	 * Set local properties, containing object name mappings, e.g. via
@@ -73,7 +88,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 * containing object name mappings.
 	 */
 	public void setMappingLocation(Resource location) {
-		this.mappingLocations = new Resource[] {location};
+		this.mappingLocations = new Resource[]{location};
 	}
 
 	/**
@@ -84,6 +99,12 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 		this.mappingLocations = mappingLocations;
 	}
 
+	/**
+	 * Merges the <code>Properties</code> configured in the <code>mappings</code> and
+	 * <code>mappingLocations</code> into the final <code>Properties</code> instance
+	 * used for <code>ObjectName</code> resolution.
+	 * @throws IOException
+	 */
 	public void afterPropertiesSet() throws IOException {
 		this.mergedMappings = new Properties();
 
@@ -112,10 +133,9 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 		}
 	}
 
-
 	/**
-	 * Attempts to retrieve the ObjectName via the given key,
-	 * trying to find a mapped value in the mappings first.
+	 * Attempts to retrieve the <code>ObjectName</code> via the given key, trying to
+	 * find a mapped value in the mappings first.
 	 */
 	public ObjectName getObjectName(Object managedResource, String key) throws MalformedObjectNameException {
 		String objectName = null;

@@ -28,6 +28,7 @@ import org.springframework.util.ObjectUtils;
  * creates a name based on the the identity of a given instance. The resulting
  * <code>ObjectName</code> will be in the form
  * <i>package</i>:class=<i>class name</i>,hashCode=<i>identity hash (in hex)</i>
+ *
  * @author Rob Harrop
  */
 public class IdentityNamingStrategy implements ObjectNamingStrategy {

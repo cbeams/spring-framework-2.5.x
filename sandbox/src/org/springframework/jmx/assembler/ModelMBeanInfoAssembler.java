@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jmx.assembler;
 
 import javax.management.JMException;
@@ -21,16 +22,21 @@ import javax.management.modelmbean.ModelMBeanInfo;
 /**
  * Interface to be implemented by all classes that can
  * create management interface metadata for a managed resource.
+ * Used by the <code>MBeanExporter</code> to generate the management
+ * interface for any bean that is not an MBean.
+ *
  * @author Rob Harrop
+ * @see org.springframework.jmx.MBeanExporter
  */
 public interface ModelMBeanInfoAssembler {
 
 	/**
 	 * Create the ModelMBeanInfo for the given managed resource.
+	 *
 	 * @param beanKey the <code>String</code> key associated with the bean
 	 * @param beanClass the <code>Class</code> of the managed resource
 	 * @return the <code>ModelMBeanInfo</code> metadata
 	 */
 	public ModelMBeanInfo getMBeanInfo(String beanKey, Class beanClass) throws JMException;
-	
+
 }

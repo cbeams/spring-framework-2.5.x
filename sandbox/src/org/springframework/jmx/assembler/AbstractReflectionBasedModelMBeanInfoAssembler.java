@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jmx.assembler;
 
 import java.beans.PropertyDescriptor;
@@ -30,19 +31,73 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import org.springframework.beans.BeanUtils;
 
 /**
+ * Extends the <code>AbstractModelMBeanInfoAssembler</code> to add a basic
+ * algorithm for building metadata based on the reflective metadata of
+ * the MBean class.
+ * <p/>
+ * The logic for creating MBean metadata from the reflective metadata is contained
+ * in this class, but this class makes no desicions as to which methods and
+ * properties are to be exposed. Instead it gives subclasses a chance to 'vote'
+ * on each property or method through the <code>includeXXX</code> methods.
+ * </p>
+ * <p/>
+ * Subclasses are also given the opportunity to populate attribute and operation
+ * metadata with additional descriptors once the metadata is assembled through the
+ * <code>populateXXXDescriptor</code> methods.
+ * </p>
+ *
  * @author Rob Harrop
+ * @see #includeOperation(java.lang.reflect.Method)
+ * @see #includeReadAttribute(java.lang.reflect.Method)
+ * @see #includeWriteAttribute(java.lang.reflect.Method)
+ * @see #populateAttributeDescriptor(javax.management.Descriptor, java.lang.reflect.Method, java.lang.reflect.Method)
+ * @see #populateOperationDescriptor(javax.management.Descriptor, java.lang.reflect.Method)
  */
 public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 		extends AbstractModelMBeanInfoAssembler {
 
+	/**
+	 * Key for the visibility descriptor field.
+	 */
 	private static final String VISIBILITY = "visibility";
+
+	/**
+	 * Lowest visibility. Used for operations that correspond to accessors or mutators
+	 * for attributes.
+	 */
 	private static final Integer ATTRIBUTE_OPERATION_VISIBILITY = new Integer(4);
 
+	/**
+	 * Key for the role descriptor field.
+	 */
 	private static final String ROLE = "role";
+
+	/**
+	 * Role for attribute accessors.
+	 */
 	private static final String GETTER = "getter";
+
+	/**
+	 * Role for attribute mutators.
+	 */
 	private static final String SETTER = "setter";
+
+	/**
+	 * Role for operations.
+	 */
 	private static final String OPERATION = "operation";
 
+	/**
+	 * Iterates through all properties on the MBean class and gives subclasses the chance to vote on the
+	 * inclusion of both the accessor and mutator. If a particular accessor or mutator is voted for
+	 * inclusion the appropriate metadata is assembled and passed to the subclass for descriptor population.
+	 *
+	 * @param beanKey the key associated with the MBean in the <code>beans</code> <code>Map</code>
+	 * of the <code>MBeanExporter</code>.
+	 * @param beanClass the <code>Class</code> of the MBean.
+	 * @return the attribute metadata.
+	 * @see #populateAttributeDescriptor(javax.management.Descriptor, java.lang.reflect.Method, java.lang.reflect.Method)
+	 */
 	protected ModelMBeanAttributeInfo[] getAttributeInfo(String beanKey, Class beanClass) throws JMException {
 		PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(beanClass);
 		List infos = new ArrayList();
@@ -67,8 +122,7 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 			if ((getter != null) || (setter != null)) {
 				// if both getter and setter are null
 				// then this does not need exposing
-				ModelMBeanAttributeInfo info = new ModelMBeanAttributeInfo(
-						props[i].getName(), getAttributeDescription(props[i]), getter, setter);
+				ModelMBeanAttributeInfo info = new ModelMBeanAttributeInfo(props[i].getName(), getAttributeDescription(props[i]), getter, setter);
 
 				Descriptor desc = info.getDescriptor();
 
@@ -91,10 +145,18 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 		return (ModelMBeanAttributeInfo[]) infos.toArray(new ModelMBeanAttributeInfo[infos.size()]);
 	}
 
-	protected ModelMBeanConstructorInfo[] getConstructorInfo(String beanKey, Class beanClass) {
-		return new ModelMBeanConstructorInfo[]{};
-	}
-
+	/**
+	 * Iterates through all methods on the MBean class and gives subclasses the chance to vote on their inclusion.
+	 * If a particular method corresponds to the accessor or mutator of an attribute that is inclued in the
+	 * managment interface then the corresponding operation is exposed with the &quot;role&quot; descriptor field
+	 * set to the appropriate value.
+	 *
+	 * @param beanKey the key associated with the MBean in the <code>beans</code> <code>Map</code>
+	 * of the <code>MBeanExporter</code>.
+	 * @param beanClass the <code>Class</code> of the MBean.
+	 * @return the operation metadata.
+	 * @see #populateOperationDescriptor(javax.management.Descriptor, java.lang.reflect.Method)
+	 */
 	protected ModelMBeanOperationInfo[] getOperationInfo(String beanKey, Class beanClass) {
 		Method[] methods = beanClass.getMethods();
 		List infos = new ArrayList();
@@ -141,24 +203,74 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 		return (ModelMBeanOperationInfo[]) infos.toArray(new ModelMBeanOperationInfo[infos.size()]);
 	}
 
+	/**
+	 * Returns an empty array of <code>ModelMBeanConstructorInfo</code>.
+	 */
+	protected ModelMBeanConstructorInfo[] getConstructorInfo(String beanKey, Class beanClass) {
+		return new ModelMBeanConstructorInfo[]{};
+	}
+
+	/**
+	 * Returns an empty array of <code>ModelMBeanNotificationInfo</code>.
+	 */
 	protected ModelMBeanNotificationInfo[] getNotificationInfo(String beanKey, Class beanClass) {
 		return new ModelMBeanNotificationInfo[]{};
 	}
 
+	/**
+	 * Allows subclasses to vote on the inclusion of a particular attribute accessor.
+	 * @param method the accessor <code>Method</code>.
+	 * @return <code>true</code> if the accessor should be included in the management interface,
+	 * otherwise <code>false<code>.
+	 */
 	protected abstract boolean includeReadAttribute(Method method);
 
+	/**
+	 * Allows subclasses to vote on the inclusion of a particular attribute mutator.
+	 * @param method the mutator <code>Method</code>.
+	 * @return <code>true</code> if the mutator should be included in the management interface,
+	 * otherwise <code>false<code>.
+	 */
 	protected abstract boolean includeWriteAttribute(Method method);
 
+	/**
+	 * Allows subclasses to vote on the inclusion of a particular operation.
+	 * @param method the operation <code>Method</code>.
+	 * @return <code>true</code> if the operation should be included in the management interface,
+	 * otherwise <code>false<code>.
+	 */
 	protected abstract boolean includeOperation(Method method);
 
+	/**
+	 * Gets the description for a particular operation.
+	 * @param method the operation <code>Method</code>.
+	 * @return the description for the operation.
+	 */
 	protected abstract String getOperationDescription(Method method);
 
-	protected abstract String getAttributeDescription(
-			PropertyDescriptor propertyDescriptor);
+	/**
+	 * Gets the description for a particular attribute.
+	 * @param propertyDescriptor the attribute <code>PropertyDescriptor</code>.
+	 * @return the description for the attribute.
+	 */
+	protected abstract String getAttributeDescription(PropertyDescriptor propertyDescriptor);
 
+	/**
+	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
+	 * attribute.
+	 * @param descriptor the attribute <code>Descriptor</code>.
+	 * @param getter the accessor method for the attribute.
+	 * @param setter the mutator method for the attribute.
+	 */
 	protected abstract void populateAttributeDescriptor(Descriptor descriptor,
 			Method getter, Method setter);
 
+	/**
+	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
+	 * operation.
+	 * @param descriptor the operation <code>Descriptor</code>.
+	 * @param method the method corresponding to the operation.
+	 */
 	protected abstract void populateOperationDescriptor(Descriptor descriptor, Method method);
 
 }

@@ -48,10 +48,10 @@ import org.springframework.jmx.util.JmxUtils;
 /**
  * A bean that allows for any Spring-managed to be exposed to an <code>MBeanServer</code>
  * without the need to define any JMX-specific information in the bean classes.
- *
+ * <p/>
  * <p>If the bean implements one of the JMX management interface then
  * MBeanExporter will simply register the MBean with the server automatically.
- *
+ * <p/>
  * <p>If the bean does not implement on the JMX management interface then
  * <code>MBeanExporter</code> will create the management information using the
  * supplied <code>ModelMBeanMetadataAssembler</code> implementation.
@@ -63,10 +63,13 @@ import org.springframework.jmx.util.JmxUtils;
  */
 public class MBeanExporter implements InitializingBean, DisposableBean, BeanFactoryAware {
 
+	/**
+	 * <code>Log</code> instance for this class.
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * The MBeanServer instance being used to register beans.
+	 * The <code>MBeanServer</code> instance being used to register beans.
 	 */
 	private MBeanServer server;
 
@@ -81,7 +84,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	private ModelMBeanInfoAssembler assembler = new ReflectiveModelMBeanInfoAssembler();
 
 	/**
-	 * The strategy to use for creating ObjectNames for an object.
+	 * The strategy to use for creating <code>ObjectName</code>s for an object.
 	 */
 	private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
 
@@ -92,7 +95,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	private ModelMBeanProvider mbeanProvider = new RequiredModelMBeanProvider();
 
 	/**
-	 * Stores the BeanFactory for use in autodetection process.
+	 * Stores the <code>BeanFactory</code> for use in autodetection process.
 	 */
 	private ConfigurableListableBeanFactory beanFactory;
 
@@ -106,6 +109,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	 * Specify an instance <code>MBeanServer</code> with which all beans should
 	 * be registered. The <code>MBeanExporter</code> will attempt to locate an
 	 * existing <code>MBeanServer</code> if none is supplied.
+	 *
 	 * @param server an instance of <code>MBeanServer</code>.
 	 */
 	public void setServer(MBeanServer server) {
@@ -115,6 +119,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	/**
 	 * Supply a <code>Map</code> of beans to be registered with the JMX
 	 * <code>MBeanServer</code>.
+	 *
 	 * @param beans a <code>Map</code> whose entries are the beans to register via JMX.
 	 */
 	public void setBeans(Map beans) {
@@ -124,6 +129,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	/**
 	 * Set the implementation of the <code>ModelMBeanInfoAssembler</code> interface
 	 * to use for this instance.
+	 *
 	 * @param assembler an implementation of the <code>ModelMBeanInfoAssembler</code> interface.
 	 */
 	public void setAssembler(ModelMBeanInfoAssembler assembler) {
@@ -133,6 +139,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	/**
 	 * Set the implementation of the <code>ObjectNamingStrategy</code> interface to
 	 * use for this instance.
+	 *
 	 * @param namingStrategy an implementation of the <code>ObjectNamingStrategy</code> interface.
 	 */
 	public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
@@ -142,6 +149,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	/**
 	 * Set the implementation of the <code>ModelMBeanProvider</code> interface to
 	 * use for this instance.
+	 *
 	 * @param mbeanProvider an implementation of the <code>ModelMBeanProvider</code> interface.
 	 */
 	public void setBeanProvider(ModelMBeanProvider mbeanProvider) {
@@ -161,7 +169,12 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		}
 	}
 
-
+	/**
+	 * Start bean registration automatically when deployed in an
+	 * <code>ApplicationContext</code>.
+	 *
+	 * @see #registerBeans()
+	 */
 	public void afterPropertiesSet() throws Exception {
 		// register the beans now
 		registerBeans();
@@ -226,6 +239,29 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		}
 	}
 
+	/**
+	 * Registers an individual bean with the <code>MBeanServer</code>. This method
+	 * is responsible for deciding <strong>how</strong> a bean should be exposed
+	 * to the <code>MBeanServer</code>. Specifically, if the <code>mapValue</code>
+	 * is the name of a bean that is configured for lazy initialization, then
+	 * a prxoy to the resource is registered with the <code>MBeanServer</code>
+	 * so that the the lazy load behavior is honored. If the bean is already an
+	 * MBean then it will be registered directly with the <code>MBeanServer</code>
+	 * without any intervention. For all other beans or bean names, the resource
+	 * itself is registered with the <code>MBeanServer</code> directly.
+	 *
+	 * @param beanKey the key associated with this bean in the <code>beans</code> <code>Map</code>.
+	 * @param mapValue the value configured for this bean in the <code>beans</code> <code>Map</code>.
+	 * May be either the <code>String</code> name of a bean, or the bean itself.
+	 * @return the <code>ObjectName</code> under which the resource was registered.
+	 * @throws JMException an error in the underlying JMX infrastructure.
+	 * @throws InvalidTargetObjectTypeException
+	 *                     an error in the definition of the MBean resource.
+	 * @see #setBeans(Map)
+	 * @see #registerLazyInit(String, String)
+	 * @see #registerMBean(String, Object)
+	 * @see #registerSimpleBean(String, Object)
+	 */
 	private ObjectName registerBean(String beanKey, Object mapValue)
 			throws JMException, InvalidTargetObjectTypeException {
 
@@ -273,11 +309,30 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		}
 	}
 
+	/**
+	 * Tests so see if the supplied <code>Object</code> is a valid
+	 * MBean resource.
+	 *
+	 * @param object the <code>Object</code> to test.
+	 * @return <code>true</code> if the <code>Object</code> is an MBean, otherwise false.
+	 */
 	private boolean isMBean(Object object) {
 		// TODO: Extend this implementation to cover all user-created MBeans.
 		return (object instanceof DynamicMBean);
 	}
 
+	/**
+	 * Registers a plain bean directly with the <code>MBeanServer</code>. The
+	 * management interface for the bean is created by the configured
+	 * <code>ModelMBeanInfoAssembler</code>.
+	 *
+	 * @param beanKey the key associated with this bean in the <code>beans</code> <code>Map</code>.
+	 * @param bean the bean to register.
+	 * @return the <code>ObjectName</code> under which the bean was registered with the <code>MBeanServer</code>.
+	 * @throws JMException an error in the underlying JMX infrastructure.
+	 * @throws InvalidTargetObjectTypeException
+	 *                     an error in the definition of the MBean resource.
+	 */
 	private ObjectName registerSimpleBean(String beanKey, Object bean)
 			throws JMException, InvalidTargetObjectTypeException {
 
@@ -296,6 +351,17 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		return objectName;
 	}
 
+	/**
+	 * Registers beans that are configured for lazy initialization with the <code>MBeanServer<code> indirectly
+	 * through a proxy.
+	 *
+	 * @param beanKey the key associated with this bean in the <code>beans</code> <code>Map</code>.
+	 * @param bean the bean to register.
+	 * @return the <code>ObjectName</code> under which the bean was registered with the <code>MBeanServer</code>.
+	 * @throws JMException an error in the underlying JMX infrastructure.
+	 * @throws InvalidTargetObjectTypeException
+	 *                     an error in the definition of the MBean resource.
+	 */
 	private ObjectName registerLazyInit(String beanKey, String beanName)
 			throws JMException, InvalidTargetObjectTypeException {
 
@@ -321,6 +387,16 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		return objectName;
 	}
 
+	/**
+	 * Registers an existing MBean with the <code>MBeanServer</code>.
+	 *
+	 * @param beanKey the key associated with this bean in the <code>beans</code> <code>Map</code>.
+	 * @param bean the bean to register.
+	 * @return the <code>ObjectName</code> under which the bean was registered with the <code>MBeanServer</code>.
+	 * @throws JMException an error in the underlying JMX infrastructure.
+	 * @throws InvalidTargetObjectTypeException
+	 *                     an error in the definition of the MBean resource.
+	 */
 	private ObjectName registerMBean(String beanKey, Object mbean) throws JMException {
 		ObjectName objectName = this.namingStrategy.getObjectName(mbean, beanKey);
 		this.server.registerMBean(mbean, objectName);
@@ -329,7 +405,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 
 	/**
 	 * Invoked when using an <code>AutodetectCapableModelMBeanInfoAssembler</code>. Gives the
-	 * assembler the opportunity to additional beans from the <code>BeanFactory</code> to the list
+	 * assembler the opportunity to add additional beans from the <code>BeanFactory</code> to the list
 	 * of beans to be exposed via JMX. This implementation prevents a bean from being added to the
 	 * list automatically if it has already been added manually and it prevents certain internal
 	 * classes from being registered automatically.

@@ -71,7 +71,7 @@ public class MBeanClientInterceptorTests extends TestCase {
 	protected IJmxTestBean getProxy() throws Exception {
 		MBeanProxyFactoryBean factory = new MBeanProxyFactoryBean();
 		factory.setServer(getServerConnection());
-		factory.setManagementInterface(IJmxTestBean.class);
+		factory.setProxyInterface(IJmxTestBean.class);
 		factory.setObjectName(OBJECT_NAME);
 		factory.afterPropertiesSet();
 		return (IJmxTestBean) factory.getObject();

@@ -19,7 +19,7 @@ import org.springframework.core.NestedRuntimeException;
 
 
 /**
- * @author robh
+ * @author Rob Harrop
  */
 public class AdapterRegistrationException extends NestedRuntimeException {
 

@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
  * that reads the the <code>ObjectName</code> from the source level
  * metadata.
  * @author Rob Harrop
+ * @see ObjectNamingStrategy
  */
 public class MetadataNamingStrategy implements ObjectNamingStrategy {
 

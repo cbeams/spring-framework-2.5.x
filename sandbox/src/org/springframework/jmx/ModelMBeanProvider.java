@@ -35,9 +35,8 @@ public interface ModelMBeanProvider {
 	 * registration phase and each invocation MUST return a new instance of <code>ModelMBean</code>
 	 *
 	 * @return an instance of a class that implements <code>ModelMBean</code>.
-	 * @throws MBeanException
-	 *             indiciating an error occured whilst creating an instance of
-	 *             the <code>ModelMBean</code> implementation class.
+	 * @throws MBeanException indicating an error occured whilst creating an instance of
+	 *                        the <code>ModelMBean</code> implementation class.
 	 */
 	ModelMBean getModelMBean() throws MBeanException;
 }

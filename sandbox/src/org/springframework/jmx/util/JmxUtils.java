@@ -30,13 +30,24 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Generic utility methods to support Spring JMX.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
 public class JmxUtils {
 
+	/**
+	 * <code>Log</code> instance for this class.
+	 */
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
+	/**
+	 * Attempts to find a locally running <code>MBeanServer</code>. Fails if no <code>MBeanServer</code> can
+	 * be found, or if more than one is found.
+	 *
+	 * @return the <code>MBeanServer</code> if found.
+	 * @throws MBeanServerNotFoundException if no <code>MBeanServer</code> is found, or more than one is found.
+	 */
 	public static MBeanServer locateMBeanServer() throws MBeanServerNotFoundException {
 		List servers = MBeanServerFactory.findMBeanServer(null);
 		// Check to see if an MBeanServer is registered.
@@ -54,7 +65,7 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Converts an array of MBeanParameterInfo into an array of <tt>Class</tt>
+	 * Converts an array of <code>MBeanParameterInfo</code> into an array of <code>Class</code>
 	 * instances corresponding to the parameters.
 	 */
 	public static Class[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo) throws ClassNotFoundException {
@@ -69,7 +80,7 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Creates a String[] representing the signature of a method.
+	 * Creates a <code>String[]</code> representing the signature of a method.
 	 * Each element in the array is the fully qualified class name
 	 * of the corresponding argument in the methods signature.
 	 */

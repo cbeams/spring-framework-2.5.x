@@ -19,15 +19,33 @@ package org.springframework.jmx.access;
 import org.springframework.core.NestedRuntimeException;
 
 /**
+ * Thrown if an exception is encountered when trying to retreive
+ * MBean metadata.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @see MBeanClientInterceptor
+ * @see MBeanProxyFactoryBean
  */
 public class MetadataRetrievalException extends NestedRuntimeException {
 
+	/**
+	 * Creates a new instance of <code>MetadataRetrievalException</code> with the
+	 * specified error message.
+	 *
+	 * @param msg the error message.
+	 */
 	public MetadataRetrievalException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Creates a new instance of <code>MetadataRetrievalException</code> with the
+	 * specified error message and root cause.
+	 *
+	 * @param msg the error message.
+	 * @param ex the root cause.
+	 */
 	public MetadataRetrievalException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

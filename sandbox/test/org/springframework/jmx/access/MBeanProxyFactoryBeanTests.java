@@ -39,7 +39,7 @@ public class MBeanProxyFactoryBeanTests extends AbstractJmxTests {
 
 	public void testProxyFactory() throws Exception {
 		MBeanProxyFactoryBean fb = getProxyFactory();
-		fb.setManagementInterface(IJmxTestBean.class);
+		fb.setProxyInterface(IJmxTestBean.class);
 		fb.afterPropertiesSet();
 
 		IJmxTestBean bean = (IJmxTestBean) fb.getObject();
@@ -58,7 +58,7 @@ public class MBeanProxyFactoryBeanTests extends AbstractJmxTests {
 
 	public void testWithLocatedMBeanServer() throws Exception {
 		MBeanProxyFactoryBean fb = new MBeanProxyFactoryBean();
-		fb.setManagementInterface(IJmxTestBean.class);
+		fb.setProxyInterface(IJmxTestBean.class);
 		fb.setObjectName(OBJECT_NAME);
 		fb.afterPropertiesSet();
 		Object proxy = fb.getObject();

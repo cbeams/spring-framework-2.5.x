@@ -24,12 +24,24 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 /**
+ * Wraps the creation of <code>ObjectName</code> instances and caches instances
+ * for reuse. Provides <code>ObjectName</code> caching to older JMX clients.
  * @author Rob Harrop
  */
 public class ObjectNameManager {
 
+	/**
+	 * Cache for the <code>ObjectName</code> instance.
+	 */
 	private static Map objectNameCache = Collections.synchronizedMap(new HashMap());
 
+	/**
+	 * Retreive the <code>ObjectName</code> instance corresponding to the supplied
+	 * name.
+	 * @param objectName the <code>ObjectName</code> in <code>String</code> format.
+	 * @return the <code>ObjectName</code> instance.
+	 * @throws MalformedObjectNameException if the supplied name is invalid.
+	 */
 	public static ObjectName getInstance(String objectName) throws MalformedObjectNameException {
 		ObjectName name = (ObjectName) objectNameCache.get(objectName);
 		if (name == null) {

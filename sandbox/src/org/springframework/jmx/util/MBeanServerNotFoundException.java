@@ -19,10 +19,19 @@ package org.springframework.jmx.util;
 import javax.management.JMException;
 
 /**
+ * Thrown when <code>JmxUtils</code> cannot locate an instance of <code>MBeanServer</code>
+ * running locally, or when more than one instance is found.
+ *
  * @author Rob Harrop
+ * @see JmxUtils#locateMBeanServer()
  */
 public class MBeanServerNotFoundException extends JMException {
 
+	/**
+	 * Create a new <code>MBeanServerNotFoundException</code> with the
+	 * supplied error message.
+	 * @param msg the error message.
+	 */
 	public MBeanServerNotFoundException(String msg) {
 		super(msg);
 	}

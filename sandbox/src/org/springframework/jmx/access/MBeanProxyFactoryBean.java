@@ -21,36 +21,80 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
+ * <p/>
+ * Creates a proxy to a managed resource running either locally or remotely. The <code>proxyInterface</code>
+ * property defines the interface that the generated proxy should implement. This interface should define methods
+ * and properties that correspond to operations and attributes in the management interface of the resource you wish
+ * to proxy.
+ * </P>
+ * <p/>
+ * There is no need for the managed resource to implement the proxy interface, although you may find it convenient
+ * to do. It is not required that every operation and attribute in the management interface is matched by a
+ * corresponding property or method in the proxy interface.
+ * </p>
+ * <p/>
+ * Attempting to invoke or access any method or property on the proxy interface that does not correspond to the
+ * management interface of the
+ * </p>
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @see MBeanClientInterceptor
  */
 public class MBeanProxyFactoryBean extends MBeanClientInterceptor implements FactoryBean, InitializingBean {
 
-	private Class managementInterface;
+	/**
+	 * The interface to proxy.
+	 */
+	private Class proxyInterface;
 
-	private Object managementProxy;
+	/**
+	 * The generated proxy.
+	 */
+	private Object mbeanProxy;
 
-	public void setManagementInterface(Class managementInterface) {
-		this.managementInterface = managementInterface;
+	/**
+	 * Sets the interface that the generated proxy will implement.
+	 *
+	 * @param managementInterface
+	 */
+	public void setProxyInterface(Class managementInterface) {
+		this.proxyInterface = managementInterface;
 	}
 
+	/**
+	 * Checks that the <code>proxyInterface</code> has been specified and then
+	 * generate the proxy.
+	 *
+	 * @throws Exception
+	 */
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
 
-		if (this.managementInterface == null) {
-			throw new IllegalArgumentException("managementInterface is required");
+		if (this.proxyInterface == null) {
+			throw new IllegalArgumentException("proxyInterface is required");
 		}
-		this.managementProxy = ProxyFactory.getProxy(this.managementInterface, this);
+		this.mbeanProxy = ProxyFactory.getProxy(this.proxyInterface, this);
 	}
 
+	/**
+	 * Gets the proxy.
+	 */
 	public Object getObject() throws Exception {
-		return this.managementProxy;
+		return this.mbeanProxy;
 	}
 
+	/**
+	 * Gets the type of the MBean proxy.
+	 */
 	public Class getObjectType() {
-		return (this.managementProxy != null ? this.managementProxy.getClass() : null);
+		return (this.mbeanProxy != null ? this.mbeanProxy.getClass() : null);
 	}
 
+	/**
+	 * Indicates if this <code>FactoryBean</code> returns a singleton instance.
+	 * Always returns <code>true</code>.
+	 */
 	public boolean isSingleton() {
 		return true;
 	}
