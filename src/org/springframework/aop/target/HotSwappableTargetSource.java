@@ -31,12 +31,12 @@ import org.springframework.aop.TargetSource;
  * at the time of serialization.
  *
  * @author Rod Johnson
- * @version $Id: HotSwappableTargetSource.java,v 1.9 2004-08-03 13:37:18 johnsonr Exp $
+ * @version $Id: HotSwappableTargetSource.java,v 1.10 2004-08-04 16:47:05 johnsonr Exp $
  */
 public class HotSwappableTargetSource implements TargetSource, Serializable {
 
 	/** Target cached and invoked using reflection */
-	private Object target;
+	protected Object target;
 
 	/**
 	 * Create a new HotSwappableTargetSource with the initial target.
@@ -61,7 +61,7 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	 * Synchronization around something that takes so little time is fine
 	 * @see org.springframework.aop.TargetSource#getTarget()
 	 */
-	public final synchronized Object getTarget() {
+	public synchronized Object getTarget() {
 		return this.target;
 	}
 
