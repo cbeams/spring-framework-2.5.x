@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -28,6 +29,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
+import org.springframework.util.DefaultPropertiesPersister;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.PropertiesPersister;
 
 /**
  * Allows for configuration of individual bean property values from a property resource,
@@ -42,10 +46,15 @@ import org.springframework.core.io.Resource;
  * (<i>pulling</i> values from a properties file into bean definitions)
  * </ul>
  *
+ * <p>Property values can be converted after reading them in, through overriding
+ * the <code>convertPropertyValue</code> method. For example, encrypted values
+ * can be detected and decrypted accordingly before processing them.
+ *
  * @author Juergen Hoeller
  * @since 02.10.2003
  * @see PropertyOverrideConfigurer
  * @see PropertyPlaceholderConfigurer
+ * @see #convertPropertyValue
  */
 public abstract class PropertyResourceConfigurer implements BeanFactoryPostProcessor, Ordered {
 
@@ -56,6 +65,10 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 	private Properties properties;
 
 	private Resource[] locations;
+
+	private String fileEncoding;
+
+	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
 
 	private boolean ignoreResourceNotFound = false;
 
@@ -72,6 +85,8 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 	 * Set local properties, e.g. via the "props" tag in XML bean definitions.
 	 * These can be considered defaults, to be overridden by properties
 	 * loaded from files.
+	 * @see #setLocation
+	 * @see #setLocations
 	 */
 	public void setProperties(Properties properties) {
 		this.properties = properties;
@@ -79,6 +94,7 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 
 	/**
 	 * Set a location of a properties file to be loaded.
+	 * @see #setLocations
 	 */
 	public void setLocation(Resource location) {
 		this.locations = new Resource[] {location};
@@ -86,9 +102,28 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 
 	/**
 	 * Set locations of properties files to be loaded.
+	 * @see #setLocation
 	 */
 	public void setLocations(Resource[] locations) {
 		this.locations = locations;
+	}
+
+	/**
+	 * Set the encoding to use for parsing properties files.
+	 * Default is none, using java.util.Properties' default encoding.
+	 * @see org.springframework.util.PropertiesPersister#load
+	 */
+	public void setFileEncoding(String encoding) {
+		this.fileEncoding = encoding;
+	}
+
+	/**
+	 * Set the PropertiesPersister to use for parsing properties files.
+	 * The default is DefaultPropertiesPersister.
+	 * @see org.springframework.util.DefaultPropertiesPersister
+	 */
+	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
+		this.propertiesPersister = propertiesPersister;
 	}
 
 	/**
@@ -115,11 +150,18 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 		if (this.locations != null) {
 			for (int i = 0; i < this.locations.length; i++) {
 				Resource location = this.locations[i];
-				logger.info("Loading properties from " + location + "");
+				if (logger.isInfoEnabled()) {
+					logger.info("Loading properties from " + location + "");
+				}
 				try {
 					InputStream is = location.getInputStream();
 					try {
-						mergedProps.load(is);
+						if (this.fileEncoding != null) {
+							this.propertiesPersister.load(mergedProps, new InputStreamReader(is, this.fileEncoding));
+						}
+						else {
+							this.propertiesPersister.load(mergedProps, is);
+						}
 					}
 					finally {
 						is.close();
@@ -128,7 +170,9 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 				catch (IOException ex) {
 					String msg = "Could not load properties from " + location;
 					if (this.ignoreResourceNotFound) {
-						logger.warn(msg + ": " + ex.getMessage());
+						if (logger.isWarnEnabled()) {
+							logger.warn(msg + ": " + ex.getMessage());
+						}
 					}
 					else {
 						throw new BeanInitializationException(msg, ex);
@@ -138,6 +182,43 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 		}
 
 		processProperties(beanFactory, mergedProps);
+	}
+
+	/**
+	 * Convert the given merged properties, converting property values
+	 * if necessary. The result will then be processed.
+	 * <p>Default implementation will invoke <code>convertPropertyValue</code>
+	 * for each property value, replacing the original with the converted value.
+	 * @see #convertPropertyValue
+	 * @see #processProperties
+	 */
+	protected void convertProperties(Properties props) {
+		Enumeration propertyNames = props.propertyNames();
+		while (propertyNames.hasMoreElements()) {
+			String propertyName = (String) propertyNames.nextElement();
+			String propertyValue = props.getProperty(propertyName);
+			String convertedValue = convertPropertyValue(propertyValue);
+			if (!ObjectUtils.nullSafeEquals(propertyValue, convertedValue)) {
+				props.setProperty(propertyName, convertedValue);
+			}
+		}
+	}
+
+	/**
+	 * Convert the given property value from the properties source
+	 * to the value that should be applied.
+	 * <p>Default implementation simply returns the original value.
+	 * Can be overridden in subclasses, for example to detect
+	 * encrypted values and decrypt them accordingly.
+	 * @param originalValue the original value from the properties source
+	 * (properties file or local "properties")
+	 * @return the converted value, to be used for processing
+	 * @see #setProperties
+	 * @see #setLocations
+	 * @see #setLocation
+	 */
+	protected String convertPropertyValue(String originalValue) {
+		return originalValue;
 	}
 
 	/**

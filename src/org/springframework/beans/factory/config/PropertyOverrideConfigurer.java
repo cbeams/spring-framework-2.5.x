@@ -50,8 +50,14 @@ import org.springframework.beans.FatalBeanException;
  * <p>In case of multiple PropertyOverrideConfigurers that define different values for
  * the same bean property, the <i>last</i> one will win (due to the overriding mechanism).
  *
+ * <p>Property values can be converted after reading them in, through overriding
+ * the <code>convertPropertyValue</code> method. For example, encrypted values
+ * can be detected and decrypted accordingly before processing them.
+ *
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 12.03.2003
+ * @see #convertPropertyValue
  * @see PropertyPlaceholderConfigurer
  */
 public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
@@ -78,9 +84,11 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		}
 		String beanName = key.substring(0, dotIndex);
 		String beanProperty = key.substring(dotIndex+1);
-		beanNames.add(beanName);
+		this.beanNames.add(beanName);
 		applyPropertyValue(factory, beanName, beanProperty, value);
-		logger.debug("Property '" + key + "' set to [" + value + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Property '" + key + "' set to [" + value + "]");
+		}
 	}
 
 	/**
@@ -94,13 +102,13 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	
 	/**
 	 * Were there overrides for this bean?
-	 * Only valid after processing has occurred at least once
+	 * Only valid after processing has occurred at least once.
 	 * @param beanName name of the bean to query status for
 	 * @return whether there were property overrides for
 	 * the named bean
 	 */
 	public boolean hasPropertyOverridesFor(String beanName) {
-		return beanNames.contains(beanName);
+		return this.beanNames.contains(beanName);
 	}
 
 }

@@ -83,15 +83,20 @@ import org.springframework.util.ObjectUtils;
  * <p>Note that the context definition <i>is</i> aware of being incomplete;
  * this is immediately obvious when looking at the XML definition file.
  *
+ * <p>Property values can be converted after reading them in, through overriding
+ * the <code>convertPropertyValue</code> method. For example, encrypted values
+ * can be detected and decrypted accordingly before processing them.
+ *
  * @author Juergen Hoeller
  * @since 02.10.2003
- * @see PropertyOverrideConfigurer
  * @see #setLocations
  * @see #setProperties
  * @see #setPlaceholderPrefix
  * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
+ * @see #convertPropertyValue
+ * @see PropertyOverrideConfigurer
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
     implements BeanNameAware, BeanFactoryAware {
@@ -275,11 +280,11 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	protected Object parseValue(Properties props, Object value) {
 		if (value instanceof String) {
-			return parseString(props, (String) value, null);
+			return parseString(props, (String) value);
 		}
 		else if (value instanceof RuntimeBeanReference) {
       RuntimeBeanReference ref = (RuntimeBeanReference) value;
-      String newBeanName = parseString(props, ref.getBeanName(), null);
+      String newBeanName = parseString(props, ref.getBeanName());
 			if (!newBeanName.equals(ref.getBeanName())) {
 				return new RuntimeBeanReference(newBeanName);
 			}
@@ -303,7 +308,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	/**
-	 * Parse the given List, exchanging its values if necessary.
+	 * Parse the given List, resolving its values if necessary.
 	 */
 	protected void parseList(Properties props, List listVal) {
 		for (int i = 0; i < listVal.size(); i++) {
@@ -316,7 +321,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	/**
-	 * Parse the given Set, exchanging its values if necessary.
+	 * Parse the given Set, resolving its values if necessary.
 	 */
 	protected void parseSet(Properties props, Set setVal) {
 		for (Iterator it = new HashSet(setVal).iterator(); it.hasNext();) {
@@ -330,7 +335,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	/**
-	 * Parse the given Map, exchanging its values if necessary.
+	 * Parse the given Map, resolving its values if necessary.
 	 */
 	protected void parseMap(Properties props, Map mapVal) {
 		for (Iterator it = new HashMap(mapVal).keySet().iterator(); it.hasNext();) {
@@ -346,6 +351,15 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 				mapVal.put(newKey, newVal);
 			}
 		}
+	}
+
+	/**
+	 * Parse the given String, resolving its values if necessary.
+	 * @see #parseString(java.util.Properties, String, String)
+	 */
+	protected String parseString(Properties props, String strVal)
+	    throws BeansException {
+		return parseString(props, strVal, null);
 	}
 
 	/**
