@@ -33,8 +33,15 @@ import org.springframework.ui.jasperreports.JasperReportsUtils;
 /**
  * Extends <code>AbstractJasperReportsView</code> to provide basic rendering logic for
  * views that are fixed format, i.e. always PDF or always HTML.
+ * <p/>
+ * <p>Subclasses need to implement two template methods: <code>createExporter</code>
+ * to create a JasperReports exporter for a specific output format, and
+ * <code>useWriter</code> to determine whether to write text or binary content.
+ * <p/>
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @see #createExporter()
+ * @see #useWriter() 
  */
 public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasperReportsView {
 
@@ -52,6 +59,11 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 
 		// Prepare report for rendering.
 		JRAbstractExporter exporter = createExporter();
+
+		if(getExporterParameters() != null) {
+			exporter.setParameters(getExporterParameters());
+		}
+
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, dataSource);
 
 		if (useWriter()) {
