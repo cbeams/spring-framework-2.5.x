@@ -52,26 +52,8 @@ import org.xml.sax.SAXParseException;
  * file. The XML files read by this class should use the following doctype:
  * 
  * <pre>
- * 
- *  
- *   
- *    
- *     
- *      
- *       
- *        
- *         
- *          &lt;!DOCTYPE web-flow PUBLIC &quot;-//SPRING//DTD WEB FLOW//EN&quot;
- *          		&quot;http://www.springframework.org/dtd/web-flow.dtd&quot;&gt;
- *          
- *         
- *        
- *       
- *      
- *     
- *    
- *   
- *  
+ *    &lt;!DOCTYPE web-flow PUBLIC &quot;-//SPRING//DTD WEB FLOW//EN&quot;
+ * 		&quot;http://www.springframework.org/dtd/web-flow.dtd&quot;&gt;
  * </pre>
  * 
  * <p>
@@ -133,6 +115,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String ACTION_STATE_ELEMENT = "action-state";
 
 	private static final String ACTION_ELEMENT = "action";
+
+	private static final String BEAN_ATTRIBUTE = "bean";
 
 	private static final String CLASS_ATTRIBUTE = "class";
 
@@ -429,7 +413,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * Parse given action definition and return a corresponding Action object.
 	 */
 	protected Action parseAction(Element element) {
-		String actionId = element.getAttribute(ID_ATTRIBUTE);
+		String actionId = element.getAttribute(BEAN_ATTRIBUTE);
 		if (StringUtils.hasText(actionId)) {
 			return getFlowServiceLocator().getAction(actionId);
 		}

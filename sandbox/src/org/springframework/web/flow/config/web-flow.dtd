@@ -49,10 +49,10 @@
 <!ELEMENT action EMPTY>
 
 <!--
-	Unique id of the action implementation exported in the configured registry.
+	Identifier of the action implementation exported in the configured registry.
 	This is similar to the <ref bean="myBean"/> notation of the Spring beans DTD.
 -->
-<!ATTLIST action id CDATA #IMPLIED>
+<!ATTLIST action bean CDATA #IMPLIED>
 
 <!--
 	Fully qualified class of the Action implementation.  An instance of the

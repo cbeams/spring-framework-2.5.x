@@ -10,7 +10,7 @@
 	</view-state>
 
 	<action-state id="item.create">
-		<action id="item.create"/>
+		<action bean="item.create"/>
 		<transition on="success" to="item.view"/>
 	</action-state>
 	
@@ -19,7 +19,7 @@
 	</view-state>
 	
 	<action-state id="item.add">
-		<action id="item.add"/>
+		<action bean="item.add"/>
 		<transition on="*" to="itemList.view"/>
 	</action-state>
 	

@@ -9,13 +9,13 @@
 	</view-state>
 
 	<action-state id="criteria.bindAndValidate">
-		<action id="person.Search.criteria.bindAndValidate"/>
+		<action bean="person.Search.criteria.bindAndValidate"/>
 		<transition on="success" to="executeQuery"/>
 		<transition on="error" to="criteria.view"/>
 	</action-state>
 	
 	<action-state id="executeQuery">
-		<action id="person.Search.executeQuery"/>
+		<action bean="person.Search.executeQuery"/>
 		<transition on="success" to="results.view"/>
 	</action-state>
 	
@@ -25,7 +25,7 @@
 	</view-state>
 
 	<action-state id="personId.set">
-		<action id="person.Search.id.set"/>
+		<action bean="person.Search.id.set"/>
 		<transition on="success" to="person.Detail"/>
 		<transition on="error" to="error"/>
 	</action-state>

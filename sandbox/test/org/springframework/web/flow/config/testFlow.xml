@@ -6,8 +6,8 @@
 <web-flow id="testFlow" start-state="actionState1">
 
 	<action-state id="actionState1">
-		<action id="action1"/>
-		<action name="action2Name" id="action2"/>
+		<action bean="action1"/>
+		<action name="action2Name" bean="action2"/>
 		<action class="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction"/>
 		<action class="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction" autowire="byType"/>
 		<action classref="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction"/>
