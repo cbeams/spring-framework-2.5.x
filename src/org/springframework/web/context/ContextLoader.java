@@ -34,30 +34,30 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  * Performs the actual initialization work for the root application context.
- * Normally called by ContextLoaderListener and ContextLoaderServlet.
+ * Called by ContextLoaderListener and ContextLoaderServlet.
  * 
- * <p>Looks for a "contextClass" parameter at the web.xml context-param level to
- * specify the context class type, falling back to the default of
- * {@link XmlWebApplicationContext}if not found. With the default ContextLoader
+ * <p>Looks for a "contextClass" parameter at the web.xml context-param level
+ * to specify the context class type, falling back to the default of
+ * {@link XmlWebApplicationContext} if not found. With the default ContextLoader
  * implementation, any context class specified needs to implement
  * ConfigurableWebApplicationContext.
  *
  * <p>Passes a "contextConfigLocation" context-param to the context instance,
- * parsing it into potentially multiple file paths which can be separated by any
- * number of commas and spaces, like "applicationContext1.xml,
+ * parsing it into potentially multiple file paths which can be separated by
+ * any number of commas and spaces, like "applicationContext1.xml,
  * applicationContext2.xml". If not explicitly specified, the context
  * implementation is supposed to use a default location (with
  * XmlWebApplicationContext: "/WEB-INF/applicationContext.xml").
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files, at least when using one of
- * Spring's default ApplicationContext implementations. This can be leveraged to
- * deliberately override certain bean definitions via an extra XML file.
+ * Spring's default ApplicationContext implementations. This can be leveraged
+ * to deliberately override certain bean definitions via an extra XML file.
  *
  * <p>Above and beyond loading the root application context, this class can
  * optionally load or obtain and hook up a shared parent context to the root
  * application context. See the
- * {@link #loadParentContext(ServletContext) method for more information.
+ * {@link #loadParentContext(ServletContext)} method for more information.
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
