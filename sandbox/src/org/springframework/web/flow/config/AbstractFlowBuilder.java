@@ -821,7 +821,7 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param stateIdPrefix
 	 * @return
 	 */
-	protected ActionState addetupState(String stateIdPrefix) {
+	protected ActionState addSetupState(String stateIdPrefix) {
 		return addSetupState(stateIdPrefix, onSuccessView(stateIdPrefix));
 	}
 
@@ -1572,28 +1572,20 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		return buildStateId(stateIdPrefix, GET);
 	}
 
-	protected String set(String stateIdPrefix) {
-		return buildStateId(stateIdPrefix, SET);
-	}
-
 	protected String load(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, LOAD);
-	}
-
-	protected String search(String stateIdPrefix) {
-		return buildStateId(stateIdPrefix, SEARCH);
 	}
 
 	protected String setup(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, SETUP);
 	}
 
-	protected String populate(String stateIdPrefix) {
-		return buildStateId(stateIdPrefix, POPULATE);
-	}
-
 	protected String view(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, VIEW);
+	}
+
+	protected String set(String stateIdPrefix) {
+		return buildStateId(stateIdPrefix, SET);
 	}
 
 	protected String add(String stateIdPrefix) {
@@ -1622,6 +1614,10 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 
 	protected String edit(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, EDIT);
+	}
+
+	protected String search(String stateIdPrefix) {
+		return buildStateId(stateIdPrefix, SEARCH);
 	}
 
 	/**

@@ -37,19 +37,19 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 
 	/**
 	 * Does this factory bean build the specified FlowBuilder implementation?
-	 * @param requiredBuilderImplementationClass The builder implementation
+	 * @param builderImplementationClass The builder implementation
 	 * @return true if yes, false otherwise
 	 */
-	public boolean buildsWith(Class requiredBuilderImplementationClass) throws IllegalArgumentException {
-		if (requiredBuilderImplementationClass == null) {
+	public boolean buildsWith(Class builderImplementationClass) throws IllegalArgumentException {
+		if (builderImplementationClass == null) {
 			return false;
 		}
-		if (!FlowBuilder.class.isAssignableFrom(requiredBuilderImplementationClass)) {
+		if (!FlowBuilder.class.isAssignableFrom(builderImplementationClass)) {
 			throw new IllegalArgumentException("The flow builder implementation class '"
-					+ requiredBuilderImplementationClass + "' you provided to this method does not implement the '"
+					+ builderImplementationClass + "' you provided to this method does not implement the '"
 					+ FlowBuilder.class.getName() + "' interface");
 		}
-		return getFlowBuilder().getClass().equals(requiredBuilderImplementationClass);
+		return getFlowBuilder().getClass().equals(builderImplementationClass);
 	}
 
 	protected FlowBuilder getFlowBuilder() {
