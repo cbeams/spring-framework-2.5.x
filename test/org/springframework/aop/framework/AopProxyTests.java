@@ -29,7 +29,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.6 2003-11-12 09:24:22 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.7 2003-11-12 15:00:45 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 
@@ -39,7 +39,7 @@ public class AopProxyTests extends TestCase {
 
 	public void testNullConfig() {
 		try {
-			AopProxy aop = new AopProxy(null);
+			AopProxy aop = new AopProxy(null, new DefaultMethodInvocationFactory());
 			aop.getProxy();
 			fail("Shouldn't allow null interceptors");
 		} catch (AopConfigException ex) {
@@ -52,7 +52,7 @@ public class AopProxyTests extends TestCase {
 			new ProxyConfigSupport(new Class[] { ITestBean.class }, false);
 		// Add no interceptors
 		try {
-			AopProxy aop = new AopProxy(pc);
+			AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 			aop.getProxy();
 			fail("Shouldn't allow no interceptors");
 		} catch (AopConfigException ex) {
@@ -68,7 +68,7 @@ public class AopProxyTests extends TestCase {
 
 		ProxyConfig pc = new ProxyConfigSupport(new Class[] { ITestBean.class }, false);
 		pc.addInterceptor(mi);
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		// Really would like to permit null arg:can't get exact mi
 		mi.invoke(null);
@@ -113,7 +113,7 @@ public class AopProxyTests extends TestCase {
 		};
 		ProxyConfig pc = new ProxyConfigSupport(new Class[] { ITestBean.class }, context);
 		pc.addInterceptor(mi);
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		assertNoInvocationContext();
 		ITestBean tb = (ITestBean) aop.getProxy();
@@ -137,7 +137,7 @@ public class AopProxyTests extends TestCase {
 
 		ProxyConfig pc = new ProxyConfigSupport(new Class[] { ITestBean.class }, false);
 		pc.addInterceptor(ii);
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		assertTrue("this is wrapped in a proxy", Proxy.isProxyClass(tb.getSpouse().getClass()));
@@ -151,7 +151,7 @@ public class AopProxyTests extends TestCase {
 		InvokerInterceptor ii = new InvokerInterceptor(raw);
 		ProxyConfig pc = new ProxyConfigSupport(new Class[] {ITestBean.class}, false);
 		pc.addInterceptor(ii);
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		Object proxy = aop.getProxy();
 		assertTrue(proxy instanceof ITestBean);
@@ -164,7 +164,7 @@ public class AopProxyTests extends TestCase {
 		InvokerInterceptor ii = new InvokerInterceptor(raw);
 		ProxyConfig pc = new ProxyConfigSupport(new Class[] {}, false);
 		pc.addInterceptor(ii);
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		Object proxy = aop.getProxy();
 		assertTrue(proxy instanceof ITestBean);
@@ -184,7 +184,7 @@ public class AopProxyTests extends TestCase {
 
 		ProxyConfig pc = new ProxyConfigSupport(new Class[] { ITestBean.class }, false);
 		pc.addInterceptor(ii);
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		assertTrue("proxy equals itself", tb.equals(tb));
@@ -196,7 +196,7 @@ public class AopProxyTests extends TestCase {
 		// Test with AOP proxy with additional interceptor
 		ProxyConfig pc2 = new ProxyConfigSupport(new Class[] { ITestBean.class }, false);
 		pc2.addInterceptor(new DebugInterceptor());
-		assertTrue(!tb.equals(new AopProxy(pc2)));
+		assertTrue(!tb.equals(new AopProxy(pc2, new DefaultMethodInvocationFactory())));
 
 		// Test with any old dynamic proxy
 		assertTrue(!tb.equals(Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { ITestBean.class }, new InvocationHandler() {
@@ -217,7 +217,7 @@ public class AopProxyTests extends TestCase {
 				return null;
 			}
 		});
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		tb.getSpouse();
@@ -241,7 +241,7 @@ public class AopProxyTests extends TestCase {
 		};
 		ProxyConfig pc = new ProxyConfigSupport(new Class[] { ITestBean.class }, true);
 		pc.addInterceptor(mi);
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		try {
 			ITestBean tb = (ITestBean) aop.getProxy();
@@ -266,7 +266,7 @@ public class AopProxyTests extends TestCase {
 		pc.addInterceptor(tii);
 		InvokerInterceptor ii = new InvokerInterceptor(target);
 		pc.addInterceptor(ii);
-		AopProxy aop = new AopProxy(pc);
+		AopProxy aop = new AopProxy(pc, new DefaultMethodInvocationFactory());
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		tb.getName();
@@ -491,6 +491,51 @@ public class AopProxyTests extends TestCase {
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		ITestBean proxied = (ITestBean) pc.getProxy();
 		assertEquals(target.getAge(), proxied.getAge());
+	}
+	
+	public void testAdviceChangeCallbacks() throws Throwable {
+		TestBean target = new TestBean();
+		target.setAge(21);
+		
+		AdviceChangeCountingProxyFactory pc = new AdviceChangeCountingProxyFactory(target);
+		RefreshCountingMethodInvocationFactory mif = new RefreshCountingMethodInvocationFactory();
+		pc.setMethodInvocationFactory(mif);
+		assertFalse(pc.isActive());
+		assertEquals(0, mif.refreshes);
+		ITestBean proxied = (ITestBean) pc.getProxy();
+		assertEquals(1, mif.refreshes);
+		assertTrue(pc.isActive());
+		assertEquals(target.getAge(), proxied.getAge());
+		assertEquals(0, pc.adviceChanges);
+		DebugInterceptor di = new DebugInterceptor();
+		pc.addInterceptor(0, di);
+		assertEquals(1, pc.adviceChanges);
+		assertEquals(2, mif.refreshes);
+		assertEquals(target.getAge(), proxied.getAge());
+		pc.removeInterceptor(di);
+		assertEquals(2, pc.adviceChanges);
+		assertEquals(3, mif.refreshes);
+		assertEquals(target.getAge(), proxied.getAge());
+	}
+	
+	
+	public static class AdviceChangeCountingProxyFactory extends ProxyFactory {
+		public int adviceChanges;
+		public AdviceChangeCountingProxyFactory(Object target) {
+			super(target);
+		}
+		protected void onAdviceChanged() {
+			++adviceChanges;
+		}
+	}
+	
+	public class RefreshCountingMethodInvocationFactory extends DefaultMethodInvocationFactory {
+		public int refreshes;
+		
+		public void refresh(ProxyConfig pc) {
+			++refreshes;
+		}
+
 	}
 	
 	/**

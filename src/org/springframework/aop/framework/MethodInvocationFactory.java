@@ -12,16 +12,16 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Factory for method invocations.
  * @author Rod Johnson
- * @version $Id: MethodInvocationFactory.java,v 1.2 2003-11-12 12:46:29 johnsonr Exp $
+ * @version $Id: MethodInvocationFactory.java,v 1.3 2003-11-12 14:59:55 johnsonr Exp $
  */
 public interface MethodInvocationFactory {
 	
 	MethodInvocation getMethodInvocation(ProxyConfig pc, Object proxy, Method method, Object[] args);
 	
 	/**
-	 * Clear state
-	 *
+	 * Cache state based on ProxyConfig.
+	 * Clear any existing state.
 	 */
-	void clear();
+	void refresh(ProxyConfig pc);
 
 }

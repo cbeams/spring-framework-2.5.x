@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.5 2003-11-12 12:46:29 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.6 2003-11-12 14:59:55 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -77,9 +77,6 @@ public class AopProxy implements InvocationHandler {
 		this.methodInvocationFactory = methodInvocationFactory;
 	}
 	
-	public AopProxy(ProxyConfig config) throws AopConfigException {
-		this(config, new DefaultMethodInvocationFactory(config));
-	}
 	
 	/**
 	 * Implementation of InvocationHandler.invoke.
