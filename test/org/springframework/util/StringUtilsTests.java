@@ -25,6 +25,20 @@ import junit.framework.TestCase;
  */
 public class StringUtilsTests extends TestCase {
 
+	public void testHasTextBlank() throws Exception {
+		String blank = "          ";
+		assertEquals(false, StringUtils.hasText(blank));
+	}
+
+	public void testHasTextNullEmpty() throws Exception {
+		assertEquals(false, StringUtils.hasText(null));
+		assertEquals(false, StringUtils.hasText(""));
+	}
+
+	public void testHasTextValid() throws Exception {
+		assertEquals(true, StringUtils.hasText("t"));
+	}
+
 	public void testTrimLeadingWhitespace() throws Exception {
 		assertEquals("", StringUtils.trimLeadingWhitespace(""));
 		assertEquals("", StringUtils.trimLeadingWhitespace(" "));
@@ -69,96 +83,6 @@ public class StringUtilsTests extends TestCase {
 		assertTrue("test last", StringUtils.countOccurrencesOf(s, "r") == 2);
 	}
 
-	public void testCommaDelimitedListToStringArrayWithNullProducesEmptyArray() {
-		String[] sa = StringUtils.commaDelimitedListToStringArray(null);
-		assertTrue("String array isn't null with null input", sa != null);
-		assertTrue("String array length == 0 with null input", sa.length == 0);
-	}
-
-	public void testCommaDelimitedListToStringArrayWithEmptyStringProducesEmptyArray() {
-		String[] sa = StringUtils.commaDelimitedListToStringArray("");
-		assertTrue("String array isn't null with null input", sa != null);
-		assertTrue("String array length == 0 with null input", sa.length == 0);
-	}
-
-	private void testCommaDelimitedListToStringArrayLegalMatch(String[] components) {
-		StringBuffer sbuf = new StringBuffer();
-		// Build String array
-		for (int i = 0; i < components.length; i++) {
-			if (i != 0)
-				sbuf.append(",");
-			sbuf.append(components[i]);
-		}
-
-		String[] sa =
-				StringUtils.commaDelimitedListToStringArray(sbuf.toString());
-		assertTrue("String array isn't null with legal match", sa != null);
-		assertTrue("String array length is correct with legal match: returned "
-				+ sa.length
-				+ " when expecting "
-				+ components.length
-				+ " with String ["
-				+ sbuf.toString()
-				+ "]",
-				sa.length == components.length);
-		assertTrue("Output equals input", Arrays.equals(sa, components));
-	}
-
-	private void testStringArrayReverseTransformationMatches(String[] sa) {
-		String[] reverse =
-				StringUtils.commaDelimitedListToStringArray(StringUtils.arrayToCommaDelimitedString(sa));
-		assertEquals("Reverse transformation is equal",
-				Arrays.asList(sa),
-				Arrays.asList(reverse));
-	}
-
-	public void testCommaDelimitedListToStringArrayMatchWords() {
-		// Could read these from files
-		String[] sa = new String[]{"foo", "bar", "big"};
-		testCommaDelimitedListToStringArrayLegalMatch(sa);
-		testStringArrayReverseTransformationMatches(sa);
-
-		sa = new String[]{"a", "b", "c"};
-		testCommaDelimitedListToStringArrayLegalMatch(sa);
-		testStringArrayReverseTransformationMatches(sa);
-
-		// Test same words
-		sa = new String[]{"AA", "AA", "AA", "AA", "AA"};
-		testCommaDelimitedListToStringArrayLegalMatch(sa);
-		testStringArrayReverseTransformationMatches(sa);
-	}
-
-	public void testCommaDelimitedListToStringArraySingleString() {
-		// Could read these from files
-		String s = "woeirqupoiewuropqiewuorpqiwueopriquwopeiurqopwieur";
-		String[] sa = StringUtils.commaDelimitedListToStringArray(s);
-		assertTrue("Found one String with no delimiters", sa.length == 1);
-		assertTrue("Single array entry matches input String with no delimiters",
-				sa[0].equals(s));
-	}
-
-	public void testCommaDelimitedListToStringArrayWithOtherPunctuation() {
-		// Could read these from files
-		String[] sa =
-				new String[]{"xcvwert4456346&*.", "///", ".!", ".", ";"};
-		testCommaDelimitedListToStringArrayLegalMatch(sa);
-	}
-
-	/**
-	 * We expect to see the empty Strings in the output
-	 */
-	public void testCommaDelimitedListToStringArrayEmptyStrings() {
-		// Could read these from files
-		String[] ss = StringUtils.commaDelimitedListToStringArray("a,,b");
-		assertTrue("a,,b produces array length 3, not " + ss.length,
-				ss.length == 3);
-		assertTrue("components are correct",
-				ss[0].equals("a") && ss[1].equals("") && ss[2].equals("b"));
-
-		String[] sa = new String[]{"", "", "a", ""};
-		testCommaDelimitedListToStringArrayLegalMatch(sa);
-	}
-
 	public void testReplace() throws Exception {
 		String inString = "a6AazAaa77abaa";
 		String oldPattern = "aa";
@@ -169,10 +93,7 @@ public class StringUtilsTests extends TestCase {
 		assertTrue("Replace 1 worked", s.equals("a6AazAfoo77abfoo"));
 
 		// Non match: no change
-		s =
-				StringUtils.replace(inString,
-						"qwoeiruqopwieurpoqwieur",
-						newPattern);
+		s = StringUtils.replace(inString, "qwoeiruqopwieurpoqwieur", newPattern);
 		assertTrue("Replace non matched is equal", s.equals(inString));
 
 		// Null new pattern: should ignore
@@ -233,19 +154,109 @@ public class StringUtilsTests extends TestCase {
 		assertTrue("Still has chars", cleaned.length() > 10);
 	}
 
-	public void testHasTextBlank() throws Exception {
-		String blank = "          ";
-		assertEquals(false, StringUtils.hasText(blank));
+
+	public void testTokenizeToStringArray() {
+		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",");
+		assertEquals(3, sa.length);
+		assertTrue("components are correct",
+				sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("c"));
 	}
 
-	public void testHasTextNullEmpty() throws Exception {
-		assertEquals(false, StringUtils.hasText(null));
-		assertEquals(false, StringUtils.hasText(""));
+	public void testTokenizeToStringArrayWithNotIgnoreEmptyTokens() {
+		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
+		assertEquals(4, sa.length);
+		assertTrue("components are correct",
+				sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("") && sa[3].equals("c"));
 	}
 
-	public void testHasTextValid() throws Exception {
-		assertEquals(true, StringUtils.hasText("t"));
+	public void testTokenizeToStringArrayWithNotTrimTokens() {
+		String[] sa = StringUtils.tokenizeToStringArray("a,b ,c", ",", false, true);
+		assertEquals(3, sa.length);
+		assertTrue("components are correct",
+				sa[0].equals("a") && sa[1].equals("b ") && sa[2].equals("c"));
 	}
+
+	public void testCommaDelimitedListToStringArrayWithNullProducesEmptyArray() {
+		String[] sa = StringUtils.commaDelimitedListToStringArray(null);
+		assertTrue("String array isn't null with null input", sa != null);
+		assertTrue("String array length == 0 with null input", sa.length == 0);
+	}
+
+	public void testCommaDelimitedListToStringArrayWithEmptyStringProducesEmptyArray() {
+		String[] sa = StringUtils.commaDelimitedListToStringArray("");
+		assertTrue("String array isn't null with null input", sa != null);
+		assertTrue("String array length == 0 with null input", sa.length == 0);
+	}
+
+	private void testStringArrayReverseTransformationMatches(String[] sa) {
+		String[] reverse =
+				StringUtils.commaDelimitedListToStringArray(StringUtils.arrayToCommaDelimitedString(sa));
+		assertEquals("Reverse transformation is equal",
+				Arrays.asList(sa),
+				Arrays.asList(reverse));
+	}
+
+	public void testCommaDelimitedListToStringArrayMatchWords() {
+		// Could read these from files
+		String[] sa = new String[] {"foo", "bar", "big"};
+		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
+		testStringArrayReverseTransformationMatches(sa);
+
+		sa = new String[] {"a", "b", "c"};
+		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
+		testStringArrayReverseTransformationMatches(sa);
+
+		// Test same words
+		sa = new String[] {"AA", "AA", "AA", "AA", "AA"};
+		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
+		testStringArrayReverseTransformationMatches(sa);
+	}
+
+	public void testCommaDelimitedListToStringArraySingleString() {
+		// Could read these from files
+		String s = "woeirqupoiewuropqiewuorpqiwueopriquwopeiurqopwieur";
+		String[] sa = StringUtils.commaDelimitedListToStringArray(s);
+		assertTrue("Found one String with no delimiters", sa.length == 1);
+		assertTrue("Single array entry matches input String with no delimiters",
+				sa[0].equals(s));
+	}
+
+	public void testCommaDelimitedListToStringArrayWithOtherPunctuation() {
+		// Could read these from files
+		String[] sa =
+				new String[] {"xcvwert4456346&*.", "///", ".!", ".", ";"};
+		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
+	}
+
+	/**
+	 * We expect to see the empty Strings in the output.
+	 */
+	public void testCommaDelimitedListToStringArrayEmptyStrings() {
+		// Could read these from files
+		String[] sa = StringUtils.commaDelimitedListToStringArray("a,,b");
+		assertEquals("a,,b produces array length 3", 3, sa.length);
+		assertTrue("components are correct",
+				sa[0].equals("a") && sa[1].equals("") && sa[2].equals("b"));
+
+		sa = new String[] {"", "", "a", ""};
+		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
+	}
+
+	private void doTestCommaDelimitedListToStringArrayLegalMatch(String[] components) {
+		StringBuffer sbuf = new StringBuffer();
+		for (int i = 0; i < components.length; i++) {
+			if (i != 0) {
+				sbuf.append(",");
+			}
+			sbuf.append(components[i]);
+		}
+
+		String[] sa = StringUtils.commaDelimitedListToStringArray(sbuf.toString());
+		assertTrue("String array isn't null with legal match", sa != null);
+		assertEquals("String array length is correct with legal match", components.length, sa.length);
+		assertTrue("Output equals input", Arrays.equals(sa, components));
+	}
+
 
 	public void testUnqualify() throws Exception {
 		String qualified = "i.am.not.unqualified";
@@ -261,7 +272,6 @@ public class StringUtilsTests extends TestCase {
 		String capitalized = "i am not capitalized";
 		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
 	}
-
 
 	public void testPathEquals() {
 		assertTrue("Must be true for the same strings",
