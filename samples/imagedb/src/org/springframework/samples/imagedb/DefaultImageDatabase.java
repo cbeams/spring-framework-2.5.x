@@ -69,7 +69,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		}
 	}
 
-	public void storeImage(String name, InputStream is, String description) throws IOException {
+	public void storeImage(String name, InputStream is, int contentLength, String description) throws IOException {
 		String sql = "INSERT INTO imagedb (image_name, content, description) VALUES (?, ?, ?)";
 		Connection con = getConnection();
 		PreparedStatement ps = null;
@@ -77,7 +77,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		try {
 			ps = con.prepareStatement(sql);
 			ps.setString(1, name);
-			lobCreator.setBlobAsBinaryStream(ps, 2, is, is.available());
+			lobCreator.setBlobAsBinaryStream(ps, 2, is, contentLength);
 			lobCreator.setClobAsString(ps, 3, description);
 			ps.executeUpdate();
 		}

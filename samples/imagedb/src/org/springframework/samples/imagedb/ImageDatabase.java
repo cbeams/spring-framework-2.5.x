@@ -18,7 +18,8 @@ public interface ImageDatabase {
 
 	void streamImage(String name, OutputStream os) throws DataAccessException, IOException;
 
-	void storeImage(String name, InputStream is, String description) throws DataAccessException, IOException;
+	void storeImage(String name, InputStream is, int contentLength, String description)
+			throws DataAccessException, IOException;
 
 	void checkImages() throws DataAccessException;
 

@@ -37,7 +37,7 @@ public class ImageController extends MultiActionController {
 		String description = request.getParameter("description");
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		MultipartFile multipartFile = multipartRequest.getFile("image");
-		this.imageDatabase.storeImage(name, multipartFile.getInputStream(), description);
+		this.imageDatabase.storeImage(name, multipartFile.getInputStream(), (int) multipartFile.getSize(), description);
 		return new ModelAndView(new RedirectView("imageList"));
 	}
 
