@@ -565,16 +565,20 @@
       <para>Let us consider a sample configuration:</para>
 
       <para><programlisting>  &lt;!-- Transaction Interceptor set up to do PROPOGATION_REQUIRED on all methods --&gt;
-  &lt;bean id="matchAllWithPropReq" class="org.springframework.transaction.interceptor.MatchAlwaysTransactionAttributeSource"&gt;
+  &lt;bean id="matchAllWithPropReq" 
+      class="org.springframework.transaction.interceptor.MatchAlwaysTransactionAttributeSource"&gt;
     &lt;property name="transactionAttribute"&gt;&lt;value&gt;PROPAGATION_REQUIRED&lt;/value&gt;&lt;/property&gt;
   &lt;/bean&gt;
-  &lt;bean id="matchAllTxInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+  &lt;bean id="matchAllTxInterceptor" 
+      class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
     &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
     &lt;property name="transactionAttributeSource"&gt;&lt;ref bean="matchAllWithPropReq"/&gt;&lt;/property&gt;
   &lt;/bean&gt;
 
-  &lt;!-- One BeanNameAutoProxyCreator handles all beans where we want all methods to use PROPOGATION_REQUIRED --&gt;
-  &lt;bean id="autoProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
+  &lt;!-- One BeanNameAutoProxyCreator handles all beans where we want all methods to use 
+       PROPOGATION_REQUIRED --&gt;
+  &lt;bean id="autoProxyCreator" 
+      class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
     &lt;property name="interceptorNames"&gt;
       &lt;list&gt;T
         &lt;idref local="matchAllTxInterceptor"/&gt;
