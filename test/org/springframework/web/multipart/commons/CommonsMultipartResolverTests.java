@@ -224,6 +224,8 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
 
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
+		filterConfig.addInitParameter("class", "notWritable");
+		filterConfig.addInitParameter("unknownParam", "someValue");
 		final MultipartFilter filter = new MultipartFilter();
 		filter.init(filterConfig);
 

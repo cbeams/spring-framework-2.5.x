@@ -40,23 +40,29 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
- * Simple extension of javax.servlet.http.HttpServlet that treats its config
- * parameters as bean properties. A very handy superclass for any type of servlet.
- * Type conversion is automatic. It is also possible for subclasses to specify
- * required properties.
+ * Simple extension of <code>javax.servlet.http.HttpServlet</code> that treats
+ * its config parameters as bean properties.
  *
- * <p>This servlet leaves request handling to subclasses, inheriting the
- * default behaviour of HttpServlet.
+ * <p>A very handy superclass for any type of servlet. Type conversion is automatic.
+ * It is also possible for subclasses to specify required properties.
  *
- * <p>This servlet superclass has no dependency on a Spring application context.
+ * <p>This servlet leaves request handling to subclasses, inheriting the default
+ * behavior of HttpServlet (<code>doGet</code>, <code>doPost</code>, etc).
+ *
+ * <p>This servlet superclass has no dependency on a Spring application context,
+ * in contrast to the FrameworkServlet class which loads its own context.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #addRequiredProperty
  * @see #initServletBean
+ * @see #doGet
+ * @see #doPost
+ * @see FrameworkServlet
  */
 public abstract class HttpServletBean extends HttpServlet {
 	
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** 
@@ -83,25 +89,30 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * properties are missing), or if subclass initialization fails.
 	 */
 	public final void init() throws ServletException {
-		logger.info("Initializing servlet '" + getServletName() + "'");
+		if (logger.isInfoEnabled()) {
+			logger.info("Initializing servlet '" + getServletName() + "'");
+		}
 
-		// set bean properties
+		// Set bean properties from init parameters.
 		try {
 			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 			BeanWrapper bw = new BeanWrapperImpl(this);
 			ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
 			initBeanWrapper(bw);
-			bw.setPropertyValues(pvs);
+			bw.setPropertyValues(pvs, true);
 		}
 		catch (BeansException ex) {
 			logger.error("Failed to set bean properties on servlet '" + getServletName() + "'", ex);
 			throw ex;
 		}
 
-		// let subclasses do whatever initialization they like
+		// Let subclasses do whatever initialization they like.
 		initServletBean();
-		logger.info("Servlet '" + getServletName() + "' configured successfully");
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Servlet '" + getServletName() + "' configured successfully");
+		}
 	}
 	
 	/**
@@ -136,7 +147,7 @@ public abstract class HttpServletBean extends HttpServlet {
 		 * we can't accept default values
 		 * @throws ServletException if any required properties are missing
 		 */
-		private ServletConfigPropertyValues(ServletConfig config, Set requiredProperties)
+		public ServletConfigPropertyValues(ServletConfig config, Set requiredProperties)
 		    throws ServletException {
 			
 			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?

@@ -42,19 +42,29 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
- * Simple base implementation of javax.servlet.Filter that treats its config
- * parameters as bean properties. A very handy superclass for any type of filter.
- * Type conversion is automatic. It is also possible for subclasses to specify
- * required properties.
+ * Simple base implementation of <code>javax.servlet.Filter</code> that treats
+ * its config parameters as bean properties. Unknown parameters are ignored.
  *
- * <p>This filter leaves actual filtering to subclasses.
+ * A very handy superclass for any type of filter. Type conversion is automatic.
+ * It is also possible for subclasses to specify required properties.
+ *
+ * <p>This filter leaves actual filtering to subclasses, which have to
+ * implement Filter's <code>doFilter</code> method.
+ *
+ * <p>This filter superclass has no dependency on a Spring application context.
+ * Filters usually don't load their own context but rather access beans from
+ * the root application context, accessible via the ServletContext.
  *
  * @author Juergen Hoeller
  * @since 06.12.2003
+ * @see #addRequiredProperty
  * @see #initFilterBean
+ * @see #doFilter
+ * @see org.springframework.web.context.support.WebApplicationContextUtils#getWebApplicationContext
  */
 public abstract class GenericFilterBean implements Filter {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
@@ -104,17 +114,20 @@ public abstract class GenericFilterBean implements Filter {
 	 * @see #initFilterBean
 	 */
 	public final void init(FilterConfig filterConfig) throws ServletException {
-		logger.info("Initializing filter '" + filterConfig.getFilterName() + "'");
+		if (logger.isInfoEnabled()) {
+			logger.info("Initializing filter '" + filterConfig.getFilterName() + "'");
+		}
+
 		this.filterConfig = filterConfig;
 
-		// set bean properties
+		// Set bean properties from init parameters.
 		try {
 			PropertyValues pvs = new FilterConfigPropertyValues(filterConfig, this.requiredProperties);
 			BeanWrapper bw = new BeanWrapperImpl(this);
 			ResourceLoader resourceLoader = new ServletContextResourceLoader(filterConfig.getServletContext());
 			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
 			initBeanWrapper(bw);
-			bw.setPropertyValues(pvs);
+			bw.setPropertyValues(pvs, true);
 		}
 		catch (BeansException ex) {
 			String msg = "Failed to set bean properties on filter '" +
@@ -123,9 +136,12 @@ public abstract class GenericFilterBean implements Filter {
 			throw new ServletException(msg, ex);
 		}
 
-		// let subclasses do whatever initialization they like
+		// Let subclasses do whatever initialization they like.
 		initFilterBean();
-		logger.info("Filter '" + filterConfig.getFilterName() + "' configured successfully");
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Filter '" + filterConfig.getFilterName() + "' configured successfully");
+		}
 	}
 
 	/**
@@ -196,7 +212,7 @@ public abstract class GenericFilterBean implements Filter {
 		 * we can't accept default values
 		 * @throws ServletException if any required properties are missing
 		 */
-		private FilterConfigPropertyValues(FilterConfig config, Set requiredProperties)
+		public FilterConfigPropertyValues(FilterConfig config, Set requiredProperties)
 		    throws ServletException {
 
 			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?

@@ -67,6 +67,8 @@ public class DispatcherServletTests extends TestCase {
 		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
 		MockServletConfig complexConfig = new MockServletConfig(servletConfig.getServletContext(), "complex");
 		complexConfig.addInitParameter("publishContext", "false");
+		complexConfig.addInitParameter("class", "notWritable");
+		complexConfig.addInitParameter("unknownParam", "someValue");
 
 		simpleDispatcherServlet = new DispatcherServlet();
 		simpleDispatcherServlet.setContextClass(SimpleWebApplicationContext.class);
