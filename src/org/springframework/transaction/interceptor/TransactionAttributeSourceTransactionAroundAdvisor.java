@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
+import org.springframework.core.Ordered;
 
 /**
  * InterceptionAroundAdvisor driven by a TransactionAttributeSource.
@@ -19,9 +20,20 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  * @author Rod Johnson
- * @version $Id: TransactionAttributeSourceTransactionAroundAdvisor.java,v 1.2 2003-12-03 13:58:24 johnsonr Exp $
+ * @version $Id: TransactionAttributeSourceTransactionAroundAdvisor.java,v 1.3 2004-01-13 13:56:02 johnsonr Exp $
  */
-public class TransactionAttributeSourceTransactionAroundAdvisor extends StaticMethodMatcherPointcutAroundAdvisor {
+public class TransactionAttributeSourceTransactionAroundAdvisor extends StaticMethodMatcherPointcutAroundAdvisor implements Ordered {
+	
+	/**
+	 * Most advice will want to run within a transaction context,
+	 * so we set the order value to be quite high. Other advisors
+	 * can use a higher value than this if want to ensure that they
+	 * always run within a transaction context. 
+	 * <br>Order value applies only when ordering is not 
+	 * specified in configuration: for example,
+	 * it applies when using an AdvisorAutoProxyCreator.
+	 */
+	public static final int ORDER_VALUE = 10;
 	
 	private TransactionAttributeSource transactionAttributeSource;
 	
@@ -37,6 +49,13 @@ public class TransactionAttributeSourceTransactionAroundAdvisor extends StaticMe
 	 */
 	public boolean matches(Method m, Class targetClass) {
 		return transactionAttributeSource.getTransactionAttribute(m, targetClass) != null;
+	}
+
+	/**
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
+	public int getOrder() {
+		return ORDER_VALUE;
 	}
 
 }
