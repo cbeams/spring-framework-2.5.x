@@ -228,6 +228,10 @@
          <id>ant</id>
          <version>1.6</version>
       </dependency>
+      <dependency>
+         <id>junit</id>
+         <version>3.8.1</version>
+      </dependency>
 <!--
       <dependency>
          <groupId>avalon-framework</groupId>
