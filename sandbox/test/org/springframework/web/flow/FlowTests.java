@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.flow;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.flow.ActionBean;
-import org.springframework.web.flow.ActionBeanEvent;
-import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowDao;
-import org.springframework.web.flow.FlowLifecycleListener;
-import org.springframework.web.flow.FlowSessionExecutionStack;
-import org.springframework.web.flow.MutableAttributesAccessor;
-import org.springframework.web.flow.ViewDescriptor;
 
 /**
  * @author Keith Donald
@@ -37,132 +30,133 @@ import org.springframework.web.flow.ViewDescriptor;
  */
 public class FlowTests extends TestCase {
 
-    private static String PERSON_DETAILS = "personDetails";
+	private static String PERSON_DETAILS = "personDetails";
 
-    public void testCreateFlowWithListener() {
-        testCreateFlow(true);
-    }
+	public void testCreateFlowWithListener() {
+		testCreateFlow(true);
+	}
 
-    public void testCreateFlowWithoutListener() {
-        //test for npe's implementation if no listener is set
-        testCreateFlow(false);
-    }
+	public void testCreateFlowWithoutListener() {
+		//test for npe's implementation if no listener is set
+		testCreateFlow(false);
+	}
 
-    private void testCreateFlow(boolean listen) {
-        final String flowId = "testFlow";
+	private void testCreateFlow(boolean listen) {
+		final String flowId = "testFlow";
 
-        String viewPersonDetailsStateId = "personDetails.view";
-        String getPersonDetailsStateId = "personDetails.get";
-        String submitEventId = "submit";
-        String submitAction = "personDetails.bindAndValidate";
-        String finish = "finish";
+		String viewPersonDetailsStateId = "personDetails.view";
+		String getPersonDetailsStateId = "personDetails.get";
+		String submitEventId = "submit";
+		String submitAction = "personDetails.bindAndValidate";
+		String finish = "finish";
 
-        HttpServletRequest req1 = new MockHttpServletRequest();
-        HttpServletRequest req2 = new MockHttpServletRequest();
+		HttpServletRequest req1 = new MockHttpServletRequest();
+		HttpServletRequest req2 = new MockHttpServletRequest();
 
-        TestFlow flow = new TestFlow(flowId);
-        MockControl flowDaoMc = MockControl.createControl(FlowDao.class);
-        FlowDao dao = (FlowDao)flowDaoMc.getMock();
-        dao.getActionBean("personDetails.get");
-        flowDaoMc.setReturnValue(new NoOpActionBean("success"));
-        dao.getActionBean("personDetails.bindAndValidate");
-        flowDaoMc.setReturnValue(new NoOpActionBean("success"));
-        flowDaoMc.replay();
-        flow.setFlowDao(dao);
+		TestFlow flow = new TestFlow(flowId);
+		MockControl flowDaoMc = MockControl.createControl(FlowDao.class);
+		FlowDao dao = (FlowDao) flowDaoMc.getMock();
+		dao.getActionBean("personDetails.get");
+		flowDaoMc.setReturnValue(new NoOpActionBean("success"));
+		dao.getActionBean("personDetails.bindAndValidate");
+		flowDaoMc.setReturnValue(new NoOpActionBean("success"));
+		flowDaoMc.replay();
+		flow.setFlowDao(dao);
 
-        FlowSessionExecutionStack fes = new FlowSessionExecutionStack();
+		FlowSessionExecutionStack fes = new FlowSessionExecutionStack();
 
-        MockControl flowListenerMc = MockControl.createControl(FlowLifecycleListener.class);
-        FlowLifecycleListener mockListener = (FlowLifecycleListener)flowListenerMc.getMock();
+		MockControl flowListenerMc = MockControl.createControl(FlowLifecycleListener.class);
+		FlowLifecycleListener mockListener = (FlowLifecycleListener) flowListenerMc.getMock();
 
-        mockListener.flowStarted(flow, fes, req1);
-        flowListenerMc.setVoidCallable();
+		mockListener.flowStarted(flow, fes, req1);
+		flowListenerMc.setVoidCallable();
 
-        mockListener.flowStateTransitioned(flow, null, flow.getRequiredState(getPersonDetailsStateId), fes, req1);
-        flowListenerMc.setVoidCallable();
+		mockListener.flowStateTransitioned(flow, null, flow.getRequiredState(getPersonDetailsStateId), fes, req1);
+		flowListenerMc.setVoidCallable();
 
-        mockListener.flowStateTransitioned(flow, flow.getRequiredState(getPersonDetailsStateId), flow
-                .getRequiredState(viewPersonDetailsStateId), fes, req1);
-        flowListenerMc.setVoidCallable();
+		mockListener.flowStateTransitioned(flow, flow.getRequiredState(getPersonDetailsStateId), flow
+				.getRequiredState(viewPersonDetailsStateId), fes, req1);
+		flowListenerMc.setVoidCallable();
 
-        mockListener.flowEventSignaled(flow, submitEventId, flow.getRequiredState(viewPersonDetailsStateId), fes, req2);
-        flowListenerMc.setVoidCallable();
+		mockListener.flowEventSignaled(flow, submitEventId, flow.getRequiredState(viewPersonDetailsStateId), fes, req2);
+		flowListenerMc.setVoidCallable();
 
-        mockListener.flowStateTransitioned(flow, flow.getRequiredState(viewPersonDetailsStateId), flow
-                .getRequiredState(submitAction), fes, req2);
-        flowListenerMc.setVoidCallable();
+		mockListener.flowStateTransitioned(flow, flow.getRequiredState(viewPersonDetailsStateId), flow
+				.getRequiredState(submitAction), fes, req2);
+		flowListenerMc.setVoidCallable();
 
-        mockListener.flowStateTransitioned(flow, flow.getRequiredState(submitAction), flow.getRequiredState(finish),
-                fes, req2);
-        flowListenerMc.setVoidCallable();
+		mockListener.flowStateTransitioned(flow, flow.getRequiredState(submitAction), flow.getRequiredState(finish),
+				fes, req2);
+		flowListenerMc.setVoidCallable();
 
-        mockListener.flowEventProcessed(flow, submitEventId, null, fes, req2);
-        flowListenerMc.setVoidCallable();
+		mockListener.flowEventProcessed(flow, submitEventId, null, fes, req2);
+		flowListenerMc.setVoidCallable();
 
-        // NO WAY TO KNOW VALUE OF 2ND FLOW SESSION ARG AHEAD OF TIME AS ITS
-        // CREATED DURING RUN - what do I do here?
-        mockListener.flowEnded(flow, null, fes, req2);
-        flowListenerMc.setVoidCallable();
+		// NO WAY TO KNOW VALUE OF 2ND FLOW SESSION ARG AHEAD OF TIME AS ITS
+		// CREATED DURING RUN - what do I do here?
+		mockListener.flowEnded(flow, null, fes, req2);
+		flowListenerMc.setVoidCallable();
 
-        flowListenerMc.replay();
+		flowListenerMc.replay();
 
-        if (listen) {
-            flow.setFlowLifecycleListener(mockListener);
-        }
+		if (listen) {
+			flow.setFlowLifecycleListener(mockListener);
+		}
 
-        assertEquals(1, flow.getViewStateCount());
+		assertEquals(1, flow.getViewStateCount());
 
-        ViewDescriptor vdesc = flow.start(fes, req1, null, null);
+		ViewDescriptor vdesc = flow.start(fes, req1, null, null);
 
-        assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
-        assertEquals(0, vdesc.getModel().size());
+		assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
+		assertEquals(0, vdesc.getModel().size());
 
-        // ignoring now b/c this is failing on the above flowEnded() call that
-        // is currently untestable (that is indeed working correctly)
-        try {
-            vdesc = flow.execute(submitEventId, viewPersonDetailsStateId, fes, req2, null);
-            assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
-            assertEquals(0, vdesc.getModel().size());
+		// ignoring now b/c this is failing on the above flowEnded() call that
+		// is currently untestable (that is indeed working correctly)
+		try {
+			vdesc = flow.execute(submitEventId, viewPersonDetailsStateId, fes, req2, null);
+			assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
+			assertEquals(0, vdesc.getModel().size());
 
-            flowDaoMc.verify();
+			flowDaoMc.verify();
 
-            if (listen) {
-                flowListenerMc.verify();
-            }
-        }
-        catch (Throwable e) {
-        
-        }
-    }
+			if (listen) {
+				flowListenerMc.verify();
+			}
+		}
+		catch (Throwable e) {
 
-    private class TestFlow extends Flow {
+		}
+	}
 
-        public TestFlow(String id) {
-            super(id);
-        }
+	private class TestFlow extends Flow {
 
-        protected void initFlow() {
-            add(createGetState(PERSON_DETAILS));
-            add(createViewState(PERSON_DETAILS));
-            add(createBindAndValidateState(PERSON_DETAILS));
-            add(createFinishEndState("viewPersonDetails"));
-        }
-    };
+		public TestFlow(String id) {
+			super(id);
+		}
 
-    /**
-     * Does nothing, just returns "success"
-     */
-    private final class NoOpActionBean implements ActionBean {
-        private String retVal;
+		protected void initFlow() {
+			add(createGetState(PERSON_DETAILS));
+			add(createViewState(PERSON_DETAILS));
+			add(createBindAndValidateState(PERSON_DETAILS));
+			add(createFinishEndState("viewPersonDetails"));
+		}
+	};
 
-        public NoOpActionBean(String retVal) {
-            this.retVal = retVal;
-        }
+	/**
+	 * Does nothing, just returns "success"
+	 */
+	private final class NoOpActionBean implements ActionBean {
 
-        public ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
-                MutableAttributesAccessor attributes) throws RuntimeException {
-            return new ActionBeanEvent(this, retVal);
-        }
-    }
+		private String retVal;
+
+		public NoOpActionBean(String retVal) {
+			this.retVal = retVal;
+		}
+
+		public ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
+				MutableAttributesAccessor attributes) throws RuntimeException {
+			return new ActionBeanEvent(this, retVal);
+		}
+	}
 
 }

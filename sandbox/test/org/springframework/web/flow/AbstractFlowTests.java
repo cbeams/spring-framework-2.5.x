@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.flow;
 
 import java.util.Collection;
@@ -30,57 +31,57 @@ import org.springframework.web.util.SessionKeyUtils;
  */
 public abstract class AbstractFlowTests extends AbstractTransactionalSpringContextTests {
 
-    private Flow flow;
+	private Flow flow;
 
-    protected FlowSessionExecutionStack flowSessionExecutionStack;
+	protected FlowSessionExecutionStack flowSessionExecutionStack;
 
-    protected void setFlow(Flow flow) {
-        Assert.notNull(flow, "Flow is required for this test");
-        this.flow = flow;
-    }
+	protected void setFlow(Flow flow) {
+		Assert.notNull(flow, "Flow is required for this test");
+		this.flow = flow;
+	}
 
-    protected void assertModelAttributePresent(Map attributeMap, String attributeName) {
-        assertNotNull("The model attribute '" + attributeName + "' is not present", attributeMap.get(attributeName));
-    }
+	protected void assertModelAttributePresent(Map attributeMap, String attributeName) {
+		assertNotNull("The model attribute '" + attributeName + "' is not present", attributeMap.get(attributeName));
+	}
 
-    protected void assertModelAttributeInstanceOf(Map attributeMap, String attributeName, Class clazz) {
-        assertModelAttributePresent(attributeMap, attributeName);
-        Assert.isInstanceOf(clazz, attributeMap.get(attributeName));
-    }
+	protected void assertModelAttributeInstanceOf(Map attributeMap, String attributeName, Class clazz) {
+		assertModelAttributePresent(attributeMap, attributeName);
+		Assert.isInstanceOf(clazz, attributeMap.get(attributeName));
+	}
 
-    protected void assertModelAttributeEquals(Map attributeMap, String attributeName, Object attributeValue) {
-        if (attributeValue != null) {
-            assertModelAttributeInstanceOf(attributeMap, attributeName, attributeValue.getClass());
-        }
-        assertEquals("The model attribute '" + attributeName + "' must equal '" + attributeValue + "'", attributeValue,
-                attributeMap.get(attributeName));
-    }
+	protected void assertModelAttributeEquals(Map attributeMap, String attributeName, Object attributeValue) {
+		if (attributeValue != null) {
+			assertModelAttributeInstanceOf(attributeMap, attributeName, attributeValue.getClass());
+		}
+		assertEquals("The model attribute '" + attributeName + "' must equal '" + attributeValue + "'", attributeValue,
+				attributeMap.get(attributeName));
+	}
 
-    protected void assertModelCollectionAttributeSize(Map attributeMap, String attributeName, int size) {
-        assertModelAttributeInstanceOf(attributeMap, attributeName, Collection.class);
-        assertEquals("The model collection attribute '" + attributeName + "' must have " + size + " elements", size,
-                ((Collection)attributeMap.get(attributeName)).size());
-    }
+	protected void assertModelCollectionAttributeSize(Map attributeMap, String attributeName, int size) {
+		assertModelAttributeInstanceOf(attributeMap, attributeName, Collection.class);
+		assertEquals("The model collection attribute '" + attributeName + "' must have " + size + " elements", size,
+				((Collection) attributeMap.get(attributeName)).size());
+	}
 
-    protected void assertModelAttributePropertyEquals(Map attributeMap, String attributeName, String propertyName,
-            Object propertyValue) {
-        assertModelAttributePresent(attributeMap, attributeName);
-        Object value = attributeMap.get(attributeName);
-        Assert.isTrue(!BeanUtils.isSimpleProperty(value.getClass()), "Attribute value must be a bean");
-        BeanWrapper wrapper = new BeanWrapperImpl(value);
-        assertEquals(propertyValue, wrapper.getPropertyValue(propertyName));
-    }
+	protected void assertModelAttributePropertyEquals(Map attributeMap, String attributeName, String propertyName,
+			Object propertyValue) {
+		assertModelAttributePresent(attributeMap, attributeName);
+		Object value = attributeMap.get(attributeName);
+		Assert.isTrue(!BeanUtils.isSimpleProperty(value.getClass()), "Attribute value must be a bean");
+		BeanWrapper wrapper = new BeanWrapperImpl(value);
+		assertEquals(propertyValue, wrapper.getPropertyValue(propertyName));
+	}
 
-    protected String generateUniqueFlowSessionId(FlowSessionExecutionStack stack) {
-        return SessionKeyUtils.generateMD5SessionKey(String.valueOf(stack.hashCode()), true);
-    }
+	protected String generateUniqueFlowSessionId(FlowSessionExecutionStack stack) {
+		return SessionKeyUtils.generateMD5SessionKey(String.valueOf(stack.hashCode()), true);
+	}
 
-    protected FlowSessionExecutionStack createFlowSessionExecutionStack() {
-        return new FlowSessionExecutionStack();
-    }
+	protected FlowSessionExecutionStack createFlowSessionExecutionStack() {
+		return new FlowSessionExecutionStack();
+	}
 
-    protected FlowEventProcessor getEventProcessor() {
-        return flow;
-    }
+	protected FlowEventProcessor getEventProcessor() {
+		return flow;
+	}
 
 }
