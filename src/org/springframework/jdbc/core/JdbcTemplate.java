@@ -60,7 +60,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.6 2003-09-17 01:15:09 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.7 2003-09-24 13:41:02 beanie42 Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -74,12 +74,12 @@ public class JdbcTemplate implements InitializingBean {
 	 * will force the use of a JDBC PreparedStatement even if the SQL
 	 * passed in has no bind parameters.
 	 */
-	public static final PreparedStatementSetter PREPARE_STATEMENT = new PreparedStatementSetter() {
+	public static final PreparedStatementSetter PREPARE_STATEMENT =
+		new PreparedStatementSetter() {
 		public void setValues(PreparedStatement ps) throws SQLException {
-			// do nothing
-		}
+				// do nothing
+	}
 	};
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -97,7 +97,6 @@ public class JdbcTemplate implements InitializingBean {
 
 	/** If this variable is false, we will throw exceptions on SQL warnings */
 	private boolean ignoreWarnings = true;
-
 
 	/**
 	 * Construct a new JdbcTemplate for bean usage.
@@ -118,7 +117,6 @@ public class JdbcTemplate implements InitializingBean {
 		setDataSource(dataSource);
 		afterPropertiesSet();
 	}
-
 
 	/**
 	 * Set the JDBC DataSource to obtain connections from.
@@ -150,7 +148,11 @@ public class JdbcTemplate implements InitializingBean {
 	 */
 	public synchronized SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
-			this.exceptionTranslator = SQLExceptionTranslatorFactory.getInstance().getDefaultTranslator(this.dataSource);
+			this.exceptionTranslator =
+				SQLExceptionTranslatorFactory
+					.getInstance()
+					.getDefaultTranslator(
+					this.dataSource);
 		}
 		return this.exceptionTranslator;
 	}
@@ -201,7 +203,6 @@ public class JdbcTemplate implements InitializingBean {
 		getExceptionTranslator();
 	}
 
-
 	//-------------------------------------------------------------------------
 	// Public methods
 	//-------------------------------------------------------------------------
@@ -221,8 +222,11 @@ public class JdbcTemplate implements InitializingBean {
 	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
 	 * @see #PREPARE_STATEMENT
 	 */
-	public void query(String sql, RowCallbackHandler callbackHandler) throws DataAccessException {
-		doWithResultSetFromStaticQuery(sql, new RowCallbackHandlerResultSetExtractor(callbackHandler));
+	public void query(String sql, RowCallbackHandler callbackHandler)
+		throws DataAccessException {
+		doWithResultSetFromStaticQuery(
+			sql,
+			new RowCallbackHandlerResultSetExtractor(callbackHandler));
 	}
 
 	/**
@@ -235,11 +239,17 @@ public class JdbcTemplate implements InitializingBean {
 	 * @throws DataAccessException if there is any problem executing
 	 * the query
 	 */
-	public void doWithResultSetFromStaticQuery(String sql, ResultSetExtractor rse) throws DataAccessException {
+	public void doWithResultSetFromStaticQuery(
+		String sql,
+		ResultSetExtractor rse)
+		throws DataAccessException {
 		if (sql == null)
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
 		if (containsBindVariables(sql))
-			throw new InvalidDataAccessApiUsageException("Cannot execute '" + sql + "' as a static query: it contains bind variables");
+			throw new InvalidDataAccessApiUsageException(
+				"Cannot execute '"
+					+ sql
+					+ "' as a static query: it contains bind variables");
 
 		Connection con = null;
 		Statement stmt = null;
@@ -250,33 +260,34 @@ public class JdbcTemplate implements InitializingBean {
 			DataSourceUtils.applyTransactionTimeout(stmt, this.dataSource);
 
 			if (logger.isInfoEnabled())
-				logger.info("Executing static SQL query '" + sql + "' using a java.sql.Statement");
+				logger.info(
+					"Executing static SQL query '"
+						+ sql
+						+ "' using a java.sql.Statement");
 
 			rs = getQueryExecutor().executeQuery(stmt, sql);
 			rse.extractData(rs);
 
 			SQLWarning warning = stmt.getWarnings();
-			rs.close();
-			stmt.close();
-
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
-		}
-		catch (SQLException ex) {
+		} catch (SQLException ex) {
+			throw getExceptionTranslator().translate(
+				"JdbcTemplate.query(sql)",
+				sql,
+				ex);
+		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
+				} catch (SQLException ignore) {
 				}
-				catch (SQLException ignore) {}
 			}
 			if (stmt != null) {
 				try {
 					stmt.close();
+				} catch (SQLException ignore) {
 				}
-				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslator().translate("JdbcTemplate.query(sql)", sql, ex);
-		}
-		finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
 	}
@@ -289,8 +300,13 @@ public class JdbcTemplate implements InitializingBean {
 	 * one row at a time
 	 * @throws DataAccessException if there is any problem
 	 */
-	public void query(PreparedStatementCreator psc, RowCallbackHandler callbackHandler) throws DataAccessException {
-		doWithResultSetFromPreparedQuery(psc, new RowCallbackHandlerResultSetExtractor(callbackHandler));
+	public void query(
+		PreparedStatementCreator psc,
+		RowCallbackHandler callbackHandler)
+		throws DataAccessException {
+		doWithResultSetFromPreparedQuery(
+			psc,
+			new RowCallbackHandlerResultSetExtractor(callbackHandler));
 	}
 
 	/**
@@ -301,7 +317,10 @@ public class JdbcTemplate implements InitializingBean {
 	 * @param rse object that will extract results.
 	 * @throws DataAccessException if there is any problem
 	 */
-	public void doWithResultSetFromPreparedQuery(PreparedStatementCreator psc, ResultSetExtractor rse) throws DataAccessException {
+	public void doWithResultSetFromPreparedQuery(
+		PreparedStatementCreator psc,
+		ResultSetExtractor rse)
+		throws DataAccessException {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -310,32 +329,36 @@ public class JdbcTemplate implements InitializingBean {
 			ps = psc.createPreparedStatement(con);
 
 			if (logger.isInfoEnabled())
-				logger.info("Executing SQL query using PreparedStatement: [" + psc + "]");
+				logger.info(
+					"Executing SQL query using PreparedStatement: ["
+						+ psc
+						+ "]");
 
 			rs = getQueryExecutor().executeQuery(ps);
 			rse.extractData(rs);
 
 			SQLWarning warning = ps.getWarnings();
-			rs.close();
-			ps.close();
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
-		}
-		catch (SQLException ex) {
+		} catch (SQLException ex) {
+			throw getExceptionTranslator().translate(
+				"JdbcTemplate.query(psc) with PreparedStatementCreator ["
+					+ psc
+					+ "]",
+				null,
+				ex);
+		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
+				} catch (SQLException ignore) {
 				}
-				catch (SQLException ignore) {}
 			}
 			if (ps != null) {
 				try {
 					ps.close();
+				} catch (SQLException ignore) {
 				}
-				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslator().translate("JdbcTemplate.query(psc) with PreparedStatementCreator [" + psc + "]", null, ex);
-		}
-		finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
 	}
@@ -352,20 +375,27 @@ public class JdbcTemplate implements InitializingBean {
 	 * @param callbackHandler object that will extract results
 	 * @throws DataAccessException if the query fails
 	 */
-	public void query(final String sql, final PreparedStatementSetter pss, RowCallbackHandler callbackHandler) throws DataAccessException {
+	public void query(
+		final String sql,
+		final PreparedStatementSetter pss,
+		RowCallbackHandler callbackHandler)
+		throws DataAccessException {
 		if (sql == null)
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
 
 		if (pss == null) {
 			// Check there are no bind parameters, in which case pss could not be null
 			if (containsBindVariables(sql))
-				throw new InvalidDataAccessApiUsageException("SQL '" + sql + "' requires at least one bind variable, but PreparedStatementSetter parameter was null");
+				throw new InvalidDataAccessApiUsageException(
+					"SQL '"
+						+ sql
+						+ "' requires at least one bind variable, but PreparedStatementSetter parameter was null");
 			query(sql, callbackHandler);
-		}
-		else {
+		} else {
 			// Wrap it in a new PreparedStatementCreator
 			query(new PreparedStatementCreator() {
-				public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
+				public PreparedStatement createPreparedStatement(Connection conn)
+					throws SQLException {
 					PreparedStatement ps = conn.prepareStatement(sql);
 					DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 					pss.setValues(ps);
@@ -393,7 +423,8 @@ public class JdbcTemplate implements InitializingBean {
 			logger.info("Running SQL update '" + sql + "'");
 
 		return update(new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
+			public PreparedStatement createPreparedStatement(Connection conn)
+				throws SQLException {
 				PreparedStatement ps = conn.prepareStatement(sql);
 				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 				return ps;
@@ -408,8 +439,9 @@ public class JdbcTemplate implements InitializingBean {
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	public int update(PreparedStatementCreator psc) throws DataAccessException {
-		return update(new PreparedStatementCreator[]{psc})[0];
+	public int update(PreparedStatementCreator psc)
+		throws DataAccessException {
+		return update(new PreparedStatementCreator[] { psc })[0];
 	}
 
 	/**
@@ -419,7 +451,8 @@ public class JdbcTemplate implements InitializingBean {
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	public int[] update(PreparedStatementCreator[] pscs) throws DataAccessException {
+	public int[] update(PreparedStatementCreator[] pscs)
+		throws DataAccessException {
 		Connection con = null;
 		PreparedStatement ps = null;
 		int index = 0;
@@ -428,29 +461,41 @@ public class JdbcTemplate implements InitializingBean {
 			int[] retvals = new int[pscs.length];
 			for (index = 0; index < retvals.length; index++) {
 				ps = pscs[index].createPreparedStatement(con);
-				if(logger.isInfoEnabled())
-					logger.info("Executing SQL update using PreparedStatement: [" + pscs[index] + "]");
+				if (logger.isInfoEnabled())
+					logger.info(
+						"Executing SQL update using PreparedStatement: ["
+							+ pscs[index]
+							+ "]");
 				retvals[index] = ps.executeUpdate();
 				if (logger.isInfoEnabled())
-					logger.info("JDBCTemplate: update affected " + retvals[index] + " rows");
+					logger.info(
+						"JDBCTemplate: update affected "
+							+ retvals[index]
+							+ " rows");
 				ps.close();
 			}
 
 			// Don't worry about warnings, as we're more likely to get exception on updates
 			// (for example on data truncation)
 			return retvals;
-		}
-		catch (SQLException ex) {
+		} catch (SQLException ex) {
 			if (ps != null) {
 				try {
 					ps.close();
+				} catch (SQLException ignore) {
 				}
-				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslator().translate("processing update " +
-			                                         (index + 1) + " of " + pscs.length + "; update was [" + pscs[index] + "]", null, ex);
-		}
-		finally {
+			throw getExceptionTranslator().translate(
+				"processing update "
+					+ (index + 1)
+					+ " of "
+					+ pscs.length
+					+ "; update was ["
+					+ pscs[index]
+					+ "]",
+				null,
+				ex);
+		} finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
 	}
@@ -466,13 +511,15 @@ public class JdbcTemplate implements InitializingBean {
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	public int update(final String sql, final PreparedStatementSetter pss) throws DataAccessException {
+	public int update(final String sql, final PreparedStatementSetter pss)
+		throws DataAccessException {
 		if (pss == null) {
 			return update(sql);
 		}
 
 		return update(new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
+			public PreparedStatement createPreparedStatement(Connection conn)
+				throws SQLException {
 				PreparedStatement ps = conn.prepareStatement(sql);
 				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 				pss.setValues(ps);
@@ -491,7 +538,8 @@ public class JdbcTemplate implements InitializingBean {
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	public int[] batchUpdate(String sql, BatchPreparedStatementSetter setter) throws DataAccessException {
+	public int[] batchUpdate(String sql, BatchPreparedStatementSetter setter)
+		throws DataAccessException {
 		Connection con = null;
 		PreparedStatement ps = null;
 		try {
@@ -508,18 +556,23 @@ public class JdbcTemplate implements InitializingBean {
 
 			ps.close();
 			return retvals;
-		}
-		catch (SQLException ex) {
+		} catch (SQLException ex) {
 			if (ps != null) {
 				try {
 					ps.close();
+				} catch (SQLException ignore) {
 				}
-				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslator().translate("processing batch update " +
-			                                         " with size=" + setter.getBatchSize() + "; update was [" + sql + "]", sql, ex);
-		}
-		finally {
+			throw getExceptionTranslator().translate(
+				"processing batch update "
+					+ " with size="
+					+ setter.getBatchSize()
+					+ "; update was ["
+					+ sql
+					+ "]",
+				sql,
+				ex);
+		} finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
 	}
@@ -531,33 +584,35 @@ public class JdbcTemplate implements InitializingBean {
 	 * @return Map of extracted out parameters
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	public Map execute(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
+	public Map execute(CallableStatementCreator csc, List declaredParameters)
+		throws DataAccessException {
 		Connection con = null;
 		CallableStatement cs = null;
 		try {
 			con = DataSourceUtils.getConnection(this.dataSource);
 			cs = csc.createCallableStatement(con);
-			if(logger.isInfoEnabled())
-				logger.info("Executing call using CallableStatement: [" + cs + "]");
+			if (logger.isInfoEnabled())
+				logger.info(
+					"Executing call using CallableStatement: [" + cs + "]");
 			boolean retval = cs.execute();
 			if (logger.isInfoEnabled())
 				logger.info("JDBCTemplate: execute returned " + retval);
 			if (retval)
 				extractReturnedResultSets(cs, declaredParameters);
 			Map retMap = extractOutputParameters(cs, declaredParameters);
-			cs.close();
 			return retMap;
-		}
-		catch (SQLException ex) {
+		} catch (SQLException ex) {
+			throw getExceptionTranslator().translate(
+				"JdbcTemplate.execute()",
+				cs.toString(),
+				ex);
+		} finally {
 			if (cs != null) {
 				try {
 					cs.close();
+				} catch (SQLException ignore) {
 				}
-				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslator().translate("JdbcTemplate.execute()", cs.toString(), ex);
-		}
-		finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
 	}
@@ -568,7 +623,8 @@ public class JdbcTemplate implements InitializingBean {
 	 * @param list Parameter list for the stored procedure
 	 * @return parameters to the stored procedure
 	 */
-	private Map extractOutputParameters(CallableStatement cs, List parameters) throws SQLException {
+	private Map extractOutputParameters(CallableStatement cs, List parameters)
+		throws SQLException {
 		Map outParams = new HashMap();
 		int sqlColIndx = 1;
 		for (int i = 0; i < parameters.size(); i++) {
@@ -580,26 +636,30 @@ public class JdbcTemplate implements InitializingBean {
 					// We can't pass back a resultset since the connection will be closed - we must process it
 					try {
 						if (((SqlOutParameter) p).isResultSetSupported()) {
-							new RowCallbackHandlerResultSetExtractor(((SqlOutParameter) p).getRowCallbackHandler()).extractData((ResultSet)out);
-							logger.info("JDBCTemplate: ResultSet returned from stored procedure was processed");
+							new RowCallbackHandlerResultSetExtractor(
+								((SqlOutParameter) p)
+									.getRowCallbackHandler())
+									.extractData(
+								(ResultSet) out);
+							logger.info(
+								"JDBCTemplate: ResultSet returned from stored procedure was processed");
 							outParams.put(p.getName(), "ResultSet processed.");
+						} else {
+							logger.warn(
+								"JDBCTemplate: ResultSet returned from stored procedure but a corresponding SqlOutParameter with a RowCallbackHandler was not declared");
+							outParams.put(
+								p.getName(),
+								"ResultSet was returned but not processed.");
 						}
-						else {
-							logger.warn("JDBCTemplate: ResultSet returned from stored procedure but a corresponding SqlOutParameter with a RowCallbackHandler was not declared");
-							outParams.put(p.getName(), "ResultSet was returned but not processed.");
-						}
-					}
-					catch (SQLException se) {
+					} catch (SQLException se) {
 						throw se;
-					}
-					finally {
+					} finally {
 						try {
 							((ResultSet) out).close();
+						} catch (SQLException ignore) {
 						}
-						catch (SQLException ignore) {}
 					}
-				}
-				else {
+				} else {
 					outParams.put(p.getName(), out);
 				}
 			}
@@ -615,7 +675,10 @@ public class JdbcTemplate implements InitializingBean {
 	 * @param call JDBC wrapper for the stored procedure
 	 * @param list Parameter list for the stored procedure
 	 */
-	private void extractReturnedResultSets(CallableStatement cs, List parameters) throws SQLException {
+	private void extractReturnedResultSets(
+		CallableStatement cs,
+		List parameters)
+		throws SQLException {
 		int rsIndx = 0;
 		do {
 			SqlParameter p = null;
@@ -625,20 +688,22 @@ public class JdbcTemplate implements InitializingBean {
 				ResultSet rs = null;
 				rs = cs.getResultSet();
 				try {
-					new RowCallbackHandlerResultSetExtractor(((SqlReturnResultSet) p).getRowCallbackHandler()).extractData(rs);
-				}
-				catch (SQLException se) {
+					new RowCallbackHandlerResultSetExtractor(
+						((SqlReturnResultSet) p)
+							.getRowCallbackHandler())
+							.extractData(
+						rs);
+				} catch (SQLException se) {
 					throw se;
-				}
-				finally {
+				} finally {
 					try {
 						rs.close();
+					} catch (SQLException ignore) {
 					}
-					catch (SQLException ignore) {}
 				}
-			}
-			else {
-				logger.warn("JDBCTemplate: ResultSet returned from stored procedure but a corresponding SqlReturnResultSet parameter was not declared");
+			} else {
+				logger.warn(
+					"JDBCTemplate: ResultSet returned from stored procedure but a corresponding SqlReturnResultSet parameter was not declared");
 			}
 			rsIndx++;
 		} while (cs.getMoreResults());
@@ -650,17 +715,16 @@ public class JdbcTemplate implements InitializingBean {
 	 * @param warning warning from current statement. May be null,
 	 * in which case this method does nothing.
 	 */
-	private void throwExceptionOnWarningIfNotIgnoringWarnings(SQLWarning warning) throws SQLWarningException {
+	private void throwExceptionOnWarningIfNotIgnoringWarnings(SQLWarning warning)
+		throws SQLWarningException {
 		if (warning != null) {
 			if (this.ignoreWarnings) {
 				logger.warn("SQLWarning ignored: " + warning);
-			}
-			else {
+			} else {
 				throw new SQLWarningException("Warning not ignored", warning);
 			}
 		}
 	}
-
 
 	/**
 	 * Default implementation of the QueryExecutor interface.
@@ -668,15 +732,16 @@ public class JdbcTemplate implements InitializingBean {
 	 */
 	private static final class DefaultQueryExecutor implements QueryExecutor {
 
-		public ResultSet executeQuery(Statement stmt, String sql) throws SQLException {
+		public ResultSet executeQuery(Statement stmt, String sql)
+			throws SQLException {
 			return stmt.executeQuery(sql);
 		}
 
-		public ResultSet executeQuery(PreparedStatement ps) throws SQLException {
+		public ResultSet executeQuery(PreparedStatement ps)
+			throws SQLException {
 			return ps.executeQuery();
 		}
 	}
-
 
 	/**
 	 * Adapter to enable use of a RowCallbackHandler inside a
@@ -684,7 +749,8 @@ public class JdbcTemplate implements InitializingBean {
 	 * to be careful when using it, so we don't use it for navigating
 	 * since this could lead to unpreditable consequences.
 	 */
-	private static final class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
+	private static final class RowCallbackHandlerResultSetExtractor
+		implements ResultSetExtractor {
 
 		/**
 		 * RowCallbackHandler to use to extract data
