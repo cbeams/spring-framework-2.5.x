@@ -31,15 +31,15 @@ import org.springframework.web.servlet.ModelAndView;
  * models. Set the <code>FlowAttributesMapper</code> interface definition for
  * how to do this.
  * 
- * @see org.springframework.web.flow.FlowAttributesMapper
+ * @see org.springframework.web.flow.FlowModelMapper
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class SubFlowState extends TransitionableState implements FlowAttributesMapper {
+public class SubFlowState extends TransitionableState implements FlowModelMapper {
 
 	private Flow subFlow;
 
-	private FlowAttributesMapper flowAttributesMapper;
+	private FlowModelMapper flowAttributesMapper;
 
 	/**
 	 * Create a new sub flow state.
@@ -77,7 +77,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
-	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition)
+	public SubFlowState(Flow flow, String id, Flow subFlow, FlowModelMapper attributesMapper, Transition transition)
 			throws IllegalArgumentException {
 		this(flow, id, subFlow, attributesMapper, new Transition[] { transition });
 	}
@@ -92,7 +92,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
-	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributesMapper attributesMapper,
+	public SubFlowState(Flow flow, String id, Flow subFlow, FlowModelMapper attributesMapper,
 			Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
 		setSubFlow(subFlow);
@@ -119,7 +119,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 *        between parent and sub flow model. Can be null if no mapper is
 	 *        needed.
 	 */
-	protected void setFlowAttributesMapper(FlowAttributesMapper attributesMapper) {
+	protected void setFlowAttributesMapper(FlowModelMapper attributesMapper) {
 		this.flowAttributesMapper = attributesMapper;
 	}
 
@@ -127,7 +127,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 * @return The attributes mapper used to map data between parent and sub
 	 *         flow model, or null if no mapping is done
 	 */
-	public FlowAttributesMapper getFlowAttributesMapper() {
+	public FlowModelMapper getFlowAttributesMapper() {
 		return this.flowAttributesMapper;
 	}
 

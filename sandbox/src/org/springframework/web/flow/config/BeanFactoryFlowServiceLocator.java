@@ -22,7 +22,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowAttributesMapper;
+import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
 
@@ -140,26 +140,26 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)
+	public FlowModelMapper getFlowAttributesMapper(String flowAttributesMapperId)
 			throws ServiceLookupException {
 		try {
-			return (FlowAttributesMapper)getBeanFactory().getBean(flowAttributesMapperId, FlowAttributesMapper.class);
+			return (FlowModelMapper)getBeanFactory().getBean(flowAttributesMapperId, FlowModelMapper.class);
 		}
 		catch (BeansException e) {
 			throw new NoSuchFlowAttributesMapperException(flowAttributesMapperId, e);
 		}
 	}
 
-	public FlowAttributesMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
+	public FlowModelMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
 			throws ServiceLookupException {
-		if (!FlowAttributesMapper.class.isAssignableFrom(flowAttributesMapperImplementationClass)) {
+		if (!FlowModelMapper.class.isAssignableFrom(flowAttributesMapperImplementationClass)) {
 			throw new IllegalArgumentException("Your attributes mapper implementation '"
 					+ flowAttributesMapperImplementationClass + "' must implement the '"
-					+ FlowAttributesMapper.class.getName() + "' interface");
+					+ FlowModelMapper.class.getName() + "' interface");
 
 		}
 		try {
-			return (FlowAttributesMapper)BeanFactoryUtils.beanOfType(getListableBeanFactory(),
+			return (FlowModelMapper)BeanFactoryUtils.beanOfType(getListableBeanFactory(),
 					flowAttributesMapperImplementationClass);
 		}
 		catch (BeansException e) {

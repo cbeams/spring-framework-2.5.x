@@ -14,7 +14,7 @@ import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowAttributesMapper;
+import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
@@ -54,10 +54,10 @@ public class XmlFlowBuilderTests extends TestCase {
 				throw new NoSuchFlowDefinitionException(flowDefinitionId);
 			}
 
-			public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)
+			public FlowModelMapper getFlowAttributesMapper(String flowAttributesMapperId)
 					throws ServiceLookupException {
 				if ("attribMapper1".equals(flowAttributesMapperId)) {
-					return new FlowAttributesMapper() {
+					return new FlowModelMapper() {
 						public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 							return new HashMap();
 						}

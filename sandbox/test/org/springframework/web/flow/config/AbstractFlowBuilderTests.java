@@ -28,7 +28,7 @@ import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowAttributesMapper;
+import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
@@ -64,7 +64,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 				}
 			}
 
-			public FlowAttributesMapper getFlowAttributesMapper(String id) throws ServiceLookupException {
+			public FlowModelMapper getFlowAttributesMapper(String id) throws ServiceLookupException {
 				if (id.equals("personId.attributesMapper")) {
 					return new PersonIdMapper();
 				}
@@ -155,7 +155,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 	}
 
-	public static class PersonIdMapper implements FlowAttributesMapper {
+	public static class PersonIdMapper implements FlowModelMapper {
 		public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 			Map inputMap = new HashMap(1);
 			inputMap.put("personId", parentFlowModel.getAttribute("personId"));

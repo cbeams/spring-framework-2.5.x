@@ -156,7 +156,7 @@ public class StateTests extends TestCase {
 		assertEquals("attributeValue", view.getModel().get("parentOutputAttribute"));
 	}
 
-	public static class InputOutputMapper implements FlowAttributesMapper {
+	public static class InputOutputMapper implements FlowModelMapper {
 		public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 			Map inputMap = new HashMap(1);
 			inputMap.put("childInputAttribute", parentFlowModel.getAttribute("parentInputAttribute"));

@@ -31,7 +31,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.Assert;
 import org.springframework.util.closure.Constraint;
 import org.springframework.web.flow.FlowModel;
-import org.springframework.web.flow.FlowAttributesMapper;
+import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.MutableFlowModel;
 
 /**
@@ -88,7 +88,7 @@ import org.springframework.web.flow.MutableFlowModel;
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper, Serializable {
+public class ParameterizableFlowAttributesMapper implements FlowModelMapper, Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());;
 

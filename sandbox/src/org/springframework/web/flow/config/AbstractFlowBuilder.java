@@ -22,7 +22,7 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowAttributesMapper;
+import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.SubFlowState;
@@ -227,7 +227,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        sub flow ends (this assumes you always transition to the same
 	 *        state regardless of which EndState is reached in the subflow)
 	 */
-	protected void addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
+	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper attributesMapper,
 			String subFlowDefaultFinishStateId) {
 		addSubFlowState(id, subFlow, attributesMapper, new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
@@ -250,7 +250,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        state regardless of which EndState is reached in the subflow)
 	 */
 	protected void addSubFlowState(String id, Class subFlowBuilderImplementation,
-			FlowAttributesMapper attributesMapper, String subFlowDefaultFinishStateId) {
+			FlowModelMapper attributesMapper, String subFlowDefaultFinishStateId) {
 		addSubFlowState(id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper,
 				new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
@@ -281,7 +281,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        the the flow built by this builder and the sub flow
 	 * @param transitions The eligible set of state transitions
 	 */
-	protected void addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
+	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper attributesMapper,
 			Transition[] transitions) {
 		new SubFlowState(getFlow(), id, subFlow, attributesMapper, transitions);
 	}
@@ -303,7 +303,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param transitions The eligible set of state transitions
 	 */
 	protected void addSubFlowState(String id, Class subFlowBuilderImplementation,
-			FlowAttributesMapper attributesMapper, Transition[] transitions) {
+			FlowModelMapper attributesMapper, Transition[] transitions) {
 		new SubFlowState(getFlow(), id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper, transitions);
 	}
 
@@ -402,7 +402,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param attributesMapperIdPrefix The attribute mapper prefix
 	 * @return The attributes mapper
 	 */
-	protected FlowAttributesMapper useAttributesMapper(String attributesMapperIdPrefix)
+	protected FlowModelMapper useAttributesMapper(String attributesMapperIdPrefix)
 			throws NoSuchFlowAttributesMapperException {
 		if (!StringUtils.hasText(attributesMapperIdPrefix)) {
 			return null;
@@ -417,7 +417,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param flowAttributesMapperImplementationClass
 	 * @return The attributes mapper
 	 */
-	protected FlowAttributesMapper useAttributesMapper(Class flowAttributesMapperImplementationClass)
+	protected FlowModelMapper useAttributesMapper(Class flowAttributesMapperImplementationClass)
 			throws NoSuchFlowAttributesMapperException {
 		return getFlowServiceLocator().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
 	}
