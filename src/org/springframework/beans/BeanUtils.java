@@ -1,3 +1,8 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+ 
 package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
@@ -11,6 +16,7 @@ import java.util.List;
  * Provides e.g. methods for sorting lists of beans by any property.
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @version $Id: BeanUtils.java,v 1.7 2003-11-18 17:04:15 johnsonr Exp $
  */
 public abstract class BeanUtils {
 
@@ -26,10 +32,10 @@ public abstract class BeanUtils {
 			return clazz.newInstance();
 		}
 		catch (InstantiationException ex) {
-			throw new FatalBeanException("Could not instantiate [" + clazz + "]; is it an interface or an abstract class?", ex);
+			throw new FatalBeanException("Could not instantiate [" + clazz + "]; Is it an interface or an abstract class? Does it have a no-arg constructor?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not instantiate [" + clazz + "]; has class definition changed? Is there a public constructor?", ex);
+			throw new FatalBeanException("Could not instantiate [" + clazz + "]; has class definition changed? Is there a public no-arg constructor?", ex);
 		}
 	}
 
