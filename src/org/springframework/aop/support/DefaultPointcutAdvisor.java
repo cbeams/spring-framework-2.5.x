@@ -12,7 +12,7 @@ import org.springframework.aop.PointcutAdvisor;
  * Convenient superclass for pointcut-driven advisors, implementing
  * the getPointcut() and isPerInstance() methods.
  * @author Rod Johnson
- * @version $Id: DefaultPointcutAdvisor.java,v 1.1 2004-02-22 09:48:24 johnsonr Exp $
+ * @version $Id: DefaultPointcutAdvisor.java,v 1.2 2004-02-22 10:25:06 johnsonr Exp $
  */
 public class DefaultPointcutAdvisor implements PointcutAdvisor {
 	
@@ -66,6 +66,10 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor {
 		DefaultPointcutAdvisor other = (DefaultPointcutAdvisor) o;
 		return other.advice.equals(this.advice) && 
 			other.pointcut.equals(this.pointcut);
+	}
+	
+	public String toString() {
+		return "DefaultPointcutAdvisor: pointcut=[" + pointcut + "] advice=[" + advice + "]";
 	}
 
 }
