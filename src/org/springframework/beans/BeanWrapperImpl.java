@@ -10,7 +10,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
-import java.beans.PropertyVetoException;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -62,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.22 2004-01-29 23:26:54 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.23 2004-02-02 11:33:34 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -163,8 +162,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws BeansException if the object cannot be changed
 	 */
 	public void setWrappedInstance(Object object) throws BeansException {
-		if (object == null)
-			throw new FatalBeanException("Cannot set BeanWrapperImpl target to a null object", null);
+		if (object == null) {
+			throw new FatalBeanException("Cannot set BeanWrapperImpl target to a null object");
+		}
 		this.object = object;
 		if (this.cachedIntrospectionResults == null ||
 		    !this.cachedIntrospectionResults.getBeanClass().equals(object.getClass())) {
@@ -492,21 +492,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	public void setPropertyValue(String propertyName, Object value) throws PropertyVetoException, BeansException {
-		setPropertyValue(new PropertyValue(propertyName, value));
-	}
-
-	/**
-	 * Set an individual field. All other setters go through this.
-	 * @param pv property value to use for update
-	 * @throws PropertyVetoException if a listeners throws a JavaBeans API veto
-	 * @throws BeansException if there's a low-level, fatal error
-	 */
-	public void setPropertyValue(PropertyValue pv) throws PropertyVetoException, BeansException {
-		if (isNestedProperty(pv.getName())) {
+	public void setPropertyValue(String propertyName, Object value) throws BeansException {
+		if (isNestedProperty(propertyName)) {
 			try {
-				BeanWrapper nestedBw = getBeanWrapperForPropertyPath(pv.getName());
-				nestedBw.setPropertyValue(new PropertyValue(getFinalPath(pv.getName()), pv.getValue()));
+				BeanWrapper nestedBw = getBeanWrapperForPropertyPath(propertyName);
+				nestedBw.setPropertyValue(new PropertyValue(getFinalPath(propertyName), value));
 				return;
 			}
 			catch (NullValueInNestedPathException ex) {
@@ -515,24 +505,24 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			catch (FatalBeanException ex) {
 				// error in the nested path
-				throw new NotWritablePropertyException(pv.getName(), getWrappedClass());
+				throw new NotWritablePropertyException(propertyName, getWrappedClass());
 			}
 		}
 
-		if (!isWritableProperty(pv.getName())) {
-			throw new NotWritablePropertyException(pv.getName(), getWrappedClass());
+		if (!isWritableProperty(propertyName)) {
+			throw new NotWritablePropertyException(propertyName, getWrappedClass());
 		}
-		PropertyDescriptor pd = getPropertyDescriptor(pv.getName());
+		PropertyDescriptor pd = getPropertyDescriptor(propertyName);
 		Method writeMethod = pd.getWriteMethod();
 		Object newValue = null;
 
 		try {
 			// old value may still be null
-			newValue = doTypeConversionIfNecessary(pv.getName(), null, pv.getValue(), pd.getPropertyType());
+			newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, pd.getPropertyType());
 
 			if (pd.getPropertyType().isPrimitive() &&
 					(newValue == null || "".equals(newValue))) {
-				throw new IllegalArgumentException("Invalid value [" + pv.getValue() + "] for property '" +
+				throw new IllegalArgumentException("Invalid value [" + value + "] for property '" +
 							pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
 			}
 
@@ -540,7 +530,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				logger.debug("About to invoke write method [" + writeMethod +
 				             "] on object of class [" + object.getClass().getName() + "]");
 			}
-			
+
 			writeMethod.invoke(this.object, new Object[] { newValue });
 			if (logger.isDebugEnabled()) {
 				String msg = "Invoked write method [" + writeMethod + "] with value ";
@@ -554,15 +544,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 		}
 		catch (InvocationTargetException ex) {
-			// Create this lazily
 			// TODO could consider getting rid of PropertyChangeEvents as exception parameters
 			// as they can never contain anything but null for the old value as we no longer
-			// support event propagation
-			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + pv.getName(), null, newValue);
-			if (ex.getTargetException() instanceof PropertyVetoException) {
-				throw (PropertyVetoException) ex.getTargetException();
-			}
-			else if (ex.getTargetException() instanceof ClassCastException) {
+			// support event propagation.
+			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
+																																				null, newValue);
+			if (ex.getTargetException() instanceof ClassCastException) {
 				throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
 			}
 			else {
@@ -570,12 +557,17 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to set property [" + pv + "] threw exception", ex);
+			throw new FatalBeanException("Illegal attempt to set property [" + value + "] threw exception", ex);
 		}
 		catch (IllegalArgumentException ex) {
-			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + pv.getName(), null, newValue);
+			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
+																																				null, newValue);
 			throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
 		}
+	}
+
+	public void setPropertyValue(PropertyValue pv) throws BeansException {
+		setPropertyValue(pv.getName(), pv.getValue());
 	}
 
 	/**
@@ -596,39 +588,36 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	public void setPropertyValues(PropertyValues propertyValues, boolean ignoreUnknown) throws BeansException {
 		// Create only if needed
-		PropertyVetoExceptionsException propertyVetoExceptionsException = new PropertyVetoExceptionsException(this);
+		PropertyAccessExceptionsException propertyVetoExceptionsException = new PropertyAccessExceptionsException(this);
 
 		PropertyValue[] pvs = propertyValues.getPropertyValues();
 		for (int i = 0; i < pvs.length; i++) {
 			try {
 				// This method may throw ReflectionException, which won't be caught
 				// here, if there is a critical failure such as no matching field.
-				// We can attempt to deal only with less serious exceptions
+				// We can attempt to deal only with less serious exceptions.
 				setPropertyValue(pvs[i]);
 			}
-					// Fatal ReflectionExceptions will just be rethrown
+			// fatal ReflectionExceptions will just be rethrown
 			catch (NotWritablePropertyException ex) {
-				if (!ignoreUnknown)
+				if (!ignoreUnknown) {
 					throw ex;
-				// Otherwise, just ignore it and continue...
-			}
-			catch (PropertyVetoException ex) {
-				propertyVetoExceptionsException.addPropertyVetoException(ex);
+				}
+				// otherwise, just ignore it and continue...
 			}
 			catch (TypeMismatchException ex) {
-				propertyVetoExceptionsException.addTypeMismatchException(ex);
+				propertyVetoExceptionsException.addPropertyAccessException(ex);
 			}
 			catch (MethodInvocationException ex) {
-				propertyVetoExceptionsException.addMethodInvocationException(ex);
+				propertyVetoExceptionsException.addPropertyAccessException(ex);
 			}
 		}
 
-		// If we encountered individual exceptions, throw the composite exception
+		// if we encountered individual exceptions, throw the composite exception
 		if (propertyVetoExceptionsException.getExceptionCount() > 0) {
 			throw propertyVetoExceptionsException;
 		}
 	}
-
 
 	private PropertyChangeEvent createPropertyChangeEvent(String propertyName, Object oldValue, Object newValue)
 			throws BeansException {
@@ -643,70 +632,98 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * the PropertyEditor class. Note that a PropertyEditor must be registered
 	 * for this class for this to work. This is a standard Java Beans API.
 	 * A number of property editors are automatically registered by this class.
-	 * @param propertyName name of the property
-	 * @param oldValue previous value, if available. May be null.
 	 * @param newValue proposed change value.
 	 * @param requiredType type we must convert to
 	 * @throws BeansException if there is an internal error
-	 * @return new value, possibly the result of type convertion.
+	 * @return new value, possibly the result of type convertion
 	 */
-	public Object doTypeConversionIfNecessary(String propertyName, Object oldValue, Object newValue,
-																						Class requiredType) throws BeansException {
-		if (newValue instanceof List && requiredType.isArray()) {
-			List list = (List) newValue;
+	public Object doTypeConversionIfNecessary(Object newValue, Class requiredType) throws BeansException {
+		return doTypeConversionIfNecessary(null, null, null, newValue, requiredType);
+	}
+
+	/**
+	 * Convert the value to the required type (if necessary from a String),
+	 * for the specified property.
+	 * @param propertyName name of the property
+	 * @param oldValue previous value, if available (may be null)
+	 * @param newValue proposed change value.
+	 * @param requiredType type we must convert to
+	 * @throws BeansException if there is an internal error
+	 * @return new value, possibly the result of type convertion
+	 */
+	protected Object doTypeConversionIfNecessary(String propertyName, String propertyDescriptor,
+																							 Object oldValue, Object newValue,
+																							 Class requiredType) throws BeansException {
+
+		if (requiredType.isArray()) {
+			// convert individual elements to array elements
 			Class componentType = requiredType.getComponentType();
-			try {
-				Object[] arr = (Object[]) Array.newInstance(componentType, list.size());
+			if (newValue instanceof List) {
+				List list = (List) newValue;
+				Object[] result = (Object[]) Array.newInstance(componentType, list.size());
 				for (int i = 0; i < list.size(); i++) {
-					arr[i] = doTypeConversionIfNecessary(propertyName, null, list.get(i), componentType);
+					result[i] = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
+																									null, list.get(i), componentType);
 				}
-				return arr;
+				return result;
 			}
-			catch (ArrayStoreException ex) {
-				throw new TypeMismatchException(createPropertyChangeEvent(propertyName, oldValue, newValue), requiredType, ex);
+			else if (newValue instanceof Object[]) {
+				Object[] array = (Object[]) newValue;
+				Object[] result = (Object[]) Array.newInstance(componentType, array.length);
+				for (int i = 0; i < array.length; i++) {
+					result[i] = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
+																									null, array[i], componentType);
+				}
+				return result;
 			}
 		}
 
-		else if (newValue != null) {
-			// Custom editor for this type?
+		if (newValue != null) {
+			// custom editor for this type?
 			PropertyEditor pe = findCustomEditor(requiredType, propertyName);
-			// Value not of required type?
-			if ((pe != null || !requiredType.isAssignableFrom(newValue.getClass()))) {
+
+			// value not of required type?
+			if (pe != null || !requiredType.isAssignableFrom(newValue.getClass())) {
 
 				if (newValue instanceof String[]) {
-					// Convert String array to String
+					// convert String array to String
 					newValue = StringUtils.arrayToCommaDelimitedString((String[])newValue);
-					if (logger.isDebugEnabled())
-						logger.debug("Convert: StringArray to CommaDelimitedString [" + newValue + "]");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Converting String array to comma-delimited String [" + newValue + "]");
+					}
 				}
 
-				if (newValue instanceof String) {
-					// Use PropertyEditor's setAsText in case of a String value
-					if (logger.isDebugEnabled())
-						logger.debug("Convert: String to [" + requiredType + "]");
+				else if (newValue instanceof String) {
 					if (pe == null) {
-						// No custom editor -> check BeanWrapper's default editors
+						// no custom editor -> check BeanWrapper's default editors
 						pe = (PropertyEditor) defaultEditors.get(requiredType);
 						if (pe == null) {
-							// No BeanWrapper default editor -> check standard JavaBean editors
+							// no BeanWrapper default editor -> check standard JavaBean editors
 							pe = PropertyEditorManager.findEditor(requiredType);
 						}
 					}
-					if (logger.isDebugEnabled())
-						logger.debug("Using property editor [" + pe + "]");
 					if (pe != null) {
+						// use PropertyEditor's setAsText in case of a String value
+						if (logger.isDebugEnabled()) {
+							logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
+						}
 						try {
 							pe.setAsText((String) newValue);
 							newValue = pe.getValue();
 						}
 						catch (IllegalArgumentException ex) {
-							throw new TypeMismatchException(createPropertyChangeEvent(propertyName, oldValue, newValue), requiredType, ex);
+							throw new TypeMismatchException(createPropertyChangeEvent(propertyDescriptor, oldValue, newValue),
+																							requiredType, ex);
 						}
+					}
+					else {
+						throw new TypeMismatchException(createPropertyChangeEvent(propertyDescriptor, oldValue, newValue),
+																						requiredType);
 					}
 				}
 
 				else if (pe != null) {
-					// Not a String -> use PropertyEditor's setValue
+					// Not a String -> use PropertyEditor's setValue.
 					// With standard PropertyEditors, this will return the very same object;
 					// we just want to allow special PropertyEditors to override setValue
 					// for type conversion from non-String values to the required type.
@@ -715,11 +732,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 						newValue = pe.getValue();
 					}
 					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchException(createPropertyChangeEvent(propertyName, oldValue, newValue), requiredType, ex);
+						throw new TypeMismatchException(createPropertyChangeEvent(propertyDescriptor, oldValue, newValue),
+																						requiredType, ex);
 					}
 				}
 			}
 		}
+
 		return newValue;
 	}
 
@@ -749,14 +768,14 @@ public class BeanWrapperImpl implements BeanWrapper {
 			return getPropertyDescriptor(propertyName).getReadMethod() != null;
 		}
 		catch (BeansException ex) {
-			// Doesn't exist, so can't be readable
+			// doesn't exist, so can't be readable
 			return false;
 		}
 	}
 
 	public boolean isWritableProperty(String propertyName) {
 		// This is a programming error, although asking for a property
-		// that doesn't exist is not
+		// that doesn't exist is not.
 		if (propertyName == null) {
 			throw new FatalBeanException("Can't find writability status for null property");
 		}
@@ -764,7 +783,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			return getPropertyDescriptor(propertyName).getWriteMethod() != null;
 		}
 		catch (BeansException ex) {
-			// Doesn't exist, so can't be writable
+			// doesn't exist, so can't be writable
 			return false;
 		}
 	}
@@ -783,8 +802,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 			return returnVal;
 		}
 		catch (InvocationTargetException ex) {
-			//if (ex.getTargetException() instanceof ClassCastException)
-			//	throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
 			throw new MethodInvocationException(ex.getTargetException(), methodName);
 		}
 		catch (IllegalAccessException ex) {

@@ -7,7 +7,6 @@ package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
-import java.beans.PropertyVetoException;
 import java.util.Map;
 
 /**
@@ -32,7 +31,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.8 2004-01-06 22:24:25 jhoeller Exp $
+ * @version $Id: BeanWrapper.java,v 1.9 2004-02-02 11:33:34 jhoeller Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -117,14 +116,14 @@ public interface BeanWrapper {
 	 * @param propertyName name of the property to set value of
 	 * @param value the new value
 	 */
-	void setPropertyValue(String propertyName, Object value) throws PropertyVetoException, BeansException;
+	void setPropertyValue(String propertyName, Object value) throws BeansException;
 
 	/**
 	 * Update a property value.
 	 * <b>This is the preferred way to update an individual property.</b>
 	 * @param pv object containing new property value
 	 */
-	void setPropertyValue(PropertyValue pv) throws PropertyVetoException, BeansException;
+	void setPropertyValue(PropertyValue pv) throws BeansException;
 
 	/**
 	 * Perform a bulk update from a Map.
@@ -134,7 +133,7 @@ public interface BeanWrapper {
 	 * @param m Map to take properties from. Contains property value objects,
 	 * keyed by property name
 	 */
-	void setPropertyValues(Map m) throws BeansException;
+	void setPropertyValues(Map map) throws BeansException;
 
 	/**
 	 * The preferred way to perform a bulk update.
@@ -142,7 +141,7 @@ public interface BeanWrapper {
 	 * in that an implementation of this class will continue to update properties
 	 * if a <b>recoverable</b> error (such as a vetoed property change or a type mismatch,
 	 * but <b>not</b> an invalid fieldname or the like) is encountered, throwing a
-	 * PropertyVetoExceptionsException containing all the individual errors.
+	 * PropertyAccessExceptionsException containing all the individual errors.
 	 * This exception can be examined later to see all binding errors.
 	 * Properties that were successfully updated stay changed.
 	 * <p>Does not allow unknown fields.
@@ -157,7 +156,7 @@ public interface BeanWrapper {
 	 * in that an implementation of this class will continue to update properties
 	 * if a <b>recoverable</b> error (such as a vetoed property change or a type mismatch,
 	 * but <b>not</b> an invalid fieldname or the like) is encountered, throwing a
-	 * PropertyVetoExceptionsException containing all the individual errors.
+	 * PropertyAccessExceptionsException containing all the individual errors.
 	 * This exception can be examined later to see all binding errors.
 	 * Properties that were successfully updated stay changed.
 	 * <p>Does not allow unknown fields.

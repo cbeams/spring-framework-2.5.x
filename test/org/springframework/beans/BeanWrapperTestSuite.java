@@ -1,18 +1,15 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
 import java.beans.PropertyEditorSupport;
+import java.beans.PropertyVetoException;
 import java.util.Properties;
 
 import junit.framework.TestCase;
 
 
 /**
- * @version $Id: BeanWrapperTestSuite.java,v 1.9 2004-01-06 22:24:24 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.10 2004-02-02 11:34:32 jhoeller Exp $
  * @author Rod Johnson
  */
 public class BeanWrapperTestSuite extends TestCase {
@@ -120,13 +117,8 @@ public class BeanWrapperTestSuite extends TestCase {
 	public void testGetterThrowsException() {
 		GetterBean gb = new GetterBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		try {
-			bw.setPropertyValue("name","tom");
-			assertTrue("Set name to tom", gb.getName().equals("tom"));
-		}
-		catch (PropertyVetoException ex) {
-			fail("Shouldn't throw PropertyVetoException, even if getter threw an exception veto");
-		}
+		bw.setPropertyValue("name","tom");
+		assertTrue("Set name to tom", gb.getName().equals("tom"));
 	}
 	
 	public void testEmptyPropertyValuesSet() {
@@ -191,44 +183,16 @@ public class BeanWrapperTestSuite extends TestCase {
 		TestBean t = new TestBean();
 		t.setName("Frank");	// we need to change it back
 		t.setSpouse(t);
-		try {
-			BeanWrapper bw = new BeanWrapperImpl(t);
-			assertTrue("name is not null to start off", t.getName() != null);
-			bw.setPropertyValue("name", null);
-			assertTrue("name is now null", t.getName() == null);
-			// Now test with non-string
-			assertTrue("spouse is not null to start off", t.getSpouse() != null);
-			bw.setPropertyValue("spouse", null);
-			assertTrue("spouse is now null", t.getSpouse() == null);
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail("Shouldn't throw exception when everything is valid");
-		}
+		BeanWrapper bw = new BeanWrapperImpl(t);
+		assertTrue("name is not null to start off", t.getName() != null);
+		bw.setPropertyValue("name", null);
+		assertTrue("name is now null", t.getName() == null);
+		// Now test with non-string
+		assertTrue("spouse is not null to start off", t.getSpouse() != null);
+		bw.setPropertyValue("spouse", null);
+		assertTrue("spouse is now null", t.getSpouse() == null);
 	}
-	
-	
-	
-	
-	public static class PropsTest {
-		public Properties props;
-		public String name;
-		public String[] sa;
-		
-		public void setProperties(Properties p) {
-			props = p;
-		}
-		
-		public void setName(String name) {
-			this.name = name;
-		}
-		
-		public void setStringArray(String[] sa) {
-			this.sa = sa;
-		}
-	}
-	
-	
+
 	/**
 	 * Test default conversion of properties
 	 */
@@ -262,8 +226,6 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertTrue("stringArray length = 1", pt.sa.length == 1);
 		assertTrue("stringArray elt is ok", pt.sa[0].equals("one"));
 	}
-	
-	
 
 	public void testIndividualAllValid() {
 		TestBean t = new TestBean();
@@ -282,9 +244,6 @@ public class BeanWrapperTestSuite extends TestCase {
 		catch (BeansException ex) {
 			fail("Shouldn't throw exception when everything is valid");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Shouldn't throw exception when everything is valid");
-		}
 	}
 
 	public void test2Invalid() {
@@ -301,13 +260,13 @@ public class BeanWrapperTestSuite extends TestCase {
 			bw.setPropertyValues(pvs);
 			fail("Should throw exception when everything is valid");
 		}
-		catch (PropertyVetoExceptionsException ex) {
+		catch (PropertyAccessExceptionsException ex) {
 			assertTrue("Must contain 2 exceptions", ex.getExceptionCount() == 2);
 			// Test validly set property matches
 			assertTrue("Validly set property must stick", t.getName().equals(newName));
 			assertTrue("Invalidly set property must retain old value", t.getAge() == 0);
 			assertTrue("New value of dodgy setter must be available through exception",
-				ex.getPropertyVetoException("touchy").getPropertyChangeEvent().getNewValue().equals(invalidTouchy));
+				ex.getPropertyAccessException("touchy").getPropertyChangeEvent().getNewValue().equals(invalidTouchy));
 		}
 		catch (Exception ex) {
 			fail("Shouldn't throw exception other than pvee");
@@ -478,7 +437,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			fail("Should've thrown exception");
 		}
 		catch (MethodInvocationException mie) {
-			assertTrue("Threw in exception", mie.getRootCause()==ex);
+			assertTrue("Threw in exception", mie.getCause()==ex);
 		}
 		
 		RuntimeException rex = new RuntimeException();
@@ -488,7 +447,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			fail("Should've thrown exception");
 		}
 		catch (MethodInvocationException mie) {
-			assertTrue("Threw in exception", mie.getRootCause()==rex);
+			assertTrue("Threw in exception", mie.getCause()==rex);
 		}
 
 	}
@@ -550,15 +509,10 @@ public class BeanWrapperTestSuite extends TestCase {
 		String lawyerCompany = "Dr. Sueem";
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		try {
-			bw.setPropertyValue("doctor.company", doctorCompany);
-			bw.setPropertyValue("lawyer.company", lawyerCompany);
-			assertEquals(doctorCompany, tb.getDoctor().getCompany());
-			assertEquals(lawyerCompany, tb.getLawyer().getCompany());
-		}
-		catch (PropertyVetoException ex) {
-			fail("Shouldn't throw PropertyVetoException, even if getter threw an exception veto");
-		}
+		bw.setPropertyValue("doctor.company", doctorCompany);
+		bw.setPropertyValue("lawyer.company", lawyerCompany);
+		assertEquals(doctorCompany, tb.getDoctor().getCompany());
+		assertEquals(lawyerCompany, tb.getLawyer().getCompany());
 	}
 
 	public void testIndexedProperties() {
@@ -860,6 +814,42 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals("mapname0", bw.getPropertyValue("map[key2].nestedIndexedBean.map[\"key2\"].name"));
 	}
 
+	public void testArrayToArrayConversion() throws PropertyVetoException {
+		IndexedTestBean tb = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean(text, 99));
+			}
+		});
+		bw.setPropertyValue("array", new String[] {"a", "b"});
+		assertEquals(2, tb.getArray().length);
+		assertEquals("a", tb.getArray()[0].getName());
+		assertEquals("b", tb.getArray()[1].getName());
+	}
+
+
+	private static class PropsTest {
+
+		private Properties props;
+
+		private String name;
+
+		private String[] sa;
+
+		public void setProperties(Properties p) {
+			props = p;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public void setStringArray(String[] sa) {
+			this.sa = sa;
+		}
+	}
+
 
 	private static class GetterBean {
 
@@ -877,46 +867,10 @@ public class BeanWrapperTestSuite extends TestCase {
 	}
 
 
-	private static class ConsoleListener implements PropertyChangeListener {
-
-		int events;
-
-		public void propertyChange(PropertyChangeEvent e) {
-			++events;
-		}
-
-		public int getEventCount() {
-			return events;
-		}
-	}
-
-
 	private static class ThrowsException {
+
 		public void doSomething(Throwable t) throws Throwable {
 			throw t;
-		}
-	}
-
-
-	private static class AgistListener implements VetoableChangeListener {
-
-		int events;
-
-		public void vetoableChange(PropertyChangeEvent e) throws PropertyVetoException {
-			++events;
-			//System.out.println("VetoableChangeEvent: old value=[" + e.getOldValue() + "] new value=[" + e.getNewValue() + "]");
-			if ("age".equals(e.getPropertyName())) {
-				//if (e.getPropertyName().equals("age")
-				Integer newValue = (Integer) e.getNewValue();
-				if (newValue.intValue() > 65) {
-					//System.out.println("Yeah! got another old bugger and vetoed it");
-					throw new PropertyVetoException("You specified " + newValue.intValue() + "; that's too bloody old", e);
-				}
-			}
-		}
-
-		public int getEventCount() {
-			return events;
 		}
 	}
 

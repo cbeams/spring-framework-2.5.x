@@ -1,4 +1,3 @@
-
 package org.springframework.core;
 
 /**
@@ -12,7 +11,7 @@ package org.springframework.core;
  * framework-specific, superclass.
  *
  * @author Rod Johnson
- * @version $Id: ErrorCoded.java,v 1.1.1.1 2003-08-14 16:20:24 trisberg Exp $
+ * @version $Id: ErrorCoded.java,v 1.2 2004-02-02 11:33:34 jhoeller Exp $
  * @see org.springframework.context.MessageSource
  */
 public interface ErrorCoded {
@@ -26,4 +25,3 @@ public interface ErrorCoded {
 	String getErrorCode();
 
 }
-

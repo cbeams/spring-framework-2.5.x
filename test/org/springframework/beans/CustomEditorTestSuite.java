@@ -1,7 +1,6 @@
 package org.springframework.beans;
 
 import java.beans.PropertyEditorSupport;
-import java.beans.PropertyVetoException;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -52,9 +51,6 @@ public class CustomEditorTestSuite extends TestCase {
 			bw.setPropertyValue("name", "value");
 			bw.setPropertyValue("touchy", "value");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -75,9 +71,6 @@ public class CustomEditorTestSuite extends TestCase {
 		try {
 			bw.setPropertyValue("name", "value");
 			bw.setPropertyValue("touchy", "value");
-		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
 		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
@@ -101,9 +94,6 @@ public class CustomEditorTestSuite extends TestCase {
 			bw.setPropertyValue("spouse.name", "value");
 			bw.setPropertyValue("touchy", "value");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -126,9 +116,6 @@ public class CustomEditorTestSuite extends TestCase {
 			bw.setPropertyValue("spouse.name", "value");
 			bw.setPropertyValue("touchy", "value");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -145,9 +132,6 @@ public class CustomEditorTestSuite extends TestCase {
 		try {
 			bw.setPropertyValue("bool1", "true");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -157,9 +141,6 @@ public class CustomEditorTestSuite extends TestCase {
 		try {
 			bw.setPropertyValue("bool1", "false");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -168,9 +149,6 @@ public class CustomEditorTestSuite extends TestCase {
 
 		try {
 			bw.setPropertyValue("bool1", "argh");
-		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
 		}
 		catch (BeansException ex) {
 			// expected
@@ -187,9 +165,6 @@ public class CustomEditorTestSuite extends TestCase {
 		try {
 			bw.setPropertyValue("bool2", "true");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -199,9 +174,6 @@ public class CustomEditorTestSuite extends TestCase {
 		try {
 			bw.setPropertyValue("bool2", "false");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -210,9 +182,6 @@ public class CustomEditorTestSuite extends TestCase {
 
 		try {
 			bw.setPropertyValue("bool2", "");
-		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
 		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
@@ -229,9 +198,6 @@ public class CustomEditorTestSuite extends TestCase {
 		try {
 			bw.setPropertyValue("bool2", "true");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -241,9 +207,6 @@ public class CustomEditorTestSuite extends TestCase {
 		try {
 			bw.setPropertyValue("bool2", "false");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -252,9 +215,6 @@ public class CustomEditorTestSuite extends TestCase {
 
 		try {
 			bw.setPropertyValue("bool2", "");
-		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
 		}
 		catch (BeansException ex) {
 			// expected
@@ -287,9 +247,6 @@ public class CustomEditorTestSuite extends TestCase {
 			bw.setPropertyValue("double2", "6,1");
 			bw.setPropertyValue("float1", "7,1");
 			bw.setPropertyValue("float2", "8,1");
-		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
 		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
@@ -324,9 +281,6 @@ public class CustomEditorTestSuite extends TestCase {
 			bw.setPropertyValue("long1", "5");
 			bw.setPropertyValue("long2", "6");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -338,9 +292,6 @@ public class CustomEditorTestSuite extends TestCase {
 		try {
 			bw.setPropertyValue("long2", "");
 		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
-		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
 		}
@@ -349,9 +300,6 @@ public class CustomEditorTestSuite extends TestCase {
 
 		try {
 			bw.setPropertyValue("long1", "");
-		}
-		catch (PropertyVetoException ex) {
-			fail("Should not throw PropertyVetoException: " + ex.getMessage());
 		}
 		catch (BeansException ex) {
 			// expected
