@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.MutableSortDefinition;
 import org.springframework.beans.PropertyComparator;
 import org.springframework.beans.SortDefinition;
@@ -244,8 +243,7 @@ public class PagedListHolder {
 	public void resort() {
 		if (this.sort != null && !"".equals(this.sort.getProperty()) && !this.sort.equals(this.sortUsed)) {
 			PropertyComparator.sort(this.source, this.sort);
-			this.sortUsed = (MutableSortDefinition) BeanUtils.instantiateClass(this.sort.getClass());
-			BeanUtils.copyProperties(this.sort, this.sortUsed);
+			this.sortUsed = new MutableSortDefinition(this.sort);
 			setPage(0);
 		}
 	}

@@ -10,8 +10,6 @@ package org.springframework.beans;
  */
 public class MutableSortDefinition implements SortDefinition {
 
-	public static final String NO_CHANGE = "nochange";
-
 	private String property = "";
 
 	private boolean ignoreCase = true;
@@ -23,10 +21,10 @@ public class MutableSortDefinition implements SortDefinition {
 	public MutableSortDefinition() {
 	}
 
-	public MutableSortDefinition(String property, boolean ignoreCase, boolean ascending) {
-		this.property = property;
-		this.ignoreCase = ignoreCase;
-		this.ascending = ascending;
+	public MutableSortDefinition(SortDefinition source) {
+		this.property = source.getProperty();
+		this.ignoreCase = source.isIgnoreCase();
+		this.ascending = source.isAscending();
 	}
 
 	public MutableSortDefinition(boolean toggleAscendingOnSameProperty) {
@@ -34,17 +32,11 @@ public class MutableSortDefinition implements SortDefinition {
 	}
 
 	/**
-	 * Sets the sort property.
+	 * Set the sort property.
 	 * If the property was the same as the current, the sort is reversed if
-	 * toggleAscendingOnProperty is activated, else simply ignored.
-	 * <br>If the property equals <code>NO_CHANGE</code>, nothing is done.
-	 * In web applications, this allows having a form element managing the property. 
+	 * "toggleAscendingOnProperty" is activated, else simply ignored.
 	 */
 	public void setProperty(String property) {
-		// If NO_CHANGE does nothing
-		if (NO_CHANGE.equals(property)) {
-			return;
-		}
 		if (property == null || "".equals(property)) {
 			this.property = "";
 		}
