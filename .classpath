@@ -60,7 +60,6 @@
 	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
 	<classpathentry kind="lib" path="lib/cglib/asm.jar"/>
 	<classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1-rc1.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/burlap-2.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/hessian-2.1.12.jar"/>
@@ -79,5 +78,6 @@
 	<classpathentry kind="lib" path="lib/cglib/cglib-2.0.1.jar"/>
 	<classpathentry kind="src" path="mock"/>
 	<classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
