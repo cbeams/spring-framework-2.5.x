@@ -10,8 +10,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
 
 /**
+ * Convenient super class for iBATIS SqlMapClient data access objects.
+ * Requires a DataSource to be set, providing a SqlMapClientTemplate
+ * based on it to subclasses.
  * @author Juergen Hoeller
  * @since 29.11.2003
+ * @see org.springframework.orm.ibatis.SqlMapClientTemplate
  */
 public class SqlMapClientDaoSupport implements InitializingBean {
 

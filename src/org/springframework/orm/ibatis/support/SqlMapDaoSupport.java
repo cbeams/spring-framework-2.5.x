@@ -9,8 +9,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.orm.ibatis.SqlMapTemplate;
 
 /**
+ * Convenient super class for iBATIS SqlMap data access objects.
+ * Requires a DataSource to be set, providing a SqlMapTemplate
+ * based on it to subclasses.
  * @author Juergen Hoeller
  * @since 29.11.2003
+ * @see org.springframework.orm.ibatis.SqlMapTemplate
  */
 public class SqlMapDaoSupport {
 

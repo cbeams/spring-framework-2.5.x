@@ -29,7 +29,7 @@ import org.springframework.jdbc.support.JdbcAccessor;
  * executeXXX methods. See the MappedStatement javadocs for details on those methods.
  *
  * <p>NOTE: The SqlMap/MappedStatement API is the one to use with iBATIS SQL Maps 1.x.
- * The SqlMapClient/SqlMapSession is only available with SQL Maps 2.
+ * The SqlMapClient/SqlMapSession API is only available with SQL Maps 2.
  *
  * @author Juergen Hoeller
  * @since 28.11.2003

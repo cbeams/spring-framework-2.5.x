@@ -11,7 +11,7 @@ import com.ibatis.db.sqlmap.MappedStatement;
  * often as anonymous classes within a method implementation.
  *
  * <p>NOTE: The SqlMap/MappedStatement API is the one to use with iBATIS SQL Maps 1.x.
- * The SqlMapClient/SqlMapSession is only available with SQL Maps 2.
+ * The SqlMapClient/SqlMapSession API is only available with SQL Maps 2.
  *
  * @author Juergen Hoeller
  * @since 28.11.2003

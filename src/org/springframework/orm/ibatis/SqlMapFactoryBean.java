@@ -17,7 +17,7 @@ import org.springframework.core.io.Resource;
  * current bean factory, possibly for use with SqlMapTemplate.
  *
  * <p>NOTE: The SqlMap/MappedStatement API is the one to use with iBATIS SQL Maps 1.x.
- * The SqlMapClient/SqlMapSession is only available with SQL Maps 2.
+ * The SqlMapClient/SqlMapSession API is only available with SQL Maps 2.
  *
  * @author Juergen Hoeller
  * @since 28.11.2003

@@ -16,7 +16,7 @@ import org.springframework.dao.DataAccessException;
  * execution methods. See the SqlMapSession javadocs for details on those methods.
  *
  * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
- * With SQL Maps 1.x, the SqlMap/MappedStatement has to be used.
+ * With SQL Maps 1.x, the SqlMap/MappedStatement API has to be used.
  *
  * @author Juergen Hoeller
  * @since 24.02.2004

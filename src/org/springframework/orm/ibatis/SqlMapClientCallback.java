@@ -10,7 +10,7 @@ import com.ibatis.sqlmap.client.SqlMapSession;
  * assumably often as anonymous classes within a method implementation.
  *
  * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
- * With SQL Maps 1.x, the SqlMap/MappedStatement has to be used.
+ * With SQL Maps 1.x, the SqlMap/MappedStatement API has to be used.
  *
  * @author Juergen Hoeller
  * @since 24.02.2004
