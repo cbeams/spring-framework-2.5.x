@@ -25,9 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
 
@@ -123,7 +123,7 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 		public int initCount;
 
 		public void setLocation(Resource location) {
-			if (!(location instanceof ClassPathResource)) {
+			if (!(location instanceof ServletContextResource)) {
 				throw new IllegalArgumentException("Expecting ClassPathResource, not " + location.getClass().getName());
 			}
 		}

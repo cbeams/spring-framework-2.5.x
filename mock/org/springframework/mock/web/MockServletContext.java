@@ -54,6 +54,7 @@ public class MockServletContext implements ServletContext {
 
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
 
+
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final String resourceBasePath;
@@ -66,15 +67,16 @@ public class MockServletContext implements ServletContext {
 
 
 	/**
-	 * Create new MockServletContext that is not able to load resources.
+	 * Create a new MockServletContext, using no base path and a
+	 * DefaultResourceLoader (i.e. the classpath root as WAR root).
+	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public MockServletContext() {
-		this(null, null);
+		this("");
 	}
 
 	/**
-	 * Create new MockServletContext that's able to load resources,
-	 * using a DefaultResourceLoader.
+	 * Create a new MockServletContext, using a DefaultResourceLoader.
 	 * @param resourceBasePath the WAR root directory (should not end with a /)
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
@@ -83,7 +85,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/**
-	 * Create new MockServletContext that's able to load resources.
+	 * Create a new MockServletContext.
 	 * @param resourceBasePath the WAR root directory (should not end with a /)
 	 * @param resourceLoader the ResourceLoader to use
 	 */
@@ -127,25 +129,16 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public URL getResource(String path) throws MalformedURLException {
-		if (this.resourceBasePath == null) {
-			throw new UnsupportedOperationException("No WAR root: getResource fails");
-		}
-		if (!path.startsWith("/")) {
-			path = "/" + path;
-		}
-		return new URL(this.resourceBasePath + path);
+		return new URL(getResourceLocation(path));
 	}
 
 	public InputStream getResourceAsStream(String path) {
-		if (this.resourceBasePath == null) {
-			throw new UnsupportedOperationException("No WAR root: getResourceAsStream fails");
-		}
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
 			return resource.getInputStream();
 		}
 		catch (IOException ex) {
-			logger.error("Couldn't open resource " + resource, ex);
+			logger.warn("Couldn't open resource " + resource, ex);
 			return null;
 		}
 	}
@@ -183,13 +176,14 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public String getRealPath(String path) {
-		if (this.resourceBasePath == null) {
-			throw new UnsupportedOperationException("No WAR root: getRealPath fails");
+		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
+		try {
+			return resource.getFile().getAbsolutePath();
 		}
-		if (!path.startsWith("/")) {
-			path = "/" + path;
+		catch (IOException ex) {
+			logger.warn("Couldn't determine real path of resource " + resource, ex);
+			return null;
 		}
-		return this.resourceBasePath + path;
 	}
 
 	public String getServerInfo() {

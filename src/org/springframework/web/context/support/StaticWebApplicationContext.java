@@ -20,6 +20,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
@@ -74,6 +75,13 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 			setDisplayName("Root StaticWebApplicationContext");
 		}
 		super.refresh();
+	}
+
+	/**
+	 * This implementation supports file paths beneath the root of the ServletContext.
+	 */
+	protected Resource getResourceByPath(String path) {
+		return new ServletContextResource(this.servletContext, path);
 	}
 
 	/**

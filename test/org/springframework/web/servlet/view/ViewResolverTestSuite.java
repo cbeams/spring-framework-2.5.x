@@ -39,6 +39,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
@@ -272,7 +273,7 @@ public class ViewResolverTestSuite extends TestCase {
 	public static class TestView extends InternalResourceView {
 
 		public void setLocation(Resource location) {
-			if (!(location instanceof ClassPathResource)) {
+			if (!(location instanceof ServletContextResource)) {
 				throw new IllegalArgumentException("Expecting ClassPathResource, not " + location.getClass().getName());
 			}
 		}
