@@ -100,11 +100,16 @@ public class BindTag extends RequestContextAwareTag {
 		Object value = null;
 
 		if (this.property != null) {
-			fes = this.errors.getFieldErrors(this.property);
-			value = this.errors.getFieldValue(this.property);
-			editor = this.errors.getCustomEditor(this.property);
-			if (isHtmlEscape() && value instanceof String) {
-				value = HtmlUtils.htmlEscape((String) value);
+			if ("*".equals(this.property)) {
+				fes = this.errors.getAllErrors();
+			}
+			else {
+				fes = this.errors.getFieldErrors(this.property);
+				value = this.errors.getFieldValue(this.property);
+				editor = this.errors.getCustomEditor(this.property);
+				if (isHtmlEscape() && value instanceof String) {
+					value = HtmlUtils.htmlEscape((String)value);
+				}
 			}
 		}
 		else {
@@ -123,7 +128,7 @@ public class BindTag extends RequestContextAwareTag {
 	private String[] getErrorCodes(List fes) {
 		String[] codes = new String[fes.size()];
 		for (int i = 0; i < fes.size(); i++) {
-			ObjectError error = (ObjectError) fes.get(i);
+			ObjectError error = (ObjectError)fes.get(i);
 			codes[i] = error.getCode();
 		}
 		return codes;
@@ -135,7 +140,7 @@ public class BindTag extends RequestContextAwareTag {
 	private String[] getErrorMessages(List fes) throws NoSuchMessageException {
 		String[] messages = new String[fes.size()];
 		for (int i = 0; i < fes.size(); i++) {
-			ObjectError error = (ObjectError) fes.get(i);
+			ObjectError error = (ObjectError)fes.get(i);
 			messages[i] = getRequestContext().getMessage(error, isHtmlEscape());
 		}
 		return messages;
@@ -149,4 +154,3 @@ public class BindTag extends RequestContextAwareTag {
 	}
 
 }
-
