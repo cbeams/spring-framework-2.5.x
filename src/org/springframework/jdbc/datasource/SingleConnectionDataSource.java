@@ -53,7 +53,10 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 
 	private boolean suppressClose;
 
-	/** wrapped connection */
+	/** Wrapped connection */
+	private Connection target;
+
+	/** Proxy connection */
 	private Connection connection;
 
 
@@ -77,17 +80,17 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 
 	/**
 	 * Create a new SingleConnectionDataSource with a given connection.
-	 * @param source underlying target connection
+	 * @param target underlying target connection
 	 * @param suppressClose if the connection should be wrapped with a* connection that
 	 * suppresses close() calls (to allow for normal close() usage in applications that
 	 * expect a pooled connection but do not know our SmartDataSource interface).
 	 */
-	public SingleConnectionDataSource(Connection source, boolean suppressClose) {
-		if (source == null) {
+	public SingleConnectionDataSource(Connection target, boolean suppressClose) {
+		if (target == null) {
 			throw new IllegalArgumentException("Connection is null in SingleConnectionDataSource");
 		}
 		this.suppressClose = suppressClose;
-		init(source);
+		init(target);
 	}
 
 	/**
@@ -124,10 +127,11 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	/**
 	 * Initialize the underlying connection.
 	 * Wraps the connection with a close-suppressing proxy if necessary.
-	 * @param source the JDBC Connection to use
+	 * @param target the JDBC Connection to use
 	 */
-	protected void init(Connection source) {
-		this.connection = this.suppressClose ? getCloseSuppressingConnectionProxy(source) : source;
+	protected void init(Connection target) {
+		this.target = target;
+		this.connection = this.suppressClose ? getCloseSuppressingConnectionProxy(target) : target;
 	}
 
 	/**
@@ -137,8 +141,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * automatically invoke this on destruction of its cached singletons.
 	 */
 	public void destroy() throws SQLException {
-		if (this.connection != null) {
-			this.connection.close();
+		if (this.target != null) {
+			this.target.close();
 		}
 	}
 
