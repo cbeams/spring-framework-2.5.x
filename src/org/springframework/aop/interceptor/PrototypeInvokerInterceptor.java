@@ -17,7 +17,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
  * to do an explicit getBean() method to get the prototype
  * instance.
  * @author Rod Johnson
- * @version $Id: PrototypeInvokerInterceptor.java,v 1.4 2003-11-22 17:02:03 johnsonr Exp $
+ * @version $Id: PrototypeInvokerInterceptor.java,v 1.5 2003-11-24 09:34:08 johnsonr Exp $
  */
 public class PrototypeInvokerInterceptor extends AbstractReflectionInvokerInterceptor implements BeanFactoryAware {
 	
@@ -60,6 +60,9 @@ public class PrototypeInvokerInterceptor extends AbstractReflectionInvokerInterc
 	}
 
 	public Object getTarget() {
+		if (logger.isInfoEnabled()) {
+			logger.info("Creating new target from bean '" + this.targetBeanName + "'");
+		}
 		return this.owningBeanFactory.getBean(this.targetBeanName);
 	}
 
