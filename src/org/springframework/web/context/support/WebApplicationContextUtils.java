@@ -7,29 +7,18 @@ package org.springframework.web.context.support;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Utilities common to all WebApplicationContext implementations.
- *
- * <p>Features convenient methods to retrieve the root WebApplicationContext
- * for a given ServletContext. This is e.g. useful for accessing a Spring
- * context from within custom web views or Struts actions.
- *
- * @author Rod Johnson
+ * Convenience methods to retrieve the root WebApplicationContext for a given
+ * ServletContext. This is e.g. useful for accessing a Spring context from
+ * within custom web views or Struts actions.
  * @author Juergen Hoeller
- * @version $Id: WebApplicationContextUtils.java,v 1.7 2003-12-16 17:14:56 johnsonr Exp $
- * @see #getWebApplicationContext
+ * @version $Id: WebApplicationContextUtils.java,v 1.8 2004-02-04 17:31:55 jhoeller Exp $
  * @see org.springframework.web.context.ContextLoader
  */
 public abstract class WebApplicationContextUtils {
 	
-	private static final Log log = LogFactory.getLog(WebApplicationContextUtils.class);
-
 	/**
 	 * Find the root WebApplicationContext for this web app, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
@@ -45,46 +34,17 @@ public abstract class WebApplicationContextUtils {
 	 * Find the root WebApplicationContext for this web app, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
 	 * @param sc ServletContext to find the web application context for
-	 * @return the root WebApplicationContext for this web app, or null if none
+	 * @return the root WebApplicationContext for this web app
 	 * @throws IllegalStateException if the root WebApplicationContext could not be found
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	public static WebApplicationContext getRequiredWebApplicationContext(ServletContext sc) throws IllegalStateException {
-		WebApplicationContext wac =
-				(WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+	public static WebApplicationContext getRequiredWebApplicationContext(ServletContext sc)
+	    throws IllegalStateException {
+		WebApplicationContext wac = getWebApplicationContext(sc);
 		if (wac == null) {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
 		}
 		return wac;
-	}
-
-	/**
-	 * Expose the given WebApplicationContext as an attribute of the ServletContext
-	 * it references.
-	 * @param wac the WebApplicationContext to expose
-	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
-	 */
-	public static void publishWebApplicationContext(WebApplicationContext wac) {
-		// Set WebApplicationContext as an attribute in the ServletContext
-		// so other components in this web application can access it
-		ServletContext sc = wac.getServletContext();
-		if (sc == null) {
-			throw new IllegalArgumentException("ServletContext can't be null in WebApplicationContext " + wac);
-		}
-		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
-		log.info("Published root WebApplicationContext [" + wac + "] with ServletContext attribute name '" + WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "'");
-	}
-
-	/**
-	 * Parse the given context config location into potentially separate file paths.
-	 * @param location the location string
-	 * @return an array of file paths
-	 * @see org.springframework.web.context.ConfigurableWebApplicationContext#CONFIG_LOCATION_DELIMITERS
-	 */
-	public static String[] parseContextConfigLocation(String location) {
-		return StringUtils.tokenizeToStringArray(location,
-																						 ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS,
-																						 true, true);
 	}
 
 }

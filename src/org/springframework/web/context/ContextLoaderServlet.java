@@ -76,7 +76,7 @@ public class ContextLoaderServlet extends HttpServlet {
 	 * Close the root web application context.
 	 */
 	public void destroy() {
-		this.contextLoader.closeContext(getServletContext());
+		this.contextLoader.closeWebApplicationContext(getServletContext());
 	}
 
 	/**
@@ -85,12 +85,14 @@ public class ContextLoaderServlet extends HttpServlet {
 	 * listener is much more appropriate for initialization work ;-)
 	 */
 	public void doService(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		getServletContext().log("Attempt to call service method on ContextLoaderServlet as " + request.getRequestURI() + " was ignored");
+		getServletContext().log("Attempt to call service method on ContextLoaderServlet as " +
+		                        request.getRequestURI() + " was ignored");
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
 	public String getServletInfo() {
-		return "ContextLoaderServlet for Servlet API 2.2/2.3 (deprecated in favour of ContextLoaderListener for Servlet API 2.4)";
+		return "ContextLoaderServlet for Servlet API 2.2/2.3 " +
+		    "(deprecated in favour of ContextLoaderListener for Servlet API 2.4)";
 	}
 
 }

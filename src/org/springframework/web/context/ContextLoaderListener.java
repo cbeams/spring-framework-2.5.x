@@ -11,7 +11,7 @@ import javax.servlet.ServletContextListener;
  * if the latter is used.
  *
  * <p>For Servlet 2.2 containers and Servlet 2.3 ones that do not initalize
- * listeners before servlets, use ContextLoaderServlet. See the latter's javadoc
+ * listeners before servlets, use ContextLoaderServlet. See the latter's Javadoc
  * for details.
  *
  * @author Juergen Hoeller
@@ -44,7 +44,7 @@ public class ContextLoaderListener implements ServletContextListener {
 	 * Close the root web application context.
 	 */ 
 	public void contextDestroyed(ServletContextEvent event) {
-		this.contextLoader.closeContext(event.getServletContext());
+		this.contextLoader.closeWebApplicationContext(event.getServletContext());
 	}
 
 }

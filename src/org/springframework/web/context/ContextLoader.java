@@ -9,8 +9,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.config.ConfigurableApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
@@ -79,12 +79,19 @@ public class ContextLoader {
 			ApplicationContext parent = loadParentContext(servletContext);
 			WebApplicationContext wac = createWebApplicationContext(servletContext, parent);
 			logger.info("Using context class [" + wac.getClass().getName() + "] for root WebApplicationContext");
-			WebApplicationContextUtils.publishWebApplicationContext(wac);
+			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+			logger.info("Published root WebApplicationContext [" + wac +
+			            "] with ServletContext attribute name '" +
+			            WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "'");
 			return wac;
 		}
-		catch (BeansException ex) {
+		catch (RuntimeException ex) {
 			logger.error("Context initialization failed", ex);
 			throw ex;
+		}
+		catch (Error err) {
+			logger.error("Context initialization failed", err);
+			throw err;
 		}
 	}
 
@@ -115,12 +122,16 @@ public class ContextLoader {
 																							"] is not of type ConfigurableWebApplicationContext");
 			}
 		}
-		ConfigurableWebApplicationContext wac = (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
+		ConfigurableWebApplicationContext wac =
+		    (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 		wac.setParent(parent);
 		wac.setServletContext(servletContext);
 		String configLocation = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
 		if (configLocation != null) {
-			wac.setConfigLocations(WebApplicationContextUtils.parseContextConfigLocation(configLocation));
+			wac.setConfigLocations(
+			    StringUtils.tokenizeToStringArray(configLocation,
+			                                      ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS,
+			                                      true, true));
 		}
 		wac.refresh();
 		return wac;
@@ -142,9 +153,9 @@ public class ContextLoader {
 	 * Close Spring's web application context for the given servlet context.
 	 * @param servletContext current servlet context
 	 */
-	public void closeContext(ServletContext servletContext) throws ApplicationContextException {
+	public void closeWebApplicationContext(ServletContext servletContext) throws ApplicationContextException {
 		servletContext.log("Closing root WebApplicationContext");
-		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
+		Object wac = servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (wac instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) wac).close();
 		}
