@@ -232,7 +232,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	 * @param errors
 	 * @param model
 	 */
-	public static void exportErrors(BindException errors, MutableAttributesAccessor model) {
+	public void exportErrors(BindException errors, MutableAttributesAccessor model) {
 		// and also bind it under the local (to flow) alias, so other
 		// actions can find it easily
 		model.setAttribute(LOCAL_FORM_OBJECT_NAME, errors.getTarget());
@@ -240,7 +240,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 		model.setAttributes(errors.getModel());
 	}
 
-	public static void exportErrors(String formObjectName, Object formObject, MutableAttributesAccessor model) {
+	public void exportErrors(String formObjectName, Object formObject, MutableAttributesAccessor model) {
 		exportErrors(new BindException(formObject, formObjectName), model);
 	}
 
