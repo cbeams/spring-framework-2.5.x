@@ -56,7 +56,7 @@ import org.springframework.mail.SimpleMailMessage;
  * @since 10.09.2003
  * @see JavaMailSender
  * @see org.springframework.mail.MailSender
- * @version $Id: JavaMailSenderImpl.java,v 1.13 2004-06-05 14:41:03 jhoeller Exp $
+ * @version $Id: JavaMailSenderImpl.java,v 1.14 2004-06-18 11:56:18 jhoeller Exp $
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
@@ -80,6 +80,17 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 
 	/**
+	 * Set JavaMail properties for the Session. A new Session will be created
+	 * with those properties. Use either this or setSession, not both.
+	 * <p>Non-default properties in this MailSender will override given
+	 * JavaMail properties.
+	 * @see #setSession
+	 */
+	public void setJavaMailProperties(Properties javaMailProperties) {
+		this.session = Session.getInstance(javaMailProperties);
+	}
+
+	/**
 	 * Set the JavaMail Session, possibly pulled from JNDI. Default is a new Session
 	 * without defaults, i.e. completely configured via this object's properties.
 	 * <p>If using a pre-configured Session, non-default properties in this
@@ -94,14 +105,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
-	 * Set JavaMail properties for the Session. A new Session will be created
-	 * with those properties. Use either this or setSession, not both.
-	 * <p>Non-default properties in this MailSender will override given
-	 * JavaMail properties.
-	 * @see #setSession
+	 * Return the JavaMail Session.
 	 */
-	public void setJavaMailProperties(Properties javaMailProperties) {
-		this.session = Session.getInstance(javaMailProperties);
+	public Session getSession() {
+		return session;
 	}
 
 	/**
@@ -112,10 +119,24 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
+	 * Return the mail protocol.
+	 */
+	public String getProtocol() {
+		return protocol;
+	}
+
+	/**
 	 * Set the mail server host, typically an SMTP host.
 	 */
 	public void setHost(String host) {
 		this.host = host;
+	}
+
+	/**
+	 * Return the mail server host.
+	 */
+	public String getHost() {
+		return host;
 	}
 
 	/**
@@ -127,6 +148,13 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
+	 * Return the mail server port.
+	 */
+	public int getPort() {
+		return port;
+	}
+
+	/**
 	 * Set the username for the account at the mail host, if any.
 	 */
 	public void setUsername(String username) {
@@ -134,10 +162,24 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
+	 * Return the username for the account at the mail host.
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
 	 * Set the password for the account at the mail host, if any.
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	/**
+	 * Return the password for the account at the mail host.
+	 */
+	public String getPassword() {
+		return password;
 	}
 
 
@@ -197,7 +239,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	//---------------------------------------------------------------------
 
 	public MimeMessage createMimeMessage() {
-		return new MimeMessage(this.session);
+		return new MimeMessage(getSession());
 	}
 
 	public void send(MimeMessage mimeMessage) throws MailException {
@@ -211,8 +253,8 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	public void send(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
 		Map failedMessages = new HashMap();
 		try {
-			Transport transport = getTransport(this.session);
-			transport.connect(this.host, this.port, this.username, this.password);
+			Transport transport = getTransport(getSession());
+			transport.connect(getHost(), getPort(), getUsername(), getPassword());
 			try {
 				for (int i = 0; i < mimeMessages.length; i++) {
 					MimeMessage mimeMessage = mimeMessages[i];
@@ -247,7 +289,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	public void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException {
 		try {
-			List mimeMessages = new ArrayList();
+			List mimeMessages = new ArrayList(mimeMessagePreparators.length);
 			for (int i = 0; i < mimeMessagePreparators.length; i++) {
 				MimeMessage mimeMessage = createMimeMessage();
 				mimeMessagePreparators[i].prepare(mimeMessage);
@@ -269,7 +311,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Can be overridden in subclasses, e.g. to return a mock Transport object.
 	 */
 	protected Transport getTransport(Session session) throws NoSuchProviderException {
-		return session.getTransport(this.protocol);
+		return session.getTransport(getProtocol());
 	}
 
 }
