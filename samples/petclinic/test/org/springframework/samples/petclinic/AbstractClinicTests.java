@@ -9,8 +9,8 @@ import org.springframework.test.AbstractTransactionalDataSourceSpringContextTest
 /**
  * Base class for Clinic tests.
  * Allows subclasses to specify context locations.
- * <p>
- * This class extends AbstractTransactionalDataSourceSpringContextTests,
+ *
+ * <p>This class extends AbstractTransactionalDataSourceSpringContextTests,
  * one of the valuable test superclasses provided in the org.springframework.test
  * package. This represents best practice for integration tests with Spring. 
  * The AbstractTransactionalDataSourceSpringContextTests superclass provides the
@@ -26,8 +26,8 @@ import org.springframework.test.AbstractTransactionalDataSourceSpringContextTest
  * used to verify database state after test operations, or verify the results of queries
  * performed by application code. An ApplicationContext is also inherited, and can be
  * used for explicit lookup if necessary.
- * <p>
- * The AbstractTransactionalDataSourceSpringContextTests and related classes are shipped
+ *
+ * <p>The AbstractTransactionalDataSourceSpringContextTests and related classes are shipped
  * in the spring-mock.jar.
  * 
  * @see org.springframework.test.AbstractTransactionalDataSourceSpringContextTests
