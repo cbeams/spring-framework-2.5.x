@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.support;
+package org.springframework.jms;
+
+import java.util.Properties;
 
 import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
+import javax.naming.NamingException;
 
 /**
  * Provides common administration tasks.  Currenlty for centralizing
@@ -51,9 +54,20 @@ public interface JmsAdmin {
 	 * created.  
 	 *
 	 * @param destinationName The name of a dynamic destination.
+	 * @param createDynamic If true, create a dynamic destination if not
+	 * found in JNDI.
+	 * @param isPubSubDomain if true, create a Topic for a dynamic destination,
+	 * otherwise create a Queue (point-to-point)   
 	 * @return The JMS destination object.  Null if not found.
 	 */
 	Destination lookup(String destinationName, boolean createDynamic, boolean isPubSubDomain);
+	
+	/**
+	 * Perform a JNDI lookup of a JMS destination.
+	 * @param destinationName
+	 * @return The JMS destination object.  
+	 */
+	Destination lookup(String destinationName) throws NamingException;
 	
 	/**
 	 * Lookup topics that have been created with JmsAdmin 
@@ -68,6 +82,13 @@ public interface JmsAdmin {
 	 * @return the JMS Queue.  Null if not found.
 	 */
 	Queue lookupDynamicQueue(String queueName);
+	
+	/**
+	 * Set the JNDI environment to configure the lookup of JNDI
+	 * resources.
+	 * @param jndiEnvironment Properties to configure JNDI.
+	 */
+	void setJndiEnvironment(Properties jndiEnvironment);
 
 	
 	

@@ -28,8 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.converter.JmsConverter;
-import org.springframework.jms.support.DefaultJmsAdmin;
-import org.springframework.jms.support.JmsAdmin;
 import org.springframework.util.ClassUtils;
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.support;
+package org.springframework.jms;
 
 /**
  * Information about a JMS Topic.

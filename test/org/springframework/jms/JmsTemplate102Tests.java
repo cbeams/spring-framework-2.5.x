@@ -35,7 +35,6 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.easymock.MockControl;
-import org.springframework.jms.support.DefaultJmsAdmin;
 
 /**
  * Unit test for the JmsTemplate using the JmsTemplate102 implementation.

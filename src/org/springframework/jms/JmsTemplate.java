@@ -21,7 +21,6 @@ import java.util.Properties;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 
-import org.springframework.jms.support.JmsAdmin;
 
 /**
  * A helper class that simplifies sending of JMS messages.
