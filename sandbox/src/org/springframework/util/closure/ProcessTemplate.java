@@ -31,16 +31,14 @@ package org.springframework.util.closure;
  * records. The results (a single parsed record) are passed to the callback for
  * processing.
  * 
- * <code>
- * 
+ * <pre>
  * ProcessTemplate recordGenerator = new CsvRecordGenerator(new FileSystemResource(file));
- * 
  * recordGenerator.run(new Block() {
- *     protected void handle(Object csvRecord) {
- *         // process each record
- *     }
+ * 	protected void handle(Object csvRecord) {
+ * 		// process each record
+ * 	}
  * });
- * </code>
+ * </pre>
  * 
  * This is a generic equivalent to approaches used throughout The Spring
  * Framework, including Spring's JDBC Template for processing DB query result
@@ -52,12 +50,11 @@ package org.springframework.util.closure;
  */
 public interface ProcessTemplate {
 
-    /**
-     * Execute the template with the specific closure callback for the insertion
-     * of custom processing code.
-     * 
-     * @param templateCallback
-     *            The procedure callback.
-     */
-    public void run(Closure templateCallback);
+	/**
+	 * Execute the template with the specific closure callback for the insertion
+	 * of custom processing code.
+	 * 
+	 * @param templateCallback The procedure callback.
+	 */
+	public void run(Closure templateCallback);
 }

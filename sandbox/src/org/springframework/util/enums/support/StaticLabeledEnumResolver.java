@@ -46,7 +46,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 	protected Map findLocalizedEnums(String type, Locale locale) {
 		final Map enums = new TreeMap();
 		try {
-			new CodedEnumFieldValueGenerator(ClassUtils.forName(type)).run(new Block() {
+			new LabeledEnumFieldValueGenerator(ClassUtils.forName(type)).run(new Block() {
 				protected void handle(Object value) {
 					LabeledEnum e = (LabeledEnum)value;
 					enums.put(e.getCode(), e);
@@ -66,7 +66,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 	 * enumeration <code>Class</code>.
 	 * <p>
 	 * Iterates over the static fields of the class and adds all instances of
-	 * <code>CodedEnum</code> to the list resolvable by this resolver.
+	 * <code>LabeledEnum</code> to the list resolvable by this resolver.
 	 * 
 	 * @param clazz The enum class.
 	 */
@@ -74,7 +74,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering statically defined coded enums for class " + clazz);
 		}
-		new CodedEnumFieldValueGenerator(clazz).run(new Block() {
+		new LabeledEnumFieldValueGenerator(clazz).run(new Block() {
 			protected void handle(Object value) {
 				add((LabeledEnum)value);
 			}
@@ -86,12 +86,12 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 	 * processed.
 	 * @author Keith Donald
 	 */
-	private static class CodedEnumFieldValueGenerator implements ProcessTemplate {
-		private static final Log logger = LogFactory.getLog(CodedEnumFieldValueGenerator.class);
+	private static class LabeledEnumFieldValueGenerator implements ProcessTemplate {
+		private static final Log logger = LogFactory.getLog(LabeledEnumFieldValueGenerator.class);
 
 		private Class clazz;
 
-		public CodedEnumFieldValueGenerator(Class clazz) {
+		public LabeledEnumFieldValueGenerator(Class clazz) {
 			Assert.notNull(clazz, "clazz is required");
 			this.clazz = clazz;
 		}
@@ -105,7 +105,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 						try {
 							Object value = field.get(null);
 							Assert.isTrue(LabeledEnum.class.isInstance(value),
-									"Field value must be a CodedEnum instance.");
+									"Field value must be a LabeledEnum instance.");
 							fieldValueCallback.call(value);
 						}
 						catch (IllegalAccessException e) {

@@ -36,7 +36,7 @@ import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
 /**
- * A Hibernate user type for <code>CodedEnum</code> instances.
+ * A Hibernate user type for <code>LabeledEnum</code> instances.
  * @author Keith Donald
  */
 public abstract class AbstractLabeledEnumUserType implements UserType, Serializable {

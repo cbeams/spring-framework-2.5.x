@@ -25,8 +25,8 @@ import org.springframework.util.enums.LabeledEnum;
 import org.springframework.util.enums.LabeledEnumResolver;
 
 /**
- * Property Editor converts the string form of a CodedEnum into a CodedEnum
- * instance using a CodedEnumResolver.
+ * Property Editor converts the string form of a LabeledEnum into a LabeledEnum
+ * instance using a LabeledEnumResolver.
  * @author Keith Donald
  */
 public class LabeledEnumEditor extends PropertyEditorSupport {
