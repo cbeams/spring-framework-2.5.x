@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
+
+<webflow id="sellItemFlow" start-state="setupForm">
+
+	<action-state id="setupForm">
+		<action bean="sellItemFlowAction"/>
+		<transition on="success" to="enterPriceAndItemCount"/>
+	</action-state>
+
+	<view-state id="enterPriceAndItemCount" view="priceAndItemCountForm">
+		<transition on="submit" to="bindAndValidatePriceAndItemCount"/>
+	</view-state>
+	
+	<action-state id="bindAndValidatePriceAndItemCount">
+		<action bean="sellItemFlowAction">
+			<property name="executeMethodName" value="bindAndValidate"/>
+		</action>
+		<transition on="success" to="enterCategory"/>
+		<transition on="error" to="enterPriceAndItemCount"/>
+	</action-state>
+	
+	<view-state id="enterCategory" view="categoryForm">
+		<transition on="submit" to="bindAndValidateCategory"/>
+	</view-state>
+
+	<action-state id="bindAndValidateCategory">
+		<action bean="sellItemFlowAction">
+			<property name="executeMethodName" value="bindAndValidate"/>
+		</action>
+		<transition on="success" to="processShippingDetails"/>
+		<transition on="error" to="enterCategory"/>
+	</action-state>
+	
+	<action-state id="processShippingDetails">
+		<action bean="sellItemFlowAction"/>
+		<transition on="shipping" to="enterShippingDetails"/>
+		<transition on="pickedUp" to="showCostOverview"/>
+	</action-state>
+	
+	<view-state id="enterShippingDetails" view="shippingDetailsForm">
+		<transition on="submit" to="bindAndValidateShippingDetails"/>
+	</view-state>
+
+	<action-state id="bindAndValidateShippingDetails">
+		<action bean="sellItemFlowAction">
+			<property name="executeMethodName" value="bindAndValidate"/>
+		</action>
+		<transition on="success" to="showCostOverview"/>
+		<transition on="error" to="enterShippingDetails"/>
+	</action-state>
+	
+	<end-state id="showCostOverview" view="costOverview"/>
+
+</webflow>
