@@ -60,7 +60,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.42 2004-07-29 12:21:35 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.43 2004-08-04 15:10:57 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -1029,6 +1029,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		
 		TestBean tb2 = new TestBean();
 		tb2.setAge(26);
+		tb2.setName("Juergen");
 		TestBean tb3 = new TestBean();
 		tb3.setAge(37);
 		ProxyFactory pc = new ProxyFactory(tb1);
@@ -1050,13 +1051,16 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(nop.getCount(), 3);
 		hts.swap(tb1);
 		assertEquals(tb1.getAge(), proxy.getAge());
-		assertEquals(nop.getCount(), 4);
+		tb1.setName("Colin");
+		assertEquals(tb1.getName(), proxy.getName());
+		assertEquals(nop.getCount(), 5);
 		
 		// Change back, relying on casting to Advised
 		Advised advised = (Advised) proxy;
 		assertSame(hts, advised.getTargetSource());
 		SingletonTargetSource sts = new SingletonTargetSource(tb2);
 		advised.setTargetSource(sts);
+		assertEquals(tb2.getName(), proxy.getName());
 		assertSame(sts, advised.getTargetSource());
 		assertEquals(tb2.getAge(), proxy.getAge());
 	}
