@@ -38,18 +38,30 @@ import org.springframework.transaction.TransactionUsageException;
  * through a standard JtaTransactionManager definition with a corresponding
  * "transactionManagerName" property value.
  *
- * <p>Currently tested on BEA WebLogic 8.1 SP2. On WebLogic 7.0 SP2, "forceResume"
- * unfortunately fails with a mysterious, WebLogic-internal NullPointerException.
- * Thanks to Eugene Kuleshov for tracking down and reporting this issue!
- * The solution for WebLogic 7.0 is to set the transactionManager using the
- * WebLogicServerTransactionManagerFactoryBean.  This factory bean can provide a
- * reference to the ServerTransactionManagerImpl via WebLogic's TxHelper class.
- * This has been tested on WebLogic 7.0 SP5.
+ * <p>Will work out-of-the-box on BEA WebLogic 8.1 and higher (tested on 8.1 SP2).
+ * On WebLogic 7.0 SP2, a "forceResume" call on the TransactionManager reference
+ * obtained from JNDI unfortunately fails with a mysterious, WebLogic-internal
+ * NullPointerException. (Thanks to Eugene Kuleshov and Dmitri Maximovich for
+ * tracking down and reporting this issue!)
+ *
+ * <p>The solution for WebLogic 7.0 is to wire the "transactionManager" property
+ * with a WebLogicServerTransactionManagerFactoryBean. This factory bean provides
+ * a reference to the ServerTransactionManagerImpl via WebLogic's TxHelper class.
+ * This has been tested on WebLogic 7.0 SP5. The TxHelper lookup is available on
+ * WebLogic 8.1, but deprecated - so we recommend the default JNDI lookup there.
+ *
+ * <pre>
+ * &lt;bean id="wlsTm" class="org.springframework.transaction.jta.WebLogicServerTransactionManagerFactoryBean"/&gt;
+ *
+ * &lt;bean id="transactionManager" class="org.springframework.transaction.jta.WebLogicJtaTransactionManager"&gt;
+ *   &lt;property name="transactionManager"&gt;&lt;ref local="wlsTm"/&gt;&lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setTransactionManagerName
  * @see #DEFAULT_TRANSACTION_MANAGER_NAME
+ * @see WebLogicServerTransactionManagerFactoryBean
  * @see weblogic.transaction.TransactionManager#forceResume
  */
 public class WebLogicJtaTransactionManager extends JtaTransactionManager {

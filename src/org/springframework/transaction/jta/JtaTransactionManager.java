@@ -169,13 +169,13 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
 
-	private transient UserTransaction userTransaction;
-
 	private String userTransactionName = DEFAULT_USER_TRANSACTION_NAME;
 
-	private transient TransactionManager transactionManager;
+	private transient UserTransaction userTransaction;
 
 	private String transactionManagerName;
+
+	private transient TransactionManager transactionManager;
 
 	private boolean autodetectTransactionManager = true;
 
@@ -236,8 +236,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Set the JNDI name of the JTA UserTransaction.
-	 * The default one is used if not set.
+	 * The J2EE default "java:comp/UserTransaction" is used if not set.
 	 * @see #DEFAULT_USER_TRANSACTION_NAME
+	 * @see #setUserTransaction
 	 */
 	public void setUserTransactionName(String userTransactionName) {
 		this.userTransactionName = userTransactionName;
@@ -247,6 +248,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	 * Set the JTA UserTransaction to use as direct reference.
 	 * Typically just used for local JTA setups; in a J2EE environment,
 	 * the UserTransaction will always be fetched from JNDI.
+	 * @see #setUserTransactionName
 	 */
 	public void setUserTransaction(UserTransaction userTransaction) {
 		this.userTransaction = userTransaction;
@@ -260,9 +262,25 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	/**
+	 * Set the JNDI name of the JTA TransactionManager.
+	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
+	 * as this not supported by the UserTransaction interface.
+	 * <p>Note that the TransactionManager will be autodetected if the JTA
+	 * UserTransaction object implements the JTA TransactionManager interface too.
+	 * @see #setTransactionManager
+	 */
+	public void setTransactionManagerName(String transactionManagerName) {
+		this.transactionManagerName = transactionManagerName;
+	}
+
+	/**
 	 * Set the JTA TransactionManager to use as direct reference.
 	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
 	 * as this not supported by the UserTransaction interface.
+	 * <p>Note that the TransactionManager will be autodetected if the JTA
+	 * UserTransaction object implements the JTA TransactionManager interface too.
+	 * @see #setTransactionManagerName
+	 * @see #setAutodetectTransactionManager
 	 */
 	public void setTransactionManager(TransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
@@ -273,15 +291,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	 */
 	public TransactionManager getTransactionManager() {
 		return transactionManager;
-	}
-
-	/**
-	 * Set the JNDI name of the JTA TransactionManager.
-	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
-	 * as this not supported by the UserTransaction interface.
-	 */
-	public void setTransactionManagerName(String transactionManagerName) {
-		this.transactionManagerName = transactionManagerName;
 	}
 
 	/**
