@@ -40,13 +40,13 @@ import org.springframework.core.io.Resource;
  *
  * <p>Returns SQLErrorCodes populated with vendor codes
  * defined in a configuration file named "sql-error-codes.xml".
- * Reads the default file in this package if not overridden by a file
- * in the root of the classpath (e.g. in the "/WEB-INF/classes" directory).
+ * Reads the default file in this package if not overridden by a file in
+ * the root of the class path (e.g. in the "/WEB-INF/classes" directory).
  *
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SQLErrorCodesFactory.java,v 1.13 2004-05-23 20:26:43 jhoeller Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.14 2004-05-27 13:20:48 jhoeller Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -87,14 +87,16 @@ public class SQLErrorCodesFactory {
 
 
 	/**
-	* Create a Map to hold error codes for all databases defined in the config file.
-	*/
-	private final Map rdbmsErrorCodes;
+	 * Map to hold database product name retrieved from database metadata.
+	 * Key is the DataSource, value is the database product name.
+	 */
+	private final Map dataSourceProductName = new HashMap(10);
 
 	/**
-	* Create a Map to hold database product name retreived from database metadata.
-	*/
-	private final Map dataSourceProductName = new HashMap(10);
+	 * Map to hold error codes for all databases defined in the config file.
+	 * Key is the database product name, value is the SQLErrorCodes instance.
+	 */
+	private final Map rdbmsErrorCodes;
 
 	/**
 	 * Not public to enforce Singleton design pattern.
@@ -157,6 +159,7 @@ public class SQLErrorCodesFactory {
 	 * <b>Not to be overriden by application developers, who should obtain instances
 	 * of this class from the static getInstance() method.</b>
 	 * @return the input stream or null if the resource wasn't found
+	 * @see #getInstance
 	 */
 	protected Resource loadResource(String path) {
 		return new ClassPathResource(path);
@@ -172,11 +175,10 @@ public class SQLErrorCodesFactory {
 		logger.info("Looking up default SQLErrorCodes for DataSource");
 		
 		// Let's avoid looking up database product info if we can.
-		Integer dataSourceHash = new Integer(ds.hashCode());
-		if (dataSourceProductName.containsKey(dataSourceHash)) {
-			String dataSourceDbName = (String)dataSourceProductName.get(dataSourceHash);
-			logger.info("Database product name found in cache {" +
-					dataSourceHash + "}. Name is " + dataSourceDbName);
+		String dataSourceDbName = (String) this.dataSourceProductName.get(ds);
+		if (dataSourceDbName != null) {
+			logger.info("Database product name found in cache for DataSource [" +
+			            ds + "]. Name is '" + dataSourceDbName + "'.");
 			return getErrorCodes(dataSourceDbName);
 		}
 
@@ -193,23 +195,23 @@ public class SQLErrorCodesFactory {
 				}
 			});
 			if (dbmdInfo != null) {
-		// should always be the case outside of test environments
-		String dbName = (String)dbmdInfo.get("DatabaseProductName");
-		String driverVersion = (String)dbmdInfo.get("DriverVersion");
-		// special check for DB2
-		if (dbName != null && dbName.startsWith("DB2/")) {
-			dbName = "DB2";
-		}
-		if (dbName != null) {
-			dataSourceProductName.put(new Integer(ds.hashCode()), dbName);
-			logger.info("Database Product Name is " + dbName);
-			logger.info("Driver Version is " + driverVersion);
-			SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
-			if (sec != null) {
-				return sec;
-			}
-			logger.info("Error Codes for " + dbName + " not found");
-		}
+				// should always be the case outside of test environments
+				String dbName = (String) dbmdInfo.get("DatabaseProductName");
+				String driverVersion = (String) dbmdInfo.get("DriverVersion");
+				// special check for DB2
+				if (dbName != null && dbName.startsWith("DB2/")) {
+					dbName = "DB2";
+				}
+				if (dbName != null) {
+					this.dataSourceProductName.put(ds, dbName);
+					logger.info("Database Product Name is " + dbName);
+					logger.info("Driver Version is " + driverVersion);
+					SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
+					if (sec != null) {
+						return sec;
+					}
+					logger.info("Error Codes for " + dbName + " not found");
+				}
 			}
 		}
 		catch (MetaDataAccessException ex) {
@@ -221,8 +223,8 @@ public class SQLErrorCodesFactory {
 	}
 
 	/**
-	 * Return SQLErrorCodes instance for the given database. No need for a 
-	 * database metadata lookup.
+	 * Return SQLErrorCodes instance for the given database.
+	 * No need for a  database metadata lookup.
 	 */
 	public SQLErrorCodes getErrorCodes(String dbName) {
 		SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
