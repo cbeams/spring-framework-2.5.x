@@ -19,7 +19,6 @@ package org.springframework.web.servlet.support;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
@@ -43,10 +42,8 @@ public abstract class JstlUtils {
 	 * @param request current HTTP request
 	 * @param messageSource the MessageSource to expose,
 	 * typically the current application context
-	 * @throws ServletException
 	 */
-	public static void exposeLocalizationContext(HttpServletRequest request, MessageSource messageSource)
-	    throws ServletException {
+	public static void exposeLocalizationContext(HttpServletRequest request, MessageSource messageSource) {
 
 		// add JSTL locale and LocalizationContext request attributes
 		Locale jstlLocale = RequestContextUtils.getLocale(request);
