@@ -21,10 +21,10 @@ import java.lang.reflect.Method;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
@@ -40,27 +40,24 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * and AspectJ aspect.
  * @author Rod Johnson
  * @since 16-Mar-2003
-*  @version $Id: AbstractTransactionAspectTests.java,v 1.1 2004-06-30 11:35:01 johnsonr Exp $
+*  @version $Id: AbstractTransactionAspectTests.java,v 1.2 2004-06-30 14:43:16 jhoeller Exp $
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
 	
 	/**
-	 * Subclasses must implement this to create an advised object
-	 * based on the given target. In the case of AspectJ, the 
-	 * advised object will already have been created, as there's
-	 * no distinction between target and proxy.
+	 * Subclasses must implement this to create an advised object based on the
+	 * given target. In the case of AspectJ, the  advised object will already
+	 * have been created, as there's no distinction between target and proxy.
 	 * In the case of Spring's own AOP framework, a proxy must be created
 	 * using a suitably configured transaction interceptor
-	 * @param target target if there's a distinct target. If not (AspectJ)
-	 * return target
-	 * @param ptm
-	 * @param tas
+	 * @param target target if there's a distinct target. If not (AspectJ),
+	 * return target.
 	 * @return transactional advised object
 	 */
-	protected abstract Object advised(Object target, PlatformTransactionManager ptm, TransactionAttributeSource tas);
+	protected abstract Object advised(Object target, PlatformTransactionManager ptm,
+	                                  TransactionAttributeSource tas);
 
 	public void testNoTransaction() throws Exception {
-		
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
@@ -69,13 +66,15 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		TestBean tb = new TestBean();
 		TransactionAttributeSource tas = new MapTransactionAttributeSource();
-		
+
 		// All the methods in this class use the advised() template method
 		// to obtain a transaction object, configured with the given PlatformTransactionManager
 		// and transaction attribute source
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
+		checkTransactionStatus(false);
 		itb.getName();
+		checkTransactionStatus(false);
 
 		ptxControl.verify();
 	}
@@ -105,56 +104,54 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
+		checkTransactionStatus(false);
 		// verification!?
 		itb.getName();
+		checkTransactionStatus(false);
 
 		ptxControl.verify();
 	}
 	
 	public void testRollbackOnCheckedException() throws Throwable {
-		testRollbackOnException(new Exception(), true, false);
+		doTestRollbackOnException(new Exception(), true, false);
 	}
 
 	public void testNoRollbackOnCheckedException() throws Throwable {
-		testRollbackOnException(new Exception(), false, false);
+		doTestRollbackOnException(new Exception(), false, false);
 	}
 
 	public void testRollbackOnUncheckedException() throws Throwable {
-		testRollbackOnException(new RuntimeException(), true, false);
+		doTestRollbackOnException(new RuntimeException(), true, false);
 	}
 
 	public void testNoRollbackOnUncheckedException() throws Throwable {
-		testRollbackOnException(new RuntimeException(), false, false);
+		doTestRollbackOnException(new RuntimeException(), false, false);
 	}
 
 	public void testRollbackOnCheckedExceptionWithRollbackException() throws Throwable {
-		testRollbackOnException(new Exception(), true, true);
+		doTestRollbackOnException(new Exception(), true, true);
 	}
 
 	public void testNoRollbackOnCheckedExceptionWithRollbackException() throws Throwable {
-		testRollbackOnException(new Exception(), false, true);
+		doTestRollbackOnException(new Exception(), false, true);
 	}
 
 	public void testRollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
-		testRollbackOnException(new RuntimeException(), true, true);
+		doTestRollbackOnException(new RuntimeException(), true, true);
 	}
 
 	public void testNoRollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
-		testRollbackOnException(new RuntimeException(), false, true);
+		doTestRollbackOnException(new RuntimeException(), false, true);
 	}
 
-	
-	
 	/**
-	 * Check that the given exception thrown by the target can
-	 * produce the desired behaviour with the appropriate transaction
-	 * attribute
+	 * Check that the given exception thrown by the target can produce the
+	 * desired behavior with the appropriate transaction attribute.
 	 * @param ex exception to be thrown by the target
 	 * @param shouldRollback whether this should cause a transaction rollback
-	 * @throws java.lang.Throwable
 	 */
-	protected void testRollbackOnException(final Exception ex, final boolean shouldRollback, boolean rollbackException)
-	    throws Throwable {
+	protected void doTestRollbackOnException(final Exception ex, final boolean shouldRollback,
+	                                         boolean rollbackException) throws Exception {
 
 		TransactionAttribute txatt = new DefaultTransactionAttribute() {
 			public boolean rollbackOn(Throwable t) {
@@ -284,15 +281,10 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		ptxControl.verify();
 	}
 
-
-
 	/**
-	 * Simulate failure of the underlying transaction infrastructure
-	 * to commit.
-	 * Check that the target method was invoked, but that the
-	 * transaction infrastructure exception was thrown to the
-	 * client
-	 * @throws java.lang.Exception
+	 * Simulate failure of the underlying transaction infrastructure to commit.
+	 * Check that the target method was invoked, but that the transaction
+	 * infrastructure exception was thrown to the client
 	 */
 	public void testCannotCommitTransaction() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
@@ -329,6 +321,21 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		// Should have invoked target and changed name
 		assertTrue(itb.getName() == name);
 		ptxControl.verify();
+	}
+
+	protected void checkTransactionStatus(boolean expected) {
+		try {
+			TransactionInterceptor.currentTransactionStatus();
+			if (!expected) {
+				fail("Should have thrown NoTransactionException");
+			}
+		}
+		catch (NoTransactionException ex) {
+			if (expected) {
+				fail("Should have current TransactionStatus");
+			}
+		}
+
 	}
 
 }
