@@ -115,6 +115,9 @@
 	<!-- A formatter registry, a thread-safe cache for Formatters -->
 	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterLocator"/>
 
+	<!-- A broadcaster that will notify the formatter registry to cleanup all thread locals on app shutdown -->
+	<bean id="thread.cleanupBroadcaster" class="org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster"/>
+
 	<!-- The set action sets request parameter attribute(s) as attributes in the flow model.
 	     The exact mapping(s) policies are fully configurable; in this case, the
 	     "id" request parameter is mapped to the "colleagueId" attribute and converted
