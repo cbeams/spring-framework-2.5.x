@@ -12,12 +12,10 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.logging.Log;
@@ -45,7 +43,7 @@ import org.springframework.mail.SimpleMailMessage;
  * @author Juergen Hoeller
  * @see JavaMailSender
  * @see org.springframework.mail.MailSender
- * @version $Id: JavaMailSenderImpl.java,v 1.7 2003-11-07 21:39:24 jhoeller Exp $
+ * @version $Id: JavaMailSenderImpl.java,v 1.8 2004-01-26 17:05:00 jhoeller Exp $
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
@@ -124,32 +122,29 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			List mimeMessages = new ArrayList();
 			for (int i = 0; i < simpleMessages.length; i++) {
 				SimpleMailMessage simpleMessage = simpleMessages[i];
-				if (logger.isDebugEnabled())
-					logger.debug("Sending email using the following mail properties [" + simpleMessage + "]");
-				MimeMessage mimeMessage = createMimeMessage();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Creating MIME message using the following mail properties: " + simpleMessage);
+				}
+				MimeMessageHelper message = new MimeMessageHelper(createMimeMessage());
 				if (simpleMessage.getFrom() != null) {
-					mimeMessage.setFrom(new InternetAddress(simpleMessage.getFrom()));
+					message.setFrom(simpleMessage.getFrom());
 				}
 				if (simpleMessage.getTo() != null) {
-					mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(simpleMessage.getTo()));
+					message.setTo(simpleMessage.getTo());
 				}
 				if (simpleMessage.getCc() != null) {
-					for (int j = 0; j < simpleMessage.getCc().length; j++) {
-						mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress(simpleMessage.getCc()[j]));
-					}
+					message.setCc(simpleMessage.getCc());
 				}
 				if (simpleMessage.getBcc() != null) {
-					for (int j = 0; j < simpleMessage.getBcc().length; j++) {
-						mimeMessage.addRecipient(Message.RecipientType.BCC, new InternetAddress(simpleMessage.getBcc()[j]));
-					}
+					message.setBcc(simpleMessage.getBcc());
 				}
 				if (simpleMessage.getSubject() != null) {
-					mimeMessage.setSubject(simpleMessage.getSubject());
+					message.setSubject(simpleMessage.getSubject());
 				}
 				if (simpleMessage.getText() != null) {
-					mimeMessage.setText(simpleMessage.getText());
+					message.setText(simpleMessage.getText());
 				}
-				mimeMessages.add(mimeMessage);
+				mimeMessages.add(message.getMimeMessage());
 			}
 			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
 		}
