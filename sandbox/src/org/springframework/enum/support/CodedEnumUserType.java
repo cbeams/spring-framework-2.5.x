@@ -37,10 +37,11 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  */
 public class CodedEnumUserType implements UserType {
+    private String enumType;
     private Class enumClass;
     private CodedEnumResolver enumResolver = StaticCodedEnumResolver
             .getInstance();
-    private NullableType type;
+    private NullableType persistentType;
 
     protected CodedEnumUserType(Class enumClass) {
         Assert.notNull(enumClass);
@@ -49,21 +50,41 @@ public class CodedEnumUserType implements UserType {
         this.enumClass = enumClass;
     }
 
+    protected CodedEnumUserType(Class enumClass, String enumType) {
+        Assert.notNull(enumClass);
+        Assert.notNull(enumType);
+        Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
+        setTypes(enumClass);
+        this.enumClass = enumClass;
+        this.enumType = enumType;
+    }
+
     protected CodedEnumUserType(Class enumClass, NullableType type) {
         Assert.notNull(enumClass);
         Assert.notNull(type);
         Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
         this.enumClass = enumClass;
-        this.type = type;
+        this.persistentType = type;
     }
+
+    protected CodedEnumUserType(Class enumClass, String enumType, NullableType persistentType) {
+        Assert.notNull(enumClass);
+        Assert.notNull(enumType);
+        Assert.notNull(persistentType);
+        Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
+        this.enumClass = enumClass;
+        this.enumType = enumType;
+        this.persistentType = persistentType;
+    }
+
 
     private void setTypes(Class enumClass) {
         if (ShortCodedEnum.class.isAssignableFrom(enumClass)) {
-            this.type = Hibernate.SHORT;
+            this.persistentType = Hibernate.SHORT;
         } else if (LetterCodedEnum.class.isAssignableFrom(enumClass)) {
-            this.type = Hibernate.CHARACTER;
+            this.persistentType = Hibernate.CHARACTER;
         } else if (StringCodedEnum.class.isAssignableFrom(enumClass)) {
-            this.type = Hibernate.STRING;
+            this.persistentType = Hibernate.STRING;
         } else {
             throw new IllegalArgumentException(
                     "Unable to determine enum sql type.");
@@ -78,7 +99,7 @@ public class CodedEnumUserType implements UserType {
      * @see net.sf.hibernate.UserType#sqlTypes()
      */
     public int[] sqlTypes() {
-        return type.sqlTypes(null);
+        return persistentType.sqlTypes(null);
     }
 
     /**
@@ -105,8 +126,10 @@ public class CodedEnumUserType implements UserType {
         if (code == null) {
             return null;
         }
-        String type = ClassUtils.getShortNameAsProperty(enumClass);
-        return enumResolver.getEnum(type, code);
+        if (enumType == null) {
+            enumType = ClassUtils.getShortNameAsProperty(enumClass);
+        }
+        return enumResolver.getEnum(enumType, code);
     }
 
     /**

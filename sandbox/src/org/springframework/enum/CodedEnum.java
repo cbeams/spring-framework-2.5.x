@@ -20,7 +20,7 @@ import org.springframework.context.MessageSourceResolvable;
 /**
  * @author  Keith Donald
  */
-public interface CodedEnum extends MessageSourceResolvable {
+public interface CodedEnum extends MessageSourceResolvable, Comparable {
     public String getType();
     public Object getCode();
     public String getLabel();

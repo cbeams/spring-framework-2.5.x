@@ -80,9 +80,6 @@ public class StaticCodedEnumResolver implements CodedEnumResolver {
 
     public void add(CodedEnum enum) {
         Map enums = (Map)this.enumsByType.get(enum.getType());
-        System.out.println(enum);
-        System.out.println(enum.getCode().getClass());
-
         if (enums == null) {
             enums = new TreeMap();
             enums.put(enum.getCode(), enum);
