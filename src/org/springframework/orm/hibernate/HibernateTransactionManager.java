@@ -198,8 +198,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected Object doGetTransaction() {
 		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
-			logger.debug("Found thread-bound session for Hibernate transaction");
 			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(this.sessionFactory);
+			logger.debug("Found thread-bound session [" + sessionHolder.getSession() + "] for Hibernate transaction");
 			return new HibernateTransactionObject(sessionHolder);
 		}
 		else {
@@ -213,16 +213,24 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
+
+		// cache to avoid repeated checks
+		boolean debugEnabled = logger.isDebugEnabled();
+
 		if (txObject.getSessionHolder() == null) {
-			logger.debug("Opening new session for Hibernate transaction");
 			Session session = SessionFactoryUtils.getSession(this.sessionFactory, this.entityInterceptor,
 																											 this.jdbcExceptionTranslator);
+			if (debugEnabled) {
+				logger.debug("Opened new session [" + session + "] for Hibernate transaction");
+			}
 			txObject.setSessionHolder(new SessionHolder(session));
 		}
 
-		logger.debug("Beginning Hibernate transaction");
 		try {
 			Session session = txObject.getSessionHolder().getSession();
+			if (debugEnabled) {
+				logger.debug("Beginning Hibernate transaction on session [" + session + "]");
+			}
 
 			// apply read-only
 			if (definition.isReadOnly()) {
@@ -231,6 +239,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					session.setFlushMode(FlushMode.NEVER);
 				}
 				try {
+					if (debugEnabled) {
+						logger.debug("Setting JDBC connection [" + session.connection() + "] read-only");
+					}
 					session.connection().setReadOnly(true);
 				}
 				catch (Exception ex) {
@@ -246,7 +257,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// apply isolation level
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-				logger.debug("Changing isolation level to " + definition.getIsolationLevel());
+				if (debugEnabled) {
+					logger.debug("Changing isolation level of JDBC connection [" + session.connection() +
+											 "] to " + definition.getIsolationLevel());
+				}
 				txObject.setPreviousIsolationLevel(new Integer(session.connection().getTransactionIsolation()));
 				session.connection().setTransactionIsolation(definition.getIsolationLevel());
 			}
@@ -276,9 +290,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		catch (SQLException ex) {
 			throw new CannotCreateTransactionException("Could not set transaction isolation", ex);
 		}
-		catch (net.sf.hibernate.TransactionException ex) {
-			throw new CannotCreateTransactionException("Could not create Hibernate transaction", ex);
-		}
 		catch (HibernateException ex) {
 			throw new CannotCreateTransactionException("Could not create Hibernate transaction", ex);
 		}
@@ -290,7 +301,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected void doCommit(TransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
-		logger.debug("Committing Hibernate transaction");
+		if (status.isDebug()) {
+			logger.debug("Committing Hibernate transaction on session [" +
+									 txObject.getSessionHolder().getSession() + "]");
+		}
 		try {
 			txObject.getSessionHolder().getTransaction().commit();
 		}
@@ -310,7 +324,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected void doRollback(TransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
-		logger.debug("Rolling back Hibernate transaction");
+		if (status.isDebug()) {
+			logger.debug("Rolling back Hibernate transaction on session [" +
+									 txObject.getSessionHolder().getSession() + "]");
+		}
 		try {
 			txObject.getSessionHolder().getTransaction().rollback();
 		}
@@ -329,7 +346,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected void doSetRollbackOnly(TransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
-		logger.debug("Setting Hibernate transaction rollback-only");
+		if (status.isDebug()) {
+			logger.debug("Setting Hibernate transaction on Session [" +
+									 txObject.getSessionHolder().getSession() + "] rollback-only");
+		}
 		txObject.getSessionHolder().setRollbackOnly();
 	}
 
@@ -351,12 +371,18 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (txObject.getPreviousIsolationLevel() != null) {
-				logger.debug("Resetting isolation level to " + txObject.getPreviousIsolationLevel());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resetting isolation level of connection [" + con + "] to " +
+											 txObject.getPreviousIsolationLevel());
+				}
 				con.setTransactionIsolation(txObject.getPreviousIsolationLevel().intValue());
 			}
 
 			// reset read-only
 			if (con.isReadOnly()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resetting read-only flag of connection [" + con + "]");
+				}
 				con.setReadOnly(false);
 			}
 		}
@@ -365,10 +391,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			logger.warn("Could not reset JDBC connection of Hibernate session", ex);
 		}
 
+		Session session = txObject.getSessionHolder().getSession();
 		if (txObject.isNewSessionHolder()) {
-			logger.debug("Closing Hibernate session after transaction");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Closing Hibernate session [" + session + "] after transaction");
+			}
 			try {
-				SessionFactoryUtils.closeSessionIfNecessary(txObject.getSessionHolder().getSession(), this.sessionFactory);
+				SessionFactoryUtils.closeSessionIfNecessary(session, this.sessionFactory);
 			}
 			catch (CleanupFailureDataAccessException ex) {
 				// just log it, to keep a transaction-related exception
@@ -376,10 +405,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 		}
 		else {
-			logger.debug("Not closing pre-bound Hibernate session after transaction");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Not closing pre-bound Hibernate session [" + session + "] after transaction");
+			}
 			txObject.getSessionHolder().setTransaction(null);
 			if (txObject.getPreviousFlushMode() != null) {
-				txObject.getSessionHolder().getSession().setFlushMode(txObject.getPreviousFlushMode());
+				session.setFlushMode(txObject.getPreviousFlushMode());
 			}
 		}
 	}

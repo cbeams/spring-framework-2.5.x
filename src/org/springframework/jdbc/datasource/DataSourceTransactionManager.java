@@ -45,7 +45,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.10 2003-12-21 17:16:58 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.11 2003-12-30 00:46:27 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -226,12 +226,18 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (txObject.getPreviousIsolationLevel() != null) {
-				logger.debug("Resetting isolation level to " + txObject.getPreviousIsolationLevel());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resetting isolation level of connection [" + con + "] to " +
+											 txObject.getPreviousIsolationLevel());
+				}
 				con.setTransactionIsolation(txObject.getPreviousIsolationLevel().intValue());
 			}
 
 			// reset read-only
 			if (con.isReadOnly()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resetting read-only flag of connection [" + con + "]");
+				}
 				con.setReadOnly(false);
 			}
 		}
