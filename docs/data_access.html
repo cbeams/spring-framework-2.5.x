@@ -38,7 +38,7 @@ public List loadProductsByCategory(final String category) {<br>
 }
 </code>
 
-<p>A callback implementation can effectively be used for any Hibernate data access. For simple single step actions like a single find, load, saveOrUpdate, or delete call, HibernateTemplate offers alternative convenience methods that can replace such one line callback implementations:
+<p>A callback implementation can effectively be used for any Hibernate data access. For simple single-step actions like a single find, load, saveOrUpdate, or delete call, HibernateTemplate offers alternative convenience methods that can replace such one line callback implementations:
 
 <p><code>
 public List loadProductsByCategory(String category) {<br>
@@ -47,7 +47,7 @@ public List loadProductsByCategory(String category) {<br>
 }
 </code>
 
-<p>In any case, HibernateTemplate cares for proper Session opening and closing, and for automatically taking part in transactions. The latter is available to non-templating code too, via the SessionFactoryUtils helper class. The template instances are thread-safe and reusable, they can thus be kept as instance variables of the surrounding class.
+<p>In any case, HibernateTemplate cares for proper Session opening and closing, and for automatically participating in transactions. The latter is available to non-templating code too, via the SessionFactoryUtils helper class. The template instances are thread-safe and reusable, they can thus be kept as instance variables of the surrounding class.
 
 
 <p><h3>3. Alternative: Applying an AOP Interceptor</h3>
@@ -85,7 +85,7 @@ public void increasePriceOfAllProductsInCategory(final String category) {<br>
 &nbsp;&nbsp;transactionTemplate.execute(<br>
 &nbsp;&nbsp;&nbsp;&nbsp;new TransactionCallbackWithoutResult() {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public void doInTransactionWithoutResult(TransactionStatus status) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List productsToChange = this.productDAO.loadProductsByCategory(category);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List productsToChange = productDAO.loadProductsByCategory(category);<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
 &nbsp;&nbsp;&nbsp;&nbsp;}<br>
