@@ -21,8 +21,8 @@
       <description>CmtJtaNoSpringTx Session Bean</description>
       <display-name>CmtJtaNoSpringTx</display-name>
       <ejb-name>CmtJtaNoSpringTx</ejb-name>
-      <home>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTxHome</home>
-      <remote>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx</remote>
+      <home>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTxHomeRemote</home>
+      <remote>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTxRemote</remote>
       <ejb-class>org.springframework.integrationtest.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTxEJB</ejb-class>
       <session-type>Stateless</session-type>
       <transaction-type>Container</transaction-type>
@@ -44,7 +44,7 @@
         <method-intf>Remote</method-intf>
         <method-name>*</method-name>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
     </container-transaction>
   </assembly-descriptor>
 </ejb-jar>

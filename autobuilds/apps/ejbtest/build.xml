@@ -67,11 +67,10 @@
   -->
   <!-- Destination locations for the build -->
   <property name="target.dir" location="target"/>
-  <property name="target.classes.dir" location="${target.dir}/classes"/>
   <property name="target.classes.java.dir"
-      location="${target.classes.dir}/java"/>
+      location="${target.dir}/classes"/>
   <property name="target.classes.cactus.dir"
-      location="${target.classes.dir}/cactus"/>
+      location="${target.dir}/cactus-classes"/>
   <property name="target.testreports.dir"
       location="${target.dir}/test-reports"/>
 
@@ -97,6 +96,8 @@
       location="${spring.root}/lib/jakarta-commons/commons-logging.jar"/>
   <property name="ejb.jar"
       location="${spring.root}/lib/j2ee/ejb.jar"/>
+  <property name="hibernate.jar"
+      location="${spring.root}/lib/hibernate/hibernate2.jar"/>
   <property name="junit.jar"
       location="${spring.root}/lib/junit/junit-3.8.1.jar"/>
   <property name="servlet.jar"
@@ -108,6 +109,7 @@
   <path id="project.classpath">
     <pathelement location="${commons.logging.jar}"/>
     <pathelement location="${ejb.jar}"/>
+    <pathelement location="${hibernate.jar}"/>
     <pathelement location="${servlet.jar}"/>
     <pathelement location="${spring.jar}"/>
   </path>
@@ -220,10 +222,25 @@
       <fileset dir="${spring.root}/lib/aopalliance">
         <include name="aopalliance.jar"/>
       </fileset>
+      <fileset dir="${spring.root}/lib/cglib">
+        <include name="asm.jar"/>
+        <include name="cglib-2.0.jar"/>
+      </fileset>
+      <fileset dir="${spring.root}/lib/dom4j">
+        <include name="dom4j.jar"/>
+      </fileset>
       <fileset dir="${spring.root}/lib/jakarta-commons">
+        <include name="commons-collections.jar"/>
         <include name="commons-logging.jar"/>
       </fileset>
-
+      <fileset dir="${spring.root}/lib/hibernate">
+        <include name="ehcache.jar"/>
+        <include name="hibernate2.jar"/>
+      	<include name="odmg.jar"/>
+      </fileset>
+      <fileset dir="${spring.root}/lib/hsqldb">
+        <include name="hsqldb.jar"/>
+      </fileset>
     </ear>
 
   </target>
@@ -322,7 +339,7 @@
       <formatter type="xml"/>
       <batchtest>
         <fileset dir="${src.cactus.dir}">
-          <include name="**/Test*.java"/>
+          <include name="**/*Test.java"/>
           <exclude name="**/Test*All.java"/>
         </fileset>
       </batchtest>

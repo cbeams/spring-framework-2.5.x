@@ -54,6 +54,7 @@
  * <http://www.apache.org/>.
  *
  */
+
 package org.apache.cactus.sample.ejb;
 
 import java.rmi.RemoteException;
@@ -65,17 +66,15 @@ import javax.ejb.EJBObject;
  *
  * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
  * 
- * @version $Id: Converter.java,v 1.1 2004-04-16 23:13:36 colins Exp $
+ * @version $Id: Converter.java,v 1.2 2004-04-18 03:28:52 colins Exp $
  */
-public interface Converter extends EJBObject
-{
-    /**
-     * Convert Yens to US dollars.
-     * 
-     * @param theYenAmount the amount to convert
-     * @return the conversion in US dollars
-     * @throws RemoteException in case of error
-     */
-    double convertYenToDollar(double theYenAmount) 
-        throws RemoteException;
+public interface Converter extends EJBObject {
+	/**
+	 * Convert Yens to US dollars.
+	 * 
+	 * @param theYenAmount the amount to convert
+	 * @return the conversion in US dollars
+	 * @throws RemoteException in case of error
+	 */
+	double convertYenToDollar(double theYenAmount) throws RemoteException;
 }

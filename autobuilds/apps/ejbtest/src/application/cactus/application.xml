@@ -13,13 +13,34 @@
   <description>Cactus EJB Sample for J2EE 1.3</description>
 
   <module>
-    <java>spring.jar</java>
-  </module>
-  <module>
     <java>aopalliance.jar</java>
   </module>
   <module>
+    <java>asm.jar</java>
+  </module>
+  <module>
+    <java>cglib-2.0.jar</java>
+  </module>
+  <module>
+    <java>commons-collections.jar</java>
+  </module>
+  <module>
     <java>commons-logging.jar</java>
+  </module>
+  <module>
+    <java>dom4j.jar</java>
+  </module>
+  <module>
+    <java>ehcache.jar</java>
+  </module>
+  <module>
+    <java>hibernate2.jar</java>
+  </module>
+  <module>
+    <java>odmg.jar</java>
+  </module>
+  <module>
+    <java>spring.jar</java>
   </module>
 
   <module>

@@ -57,21 +57,41 @@
 
 package org.apache.cactus.sample.ejb;
 
-import java.rmi.RemoteException;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.rmi.PortableRemoteObject;
 
-import javax.ejb.CreateException;
-import javax.ejb.EJBHome;
+import org.apache.cactus.ServletTestCase;
 
 /**
- * Sample EJB home interface
+ * Sample Cactus test for a session bean.
  *
  * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
  * 
- * @version $Id: ConverterHome.java,v 1.2 2004-04-18 03:28:52 colins Exp $
+ * @version $Id: ConverterEJBTest.java,v 1.1 2004-04-18 03:28:53 colins Exp $
  */
-public interface ConverterHome extends EJBHome {
+public class ConverterEJBTest extends ServletTestCase {
 	/**
-	 * @see EJB specifications
+	 * Class under test
 	 */
-	Converter create() throws RemoteException, CreateException;
+	private Converter converter;
+
+	/**
+	 * @see TestCase#setUp()
+	 */
+	public void setUp() throws Exception {
+		Context ctx = new InitialContext();
+		ConverterHome home = (ConverterHome) PortableRemoteObject.narrow(ctx
+				.lookup("Converter"), ConverterHome.class);
+		this.converter = home.create();
+	}
+
+	/**
+	 * Verify yen to dollars conversion works.
+	 * @throws Exception on error
+	 */
+	public void testConvert() throws Exception {
+		double dollar = this.converter.convertYenToDollar(100.0);
+		assertEquals("dollar", 1.0, dollar, 0.01);
+	}
 }

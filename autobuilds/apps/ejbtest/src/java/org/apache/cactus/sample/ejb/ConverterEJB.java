@@ -54,6 +54,7 @@
  * <http://www.apache.org/>.
  *
  */
+
 package org.apache.cactus.sample.ejb;
 
 import javax.ejb.CreateException;
@@ -65,56 +66,49 @@ import javax.ejb.SessionContext;
  *
  * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
  * 
- * @version $Id: ConverterEJB.java,v 1.1 2004-04-16 23:13:36 colins Exp $
+ * @version $Id: ConverterEJB.java,v 1.2 2004-04-18 03:28:52 colins Exp $
  */
-public class ConverterEJB implements SessionBean
-{
-    /**
-     * Session bean context
-     */
-    private SessionContext context;
+public class ConverterEJB implements SessionBean {
+	/**
+	 * Session bean context
+	 */
+	private SessionContext context;
 
-    /**
-     * @see Converter#convertYenToDollar(double)
-     */
-    public double convertYenToDollar(double theYenAmount)
-    {
-        return theYenAmount / 100.0;
-    }
+	/**
+	 * @see Converter#convertYenToDollar(double)
+	 */
+	public double convertYenToDollar(double theYenAmount) {
+		return theYenAmount / 100.0;
+	}
 
-    /**
-     * @see EJB specifications 
-     */
-    public void ejbCreate() throws CreateException
-    {
-    }
+	/**
+	 * @see EJB specifications 
+	 */
+	public void ejbCreate() throws CreateException {
+	}
 
-    /**
-     * @see EJB specifications 
-     */
-    public void setSessionContext(SessionContext theContext)
-    {
-        this.context = theContext;
-    }
+	/**
+	 * @see EJB specifications 
+	 */
+	public void setSessionContext(SessionContext theContext) {
+		this.context = theContext;
+	}
 
-    /**
-     * @see SessionBean#ejbActivate()
-     */
-    public void ejbActivate()
-    {
-    }
+	/**
+	 * @see SessionBean#ejbActivate()
+	 */
+	public void ejbActivate() {
+	}
 
-    /**
-     * @see SessionBean#ejbPassivate()
-     */
-    public void ejbPassivate()
-    {
-    }
+	/**
+	 * @see SessionBean#ejbPassivate()
+	 */
+	public void ejbPassivate() {
+	}
 
-    /**
-     * @see SessionBean#ejbRemove()
-     */
-    public void ejbRemove()
-    {
-    }
+	/**
+	 * @see SessionBean#ejbRemove()
+	 */
+	public void ejbRemove() {
+	}
 }
