@@ -41,11 +41,71 @@
   
   <sect1 id="jdbc-core">
     <title>Using the JDBC Core classes to control basic JDBC processing and error handling</title>
-      <sect2 id="jdbc-JDBCTemplate">
-    	  <title>JDBCTemplate</title>
+      <sect2 id="jdbc-JdbcTemplate">
+    	  <title>JdbcTemplate</title>
 			</sect2>
+			<para>
+			This is the central class in the JDBC core package.  It simplifies the use of JDBC since it handles the creation and release
+			of resources.  This helps to avoid common errors like forgetting to always close the connection. It executes the core JDBC 
+			workflow like statement creation and execution, leaving application code to provide SQL and extract results. This class executes
+			SQL queries, update statments or stored procedure calls, initating iteration over ResultSets and extraction of returned parameter values.  
+			It also catches JDBC exceptions and translates them to the generic, more informative, exception hierarchy defined in the 
+			<literal>org.springframework.dao</literal> package.
+      </para>
+			<para>
+      Code using this class only need to implement callback interfaces, giving them a clearly defined contract. The <literal>PreparedStatementCreator</literal> 
+			callback interface creates a prepared statement given a Connection provided by this class, providing SQL and any necessary parameters.  
+			The same is true for the <literal>CallableStatementCreateor</literal> interface which creates callable statement.  The <literal>RowCallbackHandler</literal> interface 
+			extracts values from each row of a ResultSet.
+      </para>
+			<para>
+      This class can be used within a service implementation via direct instantiation with a DataSource reference, or get prepared in an 
+			application context and given to services as bean reference. Note: The DataSource should always be configured as a bean in the 
+			application context, in the first case given to the service directly, in the second case to the prepared template.  Because this 
+			class is parameterizable by the callback interfaces and the SQLExceptionTranslator interface, it isn't necessary to subclass it. 
+			All SQL issued by this class is logged. 
+			</para>
       <sect2 id="jdbc-SQLExceptionTranslator">
     	  <title>SQLExceptionTranslator</title>
+				<para>
+				Interface to be implemented by classes that can translate between SQLExceptions and our data access strategy-agnostic 
+				<literal>org.springframework.dao.DataAccessException</literal>.
+				</para>
+				<para>
+				Implementations can be generic (for example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error codes) 
+				for greater precision. 
+        </para>
+				<para>
+				<literal>SQLErrorCodeSQLExceptionTranslator</literal> is the implementation of SQLExceptionTranslator that is used by default.  
+				This implementation uses specific vendor codes. More precise than <literal>SQLState</literal> implementation, but vendor specific.  
+				The error code translations are based on codes held in a JavaBean type class named <literal>SQLErrorCodes</literal>.  This class is
+				created and populated by an <literal>SQLErrorCodesFactory</literal> which as the name suggests is a factory for creating 
+				<literal>SQLErrorCodes</literal> based on the contents of a configuration file named "sql-error-codes.xml".  This file is populated with 
+				vendor codes and based on the DatabaseProductName taken from the DatabaseMetaData, the codes for the current database are used.
+				</para>
+				<para>
+				The <literal>SQLErrorCodeSQLExceptionTranslator</literal>  applies the following matching rules:
+				<itemizedlist spacing="compact">
+				<listitem>
+				<para>
+				Try custom translation implemented by any subclass. Note that this class is concrete and is typically used itself, in which case 
+				this rule doesn't apply.
+				</para>
+				</listitem>
+				<listitem>
+				<para>
+				Apply error code matching. Error codes are obtained from the SQLErrorCodesFactory by default. This looks up error 
+				codes from the classpath and keys into them from the database name from the database metadata.
+				</para>
+				</listitem>
+				<listitem>
+				<para>
+				Use the fallback translator. SQLStateSQLExceptionTranslator is the default fallback translator. 
+				</para>
+				</listitem>
+				</itemizedlist>
+       </para>
+
 			</sect2>
 
   </sect1>
