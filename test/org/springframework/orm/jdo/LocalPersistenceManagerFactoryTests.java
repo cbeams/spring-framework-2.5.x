@@ -17,19 +17,40 @@
 package org.springframework.orm.jdo;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Properties;
 
 import javax.jdo.JDOFatalUserException;
+import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * @author Juergen Hoeller
  */
 public class LocalPersistenceManagerFactoryTests extends TestCase {
+
+	public void testLocalPersistenceManagerFactoryBean() throws IOException {
+		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
+				return new MockPersistenceManagerFactory();
+			}
+		};
+		pmfb.setJdoProperties(new Properties());
+		DataSource ds = new DriverManagerDataSource();
+		DataSource ds2 = new DriverManagerDataSource();
+		pmfb.setDataSource(ds);
+		pmfb.setDataSource2(ds2);
+		pmfb.afterPropertiesSet();
+		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfb.getObject();
+		assertEquals(ds, pmf.getConnectionFactory());
+		assertEquals(ds2, pmf.getConnectionFactory2());
+	}
 
 	public void testLocalPersistenceManagerFactoryBeanWithInvalidSettings() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean();
@@ -42,17 +63,36 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		}
 	}
 
-	public void testLocalPersistenceManagerFactoryBeanWithJdoHelper() throws IOException {
+	public void testLocalPersistenceManagerFactoryBeanWithIncompleteProperties() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean();
-		Properties prop = new Properties();
-		prop.setProperty("myKey", "myValue");
-		pmfb.setJdoProperties(prop);
+		Properties props = new Properties();
+		props.setProperty("myKey", "myValue");
+		pmfb.setJdoProperties(props);
 		try {
 			pmfb.afterPropertiesSet();
 			fail("Should have thrown JDOFatalUserException");
 		}
 		catch (JDOFatalUserException ex) {
 			// expected
+		}
+	}
+
+	public void testLocalPersistenceManagerFactoryBeanWithInvalidProperty() throws IOException {
+		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
+				throw new IllegalArgumentException(props.getProperty("myKey"));
+			}
+		};
+		Properties props = new Properties();
+		props.setProperty("myKey", "myValue");
+		pmfb.setJdoProperties(props);
+		try {
+			pmfb.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+			assertTrue("Correct exception", "myValue".equals(ex.getMessage()));
 		}
 	}
 
@@ -73,22 +113,133 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		}
 	}
 
-	public void testLocalPersistenceManagerFactoryBeanWithProperties() throws IOException {
-		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
-			protected PersistenceManagerFactory newPersistenceManagerFactory(Properties prop) {
-				throw new IllegalArgumentException(prop.getProperty("myKey"));
-			}
-		};
-		Properties prop = new Properties();
-		prop.setProperty("myKey", "myValue");
-		pmfb.setJdoProperties(prop);
-		try {
-			pmfb.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
+
+	public static class MockPersistenceManagerFactory implements PersistenceManagerFactory {
+
+		private Object connectionFactory;
+
+		private Object connectionFactory2;
+
+		public void close() {
 		}
-		catch (IllegalArgumentException ex) {
-			// expected
-			assertTrue("Correct exception", "myValue".equals(ex.getMessage()));
+
+		public PersistenceManager getPersistenceManager() {
+			return null;
+		}
+
+		public PersistenceManager getPersistenceManager(String beanName, String beanName1) {
+			return null;
+		}
+
+		public void setConnectionUserName(String beanName) {
+		}
+
+		public String getConnectionUserName() {
+			return null;
+		}
+
+		public void setConnectionPassword(String beanName) {
+		}
+
+		public void setConnectionURL(String beanName) {
+		}
+
+		public String getConnectionURL() {
+			return null;
+		}
+
+		public void setConnectionDriverName(String beanName) {
+		}
+
+		public String getConnectionDriverName() {
+			return null;
+		}
+
+		public void setConnectionFactoryName(String beanName) {
+		}
+
+		public String getConnectionFactoryName() {
+			return null;
+		}
+
+		public void setConnectionFactory(Object o) {
+			this.connectionFactory = o;
+		}
+
+		public Object getConnectionFactory() {
+			return connectionFactory;
+		}
+
+		public void setConnectionFactory2Name(String beanName) {
+		}
+
+		public String getConnectionFactory2Name() {
+			return null;
+		}
+
+		public void setConnectionFactory2(Object o) {
+			this.connectionFactory2 = o;
+		}
+
+		public Object getConnectionFactory2() {
+			return connectionFactory2;
+		}
+
+		public void setMultithreaded(boolean b) {
+		}
+
+		public boolean getMultithreaded() {
+			return false;
+		}
+
+		public void setOptimistic(boolean b) {
+		}
+
+		public boolean getOptimistic() {
+			return false;
+		}
+
+		public void setRetainValues(boolean b) {
+		}
+
+		public boolean getRetainValues() {
+			return false;
+		}
+
+		public void setRestoreValues(boolean b) {
+		}
+
+		public boolean getRestoreValues() {
+			return false;
+		}
+
+		public void setNontransactionalRead(boolean b) {
+		}
+
+		public boolean getNontransactionalRead() {
+			return false;
+		}
+
+		public void setNontransactionalWrite(boolean b) {
+		}
+
+		public boolean getNontransactionalWrite() {
+			return false;
+		}
+
+		public void setIgnoreCache(boolean b) {
+		}
+
+		public boolean getIgnoreCache() {
+			return false;
+		}
+
+		public Properties getProperties() {
+			return null;
+		}
+
+		public Collection supportedOptions() {
+			return null;
 		}
 	}
 
