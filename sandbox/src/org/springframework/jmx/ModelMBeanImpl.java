@@ -15,6 +15,11 @@
  */
 package org.springframework.jmx;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
 import javax.management.AttributeChangeNotificationFilter;
@@ -30,6 +35,7 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
+import javax.management.NotificationEmitter;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ReflectionException;
@@ -40,37 +46,74 @@ import javax.management.modelmbean.ModelMBeanInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanWrapper;
+
+import java.util.List;
 
 /**
  * ModelMBean implementation that uses reflection to invoke methods for
  * operations and attributes.
  * 
  * @author Rob Harrop
+ * @since 1.2
+ * @version $Id: ModelMBeanImpl.java,v 1.4 2004-08-02 13:12:51 robharrop Exp $
  */
-public class ModelMBeanImpl implements ModelMBean {
+public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
 
+    /**
+     * Logger for this class
+     */
     private static final Log log = LogFactory.getLog(ModelMBeanImpl.class);
-    
+
+    /**
+     * MBeanInvoker responsible for invocations against this MBean
+     */
     private MBeanInvoker invoker = null;
 
+    /**
+     * Management Interface metadata for this MBean
+     */
     private MBeanInfo beanInfo = null;
 
+    /**
+     * Store a reference to the managed resource
+     */
     private Object managedResource = null;
 
-    private BeanWrapper resourceWrapper = null;
+    /**
+     * NotificationBroadcasterSupport for use with AttributeChangeNotifications
+     */
+    private NotificationBroadcasterSupport attributeNotificationBroadcaster = null;
 
-    private NotificationBroadcasterSupport notificationBroadcaster = null;
-    
+    /**
+     * Maintains a list of AttributeChangeNotificationFilters, keyed by
+     * NotificationListener. This allows for the more fine grained control over
+     * attribute notifications that is not supported by the
+     * NotificationBroadcasterSupport.
+     */
+    private Map attributeNotificationFilters = new HashMap();
+
+    /**
+     * Sequence number for broadcasting notifications
+     */
     private long sequenceNumber = 0;
-    
+
+    /**
+     * Notification message for attribute change notifications.
+     */
     private static final String MESSAGE = "Attribute Value Changed.";
 
+    /**
+     * Create a new instance using the supplier <tt>MBeanInvoker</tt>
+     * 
+     * @param invoker
+     *            An implementation of MBeanInvoker used to invoke operations on
+     *            the MBean
+     */
     public ModelMBeanImpl(MBeanInvoker invoker) {
         this.invoker = invoker;
 
         // create broadcaster support object
-        notificationBroadcaster = new NotificationBroadcasterSupport();
+        attributeNotificationBroadcaster = new NotificationBroadcasterSupport();
     }
 
     /**
@@ -99,6 +142,10 @@ public class ModelMBeanImpl implements ModelMBean {
 
     /**
      * Gets the value of an attribute (property)
+     * 
+     * @param attributeName
+     *            The name of the attribute whose value you want to return
+     * @return The value of the attribute
      */
     public Object getAttribute(String attributeName)
             throws AttributeNotFoundException, MBeanException,
@@ -112,7 +159,8 @@ public class ModelMBeanImpl implements ModelMBean {
     public void setAttribute(Attribute attribute)
             throws AttributeNotFoundException, InvalidAttributeValueException,
             MBeanException, ReflectionException {
-        Attribute current = new Attribute(attribute.getName(), getAttribute(attribute.getName()));
+        Attribute current = new Attribute(attribute.getName(),
+                getAttribute(attribute.getName()));
         invoker.setAttribute(attribute);
         sendAttributeChangeNotification(current, attribute);
     }
@@ -130,12 +178,12 @@ public class ModelMBeanImpl implements ModelMBean {
      */
     public AttributeList setAttributes(AttributeList attributes) {
         AttributeList result = new AttributeList();
-        for(int x = 0; x < attributes.size(); x++) {
-            Attribute a = (Attribute)attributes.get(x);
+        for (int x = 0; x < attributes.size(); x++) {
+            Attribute a = (Attribute) attributes.get(x);
             try {
                 setAttribute(a);
                 result.add(a);
-            } catch(JMException ignored) {
+            } catch (JMException ignored) {
                 // failures are ignored
             }
         }
@@ -162,52 +210,82 @@ public class ModelMBeanImpl implements ModelMBean {
 
     public void sendNotification(Notification notification)
             throws MBeanException, RuntimeOperationsException {
-        notificationBroadcaster.sendNotification(notification);
+        // TODO: Implement me
     }
 
     public void sendNotification(String notification) throws MBeanException,
             RuntimeOperationsException {
-
+        // TODO: Implement me
     }
 
-    public void sendAttributeChangeNotification(AttributeChangeNotification notification)
-            throws MBeanException, RuntimeOperationsException {
-        sendNotification(notification);
+    public void addNotificationListener(NotificationListener listener,
+            NotificationFilter filter, Object handBack)
+            throws IllegalArgumentException {
+
+        if(listener == null) {
+            throw new IllegalArgumentException("The NotificationListener cannot be null");
+        }
+            
+        if((filter != null) && (filter instanceof AttributeChangeNotificationFilter)) {
+            attributeNotificationBroadcaster.addNotificationListener(listener, filter, handBack);
+        }
     }
 
-    public void sendAttributeChangeNotification(Attribute originalAttr, Attribute newAttr)
-            throws MBeanException, RuntimeOperationsException {
-       
-       // locate the attribute
-       MBeanAttributeInfo[] attrs = beanInfo.getAttributes();
-       MBeanAttributeInfo attr = null;
-       
-       for(int x = 0; x < attrs.length; x++) {
-           if(attrs[x].getName().equals(originalAttr.getName())) {
-               attr = attrs[x];
-               break;
-           }
-       }
-        
-       if(attr == null) {
-           // just to be sure!
-           throw new RuntimeOperationsException(new NotificationException("Attribute: " + originalAttr.getName() + " is unrecognised"));
-       }
-       
-       AttributeChangeNotification notification = 
-           new AttributeChangeNotification(
-                   this, 
-                   sequenceNumber++, 
-                   System.currentTimeMillis(),
-                   MESSAGE,
-                   attr.getName(),
-                   attr.getType(),
-                   originalAttr, 
-                   newAttr);
-       
-       sendAttributeChangeNotification(notification);
+    public void removeNotificationListener(NotificationListener listener)
+            throws ListenerNotFoundException {
+        attributeNotificationBroadcaster.removeNotificationListener(listener);
+    }
+    
+
+    public void removeNotificationListener(NotificationListener listener, NotificationFilter filter, Object handBack) throws ListenerNotFoundException {
+        attributeNotificationBroadcaster.removeNotificationListener(listener, filter, handBack);
     }
 
+    public MBeanNotificationInfo[] getNotificationInfo() {
+        return null;
+    }
+
+    public void sendAttributeChangeNotification(
+            AttributeChangeNotification notification) throws MBeanException,
+            RuntimeOperationsException {
+        attributeNotificationBroadcaster.sendNotification(notification);
+    }
+
+    public void sendAttributeChangeNotification(Attribute originalAttr,
+            Attribute newAttr) throws MBeanException,
+            RuntimeOperationsException {
+
+        // locate the attribute
+        MBeanAttributeInfo[] attrs = beanInfo.getAttributes();
+        MBeanAttributeInfo attr = null;
+
+        for (int x = 0; x < attrs.length; x++) {
+            if (attrs[x].getName().equals(originalAttr.getName())) {
+                attr = attrs[x];
+                break;
+            }
+        }
+
+        if (attr == null) {
+            // just to be sure!
+            throw new RuntimeOperationsException(
+                    new NotificationException("Attribute: "
+                            + originalAttr.getName() + " is unrecognised"));
+        }
+
+        AttributeChangeNotification notification = new AttributeChangeNotification(
+                this, sequenceNumber++, System.currentTimeMillis(), MESSAGE,
+                attr.getName(), attr.getType(), originalAttr, newAttr);
+
+        sendAttributeChangeNotification(notification);
+    }
+
+    /**
+     * Add a NotificationListener to listen for
+     * changes in attribute values
+     * @param listener The NotificationListener to notify of changes
+     * @param attributeName The name of attribute to listen to or null to listen to all attributes 
+     */
     public void addAttributeChangeNotificationListener(
             NotificationListener listener, String attributeName, Object handback)
             throws MBeanException, RuntimeOperationsException,
@@ -225,9 +303,12 @@ public class ModelMBeanImpl implements ModelMBean {
                             "No attribute information is available for this MBean."
                                     + " Ensure that the management information has been configured."));
         }
-
+        
         MBeanAttributeInfo[] attrs = beanInfo.getAttributes();
         MBeanAttributeInfo attribute = null;
+
+        // see if we already have a filter for this listener
+        AttributeChangeNotificationFilter filter = new AttributeChangeNotificationFilter();
 
         // if an attribute name was
         // provided then we should check that it exists and
@@ -252,46 +333,61 @@ public class ModelMBeanImpl implements ModelMBean {
             }
 
             // add to broadcaster
-            AttributeChangeNotificationFilter filter = new AttributeChangeNotificationFilter();
             filter.enableAttribute(attributeName);
-            notificationBroadcaster.addNotificationListener(listener, filter,
-                    handback);
+            attributeNotificationBroadcaster.addNotificationListener(listener,
+                    filter, handback);
         } else {
-            AttributeChangeNotificationFilter filter = new AttributeChangeNotificationFilter();
 
             for (int x = 0; x < attrs.length; x++) {
                 filter.enableAttribute(attrs[x].getName());
             }
 
-            notificationBroadcaster.addNotificationListener(listener, filter,
-                    handback);
+            attributeNotificationBroadcaster.addNotificationListener(listener,
+                    filter, handback);
 
         }
-
+        
+        // cache the filter for this listener
+        // allows us to disable just a specific
+        // attribute name later on
+        List filterList = (List)attributeNotificationFilters.get(listener);
+        
+        if(filterList == null) {
+            filterList = new ArrayList();
+            attributeNotificationFilters.put(listener, filterList);
+        }
+        
+        filterList.add(filter);
     }
+
 
     public void removeAttributeChangeNotificationListener(
             NotificationListener listener, String attributeName)
             throws MBeanException, RuntimeOperationsException,
             ListenerNotFoundException {
-        
-    }
 
-    public void addNotificationListener(NotificationListener listener,
-            NotificationFilter filter, Object handBack)
-            throws IllegalArgumentException {
+        // check for null listener
+        if (listener == null) {
+            throw new ListenerNotFoundException(
+                    "A null NotificationListener cannot be found");
+        }
 
-        // TODO: more error handling
-        notificationBroadcaster.addNotificationListener(listener, filter, handBack);
-        
-    }
+        // filter list
+        List filters = (List)attributeNotificationFilters.get(listener);
 
-    public void removeNotificationListener(NotificationListener listener)
-            throws ListenerNotFoundException {
-
-    }
-
-    public MBeanNotificationInfo[] getNotificationInfo() {
-        return null;
+        if(filters != null) {
+            
+            Iterator itr = filters.iterator();
+            
+            while(itr.hasNext()){
+                AttributeChangeNotificationFilter filter = (AttributeChangeNotificationFilter)itr.next();
+                
+                if(attributeName == null) {
+                    filter.disableAllAttributes();
+                } else {
+                    filter.disableAttribute(attributeName);
+                }
+            }
+        }
     }
 }

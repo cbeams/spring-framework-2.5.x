@@ -74,7 +74,7 @@
 		<property name="namingStrategy">
 	        <ref local="metadataNamingStrategy"/>
 	    </property>    
-	</bean>
+	</bean> 
 	
 	<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
 		<property name="name">

@@ -3,7 +3,7 @@
 <!--
   Build file for the Spring Framework.
 
-  $Id: build.xml,v 1.74 2004-07-27 19:09:11 jhoeller Exp $
+  $Id: build.xml,v 1.75 2004-08-02 13:12:50 robharrop Exp $
 
   This script requires a "lib" directory containing the necessary third party JAR files.
   See project.properties for the definitions of the properties used in this file.
@@ -894,7 +894,7 @@
 
 		<mkdir dir="${sandbox.reports.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
+		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${sandbox.target.testclasses.dir}"/>
@@ -917,6 +917,51 @@
 		</junit>
 
 	</target>
+	
+	<target name="test-sandbox-summary" depends="build-sandbox,buildtests-sandbox" description="Run tests and generate test summary">
+	
+			<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
+
+			<mkdir dir="${sandbox.reports.dir}"/>
+					
+			<property name="reports.dir" value="${sandbox.reports.dir}"/>
+			<property name="summary.dir" value="${sandbox.reports.dir}/reports"/>
+
+			<mkdir dir="${reports.dir}"/>
+			<mkdir dir="${summary.dir}"/>
+
+			<junit printsummary="yes" haltonfailure="no" haltonerror="no">
+
+				<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+				<classpath location="${sandbox.target.testclasses.dir}"/>
+				<classpath location="${sandbox.target.classes.dir}"/>
+				<classpath location="${target.testclasses.dir}"/>
+
+				<!-- Need files loaded as resources -->
+				<classpath location="${sandbox.test.dir}"/>
+
+				<classpath refid="all-libs"/>
+				<classpath location="${target.classes.dir}"/>
+
+				<formatter type="plain" usefile="false"/>
+				<formatter type="xml"/>
+
+				<batchtest fork="yes" todir="${reports.dir}">
+					<fileset dir="${sandbox.target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+				</batchtest>
+
+			</junit>
+
+			<junitreport todir="${reports.dir}">
+
+				<fileset dir="${reports.dir}">
+					<include name="TEST-*.xml"/>
+				</fileset>
+				<report todir="${summary.dir}"/>
+
+			</junitreport>
+
+		</target>
 
 
 	<target name="sandboxjar" depends="build,build-sandbox,initdist" description="Create jar with sandbox classes">
