@@ -18,8 +18,8 @@ package org.springframework.web.flow;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Interface to be implemented by objects that can listen to the operation of a
- * Flow object.
+ * Interface to be implemented by objects that wish to listen and respond to the
+ * lifecycle of a FlowExecution.
  * @author Keith Donald
  */
 public interface FlowExecutionListener {
@@ -58,8 +58,7 @@ public interface FlowExecutionListener {
 	 * @param previousState
 	 * @param newState
 	 */
-	public void stateTransitioned(FlowExecution flowExecution, AbstractState previousState,
-			AbstractState newState);
+	public void stateTransitioned(FlowExecution flowExecution, AbstractState previousState, AbstractState newState);
 
 	/**
 	 * Called when a sub flow is spawned.
@@ -74,6 +73,11 @@ public interface FlowExecutionListener {
 	 */
 	public void subFlowEnded(FlowExecution flowExecution, FlowSession endedSession);
 
+	/**
+	 * Called when the flow execution terminates.
+	 * @param flowExecution
+	 * @param endedRootFlowSession
+	 */
 	public void ended(FlowExecution flowExecution, FlowSession endedRootFlowSession);
 
 }

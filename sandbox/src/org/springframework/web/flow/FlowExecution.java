@@ -45,28 +45,35 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	public AbstractState getCurrentState();
 
 	/**
-	 * @param input
-	 * @param request
-	 * @param response
-	 * @return
+	 * Start this flow execution, transitioning it to the start state and
+	 * returning the starting model and view descriptor.
+	 * @param input Model input attributes to the flow execution
+	 * @param request The current http request
+	 * @param response The current http response
+	 * @return The starting model and view.
 	 */
 	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response);
 
 	/**
-	 * @param eventId
-	 * @param currentStateId
-	 * @param request
-	 * @param response
-	 * @return
+	 * Signal an occurence of the specified event in the (optionally) provided
+	 * state of this flow execution.
+	 * @param eventId The event that occured
+	 * @param stateId The state the event occured in
+	 * @param request The current http request
+	 * @param response The current http response
+	 * @return The next model and view descriptor to display for this flow.
 	 */
-	public ModelAndView signalEvent(String eventId, String currentStateId, HttpServletRequest request,
+	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
 			HttpServletResponse response);
 
 	/**
-	 * @param flow
-	 * @param request
-	 * @param response
-	 * @return
+	 * Spawn the specified flow as a subflow of this flow execution, passing the
+	 * subflow the input provided.
+	 * @param flow The subfow definition.
+	 * @param input Subflow model input attributes.
+	 * @param request The current request
+	 * @param response The current response
+	 * @return The next model and view descriptor to display for this flow.
 	 */
 	public ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response);
 

@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Provides end state functionality for a web flow.
+ * Terminates a active web flow session when entered.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu

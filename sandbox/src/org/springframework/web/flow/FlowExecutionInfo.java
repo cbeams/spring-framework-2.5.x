@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * Provides management information about the current state of a ongoing flow
- * session execution.
+ * execution.
  * @author Keith Donald
  */
 public interface FlowExecutionInfo extends AttributesAccessor, Serializable {

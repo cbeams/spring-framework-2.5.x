@@ -31,7 +31,7 @@ import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A single client session instance of a flow.
+ * A single client session instance for a flow participating in a FlowExecution.
  * 
  * @author Keith Donald
  */

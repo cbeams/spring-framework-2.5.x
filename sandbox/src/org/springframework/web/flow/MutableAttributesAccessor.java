@@ -23,9 +23,23 @@ import java.util.Map;
  * @author Keith Donald
  */
 public interface MutableAttributesAccessor extends AttributesAccessor {
+
+	/**
+	 * Set the attribute with the provided name to the value provided.
+	 * @param attributeName The attribute name
+	 * @param attributeValue The attribute value
+	 */
 	public void setAttribute(String attributeName, Object attributeValue);
 
+	/**
+	 * Remove the specified attribute, if it exists.
+	 * @param attributeName The attribute name.
+	 */
 	public void removeAttribute(String attributeName);
 
+	/**
+	 * Perform a bulk-set operation on a number of attributes.
+	 * @param attributes The map of attributes (name=value pairs).
+	 */
 	public void setAttributes(Map attributes);
 }

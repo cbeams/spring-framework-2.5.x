@@ -38,7 +38,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.SessionKeyUtils;
 
 /**
- * A stack tracking the execution of a flow session.
+ * Default implementation of FlowExecution that uses a stack-based data
+ * structure to manage flow sessions.
  * 
  * @author Keith Donald
  */
