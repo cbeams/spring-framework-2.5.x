@@ -26,6 +26,8 @@ import org.springframework.rules.predicates.LessThanEqualTo;
 import org.springframework.rules.predicates.ParameterizedBeanPropertyExpression;
 import org.springframework.rules.predicates.ParameterizedBinaryPredicate;
 import org.springframework.rules.predicates.Range;
+import org.springframework.rules.predicates.Required;
+import org.springframework.rules.predicates.StringLengthConstraint;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
 import org.springframework.rules.predicates.UnaryNot;
@@ -61,8 +63,8 @@ public class PredicateFactory {
 
     /**
      * Attaches a predicate that tests the result returned by evaluating the
-     * specified unary function.  This effectively attaches a constraint on
-     * the function return value.
+     * specified unary function. This effectively attaches a constraint on the
+     * function return value.
      * 
      * @param constraint
      *            the predicate to test the function result
@@ -71,15 +73,15 @@ public class PredicateFactory {
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public static UnaryPredicate attachResultConstraint(UnaryPredicate constraint,
-            UnaryFunction function) {
+    public static UnaryPredicate attachResultConstraint(
+            UnaryPredicate constraint, UnaryFunction function) {
         return new UnaryFunctionResultConstraint(constraint, function);
     }
 
     /**
      * Attaches a predicate that tests the result returned by evaluating the
-     * specified binary function.  This effectively attaches a constraint on
-     * the function return value.
+     * specified binary function. This effectively attaches a constraint on the
+     * function return value.
      * 
      * @param constraint
      *            the predicate to test the function result
@@ -88,8 +90,8 @@ public class PredicateFactory {
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public static BinaryPredicate attachResultConstraint(UnaryPredicate constraint,
-            BinaryFunction function) {
+    public static BinaryPredicate attachResultConstraint(
+            UnaryPredicate constraint, BinaryFunction function) {
         return new BinaryFunctionResultConstraint(constraint, function);
     }
 
@@ -343,6 +345,38 @@ public class PredicateFactory {
         BeanPropertyExpression max = new BeanPropertyExpression(propertyName,
                 maxPropertyName, LessThanEqualTo.instance());
         return and(min, max);
+    }
+
+    /**
+     * Returns a required predicate.
+     * 
+     * @return The required predicate instance.
+     */
+    public static UnaryPredicate required() {
+        return Required.instance();
+    }
+
+    /**
+     * Returns a maxlength predicate.
+     * 
+     * @param maxLength
+     *            The maximum length in characters.
+     * @return The configured maxlength predicate.
+     */
+    public static UnaryPredicate maxLength(int maxLength) {
+        return new StringLengthConstraint(maxLength);
+    }
+
+    /**
+     * Returns a minlength predicate.
+     * 
+     * @param minLength
+     *            The minimum length in characters.
+     * @return The configured minlength predicate.
+     */
+    public static UnaryPredicate minLength(int minLength) {
+        return new StringLengthConstraint(
+                RelationalOperator.GREATER_THAN_EQUAL_TO, minLength);
     }
 
 }
