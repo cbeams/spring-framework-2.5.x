@@ -82,13 +82,13 @@ public class TilesView extends InternalResourceView {
 
 			// execute controller associated to definition, if any
 			Controller controller = definition.getOrCreateController();
-			System.out.println("Executing controller " + controller);
+			logger.info("Executing controller " + controller);
 			if (controller instanceof ApplicationContextAware) {
-				System.out.println("Setting applcation context " + getApplicationContext());
+				logger.info("Setting applcation context " + getApplicationContext());
 				((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
 			}
 			if (controller != null) {
-				System.out.println("Executing controller " + controller + " now");	
+				logger.info("Executing controller " + controller + " now");	
 				controller.perform(tileContext, request, response, getServletContext());
 			}
 
