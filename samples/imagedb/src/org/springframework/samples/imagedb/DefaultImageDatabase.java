@@ -3,7 +3,6 @@ package org.springframework.samples.imagedb;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,10 +11,11 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
+import org.springframework.jdbc.core.support.AbstractLobStreamingResultSetExtractor;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.object.MappingSqlQuery;
-import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.FileCopyUtils;
@@ -45,50 +45,32 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		return this.getImagesQuery.execute();
 	}
 
-	public void streamImage(String name, OutputStream os) throws DataAccessException, IOException {
-		String sql = "SELECT content FROM imagedb WHERE image_name=?";
-		Connection con = getConnection();
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		try {
-			ps = con.prepareStatement(sql);
-			ps.setString(1, name);
-			rs = ps.executeQuery();
-			if (!rs.next()) {
-				throw new DataRetrievalFailureException("Image with name '" + name + "' not found in database");
-			}
-			FileCopyUtils.copy(this.lobHandler.getBlobAsBinaryStream(rs, 1), os);
-		}
-		catch (SQLException ex) {
-			getJdbcTemplate().getExceptionTranslator().translate("streamImage", sql, ex);
-		}
-		finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeStatement(ps);
-			closeConnectionIfNecessary(con);
-		}
+	public void streamImage(final String name, final OutputStream os) throws DataAccessException {
+		getJdbcTemplate().query(
+				"SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
+				new AbstractLobStreamingResultSetExtractor() {
+					protected void handleNoRowFound() throws LobRetrievalFailureException {
+						throw new LobRetrievalFailureException("Image with name '" + name + "' not found in database");
+					}
+					public void streamData(ResultSet rs) throws SQLException, IOException {
+						FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), os);
+					}
+				}
+		);
 	}
 
-	public void storeImage(String name, InputStream is, int contentLength, String description) throws IOException {
-		String sql = "INSERT INTO imagedb (image_name, content, description) VALUES (?, ?, ?)";
-		Connection con = getConnection();
-		PreparedStatement ps = null;
-		LobCreator lobCreator = this.lobHandler.getLobCreator();
-		try {
-			ps = con.prepareStatement(sql);
-			ps.setString(1, name);
-			lobCreator.setBlobAsBinaryStream(ps, 2, is, contentLength);
-			lobCreator.setClobAsString(ps, 3, description);
-			ps.executeUpdate();
-		}
-		catch (SQLException ex) {
-			getExceptionTranslator().translate("streamImage", sql, ex);
-		}
-		finally {
-			lobCreator.close();
-			JdbcUtils.closeStatement(ps);
-			closeConnectionIfNecessary(con);
-		}
+	public void storeImage(final String name, final InputStream is, final int contentLength,
+												 final String description) throws DataAccessException {
+		getJdbcTemplate().execute(
+				"INSERT INTO imagedb (image_name, content, description) VALUES (?, ?, ?)",
+				new AbstractLobCreatingPreparedStatementCallback(this.lobHandler) {
+					protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+						ps.setString(1, name);
+						lobCreator.setBlobAsBinaryStream(ps, 2, is, contentLength);
+						lobCreator.setClobAsString(ps, 3, description);
+					}
+				}
+		);
 	}
 
 	public void checkImages() {

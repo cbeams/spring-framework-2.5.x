@@ -1,6 +1,5 @@
 package org.springframework.samples.imagedb;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -16,10 +15,10 @@ public interface ImageDatabase {
 
 	List getImages() throws DataAccessException;
 
-	void streamImage(String name, OutputStream os) throws DataAccessException, IOException;
+	void streamImage(String name, OutputStream os) throws DataAccessException;
 
 	void storeImage(String name, InputStream is, int contentLength, String description)
-			throws DataAccessException, IOException;
+			throws DataAccessException;
 
 	void checkImages() throws DataAccessException;
 
