@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.2 (15.11.2004)
+Changes in version 1.1.2 (31.10.2004)
 -------------------------------------
 
 General
@@ -12,6 +12,8 @@ General
 
 Package org.springframework.aop
 * added "setExposeProxy" method to Advised interface
+* deprecated Adviced's "getExposeProxy" and "getProxyTargetClass" in favor of "isExposeProxy" and "isProxyTargetClass"
+* deprecated ProxyConfig's "getOptimize" and "getOpaque" in favor of "isOptimize" and "isOpaque"
 * DelegatingIntroductionInterceptor now massages return type, returning the proxy if a delegate method returns "this"
 * reworked ProxyFactoryBean and AbstractPrototypeBasedTargetSource to leverage BeanFactory's "getType" method
 * moved "invokeJoinpointUsingReflection" method from aop.framework.AopProxyUtils to aop.support.AopUtils
@@ -47,16 +49,34 @@ Package org.springframework.context
 
 Package org.springframework.core
 * ResourceEditor resolves all placeholders in a path as system properties now, not just the first one
+* PathMatchingResourcePatternResolver handles "classpath:*-context.xml" style patterns now too (without leading slash)
 
 Package org.springframework.dao
+* deprecated IncorrectUpdateSemanticsDataAccessException's "getDataWasUpdated" method in favor of "wasDataUpdated"
 * added "objectResult(collection,type)" and "intResult"/"longResult(collection)" convenience methods to DataAccessUtils
 
+Package org.springframework.ejb
+* AbstractRemoteSlsbInvokerInterceptor treats RMI's ConnectIOException and NoSuchObjectException as connect failure too
+
+Package org.springframework.jdbc
+* added "extractDatabaseMetaData(dataSource,methodName)" method to JdbcUtils, performing specific DatabaseMetaData calls
+* reworked DataSourceTransactionObject into an inner class of DataSourceTransactionManager
+* deprecated JdbcTemplate's "getIgnoreWarnings" in favor of "isIgnoreWarnings"
+
+Package org.springframework.mail
+* added "equals" and "hashCode" implementations to SimpleMailMessage
+
 Package org.springframework.orm
+* reworked Hibernate/Jdo/PersistenceBrokerTransactionObject into inner classes of HibernateTransactionManager and co
+* added support for pre-bound Sessions (e.g. OpenSessionInViewFilter/Interceptor) with JTA and TransactionManagerLookup
 * fixed LocalSessionFactoryBean to call "configure" after "setNamingStrategy" (in case of a specified "configLocation")
 * added "load(entity, id)" method to HibernateOperations and HibernateTemplate
+* added "initialize" and "closeIterator" methods to HibernateOperations/Template, following "Hibernate.initialize/close"
+* added "queryCacheRegion" property to HibernateTemplate, specifying the cache region used for queries
 
 Package org.springframework.remoting
 * HttpInvokerClientInterceptor and RmiClientInterceptor handle "toString" method locally now, returning proxy info
+* (Jndi)RmiClientInterceptor treats RMI's ConnectIOException and NoSuchObjectException as connect failure too
 
 Package org.springframework.scheduling
 * moved "configTimeDataSourceHolder" from LocalDataSourceJobStore to SchedulerFactoryBean
@@ -67,13 +87,18 @@ Package org.springframework.util
 
 Package org.springframework.validation
 * DataBinder does not accept an empty String (without text content) as value for a required field
+* DataBinder logs a warning when suppressing a non-allowed field (i.e. a field not specified in "allowedFields")
 
-Package org.springframework.web
+Package org.springframework.webC
+* added ServletContextResourcePatternResolver, to find matching resources within a web app even in an unexpanded WAR
+* fixed UrlPathHelper to check for request URIs that do not start with the application's context path (rather unusual)
 * fixed FrameworkServlet to use "doGet"/"doPost"/"doHead" etc, to reenable proper LastModified support in controllers
 * fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
 * DispatcherServlet caches chosen HandlerExecutionChain in "getLastModified", for reuse in "doService"
 * added "defaultStatusCode" property to SimpleMappingExceptionResolver, specifying the HTTP status code for error views
 * added "createVelocityContext" hook to VelocityView, for using a different impl of Velocity's Context interface
+* added "springMessage"/"springMessageText" macros for Velocity and "message"/"messageText" macros for FreeMarker
+* fixed AbstractExcelView to not hold the HSSFWorkbook instance in an instance variable (avoiding concurrency issues)
 
 
 Changes in version 1.1.1 (30.9.2004)
