@@ -240,7 +240,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 */
 	public void setFormObjectClass(Class formObjectClass) {
 		this.formObjectClass = formObjectClass;
-		this.validateMethodDispatcher.setParameterTypes(new Class[] { formObjectClass, Errors.class});
+		this.validateMethodDispatcher.setParameterTypes(new Class[] { this.formObjectClass, Errors.class});
 	}
 
 	/**
