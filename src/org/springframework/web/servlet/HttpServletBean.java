@@ -16,9 +16,11 @@
 
 package org.springframework.web.servlet;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -28,7 +30,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.util.StringUtils;
 
 /**
  * Simple extension of javax.servlet.http.HttpServlet that treats its config
@@ -42,6 +47,8 @@ import org.springframework.beans.PropertyValues;
  * <p>This servlet superclass has no dependency on a Spring application context.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @see #addRequiredProperty
  * @see #initServletBean
  */
 public abstract class HttpServletBean extends HttpServlet {
@@ -49,10 +56,10 @@ public abstract class HttpServletBean extends HttpServlet {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** 
-	 * List of required properties (Strings) that must be supplied as
+	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this servlet.
 	 */
-	private List requiredProperties = new ArrayList();
+	private Set requiredProperties = new HashSet();
 
 	/**
 	 * Subclasses can invoke this method to specify that this property
@@ -60,10 +67,10 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * and must be supplied as a config parameter.
 	 * @param property name of the required property
 	 */
-	protected final void setRequiredProperty(String property) {
+	protected final void addRequiredProperty(String property) {
 		this.requiredProperties.add(property);
 	}
-	
+
 	/**
 	 * Map config parameters onto bean properties of this servlet, and
 	 * invoke subclass initialization.
@@ -75,8 +82,7 @@ public abstract class HttpServletBean extends HttpServlet {
 
 		// set bean properties
 		try {
-			String[] reqPropArray = (String[]) this.requiredProperties.toArray(new String[this.requiredProperties.size()]);
-			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), reqPropArray);
+			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 			BeanWrapper bw = new BeanWrapperImpl(this);
 			bw.setPropertyValues(pvs);
 		}
@@ -98,5 +104,41 @@ public abstract class HttpServletBean extends HttpServlet {
 	 */
 	protected void initServletBean() throws ServletException {
 	}
-	
+
+
+	/**
+	 * PropertyValues implementation created from ServletConfig init parameters.
+	 */
+	private static class ServletConfigPropertyValues extends MutablePropertyValues {
+
+		/**
+		 * Create new ServletConfigPropertyValues.
+		 * @param config ServletConfig we'll use to take PropertyValues from
+		 * @param requiredProperties set of property names we need, where
+		 * we can't accept default values
+		 * @throws ServletException if any required properties are missing
+		 */
+		private ServletConfigPropertyValues(ServletConfig config, Set requiredProperties) throws ServletException {
+			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
+					new HashSet(requiredProperties) : null;
+
+			Enumeration enum = config.getInitParameterNames();
+			while (enum.hasMoreElements()) {
+				String property = (String) enum.nextElement();
+				Object value = config.getInitParameter(property);
+				addPropertyValue(new PropertyValue(property, value));
+				if (missingProps != null) {
+					missingProps.remove(property);
+				}
+			}
+
+			// fail if we are still missing properties
+			if (missingProps != null && missingProps.size() > 0) {
+				throw new ServletException("Initialization from ServletConfig for servlet '" + config.getServletName() +
+																	 "' failed; the following required properties were missing: " +
+																	 StringUtils.collectionToDelimitedString(missingProps, ", "));
+			}
+		}
+	}
+
 }

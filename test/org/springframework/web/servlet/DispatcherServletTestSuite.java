@@ -18,7 +18,6 @@ package org.springframework.web.servlet;
 
 import java.util.Locale;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -47,14 +46,16 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
  */
 public class DispatcherServletTestSuite extends TestCase {
 
-	private ServletConfig servletConfig;
-	
+	private MockServletConfig servletConfig;
+
 	private DispatcherServlet simpleDispatcherServlet;
 
 	private DispatcherServlet complexDispatcherServlet;
 
 	protected void setUp() throws ServletException {
 		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
+		MockServletConfig complexConfig = new MockServletConfig(servletConfig.getServletContext(), "complex");
+		complexConfig.addInitParameter("publishContext", "false");
 
 		simpleDispatcherServlet = new DispatcherServlet();
 		simpleDispatcherServlet.setContextClass(SimpleWebApplicationContext.class);
@@ -63,8 +64,8 @@ public class DispatcherServletTestSuite extends TestCase {
 		complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
-		complexDispatcherServlet.setPublishContext(false);
-		complexDispatcherServlet.init(new MockServletConfig(servletConfig.getServletContext(), "complex"));
+		complexDispatcherServlet.addRequiredProperty("publishContext");
+		complexDispatcherServlet.init(complexConfig);
 	}
 
 	public void testDispatcherServlets() {
