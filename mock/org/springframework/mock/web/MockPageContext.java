@@ -127,7 +127,12 @@ public class MockPageContext extends PageContext {
 	}
 
 	public void setAttribute(String name, Object value) {
-		this.attributes.put(name, value);
+		if (value != null) {
+			this.attributes.put(name, value);
+		}
+		else {
+			this.attributes.remove(name);
+		}
 	}
 
 	public void setAttribute(String name, Object value, int scope) {
@@ -225,7 +230,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public Enumeration getAttributeNames() {
-		return this.attributes.elements();
+		return this.attributes.keys();
 	}
 
 	public Enumeration getAttributeNamesInScope(int scope) {
