@@ -3,6 +3,11 @@ package org.springframework.orm.hibernate;
 import java.util.Properties;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.File;
+import java.io.InputStream;
+import java.io.IOException;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.HibernateException;
@@ -15,21 +20,28 @@ import net.sf.hibernate.connection.UserSuppliedConnectionProvider;
 
 import org.easymock.MockControl;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
  */
 public class LocalSessionFactoryBeanTests extends TestCase {
 
-	public void testLocalSessionFactoryBeanWithDataSourceAndMappingResources() throws HibernateException {
+	public void testLocalSessionFactoryBeanWithDataSourceAndMappingResources() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
-		final Set invocations = new HashSet();
+		final List invocations = new ArrayList();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected Configuration newConfiguration() throws HibernateException {
 				return new Configuration() {
-					public Configuration addResource(String path, ClassLoader classLoader) throws MappingException {
-						assertTrue(Thread.currentThread().getContextClassLoader() == classLoader);
-						invocations.add("addResource " + path);
+					public Configuration addInputStream(InputStream is) throws MappingException {
+						try {
+							is.close();
+						}
+						catch (IOException ex) {
+						}
+						invocations.add("addResource");
 						return this;
 					}
 				};
@@ -41,22 +53,23 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				return null;
 			}
 		};
-		sfb.setMappingResources(new String[] {"mapping.hbm.xml", "/mapping2.hbm.xml"});
+		sfb.setMappingResources(new String[] {"/org/springframework/beans/factory/xml/test.xml",
+																					"/org/springframework/beans/factory/xml/child.xml"});
 		sfb.setDataSource(ds);
 		sfb.afterPropertiesSet();
-		assertTrue(invocations.contains("addResource mapping.hbm.xml"));
-		assertTrue(invocations.contains("addResource mapping2.hbm.xml"));
-		assertTrue(invocations.contains("newSessionFactory"));
+		assertEquals("addResource", invocations.get(0));
+		assertEquals("addResource", invocations.get(1));
+		assertEquals("newSessionFactory", invocations.get(2));
 	}
 
-	public void testLocalSessionFactoryBeanWithDataSourceAndMappingResourceJars() throws HibernateException {
+	public void testLocalSessionFactoryBeanWithDataSourceAndMappingJarLocations() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final Set invocations = new HashSet();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected Configuration newConfiguration() throws HibernateException {
 				return new Configuration() {
-					public Configuration addJar(String path) throws MappingException {
-						invocations.add("addResource " + path);
+					public Configuration addJar(File file) throws MappingException {
+						invocations.add("addResource " + file.getPath());
 						return this;
 					}
 				};
@@ -68,7 +81,8 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				return null;
 			}
 		};
-		sfb.setMappingResourceJars(new String[] {"/mapping.hbm.jar", "mapping2.hbm.jar"});
+		sfb.setMappingJarLocations(new Resource[] {new FileSystemResource("mapping.hbm.jar"),
+																							 new FileSystemResource("mapping2.hbm.jar")});
 		sfb.setDataSource(ds);
 		sfb.afterPropertiesSet();
 		assertTrue(invocations.contains("addResource mapping.hbm.jar"));
@@ -76,15 +90,18 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
 
-	public void testLocalSessionFactoryBeanWithDataSourceAndProperties() throws HibernateException {
+	public void testLocalSessionFactoryBeanWithDataSourceAndProperties() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final Set invocations = new HashSet();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected Configuration newConfiguration() throws HibernateException {
 				return new Configuration() {
-					public Configuration addResource(String path, ClassLoader classLoader) throws MappingException {
-						assertEquals("mapping.hbm.xml", path);
-						assertTrue(Thread.currentThread().getContextClassLoader() == classLoader);
+					public Configuration addInputStream(InputStream is) throws MappingException {
+						try {
+							is.close();
+						}
+						catch (IOException ex) {
+						}
 						invocations.add("addResource");
 						return this;
 					}
@@ -98,7 +115,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				return null;
 			}
 		};
-		sfb.setMappingResources(new String[] {"mapping.hbm.xml"});
+		sfb.setMappingLocations(new Resource[] {new ClassPathResource("/org/springframework/beans/factory/xml/test.xml")});
 		sfb.setDataSource(ds);
 		Properties prop = new Properties();
 		prop.setProperty(Environment.CONNECTION_PROVIDER, "myClass");
@@ -109,19 +126,9 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
 
-	public void testLocalSessionFactoryBeanWithValidProperties() throws HibernateException {
+	public void testLocalSessionFactoryBeanWithValidProperties() throws Exception {
 		final Set invocations = new HashSet();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			protected Configuration newConfiguration() throws HibernateException {
-				return new Configuration() {
-					public Configuration addResource(String path, ClassLoader classLoader) throws MappingException {
-						assertEquals("mapping.hbm.xml", path);
-						assertTrue(Thread.currentThread().getContextClassLoader() == classLoader);
-						invocations.add("addResource");
-						return this;
-					}
-				};
-			}
 			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				assertEquals(UserSuppliedConnectionProvider.class.getName(), config.getProperty(Environment.CONNECTION_PROVIDER));
 				assertEquals("myValue", config.getProperty("myProperty"));
@@ -129,17 +136,15 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				return null;
 			}
 		};
-		sfb.setMappingResources(new String[] {"mapping.hbm.xml"});
 		Properties prop = new Properties();
 		prop.setProperty(Environment.CONNECTION_PROVIDER, UserSuppliedConnectionProvider.class.getName());
 		prop.setProperty("myProperty", "myValue");
 		sfb.setHibernateProperties(prop);
 		sfb.afterPropertiesSet();
-		assertTrue(invocations.contains("addResource"));
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
 
-	public void testLocalSessionFactoryBeanWithInvalidProperties() throws HibernateException {
+	public void testLocalSessionFactoryBeanWithInvalidProperties() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean();
 		sfb.setMappingResources(new String[0]);
 		Properties prop = new Properties();
@@ -153,18 +158,18 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testLocalSessionFactoryBeanWithInvalidMappings() throws HibernateException {
+	public void testLocalSessionFactoryBeanWithInvalidMappings() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean();
 		sfb.setMappingResources(new String[] {"mapping.hbm.xml"});
 		try {
 			sfb.afterPropertiesSet();
 		}
-		catch (MappingException ex) {
+		catch (IOException ex) {
 			// expected, mapping resource not found
 		}
 	}
 
-	public void testLocalSessionFactoryBeanWithCustomSessionFactory() throws HibernateException {
+	public void testLocalSessionFactoryBeanWithCustomSessionFactory() throws Exception {
 		MockControl factoryControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sessionFactory = (SessionFactory) factoryControl.getMock();
 		sessionFactory.close();
@@ -183,7 +188,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		factoryControl.verify();
 	}
 
-	public void testLocalSessionFactoryBeanWithEntityInterceptor() throws HibernateException {
+	public void testLocalSessionFactoryBeanWithEntityInterceptor() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected Configuration newConfiguration() throws HibernateException {
 				return new Configuration() {

@@ -1,5 +1,7 @@
 package org.springframework.orm.hibernate;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,6 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
 
@@ -95,11 +99,13 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private String configLocation;
+	private Resource configLocation;
 
-	private String[] mappingResources;
+	private Resource[] mappingLocations;
 
-	private String[] mappingResourceJars;
+	private Resource[] mappingJarLocations;
+
+	private Resource[] mappingDirectoryLocations;
 
 	private Properties hibernateProperties;
 
@@ -117,34 +123,66 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 
 	/**
-	 * Set the location of the Hibernate XML config file as class path resource.
-	 * A typical value is "/hibernate.cfg.xml", in the case of web applications
-	 * normally to be found in WEB-INF/classes.
-	 * <p>Note: Can be omitted when all necessary properties and mapping resources
-	 * are specified locally via this bean.
+	 * Set the location of the Hibernate XML config file, for example as
+	 * classpath resource "classpath:hibernate.cfg.xml".
+	 * <p>Note: Can be omitted when all necessary properties and mapping
+	 * resources are specified locally via this bean.
+	 * @see net.sf.hibernate.cfg.Configuration#configure(java.net.URL)
 	 */
-	public void setConfigLocation(String configLocation) {
+	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
 	}
 
 	/**
 	 * Set Hibernate mapping resources to be found in the class path,
 	 * like "example.hbm.xml" or "mypackage/example.hbm.xml".
-	 * <p>Can be used to override values from a Hibernate XML config file,
+	 * Analogous to mapping entries in a Hibernate XML config file.
+	 * Alternative to the more generic setMappingLocations method.
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
 	 * or to specify all mappings locally.
+	 * @see #setMappingLocations
+	 * @see net.sf.hibernate.cfg.Configuration#addResource
 	 */
 	public void setMappingResources(String[] mappingResources) {
-		this.mappingResources = mappingResources;
+		this.mappingLocations = new Resource[mappingResources.length];
+		for (int i = 0; i < mappingResources.length; i++) {
+			this.mappingLocations[i] = new ClassPathResource(mappingResources[i]);
+		}
 	}
 
 	/**
-	 * Set jar files in the class path that contain Hibernate mapping resources,
-	 * like "example.hbm.jar".
-	 * <p>Can be used to override values from a Hibernate XML config file,
+	 * Set locations of Hibernate mapping files, for example as classpath
+	 * resource "classpath:example.hbm.xml". Supports any resource location
+	 * via Spring's resource abstraction, for example relative paths like
+	 * "WEB-INF/mappings/example.hbm.xml" when running in an application context.
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
 	 * or to specify all mappings locally.
+	 * @see net.sf.hibernate.cfg.Configuration#addInputStream
 	 */
-	public void setMappingResourceJars(String[] mappingResourceJars) {
-		this.mappingResourceJars = mappingResourceJars;
+	public void setMappingLocations(Resource[] mappingLocations) {
+		this.mappingLocations = mappingLocations;
+	}
+
+	/**
+	 * Set locations of jar files that contain Hibernate mapping resources,
+	 * like "WEB-INF/lib/example.hbm.jar".
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 * @see net.sf.hibernate.cfg.Configuration#addJar(java.io.File)
+	 */
+	public void setMappingJarLocations(Resource[] mappingJarLocations) {
+		this.mappingJarLocations = mappingJarLocations;
+	}
+
+	/**
+	 * Set locations of directories that contain Hibernate mapping resources,
+	 * like "WEB-INF/mappings".
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 * @see net.sf.hibernate.cfg.Configuration#addDirectory(java.io.File)
+	 */
+	public void setMappingDirectoryLocations(Resource[] mappingDirectoryLocations) {
+		this.mappingDirectoryLocations = mappingDirectoryLocations;
 	}
 
 	/**
@@ -230,7 +268,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @throws IllegalArgumentException in case of illegal property values
 	 * @throws HibernateException in case of Hibernate initialization errors
 	 */
-	public void afterPropertiesSet() throws IllegalArgumentException, HibernateException {
+	public void afterPropertiesSet() throws IllegalArgumentException, HibernateException, IOException {
 		// create Configuration instance
 		Configuration config = newConfiguration();
 
@@ -242,35 +280,33 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 		if (this.configLocation != null) {
 			// load Hibernate configuration from given location
-			String resourceLocation = this.configLocation;
-			if (!resourceLocation.startsWith("/")) {
-				// loaded with Class.getResourceStream -> use leading slash to load from root
-				resourceLocation = "/" + resourceLocation;
-			}
-			config.configure(resourceLocation);
+			config.configure(this.configLocation.getURL());
 		}
 
-		if (this.mappingResources != null) {
+		if (this.mappingLocations != null) {
 			// register given Hibernate mapping definitions, contained in resource files
-			for (int i = 0; i < this.mappingResources.length; i++) {
-				String resourcePath = this.mappingResources[i];
-				if (resourcePath.startsWith("/")) {
-					// loaded via ClassLoader.getResourceAsStream -> never use leading slash
-					resourcePath = resourcePath.substring(1);
-				}
-				config.addResource(resourcePath, Thread.currentThread().getContextClassLoader());
+			for (int i = 0; i < this.mappingLocations.length; i++) {
+				config.addInputStream(this.mappingLocations[i].getInputStream());
 			}
 		}
 
-		if (this.mappingResourceJars != null) {
-			// register given Hibernate mapping definitions, contained in resources in jar files
-			for (int i = 0; i < this.mappingResourceJars.length; i++) {
-				String resourcePath = this.mappingResourceJars[i];
-				if (resourcePath.startsWith("/")) {
-					// loaded via ClassLoader.getResourceAsStream -> never use leading slash
-					resourcePath = resourcePath.substring(1);
+		if (this.mappingJarLocations != null) {
+			// register given Hibernate mapping definitions, contained in jar files
+			for (int i = 0; i < this.mappingJarLocations.length; i++) {
+				Resource resource = this.mappingJarLocations[i];
+				config.addJar(resource.getFile());
+			}
+		}
+
+		if (this.mappingDirectoryLocations != null) {
+			// register all Hibernate mapping definitions in the given directories
+			for (int i = 0; i < this.mappingDirectoryLocations.length; i++) {
+				File file = this.mappingDirectoryLocations[i].getFile();
+				if (!file.isDirectory()) {
+					throw new IllegalArgumentException("Mapping directory location [" + this.mappingDirectoryLocations[i] +
+																						 "] does not denote a directory");
 				}
-				config.addJar(resourcePath);
+				config.addDirectory(file);
 			}
 		}
 
