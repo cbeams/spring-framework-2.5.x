@@ -110,7 +110,7 @@ public abstract class StringUtils {
 			return str;
 		}
 		StringBuffer buf = new StringBuffer(str);
-		while (Character.isWhitespace(buf.charAt(0))) {
+		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(0))) {
 			buf.deleteCharAt(0);
 		}
 		return buf.toString();
@@ -127,7 +127,7 @@ public abstract class StringUtils {
 			return str;
 		}
 		StringBuffer buf = new StringBuffer(str);
-		while (Character.isWhitespace(buf.charAt(buf.length() - 1))) {
+		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(buf.length() - 1))) {
 			buf.deleteCharAt(buf.length() - 1);
 		}
 		return buf.toString();
@@ -140,7 +140,7 @@ public abstract class StringUtils {
 	 * @param sub string to search for. Return 0 if this is null.
 	 */
 	public static int countOccurrencesOf(String str, String sub) {
-		if (str == null || sub == null || "".equals(sub)) {
+		if (str == null || sub == null || str.length() == 0 || sub.length() == 0) {
 			return 0;
 		}
 		int count = 0, pos = 0, idx = 0;

@@ -25,38 +25,46 @@ import junit.framework.TestCase;
  */
 public class StringUtilsTests extends TestCase {
 
+	public void testTrimLeadingWhitespace() throws Exception {
+		assertEquals("", StringUtils.trimLeadingWhitespace(""));
+		assertEquals("", StringUtils.trimLeadingWhitespace(" "));
+		assertEquals("", StringUtils.trimLeadingWhitespace("\t"));
+		assertEquals("a", StringUtils.trimLeadingWhitespace(" a"));
+		assertEquals("a ", StringUtils.trimLeadingWhitespace("a "));
+		assertEquals("a ", StringUtils.trimLeadingWhitespace(" a "));
+	}
+
+	public void testTrimTrailingWhitespace() throws Exception {
+		assertEquals("", StringUtils.trimTrailingWhitespace(""));
+		assertEquals("", StringUtils.trimTrailingWhitespace(" "));
+		assertEquals("", StringUtils.trimTrailingWhitespace("\t"));
+		assertEquals("a", StringUtils.trimTrailingWhitespace("a "));
+		assertEquals(" a", StringUtils.trimTrailingWhitespace(" a"));
+		assertEquals(" a", StringUtils.trimTrailingWhitespace(" a "));
+	}
+
 	public void testCountOccurrencesOf() {
-		assertTrue(
-				"nullx2 = 0",
+		assertTrue("nullx2 = 0",
 				StringUtils.countOccurrencesOf(null, null) == 0);
-		assertTrue(
-				"null string = 0",
+		assertTrue("null string = 0",
 				StringUtils.countOccurrencesOf("s", null) == 0);
-		assertTrue(
-				"null substring = 0",
+		assertTrue("null substring = 0",
 				StringUtils.countOccurrencesOf(null, "s") == 0);
 		String s = "erowoiueoiur";
-		assertTrue(
-				"not found = 0",
+		assertTrue("not found = 0",
 				StringUtils.countOccurrencesOf(s, "WERWER") == 0);
-		assertTrue(
-				"not found char = 0",
+		assertTrue("not found char = 0",
 				StringUtils.countOccurrencesOf(s, "x") == 0);
-		assertTrue(
-				"not found ws = 0",
+		assertTrue("not found ws = 0",
 				StringUtils.countOccurrencesOf(s, " ") == 0);
-		assertTrue(
-				"not found empty string = 0",
+		assertTrue("not found empty string = 0",
 				StringUtils.countOccurrencesOf(s, "") == 0);
 		assertTrue("found char=2", StringUtils.countOccurrencesOf(s, "e") == 2);
-		assertTrue(
-				"found substring=2",
+		assertTrue("found substring=2",
 				StringUtils.countOccurrencesOf(s, "oi") == 2);
-		assertTrue(
-				"found substring=2",
+		assertTrue("found substring=2",
 				StringUtils.countOccurrencesOf(s, "oiu") == 2);
-		assertTrue(
-				"found substring=3",
+		assertTrue("found substring=3",
 				StringUtils.countOccurrencesOf(s, "oiur") == 1);
 		assertTrue("test last", StringUtils.countOccurrencesOf(s, "r") == 2);
 	}
@@ -85,8 +93,7 @@ public class StringUtilsTests extends TestCase {
 		String[] sa =
 				StringUtils.commaDelimitedListToStringArray(sbuf.toString());
 		assertTrue("String array isn't null with legal match", sa != null);
-		assertTrue(
-				"String array length is correct with legal match: returned "
+		assertTrue("String array length is correct with legal match: returned "
 				+ sa.length
 				+ " when expecting "
 				+ components.length
@@ -99,10 +106,8 @@ public class StringUtilsTests extends TestCase {
 
 	private void testStringArrayReverseTransformationMatches(String[] sa) {
 		String[] reverse =
-				StringUtils.commaDelimitedListToStringArray(
-						StringUtils.arrayToCommaDelimitedString(sa));
-		assertEquals(
-				"Reverse transformation is equal",
+				StringUtils.commaDelimitedListToStringArray(StringUtils.arrayToCommaDelimitedString(sa));
+		assertEquals("Reverse transformation is equal",
 				Arrays.asList(sa),
 				Arrays.asList(reverse));
 	}
@@ -128,8 +133,7 @@ public class StringUtilsTests extends TestCase {
 		String s = "woeirqupoiewuropqiewuorpqiwueopriquwopeiurqopwieur";
 		String[] sa = StringUtils.commaDelimitedListToStringArray(s);
 		assertTrue("Found one String with no delimiters", sa.length == 1);
-		assertTrue(
-				"Single array entry matches input String with no delimiters",
+		assertTrue("Single array entry matches input String with no delimiters",
 				sa[0].equals(s));
 	}
 
@@ -140,15 +144,15 @@ public class StringUtilsTests extends TestCase {
 		testCommaDelimitedListToStringArrayLegalMatch(sa);
 	}
 
-	/** We expect to see the empty Strings in the output */
+	/**
+	 * We expect to see the empty Strings in the output
+	 */
 	public void testCommaDelimitedListToStringArrayEmptyStrings() {
 		// Could read these from files
 		String[] ss = StringUtils.commaDelimitedListToStringArray("a,,b");
-		assertTrue(
-				"a,,b produces array length 3, not " + ss.length,
+		assertTrue("a,,b produces array length 3, not " + ss.length,
 				ss.length == 3);
-		assertTrue(
-				"components are correct",
+		assertTrue("components are correct",
 				ss[0].equals("a") && ss[1].equals("") && ss[2].equals("b"));
 
 		String[] sa = new String[]{"", "", "a", ""};
@@ -166,8 +170,7 @@ public class StringUtilsTests extends TestCase {
 
 		// Non match: no change
 		s =
-				StringUtils.replace(
-						inString,
+				StringUtils.replace(inString,
 						"qwoeiruqopwieurpoqwieur",
 						newPattern);
 		assertTrue("Replace non matched is equal", s.equals(inString));
@@ -185,23 +188,19 @@ public class StringUtilsTests extends TestCase {
 		String inString = "The quick brown fox jumped over the lazy dog";
 
 		String noThe = StringUtils.delete(inString, "the");
-		assertTrue(
-				"Result has no the [" + noThe + "]",
+		assertTrue("Result has no the [" + noThe + "]",
 				noThe.equals("The quick brown fox jumped over  lazy dog"));
 
 		String nohe = StringUtils.delete(inString, "he");
-		assertTrue(
-				"Result has no he [" + nohe + "]",
+		assertTrue("Result has no he [" + nohe + "]",
 				nohe.equals("T quick brown fox jumped over t lazy dog"));
 
 		String nosp = StringUtils.delete(inString, " ");
-		assertTrue(
-				"Result has no spaces",
+		assertTrue("Result has no spaces",
 				nosp.equals("Thequickbrownfoxjumpedoverthelazydog"));
 
 		String killEnd = StringUtils.delete(inString, "dog");
-		assertTrue(
-				"Result has no dog",
+		assertTrue("Result has no dog",
 				killEnd.equals("The quick brown fox jumped over the lazy "));
 
 		String mismatch = StringUtils.delete(inString, "dxxcxcxog");
@@ -212,13 +211,11 @@ public class StringUtilsTests extends TestCase {
 		String inString = "Able was I ere I saw Elba";
 
 		String res = StringUtils.deleteAny(inString, "I");
-		assertTrue(
-				"Result has no Is [" + res + "]",
+		assertTrue("Result has no Is [" + res + "]",
 				res.equals("Able was  ere  saw Elba"));
 
 		res = StringUtils.deleteAny(inString, "AeEba!");
-		assertTrue(
-				"Result has no Is [" + res + "]",
+		assertTrue("Result has no Is [" + res + "]",
 				res.equals("l ws I r I sw l"));
 
 		String mismatch = StringUtils.deleteAny(inString, "#@$#$^");
@@ -267,75 +264,47 @@ public class StringUtilsTests extends TestCase {
 
 
 	public void testPathEquals() {
-		assertTrue(
-				"Must be true for the same strings",
-				StringUtils.pathEquals(
-						"/dummy1/dummy2/dummy3",
+		assertTrue("Must be true for the same strings",
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
 						"/dummy1/dummy2/dummy3"));
-		assertTrue(
-				"Must be true for the same win strings",
-				StringUtils.pathEquals(
-						"C:\\dummy1\\dummy2\\dummy3",
+		assertTrue("Must be true for the same win strings",
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
 						"C:\\dummy1\\dummy2\\dummy3"));
-		assertTrue(
-				"Must be true for one top path on 1",
-				StringUtils.pathEquals(
-						"/dummy1/bin/../dummy2/dummy3",
+		assertTrue("Must be true for one top path on 1",
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3",
 						"/dummy1/dummy2/dummy3"));
-		assertTrue(
-				"Must be true for one win top path on 2",
-				StringUtils.pathEquals(
-						"C:\\dummy1\\dummy2\\dummy3",
+		assertTrue("Must be true for one win top path on 2",
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
 						"C:\\dummy1\\bin\\..\\dummy2\\dummy3"));
-		assertTrue(
-				"Must be true for two top paths on 1",
-				StringUtils.pathEquals(
-						"/dummy1/bin/../dummy2/bin/../dummy3",
+		assertTrue("Must be true for two top paths on 1",
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/bin/../dummy3",
 						"/dummy1/dummy2/dummy3"));
-		assertTrue(
-				"Must be true for two win top paths on 2",
-				StringUtils.pathEquals(
-						"C:\\dummy1\\dummy2\\dummy3",
+		assertTrue("Must be true for two win top paths on 2",
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
 						"C:\\dummy1\\bin\\..\\dummy2\\bin\\..\\dummy3"));
-		assertTrue(
-				"Must be true for double top paths on 1",
-				StringUtils.pathEquals(
-						"/dummy1/bin/tmp/../../dummy2/dummy3",
+		assertTrue("Must be true for double top paths on 1",
+				StringUtils.pathEquals("/dummy1/bin/tmp/../../dummy2/dummy3",
 						"/dummy1/dummy2/dummy3"));
-		assertTrue(
-				"Must be true for double top paths on 2 with similarity",
-				StringUtils.pathEquals(
-						"/dummy1/dummy2/dummy3",
+		assertTrue("Must be true for double top paths on 2 with similarity",
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
 						"/dummy1/dum/dum/../../dummy2/dummy3"));
-		assertTrue(
-				"Must be true for current paths",
-				StringUtils.pathEquals(
-						"./dummy1/dummy2/dummy3",
+		assertTrue("Must be true for current paths",
+				StringUtils.pathEquals("./dummy1/dummy2/dummy3",
 						"dummy1/dum/./dum/../../dummy2/dummy3"));
-		assertFalse(
-				"Must be false for relative/absolute paths",
-				StringUtils.pathEquals(
-						"./dummy1/dummy2/dummy3",
+		assertFalse("Must be false for relative/absolute paths",
+				StringUtils.pathEquals("./dummy1/dummy2/dummy3",
 						"/dummy1/dum/./dum/../../dummy2/dummy3"));
-		assertFalse(
-				"Must be false for different strings",
-				StringUtils.pathEquals(
-						"/dummy1/dummy2/dummy3",
+		assertFalse("Must be false for different strings",
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
 						"/dummy1/dummy4/dummy3"));
-		assertFalse(
-				"Must be false for one false path on 1",
-				StringUtils.pathEquals(
-						"/dummy1/bin/tmp/../dummy2/dummy3",
+		assertFalse("Must be false for one false path on 1",
+				StringUtils.pathEquals("/dummy1/bin/tmp/../dummy2/dummy3",
 						"/dummy1/dummy2/dummy3"));
-		assertFalse(
-				"Must be false for one false win top path on 2",
-				StringUtils.pathEquals(
-						"C:\\dummy1\\dummy2\\dummy3",
+		assertFalse("Must be false for one false win top path on 2",
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
 						"C:\\dummy1\\bin\\tmp\\..\\dummy2\\dummy3"));
-		assertFalse(
-				"Must be false for top path on 1 + difference",
-				StringUtils.pathEquals(
-						"/dummy1/bin/../dummy2/dummy3",
+		assertFalse("Must be false for top path on 1 + difference",
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3",
 						"/dummy1/dummy2/dummy4"));
 	}
 
