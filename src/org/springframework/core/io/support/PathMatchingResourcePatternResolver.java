@@ -16,8 +16,9 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * ResourcePatternResolver that applies Ant-style path matching,
- * using Spring's PathMatcher class.
+ * ResourcePatternResolver that applies Ant-style path matching, using Spring's
+ * PathMatcher class. Also inherits the capability to retrieve multiple class path
+ * resources with the same name from ClassPathResourcePatternResolver.
  *
  * <p>Locations can either be suitable for <code>ResourceLoader.getResource</code>
  * (URLs like "file:C:/context.xml", pseudo-URLs like "classpath:/context.xml",
@@ -34,39 +35,52 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.util.PathMatcher
  * @see org.springframework.core.io.ResourceLoader#getResource
  */
-public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
+public class PathMatchingResourcePatternResolver extends ClassPathResourcePatternResolver {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final ResourceLoader resourceLoader;
+	/**
+	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
+	 * @see org.springframework.core.io.DefaultResourceLoader
+	 */
+	public PathMatchingResourcePatternResolver() {
+		super();
+	}
 
 	/**
-	 * Create new PathMatchingResourcePatternResolver.
+	 * Create a new PathMatchingResourcePatternResolver.
 	 * @param resourceLoader ResourceLoader to load root directories
 	 * and actual resources with
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
+		super(resourceLoader);
 	}
 
 	public Resource[] getResources(String locationPattern) throws IOException {
-		List result = new ArrayList();
+		// check for file pattern
 		if (PathMatcher.isPattern(locationPattern)) {
+			List result = new ArrayList();
 			String rootDirPath = determineRootDir(locationPattern);
 			String subPattern = locationPattern.substring(rootDirPath.length());
-			File rootDir = this.resourceLoader.getResource(rootDirPath).getFile().getAbsoluteFile();
-			logger.debug("Looking for bean definition files in directory tree [" + rootDir.getPath() + "]");
+			File rootDir = getResourceLoader().getResource(rootDirPath).getFile().getAbsoluteFile();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
+			}
 			List matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
-			logger.info("Resolved location subPattern [" + locationPattern + "] to file paths: " + matchingFiles);
+			if (logger.isInfoEnabled()) {
+				logger.info("Resolved location pattern [" + locationPattern + "] to file paths: " + matchingFiles);
+			}
 			for (Iterator it = matchingFiles.iterator(); it.hasNext();) {
 				File file = (File) it.next();
 				result.add(new FileSystemResource(file));
 			}
+			return (Resource[]) result.toArray(new Resource[result.size()]);
 		}
+
+		// else fall back to class path resources respectively a single resource
 		else {
-			result.add(this.resourceLoader.getResource(locationPattern));
+			return super.getResources(locationPattern);
 		}
-		return (Resource[]) result.toArray(new Resource[result.size()]);
 	}
 
 	/**
