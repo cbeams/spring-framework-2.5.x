@@ -41,7 +41,7 @@ import org.springframework.core.io.Resource;
  * @since 18.02.2004
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
- * @version $Id: SchedulerFactoryBean.java,v 1.5 2004-02-22 21:53:26 jhoeller Exp $
+ * @version $Id: SchedulerFactoryBean.java,v 1.6 2004-03-01 12:46:17 jhoeller Exp $
  */
 public class SchedulerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
@@ -185,12 +185,7 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 		}
 
 		// get Scheduler instance from SchedulerFactory
-		if (this.schedulerName != null) {
-			this.scheduler = schedulerFactory.getScheduler(this.schedulerName);
-		}
-		else {
-			this.scheduler = schedulerFactory.getScheduler();
-		}
+		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
 
 		// register JobDetails
 		if (this.jobDetails != null) {
@@ -230,6 +225,29 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 
 		logger.info("Starting Quartz Scheduler");
 		this.scheduler.start();
+	}
+
+	/**
+	 * Create the Scheduler instance for the given factory and scheduler name.
+	 * Called by afterPropertiesSet.
+	 * <p>Default implementation invokes the corresponding getScheduler methods
+	 * of SchedulerFactory. Can be overridden for custom Scheduler creation.
+	 * @param schedulerFactory the factory to create the Scheduler with
+	 * @param schedulerName the name of the scheduler to create
+	 * @return the Scheduler instance
+	 * @throws SchedulerException if thrown by Quartz methods
+	 * @see #afterPropertiesSet
+	 * @see org.quartz.SchedulerFactory#getScheduler
+	 * @see org.quartz.SchedulerFactory#getScheduler(String)
+	 */
+	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
+			throws SchedulerException {
+		if (schedulerName != null) {
+			return schedulerFactory.getScheduler(schedulerName);
+		}
+		else {
+			return schedulerFactory.getScheduler();
+		}
 	}
 
 
