@@ -66,6 +66,24 @@
 			</list>
 		</property>
 	</bean>
+	
+	<bean id="swapper" 
+		class="org.springframework.aop.target.HotSwappableTargetSource">	
+		<property name="initialTarget"><ref local="target"/></property>
+	</bean>
+	
+	<bean id="hotSwapped" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="mockMan"/></property>
+		<!-- Should automatically pick up the target source, rather than simple target -->
+		<property name="target"><ref local="swapper"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="setAge">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="enableCglibSubclassOptimizations"><value>false</value></property>
+	</bean>
 
 	<bean id="txnInvocationCounterPointcut" 
 		class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterPointcut"

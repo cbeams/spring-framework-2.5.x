@@ -15,10 +15,14 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.DerivedTestBean;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.transaction.DummyTxManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -27,7 +31,7 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.10 2003-11-16 12:54:57 johnsonr Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.11 2003-12-02 16:22:14 johnsonr Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
@@ -99,6 +103,50 @@ public class BeanFactoryTransactionTests extends TestCase {
 		testBean.setAge(age);
 		assertTrue(testBean.getAge() == age);
 		ptmControl.verify();
+	}
+	
+	/**
+	 * Check that we fail gracefully if the user doesn't
+	 * set any transaction attributes.
+	 */
+	public void testNoTransactionAttributeSource() {
+		InputStream is = getClass().getResourceAsStream("noTransactionAttributeSource.xml");
+		try {
+			XmlBeanFactory bf = new XmlBeanFactory(is, null);
+			ITestBean testBean = (ITestBean) bf.getBean("noTransactionAttributeSource");
+			fail("Should require TransactionAttributeSource to be set");
+		}
+		catch (FatalBeanException ex) {
+			// Ok
+		}
+	}
+	
+	/**
+	 * Test that we can set the target to a dynamic TargetSource
+	 * @throws NoSuchMethodException
+	 */
+	public void testDynamicTargetSource() throws NoSuchMethodException {
+		// Install facade
+		DummyTxManager txMan = new DummyTxManager();
+		PlatformTransactionManagerFacade.delegate = txMan;
+		
+		TestBean tb = (TestBean) factory.getBean("hotSwapped");
+		assertEquals(666, tb.getAge());
+		int newAge = 557;
+		tb.setAge(newAge);
+		assertEquals(newAge, tb.getAge());
+		
+		TestBean target2 = new TestBean();
+		target2.setAge(65);
+		HotSwappableTargetSource ts = (HotSwappableTargetSource) factory.getBean("swapper");
+		ts.swap(target2);
+		assertEquals(target2.getAge(), tb.getAge());
+		tb.setAge(newAge);
+		assertEquals(newAge, target2.getAge());
+		
+		assertEquals(0, txMan.inflight);
+		assertEquals(2, txMan.commits);
+		assertEquals(0, txMan.rollbacks);
 	}
 
 
