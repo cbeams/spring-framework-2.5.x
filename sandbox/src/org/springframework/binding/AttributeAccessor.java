@@ -20,8 +20,9 @@ package org.springframework.binding;
  * Useful for hiding the structure or source of the underlying attribute
  * collection.
  * <p>
- * For example, the backing collection might be a javabean, a http request, a
- * http session, a map, a mbean, or some other attribute holder.
+ * For example, the backing collection might be a javabean, an http request,
+ * an http session, a map, an mbean, or some other attribute holder.
+ * 
  * @author Keith Donald
  */
 public interface AttributeAccessor {
@@ -37,7 +38,7 @@ public interface AttributeAccessor {
 	 * Get the attribute value associated with the provided name, returning
 	 * <code>null</code> if not found.
 	 * @param attributeName The attribute name
-	 * @return The attribute value, or null if not found.
+	 * @return the attribute value, or null if not found.
 	 */
 	public Object getAttribute(String attributeName);
 }

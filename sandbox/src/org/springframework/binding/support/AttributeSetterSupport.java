@@ -23,10 +23,12 @@ import org.springframework.util.closure.support.IteratorProcessTemplate;
 public abstract class AttributeSetterSupport implements AttributeSetter, Map {
 
 	/**
-	 * @param attributeName
-	 * @param requiredType
-	 * @return
-	 * @throws IllegalStateException
+	 * Get an attribute value and make sure it is of the required type.
+	 * @param attributeName name of the attribute to get
+	 * @param requiredType the required type of the attribute value
+	 * @return the attribute value, or null if not found
+	 * @throws IllegalStateException when the value is not of the required
+	 *         type
 	 */
 	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException {
 		Object value = getAttribute(attributeName);
@@ -131,6 +133,7 @@ public abstract class AttributeSetterSupport implements AttributeSetter, Map {
 	public abstract Map getAttributeMap();
 
 	// map operations
+	
 	public boolean containsKey(Object key) {
 		return containsAttribute(String.valueOf(key));
 	}
