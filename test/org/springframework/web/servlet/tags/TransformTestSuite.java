@@ -24,10 +24,10 @@ public class TransformTestSuite extends AbstractTagTest {
 		MockPageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(tb, "tb");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		CustomDateEditor l = new CustomDateEditor(df, true);
-		errors.registerCustomEditor(Date.class, l);
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
 
 		// execute the bind tag using the date property
 		BindTag bind = new BindTag();
@@ -66,16 +66,15 @@ public class TransformTestSuite extends AbstractTagTest {
 		assertEquals(pc.getAttribute("theString"), "name");
 	}
 	
-	public void testTransformTagOutsideBindTag() 
-	throws JspException {
+	public void testTransformTagOutsideBindTag() throws JspException {
 		// first set up the pagecontext and the bean
 		MockPageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(tb, "tb");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		CustomDateEditor l = new CustomDateEditor(df, true);
-		errors.registerCustomEditor(Date.class, l);
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
 
 		// now try to execute the tag outside a bindtag
 		TransformTag transform = new TransformTag();
@@ -105,16 +104,15 @@ public class TransformTestSuite extends AbstractTagTest {
 		}	
 	}
 	
-	public void testTransformTagNonExistingValue() 
-	throws JspException {
+	public void testTransformTagNonExistingValue() throws JspException {
 		//		first set up the pagecontext and the bean
 		MockPageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(tb, "tb");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		CustomDateEditor l = new CustomDateEditor(df, true);
-		errors.registerCustomEditor(Date.class, l);
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
 		
 		// try with non-existing value
 		BindTag bind = new BindTag();
@@ -133,16 +131,15 @@ public class TransformTestSuite extends AbstractTagTest {
 		assertNull(pc.getAttribute("theString2"));
 	}
 	
-	public void testSettingOfScope()
-	throws JspException {
-//		first set up the pagecontext and the bean
+	public void testSettingOfScope() throws JspException {
+		 // first set up the pagecontext and the bean
 		 MockPageContext pc = createPageContext();
 		 TestBean tb = new TestBean();
 		 DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		 ServletRequestDataBinder errors = new ServletRequestDataBinder(tb, "tb");
+		 ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		 CustomDateEditor l = new CustomDateEditor(df, true);
-		 errors.registerCustomEditor(Date.class, l);
-		 pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		 binder.registerCustomEditor(Date.class, l);
+		 pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
 
 		 // execute the bind tag using the date property
 		 BindTag bind = new BindTag();

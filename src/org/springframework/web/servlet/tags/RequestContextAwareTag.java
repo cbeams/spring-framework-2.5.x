@@ -5,6 +5,9 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
@@ -26,6 +29,8 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  */
 public abstract class RequestContextAwareTag extends TagSupport {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private Boolean htmlEscape;
 
 	private RequestContext requestContext;
@@ -36,12 +41,7 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 * @see HtmlEscapeTag#setDefaultHtmlEscape
 	 */
 	public final void setHtmlEscape(String htmlEscape) throws JspException {
-		this.htmlEscape =
-			new Boolean(
-				ExpressionEvaluationUtils.evaluateBoolean(
-					"htmlEscape",
-					htmlEscape,
-					pageContext));
+		this.htmlEscape =	new Boolean(ExpressionEvaluationUtils.evaluateBoolean("htmlEscape", htmlEscape, pageContext));
 	}
 
 	/**
@@ -50,7 +50,7 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 */
 	protected final boolean isHtmlEscape() {
 		return (
-			this.htmlEscape != null
+				this.htmlEscape != null
 				? this.htmlEscape.booleanValue()
 				: HtmlEscapeTag.isDefaultHtmlEscape(this.pageContext));
 	}
@@ -68,15 +68,16 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 */
 	public final int doStartTag() throws JspException {
 		try {
-			this.requestContext =
-				new RequestContext(
-					(HttpServletRequest) this.pageContext.getRequest());
+			this.requestContext =	new RequestContext((HttpServletRequest) this.pageContext.getRequest());
 			return doStartTagInternal();
-		} catch (JspException ex) {
+		}
+		catch (JspException ex) {
 			throw ex;
-		} catch (RuntimeException ex) {
+		}
+		catch (RuntimeException ex) {
 			throw ex;
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			pageContext.getServletContext().log("Exception in custom tag", ex);
 			throw new JspTagException(ex.getMessage());
 		}

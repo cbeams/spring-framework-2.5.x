@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.41 2003-11-13 11:51:19 jhoeller Exp $
+$Id: changelog.txt,v 1.42 2003-11-14 11:43:13 jhoeller Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
@@ -63,6 +63,7 @@ Changes in version 1.0 M3 (XX.11.2003)
 * introduced JdoAccessor as common base class for JdoTemplate and JdoInterceptor
 * introduced JdoDialect interface with getJdbcConnection and flush methods
 * added support for JdoDialect in JdoTransactionManager and JdoAccessor/JdoTemplate/JdoInterceptor
+* reworked DataBinder and ServletRequestDataBinder to contain a BindException instead of derive from it
 * reworked VelocityEngineFactory to allow VelocityEngineFactoryBean to run outside of application context
 * view bean factories of XmlViewResolver and ResourceBundleViewResolver are now children of the application context
 * added "attributesMap" property to AbstractView, for setting attribute values like bean references via a Map

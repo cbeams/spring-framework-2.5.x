@@ -225,8 +225,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 		  }
 			// process submit
 			Object command = getCommand(request);
-			ServletRequestDataBinder errors = bindAndValidate(request, command);
-			return processFormSubmission(request, response, command, errors);
+			ServletRequestDataBinder binder = bindAndValidate(request, command);
+			return processFormSubmission(request, response, command, binder.getErrors());
 		}
 		else {
 			return showNewForm(request, response);
@@ -274,7 +274,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 			logger.debug("Binding to new form");
 			binder.bind(request);
 		}
-		return showForm(request, response, binder);
+		return showForm(request, response, binder.getErrors());
 	}
 
 	/**
@@ -392,8 +392,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 		Object command = formBackingObject(request);
-		ServletRequestDataBinder errors = bindAndValidate(request, command);
-		return processFormSubmission(request, response, command, errors);
+		ServletRequestDataBinder binder = bindAndValidate(request, command);
+		return processFormSubmission(request, response, command, binder.getErrors());
 	}
 
 	/**
@@ -410,12 +410,14 @@ public abstract class AbstractFormController extends BaseCommandController {
 			return super.getCommand(request);
 		}
 		HttpSession session = request.getSession(false);
-		if (session == null)
+		if (session == null) {
 			throw new ServletException("Must have session when trying to bind");
+		}
 		Object formObject = session.getAttribute(getFormSessionAttributeName());
 		session.removeAttribute(getFormSessionAttributeName());
-		if (formObject == null)
+		if (formObject == null) {
 			throw new ServletException("Form object not found in session");
+		}
 		return formObject;
 	}
 
@@ -425,15 +427,18 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * <p>Subclasses can override this to provide custom submission handling
 	 * like triggering a custom action. They can also provide custom validation
 	 * and call showForm or proceed with the submission accordingly.
+	 * <p>Can call errors.getModel() to populate the ModelAndView model with the command
+	 * and the Errors instance, under the specified bean name.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
-	 * @param errors binder without errors (subclass can add errors if it wants to)
+	 * @param errors Errors instance without errors (subclass can add errors if it wants to)
 	 * @return the prepared model and view, or null
 	 * @throws ServletException in case of invalid state or arguments
 	 * @throws IOException in case of I/O errors
 	 * @see #isFormSubmission
 	 * @see #showForm
+	 * @see org.springframework.validation.Errors
 	 */
 	protected abstract ModelAndView processFormSubmission(HttpServletRequest request,	HttpServletResponse response,
 	                                                      Object command, BindException errors)

@@ -17,7 +17,7 @@ public class BindTestSuite extends AbstractTagTest {
 
 	public void testBindErrorsTagWithErrors() throws JspException {
 		MockPageContext pc = createPageContext();
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		errors.reject("test", null, "test");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindErrorsTag tag = new BindErrorsTag();
@@ -29,7 +29,7 @@ public class BindTestSuite extends AbstractTagTest {
 
 	public void testBindErrorsTagWithoutErrors() throws JspException {
 		MockPageContext pc = createPageContext();
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindErrorsTag tag = new BindErrorsTag();
 		tag.setPageContext(pc);
@@ -48,7 +48,7 @@ public class BindTestSuite extends AbstractTagTest {
 
 	public void testBindTagWithoutErrors() throws JspException {
 		MockPageContext pc = createPageContext();
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -69,7 +69,7 @@ public class BindTestSuite extends AbstractTagTest {
 
 	public void testBindTagWithGlobalErrors() throws JspException {
 		MockPageContext pc = createPageContext();
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		errors.reject("code1", null, "message1");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
@@ -93,7 +93,7 @@ public class BindTestSuite extends AbstractTagTest {
 	throws JspException {
 		// one error (should not include delimiter)
 		MockPageContext pc = createPageContext();
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		errors.reject("code1", null, "message1");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
@@ -106,7 +106,7 @@ public class BindTestSuite extends AbstractTagTest {
 			
 		// two errors
 		pc = createPageContext();
-		errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		errors.reject("code1", null, "message1");
 		errors.reject("code1", null, "message2");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
@@ -120,7 +120,7 @@ public class BindTestSuite extends AbstractTagTest {
 			
 		// no errors
 		pc = createPageContext();
-		errors = new ServletRequestDataBinder(new TestBean(), "tb");
+		errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		tag = new BindTag();
 		tag.setPageContext(pc);
@@ -135,7 +135,7 @@ public class BindTestSuite extends AbstractTagTest {
 		MockPageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		tb.setName("name1");
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(tb, "tb");
+		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
 		errors.rejectValue("name", "code1", "message & 1");
 		errors.rejectValue("name", "code2", "message2");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
@@ -164,7 +164,7 @@ public class BindTestSuite extends AbstractTagTest {
 		TestBean spouse = new TestBean();
 		spouse.setName("name2");
 		tb.setSpouse(spouse);
-		ServletRequestDataBinder errors = new ServletRequestDataBinder(tb, "tb");
+		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
 		errors.rejectValue("spouse.name", "code1", "message1");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();

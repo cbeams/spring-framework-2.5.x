@@ -151,6 +151,4 @@ public interface Errors {
 	 */
 	void setNestedPath(String nestedPath);
 
-    PropertyEditor getCustomEditor(String property);
-
 }

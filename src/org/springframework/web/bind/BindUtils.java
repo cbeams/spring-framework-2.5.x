@@ -26,7 +26,7 @@ public abstract class BindUtils {
 	public static BindException bind(ServletRequest request, Object object, String objectName) {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(object, objectName);
 		binder.bind(request);
-		return binder;
+		return binder.getErrors();
 	}
 
 	/**
@@ -47,7 +47,7 @@ public abstract class BindUtils {
 			initializer.initBinder(request, binder);
 		}
 		binder.bind(request);
-		return binder;
+		return binder.getErrors();
 	}
 
 	/**

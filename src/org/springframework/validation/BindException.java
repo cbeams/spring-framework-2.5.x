@@ -179,10 +179,26 @@ public class BindException extends Exception implements Errors {
 	public Object getFieldValue(String field) {
 		field = fixedField(field);
 		FieldError fe = getFieldError(field);
-		if (fe == null)
-			return getBeanWrapper().getPropertyValue(field);
-		else
+		if (fe != null) {
 			return fe.getRejectedValue();
+		}
+		else {
+			Object value = getBeanWrapper().getPropertyValue(field);
+			if (value != null) {
+				PropertyEditor customEditor = getBeanWrapper().findCustomEditor(null, field);
+				if (customEditor != null) {
+					customEditor.setValue(value);
+					return customEditor.getAsText();
+				}
+			}
+			return value;
+		}
+	}
+
+	public PropertyEditor getCustomEditor(String field) {
+		field = fixedField(field);
+		FieldError fe = getFieldError(field);
+		return (fe == null ? getBeanWrapper().findCustomEditor(null, field) : null);
 	}
 
 	public void setNestedPath(String nestedPath) {
@@ -191,12 +207,6 @@ public class BindException extends Exception implements Errors {
 		if (nestedPath.length() > 0)
 			nestedPath += ".";
 		this.nestedPath = nestedPath;
-	}
-
-	public PropertyEditor getCustomEditor(String field) {
-		field = fixedField(field);
-		FieldError fe = getFieldError(field);
-		return (fe == null ? getBeanWrapper().findCustomEditor(null, field) : null);
 	}
 
 	/**

@@ -19,6 +19,11 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  */
 public class ServletRequestDataBinder extends DataBinder {
 
+	/**
+	 * Create a new DataBinder instance.
+	 * @param target target object to bind onto
+	 * @param name name of the target object
+	 */
 	public ServletRequestDataBinder(Object target, String name) {
 		super(target, name);
 	}
@@ -57,8 +62,9 @@ public class ServletRequestDataBinder extends DataBinder {
 	 * @throws ServletRequestBindingException subclass of ServletException on any binding problem
 	 */
 	public void closeNoCatch() throws ServletRequestBindingException {
-		if (hasErrors()) {
-			throw new ServletRequestBindingException("Errors binding onto object [" + getTarget() + "]", this);
+		if (getErrors().hasErrors()) {
+			throw new ServletRequestBindingException("Errors binding onto object [" + getErrors().getTarget() + "]",
+																							 getErrors());
 		}
 	}
 

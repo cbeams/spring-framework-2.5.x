@@ -1,12 +1,13 @@
 package org.springframework.web.servlet.tags;
 
-import java.util.List;
 import java.beans.PropertyEditor;
+import java.util.List;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.util.ExpressionEvaluationUtils;
@@ -33,9 +34,9 @@ public class BindTag extends RequestContextAwareTag {
 
 	private String path;
 
-	private Errors errors;
-
 	private String property;
+
+	private Errors errors;
 
 	private PropertyEditor editor;
 
@@ -49,7 +50,16 @@ public class BindTag extends RequestContextAwareTag {
 	}
 
 	/**
-	 * Retrieves the path that this tag should apply to
+	 * Retrieve the property that this tag is currently bound to,
+	 * or null if bound to an object rather than a specific property.
+	 * Intended for cooperating nesting tags.
+	 */
+	public String getProperty() {
+		return property;
+	}
+
+	/**
+	 * Retrieve the path that this tag should apply to
 	 * @return the path that this tag should apply to or <code>null</code>
 	 * if it is not set
 	 * @see #setPath(String)
@@ -59,7 +69,7 @@ public class BindTag extends RequestContextAwareTag {
 	}
 
 	/**
-	 * Retrieves the Errors instance that this tag is currently bound to.
+	 * Retrieve the Errors instance that this tag is currently bound to.
 	 * Intended for cooperating nesting tags.
 	 * @return an instance of Errors
 	 */
@@ -67,17 +77,13 @@ public class BindTag extends RequestContextAwareTag {
 		return errors;
 	}
 
+	/**
+	 * Retrieve the property editor for the property that this tag is
+	 * currently bound to. Intended for cooperating nesting tags.
+	 * @return the property editor, or null if none applicable
+	 */
 	public PropertyEditor getEditor() {
 		return editor;
-	}
-
-	/**
-	 * Retrieves the property that this tag is currently bound to,
-	 * or null if bound to an object rather than a specific property.
-	 * Intended for cooperating nesting tags.
-	 */
-	public String getProperty() {
-		return property;
 	}
 
 	protected int doStartTagInternal() throws Exception {
@@ -111,7 +117,13 @@ public class BindTag extends RequestContextAwareTag {
 			else {
 				fes = this.errors.getFieldErrors(this.property);
 				value = this.errors.getFieldValue(this.property);
-				editor = this.errors.getCustomEditor(this.property);
+				if (this.errors instanceof BindException) {
+					this.editor = ((BindException) this.errors).getCustomEditor(this.property);
+				}
+				else {
+					logger.warn("Cannot not expose custom property editor because Errors instance [" + this.errors +
+											"] is not of type BindException");
+				}
 				if (isHtmlEscape() && value instanceof String) {
 					value = HtmlUtils.htmlEscape((String)value);
 				}

@@ -146,10 +146,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * and before error evaluation.
 	 * @param request current HTTP request
 	 * @param command bound command
-	 * @param errors binder for additional custom validation
+	 * @param errors Errors instance for additional custom validation
 	 * @param page current wizard page
 	 * @throws ServletException in case of invalid state or arguments
 	 * @see #bindAndValidate
+	 * @see org.springframework.validation.Errors
 	 */
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors, int page)
 	    throws ServletException {
@@ -375,12 +376,15 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for processing the final action of this wizard.
+	 * <p>Can call errors.getModel() to populate the ModelAndView model with the command
+	 * and the Errors instance, under the specified bean name.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param command form object with the current wizard state
-	 * @param errors binder containing errors
+	 * @param errors Errors instance containing errors
 	 * @return the finish view
 	 * @throws ServletException in case of invalid state or arguments
+	 * @see org.springframework.validation.Errors
 	 */
 	protected abstract ModelAndView processFinish(HttpServletRequest request, HttpServletResponse response,
 	                                              Object command, BindException errors)
@@ -388,12 +392,15 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for processing the cancel action of this wizard.
+	 * <p>Can call errors.getModel() to populate the ModelAndView model with the command
+	 * and the Errors instance, under the specified bean name.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param command form object with the current wizard state
-	 * @param errors binder containing errors
+	 * @param errors Errors instance containing errors
 	 * @return the finish view
 	 * @throws ServletException in case of invalid state or arguments
+	 * @see org.springframework.validation.Errors
 	 */
 	protected abstract ModelAndView processCancel(HttpServletRequest request, HttpServletResponse response,
 	                                              Object command, BindException errors)

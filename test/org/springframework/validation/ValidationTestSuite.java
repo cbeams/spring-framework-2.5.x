@@ -36,7 +36,7 @@ public class ValidationTestSuite extends TestCase {
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("changed age correctly", rod.getAge() == 32);
 
-		Map m = binder.getModel();
+		Map m = binder.getErrors().getModel();
 		assertTrue("There is one element in map", m.size() == 2);
 		TestBean tb = (TestBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
@@ -58,12 +58,12 @@ public class ValidationTestSuite extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map m = binder.getModel();
+			Map m = binder.getErrors().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
 			TestBean tb = (TestBean) m.get("person");
 			assertTrue("Same object", tb.equals(rod));
 
-			BindException be = (BindException) m.get(DataBinder.ERROR_KEY_PREFIX + "person");
+			BindException be = (BindException) m.get(BindException.ERROR_KEY_PREFIX + "person");
 			assertTrue("Added itself to map", ex == be);
 			assertTrue(be.hasErrors());
 			assertTrue("Correct number of errors", be.getErrorCount() == 1);
@@ -90,14 +90,14 @@ public class ValidationTestSuite extends TestCase {
 		pvs.addPropertyValue(new PropertyValue("touchy", "value"));
 		binder.bind(pvs);
 
-		binder.rejectValue("name", "someCode", "someMessage");
-		binder.rejectValue("touchy", "someCode", "someMessage");
+		binder.getErrors().rejectValue("name", "someCode", "someMessage");
+		binder.getErrors().rejectValue("touchy", "someCode", "someMessage");
 
-		assertEquals("value", binder.getFieldValue("name"));
-		assertEquals("prefixvalue", binder.getFieldError("name").getRejectedValue());
+		assertEquals("prefixvalue", binder.getErrors().getFieldValue("name"));
+		assertEquals("prefixvalue", binder.getErrors().getFieldError("name").getRejectedValue());
 		assertEquals("prefixvalue", tb.getName());
-		assertEquals("value", binder.getFieldValue("touchy"));
-		assertEquals("value", binder.getFieldError("touchy").getRejectedValue());
+		assertEquals("value", binder.getErrors().getFieldValue("touchy"));
+		assertEquals("value", binder.getErrors().getFieldError("touchy").getRejectedValue());
 		assertEquals("value", tb.getTouchy());
 	}
 
@@ -118,7 +118,7 @@ public class ValidationTestSuite extends TestCase {
 		pvs.addPropertyValue(new PropertyValue("age", ""));
 		binder.bind(pvs);
 
-		assertEquals("argh", binder.getFieldValue("age"));
+		assertEquals("argh", binder.getErrors().getFieldValue("age"));
 		assertEquals(99, tb.getAge());
 	}
 
@@ -140,14 +140,14 @@ public class ValidationTestSuite extends TestCase {
 		pvs.addPropertyValue(new PropertyValue("touchy", "value"));
 		binder.bind(pvs);
 
-		binder.rejectValue("name", "someCode", "someMessage");
-		binder.rejectValue("touchy", "someCode", "someMessage");
+		binder.getErrors().rejectValue("name", "someCode", "someMessage");
+		binder.getErrors().rejectValue("touchy", "someCode", "someMessage");
 
-		assertEquals("value", binder.getFieldValue("name"));
-		assertEquals("prefixvalue", binder.getFieldError("name").getRejectedValue());
+		assertEquals("prefixvalue", binder.getErrors().getFieldValue("name"));
+		assertEquals("prefixvalue", binder.getErrors().getFieldError("name").getRejectedValue());
 		assertEquals("prefixvalue", tb.getName());
-		assertEquals("value", binder.getFieldValue("touchy"));
-		assertEquals("prefixvalue", binder.getFieldError("touchy").getRejectedValue());
+		assertEquals("prefixvalue", binder.getErrors().getFieldValue("touchy"));
+		assertEquals("prefixvalue", binder.getErrors().getFieldError("touchy").getRejectedValue());
 		assertEquals("prefixvalue", tb.getTouchy());
 	}
 

@@ -177,12 +177,11 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * This implementation calls showForm in case of errors,
 	 * and delegates to onSubmit's full version else.
-	 * <p>This can only be overridden to check for an action that should
-	 * be executed without respect to binding errors, like a cancel action.
-	 * To just handle successful submissions without binding errors,
-	 * override one of the onSubmit methods.
+	 * <p>This can only be overridden to check for an action that should be executed
+	 * without respect to binding errors, like a cancel action. To just handle successful
+	 * submissions without binding errors, override one of the onSubmit methods.
 	 * @see #showForm
-	 * @see #onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
+	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
 	 */
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response,
 	                                             Object command, BindException errors)
@@ -200,19 +199,21 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * Submit callback with all parameters. Called in case of submit without errors
 	 * reported by the registered validator resp. on every submit if no validator.
-	 * <p>Default implementation delegates to onSubmit(command,errors).
-	 * Subclasses can override this to provide custom submission handling
-	 * like triggering a custom action. They can also provide custom validation
-	 * and call showForm/super.onSubmit accordingly.
+	 * <p>Default implementation delegates to onSubmit(command, errors). Subclasses can
+	 * override this to provide custom submission handling like triggering a custom action.
+	 * They can also provide custom validation and call showForm/super.onSubmit accordingly.
+	 * <p>Can call errors.getModel() to populate the ModelAndView model with the command
+	 * and the Errors instance, under the specified bean name.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
-	 * @param errors binder without errors (subclass can add errors if it wants to)
+	 * @param errors Errors instance without errors (subclass can add errors if it wants to)
 	 * @return the prepared model and view, or null
 	 * @throws ServletException in case of invalid state or arguments
 	 * @throws IOException in case of I/O errors
 	 * @see #onSubmit(Object)
 	 * @see #showForm
+	 * @see org.springframework.validation.Errors
 	 */
 	protected ModelAndView onSubmit(HttpServletRequest request,	HttpServletResponse response,
 																	Object command,	BindException errors)

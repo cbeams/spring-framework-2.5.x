@@ -250,9 +250,9 @@ public abstract class BaseCommandController extends AbstractController {
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
 		if (isValidateOnBinding()) {
-			ValidationUtils.invokeValidator(getValidator(), command, binder);
+			ValidationUtils.invokeValidator(getValidator(), command, binder.getErrors());
 		}
-		onBindAndValidate(request, command, binder);
+		onBindAndValidate(request, command, binder.getErrors());
 		return binder;
 	}
 
@@ -294,9 +294,10 @@ public abstract class BaseCommandController extends AbstractController {
 	 * and before error evaluation.
 	 * @param request current HTTP request
 	 * @param command bound command
-	 * @param errors binder for additional custom validation
+	 * @param errors Errors instance for additional custom validation
 	 * @throws ServletException in case of invalid state or arguments
 	 * @see #bindAndValidate
+	 * @see org.springframework.validation.Errors
 	 */
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
 			throws ServletException {
