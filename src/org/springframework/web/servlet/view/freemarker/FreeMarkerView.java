@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -132,9 +133,13 @@ public class FreeMarkerView extends AbstractTemplateView {
 			// check that we can get the template, even if we might subsequently get it again
 			getTemplate(this.configuration.getLocale());
 		}
+		catch (ParseException ex) {
+		    throw new ApplicationContextException("Failed to parse FreeMarker template for URL [" + 
+			        getUrl() + "]", ex);
+		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("Cannot load FreeMarker template for URL [" + getUrl() +
-					"]: Did you specify the correct template loader path?");
+			throw new ApplicationContextException("Cannot load FreeMarker template for URL [" + 
+			        getUrl() + "]", ex);
 		}
 	}
 
