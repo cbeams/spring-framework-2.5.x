@@ -49,7 +49,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 
 		prepareConnection(httpCon, baos.size());
 		baos.writeTo(httpCon.getOutputStream());
-		return readRemoteInvocationResult(httpCon.getInputStream());
+		return readRemoteInvocationResult(httpCon.getInputStream(), config.getCodebaseUrl());
 	}
 
 	/**

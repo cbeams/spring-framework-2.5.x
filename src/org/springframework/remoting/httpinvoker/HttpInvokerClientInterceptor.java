@@ -35,16 +35,51 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * invocation results. Uses Java serialization just like RMI, but provides
  * the same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
  *
+ * <p>Can use the JDK's RMIClassLoader to load classes from a given codebase,
+ * performing on-demand dynamic code download from a remote location.
+ * The codebase can consist of multiple URLs, separated by spaces.
+ * Note that RMIClassLoader requires a SecurityManager to be set, like when
+ * using dynamic class download with standard RMI! (See the RMI documentation
+ * for details.)
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setServiceUrl
+ * @see #setCodebaseUrl
  * @see HttpInvokerServiceExporter
  * @see HttpInvokerProxyFactoryBean
+ * @see java.rmi.server.RMIClassLoader
  */
 public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		implements MethodInterceptor, HttpInvokerClientConfiguration {
 
+	private String codebaseUrl;
+
 	private HttpInvokerRequestExecutor httpInvokerRequestExecutor = new SimpleHttpInvokerRequestExecutor();
+
+
+	/**
+	 * Set the codebase URL to download classes from if not found locally.
+	 * Can consists of multiple URLs, separated by spaces.
+	 * <p>Follows RMI's codebase conventions for dynamic class download.
+	 * In contrast to RMI, where the server determines the URL for class download
+	 * (via the "java.rmi.server.codebase" system property), it's the client
+	 * that determines the codebase URL here. The server will usually be the
+	 * same as for the service URL, just pointing to a different path there.
+	 * @see #setServiceUrl
+	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
+	 * @see java.rmi.server.RMIClassLoader
+	 */
+	public void setCodebaseUrl(String codebaseUrl) {
+		this.codebaseUrl = codebaseUrl;
+	}
+
+	/**
+	 * Return the codebase URL to download classes from if not found locally.
+	 */
+	public String getCodebaseUrl() {
+		return codebaseUrl;
+	}
 
 	/**
 	 * Set the HttpInvokerRequestExecutor implementation to use for executing
@@ -64,6 +99,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	public HttpInvokerRequestExecutor getHttpInvokerRequestExecutor() {
 		return httpInvokerRequestExecutor;
 	}
+
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {

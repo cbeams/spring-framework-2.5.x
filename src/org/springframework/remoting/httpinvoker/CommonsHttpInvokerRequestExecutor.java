@@ -85,7 +85,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 		try {
 			postMethod.setRequestBody(new ByteArrayInputStream(baos.toByteArray()));
 			executePostMethod(config, this.httpClient, postMethod);
-			return readRemoteInvocationResult(postMethod.getResponseBodyAsStream());
+			return readRemoteInvocationResult(postMethod.getResponseBodyAsStream(), config.getCodebaseUrl());
 		}
 		finally {
 			// need to explicitly release because it might be pooled

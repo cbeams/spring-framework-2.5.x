@@ -27,10 +27,14 @@ import org.springframework.beans.factory.InitializingBean;
  * used as bean reference, exposing the specified service interface.
  *
  * <p>The service URL must be an HTTP URL exposing an HTTP invoker service.
- * For details, see HttpInvokerClientInterceptor docs.
+ * Optionally, a codebase URL can be specified for on-demand dynamic code download
+ * from a remote location. For details, see HttpInvokerClientInterceptor docs.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see #setServiceInterface
+ * @see #setServiceUrl
+ * @see #setCodebaseUrl
  * @see HttpInvokerClientInterceptor
  * @see HttpInvokerServiceExporter
  */

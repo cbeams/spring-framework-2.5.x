@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.remoting.rmi.CodebaseAwareObjectInputStream;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
 
@@ -96,9 +97,10 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 		}
 	}
 
+
 	/**
 	 * Execute a request to send the given serialized remote invocation.
-	 * <p>Implementations will usually call readRemoteInvocationResult
+	 * <p>Implementations will usually call <code>readRemoteInvocationResult</code>
 	 * to deserialize a returned RemoteInvocationResult object.
 	 * @param config the HTTP invoker configuration that specifies the
 	 * target service
@@ -107,11 +109,20 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @return the RemoteInvocationResult object
 	 * @throws IOException if thrown by I/O operations
 	 * @throws ClassNotFoundException if thrown during deserialization
-	 * @see #readRemoteInvocationResult
+	 * @see #readRemoteInvocationResult(java.io.InputStream, String)
 	 */
 	protected abstract RemoteInvocationResult doExecuteRequest(
 			HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
 			throws IOException, ClassNotFoundException;
+
+	/**
+	 * @deprecated in favor of readRemoteInvocationResult(InputStream, String)
+	 * @see #readRemoteInvocationResult(java.io.InputStream, String)
+	 */
+	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is)
+			throws IOException, ClassNotFoundException {
+		return readRemoteInvocationResult(is, null);
+	}
 
 	/**
 	 * Deserialize a RemoteInvocationResult from the given InputStream.
@@ -119,9 +130,9 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @return the RemoteInvocationResult object
 	 * @throws IOException if thrown by I/O methods
 	 */
-	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is)
+	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, String codebaseUrl)
 			throws IOException, ClassNotFoundException {
-		ObjectInputStream ois = new ObjectInputStream(is);
+		ObjectInputStream ois = createObjectInputStream(is, codebaseUrl);
 		try {
 			Object obj = ois.readObject();
 			if (!(obj instanceof RemoteInvocationResult)) {
@@ -131,6 +142,26 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 		}
 		finally {
 			ois.close();
+		}
+	}
+
+	/**
+	 * Create an ObjectInputStream for the given InputStream and codebase.
+	 * The default implementation creates a CodebaseAwareObjectInputStream
+	 * if a codebase is specified, and a standard ObjectInputStream else.
+	 * @param is the InputStream to read from
+	 * @param codebaseUrl the codebase URL to load classes from if not found locally
+	 * @return the new ObjectInputStream instance to use
+	 * @throws IOException if creation of the ObjectInputStream failed
+	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
+	 * @see java.io.ObjectInputStream
+	 */
+	protected ObjectInputStream createObjectInputStream(InputStream is, String codebaseUrl) throws IOException {
+		if (codebaseUrl != null) {
+			return new CodebaseAwareObjectInputStream(is, codebaseUrl);
+		}
+		else {
+			return new ObjectInputStream(is);
 		}
 	}
 
