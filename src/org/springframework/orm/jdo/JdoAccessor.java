@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.jdo;
 
@@ -28,13 +28,14 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * Base class for JdoTemplate and JdoInterceptor, defining common
- * properties like flushing behavior.
+ * properties like PersistenceManagerFactory and flushing behavior.
  *
  * <p>Note: With JDO, modifications to persistent objects are just possible
  * within a transaction (in contrast to Hibernate). Therefore, eager flushing
- * will just get applied when in a transaction. Furthermore, there is explicit
- * notion of flushing never, as this would not imply a performance gain due to
- * JDO's field interception mechanism that doesn't involve snapshot comparison.
+ * will just get applied when in a transaction. Furthermore, there is no
+ * explicit notion of flushing never, as this would not imply a performance
+ * gain due to JDO's field interception mechanism that doesn't involve
+ * the overhead of snapshot comparisons.
  *
  * <p>Eager flushing is just available for specific JDO implementations.
  * You need to a corresponding JdoDialect to make eager flushing work.
@@ -46,7 +47,7 @@ import org.springframework.dao.DataAccessException;
  * @see JdoTemplate
  * @see JdoInterceptor
  * @see #setFlushEager
- * @version $Id: JdoAccessor.java,v 1.8 2004-06-17 09:46:30 jhoeller Exp $
+ * @version $Id: JdoAccessor.java,v 1.9 2004-06-17 15:53:20 jhoeller Exp $
  */
 public class JdoAccessor implements InitializingBean {
 
@@ -90,7 +91,7 @@ public class JdoAccessor implements InitializingBean {
 	 */
 	public JdoDialect getJdoDialect() {
 		if (this.jdoDialect == null) {
-			this.jdoDialect = new DefaultJdoDialect(this.persistenceManagerFactory);
+			this.jdoDialect = new DefaultJdoDialect(getPersistenceManagerFactory());
 		}
 		return this.jdoDialect;
 	}
@@ -125,7 +126,7 @@ public class JdoAccessor implements InitializingBean {
 	 * for the specified PersistenceManagerFactory if none set.
 	 */
 	public void afterPropertiesSet() {
-		if (this.persistenceManagerFactory == null) {
+		if (getPersistenceManagerFactory() == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory is required");
 		}
 		getJdoDialect();
