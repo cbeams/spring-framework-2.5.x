@@ -46,7 +46,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see VelocityView
- * @version $Id: VelocityConfigurer.java,v 1.3 2003-09-20 16:32:40 johnsonr Exp $
+ * @version $Id: VelocityConfigurer.java,v 1.4 2003-09-20 20:44:17 johnsonr Exp $
  */
 public class VelocityConfigurer extends WebApplicationObjectSupport implements VelocityConfiguration {
 
@@ -106,13 +106,21 @@ public class VelocityConfigurer extends WebApplicationObjectSupport implements V
 	public void setWebAppRootMarker(String webAppRootMarker) {
 		this.webAppRootMarker = webAppRootMarker;
 	}
+	
+	/**
+	 * @return a new VelocityEngine. Subclasses can override this for custom initialization,
+	 * or tests can override it
+	 */
+	protected VelocityEngine newVelocityEngine() {
+		return new VelocityEngine();
+	}
 
 	/**
 	 * Initializes the Velocity runtime.
 	 */
 	protected void initApplicationContext() throws ApplicationContextException {
 		
-		this.velocityEngine = new VelocityEngine();
+		this.velocityEngine = newVelocityEngine();
 		
 		try {
 			Properties prop = new Properties();
@@ -125,6 +133,9 @@ public class VelocityConfigurer extends WebApplicationObjectSupport implements V
 			if (actualLocation != null) {
 				logger.info("Loading Velocity config from [" + actualLocation + "]");
 				InputStream is = getApplicationContext().getResourceAsStream(actualLocation);
+				if (is == null) {
+					throw new ApplicationContextException("Velocity properties file not found within WAR at '" + actualLocation + "'");
+				}
 				prop.load(is);
 			}
 			// merge local properties if set
