@@ -59,8 +59,13 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	private long lastEventTimestamp;
 
 	public FlowExecutionStack(Flow rootFlow) {
+		Assert.notNull(rootFlow, "The root flow definition is required");
 		this.id = SessionKeyUtils.generateMD5SessionKey(String.valueOf(this), true);
 		this.rootFlow = rootFlow;
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response) {
@@ -99,14 +104,29 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return view;
 	}
 
-	public ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response) {
-		assertActive();
+	protected ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response) {
 		activate(new FlowSession(flow, input));
-		return getCurrentState().enter(this, request, response);
+		return flow.getStartState().enter(this, request, response);
 	}
 
-	public String getId() {
-		return id;
+	protected ModelAndView spawn(Flow flow, String stateId, Map input, HttpServletRequest request,
+			HttpServletResponse response) {
+		activate(new FlowSession(flow, input));
+		return flow.getRequiredTransitionableState(stateId).enter(this, request, response);
+	}
+
+	protected void activate(FlowSession flowSession) {
+		if (!executingFlowSessions.isEmpty()) {
+			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
+		}
+		executingFlowSessions.push(flowSession);
+		flowSession.setStatus(FlowSessionStatus.ACTIVE);
+		if (isRootFlowActive()) {
+			fireStarted();
+		}
+		else {
+			fireSubFlowSpawned();
+		}
 	}
 
 	public String getCaption() {
@@ -122,11 +142,11 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	public String getRootFlowId() {
-		return getRootFlowSession().getFlowId();
+		return rootFlow.getId();
 	}
 
 	public Flow getRootFlow() {
-		return getRootFlowSession().getFlow();
+		return rootFlow;
 	}
 
 	public FlowSession getRootFlowSession() {
@@ -335,20 +355,6 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	public void removeAttribute(String attributeName) {
 		getActiveFlowSession().removeAttribute(attributeName);
-	}
-
-	protected void activate(FlowSession flowSession) {
-		if (!executingFlowSessions.isEmpty()) {
-			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
-		}
-		executingFlowSessions.push(flowSession);
-		flowSession.setStatus(FlowSessionStatus.ACTIVE);
-		if (isRootFlowActive()) {
-			fireStarted();
-		}
-		else {
-			fireSubFlowSpawned();
-		}
 	}
 
 	protected FlowSession endActiveSession() {

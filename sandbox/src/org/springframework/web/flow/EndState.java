@@ -56,11 +56,8 @@ public class EndState extends AbstractState {
 	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		FlowSession endingFlowSession = sessionExecution.endActiveSession();
-		Assert.isTrue(endingFlowSession.getCurrentState().equals(this),
-				"The ending flow session's current state should always equal this end state, but it doesn't "
-						+ "-- this should not happen");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Session for flow '" + getFlow().getId() + "' ended, details=" + endingFlowSession);
+			logger.debug("Session for flow '" + getFlow().getId() + "' ended, session details = " + endingFlowSession);
 		}
 		if (sessionExecution.isActive()) {
 			// session execution is still active, resume in parent
