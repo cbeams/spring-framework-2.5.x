@@ -27,7 +27,9 @@ import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.TimeStamped;
 import org.springframework.aop.interceptor.SerializableNopInterceptor;
+import org.springframework.beans.INestedTestBean;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
@@ -195,6 +197,25 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		assertEquals(0, tsp.getTimeStamp());
 	
 		assertEquals(raw.toString(), tsp.toString());
+	}
+	
+	public void testDelegateReturnsThisIsMassagedToReturnProxy() {
+	    NestedTestBean target = new NestedTestBean();
+	    String company = "Interface21";
+	    target.setCompany(company);
+	    TestBean delegate = new TestBean() {
+            public ITestBean getSpouse() {
+                return this;
+            }
+	    };
+	    ProxyFactory pf = new ProxyFactory(target);
+	    pf.addAdvice(new DelegatingIntroductionInterceptor(delegate));
+	    INestedTestBean proxy = (INestedTestBean) pf.getProxy();
+	    
+	    assertEquals(company, proxy.getCompany());
+	    ITestBean introduction = (ITestBean) proxy;
+	    assertSame("Introduced method returning delegate returns proxy", introduction, introduction.getSpouse());
+	    assertTrue("Introduced method returning delegate returns proxy", AopUtils.isAopProxy(introduction.getSpouse()));
 	}
 	
 	protected static class SerializableTimeStamped implements TimeStamped, Serializable {
