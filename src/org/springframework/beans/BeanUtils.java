@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.15 2004-03-18 02:46:12 trisberg Exp $
+ * @version $Id: BeanUtils.java,v 1.16 2004-06-11 23:38:14 jhoeller Exp $
  */
 public abstract class BeanUtils {
 
@@ -92,16 +92,29 @@ public abstract class BeanUtils {
 	 * @return if the type is assignable from the value
 	 */
 	public static boolean isAssignable(Class type, Object value) {
-		return (type.isInstance(value) ||
-		    (!type.isPrimitive() && value == null) ||
-		    (type.equals(boolean.class) && value instanceof Boolean) ||
-		    (type.equals(byte.class) && value instanceof Byte) ||
-		    (type.equals(char.class) && value instanceof Character) ||
-		    (type.equals(short.class) && value instanceof Short) ||
-		    (type.equals(int.class) && value instanceof Integer) ||
-		    (type.equals(long.class) && value instanceof Long) ||
-		    (type.equals(float.class) && value instanceof Float) ||
-		    (type.equals(double.class) && value instanceof Double));
+		return (value != null && isAssignable(type, value.getClass()) ||
+				(value == null) && !type.isPrimitive());
+	}
+
+	/**
+	 * Determine if the given target type is assignable from the given value
+	 * type, assuming setting by reflection. Considers primitive wrapper
+	 * classes as assignable to the corresponding primitive types.
+	 * <p>For example used in BeanWrapperImpl's custom editor matrching.
+	 * @param targetType the target targetType
+	 * @param valueType the value type that should be assigned to the target type
+	 * @return if the target type is assignable from the value type
+	 */
+	public static boolean isAssignable(Class targetType, Class valueType) {
+		return (targetType.isAssignableFrom(valueType)) ||
+				(targetType.equals(boolean.class) && valueType.equals(Boolean.class)) ||
+		    (targetType.equals(byte.class) && valueType.equals(Byte.class)) ||
+		    (targetType.equals(char.class) && valueType.equals(Character.class)) ||
+		    (targetType.equals(short.class) && valueType.equals(Short.class)) ||
+		    (targetType.equals(int.class) && valueType.equals(Integer.class)) ||
+		    (targetType.equals(long.class) && valueType.equals(Long.class)) ||
+		    (targetType.equals(float.class) && valueType.equals(Float.class)) ||
+		    (targetType.equals(double.class) && valueType.equals(Double.class));
 	}
 
 	/**
