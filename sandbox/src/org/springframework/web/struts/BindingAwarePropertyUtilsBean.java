@@ -22,16 +22,16 @@ import org.apache.commons.beanutils.PropertyUtilsBean;
 
 /**
  * Override normal commons PropertyUtilsBean so that it is aware of
- * BindingActionForm
+ * BindingActionForm.  Should be installed in struts-config.xml using the
+ * BindingPlugin.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-
 public class BindingAwarePropertyUtilsBean extends PropertyUtilsBean {
 	public static final Logger logger = Logger.getLogger(BindingAwarePropertyUtilsBean.class.getName());
 
-	/**
+	/*
 	 * Override superclass method
 	 * @see org.apache.commons.beanutils.PropertyUtilsBean#getProperty(java.lang.Object,
 	 *      java.lang.String)

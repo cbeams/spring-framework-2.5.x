@@ -33,18 +33,23 @@ import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.AttributesAccessor;
 
 /**
- * A Struts action form adapter that is works with Spring's (more complete and
- * advanced) data binder and bind exception (errors interface) under neath the
- * covers, to bind to POJOs and manage rejected values.
+ * A Struts action form adapter that uses Spring's more complete and advanced
+ * data binder and bind exception object under neath the covers to bind to POJOs
+ * and manage rejected values.
+ * <p>
+ * Also provides hierarchical message resolution, which is traditionally not
+ * supported in struts-based apps.
+ * 
  * @author Keith Donald
  * @author Ben Alex
  */
 public class BindingActionForm extends ActionForm {
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	/** Used to separate elements when detecting most specific error message */
+	public static final String CODE_SEPARATOR = ".";
 
 	private Errors errors;
 
@@ -52,53 +57,24 @@ public class BindingActionForm extends ActionForm {
 
 	private MessageResources messageResources;
 
-	private HttpServletRequest httpServletRequest;
-
-	private AttributesAccessor model;
-
-	/** Used to separate elements when detecting most specific error message */
-	public static final String CODE_SEPARATOR = ".";
-
-	public BindingActionForm() {
-		super();
-	}
-
 	public void setErrors(Errors errors) {
 		this.errors = errors;
 	}
 
-	public void setHttpServletRequest(HttpServletRequest httpServletRequest) {
-		this.httpServletRequest = httpServletRequest;
-		updateFromHttpServletRequest();
-	}
-
-	public void setModel(AttributesAccessor model) {
-		this.model = model;
-	}
-
-	public ActionErrors bind(HttpServletRequest request, ServletRequestDataBinder binder) {
-		binder.bind(request);
-		setErrors(binder.getErrors());
-		setHttpServletRequest(request);
-		assertErrorsSet();
-		return getActionErrors();
-	}
-
-	private void assertErrorsSet() {
-		Assert.notNull(this.errors,
-				"The errors instance must be set on this action form in order to access form properties");
+	public void setRequest(HttpServletRequest request) {
+		updateFromHttpRequest(request);
 	}
 
 	protected Errors getErrors() {
 		return errors;
 	}
 
-	private void updateFromHttpServletRequest() {
+	private void updateFromHttpRequest(HttpServletRequest request) {
 		// Obtain the locale from the Struts well-known location
-		this.locale = (Locale)httpServletRequest.getSession().getAttribute(Globals.LOCALE_KEY);
+		this.locale = (Locale)request.getSession().getAttribute(Globals.LOCALE_KEY);
 
 		// Obtain the MessageResources from the Struts well-known location
-		this.messageResources = (MessageResources)httpServletRequest.getAttribute(Globals.MESSAGES_KEY);
+		this.messageResources = (MessageResources)request.getAttribute(Globals.MESSAGES_KEY);
 
 		Assert.notNull(this.locale, "The locale could not be retrieved");
 		Assert.notNull(this.messageResources, "The message resources could not be retrieved");
@@ -113,11 +89,11 @@ public class BindingActionForm extends ActionForm {
 
 	public ActionErrors getActionErrors() {
 		assertErrorsSet();
-		Errors errors = getErrors();
-		if (!errors.hasErrors()) {
-			return new ActionErrors();
-		}
 		ActionErrors actionErrors = new ActionErrors();
+		if (!hasErrors()) {
+			return actionErrors;
+		}
+		Errors errors = getErrors();
 		Iterator it = errors.getAllErrors().iterator();
 		while (it.hasNext()) {
 			ObjectError objectError = (ObjectError)it.next();
@@ -138,6 +114,11 @@ public class BindingActionForm extends ActionForm {
 			logger.debug("Final ActionErrors: " + actionErrors);
 		}
 		return actionErrors;
+	}
+
+	private void assertErrorsSet() {
+		Assert.notNull(this.errors,
+				"The errors instance must be set on this action form in order to access form properties");
 	}
 
 	private Object[] resolveArgs(Object[] arguments) {
@@ -164,23 +145,20 @@ public class BindingActionForm extends ActionForm {
 	}
 
 	private String findEffectiveMessageKey(ObjectError error, String objectName, String field) {
-		Assert.notNull(this.locale, "The locale must be set to enable the most specific error message to be resolved");
-		Assert.notNull(this.messageResources,
-				"The message resources must be set to enable the most specific error message to be resolved");
 		String[] possibleMatches = error.getCodes();
 		for (int i = 0; i < possibleMatches.length; i++) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Testing code '" + possibleMatches[i] + "'");
+				logger.debug("Testing error code '" + possibleMatches[i] + "'");
 			}
 			if (this.messageResources.isPresent(this.locale, possibleMatches[i])) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found code '" + possibleMatches[i] + "' in resource bundle!");
+					logger.debug("Found error code '" + possibleMatches[i] + "' in resource bundle!");
 				}
 				return possibleMatches[i];
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Could not find a suitable message key");
+			logger.debug("Could not find a suitable message error code, returning default message");
 		}
 		return error.getDefaultMessage();
 	}
@@ -196,9 +174,6 @@ public class BindingActionForm extends ActionForm {
 			Errors errors = getErrors();
 			if (errors.hasFieldErrors(propertyPath)) {
 				FieldError error = errors.getFieldError(propertyPath);
-				Assert
-						.notNull(error, "The field error property should not be null for property '" + propertyPath
-								+ "'");
 				return error.isBindingFailure();
 			}
 		}
@@ -206,8 +181,9 @@ public class BindingActionForm extends ActionForm {
 	}
 
 	/**
+	 * Returns the rejected value for the specified bean property path
 	 * @param propertyPath
-	 * @return
+	 * @return the rejected value
 	 */
 	public Object getRejectedValue(String propertyPath) {
 		assertErrorsSet();
@@ -240,5 +216,4 @@ public class BindingActionForm extends ActionForm {
 	protected String getDefaultFormattedValue(Object value) {
 		return (value != null) ? value.toString() : "";
 	}
-
 }

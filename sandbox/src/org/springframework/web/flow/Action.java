@@ -32,9 +32,9 @@ import javax.servlet.http.HttpServletResponse;
  * stubs, as they are simple POJOs.
  * <p>
  * Note: because Actions are singletons, take care not to store and/or modify
- * caller-specific state. The Action execute method always runs in its own
- * thread, so make sure you deal only with local data or internal, thread-safe
- * services.
+ * caller-specific state. The Action execute method always runs in an
+ * independently executing thread on each invocation, so make
+ * sure you deal only with local data or internal, thread-safe services.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -49,7 +49,7 @@ public interface Action {
 	 * definition.
 	 * <p>
 	 * Note: The <code>MutableAttributesAccessor</code> model argument to this
-	 * method provides access to the <b>data model</b> of the active flow
+	 * method provides access to the <b>data model </b> of the active flow
 	 * session. All attributes in the flow model are considered in "flow scope";
 	 * that is, they exist for the life of the flow session and will be cleaned
 	 * up when the flow session ends. All attributes in the flow model are
@@ -70,7 +70,7 @@ public interface Action {
 	 * @param model The data model for the current flow session ("flow scope")
 	 * @return A logical result outcome, used as grounds for a transition in the
 	 *         current state
-	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked; note: any recoverable exceptions should be
 	 *         caught and an appropriate result outcome returned.
 	 */

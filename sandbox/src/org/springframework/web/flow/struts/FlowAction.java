@@ -36,8 +36,11 @@ import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
 
 /**
- * Struts Action that provides an entry point into the workflow mechanism for
- * this application.
+ * Struts Action that acts a front controller entry point into the web flow
+ * system. Typically, a FlowAction exists per top-level (root) flow definition
+ * in the application. Alternatively, a single FlowController may manage all
+ * flow executions by parameterization with the appropriate <code>flowId</code>
+ * in views that start new flow executions.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -83,10 +86,10 @@ public class FlowAction extends TemplateAction {
 			HttpServletResponse response) throws Exception {
 		synchronized (this) {
 			if (executionManager == null) {
-				executionManager = new HttpFlowExecutionManager(logger, getFlow(mapping), getWebApplicationContext(), null);
+				executionManager = new HttpFlowExecutionManager(logger, getFlow(mapping), getWebApplicationContext(),
+						null);
 			}
 		}
-		// struts specific
 		if (form instanceof BindingActionForm) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Setting binding action form key '" + getActionFormAttributeName() + "' to form " + form);
@@ -95,16 +98,13 @@ public class FlowAction extends TemplateAction {
 			// attribute so it'll be accessible to binding flow action beans
 			request.setAttribute(getActionFormAttributeName(), form);
 		}
-		// end struts specific
-
 		ModelAndView modelAndView = executionManager.handleRequest(request, response, getFlowExecutionInput(request));
-
 		FlowExecution flowExecution = executionManager.getRequiredFlowExecution(request);
 		if (flowExecution.isActive()) {
 			// struts specific
 			String mappingFlowId = getFlowId(mapping);
 			if (StringUtils.hasText(mappingFlowId)) {
-				String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
+				String actionPathName = StringUtils.replace(mappingFlowId, ".", "/");
 				String actionFormBeanName = actionPathName + "Form";
 				if (logger.isDebugEnabled()) {
 					logger.debug("Setting '" + getActionPathAttributeName() + "' attribute to value '" + actionPathName
@@ -119,12 +119,9 @@ public class FlowAction extends TemplateAction {
 				BindingActionForm bindingForm = (BindingActionForm)form;
 				bindingForm.setErrors((Errors)flowExecution.getAttribute(AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME,
 						Errors.class));
-				bindingForm.setHttpServletRequest(request);
-				bindingForm.setModel(flowExecution);
+				bindingForm.setRequest(request);
 			}
-			// end struts specific
 		}
-
 		return createForwardFromModelAndView(modelAndView, mapping, request);
 	}
 
@@ -136,17 +133,17 @@ public class FlowAction extends TemplateAction {
 	 * Return a Struts ActionForward given a ModelAndView. We need to add all
 	 * attributes from the ModelAndView as request attributes.
 	 */
-	private ActionForward createForwardFromModelAndView(ModelAndView mv, ActionMapping mapping,
+	private ActionForward createForwardFromModelAndView(ModelAndView modelAndView, ActionMapping mapping,
 			HttpServletRequest request) {
-		if (mv != null) {
-			Iterator it = mv.getModel().entrySet().iterator();
+		if (modelAndView != null) {
+			Iterator it = modelAndView.getModel().entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry)it.next();
 				request.setAttribute((String)entry.getKey(), entry.getValue());
 			}
-			ActionForward forward = mapping.findForward(mv.getViewName());
+			ActionForward forward = mapping.findForward(modelAndView.getViewName());
 			if (forward == null) {
-				forward = new ActionForward(mv.getViewName());
+				forward = new ActionForward(modelAndView.getViewName());
 			}
 			return forward;
 		}

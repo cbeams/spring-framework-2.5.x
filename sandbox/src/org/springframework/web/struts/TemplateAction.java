@@ -39,9 +39,9 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Base Struts action for use in Voca web applications. Includes convenience
- * methods that subclasses can use to extract request parrameters, and provides
- * access to the middle tier via a Spring WebApplicationContext.
+ * Base Struts action. Includes convenience methods that subclasses can use to
+ * extract request parrameters, and provides access to the middle tier via a
+ * Spring WebApplicationContext.
  * @author Keith Donald
  */
 public abstract class TemplateAction extends Action {
