@@ -58,11 +58,11 @@ public interface ApplicationContextAware {
 	 * <p>Invoked after population of normal bean properties but before an init
 	 * callback like InitializingBean's afterPropertiesSet or a custom init-method.
 	 * Invoked after ResourceLoaderAware's setResourceLoader.
-	 * @param context ApplicationContext object to be used by this object
-	 * @throws ApplicationContextException in case of context initialization errors
-	 * @throws BeansException if thrown by application context methods
+	 * @param applicationContext ApplicationContext object to be used by this object
+	 * @throws ApplicationContextException in case of applicationContext initialization errors
+	 * @throws BeansException if thrown by application applicationContext methods
 	 * @see org.springframework.beans.factory.BeanInitializationException
 	 */
-	void setApplicationContext(ApplicationContext context) throws BeansException;
+	void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
 
 }
