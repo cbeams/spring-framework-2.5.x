@@ -1,10 +1,10 @@
 package org.springframework.web.multipart.cos;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import org.springframework.web.multipart.support.AbstractMultipartHttpServletReq
  *
  * <p>Not intended for direct application usage. Application code can cast
  * to this implementation to access the underlying COS MultipartRequest,
- * if it ever neeeds to.
+ * if it ever needs to.
  *
  * @author Juergen Hoeller
  * @since 06.10.2003
@@ -33,7 +33,7 @@ import org.springframework.web.multipart.support.AbstractMultipartHttpServletReq
  */
 public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
-	private MultipartRequest multipartRequest;
+	private final MultipartRequest multipartRequest;
 
 	protected CosMultipartHttpServletRequest(HttpServletRequest originalRequest, MultipartRequest multipartRequest) {
 		super(originalRequest);

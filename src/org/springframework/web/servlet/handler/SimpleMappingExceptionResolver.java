@@ -20,9 +20,9 @@ import org.springframework.web.servlet.ModelAndView;
  * Exception resolver that allows for mapping exception class names to view names,
  * either for a list of given handlers or for all handlers in the DispatcherServlet.
  *
- * <p>Error views are analogous to the error page JSPs, but can be used with
- * any kind of exception including any checked one, with fine-granular mappings
- * for specific handlers.
+ * <p>Error views are analogous to error page JSPs, but can be used with any
+ * kind of exception including any checked one, with fine-granular mappings for
+ * specific handlers.
  *
  * @author Juergen Hoeller
  * @since 22.11.2003
@@ -87,8 +87,9 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	/**
-	 * Set the name of the model attribute as which the exception should be exposed.
-	 * Default is "exception".
+	 * Set the name of the model attribute as which the exception should
+	 * be exposed. Default is "exception".
+	 * @see #DEFAULT_EXCEPTION_ATTRIBUTE
 	 */
 	public void setExceptionAttribute(String exceptionAttribute) {
 		this.exceptionAttribute = exceptionAttribute;
@@ -109,7 +110,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 			}
 		}
 		// return default error view else, if defined
-		return (this.defaultErrorView != null ?getModelAndView(this.defaultErrorView, ex) : null);
+		return (this.defaultErrorView != null ? getModelAndView(this.defaultErrorView, ex) : null);
 	}
 
 	/**
