@@ -41,7 +41,7 @@ import org.springframework.jndi.JndiTemplate;
  * @author Andre Biryukov
  * @author Mark Pollack
  */
-public class JmsTemplate11Tests extends TestCase {
+public class JmsTemplateTests extends TestCase {
 
 	private Context mockJndiContext;
 	private MockControl mockJndiControl;
@@ -95,9 +95,11 @@ public class JmsTemplate11Tests extends TestCase {
 		connectionFactoryControl.setReturnValue(mockConnection);
 		connectionFactoryControl.replay();
 
-		//TODO tests with TX= true
+		//TODO tests with TX=true
 		mockConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		connectionControl.setReturnValue(mockSession);
+		mockSession.getTransacted();
+		sessionControl.setReturnValue(false);
 
 		mockJndiContext.lookup("testDestination");
 		mockJndiControl.setReturnValue(mockQueue);
@@ -108,15 +110,8 @@ public class JmsTemplate11Tests extends TestCase {
 		sender.setConnectionFactory(mockConnectionFactory);
 		setJndiTemplate(sender);
 
-		//Session behavior
-		mockSession.getTransacted();
-		sessionControl.setReturnValue(true);
-
-		//Mock the javax.jms MessageProducer
-		MockControl messageProducerControl =
-				MockControl.createControl(MessageProducer.class);
-		MessageProducer mockMessageProducer =
-				(MessageProducer) messageProducerControl.getMock();
+		MockControl messageProducerControl = MockControl.createControl(MessageProducer.class);
+		MessageProducer mockMessageProducer = (MessageProducer) messageProducerControl.getMock();
 
 		mockSession.createProducer(null);
 		sessionControl.setReturnValue(mockMessageProducer);
@@ -129,7 +124,6 @@ public class JmsTemplate11Tests extends TestCase {
 		mockSession.close();
 		sessionControl.setVoidCallable(1);
 
-		//Connection behavior
 		mockConnection.close();
 		connectionControl.setVoidCallable(1);
 
@@ -137,8 +131,7 @@ public class JmsTemplate11Tests extends TestCase {
 		connectionControl.replay();
 
 		sender.execute(new ProducerCallback() {
-			public Object doInJms(Session session, MessageProducer msgProducer)
-					throws JMSException {
+			public Object doInJms(Session session, MessageProducer msgProducer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = msgProducer.getPriority();
 				return null;
@@ -158,14 +151,9 @@ public class JmsTemplate11Tests extends TestCase {
 		sender.setConnectionFactory(mockConnectionFactory);
 		setJndiTemplate(sender);
 
-		//Session behavior
-		mockSession.getTransacted();
-		sessionControl.setReturnValue(true);
-
 		mockSession.close();
 		sessionControl.setVoidCallable(1);
 
-		//Connection behavior
 		mockConnection.close();
 		connectionControl.setVoidCallable(1);
 
@@ -235,11 +223,9 @@ public class JmsTemplate11Tests extends TestCase {
 	 * callback but with different QOS options.
 	 * @param ignoreQOS test using default QOS options.
 	 */
-	private void doTestSendDestination(
-			boolean ignoreQOS,
-			boolean explicitDestination,
-			boolean useDefaultDestination)
-			throws Exception {
+	private void doTestSendDestination(boolean ignoreQOS, boolean explicitDestination,
+			boolean useDefaultDestination) throws Exception {
+
 		JmsTemplate sender = new JmsTemplate();
 		sender.setConnectionFactory(mockConnectionFactory);
 		setJndiTemplate(sender);
@@ -247,14 +233,10 @@ public class JmsTemplate11Tests extends TestCase {
 			sender.setDefaultDestination(mockQueue);
 		}
 
-		//Mock the javax.jms MessageProducer
-		MockControl messageProducerControl =
-				MockControl.createControl(MessageProducer.class);
-		MessageProducer mockMessageProducer =
-				(MessageProducer) messageProducerControl.getMock();
+		MockControl messageProducerControl = MockControl.createControl(MessageProducer.class);
+		MessageProducer mockMessageProducer = (MessageProducer) messageProducerControl.getMock();
 
-		MockControl messageControl =
-				MockControl.createControl(TextMessage.class);
+		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
 		mockSession.close();
@@ -279,19 +261,14 @@ public class JmsTemplate11Tests extends TestCase {
 			sender.setDeliveryMode(deliveryMode);
 			sender.setPriority(priority);
 			sender.setTimeToLive(timeToLive);
-			mockMessageProducer.send(
-					mockMessage,
-					deliveryMode,
-					priority,
-					timeToLive);
+			mockMessageProducer.send(mockMessage, deliveryMode, priority, timeToLive);
 		}
 
 		messageProducerControl.replay();
 
 		if (useDefaultDestination) {
 			sender.send(new MessageCreator() {
-				public Message createMessage(Session session)
-						throws JMSException {
+				public Message createMessage(Session session) throws JMSException {
 					return session.createTextMessage("just testing");
 				}
 			});
@@ -330,14 +307,10 @@ public class JmsTemplate11Tests extends TestCase {
 		sender.setMessageConverter(new SimpleMessageConverter());
 		String s = "Hello world";
 
-		//Mock the javax.jms MessageProducer
-		MockControl messageProducerControl =
-				MockControl.createControl(MessageProducer.class);
-		MessageProducer mockMessageProducer =
-				(MessageProducer) messageProducerControl.getMock();
+		MockControl messageProducerControl = MockControl.createControl(MessageProducer.class);
+		MessageProducer mockMessageProducer = (MessageProducer) messageProducerControl.getMock();
 
-		MockControl messageControl =
-				MockControl.createControl(TextMessage.class);
+		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
 		mockSession.close();
@@ -367,11 +340,37 @@ public class JmsTemplate11Tests extends TestCase {
 		sessionControl.verify();
 	}
 
-	private void doTestReceive(
-			boolean explicitDestination,
-			boolean useDefaultDestination,
-			boolean testConverter)
-			throws Exception {
+	public void testReceiveDefaultDestination() throws Exception {
+		doTestReceive(false, true, false, false);
+	}
+
+	public void testReceiveDestination() throws Exception {
+		doTestReceive(true, false, false, false);
+	}
+
+	public void testReceiveDestinationWithClientAcknowledge() throws Exception {
+		doTestReceive(true, false, false, true);
+	}
+
+	public void testReceiveStringDestination() throws Exception {
+		doTestReceive(false, false, false, false);
+	}
+
+	public void testReceiveAndConvertDefaultDestination() throws Exception {
+		doTestReceive(false, true, true, false);
+	}
+
+	public void testReceiveAndConvertStringDestination() throws Exception {
+		doTestReceive(false, false, true, false);
+	}
+
+	public void testReceiveAndConvertDestination() throws Exception {
+		doTestReceive(true, false, true, false);
+	}
+
+	private void doTestReceive(boolean explicitDestination, boolean useDefaultDestination,
+			boolean testConverter, boolean clientAcknowledge) throws Exception {
+
 		JmsTemplate sender = new JmsTemplate();
 		sender.setConnectionFactory(mockConnectionFactory);
 		setJndiTemplate(sender);
@@ -380,33 +379,37 @@ public class JmsTemplate11Tests extends TestCase {
 			sender.setDefaultDestination(mockQueue);
 		}
 
-		//Mock the javax.jms MessageConsumer
-		MockControl messageConsumerControl =
-				MockControl.createControl(MessageConsumer.class);
-		MessageConsumer mockMessageConsumer =
-				(MessageConsumer) messageConsumerControl.getMock();
+		mockConnection.start();
+		connectionControl.setVoidCallable(1);
+		mockConnection.close();
+		connectionControl.setVoidCallable(1);
 
-		MockControl messageControl =
-				MockControl.createControl(TextMessage.class);
+		MockControl messageConsumerControl = MockControl.createControl(MessageConsumer.class);
+		MessageConsumer mockMessageConsumer = (MessageConsumer) messageConsumerControl.getMock();
+
+		mockSession.createConsumer(mockQueue);
+		sessionControl.setReturnValue(mockMessageConsumer);
+		mockSession.getAcknowledgeMode();
+		if (clientAcknowledge) {
+			sessionControl.setReturnValue(Session.CLIENT_ACKNOWLEDGE);
+		}
+		else {
+			sessionControl.setReturnValue(Session.AUTO_ACKNOWLEDGE);
+		}
+		mockSession.close();
+		sessionControl.setVoidCallable(1);
+
+		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
 		if (testConverter) {
 			mockMessage.getText();
 			messageControl.setReturnValue("Hello World!");
 		}
-		mockMessage.acknowledge();
-		messageControl.setVoidCallable(1);
-
-		mockSession.close();
-		sessionControl.setVoidCallable(1);
-
-		mockConnection.start();
-		connectionControl.setVoidCallable(1);
-		mockConnection.close();
-		connectionControl.setVoidCallable(1);
-
-		mockSession.createConsumer(mockQueue);
-		sessionControl.setReturnValue(mockMessageConsumer);
+		if (clientAcknowledge) {
+			mockMessage.acknowledge();
+			messageControl.setVoidCallable(1);
+		}
 
 		sessionControl.replay();
 		connectionControl.replay();
@@ -431,8 +434,7 @@ public class JmsTemplate11Tests extends TestCase {
 		else {
 			if (explicitDestination) {
 				if (testConverter) {
-					textFromMessage =
-							(String) sender.receiveAndConvert(mockQueue);
+					textFromMessage = (String) sender.receiveAndConvert(mockQueue);
 				}
 				else {
 					m = sender.receive(mockQueue);
@@ -440,8 +442,7 @@ public class JmsTemplate11Tests extends TestCase {
 			}
 			else {
 				if (testConverter) {
-					textFromMessage =
-							(String) sender.receiveAndConvert("testDestination");
+					textFromMessage = (String) sender.receiveAndConvert("testDestination");
 				}
 				else {
 					m = sender.receive("testDestination");
@@ -451,47 +452,16 @@ public class JmsTemplate11Tests extends TestCase {
 
 		connectionFactoryControl.verify();
 		connectionControl.verify();
-		messageConsumerControl.verify();
-
 		sessionControl.verify();
+		messageConsumerControl.verify();
+		messageControl.verify();
 
 		if (testConverter) {
-			assertEquals(
-					"Message Text should be equal",
-					"Hello World!",
-					textFromMessage);
+			assertEquals("Message Text should be equal", "Hello World!", textFromMessage);
 		}
 		else {
-
-			assertEquals(
-					"Messages should refer to the same object",
-					m,
-					mockMessage);
+			assertEquals("Messages should refer to the same object", m, mockMessage);
 		}
-	}
-
-	public void testReceiveDefaultDestination() throws Exception {
-		doTestReceive(false, true, false);
-	}
-
-	public void testReceiveDestination() throws Exception {
-		doTestReceive(true, false, false);
-	}
-
-	public void testReceiveStringDestination() throws Exception {
-		doTestReceive(false, false, false);
-	}
-
-	public void testReceiveAndConvertDefaultDestination() throws Exception {
-		doTestReceive(false, true, true);
-	}
-
-	public void testReceiveAndConvertStringDestination() throws Exception {
-		doTestReceive(false, false, true);
-	}
-
-	public void testReceiveAndConvertDestination() throws Exception {
-		doTestReceive(true, false, true);
 	}
 
 	private void setJndiTemplate(JmsTemplate sender) {

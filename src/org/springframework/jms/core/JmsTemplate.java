@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.Constants;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionHolder;
 import org.springframework.jms.support.JmsUtils;
@@ -77,6 +78,8 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 */
 	public static final long DEFAULT_RECEIVE_TIMEOUT = -1;
 
+	/** Constants instance for javax.jms.Session */
+	private static final Constants constants = new Constants(Session.class);
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -237,8 +240,20 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 	/**
+	 * Set the JMS acknowledgement mode by the name of the corresponding constant
+	 * in the JMS Session interface, e.g. "CLIENT_ACKNOWLEDGE".
+	 * @param constantName name of the constant
+	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
+	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
+	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 */
+	public void setSessionAcknowledgeModeName(String constantName) {
+		setSessionAcknowledgeMode(constants.asNumber(constantName).intValue());
+	}
+
+	/**
 	 * Set the JMS acknowledgement mode that is used when creating a JMS session to send
-	 * a message.  Vendor extensions to the acknowledgment mode can be set here as well.
+	 * a message. Vendor extensions to the acknowledgment mode can be set here as well.
 	 * <p>Note that that inside an EJB the parameters to
 	 * create<Queue|Topic>Session(boolean transacted, int acknowledgeMode) method are not
 	 * taken into account. Depending on the transaction context in the EJB, the container
@@ -589,7 +604,8 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 			logger.debug("Sending created message [" + message + "]");
 		}
 		doSend(producer, message);
-		if (isSessionTransacted()) {
+		if (session.getTransacted() && !TransactionSynchronizationManager.hasResource(getConnectionFactory())) {
+			// transacted session created by this template -> commit
 			session.commit();
 		}
 	}
@@ -703,17 +719,24 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 			}
 			Message message = (timeout >= 0) ?
 					consumer.receive(timeout) : consumer.receive();
-			if (message != null) {
-				message.acknowledge();
+			if (session.getTransacted()) {
+				if (conHolder == null) {
+					// transacted session created by this template -> commit
+					session.commit();
+				}
 			}
-			if (isSessionTransacted()) {
-				session.commit();
+			else if (message != null && isClientAcknowledge(session)) {
+				message.acknowledge();
 			}
 			return message;
 		}
 		finally {
 			JmsUtils.closeMessageConsumer(consumer);
 		}
+	}
+
+	protected boolean isClientAcknowledge(Session session) throws JMSException {
+		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}
 
 
