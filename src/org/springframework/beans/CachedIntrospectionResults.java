@@ -39,11 +39,12 @@ import org.apache.commons.logging.LogFactory;
  * <p>Information is cached statically, so we don't need to create new
  * objects of this class for every JavaBean we manipulate. Thus this class
  * implements the factory design pattern, using a private constructor
- * and a public static forClass() method to obtain instances.
+ * and a static forClass method to obtain instances.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 05 May 2001
-*  @version $Id: CachedIntrospectionResults.java,v 1.9 2004-05-23 20:25:06 jhoeller Exp $
+*  @version $Id: CachedIntrospectionResults.java,v 1.10 2004-05-24 09:52:22 jhoeller Exp $
  */
 final class CachedIntrospectionResults {
 
@@ -88,16 +89,23 @@ final class CachedIntrospectionResults {
 	 */
 	private CachedIntrospectionResults(Class clazz) throws BeansException {
 		try {
-			logger.debug("Getting BeanInfo for class [" + clazz.getName() + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Getting BeanInfo for class [" + clazz.getName() + "]");
+			}
 			this.beanInfo = Introspector.getBeanInfo(clazz);
 
-			logger.debug("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
+			}
 			this.propertyDescriptorCache = new HashMap();
-			// This call is slow so we do it once
+
+			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
-				logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() +
-										 "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() +
+											 "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
+				}
 				this.propertyDescriptorCache.put(pds[i].getName(), pds[i]);
 			}
 		}
@@ -117,7 +125,7 @@ final class CachedIntrospectionResults {
 	protected PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
 		PropertyDescriptor pd = (PropertyDescriptor) this.propertyDescriptorCache.get(propertyName);
 		if (pd == null) {
-			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass().getName() + "]", null);
+			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass().getName() + "]");
 		}
 		return pd;
 	}
