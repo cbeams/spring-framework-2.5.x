@@ -141,7 +141,8 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore's Struts web tier
 
 * jakarta-commons/commons-collections.jar
-- Commons Collections 2.1.1 (http://jakarta.apache.org/commons/collections)
+- Commons Collections 3.1 (http://jakarta.apache.org/commons/collections)
+- optional for using linked/identity maps in Spring core (on JDK <= 1.4)
 - required for running JPetStore's Struts web tier (by Struts)
 - required for running Petclinic (by Hibernate and OJB)
 
