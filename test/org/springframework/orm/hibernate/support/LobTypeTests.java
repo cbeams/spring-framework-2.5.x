@@ -23,11 +23,16 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionManager;
+
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.orm.hibernate.MockJtaTransaction;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -69,7 +74,7 @@ public class LobTypeTests extends TestCase {
 		lobHandlerControl.replay();
 		lobCreatorControl.replay();
 
-		ClobStringType type = new ClobStringType(lobHandler);
+		ClobStringType type = new ClobStringType(lobHandler, null);
 		assertEquals(1, type.sqlTypes().length);
 		assertEquals(Types.CLOB, type.sqlTypes()[0]);
 		assertEquals(String.class, type.returnedClass());
@@ -90,6 +95,33 @@ public class LobTypeTests extends TestCase {
 		}
 	}
 
+	public void testClobStringTypeWithJtaSynchronization() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 1);
+
+		lobHandler.getClobAsString(rs, 1);
+		lobHandlerControl.setReturnValue("content");
+		lobCreator.setClobAsString(ps, 1, "content");
+		lobCreatorControl.setVoidCallable(1);
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		ClobStringType type = new ClobStringType(lobHandler, tm);
+		assertEquals("content", type.nullSafeGet(rs, new String[] {"column"}, null));
+		tmControl.replay();
+		type.nullSafeSet(ps, "content", 1);
+		Synchronization synch = transaction.getSynchronization();
+		assertNotNull(synch);
+		synch.afterCompletion(Status.STATUS_COMMITTED);
+		tmControl.verify();
+	}
+
 	public void testBlobByteArrayType() throws Exception {
 		byte[] content = "content".getBytes();
 		lobHandler.getBlobAsBytes(rs, 1);
@@ -100,7 +132,7 @@ public class LobTypeTests extends TestCase {
 		lobHandlerControl.replay();
 		lobCreatorControl.replay();
 
-		BlobByteArrayType type = new BlobByteArrayType(lobHandler);
+		BlobByteArrayType type = new BlobByteArrayType(lobHandler, null);
 		assertEquals(1, type.sqlTypes().length);
 		assertEquals(Types.BLOB, type.sqlTypes()[0]);
 		assertEquals(byte[].class, type.returnedClass());
@@ -119,6 +151,34 @@ public class LobTypeTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+	}
+
+	public void testBlobByteArrayTypeWithJtaSynchronization() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 1);
+
+		byte[] content = "content".getBytes();
+		lobHandler.getBlobAsBytes(rs, 1);
+		lobHandlerControl.setReturnValue(content);
+		lobCreator.setBlobAsBytes(ps, 1, content);
+		lobCreatorControl.setVoidCallable(1);
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobByteArrayType type = new BlobByteArrayType(lobHandler, tm);
+		assertEquals(content, type.nullSafeGet(rs, new String[] {"column"}, null));
+		tmControl.replay();
+		type.nullSafeSet(ps, content, 1);
+		Synchronization synch = transaction.getSynchronization();
+		assertNotNull(synch);
+		synch.afterCompletion(Status.STATUS_COMMITTED);
+		tmControl.verify();
 	}
 
 	protected void tearDown() {

@@ -21,9 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import javax.transaction.TransactionManager;
+
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.orm.hibernate.LocalSessionFactoryBean;
 
 /**
  * Hibernate UserType implementation for Strings that get mapped to CLOBs.
@@ -45,19 +46,21 @@ import org.springframework.orm.hibernate.LocalSessionFactoryBean;
 public class ClobStringType extends AbstractLobType {
 
 	/**
-	 * Constructor used by Hibernate: fetches config-time LobHandler
-	 * from LocalSessionFactoryBean.
-	 * @see LocalSessionFactoryBean#getConfigTimeLobHandler
+	 * Constructor used by Hibernate: fetches config-time LobHandler and
+	 * config-time JTA TransactionManager from LocalSessionFactoryBean.
+	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#getConfigTimeLobHandler
+	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#getConfigTimeTransactionManager
 	 */
 	public ClobStringType() {
 		super();
 	}
 
 	/**
-	 * Constructor used for testing: takes an explicit LobHandler.
+	 * Constructor used for testing: takes an explicit LobHandler
+	 * and an explicit JTA TransactionManager (can be null).
 	 */
-	protected ClobStringType(LobHandler lobHandler) {
-		super(lobHandler);
+	protected ClobStringType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
+		super(lobHandler, jtaTransactionManager);
 	}
 
 	public int[] sqlTypes() {

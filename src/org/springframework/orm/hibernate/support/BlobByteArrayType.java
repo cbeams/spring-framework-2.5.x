@@ -22,9 +22,10 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
 
+import javax.transaction.TransactionManager;
+
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.orm.hibernate.LocalSessionFactoryBean;
 
 /**
  * Hibernate UserType implementation for byte arrays that get mapped to BLOBs.
@@ -43,19 +44,21 @@ import org.springframework.orm.hibernate.LocalSessionFactoryBean;
 public class BlobByteArrayType extends AbstractLobType  {
 
 	/**
-	 * Constructor used by Hibernate: fetches config-time LobHandler
-	 * from LocalSessionFactoryBean.
-	 * @see LocalSessionFactoryBean#getConfigTimeLobHandler
+	 * Constructor used by Hibernate: fetches config-time LobHandler and
+	 * config-time JTA TransactionManager from LocalSessionFactoryBean.
+	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#getConfigTimeLobHandler
+	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#getConfigTimeTransactionManager
 	 */
 	public BlobByteArrayType() {
 		super();
 	}
 
 	/**
-	 * Constructor used for testing: takes an explicit LobHandler.
+	 * Constructor used for testing: takes an explicit LobHandler
+	 * and an explicit JTA TransactionManager (can be null).
 	 */
-	protected BlobByteArrayType(LobHandler lobHandler) {
-		super(lobHandler);
+	protected BlobByteArrayType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
+		super(lobHandler, jtaTransactionManager);
 	}
 
 	public int[] sqlTypes() {

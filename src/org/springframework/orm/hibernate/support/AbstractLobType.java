@@ -20,9 +20,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionManager;
+
 import net.sf.hibernate.UserType;
 import net.sf.hibernate.util.EqualsHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.orm.hibernate.LocalSessionFactoryBean;
@@ -33,6 +40,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Abstract base class for Hibernate UserType implementations that map to LOBs.
  * Retrieves the LobHandler to use from LocalSessionFactoryBean at config time.
  *
+ * <p>Requires either active Spring transaction synchronization or a specified
+ * "jtaTransactionManager" on LocalSessionFactoryBean plus an active JTA transaction.
+ *
  * <p>Offers template methods for getting and setting that pass in the LobHandler
  * respectively LobCreator to use.
  *
@@ -40,30 +50,39 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @since 1.1
  * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setLobHandler
+ * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
  */
 public abstract class AbstractLobType implements UserType {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private final LobHandler lobHandler;
+
+	private final TransactionManager jtaTransactionManager;
 
 
 	/**
-	 * Constructor used by Hibernate: fetches config-time LobHandler
-	 * from LocalSessionFactoryBean.
+	 * Constructor used by Hibernate: fetches config-time LobHandler and
+	 * config-time JTA TransactionManager from LocalSessionFactoryBean.
 	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#getConfigTimeLobHandler
+	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#getConfigTimeTransactionManager
 	 */
 	protected AbstractLobType() {
-		this(LocalSessionFactoryBean.getConfigTimeLobHandler());
+		this(LocalSessionFactoryBean.getConfigTimeLobHandler(),
+		    LocalSessionFactoryBean.getConfigTimeTransactionManager());
 	}
 
 	/**
-	 * Constructor used for testing: takes an explicit LobHandler.
+	 * Constructor used for testing: takes an explicit LobHandler
+	 * and an explicit JTA TransactionManager (can be null).
 	 */
-	protected AbstractLobType(LobHandler lobHandler) {
+	protected AbstractLobType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
 		if (lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-																			"lobHandler property must be set on LocalSessionFactoryBean");
+			    "lobHandler property must be set on LocalSessionFactoryBean");
 		}
 		this.lobHandler = lobHandler;
+		this.jtaTransactionManager = jtaTransactionManager;
 	}
 
 
@@ -106,12 +125,32 @@ public abstract class AbstractLobType implements UserType {
 	 * @see #nullSafeSetInternal
 	 */
 	public final void nullSafeSet(PreparedStatement st, Object value, int index) throws SQLException {
-		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-			throw new IllegalStateException("Active transaction synchronization required");
-		}
 		LobCreator lobCreator = this.lobHandler.getLobCreator();
 		nullSafeSetInternal(st, index, value, lobCreator);
-		TransactionSynchronizationManager.registerSynchronization(new LobCreatorSynchronization(lobCreator));
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			logger.debug("Registering Spring transaction synchronization for Hibernate LOB type");
+			TransactionSynchronizationManager.registerSynchronization(
+			    new SpringLobCreatorSynchronization(lobCreator));
+		}
+		else {
+			if (this.jtaTransactionManager != null) {
+				try {
+					int jtaStatus = this.jtaTransactionManager.getStatus();
+					if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
+						logger.debug("Registering JTA transaction synchronization for Hibernate LOB type");
+						this.jtaTransactionManager.getTransaction().registerSynchronization(
+								new JtaLobCreatorSynchronization(lobCreator));
+						return;
+					}
+				}
+				catch (Exception ex) {
+					throw new DataAccessResourceFailureException(
+							"Could not register synchronization with JTA TransactionManager", ex);
+				}
+			}
+			throw new IllegalStateException("Active Spring transaction synchronization or " +
+			    "jtaTransactionManager on LocalSessionFactoryBean plus active JTA transaction required");
+		}
 	}
 
 	/**
@@ -133,24 +172,46 @@ public abstract class AbstractLobType implements UserType {
 	 * @param lobCreator the LobCreator to use
 	 * @throws SQLException if thrown by JDBC methods
 	 */
-	protected abstract void nullSafeSetInternal(PreparedStatement ps, int index, Object value, LobCreator lobCreator)
-			throws SQLException;
+	protected abstract void nullSafeSetInternal(
+	    PreparedStatement ps, int index, Object value, LobCreator lobCreator) throws SQLException;
 
 
 	/**
-	 * Callback for resource cleanup at the end of a transaction.
+	 * Callback for resource cleanup at the end of a Spring transaction.
 	 * Invokes LobCreator.close to clean up temporary LOBs that might have been created.
 	 * @see org.springframework.jdbc.support.lob.LobCreator#close
 	 */
-	private static class LobCreatorSynchronization extends TransactionSynchronizationAdapter {
+	private static class SpringLobCreatorSynchronization extends TransactionSynchronizationAdapter {
 
 		private final LobCreator lobCreator;
 
-		private LobCreatorSynchronization(LobCreator lobCreator) {
+		private SpringLobCreatorSynchronization(LobCreator lobCreator) {
 			this.lobCreator = lobCreator;
 		}
 
 		public void beforeCompletion() {
+			this.lobCreator.close();
+		}
+	}
+
+
+	/**
+	 * Callback for resource cleanup at the end of a JTA transaction.
+	 * Invokes LobCreator.close to clean up temporary LOBs that might have been created.
+	 * @see org.springframework.jdbc.support.lob.LobCreator#close
+	 */
+	private static class JtaLobCreatorSynchronization implements Synchronization {
+
+		private final LobCreator lobCreator;
+
+		public JtaLobCreatorSynchronization(LobCreator lobCreator) {
+			this.lobCreator = lobCreator;
+		}
+
+		public void beforeCompletion() {
+		}
+
+		public void afterCompletion(int status) {
 			this.lobCreator.close();
 		}
 	}
