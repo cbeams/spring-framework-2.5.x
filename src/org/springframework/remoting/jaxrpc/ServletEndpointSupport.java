@@ -57,7 +57,7 @@ public class ServletEndpointSupport implements ServiceLifecycle {
 		}
 		this.servletEndpointContext = (ServletEndpointContext) context;
 		ServletContext servletContext = this.servletEndpointContext.getServletContext();
-		this.webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+		this.webApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 		this.messageSourceAccessor = new MessageSourceAccessor(this.webApplicationContext);
 		onInit();
 	}
