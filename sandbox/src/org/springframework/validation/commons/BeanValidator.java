@@ -21,118 +21,108 @@ import org.springframework.validation.Errors;
 
 /**
  * Wrapper for the commons validator to be used with the spring framework.
- * <p>
- * Use this class to validate beans with a known base class name. The name of
+ * 
+ * <p>Use this class to validate beans with a known base class name. The name of
  * the object's base class is used to resolve validation rules for the bean
- * being validated.
- * <p>
- * The following properties must be initialized (only if using zero-argument
- * construction) before the supports() or validate() methods may be invoked:
- * </p>
+ * being validated.</p>
+ * 
+ * <p>The following properties must be initialized (only if using zero-argument
+ * construction) before the supports() or validate() methods may be invoked:</p>
  * <ul>
  * <li>validatorFactory</li>
  * </ul>
- * <p>
- * The following is an optional setting.
+ * 
+ * <p>The following is an optional setting.</p>
  * <ul>
  * <li>useFullyQualifiedBeanName (defaults to false) allows specification of
- * fully qualified bean (form) names in the validation.xml file.</li>
+ * 		fully qualified bean (form) names in the validation.xml file.</li>
  * </ul>
  * 
  * @author dmiller
  */
-public class BeanValidator implements org.springframework.validation.Validator,
-        Serializable {
+public class BeanValidator implements org.springframework.validation.Validator, Serializable {
+	
+	private boolean useFullyQualifiedBeanName = false;
+	private ValidatorAdaptor validator;
+	
+	public BeanValidator() {
+		validator = new ValidatorAdaptor();
+	}
 
-    private boolean useFullyQualifiedBeanName = false;
-    private ValidatorAdaptor validator;
+	public BeanValidator(ValidatorFactory factory) {
+		this();
+		setValidatorFactory(factory);
+	}
 
-    public BeanValidator() {
-        validator = new ValidatorAdaptor();
-    }
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	 * Validator interface implementation
+	 */
 
-    public BeanValidator(ValidatorFactory factory) {
-        this();
-        setValidatorFactory(factory);
-    }
+	/**
+	 * @see org.springframework.validation.Validator#supports(java.lang.Class)
+	 */
+	public boolean supports(Class clazz) {
+		return validator.supports(getBeanName(clazz));
+	}
 
-    /*
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * Validator interface implementation
-     */
+	/**
+	 * @see org.springframework.validation.Validator#validate(java.lang.Object, org.springframework.validation.Errors)
+	 */
+	public void validate(Object obj, Errors errors) {
+		validator.validate(getBeanName(obj.getClass()), obj, errors);
+	}
 
-    /**
-     * @see org.springframework.validation.Validator#supports(java.lang.Class)
-     */
-    public boolean supports(Class clazz) {
-        return validator.supports(getBeanName(clazz));
-    }
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	 * Public property setters
+	 */
+	
+	/**
+	 * Sets the useFullyQualifiedBeanName. Note: this setting is not mandatory.
+	 * It defaults to false.
+	 * 
+	 * @param useFullyQualifiedBeanName The useFullyQualifiedBeanName to set
+	 */
+	public void setUseFullyQualifiedBeanName(boolean useFullyQualifiedBeanName) {
+		this.useFullyQualifiedBeanName = useFullyQualifiedBeanName;
+	}
 
-    /**
-     * @see org.springframework.validation.Validator#validate(java.lang.Object,
-     *      org.springframework.validation.Errors)
-     */
-    public void validate(Object obj, Errors errors) {
-        validator.validate(getBeanName(obj.getClass()), obj, errors);
-    }
+	/**
+	 * Sets the validator factory for this validator.
+	 * 
+	 * @param factory an initialized instance of ValidatorFactory.
+	 */
+	public void setValidatorFactory(ValidatorFactory factory) {
+		validator.setValidatorFactory(factory);
+	}
 
-    /*
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * Public property setters
-     */
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	 * Private helper methods
+	 */
 
-    /**
-     * Sets the useFullyQualifiedBeanName. Note: this setting is not mandatory.
-     * It defaults to false.
-     * 
-     * @param useFullyQualifiedBeanName
-     *            The useFullyQualifiedBeanName to set
-     */
-    public void setUseFullyQualifiedBeanName(boolean useFullyQualifiedBeanName) {
-        this.useFullyQualifiedBeanName = useFullyQualifiedBeanName;
-    }
-
-    /**
-     * Sets the validator factory for this validator.
-     * 
-     * @param factory
-     *            an initialized instance of ValidatorFactory.
-     */
-    public void setValidatorFactory(ValidatorFactory factory) {
-        validator.setValidatorFactory(factory);
-    }
-
-    /*
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * Private helper methods
-     */
-
-    /**
-     * If <code>useFullyQualifiedBeanName</code> is false (default value),
-     * this function returns a string containing a short name for the given
-     * class (e.g. myBean for the class com.domain.test.MyBean). Otherwise, it
-     * returns the value returned by Class.getName().
-     * 
-     * @param clazz
-     *            Class of the bean to be validated.
-     * 
-     * @return String containing the bean name.
-     */
-    protected String getBeanName(Class clazz) {
-        String name = clazz.getName();
-        if (useFullyQualifiedBeanName) {
-            return name;
-        } else {
-            int afterDot = name.lastIndexOf(".") + 1;
-            String firstChar = name.substring(afterDot, afterDot + 1)
-                    .toLowerCase();
-            String otherChars = "";
-            if (afterDot + 1 <= name.length()) {
-                // Get the rest of the bean name
-                otherChars = name.substring(afterDot + 1);
-            }
-            return firstChar + otherChars;
-        }
-    }
-
+	/**
+	 * If <code>useFullyQualifiedBeanName</code> is false (default value),
+	 * this function returns a string containing a short name for the given
+	 * class (e.g. myBean for the class com.domain.test.MyBean). Otherwise, it
+	 * returns the value returned by Class.getName().
+	 * 
+	 * @param clazz Class of the bean to be validated.
+	 * 
+	 * @return String containing the bean name.
+	 */
+	protected String getBeanName(Class clazz) {
+		String name = clazz.getName();
+		if (useFullyQualifiedBeanName) {
+			return name;
+		} else {
+			int afterDot = name.lastIndexOf(".") + 1;
+			String firstChar = name.substring(afterDot, afterDot + 1).toLowerCase();
+			String otherChars = "";
+			if (afterDot + 1 <= name.length()) {
+				// Get the rest of the bean name
+				otherChars = name.substring(afterDot + 1);
+			}
+			return firstChar + otherChars;
+		}
+	}
+	
 }
