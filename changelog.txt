@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.47 2003-11-21 23:29:10 jhoeller Exp $
+$Id: changelog.txt,v 1.48 2003-11-23 14:24:22 jhoeller Exp $
 
 
 Changes in version 1.0 M3 (23.11.2003)
@@ -18,7 +18,7 @@ Package org.springframework.beans
 * log value when setting property value in case of simple properties, at debug lebel
 * ClassEditor and other framework classes use the thread context class loader now, consistent within the framework
 * introduced "containsBean" method in BeanFactory, checking for the existence of a bean without creating it
-* "isSingleton" method now checks singleton status of created object in case of a FactoryBean
+* BeanFactory's "isSingleton" method now checks singleton status of created object in case of a FactoryBean
 * introduced "getBeansOfType" method in ListableBeanFactory, retrieving both normal beans and FactoryBean-created beans
 * introduced "getObjectType" method in FactoryBean, to avoid unnecessary bean creation on autowire checks
 * reworked BeanFactoryUtils' "beanNamesIncludingAncestors" and "beansOfTypeIncludingAncestors" methods
@@ -27,7 +27,7 @@ Package org.springframework.beans
 * introduced BeanNameAware interface to be implemented by beans that want to be aware of their bean factory name
 * introduced ConfigurableBeanFactory and ConfigurableListableBeanFactory interfaces in beans.factory.config package
 * reworked BeanPostProcessor and BeanFactoryPostProcessor interfaces and moved them to beans.factory.config package
-* made AbstractBeanFactory and ListableBeanFactoryImpl methods
+* renamed ListableBeanFactoryImpl to DefaultListableBeanFactory, reflecting its role in the reworked factory hierarchy
 * reworked AbstractBeanDefinition/RootBeanDefinition/ChildBeanDefinition, introduced "validate" method
 * check for invalid bean definitions: "lazy-init" attribute and FactoryBean classes only allowed for singletons
 * fixed RootBeanDefinition bug that caused an unnecessary additional invocation of the constructor of the defined bean
@@ -44,6 +44,7 @@ Package org.springframework.beans
 * added "default-dependency-check" and "default-autowire" attributes to root tag in XML bean definitions
 * reworked PropertiesFactoryBean to allow for loaded and local properties and moved into beans.factory.config package
 * added CommonsLogFactoryBean to beans.factory.config package, for setting up shared Log instances
+* added MethodInvocationFactoryBean to beans.factory.config package, for exposing an object from any static method call
 
 Package org.springframework.context
 * split ApplicationContext interface into ApplicationContext client interface and ConfigurableApplicationContext SPI
@@ -58,7 +59,7 @@ Package org.springframework.jdbc
 * added setter methods for data access templates and convenience methods for resource opening/closing to JdbcDaoSupport
 * refactored JDBC core package so that SQLErrorCodeExceptionTranslator can be subclassed by and passed into JdbcTemplate
 * refactored JDBC object package so that one JdbcTemplate can be used to configure multiple RdbmsOperations
-* reworked JdbcBeanFactory to extend ListableBeanFactoryImpl instead of using a refreshable delegate
+* reworked JdbcBeanFactory to extend DefaultListableBeanFactory instead of using a refreshable delegate
 
 Package org.springframework.mail
 * added "port" bean property to JavaMailSenderImpl, for setting a non-default mail server port
@@ -81,6 +82,8 @@ Package org.springframework.orm
 Package org.springframework.samples
 * switched Countries and Petclinic to auto-detection of spring.tld in META-INF of spring.jar
 * switched Countries and Petclinic to ContextLoaderServlet for maximum compatibility
+* Tiles Example uses package org.springframework.samples.tiles now
+* added warfile.bat, readme.txt, and redirecting index.jsp to Tiles Example
 
 Package org.springframework.transaction
 * moved commit exception handling from concrete implementations up to the generic AbstractPlatformTransactionManager
@@ -103,11 +106,17 @@ Package org.springframework.web
 * reworked DataBinder and ServletRequestDataBinder to contain a BindException instead of derive from it
 * interfaces HandlerAdapter, HandlerMapping, and ViewResolver do not require ApplicationContextAware anymore
 * interface View does not require addStaticAttribute and getName methods anymore
-* view bean factories of XmlViewResolver and ResourceBundleViewResolver are now children of the application context
+* HandlerAdapter and Controller can throw any Exception now, instead of just ServletException and IOException
+* introduced HandlerExceptionResolver interface, for resolution of specific exceptions to error page ModelAndViews
+* added SimplerMappingExceptionResolver implementation, for mapping exception class names/messages to view names
+* introduced ModelAndViewDefiningException, to be thrown during handler processing to forward to a specific error page
 * renamed BaseCommandController's "setBeanName" method to "setCommandName", keeping "setBeanName" deprecated
 * renamed BaseCommandController's "userObject" method to "getCommand"
 * check both ".x" and ".y" as submit image suffixes in AbstractWizardFormController
+* moved FileNameViewController from Tiles Example to package org.springframework.web.servlet.mvc
+* view bean factories of XmlViewResolver and ResourceBundleViewResolver are now children of the application context
 * added "attributesMap" property to AbstractView, for setting attribute values like bean references via a Map
+* renamed InternalResourceView's "exposeModelsAsRequestAttributes" method to "exposeModelAsRequestAttributes"
 * if in included request, examine the include paths for handler mappings instead of the original request paths
 * if already in included request, perform another include instead of forward in InternalResourceView
 * fixed potential NPE in debug log statement of VelocityView
