@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc.multiaction;
 
@@ -122,13 +122,13 @@ public class MultiActionController extends AbstractController implements LastMod
 	private Object delegate;
 
 	/** Methods, keyed by name */
-	private Map methodHash;
+	private Map handlerMethodMap;
 	
 	/** LastModified methods, keyed by handler method name (without LAST_MODIFIED_SUFFIX) */
-	private Map lastModifiedMethodHash;
+	private Map lastModifiedMethodMap;
 	
 	/** Methods, keyed by exception class */
-	private Map exceptionHandlerHash;
+	private Map exceptionHandlerMap;
 
 
 	//---------------------------------------------------------------------
@@ -192,8 +192,8 @@ public class MultiActionController extends AbstractController implements LastMod
 			throw new IllegalArgumentException("delegate cannot be null in MultiActionController");
 		}
 		this.delegate = delegate;
-		this.methodHash = new HashMap();
-		this.lastModifiedMethodHash = new HashMap();
+		this.handlerMethodMap = new HashMap();
+		this.lastModifiedMethodMap = new HashMap();
 		
 		// Look at all methods in the subclass, trying to find
 		// methods that are validators according to our criteria
@@ -209,19 +209,19 @@ public class MultiActionController extends AbstractController implements LastMod
 				if (params.length >= 2 && params[0].equals(HttpServletRequest.class) &&
 						params[1].equals(HttpServletResponse.class)) {
 					// we're in business
-					if (logger.isInfoEnabled()) {
-						logger.info("Found action method [" + methods[i] + "]");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found action method [" + methods[i] + "]");
 					}
-					this.methodHash.put(methods[i].getName(), methods[i]);
+					this.handlerMethodMap.put(methods[i].getName(), methods[i]);
 					
 					// look for corresponding LastModified method
 					try {
 						Method lastModifiedMethod = delegate.getClass().getMethod(methods[i].getName() + LAST_MODIFIED_METHOD_SUFFIX,
 																																			new Class[] { HttpServletRequest.class } );
 						// put in cache, keyed by handler method name
-						this.lastModifiedMethodHash.put(methods[i].getName(), lastModifiedMethod);
-						if (logger.isInfoEnabled()) {
-							logger.info("Found last modified method for action method [" + methods[i] + "]");
+						this.lastModifiedMethodMap.put(methods[i].getName(), lastModifiedMethod);
+						if (logger.isDebugEnabled()) {
+							logger.debug("Found last modified method for action method [" + methods[i] + "]");
 						}
 					}
 					catch (NoSuchMethodException ex) {
@@ -233,12 +233,12 @@ public class MultiActionController extends AbstractController implements LastMod
 		
 		// There must be SOME handler methods.
 		// WHAT IF SETTING DELEGATE LATER!?
-		if (this.methodHash.isEmpty()) {
+		if (this.handlerMethodMap.isEmpty()) {
 			throw new ApplicationContextException("No handler methods in class [" + getClass().getName() + "]");
 		}
 		
 		// now look for exception handlers
-		this.exceptionHandlerHash = new HashMap();
+		this.exceptionHandlerMap = new HashMap();
 		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].getReturnType().equals(ModelAndView.class) &&
 					methods[i].getParameterTypes().length == 3) {
@@ -248,9 +248,9 @@ public class MultiActionController extends AbstractController implements LastMod
 					Throwable.class.isAssignableFrom(params[2])
 				) {
 					// Have an exception handler
-					this.exceptionHandlerHash.put(params[2], methods[i]);
-					if (logger.isInfoEnabled()) {
-						logger.info("Found exception handler method [" + methods[i] + "]");
+					this.exceptionHandlerMap.put(params[2], methods[i]);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found exception handler method [" + methods[i] + "]");
 					}
 				}
 			}
@@ -270,7 +270,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	public final long getLastModified(HttpServletRequest request) {
 		try {
 			String handlerMethodName = this.methodNameResolver.getHandlerMethodName(request);
-			Method lastModifiedMethod = (Method) this.lastModifiedMethodHash.get(handlerMethodName);
+			Method lastModifiedMethod = (Method) this.lastModifiedMethodMap.get(handlerMethodName);
 			if (lastModifiedMethod != null) {
 				try {
 					// invoke the last-modified method
@@ -313,14 +313,13 @@ public class MultiActionController extends AbstractController implements LastMod
 	
 	/**
 	 * Invoke the named method.
-	 * Use a custom exception handler if possible;
-	 * otherwise, throw an unchecked exception;
-	 * wrap a checked exception or Throwable
+	 * <p>Usse a custom exception handler if possible; otherwise, throw an
+	 * unchecked exception; wrap a checked exception or Throwable.
 	 */
-	protected final ModelAndView invokeNamedMethod(String method, HttpServletRequest request,
-	                                               HttpServletResponse response) throws Exception {
+	protected final ModelAndView invokeNamedMethod(
+			String method, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		Method m = (Method) this.methodHash.get(method);
+		Method m = (Method) this.handlerMethodMap.get(method);
 		if (m == null) {
 			throw new NoSuchRequestHandlingMethodException(method, getClass());
 		}
@@ -334,9 +333,9 @@ public class MultiActionController extends AbstractController implements LastMod
 			if (m.getParameterTypes().length >= 3 && m.getParameterTypes()[2].equals(HttpSession.class) ){
 				HttpSession session = request.getSession(false);
 				if (session == null) {
-					return handleException(
-							request, response,
-							new SessionRequiredException("Pre-existing session required for handler method '" + method + "'"));
+					return handleException(request, response,
+							new SessionRequiredException(
+									"Pre-existing session required for handler method '" + method + "'"));
 				}
 				params.add(session);
 			}
@@ -353,8 +352,7 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 		catch (InvocationTargetException ex) {
 			// This is what we're looking for: the handler method threw an exception
-			Throwable t = ex.getTargetException();
-			return handleException(request, response, t);
+			return handleException(request, response, ex.getTargetException());
 		}
 	}
 
@@ -364,24 +362,25 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * Allow the subclass a chance to handle it.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param t the exception that got thrown
+	 * @param ex the exception that got thrown
 	 * @return a ModelAndView to render the response
 	 */
-	private ModelAndView handleException(HttpServletRequest request, HttpServletResponse response, Throwable t)
+	private ModelAndView handleException(HttpServletRequest request, HttpServletResponse response, Throwable ex)
 			throws Exception {
-		Method handler = getExceptionHandler(t);
+
+		Method handler = getExceptionHandler(ex);
 		if (handler != null) {
-			return invokeExceptionHandler(handler, request, response, t);
+			return invokeExceptionHandler(handler, request, response, ex);
 		}
 		// If we get here, there was no custom handler
-		if (t instanceof Exception) {
-			throw (Exception) t;
+		if (ex instanceof Exception) {
+			throw (Exception) ex;
 		}
-		if (t instanceof Error) {
-			throw (Error) t;
+		if (ex instanceof Error) {
+			throw (Error) ex;
 		}
-		// Shouldn't happen
-		throw new ServletException("Unknown Throwable type encountered: " + t);
+		// shouldn't happen
+		throw new ServletException("Unknown Throwable type encountered: " + ex);
 	}
 
 	/**
@@ -398,8 +397,9 @@ public class MultiActionController extends AbstractController implements LastMod
 			return clazz.newInstance();
 		}
 		catch (Exception ex) {
-			throw new ServletException("Cannot instantiate command of class [" + clazz.getName() +
-			                           "]: Does it have a public no arg constructor?", ex);
+			throw new ServletException(
+					"Cannot instantiate command of class [" + clazz.getName() +
+					"]: Does it have a public no arg constructor?", ex);
 		}
 	}
 	
@@ -409,29 +409,30 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @param command command object, that must be a JavaBean
 	 */
 	protected void bind(ServletRequest request, Object command) throws ServletException {
-		logger.debug("Binding request parameters onto command");
+		logger.debug("Binding request parameters onto MultiActionController command");
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, "command");
 		binder.bind(request);
 		binder.closeNoCatch();
 	}
 	
 	/**
+	 * Determine the exception handler method for the given exception.
 	 * Can return null if not found.
-	 * @return a handler for the given exception type
-	 * @param exception Won't be a ServletException or IOException
+	 * @return a handler for the given exception type, or null
+	 * @param exception the exception to handle
 	 */
 	protected Method getExceptionHandler(Throwable exception) {
 		Class exceptionClass = exception.getClass();
-		if (logger.isInfoEnabled()) {
-			logger.info("Trying to find handler for exception class [" + exceptionClass.getName() + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Trying to find handler for exception class [" + exceptionClass.getName() + "]");
 		}
-		Method handler = (Method) this.exceptionHandlerHash.get(exceptionClass);
+		Method handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
 		while (handler == null && !exceptionClass.equals(Throwable.class)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Trying to find handler for exception superclass [" + exceptionClass.getName() + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Trying to find handler for exception superclass [" + exceptionClass.getName() + "]");
 			}
 			exceptionClass = exceptionClass.getSuperclass();
-			handler = (Method) this.exceptionHandlerHash.get(exceptionClass);
+			handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
 		}
 		return handler;
 	}
@@ -440,15 +441,17 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * Invoke the selected exception handler.
 	 * @param handler handler method to invoke
 	 */
-	private ModelAndView invokeExceptionHandler(Method handler, HttpServletRequest request,
-																							HttpServletResponse response, Throwable ex) throws Exception {
+	private ModelAndView invokeExceptionHandler(
+			Method handler, HttpServletRequest request, HttpServletResponse response, Throwable ex)
+			throws Exception {
+
 		if (handler == null) {
 			throw new ServletException("No handler for exception", ex);
 		}
 
 		// If we get here, we have a handler.
-		if (logger.isInfoEnabled()) {
-			logger.info("Invoking exception handler [" + handler + "] for exception [" + ex + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking exception handler [" + handler + "] for exception [" + ex + "]");
 		}
 		try {
 			ModelAndView mv = (ModelAndView) handler.invoke(this.delegate, new Object[] {request, response, ex});
