@@ -760,6 +760,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param request
 	 */
 	protected void fireStarted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow started event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
 				((FlowLifecycleListener)o).flowStarted(Flow.this, sessionExecution, request);
@@ -775,6 +778,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	protected void fireEventSignaled(final String eventId, final TransitionableState fromState,
 			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow event signaled event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
 				((FlowLifecycleListener)o).flowEventSignaled(Flow.this, eventId, fromState, sessionExecution, request);
@@ -790,6 +796,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	protected void fireEventProcessed(final String eventId, final TransitionableState fromState,
 			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow event processed event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
 				((FlowLifecycleListener)o).flowEventProcessed(Flow.this, eventId, fromState, sessionExecution, request);
@@ -823,6 +832,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	protected void fireEnded(final FlowSession endingFlowSession, final FlowSessionExecution sessionExecution,
 			final HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow ended event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
 				((FlowLifecycleListener)o).flowEnded(Flow.this, endingFlowSession, sessionExecution, request);

@@ -112,6 +112,9 @@ public class SubFlowState extends TransitionableState {
 		}
 		else {
 			try {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Retrieving sub flow definition with id '" + this.subFlowId + "'");
+				}
 				Flow subFlow = flow.getFlowDao().getFlow(this.subFlowId);
 				Assert.notNull(subFlow, "The subflow retrieved must be non-null");
 				if (logger.isInfoEnabled()) {
@@ -152,9 +155,6 @@ public class SubFlowState extends TransitionableState {
 
 	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieving sub flow definition with id '" + this.subFlowId + "'");
-		}
 		Flow subFlow = getSubFlow(flow);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + flow.getId() + "'");
