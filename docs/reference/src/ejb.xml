@@ -1,53 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="ejb">
+  <title>Accessing and implementing EJBs</title>
 
-    <title>Accessing and implementing EJBs</title>
-    
-    <para>
-    	As a lightweight container, Spring is often considered an  EJB replacement.
-    	While we believe that Spring provides a better container for many applications than an
-    	EJB container, it's important to note that using Spring does not prevent you from
-    	using EJB. In fact, Spring makes it much easier to develop with EJB.
-    </para>
-    
-    <para>
-    	In this chapter, we look at how Spring can help you access and implement EJBs.
-    	Spring provides particular value when accessing stateless session beans (SLSBs),
-    	so we'll begin by discussing this.
-    </para>
-    
-    <sect1 id="ejb-access">
+  <para>As a lightweight container, Spring is often considered an EJB
+  replacement. We do believe that for many if not most applications and use
+  cases, Spring as a container, combined with its rich supporting
+  functionality in the area of transactions, ORM and JDBC access, is a better
+  choice than implementing equivalent functionality via an EJB container and
+  EJBs.</para>
 
-		<title>Accessing EJBs</title>
+  <para>However, it is important to note that using Spring does not prevent
+  you from using EJBs. In fact, Spring makes it much easier to access EJBs and
+  implement EJBs and functionality within them. Additionally, using Spring to
+  access services provided by EJBs allows the implementation of those services
+  to later transparently be switched between local EJB, remote EJB, or POJO
+  (plain java object) implementations of those services, without the client
+  code client code having to be changed.</para>
 
-		
-		 <sect2 id="ejb-access-concepts">
+  <para>In this chapter, we look at how Spring can help you access and
+  implement EJBs. Spring provides particular value when accessing stateless
+  session beans (SLSBs), so we'll begin by discussing this.</para>
 
-			<title>Concepts</title>
-		</sect2>
-		
-		<sect2 id="ejb-access-local">
+  <sect1 id="ejb-access">
+    <title>Accessing EJBs</title>
 
-			<title>Accessing local SLSBs</title>
-		</sect2>
-		
-		<sect2 id="ejb-access-remote">
-			<title>Accessing remote SLSBs</title>
-		</sect2>
+    <sect2 id="ejb-access-concepts">
+      <title>Concepts</title>
+    </sect2>
 
-	</sect1>
-	
-	<sect1 id="ejb-implementation">
-		<title>Using Spring convenience EJB implementation classes</title>
-		
-		<para>
-			Spring also provides convenience classes to help you implement EJBs.
-			These are designed to encourage the good practice of putting business logic
-			behind EJBs in POJOs, leaving EJBs responsible for transaction demarcation and
-			(optionally) remoting.
-		</para>
-		
-	</sect1>
+    <sect2 id="ejb-access-local">
+      <title>Accessing local SLSBs</title>
+    </sect2>
 
+    <sect2 id="ejb-access-remote">
+      <title>Accessing remote SLSBs</title>
+    </sect2>
+  </sect1>
 
+  <sect1 id="ejb-implementation">
+    <title>Using Spring convenience EJB implementation classes</title>
+
+    <para>Spring also provides convenience classes to help you implement EJBs.
+    These are designed to encourage the good practice of putting business
+    logic behind EJBs in POJOs, leaving EJBs responsible for transaction
+    demarcation and (optionally) remoting.</para>
+  </sect1>
 </chapter>
-
