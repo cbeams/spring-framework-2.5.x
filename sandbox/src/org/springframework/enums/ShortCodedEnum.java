@@ -13,16 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.enums;
 
 /**
- * <p>Implementation of CodedEnum which uses Short as the code type.</p>
- *
- * <p>Should almsot always be subclassed, but for some simple situations it may
- * be used directly. Note that you will not be able to use unique type based
- * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.</p>
- *
+ * Implementation of CodedEnum which uses Short as the code type.
+ * <p>
+ * Should almsot always be subclassed, but for some simple situations it may be
+ * used directly. Note that you will not be able to use unique type based
+ * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.
  * @author Keith Donald
  */
 public class ShortCodedEnum extends AbstractCodedEnum {
@@ -39,7 +37,7 @@ public class ShortCodedEnum extends AbstractCodedEnum {
 
 	protected ShortCodedEnum(int code, String label) {
 		super(label);
-		this.code = new Short((short) code);
+		this.code = new Short((short)code);
 	}
 
 	public Comparable getCode() {
@@ -47,7 +45,6 @@ public class ShortCodedEnum extends AbstractCodedEnum {
 	}
 
 	public short getShortCode() {
-		return ((Short) getCode()).shortValue();
+		return ((Short)getCode()).shortValue();
 	}
-
 }

@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.enums.support;
 
 import java.io.Serializable;
@@ -29,6 +28,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.support.Block;
 
 /**
+ * A enum resolver that loads enums using the <code>Hibernate</code> data access apis.
  * @author Keith Donald
  */
 public class HibernateCodedEnumResolver extends AbstractCodedEnumResolver {
@@ -90,5 +90,4 @@ public class HibernateCodedEnumResolver extends AbstractCodedEnumResolver {
 		}.forEach(all);
 		return map;
 	}
-
 }

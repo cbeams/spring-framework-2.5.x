@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.enums.support;
 
 import java.util.Collection;
@@ -37,10 +36,9 @@ import org.springframework.util.DefaultObjectStyler;
  * @author Keith Donald
  */
 public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
+	protected transient final Log logger = LogFactory.getLog(getClass());
 
 	private Map localeCache;
-
-	protected transient final Log logger = LogFactory.getLog(getClass());
 
 	private boolean caching = true;
 
@@ -143,5 +141,4 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
 		logger.info("Assuming no enums exist for type " + type + " and locale " + locale);
 		return null;
 	}
-
 }

@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.enums.support;
 
 import java.lang.reflect.Field;
@@ -91,7 +90,6 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 	 * @author Keith Donald
 	 */
 	private static class CodedEnumFieldValueGenerator implements ProcessTemplate {
-
 		private static final Log logger = LogFactory.getLog(CodedEnumFieldValueGenerator.class);
 
 		private Class clazz;
@@ -137,5 +135,4 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 	public Map getEnumAsMap(Class type) {
 		return getEnumsAsMap(type.getName(), null);
 	}
-
 }

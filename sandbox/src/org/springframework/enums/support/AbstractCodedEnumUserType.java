@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.enums.support;
 
 import java.io.Serializable;
@@ -36,6 +35,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * A Hibernate user type for <code>CodedEnum</code> instances.
  * @author Keith Donald
  */
 public abstract class AbstractCodedEnumUserType implements UserType, Serializable {

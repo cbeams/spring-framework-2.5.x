@@ -55,12 +55,12 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
 		if (!(o instanceof AbstractCodedEnum)) {
 			return false;
 		}
-		AbstractCodedEnum e = (AbstractCodedEnum) o;
+		AbstractCodedEnum e = (AbstractCodedEnum)o;
 		return this.getCode().equals(e.getCode()) && this.getType().equals(e.getType());
 	}
 
 	public int compareTo(Object o) {
-		AbstractCodedEnum e = (AbstractCodedEnum) o;
+		AbstractCodedEnum e = (AbstractCodedEnum)o;
 		Assert.isTrue(getType().equals(e.getType()), "You may only compare enumerations of the same type.");
 		return getCode().compareTo(e.getCode());
 	}
@@ -70,11 +70,12 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
 	}
 
 	/**
-	 * The enumeration key is used as the message key for internationalizing enums.
+	 * The enumeration key is used as the message key for internationalizing
+	 * enums.
 	 * @see org.springframework.context.MessageSourceResolvable#getCodes()
 	 */
 	public String[] getCodes() {
-		return new String[]{getKey()};
+		return new String[] { getKey() };
 	}
 
 	public Object[] getArguments() {
@@ -102,5 +103,4 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
 		String enumStr = (label != null ? (getLabel() + " (" + getCode() + ")") : String.valueOf(getCode()));
 		return "[" + getType() + "." + enumStr + "]";
 	}
-
 }
