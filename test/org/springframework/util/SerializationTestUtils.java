@@ -17,7 +17,6 @@ import java.io.Serializable;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
@@ -25,7 +24,7 @@ import org.springframework.beans.TestBean;
  * Exposes static methods for use in other test cases.
  * Extends TestCase only to test itself.
  * @author Rod Johnson
- * @version $Id: SerializationTestUtils.java,v 1.1 2004-06-11 08:05:10 johnsonr Exp $
+ * @version $Id: SerializationTestUtils.java,v 1.2 2004-06-11 08:15:48 johnsonr Exp $
  */
 public class SerializationTestUtils extends TestCase {
 	
@@ -33,6 +32,16 @@ public class SerializationTestUtils extends TestCase {
 		OutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(baos);
 		oos.writeObject(o);
+	}
+	
+	public static boolean isSerializable(Object o) throws IOException {
+		try {
+			testSerialization(o);
+			return true;
+		}
+		catch (NotSerializableException ex) {
+			return false;
+		}
 	}
 	
 	public static Object serializeAndDeserialize(Object o) throws IOException, ClassNotFoundException {
@@ -57,6 +66,9 @@ public class SerializationTestUtils extends TestCase {
 	public void testWithNonSerializableObject() throws IOException {
 		TestBean o = new TestBean();
 		assertFalse(o instanceof Serializable);
+		
+		assertFalse(isSerializable(o));
+		
 		try {
 			testSerialization(o);
 			fail();
@@ -73,6 +85,8 @@ public class SerializationTestUtils extends TestCase {
 		assertTrue(p instanceof Serializable);
 	
 		testSerialization(p);
+		
+		assertTrue(isSerializable(p));
 		
 		Point p2 = (Point) serializeAndDeserialize(p);
 		assertNotSame(p, p2);
