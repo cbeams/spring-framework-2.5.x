@@ -293,24 +293,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
 				also includes <literal>sun.bean.editors</literal>, which includes
 				PropertyEditors for Font, Color and all the primitive types.
 			</para>
-			<para>
-				When in need of a custom editor in your BeanFactory (i.e. you have some
-				exotic type that you need express as a property in an XML
-				file containing beans), you can use the <literal>BeanFactoryPostProcessor</literal>
-				infrastructure to do this. TODOOOODOOD reference provides more info on how to use
-				the <literal>BeanFactoryPostProcessor</literal>. The following piece of code
-				shows the actual processor that registered a custom editor for use with the
-				BeanFactory:
-				<programlisting><![CDATA[
-public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
-	void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-	    beanFactory.registerCustomEditor(Date.class, new CustomDateEditor());
-	}
-}
-				]]></programlisting>
-
-			</para>
-		</sect2> 
+		</sect2>
 		
 		<sect2 id="beans-beans-other">
 			<title>Other features worth mentioning</title>

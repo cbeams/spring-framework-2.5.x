@@ -62,7 +62,7 @@
 			</mediaobject>
 		</para>
 		<para>
-			The <emphasis>beans</emphasis> package is the most fundamental part of the framework and
+			The <emphasis>Core</emphasis> package is the most fundamental part of the framework and
 			provides the Dependency Injection features allowing you to manage
 			beans containing functionality. The basic concept here is the 
 			BeanFactory, which provides a factory pattern removing the need for
@@ -70,8 +70,8 @@
 			and specification of dependencies from your actual logic.            
 		</para>
 		<para>
-			On top of the <emphasis>beans</emphasis> package sits the 
-			<emphasis>context</emphasis> package,
+			On top of the <emphasis>Core</emphasis> package sits the 
+			<emphasis>Context</emphasis> package,
 			providing a way to access beans in a framework-style manner,
 			somewhat resembling a JNDI-registry. The context package inherits
 			its features from the beans package and adds support text messaging using
@@ -80,7 +80,7 @@
 			creation of contexts by, for example, a servlet container.
 		</para>
 		<para>
-			The <emphasis>JDBC</emphasis> package provides a JDBC-abstraction
+			The <emphasis>DAO</emphasis> package provides a JDBC-abstraction
 			layer that removes the need to do tedious JDBC coding and parsing
 			database-vendor specific error codes.
 			Also, the JDBC package provides a way to do 
@@ -106,7 +106,7 @@
 			a little like .NET attributes.
 		</para>
 		<para>
-			Spring's <emphasis>web</emphasis> package provides the basic 
+			Spring's <emphasis>Web</emphasis> package provides the basic 
 			web-oriented integration features, like multipart functionality,
 			initialization of contexts using servlet listeners and 
 			a web-oriented application context. When using
@@ -114,7 +114,7 @@
 			integrate with.
 		</para>
 		<para>
-			Spring <emphasis>web MVC</emphasis> package provides a 
+			Spring <emphasis>Web MVC</emphasis> package provides a 
 			Model-View-Controller implementation for web-applications. 
 			Spring's MVC implementation is not just any implementation,
 			it provides a clean separation between domain model code and

@@ -191,8 +191,7 @@
 				All of the features described in <xref linkend="beans-definition"/> will be 
 				configurable for each of your beans using one of the out-of-the-box BeanFactory 
 				implementations. In the example below we will use the most popular BeanFactory
-				to illustrate the behavior, i.e. the <literal>XmlBeanFactory</literal>. More information 
-				on the XmlBeanFactory and other implementations can be found further ahead.
+				to illustrate the behavior, i.e. the <literal>XmlBeanFactory</literal>.
 			</para>
 		</sect2>
 		
@@ -265,7 +264,7 @@
 	</sect1>
 	
 	<sect1 id="beans-dependencies">		
-		<title>Properties, dependencies and autowiring</title>
+		<title>Properties, collaborators, autowiring and dependency checking</title>
 		
 		<sect2 id="beans-factory-collaborators">
 			<title>Setting beans properties and collaborators</title>
@@ -308,7 +307,7 @@
 							property to the type that was required (when using the XML format to define a bean
 							that contains a setter with a <literal>Class</literal>-parameter, Spring uses the
 							<literal>ClassEditor</literal> (more about PropertyEditors and how to manually
-							add custom ones, can be found further ahead, TODODODODODODO reference!)
+							add custom ones, can be in <xref linkend="beans-customeditors"/>.
 						</para>
 					</listitem>
 					<listitem>
@@ -419,6 +418,47 @@ public class ExampleBean {
 				arguments to the constructor of the <literal>ExampleBean</literal>.	
 			</para>
 			
+		</sect2>
+		
+		<sect2 id="beans-factory-nullvalues">
+			<title>Setting <emphasis>null</emphasis> values</title>
+			<para>
+				Spring treats empty arguments for properties and the like as empty Strings. Consider the following
+				code examples if you need to set <emphasis>null</emphasis>-values.
+				<programlisting><![CDATA[
+<bean class="ExampleBean">
+	<property name="email"><value></value></property>
+</bean>
+				]]></programlisting>
+				results in <literal>exampleBean.setEmail("");</literal> as opposed to
+				<programlisting><![CDATA[
+<bean class="ExampleBean">
+	<property name="email"><null/></property>
+</bean>
+				]]></programlisting>
+				which will result in: <literal>exampleBean.setEmail(<emphasis>null</emphasis>)</literal>.
+			</para>
+		</sect2>
+		
+		<sect2 id="beans-factory-dependson">
+			<title>Using <literal>depends-on</literal></title>
+			<para>
+				In normal situations, Spring resolves references to bean using for instance
+				the <literal>&lt;ref bean/&gt;</literal>-tag. When just using those tags, 
+				without having special needs for initialization, you don't have to use the
+				<literal>depends-on</literal>-tag. However, when you're using statics (which you
+				of course shouldn't ;-) that need initialization or some beans needs to be initialized
+				because of something else needing preparation, you can use the <literal>depends-on</literal>-tag,
+				which will ensure all beans you're mentioning there, will get initialized before their actually
+				set on the bean. For example:
+				<programlisting><![CDATA[
+<bean id="beanOne" class="ExampleBean" depends-on="manager">
+	<property name="manager"><ref local="manager"/>
+</bean>
+
+<bean id="manager" class="ManagerBean"/>
+				]]></programlisting>
+			</para>
 		</sect2>
 		
 		<sect2 id="beans-factory-autowire">	
@@ -876,108 +916,8 @@ cfg.postProcessBeanFactory(factory);
 		<sect1 id="beans-factory-diagrams">
 			<title>Lifecycle of a bean in the BeanFactory</title>
 			<para>
-				This section describes the lifecycle of a bean in the BeanFactory, 
-				some of the basic characteristics of events happening in the BeanFactory as well
-				as the different types of beans.
+				This chapter will be re-written soon.
 			</para>
-			
-			<sect2 id="beans-factory-diagrams-lifecycle">
-				<title>The basic lifecycle of a bean</title>
-				<para>
-					The lifecycle of a bean begins with a bean definition, for instance defined
-					in XML or a properties file. The first step is the calling of the default constructor:
-					
-					<orderedlist spacing="compact">
-						<listitem>
-							<para>
-								default constructor
-							</para>
-						</listitem>
-					</orderedlist>
-
-				</para>
-				<para>
-					The second step is the initialization process in which you can prepare your bean
-					for use.
-					<orderedlist spacing="compact" continuation="continues">
-						<listitem>
-							<para>
-								the autowiring process in which any possible collaborators that can
-								be automatically resolved, will be set (TODO: reference)
-							</para>
-						</listitem>
-						<listitem>
-							<para>
-								checking of dependencies, which means that if dependencies are unsatisfied
-								(i.e. they are <literal>null</literal>), an <literal>UnsatisfiedDependencyException</literal>
-								will be thrown. (TODO: reference)
-							</para>
-						</listitem>
-						<listitem>
-							<para>
-								property setting, which means that all properties defined with the bean definition
-								in for instance an XML file, will be set on the bean
-							</para>
-						</listitem>
-						<listitem>
-							<para>
-								<literal>afterPropertiesSet()</literal> is called. This method is specified by the
-								<literal>InitializingBean</literal>, and thus will only be called if your bean 
-								implements this interface (TODO: reference)
-							</para>
-						</listitem>
-						<listitem>
-							<para>
-								the extra initialization method will be called that might have been
-								specified with the bean definition (TODO: reference)
-							</para>
-						</listitem>
-						<listitem>
-							<para>
-								if your bean is <literal>BeanFactoryAware</literal> the 
-								<literal>setBeanFactory()</literal> method will now be called enabling
-								the bean to have access to the BeanFactory (TODO: reference)
-							</para>
-						</listitem>
-					</orderedlist>
-				</para>
-				<para>
-					Right now, your bean is ready for use. Calls to <literal>BeanFactory.getBean()</literal>
-					with the name of the bean, will result in an instance of that bean being returned.
-					Depending on whether or not this bean is a singleton, a shared instance will be returned.
-					More information on consequences for singletons can be found below.
-				</para>
-				<para>
-			        When the <literal>BeanFactory</literal> gets destroyed (for instance when the
-			        application server shuts down), the destruction process of the BeanFactory
-			        will try to destroy all beans that it knows about. The destruction process 
-			        <emphasis>will only occur for singletons beans</emphasis>.
-			        
-			        <orderedlist spacing="compact" continuation="continues">
-			        	<listitem>
-			        		<para>
-			        			If your bean implements <literal>DisposableBean</literal> the
-			        			BeanFactory will call <literal>destroy()</literal>
-			        		</para>
-			        	</listitem>
-			        	<listitem>
-			        		<para>
-			        			If you bean definition includes a destroy method declaration,
-			        			this method will be called as well
-			        		</para>
-			        	</listitem>
-			        </orderedlist>
-			    </para>
-			    <para>
-			    	A diagram illustrating the lifecycle of a bean:
-			    </para>
-				<mediaobject>
-					<imageobject role="fo">
-    		        	<imagedata fileref="images/bean-lifecycle-overview.gif" format="GIF" align="center"/>
-		        	</imageobject>
-		        </mediaobject>
-			</sect2>
-			
 		</sect1>
 			
 	
@@ -1527,26 +1467,139 @@ public class BlackListNotifier implement ApplicationListener {
 		
 	</sect1>
 	
+		<sect1 id="beans-customeditors">
+			<title>Registerin additional custom editors</title>
+			<para>
+				When in need of a custom editor in your BeanFactory 
+				or ApplicationContext (e.g. you have some
+				exotic type that you need to express as a property in a BeanFactory XML
+				file), you can use the <literal>CustomEditorConfigurer</literal>, which is a 
+				special kind of <literal>BeanFactoryPostProcessor</literal> (more about those
+				can be found in <xref linkend="beans-factory-customizing"/>).
+				Consider the following code samples:
+				<programlisting><![CDATA[
+public class ExoticType {
+
+	private String name;
 	
+	public ExoticType(String name) {
+		this.name = name;
+	}
+}
+
+public class DependsOnExoticType {
 	
+	private ExoticType type;
+
+	public void setType(ExoticType type) {
+		this.type = type;
+	}
+}
+				]]></programlisting>
+				Wiring this up should be done something like this:
+				<programlisting><![CDATA[
+<bean id="sample" class="example.DependsOnExoticType">
+	<property name="type"><value>exoticTypeTwo</value></property>
+</bean>
+				]]></programlisting>
+				When you want to do this, you would need to create a PropertyEditor and wire it
+				up using the <literal>CustomEditorConfigurer</literal>:
+				<programlisting><![CDATA[
+public class ExoticTypeEditor extends PropertyEditorSupport {
+
+	private String format;
+
+	public void setWhatever(String format) {
+		this.format = format
 	
+	public void setAsText(String text) {
+		if (format != null && format.equals("upperCase")) {
+			text = text.toUpperCase();
+		}
+		ExoticType type = new ExoticType(text);
+		setValue(type);
+	}
+}					
+				]]></programlisting>
+				To actually register it, do the following:
+				<programlisting><![CDATA[
+<bean id="customEditorConfigurer" 
+	class="org.springframework.bean.factory.config.CustomEditorConfigurer>
+	<property name="customEditors">
+		<map>
+			<entry key="example.ExoticType">
+				<bean class="example.ExoticTypeEditor">
+					<property name="format">
+						<value>upperCase</value>
+					</property>
+				</bean>
+			</entry>
+		</map>
+	</property>
+</bean>
+				]]></programlisting>				
+			</para>			
+			<para>				
+				Besides using the <literal>CustomEditorConfigurer</literal>, you can
+				also register custom editors programmatically if you need. This might
+				come in handy when for instance using the BeanFactory (which does not
+				automatically detect BeanFactoryPostProcessors). Use the 
+				<literal>ConfigurableBeanFactory.registerCustomEditor()</literal> method
+				to do this.
+			</para>
+		</sect1>
+		
 	
-	<!--<sect1 id="context-create">
-		<title>Creating an ApplicationContext</title>
+	<sect1 id="context-create">
+		<title>Creating an ApplicationContext from a webapplication</title>
 		<para>
 			As opposed to the BeanFactory, which is often being created programmatically, ApplicationContexts
 			can be created generically using for example a <literal>ContextLoader</literal>. Of course you can
 			also create ApplicationContexts programmatically using one of the ApplicationContext implementations.
 			First, let's examine the ContextLoader and its implementations.
 		</para>
-		
-		<sect2 id="context-create-contextloader">
-			<title>Using the <literal>ContextLoader</literal> and <literal>ContextLoaderListener</literal></title>
-			<para>
-				The ContextLoader
-			</para>
-		</sect2>
-	</sect1>-->
+		<para>
+			The ContextLoader has two implementations: the <literal>ContextLoaderListener</literal> and the
+			<literal>ContextLoaderServlet</literal>. They both have the same functionality but differ
+			in that the listener cannot be used in Servlet 2.2 compatible containers. Since
+			the Servlet 2.4 specification, listener are required to initialize after startup of a webapplication.
+			A lot of 2.3 compatible containers already implement this feature. Up to you which one you're
+			going to use (for more information on compatibility, have a look at the JavaDOC for
+			the ContextLoaderServlet).
+		</para>
+		<para>
+			You can register an ApplicationContext using the <literal>ContextLoaderListener</literal>
+			as follows:
+			<programlisting><![CDATA[
+<context-param>
+	<param-name>contextConfigLocation</param-name>
+	<param-value>/WEB-INF/daoContext.xml /WEB-INF/applicationContext.xml</param-value>
+</context-param>
+
+<listener>
+	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener>
+
+<!-- OR USE THE CONTEXTLOADERSERVLET INSTEAD OF THE LISTENER
+<servlet>
+	<servlet-name>context</servlet-name>
+	<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+	<load-on-startup>1</load-on-startup>
+</servlet>
+-->
+
+
+
+			]]></programlisting>
+			The listener inspects the <literal>contextConfigLocation</literal> parameter. If it
+			doesn't exist, it'll use <literal>/WEB-INF/applicationContext.xml</literal> as a 
+			default. When it <emphasis>does</emphasis> exist, it'll separate the String
+			using predefined delimiters (comma, semi-colon and space) and use the values
+			as locations where application contexts will be searched for.
+			The ContextLoaderServlet can - as said - be used instead of the ContextLoaderListener.
+			The servlet will use the contextConfigLocation parameter just as the listener does.
+		</para>
+	</sect1>
         	
 </chapter>
 
