@@ -64,16 +64,15 @@
 	</bean>
 
 	<!--
-		- Note that in a real-life app with multiple tx proxies such as the 
-		- following, you will probably want to use parent and child bean
-		- definitions as described in the manual to reduce duplicaiton.
-    -->
-	<!--
 		- Transactional proxy for Petclinic's central data access object.
 		-
 		- Defines specific transaction attributes with "readOnly" markers,
 		- which is an optimization that is particularly valuable with Hibernate
 		- (to suppress unnecessary flush attempts for read-only operations).
+		-
+		- Note that in a real-life app with multiple transaction proxies,
+		- you will probably want to use parent and child bean definitions
+		- as described in the manual, to reduce duplication.
     -->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
