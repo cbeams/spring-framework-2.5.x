@@ -3,6 +3,7 @@ package org.springframework.beans.factory.config;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -86,16 +87,15 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 	}
 
 	/**
-	 *
-	 * @return
+	 * Returns the type specified by the service implementation type.
+	 * @return the service implementation type.
 	 */
 	public Class getObjectType() {
 		return this.serviceCreatorInterface;
 	}
 
 	/**
-	 * Always returns true.
-	 * @return
+	 * Always returns <code>true</code>.
 	 */
 	public boolean isSingleton() {
 		return true;
@@ -103,9 +103,15 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 
 	/**
 	 * Sets the service creator interface.
-	 * @param serviceCreatorInterface
+	 * @param serviceCreatorInterface the interface that the proxy should implement.
 	 */
 	public void setServiceCreatorInterface(Class serviceCreatorInterface) {
+
+		if (!serviceCreatorInterface.isInterface()) {
+			throw new FatalBeanException("Class [" + serviceCreatorInterface.getName() +
+					"] provided for service creator interface must be an interface.");
+		}
+
 		this.serviceCreatorInterface = serviceCreatorInterface;
 	}
 
@@ -114,6 +120,11 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 	 * @param serviceImplementationType
 	 */
 	public void setServiceImplementationType(Class serviceImplementationType) {
+		if (serviceImplementationType.isInterface() || Modifier.isAbstract(serviceImplementationType.getModifiers())) {
+			throw new FatalBeanException("Class [" + serviceImplementationType.getName() +
+					"] provided for service implementation type must be a concrete class.");
+		}
+
 		this.serviceImplementationType = serviceImplementationType;
 	}
 
@@ -128,12 +139,8 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 					ServiceCreationFactoryBean.class.getName() + "] is required.");
 		}
 
-		if (!serviceCreatorInterface.isInterface()) {
-			throw new FatalBeanException("Class [" + serviceCreatorInterface.getName() +
-					"] provided for service creator interface must be an interface.");
-		}
 
-		checkCreationMethods();
+		validateCreationMethods();
 
 		createProxy();
 	}
@@ -152,31 +159,52 @@ public class ServiceCreationFactoryBean implements FactoryBean, InitializingBean
 	 * Validates that all the creation methods on the service creation
 	 * interface have return types that are compatible with the service implementation
 	 * type, and parameters lists that match a constructor on the service implementation.
+	 * @throws FatalBeanException if validation fails.
 	 */
-	private void checkCreationMethods() {
+	private void validateCreationMethods() throws FatalBeanException {
 		Method[] methods = serviceCreatorInterface.getMethods();
 		for (int x = 0; x < methods.length; x++) {
 			Method method = methods[x];
-			Class returnType = method.getReturnType();
 
-			// test return type is compatible with
-			// service implementation type
-			if (!returnType.isAssignableFrom(serviceImplementationType)) {
-				throw new FatalBeanException("Return type of method [" + method +
-						"] is incompatible with service implementation type [" +
-						serviceImplementationType.getName() + "].");
-			}
+			validateReturnType(method);
+			validateConstructorMatch(method);
 
-			// check that the method has a corresponding constructor
-			try {
-				Constructor ctor = serviceImplementationType.getConstructor(method.getParameterTypes());
-			}
-			catch (NoSuchMethodException ex) {
-				throw new FatalBeanException("Method [" + method +
-						"] has no corresponding constructor on the service implementation type ["
-						+ serviceImplementationType.getName() + "].");
-			}
+		}
+	}
 
+	/**
+	 * Validates that the given <code>Method</code> can be matched to a constructor on
+	 * the service implementation type that has the same parameter list.
+	 * @param method the <code>Method</code> to validate.
+	 * @throws FatalBeanException if the <code>Method</code> does not having a matching constructor.
+	 */
+	private void validateConstructorMatch(Method method) throws FatalBeanException {
+		// check that the method has a corresponding constructor
+		try {
+			Constructor ctor = serviceImplementationType.getConstructor(method.getParameterTypes());
+		}
+		catch (NoSuchMethodException ex) {
+			throw new FatalBeanException("Method [" + method +
+					"] has no corresponding constructor on the service implementation type ["
+					+ serviceImplementationType.getName() + "].");
+		}
+	}
+
+	/**
+	 * Validates that the return type of the supplied <code>Method</code> is compatible with the
+	 * service implementation type.
+	 * @param method the <code>Method</code> to validate
+	 * @throws FatalBeanException if the return type is not compatible.
+	 */
+	private void validateReturnType(Method method) throws FatalBeanException {
+		Class returnType = method.getReturnType();
+
+		// test return type is compatible with
+		// service implementation type
+		if (!returnType.isAssignableFrom(serviceImplementationType)) {
+			throw new FatalBeanException("Return type of method [" + method +
+					"] is incompatible with service implementation type [" +
+					serviceImplementationType.getName() + "].");
 		}
 	}
 

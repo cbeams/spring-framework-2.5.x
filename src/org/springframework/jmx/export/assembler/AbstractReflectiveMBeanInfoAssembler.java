@@ -23,35 +23,38 @@ import java.util.List;
 
 import javax.management.Descriptor;
 import javax.management.JMException;
+import javax.management.MBeanParameterInfo;
+import javax.management.MBeanOperationInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanConstructorInfo;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.jmx.support.JmxUtils;
 
 /**
  * Extends the <code>AbstractMBeanInfoAssembler</code> to add a basic
  * algorithm for building metadata based on the reflective metadata of
  * the MBean class.
- *
+ * <p/>
  * <p>The logic for creating MBean metadata from the reflective metadata is contained
  * in this class, but this class makes no desicions as to which methods and
  * properties are to be exposed. Instead it gives subclasses a chance to 'vote'
  * on each property or method through the <code>includeXXX</code> methods.
- *
+ * <p/>
  * <p>Subclasses are also given the opportunity to populate attribute and operation
  * metadata with additional descriptors once the metadata is assembled through the
  * <code>populateXXXDescriptor</code> methods.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 1.2
  * @see #includeOperation
  * @see #includeReadAttribute
  * @see #includeWriteAttribute
  * @see #populateAttributeDescriptor
  * @see #populateOperationDescriptor
+ * @since 1.2
  */
 public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBeanInfoAssembler {
 
@@ -91,8 +94,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Iterate through all properties on the MBean class and gives subclasses the chance to vote on the
 	 * inclusion of both the accessor and mutator. If a particular accessor or mutator is voted for
 	 * inclusion the appropriate metadata is assembled and passed to the subclass for descriptor population.
-	 * @param beanKey the key associated with the MBean in the <code>beans</code> <code>Map</code>
-	 * of the <code>MBeanExporter</code>.
+	 *
+	 * @param beanKey   the key associated with the MBean in the <code>beans</code> <code>Map</code>
+	 *                  of the <code>MBeanExporter</code>.
 	 * @param beanClass the <code>Class</code> of the MBean.
 	 * @return the attribute metadata.
 	 * @see #populateAttributeDescriptor(javax.management.Descriptor, java.lang.reflect.Method, java.lang.reflect.Method)
@@ -117,8 +121,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 			if (getter != null || setter != null) {
 				// If both getter and setter are null, then this does not need exposing.
-				ModelMBeanAttributeInfo info = new ModelMBeanAttributeInfo(
-						props[i].getName(), getAttributeDescription(props[i]), getter, setter);
+				ModelMBeanAttributeInfo info = new ModelMBeanAttributeInfo(props[i].getName(), getAttributeDescription(props[i]), getter, setter);
 
 				Descriptor desc = info.getDescriptor();
 				if (getter != null) {
@@ -143,8 +146,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * or mutator of an attribute that is inclued in the managment interface, then
 	 * the corresponding operation is exposed with the &quot;role&quot; descriptor
 	 * field set to the appropriate value.
-	 * @param beanKey the key associated with the MBean in the beans map
-	 * of the <code>MBeanExporter</code>
+	 *
+	 * @param beanKey   the key associated with the MBean in the beans map
+	 *                  of the <code>MBeanExporter</code>
 	 * @param beanClass the class of the MBean
 	 * @return the operation metadata
 	 * @see #populateOperationDescriptor
@@ -167,7 +171,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 						(method.equals(pd.getWriteMethod()) && includeWriteAttribute(method, beanKey))) {
 					// Attributes need to have their methods exposed as
 					// operations to the JMX server as well.
-					info = new ModelMBeanOperationInfo(getOperationDescription(method), method);
+					info = createModelMBeanOperationInfo(method, pd.getName(), true);
 					Descriptor desc = info.getDescriptor();
 					desc.setField(VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
 					if (method.equals(pd.getReadMethod())) {
@@ -180,7 +184,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 				}
 			}
 			else if (includeOperation(method, beanKey)) {
-				info = new ModelMBeanOperationInfo(getOperationDescription(method), method);
+				info = createModelMBeanOperationInfo(method, method.getName(), false);
 				Descriptor desc = info.getDescriptor();
 				desc.setField(ROLE, OPERATION);
 				populateOperationDescriptor(desc, method);
@@ -199,8 +203,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Create constructor info for the given bean key and class.
 	 * <p>Default implementation returns an empty array of
 	 * <code>ModelMBeanConstructorInfo</code>.
-	 * @param beanKey the key associated with the MBean in the beans map
-	 * of the <code>MBeanExporter</code>
+	 *
+	 * @param beanKey   the key associated with the MBean in the beans map
+	 *                  of the <code>MBeanExporter</code>
 	 * @param beanClass the class of the MBean
 	 * @return the ModelMBeanConstructorInfo array
 	 */
@@ -212,8 +217,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Create notification info for the given bean key and class.
 	 * <p>Default implementation returns an empty array of
 	 * <code>ModelMBeanNotificationInfo</code>.
-	 * @param beanKey the key associated with the MBean in the beans map
-	 * of the <code>MBeanExporter</code>
+	 *
+	 * @param beanKey   the key associated with the MBean in the beans map
+	 *                  of the <code>MBeanExporter</code>
 	 * @param beanClass the class of the MBean
 	 * @return the ModelMBeanNotificationInfo array
 	 */
@@ -222,23 +228,37 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	}
 
 	/**
+	 * Create parameter info for the given method. Default implementation
+	 * returns an empty arry of <code>MBeanParameterInfo</code>.
+	 *
+	 * @param method the <code>Method</code> to get the parameter information for.
+	 * @return the <code>MBeanParameterInfo</code> array.
+	 */
+	protected MBeanParameterInfo[] getOperationParameters(Method method) {
+		return new MBeanParameterInfo[0];
+	}
+
+	/**
 	 * Allows subclasses to vote on the inclusion of a particular attribute accessor.
+	 *
 	 * @param method the accessor <code>Method</code>.
 	 * @return <code>true</code> if the accessor should be included in the management interface,
-	 * otherwise <code>false<code>.
+	 *         otherwise <code>false<code>.
 	 */
 	protected abstract boolean includeReadAttribute(Method method, String beanKey);
 
-  /**
+	/**
 	 * Allows subclasses to vote on the inclusion of a particular attribute mutator.
+	 *
 	 * @param method the mutator <code>Method</code>.
 	 * @return <code>true</code> if the mutator should be included in the management interface,
-	 * otherwise <code>false<code>.
+	 *         otherwise <code>false<code>.
 	 */
 	protected abstract boolean includeWriteAttribute(Method method, String beanKey);
 
 	/**
 	 * Allows subclasses to vote on the inclusion of a particular operation.
+	 *
 	 * @param method the operation method
 	 * @return whether the operation should be included in the management interface
 	 */
@@ -248,6 +268,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Get the description for a particular attribute.
 	 * <p>Default implementation returns a description for the operation
 	 * that is the name of corresponding <code>Method</code>.
+	 *
 	 * @param propertyDescriptor the PropertyDescriptor for the attribute
 	 * @return the description for the attribute
 	 */
@@ -259,6 +280,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Get the description for a particular operation.
 	 * <p>Default implementation returns a description for the operation
 	 * that is the name of corresponding <code>Method</code>.
+	 *
 	 * @param method the operation method
 	 * @return the description for the operation.
 	 */
@@ -269,9 +291,10 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	/**
 	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
 	 * attribute. Default implementation is empty.
+	 *
 	 * @param descriptor the attribute descriptor
-	 * @param getter the accessor method for the attribute
-	 * @param setter the mutator method for the attribute
+	 * @param getter     the accessor method for the attribute
+	 * @param setter     the mutator method for the attribute
 	 */
 	protected void populateAttributeDescriptor(Descriptor descriptor, Method getter, Method setter) {
 	}
@@ -279,10 +302,32 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	/**
 	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
 	 * operation. Default implementation is empty.
+	 *
 	 * @param descriptor the operation descriptor
-	 * @param method the method corresponding to the operation
+	 * @param method     the method corresponding to the operation
 	 */
 	protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
 	}
 
+	/**
+	 * Creates an instance of <code>ModelMBeanOperationInfo</code> for the
+	 * given method. Populates the parameter info for the operation.
+	 *
+	 * @param method the <code>Method</code> to create a <code>ModelMBeanOperationInfo</code> for.
+	 * @return the <code>ModelMBeanOperationInfo</code>.
+	 */
+	private ModelMBeanOperationInfo createModelMBeanOperationInfo(Method method, String name, boolean isAttributeOperation) {
+		MBeanParameterInfo[] params = getOperationParameters(method);
+
+		if (params.length == 0) {
+			return new ModelMBeanOperationInfo(getOperationDescription(method), method);
+		}
+		else {
+			return new ModelMBeanOperationInfo(name,
+				getOperationDescription(method),
+				getOperationParameters(method),
+				method.getReturnType().getName(),
+				MBeanOperationInfo.UNKNOWN);
+		}
+	}
 }
