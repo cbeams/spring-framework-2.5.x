@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc;
 
@@ -181,14 +181,41 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * This implementation shows the configured form view.
-	 * Can be called within onSubmit implementations, to redirect back to the form
+	 * This implementation shows the configured form view, delegating to the
+	 * analogous showForm version with a controlModel argument.
+	 * <p>Can be called within onSubmit implementations, to redirect back to the form
 	 * in case of custom validation errors (i.e. not determined by the validator).
+	 * <p>Can be overridden in subclasses to show a custom view, writing directly
+	 * to the response or preparing the response before rendering a view.
+	 * <p>If calling showForm with a custom control model in subclasses, it's preferable
+	 * to override the analogous showForm version with a controlModel argument
+	 * (which will handle both standard form showing and custom form showing then).
 	 * @see #setFormView
+	 * @see #showForm(HttpServletRequest, HttpServletResponse, BindException, Map)
 	 */
 	protected ModelAndView showForm(
 			HttpServletRequest request, HttpServletResponse response, BindException errors) throws Exception {
-		return showForm(request, errors, getFormView());
+		return showForm(request, response, errors, null);
+	}
+
+	/**
+	 * This implementation shows the configured form view.
+	 * <p>Can be called within onSubmit implementations, to redirect back to the form
+	 * in case of custom validation errors (i.e. not determined by the validator).
+	 * <p>Can be overridden in subclasses to show a custom view, writing directly
+	 * to the response or preparing the response before rendering a view.
+	 * @param request current HTTP request
+	 * @param errors validation errors holder
+	 * @param controlModel model map containing controller-specific control data
+	 * (e.g. current page in wizard-style controllers or special error message)
+	 * @return the prepared form view
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #setFormView
+	 */
+	protected ModelAndView showForm(
+			HttpServletRequest request, HttpServletResponse response, BindException errors, Map controlModel)
+			throws Exception {
+		return showForm(request, errors, getFormView(), controlModel);
 	}
 
 	/**
@@ -244,7 +271,7 @@ public class SimpleFormController extends AbstractFormController {
 
 	/**
 	 * Submit callback with all parameters. Called in case of submit without errors
-	 * reported by the registered validator respectively on every submit if no validator.
+	 * reported by the registered validator, or on every submit if no validator.
 	 * <p>Default implementation delegates to onSubmit(Object, BindException).
 	 * For simply performing a submit action and rendering the specified success view,
 	 * consider implementing doSubmitAction rather than an onSubmit version.
