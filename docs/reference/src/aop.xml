@@ -2020,7 +2020,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
     </sect2>
 
     <sect2 id="aop-ts-prototype">
-      <title>Prototype" target sources</title>
+      <title>Prototype target sources</title>
 
       <para>Setting up a "prototype" target source is similar to a pooling
       TargetSource. In this case, a new instance of the target will be created
@@ -2042,6 +2042,36 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
       Inheritance is used in the TargetSource implementations to ensure
       consistent naming. As with the pooling target source, the target bean
       must be a prototype bean definition.</para>
+    </sect2>
+
+    <sect2 id="aop-ts-threadlocal">
+        <title>ThreadLocal target sources</title>
+        <para>
+            ThreadLocal target sources are useful if you need an object to be created
+            for each incoming request (per thread that is). The concept of a
+            <literal>ThreadLocal</literal> provide a JDK-wide
+            facility to transparently store resource alongside a thread. Setting up a ThreadLocalTargetSource
+            is pretty much the same as was explained for the other target sources:
+        </para>
+        <para>
+            <programlisting><![CDATA[
+<bean id="threadlocalTargetSource"
+  class="org.springframework.aop.target.ThreadLocalTargetSource">
+  <property name="targetBeanName"><value>businessObjectTarget</value></property>
+</bean>
+            ]]></programlisting>
+        </para>
+        <para>
+            <emphasis>ThreadLocals come with serious issues (potentially resulting in memory leaks)
+            when incorrectly using them in a multi-threaded and multi-classloader environments. One should
+            always consider wrapping a threadlocal in some other class and never directly use the ThreadLocal
+            itself (except of course in the wrapper class). Also, one should always remember to correctly set and unset (where the
+            latter simply involved a call to ThreadLocal.set(null)) the resource local to the thread.
+            Unsetting should be done in any case since not unsetting it might result in problematic behavior.
+            Spring's ThreadLocal support is doing this for you and should always be considered in favor of
+            using ThreadLocals without other proper handling code.</emphasis>
+                                           </para>
+
     </sect2>
   </sect1>
 
