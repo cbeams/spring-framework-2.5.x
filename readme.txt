@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 1.2 RC1 (March 2005)
+THE SPRING FRAMEWORK, release 1.2 RC2 (April 2005)
 --------------------------------------------------
 http://www.springframework.org
 
@@ -86,7 +86,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~65 KB)
+* "spring-core" (~70 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -94,23 +94,15 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~150 KB)
+* "spring-aop" (~145 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (CGLIB, Commons Attributes)
-
-* "spring-dao" (~85 KB)
-- Contents: DAO support, transaction infrastructure
-- Dependencies: spring-core, (spring-aop, JTA)
-
-* "spring-jdbc" (~175 KB)
-- Contents: JDBC support
-- Dependencies: spring-dao, (spring-beans)
 
 * "spring-context" (~100 KB)
 - Contents: application context, validation, JNDI, UI context support
 - Dependencies: spring-beans, (spring-aop, Velocity, FreeMarker, JasperReports)
 
-* "spring-support" (~105 KB)
+* "spring-support" (~110 KB)
 - Contents: JMX support, mail support, scheduling support, caching support
 - Dependencies: spring-beans, (JMX, JavaMail, COS, Quartz, EHCache)
 
@@ -124,17 +116,25 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 * "spring-remoting" (~120 KB)
 - Contents: remoting support, EJB support, JMS support
-- Dependencies: spring-aop, (spring-web, JAX-RPC, Hessian, Burlap, EJB, JMS)
+- Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
+
+* "spring-dao" (~85 KB)
+- Contents: DAO support, transaction infrastructure
+- Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
+
+* "spring-jdbc" (~175 KB)
+- Contents: JDBC support
+- Dependencies: spring-dao, spring-beans
 
 * "spring-orm" (~105 KB)
 - Contents: iBATIS SQL Maps support, JDO support, Apache OJB support
-- Dependencies: spring-dao, (spring-aop, spring-web, iBATIS SQL Maps, JDO, Apache OJB)
+- Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, JDO, Apache OJB)
 
 * "spring-hibernate" (~170 KB)
 - Contents: Hibernate 2.1 support, Hibernate 3.0 support
-- Dependencies: spring-dao, (spring-aop, spring-web, Hibernate2, Hibernate3)
+- Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1575 KB)
+* "spring" (~1580 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 

@@ -229,29 +229,6 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/spring-dao.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/dao/**"/>
-				<include name="org/springframework/transaction/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/spring-jdbc.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/jdbc/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
 		<jar jarfile="${dist.dir}/spring-context.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/context/**"/>
@@ -309,6 +286,29 @@
 				<include name="org/springframework/ejb/**"/>
 				<include name="org/springframework/jms/**"/>
 				<include name="org/springframework/remoting/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-dao.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/dao/**"/>
+				<include name="org/springframework/transaction/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-jdbc.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/jdbc/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
