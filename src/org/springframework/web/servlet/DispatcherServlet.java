@@ -80,7 +80,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.16 2003-11-23 11:58:18 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.17 2003-11-27 18:37:20 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -401,6 +401,9 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 					else if (ex instanceof IOException) {
 						throw (IOException) ex;
+					}
+					else if (ex instanceof RuntimeException) {
+						throw (RuntimeException) ex;
 					}
 					else {
 						throw new ServletException(ex.getMessage(), ex);
