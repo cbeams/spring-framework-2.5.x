@@ -177,26 +177,6 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/spring-context.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/cache/**"/>
-				<include name="org/springframework/context/**"/>
-				<include name="org/springframework/ejb/**"/>
-				<include name="org/springframework/jms/**"/>
-				<include name="org/springframework/jndi/**"/>
-				<include name="org/springframework/mail/**"/>
-				<include name="org/springframework/remoting/**"/>
-				<include name="org/springframework/scheduling/**"/>
-				<include name="org/springframework/ui/**"/>
-				<include name="org/springframework/validation/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
 		<jar jarfile="${dist.dir}/spring-dao.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/dao/**"/>
@@ -210,9 +190,40 @@
 			</manifest>
 		</jar>
 
+		<jar jarfile="${dist.dir}/spring-context.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/cache/**"/>
+				<include name="org/springframework/context/**"/>
+				<include name="org/springframework/jndi/**"/>
+				<include name="org/springframework/mail/**"/>
+				<include name="org/springframework/scheduling/**"/>
+				<include name="org/springframework/ui/**"/>
+				<include name="org/springframework/validation/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
 		<jar jarfile="${dist.dir}/spring-orm.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-remoting.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/ejb/**"/>
+				<include name="org/springframework/jms/**"/>
+				<include name="org/springframework/jmx/**"/>
+				<include name="org/springframework/remoting/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -419,7 +430,8 @@
 
 	 	<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.test}">
-			<fileset dir="${test.dir}" includes="**/autoproxy/metadata/*.java"/>
+			<fileset dir="${test.dir}" includes="org/springframework/aop/**/*.java"/>
+			<fileset dir="${test.dir}" includes="org/springframework/jmx/**/*.java"/>
 		</attribute-compiler>
 
  	</target>
@@ -831,6 +843,7 @@
 				<include name="lib/jamon/**"/>
 				<include name="lib/jasperreports/**"/>
 				<include name="lib/jdo/**"/>
+				<include name="lib/jmx/**"/>
 				<include name="lib/jotm/**"/>
 				<include name="lib/jsf/**"/>
 				<include name="lib/junit/**"/>
@@ -938,7 +951,6 @@
 
 		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.sandbox.test}" >
-
 			<fileset dir="${sandbox.test.dir}" includes="**/*.java"/>
 		</attribute-compiler>
 
