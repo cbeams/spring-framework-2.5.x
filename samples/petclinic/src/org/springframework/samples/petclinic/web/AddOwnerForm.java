@@ -1,14 +1,11 @@
 package org.springframework.samples.petclinic.web;
 
-import org.springframework.samples.petclinic.Owner;
-
-import org.springframework.web.servlet.ModelAndView;
-
-import java.io.IOException;
-
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
+
+import org.springframework.samples.petclinic.Owner;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * JavaBean form controller that is used to add a new <code>Owner</code> to the system.

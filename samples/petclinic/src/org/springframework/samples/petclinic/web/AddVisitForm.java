@@ -1,14 +1,11 @@
 package org.springframework.samples.petclinic.web;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.Visit;
-
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 
