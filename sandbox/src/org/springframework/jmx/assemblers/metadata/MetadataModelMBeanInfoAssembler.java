@@ -22,13 +22,12 @@ import javax.management.Descriptor;
 
 import org.springframework.jmx.assemblers.AbstractReflectionBasedModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.AutodetectCapableModelMBeanInfoAssembler;
+import org.springframework.jmx.metadata.support.JmxAttributeSource;
 import org.springframework.jmx.metadata.support.ManagedAttribute;
 import org.springframework.jmx.metadata.support.ManagedOperation;
 import org.springframework.jmx.metadata.support.ManagedResource;
-import org.springframework.jmx.metadata.support.MetadataReader;
+import org.springframework.jmx.metadata.support.commons.CommonsAttributesJmxAttributeSource;
 import org.springframework.jmx.util.JmxUtils;
-import org.springframework.metadata.Attributes;
-import org.springframework.metadata.commons.CommonsAttributes;
 
 /**
  * Implementation of <tt>ModelMBeanInfoAssembler</tt> that reads the
@@ -49,20 +48,21 @@ public class MetadataModelMBeanInfoAssembler extends
     private static final String CURRENCY_TIME_LIMIT = "currencyTimeLimit";
     
     private static final String DEFAULT = "default";
+    
+    private static final String PERSIST_POLICY = "persistPolicy";
+    
+    private static final String PERSIST_PERIOD = "persistPeriod";
+    
+    private static final String PERSIST_LOCATION = "persistLocation";
+    
+    private static final String PERSIST_NAME = "persistName";
 
-    /**
-     * Attributes implementation. Default is Commons Attributes
-     */
-    private Attributes attributes = new CommonsAttributes();
+  
+    private JmxAttributeSource attributeSource = new CommonsAttributesJmxAttributeSource();
 
-    /**
-     * Set the <tt>Attributes</tt> implementation.
-     * 
-     * @param attributes
-     * @see org.springframework.metadata.Attributes
-     */
-    public void setAttributes(Attributes attributes) {
-        this.attributes = attributes;
+
+    public void setAttributeSource(JmxAttributeSource attributeSource) {
+        this.attributeSource = attributeSource;
     }
 
     protected boolean includeReadAttribute(Method method) {
@@ -84,8 +84,7 @@ public class MetadataModelMBeanInfoAssembler extends
     protected String getOperationDescription(Method method) {
 
         if (JmxUtils.isProperty(method)) {
-            ManagedAttribute ma = MetadataReader.getManagedAttribute(
-                    attributes, method);
+            ManagedAttribute ma = attributeSource.getManagedAttribute(method);
 
             if (ma == null) {
                 return method.getName();
@@ -93,8 +92,7 @@ public class MetadataModelMBeanInfoAssembler extends
                 return ma.getDescription();
             }
         } else {
-            ManagedOperation mo = MetadataReader.getManagedOperation(
-                    attributes, method);
+            ManagedOperation mo = attributeSource.getManagedOperation(method);
 
             if (mo == null) {
                 return method.getName();
@@ -118,10 +116,8 @@ public class MetadataModelMBeanInfoAssembler extends
         Method readMethod = propertyDescriptor.getReadMethod();
         Method writeMethod = propertyDescriptor.getWriteMethod();
 
-        ManagedAttribute getter = (readMethod != null) ? MetadataReader
-                .getManagedAttribute(attributes, readMethod) : null;
-        ManagedAttribute setter = (writeMethod != null) ? MetadataReader
-                .getManagedAttribute(attributes, writeMethod) : null;
+        ManagedAttribute getter = (readMethod != null) ? attributeSource.getManagedAttribute(readMethod) : null;
+        ManagedAttribute setter = (writeMethod != null) ? attributeSource.getManagedAttribute(writeMethod) : null;
 
         StringBuffer sb = new StringBuffer();
 
@@ -142,8 +138,7 @@ public class MetadataModelMBeanInfoAssembler extends
      * found.
      */
     protected String getDescription(Object bean) {
-        ManagedResource mr = MetadataReader.getManagedResource(attributes, bean
-                .getClass());
+        ManagedResource mr = attributeSource.getManagedResource(bean.getClass());
 
         if (mr == null) {
             return "";
@@ -154,8 +149,7 @@ public class MetadataModelMBeanInfoAssembler extends
 
     protected void populateMBeanDescriptor(Descriptor mbeanDescriptor,
             Object bean) {
-        ManagedResource mr = MetadataReader.getManagedResource(attributes, bean
-                .getClass());
+        ManagedResource mr = attributeSource.getManagedResource(bean.getClass());
 
         mbeanDescriptor.setField(LOG, mr.isLog() ? "true" : "false");
 
@@ -165,45 +159,65 @@ public class MetadataModelMBeanInfoAssembler extends
 
         mbeanDescriptor.setField(CURRENCY_TIME_LIMIT, new Integer(mr
                 .getCurrencyTimeLimit()));
+        
+        mbeanDescriptor.setField(PERSIST_POLICY, mr.getPersistPolicy());
+        
+        mbeanDescriptor.setField(PERSIST_PERIOD, new Integer(mr.getPersistPeriod()));
+        
+        mbeanDescriptor.setField(PERSIST_LOCATION, mr.getPersistLocation());
+        
+        mbeanDescriptor.setField(PERSIST_NAME, mr.getPersistName());
     }
 
     protected void populateAttributeDescriptor(Descriptor descriptor,
             Method getter, Method setter) {
 
-        ManagedAttribute gma = (getter == null) ? ManagedAttribute.EMPTY : MetadataReader
-                .getManagedAttribute(attributes, getter);
+        ManagedAttribute gma = (getter == null) ? ManagedAttribute.EMPTY : attributeSource.getManagedAttribute(getter);
         
-        ManagedAttribute sma = (setter == null) ? ManagedAttribute.EMPTY : MetadataReader
-                .getManagedAttribute(attributes, setter);
+        ManagedAttribute sma = (setter == null) ? ManagedAttribute.EMPTY : attributeSource.getManagedAttribute(setter);
 
 
-        int ctl = getCurrencyTimeLimit(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit());
+        int ctl = resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit());
         descriptor.setField(CURRENCY_TIME_LIMIT, new Integer(ctl));
         
-        Object defaultValue = getDefaultValue(gma.getDefaultValue(), sma.getDefaultValue());
+        Object defaultValue = resolveObjectDescriptor(gma.getDefaultValue(), sma.getDefaultValue());
         descriptor.setField(DEFAULT, defaultValue);
+        
+        String persistPolicy = resolveStringDescriptor(gma.getPersistPolicy(), sma.getPersistPolicy(), "Never");
+        descriptor.setField(PERSIST_POLICY, persistPolicy);
+        
+        int persistPeriod = resolveIntDescriptor(gma.getPersistPeriod(), sma.getPersistPeriod());
+        descriptor.setField(PERSIST_PERIOD, new Integer(persistPeriod));
             
     }
     
+    /**
+     * Adds the <code>currencyTimeLimit</code> field to the supplied
+     * <code>Descriptor</code> using the value provided in the metadata
+     * for the supplied <code>Method</code>.
+     */
     protected void populateOperationDescriptor(Descriptor descriptor,
             Method method) {
-        ManagedOperation mo = MetadataReader.getManagedOperation(attributes, method);
+        ManagedOperation mo = attributeSource.getManagedOperation(method);
         
         if(mo != null) {
             descriptor.setField(CURRENCY_TIME_LIMIT, new Integer(mo.getCurrencyTimeLimit()));
         }
     }
     
+    
     /**
      * Determines which of two <code>int</code> values
-     * should be used for the <code>currencyTimeLimit</code> descriptor.
+     * should be used as the value for an attribute descriptor.
      * In general only the getter or the setter will be have a non-zero
      * value so we use that value. In the event that both values
-     * are non-zero we use the greater of the two.
+     * are non-zero we use the greater of the two. This method can be used
+     * to resolve any <code>int</code> valued descriptor where there are two
+     * possible values.
      * @param getter the <code>int</code> value associated with the getter for this attribute.
      * @param setter the <code>int</code> value associated with the setter for this attribute.
      */
-    private int getCurrencyTimeLimit(int getter, int setter) {
+    private int resolveIntDescriptor(int getter, int setter) {
         if(getter == 0 && setter != 0) {
             return setter;
         } else if(setter == 0 && getter != 0) {
@@ -214,15 +228,36 @@ public class MetadataModelMBeanInfoAssembler extends
     }
     
     /**
-     * Locates the default value descriptor based on values attached
+     * Locates the value of a descriptor based on values attached
      * to both the getter and setter methods. If both have values
      * supplied then the value attached to the getter is preferred.
-     * @param getter
-     * @param setter
-     * @return
+     * @param getter the <code>Object</code> value associated with the get method.
+     * @param setter the <code>Object</code> value associated with the set method.
+     * @return The appropriate <code>Object</code> to use as the value for the descriptor.
      */
-    private Object getDefaultValue(Object getter, Object setter) {
+    private Object resolveObjectDescriptor(Object getter, Object setter) {
         if(getter != null) {
+            return getter;
+        } else if (setter != null) {
+            return setter;
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Locates the value of a descriptor based on values attached
+     * to both the getter and setter methods. If both have values
+     * supplied then the value attached to the getter is preferred.
+     * The supplied default value is used to check to see if the value
+     * associated with the getter has changed from the default.
+     * @param getter the <code>String</code> value associated with the get method.
+     * @param setter the <code>String</code> value associated with the set method.
+     * @param defaultValue the <code>String</code> valued default associated with this descriptor.
+     * @return The appropriate <code>String</code> to use as the value for the descriptor.
+     */
+    private String resolveStringDescriptor(String getter, String setter, String defaultValue) {
+        if(getter != null && !defaultValue.equals(getter)) {
             return getter;
         } else if (setter != null) {
             return setter;
@@ -232,15 +267,13 @@ public class MetadataModelMBeanInfoAssembler extends
     }
 
     private boolean hasManagedAttribute(Method method) {
-        ManagedAttribute ma = MetadataReader.getManagedAttribute(attributes,
-                method);
+        ManagedAttribute ma = attributeSource.getManagedAttribute(method);
 
         return (ma != null) ? true : false;
     }
 
     private boolean hasManagedOperation(Method method) {
-        ManagedOperation mo = MetadataReader.getManagedOperation(attributes,
-                method);
+        ManagedOperation mo = attributeSource.getManagedOperation(method);
 
         return (mo != null) ? true : false;
     }
@@ -250,7 +283,7 @@ public class MetadataModelMBeanInfoAssembler extends
      * ManagedResource attribute. If so it will add it list of included beans
      */
     public boolean includeBean(String beanName, Object bean) {
-        if (MetadataReader.getManagedResource(attributes, bean.getClass()) != null) {
+        if (attributeSource.getManagedResource(bean.getClass()) != null) {
             return true;
         } else {
             return false;

@@ -20,24 +20,24 @@ import javax.management.ObjectName;
 
 import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
+import org.springframework.jmx.metadata.support.JmxAttributeSource;
 import org.springframework.jmx.metadata.support.ManagedResource;
-import org.springframework.jmx.metadata.support.MetadataReader;
-import org.springframework.metadata.Attributes;
-import org.springframework.metadata.commons.CommonsAttributes;
+import org.springframework.jmx.metadata.support.commons.CommonsAttributesJmxAttributeSource;
 
 /**
  * An implementation of the <code>ObjectNamingStrategy</code> interface
  * that reads the the <code>ObjectName</code> from the source level
  * metadata.
- * @author robh
+ * @author Rob Harrop
  */
 public class MetadataNamingStrategy implements ObjectNamingStrategy {
 
     /**
-     * The <code>Attributes</code> implementation. Uses Commons Attributes by
+     * The <code>JmxAttributeSource</code> implementation to use for reading
+     * metdata. Uses <code>CommonsAttributesJmxAttributeSource</code> by
      * default.
      */
-    private Attributes attributes = new CommonsAttributes();
+    private JmxAttributeSource attributeSource = new CommonsAttributesJmxAttributeSource();
 
     /**
      * Reads the <code>ObjectName</code> from the source level metadata associated
@@ -45,8 +45,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
      */
     public ObjectName getObjectName(Object managedResource, String key)
             throws ObjectNamingException {
-        ManagedResource mr = MetadataReader.getManagedResource(attributes,
-                managedResource.getClass());
+        ManagedResource mr = attributeSource.getManagedResource(managedResource.getClass());
 
         // check that the managed resource attribute has been specified
         if (mr == null) {
@@ -76,11 +75,11 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
     }
 
     /**
-     * Set the implementation of the <code>Attributes</code> interface to use
+     * Set the implementation of the <code>JmxAttributeSource</code> interface to use
      * when reading the source level metadata.
-     * @param attributes
+     * @param attributeSource An implementation of the <code>JmxAttributeSource</code> interface.
      */
-    public void setAttributes(Attributes attributes) {
-        this.attributes = attributes;
+    public void setAttributeSource(JmxAttributeSource attributeSource) {
+        this.attributeSource = attributeSource;
     }
 }

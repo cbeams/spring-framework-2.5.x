@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.jmx.metadata.support;
 
 /**
@@ -21,17 +21,37 @@ package org.springframework.jmx.metadata.support;
 public class ManagedAttribute extends AbstractJmxAttribute {
 
     public static final ManagedAttribute EMPTY = new ManagedAttribute();
-    
+
     private Object defaultValue;
-    
+
+    private String persistPolicy = "Never";
+
+    private int persistPeriod;
+
+    public int getPersistPeriod() {
+        return persistPeriod;
+    }
+
+    public void setPersistPeriod(int persistPeriod) {
+        this.persistPeriod = persistPeriod;
+    }
+
+    public String getPersistPolicy() {
+        return persistPolicy;
+    }
+
+    public void setPersistPolicy(String persistPolicy) {
+        this.persistPolicy = persistPolicy;
+    }
+
     public ManagedAttribute() {
         description = "";
     }
-    
+
     public void setDefaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
     }
-    
+
     public Object getDefaultValue() {
         return defaultValue;
     }
