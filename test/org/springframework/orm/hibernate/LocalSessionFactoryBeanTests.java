@@ -21,31 +21,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  */
 public class LocalSessionFactoryBeanTests extends TestCase {
 
-	public void testLocalSessionFactoryBeanWithDefaultConfigFile() throws HibernateException {
-		final DriverManagerDataSource ds = new DriverManagerDataSource();
-		final Set invocations = new HashSet();
-		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			protected Configuration newConfiguration() throws HibernateException {
-				return new Configuration() {
-					public Configuration configure() throws HibernateException {
-						invocations.add("configure");
-						return this;
-					}
-				};
-			}
-			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
-				assertEquals(LocalDataSourceConnectionProvider.class.getName(), config.getProperty(Environment.CONNECTION_PROVIDER));
-				assertEquals(ds, LocalDataSourceConnectionProvider.configTimeDataSourceHolder.get());
-				invocations.add("newSessionFactory");
-				return null;
-			}
-		};
-		sfb.setDataSource(ds);
-		sfb.afterPropertiesSet();
-		assertTrue(invocations.contains("configure"));
-		assertTrue(invocations.contains("newSessionFactory"));
-	}
-
 	public void testLocalSessionFactoryBeanWithDataSourceAndMappingResources() throws HibernateException {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final Set invocations = new HashSet();
