@@ -40,7 +40,41 @@ public class SubFlowState extends TransitionableState {
 	public SubFlowState(String id) {
 		super(id);
 	}
-	
+
+	public SubFlowState(String id, String subFlowId, Transition transition) {
+		this(id, subFlowId, null, new Transition[] { transition });
+	}
+
+	public SubFlowState(String id, Flow subFlow, Transition[] transitions) {
+		this(id, subFlow, null, transitions);
+	}
+
+	public SubFlowState(String id, String subFlowId, Transition[] transitions) {
+		this(id, subFlowId, null, transitions);
+	}
+
+	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition transition) {
+		this(id, subFlowId, attributesMapperId, new Transition[] { transition });
+	}
+
+	public SubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition) {
+		this(id, subFlow, attributesMapper, new Transition[] { transition });
+	}
+
+	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
+		super(id);
+		setSubFlowId(subFlowId);
+		setAttributesMapperId(attributesMapperId);
+		addAll(transitions);
+	}
+
+	public SubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
+		super(id);
+		setSubFlow(subFlow);
+		setAttributesMapper(attributesMapper);
+		addAll(transitions);
+	}
+
 	public SubFlowState(Flow flow, String id) {
 		super(flow, id);
 	}
@@ -71,7 +105,6 @@ public class SubFlowState extends TransitionableState {
 
 	public SubFlowState(Flow flow, String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
 		super(flow, id);
-		Assert.hasText(subFlowId, "The id of the subflow definition is required");
 		setSubFlowId(subFlowId);
 		setAttributesMapperId(attributesMapperId);
 		addAll(transitions);
@@ -80,7 +113,6 @@ public class SubFlowState extends TransitionableState {
 	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributesMapper attributesMapper,
 			Transition[] transitions) {
 		super(flow, id);
-		Assert.notNull(subFlow, "The subflow definition instance is required");
 		setSubFlow(subFlow);
 		setAttributesMapper(attributesMapper);
 		addAll(transitions);
