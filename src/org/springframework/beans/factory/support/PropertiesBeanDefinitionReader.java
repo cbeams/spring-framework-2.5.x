@@ -364,29 +364,20 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			parent = this.defaultParentBean;
 		}
 
-		if (className == null && parent == null) {
-			throw new BeanDefinitionStoreException(resourceDescription, beanName,
-																						 "Either 'class' or 'parent' is required");
-		}
-
 		try {
-			AbstractBeanDefinition beanDefinition = null;
-			if (className != null) {
-				// Load the class using a special class loader if one is available.
-				// Otherwise rely on the thread context classloader.
-				Class clazz = Class.forName(className, true, getBeanClassLoader());
-				beanDefinition = new RootBeanDefinition(clazz, pvs);
-			}
-			else {
-				beanDefinition = new ChildBeanDefinition(parent, pvs);
-			}
-
-			beanDefinition.setSingleton(singleton);
-			beanDefinition.setLazyInit(lazyInit);
-			getBeanFactory().registerBeanDefinition(beanName, beanDefinition);
+			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
+					className, parent, null, pvs, getBeanClassLoader());
+			bd.setSingleton(singleton);
+			bd.setLazyInit(lazyInit);
+			getBeanFactory().registerBeanDefinition(beanName, bd);
 		}
 		catch (ClassNotFoundException ex) {
-			throw new BeanDefinitionStoreException(resourceDescription, beanName, "Class [" + className + "] not found", ex);
+			throw new BeanDefinitionStoreException(resourceDescription, beanName,
+			                                       "Bean class [" + className + "] not found", ex);
+		}
+		catch (NoClassDefFoundError err) {
+			throw new BeanDefinitionStoreException(resourceDescription, beanName,
+			                                       "Class that bean class [" + className + "] depends on not found", err);
 		}
 	}
 
