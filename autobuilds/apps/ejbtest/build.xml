@@ -223,8 +223,7 @@
         <include name="aopalliance.jar"/>
       </fileset>
       <fileset dir="${spring.root}/lib/cglib">
-        <include name="asm.jar"/>
-        <include name="cglib-2.0.1.jar"/>
+        <include name="cglib-full-2.0.2.jar"/>
       </fileset>
       <fileset dir="${spring.root}/lib/dom4j">
         <include name="dom4j.jar"/>

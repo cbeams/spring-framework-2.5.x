@@ -57,7 +57,6 @@
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-common.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
-	<classpathentry kind="lib" path="lib/cglib/asm.jar"/>
 	<classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/burlap-2.1.12.jar"/>
@@ -79,7 +78,7 @@
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
 	<classpathentry kind="lib" path="lib/rowset/rowset.jar"/>
-	<classpathentry kind="lib" path="lib/cglib/cglib-2.0.2-dev.jar"/>
+	<classpathentry kind="lib" path="lib/cglib/cglib-full-2.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>

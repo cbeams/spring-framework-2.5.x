@@ -26,7 +26,7 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when Spring's Hessian remoting support
 
-* cglib/cglib-2.0.2-dev.jar, cglib/asm.jar
+* cglib/cglib-full-2.0.2.jar
 - CGLIB 2.0.2 with ObjectWeb ASM 1.4 (http://cglib.sourceforge.net)
 - required for building the framework
 - required at runtime when proxying full target classes via Spring AOP
