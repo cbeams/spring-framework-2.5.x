@@ -235,7 +235,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL must not be null");
 		}
-		if (sql.indexOf("?") != -1) {
+		if (JdbcUtils.countParameterPlaceholders(sql, '?', '\'') > 0) {
 			throw new InvalidDataAccessApiUsageException(
 					"Cannot execute [" + sql + "] as a static query: it contains bind variables");
 		}
