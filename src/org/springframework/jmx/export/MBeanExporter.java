@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import javax.management.modelmbean.RequiredModelMBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -412,7 +412,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		}
 
 		ModelMBean mbean = createModelMBean();
-		Class beanClass = (AopUtils.isAopProxy(bean) ? bean.getClass().getSuperclass() : bean.getClass());
+		Class beanClass = getBeanClass(bean);
 		mbean.setModelMBeanInfo(this.assembler.getMBeanInfo(beanKey, beanClass));
 		mbean.setManagedResource(bean, "ObjectReference");
 
@@ -535,6 +535,23 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 			// Probably a directly registered singleton.
 			return false;
 		}
+	}
+
+	/**
+	 * Return the actual bean class of the given bean instance.
+	 * This is the class exposed to the <code>MBeanInfoAssembler</code>
+	 * (which, for example, might check the given class for annotations).
+	 * @param bean the bean instance (might be an AOP proxy)
+	 * @return the bean class to expose
+	 * @see org.springframework.jmx.export.assembler.MBeanInfoAssembler#getMBeanInfo(String, Class)
+	 * @see org.springframework.aop.framework.Advised#getTargetSource
+	 * @see org.springframework.aop.TargetSource#getTargetClass
+	 */
+	protected Class getBeanClass(Object bean) {
+		if (bean instanceof Advised) {
+			return ((Advised) bean).getTargetSource().getTargetClass();
+		}
+		return bean.getClass();
 	}
 
 	/**
