@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support;
 
+import java.lang.ref.WeakReference;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -44,12 +45,13 @@ import org.springframework.core.io.Resource;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
- * @version $Id: SQLErrorCodesFactory.java,v 1.12 2004-04-22 07:45:02 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: SQLErrorCodesFactory.java,v 1.13 2004-05-23 20:26:43 jhoeller Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(SQLErrorCodesFactory.class);
 
 	/**
 	 * Name of custom SQL error codes file, loading from the root
@@ -63,26 +65,31 @@ public class SQLErrorCodesFactory {
 	public static final String SQL_ERROR_CODE_DEFAULT_PATH = "org/springframework/jdbc/support/sql-error-codes.xml";
 
 	/**
-	 * Keep track of this instance so we can return it to classes that request it.
+	 * Keep track of a single instance so we can return it to classes that request it.
+	 * Needs to be a WeakReference to allow for proper garbage collection on shutdown!
 	 */
-	private static final SQLErrorCodesFactory instance;
-
-	static {
-		instance = new SQLErrorCodesFactory();
-	}
+	private static WeakReference instance;
 
 	/**
 	 * Return singleton instance.
 	 */
-	public static SQLErrorCodesFactory getInstance() {
-		return instance;
+	public static synchronized SQLErrorCodesFactory getInstance() {
+		SQLErrorCodesFactory factory = null;
+		if (instance != null) {
+			factory = (SQLErrorCodesFactory) instance.get();
+		}
+		if (factory == null) {
+			factory = new SQLErrorCodesFactory();
+			instance = new WeakReference(factory);
+		}
+		return factory;
 	}
 
 
 	/**
 	* Create a Map to hold error codes for all databases defined in the config file.
 	*/
-	private Map rdbmsErrorCodes;
+	private final Map rdbmsErrorCodes;
 
 	/**
 	* Create a Map to hold database product name retreived from database metadata.
@@ -96,6 +103,8 @@ public class SQLErrorCodesFactory {
 	 * <b>Do not subclass in application code.</b>
 	 */
 	protected SQLErrorCodesFactory() {
+		Map errorCodes = null;
+
 		try {
 			String path = SQL_ERROR_CODE_OVERRIDE_PATH;
 			Resource resource = loadResource(path);
@@ -108,7 +117,7 @@ public class SQLErrorCodesFactory {
 			}
 			ListableBeanFactory bf = new XmlBeanFactory(resource);
 			String[] rdbmsNames = bf.getBeanDefinitionNames(SQLErrorCodes.class);
-			this.rdbmsErrorCodes = new HashMap(rdbmsNames.length);
+			errorCodes = new HashMap(rdbmsNames.length);
 
 			for (int i = 0; i < rdbmsNames.length; i++) {
 				SQLErrorCodes ec = (SQLErrorCodes) bf.getBean(rdbmsNames[i]);
@@ -125,18 +134,20 @@ public class SQLErrorCodesFactory {
 					Arrays.sort(ec.getDataIntegrityViolationCodes());
 				}
 				if (ec.getDatabaseProductName() == null) {
-					this.rdbmsErrorCodes.put(rdbmsNames[i], ec);
+					errorCodes.put(rdbmsNames[i], ec);
 				}
 				else {
-					this.rdbmsErrorCodes.put(ec.getDatabaseProductName(), ec);
+					errorCodes.put(ec.getDatabaseProductName(), ec);
 				}
 			}
-			logger.info("SQLErrorCodes loaded: " + this.rdbmsErrorCodes.keySet());
+			logger.info("SQLErrorCodes loaded: " + errorCodes.keySet());
 		}
-		catch (BeanDefinitionStoreException be) {
-			logger.warn("Error loading error codes from config file. Message: " + be.getMessage());
-			this.rdbmsErrorCodes = new HashMap(0);
+		catch (BeanDefinitionStoreException ex) {
+			logger.warn("Error loading error codes from config file. Message: " + ex.getMessage());
+			errorCodes = new HashMap(0);
 		}
+
+		this.rdbmsErrorCodes = errorCodes;
 	}
 	
 	/**
@@ -160,50 +171,50 @@ public class SQLErrorCodesFactory {
 	public SQLErrorCodes getErrorCodes(DataSource ds) {
 		logger.info("Looking up default SQLErrorCodes for DataSource");
 		
-        // Let's avoid looking up database product info if we can.
-        Integer dataSourceHash = new Integer(ds.hashCode());
-        if (dataSourceProductName.containsKey(dataSourceHash)) {
-            String dataSourceDbName = (String)dataSourceProductName.get(dataSourceHash);
-            logger.info("Database product name found in cache {" + 
-            		dataSourceHash + "}. Name is " + dataSourceDbName);
-            return getErrorCodes(dataSourceDbName);
-        }
+		// Let's avoid looking up database product info if we can.
+		Integer dataSourceHash = new Integer(ds.hashCode());
+		if (dataSourceProductName.containsKey(dataSourceHash)) {
+			String dataSourceDbName = (String)dataSourceProductName.get(dataSourceHash);
+			logger.info("Database product name found in cache {" +
+					dataSourceHash + "}. Name is " + dataSourceDbName);
+			return getErrorCodes(dataSourceDbName);
+		}
 
-        // We could not find it - got to look it up.
-        try {
-	        Map dbmdInfo = (Map) JdbcUtils.extractDatabaseMetaData(ds, new DatabaseMetaDataCallback() {
-	        	public Object processMetaData(DatabaseMetaData dbmd) throws SQLException {
-	        		Map info = new HashMap(2);
-	        		if (dbmd != null) {
-	        			info.put("DatabaseProductName", dbmd.getDatabaseProductName());
-	        			info.put("DriverVersion", dbmd.getDriverVersion());
-	        		}
-	        		return info;
-	        	}        	
-	        });
-	        if (dbmdInfo != null) {
-				// should always be the case outside of test environments
-				String dbName = (String)dbmdInfo.get("DatabaseProductName");
-				String driverVersion = (String)dbmdInfo.get("DriverVersion");
-				// special check for DB2
-				if (dbName != null && dbName.startsWith("DB2/")) {
-					dbName = "DB2";
-				}
-				if (dbName != null) {
-					dataSourceProductName.put(new Integer(ds.hashCode()), dbName);
-					logger.info("Database Product Name is " + dbName);
-					logger.info("Driver Version is " + driverVersion);
-					SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
-					if (sec != null) {
-						return sec;
+		// We could not find it - got to look it up.
+		try {
+			Map dbmdInfo = (Map) JdbcUtils.extractDatabaseMetaData(ds, new DatabaseMetaDataCallback() {
+				public Object processMetaData(DatabaseMetaData dbmd) throws SQLException {
+					Map info = new HashMap(2);
+					if (dbmd != null) {
+						info.put("DatabaseProductName", dbmd.getDatabaseProductName());
+						info.put("DriverVersion", dbmd.getDriverVersion());
 					}
-					logger.info("Error Codes for " + dbName + " not found");
+					return info;
 				}
-	        }
-        }
-        catch (MetaDataAccessException ex) {
-			logger.warn("Error while getting database metadata", ex);	
-        }
+			});
+			if (dbmdInfo != null) {
+		// should always be the case outside of test environments
+		String dbName = (String)dbmdInfo.get("DatabaseProductName");
+		String driverVersion = (String)dbmdInfo.get("DriverVersion");
+		// special check for DB2
+		if (dbName != null && dbName.startsWith("DB2/")) {
+			dbName = "DB2";
+		}
+		if (dbName != null) {
+			dataSourceProductName.put(new Integer(ds.hashCode()), dbName);
+			logger.info("Database Product Name is " + dbName);
+			logger.info("Driver Version is " + driverVersion);
+			SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
+			if (sec != null) {
+				return sec;
+			}
+			logger.info("Error Codes for " + dbName + " not found");
+		}
+			}
+		}
+		catch (MetaDataAccessException ex) {
+			logger.warn("Error while getting database metadata", ex);
+		}
 
 		// fallback is to return an empty ErrorCodes instance
 		return new SQLErrorCodes();
