@@ -25,9 +25,9 @@ public class ToStringBuilderTests extends TestCase {
         };
         String identity = Integer.toHexString(System.identityHashCode(stringy));
         assertEquals(
-            "[ToStringBuilderTestSuite.1@"
+            "[ToStringBuilderTests.1@"
                 + identity
-                + " familyFavoriteSport = <entries = { 'Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football' }>]",
+                + " familyFavoriteSport = <map = { 'Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football' }>]",
             stringy.toString());
     }
 
@@ -36,7 +36,7 @@ public class ToStringBuilderTests extends TestCase {
         String identity = Integer.toHexString(System.identityHashCode(array));
         String stringy = new ToStringBuilder(array).toString();
         assertEquals(
-            "[Object;@" + identity + " <elements = { A, B, C }>]",
+            "[Object;@" + identity + " <array = { A, B, C }>]",
             stringy);
     }
 
@@ -46,7 +46,7 @@ public class ToStringBuilderTests extends TestCase {
         String identity =
             Integer.toHexString(System.identityHashCode(integers));
         assertEquals(
-            "[[I@" + identity + " <elements = { 0, 1, 2, 3, 4 }>]",
+            "[[I@" + identity + " <array = { 0, 1, 2, 3, 4 }>]",
             str);
     }
 
@@ -58,11 +58,10 @@ public class ToStringBuilderTests extends TestCase {
         String identity = Integer.toHexString(System.identityHashCode(this));
         String str =
             new ToStringBuilder(this).append("myLetters", list).toString();
-        System.out.println(str);
         assertEquals(
-            "[ToStringBuilderTestSuite@"
+            "[ToStringBuilderTests@"
                 + identity
-                + " myLetters = <elements = { A, B, C }>]",
+                + " myLetters = <list = { A, B, C }>]",
             str);
     }
 
